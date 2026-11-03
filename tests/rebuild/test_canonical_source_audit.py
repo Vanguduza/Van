@@ -1470,3 +1470,214 @@ def test_real_dynamic_python_gate_uses_mapped_private_library_and_restores_envir
     assert observed['expected']==observed['original_env']==original_path
     assert observed['code']==0
     _assert_supervision_cleanup(observed['owner'])
+
+
+@pytest.fixture
+def synthetic_trading_parent_post(canonical_fixture,tmp_path,monkeypatch,request):
+    """Real synthetic Git/pytest owner; fake lock profile, no PostgreSQL claim."""
+    root,_=canonical_fixture
+    instrument=root/'tools/rebuild/canonical_source_audit.py'
+    text=instrument.read_text()
+    actual="'trading_pg': {'owner':'postgres-ledger', 'locks':BACKEND_LOCK, 'pg':True},"
+    replacement="'trading_pg': {'owner':'postgres-ledger', 'locks':('tools/rebuild/requirements.lock',)},"
+    assert actual in text
+    instrument.write_text(text.replace(actual,replacement,1))
+    testfile=root/'trading/tests/test_fixture.py'
+    tracker,cwd=request.param if isinstance(request.param,tuple) else (bool(request.param),'backend')
+    testfile.write_text('''def test_fixture():
+    import multiprocessing,time
+    if TRACKER:
+        child=multiprocessing.get_context('spawn').Process(target=time.sleep,args=(0.01,))
+        child.start();child.join(5);assert child.exitcode==0
+        from tools.rebuild.canonical_source_audit import _owned_children
+        owned=_owned_children();assert any(b'multiprocessing.resource_tracker' in open('/proc/%d/cmdline'%pid,'rb').read() for pid in owned)
+    assert True
+'''.replace('TRACKER',repr(tracker)))
+    git(root,'add','.')
+    git(root,'-c','user.name=Canonical audit fixture','-c','user.email=source@example.test','commit','-qm','synthetic trading source')
+    head=git(root,'rev-parse','HEAD');output=tmp_path/('trading-post-'+str(tracker)+'-'+cwd)
+    env={**os.environ,'PYTHONPATH':os.pathsep.join(str(root/p) for p in audit.proof.CANONICAL_PYTHONPATH),
+        'PYTHONDONTWRITEBYTECODE':'1','PYTEST_DISABLE_PLUGIN_AUTOLOAD':'1',
+        'GITHUB_RUN_ID':'SYNTHETIC-PARENT-POST','GITHUB_RUN_ATTEMPT':'1'}
+    command=[sys.executable,'-B','-s',str(instrument),'run','--profile','trading_pg','--cwd',cwd,
+        '--expected-commit',head,'--output',str(output),'--timeout-seconds','30']
+    run=subprocess.run(command,cwd=root,env=env,capture_output=True,text=True,timeout=40)
+    assert run.returncode==0,(run.stdout,run.stderr,(output/'receipt.json').read_text(),
+        (output/'pytest.log').read_text() if (output/'pytest.log').exists() else '')
+    monkeypatch.setitem(audit.PROFILES,'trading_pg',{'owner':'postgres-ledger','locks':('tools/rebuild/requirements.lock',)})
+    for key in ('PYTHONPATH','GITHUB_RUN_ID','GITHUB_RUN_ATTEMPT'):monkeypatch.setenv(key,env[key])
+    return root,head,output,audit.inventory(root)
+
+
+@pytest.mark.parametrize('synthetic_trading_parent_post',[False,True],indirect=True,ids=['no-tracker','joined-tracker'])
+def test_trading_pg_parent_post_binds_actual_child_teardown_and_source(synthetic_trading_parent_post):
+    root,head,out,manifest=synthetic_trading_parent_post
+    state,outcomes,_=audit.verify_profile(out,manifest,'trading_pg','backend',head,root)
+    receipt=audit.load(out/'receipt.json');post=audit.load(out/'parent-post.json')
+    assert receipt['schema']==state['schema']==audit.PARENT_POST_SCHEMA
+    assert state['post_source_observation']==audit.PARENT_POST_STATE
+    assert 'child_source_after' not in state and 'generated_cache_candidates' not in state
+    assert post['child_identity']==state['child_process_identity'] and post['parent_identity']==receipt['supervisor_identity']
+    assert post['source_after']==receipt['source_after']==state['child_source_before']
+    _assert_supervision_cleanup(receipt['process_supervision'])
+    assert outcomes=={'trading/tests/test_fixture.py::test_fixture':{'setup':'passed','call':'passed','teardown':'passed'}}
+
+
+@pytest.mark.parametrize('damage',['missing-parent','missing-child','child-nonzero','child-tamper','wrong-parent',
+    'wrong-uuid','wrong-profile','surviving-descendant','source-drift','parent-transcript'])
+@pytest.mark.parametrize('synthetic_trading_parent_post',[False],indirect=True)
+def test_trading_pg_parent_post_rejects_missing_and_tampered_evidence(synthetic_trading_parent_post,damage):
+    root,head,out,manifest=synthetic_trading_parent_post
+    originals={p:p.read_bytes() for p in out.iterdir() if p.is_file()}
+    try:
+        state=audit.load(out/'terminal.json');receipt=audit.load(out/'receipt.json');post=audit.load(out/'parent-post.json')
+        if damage=='missing-parent':(out/'parent-post.json').unlink()
+        elif damage=='missing-child':(out/'terminal.json').unlink()
+        elif damage=='child-nonzero':state['pytest_exit']=1;audit.dump(out/'terminal.json',state)
+        elif damage=='child-tamper':state['child_environment_after']['uid']+=1;audit.dump(out/'terminal.json',state)
+        elif damage=='wrong-parent':post['parent_identity']['pid']+=1;audit.dump(out/'parent-post.json',post)
+        elif damage=='wrong-uuid':post['execution_id']='foreign';audit.dump(out/'parent-post.json',post)
+        elif damage=='wrong-profile':post['profile']='documentary';audit.dump(out/'parent-post.json',post)
+        elif damage=='surviving-descendant':receipt['process_supervision']['owned_children_absent']=False
+        elif damage=='source-drift':receipt['source_after']['tree']='0'*40
+        elif damage=='parent-transcript':receipt['probe_supervision'].pop()
+        # Reseal the parent artifact where possible: negative evidence must
+        # fail its independent owner/exit/source/transcript invariants, not
+        # merely because an old content hash was left behind.
+        if damage in {'child-nonzero','child-tamper','surviving-descendant','source-drift','parent-transcript'}:
+            audit.dump(out/'parent-post.json',audit._parent_post_record(receipt,state,out))
+        for name in ('terminal.json','parent-post.json'):
+            if (out/name).exists():receipt['artifacts'][name]=audit.sha(out/name)
+        audit.dump(out/'receipt.json',receipt)
+        with pytest.raises((ValueError,FileNotFoundError,KeyError)):
+            audit.verify_profile(out,manifest,'trading_pg','backend',head,root)
+    finally:
+        for p in out.iterdir():
+            if p.is_file() and p not in originals:p.unlink()
+        for p,data in originals.items():p.write_bytes(data)
+
+
+def test_trading_pg_failed_actual_child_cannot_issue_parent_post(canonical_fixture,tmp_path):
+    root,_=canonical_fixture;instrument=root/'tools/rebuild/canonical_source_audit.py'
+    source=instrument.read_text();old="'trading_pg': {'owner':'postgres-ledger', 'locks':BACKEND_LOCK, 'pg':True},"
+    assert old in source
+    instrument.write_text(source.replace(old,"'trading_pg': {'owner':'postgres-ledger', 'locks':('tools/rebuild/requirements.lock',)},",1))
+    (root/'trading/tests/test_fixture.py').write_text('def test_fixture(): assert False\n')
+    git(root,'add','.');git(root,'-c','user.name=Canonical audit fixture','-c','user.email=source@example.test','commit','-qm','synthetic failing child')
+    head=git(root,'rev-parse','HEAD');output=tmp_path/'trading-post-failure'
+    env={**os.environ,'PYTHONPATH':os.pathsep.join(str(root/p) for p in audit.proof.CANONICAL_PYTHONPATH),
+        'PYTHONDONTWRITEBYTECODE':'1','PYTEST_DISABLE_PLUGIN_AUTOLOAD':'1',
+        'GITHUB_RUN_ID':'SYNTHETIC-FAILURE','GITHUB_RUN_ATTEMPT':'1'}
+    command=[sys.executable,'-B','-s',str(instrument),'run','--profile','trading_pg','--cwd','backend',
+        '--expected-commit',head,'--output',str(output),'--timeout-seconds','30']
+    run=subprocess.run(command,cwd=root,env=env,capture_output=True,text=True,timeout=40)
+    assert run.returncode!=0
+    receipt=audit.load(output/'receipt.json');state=audit.load(output/'terminal.json')
+    assert state['pytest_exit']!=0 and receipt['state']=='BLOCKED' and receipt['exit']!=0
+    assert not (output/'parent-post.json').exists()
+    assert receipt['process_supervision']['leader_waited'] is True
+    assert receipt['process_supervision']['owned_children_absent'] is True
+    assert receipt['process_supervision']['waitpid_echild'] is True
+
+
+@pytest.mark.parametrize('profile',['trading_pg','browser'])
+@pytest.mark.parametrize('mode',['live-descendant','post-source-drift'])
+def test_trading_pg_real_dirty_or_surviving_child_blocks_parent_post(canonical_fixture,tmp_path,mode,profile):
+    root,_=canonical_fixture;instrument=root/'tools/rebuild/canonical_source_audit.py'
+    source=instrument.read_text()
+    if profile=='trading_pg':
+        old="'trading_pg': {'owner':'postgres-ledger', 'locks':BACKEND_LOCK, 'pg':True},"
+        replacement="'trading_pg': {'owner':'postgres-ledger', 'locks':('tools/rebuild/requirements.lock',)},"
+    else:
+        old="'browser': {'owner':'browser-guard-source full browser', 'locks':BACKEND_LOCK, 'chromium':True},"
+        replacement="'browser': {'owner':'browser-guard-source full browser', 'locks':('tools/rebuild/requirements.lock',), 'chromium':True},"
+    assert old in source;instrument.write_text(source.replace(old,replacement,1))
+    if mode=='live-descendant':
+        body='''def test_fixture():
+    import subprocess,sys
+    subprocess.Popen([sys.executable,'-c','import time; time.sleep(30)'],start_new_session=True,
+        stdin=subprocess.DEVNULL,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+'''
+    else:
+        body='''def test_fixture():
+    from pathlib import Path
+    Path(__file__).write_text('def test_fixture(): assert True\\n# source drift\\n')
+'''
+    target=root/('trading/tests/test_fixture.py' if profile=='trading_pg' else 'backend/tests/test_browser_synthetic.py')
+    target.write_text(body)
+    git(root,'add','.');git(root,'-c','user.name=Canonical audit fixture','-c','user.email=source@example.test','commit','-qm','synthetic postcondition')
+    head=git(root,'rev-parse','HEAD');output=tmp_path/('trading-post-'+mode)
+    env={**os.environ,'PYTHONPATH':os.pathsep.join(str(root/p) for p in audit.proof.CANONICAL_PYTHONPATH),
+        'PYTHONDONTWRITEBYTECODE':'1','PYTEST_DISABLE_PLUGIN_AUTOLOAD':'1',
+        'GITHUB_RUN_ID':'SYNTHETIC-POSTCONDITION','GITHUB_RUN_ATTEMPT':'1'}
+    if profile=='browser':
+        chromium=tmp_path/'synthetic-chromium';chromium.write_bytes(b'synthetic identity, not Chromium')
+        env['VAN_TEST_CHROMIUM']=str(chromium)
+    command=[sys.executable,'-B','-s',str(instrument),'run','--profile',profile,'--cwd','backend',
+        '--expected-commit',head,'--output',str(output),'--timeout-seconds','30']
+    run=subprocess.run(command,cwd=root,env=env,capture_output=True,text=True,timeout=40)
+    assert run.returncode!=0
+    receipt=audit.load(output/'receipt.json')
+    assert receipt['state']=='BLOCKED' and not (output/'parent-post.json').exists()
+    if mode=='live-descendant':
+        supervision=receipt['process_supervision']
+        assert supervision['unexpected_live_descendants'] is True
+        assert supervision['owned_children_absent'] is True and supervision['waitpid_echild'] is True
+        assert any(row['signals'] and row['reaped'] is True for row in supervision['adopted'])
+    else:
+        assert 'tracked source differs' in receipt['reason']
+        assert receipt['process_supervision']['leader_waited'] is True
+        assert receipt['process_supervision']['owned_children_absent'] is True
+
+
+@pytest.mark.parametrize('synthetic_trading_parent_post',[(False,'checkout')],indirect=True)
+def test_trading_pg_parent_post_checkout_cwd_actual_producer(synthetic_trading_parent_post):
+    root,head,out,manifest=synthetic_trading_parent_post
+    state,outcomes,_=audit.verify_profile(out,manifest,'trading_pg','checkout',head,root)
+    receipt=audit.load(out/'receipt.json');post=audit.load(out/'parent-post.json')
+    assert state['actual_cwd']==receipt['actual_cwd']==str(root)
+    assert post['cwd']=='checkout' and post['actual_cwd']==str(root)
+    assert state['post_source_observation']==audit.PARENT_POST_STATE
+    _assert_supervision_cleanup(receipt['process_supervision'])
+    assert list(outcomes)==['trading/tests/test_fixture.py::test_fixture']
+
+
+@pytest.mark.parametrize('cwd,tracker',[('checkout',True),('backend',False)])
+def test_browser_parent_post_actual_producer_binds_cwd_and_runtime(canonical_fixture,tmp_path,monkeypatch,cwd,tracker):
+    """Synthetic Chromium identity exercises admission; this is not browser qualification."""
+    root,_=canonical_fixture;instrument=root/'tools/rebuild/canonical_source_audit.py'
+    source=instrument.read_text();old="'browser': {'owner':'browser-guard-source full browser', 'locks':BACKEND_LOCK, 'chromium':True},"
+    spec={'owner':'browser-guard-source full browser','locks':('tools/rebuild/requirements.lock',),'chromium':True}
+    replacement="'browser': {'owner':'browser-guard-source full browser', 'locks':('tools/rebuild/requirements.lock',), 'chromium':True},"
+    assert old in source;instrument.write_text(source.replace(old,replacement,1))
+    browser=root/'backend/tests/test_browser_synthetic.py'
+    browser.write_text('''def test_fixture():
+    import multiprocessing,time
+    if TRACKER:
+        child=multiprocessing.get_context('spawn').Process(target=time.sleep,args=(0.01,))
+        child.start();child.join(5);assert child.exitcode==0
+        from tools.rebuild.canonical_source_audit import _owned_children
+        assert any(b'multiprocessing.resource_tracker' in open('/proc/%d/cmdline'%pid,'rb').read() for pid in _owned_children())
+    assert True
+'''.replace('TRACKER',repr(tracker)))
+    chromium=tmp_path/'synthetic-chromium';chromium.write_bytes(b'synthetic identity, not Chromium')
+    git(root,'add','.');git(root,'-c','user.name=Canonical audit fixture','-c','user.email=source@example.test','commit','-qm','synthetic browser source')
+    head=git(root,'rev-parse','HEAD');output=tmp_path/('browser-post-'+cwd)
+    env={**os.environ,'PYTHONPATH':os.pathsep.join(str(root/p) for p in audit.proof.CANONICAL_PYTHONPATH),
+        'PYTHONDONTWRITEBYTECODE':'1','PYTEST_DISABLE_PLUGIN_AUTOLOAD':'1','VAN_TEST_CHROMIUM':str(chromium),
+        'GITHUB_RUN_ID':'SYNTHETIC-BROWSER-PARENT-POST','GITHUB_RUN_ATTEMPT':'1'}
+    command=[sys.executable,'-B','-s',str(instrument),'run','--profile','browser','--cwd',cwd,
+        '--expected-commit',head,'--output',str(output),'--timeout-seconds','30']
+    run=subprocess.run(command,cwd=root,env=env,capture_output=True,text=True,timeout=40)
+    assert run.returncode==0,(run.stdout,run.stderr,(output/'receipt.json').read_text(),
+        (output/'pytest.log').read_text() if (output/'pytest.log').exists() else '')
+    monkeypatch.setitem(audit.PROFILES,'browser',spec)
+    for key in ('PYTHONPATH','GITHUB_RUN_ID','GITHUB_RUN_ATTEMPT','VAN_TEST_CHROMIUM'):monkeypatch.setenv(key,env[key])
+    state,outcomes,_=audit.verify_profile(output,audit.inventory(root),'browser',cwd,head,root)
+    receipt=audit.load(output/'receipt.json');post=audit.load(output/'parent-post.json')
+    assert receipt['schema']==state['schema']==audit.PARENT_POST_SCHEMA
+    assert post['schema']=='van.parent-post/1' and post['profile']=='browser' and post['cwd']==cwd
+    assert receipt['environment_before']['chromium_sha256']==audit.sha(chromium)
+    assert state['child_environment_before']==state['child_environment_after']==receipt['environment_after']
+    _assert_supervision_cleanup(receipt['process_supervision'])
+    assert list(outcomes)==['backend/tests/test_browser_synthetic.py::test_fixture']

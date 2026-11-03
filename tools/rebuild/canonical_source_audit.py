@@ -37,6 +37,9 @@ from tools.rebuild.source_storage_audit import checkout_root
 
 LEGACY_SCHEMA = 'van.canonical-cwd-audit/1'
 SCHEMA = 'van.canonical-cwd-audit/2'
+PARENT_POST_SCHEMA = 'van.canonical-cwd-audit/3-parent-post'
+PARENT_POST_PROFILES = frozenset({'trading_pg','browser'})
+PARENT_POST_STATE = 'PENDING_BOUND_PARENT_AFTER_CHILD_REAP'
 PROBE_OUTPUT_CAP = 8 * 1024**2
 EXEC_ENVIRONMENT_CAP = 8 * 1024**2
 LAUNCH_GATE_SECONDS = 5
@@ -333,7 +336,8 @@ def pytest_configure(config):
     state_path=config.getoption('--van-canonical-state')
     if not state_path:return
     state=load(state_path);root=Path(state['root'])
-    require(state.get('schema')==SCHEMA,'current owned-descendant collector schema required')
+    expected_schema=PARENT_POST_SCHEMA if state.get('profile') in PARENT_POST_PROFILES else SCHEMA
+    require(state.get('schema')==expected_schema,'current owned-descendant collector schema required')
     require(state.get('supervisor_identity',{}).get('pid')==os.getppid(),'foreign actual supervisor identity')
     require(Path.cwd().resolve()==public.execution_directory(root,state['cwd']),'wrong actual invocation cwd')
     require(not config.option.keyword and not config.option.markexpr and not config.option.deselect
@@ -392,11 +396,21 @@ def pytest_runtest_logreport(report):
 def pytest_sessionfinish(session,exitstatus):
     if _STATE is None:return
     _STATE['pytest_exit']=int(exitstatus)
-    with supervised_probes(_STATE['probe_supervision'],_STATE['probe_timeout_seconds']):
-        after,candidates=proof._source_observation(_STATE['root'],_STATE['commit'],after_run=True)
-        _STATE.update(child_source_after=after,generated_cache_candidates=candidates,
+    if _STATE['schema']==PARENT_POST_SCHEMA:
+        # The original interpreter may own a legitimate multiprocessing
+        # tracker until interpreter exit. Do not spawn or claim a git probe here.
+        # Its actual in-process runtime/PG and protected observations are retained.
+        spec=PROFILES[_STATE['profile']]
+        require(not any(spec.get(k) for k in ('nft','agp','dds')),'parent-post runtime must not spawn')
+        _STATE.update(post_source_observation=PARENT_POST_STATE,
             child_environment_after=environment(_STATE['profile'],Path(_STATE['root'])),
             child_protected_after=protected(Path(_STATE['root'])))
+    else:
+        with supervised_probes(_STATE['probe_supervision'],_STATE['probe_timeout_seconds']):
+            after,candidates=proof._source_observation(_STATE['root'],_STATE['commit'],after_run=True)
+            _STATE.update(child_source_after=after,generated_cache_candidates=candidates,
+                child_environment_after=environment(_STATE['profile'],Path(_STATE['root'])),
+                child_protected_after=protected(Path(_STATE['root'])))
     dump(Path(_STATE['output'])/'terminal.json',_STATE)
 
 def build_pytest_arguments(root, output, profile, manifest, collect_only, basetemp):
@@ -804,7 +818,7 @@ class _BoundedCapture:
 
 def profile_evidence_scope(receipt):
     if receipt.get('schema')==LEGACY_SCHEMA:return 'HISTORICAL_GROUP_ONLY'
-    require(receipt.get('schema')==SCHEMA,'unsupported canonical profile schema')
+    require(receipt.get('schema') in {SCHEMA,PARENT_POST_SCHEMA},'unsupported canonical profile schema')
     return 'OWNED_DESCENDANTS_REQUIRED'
 
 
@@ -992,7 +1006,8 @@ def _verify_probe_transcript(records,receipt,state,root,*,collector):
             and all(row['cwd']==str(root) and row['timeout_seconds']==timeout for row in prefix),
             'original collector plugin probe transcript differs')
         records=records[len(local):]
-        runtime();source();source();runtime()
+        runtime();source()
+        if receipt.get('schema')!=PARENT_POST_SCHEMA:source();runtime()
     else:
         append(['git','ls-files','-z','--',*ROOTS]);source();runtime();source()
         for relative in receipt['generated_cache_outputs']:
@@ -1006,12 +1021,30 @@ def _verify_probe_transcript(records,receipt,state,root,*,collector):
         'original prerequisite probe transcript differs')
 
 
+
+def _parent_post_record(receipt,state,folder):
+    """Construct only the parent-owned after-child observation; never child evidence."""
+    folder=Path(folder)
+    names={'input.json','collection.json','terminal.json','phases.jsonl','storage-audit.json',
+        'generated-bytecode.json','pytest.log'} | (set() if receipt['collect_only'] else {'report.xml'})
+    return {'schema':'van.parent-post/1','execution_id':receipt['execution_id'],
+        'workflow':receipt['workflow'],'profile':receipt['profile'],'cwd':receipt['cwd'],
+        'actual_cwd':receipt['actual_cwd'],'commit':receipt['commit'],
+        'parent_identity':receipt['supervisor_identity'],'child_identity':state['child_process_identity'],
+        'child_exit':receipt['exit'],'child_pytest_exit':state['pytest_exit'],
+        'manifest_sha256':hashlib.sha256(_JSON_DUMPS(receipt['manifest'],sort_keys=True,separators=(',',':')).encode()).hexdigest(),
+        'parent_probe_transcript_sha256':hashlib.sha256(_JSON_DUMPS(receipt['probe_supervision'],sort_keys=True,separators=(',',':')).encode()).hexdigest(),
+        'source_after':receipt['source_after'],'environment_after':receipt['environment_after'],
+        'protected_after':receipt['protected_after'],'generated_cache_outputs':receipt['generated_cache_outputs'],
+        'artifacts':{name:sha(folder/name) for name in sorted(names)}}
+
+
 def run(args):
     root=ROOT;output=args.output.resolve();require(not output.exists(),'fresh owned evidence directory required')
     require(not output.is_relative_to(root),'canonical audit outputs/basetemps must be outside checkout')
     require(args.profile not in {'gateway','media'},'original public four-worker/media owner must be used')
     output.mkdir(parents=True)
-    baseline={'schema':SCHEMA,'profile':args.profile,'cwd':args.cwd,'commit':args.expected_commit,
+    baseline={'schema':PARENT_POST_SCHEMA if args.profile in PARENT_POST_PROFILES else SCHEMA,'profile':args.profile,'cwd':args.cwd,'commit':args.expected_commit,
         'root':str(root),'output':str(output),'execution_id':str(uuid.uuid4()),
         'workflow':{'id':os.environ.get('GITHUB_RUN_ID'),'attempt':os.environ.get('GITHUB_RUN_ATTEMPT')},
         'collect_only':args.collect_only,'terminal':False,'preflight_cwd':str(Path.cwd().resolve())}
@@ -1045,12 +1078,25 @@ def run(args):
         child_terminal=evidence['leader_waited'] and evidence['owned_children_absent'] and evidence['waitpid_echild']
         remaining=evidence['remaining_owned']
         baseline.update(child_pid=evidence['leader_identity']['pid'],exit=exitcode,children_remaining=remaining)
+        if baseline['schema']==PARENT_POST_SCHEMA:
+            # The parent is the only actor here and acts strictly after actual
+            # child wait and complete owned-descendant drain, without a bypass.
+            require(exitcode==0 and child_terminal and evidence['leader_forced_cleanup'] is False
+                and evidence['unexpected_live_descendants'] is False and evidence['cleanup_error'] is None
+                and evidence['interrupted'] is None,'parent post requires clean child termination')
         baseline['generated_cache_outputs']=proof.archive_generated_bytecode(root,args.expected_commit,baseline['source_before'],output)
         child_state=load(output/'terminal.json')
-        require(child_state.get('generated_cache_candidates')==baseline['generated_cache_outputs'],'child/parent generated-cache observation differs')
+        if baseline['schema']==PARENT_POST_SCHEMA:
+            require(child_state.get('post_source_observation')==PARENT_POST_STATE
+                and 'child_source_after' not in child_state and 'generated_cache_candidates' not in child_state
+                and child_state.get('pytest_exit')==0,'missing or nonterminal child pending post-state')
+        else:
+            require(child_state.get('generated_cache_candidates')==baseline['generated_cache_outputs'],'child/parent generated-cache observation differs')
         baseline.update(source_after=proof.source_identity(root,args.expected_commit),
             environment_after=environment(args.profile,root),protected_after=protected(root))
         baseline['state']='TERMINAL' if exitcode==0 else 'FAILED'
+        if baseline['schema']==PARENT_POST_SCHEMA:
+            dump(output/'parent-post.json',_parent_post_record(baseline,child_state,output))
     except BaseException as exc:
         baseline.update(state='BLOCKED',reason_type=type(exc).__name__,reason=str(exc))
         baseline.setdefault('exit',owner.evidence['leader_exit'])
@@ -1096,7 +1142,7 @@ def producer_output(folder, receipt, state, root):
     # consumer's extraction directory. Keep every original argument exact.
     identities=('schema','profile','cwd','commit','root','output','execution_id',
         'workflow','collect_only','manifest','actual_cwd')
-    if receipt.get('schema')==SCHEMA:identities+=('supervisor_identity','preflight_cwd','probe_timeout_seconds')
+    if receipt.get('schema') in {SCHEMA,PARENT_POST_SCHEMA}:identities+=('supervisor_identity','preflight_cwd','probe_timeout_seconds')
     for observed in (state,load(Path(folder)/'input.json'),load(Path(folder)/'collection.json')):
         require(isinstance(observed,dict) and all(key in receipt and key in observed and receipt[key]==observed[key]
             for key in identities),'original producer identity differs')
@@ -1114,7 +1160,8 @@ def verify_profile(folder,manifest,profile,cwd,commit,root):
     _verify_probe_transcript(receipt['probe_supervision'],receipt,state,root,collector=False)
     _verify_probe_transcript(state['probe_supervision'],receipt,state,root,collector=True)
     require(receipt['state']=='TERMINAL' and receipt['terminal'] and receipt['exit']==0 and receipt.get('children_remaining')==[] and state['pytest_exit']==0,'blocked/aborted/failed runtime')
-    require(receipt['schema']==state['schema']==SCHEMA and receipt['manifest']==state['manifest']==manifest,'source/profile inventory mismatch')
+    expected_schema=PARENT_POST_SCHEMA if profile in PARENT_POST_PROFILES else SCHEMA
+    require(receipt['schema']==state['schema']==expected_schema and receipt['manifest']==state['manifest']==manifest,'source/profile inventory mismatch')
     require(receipt['profile']==state['profile']==profile and receipt['cwd']==state['cwd']==cwd and receipt['commit']==state['commit']==commit,'foreign profile/cwd/commit')
     require(receipt['actual_cwd']==state['actual_cwd']==str(public.execution_directory(root,cwd)),'wrong actual parent cwd')
     require(isinstance(receipt.get('execution_id'),str) and receipt['execution_id'] and receipt['execution_id']==state['execution_id'] and receipt['workflow']==state['workflow']==
@@ -1130,14 +1177,25 @@ def verify_profile(folder,manifest,profile,cwd,commit,root):
         'identity_sha256':hashlib.sha256(_JSON_DUMPS(receipt['basetemp'],sort_keys=True).encode()).hexdigest()},
         'missing or foreign terminal basetemp cleanup')
     expected=proof.source_identity(root,commit)
-    require(receipt['source_before']==receipt['source_after']==state['child_source_before']==state['child_source_after']==expected,'source drift')
+    if expected_schema==PARENT_POST_SCHEMA:
+        require(state.get('post_source_observation')==PARENT_POST_STATE
+            and 'child_source_after' not in state and 'generated_cache_candidates' not in state,
+            'missing or falsified child pending post-state')
+        require(receipt['source_before']==receipt['source_after']==state['child_source_before']==expected,'source drift')
+        parent_post=load(folder/'parent-post.json')
+        require(parent_post==_parent_post_record(receipt,state,folder),'foreign or tampered parent post-state')
+    else:
+        require(receipt['source_before']==receipt['source_after']==state['child_source_before']==state['child_source_after']==expected,'source drift')
     require(receipt['protected_before']==receipt['protected_after']==state['protected_before']==state['child_protected_after']==protected(root),'protected-directory snapshot drift')
     require(not state['collection_errors'] and not state['internal_errors'],'collection/internal failure')
     require(state['pytest_inputs']['config_sha256']==sha(Path(root)/'pytest.ini') and state['pytest_inputs']['autoload'] is False,'wrong config/plugins')
     mandatory={'input.json','collection.json','terminal.json','phases.jsonl','storage-audit.json','generated-bytecode.json','pytest.log'} | (set() if state['collect_only'] else {'report.xml'})
+    if expected_schema==PARENT_POST_SCHEMA:mandatory.add('parent-post.json')
     require(set(receipt['artifacts'])==mandatory,'missing or foreign runtime artifact')
     for name,digest in receipt['artifacts'].items():require(sha(folder/name)==digest,'artifact content drift')
-    proof.verify_generated_bytecode(folder,root,commit,state,receipt)
+    cache_state=({**state,'generated_cache_candidates':parent_post['generated_cache_outputs']}
+        if expected_schema==PARENT_POST_SCHEMA else state)
+    proof.verify_generated_bytecode(folder,root,commit,cache_state,receipt)
     audit=load(folder/'storage-audit.json')
     require(audit['root']==str(root) and audit['invocation_cwd']==receipt['actual_cwd'] and audit['forbidden_events']==[]
         and audit['source_sha256']==sha(Path(root)/'tools/rebuild/source_storage_audit.py'),'wrong/violating storage audit')

@@ -134,9 +134,31 @@ def isolated_account_files(tmp_path, monkeypatch, _env):
     get_settings.cache_clear()
 
 
+@pytest.fixture
+async def lost_reply_without_automatic_scheduler(tmp_path,monkeypatch,_env):
+    """Isolate this lost-ACK window from unrelated scheduled maintenance."""
+    from httpx import ASGITransport,AsyncClient
+    from van_gateway.app import create_app
+    from van_gateway.config import get_settings
+    from backend.tests.test_trading_api import HDR,DEVICE_PEM,OWNER
+    monkeypatch.setenv('VAN_SCHEDULER_ENABLED','false');get_settings.cache_clear()
+    app=create_app()
+    async with AsyncClient(transport=ASGITransport(app=app),base_url='http://test') as ac:
+        async with app.router.lifespan_context(app):
+            assert app.state.scheduler._task is None
+            ticket=await ac.post('/v1/devices/pairing-ticket',json={'label':'test','ttl_seconds':600},headers=HDR)
+            assert ticket.status_code==200,ticket.text
+            paired=await ac.post('/v1/devices/pair',json={'pairing_token':ticket.json()['pairing_token'],
+                'device_id':'test-device','device_secret':'test-device-secret','public_key_pem':DEVICE_PEM,'label':'test'})
+            assert paired.status_code==200,paired.text
+            ac.headers.update({'X-Van-Ingress-Token':paired.json()['ingress_token'],'X-Van-Device-Token':paired.json()['device_access_token']})
+            app.state.trading.owner_authority=OWNER.verifier
+            yield ac,app
+
+
 @pytest.mark.asyncio
-async def test_lost_reply_is_unknown_then_native_readback_confirms_original_issue(client,tmp_path,monkeypatch):
-    ac,app=client
+async def test_lost_reply_is_unknown_then_native_readback_confirms_original_issue(lost_reply_without_automatic_scheduler,tmp_path,monkeypatch):
+    ac,app=lost_reply_without_automatic_scheduler
     args={'alias':'owner_mt5','server':'Broker-Demo','login':'12345678'}
     body=await approved(ac,'mt5_ea_issue_key',args)
     operation_id=body['approval_proof']['challenge_id']
