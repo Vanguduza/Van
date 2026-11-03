@@ -1144,7 +1144,11 @@ __attribute__((constructor)) static void before_main(void) {
     const char *marker=getenv("VAN_TEST_LOADER_MARKER");
     if (!marker) return;
     int fd=open(marker,O_WRONLY|O_CREAT|O_EXCL,0600);
-    if (fd>=0) { write(fd,"constructor",11); close(fd); }
+    if (fd>=0) {
+        const char *bound=getenv("VAN_TEST_BOUND_MARKER");
+        const char *value=bound ? (access(bound,F_OK)==0 ? "after-bind" : "before-bind") : "constructor";
+        write(fd,value,strlen(value)); close(fd);
+    }
     const char *child=getenv("VAN_TEST_LOADER_CHILD");
     if (child && strcmp(child,"1")==0 && fork()==0) { sleep(30); _exit(0); }
 }
@@ -1161,43 +1165,228 @@ __attribute__((constructor)) static void before_main(void) {
     return library
 
 
-_LOADER_REFUSAL_DRIVER = r'''
-import json,os,subprocess,sys
+_LOADER_HANDOFF_DRIVER = r'''
+import hashlib,json,os,subprocess,sys
 from pathlib import Path
-from unittest.mock import patch
-from tools.rebuild.canonical_source_audit import OwnedProcessSupervisor
-library,marker,key,location=sys.argv[1:]
-owner=OwnedProcessSupervisor();env=os.environ.copy()
-env.update(VAN_TEST_LOADER_MARKER=marker,VAN_TEST_LOADER_CHILD='1')
-value=library if key=='LD_PRELOAD' else 'fixture-value-never-disclosed'
-if location=='explicit':env[key]=value
-else:os.environ[key]=value
-with patch('subprocess.Popen',wraps=subprocess.Popen) as spawn:
-    try:
-        with open(marker+'.log','wb') as log:
-            owner.run([sys.executable,'-c',"raise RuntimeError('must not execute')"],
-                cwd=os.getcwd(),env=env,log=log,timeout_seconds=2)
-    except BaseException as error:
-        result={'type':type(error).__name__,'reason':str(error)}
-    else:result={'type':'unexpected-success'}
-    result.update(spawned=spawn.called,effect_exists=Path(marker).exists(),evidence=owner.evidence)
+from tools.rebuild.canonical_source_audit import OwnedProcessSupervisor,foreground_git_environment
+library,marker,key,location,mode=sys.argv[1:]
+owner=OwnedProcessSupervisor();bound=marker+'.bound'
+env=os.environ.copy();value=library if key=='LD_PRELOAD' else '' if key=='LD_AUDIT' else 'glibc.malloc.trim_threshold=131072' if key=='GLIBC_TUNABLES' else 'fixture-loader-value'
+if location=='inherited':
+    os.environ[key]=value;env=os.environ.copy()
+else:env[key]=value
+env.update(VAN_TEST_LOADER_MARKER=marker,VAN_TEST_LOADER_CHILD='0',VAN_TEST_BOUND_MARKER=bound)
+original_bind=owner._bind
+def bind(pid):
+    assert not Path(marker).exists()
+    if mode=='bind_failure':raise OSError('controlled permanent binding failure')
+    if mode=='early_interrupt':raise KeyboardInterrupt()
+    result=original_bind(pid);Path(bound).write_text('bound');return result
+owner._bind=bind
+if mode=='missing_ack':owner._release_gate=lambda descriptor:0
+expected=foreground_git_environment(env)
+def digest(environment):
+    return hashlib.sha256(repr(sorted((os.fsencode(k),os.fsencode(v)) for k,v in environment.items())).encode()).hexdigest()
+code="import os,hashlib;print(hashlib.sha256(repr(sorted(os.environb.items())).encode()).hexdigest())"
+log_path=marker+'.log';before=len(list(Path('/proc/self/fd').iterdir()))
+try:
+    with open(log_path,'wb') as log:owner.run([sys.executable,'-c',code],cwd=os.getcwd(),env=env,log=log,timeout_seconds=3)
+except BaseException as error:result={'type':type(error).__name__}
+else:result={'type':'success','environment_exact':Path(log_path).read_text().strip()==digest(expected)}
+result.update(effect=Path(marker).read_text() if Path(marker).exists() else None,
+    fd_count_restored=len(list(Path('/proc/self/fd').iterdir()))==before,evidence=owner.evidence)
 print(json.dumps(result,sort_keys=True))
 '''
 
 
 @pytest.mark.parametrize('key',['LD_PRELOAD','LD_AUDIT','LD_LIBRARY_PATH','GCONV_PATH','GLIBC_TUNABLES'])
 @pytest.mark.parametrize('location',['explicit','inherited'])
-def test_loader_override_refuses_before_spawn_and_constructor_or_child_effect(actual_loader_constructor,tmp_path,key,location):
-    marker=tmp_path/'unbound-constructor-marker'
-    result=subprocess.run([sys.executable,'-c',_LOADER_REFUSAL_DRIVER,str(actual_loader_constructor),str(marker),key,location],
+def test_loader_environment_is_restored_exactly_only_after_owned_bootstrap(actual_loader_constructor,tmp_path,key,location):
+    marker=tmp_path/'constructor-marker'
+    result=subprocess.run([sys.executable,'-c',_LOADER_HANDOFF_DRIVER,str(actual_loader_constructor),str(marker),key,location,'success'],
         cwd=Path(__file__).resolve().parents[2],env=os.environ.copy(),capture_output=True,text=True,timeout=15)
     assert result.returncode==0,(result.stdout,result.stderr)
     observed=json.loads(result.stdout)
-    assert observed['type']=='ProcessSupervisionBlocked'
-    assert observed['reason']=='UNQUALIFIED_PREEXEC_LOADER_ENVIRONMENT:'+key
-    assert observed['spawned'] is False and observed['effect_exists'] is False
-    assert observed['evidence']['leader_identity'] is None
-    assert observed['evidence']['leader_waited'] is False
-    assert observed['evidence']['waitpid_echild'] is True
-    assert observed['evidence']['owned_children_absent'] is True
-    assert observed['evidence']['remaining_owned']==[]
+    assert observed['type']=='success' and observed['environment_exact'] is True
+    assert observed['effect']==('after-bind' if key=='LD_PRELOAD' else None)
+    assert observed['fd_count_restored'] is True
+    _assert_supervision_cleanup(observed['evidence'])
+    assert observed['evidence']['launch_gate']['exec_environment']['sealed'] is True
+    assert observed['evidence']['launch_gate']['exec_environment']['parent_closed'] is True
+
+
+@pytest.mark.parametrize('mode',['bind_failure','early_interrupt','missing_ack'])
+def test_original_preload_cannot_execute_when_binding_or_ack_fails(actual_loader_constructor,tmp_path,mode):
+    marker=tmp_path/'unbound-constructor-marker'
+    result=subprocess.run([sys.executable,'-c',_LOADER_HANDOFF_DRIVER,str(actual_loader_constructor),str(marker),'LD_PRELOAD','explicit',mode],
+        cwd=Path(__file__).resolve().parents[2],env=os.environ.copy(),capture_output=True,text=True,timeout=15)
+    assert result.returncode==0,(result.stdout,result.stderr)
+    observed=json.loads(result.stdout)
+    assert observed['type'] in {'OSError','KeyboardInterrupt','ProcessSupervisionBlocked'}
+    assert observed['effect'] is None and observed['fd_count_restored'] is True
+    assert observed['evidence']['leader_waited'] is True and observed['evidence']['leader_exit']==125
+    assert observed['evidence']['waitpid_echild'] is True and observed['evidence']['owned_children_absent'] is True
+    assert observed['evidence']['launch_gate']['aborted_before_exec'] is True
+
+
+def test_exec_environment_memfd_is_byte_exact_and_kernel_sealed():
+    import fcntl
+    values={'EMPTY':'', 'NONASCII':'snowman-\u2603', 'RAW':'\udcff', 'EQUALS':'a=b'}
+    fd,evidence=audit._sealed_exec_environment(values)
+    try:
+        expected=b''.join(os.fsencode(k)+b'='+os.fsencode(v)+b'\0' for k,v in values.items())
+        assert os.read(fd,len(expected)+1)==expected
+        assert evidence['bytes']==len(expected) and evidence['entries']==len(values)
+        assert fcntl.fcntl(fd,1034)==0x000f
+        for action in (lambda:os.pwrite(fd,b'x',0),lambda:os.ftruncate(fd,len(expected)+1),lambda:os.ftruncate(fd,len(expected)-1)):
+            with pytest.raises(OSError):action()
+    finally:os.close(fd)
+
+
+def test_exec_environment_capacity_refuses_before_fd_creation(monkeypatch):
+    created=[]
+    monkeypatch.setattr(os,'memfd_create',lambda *a,**k:created.append(True))
+    with pytest.raises(audit.ProcessSupervisionBlocked,match='ORIGINAL_EXEC_ENVIRONMENT_CAPACITY'):
+        audit._sealed_exec_environment({'TOO_LARGE':'x'*audit.PROBE_OUTPUT_CAP})
+    assert created==[]
+
+
+def test_exec_environment_seal_failure_closes_fd(monkeypatch):
+    import fcntl
+    descriptors=[];real_create=os.memfd_create;real_fcntl=fcntl.fcntl
+    def create(*args,**kwargs):
+        descriptor=real_create(*args,**kwargs);descriptors.append(descriptor);return descriptor
+    def fail_seal(fd,operation,*args):
+        if operation==1033:raise OSError('controlled seal failure')
+        return real_fcntl(fd,operation,*args)
+    monkeypatch.setattr(os,'memfd_create',create);monkeypatch.setattr(fcntl,'fcntl',fail_seal)
+    with pytest.raises(OSError,match='controlled seal failure'):
+        audit._sealed_exec_environment({'PRIVATE':'value'})
+    assert len(descriptors)==1
+    with pytest.raises(OSError):os.fstat(descriptors[0])
+
+
+def test_actual_bootstrap_uses_active_runtime_not_sysconfig(monkeypatch):
+    import ctypes,hashlib,sysconfig
+    monkeypatch.setattr(sysconfig,'get_config_var',lambda key:'/fixture/stale/libdir')
+    env,evidence=audit._trusted_bootstrap_environment({'PATH':'/usr/bin','LD_PRELOAD':'untrusted','GLIBC_TUNABLES':'untrusted'})
+    assert 'LD_PRELOAD' not in env and 'GLIBC_TUNABLES' not in env
+    executable=Path('/proc/self/exe').resolve()
+    assert evidence['executable']==str(executable)
+    assert evidence['executable_sha256']==hashlib.sha256(executable.read_bytes()).hexdigest()
+    address=ctypes.cast(ctypes.pythonapi.Py_GetVersion,ctypes.c_void_p).value
+    mapping=next(line for line in Path('/proc/self/maps').read_text().splitlines()
+        if int(line.split()[0].split('-')[0],16)<=address<int(line.split()[0].split('-')[1],16))
+    fields=mapping.split(None,5);assert len(fields)==6
+    active=Path(fields[5]).resolve()
+    if active==executable:
+        assert evidence['library_mode']=='STANDALONE_NO_MAPPED_LIBPYTHON' and evidence['library'] is None
+        assert 'LD_LIBRARY_PATH' not in env
+    else:
+        assert evidence['library_mode']=='ACTIVE_MAPPED_LIBPYTHON'
+        assert evidence['library']['path']==str(active)
+        assert evidence['library']['sha256']==hashlib.sha256(active.read_bytes()).hexdigest()
+        assert env['LD_LIBRARY_PATH']==str(active.parent)
+
+
+_EXEC_HANDOFF_FAILURE_DRIVER = r'''
+import json,os,subprocess,sys
+from unittest.mock import patch
+from tools.rebuild import canonical_source_audit as audit
+mode,log_path,marker=sys.argv[1:];fds=[];created=os.memfd_create
+def create(*args,**kwargs):
+    fd=created(*args,**kwargs);fds.append(fd);return fd
+owner=audit.OwnedProcessSupervisor()
+with open(log_path,'wb') as log, patch('os.memfd_create',side_effect=create), patch('subprocess.Popen',side_effect=OSError('controlled spawn failure')) as spawn:
+    try:owner.run([sys.executable,'-c','open('+repr(marker)+',"w").write("executed")'],cwd=os.getcwd(),env=os.environ.copy(),log=log,timeout_seconds=3)
+    except BaseException as error:kind=type(error).__name__
+    else:kind='unexpected success'
+closed=[]
+for fd in fds:
+    try:os.fstat(fd);closed.append(False)
+    except OSError:closed.append(True)
+print(json.dumps({'kind':kind,'spawn_count':spawn.call_count,'closed':closed,'effect':os.path.exists(marker),'evidence':owner.evidence}))
+'''
+
+
+def test_spawn_failure_closes_sealed_environment_and_starts_no_child(tmp_path):
+    log=tmp_path/'spawn.log';marker=tmp_path/'spawn.effect'
+    result=subprocess.run([sys.executable,'-c',_EXEC_HANDOFF_FAILURE_DRIVER,'spawn',str(log),str(marker)],
+        cwd=Path(__file__).resolve().parents[2],capture_output=True,text=True,timeout=15)
+    assert result.returncode==0,(result.stdout,result.stderr)
+    value=json.loads(result.stdout)
+    assert value['kind']=='OSError' and value['spawn_count']==1 and value['closed']==[True]
+    assert value['effect'] is False
+    assert value['evidence']['leader_identity'] is None and value['evidence']['waitpid_echild'] is True
+    assert value['evidence']['owned_children_absent'] is True
+
+
+_DYNAMIC_BOOTSTRAP_DRIVER = r'''
+import json,os,sys,types
+from pathlib import Path
+# The source module's hook decorator is registered only when pytest runs;
+# this isolated embedded interpreter exercises just the process supervisor.
+pytest=types.ModuleType('pytest')
+pytest.hookimpl=lambda **kwargs:lambda function:function
+sys.modules['pytest']=pytest
+from tools.rebuild import canonical_source_audit as audit
+private=sys.argv[1];log=Path(sys.argv[2]);expected=os.environ['LD_LIBRARY_PATH']
+bootstrap,evidence=audit._trusted_bootstrap_environment(os.environ.copy())
+owner=audit.OwnedProcessSupervisor()
+with log.open('wb') as output,log.with_suffix('.stderr').open('wb') as diagnostics:
+    code=owner.run([sys.executable,'-c','import os;print(os.environ["LD_LIBRARY_PATH"])'],
+        cwd=os.getcwd(),env=os.environ.copy(),log=output,stderr=diagnostics,timeout_seconds=5)
+print(json.dumps({'evidence':evidence,'bootstrap_path':bootstrap.get('LD_LIBRARY_PATH'),
+    'expected':expected,'original_env':log.read_text().strip(),'code':code,'owner':owner.evidence}))
+'''
+
+
+def test_real_dynamic_python_gate_uses_mapped_private_library_and_restores_environment(tmp_path):
+    import ctypes,hashlib
+    compiler=shutil.which('cc')
+    assert compiler, 'dynamic interpreter fixture requires cc'
+    address=ctypes.cast(ctypes.pythonapi.Py_GetVersion,ctypes.c_void_p).value
+    mapping=next(line for line in Path('/proc/self/maps').read_text().splitlines()
+        if int(line.split()[0].split('-')[0],16)<=address<int(line.split()[0].split('-')[1],16))
+    active=Path(mapping.split(None,5)[5]).resolve()
+    candidates=[]
+    if active.name.startswith('libpython') and '.so' in active.name:candidates.append(active)
+    for directory in [Path(sys.base_prefix)/'lib',Path('/usr/lib'),*sorted(Path('/usr/lib').glob('*-linux-gnu'))]:
+        candidates.extend(sorted(directory.glob('libpython*.so.1.0')))
+    candidates=list(dict.fromkeys(path.resolve() for path in candidates if path.is_file()))
+    assert candidates, 'dynamic interpreter fixture requires an installed shared libpython'
+    private=tmp_path/'trusted';private.mkdir(mode=0o700)
+    source=tmp_path/'embed.c';binary=private/'python-embedded'
+    source.write_text('extern int Py_BytesMain(int, char **);\nint main(int argc, char **argv) { return Py_BytesMain(argc, argv); }\n')
+    proof='import ctypes,os; a=ctypes.cast(ctypes.pythonapi.Py_GetVersion,ctypes.c_void_p).value; print(next(l.split(None,5)[5].strip() for l in open("/proc/self/maps") if len(l.split(None,5))==6 and int(l.split()[0].split("-")[0],16)<=a<int(l.split()[0].split("-")[1],16)))'
+    failures=[];library=None
+    for candidate in candidates:
+        build=subprocess.run([compiler,str(source),str(candidate),'-o',str(binary)],capture_output=True,text=True,timeout=20)
+        if build.returncode:
+            failures.append((str(candidate),'link failed'));continue
+        probe_env={k:v for k,v in os.environ.items() if not k.startswith('LD_') and k not in {'GCONV_PATH','GLIBC_TUNABLES'}}
+        probe_env['LD_LIBRARY_PATH']=str(candidate.parent)
+        probe=subprocess.run([str(binary),'-c',proof],env=probe_env,capture_output=True,text=True,timeout=20)
+        if probe.returncode==0 and Path(probe.stdout.strip()).resolve()==candidate:
+            library=candidate;break
+        failures.append((str(candidate),'embedded interpreter or active mapping failed'))
+    assert library is not None, f'no usable installed shared Python interpreter: {failures}'
+    if library.stat().st_size<=8*1024*1024:
+        mapped=private/library.name;shutil.copyfile(library,mapped);mapped.chmod(0o644)
+        assert hashlib.sha256(mapped.read_bytes()).digest()==hashlib.sha256(library.read_bytes()).digest()
+        original_path=str(private)
+    else:
+        mapped=library
+        original_path=str(private)+':'+str(library.parent)
+    env={**os.environ,'LD_LIBRARY_PATH':original_path}
+    result=subprocess.run([str(binary),'-c',_DYNAMIC_BOOTSTRAP_DRIVER,str(private),str(tmp_path/'original.log')],
+        cwd=Path(__file__).resolve().parents[2],env=env,capture_output=True,text=True,timeout=20)
+    assert result.returncode==0,(result.stdout,result.stderr)
+    observed=json.loads(result.stdout);evidence=observed['evidence']
+    assert evidence['library_mode']=='ACTIVE_MAPPED_LIBPYTHON'
+    assert evidence['library']['path']==str(mapped.resolve())
+    assert evidence['library']['sha256']==hashlib.sha256(mapped.read_bytes()).hexdigest()
+    assert observed['bootstrap_path']==str(mapped.parent)
+    assert observed['expected']==observed['original_env']==original_path
+    assert observed['code']==0
+    _assert_supervision_cleanup(observed['owner'])

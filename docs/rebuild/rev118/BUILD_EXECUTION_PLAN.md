@@ -441,3 +441,11 @@ Exact5fdf hosted CI exposed two account approval contract failures: Android omit
 The complete existing approval contract passes9/9 and two actual HTTP boundary/reauth cases pass2/2. A Kotlin cold-recovery regression preserves UNKNOWN original state and forbids resend; it remains locally unexecuted because this host has no Kotlin/Gradle toolchain. Exact-head hosted Android qualification remains pending. Source evidence is not formal/unit/native/provider acceptance.
 
 Process lesson: every cross-language action change must inspect all declared protocol/approval/journal lists and their real form, transport and recovery consumers before freezing; preserve strict equality contracts rather than weakening them.
+
+## 3 November: supervised bootstrap hosted compatibility SOURCE
+
+Published275 introduced a concrete compatibility regression by refusing the standard hosted LD_LIBRARY_PATH before required workers could execute. The correction gives only the trusted bootstrap a verified active-library environment, passes the original effective environment privately in a bounded sealed memfd, and restores it after actual pidfd/PID/start/PPID binding. Original command/environment, hooks, and Java/Node timeouts remain intact. Installed runtime trust is a prerequisite, not a hostile-host sandbox claim.
+
+Final pinned source passes195 tests with zero skips, including actual shared-library bootstrap, original preload constructor after binding, no constructor effect on binding/acknowledgement failure, actual sealing and descriptor cleanup, descendant reaping and independent receipt readback. Earlier failed attempts remain recorded. Complementary independent production/test review is clear with authorship exclusions. See [source evidence](receipts/OBL004_BOOTSTRAP_COMPAT_SOURCE_20261103.json). Parent275 hosted qualification remains incomplete; protected entry67 and trusted-checker prerequisites remain separate. No formal unit/native/provider acceptance follows.
+
+Process lesson: exercise both inherited hosted runtime variables and an actual dynamically linked Python before publishing a bootstrap admission policy; preserve the original execution environment after ownership rather than rejecting ordinary supported hosts.

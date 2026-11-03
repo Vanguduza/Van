@@ -9,6 +9,7 @@ import argparse
 from collections import Counter, defaultdict
 import configparser
 import fnmatch
+import fcntl
 import hashlib
 import importlib.metadata
 import json
@@ -38,17 +39,44 @@ LEGACY_SCHEMA = 'van.canonical-cwd-audit/1'
 SCHEMA = 'van.canonical-cwd-audit/2'
 PROBE_OUTPUT_CAP = 8 * 1024**2
 LAUNCH_GATE_SECONDS = 5
-LAUNCH_ENVIRONMENT_POLICY = 'van.no-preexec-loader-overrides/1'
+LAUNCH_ENVIRONMENT_POLICY = 'van.trusted-bootstrap-private-exec-environment/2'
+# Linux UAPI values: some supported Python builds omit the fcntl names.
+# Support is established by actual add/get-seal syscalls, never by these names.
+LINUX_F_ADD_SEALS=1033
+LINUX_F_GET_SEALS=1034
+LINUX_ENVIRONMENT_SEALS=0x0001|0x0002|0x0004|0x0008
 # Isolated Python starts this trusted gate, then execs the original argv in the
 # same PID only after the parent has bound pidfd + PID/start/PPID. Neither the
 # original program nor its startup hooks can run while ownership is unbound.
 LAUNCH_GATE = '''import os,select,sys
 descriptor=int(sys.argv[1])
+environment_descriptor=int(sys.argv[2])
+environment_size=int(sys.argv[3])
 ready,_,_=select.select([descriptor],[],[],5)
 allowed=os.read(descriptor,1) if ready else b''
 os.close(descriptor)
-if allowed!=b'X':os._exit(125)
-os.execvpe(sys.argv[2],sys.argv[2:],os.environ)
+if allowed!=b'X':
+    os.close(environment_descriptor)
+    os._exit(125)
+try:
+    chunks=[];remaining=environment_size
+    while remaining:
+        chunk=os.read(environment_descriptor,min(65536,remaining))
+        if not chunk:raise ValueError()
+        chunks.append(chunk);remaining-=len(chunk)
+    if os.read(environment_descriptor,1):raise ValueError()
+    os.close(environment_descriptor);environment_descriptor=None
+    payload=b''.join(chunks)
+    if payload and not payload.endswith(b'\\0'):raise ValueError()
+    environment={}
+    for entry in payload[:-1].split(b'\\0') if payload else []:
+        key,separator,value=entry.partition(b'=')
+        if not separator or key in environment:raise ValueError()
+        environment[key]=value
+    os.execvpe(sys.argv[4],sys.argv[4:],environment)
+except BaseException:
+    if environment_descriptor is not None:os.close(environment_descriptor)
+    os._exit(126)
 '''
 ROOTS = ('backend/tests', 'tests', 'services', 'hermes/policy/tests', 'trading/tests')
 UID_NODE = 'backend/tests/test_browser_egress_proxy_i8.py::test_only_the_configured_client_uid_may_use_a_listener'
@@ -415,6 +443,99 @@ def foreground_git_environment(environment):
     return environment
 
 
+def _trusted_bootstrap_environment(effective):
+    """Use the already trusted active Python runtime, never caller loader knobs.
+
+    The installed runtime and its non-world/group-writable dependency directory
+    remain prerequisites. This is not a sandbox against a hostile runtime owner.
+    sysconfig LIBDIR may describe a build machine, so it is not a source here.
+    """
+    import ctypes
+    executable=Path(sys.executable).resolve(strict=True)
+    active=Path('/proc/self/exe').stat();actual=executable.stat()
+    if (not stat.S_ISREG(actual.st_mode) or (active.st_dev,active.st_ino)!=(actual.st_dev,actual.st_ino)
+        or actual.st_mode & 0o022):
+        raise ProcessSupervisionBlocked('UNQUALIFIED_BOOTSTRAP_EXECUTABLE')
+    libraries={};api_mapping=None
+    api_address=ctypes.cast(ctypes.pythonapi.Py_GetVersion,ctypes.c_void_p).value
+    for line in Path('/proc/self/maps').read_text().splitlines():
+        fields=line.split(None,5)
+        if len(fields)!=6:continue
+        low,high=(int(value,16) for value in fields[0].split('-'))
+        if api_address is not None and low<=api_address<high:
+            if api_mapping is not None or 'x' not in fields[1]:
+                raise ProcessSupervisionBlocked('AMBIGUOUS_BOOTSTRAP_PYTHON_API')
+            api_mapping=fields
+        if not re.search(r'/libpython[^/]*\.so(?:\.[0-9]+)*(?: \(deleted\))?$',fields[5]):continue
+        name=fields[5]
+        if name.endswith(' (deleted)'):raise ProcessSupervisionBlocked('DELETED_BOOTSTRAP_LIBRARY')
+        library=Path(name).resolve(strict=True);info=library.stat()
+        major,minor=(int(value,16) for value in fields[3].split(':'))
+        if (not stat.S_ISREG(info.st_mode) or info.st_mode & 0o022
+            or (os.major(info.st_dev),os.minor(info.st_dev),info.st_ino)!=(major,minor,int(fields[4]))):
+            raise ProcessSupervisionBlocked('REPLACED_BOOTSTRAP_LIBRARY')
+        libraries[str(library)]=library
+    if len(libraries)>1:raise ProcessSupervisionBlocked('AMBIGUOUS_BOOTSTRAP_LIBRARY')
+    if api_mapping is None or api_mapping[5].endswith(' (deleted)'):
+        raise ProcessSupervisionBlocked('UNQUALIFIED_BOOTSTRAP_PYTHON_API')
+    api_file=Path(api_mapping[5]).resolve(strict=True);api_info=api_file.stat()
+    major,minor=(int(value,16) for value in api_mapping[3].split(':'))
+    if (os.major(api_info.st_dev),os.minor(api_info.st_dev),api_info.st_ino)!=(major,minor,int(api_mapping[4])):
+        raise ProcessSupervisionBlocked('REPLACED_BOOTSTRAP_PYTHON_API')
+    if libraries:
+        if api_file!=next(iter(libraries.values())):
+            raise ProcessSupervisionBlocked('UNRELATED_MAPPED_BOOTSTRAP_LIBRARY')
+    elif api_file!=executable:
+        raise ProcessSupervisionBlocked('UNQUALIFIED_STANDALONE_PYTHON_API')
+    bootstrap={key:value for key,value in effective.items()
+        if not os.fsdecode(key).startswith('LD_') and os.fsdecode(key) not in {'GCONV_PATH','GLIBC_TUNABLES'}}
+    evidence={'schema':'van.active-python-bootstrap/1','executable':str(executable),
+        'executable_sha256':hashlib.sha256(executable.read_bytes()).hexdigest(),
+        'library_mode':'STANDALONE_NO_MAPPED_LIBPYTHON','library':None}
+    if libraries:
+        library=next(iter(libraries.values()));directory=library.parent;info=directory.stat()
+        if (not stat.S_ISDIR(info.st_mode) or info.st_mode & 0o022
+            or any(char in str(directory) for char in (':','\n','\r'))):
+            raise ProcessSupervisionBlocked('UNQUALIFIED_BOOTSTRAP_LIBRARY_DIRECTORY')
+        bootstrap['LD_LIBRARY_PATH']=str(directory)
+        evidence.update(library_mode='ACTIVE_MAPPED_LIBPYTHON',library={
+            'path':str(library),'sha256':hashlib.sha256(library.read_bytes()).hexdigest(),
+            'device':library.stat().st_dev,'inode':library.stat().st_ino,
+            'directory_device':info.st_dev,'directory_inode':info.st_ino,'directory_mode':stat.S_IMODE(info.st_mode)})
+    return bootstrap,evidence
+
+
+def _sealed_exec_environment(environment):
+    """No payload value is returned in evidence, argv, a pathname or a log."""
+    descriptor=None
+    try:
+        entries=[];names=set();size=0
+        for key,value in environment.items():
+            key=os.fsencode(key);value=os.fsencode(value)
+            if b'=' in key or b'\0' in key or b'\0' in value or key in names:
+                raise ProcessSupervisionBlocked('INVALID_ORIGINAL_EXEC_ENVIRONMENT')
+            names.add(key);entry=key+b'='+value+b'\0';size+=len(entry)
+            if size>PROBE_OUTPUT_CAP:raise ProcessSupervisionBlocked('ORIGINAL_EXEC_ENVIRONMENT_CAPACITY')
+            entries.append(entry)
+        descriptor=os.memfd_create('van-owned-exec-environment',os.MFD_CLOEXEC|os.MFD_ALLOW_SEALING)
+        for entry in entries:
+            pending=memoryview(entry)
+            while pending:
+                written=os.write(descriptor,pending)
+                if written<=0:raise ProcessSupervisionBlocked('ORIGINAL_EXEC_ENVIRONMENT_WRITE_FAILED')
+                pending=pending[written:]
+        seals=LINUX_ENVIRONMENT_SEALS
+        fcntl.fcntl(descriptor,LINUX_F_ADD_SEALS,seals)
+        if fcntl.fcntl(descriptor,LINUX_F_GET_SEALS)!=seals or os.fstat(descriptor).st_size!=size:
+            raise ProcessSupervisionBlocked('ORIGINAL_EXEC_ENVIRONMENT_NOT_SEALED')
+        os.lseek(descriptor,0,os.SEEK_SET)
+        return descriptor,{'schema':'van.sealed-exec-environment/1','bytes':size,'entries':len(entries),
+            'sealed':True,'parent_closed':False,'read_after_ownership_ack':True,'closed_before_original_exec':True}
+    except BaseException:
+        if descriptor is not None:os.close(descriptor)
+        raise
+
+
 class OwnedProcessSupervisor:
     """Process-local Linux ownership, deliberately ported from the qualified runner.
 
@@ -429,6 +550,7 @@ class OwnedProcessSupervisor:
             'leader_waited':False,'leader_exit':None,'leader_forced_cleanup':False,
             'launch_gate':{'schema':'van.bound-exec-gate/1','source_sha256':hashlib.sha256(LAUNCH_GATE.encode()).hexdigest(),
                 'timeout_seconds':LAUNCH_GATE_SECONDS,'environment_policy':LAUNCH_ENVIRONMENT_POLICY,
+                'bootstrap':None,'exec_environment':None,
                 'released':False,'closed':False,'aborted_before_exec':False},
             'adopted':[],'owned_children_absent':False,'waitpid_echild':False,
             'unexpected_live_descendants':False,'cleanup_error':None,'interrupted':None,'remaining_owned':[]}
@@ -547,23 +669,26 @@ class OwnedProcessSupervisor:
 
     def run(self,command,*,cwd,env,log,timeout_seconds,stderr=subprocess.STDOUT,capture=None):
         child=None;descriptor=None;identity=None;primary=None
-        gate_read=None;gate_write=None
+        gate_read=None;gate_write=None;environment_descriptor=None
         self.capture=capture
         try:
             self.preflight()
             if _owned_children():raise ProcessSupervisionBlocked('OWNED_CHILD_BASELINE_CHANGED')
             launch_env=foreground_git_environment(env)
-            # -I/-S constrain Python, not its ELF loader. Refuse these inputs
-            # before Popen instead of silently changing the eventual exec env.
-            unsupported=sorted(key for key in set(os.environ)|set(launch_env)
-                if key.startswith('LD_') or key in {'GCONV_PATH','GLIBC_TUNABLES'})
-            if unsupported:
-                raise ProcessSupervisionBlocked('UNQUALIFIED_PREEXEC_LOADER_ENVIRONMENT:'+','.join(unsupported))
+            try:
+                bootstrap_env,bootstrap=_trusted_bootstrap_environment(launch_env)
+                environment_descriptor,environment=_sealed_exec_environment(launch_env)
+            except (OSError,AttributeError):
+                raise ProcessSupervisionBlocked('TRUSTED_BOOTSTRAP_RUNTIME_UNAVAILABLE') from None
+            self.evidence['launch_gate'].update(bootstrap=bootstrap,exec_environment=environment)
             gate_read,gate_write=os.pipe()
-            launcher=[sys.executable,'-I','-S','-B','-c',LAUNCH_GATE,str(gate_read),*[os.fspath(v) for v in command]]
-            child=subprocess.Popen(launcher,cwd=cwd,env=launch_env,stdout=log,stderr=stderr,
-                start_new_session=True,pass_fds=(gate_read,))
+            launcher=[sys.executable,'-I','-S','-B','-c',LAUNCH_GATE,str(gate_read),
+                str(environment_descriptor),str(environment['bytes']),*[os.fspath(v) for v in command]]
+            child=subprocess.Popen(launcher,cwd=cwd,env=bootstrap_env,stdout=log,stderr=stderr,
+                start_new_session=True,pass_fds=(gate_read,environment_descriptor))
             self.child_started=True;self.child_pid=child.pid
+            os.close(environment_descriptor);environment_descriptor=None
+            self.evidence['launch_gate']['exec_environment']['parent_closed']=True
             os.close(gate_read);gate_read=None
             if capture is not None:capture.start(child)
             descriptor,identity=self._bind(child.pid)
@@ -577,8 +702,10 @@ class OwnedProcessSupervisor:
         finally:
             # Every exit path closes the sole parent gate writer before any
             # ownership retry. EOF cannot authorize execution and is bounded.
-            for gate in (gate_read,gate_write):
+            for gate in (gate_read,gate_write,environment_descriptor):
                 if gate is not None:os.close(gate)
+            if self.evidence['launch_gate']['exec_environment'] is not None:
+                self.evidence['launch_gate']['exec_environment']['parent_closed']=True
             self.evidence['launch_gate']['closed']=True
             try:
                 if child is not None:
@@ -680,10 +807,36 @@ def _verify_process_supervision(receipt,state):
     require(isinstance(evidence,dict) and set(evidence)==keys and evidence['schema']=='van.kernel-owned-child-supervision/1',
         'missing or foreign owned-child supervision')
     require(evidence['capabilities']=={'pidfd':True,'subreaper':True,'proc_identity':True},'unproven process supervision capabilities')
-    require(evidence['launch_gate']=={'schema':'van.bound-exec-gate/1',
+    gate=evidence['launch_gate']
+    require(isinstance(gate,dict) and set(gate)=={'schema','source_sha256','timeout_seconds','environment_policy',
+        'released','closed','aborted_before_exec','bootstrap','exec_environment'},'missing exact bound-exec launch gate')
+    require({key:value for key,value in gate.items() if key not in {'bootstrap','exec_environment'}}=={'schema':'van.bound-exec-gate/1',
         'source_sha256':hashlib.sha256(LAUNCH_GATE.encode()).hexdigest(),'timeout_seconds':LAUNCH_GATE_SECONDS,
         'environment_policy':LAUNCH_ENVIRONMENT_POLICY,
         'released':True,'closed':True,'aborted_before_exec':False},'missing exact bound-exec launch gate')
+    bootstrap=gate['bootstrap'];environment=gate['exec_environment']
+    digest=lambda value:isinstance(value,str) and re.fullmatch('[0-9a-f]{64}',value) is not None
+    require(isinstance(bootstrap,dict) and set(bootstrap)=={'schema','executable','executable_sha256','library_mode','library'}
+        and bootstrap['schema']=='van.active-python-bootstrap/1' and isinstance(bootstrap['executable'],str)
+        and Path(bootstrap['executable']).is_absolute() and digest(bootstrap['executable_sha256']),
+        'unproven trusted bootstrap executable')
+    library=bootstrap['library']
+    if bootstrap['library_mode']=='STANDALONE_NO_MAPPED_LIBPYTHON':
+        require(library is None,'foreign standalone bootstrap library')
+    else:
+        require(bootstrap['library_mode']=='ACTIVE_MAPPED_LIBPYTHON' and isinstance(library,dict)
+            and set(library)=={'path','sha256','device','inode','directory_device','directory_inode','directory_mode'}
+            and isinstance(library['path'],str) and Path(library['path']).is_absolute() and digest(library['sha256'])
+            and all(type(library[key]) is int and library[key]>=0 for key in ('device','inode','directory_device','directory_inode','directory_mode'))
+            and library['inode']>0 and library['directory_inode']>0 and not library['directory_mode'] & 0o022,
+            'unproven active mapped bootstrap library')
+    require(isinstance(environment,dict) and set(environment)=={'schema','bytes','entries','sealed','parent_closed',
+        'read_after_ownership_ack','closed_before_original_exec'}
+        and environment['schema']=='van.sealed-exec-environment/1'
+        and type(environment['bytes']) is int and 0<=environment['bytes']<=PROBE_OUTPUT_CAP
+        and type(environment['entries']) is int and 0<=environment['entries']<=environment['bytes']
+        and all(environment[key] is True for key in ('sealed','parent_closed','read_after_ownership_ack','closed_before_original_exec')),
+        'unproven original exec environment handoff')
     def identity(value):
         return (isinstance(value,dict) and set(value)=={'pid','ppid','start_ticks'} and
             all(type(value[k]) is int for k in value) and value['pid']>0 and value['ppid']>=0 and value['start_ticks']>0)

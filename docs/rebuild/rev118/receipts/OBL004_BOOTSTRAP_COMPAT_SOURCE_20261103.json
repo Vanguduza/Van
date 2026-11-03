@@ -1,0 +1,59 @@
+{
+  "schema": "van.obl004-bootstrap-compatibility-source/1",
+  "base": "27551d27e1c131b0f7e7b24c96d3e904d5b97f81",
+  "status": "SOURCE_TESTED_REVIEWED_HOSTED_QUALIFICATION_PENDING",
+  "problem": "Published275 rejected standard hosted LD_LIBRARY_PATH before spawning required supervised workers. This is a source compatibility regression.",
+  "implementation": {
+    "paths": [
+      "tools/rebuild/canonical_source_audit.py",
+      "tests/rebuild/test_canonical_source_audit.py"
+    ],
+    "source_sha256": "304440e098d08273aa9f44fbd26c0859bd03971b3adad3c97c8b324649a48f96",
+    "test_sha256": "5b898ad5a5d9335066c0dd0927acd86c081a4bdd423db7cbb82d392c84b9200b",
+    "policy": "Trusted installed Python bootstrap uses actual active C API mapped library; original effective environment crosses an immutable size-bounded sealed memfd and is read/restored only after actual pidfd/PID/start/PPID ownership acknowledgement. Final argv/cwd/environment and existing Java/Node timeouts preserved. No environment contents enter receipt/argv.",
+    "limits": "Trusted installed runtime prerequisite; not a hostile-runtime sandbox."
+  },
+  "tests": {
+    "final": {
+      "passed": 195,
+      "skipped": 0,
+      "seconds": 78.1,
+      "exit": 0,
+      "exception": null,
+      "child_waited": true,
+      "owned_children_absent": true,
+      "remaining": []
+    },
+    "retained_attempts": [
+      "R1:25 failures before spawn: omitted Python symbolic Linux sealing constants; fixed actual UAPI seal verification",
+      "R2:24 passed,2 failed: invalid GLIBC_TUNABLES fixture normalized by native loader; valid tunable with exact environment oracle substituted",
+      "R3:195 passed; dynamic shared-library fixture then made portable",
+      "R4:194 passed,1 failed: benign embedded Python stderr contaminated exact stdout path; separated stderr while retaining exact assertions",
+      "R5:195 passed,0 skipped on final pinned files"
+    ],
+    "proofs": [
+      "actual kernel seals deny write/grow/shrink; byte-preserving environment including empty/unicode/surrogate/equals",
+      "capacity/sealing/Popen failure descriptor cleanup",
+      "actual shared-libpython runtime bootstrap and standard LD_LIBRARY_PATH success",
+      "actual preload constructor runs only after ownership; bind failure/early interrupt/missing acknowledgement have no constructor/command effect",
+      "existing timeout/interrupt/adopted descendants/ECHILD/readers/CLI/readback and strict v2 transcript gates"
+    ]
+  },
+  "review": {
+    "production": "Terra independent CLEAR, source304440e; excludes own authored tests",
+    "tests": "Terra independently reviewed Sol constructor/driver and positive/failure hunks, plus final two-line stderr separation. Sol independently reviewed Terra actual kernel/runtime/dynamic portable fixture hunks. No self-authored test review claimed."
+  },
+  "hosted_parent": {
+    "run": 41696635840,
+    "qualification": "INCOMPLETE",
+    "confirmed": [
+      "browser_checkout and trading_pg_checkout original collect/execute receipts BLOCKED ProcessSupervisionBlocked UNQUALIFIED_PREEXEC_LOADER_ENVIRONMENT:LD_LIBRARY_PATH before tests",
+      "documentary job126132970833:31 failures,364 passes,55 fixture errors; supervisor/CLI/loader predicates blocked by pre-exec environment admission",
+      "public gateway0 jobs126132970902 and126132971087:2 protected entry67 assertions each,1121 passed each",
+      "project-truth126132970856:trusted base8eb1889822fc8a83f219977c15340172e16acd91 lacks tools/ci/project_truth_ledger.py"
+    ],
+    "limits": "Remaining failed-job predicates inventoried separately; statuses alone are not classified as loader failures. Original artifacts remain failed. No retry/cancel or whole-run qualification."
+  },
+  "authority": "Existing candidate-build authorization; no authority/native/provider/production/unit acceptance or protected entry67 change.",
+  "formal_units_accepted": 0
+}
