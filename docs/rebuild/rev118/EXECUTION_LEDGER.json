@@ -1312,7 +1312,7 @@
     "updated_utc": "2026-11-02T14:08:06.907570+00:00",
     "verified_source_head": "f74aac3bf503478cd6800949b5541b4c17609d9c"
   },
-  "current_action": "Normal reviewed source candidate commit/final4fd verification/push; ordinary existing CI results pending; no unit/native acceptance. Future18disconnect/OBSERVE remains unleased.",
+  "current_action": "Published OBSERVE29b931/GREEN244; exact hosted source qualification remains active. Repair the confirmed inherited canonical-artifact producer/consumer path mismatch without relaxing invocation/source/owner checks, then actual real-Git guards, independent review, genuine hooks/baseline and normal publication. Full BE004 eight verbs/11requirements/21acceptances/20contexts/6actions and native gates remain OPEN; next dependency-ready work follows actual requirement/context/action/refusal coverage.",
   "delegation": {
     "active_assignments": [
       {
@@ -1707,6 +1707,13 @@
       "evidence": "receipts/NEW_ACCOUNT_OBSERVE_SOURCE_20261103.json",
       "scope": "BE004 new account OBSERVE defaults SOURCE",
       "status": "SAFE_PAPER_METADATA_TESTED_PROVIDER_ANDROID_HOSTED_PENDING"
+    },
+    {
+      "acceptance_issued": false,
+      "at_utc": "2026-11-03T09:21:35.852502+00:00",
+      "evidence": "receipts/CANONICAL_AUDIT_RELOCATION_SOURCE_20261103.json",
+      "scope": "Canonical source artifact relocation verifier SOURCE",
+      "status": "SOURCE_REVIEWED_SELECTED_TREE123PASS11DEPENDENCYFAIL_ACTUAL_GIT_CHECK_PENDING"
     }
   ],
   "pre002_challenge": "pre002/challenge/: 324 author-prepared dossiers (AUTHOR_CHALLENGED_PENDING_INDEPENDENT_REVIEW)",
@@ -3109,5 +3116,5 @@
       "status": "IN_PROGRESS"
     }
   },
-  "updated_at_utc": "2026-11-03T09:03:33.152802+00:00"
+  "updated_at_utc": "2026-11-03T09:21:35.852502+00:00"
 }

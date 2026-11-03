@@ -417,6 +417,26 @@ def run(args):
     dump(output/'receipt.json',baseline)
     return 0 if baseline['state']=='TERMINAL' else 1
 
+def producer_output(folder, receipt, state, root):
+    """Bind the original invocation path; downloaded artifacts may be relocated."""
+    original=receipt.get('output')
+    require(isinstance(original,str) and bool(original) and '\x00' not in original,
+        'invalid original producer output')
+    output=Path(original)
+    require(output.is_absolute() and str(output)==original and '..' not in output.parts
+        and output!=Path('/') and not output.is_relative_to(Path(root)),
+        'invalid original producer output')
+    # These are original producer observations, not paths inferred from the
+    # consumer's extraction directory. Keep every original argument exact.
+    identities=('schema','profile','cwd','commit','root','output','execution_id',
+        'workflow','collect_only','manifest','actual_cwd')
+    for observed in (state,load(Path(folder)/'input.json'),load(Path(folder)/'collection.json')):
+        require(isinstance(observed,dict) and all(key in receipt and key in observed and receipt[key]==observed[key]
+            for key in identities),'original producer identity differs')
+    require(receipt['root']==str(root),'foreign original producer root')
+    return output
+
+
 def verify_profile(folder,manifest,profile,cwd,commit,root):
     folder=Path(folder);receipt=load(folder/'receipt.json');state=load(folder/'terminal.json')
     require(receipt['workflow'].get('id') and receipt['workflow'].get('attempt'),'missing current workflow identity')
@@ -452,9 +472,10 @@ def verify_profile(folder,manifest,profile,cwd,commit,root):
     expected_files={r['path'] for r in manifest['files'] if profile in r['profiles']}
     require({n.split('::')[0] for n in full}==expected_files,'missing or foreign collected profile file')
     command=receipt['command']
-    prefix=['-B','-s',str(Path(root)/'tools/rebuild/source_storage_audit.py'),'--checkout-root',str(root),'--report',str(folder/'storage-audit.json')]
+    output=producer_output(folder,receipt,state,root)
+    prefix=['-B','-s',str(Path(root)/'tools/rebuild/source_storage_audit.py'),'--checkout-root',str(root),'--report',str(output/'storage-audit.json')]
     require(type(state.get('collect_only')) is bool and receipt.get('collect_only')==state['collect_only'],'phase identity differs')
-    expected_arguments=build_pytest_arguments(root,folder,profile,manifest,state['collect_only'],basetemp)
+    expected_arguments=build_pytest_arguments(root,output,profile,manifest,state['collect_only'],basetemp)
     require(command[1:8]==prefix and command[8:]==state['pytest_arguments']==expected_arguments,'recorded actual pytest invocation differs')
     chosen=selectors(manifest,profile,root)
     require(command[8:8+len(chosen)]==chosen,'absolute original selectors differ')

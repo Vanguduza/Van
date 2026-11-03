@@ -84,8 +84,15 @@ def test_actual_cli_collection_execution_and_independent_readback_bind_cwd(canon
         result=subprocess.run(command,cwd=root,env=env,capture_output=True,text=True,timeout=40)
         assert result.returncode==0, (result.stdout,result.stderr,(output/mode/'receipt.json').read_text(),(output/mode/'pytest.log').read_text() if (output/mode/'pytest.log').exists() else '')
     for key in ('PYTHONPATH','GITHUB_RUN_ID','GITHUB_RUN_ATTEMPT'):monkeypatch.setenv(key,env[key])
+    original_output=output
+    output=tmp_path/('downloaded-profile-'+cwd)
+    shutil.move(str(original_output),output)
+    assert not original_output.exists()
     manifest=audit.inventory(root)
+    collected,empty,_=audit.verify_profile(output/'collect',manifest,'documentary',cwd,head,root)
+    assert collected['collect_only'] is True and empty=={}
     state,outcomes,_=audit.verify_profile(output/'execute',manifest,'documentary',cwd,head,root)
+    assert state['output']==str(original_output/'execute')
     assert state['actual_cwd']==str(root if cwd=='checkout' else root/'backend')
     receipt=audit.load(output/'execute'/'receipt.json')
     assert state['actual_basetemp']==receipt['basetemp']['path']
@@ -135,7 +142,9 @@ def actual_phase_receipt(tmp_path_factory):
 @pytest.mark.parametrize('damage',['wrong-cwd','wrong-actual-cwd','source','protected','lock','missing-call',
     'duplicate-phase','foreign-phase','failed-setup','missing-junit','lost-file','storage-cwd','storage-write',
     'collect-only','foreign-artifact','aborted','selector-override','foreign-plugin','wrong-config-cut',
-    'temp-execution','temp-actual','temp-cleanup','temp-path'])
+    'temp-execution','temp-actual','temp-cleanup','temp-path',
+    'output-state','output-input','output-collection','output-relative','output-dotdot',
+    'output-checkout','output-root','wrapper-report','state-path','junit-path'])
 def test_resealed_actual_phase_receipts_fail_closed(actual_phase_receipt,monkeypatch,damage):
     root,head,out,env=actual_phase_receipt
     for key in ('PYTHONPATH','GITHUB_RUN_ID','GITHUB_RUN_ATTEMPT'):monkeypatch.setenv(key,env[key])
@@ -169,6 +178,24 @@ def test_resealed_actual_phase_receipts_fail_closed(actual_phase_receipt,monkeyp
         elif damage=='temp-cleanup':receipt['basetemp_cleanup']['state']='RETAINED_UNVERIFIED_CHILD_TERMINATION'
         elif damage=='temp-path':
             state['basetemp']['path']=receipt['basetemp']['path']=str(root/'basetemp')
+        elif damage in {'output-state','output-input','output-collection'}:
+            if damage=='output-state':state['output']=str(out.parent/'foreign-output')
+            else:
+                path=out/('input.json' if damage=='output-input' else 'collection.json')
+                value=audit.load(path);value['output']=str(out.parent/'foreign-output');audit.dump(path,value)
+        elif damage in {'output-relative','output-dotdot','output-checkout','output-root'}:
+            value={'output-relative':'relative-output','output-dotdot':str(out.parent)+'/../foreign',
+                'output-checkout':str(root/'evidence'),'output-root':'/'}[damage]
+            receipt['output']=state['output']=value
+            for name in ('input.json','collection.json'):
+                original=audit.load(out/name);original['output']=value;audit.dump(out/name,original)
+        elif damage=='wrapper-report':receipt['command'][7]=str(out.parent/'foreign-storage-audit.json')
+        elif damage in {'state-path','junit-path'}:
+            option='--van-canonical-state=' if damage=='state-path' else '--junitxml='
+            arguments=state['pytest_arguments']
+            index=next(i for i,arg in enumerate(arguments) if arg.startswith(option))
+            arguments[index]=option+str(out.parent/'foreign.json')
+            receipt['command']=receipt['command'][:8]+arguments
         elif damage in {'selector-override','foreign-plugin','wrong-config-cut'}:
             arguments=state['pytest_arguments']
             if damage=='selector-override':arguments.extend(['-k','narrow'])
