@@ -72,7 +72,9 @@ async def test_lost_native_reply_after_unlink_is_recovered_by_original_read_with
         return result
     monkeypatch.setattr(app.state.onboarding.control,'run',lost_reply)
     response=await ac.post('/v1/trading/accounts/action',json=body)
-    assert response.status_code==409 and response.json()['effect_state']=='UNKNOWN',response.text
+    # The lifecycle owner independently reads the original sealed result after
+    # a lost ACK; it never repeats the native request.
+    assert response.status_code==200 and response.json()['effect_state']=='APPLIED',response.text
     assert 'paper_owner' not in AccountRegistry(tmp_path/'accounts.json').accounts
     status=await ac.get('/v1/trading/accounts/operations/'+response.json()['operation_id'])
     assert status.status_code==200 and status.json()['effect_state']=='APPLIED',status.text
@@ -145,14 +147,19 @@ async def test_native_funds_changing_after_gateway_preflight_requires_fresh_revi
 @pytest.mark.asyncio
 @pytest.mark.parametrize('field,value',[('remote_account_closed',True),('retained_remote_funds',None)])
 async def test_incomplete_or_broker_closing_native_review_is_refused_before_signature(client,tmp_path,monkeypatch,field,value):
-    ac,app=client;native_funds(tmp_path,monkeypatch);native=app.state.onboarding.control.review
-    def broken(action,args):
-        review=native(action,args);review['retirement'][field]=value
-        review['review_digest']=canonical_hash({k:v for k,v in review.items() if k!='review_digest'})
+    ac,app=client;native_funds(tmp_path,monkeypatch);native=app.state.onboarding.control.run
+    def broken(command,args):
+        review=native(command,args)
+        if command=='account_review' and args.get('action')=='account_remove' and isinstance(review.get('view'),dict):
+            unlink=review['view']['unlink_review'];unlink['retirement'][field]=value
+            unlink['review_digest']=canonical_hash({k:v for k,v in unlink.items() if k!='review_digest'})
+            review['review_digest']=unlink['review_digest']
+            review['context_digest']=canonical_hash({k:v for k,v in review.items() if k not in {'context_digest','review_digest','request_digest'}})
         return review
-    monkeypatch.setattr(app.state.onboarding.control,'review',broken)
-    response=await act(ac,'account_remove',{'alias':'fx_primary'},expected_challenge_status=409)
-    assert response.status_code==409
+    monkeypatch.setattr(app.state.onboarding.control,'run',broken)
+    response=await act(ac,'account_remove',{'alias':'fx_primary'},expected_challenge_status=503)
+    assert response.status_code==503 and 'NATIVE_REVIEW_UNVERIFIED' in response.text
+
 
 
 @pytest.mark.asyncio

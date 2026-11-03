@@ -15,7 +15,7 @@ from commander.account_effects import (AccountEffectJournal,operation_intent,inv
     mark_account_effect,require_current_account_effect,AccountOperationBlocked)
 from commander.account_retirement import retirement_scope,credential_cleanup
 
-VARIANTS={'DELETE_GRACE','CANCEL_DELETE'}
+VARIANTS={'DELETE_GRACE','CANCEL_DELETE','IMMEDIATE_DISCONNECT'}
 
 def _check_source_after_waits(blocking_checks, source_check, pure_time_check):
     """Finish all existing blocking checks before the final source binding.
@@ -63,15 +63,90 @@ def selected_sessions(settings,account):
         proofs.append({'source_ref':canonical_hash(str(path.resolve())),'sha256':observed,'account_alias':cfg.account_alias})
     return sorted(selected),proofs
 
+class _GatewayLifecycleAdmission:
+    """Process-local ingress capability for the existing Gateway attestation.
+
+    Created only by the trusted local adapter or authenticated Commander ingress.
+    JSON fields and caller callbacks cannot produce this capability. It is not an
+    approval issuer: native separately checks the immutable two-proof DATA.
+    """
+    def __init__(self, admission, current, transport_binding):
+        from copy import deepcopy
+        self.admission=deepcopy(admission)
+        self.current=current
+        self.transport_binding=transport_binding
+    def require(self, args):
+        import re
+        self.current()
+        record=self.admission
+        try:
+            context=record['context'];operation=args['_native_operation']
+            if (record!=args['_lifecycle_admission']
+                or record['schema']!='van.account-lifecycle-admission/1'
+                or record['admission_digest']!=canonical_hash({k:v for k,v in record.items() if k!='admission_digest'})
+                or record['reauth_purpose']!='ACCOUNT_LOCAL_LIFECYCLE_REAUTH_DATA'
+                or record['state']!='ADMITTED_NOT_NATIVE_COMPLETION' or record['owner_id']!='owner'
+                or context['lifecycle_id']!='proposed:'+context['resource_version']
+                or context['variant']!='IMMEDIATE_DISCONNECT' or context['alias']!=args['alias']
+                or context['semantic_digest']!=canonical_hash(semantic(args))
+                or context['resource_version']!=args['_expected_resource_version']
+                or context['incarnation']!=args['_expected_resource_version']
+                or context['review_digest']!=args['_expected_lifecycle_context_digest']
+                or context['account_control_domain']!=args['_expected_account_control_domain']
+                or context['original_device_id']!=operation['device_id']
+                or record['device_id']!=operation['device_id'] or record['operation_id']!=operation['operation_id']
+                or record['reauth_fact_id']!=args['reauth_fact_id']
+                or record['reauth_fact_digest']!=args['reauth_fact_digest']
+                or record['reauth_fact_id']==record['operation_id']
+                or record['reauth_proof_ref']==record['authority_ref']
+                or record['request_digest']!=canonical_hash({'context':context,'fact_id':record['reauth_fact_id'],
+                    'challenge_id':record['operation_id'],'text_digest':record['approval_text_digest'],
+                    'parameters_digest':record['approval_parameters_digest']})
+                or record['expires_at_unix']!=operation['expires_at_unix']
+                or type(record['created_at_unix']) is not int or not 0<=record['created_at_unix']<=int(time.time())<record['expires_at_unix']
+                or type(record['expires_at_unix']) is not int or int(time.time())>=record['expires_at_unix']
+                or operation['request_digest']!=canonical_hash({k:v for k,v in args.items() if not k.startswith('_')})
+                or operation['authority_ref']!=record['authority_ref']+'::review:'+args['_expected_review_digest']
+                or any(not isinstance(record[k],str) or re.fullmatch('[0-9a-f]{64}',record[k]) is None for k in
+                       ('actor_key_ref','reauth_fact_digest','reauth_proof_ref','authority_ref','approval_text_digest','approval_parameters_digest','request_digest'))):
+                raise ValueError()
+        except (KeyError,TypeError,ValueError):
+            raise HTTPException(403,'IMMEDIATE_DISCONNECT gateway two-proof attestation invalid') from None
+
 class NativeLifecycle:
+    def require_admission(self,args):
+        if args.get('variant')!='IMMEDIATE_DISCONNECT':return
+        verifier=self.st.lifecycle_admission_verifier
+        if callable(verifier):
+            # The actual service/Store verifier is installed once at bootstrap;
+            # args cannot select its callable or mint a replacement capability.
+            record=verifier(args)
+            attestation=_GatewayLifecycleAdmission(record,lambda:None,None)
+        else:
+            attestation=args.get('_lifecycle_admission_guard')
+            if (self.st.lifecycle_transport_binding is None
+                or not isinstance(attestation,_GatewayLifecycleAdmission)
+                or attestation.transport_binding is not self.st.lifecycle_transport_binding):
+                raise HTTPException(403,'IMMEDIATE_DISCONNECT gateway two-proof attestation required')
+        attestation.require(args)
+
     def __init__(self,settings,ledger,domain,retirement_review,resource_version,*,clock=None):
         self.st,self.ledger,self.domain,self.retirement_review,self.resource_version=settings,ledger,domain,retirement_review,resource_version
         self.clock=clock or (lambda:int(time.time()))
     def registry(self):return AccountRegistry(self.st.registry_path)
-    def row(self,alias):
-        value=self.registry()._lifecycles.get(alias)
-        if value is None:raise HTTPException(404,'No original local deletion')
+    def row(self,alias,lifecycle_id=None):
+        registry=self.registry();value=registry._lifecycles.get(alias)
+        if lifecycle_id is not None and (value is None or value['operation_id']!=lifecycle_id):
+            value=registry._lifecycle_history.get(lifecycle_id)
+        if value is None or value['alias']!=alias:raise HTTPException(404,'No exact original local lifecycle')
         return value
+    @staticmethod
+    def replace_row(cur,row,new):
+        alias=row['alias'];operation=row['operation_id']
+        if cur._lifecycles.get(alias)==row:cur._lifecycles[alias]=new
+        elif cur._lifecycle_history.get(operation)==row:cur._lifecycle_history[operation]=new
+        else:raise HTTPException(409,'Exact original lifecycle changed')
+
     def require_original(self,row):
         # Metadata cannot turn an original UNKNOWN/null into APPLIED. A genuine
         # existing sealed cleanup-child resolution is a separate postcondition.
@@ -82,23 +157,51 @@ class NativeLifecycle:
                 or 'account:'+row['alias'] not in state.intent.targets
                 or 'account-control-domain:'+row['account_control_domain'] not in state.intent.targets):
             raise HTTPException(409,'Original deletion binding requires reconciliation; HOLD')
-        if state.phase=='APPLIED' and isinstance(state.result,dict) and state.result.get('lifecycle')==public_record(row):return state
+        if state.phase=='APPLIED' and isinstance(state.result,dict):
+            old=state.result.get('lifecycle')
+            if isinstance(old,dict):
+                normalized={**old,'variant':old.get('variant','DELETE_GRACE')};public=public_record(row)
+                immutable=set(public)-{'revision','phase','record_digest'}
+                expected='DISCONNECTED' if public['variant']=='IMMEDIATE_DISCONNECT' else 'PENDING_ARCHIVE'
+                if (normalized.get('phase')==expected and normalized.get('revision')==2
+                    and state.result.get('removed') is True
+                    and all(normalized.get(k)==public[k] for k in immutable)):
+                    if row['phase']==expected and row['revision']==normalized['revision']:
+                        if normalized.get('record_digest')==canonical_hash(row):return state
+                    elif (public['variant']=='DELETE_GRACE' and row['phase'] in {'ARCHIVED','RELINK_REQUIRED'}
+                          and row['revision']==normalized['revision']+1 and row['restore'] is None):return state
         if state.phase=='UNKNOWN' and state.result is None and journal._resolved_safety_obligation(state):
             from commander.account_cleanup import UnlinkRecoveryBook
             plan=UnlinkRecoveryBook(self.ledger,initialize=False,secrets_root=self.st.secrets_dir)._history(row['operation_id'])['plan']
-            restored=Account(**{**row['restore'],'credential_ref':CredentialRef(**row['restore']['credential_ref'])})
-            if plan is not None and canonical_hash(restored.public())==plan.payload['data']['account_public_digest']:
-                return state
+            if plan is not None:
+                data=plan.payload['data']
+                if (data['alias']==row['alias'] and data['account_control_domain']==row['account_control_domain']
+                    and data['original_resource_version']==row['incarnation'] and data['review_digest']==row['unlink_ref']):
+                    if row['restore'] is None and row['phase'] in {'DISCONNECTED','ARCHIVED','RELINK_REQUIRED'}:return state
+                    if isinstance(row['restore'],dict):
+                        restored=Account(**{**row['restore'],'credential_ref':CredentialRef(**row['restore']['credential_ref'])})
+                        # Reconstruct the original opaque resource image from
+                        # sealed non-secret plan metadata. This binds the FULL
+                        # restore account, including its private credential
+                        # locator, without opening a credential or new issuer.
+                        generation=None
+                        if data['credential_cleanup']=='DELETE_MANAGED':
+                            g=data['target']['generation'];generation=[g[0],g[1],g[3],g[4],g[5]]
+                        elif data['credential_cleanup']=='NONE':
+                            generation='ABSENT' if restored.credential_ref.secrets_file else None
+                        else:raise HTTPException(409,'Original lifecycle credential disposition unsupported; HOLD')
+                        image={'schema':'vati.account-resource/1','alias':row['alias'],'revision':data['registry_revision'],
+                            'account':asdict(restored),'credential_file_generation':generation}
+                        if (canonical_hash(restored.public())==data['account_public_digest']
+                            and canonical_hash(image)==data['original_resource_version']):return state
         raise HTTPException(409,'Original deletion outcome/evidence requires reconciliation; HOLD')
 
-    def reconcile_metadata(self,alias):
-        row=self.row(alias)
-        if row['phase']!='DELETING':return False
+    def reconcile_metadata(self,alias,lifecycle_id=None):
+        row=self.row(alias,lifecycle_id)
+        if row['phase'] not in {'DELETING','DISCONNECTING'}:return False
         self.require_original(row) # Only the qualified separate child can do this.
         def update(cur):
-            if cur._lifecycles.get(alias)!=row or alias in cur.accounts:
-                raise HTTPException(409,'Original lifecycle changed during metadata reconciliation')
-            cur._lifecycles[alias]={**row,'phase':'PENDING_ARCHIVE','revision':row['revision']+1}
+            self.replace_row(cur,row,{**row,'phase':'DISCONNECTED' if row['phase']=='DISCONNECTING' else 'PENDING_ARCHIVE','revision':row['revision']+1,'restore':None if row['phase']=='DISCONNECTING' else row['restore']})
         def current_data_scope():
             if row["account_control_domain"]!=self.domain(self.ledger):raise HTTPException(409,"Original lifecycle native scope changed")
             self.require_original(row)
@@ -132,21 +235,30 @@ class NativeLifecycle:
         read_guard();a=semantic(args);alias=a.get('alias');variant=a.get('variant')
         if variant not in VARIANTS:raise HTTPException(422,'Unknown local lifecycle operation')
         domain=self.domain(self.ledger)
-        if variant=='DELETE_GRACE':
-            if set(a)!={'alias','variant','grace_seconds','oauth_discard_digest'} or type(a['grace_seconds']) is not int or not 0<a['grace_seconds']<2**31:
+        if variant in {'DELETE_GRACE','IMMEDIATE_DISCONNECT'}:
+            if (set(a)!=({'alias','variant','grace_seconds','oauth_discard_digest'} if variant=='DELETE_GRACE' else {'alias','variant','oauth_discard_digest'}) or variant=='DELETE_GRACE' and (type(a['grace_seconds']) is not int or not 0<a['grace_seconds']<2**31)):
                 raise HTTPException(422,'Explicit positive owner-selected grace required; no default')
             registry=self.registry();account=registry.get(alias)
-            if alias in registry._lifecycles:raise HTTPException(409,'Original deletion/detachment must be reconciled; no replacement')
+            prior=registry._lifecycles.get(alias)
+            if prior is not None:
+                if prior['incarnation']==self.resource_version(alias):raise HTTPException(409,'Original lifecycle still owns this account generation')
+                self.require_original(prior) # genuine completed unlink or sealed separate resolution
+
             strategies,sources=selected_sessions(self.st,account)
-            unlink=self.retirement_review({**semantic(args),**({"_native_operation":args["_native_operation"]} if "_native_operation" in args else {})},inside_removal=inside,native_ledger=self.ledger)
+            from vati.app.account_lease import LeaseStoreUnavailable
+            try:unlink=self.retirement_review({**semantic(args),**({"_native_operation":args["_native_operation"]} if "_native_operation" in args else {})},inside_removal=inside,native_ledger=self.ledger)
+            except LeaseStoreUnavailable:raise HTTPException(503,'Native authority store is unreachable; local unlink unavailable') from None
             cleanup,_=credential_cleanup(self.st,registry,account)
             if cleanup in {'KEEP_SHARED','KEEP_EXTERNAL'}:raise HTTPException(409,'Credential destruction cannot be proven for this account; HOLD')
-            value={'variant':variant,'grace_seconds':a['grace_seconds'],'strategies':strategies,'session_sources':sources,
+            value={'variant':variant,'grace_seconds':a.get('grace_seconds'),'strategies':strategies,'session_sources':sources,
                 'unlink_review':unlink,'incarnation':unlink['resource_version'],'account_control_domain':domain,
                 'owner_device_id':device,'credential_disposition':cleanup}
+            if prior is not None:value['prior_lifecycle']=public_record(prior)
         else:
             if set(a)!={'alias','variant','lifecycle_id','expected_revision','expected_digest'}:raise HTTPException(422,'Exact original deletion revision required')
-            row=self.row(alias)
+            row=self.row(alias,a['lifecycle_id'])
+            if self.registry()._lifecycles.get(alias,{}).get('operation_id')!=a['lifecycle_id']:
+                raise HTTPException(409,'Original cancellation cannot affect a newer account generation')
             if (row['operation_id']!=a['lifecycle_id'] or row['revision']!=a['expected_revision']
                     or canonical_hash(row)!=a['expected_digest'] or row['device_id']!=device
                     or row['account_control_domain']!=domain):raise HTTPException(409,'Original deletion scope/version changed')
@@ -158,21 +270,25 @@ class NativeLifecycle:
             remote,_=self.remote_state(row)
             value={'variant':variant,'original':public_record(row),'account_control_domain':domain,'owner_device_id':device,'remote_state':remote}
         read_guard()
+        if variant in {'DELETE_GRACE','IMMEDIATE_DISCONNECT'} and selected_sessions(self.st,account)!=(strategies,sources):
+            raise HTTPException(409,'Native strategy source changed after current-owner wait; HOLD')
         body={'schema':'vati.account-lifecycle-review/1','action':'account_remove','alias':alias,
             'resource_version':self.resource_version(alias),'semantic_digest':canonical_hash(a),'view':value}
         body['context_digest']=canonical_hash(body)
         # Existing prospective unlink plans bind this raw native review digest.
         # Full lifecycle context (including strategy selection) is independently
         # parameter-bound by A4 and rechecked by the dispatch writer below.
-        binding_digest=value['unlink_review']['review_digest'] if variant=='DELETE_GRACE' else canonical_hash(body)
+        binding_digest=value['unlink_review']['review_digest'] if variant in {'DELETE_GRACE','IMMEDIATE_DISCONNECT'} else canonical_hash(body)
         return {**body,'request_digest':canonical_hash({k:v for k,v in args.items() if not k.startswith('_')}),
                 'review_digest':binding_digest}
     def execute(self,args,guard):
+        self.require_admission(args)
         if not callable(guard):raise HTTPException(403,'Current lifecycle actor required')
         intent=operation_intent('account_remove',args)
         domain=self.domain(self.ledger)
         if domain!=args.get('_expected_account_control_domain'):raise AccountOperationBlocked('Lifecycle native domain changed')
         def current():
+            self.require_admission(args)
             guard()
             if self.domain(self.ledger)!=domain:raise AccountOperationBlocked('Lifecycle native domain changed')
             guard()
@@ -198,6 +314,9 @@ class NativeLifecycle:
                 return self.delete(args,intent,review,final)
         return invoke_account_effect(AccountEffectJournal(self.ledger,cleanup_secrets_root=self.st.secrets_dir),intent,effect,dispatch_guard=current)
     def delete(self,args,intent,review,guard):
+        # Direct helper calls have no journal claim or paired-owner authority.
+        require_current_account_effect()
+        self.require_admission(args)
         from commander.accounts import _shred,_file_generation
         from vati.core.file_lock import exclusive_state_lock
         from contextlib import nullcontext
@@ -223,8 +342,8 @@ class NativeLifecycle:
         now=self.clock();incarnation=review['view']['incarnation']
         row={'schema':'vati.account-lifecycle/1','alias':alias,'operation_id':intent.operation_id,'device_id':intent.device_id,
             'account_control_domain':review['view']['account_control_domain'],'incarnation':incarnation,
-            'revision':1,'phase':'DELETING','created_at_unix':now,'grace_seconds':args['grace_seconds'],
-            'archive_at_unix':now+args['grace_seconds'],'restore':asdict(account),
+            'revision':1,'phase':'DISCONNECTING' if args['variant']=='IMMEDIATE_DISCONNECT' else 'DELETING','created_at_unix':now,'grace_seconds':args.get('grace_seconds'),
+            'archive_at_unix':None if args['variant']=='IMMEDIATE_DISCONNECT' else now+args['grace_seconds'],'restore':asdict(account),
             'strategies':review['view']['strategies'],'session_sources':review['view']['session_sources'],
             'history_ref':unlink['retirement']['trade_history_ref'],'credential_disposition':disposition,
             'unlink_ref':unlink['review_digest'],'oauth_discard_ref':oauth['digest'],'detached':True,
@@ -250,8 +369,17 @@ class NativeLifecycle:
             # marker. This changes registry FILE bytes, not account revision or
             # credential identity, and grants no execution/reassignment rights.
             def reserve(cur):
-                if alias in cur._lifecycles or cur.accounts.get(alias)!=account:
-                    raise HTTPException(409,'Original lifecycle or account changed before reservation')
+                previous=cur._lifecycles.get(alias)
+                if cur.accounts.get(alias)!=account:raise HTTPException(409,'Original account changed before reservation')
+                expected=review['view'].get('prior_lifecycle')
+                if previous is None:
+                    if expected is not None:raise HTTPException(409,'Original lifecycle disappeared')
+                else:
+                    if (expected!=public_record(previous) or previous['incarnation']==incarnation
+                        or previous['operation_id'] in cur._lifecycle_history):
+                        raise HTTPException(409,'Original lifecycle changed before incarnation reservation')
+                    self.require_original(previous)
+                    cur._lifecycle_history[previous['operation_id']]=previous
                 cur._lifecycles[alias]=row
             def reservation_before():
                 if self.resource_version(alias)!=intent.resource_version:
@@ -313,11 +441,11 @@ class NativeLifecycle:
             def done(cur):
                 old=cur._lifecycles[alias]
                 if old!=row:raise HTTPException(409,'Lifecycle changed during credential cleanup')
-                cur._lifecycles[alias]={**old,'phase':'PENDING_ARCHIVE','revision':2}
+                cur._lifecycles[alias]={**old,'phase':'DISCONNECTED' if args['variant']=='IMMEDIATE_DISCONNECT' else 'PENDING_ARCHIVE','revision':2,'restore':None if args['variant']=='IMMEDIATE_DISCONNECT' else old['restore']}
             registry.lifecycle_update(alias,done,before_replace=before,advance_resource=False)
-        return {'lifecycle':public_record(self.row(alias)),'removed':True,'remote_account_closed':False,'historical_data_retained':True}
+        return {'alias':alias,'lifecycle':public_record(self.row(alias)),'removed':True,**{k:unlink['retirement'][k] for k in ('remote_account_closed','historical_data_retained','retained_remote_funds','credential_cleanup')}}
     def cancel(self,args,intent,guard):
-        alias=args['alias'];row=self.row(alias)
+        alias=args['alias'];row=self.row(alias,args['lifecycle_id'])
         _,remote_deadline=self.remote_state(row)
         def update(cur):
             current=cur._lifecycles.get(alias)
@@ -335,36 +463,35 @@ class NativeLifecycle:
             mark_account_effect()
         self.registry().lifecycle_update(alias,update,before_replace=before)
         return {'lifecycle':public_record(self.row(alias)),'removed':False,'remote_account_closed':False,'historical_data_retained':True}
-    def read(self,alias,device,guard):
-        guard();row=self.row(alias)
+    def read(self,alias,device,guard,lifecycle_id=None):
+        guard();row=self.row(alias,lifecycle_id)
         if row['device_id']!=device or row['account_control_domain']!=self.domain(self.ledger):raise HTTPException(403,'Original lifecycle is outside current owner/domain')
         held=None
         try:
-            if row['phase']=='DELETING':self.reconcile_metadata(alias)
-            self.archive_due(alias)
+            if row['phase'] in {'DELETING','DISCONNECTING'}:self.reconcile_metadata(alias,row["operation_id"])
+            self.archive_due(alias,row["operation_id"])
         except HTTPException as error:
             if error.status_code!=409:raise
             held='ORIGINAL_OUTCOME_REQUIRES_RECONCILIATION'
         state=AccountEffectJournal(self.ledger,cleanup_secrets_root=self.st.secrets_dir).status(row['operation_id'],row['device_id'])
-        guard();result=public_record(self.row(alias))
+        guard();result=public_record(self.row(alias,row["operation_id"]))
         result['native_original_phase']=state.phase if state is not None else 'UNKNOWN'
         if held is not None:result['metadata_hold']=held
         return result
-    def archive_due(self,alias):
+    def archive_due(self,alias,lifecycle_id=None):
         """Metadata-only CAS under the original admitted data intent.
 
         Never shreds credentials, sends a provider call, clears detachment or
         alters native history. Partial DELETING never ages into success.
         """
-        registry=self.registry();row=registry._lifecycles.get(alias)
+        registry=self.registry();row=self.row(alias,lifecycle_id)
         if row is None or row['phase']!='PENDING_ARCHIVE' or self.clock()<row['archive_at_unix']:return False
         if row['account_control_domain']!=self.domain(self.ledger):raise HTTPException(409,'Original lifecycle native domain changed; HOLD')
         self.require_original(row)
         def update(cur):
-            original=cur._lifecycles.get(alias)
-            if original!=row or self.clock()<original['archive_at_unix']:raise HTTPException(409,'Lifecycle changed at archive arbitration')
-            cur._lifecycles[alias]={**row,'phase':'ARCHIVED','restore':None,'session_sources':[],
-                'revision':row['revision']+1}
+            if self.clock()<row['archive_at_unix']:raise HTTPException(409,'Lifecycle changed at archive arbitration')
+            self.replace_row(cur,row,{**row,'phase':'ARCHIVED','restore':None,'session_sources':[],
+                'revision':row['revision']+1})
         def current_data_scope():
             if row["account_control_domain"]!=self.domain(self.ledger):raise HTTPException(409,"Original lifecycle native scope changed")
             self.require_original(row)

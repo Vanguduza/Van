@@ -425,11 +425,12 @@ def create_app(settings: Optional[CommanderSettings] = None) -> FastAPI:
         return {"accounts": AccountRegistry(p).public(), "registry": str(p)}
 
     capsule_dir = st.capsule_dir or str(Path(st.repo_root) / "trading" / "strategies" / "registry")
+    lifecycle_transport_binding=object()
     handlers = {"status": cmd_status, "ledger_status": cmd_ledger_status, "services": cmd_services, "restart_service": cmd_restart, "tail_log": cmd_tail, "run_backtest": cmd_backtest,
                 "vekl_resolve": cmd_vekl, "halt": cmd_halt, "doctor": cmd_doctor, "accounts": cmd_accounts,
                 "positions": cmd_positions, "assessment": cmd_assessment,
-                **build_account_handlers(replace(st.account_control, operation_ledger=st.ledger) if st.account_control else
-                    AccountControlSettings(registry_path=st.accounts_registry, secrets_dir=st.secrets_dir, operation_ledger=st.ledger, lifecycle_session_sources=st.lifecycle_session_sources)),
+                **build_account_handlers(replace(st.account_control, operation_ledger=st.ledger, lifecycle_transport_binding=lifecycle_transport_binding) if st.account_control else
+                    AccountControlSettings(registry_path=st.accounts_registry, secrets_dir=st.secrets_dir, operation_ledger=st.ledger, lifecycle_session_sources=st.lifecycle_session_sources,lifecycle_transport_binding=lifecycle_transport_binding)),
                 **build_runtime_control_handlers(st),
                 **build_strategy_handlers(StrategyPromotionSettings(
                     capsule_dir=capsule_dir,
@@ -508,6 +509,12 @@ def create_app(settings: Optional[CommanderSettings] = None) -> FastAPI:
                 values = parsed.args
                 if name in {'account_upsert','account_remove','account_review','deriv_create_demo','deriv_oauth_link','ctrader_link'}:
                     values = {**values, '_account_dispatch_guard': current_account_authority}
+                    if name=='account_remove' and values.get('variant')=='IMMEDIATE_DISCONNECT':
+                        if principal.lower()!=GATEWAY_PRINCIPAL:
+                            raise HTTPException(403,'IMMEDIATE_DISCONNECT requires current authenticated gateway principal')
+                        from commander.account_lifecycle import _GatewayLifecycleAdmission
+                        values={**values,'_lifecycle_admission_guard':_GatewayLifecycleAdmission(
+                            values.get('_lifecycle_admission'),current_account_authority,lifecycle_transport_binding)}
                     if legacy_demo:
                         def admit_legacy_demo():
                             from commander.auth import HDR_TS,HDR_SIG,SKEW_S

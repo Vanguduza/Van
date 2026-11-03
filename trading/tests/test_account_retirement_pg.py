@@ -1,13 +1,16 @@
 """Actual PostgreSQL account lease/journal isolation; no broker effects."""
 from concurrent.futures import ThreadPoolExecutor
 from decimal import Decimal as D
-import os
+import os,asyncio
 from threading import Event
 import time
 from types import SimpleNamespace as NS
 import uuid
 
 import pytest
+from backend.tests.test_trading_api import client,_env
+from backend.tests.test_account_update_review import isolate,immediate_challenge
+from van_gateway.trading.accounts import LocalAccountControl
 from fastapi import HTTPException
 from commander.accounts import AccountControlSettings,build_account_handlers,_write_secrets
 from vati.accounts import Account,AccountRegistry,CredentialRef
@@ -19,7 +22,7 @@ from vati.risk.contracts import Direction,LossModel
 
 
 @pytest.fixture
-def pg_native(tmp_path,monkeypatch):
+def pg_native(tmp_path,monkeypatch,client):
     dsn=os.environ.get('VATI_TEST_PG_DSN')
     if not dsn or os.environ.get('VATI_TEST_PG_ISOLATED_FIXTURE')!='1':
         pytest.skip('actual isolated PostgreSQL fixture must be explicitly bound')
@@ -32,43 +35,55 @@ def pg_native(tmp_path,monkeypatch):
         credential_ref=CredentialRef(secrets_file=str(secret))))
     view=NS(block=None,release=None)
     def balance():
-        if view.block is not None:
+        from commander.account_effects import _effect_started
+        if view.block is not None and _effect_started.get() is not None:
             view.block.set();assert view.release.wait(timeout=5)
         return AccountState(alias,D('100'),D('100'),'USD',True,server_time_unix_ms=int(time.time()*1000))
     adapter=NS(sync_account=balance,positions=lambda:[],orders=lambda:[],
         heartbeat=lambda **kw:Health(True,0,kw['now_ms']))
     monkeypatch.setattr('vati.app.service.build_adapter',lambda *a,**k:adapter)
-    handlers=build_account_handlers(AccountControlSettings(str(registry.path),str(tmp_path),operation_ledger=dsn))
-    return NS(dsn=dsn,namespace=namespace,alias=alias,account=account,handlers=handlers,registry=registry.path,secret=secret,view=view)
+    ac,app=client
+    app.state.onboarding.control=LocalAccountControl(str(registry.path),str(tmp_path),operation_ledger=dsn)
+    app.state.account_lifecycle.bind_local_admission_verifier()
+    handlers=app.state.onboarding.control.handlers
+    return NS(ac=ac,dsn=dsn,namespace=namespace,alias=alias,account=account,handlers=handlers,registry=registry.path,secret=secret,view=view)
 
 
-def test_actual_pg_live_runtime_prevents_destructive_unlink(pg_native):
+@pytest.mark.asyncio
+async def test_actual_pg_live_runtime_prevents_destructive_unlink(pg_native):
     n=pg_native;store=PostgresLeaseStore(n.dsn)
     actor=AccountRuntimeLease(store,account_alias=n.alias,instance_id='actual-pg-runtime')
     assert actor.acquire().permits_orders;before=n.secret.read_bytes()
     try:
-        with pytest.raises(HTTPException) as refused:n.handlers['account_remove']({'alias':n.alias})
-        assert refused.value.status_code==409
+        refused=await immediate_challenge(n.ac,n.alias,expected_status=409)
+        assert refused.status_code==409 and 'runtime is active' in refused.text
         assert n.secret.read_bytes()==before and AccountRegistry(n.registry).get(n.alias)
     finally:actor.release();store.close()
 
 
-def test_actual_pg_first_retirement_owns_the_previously_absent_lease_row(pg_native):
+@pytest.mark.asyncio
+async def test_actual_pg_first_retirement_owns_the_previously_absent_lease_row(pg_native):
     n=pg_native;store=PostgresLeaseStore(n.dsn)
     try:assert store.read(n.alias) is None
     finally:store.close()
-    result=n.handlers['account_remove']({'alias':n.alias})
+    body,_=await immediate_challenge(n.ac,n.alias)
+    response=await n.ac.post('/v1/trading/accounts/action',json=body)
+    assert response.status_code==200,response.text
+    result=response.json()
     assert result['removed'] is True and result['remote_account_closed'] is False
     assert not n.secret.exists() and n.alias not in AccountRegistry(n.registry).accounts
 
 
-def test_actual_pg_row_guard_fences_a_competing_actor_even_beyond_lease_ttl(pg_native):
-    n=pg_native;entered=Event();release=Event();n.view.block=entered;n.view.release=release
+@pytest.mark.asyncio
+async def test_actual_pg_row_guard_fences_a_competing_actor_even_beyond_lease_ttl(pg_native):
+    n=pg_native;entered=Event();release=Event()
+    body,_=await immediate_challenge(n.ac,n.alias)
+    n.view.block=entered;n.view.release=release
     store=PostgresLeaseStore(n.dsn);other=AccountRuntimeLease(store,account_alias=n.alias,instance_id='competing-native-runtime')
     with ThreadPoolExecutor(max_workers=2) as pool:
-        removal=pool.submit(n.handlers['account_remove'],{'alias':n.alias})
+        removal=asyncio.create_task(n.ac.post('/v1/trading/accounts/action',json=body))
         try:
-            assert entered.wait(timeout=5)
+            assert await asyncio.to_thread(entered.wait,5)
             current=store.read(n.alias);assert current and current.holder_instance_id.startswith('commander-unlink:')
             competing=pool.submit(other.acquire,now_ms=current.expires_at_ms+1)
             assert not competing.done()
@@ -77,7 +92,8 @@ def test_actual_pg_row_guard_fences_a_competing_actor_even_beyond_lease_ttl(pg_n
             assert not release.wait(timeout=.15)
             assert not competing.done()
         finally:release.set()
-        assert removal.result(timeout=5)['removed'] is True
+        removed=await asyncio.wait_for(removal,5)
+        assert removed.status_code==200 and removed.json()['removed'] is True,removed.text
         result=competing.result(timeout=5)
         if not result.permits_orders:
             # Retirement releases its row lock before expiring the lease. A

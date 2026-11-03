@@ -3763,11 +3763,13 @@ def create_app() -> FastAPI:
             raise HTTPException(status_code=403, detail="device_identity_mismatch")
         if req.action not in ACCOUNT_ACTIONS:
             raise HTTPException(status_code=404, detail="unknown account action")
+        if req.action=='account_remove' and 'variant' not in req.args:
+            raise HTTPException(422,'IMMEDIATE_DISCONNECT requires fresh reauthentication and separate A4 permission')
         if req.action=='account_remove' and 'variant' in req.args:
             variant=req.args['variant']
-            if not isinstance(variant,str) or variant not in {'PENDING_CLEANUP','DELETE_GRACE','CANCEL_DELETE'}:
+            if not isinstance(variant,str) or variant not in {'PENDING_CLEANUP','DELETE_GRACE','CANCEL_DELETE','IMMEDIATE_DISCONNECT'}:
                 raise HTTPException(422,'Unknown account retirement variant; no local effect')
-        if {"_expected_resource_version", "_native_operation", "_expected_review_digest", "_expected_lifecycle_context_digest", "_lifecycle_oauth"}.intersection(req.args):
+        if {"_expected_resource_version", "_native_operation", "_expected_review_digest", "_expected_lifecycle_context_digest", "_lifecycle_oauth", "_lifecycle_admission", "_lifecycle_admission_guard"}.intersection(req.args):
             raise HTTPException(status_code=422, detail="native resource binding is supplied by the gateway")
         try:
             await auth.require_device(req.device_id)
@@ -3908,18 +3910,17 @@ def create_app() -> FastAPI:
                 'required':['alias','state','loginid'] if name=='deriv_oauth_link' else ['alias','state','ctid_trader_account_id']}
             schemas[name]={'oneOf':[schemas[name],selection]}
         remove_schema=schemas['account_remove']
-        from van_gateway.trading.account_lifecycle_api import DeleteArgs,CancelArgs
+        from van_gateway.trading.account_lifecycle_api import DeleteArgs,CancelArgs,DisconnectArgs
         pending_properties={k:v for k,v in remove_schema['properties'].items() if k in {
             'alias','variant','parent_operation_id','plan_ref','retire_parent_safety_obligation','reauth_fact_id','reauth_fact_digest'}}
         pending_properties['variant']={'enum':['PENDING_CLEANUP']}
         lifecycle_schemas=[]
-        for model in (DeleteArgs,CancelArgs):
+        for model in (DeleteArgs,CancelArgs,DisconnectArgs):
             body=model.model_json_schema()
             body['required']=list(dict.fromkeys(body.get('required',[])+['reauth_fact_id','reauth_fact_digest']))
             lifecycle_schemas.append(body)
         schemas['account_remove']={'oneOf':[
-            {'type':'object','properties':{'alias':remove_schema['properties']['alias']},'required':['alias'],'not':{'required':['variant']}},
-            {'type':'object','properties':pending_properties,'required':['alias','variant','parent_operation_id','plan_ref',
+                        {'type':'object','properties':pending_properties,'required':['alias','variant','parent_operation_id','plan_ref',
                 'retire_parent_safety_obligation','reauth_fact_id','reauth_fact_digest'],'additionalProperties':False},*lifecycle_schemas]}
         def mark_private_inputs(definition):
             for key,value in definition.get('properties',{}).items():
@@ -3948,7 +3949,7 @@ def create_app() -> FastAPI:
         if req.action=='account_remove' and req.args.get('variant')=='PENDING_CLEANUP':
             try:return await app.state.account_cleanup.challenge(request,req)
             except ReauthError as error:return cleanup_failure(error)
-        if req.action=='account_remove' and req.args.get('variant') in {'DELETE_GRACE','CANCEL_DELETE'}:
+        if req.action=='account_remove' and req.args.get('variant') in {'DELETE_GRACE','CANCEL_DELETE','IMMEDIATE_DISCONNECT'}:
             try:return await app.state.account_lifecycle.challenge(request,req)
             except ReauthError as error:return cleanup_failure(error)
         if not requires_owner_approval(req.action):
@@ -4014,8 +4015,12 @@ def create_app() -> FastAPI:
         if req.action=='account_remove' and req.args.get('variant')=='PENDING_CLEANUP':
             try:return await app.state.account_cleanup.action(request,req)
             except ReauthError as error:return cleanup_failure(error)
-        if req.action=='account_remove' and req.args.get('variant') in {'DELETE_GRACE','CANCEL_DELETE'}:
-            try:return await app.state.account_lifecycle.action(request,req)
+        if req.action=='account_remove' and req.args.get('variant') in {'DELETE_GRACE','CANCEL_DELETE','IMMEDIATE_DISCONNECT'}:
+            try:
+                result=await app.state.account_lifecycle.action(request,req)
+                if req.args['variant']=='IMMEDIATE_DISCONNECT' and result['effect_state']!='APPLIED':
+                    return JSONResponse(status_code=409,content=result)
+                return result
             except ReauthError as error:return cleanup_failure(error)
         from commander.account_effects import JOURNALED_COMMANDS
         expected_domain=request.headers.get('X-Van-Account-Control-Domain')

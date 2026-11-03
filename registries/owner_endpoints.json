@@ -10189,7 +10189,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3887",
+      "source": "backend/van_gateway/app.py:3889",
       "summary": "Trading Account Catalog",
       "tags": [],
       "parameters": [],
@@ -10313,7 +10313,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/trading/account_lifecycle_api.py:237",
+      "source": "backend/van_gateway/trading/account_lifecycle_api.py:303",
       "summary": "Original",
       "tags": [
         "account-lifecycle"
@@ -10361,7 +10361,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/trading/account_lifecycle_api.py:232",
+      "source": "backend/van_gateway/trading/account_lifecycle_api.py:292",
       "summary": "Read",
       "tags": [
         "account-lifecycle"
@@ -10404,6 +10404,65 @@
       "readiness": "REPOSITORY_DECLARATION_ONLY"
     },
     {
+      "endpoint_id": "VE-eaab3f061854",
+      "method": "GET",
+      "path": "/v1/trading/accounts/lifecycle/records/{alias}/{lifecycle_id}",
+      "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+      "device_proof_required_when_bound": false,
+      "registration": "DEFAULT",
+      "condition": null,
+      "source": "backend/van_gateway/trading/account_lifecycle_api.py:297",
+      "summary": "Read Exact",
+      "tags": [
+        "account-lifecycle"
+      ],
+      "parameters": [
+        {
+          "name": "alias",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "title": "Alias"
+          }
+        },
+        {
+          "name": "lifecycle_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "title": "Lifecycle Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccountLifecycleState"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "openapi_components": "owner_endpoint_schemas.json",
+      "readiness": "REPOSITORY_DECLARATION_ONLY"
+    },
+    {
       "endpoint_id": "VE-23d73eb21056",
       "method": "GET",
       "path": "/v1/trading/accounts/operations/{operation_id}",
@@ -10411,7 +10470,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3983",
+      "source": "backend/van_gateway/app.py:3984",
       "summary": "Trading Account Operation",
       "tags": [],
       "parameters": [
@@ -12735,7 +12794,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:4296",
+      "source": "backend/van_gateway/app.py:4301",
       "summary": "Trading Oauth Callback",
       "tags": [],
       "parameters": [
@@ -13052,7 +13111,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:4150",
+      "source": "backend/van_gateway/app.py:4155",
       "summary": "Trading Strategy Promotion Candidates",
       "tags": [],
       "parameters": [],
@@ -13078,7 +13137,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:4349",
+      "source": "backend/van_gateway/app.py:4354",
       "summary": "Trading Tickets",
       "tags": [],
       "parameters": [
@@ -13649,7 +13708,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:4340",
+      "source": "backend/van_gateway/app.py:4345",
       "summary": "Latest Visual Acceptance",
       "tags": [],
       "parameters": [],
@@ -21343,7 +21402,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:4413",
+      "source": "backend/van_gateway/app.py:4418",
       "summary": "Reset Events",
       "tags": [],
       "parameters": [
@@ -25670,7 +25729,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:4011",
+      "source": "backend/van_gateway/app.py:4012",
       "summary": "Trading Account Action",
       "tags": [],
       "parameters": [],
@@ -25774,7 +25833,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3939",
+      "source": "backend/van_gateway/app.py:3940",
       "summary": "Trading Account Challenge",
       "tags": [],
       "parameters": [],
@@ -25915,7 +25974,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/trading/account_lifecycle_api.py:226",
+      "source": "backend/van_gateway/trading/account_lifecycle_api.py:286",
       "summary": "Prepare",
       "tags": [
         "account-lifecycle"
@@ -25962,7 +26021,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/trading/account_lifecycle_api.py:228",
+      "source": "backend/van_gateway/trading/account_lifecycle_api.py:288",
       "summary": "Challenge",
       "tags": [
         "account-lifecycle"
@@ -26009,7 +26068,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/trading/account_lifecycle_api.py:230",
+      "source": "backend/van_gateway/trading/account_lifecycle_api.py:290",
       "summary": "Verify",
       "tags": [
         "account-lifecycle"
@@ -26476,7 +26535,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:4353",
+      "source": "backend/van_gateway/app.py:4358",
       "summary": "Trading Halt",
       "tags": [],
       "parameters": [
@@ -27474,7 +27533,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:4185",
+      "source": "backend/van_gateway/app.py:4190",
       "summary": "Trading Strategy Promote",
       "tags": [],
       "parameters": [],
@@ -27519,7 +27578,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:4163",
+      "source": "backend/van_gateway/app.py:4168",
       "summary": "Trading Strategy Promotion Challenge",
       "tags": [],
       "parameters": [],
@@ -27564,7 +27623,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:4377",
+      "source": "backend/van_gateway/app.py:4382",
       "summary": "Trading Confirm Ticket",
       "tags": [],
       "parameters": [
@@ -27948,7 +28007,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:4325",
+      "source": "backend/van_gateway/app.py:4330",
       "summary": "Record Visual Acceptance",
       "tags": [],
       "parameters": [],

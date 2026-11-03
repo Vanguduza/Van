@@ -48,7 +48,7 @@ class AccountLifecycleReauthentication:
         if (not isinstance(context,dict) or set(context)!=CONTEXT_KEYS
                 or caller.get('owner_id')!='owner' or context.get('original_device_id')!=caller.get('device_id')
                 or not isinstance(caller.get('device_id'),str) or not caller['device_id']
-                or context.get('variant') not in {'DELETE_GRACE','CANCEL_DELETE'}):raise ReauthError('LIFECYCLE_CONTEXT_UNVERIFIED')
+                or context.get('variant') not in {'DELETE_GRACE','CANCEL_DELETE','IMMEDIATE_DISCONNECT'}):raise ReauthError('LIFECYCLE_CONTEXT_UNVERIFIED')
         for k in ('incarnation','account_control_domain','review_digest','resource_version','semantic_digest'):
             if not isinstance(context[k],str) or re.fullmatch(r'[0-9a-f]{64}',context[k]) is None:raise ReauthError('LIFECYCLE_CONTEXT_UNVERIFIED')
         if (not isinstance(context['alias'],str) or re.fullmatch(r'[a-z0-9_]{3,32}',context['alias']) is None
@@ -163,11 +163,12 @@ class AccountLifecycleReauthentication:
             fact=json.loads(row['value']);proof=fact.pop('fact_digest')
             if (set(fact)!={'schema','purpose','owner_id','device_id','actor_key_ref','context','created_at_unix','expires_at_unix','original_proof_ref','execution_authority'}
                     or fact['schema']!='van.account-lifecycle-reauth/1' or fact['purpose']!=PURPOSE
-                    or fact['owner_id']!=caller['owner_id'] or fact['device_id']!=caller['device_id'] or fact['context']!=context
+                    or fact['owner_id']!=caller['owner_id'] or fact['device_id']!=caller['device_id']
                     or fact['execution_authority'] is not False or proof!=digest(fact)
                     or type(fact['created_at_unix']) is not int or type(fact['expires_at_unix']) is not int
                     or not fact['created_at_unix']<fact['expires_at_unix']<=fact['created_at_unix']+OwnerApprovalService.DEFAULT_TTL_SECONDS):raise ValueError()
         except (KeyError,TypeError,ValueError,AttributeError):raise ReauthError('LIFECYCLE_REAUTH_FACT_UNKNOWN',503) from None
+        if fact['context']!=context:raise ReauthError('LIFECYCLE_REAUTH_CONTEXT_CHANGED')
         if fact['actor_key_ref']!=actor_key_ref:raise ReauthError('LIFECYCLE_REAUTH_ACTOR_CHANGED')
         if self.clock()>=fact['expires_at_unix']:raise ReauthError('LIFECYCLE_REAUTH_EXPIRED')
         return {**fact,'fact_digest':proof}
@@ -216,8 +217,8 @@ class AccountLifecycleReauthentication:
                 now=self.clock()
                 if now>=expiry:raise ReauthError('LIFECYCLE_PERMISSION_EXPIRED')
                 record={'schema':'van.account-lifecycle-admission/1','owner_id':'owner','device_id':caller['device_id'],
-                    'operation_id':challenge_id,'actor_key_ref':actor_key_ref,'context':context,'request_digest':request_digest,
-                    'reauth_fact_digest':fact['fact_digest'],'created_at_unix':now,'expires_at_unix':expiry,
+                    'operation_id':challenge_id,'reauth_purpose':PURPOSE,'actor_key_ref':actor_key_ref,'context':context,'request_digest':request_digest,
+                    'reauth_fact_digest':fact['fact_digest'],'reauth_proof_ref':fact['original_proof_ref'],'created_at_unix':now,'expires_at_unix':expiry,
                     'authority_ref':proof['authority_ref'],'approval_text_digest':digest(text),'approval_parameters_digest':digest(parameters),
                     'reauth_fact_id':fact_id,'state':'ADMITTED_NOT_NATIVE_COMPLETION'}
                 record['admission_digest']=digest(record)

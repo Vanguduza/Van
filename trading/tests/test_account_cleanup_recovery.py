@@ -79,7 +79,7 @@ async def test_private_may_begin_is_independently_committed_before_actual_regist
 
 
 @pytest.mark.asyncio
-async def test_expiry_after_technical_commit_before_replace_keeps_known_no_effect_refused(client,tmp_path,monkeypatch):
+async def test_expiry_after_technical_commit_before_replace_retains_reserved_unknown(client,tmp_path,monkeypatch):
     from types import SimpleNamespace
     import commander.account_effects as effects
     ac,app=client;await paper(ac)
@@ -93,16 +93,21 @@ async def test_expiry_after_technical_commit_before_replace_keeps_known_no_effec
         return result
     monkeypatch.setattr(UnlinkRecoveryBook,'step',delayed)
     response=await ac.post('/v1/trading/accounts/action',json=body)
-    assert seen and response.status_code==403,response.text
-    assert (tmp_path/'accounts.json').read_bytes()==before
+    assert seen and response.status_code==409 and response.json()['effect_state']=='UNKNOWN',response.text
+    # Persistent incarnation detachment now precedes the recoverable plan.
+    # A later refused account-removal replacement cannot erase that DATA effect.
+    from vati.accounts import AccountRegistry
+    cold=AccountRegistry(tmp_path/'accounts.json')
+    assert (tmp_path/'accounts.json').read_bytes()!=before
+    assert 'paper_owner' in cold.accounts and cold._lifecycles['paper_owner']['phase']=='DISCONNECTING'
     with closing(Ledger(tmp_path/'vati.sqlite')) as ledger:
         parent=AccountEffectJournal(ledger).status(operation,'test-device')
-        assert parent.phase=='REFUSED'
+        assert parent.phase=='UNKNOWN' and parent.result is None
         assert UnlinkRecoveryBook(ledger,secrets_root=tmp_path/'secrets')._history(operation)['steps']['REGISTRY_REMOVE'].payload['data']['state']=='MAY_BEGIN'
 
 
 @pytest.mark.asyncio
-async def test_invalid_integrity_key_before_first_effect_is_known_refused_not_unknown(client,tmp_path):
+async def test_invalid_integrity_key_after_reservation_preserves_unknown_without_plan(client,tmp_path):
     ac,app=client;await paper(ac)
     body,_=await challenge(ac,'account_remove',{'alias':'paper_owner'})
     key=tmp_path/'secrets'/'private.unlink-plan-integrity.env'
@@ -110,10 +115,13 @@ async def test_invalid_integrity_key_before_first_effect_is_known_refused_not_un
     before=(tmp_path/'accounts.json').read_bytes()
     result=await ac.post('/v1/trading/accounts/action',json=body)
     assert result.status_code==409,result.text
-    assert (tmp_path/'accounts.json').read_bytes()==before
+    from vati.accounts import AccountRegistry
+    cold=AccountRegistry(tmp_path/'accounts.json')
+    assert (tmp_path/'accounts.json').read_bytes()!=before
+    assert 'paper_owner' in cold.accounts and cold._lifecycles['paper_owner']['phase']=='DISCONNECTING'
     with closing(Ledger(tmp_path/'vati.sqlite')) as ledger:
         state=AccountEffectJournal(ledger).status(body['approval_proof']['challenge_id'],'test-device')
-        assert state.phase=='REFUSED'
+        assert state.phase=='UNKNOWN' and state.result is None
         assert not UnlinkRecoveryBook(ledger,initialize=False,secrets_root=tmp_path/'secrets')._facts(state.intent.operation_id)
     assert key.read_text()=='UNLINK_PLAN_INTEGRITY_KEY=malformed\n'
 

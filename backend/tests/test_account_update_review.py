@@ -24,7 +24,55 @@ def isolate(tmp_path,monkeypatch,_env):
     get_settings.cache_clear()
 
 
+async def immediate_challenge(ac,alias,*,expected_status=200,device='test-device',secret='test-device-secret',headers=None,proof_signer=None):
+    """Actual paired enrollment verifier and distinct proofs, never fake native DATA.
+
+    Only ordinary metadata source selections are synthesized. Existing native
+    safety/credential checks still own their boundaries; none are bypassed.
+    """
+    app=ac._transport.app
+    control=app.state.onboarding.control
+    if hasattr(control,'settings'):
+        settings=control.settings
+        if settings.lifecycle_session_sources is None:
+            from pathlib import Path
+            config=Path(settings.registry_path).parent/'disconnect-session.json'
+            config.write_text(json.dumps({'account_alias':alias,'symbol':'EURUSD','base':'EUR','quote':'USD','timeframe':'M5',
+                'contract':{},'mandate':{},'capsules':['fx_trend_pullback-v1'],'registry_path':settings.registry_path}))
+            settings.lifecycle_session_sources=((str(config),hashlib.sha256(config.read_bytes()).hexdigest()),)
+        app.state.account_lifecycle.bind_local_admission_verifier()
+    def signed(args):
+        issued=int(time.time())
+        return {'device_id':device,'issued_at_unix':issued,'action':'account_remove','args':args,
+            'signature':hmac.new(secret.encode(),canonical_action(device,issued,'account_remove',args).encode(),hashlib.sha256).hexdigest()}
+    prepared=await ac.post('/v1/trading/accounts/lifecycle/prepare',json=signed({'alias':alias,'variant':'IMMEDIATE_DISCONNECT'}),headers=headers)
+    if prepared.status_code!=200:
+        assert prepared.status_code==expected_status,prepared.text
+        return prepared
+    args=prepared.json()['args'];first=await ac.post('/v1/trading/accounts/lifecycle/reauth/challenge',json=signed(args),headers=headers)
+    if first.status_code!=200:
+        assert first.status_code==expected_status,first.text
+        return first
+    # Both signatures use the actual fixture owner enrolled by this client.
+    # The default is the same canonical DEVICE_KEY used by the prior helper;
+    # a differently collected fixture explicitly passes its own signer.
+    signer=_approval_proof if proof_signer is None else proof_signer
+    issued=first.json();proof=signer({'approval_challenge_id':issued['challenge_id'],'approval_challenge':issued['canonical']})
+    fact=await ac.post('/v1/trading/accounts/lifecycle/reauth/verify',json=signed(args)|{'approval_proof':proof},headers=headers)
+    assert fact.status_code==200,fact.text
+    body=signed(args|{'reauth_fact_id':fact.json()['reauth_fact_id'],'reauth_fact_digest':fact.json()['fact_digest']})
+    response=await ac.post('/v1/trading/accounts/challenge',json=body,headers=headers)
+    assert response.status_code==expected_status,response.text
+    if expected_status!=200:return response
+    issued=response.json()
+    # Old fixture consumers inspect the same raw retirement review. Their
+    # actual permission still signs the complete lifecycle context plus fact.
+    issued={**issued,'lifecycle_review':issued['resolved_review'],'resolved_review':issued['resolved_review']['view']['unlink_review']}
+    return {**body,'approval_proof':signer(issued)},issued
+
 async def challenge(ac,action,args):
+    if action=='account_remove' and set(args)=={'alias'}:
+        return await immediate_challenge(ac,args['alias'])
     issued=int(time.time())
     body={'device_id':'test-device','issued_at_unix':issued,'action':action,'args':args,
         'signature':hmac.new(b'test-device-secret',canonical_action('test-device',issued,action,args).encode(),hashlib.sha256).hexdigest()}

@@ -45,8 +45,8 @@ ACCOUNT_TOOL_SCHEMAS = {
     "account_revision": {"description": "Read the authenticated native account-control state namespace and, when alias is supplied, its exact configuration version. Namespace data confers no authority.", "properties": {"alias": {"type": "string"}}},
     "account_upsert": {"description": "Register a new account or edit specified public settings. Existing omitted settings and credentials are preserved. New accounts require broker; native identity changes require verified migration.", "properties": {"alias": {"type": "string"}, "broker": {"type": "string"}, "mode": {"type": "string"}, "currency": {"type": "string"}, "label": {"type": "string"}, "server": {"type": "string"}, "login": {"type": "string"}, "bridge_url": {"type": "string"}, "demo": {"type": "boolean"}, "enabled": {"type": "boolean"}, "notes": {"type": "string"}, "venue": {"type": "string"}, "mandate_ref": {"type": "string"}}, "required": ["alias"]},
     "account_credentials": {"description": "Store credential values for an alias in its 0600 secrets file (allowlisted keys per broker). Values are never echoed.", "properties": {"alias": {"type": "string"}, "secrets": {"type": "object"}}, "required": ["alias", "secrets"]},
-    "account_remove": {"description": "Unlink only the VAN-local account after exact owner review and current native safety facts. PENDING_CLEANUP is a separately reauthenticated and A4-approved original-device child bound to its genuine private plan; it never replays or completes the UNKNOWN parent. History/remote accounts/funds remain; no provider closure or money movement. DELETE_GRACE and CANCEL_DELETE use distinct purpose-bound reauthentication DATA plus separate substantive permission, explicit owner-selected grace, and per-incarnation metadata/detachment; cancellation never restores credentials or strategy eligibility.", "properties": {"alias": {"type": "string"},
-        "variant":{"enum":["PENDING_CLEANUP","DELETE_GRACE","CANCEL_DELETE"]},"grace_seconds":{"type":"integer","minimum":1},"lifecycle_id":{"type":"string"},"expected_revision":{"type":"integer"},"expected_digest":{"type":"string"},"parent_operation_id":{"type":"string","pattern":"^[A-Za-z0-9_-]{20,128}$"},
+    "account_remove": {"description": "IMMEDIATE_DISCONNECT requires fresh purpose-bound reauthentication plus separate substantive A4 approval and fresh native safety facts; alias-only removal is refused. PENDING_CLEANUP is a separately reauthenticated and A4-approved original-device child bound to its genuine private plan; it never replays or completes the UNKNOWN parent. History/remote accounts/funds remain; no provider closure or money movement. DELETE_GRACE and CANCEL_DELETE use distinct purpose-bound reauthentication DATA plus separate substantive permission, explicit owner-selected grace, and per-incarnation metadata/detachment; cancellation never restores credentials or strategy eligibility.", "properties": {"alias": {"type": "string"},
+        "variant":{"enum":["PENDING_CLEANUP","DELETE_GRACE","CANCEL_DELETE","IMMEDIATE_DISCONNECT"]},"grace_seconds":{"type":"integer","minimum":1},"lifecycle_id":{"type":"string"},"expected_revision":{"type":"integer"},"expected_digest":{"type":"string"},"parent_operation_id":{"type":"string","pattern":"^[A-Za-z0-9_-]{20,128}$"},
         "plan_ref":{"type":"string","pattern":"^[0-9a-f]{64}$"},"retire_parent_safety_obligation":{"type":"boolean"},
         "reauth_fact_id":{"type":"string","pattern":"^[A-Za-z0-9_-]{20,128}$"},
         "reauth_fact_digest":{"type":"string","pattern":"^[0-9a-f]{64}$"}}, "required": ["alias"]},
@@ -72,6 +72,9 @@ class AccountControlSettings:
     operation_ledger: str = ""  # Actual constructors bind the existing native VATI ledger.
     lifecycle_session_sources: tuple | None = None  # Exact native configured (path,SHA256) scope; missing HOLD.
     lifecycle_remote_state_reader: Optional[Callable] = None  # Independent original-incarnation observation; no credential restoration.
+
+    lifecycle_admission_verifier: Optional[Callable] = None  # Trusted local Gateway bootstrap; never command DATA.
+    lifecycle_transport_binding: Any = None  # Unique Commander ingress identity; no direct-handler default.
 
     def __post_init__(self):
         if self.lifecycle_session_sources is None:
@@ -368,11 +371,12 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
         try:
             service=NativeLifecycle(st,ledger,control_domain,retirement_review,current_resource_version)
             if method=='review':return service.review(args,device,guard)
-            if method=='read':return service.read(args['alias'],device,guard)
+            if method=='read':return service.read(args['alias'],device,guard,args.get('lifecycle_id'))
             if method=='archive_due':
                 # Only previously admitted local metadata; no credential or
                 # provider effect, filesystem scan, new permission or history.
-                return {'archived':sum(service.archive_due(alias) for alias in list(reg()._lifecycles))}
+                current=reg();rows=list(current._lifecycles.values())+list(current._lifecycle_history.values())
+                return {'archived':sum(service.archive_due(row['alias'],row['operation_id']) for row in rows)}
             return service.execute(args,guard)
         finally:ledger.close()
 
@@ -381,9 +385,9 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
         if a.get("action") in {"account_lifecycle_read","account_lifecycle_archive_due"}:
             return lifecycle_call("read" if a["action"]=="account_lifecycle_read" else "archive_due",a.get("args",{}),a.get("owner_device_id"),a.get("_account_dispatch_guard"))
         if a.get('action')=='account_remove' and isinstance(a.get('args'),dict):
-            if 'variant' in a['args'] and (not isinstance(a['args']['variant'],str) or a['args']['variant'] not in {'PENDING_CLEANUP','DELETE_GRACE','CANCEL_DELETE'}):
+            if 'variant' in a['args'] and (not isinstance(a['args']['variant'],str) or a['args']['variant'] not in {'PENDING_CLEANUP','DELETE_GRACE','CANCEL_DELETE','IMMEDIATE_DISCONNECT'}):
                 raise HTTPException(422,'Unknown native account retirement variant')
-            if a["args"].get("variant") in {"DELETE_GRACE","CANCEL_DELETE"}:
+            if a["args"].get("variant") in {"DELETE_GRACE","CANCEL_DELETE","IMMEDIATE_DISCONNECT"}:
                 return lifecycle_call("review",a["args"],a.get("owner_device_id"),a.get("_account_dispatch_guard"))
             if a['args'].get('variant')=='PENDING_CLEANUP':
                 from commander.account_cleanup import NativeCleanup
@@ -495,95 +499,7 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
         return {"alias": alias, "stored_keys": keys}
 
     def cmd_account_remove(a: dict,*,native_ledger=None) -> dict:
-        from commander.account_retirement import credential_cleanup
-        from contextlib import nullcontext
-        from vati.core.file_lock import exclusive_state_lock
-        alias = _alias(a)
-        r = reg()
-        if alias not in r.accounts:
-            raise HTTPException(404, f"unknown alias {alias}")
-        readback_guards=[]
-        review=retirement_review(a,inside_removal=True,native_ledger=native_ledger,readback_guards=readback_guards)
-        if len(readback_guards)!=1:raise HTTPException(409,'Current native retirement observation is unavailable')
-        if ('_native_operation' in a or '_expected_review_digest' in a) and a.get('_expected_review_digest')!=review['review_digest']:
-            raise HTTPException(409,'Native unlink facts changed or owner review missing; local connection retained')
-        # Freeze all credential-reference writers through the final plan check
-        # and deletion. An alias added during venue IO must retain its access.
-        with r._mutation_lock():
-            current=reg();account=current.get(alias);cleanup,target=credential_cleanup(st,current,account)
-            if cleanup!=review['retirement']['credential_cleanup']:
-                raise HTTPException(409,'Credential reference ownership changed; review local unlink again')
-            with exclusive_state_lock(target) if target is not None else nullcontext():
-                if current_resource_version(alias)!=review['resource_version']:
-                    raise HTTPException(409,'Native credential generation changed; local connection retained')
-                recovery=None
-                if '_native_operation' in a:
-                    from commander.account_cleanup import UnlinkRecoveryBook,prepare_plan
-                    intent=operation_intent('account_remove',a)
-                    recovery=UnlinkRecoveryBook(native_ledger,secrets_root=st.secrets_dir)
-                    plan=prepare_plan(st,current,account,review,target)
-                    plan['account_control_domain']=a['_expected_account_control_domain']
-                    plan_ref,epoch=recovery.prepare(intent,plan)
-                def recovery_step(step,state,*,post_generation=None,resource_version=None):
-                    if recovery is not None:
-                        recovery.step(intent.operation_id,plan_ref,epoch,intent.operation_id,step,state,
-                            post_generation=list(post_generation) if post_generation is not None else None,
-                            resource_version=resource_version)
-                def require_final_times():
-                    for check in readback_guards:check.check_time()
-                    a['_retirement_time_guard']()
-                a['_retirement_clock_register'](require_final_times)
-                def current_scope():
-                    for check in readback_guards:check()
-                    guard=a.get('_retirement_guard')
-                    if callable(guard):guard()
-                    if '_native_operation' in a:require_current_account_effect()
-                    if recovery is not None:recovery.require_epoch(intent.operation_id,plan_ref,epoch,intent.operation_id)
-                    require_final_times()
-                def mark_final_effect():
-                    # No blocking callback follows the final file-identity
-                    # check. These predicates only sample current clocks from
-                    # the already verified, continuously held native scope.
-                    require_final_times()
-                    a['_retirement_authority_time_guard']()
-                    mark_account_effect()
-                def before_remove():
-                    if current_resource_version(alias)!=review['resource_version']:
-                        raise HTTPException(409,'Native account changed before local unlink replacement')
-                    current_scope()
-                    recovery_step('REGISTRY_REMOVE','MAY_BEGIN')
-                    # The journal writer may have waited; final guards follow it.
-                    current_scope()
-                    mark_final_effect()
-                def after_remove():
-                    recovery_step('REGISTRY_REMOVE','DONE',resource_version=current_resource_version(alias))
-                generation=_file_generation(target.stat()) if target is not None else None
-                if recovery is not None:
-                    current.remove(alias,before_replace=before_remove,after_replace=after_remove)
-                else:current.remove(alias,before_replace=before_remove)
-                own_removal_version=current_resource_version(alias)
-                def before_credential_effect():
-                    if current_resource_version(alias)!=own_removal_version:
-                        raise HTTPException(409,'Native account changed after original unlink; credential cleanup unconfirmed')
-                    current_scope()
-                def before_overwrite():
-                    before_credential_effect()
-                    recovery_step('CREDENTIAL_OVERWRITE','MAY_BEGIN')
-                    before_credential_effect()
-                def after_overwrite(own_generation):
-                    recovery_step('CREDENTIAL_OVERWRITE','DONE',post_generation=own_generation,
-                        resource_version=own_removal_version)
-                def before_unlink():
-                    before_credential_effect()
-                    recovery_step('CREDENTIAL_UNLINK','MAY_BEGIN')
-                    before_credential_effect()
-                def after_unlink():
-                    recovery_step('CREDENTIAL_UNLINK','DONE',resource_version=own_removal_version)
-                if target is not None:_shred(target,before_write=before_overwrite,
-                    before_unlink=before_unlink,expected_generation=generation,before_effect=mark_final_effect,
-                    **({'after_write':after_overwrite,'after_unlink':after_unlink} if recovery is not None else {}))
-        return {"alias": alias, "removed": True,**{k:review['retirement'][k] for k in (
-            'remote_account_closed','historical_data_retained','retained_remote_funds','credential_cleanup')}}
+        raise HTTPException(422,'Legacy alias-only removal has no two-proof lifecycle authority')
 
     def cmd_account_verify(a: dict) -> dict:
         alias = _alias(a)
@@ -873,11 +789,12 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
     def serialize_retirement(handler):
         @wraps(handler)
         def invoke(args):
-            from commander.account_retirement import retirement_scope
-            alias=_alias(args)
-            if 'variant' in args and (not isinstance(args['variant'],str) or args['variant'] not in {'PENDING_CLEANUP','DELETE_GRACE','CANCEL_DELETE'}):
+            _alias(args)
+            if 'variant' not in args:
+                raise HTTPException(422,'IMMEDIATE_DISCONNECT requires purpose-bound reauthentication and separate A4 admission')
+            if 'variant' in args and (not isinstance(args['variant'],str) or args['variant'] not in {'PENDING_CLEANUP','DELETE_GRACE','CANCEL_DELETE','IMMEDIATE_DISCONNECT'}):
                 raise HTTPException(422,'Unknown native account retirement variant')
-            if args.get("variant") in {"DELETE_GRACE","CANCEL_DELETE"}:
+            if args.get("variant") in {"DELETE_GRACE","CANCEL_DELETE","IMMEDIATE_DISCONNECT"}:
                 return lifecycle_call("execute",args,guard=args.get("_account_dispatch_guard"))
             ledger=open_operation_ledger()
             try:
@@ -904,55 +821,6 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
                 try:return NativeCleanup(st,ledger,reg,control_domain).execute(args,operation_intent('account_remove',args),current_cleanup_scope)
                 except AccountEffectError:raise AccountOperationUnconfirmed(args.get('_native_operation',{}).get('operation_id')) from None
                 finally:ledger.close()
-            final_clock_checks=[]
-            def register_final_clock(check):
-                final_clock_checks[:]=[check]
-            def require_authority_time():
-                if '_native_operation' in args:
-                    from commander import account_effects as effect_context
-                    # intent is the immutable validated original used by the
-                    # actual journal claim, never caller timing labels.
-                    if int(effect_context.time.time())>=intent.expires_at_unix:
-                        raise HTTPException(403,'Original owner authority expired before native local effect')
-            def current_scope():
-                guard=args.get('_account_dispatch_guard')
-                if callable(guard):guard()
-                if args['_expected_account_control_domain']!=control_domain(ledger):
-                    raise AccountOperationBlocked('Account-control namespace changed before local unlink write')
-                if callable(guard):guard()
-                # Pure clock predicates run after all potentially blocking
-                # owner/key/domain checks, immediately before the effect mark.
-                for check in final_clock_checks:check()
-            def retire():
-                # The unique original journal claim is durable before taking
-                # lease -> alias locks. No ledger transaction spans venue IO.
-                with retirement_scope(st,alias) as require_lease,reg().operation_lock(alias):
-                    def writer_scope():
-                        require_lease()
-                        current_scope()
-                    if '_expected_resource_version' in args:
-                        if args['_expected_account_control_domain']!=control_domain(ledger):
-                            raise AccountOperationBlocked('Account-control namespace changed before local unlink')
-                        if args['_expected_resource_version']!=current_resource_version(alias):
-                            raise HTTPException(409,'Account changed since owner approval; local connection retained')
-                    try:
-                        return handler({**args,'_retirement_guard':writer_scope,
-                            '_retirement_time_guard':require_lease.check_time,
-                            '_retirement_clock_register':register_final_clock,
-                            '_retirement_authority_time_guard':require_authority_time},native_ledger=ledger)
-                    except AccountEffectError:
-                        from commander.account_effects import _effect_started
-                        marker=_effect_started.get()
-                        if marker is not None and marker[0] is False:
-                            raise HTTPException(409,'Original cleanup evidence is unavailable; no new local effect started') from None
-                        raise
-            try:
-                if '_native_operation' not in args:return retire()
-                intent=operation_intent('account_remove',args)
-                return invoke_account_effect(AccountEffectJournal(ledger,cleanup_secrets_root=st.secrets_dir),intent,retire,dispatch_guard=current_scope)
-            except AccountEffectError:
-                raise AccountOperationUnconfirmed(args.get('_native_operation',{}).get('operation_id')) from None
-            finally:ledger.close()
         return invoke
 
     # Serialize before the registry lookup as well as the file swap. Otherwise

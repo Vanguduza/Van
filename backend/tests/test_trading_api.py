@@ -439,6 +439,12 @@ async def test_account_onboarding_is_device_signed_and_forwards_without_storing_
                   approve=True):
         """Do what the device does: sign, and for a mutating action, get a challenge and
         sign it under the biometric before sending (P1-SEC-004)."""
+        if action=='account_remove' and approve and secret=='test-device-secret':
+            from backend.tests.test_account_update_review import immediate_challenge
+            value=await immediate_challenge(ac,args['alias'],expected_status=409 if args['alias']=='mt5_ea' else 200,proof_signer=_approval_proof)
+            if args['alias']=='mt5_ea':return value
+            body,_=value
+            return await ac.post('/v1/trading/accounts/action',json=body)
         issued = issued or now
         body = {"device_id": device, "issued_at_unix": issued,
                 "signature": _sign_action(secret, device, issued, action, args),
@@ -612,3 +618,27 @@ def test_account_learning_readback_refuses_other_accounts_cohorts_or_authority(p
     ledger.close()
     assert TradingService(str(tmp_path/'scope.sqlite')).accounts()['accounts'][0]['restated_learning'] == {
         'status': 'UNVERIFIED_REPORT', 'selection_authority': False}
+
+
+@pytest.mark.asyncio
+async def test_immediate_paper_disconnect_uses_actual_enrolled_fixture_signer(client,tmp_path):
+    import time
+    """Both collection namespaces keep their own real enrolled signing owner."""
+    ac,app=client
+    from van_gateway.trading.accounts import LocalAccountControl
+    from backend.tests.test_account_update_review import immediate_challenge
+    app.state.onboarding.control=LocalAccountControl(str(tmp_path/'accounts.json'),str(tmp_path/'secrets'),
+        operation_ledger=str(tmp_path/'vati.sqlite'))
+    app.state.account_lifecycle.bind_local_admission_verifier()
+    args={'alias':'paper_owner','broker':'PAPER'};issued=int(time.time())
+    body={'device_id':'test-device','issued_at_unix':issued,'action':'account_upsert','args':args,
+        'signature':_sign_action('test-device-secret','test-device',issued,'account_upsert',args)}
+    challenge=await ac.post('/v1/trading/accounts/challenge',json=body)
+    assert challenge.status_code==200,challenge.text
+    created=await ac.post('/v1/trading/accounts/action',json=body|{'approval_proof':_approval_proof(challenge.json())})
+    assert created.status_code==200,created.text
+    signed,_=await immediate_challenge(ac,'paper_owner',proof_signer=_approval_proof)
+    assert signed['args']['reauth_fact_id']!=signed['approval_proof']['challenge_id']
+    result=await ac.post('/v1/trading/accounts/action',json=signed)
+    assert result.status_code==200 and result.json()['effect_state']=='APPLIED',result.text
+    assert result.json()['lifecycle']['variant']=='IMMEDIATE_DISCONNECT' and result.json()['credential_cleanup']=='NONE'

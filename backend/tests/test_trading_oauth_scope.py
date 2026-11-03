@@ -21,6 +21,12 @@ def isolated_native_account_state(tmp_path,monkeypatch,_env):
 
 async def act(ac, action, args, *, device='test-device', secret='test-device-secret', headers=None, expected_challenge_status=200):
     import hashlib,hmac
+    if action=='account_remove' and set(args)=={'alias'}:
+        from backend.tests.test_account_update_review import immediate_challenge
+        issued=await immediate_challenge(ac,args['alias'],expected_status=expected_challenge_status,device=device,secret=secret,headers=headers)
+        if expected_challenge_status!=200:return issued
+        body,_=issued
+        return await ac.post('/v1/trading/accounts/action',json=body,headers=headers)
     issued = int(time.time())
     signature = hmac.new(secret.encode(), canonical_action(device,issued,action,args).encode(),hashlib.sha256).hexdigest()
     body = {'device_id':device,'issued_at_unix':issued,'signature':signature,'action':action,'args':args}

@@ -1,0 +1,152 @@
+{
+  "at_utc": "2026-11-03T05:45:19.334286+00:00",
+  "branch": "ccr-9e07e1af-8mgz1p",
+  "candidate": {
+    "base_zip_sha256": "496efb35eac09a69defe9809a407756cf47227e2cfa081098cf6cd205ff4324f",
+    "full_manifest_sha256": "d55d7669971cfa6c823aa25fec2a6f3561c91f5062e46f605d4e7ef5e92825b3",
+    "path_sha256": {
+      "backend/tests/test_account_cleanup.py": "7864eca557b5134ef72d0abe33ae4c1d03f6066f024e2cfd3186169bec786aae",
+      "backend/tests/test_account_deletion_lifecycle.py": "47308b4c49b86a22318c33721cfe23d588f8507a02e276462a8c88cbe2907276",
+      "backend/tests/test_account_resource_binding.py": "9d47a439a1a5e82be2259a4482ce18b51c022b3dfc16bc01bc91284026eb18fe",
+      "backend/tests/test_account_unlink_review.py": "2892960ba6aeb320408579970a19e90781ccc4aa61b16fa9b739b22ca3358f02",
+      "backend/tests/test_account_update_review.py": "874e93fc2f14b76375dd06026c2e0e29a4bc2d7fc2b0cd079d1d1ba19d75fa4a",
+      "backend/tests/test_stateful_link_binding.py": "3318a8063954c01d4e582ce47585412606981b77d172c46e36939c017c1d3e79",
+      "backend/tests/test_trading_api.py": "e7566269cc10c251057cd3e0d2276090a847483f1978865f1220228aa5853892",
+      "backend/tests/test_trading_oauth_effects.py": "6499c50249ef282787cbabcce8175abe06fb73d4972d2f4e9d3d608de01fb9c4",
+      "backend/tests/test_trading_oauth_scope.py": "063d74f86ccb946649e757966908b211563ae6156df0ba91a4ddd82c57b663c5",
+      "backend/van_gateway/app.py": "de4be9d085718858241bb5502d4de3905f166deef4d8af86f4d56e8810d4747d",
+      "backend/van_gateway/approval/account_lifecycle_reauth.py": "298aed7a6b8e668e7a0ec5c8d92a1e821b595498f0cc8bee832ebc3410dbcf03",
+      "backend/van_gateway/trading/account_contracts.py": "e3fe76141608e753329fa44b5a43ded8b66ec39561f5f0eb5fd2bd735f744f99",
+      "backend/van_gateway/trading/account_lifecycle_api.py": "d7443c2deb4ca80c2c52fe54cfc6cff9ff1e04004bb1bd15d39e9645997fe420",
+      "backend/van_gateway/trading/accounts.py": "e5492f0721f4c2f0c7229020a51326591d36920ef9aa19a14af1a2761236c57c",
+      "docs/rebuild/rev118/backend/OWNER_REGISTRY_GENERATION.json": "67f38f04b8a346b93ad4bb0efa2271663b2c61c2b0f5b726a374648cc63a1773",
+      "docs/rebuild/rev118/backend/OWNER_REGISTRY_SOURCE_REFRESH_20261022.json": "091ea346f5ec0e7c9803522a4e957f8d1864f9ceac270ccc1f05bd9d7799338f",
+      "registries/owner_endpoint_schemas.json": "88a166d59a951a38d498bb4a8ab4066e022a99078748e0c859f2ec619c1dcd5c",
+      "registries/owner_endpoints.json": "bd0cc4dd519a7dba0ba524f37f43eeab2e1975fc61b880dc09213682fac3251e",
+      "registries/owner_features.json": "f766a434eb2e4551825c19879711153cb5075f246a613381ca5077fd98cb21a0",
+      "registries/owner_screens.json": "57fef69fdce9ceefe5154b70ec0f59b3087c7ef8cbd9fba73953996c1eb6328b",
+      "tools/rebuild/refresh_owner_source_contracts.py": "b934bd7bb1f1d240dcc1e88b3639c652c86c57be2976e73bfdc3f0356ed20fc1",
+      "trading/commander/account_lifecycle.py": "ffc612178bc520a28abf828c2cd6269d9b776c7d72ed1da84627f883bfe80a60",
+      "trading/commander/accounts.py": "91423f7d1398497430c2419d4a0226b3be79fd74576652724f53e9aea361769e",
+      "trading/commander/app.py": "aabc51f012caed2fc5f023cf317f9d1a364879ae875cd46b6b059c54dd743ed4",
+      "trading/tests/test_account_cleanup_recovery.py": "7b9aa397a872209f893a532e3dfbe67ff2c1ad6218933c4df1e004d594124a40",
+      "trading/tests/test_account_credential_atomicity.py": "595cf31f130b1e98d7d1f8840b80958fea3fa3a7cc7226c1401a75f2988e7f86",
+      "trading/tests/test_account_retirement_native_guards.py": "7507791363bffe17260570b4ca170535e64d771130beeaf305ddb6babe41634c",
+      "trading/tests/test_account_retirement_pg.py": "60ae925fe5f6a0adb03578ee82a6c43fdc60a6d35e0bc9b2eb134f398e8ca59a",
+      "trading/tests/test_account_strategy_detachment.py": "794a0f5037a9780a4999e3978923d09c118a32e067b620509cf8130b5eb851e7",
+      "trading/tests/test_account_unlink_currentness.py": "a7e32d6a7a32a3cbbd729c34a954b92b9336c26c800d94b571da010d16cecc5b",
+      "trading/tests/test_commander.py": "60d6ba0e20b1cf64510ef3680db308243f25f711706ae7f05bd80ecf6f19e917",
+      "trading/tests/test_commander_accounts.py": "1b973592e3e8a428a4dd9cf9218177d8f14157787d9c96d3b54f4ca428a4ebb4",
+      "trading/tests/test_native_account_deletion_lifecycle.py": "3314ef1d0237ba2cee36520087a93293d11dbe810d9cedb1d379b5d28ff16456",
+      "trading/vati/accounts/lifecycle.py": "91aa3ee6054d0d56cf4f580c0feb95968b46a5d3b9c2d3ec6412cb273203728d",
+      "trading/vati/accounts/registry.py": "00736faccfb40d26e6ec69236018d7019adc7e0c86b92129b84e4fb764c3e99c"
+    },
+    "test_delta_zip_sha256": "dc2d1ab1967dfc9aefaf144baaf21fa69513420404f5c6a157b62839265b4dd3"
+  },
+  "canonical_package_tree": "ac0226a22a95f51642cfeb37b3709b40f7cacf10",
+  "contract": [
+    "Strict IMMEDIATE_DISCONNECT uses independent fresh enrolled-verifier reauthentication and distinct substantive A4 permission consumed under one existing Store writer. Native local ingress uses the bootstrap-bound current Store/actor verifier; signed Commander current principal carries immutable Gateway attestation. Transport markers/callback labels issue no Owner authority.",
+    "Unique managed credential destruction or credential-free PAPER metadata only; shared/external access without independent per-account destruction proof HOLDS before new OAuth/detachment/unlink effects. History, remote accounts/funds and other references remain.",
+    "DISCONNECTING to DISCONNECTED has strict null grace/archive metadata, no hidden duration; persistent detachment precedes recoverable plan. Sticky schema3 preserves exact prior incarnation/operation history for same-alias reuse, old controls cannot select a newer generation, historical grace archive remains metadata-only.",
+    "Original UNKNOWN/null and genuine separate cleanup-child facts remain separate; legacy grace/cancel readers remain compatible. No credential restoration, strategy reassignment, global capsule demotion or mandate mutation."
+  ],
+  "coordination": {
+    "activation_precision": "minute as observed in root message; not a fabricated exact runtime block",
+    "completed_worker_requires_followup_task": true,
+    "observed_root_activation_utc": "2026-11-03T05:37:00Z",
+    "queued_message_is_not_active_work": true,
+    "review_queue_delay_start_utc": null,
+    "source_review_executions": 0
+  },
+  "derived_contracts": {
+    "actual_main_cli_apply_exit": 0,
+    "actual_main_cli_check_exit": 0,
+    "endpoints": 503,
+    "frontend_groups_functions_surfaces": [
+      42,
+      105,
+      78
+    ],
+    "no_new_ui": true,
+    "old407_schema_ids_retained": true,
+    "old502_endpoint_ids_retained": true,
+    "schemas": 407
+  },
+  "evidence_boundaries": {
+    "PG_hardware_Android_producer": "PENDING",
+    "continuous_remote_revocation_or_2PC": "NOT_IMPLEMENTED_BY_THIS_PACKET",
+    "credential_native_provider_integration": "UNEXECUTED_OPEN",
+    "native_owner_unit_formal_BG001_S24_acceptances": 0,
+    "source_migration_qualification": "OPEN"
+  },
+  "historical_evidence": [
+    "Original a68 CI41459817156 attempt1 failed:41jobs28success13failure; mandatory entry67/privateDDS/trustedbase gates unwaived. Original Android retry success18PASS4declaredSKIP is historical source evidence, not this disconnect/device acceptance.",
+    "Initial source setup6errors, preview generation IndentationError/missing readonly Java support, intermediate failed source selections, failed31case selection and initial signer test NameError remain recorded; none relabeled successful."
+  ],
+  "intermediate_artifact_loss": {
+    "cause": "snapshot wrapper reused Phase2 output filename",
+    "lost_bytes": 630138,
+    "lost_zip_sha256": "0d28b87389cfb69750c0c31337f83ae154a163f570802931f6f2abf91ac4aff9",
+    "phase1_preimages_actual_receipts_and_current_layered_artifacts_retained": true,
+    "restoration_claimed": false
+  },
+  "metrics": {
+    "implementation_start_utc": "2026-11-03T04:24:52Z",
+    "integration_start_utc": "2026-11-03T05:44:21.395220+00:00",
+    "model_cost": null,
+    "model_usage": null,
+    "phases_may_overlap": true,
+    "publish_ci_wait_seconds": null,
+    "source_copy_utc": "2026-11-03T04:25:57.563742+00:00"
+  },
+  "publication": "Genuine hooks, final committed4fd verification, normal push/exact remote and exact-head CI remain pending at creation of this pre-commit source receipt.",
+  "resource_variances": {
+    "actual_workspace_floor_preserved": true,
+    "archive_prior_budget_overrun_bytes": 782177,
+    "prior_limit_bytes": 3145728,
+    "prospective_limit_after_variance": 4194304,
+    "retroactive_compliance": false,
+    "scratch_current_cap_bytes": 134217728
+  },
+  "schema": "van.be004.immediate-disconnect-source/1",
+  "scope": {
+    "acceptance_identities": 21,
+    "actions": 6,
+    "contexts": 20,
+    "requirements": 11,
+    "unit": "BE-004",
+    "verbs": 8,
+    "whole_unit": "OPEN"
+  },
+  "source_base": "a68aa5ab1c8f603f97869790d5d532be436dc0fe",
+  "status": "SOURCE_IMPLEMENTED_SOURCE_TESTED_INDEPENDENTLY_REVIEWED_CANDIDATE",
+  "validation": {
+    "affected_replay_rerun": {
+      "exit": 0,
+      "passed": 1,
+      "source_runtime_unchanged": true
+    },
+    "blocked_probe_retried_or_added": false,
+    "combined_unique_source_passes": 32,
+    "controlled_fixture_authentication_only": true,
+    "failed_full_selection": {
+      "cases": 31,
+      "cause": "test migration changed original cached-read 200 oracle to403; production returned correct sealed result",
+      "exit": 1,
+      "failed": 1,
+      "passed": 30
+    },
+    "non_sensitive_only": true,
+    "production_credentials_provider_financial_effects_executed": false,
+    "reuse": "Prior30 are semantically reusable under unchanged production code and default canonical signing key/algorithm/text. Test fixture bytes changed; no all-input-byte-identity or clean full-run claim.",
+    "reviewer_executions": 0,
+    "signer_closure": {
+      "backend_cwd_passed": 2,
+      "executions": 4,
+      "exit": 0,
+      "initial_nameerror_run": "1PASS/1FAIL retained separately",
+      "root_passed": 2,
+      "unique_cases": 2
+    }
+  }
+}

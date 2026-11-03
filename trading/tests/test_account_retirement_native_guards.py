@@ -3,6 +3,9 @@ from dataclasses import asdict,replace
 from decimal import Decimal as D
 from types import SimpleNamespace as NS
 import time
+from backend.tests.test_trading_api import client,_env
+from backend.tests.test_account_update_review import isolate,immediate_challenge
+from van_gateway.trading.accounts import LocalAccountControl
 
 import pytest
 from fastapi import HTTPException
@@ -18,7 +21,7 @@ from vati.execution.exit_journal import ExitJournal
 
 
 @pytest.fixture
-def native(tmp_path,monkeypatch):
+def native(tmp_path,monkeypatch,client):
     path=tmp_path/'accounts.json';secrets=tmp_path/'secrets';secrets.mkdir()
     secret=secrets/'fx_primary.env';_write_secrets(secret,{'BRIDGE_SIGNING_KEY':'test-fixture-never-owner'})
     registry=AccountRegistry(path)
@@ -31,12 +34,21 @@ def native(tmp_path,monkeypatch):
         positions=lambda:view['positions'],orders=lambda:view['orders'],
         heartbeat=lambda **kw:Health(view['connected'],0,kw['now_ms']))
     monkeypatch.setattr('vati.app.service.build_adapter',lambda *a,**k:adapter)
-    handlers=build_account_handlers(AccountControlSettings(str(path),str(secrets),operation_ledger=str(ledger_path)))
-    return NS(handlers=handlers,path=path,secret=secret,ledger=ledger_path,view=view)
+    ac,app=client
+    app.state.onboarding.control=LocalAccountControl(str(path),str(secrets),operation_ledger=str(ledger_path))
+    app.state.account_lifecycle.bind_local_admission_verifier()
+    return NS(handlers=app.state.onboarding.control.handlers,ac=ac,path=path,secret=secret,ledger=ledger_path,view=view)
 
+
+async def disconnect(native,*,expected=200):
+    issued=await immediate_challenge(native.ac,'fx_primary',expected_status=expected)
+    if expected!=200:return issued
+    body,_=issued
+    return await native.ac.post('/v1/trading/accounts/action',json=body)
 
 @pytest.mark.parametrize('obstruction',['position','pending','funds','unavailable','lease','original-unknown'])
-def test_native_unlink_retains_profile_and_protection_credentials_when_not_safe(native,obstruction):
+@pytest.mark.asyncio
+async def test_native_unlink_retains_profile_and_protection_credentials_when_not_safe(native,obstruction):
     lease=None;store=None
     if obstruction=='position':native.view['positions']=[NS(position_id='42')]
     elif obstruction=='pending':native.view['orders']=[{'ticket':'11'}]
@@ -53,9 +65,8 @@ def test_native_unlink_retains_profile_and_protection_credentials_when_not_safe(
             event_time_ms=now,received_time_ms=now,correlation_id='original'));ledger.close()
     before=native.secret.read_bytes()
     try:
-        with pytest.raises(HTTPException) as rejected:
-            native.handlers['account_remove']({'alias':'fx_primary'})
-        assert rejected.value.status_code in (409,503)
+        rejected=await disconnect(native,expected=409)
+        assert rejected.status_code==409 and 'attestation required' not in rejected.text
         assert AccountRegistry(native.path).get('fx_primary')
         assert native.secret.read_bytes()==before
     finally:
@@ -63,8 +74,11 @@ def test_native_unlink_retains_profile_and_protection_credentials_when_not_safe(
         if store:store.close()
 
 
-def test_known_nonzero_funds_are_retained_remotely_not_reported_closed(native):
-    result=native.handlers['account_remove']({'alias':'fx_primary'})
+@pytest.mark.asyncio
+async def test_known_nonzero_funds_are_retained_remotely_not_reported_closed(native):
+    response=await disconnect(native)
+    assert response.status_code==200,response.text
+    result=response.json()
     assert result['removed'] is True and result['remote_account_closed'] is False
     assert result['historical_data_retained'] is True
     assert result['retained_remote_funds']=={'balance':'100.25','equity':'100.25','currency':'USD'}
@@ -72,18 +86,21 @@ def test_known_nonzero_funds_are_retained_remotely_not_reported_closed(native):
     assert native.ledger.exists()
 
 
-def test_unbound_original_protective_exit_cannot_be_assumed_to_belong_to_another_account(native):
+@pytest.mark.asyncio
+async def test_unbound_original_protective_exit_cannot_be_assumed_to_belong_to_another_account(native):
     ledger=Ledger(str(native.ledger))
     ExitJournal(ledger,'vati-execution-router').begin(venue='mt5',position_id='42',
         trade_intent_id='unbound-legacy-intent',action='FULL_CLOSE',quantity=None,
         reason='protective',now_ms=int(time.time()*1000))
     ledger.close();before=native.secret.read_bytes()
-    with pytest.raises(HTTPException):native.handlers['account_remove']({'alias':'fx_primary'})
+    response=await disconnect(native,expected=409)
+    assert response.status_code==409 and 'protective' in response.text.lower()
     assert AccountRegistry(native.path).get('fx_primary') and native.secret.read_bytes()==before
 
 
 @pytest.mark.parametrize('settled',[False,True])
-def test_actual_paper_order_and_cash_close_need_settled_history_before_local_unlink(tmp_path,eurusd,settled):
+@pytest.mark.asyncio
+async def test_actual_paper_order_and_cash_close_need_settled_history_before_local_unlink(tmp_path,eurusd,settled,client):
     from test_single_session_recovery import opened_service
     service,cfg,clock=opened_service(tmp_path,eurusd)
     try:
@@ -95,42 +112,55 @@ def test_actual_paper_order_and_cash_close_need_settled_history_before_local_unl
                 'LOCAL_UNLINK_RECONCILIATION',clock['now'])
         before=service._ledger.count(EventKind.TRADE_REVIEW)
         service.close()
-        handlers=build_account_handlers(AccountControlSettings(cfg.registry_path,str(tmp_path/'managed'),operation_ledger=cfg.ledger))
+        ac,app=client
+        app.state.onboarding.control=LocalAccountControl(cfg.registry_path,str(tmp_path/'managed'),operation_ledger=cfg.ledger)
+        app.state.account_lifecycle.bind_local_admission_verifier()
         if settled:
-            result=handlers['account_remove']({'alias':cfg.account_alias})
+            body,_=await immediate_challenge(ac,cfg.account_alias)
+            response=await ac.post('/v1/trading/accounts/action',json=body)
+            assert response.status_code==200,response.text
+            result=response.json()
             assert result['removed'] is True and result['retained_remote_funds'] is None
             assert cfg.account_alias not in AccountRegistry(cfg.registry_path).accounts
         else:
-            with pytest.raises(HTTPException) as blocked:handlers['account_remove']({'alias':cfg.account_alias})
-            assert 'unsettled' in blocked.value.detail.lower()
+            blocked=await immediate_challenge(ac,cfg.account_alias,expected_status=409)
+            assert 'unsettled' in blocked.text.lower()
             assert AccountRegistry(cfg.registry_path).get(cfg.account_alias)
         assert service._ledger.count(EventKind.TRADE_REVIEW)==before
     finally:service.close();service._ledger.close()
 
 
-def test_unlink_does_not_destroy_credentials_shared_with_another_native_account(native):
+@pytest.mark.asyncio
+async def test_unlink_does_not_destroy_credentials_shared_with_another_native_account(native):
     registry=AccountRegistry(native.path);account=registry.get('fx_primary')
     registry.replace(replace(account,broker='CTRADER',login='12345',server='demo'))
     registry=AccountRegistry(native.path);account=registry.get('fx_primary')
     registry.add(replace(account,alias='other_account',login='67890'))
     before=native.secret.read_bytes()
-    result=native.handlers['account_remove']({'alias':'fx_primary'})
-    assert result['removed'] is True and native.secret.read_bytes()==before
-    assert result['credential_cleanup']=='KEEP_SHARED'
+    # Deliberate canonical correction: removing a local reference is not
+    # per-account credential revocation/destruction; shared access must HOLD.
+    response=await disconnect(native,expected=409)
+    assert 'destruction cannot be proven' in response.text
+    assert AccountRegistry(native.path).get('fx_primary')
+    assert native.secret.read_bytes()==before
     assert AccountRegistry(native.path).get('other_account')
 
 
-def test_unmanaged_credential_reference_does_not_authorize_deleting_another_alias_file(native,tmp_path):
+@pytest.mark.asyncio
+async def test_unmanaged_credential_reference_does_not_authorize_deleting_another_alias_file(native,tmp_path):
     registry=AccountRegistry(native.path);account=registry.get('fx_primary')
     external=tmp_path/'external'/'private.env';_write_secrets(external,{'BRIDGE_SIGNING_KEY':'fixture-external'})
     registry.add(replace(account,alias='other_account',login='98765'))
     registry=AccountRegistry(native.path);registry.replace(replace(account,credential_ref=CredentialRef(secrets_file=str(external))))
     before=native.secret.read_bytes();external_before=external.read_bytes()
-    assert native.handlers['account_remove']({'alias':'fx_primary'})['removed']
+    response=await disconnect(native,expected=409)
+    assert 'destruction cannot be proven' in response.text
+    assert AccountRegistry(native.path).get('fx_primary')
     assert native.secret.read_bytes()==before and external.read_bytes()==external_before
 
 
-def test_a_shared_reference_added_after_native_readback_is_rechecked_before_deletion(native,monkeypatch):
+@pytest.mark.asyncio
+async def test_a_shared_reference_added_after_native_readback_is_rechecked_before_deletion(native,monkeypatch):
     import commander.account_retirement as module
     inspect=module.inspect_retirement
     def shared_after_facts(*args,**kwargs):
@@ -140,18 +170,19 @@ def test_a_shared_reference_added_after_native_readback_is_rechecked_before_dele
         return facts
     monkeypatch.setattr(module,'inspect_retirement',shared_after_facts)
     before=native.secret.read_bytes()
-    with pytest.raises(HTTPException) as blocked:native.handlers['account_remove']({'alias':'fx_primary'})
-    assert blocked.value.status_code==409 and 'ownership changed' in blocked.value.detail
+    blocked=await disconnect(native,expected=409)
+    assert blocked.status_code==409 and 'destruction cannot be proven' in blocked.text
     assert native.secret.read_bytes()==before
     registry=AccountRegistry(native.path)
     assert registry.get('fx_primary') and registry.get('late_reference')
 
 
-def test_unreachable_authority_is_not_reported_as_observed_lease_exclusion(native,monkeypatch):
+@pytest.mark.asyncio
+async def test_unreachable_authority_is_not_reported_as_observed_lease_exclusion(native,monkeypatch):
     def unavailable(*args):raise LeaseStoreUnavailable('controlled source fixture outage')
     monkeypatch.setattr('commander.account_retirement.lease_store',
         lambda *a:NS(read=unavailable,close=lambda:None))
     before=native.secret.read_bytes()
-    with pytest.raises(HTTPException) as blocked:native.handlers['account_remove']({'alias':'fx_primary'})
-    assert 'store is unreachable' in blocked.value.detail and 'runtime is active' not in blocked.value.detail
+    blocked=await disconnect(native,expected=503)
+    assert 'store is unreachable' in blocked.text and 'runtime is active' not in blocked.text
     assert native.secret.read_bytes()==before and AccountRegistry(native.path).get('fx_primary')

@@ -4,6 +4,8 @@ import os
 from pathlib import Path
 
 import pytest
+from backend.tests.test_trading_api import client,_env
+from backend.tests.test_account_update_review import isolate
 
 from commander.accounts import _write_secrets
 from vati.accounts.registry import load_secret_file
@@ -87,7 +89,11 @@ def test_a_secret_destination_symlink_cannot_redirect_a_rotation(tmp_path):
     assert target.read_bytes() == before and alias.is_symlink()
 
 
-def test_real_handlers_serialize_rotation_with_unlink_without_orphaning_secret_files(tmp_path, monkeypatch):
+@pytest.mark.asyncio
+async def test_real_handlers_serialize_rotation_with_unlink_without_orphaning_secret_files(tmp_path, monkeypatch,client):
+    import asyncio
+    from backend.tests.test_account_update_review import immediate_challenge
+    from van_gateway.trading.accounts import LocalAccountControl
     from concurrent.futures import ThreadPoolExecutor
     from threading import Event
     from commander.accounts import AccountControlSettings, build_account_handlers
@@ -97,10 +103,14 @@ def test_real_handlers_serialize_rotation_with_unlink_without_orphaning_secret_f
     from test_deriv_native_identity import Socket, native
     from vati.core import Ledger
     ledger=tmp_path/'authority.sqlite';Ledger(str(ledger)).close()
-    handlers = build_account_handlers(AccountControlSettings(str(registry), str(path.parent),
-        deriv_connector=lambda url: Socket(native()),operation_ledger=str(ledger)))
+    ac,app=client
+    app.state.onboarding.control=LocalAccountControl(str(registry),str(path.parent),
+        deriv_connector=lambda url: Socket(native()),operation_ledger=str(ledger))
+    app.state.account_lifecycle.bind_local_admission_verifier()
+    handlers=app.state.onboarding.control.handlers
     handlers['account_upsert']({'alias': 'deriv_demo', 'broker': 'DERIV'})
     handlers['account_credentials']({'alias': 'deriv_demo', 'secrets': {'DERIV_API_TOKEN': 'fixture-old'}})
+    body,_=await immediate_challenge(ac,'deriv_demo')
     started, release, removed = Event(), Event(), Event()
     original_write = module._write_secrets
     def paused_write(destination, values, **kwargs):
@@ -109,20 +119,23 @@ def test_real_handlers_serialize_rotation_with_unlink_without_orphaning_secret_f
             assert release.wait(timeout=5)
         return original_write(destination, values, **kwargs)
     monkeypatch.setattr(module, '_write_secrets', paused_write)
-    def unlink():
-        try:
-            return handlers['account_remove']({'alias': 'deriv_demo'})
-        finally:
-            removed.set()
+    async def unlink():
+        try:return await ac.post('/v1/trading/accounts/action',json=body)
+        finally:removed.set()
     with ThreadPoolExecutor(max_workers=2) as pool:
         rotation = pool.submit(handlers['account_credentials'],
             {'alias': 'deriv_demo', 'secrets': {'DERIV_API_TOKEN': 'fixture-new'}})
-        assert started.wait(timeout=3)
-        removal = pool.submit(unlink)
+        assert await asyncio.to_thread(started.wait,3)
+        removal=asyncio.create_task(unlink())
         try:
-            assert not removed.wait(timeout=0.25), 'unlink ran through an in-flight credential mutation'
+            assert not await asyncio.to_thread(removed.wait,.25), 'unlink ran through an in-flight credential mutation'
         finally:
             release.set()
         assert rotation.result(timeout=5)['stored_keys'] == ['DERIV_API_TOKEN']
-        assert removal.result(timeout=5)['removed']
+        stale=await asyncio.wait_for(removal,5)
+        assert stale.status_code==409,stale.text
+        assert path.exists() and AccountRegistry(registry).get('deriv_demo')
+        fresh,_=await immediate_challenge(ac,'deriv_demo')
+        result=await ac.post('/v1/trading/accounts/action',json=fresh)
+        assert result.status_code==200 and result.json()['removed'],result.text
     assert not path.exists() and 'deriv_demo' not in AccountRegistry(registry).accounts

@@ -76,7 +76,8 @@ class LocalAccountControl:
     def __init__(self, registry_path: str, secrets_dir: str, **overrides: Any) -> None:
         _trading_path()
         from commander.accounts import AccountControlSettings, build_account_handlers
-        self.handlers = build_account_handlers(AccountControlSettings(registry_path=registry_path, secrets_dir=secrets_dir, **overrides))
+        self.settings = AccountControlSettings(registry_path=registry_path, secrets_dir=secrets_dir, **overrides)
+        self.handlers = build_account_handlers(self.settings)
 
     def run(self, cmd: str, args: dict) -> dict:
         if cmd not in self.handlers:

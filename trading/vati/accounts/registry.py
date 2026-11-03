@@ -131,6 +131,7 @@ class AccountRegistry:
         self._resource_revisions = {}
         self._schema_version = 1
         self._lifecycles = {}
+        self._lifecycle_history = {}
         self.accounts = self._read_accounts()
         self._loaded_accounts = dict(self.accounts)
         self._loaded_revisions = dict(self._resource_revisions)
@@ -140,16 +141,20 @@ class AccountRegistry:
             self._resource_revisions = {}
             self._schema_version = 1
             self._lifecycles = {}
+            self._lifecycle_history = {}
             return {}
         try:
             data = json.loads(self.path.read_text(encoding="utf-8"))
             if not isinstance(data, dict) or not isinstance(data.get("accounts"), list):
                 raise AccountRegistryError("account registry schema is invalid")
             version=data.get("schema_version",1)
-            if type(version) is not int or version not in (1,2):
+            if type(version) is not int or version not in (1,2,3):
                 raise AccountRegistryError("account registry schema is unsupported")
-            if version==1 and data.get("account_lifecycles") or version==2 and not data.get("account_lifecycles"):
+            if version==1 and data.get("account_lifecycles") or version>=2 and not data.get("account_lifecycles"):
                 raise AccountRegistryError("lifecycle registry version or persistent detachment is unavailable; HOLD")
+            if (version<3 and 'account_lifecycle_history' in data
+                or version==3 and not data.get('account_lifecycle_history')):
+                raise AccountRegistryError('lifecycle history schema or persistent incarnation evidence unavailable; HOLD')
             revisions = data.get("resource_revisions", {})
             if (not isinstance(revisions, dict) or any(
                 not isinstance(alias, str) or not re.fullmatch(r"[a-z0-9_]{3,32}", alias)
@@ -163,8 +168,9 @@ class AccountRegistry:
                 if account.alias in records:
                     raise AccountRegistryError("account registry contains duplicate identities")
                 records[account.alias] = account
-            from vati.accounts.lifecycle import validate_records
+            from vati.accounts.lifecycle import validate_records,validate_history
             self._lifecycles = validate_records(data.get("account_lifecycles", {}))
+            self._lifecycle_history=validate_history(self._lifecycles,data.get("account_lifecycle_history", {}))
             self._schema_version = version
             self._resource_revisions = dict(revisions)
             return records
@@ -244,10 +250,12 @@ class AccountRegistry:
             current = AccountRegistry(self.path)
             import copy
             original_lifecycles=copy.deepcopy(current._lifecycles)
+            original_history=copy.deepcopy(current._lifecycle_history)
             original_accounts=dict(current.accounts)
             result = transform(current)
-            from vati.accounts.lifecycle import validate_records
+            from vati.accounts.lifecycle import validate_records,validate_history
             validate_records(current._lifecycles)
+            validate_history(current._lifecycles,current._lifecycle_history)
             # A metadata prune/rollback is not account reassignment authority.
             if not original_lifecycles.keys()<=current._lifecycles.keys():
                 raise AccountRegistryError("persistent account detachment cannot be erased")
@@ -259,14 +267,37 @@ class AccountRegistry:
                 'remote_account_closed','original_request'}
             for subject,old in original_lifecycles.items():
                 now=current._lifecycles[subject]
-                if subject!=alias and now!=old or any(now[k]!=old[k] for k in immutable):
+                rotation=(subject==alias and now['operation_id']!=old['operation_id']
+                    and now['incarnation']!=old['incarnation'] and alias in original_accounts
+                    and current._lifecycle_history.get(old['operation_id'])==old)
+                if not rotation and (subject!=alias and now!=old or any(now[k]!=old[k] for k in immutable)):
                     raise AccountRegistryError("original account lifecycle binding is immutable")
+            if not original_history.keys()<=current._lifecycle_history.keys():
+                raise AccountRegistryError('original lifecycle history cannot be erased')
+            for operation,old in original_history.items():
+                now=current._lifecycle_history[operation]
+                if now==old:continue
+                allowed={('DELETING','PENDING_ARCHIVE'),('DISCONNECTING','DISCONNECTED'),('PENDING_ARCHIVE','ARCHIVED')}
+                if (old['alias']!=alias or not callable(before_replace)
+                    or (old['phase'],now['phase']) not in allowed or now['revision']!=old['revision']+1
+                    or any(now[k]!=old[k] for k in immutable)
+                    or now['phase'] in {'DISCONNECTED','ARCHIVED'} and now['restore'] is not None
+                    or now['phase']=='ARCHIVED' and now['session_sources']!=[]
+                    or now['phase']!='ARCHIVED' and now['session_sources']!=old['session_sources']
+                    or now['phase']=='PENDING_ARCHIVE' and now['restore']!=old['restore']):
+                    raise AccountRegistryError('historical lifecycle binding is immutable')
+            for operation in current._lifecycle_history.keys()-original_history.keys():
+                old=original_lifecycles.get(alias)
+                if (old is None or operation!=old['operation_id'] or current._lifecycle_history[operation]!=old
+                    or current._lifecycles[alias]['operation_id']==operation):
+                    raise AccountRegistryError('history can only retain the exact replaced incarnation')
             if any(current.accounts.get(subject)!=account for subject,account in original_accounts.items() if subject!=alias) or set(current.accounts)-set(original_accounts)-{alias}:
                 raise AccountRegistryError("lifecycle writer cannot mutate another account")
             if advance_resource:
                 current._resource_revisions[alias] = current._resource_revisions.get(alias, 0) + 1
             current._save_unlocked(before_replace=before_replace,after_replace=after_replace or (lambda:None))
             self.accounts, self._lifecycles = current.accounts, current._lifecycles
+            self._lifecycle_history=current._lifecycle_history
             self._resource_revisions = current._resource_revisions
             self._schema_version = current._schema_version
             self._loaded_accounts = dict(self.accounts)
@@ -317,16 +348,19 @@ class AccountRegistry:
         if any(type(epoch) is not int or not 0 < epoch < 2**63 for epoch in self._resource_revisions.values()):
             raise AccountRegistryError("account resource revision exhausted or invalid; reconcile before mutation")
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        # Version2 is sticky once detachment has existed. The actual preceding
-        # reader/writer supports only1 and therefore refuses instead of silently
-        # dropping the new safety data. This is not a backup/rollback certificate.
-        self._schema_version = 2 if self._schema_version>=2 or self._lifecycles else 1
-        if self._schema_version==2 and not self._lifecycles:
+        # Version2 detachment and version3 incarnation history are sticky.
+        # Older readers refuse the new schema instead of silently dropping
+        # persistent evidence. Source migration is not runtime qualification.
+        self._schema_version = 3 if self._schema_version>=3 or self._lifecycle_history else 2 if self._schema_version>=2 or self._lifecycles else 1
+        if self._schema_version==3 and not self._lifecycle_history:
+            raise AccountRegistryError('persistent lifecycle history cannot be pruned or downgraded')
+        if self._schema_version>=2 and not self._lifecycles:
             raise AccountRegistryError("persistent lifecycle state cannot be pruned or downgraded")
         payload = json.dumps(
             {"schema_version": self._schema_version, "accounts": [asdict(a) for a in sorted(self.accounts.values(), key=lambda x: x.alias)],
              "resource_revisions": self._resource_revisions,
-             **({"account_lifecycles": self._lifecycles} if self._lifecycles else {})},
+             **({"account_lifecycles": self._lifecycles} if self._lifecycles else {}),
+             **({"account_lifecycle_history":self._lifecycle_history} if self._lifecycle_history else {})},
             indent=2,
         ) + "\n"
         fd, temp_name = tempfile.mkstemp(prefix=f".{self.path.name}.", suffix=".tmp", dir=str(self.path.parent))

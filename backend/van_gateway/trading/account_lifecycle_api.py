@@ -16,7 +16,7 @@ from van_gateway.trading.account_contracts import AccountLifecycleReview,Account
 from van_gateway.trading.accounts import LocalAccountControl,account_approval_text
 from van_gateway.trading.oauth_effects import fingerprint
 
-VARIANTS={'DELETE_GRACE','CANCEL_DELETE'}
+VARIANTS={'DELETE_GRACE','CANCEL_DELETE','IMMEDIATE_DISCONNECT'}
 HASH=r'^[0-9a-f]{64}$'
 
 class DeleteArgs(BaseModel):
@@ -24,6 +24,14 @@ class DeleteArgs(BaseModel):
     alias:str=Field(pattern=r'^[a-z0-9_]{3,32}$')
     variant:Literal['DELETE_GRACE']
     grace_seconds:int=Field(gt=0,lt=2**31)
+    oauth_discard_digest:str=Field(pattern=HASH)
+    reauth_fact_id:str|None=None
+    reauth_fact_digest:str|None=Field(default=None,pattern=HASH)
+
+class DisconnectArgs(BaseModel):
+    model_config=ConfigDict(extra='forbid',strict=True)
+    alias:str=Field(pattern=r'^[a-z0-9_]{3,32}$')
+    variant:Literal['IMMEDIATE_DISCONNECT']
     oauth_discard_digest:str=Field(pattern=HASH)
     reauth_fact_id:str|None=None
     reauth_fact_digest:str|None=Field(default=None,pattern=HASH)
@@ -44,10 +52,45 @@ class AccountLifecycle(AccountCleanup):
     def __init__(self,store,onboarding,authenticate,authorize,*,clock=None):
         super().__init__(store,onboarding,authenticate,authorize,clock=clock)
         self.reauth=AccountLifecycleReauthentication(store,authorize,clock=clock)
+        self._native_callers={}
+        self.bind_local_admission_verifier()
+
+    def bind_local_admission_verifier(self):
+        control=self.onboarding.control
+        if isinstance(control,LocalAccountControl):
+            control.settings.lifecycle_admission_verifier=self.verify_local_admission
+
+    def verify_local_admission(self,args):
+        # This bound service method is configured on the native settings during
+        # trusted composition. Neither a request label nor a callback in args
+        # can select its Store, enrolled verifier, principal, or original row.
+        try:
+            record=args['_lifecycle_admission']
+            admitted,caller,guard,loop=self._native_callers[record['operation_id']]
+            if admitted!=record:raise ValueError()
+        except (KeyError,TypeError,ValueError):
+            raise HTTPException(403,'Current durable lifecycle admission unavailable') from None
+        async def current():
+            async with self.store.connection() as db:
+                await db.execute('BEGIN')
+                try:
+                    actor=await self.reauth.current_actor(db,caller)
+                    saved=await (await db.execute('SELECT value FROM runtime_meta WHERE key=?',
+                        (ADMISSIONS+admitted['operation_id'],))).fetchone()
+                    if (saved is None or json.loads(saved['value'])!=admitted
+                        or actor!=admitted['actor_key_ref'] or self.reauth.clock()>=admitted['expires_at_unix']):
+                        raise HTTPException(403,'Current durable lifecycle admission unavailable')
+                finally:await db.rollback()
+        pending=asyncio.run_coroutine_threadsafe(current(),loop)
+        try:pending.result(5)
+        except BaseException:
+            pending.cancel();raise HTTPException(403,'Current durable lifecycle admission unavailable') from None
+        guard()
+        return admitted
     @staticmethod
     def arguments(args,*,with_fact=None):
         try:
-            model=DeleteArgs if args.get('variant')=='DELETE_GRACE' else CancelArgs
+            model={'DELETE_GRACE':DeleteArgs,'CANCEL_DELETE':CancelArgs,'IMMEDIATE_DISCONNECT':DisconnectArgs}.get(args.get('variant'),CancelArgs)
             body=model.model_validate(args)
         except (ValidationError,AttributeError):raise ReauthError('LIFECYCLE_INPUT_INVALID',422) from None
         values=body.model_dump(exclude_none=True)
@@ -57,7 +100,7 @@ class AccountLifecycle(AccountCleanup):
     async def prepare(self,request,req):
         await self.authenticate(request,req)
         raw=dict(req.args)
-        if raw.get('variant')!='DELETE_GRACE' or set(raw)!={'alias','variant','grace_seconds'}:
+        if (raw.get('variant') not in {'DELETE_GRACE','IMMEDIATE_DISCONNECT'} or set(raw)!=({'alias','variant','grace_seconds'} if raw.get('variant')=='DELETE_GRACE' else {'alias','variant'})):
             raise ReauthError('LIFECYCLE_INPUT_INVALID',422)
         # Pairing and current policy checked before any private native read.
         caller=self.caller(request,req)
@@ -76,7 +119,7 @@ class AccountLifecycle(AccountCleanup):
         domain=await asyncio.to_thread(self.onboarding.control.domain)
         selected=request.headers.get('X-Van-Account-Control-Domain')
         if selected is not None and selected!=domain:raise ReauthError('LIFECYCLE_DOMAIN_CHANGED')
-        if args['variant']=='DELETE_GRACE':
+        if args['variant'] in {'DELETE_GRACE','IMMEDIATE_DISCONNECT'}:
             plan=await self.onboarding.pending.effects.lifecycle_plan(args['alias'],req.device_id,domain)
             if fingerprint(plan)!=args['oauth_discard_digest']:raise ReauthError('LIFECYCLE_OAUTH_SCOPE_CHANGED')
         control=self.onboarding.control
@@ -89,7 +132,7 @@ class AccountLifecycle(AccountCleanup):
                 or review['view']['account_control_domain']!=domain or review['view']['owner_device_id']!=req.device_id
                 or review['context_digest']!=digest({k:v for k,v in review.items() if k not in {'context_digest','review_digest','request_digest'}})):
                 raise ValueError()
-            if args['variant']=='DELETE_GRACE':
+            if args['variant'] in {'DELETE_GRACE','IMMEDIATE_DISCONNECT'}:
                 unlink=review['view']['unlink_review']
                 if review['review_digest']!=unlink['review_digest'] or unlink['review_digest']!=digest({k:v for k,v in unlink.items() if k!='review_digest'}):raise ValueError()
             elif review['review_digest']!=digest({k:v for k,v in review.items() if k not in {'review_digest','request_digest'}}):raise ValueError()
@@ -148,29 +191,39 @@ class AccountLifecycle(AccountCleanup):
             domain=request.headers.get('X-Van-Account-Control-Domain')
             if domain is not None and domain!=old['context']['account_control_domain']:raise ReauthError('LIFECYCLE_DOMAIN_CHANGED')
             return await self.read_child(old)
-        args,caller,review,context,guard=await self.review(request,req,with_fact=True,cancelled=cancelled)
+        try:args,caller,review,context,guard=await self.review(request,req,with_fact=True,cancelled=cancelled)
+        except (ReauthError,HTTPException):
+            won=await self.store.fetchone('SELECT value FROM runtime_meta WHERE key=?',(ADMISSIONS+proof.challenge_id,))
+            if won is not None:return await self._action(request,req,cancelled)
+            raise
         text=account_approval_text(req.device_id,req.issued_at_unix,'account_remove',args,review['resource_version'],context['account_control_domain'])
         parameters={'lifecycle_review':review,'reauth_fact_digest':args['reauth_fact_digest']}
         admitted,winner=await self.reauth.admit(caller,context,args['reauth_fact_id'],challenge_id=proof.challenge_id,
             signature_b64=proof.signature_b64,text=text,parameters=parameters,current_request_deadline=caller['request_deadline'])
         if not winner:return await self.read_child(admitted)
-        native={**args,'_expected_resource_version':review['resource_version'],'_expected_review_digest':review['review_digest'],
+        native={**args,'_lifecycle_admission':admitted,'_expected_resource_version':review['resource_version'],'_expected_review_digest':review['review_digest'],
             '_expected_lifecycle_context_digest':review['context_digest'],
             '_expected_account_control_domain':context['account_control_domain'],
             '_native_operation':{'operation_id':admitted['operation_id'],'device_id':req.device_id,'request_digest':digest(args),
                 'authority_ref':admitted['authority_ref']+'::review:'+review['review_digest'],'expires_at_unix':admitted['expires_at_unix']}}
         if isinstance(self.onboarding.control,LocalAccountControl):native['_account_dispatch_guard']=guard
         if cancelled.is_set():return await self.read_child(admitted)
+        self._native_callers[admitted['operation_id']]=(admitted,caller,guard,asyncio.get_running_loop())
         # SQL winner first, discard only exact independently observed OAuth state.
         # A failed/lost native submission is NEVER retried by a replay.
         try:
             await asyncio.to_thread(guard)
-            if args['variant']=='DELETE_GRACE':
+            # Recheck the admitted current native scope before Gateway's first
+            # local OAuth effect. A changed resource never reaches discard.
+            _,_,fresh,_,_=await self.review(request,req,with_fact=True,cancelled=cancelled)
+            if fresh!=review:raise HTTPException(409,'Lifecycle review changed before OAuth discard')
+            if args['variant'] in {'DELETE_GRACE','IMMEDIATE_DISCONNECT'}:
                 stamp=await self.onboarding.pending.effects.lifecycle_discard(args['alias'],req.device_id,context['account_control_domain'],args['oauth_discard_digest'])
                 native['_lifecycle_oauth']={'digest':stamp,'request_digest':digest(semantic(args))}
             await asyncio.to_thread(guard)
             await asyncio.to_thread(self.onboarding.control.run,'account_remove',native)
         except (HTTPException,OSError,TimeoutError,ConnectionError):pass
+        finally:self._native_callers.pop(admitted['operation_id'],None)
         return await self.read_child(admitted)
     async def read_child(self,admitted):
         try:
@@ -185,20 +238,23 @@ class AccountLifecycle(AccountCleanup):
                     or value['effect_state'] in {'APPLIED','REFUSED'} and not isinstance(value['result'],dict)):
                 raise ValueError()
             if value['effect_state']=='APPLIED':
-                result=value['result'];row=result['lifecycle'];AccountLifecycleState.model_validate(row)
-                context=admitted['context'];deletion=context['variant']=='DELETE_GRACE'
+                result=value['result'];row=result['lifecycle'];public_lifecycle=AccountLifecycleState.model_validate(row).model_dump(by_alias=True)
+                context=admitted['context'];deletion=context['variant'] in {'DELETE_GRACE','IMMEDIATE_DISCONNECT'}
                 if (row['alias']!=context['alias'] or row['account_control_domain']!=context['account_control_domain']
                         or row['operation_id']!=(admitted['operation_id'] if deletion else context['lifecycle_id'])
-                        or row['phase']!=('PENDING_ARCHIVE' if deletion else 'RELINK_REQUIRED')
+                        or row['phase']!=('DISCONNECTED' if context['variant']=='IMMEDIATE_DISCONNECT' else 'PENDING_ARCHIVE' if deletion else 'RELINK_REQUIRED')
                         or result['removed'] is not deletion or result['remote_account_closed'] is not False
                         or result['historical_data_retained'] is not True):raise ValueError()
-            return {'schema':'van.account-lifecycle-operation/1','operation_id':admitted['operation_id'],'native':value,
+            return {**({**value['result'],'lifecycle':public_lifecycle} if value['effect_state']=='APPLIED' else {}),'schema':'van.account-lifecycle-operation/1','operation_id':admitted['operation_id'],'native':value,
                 'effect_state':value['effect_state'],'execution_authority':False}
         except (HTTPException,OSError,TimeoutError,ConnectionError,ValidationError,KeyError,ValueError,TypeError):
             return {'schema':'van.account-lifecycle-operation/1','operation_id':admitted['operation_id'],'native':None,
                 'effect_state':'UNKNOWN','execution_authority':False}
-    async def read_record(self,request,alias):
+    async def read_record(self,request,alias,lifecycle_id=None):
         caller=self.read_caller(request)
+        domain=await asyncio.to_thread(self.onboarding.control.domain)
+        selected=request.headers.get('X-Van-Account-Control-Domain')
+        if selected is not None and selected!=domain:raise ReauthError('LIFECYCLE_DOMAIN_CHANGED')
         caller.update(proved=bool(getattr(request.state,'van_device_proved',False)),
             verified_binding_identity=getattr(request.state,'van_device_proof_binding_identity',None),request_deadline=int(time.time())+300)
         loop=asyncio.get_running_loop()
@@ -212,10 +268,14 @@ class AccountLifecycle(AccountCleanup):
             try:future.result(5)
             except BaseException:
                 future.cancel();raise HTTPException(403,'Current lifecycle read owner unavailable') from None
-        payload={'action':'account_lifecycle_read','args':{'alias':alias},'owner_device_id':caller['device_id']}
+        payload={'action':'account_lifecycle_read','args':{'alias':alias,**({'lifecycle_id':lifecycle_id} if lifecycle_id is not None else {})},'owner_device_id':caller['device_id']}
         if isinstance(self.onboarding.control,LocalAccountControl):payload['_account_dispatch_guard']=guard
         value=await asyncio.to_thread(self.onboarding.control.run,'account_review',payload)
-        return AccountLifecycleState.model_validate(value).model_dump(by_alias=True)
+        parsed=AccountLifecycleState.model_validate(value)
+        if (parsed.alias!=alias or parsed.device_id!=caller['device_id'] or parsed.account_control_domain!=domain
+            or lifecycle_id is not None and parsed.operation_id!=lifecycle_id):
+            raise ReauthError('LIFECYCLE_ORIGINAL_SCOPE_UNVERIFIED',503)
+        return parsed.model_dump(by_alias=True)
     async def archive_due(self):
         # Existing retention runner invokes a native data CAS, never an old A4
         # permission or a deferred credential/provider effect.
@@ -234,6 +294,12 @@ def build_lifecycle_router(service):
         import re
         if re.fullmatch(r'[a-z0-9_]{3,32}',alias) is None:raise ReauthError('LIFECYCLE_INPUT_INVALID',422)
         return await service.read_record(request,alias)
+    @router.get('/records/{alias}/{lifecycle_id}',response_model=AccountLifecycleState)
+    async def read_exact(request:Request,alias:str,lifecycle_id:str):
+        import re
+        if (re.fullmatch(r'[a-z0-9_]{3,32}',alias) is None
+            or re.fullmatch(r'[A-Za-z0-9_-]{20,128}',lifecycle_id) is None):raise ReauthError('LIFECYCLE_INPUT_INVALID',422)
+        return await service.read_record(request,alias,lifecycle_id)
     @router.get('/operations/{operation_id}')
     async def original(request:Request,operation_id:str):
         import re

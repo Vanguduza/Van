@@ -516,13 +516,24 @@
             "exclusiveMinimum": 0.0,
             "title": "Revision"
           },
+          "variant": {
+            "type": "string",
+            "enum": [
+              "DELETE_GRACE",
+              "IMMEDIATE_DISCONNECT"
+            ],
+            "title": "Variant",
+            "default": "DELETE_GRACE"
+          },
           "phase": {
             "type": "string",
             "enum": [
               "DELETING",
               "PENDING_ARCHIVE",
               "RELINK_REQUIRED",
-              "ARCHIVED"
+              "ARCHIVED",
+              "DISCONNECTING",
+              "DISCONNECTED"
             ],
             "title": "Phase"
           },
@@ -531,12 +542,26 @@
             "title": "Created At Unix"
           },
           "archive_at_unix": {
-            "type": "integer",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Archive At Unix"
           },
           "grace_seconds": {
-            "type": "integer",
-            "exclusiveMinimum": 0.0,
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Grace Seconds"
           },
           "strategies": {
@@ -9348,12 +9373,22 @@
         "properties": {
           "variant": {
             "type": "string",
-            "const": "DELETE_GRACE",
+            "enum": [
+              "DELETE_GRACE",
+              "IMMEDIATE_DISCONNECT"
+            ],
             "title": "Variant"
           },
           "grace_seconds": {
-            "type": "integer",
-            "exclusiveMinimum": 0.0,
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Grace Seconds"
           },
           "strategies": {
@@ -9394,6 +9429,16 @@
               "NONE"
             ],
             "title": "Credential Disposition"
+          },
+          "prior_lifecycle": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AccountLifecycleState"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "additionalProperties": false,

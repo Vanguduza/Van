@@ -30,7 +30,11 @@ def isolated_native_deriv_authorization(client, tmp_path):
 @pytest.mark.asyncio
 async def test_exact_callback_retry_does_not_exchange_a_provider_code_twice(client, monkeypatch):
     ac, app = client; calls=[]
+    real=app.state.onboarding.control.run
+    maintenance_control=app.state.onboarding.control.run
     def control(command,args):
+        if command=='account_review' and args=={'action':'account_lifecycle_archive_due','args':{}}:
+            return maintenance_control(command,args)
         assert command == 'ctrader_oauth_exchange'
         calls.append(args['code'])
         return {'access_token':'fixture-access','refresh_token':'fixture-refresh'}
@@ -62,7 +66,10 @@ async def test_link_retry_after_a_lost_reply_returns_receipt_without_repeating_t
     assert (await ac.get('/v1/trading/oauth/deriv/callback',params={'state':state,
         'acct1':'VRTC900','token1':'fixture-access','cur1':'USD'})).status_code == 200
     control = app.state.onboarding.control.run; calls=[]
+    maintenance_control=app.state.onboarding.control.run
     def observed(command,args):
+        if command=='account_review' and args=={'action':'account_lifecycle_archive_due','args':{}}:
+            return maintenance_control(command,args)
         calls.append(command)
         return control(command,args)
     monkeypatch.setattr(app.state.onboarding.control,'run',observed)
@@ -96,7 +103,11 @@ async def ready_deriv(ac):
 async def test_concurrent_callback_is_refused_while_owner_polling_and_event_loop_remain_responsive(client,monkeypatch):
     from threading import Event
     ac,app=client; started,release=Event(),Event();calls=[]
+    real=app.state.onboarding.control.run
+    maintenance_control=app.state.onboarding.control.run
     def control(command,args):
+        if command=='account_review' and args=={'action':'account_lifecycle_archive_due','args':{}}:
+            return maintenance_control(command,args)
         calls.append(command);started.set()
         assert release.wait(timeout=5)
         return {'access_token':'fixture-access','refresh_token':'fixture-refresh'}
@@ -123,7 +134,11 @@ async def test_concurrent_callback_is_refused_while_owner_polling_and_event_loop
 async def test_cancelled_token_exchange_keeps_unknown_and_a_new_state_cannot_reuse_the_code(client,monkeypatch):
     from threading import Event
     ac,app=client;started,release,finished=Event(),Event(),Event();calls=[]
+    real=app.state.onboarding.control.run
+    maintenance_control=app.state.onboarding.control.run
     def control(command,args):
+        if command=='account_review' and args=={'action':'account_lifecycle_archive_due','args':{}}:
+            return maintenance_control(command,args)
         calls.append(command);started.set()
         try:
             assert release.wait(timeout=5)
@@ -156,7 +171,10 @@ async def test_link_effect_without_a_committed_receipt_is_not_repeated_or_bypass
     from pathlib import Path
     ac,app=client;state=await ready_deriv(ac);calls=[]
     real=app.state.onboarding.control.run
+    maintenance_control=app.state.onboarding.control.run
     def control(command,args):
+        if command=='account_review' and args=={'action':'account_lifecycle_archive_due','args':{}}:
+            return maintenance_control(command,args)
         calls.append(command)
         return real(command,args)
     monkeypatch.setattr(app.state.onboarding.control,'run',control)
@@ -191,7 +209,10 @@ async def test_committed_link_receipt_survives_a_lost_response_and_a_new_reader(
     from van_gateway.storage.db import Store
     from van_gateway.trading.accounts import AccountOnboarding,OAuthPending
     ac,app=client;state=await ready_deriv(ac);calls=[];real=app.state.onboarding.control.run
+    maintenance_control=app.state.onboarding.control.run
     def control(command,args):
+        if command=='account_review' and args=={'action':'account_lifecycle_archive_due','args':{}}:
+            return maintenance_control(command,args)
         calls.append(command)
         return real(command,args)
     monkeypatch.setattr(app.state.onboarding.control,'run',control)
@@ -264,7 +285,11 @@ async def test_invalid_link_alias_is_refused_before_claim_and_can_be_corrected(c
 @pytest.mark.asyncio
 async def test_incomplete_provider_token_response_stays_unknown_and_cannot_be_reexchanged(client,monkeypatch):
     ac,app=client;state=await start_flow(ac,'ctrader');calls=[]
+    real=app.state.onboarding.control.run
+    maintenance_control=app.state.onboarding.control.run
     def control(command,args):
+        if command=='account_review' and args=={'action':'account_lifecycle_archive_due','args':{}}:
+            return maintenance_control(command,args)
         calls.append(command)
         return {'access_token':''}
     monkeypatch.setattr(app.state.onboarding.control,'run',control)
@@ -290,7 +315,10 @@ async def test_missing_native_authorization_material_cannot_create_a_ready_accou
 @pytest.mark.asyncio
 async def test_an_encrypted_receipt_cannot_be_transplanted_to_another_link(client,monkeypatch):
     ac,app=client;states=[];calls=[];real=app.state.onboarding.control.run
+    maintenance_control=app.state.onboarding.control.run
     def observed(command,args):
+        if command=='account_review' and args=={'action':'account_lifecycle_archive_due','args':{}}:
+            return maintenance_control(command,args)
         calls.append(command)
         return real(command,args)
     monkeypatch.setattr(app.state.onboarding.control,'run',observed)
@@ -317,7 +345,10 @@ async def test_encrypted_authorization_material_cannot_move_to_a_different_state
 @pytest.mark.parametrize('change',[{'alias':'wrong_alias'},{'broker':'MT5'},{'mode':'AUTONOMOUS_LIVE'}])
 async def test_mismatched_native_link_receipt_stays_unconfirmed(client,monkeypatch,change):
     ac,app=client;state=await ready_deriv(ac);calls=[];real=app.state.onboarding.control.run
+    maintenance_control=app.state.onboarding.control.run
     def changed(command,args):
+        if command=='account_review' and args=={'action':'account_lifecycle_archive_due','args':{}}:
+            return maintenance_control(command,args)
         calls.append(command)
         receipt=real(command,args)
         return {**receipt,'account':{**receipt['account'],**change}}
@@ -346,7 +377,10 @@ async def test_a_new_link_cannot_replace_a_registered_alias_without_an_original_
 async def test_original_unconfirmed_link_read_does_not_depend_on_current_native_inventory(client,monkeypatch):
     from fastapi import HTTPException
     ac,app=client;state=await ready_deriv(ac);calls=[];real=app.state.onboarding.control.run
+    maintenance_control=app.state.onboarding.control.run
     def observed(command,args):
+        if command=='account_review' and args=={'action':'account_lifecycle_archive_due','args':{}}:
+            return maintenance_control(command,args)
         calls.append(command);return real(command,args)
     monkeypatch.setattr(app.state.onboarding.control,'run',observed)
     def fail(point):

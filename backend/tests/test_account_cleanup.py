@@ -431,7 +431,8 @@ async def test_separate_resolution_allows_fresh_ordinary_intent_but_never_parent
         journal=AccountEffectJournal(ledger,cleanup_secrets_root=tmp_path/'secrets')
         other=replace(old.intent,operation_id='other_unresolved_original_0001',request_digest='e'*64,expires_at_unix=int(time.time())+60)
         pending=journal.claim(other);journal.uncertain(pending)
-    denied=await ac.post('/v1/trading/accounts/challenge',json=request_body({'alias':'paper_owner'}))
+    from backend.tests.test_account_update_review import immediate_challenge
+    denied=await immediate_challenge(ac,'paper_owner',expected_status=409)
     assert denied.status_code==409,denied.text
     assert AccountRegistry(tmp_path/'accounts.json').get('paper_owner')
     with closing(Ledger(tmp_path/'vati.sqlite')) as ledger:
@@ -522,7 +523,7 @@ async def test_same_child_late_concurrent_original_recovers_winner_without_resel
 async def test_actual_original_process_death_new_child_and_late_epoch_original_never_reopens(client,tmp_path,monkeypatch,window):
     """Paired gateway original; real owned native process death/temp PAPER DB.
 
-    Existing trusted LocalAccountControl child harness, not deployed/hardware
+    Existing authenticated Commander child ingress, not deployed/hardware
     authority or a provider/remote-effect qualification.
     """
     import subprocess,sys,json
@@ -542,12 +543,13 @@ def crashing_step(self,*a,**kw):
  return result
 UnlinkRecoveryBook.step=crashing_step
 if window=='completion':AccountEffectJournal.complete=lambda *a,**kw:os._exit(74)
-handlers=build_account_handlers(AccountControlSettings(root+'/accounts.json',root+'/secrets',operation_ledger=root+'/vati.sqlite'))
-handlers['account_remove'](json.loads(sys.argv[3]))
+sys.path.insert(0,str(__import__('pathlib').Path(__import__('commander').__file__).resolve().parents[1]/'tests'))
+from trading.tests.test_commander import dispatch_admitted_gateway_test_body
+dispatch_admitted_gateway_test_body(root,json.loads(sys.argv[3]))
 '''
     def killed(command,args):
         if command!='account_remove':return native(command,args)
-        child=subprocess.run([sys.executable,'-c',source,str(tmp_path),window,json.dumps(args)],capture_output=True,timeout=12)
+        child=subprocess.run([sys.executable,'-c',source,str(tmp_path),window,json.dumps({k:v for k,v in args.items() if k!='_account_dispatch_guard'})],capture_output=True,timeout=12)
         children.append(child.returncode)
         assert child.returncode==74,child.stderr.decode()[:400]
         raise ConnectionError('SOURCE actual original process terminated before result ACK')

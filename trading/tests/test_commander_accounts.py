@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 
 import pytest
+from backend.tests.test_trading_api import client,_env
 from fastapi.testclient import TestClient
 
 from commander.accounts import AccountControlSettings, redact_args
@@ -61,7 +62,9 @@ def env(tmp_path):
     return TestClient(create_app(st)), tmp_path, deriv, fakes
 
 
-def test_upsert_credentials_verify_remove_never_echo_secrets(env):
+@pytest.mark.asyncio
+async def test_upsert_credentials_verify_remove_never_echo_secrets(env,client):
+    gateway_client,gateway_app=client
     client, tmp, deriv, fakes = env
     assert "account_upsert" in COMMANDS and "mt5_ea_issue_key" in COMMANDS
     r = post(client, "account_upsert", {"alias": "Deriv Demo", "broker": "DERIV"}); assert r.status_code == 422           # alias rule
@@ -78,8 +81,18 @@ def test_upsert_credentials_verify_remove_never_echo_secrets(env):
     audit = (tmp / "log" / "commander-audit.jsonl").read_text()
     assert "a1-linked" not in audit and "[REDACTED]" in audit
     removed = post(client, "account_remove", {"alias": "deriv_demo"})
-    assert removed.status_code == 200, removed.text
-    assert removed.json()["result"]["removed"] and not sec.exists()
+    # A transport signature and an internal helper do not replace both proofs.
+    assert removed.status_code==422 and 'IMMEDIATE_DISCONNECT' in removed.text
+    assert sec.exists() and AccountRegistry(tmp/'accounts.json').get('deriv_demo')
+    from van_gateway.trading.accounts import LocalAccountControl
+    from backend.tests.test_account_update_review import immediate_challenge
+    gateway_app.state.onboarding.control=LocalAccountControl(str(tmp/'accounts.json'),str(tmp/'secrets'),
+        deriv_connector=deriv.connector,operation_ledger=str(tmp/'l.sqlite'))
+    gateway_app.state.account_lifecycle.bind_local_admission_verifier()
+    body,_=await immediate_challenge(gateway_client,'deriv_demo')
+    admitted=await gateway_client.post('/v1/trading/accounts/action',json=body)
+    assert admitted.status_code==200 and admitted.json()['removed'],admitted.text
+    assert not sec.exists()
     assert post(client, "account_verify", {"alias": "deriv_demo"}).status_code == 404
     assert redact_args({"alias": "x", "secrets": {"K": "v"}, "code": "c"}) == {"alias": "x", "secrets": "[REDACTED]", "code": "[REDACTED]"}
 

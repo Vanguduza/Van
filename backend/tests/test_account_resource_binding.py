@@ -23,6 +23,10 @@ def isolated_native_account_files(tmp_path,monkeypatch,_env):
 
 
 async def approved(ac,action,args):
+    if action=='account_remove' and set(args)=={'alias'}:
+        from backend.tests.test_account_update_review import immediate_challenge
+        body,_=await immediate_challenge(ac,args['alias'])
+        return body
     issued=int(time.time());device='test-device'
     text=canonical_action(device,issued,action,args)
     body=dict(device_id=device,issued_at_unix=issued,action=action,args=args,

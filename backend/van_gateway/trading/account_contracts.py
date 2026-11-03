@@ -147,10 +147,11 @@ class AccountLifecycleState(BaseModel):
     account_control_domain:str=Field(pattern='^[0-9a-f]{64}$')
     incarnation:str=Field(pattern='^[0-9a-f]{64}$')
     revision:int=Field(gt=0)
-    phase:Literal['DELETING','PENDING_ARCHIVE','RELINK_REQUIRED','ARCHIVED']
+    variant:Literal['DELETE_GRACE','IMMEDIATE_DISCONNECT']='DELETE_GRACE'
+    phase:Literal['DELETING','PENDING_ARCHIVE','RELINK_REQUIRED','ARCHIVED','DISCONNECTING','DISCONNECTED']
     created_at_unix:int
-    archive_at_unix:int
-    grace_seconds:int=Field(gt=0)
+    archive_at_unix:int|None
+    grace_seconds:int|None=Field(gt=0)
     strategies:list[str]
     history_ref:str=Field(pattern='^[0-9a-f]{64}$')
     credential_disposition:Literal['DELETE_MANAGED','NONE']
@@ -162,6 +163,19 @@ class AccountLifecycleState(BaseModel):
     execution_authority:Literal[False]
     native_original_phase:Literal['IN_FLIGHT','APPLIED','REFUSED','UNKNOWN']|None=None
     metadata_hold:Literal['ORIGINAL_OUTCOME_REQUIRES_RECONCILIATION']|None=None
+
+    @model_validator(mode='after')
+    def coherent_lifecycle_timing(self):
+        immediate=self.phase in {'DISCONNECTING','DISCONNECTED'}
+        if immediate!=(self.variant=='IMMEDIATE_DISCONNECT'):
+            raise ValueError('Lifecycle phase and original variant differ')
+        if immediate:
+            if self.archive_at_unix is not None or self.grace_seconds is not None:
+                raise ValueError('Immediate disconnect has no grace or archive deadline')
+        elif (self.archive_at_unix is None or self.grace_seconds is None
+              or self.archive_at_unix!=self.created_at_unix+self.grace_seconds):
+            raise ValueError('Deletion needs original explicit grace and archive deadline')
+        return self
 
     @model_serializer(mode='wrap')
     def preserve_native_data_body(self,handler):
@@ -178,8 +192,8 @@ class LifecycleSessionSource(BaseModel):
 
 class LifecycleDeleteView(BaseModel):
     model_config=ConfigDict(extra='forbid',strict=True)
-    variant:Literal['DELETE_GRACE']
-    grace_seconds:int=Field(gt=0)
+    variant:Literal['DELETE_GRACE','IMMEDIATE_DISCONNECT']
+    grace_seconds:int|None=Field(gt=0)
     strategies:list[str]
     session_sources:list[LifecycleSessionSource]
     unlink_review:AccountResolvedReview
@@ -187,6 +201,20 @@ class LifecycleDeleteView(BaseModel):
     account_control_domain:str=Field(pattern='^[0-9a-f]{64}$')
     owner_device_id:str
     credential_disposition:Literal['DELETE_MANAGED','NONE']
+    prior_lifecycle:AccountLifecycleState|None=None
+
+    @model_validator(mode='after')
+    def coherent_variant(self):
+        if (self.variant=='IMMEDIATE_DISCONNECT')!=(self.grace_seconds is None):
+            raise ValueError('Immediate disconnect has no deletion grace')
+        if not self.session_sources:raise ValueError('Native session scope must be explicit and nonempty')
+        return self
+
+    @model_serializer(mode='wrap')
+    def preserve_original_review_body(self,handler):
+        data=handler(self)
+        if self.prior_lifecycle is None:data.pop('prior_lifecycle',None)
+        return data
 
 class LifecycleRemoteState(BaseModel):
     model_config=ConfigDict(extra='forbid',strict=True)

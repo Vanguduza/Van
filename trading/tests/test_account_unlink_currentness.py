@@ -24,8 +24,13 @@ async def test_actual_registered_unlink_rechecks_current_envelope_at_writer_and_
     ac,app=client;await paper(ac)
     token='owned-native-unlink-current-key-'*3;replacement='owned-replacement-unlink-current-key-'*3
     token_file=tmp_path/'native-current-token';token_file.write_text(token);token_file.chmod(0o600)
+    import hashlib
+    source=tmp_path/'disconnect-session.json'
+    source.write_text(json.dumps({'account_alias':'paper_owner','symbol':'EURUSD','base':'EUR','quote':'USD','timeframe':'M5',
+        'contract':{},'mandate':{},'capsules':['fx_trend_pullback-v1'],'registry_path':str(tmp_path/'accounts.json')}))
+    sources=((str(source),hashlib.sha256(source.read_bytes()).hexdigest()),)
     settings=CommanderSettings(tokens={'van-gateway':token},ledger=get_settings().vati_ledger_path,
-        log_dir=str(tmp_path/'native-log'),units=(),account_control=AccountControlSettings(str(tmp_path/'accounts.json'),str(tmp_path/'secrets')))
+        log_dir=str(tmp_path/'native-log'),units=(),account_control=AccountControlSettings(str(tmp_path/'accounts.json'),str(tmp_path/'secrets'),lifecycle_session_sources=sources))
     native=TestClient(create_app(settings));calls=[]
     class Reply:
         def __init__(self,data):self.data=data
@@ -45,7 +50,7 @@ async def test_actual_registered_unlink_rechecks_current_envelope_at_writer_and_
         before=(tmp_path/'accounts.json').read_bytes();fsync=storage.os.fsync;reached=[]
         def delayed(fd):
             fsync(fd);marker=effects._effect_started.get()
-            if marker is not None and marker[1].command=='account_remove' and '.accounts.json.' in os.readlink('/proc/self/fd/'+str(fd)):
+            if marker is not None and marker[1].command=='account_remove' and not reached and '.accounts.json.' in os.readlink('/proc/self/fd/'+str(fd)):
                 reached.append(True);assert marker[0] is False
                 if fault=='key':settings.tokens['van-gateway']=replacement
                 elif fault=='transport_time':monkeypatch.setattr(auth_module,'time',NS(time=lambda:time.time()+SKEW_S+1))
@@ -53,7 +58,9 @@ async def test_actual_registered_unlink_rechecks_current_envelope_at_writer_and_
         result=await ac.post('/v1/trading/accounts/action',json=body)
         assert reached
         if fault!='healthy_cached':
-            assert result.status_code==401,result.text
+            assert result.status_code==409 and result.json()['effect_state']=='UNKNOWN',result.text
+            # Current transport loss prevents Gateway from independently reading
+            # the already sealed native refusal; original journal stays REFUSED.
             assert (tmp_path/'accounts.json').read_bytes()==before
             from commander.account_effects import AccountEffectJournal
             from vati.core import Ledger
@@ -67,7 +74,15 @@ async def test_actual_registered_unlink_rechecks_current_envelope_at_writer_and_
             monkeypatch.setattr(effects,'time',NS(time=lambda:marker_clock))
             path='/v1/cmd/account_remove';raw=json.dumps({'args':calls[0]}).encode()
             replay=native.post(path,content=raw,headers={**sign_headers(token,'POST',path,raw),'content-type':'application/json'})
+            # A sealed cached outcome is read without opening another effect;
+            # advancing only the journal's effect clock does not revoke the
+            # current authenticated transport or change original history.
             assert replay.status_code==200 and replay.json()['result']['removed'] is True,replay.text
+            path='/v1/cmd/account_operation'
+            raw=json.dumps({'args':{'operation_id':identity,'device_id':'test-device',
+                'account_control_domain':calls[0]['_expected_account_control_domain']}}).encode()
+            original=native.post(path,content=raw,headers={**sign_headers(token,'POST',path,raw),'content-type':'application/json'})
+            assert original.status_code==200 and original.json()['result']['effect_state']=='APPLIED',original.text
             assert len(reached)==1
             read=await ac.get('/v1/trading/accounts/operations/'+identity)
             assert read.status_code==200 and read.json()['effect_state']=='APPLIED' and read.json()['operation_id']==identity
@@ -122,12 +137,13 @@ from commander.account_effects import AccountEffectJournal
 root=sys.argv[1]
 def die(*a,**kw):os._exit(74)
 AccountEffectJournal.complete=die
-h=build_account_handlers(AccountControlSettings(root+'/accounts.json',root+'/secrets',operation_ledger=root+'/vati.sqlite'))
-h['account_remove'](json.loads(sys.argv[2]))
+sys.path.insert(0,str(__import__('pathlib').Path(__import__('commander').__file__).resolve().parents[1]/'tests'))
+from trading.tests.test_commander import dispatch_admitted_gateway_test_body
+dispatch_admitted_gateway_test_body(root,json.loads(sys.argv[2]))
 '''
     def killed(command,args):
         if command!='account_remove':return original(command,args)
-        child=subprocess.run([sys.executable,'-c',source,str(tmp_path),json.dumps(args)],capture_output=True,timeout=12)
+        child=subprocess.run([sys.executable,'-c',source,str(tmp_path),json.dumps({k:v for k,v in args.items() if k!='_account_dispatch_guard'})],capture_output=True,timeout=12)
         children.append(child.returncode);assert child.returncode==74,child.stderr.decode()[:400]
         raise ConnectionError('owned original process died before completion receipt')
     monkeypatch.setattr(app.state.onboarding.control,'run',killed)

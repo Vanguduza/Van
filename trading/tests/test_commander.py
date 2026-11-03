@@ -361,3 +361,27 @@ def test_native_http_account_writer_requires_an_exact_resource_version(two_princ
     response=client.post('/v1/cmd/account_upsert',content=body,
         headers={**sign_headers(GATEWAY_TOKEN,'POST','/v1/cmd/account_upsert',body),'content-type':'application/json'})
     assert response.status_code==409,response.text
+
+
+def dispatch_admitted_gateway_test_body(root, args):
+    """Existing authenticated Commander ingress for real Gateway admissions.
+
+    Process-death fixtures cannot replace the Store's two proofs with a direct
+    handler lambda. This transports the already-admitted immutable Gateway DATA
+    using only the suite's existing controlled Commander authentication key.
+    """
+    import hashlib,json
+    from pathlib import Path
+    from commander.accounts import AccountControlSettings
+    root=Path(root);source=root/'disconnect-session.json'
+    settings=AccountControlSettings(str(root/'accounts.json'),str(root/'secrets'),
+        operation_ledger=str(root/'vati.sqlite'),
+        lifecycle_session_sources=((str(source),hashlib.sha256(source.read_bytes()).hexdigest()),))
+    app=create_app(CommanderSettings(tokens={'van-gateway':TOKEN},ledger=str(root/'vati.sqlite'),
+        heartbeat_dir=str(root/'hb'),log_dir=str(root/'log'),data_dir=str(root),runner=FakeRunner(),
+        accounts_registry=str(root/'accounts.json'),secrets_dir=str(root/'secrets'),account_control=settings))
+    path='/v1/cmd/account_remove';body=json.dumps({'args':args,'requested_by':'van-gateway'}).encode()
+    with TestClient(app) as client:
+        response=client.post(path,content=body,headers={**sign_headers(TOKEN,'POST',path,body),'Content-Type':'application/json'})
+        response.raise_for_status()
+        return response.json()['result']

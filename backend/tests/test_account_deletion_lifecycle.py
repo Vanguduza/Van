@@ -25,7 +25,9 @@ async def configure(client,tmp_path):
         'contract':{},'mandate':{},'capsules':['fx_trend_pullback-v1'],'registry_path':str(tmp_path/'accounts.json')}))
     settings=AccountControlSettings(registry_path=str(tmp_path/'accounts.json'),secrets_dir=str(tmp_path/'secrets'),
         operation_ledger=str(tmp_path/'vati.sqlite'),lifecycle_session_sources=((str(config),hashlib.sha256(config.read_bytes()).hexdigest()),))
+    app.state.onboarding.control.settings=settings
     app.state.onboarding.control.handlers=build_account_handlers(settings)
+    app.state.account_lifecycle.bind_local_admission_verifier()
     return ac,app,settings,config
 
 async def approved(ac,args,reauth_family="lifecycle"):
@@ -291,6 +293,17 @@ async def test_new_grace_original_uses_unchanged_genuine_pending_cleanup_child_t
     done=await ac.post('/v1/trading/accounts/action',json=cancel)
     assert done.json()['effect_state']=='APPLIED',done.text
     assert not AccountRegistry(tmp_path/'accounts.json').get('paper_owner').enabled
+    from backend.tests.test_account_update_review import immediate_challenge
+    new_body,_=await immediate_challenge(ac,'paper_owner')
+    fresh=await ac.post('/v1/trading/accounts/action',json=new_body)
+    assert fresh.status_code==200 and fresh.json()['effect_state']=='APPLIED',fresh.text
+    cold=AccountRegistry(tmp_path/'accounts.json')
+    assert cold._lifecycle_history[original]['phase']=='RELINK_REQUIRED'
+    with closing(Ledger(tmp_path/'vati.sqlite')) as led:
+        old=AccountEffectJournal(led).status(original,'test-device')
+        assert old.phase=='UNKNOWN' and old.result is None
+    read=await ac.get('/v1/trading/accounts/lifecycle/operations/'+original)
+    assert read.status_code==200 and read.json()['effect_state']=='UNKNOWN' and read.json()['native']['result'] is None
 
 @pytest.mark.asyncio
 async def test_full_context_guard_catches_native_strategy_scope_replacement_after_real_a4_admission(client,tmp_path,monkeypatch):
@@ -382,13 +395,14 @@ async def test_actual_catalog_exposes_both_legacy_and_typed_lifecycle_effect_con
     res=await ac.get('/v1/trading/accounts/catalog');assert res.status_code==200,res.text
     item=next(x for x in res.json()['actions'] if x['action']=='account_remove')
     variants=item['input_schema']['oneOf']
-    assert len(variants)==4 and variants[0]['not']=={'required':['variant']}
-    assert variants[1]['properties']['variant']['enum']==['PENDING_CLEANUP']
-    for variant in ('DELETE_GRACE','CANCEL_DELETE'):
+    assert len(variants)==4 and all('variant' in x['required'] for x in variants)
+    assert variants[0]['properties']['variant']['enum']==['PENDING_CLEANUP']
+    for variant in ('DELETE_GRACE','CANCEL_DELETE','IMMEDIATE_DISCONNECT'):
         schema=next(x for x in variants if x.get('properties',{}).get('variant',{}).get('const')==variant)
         assert schema['additionalProperties'] is False
         assert {'reauth_fact_id','reauth_fact_digest'}<=set(schema['required'])
         if variant=='DELETE_GRACE':assert {'grace_seconds','oauth_discard_digest'}<=set(schema['required'])
+        if variant=='IMMEDIATE_DISCONNECT':assert 'oauth_discard_digest' in schema['required'] and 'grace_seconds' not in schema['properties']
     refused=await ac.post('/v1/trading/accounts/challenge',json=body({'alias':'paper_owner','variant':'unrecognized-delete'}))
     assert refused.status_code==422 and AccountRegistry(tmp_path/'accounts.json').get('paper_owner')
 
@@ -599,3 +613,108 @@ async def test_actual_reservation_ack_loss_holds_without_plan_or_logical_identit
     with closing(Ledger(tmp_path/'vati.sqlite')) as led:
         final=AccountEffectJournal(led).status(identity,'test-device')
         assert final.phase=='UNKNOWN' and final.result is None and led.verify_chain()[0]
+
+
+@pytest.mark.asyncio
+async def test_immediate_disconnect_real_two_proofs_paper_metadata_and_original_readback(client,tmp_path):
+    ac,app,_,config=await configure(client,tmp_path)
+    raw={'alias':'paper_owner','variant':'IMMEDIATE_DISCONNECT'}
+    prepare=await ac.post('/v1/trading/accounts/lifecycle/prepare',json=body(raw))
+    assert prepare.status_code==200,prepare.text
+    assert set(prepare.json()['args'])=={'alias','variant','oauth_discard_digest'}
+    approved_body=await approved(ac,prepare.json()['args'])
+    response=await ac.post('/v1/trading/accounts/action',json=approved_body)
+    assert response.status_code==200,response.text
+    result=response.json();assert result['effect_state']=='APPLIED' and result['removed'] is True
+    assert result['remote_account_closed'] is False and result['historical_data_retained'] is True
+    assert result['retained_remote_funds'] is None and result['credential_cleanup']=='NONE'
+    cold=AccountRegistry(tmp_path/'accounts.json');row=cold._lifecycles['paper_owner']
+    assert row['phase']=='DISCONNECTED' and row['restore'] is None
+    assert row['grace_seconds'] is None and row['archive_at_unix'] is None
+    assert row['original_request']['variant']=='IMMEDIATE_DISCONNECT' and 'grace_seconds' not in row['original_request']
+    assert row['detached'] is True and 'paper_owner' not in cold.accounts
+    assert config.exists() and json.loads(config.read_text())['capsules']==['fx_trend_pullback-v1']
+    state=await ac.get('/v1/trading/accounts/lifecycle/records/paper_owner')
+    assert state.status_code==200,state.text
+    assert state.json()['variant']=='IMMEDIATE_DISCONNECT' and state.json()['phase']=='DISCONNECTED'
+    assert state.json()['grace_seconds'] is None and state.json()['archive_at_unix'] is None
+    assert (await ac.post('/v1/trading/accounts/action',json=approved_body)).json()==result
+    with closing(Ledger(tmp_path/'vati.sqlite')) as ledger:
+        from commander.account_effects import AccountEffectJournal
+        original=AccountEffectJournal(ledger).status(approved_body['approval_proof']['challenge_id'],'test-device')
+        assert original.phase=='APPLIED' and ledger.verify_chain()[0]
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize('extra',[{'grace_seconds':None},{'grace_seconds':0},{'grace_seconds':7},{'archive_at_unix':None}])
+async def test_immediate_disconnect_strict_no_grace_input(client,tmp_path,extra):
+    ac,_,_,_=await configure(client,tmp_path)
+    response=await ac.post('/v1/trading/accounts/lifecycle/prepare',json=body({'alias':'paper_owner','variant':'IMMEDIATE_DISCONNECT',**extra}))
+    assert response.status_code==422,response.text
+    cold=AccountRegistry(tmp_path/'accounts.json');assert 'paper_owner' in cold.accounts and not cold._lifecycles
+
+@pytest.mark.asyncio
+async def test_alias_only_one_proof_disconnect_is_typed_refusal(client,tmp_path):
+    ac,_,_,_=await configure(client,tmp_path)
+    response=await ac.post('/v1/trading/accounts/challenge',json=body({'alias':'paper_owner'}))
+    assert response.status_code==422 and 'IMMEDIATE_DISCONNECT' in response.text
+    assert 'paper_owner' in AccountRegistry(tmp_path/'accounts.json').accounts
+
+@pytest.mark.asyncio
+async def test_same_alias_new_generation_keeps_exact_lifecycle_history_and_old_controls(client,tmp_path,monkeypatch):
+    ac,app,_,_=await configure(client,tmp_path)
+    first=await deletion(ac,grace=600)
+    before=await ac.post('/v1/trading/accounts/action',json=first)
+    assert before.status_code==200 and before.json()['effect_state']=='APPLIED',before.text
+    old_id=first['approval_proof']['challenge_id']
+    old=AccountRegistry(tmp_path/'accounts.json')._lifecycles['paper_owner']
+    await paper(ac)
+    from backend.tests.test_account_update_review import immediate_challenge
+    next_body,_=await immediate_challenge(ac,'paper_owner')
+    second=await ac.post('/v1/trading/accounts/action',json=next_body)
+    assert second.status_code==200 and second.json()['effect_state']=='APPLIED',second.text
+    current=AccountRegistry(tmp_path/'accounts.json')
+    assert current._schema_version==3 and current._lifecycle_history[old_id]==old
+    assert current._lifecycles['paper_owner']['operation_id']==next_body['approval_proof']['challenge_id']
+    assert current._lifecycles['paper_owner']['incarnation']!=old['incarnation']
+    historical=await ac.get('/v1/trading/accounts/lifecycle/records/paper_owner/'+old_id)
+    assert historical.status_code==200 and historical.json()['operation_id']==old_id,historical.text
+    wrong_domain=await ac.get('/v1/trading/accounts/lifecycle/records/paper_owner/'+old_id,
+        headers={'X-Van-Account-Control-Domain':'0'*64})
+    assert wrong_domain.status_code==409 and 'LIFECYCLE_DOMAIN_CHANGED' in wrong_domain.text
+    stale=await ac.post('/v1/trading/accounts/lifecycle/reauth/challenge',json=body({'alias':'paper_owner','variant':'CANCEL_DELETE',
+        'lifecycle_id':old_id,'expected_revision':old['revision'],'expected_digest':historical.json()['record_digest']}))
+    assert stale.status_code==409 and 'newer account generation' in stale.text
+    replay=await ac.post('/v1/trading/accounts/action',json=first)
+    assert replay.json()==before.json()
+    assert AccountRegistry(tmp_path/'accounts.json')._lifecycle_history[old_id]==old
+
+    latest=current._lifecycles['paper_owner']
+    original_init=NativeLifecycle.__init__
+    def expired(self,*args,**kwargs):return original_init(self,*args,**kwargs,clock=lambda:old['archive_at_unix']+1)
+    monkeypatch.setattr(NativeLifecycle,'__init__',expired)
+    archived=await ac.get('/v1/trading/accounts/lifecycle/records/paper_owner/'+old_id)
+    assert archived.status_code==200 and archived.json()['phase']=='ARCHIVED',archived.text
+    cold=AccountRegistry(tmp_path/'accounts.json')
+    assert cold._lifecycles['paper_owner']==latest
+    assert cold._lifecycle_history[old_id]['restore'] is None and cold._lifecycle_history[old_id]['session_sources']==[]
+    original=await ac.get('/v1/trading/accounts/lifecycle/operations/'+old_id)
+    assert original.status_code==200 and original.json()['native']['result']['lifecycle']['phase']=='PENDING_ARCHIVE'
+
+
+@pytest.mark.asyncio
+async def test_original_sealed_restore_metadata_tamper_refuses_before_cancel_observer(client,tmp_path,monkeypatch):
+    ac,_,_,_=await configure(client,tmp_path)
+    signed=await deletion(ac)
+    applied=await ac.post('/v1/trading/accounts/action',json=signed)
+    assert applied.status_code==200 and applied.json()['effect_state']=='APPLIED',applied.text
+    path=tmp_path/'accounts.json';value=json.loads(path.read_text())
+    row=value['account_lifecycles']['paper_owner'];row['restore']['notes']='tampered nonsecret metadata'
+    path.write_text(json.dumps(value))
+    observed=[]
+    def forbidden(*args):observed.append(True);raise AssertionError('unverified restore reached broker observer')
+    monkeypatch.setattr(NativeLifecycle,'remote_state',forbidden)
+    from vati.core.canonical import canonical_hash
+    response=await ac.post('/v1/trading/accounts/lifecycle/reauth/challenge',json=body({'alias':'paper_owner','variant':'CANCEL_DELETE',
+        'lifecycle_id':signed['approval_proof']['challenge_id'],'expected_revision':row['revision'],'expected_digest':canonical_hash(row)}))
+    assert response.status_code==409 and 'requires reconciliation' in response.text,response.text
+    assert not observed and AccountRegistry(path)._lifecycles['paper_owner']['restore']['notes']=='tampered nonsecret metadata'

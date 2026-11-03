@@ -205,3 +205,48 @@ def test_actual_service_parser_consumes_exact_hashed_bytes_not_a_second_source_r
     assert strategies==['a-v1'] and sources[0]['sha256']==hashlib.sha256(original).hexdigest()
     with pytest.raises(HTTPException,match='configuration changed'):
         selected_sessions(st,AccountRegistry(st.registry_path).get('paper_owner'))
+
+@pytest.mark.parametrize('forged',['dict','callback','transport_label','constructed_marker'])
+def test_immediate_direct_helper_cannot_mint_gateway_authority(forged):
+    from commander.account_lifecycle import _GatewayLifecycleAdmission
+    service=NativeLifecycle.__new__(NativeLifecycle)
+    service.st=NS(lifecycle_admission_verifier=None,lifecycle_transport_binding=None)
+    args={'variant':'IMMEDIATE_DISCONNECT','_lifecycle_admission':{'label':'not an owner proof'}}
+    if forged=='dict':args['_lifecycle_admission_guard']={'approved':True}
+    elif forged=='callback':args['_lifecycle_admission_guard']=lambda:None
+    elif forged=='transport_label':args['_lifecycle_admission_guard']='van-gateway'
+    else:args['_lifecycle_admission_guard']=_GatewayLifecycleAdmission(args['_lifecycle_admission'],lambda:None,object())
+    with pytest.raises(HTTPException,match='two-proof attestation required'):
+        service.require_admission(args)
+
+@pytest.mark.parametrize('corruption',['grace','deadline','phase','request','null_request'])
+def test_immediate_lifecycle_data_corruption_holds_in_memory(corruption):
+    from vati.accounts.lifecycle import validate_records
+    row={'schema':'vati.account-lifecycle/1','alias':'paper_owner','operation_id':'controlled_original_00001','device_id':'source-device',
+        'account_control_domain':'1'*64,'incarnation':'2'*64,'revision':2,'phase':'DISCONNECTED','created_at_unix':10,
+        'archive_at_unix':None,'grace_seconds':None,'restore':None,'strategies':['a-v1'],'session_sources':[],
+        'history_ref':'3'*64,'credential_disposition':'NONE','unlink_ref':'4'*64,'oauth_discard_ref':'5'*64,
+        'original_request':{'alias':'paper_owner','variant':'IMMEDIATE_DISCONNECT','oauth_discard_digest':'5'*64},
+        'detached':True,'link_intent':'RELINK_REQUIRED','remote_account_closed':False}
+    assert validate_records({'paper_owner':row})['paper_owner']['phase']=='DISCONNECTED'
+    if corruption=='grace':row['grace_seconds']=7
+    elif corruption=='deadline':row['archive_at_unix']=17
+    elif corruption=='phase':row['phase']='PENDING_ARCHIVE'
+    elif corruption=='request':row['original_request']['grace_seconds']=None
+    else:row['original_request']=None
+    with pytest.raises(ValueError,match='HOLD'):validate_records({'paper_owner':row})
+
+
+@pytest.mark.parametrize('waits',[1,2,3])
+def test_final_source_binding_follows_all_current_authority_waits_in_memory(waits):
+    from commander.account_lifecycle import _check_source_after_waits
+    state={'source':0,'effects':0};events=[]
+    def authority():
+        events.append('authority');state['source']+=1
+    def source():
+        events.append('source')
+        if state['source']!=0:raise HTTPException(409,'ordinary metadata source changed while authority waited')
+    def final_effect():state['effects']+=1
+    with pytest.raises(HTTPException,match='source changed'):
+        _check_source_after_waits([authority]*waits,source,final_effect)
+    assert events==['authority']*waits+['source'] and state['effects']==0

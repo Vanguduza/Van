@@ -573,6 +573,7 @@ def build(read=None):
                         ('POST', '/v1/trading/accounts/lifecycle/reauth/challenge'),
                         ('POST', '/v1/trading/accounts/lifecycle/reauth/verify'),
                         ('GET', '/v1/trading/accounts/lifecycle/records/{alias}'),
+                        ('GET', '/v1/trading/accounts/lifecycle/records/{alias}/{lifecycle_id}'),
                         ('GET', '/v1/trading/accounts/lifecycle/operations/{operation_id}')}
     for endpoint in endpoint_doc['endpoints']:
         if (endpoint['method'], endpoint['path']) not in lifecycle_routes:
