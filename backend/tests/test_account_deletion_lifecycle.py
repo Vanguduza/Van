@@ -488,6 +488,10 @@ async def test_actual_pre_registry_crash_child_cannot_drop_original_detachment(c
     from vati.accounts.registry import AccountRegistryError
     before=AccountRegistry(tmp_path/'accounts.json')
     if not managed:
+        assert before.get(alias).mode=='OBSERVE'
+        # Prior independent mode admission is fixture metadata. The healthy
+        # sending control must reach the detachment fence, not read-only mode.
+        before.replace(replace(before.get(alias),mode='DEMO_TRADER',mandate_ref='existing-admitted-PAPER-fixture'))
         with entry_fence(before,before.get(alias)):pass # Healthy sending-mode PAPER source control.
     else:
         assert before.get(alias).mode=='OBSERVE' # Managed retirement fixture is deliberately read-only.
@@ -539,12 +543,18 @@ async def test_actual_pre_registry_crash_child_cannot_drop_original_detachment(c
     state=await ac.get('/v1/trading/accounts/lifecycle/records/'+alias)
     # A new A4-approved record is deliberately not strategy reassignment.
     from backend.tests.test_trading_oauth_scope import act
-    reused=await act(ac,'account_upsert',{'alias':alias,'broker':'PAPER','mode':'DEMO_TRADER'})
+    reused=await act(ac,'account_upsert',{'alias':alias,'broker':'PAPER'})
     assert reused.status_code==200,reused.text
+    cold=AccountRegistry(tmp_path/'accounts.json')
+    assert cold.get(alias).mode=='OBSERVE'
+    # Separately admitted sending metadata isolates the persistent detachment
+    # obligation from the independent new-account read-only restriction.
+    cold.replace(replace(cold.get(alias),mode='DEMO_TRADER',mandate_ref='existing-admitted-PAPER-fixture'))
     cold=AccountRegistry(tmp_path/'accounts.json');permitted=False
     try:
         with entry_fence(cold,cold.get(alias)):permitted=True
-    except AccountRegistryError:pass
+    except AccountRegistryError as exc:
+        assert 'Account incarnation is detached' in str(exc)
     with closing(Ledger(tmp_path/'vati.sqlite')) as led:
         parent=AccountEffectJournal(led).status(identity,'test-device')
         assert parent.phase=='UNKNOWN' and parent.result is None and led.verify_chain()[0]

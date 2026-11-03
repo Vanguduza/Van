@@ -61,7 +61,8 @@ def outcome(h,args):
 def test_healthy_original_is_independently_verified_and_never_creates_again(tmp_path):
     peer=DemoPeer(); h=handlers(tmp_path,peer); args=prepare(h)
     first=h['deriv_create_demo'](args)
-    assert first['account']['broker']=='DERIV' and first['account']['safety_identity']=='DEMO'
+    assert first['account']['broker']=='DERIV' and first['account']['safety_identity']=='READ ONLY'
+    assert first['account']['mode']=='OBSERVE' and first['account']['demo'] is True
     assert peer.creates==1 and peer.auths==2 and peer.closed>=3
     assert AccountRegistry(tmp_path/'accounts.json').get('demo_owner').login=='VRTC900'
     cold=handlers(tmp_path,peer)

@@ -10,11 +10,17 @@ from vati.accounts import AccountRegistry
 from test_deriv_native_identity import Socket, native
 
 
-def handlers(tmp_path,profile):
+def handlers(tmp_path,profile,*,admitted_mode='DEMO_TRADER'):
     def connector(url):
         return Socket(profile)
     controls=build_account_handlers(AccountControlSettings(str(tmp_path/'accounts.json'),str(tmp_path/'secrets'),deriv_connector=connector))
     controls['account_upsert']({'alias':'deriv_demo','broker':'DERIV','login':'VRTC900'})
+    registry=AccountRegistry(tmp_path/'accounts.json');created=registry.get('deriv_demo')
+    assert created.mode=='OBSERVE'
+    # Fixture metadata represents a previously admitted account, not initial
+    # mode permission or a new production activation authority.
+    if admitted_mode!='OBSERVE':
+        registry.replace(replace(created,mode=admitted_mode,mandate_ref='existing-admitted-fixture'))
     path=tmp_path/'secrets'/'deriv_demo.env'
     path.write_text('DERIV_API_TOKEN=fixture-old\nDERIV_APP_ID=1089\n');path.chmod(0o600)
     return controls,path
@@ -65,6 +71,14 @@ def test_read_only_oauth_token_retains_a_real_observe_link(tmp_path):
     assert account['safety_identity']=='READ ONLY'
     assert 'fixture-readonly' not in json.dumps(result)
     assert AccountRegistry(tmp_path/'accounts.json').credentials('observe_link')['DERIV_API_TOKEN']=='fixture-readonly'
+
+
+def test_read_only_rotation_of_an_observe_account_retains_its_read_only_mode(tmp_path):
+    controls,path=handlers(tmp_path,native(scopes=['read']),admitted_mode='OBSERVE')
+    result=controls['account_credentials']({'alias':'deriv_demo','secrets':{'DERIV_API_TOKEN':'fixture-readonly'}})
+    assert result=={'alias':'deriv_demo','stored_keys':['DERIV_API_TOKEN']}
+    assert AccountRegistry(tmp_path/'accounts.json').get('deriv_demo').mode=='OBSERVE'
+    assert 'DERIV_API_TOKEN=fixture-readonly' in path.read_text()
 
 
 def test_demo_alias_collision_is_checked_before_the_remote_creation_request(tmp_path):

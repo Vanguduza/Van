@@ -1,0 +1,56 @@
+{
+  "schema": "van.new-account-observe-fixtures-source/1",
+  "created_utc": "2026-11-03T09:43:03.077078+00:00",
+  "base": "1198dc11c54e2d3a085bb050085b62f9c3bf725f",
+  "remote_parent": "29b931f172316a833d572ee338e05519bbe6a7e5",
+  "qualification": "SOURCE_CANDIDATE_ONLY",
+  "actual_trigger": {
+    "head": "29b931f172316a833d572ee338e05519bbe6a7e5",
+    "run": 41609149775,
+    "attempt": 1,
+    "postgres_job": 125826367907,
+    "trading": "3FAIL5906PASS1declaredSKIP0errors",
+    "gateway_job": 125826367710,
+    "gateway_mirror": 125826367727,
+    "gateway": "3FAIL1707PASS7SKIP4587deselected; mirror duplicates same3cases",
+    "artifact_id": 13218468853,
+    "artifact_sha256": "44df959cadb55b700256676fbc913d19796ed19759e881ba33c5ec168030a0b5",
+    "crc": "PASS"
+  },
+  "actual_corrections": [
+    "Healthy Deriv creation/recovery now expects initial OBSERVE/READ ONLY with native demo identity, original create count/replay/sealed history/privacy assertions retained.",
+    "Credential rotation refusal fixture explicitly represents a previously admitted DEMO_TRADER account; require_trade still derives from real account mode. Fresh OBSERVE remains read-only and accepts verified read-only material; separate positive added, locally unexecuted. No production guard changed.",
+    "CLI service-positive fixture first asserts fresh OBSERVE, then separately seeds previously admitted PAPER mode for its original service/mandate positive. Separate PAPER-only test proves a fresh OBSERVE account cannot inherit a sending mandate.",
+    "Original PAPER crash windows explicitly seed prior admitted sending mode for healthy entry control. Fresh A4-approved same-alias creation omits mode and asserts OBSERVE; separate admitted sending fixture isolates the persistent detachment fence and checks its named refusal, preserving original UNKNOWN/null/child/history assertions."
+  ],
+  "local_evidence": {
+    "safe3": "3PASS0skip exit0 at2026-11-03T09:39:55Z; two managedFalse PAPER crash windows plus new CLI policy counterpart; real enrolled proof flow, metadata only.",
+    "native_credential_or_managed": "NOT_RUN locally; original ordinary hosted cases remain for exact qualification. No banned key-lock/credential-destruction probe.",
+    "verifier134_reuse": "Actual real-Git134PASS0skip on1198 verifier inputs. Canonical verifier/test code, copied synthetic collector dependencies, workflow/contracts/AGP reference inputs unchanged by these four fixture edits. Qualified source-predicate reuse, not identical hashes for the whole application tree or a new full-source qualification.",
+    "runner_sha256": "860336803885aa36cff080294bf1144a0009b4b09a72ee9454d875863142d7f4",
+    "last_allocation_bytes": 249855128,
+    "aggregate_cap_bytes": 268435456
+  },
+  "preserved_unpublished_verifier": {
+    "head": "1198dc11c54e2d3a085bb050085b62f9c3bf725f",
+    "normal_guards": "PASS before committed baseline",
+    "final4fd": "INTERRUPTED_NOT_QUALIFIED after detecting new29 source failures; ownedgroupSIGSTOP thenSIGTERM/SIGCONT, waited/reaped exit-15; no source mutation while paused, no push/reset/amend.",
+    "resource_peak": "Terminal HWM UNKNOWN; last persisted sample separately retained, not retroactive compliance.",
+    "successor": "Preserve1198 and create normal corrective successor; genuine full finalHEAD baseline verification required before pushing both commits normally."
+  },
+  "process_correction": {
+    "missed_assumptions": "Production creator inventory missed test-helper descendants relying on implicit sending mode, recovery safety labels and CLI service mandate configuration.",
+    "static_audit": "107 producer functions and33 downstream sending/entry functions across backend/trading tests inventoried; high-risk helper/consumer flows inspected. Static literal audit is not complete dynamic coverage.",
+    "rule": "Before default/schema freeze enumerate creation callers AND downstream configuration/credential/recovery/entry assertions; distinguish intended new-account semantics from existing admitted fixtures. Preserve old positive/refusal/unknown/history boundaries.",
+    "snapshot_loss": "Secondary CURRENT_COMPLETE.json overwrote09:23pending snapshot e5e7b9b... with09:34a859eb43...; old status/hash message retained, no exact-byte recovery claim. This was pending metadata, not passing qualification or authority. Future timestamp/run/attempt receipts use exclusive filenames; CURRENT is a mutable pointer only."
+  },
+  "limits": {
+    "production": "No runtime, authority, mandate, crypto, provider or workflow change.",
+    "whole_unit": "BE004 OPEN all8verbs/11requirements/21acceptances/20contexts/6actions; CEX001/002/013/RV008 genuine eligible/versioned spot/matching/settlement/protection/recovery gates remain.0formalnativeacceptance.",
+    "protected": "Entry67/privateDDS/publicworker/matrix qualification gates remain unwaived.",
+    "next": "Restriction lifecycle only after corrective publication/qualification; preserve RESTRICTED reason, who/when/why, REAUTH_PENDING, protective exits and existing mode/mandate/reauth owners."
+  },
+  "final_guards": "Actual normal owner/frontend/workmap checks, identity/dependency preservation, mutation consistency only, consolidation and final PRE003 build/check; genuine hooks and complete finalHEAD4fd before normalpush/exactreadback. External receipts record actual outcomes.",
+  "model_usage": null,
+  "cost": null
+}

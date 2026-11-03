@@ -7,6 +7,7 @@ import socket
 import ssl
 import subprocess
 import threading
+from dataclasses import replace
 from datetime import datetime, timezone
 from decimal import Decimal
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -347,6 +348,8 @@ def test_cli_accounts_lake_calendar_serve(tmp_path, eurusd, capsys):
     from vati.__main__ import main
     reg = str(tmp_path / "accounts.json")
     assert main(["accounts", "add", "--registry", reg, "--alias", "paper_lab", "--broker", "PAPER"]) == 0
+    registry=AccountRegistry(reg);created=registry.get('paper_lab')
+    assert created.mode=='OBSERVE'
     assert main(["accounts", "add", "--registry", reg, "--alias", "deriv_demo", "--broker", "DERIV", "--server", "1089", "--env-var", "DERIV_TOKEN_DEMO"]) == 0
     assert main(["accounts", "verify", "--registry", reg, "--alias", "deriv_demo"]) == 1          # env var not set → MISSING, exit 1
     os.environ["DERIV_TOKEN_DEMO"] = "t0k"
@@ -362,9 +365,24 @@ def test_cli_accounts_lake_calendar_serve(tmp_path, eurusd, capsys):
     assert main(["lake", "list", "--root", str(tmp_path / "lake")]) == 0
     cal = tmp_path / "cal.json"; cal.write_text(json.dumps({"events": [{"name": "NFP", "release": "2099-01-08T13:30:00Z", "currencies": "USD", "source": "a"}]}))
     assert main(["calendar", "--file", str(cal)]) == 0
+    # This service-positive fixture represents prior separate mode admission;
+    # account creation itself never grants sending authority.
+    registry.replace(replace(created,mode='DEMO_TRADER',mandate_ref='existing-admitted-PAPER-fixture'))
     cfg = {"account_alias": "paper_lab", "symbol": "EURUSD", "base": "EUR", "quote": "USD", "timeframe": "H1", "contract": contract_to_dict(eurusd),
            "mandate": mandate_dict(venue="paper", mode="DEMO_TRADER", account_alias="paper_lab", allowed_strategies=["FX-TREND-PULLBACK-01"]), "capsules": ["FX-TREND-PULLBACK-01"], "registry_path": reg,
            "ledger": str(tmp_path / "l.sqlite"), "lake_root": str(tmp_path / "lake"), "heartbeat_path": str(tmp_path / "hb.json")}
     (tmp_path / "svc.json").write_text(json.dumps(cfg))
     assert main(["serve", "--config", str(tmp_path / "svc.json"), "--once"]) == 0
     assert json.loads((tmp_path / "hb.json").read_text())["status"] in ("RUNNING", "NO_DATA", "WAITING_FOR_BAR")
+
+
+def test_cli_new_paper_account_does_not_inherit_a_sending_mandate(tmp_path):
+    from vati.__main__ import main
+    from vati.accounts.access import AccountModeAuthorityError, validate_mode
+    path=tmp_path/'paper-only.json'
+    assert main(['accounts','add','--registry',str(path),'--alias','paper_owner','--broker','PAPER'])==0
+    account=AccountRegistry(path).get('paper_owner')
+    assert account.mode=='OBSERVE'
+    with pytest.raises(AccountModeAuthorityError,match='mandate exceeds the configured account mode'):
+        validate_mode(account,'DEMO_TRADER')
+    validate_mode(account,'OBSERVE')
