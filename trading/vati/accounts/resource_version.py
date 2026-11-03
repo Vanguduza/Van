@@ -25,6 +25,8 @@ def resource_snapshot(registry: AccountRegistry, alias: str) -> dict:
         body = {"schema": "vati.account-resource/1", "alias": alias,
                 "revision": revision, "account": asdict(account) if account else None,
                 "credential_file_generation": credential_generation}
+        if alias in current._restrictions:
+            body['restriction_digest']=canonical_hash(current._restrictions[alias])
         return {"schema": "vati.account-resource/1", "alias": alias,
                 "state": "REGISTERED" if account else "ABSENT",
                 "revision": revision, "resource_version": canonical_hash(body)}

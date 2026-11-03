@@ -3880,6 +3880,9 @@ def create_app() -> FastAPI:
     from van_gateway.trading.account_lifecycle_api import AccountLifecycle,build_lifecycle_router
     app.state.account_lifecycle=AccountLifecycle(store,onboarding,_authenticate_account_action,authorize_account_cleanup)
     app.include_router(build_lifecycle_router(app.state.account_lifecycle))
+    from van_gateway.trading.account_restrictions import AccountRestriction,build_restriction_router
+    app.state.account_restriction=AccountRestriction(store,onboarding,_authenticate_account_action,authorize_account_cleanup)
+    app.include_router(build_restriction_router(app.state.account_restriction))
 
     def cleanup_failure(error):
         return JSONResponse(status_code=error.status,content={'detail':{'code':error.code,
@@ -3945,7 +3948,7 @@ def create_app() -> FastAPI:
         domain=await asyncio.to_thread(onboarding.control.domain)
         return {'schema':'van.account-actions/1','account_control_domain':domain,
             'actions':[{'action':action,'requires_owner_approval':requires_owner_approval(action),
-                'requires_resolved_review':action in {'account_upsert','account_remove'},
+                'requires_resolved_review':action in {'account_upsert','account_remove','account_restrict'},
                 'supports_original_operation_readback':action in JOURNALED_COMMANDS,
                 'input_schema':schemas[action]} for action in ACCOUNT_ACTIONS],
             'credential_keys_by_broker':{key:sorted(value) for key,value in BROKER_SECRET_KEYS.items()}}
@@ -3959,6 +3962,8 @@ def create_app() -> FastAPI:
         key", and approving one set of credentials does not approve a different set.
         """
         await _authenticate_account_action(request, req)
+        if req.action=='account_restrict':
+            raise HTTPException(422,{'code':'RESTRICTION_PURPOSE_ROUTE_REQUIRED'})
         if req.action=='account_remove' and req.args.get('variant')=='PENDING_CLEANUP':
             try:return await app.state.account_cleanup.challenge(request,req)
             except ReauthError as error:return cleanup_failure(error)
@@ -4025,6 +4030,8 @@ def create_app() -> FastAPI:
     @app.post("/v1/trading/accounts/action", responses={409:{"model":AccountActionConflictResponse}})
     async def trading_account_action(request: Request, req: AccountActionRequest):
         await _authenticate_account_action(request, req)
+        if req.action=='account_restrict':
+            raise HTTPException(422,{'code':'RESTRICTION_PURPOSE_ROUTE_REQUIRED'})
         if req.action=='account_remove' and req.args.get('variant')=='PENDING_CLEANUP':
             try:return await app.state.account_cleanup.action(request,req)
             except ReauthError as error:return cleanup_failure(error)

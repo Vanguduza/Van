@@ -91,10 +91,10 @@
   },
   "checkpoint": {
     "acceptance_issued": false,
-    "active_packet": "BROKER_DIRECTORY_RECOVERED_SOURCE_CANDIDATE_7PASS_FINAL_CHECKS_PENDING",
+    "active_packet": "BE004_RESTRICTION_SOURCE_BOUNDED_CANDIDATE_FINAL_GUARDS_PENDING",
     "agent_assignments_ref": "delegation.active_assignments",
     "branch": "ccr-9e07e1af-8mgz1p",
-    "committed_ledger_verification": "076404a GREEN246 terminal before normal push; directory successor not yet committed or verified",
+    "committed_ledger_verification": "6aa631 GREEN247 terminal before normalpush; current candidate not committed or verified",
     "continuation_history": [
       {
         "acceptance_issued": false,
@@ -203,7 +203,6 @@
       },
       {
         "captured_at_utc": "2026-11-03T11:51:42.172286+00:00",
-        "reason": "Preserve complete prior cursor before directory candidate",
         "prior_full_cursor": {
           "acceptance_issued": false,
           "active_packet": "SOURCE_IMPLEMENTED_WITH_BOUNDED_STATIC_IN_MEMORY_VALIDATION;14current safe-memorychecks; postR5 feature/native/provider/integration UNEXECUTED_OPEN",
@@ -1222,13 +1221,78 @@
           "source_ci_receipt": "receipts/raw/account-cleanup-recovery-source-20261102/CI_PARENT_SOURCE_STATUS.json",
           "updated_utc": "2026-11-02T14:08:06.907570+00:00"
         },
-        "prior_top_level_current_action": "Published29b OBSERVE source has six actual failing consumer assumptions. Preserve unpublished verifier1198 and its134 source-pinned passes; interrupted final4fd remains NOT_QUALIFIED. Correct four test fixtures while preserving initial OBSERVE and separately admitted sending controls, then independent review/genuine full finalHEAD verification/normal publication. Restriction successor remains unstarted pending this corrective qualification; full BE004/native/provider/CEX gates OPEN."
+        "prior_top_level_current_action": "Published29b OBSERVE source has six actual failing consumer assumptions. Preserve unpublished verifier1198 and its134 source-pinned passes; interrupted final4fd remains NOT_QUALIFIED. Correct four test fixtures while preserving initial OBSERVE and separately admitted sending controls, then independent review/genuine full finalHEAD verification/normal publication. Restriction successor remains unstarted pending this corrective qualification; full BE004/native/provider/CEX gates OPEN.",
+        "reason": "Preserve complete prior cursor before directory candidate"
+      },
+      {
+        "active_packet": "BROKER_DIRECTORY_RECOVERED_SOURCE_CANDIDATE_7PASS_FINAL_CHECKS_PENDING",
+        "captured_at_utc": "2026-11-03T16:47:42.320592+00:00",
+        "current_action": "Published 076404a/GREEN246; recovered standalone read-only broker directory source candidate has current 7-case source PASS and awaits normal generation, topology checks, final packet review and integration. Restriction foundation remains isolated WIP; native/Gateway restriction workflow is UNIMPLEMENTED. All BE004/provider/CEX/native gates remain OPEN.",
+        "head": "076404a755dc0ccc91d5062a8448638ba0fc9877",
+        "meaning": "Superseded current cursor; historical packet values are not current assignment."
+      },
+      {
+        "captured_at_utc": "2026-11-03T16:53:53.819869+00:00",
+        "meaning": "Exact superseded current scalar cursor fields retained before final-review reconciliation; initial frozen handoff remains preserved.",
+        "superseded_cursor_fields": {
+          "checkpoint": {
+            "acceptance_issued": false,
+            "active_packet": "BE004_RESTRICTION_SOURCE_BOUNDED_CANDIDATE_FINAL_GUARDS_PENDING",
+            "agent_assignments_ref": "delegation.active_assignments",
+            "branch": "ccr-9e07e1af-8mgz1p",
+            "committed_ledger_verification": "6aa631 GREEN247 terminal before normalpush; current candidate not committed or verified",
+            "current_action": "Last verified published BASE6aa631/GREEN247; exactCI terminal41jobs32success9failure with protected/prerequisite/matrix gaps retained. Restriction Native/Gateway R/P/LRO and causal metadata owner source candidate has final21 safe passes and separate20DATA/22journal/8identity component evidence. Exact peer review/main guards/commit/full4fd/publication pending; unsupported native-family positive owners, Android, activation and wholeBE004 OPEN. No formal/native/provider acceptance.",
+            "current_packet": "BE004_BROKER_DIRECTORY_SOURCE",
+            "current_source_receipt": "receipts/ACCOUNT_RESTRICTION_SOURCE_20261103.json",
+            "head": "6aa631c582979c94c74e7b078cee18be3dbbc301",
+            "head_meaning": "LAST_VERIFIED_PUBLISHED_BASE_NOT_FUTURE_CANDIDATE_COMMIT",
+            "intake_PR106": "OPEN_READY_UNMERGED_PROPOSAL_NOT_USED",
+            "last_verified_published_base": "076404a755dc0ccc91d5062a8448638ba0fc9877",
+            "next_action": "Finish exact peer review; actual-main normal guards/topology/PRE003 LAST; genuine hooks/fullcommitted4fd/normalpush/exactCI; then earliest dependency-ready original source obligation.",
+            "publication_note": "076404a is the last published and committed-baseline-verified base; directory is an uncommitted candidate and no future head is asserted.",
+            "published_head": "076404a755dc0ccc91d5062a8448638ba0fc9877",
+            "source_ci_receipt": "/workspace/van-delivery-continuation-20261103/CI_076_TERMINAL_20261103/ROOT_MATRIX_QUALIFICATION.json",
+            "updated_utc": "2026-11-03T11:51:42.172286+00:00",
+            "verified_base": "6aa631c582979c94c74e7b078cee18be3dbbc301"
+          },
+          "continuation": {
+            "acceptance_issued": false,
+            "active_packet": "BE004_RESTRICTION_SOURCE_BOUNDED_CANDIDATE_FINAL_GUARDS_PENDING",
+            "application_rebuild_started": true,
+            "committed_ledger_verification": "6aa631 GREEN247 terminal before normalpush; current candidate not committed or verified",
+            "current_action": "Last verified published BASE6aa631/GREEN247; exactCI terminal41jobs32success9failure with protected/prerequisite/matrix gaps retained. Restriction Native/Gateway R/P/LRO and causal metadata owner source candidate has final21 safe passes and separate20DATA/22journal/8identity component evidence. Exact peer review/main guards/commit/full4fd/publication pending; unsupported native-family positive owners, Android, activation and wholeBE004 OPEN. No formal/native/provider acceptance.",
+            "current_packet": "BE004_RESTRICTION_EXISTING_OWNER_SOURCE",
+            "current_source_receipt": "receipts/ACCOUNT_RESTRICTION_SOURCE_20261103.json",
+            "head": "6aa631c582979c94c74e7b078cee18be3dbbc301",
+            "head_meaning": "LAST_VERIFIED_PUBLISHED_BASE_NOT_FUTURE_CANDIDATE_COMMIT",
+            "historical_progress_record_semantics": "Dated cleanup_successor, disconnect_ci_repair_20261103, disconnect_fresh_ownership_20261103, disconnect_namespace_20261103, immediate_disconnect_20261103, old_CI_terminal and published56_CI_terminal are retained historical observations, not current qualification or next-action cursors. Current state is in this continuation cursor and the dated source receipts.",
+            "historical_subpacket_fields_are_history_only": true,
+            "hosted_result": "/workspace/van-delivery-continuation-20261103/CI_6AA_TERMINAL_20261103/",
+            "last_verified_published_base": "076404a755dc0ccc91d5062a8448638ba0fc9877",
+            "latest_checkpoint_report": "docs/rebuild/rev118/CONTINUATION_20261022.md",
+            "lead": "Codex",
+            "mutation_reconciliation": "ci/MUTATION_RECONCILIATION.md and ci/MUTATION_RECONCILIATION_MAPPING.json",
+            "next_action": "Finish exact peer review; actual-main normal guards/topology/PRE003 LAST; genuine hooks/fullcommitted4fd/normalpush/exactCI; then earliest dependency-ready original source obligation.",
+            "owner_instruction": "opus is nolonger available finish building from the current state to completion",
+            "pr": 105,
+            "published_head": "076404a755dc0ccc91d5062a8448638ba0fc9877",
+            "qualification_scope": "076 committed baseline GREEN246; exact-head hosted run has 41 jobs, 32 success and 9 failure; canonical matrix remains BLOCKED_INCOMPLETE_QUALIFICATION. Directory local source7 pass; topology, normal generators and final committed baseline pending. No complete provider/native/unit acceptance.",
+            "report": "docs/rebuild/rev118/CONTINUATION_20261022.md",
+            "source_ci_receipt": "/workspace/van-delivery-continuation-20261103/CI_076_TERMINAL_20261103/ROOT_MATRIX_QUALIFICATION.json",
+            "source_qualification_run": 41614715981,
+            "updated_utc": "2026-11-03T11:51:42.172286+00:00",
+            "verified_base": "6aa631c582979c94c74e7b078cee18be3dbbc301",
+            "verified_source_head": "076404a755dc0ccc91d5062a8448638ba0fc9877"
+          }
+        }
       }
     ],
+    "current_action": "Last verified published BASE6aa631/GREEN247; exactCI terminal41jobs32success9failure with protected/prerequisite/matrix gaps retained. Restriction Native/Gateway R/P/LRO and causal metadata owner source candidate has final21 safe passes and separate20DATA/22journal/8identity component evidence. Exact peer review/main guards/commit/full4fd/publication pending; unsupported native-family positive owners, Android, activation and wholeBE004 OPEN. No formal/native/provider acceptance.",
     "current_background_jobs": [],
-    "current_packet": "BE004_BROKER_DIRECTORY_SOURCE",
-    "current_source_receipt": "receipts/BROKER_DIRECTORY_SOURCE_20261103.json",
-    "head": "076404a755dc0ccc91d5062a8448638ba0fc9877",
+    "current_packet": "BE004_RESTRICTION_EXISTING_OWNER_SOURCE",
+    "current_source_receipt": "receipts/ACCOUNT_RESTRICTION_SOURCE_20261103.json",
+    "head": "6aa631c582979c94c74e7b078cee18be3dbbc301",
+    "head_meaning": "LAST_VERIFIED_PUBLISHED_BASE_NOT_FUTURE_CANDIDATE_COMMIT",
     "historical_before_20261101": {
       "active_packet": "BE-009 exact arithmetic source locally qualified; genuine hook/publication pending; then original position projections and shared financial risk.",
       "background_jobs": [],
@@ -2230,20 +2294,24 @@
       }
     ],
     "intake_PR106": "OPEN_READY_UNMERGED_PROPOSAL_NOT_USED",
-    "last_verified_published_base": "076404a755dc0ccc91d5062a8448638ba0fc9877",
-    "next_action": "Finalize the recovered broker directory candidate through independent final review, topology/normal generators and complete final-head committed baseline, then pursue separately leased restriction native/Gateway controls. BE004/provider/CEX/native acceptance remains open.",
-    "publication_note": "076404a is the last published and committed-baseline-verified base; directory is an uncommitted candidate and no future head is asserted.",
-    "published_head": "076404a755dc0ccc91d5062a8448638ba0fc9877",
-    "source_ci_receipt": "/workspace/van-delivery-continuation-20261103/CI_076_TERMINAL_20261103/ROOT_MATRIX_QUALIFICATION.json",
-    "updated_utc": "2026-11-03T11:51:42.172286+00:00",
-    "current_action": "Published 076404a/GREEN246; recovered standalone read-only broker directory source candidate has current 7-case source PASS and awaits normal generation, topology checks, final packet review and integration. Restriction foundation remains isolated WIP; native/Gateway restriction workflow is UNIMPLEMENTED. All BE004/provider/CEX/native gates remain OPEN."
+    "last_verified_published_base": "6aa631c582979c94c74e7b078cee18be3dbbc301",
+    "next_action": "Finish exact peer review; actual-main normal guards/topology/PRE003 LAST; genuine hooks/fullcommitted4fd/normalpush/exactCI; then earliest dependency-ready original source obligation.",
+    "publication_note": "6aa631 is the last actual published and committed-baseline-verified base/GREEN247; restriction is a source candidate, no future candidate head is asserted.",
+    "published_head": "6aa631c582979c94c74e7b078cee18be3dbbc301",
+    "qualification_scope": "6aa631 committed GREEN247 and exact hosted terminal41jobs32success9failure; matrix16verified6blocked no certificates. Current restriction source21safe plus separate component evidence; actual-main/finalcommitted guards and new exact-head CI remain pending. No provider/native/unit acceptance.",
+    "source_ci_receipt": "/workspace/van-delivery-continuation-20261103/CI_6AA_TERMINAL_20261103/",
+    "source_qualification_run": 41648747325,
+    "updated_utc": "2026-11-03T16:53:53.819869+00:00",
+    "verified_base": "6aa631c582979c94c74e7b078cee18be3dbbc301",
+    "verified_source_head": "6aa631c582979c94c74e7b078cee18be3dbbc301"
   },
   "ci_prerequisite_commits": [
     "0c7fa8cf DDS sibling checkout",
     "17a7cb81 services stream-host environment"
   ],
   "continuation": {
-    "active_packet": "BROKER_DIRECTORY_RECOVERED_SOURCE_CANDIDATE_7PASS_FINAL_CHECKS_PENDING",
+    "acceptance_issued": false,
+    "active_packet": "BE004_RESTRICTION_SOURCE_BOUNDED_CANDIDATE_FINAL_GUARDS_PENDING",
     "application_rebuild_started": true,
     "baseline_maintenance_commits": [
       "6ba1fef7",
@@ -2258,84 +2326,10 @@
       "broader_original_operations": "OPEN per fullcanonicalchecklist",
       "original_parent_history": "UNKNOWN/null immutable"
     },
-    "committed_ledger_verification": "076404a GREEN246 terminal before normal push; directory successor not yet committed or verified",
-    "current_background_jobs": [],
-    "current_packet": "BE004_BROKER_DIRECTORY_SOURCE",
-    "current_source_receipt": "receipts/BROKER_DIRECTORY_SOURCE_20261103.json",
-    "disconnect_ci_repair_20261103": {
-      "PG_positive": "OPEN_NOT_RUN_LOCALLY",
-      "acceptance_issued": false,
-      "full_BE004": "OPEN",
-      "source_receipt": "docs/rebuild/rev118/receipts/ACCOUNT_DISCONNECT_CI_REPAIR_20261103.json"
-    },
-    "disconnect_fresh_ownership_20261103": {
-      "full_BE004": "OPEN",
-      "native_formal_acceptance": false,
-      "original_PG_positive": "ACTUAL_HOSTED_PASS_ON_9CFD",
-      "shared_credential_case": "PENDING_NEW_EXACT_HOSTED_RESULT",
-      "source_receipt": "docs/rebuild/rev118/receipts/ACCOUNT_DISCONNECT_OWNERSHIP_SOURCE_20261103.json"
-    },
-    "disconnect_namespace_20261103": {
-      "full_BE004": "OPEN",
-      "native_formal_acceptance": false,
-      "original_PG_positive": "PENDING_HOSTED",
-      "source_receipt": "docs/rebuild/rev118/receipts/ACCOUNT_DISCONNECT_NAMESPACE_SOURCE_20261103.json"
-    },
-    "head": "076404a755dc0ccc91d5062a8448638ba0fc9877",
-    "hosted_result": "/workspace/van-delivery-continuation-20261103/CI_076_TERMINAL_20261103/ROOT_MATRIX_QUALIFICATION.json",
-    "immediate_disconnect_20261103": {
-      "full_BE004": "OPEN",
-      "native_formal_acceptance": false,
-      "next": "Normal exact-head source CI; OBSERVE account defaults remain a separate next packet.",
-      "published_head": null,
-      "source_receipt": "docs/rebuild/rev118/receipts/ACCOUNT_DISCONNECT_SOURCE_20261103.json"
-    },
-    "last_verified_published_base": "076404a755dc0ccc91d5062a8448638ba0fc9877",
-    "latest_checkpoint_report": "docs/rebuild/rev118/CONTINUATION_20261022.md",
-    "lead": "Codex",
-    "mutation_reconciliation": "ci/MUTATION_RECONCILIATION.md and ci/MUTATION_RECONCILIATION_MAPPING.json",
-    "next_action": "Finalize the recovered broker directory candidate through independent final review, topology/normal generators and complete final-head committed baseline, then pursue separately leased restriction native/Gateway controls. BE004/provider/CEX/native acceptance remains open.",
-    "old_CI_terminal": {
-      "all_jobs": 41,
-      "failure": 13,
-      "head": "23a570cf3f4f6e67fee69a2f8d845c7a8f03d244",
-      "primary_fixture_unique_cases": 53,
-      "protected_entry67_unique": 2,
-      "run_id": 41388834052,
-      "success": 28,
-      "watch": 88283,
-      "watch_exit": 1,
-      "watch_waited_once_by_owner": true
-    },
-    "owner_instruction": "opus is nolonger available finish building from the current state to completion",
-    "pending_cleanup_design": {
-      "limits": "Prospective original-target plan/per-step facts, separately purpose-bound enrolled-key reauth and durable lockout remain unimplemented. Parent UNKNOWN immutable; legacy target proof cannot be guessed. Full grace/reauth/OAuth/strategy/funds/native gates remain open.",
-      "path": "/tmp/van-be004-pending-cleanup-source-design-20261102.json",
-      "sha256": "6d0e3c4c78ac5d798b53b4f5cc20099f6a2e93bfbbaa5e5be27c3d15bee08b44",
-      "state": "READ_ONLY_DESIGN_NO_SOURCE_LEASE"
-    },
-    "pr": 105,
-    "published56_CI_terminal": {
-      "eight_gateway_shards": "sixSUCCESS+twoonlyprotectedentry67; previous53fixturedefectsabsent",
-      "failure": 9,
-      "gates_unwaived": true,
-      "head": "56dec626ffa0f6a9f52545e890344ebf0c737c24",
-      "jobs": 41,
-      "run_id": 41405437330,
-      "success": 32,
-      "watch73187": "terminal1/ownedwaitedONCE; no newwatch"
-    },
-    "published_head": "076404a755dc0ccc91d5062a8448638ba0fc9877",
-    "qualification_scope": "076 committed baseline GREEN246; exact-head hosted run has 41 jobs, 32 success and 9 failure; canonical matrix remains BLOCKED_INCOMPLETE_QUALIFICATION. Directory local source7 pass; topology, normal generators and final committed baseline pending. No complete provider/native/unit acceptance.",
-    "report": "docs/rebuild/rev118/CONTINUATION_20261022.md",
-    "source_ci_receipt": "/workspace/van-delivery-continuation-20261103/CI_076_TERMINAL_20261103/ROOT_MATRIX_QUALIFICATION.json",
-    "source_qualification_run": 41614715981,
-    "updated_utc": "2026-11-03T11:51:42.172286+00:00",
-    "verified_source_head": "076404a755dc0ccc91d5062a8448638ba0fc9877",
+    "committed_ledger_verification": "6aa631 GREEN247 terminal before normalpush; current candidate not committed or verified",
     "continuation_history": [
       {
         "captured_at_utc": "2026-11-03T11:51:42.172286+00:00",
-        "reason": "Preserve complete prior cursor before directory candidate",
         "prior_full_cursor": {
           "active_packet": "SOURCE_IMPLEMENTED_WITH_BOUNDED_STATIC_IN_MEMORY_VALIDATION;14current safe-memorychecks; postR5 feature/native/provider/integration UNEXECUTED_OPEN",
           "application_rebuild_started": true,
@@ -2430,26 +2424,107 @@
           "updated_utc": "2026-11-02T14:08:06.907570+00:00",
           "verified_source_head": "f74aac3bf503478cd6800949b5541b4c17609d9c"
         },
-        "prior_top_level_current_action": "Published29b OBSERVE source has six actual failing consumer assumptions. Preserve unpublished verifier1198 and its134 source-pinned passes; interrupted final4fd remains NOT_QUALIFIED. Correct four test fixtures while preserving initial OBSERVE and separately admitted sending controls, then independent review/genuine full finalHEAD verification/normal publication. Restriction successor remains unstarted pending this corrective qualification; full BE004/native/provider/CEX gates OPEN."
+        "prior_top_level_current_action": "Published29b OBSERVE source has six actual failing consumer assumptions. Preserve unpublished verifier1198 and its134 source-pinned passes; interrupted final4fd remains NOT_QUALIFIED. Correct four test fixtures while preserving initial OBSERVE and separately admitted sending controls, then independent review/genuine full finalHEAD verification/normal publication. Restriction successor remains unstarted pending this corrective qualification; full BE004/native/provider/CEX gates OPEN.",
+        "reason": "Preserve complete prior cursor before directory candidate"
       }
     ],
-    "historical_progress_record_semantics": "Dated cleanup_successor, disconnect_ci_repair_20261103, disconnect_fresh_ownership_20261103, disconnect_namespace_20261103, immediate_disconnect_20261103, old_CI_terminal and published56_CI_terminal are retained historical observations, not current qualification or next-action cursors. Current state is in this continuation cursor and the dated source receipts."
+    "current_action": "Last verified published BASE6aa631/GREEN247; exactCI terminal41jobs32success9failure with protected/prerequisite/matrix gaps retained. Restriction Native/Gateway R/P/LRO and causal metadata owner source candidate has final21 safe passes and separate20DATA/22journal/8identity component evidence. Exact peer review/main guards/commit/full4fd/publication pending; unsupported native-family positive owners, Android, activation and wholeBE004 OPEN. No formal/native/provider acceptance.",
+    "current_background_jobs": [],
+    "current_packet": "BE004_RESTRICTION_EXISTING_OWNER_SOURCE",
+    "current_source_receipt": "receipts/ACCOUNT_RESTRICTION_SOURCE_20261103.json",
+    "disconnect_ci_repair_20261103": {
+      "PG_positive": "OPEN_NOT_RUN_LOCALLY",
+      "acceptance_issued": false,
+      "full_BE004": "OPEN",
+      "source_receipt": "docs/rebuild/rev118/receipts/ACCOUNT_DISCONNECT_CI_REPAIR_20261103.json"
+    },
+    "disconnect_fresh_ownership_20261103": {
+      "full_BE004": "OPEN",
+      "native_formal_acceptance": false,
+      "original_PG_positive": "ACTUAL_HOSTED_PASS_ON_9CFD",
+      "shared_credential_case": "PENDING_NEW_EXACT_HOSTED_RESULT",
+      "source_receipt": "docs/rebuild/rev118/receipts/ACCOUNT_DISCONNECT_OWNERSHIP_SOURCE_20261103.json"
+    },
+    "disconnect_namespace_20261103": {
+      "full_BE004": "OPEN",
+      "native_formal_acceptance": false,
+      "original_PG_positive": "PENDING_HOSTED",
+      "source_receipt": "docs/rebuild/rev118/receipts/ACCOUNT_DISCONNECT_NAMESPACE_SOURCE_20261103.json"
+    },
+    "head": "6aa631c582979c94c74e7b078cee18be3dbbc301",
+    "head_meaning": "LAST_VERIFIED_PUBLISHED_BASE_NOT_FUTURE_CANDIDATE_COMMIT",
+    "historical_progress_record_semantics": "Dated cleanup_successor, disconnect_ci_repair_20261103, disconnect_fresh_ownership_20261103, disconnect_namespace_20261103, immediate_disconnect_20261103, old_CI_terminal and published56_CI_terminal are retained historical observations, not current qualification or next-action cursors. Current state is in this continuation cursor and the dated source receipts.",
+    "historical_subpacket_fields_are_history_only": true,
+    "hosted_result": "/workspace/van-delivery-continuation-20261103/CI_6AA_TERMINAL_20261103/",
+    "immediate_disconnect_20261103": {
+      "full_BE004": "OPEN",
+      "native_formal_acceptance": false,
+      "next": "Normal exact-head source CI; OBSERVE account defaults remain a separate next packet.",
+      "published_head": null,
+      "source_receipt": "docs/rebuild/rev118/receipts/ACCOUNT_DISCONNECT_SOURCE_20261103.json"
+    },
+    "last_verified_published_base": "6aa631c582979c94c74e7b078cee18be3dbbc301",
+    "latest_checkpoint_report": "docs/rebuild/rev118/CONTINUATION_20261022.md",
+    "lead": "Codex",
+    "mutation_reconciliation": "ci/MUTATION_RECONCILIATION.md and ci/MUTATION_RECONCILIATION_MAPPING.json",
+    "next_action": "Finish exact peer review; actual-main normal guards/topology/PRE003 LAST; genuine hooks/fullcommitted4fd/normalpush/exactCI; then earliest dependency-ready original source obligation.",
+    "old_CI_terminal": {
+      "all_jobs": 41,
+      "failure": 13,
+      "head": "23a570cf3f4f6e67fee69a2f8d845c7a8f03d244",
+      "primary_fixture_unique_cases": 53,
+      "protected_entry67_unique": 2,
+      "run_id": 41388834052,
+      "success": 28,
+      "watch": 88283,
+      "watch_exit": 1,
+      "watch_waited_once_by_owner": true
+    },
+    "owner_instruction": "opus is nolonger available finish building from the current state to completion",
+    "pending_cleanup_design": {
+      "limits": "Prospective original-target plan/per-step facts, separately purpose-bound enrolled-key reauth and durable lockout remain unimplemented. Parent UNKNOWN immutable; legacy target proof cannot be guessed. Full grace/reauth/OAuth/strategy/funds/native gates remain open.",
+      "path": "/tmp/van-be004-pending-cleanup-source-design-20261102.json",
+      "sha256": "6d0e3c4c78ac5d798b53b4f5cc20099f6a2e93bfbbaa5e5be27c3d15bee08b44",
+      "state": "READ_ONLY_DESIGN_NO_SOURCE_LEASE"
+    },
+    "pr": 105,
+    "publication_note": "6aa631 is the last actual published and committed-baseline-verified base/GREEN247; restriction is a source candidate, no future candidate head is asserted.",
+    "published56_CI_terminal": {
+      "eight_gateway_shards": "sixSUCCESS+twoonlyprotectedentry67; previous53fixturedefectsabsent",
+      "failure": 9,
+      "gates_unwaived": true,
+      "head": "56dec626ffa0f6a9f52545e890344ebf0c737c24",
+      "jobs": 41,
+      "run_id": 41405437330,
+      "success": 32,
+      "watch73187": "terminal1/ownedwaitedONCE; no newwatch"
+    },
+    "published_head": "6aa631c582979c94c74e7b078cee18be3dbbc301",
+    "qualification_scope": "6aa631 committed GREEN247 and exact hosted terminal41jobs32success9failure; matrix16verified6blocked no certificates. Current restriction source21safe plus separate component evidence; actual-main/finalcommitted guards and new exact-head CI remain pending. No provider/native/unit acceptance.",
+    "report": "docs/rebuild/rev118/CONTINUATION_20261022.md",
+    "source_ci_receipt": "/workspace/van-delivery-continuation-20261103/CI_6AA_TERMINAL_20261103/",
+    "source_qualification_run": 41648747325,
+    "updated_utc": "2026-11-03T16:53:53.819869+00:00",
+    "verified_base": "6aa631c582979c94c74e7b078cee18be3dbbc301",
+    "verified_source_head": "6aa631c582979c94c74e7b078cee18be3dbbc301"
   },
-  "current_action": "Published 076404a/GREEN246; recovered standalone read-only broker directory source candidate has current 7-case source PASS and awaits normal generation, topology checks, final packet review and integration. Restriction foundation remains isolated WIP; native/Gateway restriction workflow is UNIMPLEMENTED. All BE004/provider/CEX/native gates remain OPEN.",
+  "current_action": "Last verified published BASE6aa631/GREEN247; exactCI terminal41jobs32success9failure with protected/prerequisite/matrix gaps retained. Restriction Native/Gateway R/P/LRO and causal metadata owner source candidate has final21 safe passes and separate20DATA/22journal/8identity component evidence. Exact peer review/main guards/commit/full4fd/publication pending; unsupported native-family positive owners, Android, activation and wholeBE004 OPEN. No formal/native/provider acceptance.",
   "delegation": {
     "active_assignments": [
       {
         "agent": "/root",
-        "state": "ARCHITECTURE_AND_FINAL_DECISIONS"
+        "state": "ARCHITECTURE_AND_FINAL_DECISIONS_ONLY"
       },
       {
         "agent": "/root/disconnect_implementation_sol",
-        "state": "SOLE_INTEGRATOR_AND_RESTRICTION_FOUNDATION_WIP",
+        "base": "6aa631c582979c94c74e7b078cee18be3dbbc301",
+        "state": "SOLE_INTEGRATOR_RESTRICTION_SOURCE_FINALIZATION",
         "worktree": "/workspace/van-review-2026-10-18/publish"
       },
       {
         "agent": "/root/disconnect_implementation_sol/disconnect_review_terra",
-        "state": "DIRECTORY_AUTHOR_AND_EXTERNAL_DRAFT_NOT_INDEPENDENT_REVIEWER"
+        "base": "6aa631c582979c94c74e7b078cee18be3dbbc301",
+        "state": "IDENTITY_JOURNAL_AUTHOR_CALLER_INDEPENDENT_REVIEW_NO_SHARED_WRITES"
       }
     ],
     "architecture_decision_owner": "/root (gpt-6-astra decisions only)",
@@ -2535,8 +2610,6 @@
         "meaning": "Sole integration writer transferred after previous model worker hit usage limit; no failed operation retried, source WIP preserved."
       },
       {
-        "captured_at_utc": "2026-11-03T11:48:57.588166+00:00",
-        "reason": "Preserve prior active assignment cursor before recovered directory packet",
         "assignments": [
           {
             "agent": "/root/accounts_workflow_sol",
@@ -2552,7 +2625,28 @@
             "model": "gpt-6.1-sol",
             "state": "READ_ONLY_NEXT_SOURCE_AND_BOUNDED_GENERATOR_REVIEW_NO_MAINWRITES"
           }
-        ]
+        ],
+        "captured_at_utc": "2026-11-03T11:48:57.588166+00:00",
+        "reason": "Preserve prior active assignment cursor before recovered directory packet"
+      },
+      {
+        "assignments": [
+          {
+            "agent": "/root",
+            "state": "ARCHITECTURE_AND_FINAL_DECISIONS"
+          },
+          {
+            "agent": "/root/disconnect_implementation_sol",
+            "state": "SOLE_INTEGRATOR_AND_RESTRICTION_FOUNDATION_WIP",
+            "worktree": "/workspace/van-review-2026-10-18/publish"
+          },
+          {
+            "agent": "/root/disconnect_implementation_sol/disconnect_review_terra",
+            "state": "DIRECTORY_AUTHOR_AND_EXTERNAL_DRAFT_NOT_INDEPENDENT_REVIEWER"
+          }
+        ],
+        "captured_at_utc": "2026-11-03T16:47:42.320592+00:00",
+        "meaning": "Superseded after directory publication and restriction owner implementation."
       }
     ],
     "delegated_packets": [],
@@ -2870,6 +2964,15 @@
       "evidence": "receipts/BROKER_DIRECTORY_SOURCE_20261103.json",
       "scope": "BE004 source-only broker directory recovered R3",
       "status": "SOURCE_7PASS_NORMAL_GENERATION_TOPOLOGY_FINAL_REVIEW_PENDING"
+    },
+    {
+      "current_cursor": "checkpoint+continuation lastverified6aa; historical nested subpacket fields are history only",
+      "kind": "SOURCE_RESTRICTION_EXISTING_OWNER_CANDIDATE",
+      "observed_at_utc": "2026-11-03T16:47:42.320592+00:00",
+      "source_receipt": "docs/rebuild/rev118/receipts/ACCOUNT_RESTRICTION_SOURCE_20261103.json",
+      "status": "21FINAL_SAFE_PASS_SEPARATE_COMPONENT_EVIDENCE_NO_ACCEPTANCE",
+      "timeout": "R4_FAILED_INCOMPLETE_CAUSE_UNRESOLVED_UNREPRODUCED",
+      "whole_BE004": "OPEN"
     }
   ],
   "pre002_challenge": "pre002/challenge/: 324 author-prepared dossiers (AUTHOR_CHALLENGED_PENDING_INDEPENDENT_REVIEW)",
@@ -4272,5 +4375,5 @@
       "status": "IN_PROGRESS"
     }
   },
-  "updated_at_utc": "2026-11-03T11:51:42.172286+00:00"
+  "updated_at_utc": "2026-11-03T16:53:53.819869+00:00"
 }

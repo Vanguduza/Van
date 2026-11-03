@@ -13910,6 +13910,56 @@
         ],
         "title": "RestoreWorkspace"
       },
+      "RestrictionRequest": {
+        "properties": {
+          "device_id": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Device Id"
+          },
+          "issued_at_unix": {
+            "type": "integer",
+            "title": "Issued At Unix"
+          },
+          "signature": {
+            "type": "string",
+            "maxLength": 256,
+            "minLength": 32,
+            "title": "Signature"
+          },
+          "action": {
+            "type": "string",
+            "const": "account_restrict",
+            "title": "Action"
+          },
+          "args": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Args"
+          },
+          "approval_proof": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OwnerApprovalProof"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "device_id",
+          "issued_at_unix",
+          "signature",
+          "action",
+          "args"
+        ],
+        "title": "RestrictionRequest"
+      },
       "ResumeBody": {
         "properties": {
           "van_session_id": {

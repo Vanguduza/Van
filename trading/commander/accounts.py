@@ -36,10 +36,19 @@ BROKER_SECRET_KEYS = {
     "MT5": {"BRIDGE_SIGNING_KEY", "BRIDGE_CA_FILE", "BRIDGE_CLIENT_CERT", "BRIDGE_CLIENT_KEY"},
     "PAPER": set(), "ZSE_OWNER_TICKET": set(),
 }
-ACCOUNT_MUTATIONS = frozenset({"account_upsert", "account_credentials", "account_remove",
+ACCOUNT_MUTATIONS = frozenset({"account_restrict", "account_upsert", "account_credentials", "account_remove",
     "deriv_create_demo", "deriv_oauth_link", "ctrader_link", "mt5_ea_issue_key"})
-ACCOUNT_COMMANDS = ("account_upsert", "account_credentials", "account_remove", "account_verify", "account_revision", "account_review", "account_operation", "deriv_verify_email", "deriv_create_demo", "deriv_oauth_link", "ctrader_discover", "ctrader_oauth_exchange", "ctrader_link", "mt5_ea_issue_key")
+ACCOUNT_COMMANDS = ("account_restrict", "account_upsert", "account_credentials", "account_remove", "account_verify", "account_revision", "account_review", "account_operation", "deriv_verify_email", "deriv_create_demo", "deriv_oauth_link", "ctrader_discover", "ctrader_oauth_exchange", "ctrader_link", "mt5_ea_issue_key")
 ACCOUNT_TOOL_SCHEMAS = {
+    "account_restrict": {"description":"Existing enrolled-device A4 and Store admission required; recovery also requires distinct fresh purpose-bound reauthentication. Metadata never grants mode, mandate or entry authority.",
+        "properties":{"alias":{"type":"string","pattern":"^[a-z0-9_]{3,32}$"},
+            "variant":{"enum":["RESTRICT","BEGIN_REAUTH","COMPLETE_REAUTH","RECONCILE_DATA"]},
+            "reason_code":{"enum":["OWNER_REQUEST","CREDENTIALS_EXPIRED","BROKER_DISABLED","KILL_SWITCH","VERIFICATION_FAILED"]},
+            "restriction_id":{"type":"string","pattern":"^[A-Za-z0-9_-]{20,128}$"},
+            "expected_revision":{"type":"integer","minimum":0},"expected_digest":{"type":"string","pattern":"^[0-9a-f]{64}$"},
+            "parent_operation_id":{"type":"string","pattern":"^[A-Za-z0-9_-]{20,128}$"},
+            "reauth_fact_id":{"type":"string","pattern":"^[A-Za-z0-9_-]{20,128}$"},
+            "reauth_fact_digest":{"type":"string","pattern":"^[0-9a-f]{64}$"}},"required":["alias","variant"],"additionalProperties":False},
     "account_review": {"description": "Resolve exact public before/after settings or local-unlink safety facts without broker effects. Native readonly checks may use host credentials; credential values and locators are never exported.", "properties": {"action": {"type": "string"}, "args": {"type": "object"}}, "required": ["action", "args"]},
     "account_operation": {"description": "Read the original native account-operation outcome for its gateway-authenticated owner device and selected native control domain. No effect or credential export; domain data confers no authority.", "properties": {"operation_id": {"type": "string"}, "device_id": {"type": "string"}, "account_control_domain": {"type":"string","pattern":"^[0-9a-f]{64}$"}}, "required": ["operation_id", "device_id"]},
     "account_revision": {"description": "Read the authenticated native account-control state namespace and, when alias is supplied, its exact configuration version. Namespace data confers no authority.", "properties": {"alias": {"type": "string"}}},
@@ -75,6 +84,9 @@ class AccountControlSettings:
 
     lifecycle_admission_verifier: Optional[Callable] = None  # Trusted local Gateway bootstrap; never command DATA.
     lifecycle_transport_binding: Any = None  # Unique Commander ingress identity; no direct-handler default.
+    restriction_admission_verifier: Optional[Callable] = None  # Actual Store-bound local owner.
+    restriction_read_verifier: Optional[Callable] = None
+    restriction_transport_binding: Any = None  # Authenticated ingress marker only; no issuer.
 
     def __post_init__(self):
         if self.lifecycle_session_sources is None:
@@ -181,7 +193,7 @@ def require_resource_version(command: str, args: dict, *, server_owned_demo=Fals
             operation_intent(command, args)
         except AccountEffectError as exc:
             raise HTTPException(409, str(exc)) from None
-    if command in {'account_upsert','account_remove'}:
+    if command in {'account_upsert','account_remove','account_restrict'}:
         review=args.get("_expected_review_digest")
         authority=args.get("_native_operation",{}).get("authority_ref","")
         if not isinstance(review,str) or not re.fullmatch(r"[0-9a-f]{64}",review) or not authority.endswith("::review:"+review):
@@ -386,8 +398,26 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
             return service.execute(args,guard)
         finally:ledger.close()
 
+    def restriction_call(method, payload):
+        from commander.account_restrictions import NativeRestriction, _GatewayRestrictionAdmission, _GatewayRestrictionRead
+        # Refuse unbound direct ingress before opening any operation ledger.
+        field='restriction_admission_verifier' if method=='execute' else 'restriction_read_verifier'
+        marker=payload.get('_restriction_admission_guard' if method=='execute' else '_restriction_read_guard')
+        marker_type=_GatewayRestrictionAdmission if method=='execute' else _GatewayRestrictionRead
+        binding=st.restriction_transport_binding
+        if not callable(getattr(st,field,None)) and (binding is None or type(marker) is not marker_type or marker.binding is not binding):
+            raise HTTPException(403,{'code':'RESTRICTION_CURRENT_GATEWAY_OWNER_REQUIRED'})
+        ledger=open_operation_ledger()
+        try:
+            service=NativeRestriction(st,ledger,control_domain,current_resource_version)
+            return getattr(service,method)(payload)
+        finally:ledger.close()
+
     def cmd_account_review(a: dict) -> dict:
         from vati.core.canonical import canonical_hash
+        restriction_methods={'account_restriction_review':'review','account_restriction_read':'read',
+            'account_restriction_pending':'pending','account_restriction_resolution':'resolution'}
+        if a.get('action') in restriction_methods:return restriction_call(restriction_methods[a['action']],a)
         if a.get("action") in {"account_lifecycle_read","account_lifecycle_archive_due"}:
             return lifecycle_call("read" if a["action"]=="account_lifecycle_read" else "archive_due",a.get("args",{}),a.get("owner_device_id"),a.get("_account_dispatch_guard"))
         if a.get('action')=='account_remove' and isinstance(a.get('args'),dict):
@@ -409,6 +439,8 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
         with reg().operation_lock(alias):
             registry=reg(); current=registry.accounts.get(alias)
             candidate=resolve_account_config({k:v for k,v in values.items() if k not in {'_expected_account_control_domain','_upsert_before_write','_account_dispatch_guard'}},alias=alias,current=current,secret_path=_secrets_path(st,alias))
+            if alias in registry._restrictions and candidate.enabled:
+                raise HTTPException(409,{'code':'RESTRICTION_ENTRY_ACTIVATION_REQUIRES_EXISTING_GOVERNED_CONTROL'})
             before=current.public() if current else None; after=candidate.public()
             public_args={key:value for key,value in values.items() if not key.startswith('_')}
             body={'schema':'vati.account-review/1','action':'account_upsert','alias':alias,
@@ -689,7 +721,7 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
         store_secrets(alias, "MT5_EA", {"BRIDGE_SIGNING_KEY": key})
         return {"account": pub, "signing_key": key, "ea_inputs": {"Alias": alias, "SigningKey": key, "BridgeUrl": os.environ.get("VAN_PUBLIC_HOST", "") and f"https://{os.environ['VAN_PUBLIC_HOST']}"}, "note": "shown once; paste into VanBridgeEA inputs"}
 
-    handlers = {"account_upsert": cmd_account_upsert, "account_credentials": cmd_account_credentials, "account_remove": cmd_account_remove, "account_verify": cmd_account_verify, "account_revision": cmd_account_revision, "account_review":cmd_account_review, "account_operation": cmd_account_operation,
+    handlers = {"account_restrict": lambda args:restriction_call("execute",args), "account_upsert": cmd_account_upsert, "account_credentials": cmd_account_credentials, "account_remove": cmd_account_remove, "account_verify": cmd_account_verify, "account_revision": cmd_account_revision, "account_review":cmd_account_review, "account_operation": cmd_account_operation,
             "deriv_verify_email": cmd_deriv_verify_email, "deriv_create_demo": cmd_deriv_create_demo, "deriv_oauth_link": cmd_deriv_oauth_link, "ctrader_discover": cmd_ctrader_discover,
             "ctrader_oauth_exchange": cmd_ctrader_oauth_exchange, "ctrader_link": cmd_ctrader_link, "mt5_ea_issue_key": cmd_mt5_ea_issue_key}
 
@@ -865,7 +897,7 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
     # Serialize before the registry lookup as well as the file swap. Otherwise
     # a rotation can read an alias, wait for unlink, then recreate orphan secrets.
     for command in ACCOUNT_MUTATIONS:
-        handlers[command] = (serialize_retirement(handlers[command]) if command=='account_remove'
+        handlers[command] = (handlers[command] if command=='account_restrict' else serialize_retirement(handlers[command]) if command=='account_remove'
                              else serialize_account_mutation(command, handlers[command]))
     return handlers
 

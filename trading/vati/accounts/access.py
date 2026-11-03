@@ -49,6 +49,8 @@ def entry_fence(registry: AccountRegistry, bound: Account):
             registry_current = AccountRegistry(path)
             from vati.accounts.lifecycle import require_attached
             require_attached(registry_current, bound.alias)
+            from vati.accounts.restrictions import require_entry_unrestricted
+            require_entry_unrestricted(registry_current,bound.alias)
             current = registry_current.get(bound.alias)
             if native_binding(current) != native_binding(bound):
                 raise AccountRegistryError("registered native account binding changed; rebuild the connection")

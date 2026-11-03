@@ -14,7 +14,7 @@ import re
 import stat
 import tempfile
 from contextlib import contextmanager, ExitStack
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, replace
 from pathlib import Path
 from typing import Any, Optional
 
@@ -130,8 +130,11 @@ class AccountRegistry:
         self.path = Path(path).resolve()
         self._resource_revisions = {}
         self._schema_version = 1
+        self._lifecycle_schema_floor = 1
         self._lifecycles = {}
         self._lifecycle_history = {}
+        self._restrictions = {}
+        self._restriction_history = {}
         self.accounts = self._read_accounts()
         self._loaded_accounts = dict(self.accounts)
         self._loaded_revisions = dict(self._resource_revisions)
@@ -140,21 +143,36 @@ class AccountRegistry:
         if not self.path.exists():
             self._resource_revisions = {}
             self._schema_version = 1
+            self._lifecycle_schema_floor = 1
             self._lifecycles = {}
             self._lifecycle_history = {}
+            self._restrictions = {}
+            self._restriction_history = {}
             return {}
         try:
             data = json.loads(self.path.read_text(encoding="utf-8"))
             if not isinstance(data, dict) or not isinstance(data.get("accounts"), list):
                 raise AccountRegistryError("account registry schema is invalid")
             version=data.get("schema_version",1)
-            if type(version) is not int or version not in (1,2,3):
+            if type(version) is not int or version not in (1,2,3,4):
                 raise AccountRegistryError("account registry schema is unsupported")
-            if version==1 and data.get("account_lifecycles") or version>=2 and not data.get("account_lifecycles"):
+            if version==1 and data.get("account_lifecycles") or version in {2,3} and not data.get("account_lifecycles"):
                 raise AccountRegistryError("lifecycle registry version or persistent detachment is unavailable; HOLD")
             if (version<3 and 'account_lifecycle_history' in data
                 or version==3 and not data.get('account_lifecycle_history')):
                 raise AccountRegistryError('lifecycle history schema or persistent incarnation evidence unavailable; HOLD')
+            restriction_keys={'account_restrictions','account_restriction_history'}
+            if version<4 and (restriction_keys|{'lifecycle_schema_floor'})&data.keys():
+                raise AccountRegistryError('restriction DATA requires its strict registry version; HOLD')
+            if version==4 and (set(data)-{'schema_version','accounts','resource_revisions','account_lifecycles',
+                    'account_lifecycle_history','lifecycle_schema_floor',*restriction_keys} or not any(data.get(k) for k in restriction_keys)):
+                raise AccountRegistryError('restriction registry fields or sticky history unavailable; HOLD')
+            floor=data.get('lifecycle_schema_floor') if version==4 else version
+            if (type(floor) is not int or floor not in {1,2,3}
+                    or floor<(3 if data.get('account_lifecycle_history') else 2 if data.get('account_lifecycles') else 1)
+                    or floor>=2 and not data.get('account_lifecycles')
+                    or floor==3 and not data.get('account_lifecycle_history')):
+                raise AccountRegistryError('prior lifecycle schema obligations were lost; HOLD')
             revisions = data.get("resource_revisions", {})
             if (not isinstance(revisions, dict) or any(
                 not isinstance(alias, str) or not re.fullmatch(r"[a-z0-9_]{3,32}", alias)
@@ -171,7 +189,13 @@ class AccountRegistry:
             from vati.accounts.lifecycle import validate_records,validate_history
             self._lifecycles = validate_records(data.get("account_lifecycles", {}))
             self._lifecycle_history=validate_history(self._lifecycles,data.get("account_lifecycle_history", {}))
+            from vati.accounts.restrictions import validate_records as validate_restrictions
+            self._restrictions,self._restriction_history=validate_restrictions(
+                data.get('account_restrictions',{}),data.get('account_restriction_history',{}))
+            if any(alias in records and records[alias].enabled for alias in self._restrictions):
+                raise AccountRegistryError('restriction entry flag differs from durable state; HOLD')
             self._schema_version = version
+            self._lifecycle_schema_floor = floor
             self._resource_revisions = dict(revisions)
             return records
         except (OSError, ValueError, TypeError) as exc:
@@ -209,7 +233,17 @@ class AccountRegistry:
                 raise AccountRegistryError(f"account {alias} changed since read; reload before mutation")
             before = self.accounts
             previous_revisions = dict(self._resource_revisions)
+            import copy
+            previous_restrictions=copy.deepcopy(self._restrictions)
+            previous_restriction_history=copy.deepcopy(self._restriction_history)
             self.accounts = current
+            if operation=='add' and alias in self._restrictions:
+                old=self._restrictions.pop(alias)
+                if old['restriction_id'] in self._restriction_history:
+                    raise AccountRegistryError('restriction incarnation history is duplicated; HOLD')
+                self._restriction_history[old['restriction_id']]=old
+            elif operation!='remove' and alias in self._restrictions and account.enabled:
+                raise AccountRegistryError('restriction cannot be cleared by enabling a local profile')
             if operation == "remove":
                 del self.accounts[alias]
             else:
@@ -223,6 +257,8 @@ class AccountRegistry:
             except BaseException:
                 self.accounts = before
                 self._resource_revisions = previous_revisions
+                self._restrictions=previous_restrictions
+                self._restriction_history=previous_restriction_history
                 raise
             self._loaded_accounts = dict(self.accounts)
             self._loaded_revisions = dict(self._resource_revisions)
@@ -251,8 +287,12 @@ class AccountRegistry:
             import copy
             original_lifecycles=copy.deepcopy(current._lifecycles)
             original_history=copy.deepcopy(current._lifecycle_history)
+            original_restrictions=copy.deepcopy(current._restrictions)
+            original_restriction_history=copy.deepcopy(current._restriction_history)
             original_accounts=dict(current.accounts)
             result = transform(current)
+            if current._restrictions!=original_restrictions or current._restriction_history!=original_restriction_history:
+                raise AccountRegistryError('unlink lifecycle cannot mutate restriction authority or history')
             from vati.accounts.lifecycle import validate_records,validate_history
             validate_records(current._lifecycles)
             validate_history(current._lifecycles,current._lifecycle_history)
@@ -298,8 +338,10 @@ class AccountRegistry:
             current._save_unlocked(before_replace=before_replace,after_replace=after_replace or (lambda:None))
             self.accounts, self._lifecycles = current.accounts, current._lifecycles
             self._lifecycle_history=current._lifecycle_history
+            self._restrictions,self._restriction_history=current._restrictions,current._restriction_history
             self._resource_revisions = current._resource_revisions
             self._schema_version = current._schema_version
+            self._lifecycle_schema_floor=current._lifecycle_schema_floor
             self._loaded_accounts = dict(self.accounts)
             self._loaded_revisions = dict(self._resource_revisions)
             return result
@@ -307,6 +349,55 @@ class AccountRegistry:
     def touch(self, alias: str) -> None:
         """Advance a native credential/resource generation without changing metadata."""
         self._mutate("touch", alias, self.get(alias))
+
+    def restriction_update(self,alias,transform,*,before_replace=None,after_replace=None):
+        """One exact-account metadata writer; never a mode/mandate authority."""
+        import copy
+        from vati.accounts.restrictions import validate_records,FIELDS
+        with self.operation_lock(alias),self._mutation_lock():
+            current=AccountRegistry(self.path)
+            accounts=dict(current.accounts);rows=copy.deepcopy(current._restrictions)
+            history=copy.deepcopy(current._restriction_history)
+            lifecycles=copy.deepcopy(current._lifecycles);lifecycle_history=copy.deepcopy(current._lifecycle_history)
+            revisions=dict(current._resource_revisions);version=current._schema_version;floor=current._lifecycle_schema_floor
+            result=transform(current)
+            if current._resource_revisions!=revisions or current._schema_version!=version or current._lifecycle_schema_floor!=floor:
+                raise AccountRegistryError('restriction callback cannot alter resource epochs or schema obligations')
+            validate_records(current._restrictions,current._restriction_history)
+            if alias not in rows and (current._restrictions.get(alias,{}).get('revision')!=1
+                    or current._restrictions[alias]['phase']!='RESTRICTED'):
+                raise AccountRegistryError('restriction must start with its exact initial transition')
+            if current._restriction_history!=history or current._lifecycles!=lifecycles or current._lifecycle_history!=lifecycle_history:
+                raise AccountRegistryError('restriction writer cannot alter another lifecycle/history')
+            if set(current.accounts)!=set(accounts) or alias not in accounts:
+                raise AccountRegistryError('restriction writer cannot create or unlink an account')
+            for subject,old in accounts.items():
+                allowed=replace(old,enabled=False) if subject==alias else old
+                if current.accounts[subject]!=allowed:
+                    raise AccountRegistryError('restriction writer cannot alter native identity, mode or mandate')
+            if set(rows)-set(current._restrictions) or set(current._restrictions)-set(rows)-{alias}:
+                raise AccountRegistryError('restriction writer scope widened or erased')
+            for subject,old in rows.items():
+                now=current._restrictions[subject]
+                if subject!=alias and now!=old:
+                    raise AccountRegistryError('restriction writer changed another account')
+                if subject==alias:
+                    mutable={'revision','phase','updated_at_unix','events'}
+                    if (any(now[k]!=old[k] for k in FIELDS-mutable) or now['revision']!=old['revision']+1
+                            or now['events'][:-1]!=old['events']):
+                        raise AccountRegistryError('restriction original bindings/history are immutable')
+                    from vati.core.canonical import canonical_hash
+                    if now['events'][-1]['previous_digest']!=canonical_hash(old):
+                        raise AccountRegistryError('restriction transition does not bind its exact predecessor')
+            current._resource_revisions[alias]=current._resource_revisions.get(alias,0)+1
+            current._schema_version=4
+            current._save_unlocked(before_replace=before_replace,after_replace=after_replace or (lambda:None))
+            self.accounts=current.accounts;self._restrictions=current._restrictions;self._restriction_history=current._restriction_history
+            self._lifecycles,self._lifecycle_history=current._lifecycles,current._lifecycle_history
+            self._resource_revisions=current._resource_revisions;self._schema_version=current._schema_version
+            self._lifecycle_schema_floor=current._lifecycle_schema_floor
+            self._loaded_accounts=dict(self.accounts);self._loaded_revisions=dict(self._resource_revisions)
+            return result
 
     def get(self, alias: str) -> Account:
         try:
@@ -325,6 +416,13 @@ class AccountRegistry:
                 raise AccountRegistryError("account registry changed since read; reload before save")
             for alias, account in self.accounts.items():
                 account.validate()
+                if alias not in current and alias in self._restrictions:
+                    old=self._restrictions.pop(alias)
+                    if old['restriction_id'] in self._restriction_history:
+                        raise AccountRegistryError('restriction incarnation history is duplicated; HOLD')
+                    self._restriction_history[old['restriction_id']]=old
+                elif alias in self._restrictions and account.enabled:
+                    raise AccountRegistryError('restriction cannot be cleared by whole-registry save')
                 if alias != account.alias:
                     raise AccountRegistryError("registry key disagrees with account identity")
             previous_revisions = dict(self._resource_revisions)
@@ -351,16 +449,26 @@ class AccountRegistry:
         # Version2 detachment and version3 incarnation history are sticky.
         # Older readers refuse the new schema instead of silently dropping
         # persistent evidence. Source migration is not runtime qualification.
-        self._schema_version = 3 if self._schema_version>=3 or self._lifecycle_history else 2 if self._schema_version>=2 or self._lifecycles else 1
+        self._schema_version = 4 if self._schema_version>=4 or self._restrictions or self._restriction_history else 3 if self._schema_version>=3 or self._lifecycle_history else 2 if self._schema_version>=2 or self._lifecycles else 1
+        self._lifecycle_schema_floor=max(self._lifecycle_schema_floor,3 if self._lifecycle_history else 2 if self._lifecycles else 1)
+        if self._schema_version==4 and not (self._restrictions or self._restriction_history):
+            raise AccountRegistryError('restriction history cannot be pruned or downgraded')
         if self._schema_version==3 and not self._lifecycle_history:
             raise AccountRegistryError('persistent lifecycle history cannot be pruned or downgraded')
-        if self._schema_version>=2 and not self._lifecycles:
+        if self._schema_version in {2,3} and not self._lifecycles:
             raise AccountRegistryError("persistent lifecycle state cannot be pruned or downgraded")
+        if self._lifecycle_schema_floor>=2 and not self._lifecycles or self._lifecycle_schema_floor==3 and not self._lifecycle_history:
+            raise AccountRegistryError('prior lifecycle state/history cannot be pruned through restriction schema')
+        from vati.accounts.restrictions import validate_records as validate_restrictions
+        validate_restrictions(self._restrictions,self._restriction_history)
         payload = json.dumps(
             {"schema_version": self._schema_version, "accounts": [asdict(a) for a in sorted(self.accounts.values(), key=lambda x: x.alias)],
              "resource_revisions": self._resource_revisions,
+             **({'lifecycle_schema_floor':self._lifecycle_schema_floor} if self._schema_version==4 else {}),
              **({"account_lifecycles": self._lifecycles} if self._lifecycles else {}),
-             **({"account_lifecycle_history":self._lifecycle_history} if self._lifecycle_history else {})},
+             **({"account_lifecycle_history":self._lifecycle_history} if self._lifecycle_history else {}),
+             **({'account_restrictions':self._restrictions} if self._restrictions else {}),
+             **({'account_restriction_history':self._restriction_history} if self._restriction_history else {})},
             indent=2,
         ) + "\n"
         fd, temp_name = tempfile.mkstemp(prefix=f".{self.path.name}.", suffix=".tmp", dir=str(self.path.parent))

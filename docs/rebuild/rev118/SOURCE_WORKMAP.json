@@ -42,11 +42,11 @@
     },
     "source_features": {
       "path": "registries/owner_features.json",
-      "sha256": "32b718b32ad337b275e146686b9c754523398c585b15b8ea0386ccd0f982096c"
+      "sha256": "1108df87d10163e58034b98a551516cda436b66e844944484cd22cc996aff817"
     },
     "source_surfaces": {
       "path": "registries/owner_screens.json",
-      "sha256": "870361037a7d29b439346cf3ff5c46e1861c70a14dba1b7a953c9e71f819fc71"
+      "sha256": "c8e4e96a6b88d5ac0d1a9a0ca47d61099ec02480ba347730da14e1431f7db5f2"
     },
     "inherited_source": {
       "path": "docs/rebuild/rev118/pre001/SOURCE_CLASSIFICATION.json",
@@ -2710,13 +2710,13 @@
       "OF-DIAGNOSTICS-001": "6986265cac94132a54fb437b103304dcaba3c29af2879b5e1f06574a2db51b56",
       "OF-TRADING-001": "fcaf7017f870a8108b856cac8e5d215bcab31543f5c98bbd0e4bffa151a6b4f9",
       "OF-TRADING-002": "d824722f9b8560dce81c6c25045ff6e4b1ded85192d47eae401c46e8798799eb",
-      "OF-TRADING-003": "2551b830ecbd3ce7218e6add93b730ceba9e1389eaec535af7ced8780eda3d6d",
-      "OF-TRADING-004": "ea6c973595fbd201d69066b5856f62602816011bc25a48a9a91e7598b303fb3e",
-      "OF-TRADING-005": "4cd4f4275f8a01a548fb26c385480fa29f28a62cc4aecc433bb5d77517473d0e",
+      "OF-TRADING-003": "32f3cd354a78c8bebc7793d7a7d4e98810db2af3e71de8b4337717c22dc97c9f",
+      "OF-TRADING-004": "f94bdad63ef9cee861322c06d21c27204aa344c58334bab1fb3d36a013986da8",
+      "OF-TRADING-005": "c1e586fddaffac3b6ce91818a2047f09279b177afbca75463a6a9a37ab60da7e",
       "OF-DEV-001": "8df3bb299015aeed6dfdc1f58947ea9c6c4d0d32bc9c04b9b13650b7fa081656",
       "OF-DEV-002": "0f07f972d7971849c76fd81799696b8c1c247000ac228028b81306a77a950ae8",
       "OF-ARTEMIS-001": "0e28e75274beda4d6328b8ca27fd016c2543f01b5f3cfdc29f69cec52c96221b",
-      "OF-EMBODIMENT-001": "9f0064f7d30eda668d376a787860cabed03168e07581ac6eebc86278b11529bd"
+      "OF-EMBODIMENT-001": "b4f7621ca33d84f8f51133b73b30e0ac761b6b88f2f184b8d11711a76bc1fb48"
     },
     "source_surfaces": {
       "van.home": "38e7b88d8305bdb1272a770cf46d0f1b4c0ceabf6b3abc2d036f62f1966883c6",
@@ -2736,16 +2736,16 @@
       "van.trading.positions.detail": "94be5e8d83c3a78bbfe40346e3a45b598c2a15f8a2f495df51784d0c027111e1",
       "van.trading.potential": "ad9be1f53998cdcb593027eaa06037ba2be3fd341baf0871c2469b37a52ebdee",
       "van.trading.history": "8ab321b6ae8b77ea843410576641a0dcfe376e3644d286ba36d0b388a40c6fa3",
-      "van.trading.accounts": "0c35622036781ee1e67e9834c9aa3621c8d0f54e32069bc6431a7229d4abfea7",
+      "van.trading.accounts": "b6fd1a9d2f3f2996dc4af32fed189a44ca8474757ac050779d8654a354506c8d",
       "van.trading.cognition": "17a92eb4b0caeb9e94748a9465447482c67ece711267a465ccaf3b36a222d4bd",
-      "van.trading.accounts.add": "e2726814f17ef02cb0e431ddceb1ab88b19a2866d8c83b38346354efe462e52d",
-      "van.trading.strategies": "7e42a757d553e1d7cff6be553bed6573dc7da10e41d113c037d5bd3f89157f3b",
+      "van.trading.accounts.add": "ebb5ca0613d960561e4104b955bea11b7365cf8c0b45f0114eb4e01cca07d63d",
+      "van.trading.strategies": "5fdc4568e136cd8d515fc1a7d617f23ea5932e8effc06d4f22fc67cd292f3ee2",
       "van.trading.halt": "5f19cc2dc2505abf4f1cb376d73964f746dc9553e22ffa7a35c594b9d1f2ce46",
       "van.memory": "2f83550b3f1cdf157972105462896dcf2c85934023e7eb01c83b378a294f2e98",
       "van.projects": "a6cdfb201acd7a81857f7e2cd45d59066683e2a9f150a2bfff76c09a62442b15",
       "van.projects.detail": "7fb4b78baef20ac1c3f31ee3642137d4ce2afc68d0b2b92b9011edf1b4412704",
       "van.connected": "74ff0c3034d082f207a1dfb1380d61f5b5aea1f4a80014f7ae61e67e140405b6",
-      "van.settings": "60ebd79dc7dfb57dc926fa1d69e49982606743293102e1c5ca605bcfb7c2e96b",
+      "van.settings": "4b389d1cf10f86e39289ccb22d28debeb8a63485bd66c37236bbf5500d6571e2",
       "van.settings.voice": "ae880cdcea466a6d8a01e4d58e0f16899dfcd5575ed58486657750646da47a9c",
       "van.settings.notifications": "686bc4a17e6aafc8f3239c25a9b22d099073cb9c2271caddfe4d046c229470fe",
       "van.work.dev.home": "13b9a8432df07ba3c6de17b0d369923fe127623af03aa065f7d553bb2178e60f",
@@ -2787,8 +2787,8 @@
       "van.memory.privacy": "77b8753c6c068dde27da8a907e40e27a07a8a0ed3beadeb79b3fb99df1fc8534",
       "van.knowledge.sources": "720aa395bb351995e4dac104428d337138ca5c1a3cf356f5981b039c70cb2d0a",
       "van.browser.outcome": "8cce7a7df867c130425163f389d33061b922e176b462dd0a0c28ef1e22dd67b8",
-      "van.trading.tickets": "7e689fd088466911a4a608e50b393fcc1e58450eb0829019a594ac50617b5fdc",
-      "van.approval.trading-ticket": "fc53e8b65ed3d43c74bb71dae2b3af184c349f5094042c6e93b109993dfa14df",
+      "van.trading.tickets": "c6ce0a305e5ff72de14455229349ba8af00e7257387439ee17853149a4c7a323",
+      "van.approval.trading-ticket": "4be58edfffceb2a26b97f5150a8e200488c4a39cbaf36b20d3795cefdad7f961",
       "van.attention.decision": "bce99bd26222a24dff1546408562f3d080eecac4bcff88f1cc18676e89f93163",
       "van.work.mission-control": "543617fb2b686d9abb3d1ef760f8d652cf8ecbc68fad9ce74c1d101955d73b6e",
       "van.memory.record": "1c4da4db0f1b6f7ce74627dd1e98d4f5024ce8ce3ed024d765403560eaa533e3",

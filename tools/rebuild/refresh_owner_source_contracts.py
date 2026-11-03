@@ -604,6 +604,22 @@ def build(read=None):
         }
         for row in cleanup_rows:
             row.setdefault('backend_contract_extensions', []).append(copy.deepcopy(extension))
+    restriction_routes={('POST','/v1/trading/accounts/restrictions/'+tail) for tail in
+        ('review','reauth/challenge','reauth/verify','challenge','action')}
+    restriction_routes.update({('GET','/v1/trading/accounts/restrictions/'+tail) for tail in
+        ('records/{alias}','records/{alias}/{restriction_id}','operations/{operation_id}')})
+    for endpoint in endpoint_doc['endpoints']:
+        if (endpoint['method'],endpoint['path']) not in restriction_routes:continue
+        extension={'method':endpoint['method'],'path':endpoint['path'],'endpoint_id':endpoint['endpoint_id'],
+            'source_ref':endpoint['source'],'authentication':endpoint['authentication'],
+            'device_proof_required_when_bound':endpoint['device_proof_required_when_bound'],
+            'source_status':'SOURCE_DEVICE_PAPER_METADATA_QUALIFICATION_ANDROID_NATIVE_PROVIDER_PENDING',
+            'authority':'EXISTING_ENROLLED_DEVICE_STORE_A4_NO_NEW_ISSUER_NO_MODE_MANDATE_GRANT',
+            'canonical_units':['BE-004'],
+            'scope':'Restriction/current-history DATA and entry-only fences. Recovery requires distinct fresh purpose-bound reauthentication and substantive A4 plus actual factory-owned native identity for read-only status. Exact original UNKNOWN/null remains immutable; separately approved causal metadata proof has strict cold readback, no resend or trading grant. Unsupported native-family identity owners, mode/mandate activation, Android and provider acceptance remain open.',
+            'specification':'docs/rebuild/rev118/receipts/ACCOUNT_RESTRICTION_SOURCE_20261103.json',
+            'new_ui_implemented':False,'live_qualified':False}
+        for row in cleanup_rows:row.setdefault('backend_contract_extensions',[]).append(copy.deepcopy(extension))
     for endpoint in endpoint_doc["endpoints"]:
         if not endpoint["path"].startswith("/v1/trading/charts/"):
             continue

@@ -28,7 +28,7 @@ from urllib.request import Request, urlopen
 
 from fastapi import HTTPException
 
-ACTIONS = ("account_upsert", "account_credentials", "account_remove", "account_verify", "deriv_verify_email", "deriv_create_demo", "deriv_oauth_link", "ctrader_discover", "ctrader_link", "mt5_ea_issue_key", "oauth_start", "oauth_pending")
+ACTIONS = ("account_restrict", "account_upsert", "account_credentials", "account_remove", "account_verify", "deriv_verify_email", "deriv_create_demo", "deriv_oauth_link", "ctrader_discover", "ctrader_link", "mt5_ea_issue_key", "oauth_start", "oauth_pending")
 #: P1-SEC-004. Actions that only read state; a biometric prompt for these would train the
 #: owner to approve without reading. Everything else changes an account or a credential and
 #: needs a CryptoObject-bound A4 proof, not a prompt that returned a boolean.

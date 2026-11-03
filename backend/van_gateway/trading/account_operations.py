@@ -24,7 +24,7 @@ BROKER_NAMES = frozenset({"PAPER", "DERIV", "CTRADER", "MT5", "MT5_EA", "ZSE_OWN
 
 OPERATIONS = (
     "link_existing", "create_demo", "request_live", "edit_local", "edit_broker",
-    "rotate_credentials", "unlink_local", "close_broker", "deposit", "withdraw",
+    "rotate_credentials", "restrict", "unlink_local", "close_broker", "deposit", "withdraw",
     "transfer", "transactions", "kyc_status", "change_leverage", "change_password",
 )
 
@@ -63,6 +63,7 @@ def capabilities_for(*, broker: str, demo: bool, safety_identity: str) -> dict[s
         "edit_broker": provider("Broker-side account details require a verified broker account-management API or session."),
         "rotate_credentials": enabled_local("account_credentials", "Update stored broker credentials through owner-approved account action.") if kind in ("DERIV", "CTRADER", "MT5", "MT5_EA") else
             _operation(UNSUPPORTED, "No broker credentials are stored for this account type.", "NONE"),
+        "restrict": enabled_local("account_restrict", "Restrict new entries with device-signed A4; recovery requires fresh purpose-bound reauthentication, a distinct A4 and fresh native identity for read-only status. No mode, mandate or entry authority is granted; missing native identity owners HOLD."),
         "unlink_local": _operation(NEEDS_EXPOSURE, "Require current position/order/protection and lease readback before unlinking; unlinking never closes the broker account.", "BROKER_AND_VATI_RECONCILIATION"),
         "close_broker": provider("Broker account closure is distinct from removing a VAN connection and requires broker verification."),
         "deposit": provider("No qualified funding adapter, payment authorization or broker receipt readback is connected."),

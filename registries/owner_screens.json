@@ -19025,6 +19025,142 @@
           "specification": "docs/rebuild/rev118/receipts/ACCOUNT_GRACE_LIFECYCLE_SOURCE_20261102.json",
           "new_ui_implemented": false,
           "live_qualified": false
+        },
+        {
+          "method": "GET",
+          "path": "/v1/trading/accounts/restrictions/operations/{operation_id}",
+          "endpoint_id": "VE-d9b12bdf81a8",
+          "source_ref": "backend/van_gateway/trading/account_restrictions.py:633",
+          "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+          "device_proof_required_when_bound": false,
+          "source_status": "SOURCE_DEVICE_PAPER_METADATA_QUALIFICATION_ANDROID_NATIVE_PROVIDER_PENDING",
+          "authority": "EXISTING_ENROLLED_DEVICE_STORE_A4_NO_NEW_ISSUER_NO_MODE_MANDATE_GRANT",
+          "canonical_units": [
+            "BE-004"
+          ],
+          "scope": "Restriction/current-history DATA and entry-only fences. Recovery requires distinct fresh purpose-bound reauthentication and substantive A4 plus actual factory-owned native identity for read-only status. Exact original UNKNOWN/null remains immutable; separately approved causal metadata proof has strict cold readback, no resend or trading grant. Unsupported native-family identity owners, mode/mandate activation, Android and provider acceptance remain open.",
+          "specification": "docs/rebuild/rev118/receipts/ACCOUNT_RESTRICTION_SOURCE_20261103.json",
+          "new_ui_implemented": false,
+          "live_qualified": false
+        },
+        {
+          "method": "GET",
+          "path": "/v1/trading/accounts/restrictions/records/{alias}",
+          "endpoint_id": "VE-f7b08fb3a729",
+          "source_ref": "backend/van_gateway/trading/account_restrictions.py:624",
+          "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+          "device_proof_required_when_bound": false,
+          "source_status": "SOURCE_DEVICE_PAPER_METADATA_QUALIFICATION_ANDROID_NATIVE_PROVIDER_PENDING",
+          "authority": "EXISTING_ENROLLED_DEVICE_STORE_A4_NO_NEW_ISSUER_NO_MODE_MANDATE_GRANT",
+          "canonical_units": [
+            "BE-004"
+          ],
+          "scope": "Restriction/current-history DATA and entry-only fences. Recovery requires distinct fresh purpose-bound reauthentication and substantive A4 plus actual factory-owned native identity for read-only status. Exact original UNKNOWN/null remains immutable; separately approved causal metadata proof has strict cold readback, no resend or trading grant. Unsupported native-family identity owners, mode/mandate activation, Android and provider acceptance remain open.",
+          "specification": "docs/rebuild/rev118/receipts/ACCOUNT_RESTRICTION_SOURCE_20261103.json",
+          "new_ui_implemented": false,
+          "live_qualified": false
+        },
+        {
+          "method": "GET",
+          "path": "/v1/trading/accounts/restrictions/records/{alias}/{restriction_id}",
+          "endpoint_id": "VE-b680a902af47",
+          "source_ref": "backend/van_gateway/trading/account_restrictions.py:628",
+          "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+          "device_proof_required_when_bound": false,
+          "source_status": "SOURCE_DEVICE_PAPER_METADATA_QUALIFICATION_ANDROID_NATIVE_PROVIDER_PENDING",
+          "authority": "EXISTING_ENROLLED_DEVICE_STORE_A4_NO_NEW_ISSUER_NO_MODE_MANDATE_GRANT",
+          "canonical_units": [
+            "BE-004"
+          ],
+          "scope": "Restriction/current-history DATA and entry-only fences. Recovery requires distinct fresh purpose-bound reauthentication and substantive A4 plus actual factory-owned native identity for read-only status. Exact original UNKNOWN/null remains immutable; separately approved causal metadata proof has strict cold readback, no resend or trading grant. Unsupported native-family identity owners, mode/mandate activation, Android and provider acceptance remain open.",
+          "specification": "docs/rebuild/rev118/receipts/ACCOUNT_RESTRICTION_SOURCE_20261103.json",
+          "new_ui_implemented": false,
+          "live_qualified": false
+        },
+        {
+          "method": "POST",
+          "path": "/v1/trading/accounts/restrictions/action",
+          "endpoint_id": "VE-6e88b7d6a053",
+          "source_ref": "backend/van_gateway/trading/account_restrictions.py:620",
+          "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+          "device_proof_required_when_bound": true,
+          "source_status": "SOURCE_DEVICE_PAPER_METADATA_QUALIFICATION_ANDROID_NATIVE_PROVIDER_PENDING",
+          "authority": "EXISTING_ENROLLED_DEVICE_STORE_A4_NO_NEW_ISSUER_NO_MODE_MANDATE_GRANT",
+          "canonical_units": [
+            "BE-004"
+          ],
+          "scope": "Restriction/current-history DATA and entry-only fences. Recovery requires distinct fresh purpose-bound reauthentication and substantive A4 plus actual factory-owned native identity for read-only status. Exact original UNKNOWN/null remains immutable; separately approved causal metadata proof has strict cold readback, no resend or trading grant. Unsupported native-family identity owners, mode/mandate activation, Android and provider acceptance remain open.",
+          "specification": "docs/rebuild/rev118/receipts/ACCOUNT_RESTRICTION_SOURCE_20261103.json",
+          "new_ui_implemented": false,
+          "live_qualified": false
+        },
+        {
+          "method": "POST",
+          "path": "/v1/trading/accounts/restrictions/challenge",
+          "endpoint_id": "VE-1e94c8a6aee2",
+          "source_ref": "backend/van_gateway/trading/account_restrictions.py:618",
+          "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+          "device_proof_required_when_bound": true,
+          "source_status": "SOURCE_DEVICE_PAPER_METADATA_QUALIFICATION_ANDROID_NATIVE_PROVIDER_PENDING",
+          "authority": "EXISTING_ENROLLED_DEVICE_STORE_A4_NO_NEW_ISSUER_NO_MODE_MANDATE_GRANT",
+          "canonical_units": [
+            "BE-004"
+          ],
+          "scope": "Restriction/current-history DATA and entry-only fences. Recovery requires distinct fresh purpose-bound reauthentication and substantive A4 plus actual factory-owned native identity for read-only status. Exact original UNKNOWN/null remains immutable; separately approved causal metadata proof has strict cold readback, no resend or trading grant. Unsupported native-family identity owners, mode/mandate activation, Android and provider acceptance remain open.",
+          "specification": "docs/rebuild/rev118/receipts/ACCOUNT_RESTRICTION_SOURCE_20261103.json",
+          "new_ui_implemented": false,
+          "live_qualified": false
+        },
+        {
+          "method": "POST",
+          "path": "/v1/trading/accounts/restrictions/reauth/challenge",
+          "endpoint_id": "VE-9d42435f59a0",
+          "source_ref": "backend/van_gateway/trading/account_restrictions.py:614",
+          "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+          "device_proof_required_when_bound": true,
+          "source_status": "SOURCE_DEVICE_PAPER_METADATA_QUALIFICATION_ANDROID_NATIVE_PROVIDER_PENDING",
+          "authority": "EXISTING_ENROLLED_DEVICE_STORE_A4_NO_NEW_ISSUER_NO_MODE_MANDATE_GRANT",
+          "canonical_units": [
+            "BE-004"
+          ],
+          "scope": "Restriction/current-history DATA and entry-only fences. Recovery requires distinct fresh purpose-bound reauthentication and substantive A4 plus actual factory-owned native identity for read-only status. Exact original UNKNOWN/null remains immutable; separately approved causal metadata proof has strict cold readback, no resend or trading grant. Unsupported native-family identity owners, mode/mandate activation, Android and provider acceptance remain open.",
+          "specification": "docs/rebuild/rev118/receipts/ACCOUNT_RESTRICTION_SOURCE_20261103.json",
+          "new_ui_implemented": false,
+          "live_qualified": false
+        },
+        {
+          "method": "POST",
+          "path": "/v1/trading/accounts/restrictions/reauth/verify",
+          "endpoint_id": "VE-2fbc1ff2704a",
+          "source_ref": "backend/van_gateway/trading/account_restrictions.py:616",
+          "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+          "device_proof_required_when_bound": true,
+          "source_status": "SOURCE_DEVICE_PAPER_METADATA_QUALIFICATION_ANDROID_NATIVE_PROVIDER_PENDING",
+          "authority": "EXISTING_ENROLLED_DEVICE_STORE_A4_NO_NEW_ISSUER_NO_MODE_MANDATE_GRANT",
+          "canonical_units": [
+            "BE-004"
+          ],
+          "scope": "Restriction/current-history DATA and entry-only fences. Recovery requires distinct fresh purpose-bound reauthentication and substantive A4 plus actual factory-owned native identity for read-only status. Exact original UNKNOWN/null remains immutable; separately approved causal metadata proof has strict cold readback, no resend or trading grant. Unsupported native-family identity owners, mode/mandate activation, Android and provider acceptance remain open.",
+          "specification": "docs/rebuild/rev118/receipts/ACCOUNT_RESTRICTION_SOURCE_20261103.json",
+          "new_ui_implemented": false,
+          "live_qualified": false
+        },
+        {
+          "method": "POST",
+          "path": "/v1/trading/accounts/restrictions/review",
+          "endpoint_id": "VE-1abe72a3639d",
+          "source_ref": "backend/van_gateway/trading/account_restrictions.py:609",
+          "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+          "device_proof_required_when_bound": true,
+          "source_status": "SOURCE_DEVICE_PAPER_METADATA_QUALIFICATION_ANDROID_NATIVE_PROVIDER_PENDING",
+          "authority": "EXISTING_ENROLLED_DEVICE_STORE_A4_NO_NEW_ISSUER_NO_MODE_MANDATE_GRANT",
+          "canonical_units": [
+            "BE-004"
+          ],
+          "scope": "Restriction/current-history DATA and entry-only fences. Recovery requires distinct fresh purpose-bound reauthentication and substantive A4 plus actual factory-owned native identity for read-only status. Exact original UNKNOWN/null remains immutable; separately approved causal metadata proof has strict cold readback, no resend or trading grant. Unsupported native-family identity owners, mode/mandate activation, Android and provider acceptance remain open.",
+          "specification": "docs/rebuild/rev118/receipts/ACCOUNT_RESTRICTION_SOURCE_20261103.json",
+          "new_ui_implemented": false,
+          "live_qualified": false
         }
       ]
     },
@@ -19549,7 +19685,7 @@
           "registration": "DEFAULT",
           "device_proof_required_when_bound": true,
           "frontend_access": "DIRECT_OWNER_ROUTE",
-          "source_ref": "backend/van_gateway/app.py:3953",
+          "source_ref": "backend/van_gateway/app.py:3956",
           "client_function": "tradingAccountChallenge",
           "client_symbol": "tradingAccountChallenge",
           "client_namespace": "VanGatewayClient",
@@ -19590,7 +19726,7 @@
           "registration": "DEFAULT",
           "device_proof_required_when_bound": true,
           "frontend_access": "DIRECT_OWNER_ROUTE",
-          "source_ref": "backend/van_gateway/app.py:4025",
+          "source_ref": "backend/van_gateway/app.py:4030",
           "client_function": "tradingAccountAction",
           "client_symbol": "tradingAccountAction",
           "client_namespace": "VanGatewayClient",
@@ -20109,7 +20245,7 @@
           "source_status": "CANDIDATE_SOURCE_ANDROID_REPAIR_NATIVE_ACCEPTANCE_PENDING",
           "client_namespace": "VanGatewayClient",
           "client_function": "tradingAccountOperation",
-          "source_ref": "backend/van_gateway/app.py:3997",
+          "source_ref": "backend/van_gateway/app.py:4002",
           "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
           "device_proof_required_when_bound": false,
           "authority": "READ_ORIGINAL_DEVICE_OWNED_ACCOUNT_OUTCOME_NO_EXECUTION_OR_CREDENTIAL_EXPORT",
@@ -20126,7 +20262,7 @@
           "source_status": "CANDIDATE_SOURCE_ANDROID_REPAIR_NATIVE_ACCEPTANCE_PENDING",
           "client_namespace": "VanGatewayClient",
           "client_function": "tradingAccountCatalog",
-          "source_ref": "backend/van_gateway/app.py:3901",
+          "source_ref": "backend/van_gateway/app.py:3904",
           "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
           "device_proof_required_when_bound": false,
           "authority": "READ_FIELD_CONTRACTS_ONLY_NO_APPROVAL_OR_ACCOUNT_EFFECT",
@@ -20140,7 +20276,7 @@
           "method": "GET",
           "path": "/v1/trading/accounts/brokers",
           "endpoint_id": "VE-61fb21dc8a0f",
-          "source_ref": "backend/van_gateway/app.py:3891",
+          "source_ref": "backend/van_gateway/app.py:3894",
           "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
           "device_proof_required_when_bound": false,
           "source_status": "CANDIDATE_BACKEND_DIRECTORY_SOURCE_ANDROID_CONSUMER_PENDING",
@@ -20248,7 +20384,7 @@
           "registration": "DEFAULT",
           "device_proof_required_when_bound": false,
           "frontend_access": "DIRECT_OWNER_ROUTE",
-          "source_ref": "backend/van_gateway/app.py:4168",
+          "source_ref": "backend/van_gateway/app.py:4175",
           "client_function": "tradingPromotionCandidates",
           "client_symbol": "tradingPromotionCandidates",
           "client_namespace": "VanGatewayClient",
@@ -20289,7 +20425,7 @@
           "registration": "DEFAULT",
           "device_proof_required_when_bound": true,
           "frontend_access": "DIRECT_OWNER_ROUTE",
-          "source_ref": "backend/van_gateway/app.py:4181",
+          "source_ref": "backend/van_gateway/app.py:4188",
           "client_function": "tradingPromotionChallenge",
           "client_symbol": "tradingPromotionChallenge",
           "client_namespace": "VanGatewayClient",
@@ -20330,7 +20466,7 @@
           "registration": "DEFAULT",
           "device_proof_required_when_bound": true,
           "frontend_access": "DIRECT_OWNER_ROUTE",
-          "source_ref": "backend/van_gateway/app.py:4203",
+          "source_ref": "backend/van_gateway/app.py:4210",
           "client_function": "tradingPromoteStrategy",
           "client_symbol": "tradingPromoteStrategy",
           "client_namespace": "VanGatewayClient",
@@ -28764,7 +28900,7 @@
           "registration": "DEFAULT",
           "device_proof_required_when_bound": true,
           "frontend_access": "DIRECT_OWNER_ROUTE",
-          "source_ref": "backend/van_gateway/app.py:4343",
+          "source_ref": "backend/van_gateway/app.py:4350",
           "client_function": "recordVisualAcceptance",
           "client_symbol": "recordVisualAcceptance",
           "client_namespace": "VanGatewayClient",
@@ -69102,7 +69238,7 @@
           "registration": "DEFAULT",
           "device_proof_required_when_bound": false,
           "frontend_access": "DIRECT_OWNER_ROUTE",
-          "source_ref": "backend/van_gateway/app.py:4367",
+          "source_ref": "backend/van_gateway/app.py:4374",
           "client_function": "tradingTickets",
           "client_symbol": "tradingTickets",
           "client_namespace": "VanGatewayClient",
@@ -69536,7 +69672,7 @@
           "registration": "DEFAULT",
           "device_proof_required_when_bound": false,
           "frontend_access": "DIRECT_OWNER_ROUTE",
-          "source_ref": "backend/van_gateway/app.py:4367",
+          "source_ref": "backend/van_gateway/app.py:4374",
           "client_function": "tradingTickets",
           "client_symbol": "tradingTickets",
           "client_namespace": "VanGatewayClient",
@@ -76129,7 +76265,7 @@
     "android_receipt": null,
     "android_receipt_sha256": null,
     "scope": "Bounded current source-citation/endpoint refresh; previous reviews retained. Whole-product, Android, deployment/provider and handset qualifications remain separate.",
-    "source_review_manifest_sha256": "cca6e2a02c69eb295f5e75c8a3e2bd57ebb0a6c2e5503efc33ccfc521d58f9b6"
+    "source_review_manifest_sha256": "d8ddb78a9239158f76c1a6a193a01a5b428caeb8724d52c32130f0c1489afac7"
   },
   "repaired_mutations": [
     {
