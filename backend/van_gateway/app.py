@@ -3886,6 +3886,18 @@ def create_app() -> FastAPI:
             'locked_until':error.locked_until,'retry_after':error.retry_after}},headers={
             'Cache-Control':'no-store',**({'Retry-After':str(error.retry_after)} if error.retry_after else {})})
 
+    from van_gateway.trading.broker_directory import broker_directory,BrokerDirectoryResponse
+
+    @app.get('/v1/trading/accounts/brokers',response_model=BrokerDirectoryResponse,response_model_exclude_unset=True)
+    async def trading_broker_directory(request:Request):
+        device_id=getattr(request.state,'van_device_id',None)
+        if not device_id:raise HTTPException(403,'paired owner device is required')
+        try:await auth.require_device(device_id)
+        except AuthError as error:raise HTTPException(403,error.message) from None
+        # The same authenticated read boundary as the action catalog. No
+        # native account dispatch, provider observation, or action permission.
+        return broker_directory()
+
     @app.get('/v1/trading/accounts/catalog',response_model=AccountActionCatalog)
     async def trading_account_catalog(request: Request):
         device_id=getattr(request.state,'van_device_id',None)

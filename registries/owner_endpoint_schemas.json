@@ -2715,6 +2715,51 @@
         ],
         "title": "BootstrapRecoverBody"
       },
+      "BrokerDirectoryResponse": {
+        "properties": {
+          "schema": {
+            "type": "string",
+            "const": "van.broker-directory/1",
+            "title": "Schema"
+          },
+          "source": {
+            "type": "string",
+            "const": "VAN_ACCOUNT_SOURCE",
+            "title": "Source"
+          },
+          "freshness": {
+            "type": "string",
+            "const": "NOT_PROVIDER_READBACK",
+            "title": "Freshness"
+          },
+          "execution_authority": {
+            "type": "boolean",
+            "const": false,
+            "title": "Execution Authority"
+          },
+          "content_revision": {
+            "$ref": "#/components/schemas/DirectoryRevision"
+          },
+          "families": {
+            "items": {
+              "$ref": "#/components/schemas/DirectoryFamily"
+            },
+            "type": "array",
+            "title": "Families"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "schema",
+          "source",
+          "freshness",
+          "execution_authority",
+          "content_revision",
+          "families"
+        ],
+        "title": "BrokerDirectoryResponse"
+      },
       "BrowserEvidenceSummary": {
         "properties": {
           "evidence_id": {
@@ -5651,6 +5696,304 @@
           "data"
         ],
         "title": "DialDevNativeActionEnvelope"
+      },
+      "DirectoryDemo": {
+        "properties": {
+          "state": {
+            "type": "string",
+            "enum": [
+              "SOURCE_IMPLEMENTED",
+              "PROVIDER_ADMISSION_REQUIRED",
+              "UNKNOWN"
+            ],
+            "title": "State"
+          },
+          "action": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Action"
+          },
+          "value": {
+            "type": "null",
+            "title": "Value"
+          },
+          "provenance": {
+            "type": "string",
+            "title": "Provenance"
+          },
+          "freshness": {
+            "type": "string",
+            "enum": [
+              "NOT_PROVIDER_READBACK",
+              "NOT_OBSERVED"
+            ],
+            "title": "Freshness"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "state",
+          "provenance",
+          "freshness"
+        ],
+        "title": "DirectoryDemo"
+      },
+      "DirectoryFamily": {
+        "properties": {
+          "family": {
+            "type": "string",
+            "enum": [
+              "CTRADER",
+              "DERIV",
+              "MT5",
+              "MT5_EA",
+              "PAPER",
+              "ZSE_OWNER_TICKET",
+              "VFEX",
+              "CEX_SPOT"
+            ],
+            "title": "Family"
+          },
+          "native_broker_kind": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Native Broker Kind"
+          },
+          "family_state": {
+            "type": "string",
+            "enum": [
+              "SOURCE_FAMILY",
+              "REQUIRED_UNADMITTED"
+            ],
+            "title": "Family State"
+          },
+          "linking": {
+            "$ref": "#/components/schemas/DirectoryLink"
+          },
+          "additional_linking_requirements": {
+            "items": {
+              "$ref": "#/components/schemas/DirectoryLink"
+            },
+            "type": "array",
+            "title": "Additional Linking Requirements"
+          },
+          "demo_availability": {
+            "$ref": "#/components/schemas/DirectoryDemo"
+          },
+          "capabilities": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/UnknownProviderFact"
+            },
+            "type": "object",
+            "title": "Capabilities"
+          },
+          "operations": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "$ref": "#/components/schemas/DirectoryOperation"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Operations"
+          },
+          "operations_provenance": {
+            "type": "string",
+            "title": "Operations Provenance"
+          },
+          "canonical_requirements": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Canonical Requirements"
+          },
+          "required_versioned_identity": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "$ref": "#/components/schemas/UnknownProviderFact"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Required Versioned Identity"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "family",
+          "native_broker_kind",
+          "family_state",
+          "linking",
+          "additional_linking_requirements",
+          "demo_availability",
+          "capabilities",
+          "operations",
+          "operations_provenance"
+        ],
+        "title": "DirectoryFamily"
+      },
+      "DirectoryLink": {
+        "properties": {
+          "method": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Method"
+          },
+          "action": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Action"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "SOURCE_IMPLEMENTED",
+              "REQUIRED_UNQUALIFIED"
+            ],
+            "title": "State"
+          },
+          "provenance": {
+            "type": "string",
+            "title": "Provenance"
+          },
+          "freshness": {
+            "type": "string",
+            "const": "NOT_PROVIDER_READBACK",
+            "title": "Freshness"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "method",
+          "action",
+          "state",
+          "provenance",
+          "freshness"
+        ],
+        "title": "DirectoryLink"
+      },
+      "DirectoryOperation": {
+        "properties": {
+          "state": {
+            "type": "string",
+            "title": "State"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          },
+          "authority": {
+            "type": "string",
+            "title": "Authority"
+          },
+          "action": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Action"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "state",
+          "reason",
+          "authority",
+          "action"
+        ],
+        "title": "DirectoryOperation"
+      },
+      "DirectoryRevision": {
+        "properties": {
+          "algorithm": {
+            "type": "string",
+            "const": "SHA-256",
+            "title": "Algorithm"
+          },
+          "digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Digest"
+          },
+          "scope": {
+            "type": "string",
+            "const": "SOURCE_PROJECTION_CONTENT",
+            "title": "Scope"
+          },
+          "freshness": {
+            "type": "string",
+            "const": "NOT_PROVIDER_READBACK",
+            "title": "Freshness"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "algorithm",
+          "digest",
+          "scope",
+          "freshness"
+        ],
+        "title": "DirectoryRevision"
       },
       "DocumentErrorResponse": {
         "properties": {
@@ -15690,6 +16033,38 @@
         ],
         "title": "TransitionBody",
         "description": "P0-VERIFY-001 \u2014 there is deliberately no `verification` field.\n\nIt used to accept a VerificationRecord from the caller, and the audit drove a mission\nto VERIFIED_SUCCESS through this route with `verifier_version: \"i-say-so/1.0\"` and\n`evidence_refs: [\"evidence://trust-me\"]`. A receipt written by whoever is claiming the\noutcome is the claim restated, not evidence for it. The gateway now runs the verifier\nthe mission's own success contract names, and the record it produces is the only one\nthat can be stored, so there is nothing useful a caller could put here.\n\nPydantic is configured to reject unknown fields on this body rather than ignore them,\nso an old client still sending `verification` gets a 422 and learns the rule instead of\nbelieving it was honoured."
+      },
+      "UnknownProviderFact": {
+        "properties": {
+          "state": {
+            "type": "string",
+            "const": "UNKNOWN",
+            "title": "State"
+          },
+          "value": {
+            "type": "null",
+            "title": "Value"
+          },
+          "provenance": {
+            "type": "string",
+            "const": "NO_ADMITTED_PROVIDER_SOURCE",
+            "title": "Provenance"
+          },
+          "freshness": {
+            "type": "string",
+            "const": "NOT_OBSERVED",
+            "title": "Freshness"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "state",
+          "value",
+          "provenance",
+          "freshness"
+        ],
+        "title": "UnknownProviderFact"
       },
       "UnresolvedProvider": {
         "properties": {

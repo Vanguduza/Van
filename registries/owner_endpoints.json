@@ -10182,6 +10182,34 @@
       "readiness": "REPOSITORY_DECLARATION_ONLY"
     },
     {
+      "endpoint_id": "VE-61fb21dc8a0f",
+      "method": "GET",
+      "path": "/v1/trading/accounts/brokers",
+      "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+      "device_proof_required_when_bound": false,
+      "registration": "DEFAULT",
+      "condition": null,
+      "source": "backend/van_gateway/app.py:3891",
+      "summary": "Trading Broker Directory",
+      "tags": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BrokerDirectoryResponse"
+              }
+            }
+          }
+        }
+      },
+      "openapi_components": "owner_endpoint_schemas.json",
+      "readiness": "REPOSITORY_DECLARATION_ONLY"
+    },
+    {
       "endpoint_id": "VE-ab7afddc7f0e",
       "method": "GET",
       "path": "/v1/trading/accounts/catalog",
@@ -10189,7 +10217,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3889",
+      "source": "backend/van_gateway/app.py:3901",
       "summary": "Trading Account Catalog",
       "tags": [],
       "parameters": [],
@@ -10470,7 +10498,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3985",
+      "source": "backend/van_gateway/app.py:3997",
       "summary": "Trading Account Operation",
       "tags": [],
       "parameters": [
@@ -12794,7 +12822,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:4302",
+      "source": "backend/van_gateway/app.py:4314",
       "summary": "Trading Oauth Callback",
       "tags": [],
       "parameters": [
@@ -13111,7 +13139,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:4156",
+      "source": "backend/van_gateway/app.py:4168",
       "summary": "Trading Strategy Promotion Candidates",
       "tags": [],
       "parameters": [],
@@ -13137,7 +13165,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:4355",
+      "source": "backend/van_gateway/app.py:4367",
       "summary": "Trading Tickets",
       "tags": [],
       "parameters": [
@@ -13708,7 +13736,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:4346",
+      "source": "backend/van_gateway/app.py:4358",
       "summary": "Latest Visual Acceptance",
       "tags": [],
       "parameters": [],
@@ -21402,7 +21430,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:4419",
+      "source": "backend/van_gateway/app.py:4431",
       "summary": "Reset Events",
       "tags": [],
       "parameters": [
@@ -25729,7 +25757,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:4013",
+      "source": "backend/van_gateway/app.py:4025",
       "summary": "Trading Account Action",
       "tags": [],
       "parameters": [],
@@ -25833,7 +25861,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3941",
+      "source": "backend/van_gateway/app.py:3953",
       "summary": "Trading Account Challenge",
       "tags": [],
       "parameters": [],
@@ -26535,7 +26563,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:4359",
+      "source": "backend/van_gateway/app.py:4371",
       "summary": "Trading Halt",
       "tags": [],
       "parameters": [
@@ -27533,7 +27561,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:4191",
+      "source": "backend/van_gateway/app.py:4203",
       "summary": "Trading Strategy Promote",
       "tags": [],
       "parameters": [],
@@ -27578,7 +27606,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:4169",
+      "source": "backend/van_gateway/app.py:4181",
       "summary": "Trading Strategy Promotion Challenge",
       "tags": [],
       "parameters": [],
@@ -27623,7 +27651,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:4383",
+      "source": "backend/van_gateway/app.py:4395",
       "summary": "Trading Confirm Ticket",
       "tags": [],
       "parameters": [
@@ -28007,7 +28035,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:4331",
+      "source": "backend/van_gateway/app.py:4343",
       "summary": "Record Visual Acceptance",
       "tags": [],
       "parameters": [],

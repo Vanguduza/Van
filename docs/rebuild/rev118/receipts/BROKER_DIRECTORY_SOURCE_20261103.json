@@ -1,0 +1,88 @@
+{
+  "schema": "van.broker-directory-source/1",
+  "created_utc": "2026-11-03T11:48:57.588166+00:00",
+  "base": "076404a755dc0ccc91d5062a8448638ba0fc9877",
+  "qualification": "SOURCE_CANDIDATE_ONLY",
+  "behavior": "Typed authenticated read-only source projection: six source families plus required/unadmitted VFEX and CEX spot. MT5 investor-password method remains required/unqualified. All 11 provider-native fields and required CEX versioned identities are UNKNOWN; content revision hashes actual source projection rows and does not claim current provider data or execution authority.",
+  "canonical_coverage": {
+    "source_families": [
+      "CTRADER",
+      "DERIV",
+      "MT5",
+      "MT5_EA",
+      "PAPER",
+      "ZSE_OWNER_TICKET"
+    ],
+    "required_unadmitted": [
+      "VFEX",
+      "CEX_SPOT"
+    ],
+    "provider_fields": [
+      "order_types",
+      "fill_policies",
+      "expiries",
+      "stop_mode",
+      "hedging_netting",
+      "minimum_lot",
+      "instruments",
+      "regulator",
+      "account_currencies",
+      "minimum_deposit",
+      "open_account_url"
+    ],
+    "CEX_obligations": [
+      "VAN-CRYPTO-001",
+      "VAN-CRYPTO-002",
+      "VAN-CRYPTO-013",
+      "VAN-RV-008"
+    ],
+    "CEX_identity_unknown": [
+      "api_family",
+      "account_subaccount",
+      "native_product",
+      "spot_type",
+      "base",
+      "quote",
+      "network"
+    ]
+  },
+  "source_pins": {
+    "backend/van_gateway/app.py": "eeab77e57211d21dd43cee269e9549f8541518891294ceaa47a9dbea8f427512",
+    "backend/van_gateway/trading/broker_directory.py": "b4e2c65a896981f9e338f7610edf5db10d3fc3316b9801f7bce2529650ac9760",
+    "backend/tests/test_broker_directory.py": "02bc265fe7fceab1cc5d2f5c5ba81512ed65cd1f095a28ae794ec1c05da8d34c",
+    "tools/rebuild/refresh_owner_source_contracts.py": "9309747cbdecd1c0b10a1f43272d1dc58d20a92fddbe7e88b6f021f069e12c0e"
+  },
+  "recovery": {
+    "source_archive": "/workspace/van-delivery-continuation-20261103/DIRECTORY_R3_RECOVERED_SOURCE_20261103.zip",
+    "sha256": "e0da1b7845ed47e78936126760106e08bea705955dde3f3e1204feb4753fe2de",
+    "crc": "PASS",
+    "original_R3_archive_and_receipt": "LOST; not restored or represented as recovered",
+    "module_and_test": "Recovered bytes match original R3 exact SHA-256 pins from retained conversation; app source matches previously observed full SHA.",
+    "prior_test_evidence": "Original R3 receipt and archive were lost; historical 7-pass survives only in conversation. Fresh recovered safe7 independently observed PASS7/0skip/exit0 with original exact R3 app/module/test hashes."
+  },
+  "review": "Integrator independently reviewed R2/R3 source and HTTP tests with no blocker; directory module author is not its independent reviewer. Separate bounded review of integrator-owned app and generator deltas found no blocker; final packet review remains required.",
+  "parent_source_status": {
+    "head": "076404a755dc0ccc91d5062a8448638ba0fc9877",
+    "committed_baseline": "GREEN246 terminal success before normal push; exact remote readback",
+    "hosted_run": 41614715981,
+    "jobs": "41 total, 32 successes, 9 failures (actual root terminal read; matrix detail in ROOT_MATRIX_QUALIFICATION.json)",
+    "matrix": "BLOCKED_INCOMPLETE_QUALIFICATION; 16 profiles verified, public-worker/private-DDS and exact union gates remain open; no certificates",
+    "cleanup_limit": "Historical 123 Git plus one Python zombie under PID1 are not claimed cleaned; maintained runner process preflights were bounded and source-independent.",
+    "reference": "/workspace/van-delivery-continuation-20261103/CI_076_TERMINAL_20261103/ROOT_MATRIX_QUALIFICATION.json"
+  },
+  "remaining": {
+    "directory": "Current seven-case focused run passed; actual private-core topology/import checks, normal owner generation, final packet review, genuine final guards and committed baseline remain pending.",
+    "restriction": "Separate active foundation-only WIP; native owner and Gateway flows are UNIMPLEMENTED and excluded from directory packet.",
+    "BE004": "OPEN: eight verbs/11 requirements/21 acceptances/20 contexts/6 owner actions; no unit/native acceptance.",
+    "CEX": "Real eligible versioned spot integration, matching, settlement, protection and recovery remain open; placeholder row grants no eligibility.",
+    "other": "Provider, Android and protected entry67 gates remain open; no frontend, provider, credential or financial effect is claimed."
+  },
+  "final_guards": "Normal owner/frontend/workmap/mutation consistency (mutation corpus NOT_RUN), consolidation, PRE003, genuine hooks and complete final-head committed baseline required. Actual outcomes recorded externally only.",
+  "local_evidence": {
+    "label": "directory-recovered-r3-safe7",
+    "result": "7 PASS, 0 skip, exit0; direct child waited, owned children absent, no exception",
+    "finished_utc": "2026-11-03T11:47:58Z",
+    "scope": "Five pure source/schema cases and two paired HTTP projection/revocation cases; local isolated fixture. No provider/financial effect.",
+    "generator_limit": "Additive owner-contract generator patch was made after this run and requires normal generation/topology verification."
+  }
+}

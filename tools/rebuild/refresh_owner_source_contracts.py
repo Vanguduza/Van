@@ -426,6 +426,19 @@ def build(read=None):
     }
     for row in (accounts, account_screen):
         row.setdefault("backend_contract_extensions", []).append(copy.deepcopy(account_controls))
+    directory = next(r for r in endpoint_doc["endpoints"] if (r["method"], r["path"]) == ("GET", "/v1/trading/accounts/brokers"))
+    directory_extension = {
+        "method": "GET", "path": directory["path"], "endpoint_id": directory["endpoint_id"],
+        "source_ref": directory["source"], "authentication": directory["authentication"],
+        "device_proof_required_when_bound": directory["device_proof_required_when_bound"],
+        "source_status": "CANDIDATE_BACKEND_DIRECTORY_SOURCE_ANDROID_CONSUMER_PENDING",
+        "authority": "CURRENT_PAIRED_DEVICE_READ_SOURCE_PROJECTION_NO_EXECUTION_OR_PROVIDER_ADMISSION",
+        "scope": "All source broker families plus required unadmitted VFEX and CEX spot. Link methods and local operation policy are source facts; provider capability, regulator, deposit, onboarding and versioned CEX identity facts remain explicitly unknown until admitted provider evidence exists.",
+        "specification": "docs/rebuild/rev118/receipts/BROKER_DIRECTORY_SOURCE_20261103.json",
+        "new_ui_implemented": False, "live_qualified": False,
+    }
+    for row in (accounts, account_screen):
+        row.setdefault("backend_contract_extensions", []).append(copy.deepcopy(directory_extension))
     account_fact_targets = [accounts] + [r for r in documents['owner_screens']['screens']
         if accounts['id'] in r.get('feature_ids', [])]
     if len(account_fact_targets) == 1:
