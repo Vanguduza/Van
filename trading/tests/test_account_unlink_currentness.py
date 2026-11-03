@@ -58,9 +58,14 @@ async def test_actual_registered_unlink_rechecks_current_envelope_at_writer_and_
         result=await ac.post('/v1/trading/accounts/action',json=body)
         assert reached
         if fault!='healthy_cached':
-            assert result.status_code==409 and result.json()['effect_state']=='UNKNOWN',result.text
-            # Current transport loss prevents Gateway from independently reading
-            # the already sealed native refusal; original journal stays REFUSED.
+            expected='UNKNOWN' if fault=='key' else 'REFUSED'
+            assert result.status_code==409 and result.json()['effect_state']==expected,result.text
+            # Rotation invalidates Gateway's readback key. A shifted shared
+            # transport clock also signs the independent readback afresh, so
+            # that read can expose the native refusal without reopening it.
+            if fault=='transport_time':
+                assert result.json()['native']['result']['status_code']==401
+                assert result.json()['native']['reconciliation_required'] is False
             assert (tmp_path/'accounts.json').read_bytes()==before
             from commander.account_effects import AccountEffectJournal
             from vati.core import Ledger
@@ -121,7 +126,8 @@ async def test_real_queued_unlink_writer_refuses_expiry_without_original_mutatio
         attempt.set()
         for worker in threads:worker.join(timeout=6)
     assert threads and all(not t.is_alive() for t in threads) and not errors
-    assert result.status_code==403 and (tmp_path/'accounts.json').read_bytes()==before,result.text
+    assert result.status_code==409 and (tmp_path/'accounts.json').read_bytes()==before,result.text
+    assert result.json()['effect_state']=='REFUSED' and result.json()['native']['result']['status_code']==403
     read=await ac.get('/v1/trading/accounts/operations/'+body['approval_proof']['challenge_id'])
     assert read.json()['effect_state']=='REFUSED'
 
@@ -188,13 +194,13 @@ async def test_held_retirement_lease_cannot_expire_during_final_validation(clien
     read=SQLiteLeaseStore.read
     def delayed_lease(self,*a,**kw):
         value=read(self,*a,**kw)
-        if wait_point=='lease_read' and armed[0] and history_seen[0] and not advanced:advance()
+        if wait_point=='lease_read' and armed[0] and not advanced:advance()
         return value
     monkeypatch.setattr(SQLiteLeaseStore,'read',delayed_lease)
     load=storage.load_secret_file
     def delayed_domain(path):
         value=load(path)
-        if wait_point=='final_domain' and armed[0] and history_seen[0] and not advanced and str(path).endswith('/.account-control-domain.env'):advance()
+        if wait_point=='final_domain' and armed[0] and not advanced and str(path).endswith('/.account-control-domain.env'):advance()
         return value
     monkeypatch.setattr(storage,'load_secret_file',delayed_domain)
     fsync=storage.os.fsync

@@ -63,8 +63,12 @@ async def test_private_may_begin_is_independently_committed_before_actual_regist
     operation=body['approval_proof']['challenge_id'];replace=registry_module.os.replace;seen=[]
     def observed(source,dest):
         marker=effects._effect_started.get()
-        if marker is not None and marker[1].command=='account_remove' and str(dest)==str(tmp_path/'accounts.json'):
-            # A wholly independent connection sees committed technical facts BEFORE replace.
+        candidate=(json.loads(__import__('pathlib').Path(source).read_text())
+            if marker is not None and marker[1].command=='account_remove' and str(dest)==str(tmp_path/'accounts.json') else None)
+        if (candidate is not None and not any(a['alias']=='paper_owner' for a in candidate['accounts'])
+                and any(a['alias']=='paper_owner' for a in json.loads(__import__('pathlib').Path(dest).read_text())['accounts'])):
+            # Reservation retains the account. Observe the actual unlink syscall,
+            # with independently committed MAY_BEGIN immediately before replace.
             with sqlite3.connect(tmp_path/'vati.sqlite') as db:
                 rows=db.execute('SELECT body_json FROM account_unlink_facts WHERE operation_id=? ORDER BY seq',(operation,)).fetchall()
             facts=[json.loads(r[0])['payload'] for r in rows]

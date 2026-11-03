@@ -162,16 +162,22 @@ async def test_unmanaged_credential_reference_does_not_authorize_deleting_anothe
 @pytest.mark.asyncio
 async def test_a_shared_reference_added_after_native_readback_is_rechecked_before_deletion(native,monkeypatch):
     import commander.account_retirement as module
-    inspect=module.inspect_retirement
+    from commander.account_effects import _effect_started
+    inspect=module.inspect_retirement;inserted=[]
     def shared_after_facts(*args,**kwargs):
         facts=inspect(*args,**kwargs)
-        registry=AccountRegistry(native.path)
-        registry.add(replace(registry.get('fx_primary'),alias='late_reference',login='98765'))
+        # Fresh challenge/readback calls are readonly. Add the competing owner
+        # once, at the admitted native effect's final ownership boundary.
+        if _effect_started.get() is not None and kwargs.get('inside_removal') and not inserted:
+            registry=AccountRegistry(native.path)
+            registry.add(replace(registry.get('fx_primary'),alias='late_reference',login='98765'))
+            inserted.append(True)
         return facts
     monkeypatch.setattr(module,'inspect_retirement',shared_after_facts)
     before=native.secret.read_bytes()
-    blocked=await disconnect(native,expected=409)
-    assert blocked.status_code==409 and 'destruction cannot be proven' in blocked.text
+    body,_=await immediate_challenge(native.ac,'fx_primary')
+    blocked=await native.ac.post('/v1/trading/accounts/action',json=body)
+    assert inserted and blocked.status_code==409 and 'destruction cannot be proven' in blocked.text
     assert native.secret.read_bytes()==before
     registry=AccountRegistry(native.path)
     assert registry.get('fx_primary') and registry.get('late_reference')

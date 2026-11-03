@@ -1,0 +1,73 @@
+{
+  "schema": "van.account-disconnect-ci-repair-source/1",
+  "base": "6933d13f763559b0b97f8e9344ccdb57d64177a8",
+  "created_utc": "2026-11-03T06:36:52.912166+00:00",
+  "qualification": "SOURCE_CANDIDATE_ONLY",
+  "full_BE004": "OPEN: eight verbs,11requirements,21acceptances,20contexts,6actions",
+  "formal_acceptance_issued": false,
+  "source_ci": {
+    "run": 41586280775,
+    "attempt": 1,
+    "terminal": "FAILURE",
+    "jobs": 41,
+    "success": 24,
+    "failure": 17,
+    "native_acceptance": false
+  },
+  "source_corrections": [
+    "Observe actual account present-to-absent registry replacement after independent committed MAY_BEGIN, separately from earlier persistent DATA reservation and later terminal metadata.",
+    "Inject one late competing shared reference only after genuine paired approval inside native effect, preserving named ownership refusal and other references.",
+    "Preserve lifecycle wrapper outer409 and actual native REFUSED401/403, exact scope/currentness/zero-effect assertions and independent original history.",
+    "Arm lease/domain delay hooks at the actual final writer waits, preserve history delay and exact lease expiry/current source predicates.",
+    "Transparent test-only PG failure observation: fixed stage, class/status, boolean account presence, validated phase and whitelisted private fact kind/state; no error message, path, credential, signature or body export; no retry or result/exception substitution."
+  ],
+  "current_safe_evidence": {
+    "oracles": {
+      "cases": 8,
+      "passes": 8,
+      "skips": 0,
+      "exit": 0,
+      "receipt": "ci6933-safe-oracles-r2/receipt.json",
+      "source_reuse": "three oracle file pins unchanged; independent reviewer read exact XML and pins"
+    },
+    "observer_mechanics": {
+      "cases": 1,
+      "passes": 1,
+      "skips": 0,
+      "exit": 0,
+      "receipt": "ci6933-observer-memory/receipt.json",
+      "scope": "pure memory exception identity and nonsensitive metadata; no Owner-authority qualification"
+    },
+    "no_clean_full_suite_claim": true
+  },
+  "retained_failures": {
+    "first_safe_batch": "FAILED_INCOMPLETE aggregate128MiB cap kill-15, incompleteXML; progress dots are not passes",
+    "original_pg_positive": "OPEN; actual UNKNOWN cause not observed; original200/rowguard/CAS/entryfence assertions unchanged; MT5 credential fixture locally NOT_RUN",
+    "shared_credential_and_gateway_credential_fixtures": "structurally migrated, locally NOT_RUN",
+    "entry67": "KNOWN_UNRESOLVED_SCOPE_EXCLUDED: exactpath PR106 stillOPEN/unmerged/reviews[]; no admitted apply authority; no evidencefile edit, no selfapproval or merge; original2 failures remain",
+    "other_CI": "required protected checker/private DDS prerequisites and unresolved OBL004 failures remain unwaived"
+  },
+  "resources": {
+    "original_cap_bytes": 134217728,
+    "repair_prospective_cap_bytes": 268435456,
+    "per_file_bytes": 8388608,
+    "scratch_reserve_each_bytes": 2147483648,
+    "memory_headroom_bytes": 4294967296,
+    "safe8_terminal_allocation_bytes": 150418822,
+    "runner_original_sha256": "fd9027023b650c8c46403a209502c16a91cf728d1c7ce268648907b1d98c29b2",
+    "runner_parameterized_sha256": "860336803885aa36cff080294bf1144a0009b4b09a72ee9454d875863142d7f4"
+  },
+  "historical_delivery_limits": {
+    "lost_intermediate_zip": "retained truthful loss receipt; no recovered-byte claim",
+    "archive_budget_overrun_bytes": 782177,
+    "prospective_expansion_not_retroactive_compliance": true,
+    "worker_handoff": "completed reviewer requires followup_task and observed running/ack; brief reviewer/Luna activation race interrupted and recorded"
+  },
+  "guards": {
+    "required": "actual owner/frontend registry checks; workmap normal apply/check; mutation registry consistency NOT_RUN; PRE003 manifest build/check last; consolidation; genuine hooks; committed4fd; normal push/exact remote+CI",
+    "completed_final_packet": false,
+    "snapshot": "requirements at source freeze; actualfinalCLI outcomes are external durablecommand/publicationreceipts"
+  },
+  "model_usage": null,
+  "cost": null
+}

@@ -21,6 +21,40 @@ from vati.accounts.access import bind_entry_authority
 from vati.risk.contracts import Direction,LossModel
 
 
+def _observe_native_failure(invoke, diagnostics, snapshot):
+    """Test-only observation; no retry, result substitution or exception translation."""
+    def observed(journal,intent,handler,**kwargs):
+        stage=['CLAIM_OR_DISPATCH'];captured=[]
+        def effect():
+            stage[0]='HANDLER_ENTERED'
+            try:
+                value=handler();stage[0]='HANDLER_RETURNED';return value
+            except BaseException as error:
+                captured.append(error);raise
+        try:return invoke(journal,intent,effect,**kwargs)
+        except BaseException as error:
+            original=captured[0] if captured else error
+            record={'stage':stage[0],'exception_class':type(original).__name__,
+                'http_status':original.status_code if isinstance(original,HTTPException) else None}
+            try:record.update(snapshot())
+            except BaseException:record['snapshot_stage']='UNAVAILABLE'
+            diagnostics.append(record)
+            raise
+    return observed
+
+
+def test_failure_observer_preserves_original_exception_and_paper_metadata():
+    diagnostics=[];failure=HTTPException(409,'controlled nonsensitive failure')
+    def invoke(journal,intent,handler,**kwargs):return handler()
+    def effect():raise failure
+    observed=_observe_native_failure(invoke,diagnostics,lambda:{'account_present':True,
+        'lifecycle_phase':'DISCONNECTING','private_facts':[{'kind':'STEP','state':'MAY_BEGIN'}]})
+    with pytest.raises(HTTPException) as caught:observed(None,None,effect)
+    assert caught.value is failure
+    assert diagnostics==[{'stage':'HANDLER_ENTERED','exception_class':'HTTPException','http_status':409,
+        'account_present':True,'lifecycle_phase':'DISCONNECTING','private_facts':[{'kind':'STEP','state':'MAY_BEGIN'}]}]
+
+
 @pytest.fixture
 def pg_native(tmp_path,monkeypatch,client):
     dsn=os.environ.get('VATI_TEST_PG_DSN')
@@ -75,8 +109,31 @@ async def test_actual_pg_first_retirement_owns_the_previously_absent_lease_row(p
 
 
 @pytest.mark.asyncio
-async def test_actual_pg_row_guard_fences_a_competing_actor_even_beyond_lease_ttl(pg_native):
-    n=pg_native;entered=Event();release=Event()
+async def test_actual_pg_row_guard_fences_a_competing_actor_even_beyond_lease_ttl(pg_native,monkeypatch):
+    import json,psycopg
+    import commander.account_lifecycle as lifecycle
+    n=pg_native;entered=Event();release=Event();diagnostics=[]
+    def snapshot():
+        registry=AccountRegistry(n.registry);row=registry._lifecycles.get(n.alias)
+        # Only fixed stage enums escape; no body values, paths or private keys.
+        with psycopg.connect(n.dsn) as db:
+            exists=db.execute("SELECT to_regclass('vati.account_unlink_facts')").fetchone()[0]
+            facts=[] if exists is None else db.execute(
+                'SELECT body_json FROM vati.account_unlink_facts WHERE namespace=%s AND operation_id=%s ORDER BY seq',
+                (n.namespace,body['approval_proof']['challenge_id'])).fetchall()
+        kinds={'PLAN','EPOCH','STEP','RESOLUTION'};states={'MAY_BEGIN','DONE'}
+        stages=[]
+        for fact in facts:
+            payload=json.loads(fact[0])['payload'];kind=payload.get('kind')
+            state=payload.get('data',{}).get('state')
+            stages.append({'kind':kind if kind in kinds else 'OTHER',
+                'state':state if state in states else None})
+        phase=row.get('phase') if row else None
+        return {'account_present':n.alias in registry.accounts,'lifecycle_phase':phase if phase in
+            {'DISCONNECTING','DISCONNECTED','DELETING','PENDING_ARCHIVE','ARCHIVED','RELINK_REQUIRED'} else None,
+            'private_facts':stages}
+    monkeypatch.setattr(lifecycle,'invoke_account_effect',
+        _observe_native_failure(lifecycle.invoke_account_effect,diagnostics,snapshot))
     body,_=await immediate_challenge(n.ac,n.alias)
     n.view.block=entered;n.view.release=release
     store=PostgresLeaseStore(n.dsn);other=AccountRuntimeLease(store,account_alias=n.alias,instance_id='competing-native-runtime')
@@ -93,7 +150,7 @@ async def test_actual_pg_row_guard_fences_a_competing_actor_even_beyond_lease_tt
             assert not competing.done()
         finally:release.set()
         removed=await asyncio.wait_for(removal,5)
-        assert removed.status_code==200 and removed.json()['removed'] is True,removed.text
+        assert removed.status_code==200 and removed.json()['removed'] is True,(removed.text,diagnostics)
         result=competing.result(timeout=5)
         if not result.permits_orders:
             # Retirement releases its row lock before expiring the lease. A

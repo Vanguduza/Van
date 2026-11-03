@@ -209,7 +209,9 @@ async def test_final_unlink_writer_rechecks_original_scope_and_fresh_native_fact
             finally:store.close()
     monkeypatch.setattr(storage.os,'fsync',delayed_fsync)
     result=await ac.post('/v1/trading/accounts/action',json=body)
-    assert seen and result.status_code==(403 if fault in {'resolution','fsync'} else 409),result.text
+    assert seen and result.status_code==409,result.text
+    if fault in {'resolution','fsync'}:
+        assert result.json()['effect_state']=='REFUSED' and result.json()['native']['result']['status_code']==403
     assert secret.read_bytes()==secret_before
     if fault=='version':assert AccountRegistry(path).get(account.alias).label=='Concurrent owner edit'
     else:

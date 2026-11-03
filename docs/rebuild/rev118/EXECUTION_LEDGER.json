@@ -1238,6 +1238,12 @@
     "current_background_jobs": [],
     "current_packet": "BE004_GRACE_LIFECYCLE_R5_SOURCE_CANDIDATE",
     "current_source_receipt": "receipts/ACCOUNT_GRACE_LIFECYCLE_SOURCE_20261102.json",
+    "disconnect_ci_repair_20261103": {
+      "PG_positive": "OPEN_NOT_RUN_LOCALLY",
+      "acceptance_issued": false,
+      "full_BE004": "OPEN",
+      "source_receipt": "docs/rebuild/rev118/receipts/ACCOUNT_DISCONNECT_CI_REPAIR_20261103.json"
+    },
     "head": "e0d6f2719b0f9bfbcd9cdb5e68b7f26c7606da3d",
     "hosted_result": "receipts/HOSTED_SOURCE_752d265b.json",
     "immediate_disconnect_20261103": {
@@ -1660,6 +1666,13 @@
       "evidence": "receipts/ACCOUNT_DISCONNECT_SOURCE_20261103.json",
       "scope": "BE004 immediate disconnect and exact incarnation history SOURCE",
       "status": "SOURCE_TESTED_INDEPENDENTLY_REVIEWED_CANDIDATE"
+    },
+    {
+      "acceptance_issued": false,
+      "at_utc": "2026-11-03T06:36:52.912166+00:00",
+      "evidence": "receipts/ACCOUNT_DISCONNECT_CI_REPAIR_20261103.json",
+      "scope": "6933 immediate disconnect CI source repair",
+      "status": "SOURCE_REPAIR_WITH_PG_CAUSE_OPEN"
     }
   ],
   "pre002_challenge": "pre002/challenge/: 324 author-prepared dossiers (AUTHOR_CHALLENGED_PENDING_INDEPENDENT_REVIEW)",
@@ -3062,5 +3075,5 @@
       "status": "IN_PROGRESS"
     }
   },
-  "updated_at_utc": "2026-11-03T05:45:19.336714+00:00"
+  "updated_at_utc": "2026-11-03T06:36:52.912166+00:00"
 }
