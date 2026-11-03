@@ -77,7 +77,12 @@ class LocalAccountControl:
         _trading_path()
         from commander.accounts import AccountControlSettings, build_account_handlers
         self.settings = AccountControlSettings(registry_path=registry_path, secrets_dir=secrets_dir, **overrides)
-        self.handlers = build_account_handlers(self.settings)
+        from vati.funding.retained_history import RetainedHistoryJobs
+        self.retained_jobs = RetainedHistoryJobs()
+        self.handlers = build_account_handlers(self.settings, retained_jobs=self.retained_jobs)
+
+    def close(self) -> None:
+        self.retained_jobs.close()
 
     def run(self, cmd: str, args: dict) -> dict:
         if cmd not in self.handlers:

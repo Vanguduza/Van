@@ -43,24 +43,33 @@ class Mt5FundingBook(FundingBook):
         rows=list(self.ledger.iter(EventKind.FUNDING_MT5_QUERY,correlation_id='mt5-query:'+scope))
         statements={e.hash:e for e in self._events(scope)}
         for event in rows:
-            p=event.payload
-            if (event.producer!=self.producer or event.hash!=canonical_hash(event.body())
-                or p.get('schema')!='native-mt5-query/1' or p.get('scope_hash')!=scope
-                or set(p)!={'schema','scope_hash','source_ref','mark','cash_key','cash_statement_ref','execution_authority'}
-                or p['execution_authority'] is not False
-                or p.get('cash_statement_ref') not in statements):raise LedgerError('mt5_native_query_journal_invalid')
-            statement=statements[p['cash_statement_ref']]
-            frame=Mt5FundingFrame.from_body(statement.payload['statement'])
-            # Reconstitute the source frame from original immutable cash rows
-            # and the small current mark; source_ref must reproduce exactly.
-            mark=p.get('mark')
-            try:
-                from dataclasses import replace
-                current=replace(frame,**{k:mark[k] for k in ('account_alias','login','server','currency','demo','observed_at_ms','source_kind','source_nonce','native_clock_ms','query_native_to_ms','currency_digits')},
-                    balance=Decimal(mark['balance']),reported_equity=Decimal(mark['reported_equity']),credit=Decimal(mark['credit']))
-                self._validate(current)
-                if current.mark_body()!=mark or current.source_ref!=p['source_ref'] or self._key(current)!=p['cash_key'] or current.scope_hash!=scope:raise ValueError()
-                if (event.event_time_ms!=current.observed_at_ms or event.received_time_ms<event.event_time_ms
-                    or statement.received_time_ms>event.received_time_ms):raise ValueError()
-            except (KeyError,TypeError,ValueError,ArithmeticError) as exc:raise LedgerError('mt5_native_query_source_invalid') from exc
+            statement=statements.get(event.payload.get('cash_statement_ref'))
+            if statement is None:raise LedgerError('mt5_native_query_journal_invalid')
+            self.validate_query(event,scope,statement)
         return rows
+
+    def validate_query(self,event,scope,statement):
+        """Validate one original query against its exact original cash event.
+
+        Retained readers separately prove statement/query/snapshot ordinal
+        ordering; this helper preserves the existing query/source semantics.
+        """
+        p=event.payload
+        if (event.kind is not EventKind.FUNDING_MT5_QUERY or event.producer!=self.producer
+            or event.hash!=canonical_hash(event.body()) or p.get('schema')!='native-mt5-query/1'
+            or p.get('scope_hash')!=scope
+            or set(p)!={'schema','scope_hash','source_ref','mark','cash_key','cash_statement_ref','execution_authority'}
+            or p['execution_authority'] is not False
+            or p.get('cash_statement_ref')!=statement.hash):raise LedgerError('mt5_native_query_journal_invalid')
+        frame=self.validate_event(statement,scope)
+        mark=p.get('mark')
+        try:
+            from dataclasses import replace
+            current=replace(frame,**{k:mark[k] for k in ('account_alias','login','server','currency','demo','observed_at_ms','source_kind','source_nonce','native_clock_ms','query_native_to_ms','currency_digits')},
+                balance=Decimal(mark['balance']),reported_equity=Decimal(mark['reported_equity']),credit=Decimal(mark['credit']))
+            self._validate(current)
+            if current.mark_body()!=mark or current.source_ref!=p['source_ref'] or self._key(current)!=p['cash_key'] or current.scope_hash!=scope:raise ValueError()
+            if (event.event_time_ms!=current.observed_at_ms or event.received_time_ms<event.event_time_ms
+                or statement.received_time_ms>event.received_time_ms):raise ValueError()
+        except (KeyError,TypeError,ValueError,ArithmeticError) as exc:raise LedgerError('mt5_native_query_source_invalid') from exc
+        return current

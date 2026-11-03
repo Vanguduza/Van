@@ -728,3 +728,55 @@ async def test_original_sealed_restore_metadata_tamper_refuses_before_cancel_obs
         'lifecycle_id':signed['approval_proof']['challenge_id'],'expected_revision':row['revision'],'expected_digest':canonical_hash(row)}))
     assert response.status_code==409 and 'requires reconciliation' in response.text,response.text
     assert not observed and AccountRegistry(path)._lifecycles['paper_owner']['restore']['notes']=='tampered nonsecret metadata'
+
+
+@pytest.mark.asyncio
+async def test_retained_history_cursor_does_not_survive_device_revocation(client,tmp_path,monkeypatch):
+    from backend.tests.test_retained_funding_history_api import retained
+    ac,app,_,account,operation,_=await retained(client,tmp_path,monkeypatch)
+    path=f'/v1/trading/accounts/lifecycle/records/{account.alias}/{operation}/financial-history'
+    first=await ac.get(path,headers={'X-Van-History-Limit':'25'})
+    assert first.status_code==200,first.text
+    cursor=first.json()['next_cursor'];assert cursor
+    await app.state.store.execute("UPDATE devices SET revoked_at_unix=? WHERE device_id='test-device'",(int(time.time()),))
+    denied=await ac.get(path,headers={'X-Van-History-Limit':'25','X-Van-History-Cursor':cursor})
+    assert denied.status_code in {401,403},denied.text
+    assert 'movements' not in denied.text
+
+
+@pytest.mark.asyncio
+async def test_retained_history_rejects_tampered_original_cleanup_plan(client,tmp_path,monkeypatch):
+    import sqlite3
+    from backend.tests.test_retained_funding_history_api import retained
+    ac,_,_,account,operation,_=await retained(client,tmp_path,monkeypatch)
+    path=f'/v1/trading/accounts/lifecycle/records/{account.alias}/{operation}/financial-history'
+    assert (await ac.get(path)).status_code==200
+    with sqlite3.connect(tmp_path/'vati.sqlite') as db:
+        changed=db.execute("UPDATE account_unlink_facts SET body_json='{}' WHERE operation_id=? AND seq=1",(operation,)).rowcount
+        assert changed==1
+    denied=await ac.get(path)
+    assert denied.status_code!=200 or denied.json().get('state') not in {'OBSERVED','CONFLICT'},denied.text
+    assert 'movements' not in denied.text or not denied.json()['movements']
+
+
+@pytest.mark.asyncio
+async def test_retained_history_ignores_later_same_physical_account_observations(client,tmp_path,monkeypatch):
+    from backend.tests.test_retained_funding_history_api import retained
+    from trading.tests.test_mt5_funding_contract import frame,cash
+    from vati.funding.mt5 import Mt5CashFact
+    from vati.funding.mt5_journal import Mt5FundingBook
+    ac,_,_,account,operation,_=await retained(client,tmp_path,monkeypatch)
+    path=f'/v1/trading/accounts/lifecycle/records/{account.alias}/{operation}/financial-history'
+    initial=await ac.get(path,headers={'X-Van-History-Limit':'25'})
+    assert initial.status_code==200,initial.text
+    before=initial.json();cursor=before['next_cursor'];assert cursor
+    later=replace(frame(),account_alias=account.alias,
+        movements=tuple(Mt5CashFact.from_body(cash(native_id=i)) for i in range(1,105)))
+    with closing(Ledger(tmp_path/'vati.sqlite')) as ledger:
+        Mt5FundingBook(ledger,clock=lambda:12000).capture(later)
+    replay=await ac.get(path,headers={'X-Van-History-Limit':'25'})
+    assert replay.status_code==200 and replay.json()==before,replay.text
+    next_page=await ac.get(path,headers={'X-Van-History-Limit':'25','X-Van-History-Cursor':cursor})
+    assert next_page.status_code==200,next_page.text
+    assert next_page.json()['movement_count']==103
+    assert [row['movement']['native_id'] for row in next_page.json()['movements']]==list(range(26,51))

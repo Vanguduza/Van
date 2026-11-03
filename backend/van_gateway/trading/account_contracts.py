@@ -138,6 +138,57 @@ class AccountCleanupReview(BaseModel):
     view:CleanupView
 
 
+class RetainedCashRow(BaseModel):
+    model_config=ConfigDict(extra='forbid',strict=True)
+    movement:dict
+    original_statement_ref:str=Field(pattern='^[0-9a-f]{64}$')
+    observed_at_ms:int
+    received_at_ms:int
+
+    @field_validator('movement')
+    @classmethod
+    def native_cash_only(cls,value):
+        ctrader={'native_id','operation','delta','balance_after','equity_after','balance_version','occurred_at_ms','money_digits'}
+        mt5={'native_id','operation','native_time_ms','profit','commission','swap','fee'}
+        if set(value) not in (ctrader,mt5):raise ValueError('Original native cash fields required')
+        return value
+
+
+class RetainedCashHistory(BaseModel):
+    model_config=ConfigDict(extra='forbid',strict=True)
+    schema_name:Literal['vati.retained-cash-history/1']=Field(alias='schema')
+    view:Literal['FINANCIAL_HISTORY']
+    alias:str
+    lifecycle_id:str
+    incarnation:str=Field(pattern='^[0-9a-f]{64}$')
+    account_control_domain:str=Field(pattern='^[0-9a-f]{64}$')
+    original_plan_ref:str=Field(pattern='^[0-9a-f]{64}$')
+    cutoff_ref:str=Field(pattern='^[0-9a-f]{64}$')
+    attribution:Literal['ORIGINAL_PHYSICAL_ACCOUNT_PRE_DELETION']
+    generation_provenance:Literal['UNKNOWN']
+    return_qualification:Literal['NOT_ISSUED']
+    settlement_qualification:Literal['NOT_ISSUED']
+    risk_capital_qualified:Literal[False]
+    execution_authority:Literal[False]
+    freshness:Literal['HISTORICAL']
+    remaining_obligations:list[str]
+    state:Literal['OBSERVED','NO_DATA','CONFLICT','UNOBSERVED','IN_PROGRESS','RECONCILIATION_REQUIRED']
+    original_prefix_state:Literal['OBSERVED','CONFLICT']|None=None
+    collection:Literal['MOVEMENTS','COVERAGE','CONFLICT']
+    reason:str
+    movements:list[RetainedCashRow]=Field(max_length=100)
+    movement_count:int|None=Field(ge=0)
+    truncated:bool
+    next_cursor:str|None=Field(max_length=4096)
+    scope_hash:str|None=Field(default=None,pattern='^[0-9a-f]{64}$')
+    snapshot_ref:str|None=Field(default=None,pattern='^[0-9a-f]{64}$')
+    query_ref:str|None=Field(default=None,pattern='^[0-9a-f]{64}$')
+    statement_ref:str|None=Field(default=None,pattern='^[0-9a-f]{64}$')
+    source_observed_at_ms:int|None=None
+    coverage_windows:list[dict]|None=None
+    conflicts:list[dict]|None=None
+
+
 class AccountLifecycleState(BaseModel):
     model_config=ConfigDict(extra='forbid',strict=True)
     schema_name:Literal['vati.account-lifecycle/1']=Field(alias='schema')

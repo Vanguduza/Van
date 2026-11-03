@@ -14104,6 +14104,314 @@
         ],
         "title": "ResumeContract"
       },
+      "RetainedCashHistory": {
+        "properties": {
+          "schema": {
+            "type": "string",
+            "const": "vati.retained-cash-history/1",
+            "title": "Schema"
+          },
+          "view": {
+            "type": "string",
+            "const": "FINANCIAL_HISTORY",
+            "title": "View"
+          },
+          "alias": {
+            "type": "string",
+            "title": "Alias"
+          },
+          "lifecycle_id": {
+            "type": "string",
+            "title": "Lifecycle Id"
+          },
+          "incarnation": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Incarnation"
+          },
+          "account_control_domain": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Account Control Domain"
+          },
+          "original_plan_ref": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Original Plan Ref"
+          },
+          "cutoff_ref": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Cutoff Ref"
+          },
+          "attribution": {
+            "type": "string",
+            "const": "ORIGINAL_PHYSICAL_ACCOUNT_PRE_DELETION",
+            "title": "Attribution"
+          },
+          "generation_provenance": {
+            "type": "string",
+            "const": "UNKNOWN",
+            "title": "Generation Provenance"
+          },
+          "return_qualification": {
+            "type": "string",
+            "const": "NOT_ISSUED",
+            "title": "Return Qualification"
+          },
+          "settlement_qualification": {
+            "type": "string",
+            "const": "NOT_ISSUED",
+            "title": "Settlement Qualification"
+          },
+          "risk_capital_qualified": {
+            "type": "boolean",
+            "const": false,
+            "title": "Risk Capital Qualified"
+          },
+          "execution_authority": {
+            "type": "boolean",
+            "const": false,
+            "title": "Execution Authority"
+          },
+          "freshness": {
+            "type": "string",
+            "const": "HISTORICAL",
+            "title": "Freshness"
+          },
+          "remaining_obligations": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Remaining Obligations"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "OBSERVED",
+              "NO_DATA",
+              "CONFLICT",
+              "UNOBSERVED",
+              "IN_PROGRESS",
+              "RECONCILIATION_REQUIRED"
+            ],
+            "title": "State"
+          },
+          "original_prefix_state": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "OBSERVED",
+                  "CONFLICT"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Original Prefix State"
+          },
+          "collection": {
+            "type": "string",
+            "enum": [
+              "MOVEMENTS",
+              "COVERAGE",
+              "CONFLICT"
+            ],
+            "title": "Collection"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          },
+          "movements": {
+            "items": {
+              "$ref": "#/components/schemas/RetainedCashRow"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "title": "Movements"
+          },
+          "movement_count": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Movement Count"
+          },
+          "truncated": {
+            "type": "boolean",
+            "title": "Truncated"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 4096
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          },
+          "scope_hash": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scope Hash"
+          },
+          "snapshot_ref": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Snapshot Ref"
+          },
+          "query_ref": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Query Ref"
+          },
+          "statement_ref": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Statement Ref"
+          },
+          "source_observed_at_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Observed At Ms"
+          },
+          "coverage_windows": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Coverage Windows"
+          },
+          "conflicts": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conflicts"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "schema",
+          "view",
+          "alias",
+          "lifecycle_id",
+          "incarnation",
+          "account_control_domain",
+          "original_plan_ref",
+          "cutoff_ref",
+          "attribution",
+          "generation_provenance",
+          "return_qualification",
+          "settlement_qualification",
+          "risk_capital_qualified",
+          "execution_authority",
+          "freshness",
+          "remaining_obligations",
+          "state",
+          "collection",
+          "reason",
+          "movements",
+          "movement_count",
+          "truncated",
+          "next_cursor"
+        ],
+        "title": "RetainedCashHistory"
+      },
+      "RetainedCashRow": {
+        "properties": {
+          "movement": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Movement"
+          },
+          "original_statement_ref": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Original Statement Ref"
+          },
+          "observed_at_ms": {
+            "type": "integer",
+            "title": "Observed At Ms"
+          },
+          "received_at_ms": {
+            "type": "integer",
+            "title": "Received At Ms"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "movement",
+          "original_statement_ref",
+          "observed_at_ms",
+          "received_at_ms"
+        ],
+        "title": "RetainedCashRow"
+      },
       "RetainedRemoteFunds": {
         "properties": {
           "balance": {

@@ -12,7 +12,7 @@ from fastapi import APIRouter,Request,HTTPException
 from van_gateway.approval.account_lifecycle_reauth import AccountLifecycleReauthentication,ReauthError,ACTION,ADMISSIONS,EPHEMERAL,USED,digest
 from van_gateway.approval.service import OwnerApprovalService
 from van_gateway.trading.account_cleanup_api import AccountCleanup,ReauthRequest,PrivateCleanupRoute
-from van_gateway.trading.account_contracts import AccountLifecycleReview,AccountLifecycleState
+from van_gateway.trading.account_contracts import AccountLifecycleReview,AccountLifecycleState,RetainedCashHistory
 from van_gateway.trading.accounts import LocalAccountControl,account_approval_text
 from van_gateway.trading.oauth_effects import fingerprint
 
@@ -250,7 +250,7 @@ class AccountLifecycle(AccountCleanup):
         except (HTTPException,OSError,TimeoutError,ConnectionError,ValidationError,KeyError,ValueError,TypeError):
             return {'schema':'van.account-lifecycle-operation/1','operation_id':admitted['operation_id'],'native':None,
                 'effect_state':'UNKNOWN','execution_authority':False}
-    async def read_record(self,request,alias,lifecycle_id=None):
+    async def read_context(self,request):
         caller=self.read_caller(request)
         domain=await asyncio.to_thread(self.onboarding.control.domain)
         selected=request.headers.get('X-Van-Account-Control-Domain')
@@ -268,6 +268,10 @@ class AccountLifecycle(AccountCleanup):
             try:future.result(5)
             except BaseException:
                 future.cancel();raise HTTPException(403,'Current lifecycle read owner unavailable') from None
+        return caller,domain,guard
+
+    async def read_record(self,request,alias,lifecycle_id=None):
+        caller,domain,guard=await self.read_context(request)
         payload={'action':'account_lifecycle_read','args':{'alias':alias,**({'lifecycle_id':lifecycle_id} if lifecycle_id is not None else {})},'owner_device_id':caller['device_id']}
         if isinstance(self.onboarding.control,LocalAccountControl):payload['_account_dispatch_guard']=guard
         value=await asyncio.to_thread(self.onboarding.control.run,'account_review',payload)
@@ -275,6 +279,31 @@ class AccountLifecycle(AccountCleanup):
         if (parsed.alias!=alias or parsed.device_id!=caller['device_id'] or parsed.account_control_domain!=domain
             or lifecycle_id is not None and parsed.operation_id!=lifecycle_id):
             raise ReauthError('LIFECYCLE_ORIGINAL_SCOPE_UNVERIFIED',503)
+        return parsed.model_dump(by_alias=True)
+
+    async def read_financial_history(self,request,alias,lifecycle_id):
+        import re
+        # The existing private route refuses query strings. Pagination headers
+        # carry DATA only, and grant no authority on replay or another device.
+        raw_limit=request.headers.get('X-Van-History-Limit','100')
+        cursor=request.headers.get('X-Van-History-Cursor')
+        collection=request.headers.get('X-Van-History-Collection','MOVEMENTS')
+        if (collection not in {'MOVEMENTS','COVERAGE','CONFLICT'}
+            or re.fullmatch(r'[1-9][0-9]{0,2}',raw_limit) is None or int(raw_limit)>100
+            or cursor is not None and not 1<=len(cursor)<=4096):
+            raise ReauthError('RETAINED_HISTORY_INPUT_INVALID',422)
+        caller,domain,guard=await self.read_context(request)
+        args={'view':'FINANCIAL_HISTORY','alias':alias,'lifecycle_id':lifecycle_id,'limit':int(raw_limit),'collection':collection}
+        if cursor is not None:args['cursor']=cursor
+        payload={'action':'account_lifecycle_read','args':args,'owner_device_id':caller['device_id']}
+        if isinstance(self.onboarding.control,LocalAccountControl):payload['_account_dispatch_guard']=guard
+        await asyncio.to_thread(guard)
+        value=await asyncio.to_thread(self.onboarding.control.run,'account_review',payload)
+        try:parsed=RetainedCashHistory.model_validate(value)
+        except ValidationError:raise ReauthError('RETAINED_HISTORY_SOURCE_UNVERIFIED',503) from None
+        if parsed.alias!=alias or parsed.lifecycle_id!=lifecycle_id or parsed.account_control_domain!=domain or parsed.collection!=collection:
+            raise ReauthError('RETAINED_HISTORY_SOURCE_SCOPE_CHANGED',503)
+        await asyncio.to_thread(guard)
         return parsed.model_dump(by_alias=True)
     async def archive_due(self):
         # Existing retention runner invokes a native data CAS, never an old A4
@@ -300,6 +329,13 @@ def build_lifecycle_router(service):
         if (re.fullmatch(r'[a-z0-9_]{3,32}',alias) is None
             or re.fullmatch(r'[A-Za-z0-9_-]{20,128}',lifecycle_id) is None):raise ReauthError('LIFECYCLE_INPUT_INVALID',422)
         return await service.read_record(request,alias,lifecycle_id)
+    @router.get('/records/{alias}/{lifecycle_id}/financial-history',response_model=RetainedCashHistory)
+    async def financial_history(request:Request,alias:str,lifecycle_id:str):
+        import re
+        if (re.fullmatch(r'[a-z0-9_]{3,32}',alias) is None
+            or re.fullmatch(r'[A-Za-z0-9_-]{20,128}',lifecycle_id) is None):
+            raise ReauthError('RETAINED_HISTORY_INPUT_INVALID',422)
+        return await service.read_financial_history(request,alias,lifecycle_id)
     @router.get('/operations/{operation_id}')
     async def original(request:Request,operation_id:str):
         import re

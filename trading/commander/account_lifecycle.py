@@ -9,6 +9,7 @@ from pathlib import Path
 import json,time
 from fastapi import HTTPException
 from vati.core.canonical import canonical_hash
+from vati.core.events import EventKind
 from vati.accounts.registry import AccountRegistry,Account,CredentialRef
 from vati.accounts.lifecycle import public_record
 from commander.account_effects import (AccountEffectJournal,operation_intent,invoke_account_effect,
@@ -499,6 +500,94 @@ class NativeLifecycle:
         guard();result=public_record(self.row(alias,row["operation_id"]))
         result['native_original_phase']=state.phase if state is not None else 'UNKNOWN'
         if held is not None:result['metadata_hold']=held
+        return result
+
+    def financial_history(self,args,device,guard):
+        """Closed read view; no archive transition, provider IO or new issuer."""
+        import re
+        if not callable(guard):raise HTTPException(403,'Current lifecycle read owner unavailable')
+        if (not {'view','alias','lifecycle_id'}<=set(args)
+            or set(args)-{'view','alias','lifecycle_id','limit','cursor','collection'}
+            or args.get('view')!='FINANCIAL_HISTORY'
+            or not isinstance(args.get('alias'),str) or re.fullmatch(r'[a-z0-9_]{3,32}',args['alias']) is None
+            or not isinstance(args.get('lifecycle_id'),str) or re.fullmatch(r'[A-Za-z0-9_-]{20,128}',args['lifecycle_id']) is None):
+            raise HTTPException(422,'Retained financial history input invalid')
+        guard();row=self.row(args['alias'],args['lifecycle_id'])
+        if row['device_id']!=device or row['account_control_domain']!=self.domain(self.ledger):
+            raise HTTPException(403,'Original lifecycle is outside current owner/domain')
+        from commander.account_cleanup import UnlinkRecoveryBook
+        from vati.funding.retained_history import RetainedHistoryReadJob,RetainedHistoryError,_cursor,_encode
+        from vati.core.ledger import LedgerError
+        collection=args.get('collection','MOVEMENTS');limit=args.get('limit',100)
+        if collection not in {'MOVEMENTS','COVERAGE','CONFLICT'} or type(limit) is not int or not 1<=limit<=100:
+            raise HTTPException(422,'Retained financial history input invalid')
+        try:
+            self.require_original(row)
+            plan=UnlinkRecoveryBook(self.ledger,initialize=False,secrets_root=self.st.secrets_dir)._history(row['operation_id'])['plan']
+            if (plan is None or plan.payload['device_id']!=device
+                or plan.payload['data']['original_resource_version']!=row['incarnation']
+                or plan.payload['data']['review_digest']!=row['unlink_ref']
+                or plan.payload['data']['account_control_domain']!=row['account_control_domain']):
+                raise LedgerError('retained_original_plan_unavailable')
+            original=next((e for e in self.ledger.iter(EventKind.ACCOUNT_OPERATION,correlation_id=row['operation_id'])
+                if e.payload.get('phase')=='IN_FLIGHT' and e.payload.get('previous_ref')==''),None)
+            if original is None:raise LedgerError('retained_original_boundary_unavailable')
+            after=0 if collection=='MOVEMENTS' else (0,0);token=None
+            if 'cursor' in args:
+                cursor=_cursor(args['cursor'])
+                if set(cursor)!={'schema','collection','after','job_id'} or cursor['schema']!='vati.retained-history-cursor/1' or cursor['collection']!=collection:
+                    raise RetainedHistoryError('RETAINED_HISTORY_CURSOR_SCOPE_CHANGED')
+                after=cursor['after'];token=cursor['job_id']
+                if collection=='MOVEMENTS':
+                    if type(after) is not int or after<0:raise RetainedHistoryError('RETAINED_HISTORY_CURSOR_INVALID')
+                else:
+                    if not isinstance(after,list) or len(after)!=2 or any(type(v) is not int or v<0 for v in after):
+                        raise RetainedHistoryError('RETAINED_HISTORY_CURSOR_INVALID')
+                    after=tuple(after)
+                if token is not None and (not isinstance(token,str) or re.fullmatch(r'[0-9a-f]{32}',token) is None):
+                    raise RetainedHistoryError('RETAINED_HISTORY_CURSOR_INVALID')
+            binding=(row['operation_id'],row['incarnation'],row['account_control_domain'],plan.hash,
+                original.hash,collection,limit,after)
+            manager=self.retained_jobs
+            if token is None:
+                job=RetainedHistoryReadJob(operation_id=row['operation_id'],cutoff_ref=original.hash,
+                    alias=row['alias'],profile=plan.payload['data']['account_identity'],collection=collection,after=after,limit=limit)
+                token=manager.start(device,binding,job,guard)
+            def advance(job):
+                progress=job.advance(self.ledger,event_budget=64,row_budget=256)
+                return job.result() if job.finished else None
+            page=manager.advance(token,device,binding,guard,advance)
+            base={'schema':'vati.retained-cash-history/1','view':'FINANCIAL_HISTORY','alias':row['alias'],
+                'lifecycle_id':row['operation_id'],'incarnation':row['incarnation'],
+                'account_control_domain':row['account_control_domain'],'original_plan_ref':plan.hash,'cutoff_ref':original.hash,
+                'attribution':'ORIGINAL_PHYSICAL_ACCOUNT_PRE_DELETION','generation_provenance':'UNKNOWN',
+                'return_qualification':'NOT_ISSUED','settlement_qualification':'NOT_ISSUED','risk_capital_qualified':False,
+                'execution_authority':False,'freshness':'HISTORICAL','collection':collection,
+                'remaining_obligations':['EXCLUSIVE_GENERATION_ATTRIBUTION','LATER_ORIGINAL_EFFECT_SETTLEMENT',
+                    'MONTHLY_YEARLY_STATEMENTS_AND_EXPORTS'],
+                'movements':[],'movement_count':None,'truncated':False,'next_cursor':None,
+                'coverage_windows':None,'conflicts':None}
+            def cursor_for(bookmark,job_id):
+                return _encode({'schema':'vati.retained-history-cursor/1','collection':collection,'after':bookmark,'job_id':job_id})
+            if page is None:
+                result=base | {'state':'IN_PROGRESS','reason':'ORIGINAL_HISTORY_VERIFICATION_IN_PROGRESS',
+                    'next_cursor':cursor_for(after,token)}
+            elif page['state']=='UNOBSERVED':
+                manager.release(token,device,binding)
+                result=base | {'state':'UNOBSERVED','reason':page['reason']}
+            else:
+                manager.release(token,device,binding)
+                source={key:value for key,value in page['source'].items() if key not in {'statement_seq','statement_chain','snapshot_seq','snapshot_chain'}}
+                fields={'MOVEMENTS':'movements','COVERAGE':'coverage_windows','CONFLICT':'conflicts'}
+                result=base | source | {'state':page['state'],'original_prefix_state':page['original_prefix_state'],'reason':page['reason'],fields[collection]:page['rows'],
+                    'truncated':page['more'],'next_cursor':cursor_for(page['bookmark'],None) if page['more'] else None}
+        except RetainedHistoryError as error:
+            raise HTTPException(409,str(error)) from None
+        except (LedgerError,ValueError,KeyError,TypeError):
+            raise HTTPException(409,'Original retained financial history requires reconciliation') from None
+        guard()
+        if self.row(args['alias'],args['lifecycle_id'])!=row or self.domain(self.ledger)!=row['account_control_domain']:
+            raise HTTPException(409,'Original retained financial history binding changed')
         return result
     def archive_due(self,alias,lifecycle_id=None):
         """Metadata-only CAS under the original admitted data intent.

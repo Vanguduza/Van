@@ -38,6 +38,31 @@ def admitted(handlers,args):
 
 def delete_args():return {'alias':'paper_owner','variant':'DELETE_GRACE','grace_seconds':600,'oauth_discard_digest':'5'*64}
 
+
+def test_retained_cash_view_current_original_device_and_post_read_guard(tmp_path):
+    st,_,handlers=service(tmp_path)
+    result=handlers['account_remove'](admitted(handlers,delete_args()))
+    row=result['lifecycle']
+    args={'view':'FINANCIAL_HISTORY','alias':row['alias'],'lifecycle_id':row['operation_id']}
+    def read(device='source-device',guard=lambda:None,body=None):
+        return handlers['account_review']({'action':'account_lifecycle_read','args':args if body is None else body,
+            'owner_device_id':device,'_account_dispatch_guard':guard})
+    result=read()
+    for _ in range(100):
+        if result['state']!='IN_PROGRESS':break
+        result=read(body=args | {'cursor':result['next_cursor']})
+    assert result['state']=='UNOBSERVED'
+    with pytest.raises(HTTPException) as refused:read(device='another-paired-device')
+    assert refused.value.status_code==403
+    with pytest.raises(HTTPException) as malformed:read(body={'view':'FINANCIAL_HISTORY'})
+    assert malformed.value.status_code==422
+    calls=[]
+    def revoke_after_read():
+        calls.append(True)
+        if len(calls)==2:raise HTTPException(403,'source device revoked after source read')
+    with pytest.raises(HTTPException) as revoked:read(guard=revoke_after_read)
+    assert revoked.value.status_code==403 and len(calls)==2
+
 def test_native_missing_current_actor_refuses_before_any_data_or_secret_effect(tmp_path):
     st,_,handlers=service(tmp_path)
     args=admitted(handlers,delete_args());args.pop('_account_dispatch_guard')

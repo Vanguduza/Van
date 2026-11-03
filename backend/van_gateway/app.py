@@ -1178,6 +1178,8 @@ def create_app() -> FastAPI:
             yield
         finally:
             await app.state.account_application_drafts.drain()
+            if isinstance(account_control, LocalAccountControl):
+                await asyncio.to_thread(account_control.close)
             speech_cleanup.cancel()
             recovery_dispatch.cancel()
             revocation_dispatch.cancel()

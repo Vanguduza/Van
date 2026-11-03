@@ -207,8 +207,11 @@ def _boolean(args: dict, name: str, default: bool) -> bool:
     return value
 
 
-def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[dict], dict]]:
+def build_account_handlers(st: AccountControlSettings, *, retained_jobs=None) -> dict[str, Callable[[dict], dict]]:
     from vati.accounts import Account, AccountRegistry, AccountRegistryError, CredentialRef
+    if retained_jobs is None:
+        from vati.funding.retained_history import RetainedHistoryJobs
+        retained_jobs = RetainedHistoryJobs()
 
     def reg() -> AccountRegistry:
         return AccountRegistry(st.registry_path)
@@ -388,8 +391,11 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
         ledger=open_operation_ledger()
         try:
             service=NativeLifecycle(st,ledger,control_domain,retirement_review,current_resource_version)
+            service.retained_jobs=retained_jobs
             if method=='review':return service.review(args,device,guard)
-            if method=='read':return service.read(args['alias'],device,guard,args.get('lifecycle_id'))
+            if method=='read':
+                if 'view' in args:return service.financial_history(args,device,guard)
+                return service.read(args['alias'],device,guard,args.get('lifecycle_id'))
             if method=='archive_due':
                 # Only previously admitted local metadata; no credential or
                 # provider effect, filesystem scan, new permission or history.

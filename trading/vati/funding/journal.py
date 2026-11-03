@@ -55,22 +55,24 @@ class FundingBook:
             if row.balance_version is not None:native_int(row.balance_version,minimum=0)
             seen.add(row.native_id)
 
+    def validate_event(self,event,scope_hash):
+        """The original owner validation, reusable for one bounded source row."""
+        if (event.kind is not self.kind or event.producer!=self.producer
+            or event.hash!=canonical_hash(event.body()) or event.payload.get('schema')!=self.schema
+            or event.payload.get('scope_hash')!=scope_hash):raise LedgerError('funding_observation_journal_invalid')
+        try:
+            statement=self.statement_type.from_body(event.payload['statement']);self._validate(statement)
+            if statement.scope_hash!=scope_hash or self._key(statement)!=event.payload['content_key'] or event.payload['state'] not in {'OBSERVED','CONFLICT'}:
+                raise ValueError('funding_observation_scope_invalid')
+        except (KeyError,TypeError,ValueError,ArithmeticError) as exc:
+            raise LedgerError('funding_observation_journal_invalid') from exc
+        return statement
+
     def _events(self,scope_hash,as_of=None):
         correlation=self.correlation_prefix+scope_hash
         rows=history_through(self.ledger,correlation,as_of) if as_of else list(self.ledger.iter(self.kind,correlation_id=correlation))
-        output=[]
-        for event in rows:
-            if (event.kind is not self.kind or event.producer!=self.producer
-                or event.hash!=canonical_hash(event.body()) or event.payload.get('schema')!=self.schema
-                or event.payload.get('scope_hash')!=scope_hash):raise LedgerError('funding_observation_journal_invalid')
-            try:
-                statement=self.statement_type.from_body(event.payload['statement']);self._validate(statement)
-                if statement.scope_hash!=scope_hash or self._key(statement)!=event.payload['content_key'] or event.payload['state'] not in {'OBSERVED','CONFLICT'}:
-                    raise ValueError('funding_observation_scope_invalid')
-            except (KeyError,TypeError,ValueError,ArithmeticError) as exc:
-                raise LedgerError('funding_observation_journal_invalid') from exc
-            output.append(event)
-        return output
+        for event in rows:self.validate_event(event,scope_hash)
+        return rows
 
     def record_statement(self,statement):
         self._validate(statement);received=native_int(self.clock(),minimum=statement.observed_at_ms)

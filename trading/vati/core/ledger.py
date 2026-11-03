@@ -258,6 +258,35 @@ class Ledger:
                 'SELECT seq, kind, producer, correlation_id, event_time_ms, received_time_ms, decision_time_ms, schema_version, payload_json, event_hash FROM events WHERE seq > ? ORDER BY seq', (seq,)):
             yield row[0], self._row_to_event(row)
 
+    def read_page(self, after_seq: int, limit: int, through_seq: Optional[int] = None):
+        """Committed original rows, bounded by count and a fixed ordinal anchor.
+
+        Each existing event JSON value remains one atomic decoding unit. This
+        bounds fetched row count, not the byte size of a historical event.
+        """
+        if (type(after_seq) is not int or after_seq < 0 or type(limit) is not int or not 1 <= limit <= 256
+                or through_seq is not None and (type(through_seq) is not int or through_seq < 0)):
+            raise ValueError('invalid bounded ledger page')
+        require_committed_source_read(self)
+        query = ('SELECT seq, kind, producer, correlation_id, event_time_ms, received_time_ms, '
+                 'decision_time_ms, schema_version, payload_json, event_hash, prev_hash, chain_hash '
+                 'FROM events WHERE seq > ?')
+        args = [after_seq]
+        if through_seq is not None:
+            query += ' AND seq <= ?'; args.append(through_seq)
+        query += ' ORDER BY seq LIMIT ?'; args.append(limit)
+        return [(row[0], self._row_to_event(row), row[10], row[11]) for row in self._conn.execute(query, args)]
+
+    def event_at(self, seq: int):
+        """One original ordinal; a missing row never aliases a later record."""
+        if type(seq) is not int or seq <= 0:
+            raise ValueError('invalid original ledger ordinal')
+        require_committed_source_read(self)
+        row = self._conn.execute(
+            'SELECT seq, kind, producer, correlation_id, event_time_ms, received_time_ms, decision_time_ms, '
+            'schema_version, payload_json, event_hash, prev_hash, chain_hash FROM events WHERE seq = ? LIMIT 1', (seq,)).fetchone()
+        return (row[0], self._row_to_event(row), row[10], row[11]) if row is not None else None
+
     def head(self) -> str:
         row = self._conn.execute("SELECT chain_hash FROM events ORDER BY seq DESC LIMIT 1").fetchone()
         return row[0] if row else GENESIS

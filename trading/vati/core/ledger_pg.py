@@ -13,7 +13,7 @@ from typing import Callable, Iterator, Optional
 
 from vati.core.canonical import canonical_hash, canonical_json
 from vati.core.events import Event, EventKind
-from vati.core.ledger import GENESIS, IncrementalChainVerifier, LedgerError, ReplayReport, _check_row
+from vati.core.ledger import GENESIS, IncrementalChainVerifier, LedgerError, ReplayReport, _check_row, require_committed_source_read
 
 # The vati schema is provisioned by the privileged deployment reconciler.
 # Runtime deliberately has no CREATE privilege on the database.
@@ -218,6 +218,42 @@ class PostgresLedger:
                 cur.execute('SELECT seq, kind, producer, correlation_id, event_time_ms, received_time_ms, decision_time_ms, schema_version, payload_json, event_hash FROM vati.events WHERE ledger = %s AND seq > %s ORDER BY seq', (self.name, seq))
                 for row in cur:
                     yield row[0], self._row_to_event(row)
+        finally:
+            self._finish_read()
+
+    def read_page(self, after_seq: int, limit: int, through_seq: Optional[int] = None):
+        """SQL LIMIT applies before client fetching; event JSON is still atomic."""
+        if (type(after_seq) is not int or after_seq < 0 or type(limit) is not int or not 1 <= limit <= 256
+                or through_seq is not None and (type(through_seq) is not int or through_seq < 0)):
+            raise ValueError('invalid bounded ledger page')
+        require_committed_source_read(self)
+        query = ('SELECT seq, kind, producer, correlation_id, event_time_ms, received_time_ms, '
+                 'decision_time_ms, schema_version, payload_json, event_hash, prev_hash, chain_hash '
+                 'FROM vati.events WHERE ledger = %s AND seq > %s')
+        args = [self.name, after_seq]
+        if through_seq is not None:
+            query += ' AND seq <= %s'; args.append(through_seq)
+        query += ' ORDER BY seq LIMIT %s'; args.append(limit)
+        try:
+            with self._conn.cursor() as cur:
+                cur.execute(query, args)
+                return [(row[0], self._row_to_event(row), row[10], row[11]) for row in cur]
+        finally:
+            self._finish_read()
+
+    def event_at(self, seq: int):
+        """The ordinal belongs to this logical ledger, including global gaps."""
+        if type(seq) is not int or seq <= 0:
+            raise ValueError('invalid original ledger ordinal')
+        require_committed_source_read(self)
+        try:
+            with self._conn.cursor() as cur:
+                cur.execute(
+                    'SELECT seq, kind, producer, correlation_id, event_time_ms, received_time_ms, decision_time_ms, '
+                    'schema_version, payload_json, event_hash, prev_hash, chain_hash FROM vati.events '
+                    'WHERE ledger = %s AND seq = %s LIMIT 1', (self.name, seq))
+                row = cur.fetchone()
+                return (row[0], self._row_to_event(row), row[10], row[11]) if row is not None else None
         finally:
             self._finish_read()
 

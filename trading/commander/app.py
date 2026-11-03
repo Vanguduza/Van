@@ -212,6 +212,8 @@ TOOL_SCHEMAS = {
 
 def create_app(settings: Optional[CommanderSettings] = None) -> FastAPI:
     st = settings or CommanderSettings()
+    from vati.funding.retained_history import RetainedHistoryJobs
+    retained_jobs = RetainedHistoryJobs()
     native_writes = ThreadPoolExecutor(max_workers=1, thread_name_prefix="van-native-command")
     native_slots = threading.BoundedSemaphore(MAX_NATIVE_PENDING_COMMANDS)
 
@@ -222,6 +224,7 @@ def create_app(settings: Optional[CommanderSettings] = None) -> FastAPI:
         finally:
             # Stop work that has not started and let actual native work finish.
             # Lifecycle teardown must not create a second executor over it.
+            await asyncio.to_thread(retained_jobs.close)
             await asyncio.to_thread(native_writes.shutdown, wait=True, cancel_futures=True)
 
     app = FastAPI(title="Van Trading Commander", version="1.0.0", lifespan=native_lifespan)
@@ -431,7 +434,7 @@ def create_app(settings: Optional[CommanderSettings] = None) -> FastAPI:
                 "vekl_resolve": cmd_vekl, "halt": cmd_halt, "doctor": cmd_doctor, "accounts": cmd_accounts,
                 "positions": cmd_positions, "assessment": cmd_assessment,
                 **build_account_handlers(replace(st.account_control, operation_ledger=st.ledger, lifecycle_transport_binding=lifecycle_transport_binding,restriction_transport_binding=restriction_transport_binding) if st.account_control else
-                    AccountControlSettings(registry_path=st.accounts_registry, secrets_dir=st.secrets_dir, operation_ledger=st.ledger, lifecycle_session_sources=st.lifecycle_session_sources,lifecycle_transport_binding=lifecycle_transport_binding,restriction_transport_binding=restriction_transport_binding)),
+                    AccountControlSettings(registry_path=st.accounts_registry, secrets_dir=st.secrets_dir, operation_ledger=st.ledger, lifecycle_session_sources=st.lifecycle_session_sources,lifecycle_transport_binding=lifecycle_transport_binding,restriction_transport_binding=restriction_transport_binding), retained_jobs=retained_jobs),
                 **build_runtime_control_handlers(st),
                 **build_strategy_handlers(StrategyPromotionSettings(
                     capsule_dir=capsule_dir,

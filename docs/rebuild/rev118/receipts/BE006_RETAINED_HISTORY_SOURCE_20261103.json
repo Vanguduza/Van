@@ -1,0 +1,26 @@
+{
+  "scope": "CANDIDATE_SOURCE_ONLY",
+  "base": "210ca53806c6a4012072200cb7ce24fe4719dad7",
+  "qualification": "INCOMPLETE; PostgreSQL, exact hosted source barrier and full unit acceptance remain open",
+  "change": "Original physical-account pre-deletion cash history uses sealed original native owner identity, original deletion ordinal and query/statement lineage; owner-bound handler jobs perform bounded event/row advancement. All-ID validation and collection continuations preserve conflicts and incomplete lineage. No later or relinked activity is attributed to the original anchor.",
+  "authority": "Existing account_lifecycle_read; cursor data is not authority. No new lifecycle schema, daemon, durable cache, provider access or secret.",
+  "verification": {
+    "prior_four_modules": "93 passed, 19 skipped in 63.04s on prior candidate; skipped PostgreSQL not qualified; receipt d1d0f2f0965a5320551c68c94b71c649877aab920da780acbaee9dd00a00e96b",
+    "affected_final": "47 passed, zero skips; receipt f8a1002caf18ff8ccfe39c66cc216b4086459835c8a10a289175cdad851aef09",
+    "relink_http": "1 passed; actual same-alias native registry re-add, later movement excluded across original HTTP pages; receipt ead5f7b58e90b58ee21018abb3aeb88508fafc516c3ed0bf078b386838248c5a",
+    "review": "Independent medium workhorse review of bounded algorithm, then exact targeted repairs for lineage and manager lifetime; no full native or PostgreSQL qualification.",
+    "retained_failures": "Focused run interrupted by aggregate scratch cap with failure marker; exact prior-source failfast exposed shutdown guard blocked by manager lock, fixed with accounted admission; preserved receipt c27c8a42b49ba6a362f1a48ac16a6cb921b035c3053f30fcffc187fe496ce46e. Fixture setup failures remain in continuation archive."
+  },
+  "workload": {
+    "scope": "local 200-row, 50-row page, 2 or 5 original snapshots/queries; no scaling or production performance qualification",
+    "two_snapshots": "69 snapshot-discovery event reads and 800 validation rows per page; 0.106/0.098s pages, 0.038s setup; SHA d76f8d1cdee4afd42d9e2c91fe7d7e0908ee34e80e053d8e102deeafa436a549",
+    "five_snapshots": "364 discovery event reads and 800 validation rows per page; 0.344/0.339s pages, 0.202s setup; SHA e34b79cdf7b8dd788a4871612308fcaaffaae4ca90920797074c95292b56c75e",
+    "limitation": "Nested original query reconstruction repeats across candidates and pages; existing decoded-event and original proof reads are atomic boundaries, not a generic byte-bound guarantee."
+  },
+  "remaining": [
+    "Live PostgreSQL adapter and exact-head hosted source qualification",
+    "Cross-worker routing/affinity qualification",
+    "Full backend, native provider and production qualification",
+    "Formal unit acceptance"
+  ]
+}
