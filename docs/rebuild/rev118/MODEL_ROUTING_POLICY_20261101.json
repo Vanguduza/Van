@@ -34,5 +34,10 @@
     "Escalate ambiguity to root only.",
     "Do not change native authority, acceptance, hooks, or scope.",
     "Make no model-price or quota assertions."
-  ]
+  ],
+  "prospective_capacity_fallback_20261103": {
+    "trigger": "Selected Sol worker reported capacity error during current continuation.",
+    "selection": "Root selected Terra medium for bounded recovery and suitable implementation work under the owner lesser-model instruction; Luna low for bounded records and review.",
+    "status": "prospective operational guidance; not a native authority, scope or acceptance grant"
+  }
 }

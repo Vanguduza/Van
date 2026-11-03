@@ -38,6 +38,7 @@ from tools.rebuild.source_storage_audit import checkout_root
 LEGACY_SCHEMA = 'van.canonical-cwd-audit/1'
 SCHEMA = 'van.canonical-cwd-audit/2'
 PROBE_OUTPUT_CAP = 8 * 1024**2
+EXEC_ENVIRONMENT_CAP = 8 * 1024**2
 LAUNCH_GATE_SECONDS = 5
 LAUNCH_ENVIRONMENT_POLICY = 'van.trusted-bootstrap-private-exec-environment/2'
 # Linux UAPI values: some supported Python builds omit the fcntl names.
@@ -523,7 +524,7 @@ def _sealed_exec_environment(environment):
             if b'=' in key or b'\0' in key or b'\0' in value or key in names:
                 raise ProcessSupervisionBlocked('INVALID_ORIGINAL_EXEC_ENVIRONMENT')
             names.add(key);entry=key+b'='+value+b'\0';size+=len(entry)
-            if size>PROBE_OUTPUT_CAP:raise ProcessSupervisionBlocked('ORIGINAL_EXEC_ENVIRONMENT_CAPACITY')
+            if size>EXEC_ENVIRONMENT_CAP:raise ProcessSupervisionBlocked('ORIGINAL_EXEC_ENVIRONMENT_CAPACITY')
             entries.append(entry)
         descriptor=os.memfd_create('van-owned-exec-environment',os.MFD_CLOEXEC|os.MFD_ALLOW_SEALING)
         for entry in entries:
@@ -852,7 +853,7 @@ def _verify_process_supervision(receipt,state):
     require(isinstance(environment,dict) and set(environment)=={'schema','bytes','entries','sealed','parent_closed',
         'read_after_ownership_ack','closed_before_original_exec'}
         and environment['schema']=='van.sealed-exec-environment/1'
-        and type(environment['bytes']) is int and 0<=environment['bytes']<=PROBE_OUTPUT_CAP
+        and type(environment['bytes']) is int and 0<=environment['bytes']<=EXEC_ENVIRONMENT_CAP
         and type(environment['entries']) is int and 0<=environment['entries']<=environment['bytes']
         and all(environment[key] is True for key in ('sealed','parent_closed','read_after_ownership_ack','closed_before_original_exec')),
         'unproven original exec environment handoff')

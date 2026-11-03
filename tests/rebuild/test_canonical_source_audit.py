@@ -205,6 +205,7 @@ try:
         assert subprocess.run is real_run
         options={'capture_output':True,'text':True,'check':mode=='error'}
         if mode!='inherited':options['timeout']=.2 if mode=='timeout' else 2
+        if mode=='oversized':options['env']={**os.environ,'VAN_FIXTURE_PADDING':'x'*5000}
         value=audit.subprocess.run([sys.executable,'-c',source],**options)
     result={'kind':'return','code':value.returncode,'stdout':value.stdout,'stderr':value.stderr}
 except BaseException as error:
@@ -226,6 +227,9 @@ def test_supervised_prerequisite_preserves_capture_error_and_timeout(tmp_path,mo
     _assert_supervision_cleanup(record['process_supervision'])
     assert record['capture_threads_joined'] is True
     assert record['output_limit_exceeded'] is (mode=='oversized')
+    if mode=='oversized':
+        assert record['process_supervision']['launch_gate']['released'] is True
+        assert record['process_supervision']['launch_gate']['exec_environment']['bytes']>4096
     assert record['stdout_bytes']<=(4096 if mode=='oversized' else 8*1024**2)
     if mode in {'capture','inherited'}:
         assert value['result']=={'kind':'return','code':0,'stdout':'probe-out\n','stderr':'probe-err\n'}
@@ -1249,7 +1253,7 @@ def test_exec_environment_capacity_refuses_before_fd_creation(monkeypatch):
     created=[]
     monkeypatch.setattr(os,'memfd_create',lambda *a,**k:created.append(True))
     with pytest.raises(audit.ProcessSupervisionBlocked,match='ORIGINAL_EXEC_ENVIRONMENT_CAPACITY'):
-        audit._sealed_exec_environment({'TOO_LARGE':'x'*audit.PROBE_OUTPUT_CAP})
+        audit._sealed_exec_environment({'TOO_LARGE':'x'*audit.EXEC_ENVIRONMENT_CAP})
     assert created==[]
 
 

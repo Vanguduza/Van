@@ -1,0 +1,25 @@
+{
+  "scope": "CANDIDATE_SOURCE_CORRECTION",
+  "base": "cdfea4a512bd1b8250e59edeb375f8d026047ca8",
+  "hosted": {
+    "run": 41711206820,
+    "job": 126179422277,
+    "merge": "6d24e13776a31b298e40af2496bf6fb18be912fe",
+    "case": "test_supervised_prerequisite_preserves_capture_error_and_timeout[oversized]",
+    "result": "465 passed, 1 failed; unproven leader or supervisor identity",
+    "artifact_sha256": "147e6df7bd5e6aa1f19c5cfc3aff7b0b78a66e8892b748035fc235c2f64f189d",
+    "pytest_log_sha256": "db265f595252125744700da944703307e600955f2cebe1e23df111af5a0cd0d6",
+    "report_sha256": "dc8fb45e413e0a3970d23f1836d57c7f94e11d7a35834355bdbe2806d97d9450"
+  },
+  "controlled_reproduction": "5000-byte dummy environment and 4096-byte output cap reproduced the same missing leader identity; direct producer rejects pre-spawn ORIGINAL_EXEC_ENVIRONMENT_CAPACITY. Hosted environment size was not observed.",
+  "change": "Separate output and environment caps at unchanged 8 MiB defaults for creation and receipt verification; preserve actual gated execution, bounded capture and pre-spawn environment capacity refusal.",
+  "source_sha256": "1154787bdcda8ddddd23d8f29accb700c90b50841ebcd421fe0789dd2678403b",
+  "test_sha256": "9af77f37cf7cb665d65454c9f900d70f526d05d2b8c1801144da958d983913f5",
+  "tests": {
+    "focused": "2 passed, zero skips",
+    "whole_auditor": "202 passed, zero skips, 74.25 seconds; supervised exit 0, no owned descendants; checkout PYTHONPATH set by runner"
+  },
+  "review": "Luna low independent two-file capacity-separation delta only; no concrete findings. Earlier Terra review of prior baseline remains separately scoped.",
+  "formal_acceptance": false,
+  "hosted_candidate_qualification": "PENDING"
+}
