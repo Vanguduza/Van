@@ -76,6 +76,7 @@ async def test_link_retry_after_a_lost_reply_returns_receipt_without_repeating_t
     args={'state':state,'loginid':'VRTC900','alias':'linked_once'}
     first = await act(ac,'deriv_oauth_link',args)
     assert first.status_code == 200, first.text
+    assert first.json()['account']['mode']=='OBSERVE' and first.json()['account']['safety_identity']=='READ ONLY'
     second = await act(ac,'deriv_oauth_link',args)
     assert second.status_code == 200, second.text
     assert first.json() == second.json()

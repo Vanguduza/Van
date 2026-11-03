@@ -206,9 +206,13 @@ class AccountOperationRecovery(private val store: AccountOperationStore) {
         if (value.action == "deriv_create_demo" && result.str("effect_state") == "APPLIED") {
             val receipt = result.obj("result") ?: result
             val account = receipt.obj("account") ?: return false
+            val validModeIdentity = when (account.str("mode")) {
+                "OBSERVE" -> account.str("safety_identity") == "READ ONLY"
+                "DEMO_TRADER" -> account.str("safety_identity") == "DEMO" // Original sealed receipts remain readable.
+                else -> false
+            }
             if (account.str("alias") != value.alias || account.str("broker") != "DERIV" ||
-                account["demo"] != JsonPrimitive(true) || account.str("mode") != "DEMO_TRADER" ||
-                account.str("safety_identity") != "DEMO" || account.str("login").isNullOrBlank() ||
+                account["demo"] != JsonPrimitive(true) || !validModeIdentity || account.str("login").isNullOrBlank() ||
                 account.str("currency").isNullOrBlank() || receipt.str("client_id") != account.str("login") ||
                 receipt.str("currency") != account.str("currency")) return false
         }

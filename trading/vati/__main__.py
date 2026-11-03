@@ -109,6 +109,10 @@ def cmd_accounts(a: argparse.Namespace) -> int:
     if a.op == "remove":
         reg.remove(a.alias); print(f"removed {a.alias}"); return 0
     if a.op == "add":
+        from vati.accounts.initial_mode import require_initial_account_mode,InitialAccountModeError
+        try:require_initial_account_mode(a.mode)
+        except InitialAccountModeError as error:
+            print(json.dumps({'error':error.code,'detail':str(error)}));return 2
         acc = Account(alias=a.alias, broker=a.broker, mode=a.mode, currency=a.currency, label=a.label or a.alias, server=a.server or "", login=a.login or "", bridge_url=a.bridge_url or "",
                       credential_ref=CredentialRef(env_var=a.env_var, secrets_file=a.secrets_file), demo=not a.live, mandate_ref=a.mandate_ref or "")
         reg.add(acc); print(json.dumps(acc.public(), indent=2)); return 0
@@ -314,7 +318,7 @@ def main(argv=None) -> int:
     sub.add_parser("stack-lock").set_defaults(fn=cmd_stack_lock)
     sub.add_parser("zse-facts").set_defaults(fn=cmd_zse_facts)
     ac = sub.add_parser("accounts"); ac.add_argument("op", choices=["list", "add", "remove", "verify"]); ac.add_argument("--registry", default="accounts.json"); ac.add_argument("--alias")
-    ac.add_argument("--broker", choices=["MT5", "DERIV", "PAPER", "ZSE_OWNER_TICKET"]); ac.add_argument("--mode", default="DEMO_TRADER"); ac.add_argument("--currency", default="USD"); ac.add_argument("--label")
+    ac.add_argument("--broker", choices=["MT5", "DERIV", "PAPER", "ZSE_OWNER_TICKET"]); ac.add_argument("--mode", default="OBSERVE"); ac.add_argument("--currency", default="USD"); ac.add_argument("--label")
     ac.add_argument("--server"); ac.add_argument("--login"); ac.add_argument("--bridge-url", dest="bridge_url"); ac.add_argument("--env-var", dest="env_var"); ac.add_argument("--secrets-file", dest="secrets_file")
     ac.add_argument("--live", action="store_true"); ac.add_argument("--mandate-ref", dest="mandate_ref"); ac.set_defaults(fn=cmd_accounts)
     lk = sub.add_parser("lake"); lk.add_argument("op", choices=["list", "import-csv", "dukascopy"]); lk.add_argument("--root", default="lake"); lk.add_argument("--symbol"); lk.add_argument("--timeframe", default="H1")

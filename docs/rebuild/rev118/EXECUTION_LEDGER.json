@@ -1700,6 +1700,13 @@
       "evidence": "receipts/ACCOUNT_DISCONNECT_OWNERSHIP_SOURCE_20261103.json",
       "scope": "BE004 fresh full-registry credential ownership SOURCE",
       "status": "SAFE_METADATA_PAPER_TESTED_HOSTED_CREDENTIAL_FIXTURE_PENDING"
+    },
+    {
+      "acceptance_issued": false,
+      "at_utc": "2026-11-03T09:03:33.152802+00:00",
+      "evidence": "receipts/NEW_ACCOUNT_OBSERVE_SOURCE_20261103.json",
+      "scope": "BE004 new account OBSERVE defaults SOURCE",
+      "status": "SAFE_PAPER_METADATA_TESTED_PROVIDER_ANDROID_HOSTED_PENDING"
     }
   ],
   "pre002_challenge": "pre002/challenge/: 324 author-prepared dossiers (AUTHOR_CHALLENGED_PENDING_INDEPENDENT_REVIEW)",
@@ -3102,5 +3109,5 @@
       "status": "IN_PROGRESS"
     }
   },
-  "updated_at_utc": "2026-11-03T07:58:41.789263+00:00"
+  "updated_at_utc": "2026-11-03T09:03:33.152802+00:00"
 }

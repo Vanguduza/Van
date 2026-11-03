@@ -69,7 +69,7 @@ async def test_upsert_credentials_verify_remove_never_echo_secrets(env,client):
     assert "account_upsert" in COMMANDS and "mt5_ea_issue_key" in COMMANDS
     r = post(client, "account_upsert", {"alias": "Deriv Demo", "broker": "DERIV"}); assert r.status_code == 422           # alias rule
     r = post(client, "account_upsert", {"alias": "deriv_demo", "broker": "DERIV", "server": "1089", "label": "Deriv demo"})
-    assert r.status_code == 200 and r.json()["result"]["account"]["safety_identity"] == "DEMO" and r.json()["result"]["account"]["credential_ref"] == {"kind": "file"}
+    assert r.status_code == 200 and r.json()["result"]["account"]["safety_identity"] == "READ ONLY" and r.json()["result"]["account"]["mode"] == "OBSERVE" and r.json()["result"]["account"]["credential_ref"] == {"kind": "file"}
     sec = tmp / "secrets" / "deriv_demo.env"
     assert sec.is_file() and oct(sec.stat().st_mode & 0o777) == "0o600"
     r = post(client, "account_credentials", {"alias": "deriv_demo", "secrets": {"DERIV_API_TOKEN": "a1-linked", "EVIL": "x"}}); assert r.status_code == 422
@@ -108,7 +108,10 @@ def test_deriv_demo_creation_and_oauth_link(env):
     assert creation["residence"] == "zw" and creation["type"] == "trading"
     reg = AccountRegistry(tmp / "accounts.json"); a = reg.get("deriv_demo")
     assert a.broker == "DERIV" and a.login == "VRTC900" and a.demo and reg.credentials("deriv_demo")["DERIV_API_TOKEN"] == "a1-virtualtoken"
+    assert a.mode=="OBSERVE" and a.safety_identity=="READ ONLY"
     assert post(client, "account_verify", {"alias": "deriv_demo"}).json()["result"]["ok"] is True
+    linked = post(client,"deriv_oauth_link",{"alias":"deriv_linked_demo","loginid":"VRTC900","token":"a1-linked","currency":"USD"}).json()["result"]["account"]
+    assert linked["mode"]=="OBSERVE" and linked["demo"] is True and linked["safety_identity"]=="READ ONLY"
     r = post(client, "deriv_oauth_link", {"alias": "deriv_real", "loginid": "CR12345", "token": "a1-live", "currency": "USD"}).json()["result"]
     assert r["account"]["safety_identity"] == "READ ONLY" and r["account"]["demo"] is False and r["account"]["mode"] == "OBSERVE"   # a real account starts read-only until an owner mandate says otherwise
     assert (tmp / "log" / "commander-audit.jsonl").read_text().count("a1-linked") == 0
@@ -137,7 +140,7 @@ def test_ctrader_discover_exchange_and_link(env):
     tok = post(client, "ctrader_oauth_exchange", {"client_id": "a", "client_secret": "s", "code": "good", "redirect_uri": "https://gw/cb"}).json()["result"]
     assert tok["access_token"] == "ct-at"
     r = post(client, "ctrader_link", {"alias": "ct_demo", "client_id": "app-id", "client_secret": "app-secret", "access_token": "tok", "refresh_token": "rt", "ctid_trader_account_id": 12345, "is_live": False, "label": "FP Markets demo"}).json()["result"]
-    assert r["account"]["broker"] == "CTRADER" and r["account"]["login"] == "12345" and r["account"]["safety_identity"] == "DEMO"
+    assert r["account"]["broker"] == "CTRADER" and r["account"]["login"] == "12345" and r["account"]["safety_identity"] == "READ ONLY" and r["account"]["mode"] == "OBSERVE"
     v = post(client, "account_verify", {"alias": "ct_demo"}).json()["result"]
     assert v["ok"] is True and v["balance"] == "10053.09"
     sec = (tmp / "secrets" / "ct_demo.env").read_text()
@@ -150,6 +153,7 @@ def test_mt5_ea_key_issue_and_verify(env, monkeypatch):
     monkeypatch.setenv("VAN_MT5_PULL_QUEUE", str(tmp / "pull.sqlite"))
     r = post(client, "mt5_ea_issue_key", {"alias": "mt5_ea", "login": "12345678", "server": "Broker-Demo", "label": "MT5 demo"}).json()["result"]
     key = r["signing_key"]
+    assert r['account']['mode']=='OBSERVE' and r['account']['safety_identity']=='READ ONLY'
     assert len(key) == 64 and r["ea_inputs"] == {"Alias": "mt5_ea", "SigningKey": key, "BridgeUrl": "https://trading.example.com"} and r["account"]["broker"] == "MT5_EA"
     assert f"BRIDGE_SIGNING_KEY={key}" in (tmp / "secrets" / "mt5_ea.env").read_text()
     v = post(client, "account_verify", {"alias": "mt5_ea"}).json()["result"]
@@ -160,6 +164,17 @@ def test_mt5_ea_key_issue_and_verify(env, monkeypatch):
     assert post(client, "account_verify", {"alias": "mt5_ea"}).json()["result"]["ok"] is True
     # the audit never carries the key
     assert key not in (tmp / "log" / "commander-audit.jsonl").read_text()
+    # Existing explicitly admitted mode, mandate and omitted native identity
+    # survive key rotation; initial defaults grant no trading authority.
+    from dataclasses import replace
+    reg=AccountRegistry(tmp/'accounts.json');original=reg.get('mt5_ea')
+    admitted=replace(original,mode='DEMO_TRADER',mandate_ref='existing-admitted-control',enabled=False,notes='Owner retained notes',venue='mt5-owner')
+    reg.replace(admitted)
+    rotated=post(client,'mt5_ea_issue_key',{'alias':'mt5_ea'}).json()['result']['account']
+    assert rotated['mode']=='DEMO_TRADER' and rotated['mandate_ref']==admitted.mandate_ref
+    current=AccountRegistry(reg.path).get('mt5_ea')
+    for field in ('login','server','currency','demo','bridge_url','enabled','notes','venue','credential_ref'):
+        assert getattr(current,field)==getattr(admitted,field)
 
 
 @pytest.mark.parametrize('action,args', [

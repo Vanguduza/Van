@@ -23,7 +23,7 @@ from pathlib import Path
 from typing import Any, Callable, Optional
 
 from fastapi import HTTPException
-from commander.account_config import resolve_account_config,validate_deriv_endpoint
+from commander.account_config import resolve_account_config,validate_deriv_endpoint,require_initial_observe
 from commander.account_effects import (AccountEffectError, AccountEffectJournal, AccountOperationUnconfirmed,
     AccountOperationBlocked, JOURNALED_COMMANDS, invoke_account_effect, mark_account_effect, operation_intent, readback,
     require_current_account_effect)
@@ -43,7 +43,7 @@ ACCOUNT_TOOL_SCHEMAS = {
     "account_review": {"description": "Resolve exact public before/after settings or local-unlink safety facts without broker effects. Native readonly checks may use host credentials; credential values and locators are never exported.", "properties": {"action": {"type": "string"}, "args": {"type": "object"}}, "required": ["action", "args"]},
     "account_operation": {"description": "Read the original native account-operation outcome for its gateway-authenticated owner device and selected native control domain. No effect or credential export; domain data confers no authority.", "properties": {"operation_id": {"type": "string"}, "device_id": {"type": "string"}, "account_control_domain": {"type":"string","pattern":"^[0-9a-f]{64}$"}}, "required": ["operation_id", "device_id"]},
     "account_revision": {"description": "Read the authenticated native account-control state namespace and, when alias is supplied, its exact configuration version. Namespace data confers no authority.", "properties": {"alias": {"type": "string"}}},
-    "account_upsert": {"description": "Register a new account or edit specified public settings. Existing omitted settings and credentials are preserved. New accounts require broker; native identity changes require verified migration.", "properties": {"alias": {"type": "string"}, "broker": {"type": "string"}, "mode": {"type": "string"}, "currency": {"type": "string"}, "label": {"type": "string"}, "server": {"type": "string"}, "login": {"type": "string"}, "bridge_url": {"type": "string"}, "demo": {"type": "boolean"}, "enabled": {"type": "boolean"}, "notes": {"type": "string"}, "venue": {"type": "string"}, "mandate_ref": {"type": "string"}}, "required": ["alias"]},
+    "account_upsert": {"description": "Register a new account or edit specified public settings. Existing omitted settings and credentials are preserved. New accounts require broker and start OBSERVE; explicit other initial modes are refused. Existing mode controls and native identity migration remain separate.", "properties": {"alias": {"type": "string"}, "broker": {"type": "string"}, "mode": {"type": "string", "description": "New accounts require OBSERVE; omitted existing mode is retained."}, "currency": {"type": "string"}, "label": {"type": "string"}, "server": {"type": "string"}, "login": {"type": "string"}, "bridge_url": {"type": "string"}, "demo": {"type": "boolean"}, "enabled": {"type": "boolean"}, "notes": {"type": "string"}, "venue": {"type": "string"}, "mandate_ref": {"type": "string"}}, "required": ["alias"]},
     "account_credentials": {"description": "Store credential values for an alias in its 0600 secrets file (allowlisted keys per broker). Values are never echoed.", "properties": {"alias": {"type": "string"}, "secrets": {"type": "object"}}, "required": ["alias", "secrets"]},
     "account_remove": {"description": "IMMEDIATE_DISCONNECT requires fresh purpose-bound reauthentication plus separate substantive A4 approval and fresh native safety facts; alias-only removal is refused. PENDING_CLEANUP is a separately reauthenticated and A4-approved original-device child bound to its genuine private plan; it never replays or completes the UNKNOWN parent. History/remote accounts/funds remain; no provider closure or money movement. DELETE_GRACE and CANCEL_DELETE use distinct purpose-bound reauthentication DATA plus separate substantive permission, explicit owner-selected grace, and per-incarnation metadata/detachment; cancellation never restores credentials or strategy eligibility.", "properties": {"alias": {"type": "string"},
         "variant":{"enum":["PENDING_CLEANUP","DELETE_GRACE","CANCEL_DELETE","IMMEDIATE_DISCONNECT"]},"grace_seconds":{"type":"integer","minimum":1},"lifecycle_id":{"type":"string"},"expected_revision":{"type":"integer"},"expected_digest":{"type":"string"},"parent_operation_id":{"type":"string","pattern":"^[A-Za-z0-9_-]{20,128}$"},
@@ -52,12 +52,12 @@ ACCOUNT_TOOL_SCHEMAS = {
         "reauth_fact_digest":{"type":"string","pattern":"^[0-9a-f]{64}$"}}, "required": ["alias"]},
     "account_verify": {"description": "Connect to the venue with the stored credentials and report equity/currency/connectivity. No order is placed.", "properties": {"alias": {"type": "string"}}, "required": ["alias"]},
     "deriv_verify_email": {"description": "Start Deriv account opening: send the verification email.", "properties": {"email": {"type": "string"}, "app_id": {"type": "string"}}, "required": ["email"]},
-    "deriv_create_demo": {"description": "Create a Deriv virtual (demo) account from the emailed code and register it under an alias.", "properties": {"alias": {"type": "string"}, "email": {"type": "string"}, "verification_code": {"type": "string"}, "client_password": {"type": "string"}, "residence": {"type": "string"}, "app_id": {"type": "string"}}, "required": ["alias", "verification_code", "client_password", "residence"]},
-    "deriv_oauth_link": {"description": "Register a Deriv account from the OAuth redirect tokens (loginid → token).", "properties": {"alias": {"type": "string"}, "loginid": {"type": "string"}, "token": {"type": "string"}, "currency": {"type": "string"}, "app_id": {"type": "string"}, "label": {"type": "string"}}, "required": ["alias", "loginid", "token"]},
+    "deriv_create_demo": {"description": "Create a Deriv virtual (demo) account from the emailed code and register it in OBSERVE; trading mode needs the existing separate controls.", "properties": {"alias": {"type": "string"}, "mode": {"type": "string", "enum": ["OBSERVE"], "default": "OBSERVE"}, "email": {"type": "string"}, "verification_code": {"type": "string"}, "client_password": {"type": "string"}, "residence": {"type": "string"}, "app_id": {"type": "string"}}, "required": ["alias", "verification_code", "client_password", "residence"]},
+    "deriv_oauth_link": {"description": "Register a Deriv account in OBSERVE from OAuth redirect tokens; token trade scope does not activate trading.", "properties": {"alias": {"type": "string"}, "mode": {"type": "string", "enum": ["OBSERVE"], "default": "OBSERVE"}, "loginid": {"type": "string"}, "token": {"type": "string"}, "currency": {"type": "string"}, "app_id": {"type": "string"}, "label": {"type": "string"}}, "required": ["alias", "loginid", "token"]},
     "ctrader_discover": {"description": "List cTrader accounts reachable with an access token (demo and live).", "properties": {"client_id": {"type": "string"}, "client_secret": {"type": "string"}, "access_token": {"type": "string"}}, "required": ["client_id", "client_secret", "access_token"]},
     "ctrader_oauth_exchange": {"description": "Exchange a cTrader OAuth code for tokens.", "properties": {"client_id": {"type": "string"}, "client_secret": {"type": "string"}, "code": {"type": "string"}, "redirect_uri": {"type": "string"}}, "required": ["client_id", "client_secret", "code", "redirect_uri"]},
-    "ctrader_link": {"description": "Register a cTrader account (ctid) with its application credentials and tokens.", "properties": {"alias": {"type": "string"}, "client_id": {"type": "string"}, "client_secret": {"type": "string"}, "access_token": {"type": "string"}, "refresh_token": {"type": "string"}, "ctid_trader_account_id": {"type": "integer"}, "is_live": {"type": "boolean"}, "label": {"type": "string"}, "currency": {"type": "string"}}, "required": ["alias", "client_id", "client_secret", "access_token", "ctid_trader_account_id"]},
-    "mt5_ea_issue_key": {"description": "Register an MT5 account served by VanBridgeEA and issue its signing key (returned once, for the EA inputs).", "properties": {"alias": {"type": "string"}, "login": {"type": "string"}, "server": {"type": "string"}, "label": {"type": "string"}, "currency": {"type": "string"}, "demo": {"type": "boolean"}}, "required": ["alias", "login", "server"]},
+    "ctrader_link": {"description": "Register a cTrader account (ctid) in OBSERVE with its application credentials and tokens.", "properties": {"alias": {"type": "string"}, "mode": {"type": "string", "enum": ["OBSERVE"], "default": "OBSERVE"}, "client_id": {"type": "string"}, "client_secret": {"type": "string"}, "access_token": {"type": "string"}, "refresh_token": {"type": "string"}, "ctid_trader_account_id": {"type": "integer"}, "is_live": {"type": "boolean"}, "label": {"type": "string"}, "currency": {"type": "string"}}, "required": ["alias", "client_id", "client_secret", "access_token", "ctid_trader_account_id"]},
+    "mt5_ea_issue_key": {"description": "Register a new MT5 account in OBSERVE or rotate an existing bridge key without changing its omitted mode, mandate or native identity. New registration requires login and server; existing key rotation may omit them. Signing key is returned once for the EA inputs.", "properties": {"alias": {"type": "string"}, "mode": {"type": "string", "description": "New initial mode must be OBSERVE; an existing mode may only be confirmed, never changed by key rotation."}, "login": {"type": "string"}, "server": {"type": "string"}, "label": {"type": "string"}, "currency": {"type": "string"}, "demo": {"type": "boolean"}}, "required": ["alias"]},
 }
 
 
@@ -201,8 +201,12 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
     def reg() -> AccountRegistry:
         return AccountRegistry(st.registry_path)
 
-    def upsert_record(alias: str, broker: str, *, mode: str = "DEMO_TRADER", currency: str = "USD", label: str = "", server: str = "", login: str = "", bridge_url: str = "", demo: bool = True, mandate_ref: str = "", before_write=None, after_write=None) -> dict:
+    def upsert_record(alias: str, broker: str, *, mode: str | None = None, currency: str = "USD", label: str = "", server: str = "", login: str = "", bridge_url: str = "", demo: bool = True, mandate_ref: str | None = None, before_write=None, after_write=None) -> dict:
         r = reg()
+        current = r.accounts.get(alias)
+        require_initial_observe({} if mode is None else {'mode':mode},current=current)
+        mode = mode if mode is not None else (current.mode if current is not None else 'OBSERVE')
+        mandate_ref = mandate_ref if mandate_ref is not None else (current.mandate_ref if current is not None else '')
         sec = _secrets_path(st, alias)
         if broker in ("DERIV", "CTRADER", "MT5_EA", "MT5"):
             if not sec.is_file():
@@ -211,7 +215,9 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
         else:
             cref = CredentialRef()
         try:
-            candidate = Account(alias=alias, broker=broker, mode=mode, currency=currency, label=label or alias, server=server, login=login, bridge_url=bridge_url, credential_ref=cref, demo=demo, mandate_ref=mandate_ref)
+            values={'broker':broker,'mode':mode,'currency':currency,'label':label if current is not None else label or alias,
+                'server':server,'login':login,'bridge_url':bridge_url,'demo':demo,'mandate_ref':mandate_ref}
+            candidate=(replace(current,**values) if current is not None else Account(alias=alias,credential_ref=cref,**values))
             candidate.validate()
             def before_registry_replace():
                 if before_write is not None:before_write()
@@ -541,6 +547,7 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
 
     def cmd_deriv_create_demo(a: dict) -> dict:
         alias = _alias(a)
+        require_initial_observe(a,current=reg().accounts.get(alias))
         require_new_alias(alias)
         app_id = str(a.get("app_id") or "1089")
         if (not str(a.get("verification_code", "")).strip()
@@ -576,7 +583,7 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
         material = saved.credentials(alias)
         verify_deriv_material(app_id=app_id, token=material.get("DERIV_API_TOKEN", ""),
             login=account.login, currency=account.currency, demo=True, require_trade=True)
-        if (account.broker != "DERIV" or not account.demo or account.mode != "DEMO_TRADER"
+        if (account.broker != "DERIV" or not account.demo or account.mode != "OBSERVE"
             or account.server != app_id or account.login != str(nav.get("client_id", ""))
             or material.get("DERIV_APP_ID") != app_id):
             raise HTTPException(409, "Original demo creation requires reconciliation of persisted native identity")
@@ -585,6 +592,7 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
 
     def cmd_deriv_oauth_link(a: dict) -> dict:
         alias = _alias(a)
+        require_initial_observe(a,current=reg().accounts.get(alias))
         require_new_alias(alias)
         loginid = str(a.get("loginid", "")).strip().upper()
         token = str(a.get("token", "")).strip()
@@ -595,7 +603,7 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
         profile = verify_deriv_material(app_id=app_id, token=token, login=loginid,
             currency=currency, demo=None, require_trade=False)
         demo = bool(profile["is_virtual"])
-        mode = "DEMO_TRADER" if demo and "trade" in profile["scopes"] else "OBSERVE"
+        mode = "OBSERVE"
         own_revision=[]
         pub = upsert_record(alias, "DERIV", currency=currency, label=str(a.get("label") or f"Deriv {loginid}"), server=app_id, login=loginid, demo=demo, mode=mode,before_write=a.get('_link_before_registry'),after_write=own_revision.append)
         store_secrets(alias, "DERIV", {"DERIV_API_TOKEN": token, "DERIV_APP_ID": str(a.get("app_id") or "1089")},before_write=a.get('_link_before_credentials'),expected_version=own_revision[0] if own_revision else None)
@@ -641,19 +649,43 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
 
     def cmd_ctrader_link(a: dict) -> dict:
         alias = _alias(a)
+        require_initial_observe(a,current=reg().accounts.get(alias))
         require_new_alias(alias)
         ctid = int(a["ctid_trader_account_id"])
         is_live = _boolean(a, "is_live", False)
         own_revision=[]
-        pub = upsert_record(alias, "CTRADER", currency=str(a.get("currency") or "USD").upper(), label=str(a.get("label") or f"cTrader {ctid}"), server="live" if is_live else "demo", login=str(ctid), demo=not is_live, mode="DEMO_TRADER" if not is_live else "OBSERVE",before_write=a.get('_link_before_registry'),after_write=own_revision.append)
+        pub = upsert_record(alias, "CTRADER", currency=str(a.get("currency") or "USD").upper(), label=str(a.get("label") or f"cTrader {ctid}"), server="live" if is_live else "demo", login=str(ctid), demo=not is_live, mode="OBSERVE",before_write=a.get('_link_before_registry'),after_write=own_revision.append)
         store_secrets(alias, "CTRADER", {"CTRADER_CLIENT_ID": a["client_id"], "CTRADER_CLIENT_SECRET": a["client_secret"], "CTRADER_ACCESS_TOKEN": a["access_token"], **({"CTRADER_REFRESH_TOKEN": a["refresh_token"]} if a.get("refresh_token") else {})},before_write=a.get('_link_before_credentials'),expected_version=own_revision[0] if own_revision else None)
         return {"account": pub,**({'account_control_domain':control_domain()} if st.operation_ledger else {})}
 
     # ------------------------------------------------------------ mt5 ea
     def cmd_mt5_ea_issue_key(a: dict) -> dict:
         alias = _alias(a)
+        current=reg().accounts.get(alias)
+        require_initial_observe(a,current=current)
+        if current is None and any(not isinstance(a.get(key),str) or not a[key].strip() for key in ('login','server')):
+            raise HTTPException(422,'New MT5 account needs login and server')
+        if current is not None and 'mode' in a and a['mode']!=current.mode:
+            raise HTTPException(422,{'code':'ACCOUNT_MODE_REQUIRES_EXISTING_CONTROL',
+                'message':'Bridge key rotation cannot change the admitted account mode'})
+        if current is not None:
+            identity={'broker':'MT5_EA','currency':str(a.get('currency',current.currency)).upper(),
+                'server':str(a.get('server',current.server)),'login':str(a.get('login',current.login)),
+                'demo':_boolean(a,'demo',current.demo),'bridge_url':a.get('bridge_url',current.bridge_url),
+                'venue':a.get('venue',current.venue)}
+            if any(value!=getattr(current,key) for key,value in identity.items()):
+                raise HTTPException(409,'Native account identity changes require verified migration; current connection retained')
+            # Retain the exact existing reference; this producer is not a vault
+            # migration and must not issue a key for an unrelated binding.
+            if (current.credential_ref.env_var or not current.credential_ref.secrets_file
+                or Path(current.credential_ref.secrets_file).resolve()!=_secrets_path(st,alias).resolve()):
+                raise HTTPException(409,'Existing bridge credential binding requires verified migration; key was not issued')
+        def prior(name,default):
+            return a[name] if name in a else getattr(current,name) if current is not None else default
         key = pysecrets.token_hex(32)
-        pub = upsert_record(alias, "MT5_EA", currency=str(a.get("currency") or "USD").upper(), label=str(a.get("label") or f"MT5 {a.get('login')}"), server=str(a.get("server", "")), login=str(a.get("login", "")), demo=_boolean(a, "demo", True))
+        pub = upsert_record(alias, "MT5_EA", currency=str(prior('currency','USD')).upper(),
+            label=str(prior('label',f"MT5 {a.get('login')}")),server=str(prior('server','')),login=str(prior('login','')),
+            bridge_url=current.bridge_url if current is not None else '',demo=_boolean(a,'demo',current.demo if current is not None else True))
         store_secrets(alias, "MT5_EA", {"BRIDGE_SIGNING_KEY": key})
         return {"account": pub, "signing_key": key, "ea_inputs": {"Alias": alias, "SigningKey": key, "BridgeUrl": os.environ.get("VAN_PUBLIC_HOST", "") and f"https://{os.environ['VAN_PUBLIC_HOST']}"}, "note": "shown once; paste into VanBridgeEA inputs"}
 
@@ -723,6 +755,13 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
                     if args.get('_expected_account_control_domain') not in (None,domain):
                         raise AccountOperationBlocked('Account-control state namespace changed before native dispatch')
                     args={**args,'_expected_account_control_domain':domain}
+                    # Refuse invalid NEW modes before the existing demo digest
+                    # vault can be read or initialized. Original journaled
+                    # outcomes still use their original reader, including UNKNOWN.
+                    if command in {'deriv_create_demo','mt5_ea_issue_key'}:
+                        original=journal._states().get(args['_native_operation'].get('operation_id'))
+                        if original is None:
+                            require_initial_observe(args,current=reg().accounts.get(alias))
                     digest_key = None
                     if command == 'deriv_create_demo':
                         from vati.accounts.registry import load_secret_file

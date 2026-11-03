@@ -5,6 +5,7 @@ from fastapi import HTTPException
 
 from vati.accounts import Account, AccountRegistryError, CredentialRef
 from vati.accounts.access import validate_mode
+from vati.accounts.initial_mode import require_initial_account_mode,InitialAccountModeError
 from vati.execution.deriv_identity import DerivIdentityError,validate_deriv_endpoint as validate_provider_endpoint
 
 TEXT_FIELDS = frozenset({'broker','mode','currency','label','server','login','bridge_url','mandate_ref','venue','notes'})
@@ -19,6 +20,13 @@ def validate_deriv_endpoint(endpoint):
         validate_provider_endpoint(endpoint)
     except DerivIdentityError as exc:
         raise HTTPException(422,str(exc)) from None
+
+
+def require_initial_observe(args, *, current=None):
+    if current is None:
+        try:require_initial_account_mode(args.get('mode','OBSERVE'))
+        except InitialAccountModeError as error:
+            raise HTTPException(422,{'code':error.code,'message':str(error)}) from None
 
 
 def resolve_account_config(args, *, alias, current, secret_path):
@@ -40,12 +48,13 @@ def resolve_account_config(args, *, alias, current, secret_path):
         if key in changes:
             changes[key]=changes[key].upper()
     if current is None:
+        require_initial_observe(args)
         broker=changes.get('broker')
         if not broker:
             raise HTTPException(422,'broker is required for a new account')
         credential=CredentialRef(secrets_file=str(secret_path)) if broker in NATIVE_BROKERS else CredentialRef()
         candidate=Account(alias=alias,broker=broker,credential_ref=credential,
-            mode='DEMO_TRADER' if changes.get('demo',True) else 'OBSERVE',currency='USD')
+            mode='OBSERVE',currency='USD')
     else:
         candidate=current
     candidate=replace(candidate,**changes)

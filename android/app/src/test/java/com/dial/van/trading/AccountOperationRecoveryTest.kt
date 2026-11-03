@@ -209,6 +209,21 @@ class AccountOperationRecoveryTest {
         assertTrue(history.observe(demo, receipt, 200, scope))
         assertTrue(history.pending(demo.deviceId).isEmpty())
     }
+    @Test fun newObserveDemoReceiptPreservesNativeIdentityAndClearsOnlyItsOriginal() {
+        val disk = Disk()
+        val demo = original.copy(action = "deriv_create_demo", alias = "owner_demo")
+        val history = AccountOperationRecovery(disk); history.remember(demo)
+        val receipt = """{"operation_id":"${demo.operationId}","action":"deriv_create_demo","effect_state":"APPLIED","reconciliation_required":false,"account_control_domain":"${scope.nativeOwnerDomain}","result":{"account":{"alias":"owner_demo","broker":"DERIV","mode":"OBSERVE","demo":true,"safety_identity":"READ ONLY","login":"VRTC900","currency":"USD"},"client_id":"VRTC900","currency":"USD"}}"""
+        for (invalid in listOf(receipt.replace("READ ONLY", "DEMO"), receipt.replace("OBSERVE", "AUTONOMOUS_LIVE"),
+            receipt.replace("owner_demo", "foreign_alias"), receipt.replace("\"demo\":true", "\"demo\":false"),
+            receipt.replace("\"client_id\":\"VRTC900\"", "\"client_id\":\"OTHER\""))) {
+            assertFalse(history.observe(demo, invalid, 200, scope))
+            assertEquals(listOf(demo), history.pending(demo.deviceId))
+        }
+        assertTrue(history.observe(demo, receipt, 200, scope))
+        assertTrue(history.pending(demo.deviceId).isEmpty())
+    }
+
     private fun response(state: String = "APPLIED", id: String = original.operationId,
                          action: String = original.action, reconcile: Boolean = false) =
         """{"operation_id":"$id","action":"$action","effect_state":"$state","reconciliation_required":$reconcile,"account_control_domain":"${scope.nativeOwnerDomain}","result":{"account":{"alias":"owner_mt5"},"credential_export_available":false}}"""

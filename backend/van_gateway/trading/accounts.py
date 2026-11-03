@@ -379,6 +379,11 @@ class AccountOnboarding:
                 and await self.pending.effects.unresolved_link_target(alias,domain))
             if action in {'deriv_create_demo','deriv_oauth_link','ctrader_link'} and snapshot.get('state')=='REGISTERED' and not original_uncertainty:
                 raise HTTPException(409,'Account alias already exists; use a new alias or the verified update workflow')
+            if snapshot.get('state')=='ABSENT' and action in {'account_upsert','deriv_create_demo','deriv_oauth_link','ctrader_link','mt5_ea_issue_key'}:
+                from vati.accounts.initial_mode import require_initial_account_mode,InitialAccountModeError
+                try:require_initial_account_mode(args.get('mode','OBSERVE'))
+                except InitialAccountModeError as error:
+                    raise HTTPException(422,{'code':error.code,'message':str(error)}) from None
             version = snapshot.get("resource_version")
             if snapshot.get("alias") != alias or not isinstance(version, str) or not re.fullmatch(r"[0-9a-f]{64}", version):
                 raise ValueError("invalid native resource version")
@@ -534,6 +539,10 @@ class AccountOnboarding:
                     approval_operation_id=native_operation.get('operation_id'),
                     original_expires_at_unix=resume[1] if resume else native_operation.get('expires_at_unix'))
             def validate(p):
+                from vati.accounts.initial_mode import require_initial_account_mode,InitialAccountModeError
+                try:require_initial_account_mode(args.get('mode','OBSERVE'))
+                except InitialAccountModeError as error:
+                    raise HTTPException(422,{'code':error.code,'message':str(error)}) from None
                 if broker == "deriv":
                     if not any(a["loginid"].upper()==str(args.get("loginid","")).upper() for a in p.get("accounts",[])):
                         raise HTTPException(422,"loginid not in the OAuth result")
@@ -552,6 +561,7 @@ class AccountOnboarding:
                 else:
                     values = {"alias":args.get("alias"),"client_id":p["client_id"],"client_secret":p["client_secret"],"access_token":p["access_token"],"refresh_token":p.get("refresh_token"),
                               "ctid_trader_account_id":args["ctid_trader_account_id"],"is_live":args.get("is_live",False),"label":args.get("label",""),"currency":args.get("currency","USD")}
+                values['mode']='OBSERVE'
                 if native_resource_version is None:
                     raise HTTPException(409, "native account version is required before a new link")
                 values["_expected_resource_version"] = native_resource_version
@@ -565,7 +575,7 @@ class AccountOnboarding:
                     or account_result.get("broker") != broker.upper()
                     or str(account_result.get("login")) != str(expected_login)
                     or account_result.get("currency") != str(values["currency"]).upper()
-                    or account_result.get("mode") not in {"DEMO_TRADER","OBSERVE"}
+                    or account_result.get("mode") != "OBSERVE"
                     or result.get('account_control_domain')!=domain):
                     raise ValueError("native account receipt does not match the requested link")
                 result={**result,'operation_id':binding['operation_id'],'device_id':owner_device_id,

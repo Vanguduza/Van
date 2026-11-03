@@ -3904,6 +3904,7 @@ def create_app() -> FastAPI:
         schemas['oauth_pending']={'type':'object','properties':{'state':{'type':'string'}},'required':['state']}
         for name in ('deriv_oauth_link','ctrader_link'):
             selection={'type':'object','properties':{'alias':{'type':'string'},'state':{'type':'string'},
+                'mode':{'type':'string','enum':['OBSERVE'],'default':'OBSERVE'},
                 'label':{'type':'string'},'currency':{'type':'string'},
                 **({'loginid':{'type':'string'}} if name=='deriv_oauth_link' else
                    {'ctid_trader_account_id':{'type':'integer'},'is_live':{'type':'boolean'}})},
