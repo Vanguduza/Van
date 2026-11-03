@@ -1244,6 +1244,12 @@
       "full_BE004": "OPEN",
       "source_receipt": "docs/rebuild/rev118/receipts/ACCOUNT_DISCONNECT_CI_REPAIR_20261103.json"
     },
+    "disconnect_namespace_20261103": {
+      "full_BE004": "OPEN",
+      "native_formal_acceptance": false,
+      "original_PG_positive": "PENDING_HOSTED",
+      "source_receipt": "docs/rebuild/rev118/receipts/ACCOUNT_DISCONNECT_NAMESPACE_SOURCE_20261103.json"
+    },
     "head": "e0d6f2719b0f9bfbcd9cdb5e68b7f26c7606da3d",
     "hosted_result": "receipts/HOSTED_SOURCE_752d265b.json",
     "immediate_disconnect_20261103": {
@@ -1673,6 +1679,13 @@
       "evidence": "receipts/ACCOUNT_DISCONNECT_CI_REPAIR_20261103.json",
       "scope": "6933 immediate disconnect CI source repair",
       "status": "SOURCE_REPAIR_WITH_PG_CAUSE_OPEN"
+    },
+    {
+      "acceptance_issued": false,
+      "at_utc": "2026-11-03T07:13:40.435663+00:00",
+      "evidence": "receipts/ACCOUNT_DISCONNECT_NAMESPACE_SOURCE_20261103.json",
+      "scope": "BE004 current-native-namespace missing-key history guard SOURCE",
+      "status": "PURE_METADATA_PREDICATE_TESTED_PG_E2E_OPEN"
     }
   ],
   "pre002_challenge": "pre002/challenge/: 324 author-prepared dossiers (AUTHOR_CHALLENGED_PENDING_INDEPENDENT_REVIEW)",
@@ -3075,5 +3088,5 @@
       "status": "IN_PROGRESS"
     }
   },
-  "updated_at_utc": "2026-11-03T06:36:52.912166+00:00"
+  "updated_at_utc": "2026-11-03T07:13:40.435663+00:00"
 }

@@ -163,7 +163,17 @@ async def test_unmanaged_credential_reference_does_not_authorize_deleting_anothe
 async def test_a_shared_reference_added_after_native_readback_is_rechecked_before_deletion(native,monkeypatch):
     import commander.account_retirement as module
     from commander.account_effects import _effect_started
-    inspect=module.inspect_retirement;inserted=[]
+    from commander.account_lifecycle import NativeLifecycle
+    inspect=module.inspect_retirement;inserted=[];refusals=[]
+    review=NativeLifecycle.review
+    def observed_review(self,*args,**kwargs):
+        try:return review(self,*args,**kwargs)
+        except HTTPException as error:
+            if (_effect_started.get() is not None and error.status_code==409
+                    and error.detail=='Credential destruction cannot be proven for this account; HOLD'):
+                refusals.append('CREDENTIAL_DESTRUCTION_UNPROVEN')
+            raise
+    monkeypatch.setattr(NativeLifecycle,'review',observed_review)
     def shared_after_facts(*args,**kwargs):
         facts=inspect(*args,**kwargs)
         # Fresh challenge/readback calls are readonly. Add the competing owner
@@ -177,7 +187,9 @@ async def test_a_shared_reference_added_after_native_readback_is_rechecked_befor
     before=native.secret.read_bytes()
     body,_=await immediate_challenge(native.ac,'fx_primary')
     blocked=await native.ac.post('/v1/trading/accounts/action',json=body)
-    assert inserted and blocked.status_code==409 and 'destruction cannot be proven' in blocked.text
+    assert inserted and refusals==['CREDENTIAL_DESTRUCTION_UNPROVEN']
+    assert blocked.status_code==409 and blocked.json()['effect_state']=='REFUSED'
+    assert blocked.json()['native']['result']['status_code']==409
     assert native.secret.read_bytes()==before
     registry=AccountRegistry(native.path)
     assert registry.get('fx_primary') and registry.get('late_reference')

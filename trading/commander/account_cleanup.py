@@ -278,6 +278,12 @@ class UnlinkRecoveryBook:
             except BaseException:db.rollback();raise
             finally:self._active=None
 
+    def _require_empty_namespace(self,db):
+        # A fresh namespace cannot borrow another namespace's private facts.
+        # Any history in THIS namespace still forbids replacing its missing key.
+        if self._execute(db,'SELECT 1 FROM '+self._table('facts')+' WHERE namespace=? LIMIT 1',
+                (self.namespace,)).fetchone():raise unknown()
+
     def _integrity_key(self,*,create=False):
         """Local data integrity only. Never creates on reads or over history."""
         from vati.core.file_lock import exclusive_state_lock
@@ -294,7 +300,7 @@ class UnlinkRecoveryBook:
                 if not create:raise unknown()
                 db=self._active
                 if db is None:raise unknown()
-                if self._execute(db,'SELECT 1 FROM '+self._table('facts')+' LIMIT 1').fetchone():raise unknown()
+                self._require_empty_namespace(db)
                 _write_secrets(path,{'UNLINK_PLAN_INTEGRITY_KEY':secrets.token_hex(32)},merge=False)
                 directory=os.open(self.secrets_root,os.O_RDONLY|os.O_DIRECTORY)
                 try:os.fsync(directory)

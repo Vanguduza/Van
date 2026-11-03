@@ -150,6 +150,10 @@ async def test_actual_pg_row_guard_fences_a_competing_actor_even_beyond_lease_tt
             assert not competing.done()
         finally:release.set()
         removed=await asyncio.wait_for(removal,5)
+        if removed.status_code!=200:
+            # Pytest tuple repr elides trailing metadata; print only the same
+            # whitelisted diagnostic enums, never the response/body or secrets.
+            print('native_failure_metadata='+json.dumps(diagnostics,sort_keys=True))
         assert removed.status_code==200 and removed.json()['removed'] is True,(removed.text,diagnostics)
         result=competing.result(timeout=5)
         if not result.permits_orders:
