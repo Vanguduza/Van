@@ -13,6 +13,229 @@ import pytest
 from tools.rebuild import canonical_source_audit as audit
 
 
+_SUPERVISION_DRIVER = r'''
+import json, os, signal, subprocess, sys
+from pathlib import Path
+from tools.rebuild.canonical_source_audit import OwnedProcessSupervisor
+mode, log_path = sys.argv[1:]
+supervisor = OwnedProcessSupervisor()
+if mode == 'unsupported':
+    from unittest.mock import patch
+    with patch('os.pidfd_open', side_effect=OSError('unsupported')), patch('subprocess.Popen') as spawn:
+        try: supervisor.preflight()
+        except BaseException as exc:
+            print(json.dumps({'result':{'kind':'exception','value':type(exc).__name__},'spawned':spawn.called}))
+        else: print(json.dumps({'result':{'kind':'return'},'spawned':spawn.called}))
+    sys.exit(0)
+supervisor.preflight()
+children = {
+    'normal': "pass",
+    'adopted_terminal': "import os,time\np=os.fork()\nif p==0: os._exit(0)\ntime.sleep(.15)\nos._exit(0)",
+    'detached_live': "import os,time\nr,w=os.pipe()\np=os.fork()\nif p==0:\n os.close(r)\n os.setsid()\n q=os.fork()\n if q==0:\n  os.setsid()\n  os.write(w,b'x')\n  time.sleep(30)\n os._exit(0)\nos.close(w)\nassert os.read(r,1)==b'x'\nos._exit(0)",
+    'timeout': "import time; time.sleep(30)",
+    'interrupt': "import time; time.sleep(30)",
+    'controller_fault': "import time; time.sleep(30)",
+    'bind_fault': "import time; time.sleep(30)",
+    'bind_permanent': "pass", 'early_interrupt': "pass", 'missing_ack': "pass",
+}
+if mode == 'controller_fault':
+    def broken_wait(child, timeout_seconds): raise RuntimeError('controlled owner failure')
+    supervisor._wait_leader = broken_wait
+if mode == 'bind_fault':
+    original_bind=supervisor._bind
+    def fail_once(pid):
+        if not getattr(fail_once,'attempted',False):
+            fail_once.attempted=True
+            raise OSError('controlled first ownership bind failure')
+        return original_bind(pid)
+    supervisor._bind=fail_once
+if mode in {'bind_fault','bind_permanent','early_interrupt','missing_ack'}:
+    children[mode]="from pathlib import Path; Path("+repr(log_path+'.effect')+").write_text('executed')"
+if mode == 'bind_permanent':
+    def unavailable(pid):raise OSError('controlled permanent post-spawn pidfd failure')
+    supervisor._bind=unavailable
+if mode == 'early_interrupt':
+    def terminated(signum,frame):raise KeyboardInterrupt()
+    signal.signal(signal.SIGTERM,terminated)
+    def before_binding(pid):signal.raise_signal(signal.SIGTERM)
+    supervisor._bind=before_binding
+if mode == 'missing_ack':supervisor._release_gate=lambda descriptor:0
+if mode == 'interrupt':
+    def interrupted(signum, frame): raise KeyboardInterrupt()
+    signal.signal(signal.SIGALRM, interrupted)
+    signal.setitimer(signal.ITIMER_REAL, .35)
+result = None
+try:
+    with Path(log_path).open('wb') as log:
+        command=(['git','-c','user.name=Fixture','-c','user.email=fixture@example.test','commit','-qm','fixture']
+                 if mode=='git' else [sys.executable,'-c',children[mode]])
+        code = supervisor.run(command, cwd=os.getcwd(), env=os.environ.copy(), log=log,
+                              timeout_seconds=.35 if mode=='timeout' else 5)
+    result = {'kind':'return','value':code}
+except BaseException as exc:
+    result = {'kind':'exception','value':type(exc).__name__}
+finally:
+    signal.setitimer(signal.ITIMER_REAL, 0)
+print(json.dumps({'result':result,'evidence':supervisor.evidence,'effect_exists':Path(log_path+'.effect').exists()},sort_keys=True))
+'''
+
+
+def _supervision_process(tmp_path, mode, *, cwd=None, env=None):
+    """Separate interpreter keeps process-global subreaper state out of pytest."""
+    run=subprocess.run([sys.executable,'-c',_SUPERVISION_DRIVER,mode,str(tmp_path/(mode+'.log'))],
+                       cwd=cwd or Path(__file__).resolve().parents[2],env=env or os.environ.copy(),capture_output=True,text=True,timeout=15)
+    assert run.returncode==0,(run.stdout,run.stderr)
+    return json.loads(run.stdout)
+
+
+def _assert_supervision_cleanup(evidence):
+    assert evidence['schema']=='van.kernel-owned-child-supervision/1'
+    assert evidence['capabilities']=={'pidfd':True,'subreaper':True,'proc_identity':True}
+    for key in ('supervisor_identity','leader_identity'):
+        assert set(evidence[key])=={'pid','ppid','start_ticks'}
+        assert all(type(value) is int and value>=0 for value in evidence[key].values())
+    assert evidence['leader_identity']['ppid']==evidence['supervisor_identity']['pid']
+    assert evidence['leader_pidfd_bound'] is True and evidence['leader_waited'] is True
+    assert evidence['owned_children_absent'] is True and evidence['waitpid_echild'] is True
+    assert evidence['remaining_owned']==[] and evidence['cleanup_error'] is None
+    for row in evidence['adopted']:
+        assert row['pidfd_bound'] is True and row['reaped'] is True and type(row['wait_status']) is int
+        assert set(row['identity'])=={'pid','ppid','start_ticks'}
+
+
+@pytest.mark.parametrize('mode',['normal','adopted_terminal'])
+def test_owned_supervisor_reaps_terminal_processes_in_isolated_interpreter(tmp_path,mode):
+    result=_supervision_process(tmp_path,mode)
+    assert result['result']=={'kind':'return','value':0}
+    _assert_supervision_cleanup(result['evidence'])
+    assert result['evidence']['unexpected_live_descendants'] is False
+    assert result['evidence']['leader_exit']==0 and result['evidence']['leader_forced_cleanup'] is False
+    if mode=='adopted_terminal':assert result['evidence']['adopted']
+
+
+def test_owned_supervisor_reaps_but_blocks_live_detached_descendants(tmp_path):
+    result=_supervision_process(tmp_path,'detached_live')
+    assert result['result']=={'kind':'exception','value':'ProcessSupervisionBlocked'}
+    _assert_supervision_cleanup(result['evidence'])
+    assert result['evidence']['unexpected_live_descendants'] is True
+    assert len({row['identity']['pid'] for row in result['evidence']['adopted']})>=2
+
+
+@pytest.mark.parametrize('mode,error',[('timeout','TimeoutExpired'),('interrupt','KeyboardInterrupt'),('controller_fault','RuntimeError')])
+def test_owned_supervisor_cleans_before_propagating_timeout_or_interrupt(tmp_path,mode,error):
+    result=_supervision_process(tmp_path,mode)
+    assert result['result']=={'kind':'exception','value':error}
+    _assert_supervision_cleanup(result['evidence'])
+    assert result['evidence']['leader_forced_cleanup'] is True
+
+
+@pytest.mark.parametrize('mode,error',[
+    ('bind_fault','OSError'),('bind_permanent','OSError'),
+    ('early_interrupt','KeyboardInterrupt'),('missing_ack','ProcessSupervisionBlocked')])
+def test_owned_supervisor_never_executes_unbound_or_unacknowledged_command(tmp_path,mode,error):
+    result=_supervision_process(tmp_path,mode)
+    assert result['result']=={'kind':'exception','value':error}
+    assert result['effect_exists'] is False
+    evidence=result['evidence']
+    assert evidence['capabilities']=={'pidfd':True,'subreaper':True,'proc_identity':True}
+    assert evidence['leader_waited'] is True and evidence['leader_exit']==125
+    assert evidence['owned_children_absent'] is True and evidence['waitpid_echild'] is True
+    assert evidence['remaining_owned']==[] and evidence['cleanup_error'] is None
+    assert evidence['launch_gate']['released'] is False and evidence['launch_gate']['closed'] is True
+    assert evidence['launch_gate']['aborted_before_exec'] is True
+    if mode in {'bind_fault','bind_permanent','early_interrupt'}:
+        assert evidence['leader_pidfd_bound'] is False and evidence['leader_identity'] is None
+    else:assert evidence['leader_pidfd_bound'] is True
+
+
+def test_owned_supervisor_leaves_unrelated_peer_alive(tmp_path):
+    peer=subprocess.Popen([sys.executable,'-c','import time; time.sleep(30)'])
+    try:
+        result=_supervision_process(tmp_path,'detached_live')
+        assert result['result']=={'kind':'exception','value':'ProcessSupervisionBlocked'}
+        _assert_supervision_cleanup(result['evidence'])
+        assert peer.poll() is None
+    finally:
+        peer.terminate()
+        peer.wait(timeout=5)
+
+
+def test_owned_supervisor_refuses_unsupported_platform_before_spawn(tmp_path):
+    result=_supervision_process(tmp_path,'unsupported')
+    assert result=={'result':{'kind':'exception','value':'ProcessSupervisionBlocked'},'spawned':False}
+
+
+def test_owned_supervisor_keeps_git_hooks_and_existing_injected_configuration(tmp_path):
+    repo=tmp_path/'repo';repo.mkdir()
+    subprocess.run(['git','init','-q'],cwd=repo,check=True)
+    (repo/'content').write_text('fixture\n')
+    subprocess.run(['git','add','content'],cwd=repo,check=True)
+    hook=repo/'.git/hooks/pre-commit'
+    hook.write_text('#!/bin/sh\ngit config --get gc.autoDetach > ../hook-sentinel\ngit config --get maintenance.autoDetach >> ../hook-sentinel\ngit config --get advice.detachedHead >> ../hook-sentinel\n')
+    hook.chmod(0o755)
+    env={**os.environ,'GIT_CONFIG_COUNT':'1','GIT_CONFIG_KEY_0':'advice.detachedHead','GIT_CONFIG_VALUE_0':'false',
+         'GIT_TRACE2_EVENT':str(tmp_path/'git-trace.json')}
+    result=_supervision_process(tmp_path,'git',cwd=repo,env=env)
+    assert result['result']=={'kind':'return','value':0}
+    _assert_supervision_cleanup(result['evidence'])
+    assert (tmp_path/'hook-sentinel').read_text().splitlines()==['false','false','false']
+    assert any('maintenance' in line for line in (tmp_path/'git-trace.json').read_text().splitlines())
+
+
+def test_auditor_receipt_scope_preserves_legacy_as_history_only():
+    assert audit.profile_evidence_scope({'schema':'van.canonical-cwd-audit/1'})=='HISTORICAL_GROUP_ONLY'
+    assert audit.profile_evidence_scope({'schema':'van.canonical-cwd-audit/2'})=='OWNED_DESCENDANTS_REQUIRED'
+    with pytest.raises(ValueError):audit.profile_evidence_scope({'schema':'van.canonical-cwd-audit/unknown'})
+
+
+_PROBE_DRIVER = r'''
+import json, os, subprocess, sys
+from tools.rebuild import canonical_source_audit as audit
+mode=sys.argv[1]; records=[]; real_run=subprocess.run
+source={'capture':"import sys; print('probe-out'); print('probe-err',file=sys.stderr)",
+        'inherited':"import sys; print('probe-out'); print('probe-err',file=sys.stderr)",
+        'error':"import sys; print('probe-error',file=sys.stderr); sys.exit(7)",
+        'timeout':"import time; time.sleep(30)",
+        'oversized':"import sys; sys.stdout.buffer.write(b'x'*16384); sys.stdout.flush()"}[mode]
+if mode=='oversized':audit.PROBE_OUTPUT_CAP=4096
+try:
+    with audit.supervised_probes(records,2):
+        assert subprocess.run is real_run
+        options={'capture_output':True,'text':True,'check':mode=='error'}
+        if mode!='inherited':options['timeout']=.2 if mode=='timeout' else 2
+        value=audit.subprocess.run([sys.executable,'-c',source],**options)
+    result={'kind':'return','code':value.returncode,'stdout':value.stdout,'stderr':value.stderr}
+except BaseException as error:
+    result={'kind':'exception','type':type(error).__name__,
+            'returncode':getattr(error,'returncode',None),'stderr':getattr(error,'stderr',None)}
+print(json.dumps({'result':result,'records':records},sort_keys=True))
+'''
+
+
+@pytest.mark.parametrize('mode',['capture','inherited','error','timeout','oversized'])
+def test_supervised_prerequisite_preserves_capture_error_and_timeout(tmp_path,mode):
+    import hashlib
+    proc=subprocess.run([sys.executable,'-c',_PROBE_DRIVER,mode],cwd=Path(__file__).resolve().parents[2],
+                        env=os.environ.copy(),capture_output=True,text=True,timeout=15)
+    assert proc.returncode==0,(proc.stdout,proc.stderr)
+    value=json.loads(proc.stdout);assert len(value['records'])==1
+    record=value['records'][0];assert record['timeout_policy']=='EXPLICIT_OR_EXISTING_PROFILE_BOUND'
+    assert record['timeout_seconds']==(.2 if mode=='timeout' else 2)
+    _assert_supervision_cleanup(record['process_supervision'])
+    assert record['capture_threads_joined'] is True
+    assert record['output_limit_exceeded'] is (mode=='oversized')
+    assert record['stdout_bytes']<=(4096 if mode=='oversized' else 8*1024**2)
+    if mode in {'capture','inherited'}:
+        assert value['result']=={'kind':'return','code':0,'stdout':'probe-out\n','stderr':'probe-err\n'}
+        assert record['stdout_sha256']==hashlib.sha256(b'probe-out\n').hexdigest()
+        assert record['stderr_sha256']==hashlib.sha256(b'probe-err\n').hexdigest()
+    elif mode=='error':
+        assert value['result']['type']=='CalledProcessError' and value['result']['returncode']==7
+        assert value['result']['stderr']=='probe-error\n'
+    elif mode=='timeout':assert value['result']['type']=='TimeoutExpired'
+    else:assert value['result']['type']=='ProcessSupervisionBlocked'
+
+
 def git(root,*args):
     return subprocess.check_output(['git',*args],cwd=root,text=True).strip()
 
@@ -95,6 +318,10 @@ def test_actual_cli_collection_execution_and_independent_readback_bind_cwd(canon
     assert state['output']==str(original_output/'execute')
     assert state['actual_cwd']==str(root if cwd=='checkout' else root/'backend')
     receipt=audit.load(output/'execute'/'receipt.json')
+    _assert_supervision_cleanup(receipt['process_supervision'])
+    assert receipt['schema']=='van.canonical-cwd-audit/2'
+    assert receipt['supervisor_identity']==receipt['process_supervision']['supervisor_identity']
+    assert state['child_process_identity']==receipt['process_supervision']['leader_identity']
     assert state['actual_basetemp']==receipt['basetemp']['path']
     assert 'pytest-' in state['actual_basetemp']
     assert receipt['basetemp_cleanup']['state']=='REMOVED_OWNED_TERMINAL'
@@ -144,7 +371,11 @@ def actual_phase_receipt(tmp_path_factory):
     'collect-only','foreign-artifact','aborted','selector-override','foreign-plugin','wrong-config-cut',
     'temp-execution','temp-actual','temp-cleanup','temp-path',
     'output-state','output-input','output-collection','output-relative','output-dotdot',
-    'output-checkout','output-root','wrapper-report','state-path','junit-path'])
+    'output-checkout','output-root','wrapper-report','state-path','junit-path',
+    'supervision-missing','supervision-echild','supervision-leader','supervision-live','supervision-schema','legacy-receipt',
+    'parent-probe-missing','child-probe-missing','parent-probe-owner','child-probe-owner',
+    'parent-probe-unjoined','child-probe-overflow','parent-probe-command','child-probe-cwd',
+    'parent-probe-drop','child-probe-reorder','parent-probe-timeout','launch-gate-missing','launch-gate-unreleased'])
 def test_resealed_actual_phase_receipts_fail_closed(actual_phase_receipt,monkeypatch,damage):
     root,head,out,env=actual_phase_receipt
     for key in ('PYTHONPATH','GITHUB_RUN_ID','GITHUB_RUN_ATTEMPT'):monkeypatch.setenv(key,env[key])
@@ -153,6 +384,28 @@ def test_resealed_actual_phase_receipts_fail_closed(actual_phase_receipt,monkeyp
     phases=[json.loads(x) for x in (out/'phases.jsonl').read_text().splitlines()]
     try:
         if damage=='wrong-cwd':state['cwd']=receipt['cwd']='checkout'
+        elif damage=='supervision-missing':receipt.pop('process_supervision')
+        elif damage=='supervision-echild':receipt['process_supervision']['waitpid_echild']=False
+        elif damage=='supervision-leader':receipt['process_supervision']['leader_identity']['start_ticks']+=1
+        elif damage=='supervision-live':receipt['process_supervision']['unexpected_live_descendants']=True
+        elif damage=='supervision-schema':receipt['process_supervision']['schema']='foreign'
+        elif damage=='launch-gate-missing':receipt['process_supervision'].pop('launch_gate')
+        elif damage=='launch-gate-unreleased':receipt['process_supervision']['launch_gate']['released']=False
+        elif damage=='legacy-receipt':receipt['schema']='van.canonical-cwd-audit/1'
+        elif damage=='parent-probe-missing':receipt['probe_supervision']=[]
+        elif damage=='child-probe-missing':state['probe_supervision']=[]
+        elif damage=='parent-probe-owner':receipt['probe_supervision'][0]['process_supervision']['supervisor_identity']['pid']+=1
+        elif damage=='child-probe-owner':state['probe_supervision'][0]['process_supervision']['supervisor_identity']['pid']+=1
+        elif damage=='parent-probe-unjoined':receipt['probe_supervision'][0]['capture_threads_joined']=False
+        elif damage=='child-probe-overflow':state['probe_supervision'][0]['output_limit_exceeded']=True
+        elif damage=='parent-probe-command':
+            import hashlib
+            record=receipt['probe_supervision'][0];record['argv']=['git','status','--porcelain']
+            record['command_sha256']=hashlib.sha256(json.dumps(record['argv'],separators=(',',':')).encode()).hexdigest()
+        elif damage=='child-probe-cwd':state['probe_supervision'][0]['cwd']=str(root/'backend')
+        elif damage=='parent-probe-drop':receipt['probe_supervision'].pop()
+        elif damage=='child-probe-reorder':state['probe_supervision'][1:3]=reversed(state['probe_supervision'][1:3])
+        elif damage=='parent-probe-timeout':receipt['probe_supervision'][0]['timeout_seconds']+=1
         elif damage=='wrong-actual-cwd':state['actual_cwd']=receipt['actual_cwd']=str(root)
         elif damage=='source':receipt['source_after']={'commit':'foreign'}
         elif damage=='protected':receipt['protected_after']={}
@@ -212,6 +465,18 @@ def test_resealed_actual_phase_receipts_fail_closed(actual_phase_receipt,monkeyp
     finally:
         for path,data in originals.items():path.write_bytes(data)
     audit.verify_profile(out,audit.inventory(root),'documentary','backend',head,root)
+
+
+def test_legacy_profile_remains_historical_and_does_not_qualify(actual_phase_receipt,monkeypatch):
+    root,head,out,env=actual_phase_receipt
+    for key in ('PYTHONPATH','GITHUB_RUN_ID','GITHUB_RUN_ATTEMPT'):monkeypatch.setenv(key,env[key])
+    path=out/'receipt.json';original=path.read_bytes();receipt=json.loads(original)
+    try:
+        receipt['schema']='van.canonical-cwd-audit/1';audit.dump(path,receipt)
+        assert audit.profile_evidence_scope(receipt)=='HISTORICAL_GROUP_ONLY'
+        with pytest.raises(ValueError,match='HISTORICAL_GROUP_ONLY'):
+            audit.verify_profile(out,audit.inventory(root),'documentary','backend',head,root)
+    finally:path.write_bytes(original)
 
 
 def test_default_public_verifier_refuses_backend_cwd_even_with_resealed_hashes(monkeypatch,tmp_path):
@@ -811,3 +1076,128 @@ def test_archived_node_policy_uses_producer_not_aggregate_reader_environment(mod
     monkeypatch.setattr(audit.subprocess,'run',lambda *a,**k:pytest.fail('archived readback must not execute reader Node'))
     audit.verify_environment('private_dds',record,root)
     assert record==original and os.environ['NODE_DISABLE_COMPILE_CACHE']=='0'
+
+
+@pytest.mark.parametrize('command',['plan','join'])
+def test_actual_auxiliary_cli_supervises_all_git_probes(canonical_fixture,tmp_path,command):
+    root,head=canonical_fixture;output=tmp_path/(command+'.json')
+    args=[sys.executable,'-B','-s',str(root/'tools/rebuild/canonical_source_audit.py'),command,
+        '--expected-commit',head,'--output',str(output),'--timeout-seconds','10']
+    if command=='join':
+        args+=['--reports',str(tmp_path/'missing-reports'),'--public-root',str(tmp_path/'missing-public'),
+            '--public-backend',str(tmp_path/'missing-backend'),'--public-root-result','failure',
+            '--public-backend-result','failure']
+    result=subprocess.run(args,cwd=root,env=os.environ.copy(),capture_output=True,text=True,timeout=20)
+    assert result.returncode==(0 if command=='plan' else 1),(result.stdout,result.stderr)
+    record=audit.load(output.with_name(output.name+'.supervision.json'))
+    assert record['state']=='TERMINAL' and record['command']==command
+    assert record['process_supervision']['waitpid_echild'] is True
+    assert record['process_supervision']['owned_children_absent'] is True
+    assert record['probe_supervision']
+    audit._verify_probe_supervision(record['probe_supervision'],record['process_supervision']['supervisor_identity'])
+    assert record['probe_supervision'][0]['argv']==['git','ls-files','-z','--',*audit.ROOTS]
+
+
+def test_actual_cli_sigterm_persists_blocked_receipt_after_owned_cleanup(canonical_fixture,tmp_path):
+    import signal,time
+    root,_=canonical_fixture;marker=tmp_path/'child-entered';output=tmp_path/'terminated-profile'
+    fixture=root/'tests/rebuild/test_fixture.py'
+    fixture.write_text('def test_blocking_source_fixture():\n    import os,time\n    from pathlib import Path\n    Path(os.environ["VAN_TEST_CHILD_MARKER"]).write_text("entered")\n    time.sleep(30)\n')
+    git(root,'add',str(fixture));git(root,'-c','user.name=Fixture','-c','user.email=fixture@example.test','commit','-qm','blocking signal fixture')
+    head=git(root,'rev-parse','HEAD')
+    env={**os.environ,'PYTHONPATH':os.pathsep.join(str(root/p) for p in audit.proof.CANONICAL_PYTHONPATH),
+        'PYTHONDONTWRITEBYTECODE':'1','PYTEST_DISABLE_PLUGIN_AUTOLOAD':'1','VAN_TEST_CHILD_MARKER':str(marker),
+        'GITHUB_RUN_ID':'SYNTHETIC-SIGTERM','GITHUB_RUN_ATTEMPT':'1'}
+    args=[sys.executable,'-B','-s',str(root/'tools/rebuild/canonical_source_audit.py'),'run','--profile','documentary',
+        '--cwd','checkout','--expected-commit',head,'--output',str(output),'--timeout-seconds','30']
+    child=subprocess.Popen(args,cwd=root,env=env,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+    descriptor=os.pidfd_open(child.pid,0)
+    try:
+        deadline=time.monotonic()+12
+        while not marker.exists() and child.poll() is None and time.monotonic()<deadline:time.sleep(.02)
+        assert marker.exists(),'actual fixture did not enter'
+        signal.pidfd_send_signal(descriptor,signal.SIGTERM)
+        stdout,stderr=child.communicate(timeout=10)
+        assert child.returncode==128+signal.SIGTERM,(stdout,stderr)
+        receipt=audit.load(output/'receipt.json')
+        assert receipt['state']=='BLOCKED' and receipt['reason_type']=='SystemExit'
+        _assert_supervision_cleanup(receipt['process_supervision'])
+        assert receipt['process_supervision']['leader_forced_cleanup'] is True
+        assert receipt['process_supervision']['interrupted']=='SystemExit'
+    finally:
+        if child.poll() is None:signal.pidfd_send_signal(descriptor,signal.SIGKILL)
+        child.wait(timeout=5);os.close(descriptor)
+
+
+@pytest.fixture(scope='module')
+def actual_loader_constructor(tmp_path_factory):
+    """Compile a source-only loader fixture; never load it in the test parent."""
+    temporary=tmp_path_factory.mktemp('loader-constructor')
+    compiler=shutil.which('cc')
+    assert compiler, 'actual compiler required for the auditor loader-boundary source probe'
+    source=temporary/'constructor.c';library=temporary/'constructor.so'
+    source.write_text(r'''#include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <string.h>
+__attribute__((constructor)) static void before_main(void) {
+    const char *marker=getenv("VAN_TEST_LOADER_MARKER");
+    if (!marker) return;
+    int fd=open(marker,O_WRONLY|O_CREAT|O_EXCL,0600);
+    if (fd>=0) { write(fd,"constructor",11); close(fd); }
+    const char *child=getenv("VAN_TEST_LOADER_CHILD");
+    if (child && strcmp(child,"1")==0 && fork()==0) { sleep(30); _exit(0); }
+}
+''')
+    built=subprocess.run([compiler,'-shared','-fPIC',str(source),'-o',str(library)],
+        capture_output=True,text=True,timeout=15)
+    assert built.returncode==0,(built.stdout,built.stderr)
+    # A child-only positive control proves the compiled constructor runs. It
+    # does not fork, and the parent never inherits LD_PRELOAD.
+    marker=temporary/'positive-marker'
+    result=subprocess.run(['/bin/true'],env={**os.environ,'LD_PRELOAD':str(library),
+        'VAN_TEST_LOADER_MARKER':str(marker),'VAN_TEST_LOADER_CHILD':'0'},capture_output=True,timeout=5)
+    assert result.returncode==0 and marker.read_text()=='constructor'
+    return library
+
+
+_LOADER_REFUSAL_DRIVER = r'''
+import json,os,subprocess,sys
+from pathlib import Path
+from unittest.mock import patch
+from tools.rebuild.canonical_source_audit import OwnedProcessSupervisor
+library,marker,key,location=sys.argv[1:]
+owner=OwnedProcessSupervisor();env=os.environ.copy()
+env.update(VAN_TEST_LOADER_MARKER=marker,VAN_TEST_LOADER_CHILD='1')
+value=library if key=='LD_PRELOAD' else 'fixture-value-never-disclosed'
+if location=='explicit':env[key]=value
+else:os.environ[key]=value
+with patch('subprocess.Popen',wraps=subprocess.Popen) as spawn:
+    try:
+        with open(marker+'.log','wb') as log:
+            owner.run([sys.executable,'-c',"raise RuntimeError('must not execute')"],
+                cwd=os.getcwd(),env=env,log=log,timeout_seconds=2)
+    except BaseException as error:
+        result={'type':type(error).__name__,'reason':str(error)}
+    else:result={'type':'unexpected-success'}
+    result.update(spawned=spawn.called,effect_exists=Path(marker).exists(),evidence=owner.evidence)
+print(json.dumps(result,sort_keys=True))
+'''
+
+
+@pytest.mark.parametrize('key',['LD_PRELOAD','LD_AUDIT','LD_LIBRARY_PATH','GCONV_PATH','GLIBC_TUNABLES'])
+@pytest.mark.parametrize('location',['explicit','inherited'])
+def test_loader_override_refuses_before_spawn_and_constructor_or_child_effect(actual_loader_constructor,tmp_path,key,location):
+    marker=tmp_path/'unbound-constructor-marker'
+    result=subprocess.run([sys.executable,'-c',_LOADER_REFUSAL_DRIVER,str(actual_loader_constructor),str(marker),key,location],
+        cwd=Path(__file__).resolve().parents[2],env=os.environ.copy(),capture_output=True,text=True,timeout=15)
+    assert result.returncode==0,(result.stdout,result.stderr)
+    observed=json.loads(result.stdout)
+    assert observed['type']=='ProcessSupervisionBlocked'
+    assert observed['reason']=='UNQUALIFIED_PREEXEC_LOADER_ENVIRONMENT:'+key
+    assert observed['spawned'] is False and observed['effect_exists'] is False
+    assert observed['evidence']['leader_identity'] is None
+    assert observed['evidence']['leader_waited'] is False
+    assert observed['evidence']['waitpid_echild'] is True
+    assert observed['evidence']['owned_children_absent'] is True
+    assert observed['evidence']['remaining_owned']==[]

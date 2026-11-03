@@ -16,12 +16,14 @@ import os
 from pathlib import Path
 import platform
 import re
+import select
 import signal
 import shutil
 import stat
 import tempfile
 import subprocess
 import sys
+import threading
 import time
 import uuid
 import xml.etree.ElementTree as ET
@@ -32,7 +34,22 @@ from tools.rebuild import public_source_shards as proof
 from tools.rebuild import backend_public_source as public
 from tools.rebuild.source_storage_audit import checkout_root
 
-SCHEMA = 'van.canonical-cwd-audit/1'
+LEGACY_SCHEMA = 'van.canonical-cwd-audit/1'
+SCHEMA = 'van.canonical-cwd-audit/2'
+PROBE_OUTPUT_CAP = 8 * 1024**2
+LAUNCH_GATE_SECONDS = 5
+LAUNCH_ENVIRONMENT_POLICY = 'van.no-preexec-loader-overrides/1'
+# Isolated Python starts this trusted gate, then execs the original argv in the
+# same PID only after the parent has bound pidfd + PID/start/PPID. Neither the
+# original program nor its startup hooks can run while ownership is unbound.
+LAUNCH_GATE = '''import os,select,sys
+descriptor=int(sys.argv[1])
+ready,_,_=select.select([descriptor],[],[],5)
+allowed=os.read(descriptor,1) if ready else b''
+os.close(descriptor)
+if allowed!=b'X':os._exit(125)
+os.execvpe(sys.argv[2],sys.argv[2:],os.environ)
+'''
 ROOTS = ('backend/tests', 'tests', 'services', 'hermes/policy/tests', 'trading/tests')
 UID_NODE = 'backend/tests/test_browser_egress_proxy_i8.py::test_only_the_configured_client_uid_may_use_a_listener'
 FORECAST = {'trading/tests/test_forecast_source_partitions.py', 'trading/tests/test_ml_runtime_boundary.py'}
@@ -287,18 +304,23 @@ def pytest_configure(config):
     state_path=config.getoption('--van-canonical-state')
     if not state_path:return
     state=load(state_path);root=Path(state['root'])
+    require(state.get('schema')==SCHEMA,'current owned-descendant collector schema required')
+    require(state.get('supervisor_identity',{}).get('pid')==os.getppid(),'foreign actual supervisor identity')
     require(Path.cwd().resolve()==public.execution_directory(root,state['cwd']),'wrong actual invocation cwd')
     require(not config.option.keyword and not config.option.markexpr and not config.option.deselect
         and not getattr(config.option,'lf',False) and getattr(config.option,'numprocesses',None) in (None,0),'noncanonical selection/parallelism override')
     require(Path(config.rootpath).resolve()==root and Path(config.inipath).resolve()==root/'pytest.ini','wrong pytest root/config')
     require(Path(config.getoption('confcutdir')).resolve()==root,'wrong conftest cut')
     require(os.environ.get('PYTEST_DISABLE_PLUGIN_AUTOLOAD')=='1','ambient pytest plugins not canonical')
-    state['pytest_inputs']=proof.effective_pytest_inputs(config,root,'gateway')
-    state['pytest_arguments']=list(config.invocation_params.args)
-    state['child_environment_before']=environment(state['profile'],root)
-    state['child_source_before']=proof.source_identity(root,state['commit'])
-    state['protected_before']=protected(root)
-    state['collection_errors']=[];state['internal_errors']=[]
+    state['probe_supervision']=[]
+    with supervised_probes(state['probe_supervision'],state['probe_timeout_seconds']):
+        state['pytest_inputs']=proof.effective_pytest_inputs(config,root,'gateway')
+        state['pytest_arguments']=list(config.invocation_params.args)
+        state['child_environment_before']=environment(state['profile'],root)
+        state['child_source_before']=proof.source_identity(root,state['commit'])
+        state['protected_before']=protected(root)
+        state['collection_errors']=[];state['internal_errors']=[]
+        state['child_process_identity']=_identity_binding(_process_identity(os.getpid()))
     _STATE=state;config._van_canonical_state=state
 
 def pytest_sessionstart(session):
@@ -341,10 +363,11 @@ def pytest_runtest_logreport(report):
 def pytest_sessionfinish(session,exitstatus):
     if _STATE is None:return
     _STATE['pytest_exit']=int(exitstatus)
-    after,candidates=proof._source_observation(_STATE['root'],_STATE['commit'],after_run=True)
-    _STATE.update(child_source_after=after,generated_cache_candidates=candidates,
-        child_environment_after=environment(_STATE['profile'],Path(_STATE['root'])),
-        child_protected_after=protected(Path(_STATE['root'])))
+    with supervised_probes(_STATE['probe_supervision'],_STATE['probe_timeout_seconds']):
+        after,candidates=proof._source_observation(_STATE['root'],_STATE['commit'],after_run=True)
+        _STATE.update(child_source_after=after,generated_cache_candidates=candidates,
+            child_environment_after=environment(_STATE['profile'],Path(_STATE['root'])),
+            child_protected_after=protected(Path(_STATE['root'])))
     dump(Path(_STATE['output'])/'terminal.json',_STATE)
 
 def build_pytest_arguments(root, output, profile, manifest, collect_only, basetemp):
@@ -356,6 +379,460 @@ def build_pytest_arguments(root, output, profile, manifest, collect_only, basete
     return arguments+(['--collect-only'] if collect_only else ['--junitxml='+str(output/'report.xml')])
 
 
+class ProcessSupervisionBlocked(ValueError):
+    """No current qualification without actual kernel ownership evidence."""
+
+
+def _process_identity(pid):
+    try:raw=Path('/proc',str(pid),'stat').read_text()
+    except (FileNotFoundError,NotADirectoryError,ProcessLookupError):return None
+    values=raw[raw.rfind(')')+2:].split()
+    return {'pid':pid,'ppid':int(values[1]),'start_ticks':int(values[19]),'state':values[0]}
+
+
+def _identity_binding(value):
+    return {key:value[key] for key in ('pid','ppid','start_ticks')}
+
+
+def _owned_children():
+    children={}
+    for entry in Path('/proc').iterdir():
+        if not entry.name.isdigit():continue
+        value=_process_identity(int(entry.name))
+        if value is not None and value['ppid']==os.getpid():children[value['pid']]=value
+    return children
+
+
+def foreground_git_environment(environment):
+    environment=dict(environment)
+    try:count=int(environment.get('GIT_CONFIG_COUNT','0'))
+    except (TypeError,ValueError):raise ProcessSupervisionBlocked('invalid existing Git configuration injection') from None
+    if not 0<=count<=128:raise ProcessSupervisionBlocked('invalid existing Git configuration injection')
+    for offset,key in enumerate(('gc.autoDetach','maintenance.autoDetach')):
+        environment['GIT_CONFIG_KEY_'+str(count+offset)]=key
+        environment['GIT_CONFIG_VALUE_'+str(count+offset)]='false'
+    environment['GIT_CONFIG_COUNT']=str(count+2)
+    return environment
+
+
+class OwnedProcessSupervisor:
+    """Process-local Linux ownership, deliberately ported from the qualified runner.
+
+    Evidence is DATA from this producer, not a new signer or platform authority.
+    Only kernel-owned children with bound PID/start/PPID identities are signalled.
+    """
+    def __init__(self):
+        self.prepared=False;self.child_started=False;self.child_pid=None
+        self.evidence={'schema':'van.kernel-owned-child-supervision/1',
+            'capabilities':{'pidfd':False,'subreaper':False,'proc_identity':False},
+            'supervisor_identity':None,'leader_identity':None,'leader_pidfd_bound':False,
+            'leader_waited':False,'leader_exit':None,'leader_forced_cleanup':False,
+            'launch_gate':{'schema':'van.bound-exec-gate/1','source_sha256':hashlib.sha256(LAUNCH_GATE.encode()).hexdigest(),
+                'timeout_seconds':LAUNCH_GATE_SECONDS,'environment_policy':LAUNCH_ENVIRONMENT_POLICY,
+                'released':False,'closed':False,'aborted_before_exec':False},
+            'adopted':[],'owned_children_absent':False,'waitpid_echild':False,
+            'unexpected_live_descendants':False,'cleanup_error':None,'interrupted':None,'remaining_owned':[]}
+
+    def preflight(self):
+        if self.prepared:return
+        descriptor=None
+        try:
+            if (sys.platform!='linux' or not hasattr(os,'pidfd_open') or not hasattr(signal,'pidfd_send_signal')
+                    or not hasattr(os,'waitid') or not hasattr(os,'WNOWAIT')):
+                raise ProcessSupervisionBlocked('OWNED_CHILD_SUPERVISION_UNAVAILABLE')
+            identity=_process_identity(os.getpid())
+            if identity is None or _owned_children():raise ProcessSupervisionBlocked('OWNED_CHILD_BASELINE_UNPROVEN')
+            self.evidence['supervisor_identity']=_identity_binding(identity)
+            self.evidence['capabilities']['proc_identity']=True
+            descriptor=os.pidfd_open(os.getpid(),0);signal.pidfd_send_signal(descriptor,0)
+            self.evidence['capabilities']['pidfd']=True
+            import ctypes
+            libc=ctypes.CDLL(None,use_errno=True);value=ctypes.c_int()
+            if libc.prctl(36,1,0,0,0)!=0 or libc.prctl(37,ctypes.byref(value),0,0,0)!=0 or value.value!=1:
+                raise ProcessSupervisionBlocked('OWNED_CHILD_SUBREAPER_UNAVAILABLE')
+            self.evidence['capabilities']['subreaper']=True;self.prepared=True
+        except ProcessSupervisionBlocked:raise
+        except Exception as error:
+            raise ProcessSupervisionBlocked('OWNED_CHILD_SUPERVISION_UNAVAILABLE:'+type(error).__name__) from None
+        finally:
+            if descriptor is not None:os.close(descriptor)
+
+    @staticmethod
+    def _bind(pid):
+        descriptor=os.pidfd_open(pid,0)
+        try:
+            identity=_process_identity(pid)
+            if identity is None or identity['ppid']!=os.getpid():raise ProcessSupervisionBlocked('OWNED_CHILD_IDENTITY_UNPROVEN')
+            return descriptor,identity
+        except BaseException:
+            os.close(descriptor);raise
+
+    @staticmethod
+    def _signal(descriptor,identity,number):
+        current=_process_identity(identity['pid'])
+        if current is None:return False
+        if current['ppid']!=os.getpid() or current['start_ticks']!=identity['start_ticks']:
+            raise ProcessSupervisionBlocked('OWNED_CHILD_IDENTITY_CHANGED')
+        try:signal.pidfd_send_signal(descriptor,number)
+        except ProcessLookupError:return False
+        return True
+
+    def _wait_leader(self,child,timeout_seconds):
+        deadline=time.monotonic()+timeout_seconds
+        while True:
+            if getattr(self,'capture',None) is not None and self.capture.failed.is_set():
+                raise ProcessSupervisionBlocked('PREREQUISITE_CAPTURE_FAILED')
+            remaining=deadline-time.monotonic()
+            if remaining<=0:raise subprocess.TimeoutExpired(child.args,timeout_seconds)
+            try:return child.wait(timeout=min(.05,remaining))
+            except subprocess.TimeoutExpired:continue
+
+    def _release_gate(self,descriptor):return os.write(descriptor,b'X')
+
+    def _drain(self):
+        self.evidence['waitpid_echild']=False;self.evidence['owned_children_absent']=False
+        deadline=time.monotonic()+5;started=time.monotonic();bound={};sent=set()
+        try:
+            while time.monotonic()<deadline:
+                current=_owned_children()
+                for pid,identity in current.items():
+                    key=(pid,identity['start_ticks'])
+                    if key not in bound:
+                        descriptor,fresh=self._bind(pid)
+                        if fresh['start_ticks']!=identity['start_ticks']:
+                            os.close(descriptor);raise ProcessSupervisionBlocked('OWNED_CHILD_IDENTITY_CHANGED')
+                        bound[key]={'fd':descriptor,'identity':fresh,'signals':[]}
+                while True:
+                    try:pending=os.waitid(os.P_ALL,0,os.WEXITED|os.WNOHANG|os.WNOWAIT)
+                    except ChildProcessError:
+                        try:unexpected=os.waitpid(-1,os.WNOHANG)
+                        except ChildProcessError:self.evidence['waitpid_echild']=True;break
+                        raise ProcessSupervisionBlocked('OWNED_CHILD_SET_CHANGED_BEFORE_ECHILD')
+                    if pending is None:break
+                    pid=pending.si_pid
+                    matches=[(key,row) for key,row in bound.items() if key[0]==pid]
+                    if not matches:
+                        descriptor,fresh=self._bind(pid);key=(pid,fresh['start_ticks'])
+                        bound[key]={'fd':descriptor,'identity':fresh,'signals':[]};matches=[(key,bound[key])]
+                    if len(matches)!=1:raise ProcessSupervisionBlocked('REAPED_CHILD_IDENTITY_UNPROVEN')
+                    key,row=matches[0]
+                    actual,status=os.waitpid(pid,os.WNOHANG)
+                    if actual!=pid:raise ProcessSupervisionBlocked('OWNED_CHILD_REAP_CHANGED')
+                    self.evidence['adopted'].append({'identity':_identity_binding(row['identity']),
+                        'pidfd_bound':True,'wait_status':status,'signals':row['signals'],'reaped':True})
+                    os.close(row['fd']);del bound[key]
+                if self.evidence['waitpid_echild']:break
+                for pid,identity in current.items():
+                    fresh=_process_identity(pid)
+                    if fresh is None:continue
+                    if fresh['ppid']!=os.getpid() or fresh['start_ticks']!=identity['start_ticks']:
+                        raise ProcessSupervisionBlocked('OWNED_CHILD_IDENTITY_CHANGED')
+                    if fresh['state']=='Z':continue
+                    self.evidence['unexpected_live_descendants']=True
+                    number=signal.SIGKILL if time.monotonic()-started>=1 else signal.SIGTERM
+                    key=(pid,fresh['start_ticks']);marker=(*key,int(number));row=bound[key]
+                    if marker not in sent and self._signal(row['fd'],fresh,number):
+                        sent.add(marker);row['signals'].append(int(number))
+                time.sleep(.02)
+            remaining=_owned_children();self.evidence['remaining_owned']=[_identity_binding(v) for v in remaining.values()]
+            self.evidence['owned_children_absent']=self.evidence['waitpid_echild'] and not remaining
+            if not self.evidence['owned_children_absent']:raise ProcessSupervisionBlocked('OWNED_CHILD_CLEANUP_INCOMPLETE')
+        finally:
+            for row in bound.values():os.close(row['fd'])
+            if not self.evidence['owned_children_absent']:
+                # Cleanup failure is not an empty child set. Retain observed
+                # identities, or explicit unknown when /proc cannot be read.
+                try:self.evidence['remaining_owned']=[_identity_binding(v) for v in _owned_children().values()]
+                except BaseException:self.evidence['remaining_owned']=None
+
+    def run(self,command,*,cwd,env,log,timeout_seconds,stderr=subprocess.STDOUT,capture=None):
+        child=None;descriptor=None;identity=None;primary=None
+        gate_read=None;gate_write=None
+        self.capture=capture
+        try:
+            self.preflight()
+            if _owned_children():raise ProcessSupervisionBlocked('OWNED_CHILD_BASELINE_CHANGED')
+            launch_env=foreground_git_environment(env)
+            # -I/-S constrain Python, not its ELF loader. Refuse these inputs
+            # before Popen instead of silently changing the eventual exec env.
+            unsupported=sorted(key for key in set(os.environ)|set(launch_env)
+                if key.startswith('LD_') or key in {'GCONV_PATH','GLIBC_TUNABLES'})
+            if unsupported:
+                raise ProcessSupervisionBlocked('UNQUALIFIED_PREEXEC_LOADER_ENVIRONMENT:'+','.join(unsupported))
+            gate_read,gate_write=os.pipe()
+            launcher=[sys.executable,'-I','-S','-B','-c',LAUNCH_GATE,str(gate_read),*[os.fspath(v) for v in command]]
+            child=subprocess.Popen(launcher,cwd=cwd,env=launch_env,stdout=log,stderr=stderr,
+                start_new_session=True,pass_fds=(gate_read,))
+            self.child_started=True;self.child_pid=child.pid
+            os.close(gate_read);gate_read=None
+            if capture is not None:capture.start(child)
+            descriptor,identity=self._bind(child.pid)
+            self.evidence['leader_identity']=_identity_binding(identity);self.evidence['leader_pidfd_bound']=True
+            if self._release_gate(gate_write)!=1:raise ProcessSupervisionBlocked('OWNED_CHILD_LAUNCH_NOT_ACKNOWLEDGED')
+            self.evidence['launch_gate']['released']=True
+            os.close(gate_write);gate_write=None;self.evidence['launch_gate']['closed']=True
+            self._wait_leader(child,timeout_seconds)
+        except BaseException as error:
+            primary=error;self.evidence['interrupted']=type(error).__name__
+        finally:
+            # Every exit path closes the sole parent gate writer before any
+            # ownership retry. EOF cannot authorize execution and is bounded.
+            for gate in (gate_read,gate_write):
+                if gate is not None:os.close(gate)
+            self.evidence['launch_gate']['closed']=True
+            try:
+                if child is not None:
+                    if not self.evidence['launch_gate']['released']:
+                        self.evidence['launch_gate']['aborted_before_exec']=True
+                        # Exact Popen wait is kernel ownership, not a numeric
+                        # signal fallback. This also works when pidfd binding
+                        # is permanently unavailable after a successful spawn.
+                        child.wait(timeout=LAUNCH_GATE_SECONDS+1)
+                        self.evidence['leader_waited']=True;self.evidence['leader_exit']=child.returncode
+                    else:
+                        self._finish_released_child(child,descriptor,identity)
+                        self.evidence['leader_waited']=child.returncode is not None;self.evidence['leader_exit']=child.returncode
+            except BaseException as error:self.evidence['cleanup_error']=type(error).__name__+': '+str(error)
+            finally:
+                # Independently attempt the kernel-owned drain even when the
+                # leader's initial/retry binding or wait failed.
+                try:
+                    if self.prepared:self._drain()
+                except BaseException as error:
+                    prior=self.evidence['cleanup_error']
+                    self.evidence['cleanup_error']=(prior+'; ' if prior else '')+type(error).__name__+': '+str(error)
+                finally:
+                    if descriptor is not None:os.close(descriptor)
+                    if capture is not None:
+                        try:capture.finish()
+                        except BaseException as error:
+                            prior=self.evidence['cleanup_error']
+                            self.evidence['cleanup_error']=(prior+'; ' if prior else '')+type(error).__name__+': '+str(error)
+        if primary is not None:raise primary
+        if self.evidence['cleanup_error'] is not None or not self.evidence['owned_children_absent']:
+            raise ProcessSupervisionBlocked('OWNED_CHILD_CLEANUP_INCOMPLETE')
+        if self.evidence['unexpected_live_descendants']:
+            raise ProcessSupervisionBlocked('UNEXPECTED_LIVE_DESCENDANTS_REAPED_NOT_QUALIFIED')
+        return self.evidence['leader_exit']
+
+    def _finish_released_child(self,child,descriptor,identity):
+        if descriptor is None or identity is None:raise ProcessSupervisionBlocked('RELEASED_CHILD_WITHOUT_BOUND_OWNERSHIP')
+        if child.poll() is None:
+            self.evidence['leader_forced_cleanup']=True
+            self._signal(descriptor,identity,signal.SIGTERM)
+            try:child.wait(timeout=1)
+            except subprocess.TimeoutExpired:
+                self._signal(descriptor,identity,signal.SIGKILL);child.wait(timeout=3)
+
+
+class _BoundedCapture:
+    """Drain pipes without allocating unbounded disk or memory, including on failure."""
+    def __init__(self):
+        self.failed=threading.Event();self.stop=threading.Event();self.threads=[]
+        self.buffers={'stdout':bytearray(),'stderr':bytearray()}
+        self.output_limit_exceeded=False;self.errors=[];self.joined=False
+
+    def start(self,child):
+        self.pipes=[child.stdout,child.stderr]
+        for name,pipe in zip(('stdout','stderr'),self.pipes):
+            worker=threading.Thread(target=self._drain,args=(name,pipe),name='canonical-probe-'+name)
+            worker.start();self.threads.append(worker)
+
+    def _drain(self,name,pipe):
+        try:
+            while True:
+                ready,_,_=select.select([pipe.fileno()],[],[],.05)
+                if not ready:
+                    if self.stop.is_set():break
+                    continue
+                data=os.read(pipe.fileno(),16384)
+                if not data:break
+                remaining=max(0,PROBE_OUTPUT_CAP-len(self.buffers[name]))
+                self.buffers[name].extend(data[:remaining])
+                if len(data)>remaining:
+                    self.output_limit_exceeded=True;self.failed.set()
+                # Continue draining/discarding after the cap while the owner
+                # kills and reaps its exact kernel children.
+        except BaseException as error:
+            self.errors.append(type(error).__name__);self.failed.set()
+        finally:pipe.close()
+
+    def finish(self):
+        self.stop.set()
+        for worker in self.threads:worker.join(timeout=5)
+        self.joined=all(not worker.is_alive() for worker in self.threads)
+        # A reader that failed to start must not leave its pipe open.
+        for pipe in getattr(self,'pipes',[])[len(self.threads):]:pipe.close()
+        if not self.joined:raise ProcessSupervisionBlocked('PREREQUISITE_READER_NOT_JOINED')
+
+
+def profile_evidence_scope(receipt):
+    if receipt.get('schema')==LEGACY_SCHEMA:return 'HISTORICAL_GROUP_ONLY'
+    require(receipt.get('schema')==SCHEMA,'unsupported canonical profile schema')
+    return 'OWNED_DESCENDANTS_REQUIRED'
+
+
+def _verify_process_supervision(receipt,state):
+    evidence=receipt.get('process_supervision')
+    keys={'schema','capabilities','supervisor_identity','leader_identity','leader_pidfd_bound','leader_waited','leader_exit',
+        'leader_forced_cleanup','adopted','owned_children_absent','waitpid_echild','unexpected_live_descendants',
+        'cleanup_error','interrupted','remaining_owned','launch_gate'}
+    require(isinstance(evidence,dict) and set(evidence)==keys and evidence['schema']=='van.kernel-owned-child-supervision/1',
+        'missing or foreign owned-child supervision')
+    require(evidence['capabilities']=={'pidfd':True,'subreaper':True,'proc_identity':True},'unproven process supervision capabilities')
+    require(evidence['launch_gate']=={'schema':'van.bound-exec-gate/1',
+        'source_sha256':hashlib.sha256(LAUNCH_GATE.encode()).hexdigest(),'timeout_seconds':LAUNCH_GATE_SECONDS,
+        'environment_policy':LAUNCH_ENVIRONMENT_POLICY,
+        'released':True,'closed':True,'aborted_before_exec':False},'missing exact bound-exec launch gate')
+    def identity(value):
+        return (isinstance(value,dict) and set(value)=={'pid','ppid','start_ticks'} and
+            all(type(value[k]) is int for k in value) and value['pid']>0 and value['ppid']>=0 and value['start_ticks']>0)
+    parent=evidence['supervisor_identity'];leader=evidence['leader_identity']
+    require(identity(parent) and identity(leader) and parent==receipt.get('supervisor_identity')
+        and parent==state.get('supervisor_identity') and leader==state.get('child_process_identity') and leader['ppid']==parent['pid']
+        and receipt.get('child_pid')==leader['pid'] and leader['pid']!=parent['pid'],'foreign supervisor/collector identity')
+    require(evidence['leader_pidfd_bound'] is True and evidence['leader_waited'] is True and type(evidence['leader_exit']) is int
+        and evidence['leader_exit']==receipt['exit']==0 and evidence['leader_forced_cleanup'] is False
+        and evidence['owned_children_absent'] is True and evidence['waitpid_echild'] is True
+        and evidence['unexpected_live_descendants'] is False and evidence['cleanup_error'] is None
+        and evidence['interrupted'] is None and evidence['remaining_owned']==[],'incomplete or forced owned-child cleanup')
+    require(isinstance(evidence['adopted'],list),'invalid adopted-child evidence');seen=set()
+    for row in evidence['adopted']:
+        require(isinstance(row,dict) and set(row)=={'identity','pidfd_bound','wait_status','signals','reaped'}
+            and identity(row['identity']) and row['identity']['ppid']==parent['pid']
+            and row['identity']['pid'] not in {parent['pid'],leader['pid']} and row['identity']['pid'] not in seen
+            and row['pidfd_bound'] is True and type(row['wait_status']) is int and row['wait_status']>=0
+            and row['signals']==[] and row['reaped'] is True,'unproven or forced adopted-child reaping')
+        seen.add(row['identity']['pid'])
+
+
+class _ProbeSubprocess:
+    """Scoped module facade: exact existing argv/timeouts, supervised ownership."""
+    def __init__(self,original,records,timeout_seconds):
+        self.original,self.records,self.timeout_seconds=original,records,timeout_seconds
+    def __getattr__(self,name):return getattr(self.original,name)
+    def run(self,command,**kwargs):
+        allowed={'cwd','env','timeout','capture_output','text','check'}
+        if set(kwargs)-allowed or not kwargs.get('capture_output'):
+            raise ProcessSupervisionBlocked('unsupported prerequisite subprocess shape')
+        timeout=kwargs.get('timeout',self.timeout_seconds)
+        if timeout is None:timeout=self.timeout_seconds
+        argv=[os.fspath(v) for v in command]
+        owner=OwnedProcessSupervisor();record={'argv':argv,'cwd':str(Path(kwargs.get('cwd') or Path.cwd()).resolve()),
+            'command_sha256':hashlib.sha256(_JSON_DUMPS(argv,separators=(',',':')).encode()).hexdigest(),
+            'timeout_seconds':timeout,'timeout_policy':'EXPLICIT_OR_EXISTING_PROFILE_BOUND','process_supervision':None}
+        capture=_BoundedCapture()
+        try:
+            code=owner.run(command,cwd=kwargs.get('cwd'),env=kwargs.get('env',os.environ),log=subprocess.PIPE,
+                stderr=subprocess.PIPE,timeout_seconds=timeout,capture=capture)
+        finally:
+            stdout,stderr=bytes(capture.buffers['stdout']),bytes(capture.buffers['stderr'])
+            record.update(process_supervision=owner.evidence,stdout_sha256=hashlib.sha256(stdout).hexdigest(),
+                stderr_sha256=hashlib.sha256(stderr).hexdigest(),stdout_bytes=len(stdout),stderr_bytes=len(stderr),
+                capture_threads_joined=capture.joined,output_limit_exceeded=capture.output_limit_exceeded,
+                capture_errors=capture.errors)
+            self.records.append(record)
+        if capture.failed.is_set():raise ProcessSupervisionBlocked('PREREQUISITE_CAPTURE_FAILED')
+        if kwargs.get('text'):stdout=stdout.decode();stderr=stderr.decode()
+        result=self.original.CompletedProcess(command,code,stdout,stderr)
+        if kwargs.get('check') and code:raise self.original.CalledProcessError(code,command,output=stdout,stderr=stderr)
+        return result
+    def check_output(self,command,**kwargs):
+        result=self.run(command,capture_output=True,**kwargs)
+        if result.returncode:raise self.original.CalledProcessError(result.returncode,command,output=result.stdout,stderr=result.stderr)
+        return result.stdout
+
+
+from contextlib import contextmanager
+@contextmanager
+def supervised_probes(records,timeout_seconds):
+    """Only this synchronous owner's modules are rebound, never global stdlib."""
+    modules=(sys.modules[__name__],proof,public)
+    previous=[(module,module.subprocess) for module in modules]
+    facade=_ProbeSubprocess(subprocess,records,timeout_seconds)
+    try:
+        for module,_ in previous:module.subprocess=facade
+        yield
+    finally:
+        for module,original in reversed(previous):module.subprocess=original
+
+
+def _verify_probe_supervision(records,parent):
+    require(isinstance(records,list) and records,'missing prerequisite subprocess proof')
+    for row in records:
+        require(isinstance(row,dict) and set(row)=={'argv','cwd','command_sha256','timeout_seconds','timeout_policy','process_supervision',
+            'stdout_sha256','stderr_sha256','stdout_bytes','stderr_bytes','capture_threads_joined','output_limit_exceeded','capture_errors'}
+            and isinstance(row['argv'],list) and row['argv'] and all(isinstance(v,str) and '\x00' not in v for v in row['argv'])
+            and isinstance(row['cwd'],str) and Path(row['cwd']).is_absolute()
+            and row['command_sha256']==hashlib.sha256(_JSON_DUMPS(row['argv'],separators=(',',':')).encode()).hexdigest()
+            and row['timeout_policy']=='EXPLICIT_OR_EXISTING_PROFILE_BOUND'
+            and type(row['timeout_seconds']) in (int,float) and 0<row['timeout_seconds']<=3600
+            and all(isinstance(row[k],str) and re.fullmatch('[0-9a-f]{64}',row[k]) for k in ('command_sha256','stdout_sha256','stderr_sha256'))
+            and all(type(row[k]) is int and 0<=row[k]<=PROBE_OUTPUT_CAP for k in ('stdout_bytes','stderr_bytes'))
+            and row['capture_threads_joined'] is True and row['output_limit_exceeded'] is False and row['capture_errors']==[],
+            'invalid prerequisite subprocess proof')
+        evidence=row['process_supervision']
+        require(isinstance(evidence,dict) and evidence.get('supervisor_identity')==parent,'foreign prerequisite subprocess owner')
+        _verify_process_supervision({'process_supervision':evidence,'supervisor_identity':parent,
+            'child_pid':(evidence.get('leader_identity') or {}).get('pid'),'exit':evidence.get('leader_exit')},
+            {'supervisor_identity':parent,'child_process_identity':evidence.get('leader_identity')})
+
+
+def _source_probe_commands():
+    return [['git','rev-parse','HEAD'],['git','diff','--no-ext-diff','--name-only','HEAD','--'],
+        ['git','ls-files','-z','--others','--exclude-standard'],
+        ['git','ls-files','-z','--others','--ignored','--exclude-standard'],
+        ['git','ls-files','--','pytest.ini'],['git','rev-parse','HEAD^{tree}']]
+
+
+def _verify_probe_transcript(records,receipt,state,root,*,collector):
+    """Reconstruct the actual helper call sequence; a hash-shaped value is no proof.
+
+    This validates original recorded argv/cwd/time bounds, without executing any
+    reader Java/Node or adopting a reader prerequisite as the producer's runtime.
+    """
+    root=Path(root);timeout=receipt.get('probe_timeout_seconds')
+    require(type(timeout) is int and 1<=timeout<=3600,'invalid original probe time bound')
+    parent_cwd=receipt.get('preflight_cwd')
+    require(parent_cwd in {str(root),str(root/'backend')},'foreign original preflight cwd')
+    default_cwd=state['actual_cwd'] if collector else parent_cwd
+    environment=receipt['environment_before'];profile=receipt['profile'];expected=[]
+    def append(argv,cwd=root,bound=timeout):expected.append((argv,str(cwd),bound))
+    def source():
+        for argv in _source_probe_commands():append(argv)
+    def runtime():
+        spec=PROFILES[profile]
+        if spec.get('nft'):append(['nft','--version'],default_cwd)
+        if spec.get('agp'):append(['java','-version'],default_cwd,10)
+        if spec.get('dds'):
+            sibling=root.parent/'dial-development-system'
+            append(['git','rev-parse','HEAD'],sibling)
+            for path in DDS_RESOLVER_SOURCES:append(['git','show',DDS_COMMIT+':'+path],sibling)
+            append([environment['node']['executable'],'--version'],default_cwd,10)
+    if collector:
+        # Plugin manager iteration order is not promised. Bind its exact local
+        # plugin set, one check each, before the deterministic helper sequence.
+        local={key for key in state['pytest_inputs']['plugins'] if key.endswith('.py')}
+        prefix=records[:len(local)]
+        require(len(prefix)==len(local) and {tuple(row['argv']) for row in prefix}==
+            {('git','ls-files','--',key) for key in local}
+            and all(row['cwd']==str(root) and row['timeout_seconds']==timeout for row in prefix),
+            'original collector plugin probe transcript differs')
+        records=records[len(local):]
+        runtime();source();source();runtime()
+    else:
+        append(['git','ls-files','-z','--',*ROOTS]);source();runtime();source()
+        for relative in receipt['generated_cache_outputs']:
+            path=Path(relative)
+            source_path=path.parent.parent/(path.name.split('.'+sys.implementation.cache_tag,1)[0]+'.py')
+            append(['git','show',receipt['commit']+':'+source_path.as_posix()])
+            append(['git','ls-tree',receipt['commit'],'--',source_path.as_posix()])
+            append(['git','show',receipt['commit']+':'+source_path.as_posix()])
+        source();source();runtime()
+    require([(row['argv'],row['cwd'],row['timeout_seconds']) for row in records]==expected,
+        'original prerequisite probe transcript differs')
+
+
 def run(args):
     root=ROOT;output=args.output.resolve();require(not output.exists(),'fresh owned evidence directory required')
     require(not output.is_relative_to(root),'canonical audit outputs/basetemps must be outside checkout')
@@ -364,9 +841,12 @@ def run(args):
     baseline={'schema':SCHEMA,'profile':args.profile,'cwd':args.cwd,'commit':args.expected_commit,
         'root':str(root),'output':str(output),'execution_id':str(uuid.uuid4()),
         'workflow':{'id':os.environ.get('GITHUB_RUN_ID'),'attempt':os.environ.get('GITHUB_RUN_ATTEMPT')},
-        'collect_only':args.collect_only,'terminal':False}
-    child_started=False;child_terminal=False;remaining=[]
+        'collect_only':args.collect_only,'terminal':False,'preflight_cwd':str(Path.cwd().resolve())}
+    child_started=False;child_terminal=False;remaining=[];owner=OwnedProcessSupervisor();interruption=None;probe_context=None
+    baseline['probe_supervision']=[];baseline['probe_timeout_seconds']=args.timeout_seconds
     try:
+        owner.preflight();baseline['supervisor_identity']=owner.evidence['supervisor_identity']
+        probe_context=supervised_probes(baseline['probe_supervision'],args.timeout_seconds);probe_context.__enter__()
         require(baseline['workflow']['id'] and baseline['workflow']['attempt'],'explicit current workflow identity required')
         require(not any(os.environ.get(k) for k in ('PYTEST_ADDOPTS','PYTEST_PLUGINS','PYTHONHOME','PYTHONUSERBASE','PYTHONSTARTUP','PYTHONINSPECT','PYTHONOPTIMIZE')),'ambient selection/import override')
         baseline['manifest']=inventory(root)
@@ -384,28 +864,40 @@ def run(args):
             *build_pytest_arguments(root,output,args.profile,baseline['manifest'],args.collect_only,baseline['basetemp']['path'])]
         env={**os.environ,'PYTHONPATH':os.pathsep.join(str(root/p) for p in proof.CANONICAL_PYTHONPATH),
             'PYTEST_DISABLE_PLUGIN_AUTOLOAD':'1','PYTHONDONTWRITEBYTECODE':'1','PYTHONNOUSERSITE':'1'}
+        baseline['command']=command
         with (output/'pytest.log').open('w') as log:
-            child=subprocess.Popen(command,cwd=cwd,env=env,stdout=log,stderr=subprocess.STDOUT,start_new_session=True)
-            child_started=True;remaining=None
-            try:exitcode=child.wait(timeout=args.timeout_seconds)
-            except subprocess.TimeoutExpired:
-                os.killpg(child.pid,signal.SIGKILL);exitcode=child.wait();baseline['timed_out']=True
-        child_terminal=True
-        remaining=[line for line in subprocess.check_output(['ps','-eo','pid=,pgid=,stat='],text=True).splitlines() if len(line.split())==3 and line.split()[1]==str(child.pid) and not line.split()[2].startswith('Z')]
-        baseline.update(child_pid=child.pid,exit=exitcode,command=command,children_remaining=remaining)
-        if remaining:
-            try:os.killpg(child.pid,signal.SIGKILL)
-            except ProcessLookupError:pass
-            raise ValueError('owned child processes survived terminal')
+            exitcode=owner.run(command,cwd=cwd,env=env,log=log,timeout_seconds=args.timeout_seconds)
+        evidence=owner.evidence
+        child_started=owner.child_started
+        child_terminal=evidence['leader_waited'] and evidence['owned_children_absent'] and evidence['waitpid_echild']
+        remaining=evidence['remaining_owned']
+        baseline.update(child_pid=evidence['leader_identity']['pid'],exit=exitcode,children_remaining=remaining)
         baseline['generated_cache_outputs']=proof.archive_generated_bytecode(root,args.expected_commit,baseline['source_before'],output)
         child_state=load(output/'terminal.json')
         require(child_state.get('generated_cache_candidates')==baseline['generated_cache_outputs'],'child/parent generated-cache observation differs')
         baseline.update(source_after=proof.source_identity(root,args.expected_commit),
             environment_after=environment(args.profile,root),protected_after=protected(root))
         baseline['state']='TERMINAL' if exitcode==0 else 'FAILED'
-    except Exception as exc:
+    except BaseException as exc:
         baseline.update(state='BLOCKED',reason_type=type(exc).__name__,reason=str(exc))
-        baseline.setdefault('exit',None)
+        baseline.setdefault('exit',owner.evidence['leader_exit'])
+        if isinstance(exc,subprocess.TimeoutExpired):baseline['timed_out']=True
+        if isinstance(exc,(KeyboardInterrupt,SystemExit)):interruption=exc
+    finally:
+        if owner.prepared:
+            try:owner._drain()
+            except BaseException as error:owner.evidence['cleanup_error']=type(error).__name__+': '+str(error)
+        if probe_context is not None:probe_context.__exit__(None,None,None)
+        baseline['process_supervision']=owner.evidence
+        if owner.evidence['cleanup_error'] is not None or owner.evidence['unexpected_live_descendants']:
+            baseline.update(state='BLOCKED',cleanup_error=owner.evidence['cleanup_error'] or 'UNEXPECTED_LIVE_DESCENDANTS')
+        child_started=owner.child_started
+        child_terminal=(owner.evidence['leader_waited'] and owner.evidence['owned_children_absent']
+            and owner.evidence['waitpid_echild'] and owner.evidence['cleanup_error'] is None
+            and owner.evidence['interrupted'] is None and not owner.evidence['unexpected_live_descendants'])
+        remaining=owner.evidence['remaining_owned'] if child_terminal else None
+        baseline['children_remaining']=remaining
+        if child_started:baseline['child_pid']=owner.child_pid
     if 'basetemp' in baseline:
         try:
             baseline['basetemp_cleanup']=cleanup_basetemp(baseline['basetemp'],root,baseline['execution_id'],
@@ -415,6 +907,7 @@ def run(args):
     baseline['terminal']=True
     baseline['artifacts']={p.name:sha(p) for p in output.iterdir() if p.is_file() and p.name!='receipt.json'}
     dump(output/'receipt.json',baseline)
+    if interruption is not None:raise interruption
     return 0 if baseline['state']=='TERMINAL' else 1
 
 def producer_output(folder, receipt, state, root):
@@ -430,6 +923,7 @@ def producer_output(folder, receipt, state, root):
     # consumer's extraction directory. Keep every original argument exact.
     identities=('schema','profile','cwd','commit','root','output','execution_id',
         'workflow','collect_only','manifest','actual_cwd')
+    if receipt.get('schema')==SCHEMA:identities+=('supervisor_identity','preflight_cwd','probe_timeout_seconds')
     for observed in (state,load(Path(folder)/'input.json'),load(Path(folder)/'collection.json')):
         require(isinstance(observed,dict) and all(key in receipt and key in observed and receipt[key]==observed[key]
             for key in identities),'original producer identity differs')
@@ -439,7 +933,13 @@ def producer_output(folder, receipt, state, root):
 
 def verify_profile(folder,manifest,profile,cwd,commit,root):
     folder=Path(folder);receipt=load(folder/'receipt.json');state=load(folder/'terminal.json')
+    require(profile_evidence_scope(receipt)!='HISTORICAL_GROUP_ONLY','HISTORICAL_GROUP_ONLY: legacy profile needs a fresh current owned-descendant run')
     require(receipt['workflow'].get('id') and receipt['workflow'].get('attempt'),'missing current workflow identity')
+    _verify_process_supervision(receipt,state)
+    _verify_probe_supervision(receipt.get('probe_supervision'),receipt.get('supervisor_identity'))
+    _verify_probe_supervision(state.get('probe_supervision'),state.get('child_process_identity'))
+    _verify_probe_transcript(receipt['probe_supervision'],receipt,state,root,collector=False)
+    _verify_probe_transcript(state['probe_supervision'],receipt,state,root,collector=True)
     require(receipt['state']=='TERMINAL' and receipt['terminal'] and receipt['exit']==0 and receipt.get('children_remaining')==[] and state['pytest_exit']==0,'blocked/aborted/failed runtime')
     require(receipt['schema']==state['schema']==SCHEMA and receipt['manifest']==state['manifest']==manifest,'source/profile inventory mismatch')
     require(receipt['profile']==state['profile']==profile and receipt['cwd']==state['cwd']==cwd and receipt['commit']==state['commit']==commit,'foreign profile/cwd/commit')
@@ -552,6 +1052,44 @@ def join(args):
         'limits':'SOURCE only; native/unit/admission gates and historical WAL/SHM disposition remain separate'}
     dump(args.output,result);return 0 if not failures else 1
 
+@contextmanager
+def termination_handlers():
+    """Turn actual CLI termination into an exception that runs ownership finally blocks."""
+    previous={number:signal.getsignal(number) for number in (signal.SIGINT,signal.SIGTERM)}
+    def interrupted(number,frame):raise SystemExit(128+number)
+    try:
+        for number in previous:signal.signal(number,interrupted)
+        yield
+    finally:
+        for number,handler in previous.items():signal.signal(number,handler)
+
+
+def _auxiliary_cli(args):
+    owner=OwnedProcessSupervisor();records=[];primary=None;code=1
+    try:
+        owner.preflight()
+        with supervised_probes(records,args.timeout_seconds):
+            if args.command=='plan':dump(args.output,inventory(ROOT));code=0
+            else:code=join(args)
+    except BaseException as error:primary=error
+    finally:
+        if owner.prepared:
+            try:owner._drain()
+            except BaseException as error:
+                owner.evidence['cleanup_error']=type(error).__name__+': '+str(error)
+                if primary is None:primary=error
+        record={'schema':SCHEMA,'command':args.command,'process_supervision':owner.evidence,
+            'probe_supervision':records,'state':'TERMINAL' if primary is None else 'BLOCKED'}
+        if primary is not None:
+            record.update(reason_type=type(primary).__name__,reason=str(primary))
+            dump(args.output,record)
+        dump(args.output.with_name(args.output.name+'.supervision.json'),record)
+    if primary is not None:
+        if isinstance(primary,(KeyboardInterrupt,SystemExit)):raise primary
+        return 1
+    return code
+
+
 def main():
     parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('command',choices=('plan','run','join'))
     parser.add_argument('--output',type=Path,required=True);parser.add_argument('--expected-commit',required=True)
@@ -561,9 +1099,10 @@ def main():
     parser.add_argument('--public-root-result',choices=('success','failure','cancelled','skipped'));parser.add_argument('--public-backend-result',choices=('success','failure','cancelled','skipped'))
     args=parser.parse_args();require(1<=args.timeout_seconds<=3600,'invalid child time cap')
     checkout_root(Path.cwd(),ROOT)
-    if args.command=='plan':dump(args.output,inventory(ROOT));return 0
-    if args.command=='run':require(args.profile is not None,'explicit original runtime profile required');return run(args)
-    require(all(getattr(args,k) is not None for k in ('reports','public_root','public_backend','public_root_result','public_backend_result')),'complete matrix inputs required')
-    return join(args)
+    with termination_handlers():
+        if args.command=='run':require(args.profile is not None,'explicit original runtime profile required');return run(args)
+        if args.command=='join':
+            require(all(getattr(args,k) is not None for k in ('reports','public_root','public_backend','public_root_result','public_backend_result')),'complete matrix inputs required')
+        return _auxiliary_cli(args)
 
 if __name__=='__main__':raise SystemExit(main())
