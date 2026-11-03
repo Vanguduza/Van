@@ -1244,6 +1244,13 @@
       "full_BE004": "OPEN",
       "source_receipt": "docs/rebuild/rev118/receipts/ACCOUNT_DISCONNECT_CI_REPAIR_20261103.json"
     },
+    "disconnect_fresh_ownership_20261103": {
+      "full_BE004": "OPEN",
+      "native_formal_acceptance": false,
+      "original_PG_positive": "ACTUAL_HOSTED_PASS_ON_9CFD",
+      "shared_credential_case": "PENDING_NEW_EXACT_HOSTED_RESULT",
+      "source_receipt": "docs/rebuild/rev118/receipts/ACCOUNT_DISCONNECT_OWNERSHIP_SOURCE_20261103.json"
+    },
     "disconnect_namespace_20261103": {
       "full_BE004": "OPEN",
       "native_formal_acceptance": false,
@@ -1686,6 +1693,13 @@
       "evidence": "receipts/ACCOUNT_DISCONNECT_NAMESPACE_SOURCE_20261103.json",
       "scope": "BE004 current-native-namespace missing-key history guard SOURCE",
       "status": "PURE_METADATA_PREDICATE_TESTED_PG_E2E_OPEN"
+    },
+    {
+      "acceptance_issued": false,
+      "at_utc": "2026-11-03T07:58:41.789263+00:00",
+      "evidence": "receipts/ACCOUNT_DISCONNECT_OWNERSHIP_SOURCE_20261103.json",
+      "scope": "BE004 fresh full-registry credential ownership SOURCE",
+      "status": "SAFE_METADATA_PAPER_TESTED_HOSTED_CREDENTIAL_FIXTURE_PENDING"
     }
   ],
   "pre002_challenge": "pre002/challenge/: 324 author-prepared dossiers (AUTHOR_CHALLENGED_PENDING_INDEPENDENT_REVIEW)",
@@ -3088,5 +3102,5 @@
       "status": "IN_PROGRESS"
     }
   },
-  "updated_at_utc": "2026-11-03T07:13:40.435663+00:00"
+  "updated_at_utc": "2026-11-03T07:58:41.789263+00:00"
 }

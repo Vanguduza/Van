@@ -29,6 +29,20 @@ def _check_source_after_waits(blocking_checks, source_check, pure_time_check):
     source_check()
     pure_time_check()
 
+def _require_approved_credential_ownership(settings,registry,account,expected_disposition,expected_target):
+    """Refuse a changed ownership snapshot; this predicate grants no authority."""
+    def normalized(value):return None if value is None else str(Path(value).resolve())
+    try:
+        disposition,target=credential_cleanup(settings,registry,account)
+        coherent=(disposition=='NONE' and target is None and expected_target is None
+            or disposition=='DELETE_MANAGED' and target is not None and expected_target is not None)
+        unchanged=(coherent and expected_disposition in {'NONE','DELETE_MANAGED'}
+            and disposition==expected_disposition and normalized(target)==normalized(expected_target))
+    except (OSError,RuntimeError,ValueError,TypeError):
+        unchanged=False
+    if not unchanged:raise HTTPException(409,'Credential ownership changed before deletion; HOLD')
+
+
 def semantic(args):
     return {k:v for k,v in args.items() if not k.startswith('_') and k not in {'reauth_fact_id','reauth_fact_digest'}}
 
@@ -362,7 +376,15 @@ class NativeLifecycle:
             # Re-read after potentially waiting locks; no carried file identity.
             fresh=self.registry()
             if self.resource_version(alias)!=intent.resource_version:raise HTTPException(409,'Native resource changed before deletion')
-            if selected_sessions(self.st,fresh.get(alias))!=(row['strategies'],row['session_sources']):raise HTTPException(409,'Strategy source changed before deletion')
+            fresh_account=fresh.accounts.get(alias)
+            if fresh_account!=account:raise HTTPException(409,'Original account changed before deletion')
+            # The global registry and original target locks are already held.
+            # Recount every reference AFTER those waits, before reservation or
+            # a recoverable plan exists. Keep the exact approved plan/target;
+            # a changed/shared/external ownership state refuses rather than adapts.
+            _require_approved_credential_ownership(self.st,fresh,fresh_account,
+                review['view']['credential_disposition'],target)
+            if selected_sessions(self.st,fresh_account)!=(row['strategies'],row['session_sources']):raise HTTPException(409,'Strategy source changed before deletion')
             # Publish persistent detachment DATA before a recoverable plan can
             # exist. A crash or lost ACK before the account-removal replacement
             # must not let a genuine legacy cleanup child lose this incarnation's

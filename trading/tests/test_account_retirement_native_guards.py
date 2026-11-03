@@ -165,15 +165,15 @@ async def test_a_shared_reference_added_after_native_readback_is_rechecked_befor
     from commander.account_effects import _effect_started
     from commander.account_lifecycle import NativeLifecycle
     inspect=module.inspect_retirement;inserted=[];refusals=[]
-    review=NativeLifecycle.review
-    def observed_review(self,*args,**kwargs):
-        try:return review(self,*args,**kwargs)
+    delete=NativeLifecycle.delete
+    def observed_delete(self,*args,**kwargs):
+        try:return delete(self,*args,**kwargs)
         except HTTPException as error:
             if (_effect_started.get() is not None and error.status_code==409
-                    and error.detail=='Credential destruction cannot be proven for this account; HOLD'):
-                refusals.append('CREDENTIAL_DESTRUCTION_UNPROVEN')
+                    and error.detail=='Native unlink facts changed'):
+                refusals.append('NATIVE_UNLINK_FACTS_CHANGED')
             raise
-    monkeypatch.setattr(NativeLifecycle,'review',observed_review)
+    monkeypatch.setattr(NativeLifecycle,'delete',observed_delete)
     def shared_after_facts(*args,**kwargs):
         facts=inspect(*args,**kwargs)
         # Fresh challenge/readback calls are readonly. Add the competing owner
@@ -187,9 +187,17 @@ async def test_a_shared_reference_added_after_native_readback_is_rechecked_befor
     before=native.secret.read_bytes()
     body,_=await immediate_challenge(native.ac,'fx_primary')
     blocked=await native.ac.post('/v1/trading/accounts/action',json=body)
-    assert inserted and refusals==['CREDENTIAL_DESTRUCTION_UNPROVEN']
+    assert inserted and refusals==['NATIVE_UNLINK_FACTS_CHANGED']
     assert blocked.status_code==409 and blocked.json()['effect_state']=='REFUSED'
     assert blocked.json()['native']['result']['status_code']==409
+    assert blocked.json()['native']['reconciliation_required'] is False
+    # The original guarded request is not rerun to reach a more specific error.
+    # An independent current readonly prepare explains the new ownership state.
+    why=await immediate_challenge(native.ac,'fx_primary',expected_status=409)
+    assert why.status_code==409 and 'Credential destruction cannot be proven for this account; HOLD' in why.text
+    original=await native.ac.get('/v1/trading/accounts/operations/'+body['approval_proof']['challenge_id'])
+    assert original.status_code==200 and original.json()['effect_state']=='REFUSED'
+    assert original.json()['result']['status_code']==409
     assert native.secret.read_bytes()==before
     registry=AccountRegistry(native.path)
     assert registry.get('fx_primary') and registry.get('late_reference')
@@ -204,3 +212,90 @@ async def test_unreachable_authority_is_not_reported_as_observed_lease_exclusion
     blocked=await disconnect(native,expected=503)
     assert 'store is unreachable' in blocked.text and 'runtime is active' not in blocked.text
     assert native.secret.read_bytes()==before and AccountRegistry(native.path).get('fx_primary')
+
+
+@pytest.mark.asyncio
+async def test_paper_reference_metadata_retains_earlier_refusal_and_fresh_named_why(client,tmp_path,monkeypatch):
+    """No credential file exists, no provider is built, and no destruction is reached."""
+    import commander.account_retirement as module
+    from commander.account_effects import _effect_started
+    from commander.account_lifecycle import NativeLifecycle
+    ac,app=client;path=tmp_path/'accounts.json';target=tmp_path/'secrets'/'paper_primary.env'
+    registry=AccountRegistry(path)
+    registry.add(Account('paper_primary','PAPER','OBSERVE','USD',credential_ref=CredentialRef(secrets_file=str(target))))
+    Ledger(tmp_path/'vati.sqlite').close()
+    assert not target.exists()
+    inspect=module.inspect_retirement;delete=NativeLifecycle.delete;inserted=[];refusals=[]
+    def observed_delete(self,*args,**kwargs):
+        try:return delete(self,*args,**kwargs)
+        except HTTPException as error:
+            if error.status_code==409 and error.detail=='Native unlink facts changed':
+                refusals.append('NATIVE_UNLINK_FACTS_CHANGED')
+            raise
+    def late_metadata(*args,**kwargs):
+        facts=inspect(*args,**kwargs)
+        if _effect_started.get() is not None and kwargs.get('inside_removal') and not inserted:
+            current=AccountRegistry(path)
+            current.add(replace(current.get('paper_primary'),alias='paper_other'))
+            inserted.append(True)
+        return facts
+    monkeypatch.setattr(NativeLifecycle,'delete',observed_delete)
+    monkeypatch.setattr(module,'inspect_retirement',late_metadata)
+    body,_=await immediate_challenge(ac,'paper_primary')
+    response=await ac.post('/v1/trading/accounts/action',json=body)
+    assert inserted and refusals==['NATIVE_UNLINK_FACTS_CHANGED']
+    assert response.status_code==409 and response.json()['effect_state']=='REFUSED',response.text
+    assert response.json()['native']['result']['status_code']==409
+    assert response.json()['native']['reconciliation_required'] is False
+    why=await immediate_challenge(ac,'paper_primary',expected_status=409)
+    assert why.status_code==409 and 'Credential destruction cannot be proven for this account; HOLD' in why.text
+    original=await ac.get('/v1/trading/accounts/operations/'+body['approval_proof']['challenge_id'])
+    assert original.status_code==200 and original.json()['effect_state']=='REFUSED'
+    assert original.json()['result']['status_code']==409
+    current=AccountRegistry(path)
+    assert set(current.accounts)=={'paper_primary','paper_other'} and not current._lifecycles
+    assert current.get('paper_primary').credential_ref==current.get('paper_other').credential_ref
+    assert not target.exists() and not (tmp_path/'secrets'/'private.unlink-plan-integrity.env').exists()
+
+
+def test_approved_ownership_guard_refuses_changed_reference_metadata_without_files(tmp_path):
+    from commander.account_lifecycle import _require_approved_credential_ownership
+    settings=NS(secrets_dir=str(tmp_path),operation_ledger='nonsensitive-memory-fixture')
+    account=Account('paper_primary','PAPER','OBSERVE','USD')
+    registry=NS(path=tmp_path/'accounts.json',accounts={account.alias:account})
+    assert _require_approved_credential_ownership(settings,registry,account,'NONE',None) is None
+    target=tmp_path/'paper_primary.env'
+    shared=replace(account,credential_ref=CredentialRef(secrets_file=str(target)))
+    registry.accounts={shared.alias:shared,'paper_other':replace(shared,alias='paper_other')}
+    before=dict(registry.accounts)
+    with pytest.raises(HTTPException) as error:
+        _require_approved_credential_ownership(settings,registry,shared,'NONE',None)
+    assert error.value.status_code==409 and error.value.detail=='Credential ownership changed before deletion; HOLD'
+    assert registry.accounts==before and not target.exists()
+    external=replace(account,credential_ref=CredentialRef(env_var='METADATA_ONLY_NOT_READ'))
+    registry.accounts={external.alias:external}
+    with pytest.raises(HTTPException):_require_approved_credential_ownership(settings,registry,external,'NONE',None)
+    assert not list(tmp_path.iterdir())
+
+
+@pytest.mark.parametrize('change',['target','disposition','unproven','missing_target','classification_error','normalized_same'])
+def test_owned_cleanup_target_comparison_uses_exact_normalized_metadata(tmp_path,monkeypatch,change):
+    import commander.account_lifecycle as module
+    expected=tmp_path/'original_target';target=tmp_path/'different_target';disposition='DELETE_MANAGED'
+    if change=='disposition':disposition='NONE';target=None
+    elif change=='unproven':disposition='UNPROVEN';target=expected
+    elif change=='missing_target':expected=None;target=None
+    elif change=='normalized_same':target=tmp_path/'missing_parent'/'..'/'original_target'
+    # Nonsensitive classification callback only: no key/file/credential effect,
+    # lifecycle admission, or claim that this helper is owner authority.
+    def classification(*args):
+        if change=='classification_error':raise OSError('controlled nonsensitive metadata unavailable')
+        return disposition,target
+    monkeypatch.setattr(module,'credential_cleanup',classification)
+    if change=='normalized_same':
+        assert module._require_approved_credential_ownership(None,None,None,'DELETE_MANAGED',expected) is None
+    else:
+        with pytest.raises(HTTPException) as error:
+            module._require_approved_credential_ownership(None,None,None,'DELETE_MANAGED',expected)
+        assert error.value.status_code==409 and error.value.detail=='Credential ownership changed before deletion; HOLD'
+    assert not list(tmp_path.iterdir())
