@@ -29,6 +29,16 @@ async def approved(ac,args):
     return b|{'approval_proof':_approval_proof(issued.json())}
 
 @pytest.mark.asyncio
+async def test_generic_onboarding_routes_cannot_issue_or_execute_restriction(client):
+    ac, _ = client
+    request = body({'alias':'paper_owner','variant':'RESTRICT','reason_code':'OWNER_REQUEST'})
+    for route in ['/v1/trading/accounts/challenge','/v1/trading/accounts/action']:
+        refused = await ac.post(route, json=request)
+        assert refused.status_code == 422, refused.text
+        assert refused.json()['detail']['code'] == 'RESTRICTION_PURPOSE_ROUTE_REQUIRED'
+
+
+@pytest.mark.asyncio
 async def test_actual_paper_restriction_reauth_readonly_never_grants_entry_or_mode(client,tmp_path,monkeypatch):
     ac,app=client;await paper(ac)
     # isolate replaces the native settings after app construction.

@@ -29,7 +29,7 @@ interface AccountOperationStore {
 class AccountOperationRecovery(private val store: AccountOperationStore) {
     companion object {
         val OAUTH_LINK_ACTIONS = setOf("deriv_oauth_link", "ctrader_link")
-        val JOURNALED_ACTIONS = setOf("account_upsert", "account_credentials", "account_remove", "mt5_ea_issue_key", "deriv_create_demo") + OAUTH_LINK_ACTIONS
+        val JOURNALED_ACTIONS = setOf("account_restrict", "account_upsert", "account_credentials", "account_remove", "mt5_ea_issue_key", "deriv_create_demo") + OAUTH_LINK_ACTIONS
         fun requiresOriginalReadback(action: String, args: JsonObject): Boolean =
             action in JOURNALED_ACTIONS && (action !in OAUTH_LINK_ACTIONS || args.str("state") != null)
         private val idPattern = Regex("^[A-Za-z0-9_-]{20,128}$")

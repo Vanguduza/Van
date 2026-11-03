@@ -21,7 +21,8 @@ import javax.crypto.spec.SecretKeySpec
  * "trading-account|device|issued|action|sha256hex(args)" under HMAC-SHA256 with the device secret.
  */
 object AccountOnboarding {
-    val ACTIONS = listOf("account_upsert", "account_credentials", "account_remove", "account_verify", "deriv_verify_email", "deriv_create_demo", "deriv_oauth_link", "ctrader_discover", "ctrader_link", "mt5_ea_issue_key", "oauth_start", "oauth_pending")
+    // Wire actions, not form capabilities. Restriction uses its dedicated purpose routes.
+    val ACTIONS = listOf("account_restrict", "account_upsert", "account_credentials", "account_remove", "account_verify", "deriv_verify_email", "deriv_create_demo", "deriv_oauth_link", "ctrader_discover", "ctrader_link", "mt5_ea_issue_key", "oauth_start", "oauth_pending")
 
     fun canonicalJson(el: JsonElement): String = when (el) {
         is JsonNull -> "null"

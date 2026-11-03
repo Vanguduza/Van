@@ -174,6 +174,23 @@ class AccountOperationRecoveryTest {
     private val scope = AccountOperationScope("https://gateway.fixture", "profile-fixture", "provision-fixture", "a".repeat(64))
     private val original = PendingAccountOperation("original_operation_id_12345", "mt5_ea_issue_key", "owner-device", "owner_mt5", scope, "b".repeat(64))
 
+    @Test fun restrictionRemainsGuardedAndColdRecoveryNeverAuthorizesResend() {
+        val disk = Disk()
+        val restriction = original.copy(action = "account_restrict", alias = "owner_account")
+        assertTrue(AccountOnboarding.requiresOwnerApproval(restriction.action))
+        assertTrue(AccountOperationRecovery.requiresOriginalReadback(restriction.action, parseObject("{}")!!))
+        AccountOperationRecovery(disk).remember(restriction)
+        val cold = AccountOperationRecovery(disk)
+        assertEquals(listOf(restriction), cold.pending(restriction.deviceId))
+        assertThrows(IllegalStateException::class.java) { cold.remember(restriction) }
+        val unknown = """{"operation_id":"${restriction.operationId}","action":"account_restrict","account_control_domain":"${scope.nativeOwnerDomain}","effect_state":"UNKNOWN","reconciliation_required":true}"""
+        assertFalse(cold.observe(restriction, unknown, 200, scope))
+        assertFalse(cold.observe(restriction, unknown.replace("\"reconciliation_required\":true", "\"reconciliation_required\":false"), 200, scope))
+        assertEquals(listOf(restriction), AccountOperationRecovery(disk).pending(restriction.deviceId))
+        assertFalse(AccountOnboarding.parseOutcome(restriction.action, unknown, 409).ok)
+        assertFalse(cold.canResume(restriction, scope))
+    }
+
     @Test fun demoCreationPersistsBeforeDispatchAndColdRecoveryNeverAuthorizesResend() {
         val disk = Disk()
         val demo = original.copy(action = "deriv_create_demo", alias = "owner_demo")
