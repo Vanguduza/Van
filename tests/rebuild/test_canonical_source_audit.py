@@ -16,6 +16,7 @@ from tools.rebuild import canonical_source_audit as audit
 _SUPERVISION_DRIVER = r'''
 import json, os, signal, subprocess, sys
 from pathlib import Path
+sys.path.insert(0,sys.argv.pop(1))
 from tools.rebuild.canonical_source_audit import OwnedProcessSupervisor
 mode, log_path = sys.argv[1:]
 supervisor = OwnedProcessSupervisor()
@@ -82,7 +83,7 @@ print(json.dumps({'result':result,'evidence':supervisor.evidence,'effect_exists'
 
 def _supervision_process(tmp_path, mode, *, cwd=None, env=None):
     """Separate interpreter keeps process-global subreaper state out of pytest."""
-    run=subprocess.run([sys.executable,'-c',_SUPERVISION_DRIVER,mode,str(tmp_path/(mode+'.log'))],
+    run=subprocess.run([sys.executable,'-c',_SUPERVISION_DRIVER,str(Path(__file__).resolve().parents[2]),mode,str(tmp_path/(mode+'.log'))],
                        cwd=cwd or Path(__file__).resolve().parents[2],env=env or os.environ.copy(),capture_output=True,text=True,timeout=15)
     assert run.returncode==0,(run.stdout,run.stderr)
     return json.loads(run.stdout)
@@ -165,7 +166,8 @@ def test_owned_supervisor_refuses_unsupported_platform_before_spawn(tmp_path):
     assert result=={'result':{'kind':'exception','value':'ProcessSupervisionBlocked'},'spawned':False}
 
 
-def test_owned_supervisor_keeps_git_hooks_and_existing_injected_configuration(tmp_path):
+def test_owned_supervisor_keeps_git_hooks_and_existing_injected_configuration(tmp_path,monkeypatch):
+    monkeypatch.delenv('PYTHONPATH',raising=False)
     repo=tmp_path/'repo';repo.mkdir()
     subprocess.run(['git','init','-q'],cwd=repo,check=True)
     (repo/'content').write_text('fixture\n')
@@ -1289,6 +1291,72 @@ def test_actual_bootstrap_uses_active_runtime_not_sysconfig(monkeypatch):
         assert env['LD_LIBRARY_PATH']==str(active.parent)
 
 
+def test_runtime_permission_metadata_is_provenance_with_actual_identity(monkeypatch):
+    """Simulated permission metadata; actual runtime files are never chmodded."""
+    real_stat=Path.stat;executable=Path('/proc/self/exe').resolve()
+    def metadata(path,*args,**kwargs):
+        import stat
+        value=real_stat(path,*args,**kwargs);fields=list(value)
+        fields[0]=stat.S_IFMT(value.st_mode)|(0o777 if path==executable or stat.S_ISDIR(value.st_mode) else 0o666)
+        return os.stat_result(fields)
+    monkeypatch.setattr(Path,'stat',metadata)
+    env,record=audit._trusted_bootstrap_environment({'LD_PRELOAD':'caller-only'})
+    assert 'LD_PRELOAD' not in env
+    assert record['executable_mode']==0o777
+    assert record['executable_device']==real_stat(executable).st_dev
+    assert record['executable_inode']==real_stat(executable).st_ino
+    if record['library'] is not None:
+        assert record['library']['mode']==0o666 and record['library']['directory_mode']==0o777
+
+
+def test_changed_executable_identity_has_distinct_failure_before_spawn(monkeypatch):
+    real_stat=Path.stat
+    def replaced(path,*args,**kwargs):
+        value=real_stat(path,*args,**kwargs)
+        if path==Path('/proc/self/exe'):
+            fields=list(value);fields[1]+=1;return os.stat_result(fields)
+        return value
+    monkeypatch.setattr(Path,'stat',replaced)
+    with pytest.raises(audit.ProcessSupervisionBlocked,match='REPLACED_BOOTSTRAP_EXECUTABLE_IDENTITY'):
+        audit._trusted_bootstrap_environment({})
+
+
+@pytest.mark.parametrize('damage,reason',[
+    ('deleted','DELETED_BOOTSTRAP_LIBRARY'),
+    ('replaced','REPLACED_BOOTSTRAP_LIBRARY_IDENTITY'),
+    ('ambiguous','AMBIGUOUS_BOOTSTRAP_LIBRARY'),
+    ('api-replaced','REPLACED_BOOTSTRAP_'),
+])
+def test_simulated_mapping_identity_damage_still_refuses(monkeypatch,tmp_path,damage,reason):
+    """Controlled /proc metadata damage, not an actual replaced loaded SDK."""
+    import ctypes
+    address=ctypes.cast(ctypes.pythonapi.Py_GetVersion,ctypes.c_void_p).value
+    real_read=Path.read_text;maps=Path('/proc/self/maps');original=real_read(maps)
+    libraries=[]
+    for suffix in ('a','b'):
+        path=tmp_path/('libpython-identity-'+suffix+'.so.1.0');path.write_bytes(b'metadata-only')
+        info=path.stat();libraries.append((path,info))
+    def line(path,info,*,inode=None,deleted=False):
+        return f'1-2 r-xp 00000000 {os.major(info.st_dev):x}:{os.minor(info.st_dev):x} {info.st_ino if inode is None else inode} {path}'+(' (deleted)' if deleted else '')
+    path,info=libraries[0]
+    if damage=='deleted':altered=original+'\n'+line(path,info,deleted=True)
+    elif damage=='replaced':altered=original+'\n'+line(path,info,inode=info.st_ino+1)
+    elif damage=='ambiguous':
+        altered='\n'.join(row for row in original.splitlines() if '/libpython' not in row)
+        altered+='\n'+'\n'.join(line(p,s) for p,s in libraries)
+    else:
+        rows=[]
+        for row in original.splitlines():
+            fields=row.split(None,5)
+            if len(fields)==6 and int(fields[0].split('-')[0],16)<=address<int(fields[0].split('-')[1],16):
+                fields[4]=str(int(fields[4])+1);row=' '.join(fields)
+            rows.append(row)
+        altered='\n'.join(rows)
+    monkeypatch.setattr(Path,'read_text',lambda path,*a,**k:altered if path==maps else real_read(path,*a,**k))
+    with pytest.raises(audit.ProcessSupervisionBlocked,match=reason):
+        audit._trusted_bootstrap_environment({})
+
+
 _EXEC_HANDOFF_FAILURE_DRIVER = r'''
 import json,os,subprocess,sys
 from unittest.mock import patch
@@ -1341,7 +1409,8 @@ print(json.dumps({'evidence':evidence,'bootstrap_path':bootstrap.get('LD_LIBRARY
 '''
 
 
-def test_real_dynamic_python_gate_uses_mapped_private_library_and_restores_environment(tmp_path):
+@pytest.mark.parametrize('runtime_mode',[0o755,0o777])
+def test_real_dynamic_python_gate_uses_mapped_private_library_and_restores_environment(tmp_path,runtime_mode):
     import ctypes,hashlib
     compiler=shutil.which('cc')
     assert compiler, 'dynamic interpreter fixture requires cc'
@@ -1371,8 +1440,11 @@ def test_real_dynamic_python_gate_uses_mapped_private_library_and_restores_envir
             library=candidate;break
         failures.append((str(candidate),'embedded interpreter or active mapping failed'))
     assert library is not None, f'no usable installed shared Python interpreter: {failures}'
+    # Only our tiny ELF and fixture directory change mode, never an SDK file.
+    assert binary.stat().st_size<=8*1024*1024
+    binary.chmod(runtime_mode);private.chmod(runtime_mode)
     if library.stat().st_size<=8*1024*1024:
-        mapped=private/library.name;shutil.copyfile(library,mapped);mapped.chmod(0o644)
+        mapped=private/library.name;shutil.copyfile(library,mapped);mapped.chmod(0o666 if runtime_mode==0o777 else 0o644)
         assert hashlib.sha256(mapped.read_bytes()).digest()==hashlib.sha256(library.read_bytes()).digest()
         original_path=str(private)
     else:
@@ -1383,6 +1455,10 @@ def test_real_dynamic_python_gate_uses_mapped_private_library_and_restores_envir
         cwd=Path(__file__).resolve().parents[2],env=env,capture_output=True,text=True,timeout=20)
     assert result.returncode==0,(result.stdout,result.stderr)
     observed=json.loads(result.stdout);evidence=observed['evidence']
+    assert evidence['schema']=='van.active-python-bootstrap/2'
+    assert evidence['runtime_trust']=='ALREADY_LOADED_INSTALLED_EXECUTOR'
+    assert evidence['executable_mode']==runtime_mode
+    assert evidence['executable_inode']==binary.stat().st_ino
     assert evidence['library_mode']=='ACTIVE_MAPPED_LIBPYTHON'
     assert evidence['library']['path']==str(mapped.resolve())
     assert evidence['library']['sha256']==hashlib.sha256(mapped.read_bytes()).hexdigest()

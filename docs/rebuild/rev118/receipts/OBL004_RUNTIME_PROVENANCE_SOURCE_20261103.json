@@ -1,0 +1,62 @@
+{
+  "schema": "van.obl004-runtime-provenance-source/1",
+  "base": "1462122f9dd9928d0e31fddbd79695aeced56e5c",
+  "state": "SOURCE_TESTED_REVIEWED_HOSTED_PENDING",
+  "source_sha256": "fa5c8a2942f4a90f6fe127e46f910992f6b1ed72096c067c4b7550f5dd295ef2",
+  "test_sha256": "f2de736fdc65eb502fc47fe705156c9ead83b759f445831657e712646af99920",
+  "scope": [
+    "tools/rebuild/canonical_source_audit.py",
+    "tests/rebuild/test_canonical_source_audit.py"
+  ],
+  "parent_hosted": {
+    "run": 41704640315,
+    "documentary_job": 126156589386,
+    "documentary_result": "39 failed,365 passed,55 errors",
+    "trading_checkout_job": 126156589936,
+    "artifact": 13265531890,
+    "artifact_sha256": "3d72c07d058719088fecc8c4a3fadcf8009b793bf58d9bd67e2992a73d5882bf",
+    "collect_execute": "BLOCKED ProcessSupervisionBlocked UNQUALIFIED_BOOTSTRAP_EXECUTABLE before tests",
+    "other_observed": "Dynamic fixture REPLACED_BOOTSTRAP_LIBRARY; real Git hook fixture ModuleNotFoundError tools from isolated cwd",
+    "cause_limit": "Original executable/library error predicates conflated type/identity and permission modes; exact hosted mode cause is not established because stat metadata was not retained.",
+    "separate_holds": "Gateway0 bothcwd protected entry67 assertions; trusted base lacks checker; DDS read key unavailable; other audit predicates individually unverified."
+  },
+  "correction": {
+    "trust": "Already loaded installed runtime is an explicit trusted executor prerequisite. Same-user filesystem mutation and hostile runtime owner are outside guarantee.",
+    "modes": "Executable/library/directory permissions are recorded provenance; no blanket writable-mode rejection and no SDK chmod.",
+    "retained": "Actual proc-exe and active-CAPI mapped file device/inode/hash checks, deleted/changed/ambiguous rejection, isolated bootstrap loader inputs, sealed private original environment only after actual pidfd ownership ACK, original argv/cwd/environment and Java/Node timeout bounds.",
+    "diagnostics": "Separate executable type/identity and library type/identity failure names.",
+    "fixture": "Explicit actual checkout import path in isolated supervision driver; PYTHONPATH removed while real Git hook and existing injected config assertions execute.",
+    "reader": "Bootstrap subproof /2 records provenance and runtime trust; strict old /1 serialization remains source-reviewed readable with its old mode rule. Legacy profile /1 remains historical-only."
+  },
+  "tests": {
+    "focused": {
+      "passed": 18,
+      "skipped": 0,
+      "deselected": 184,
+      "seconds": 8.82
+    },
+    "whole": {
+      "passed": 202,
+      "skipped": 0,
+      "seconds": 85.6,
+      "exit": 0,
+      "exception": null,
+      "owned_children_absent": true,
+      "child_waited": true,
+      "remaining": []
+    },
+    "not_additive": true,
+    "environment": "Actual PYTHONPATH unset for focused and whole commands.",
+    "proofs": "Actual owned tiny ELF and fixture directory0777; conditional small owned shared-library copy mode0666, never SDK chmod. Permission and proc-map damage tests explicitly labelled simulated metadata. Existing actual loader constructor positive-after-ACK and no-effect failure cases retained.",
+    "limits": "No specifically directed execution claim for old /1 bootstrap compatibility or malformed /2 provenance branches; those branches independently source-reviewed. Whole current /2 producer and cold-reader tests execute."
+  },
+  "review": {
+    "reviewer": "Terra",
+    "result": "CLEAR",
+    "scope": "All current Sol-authored production and test delta against146; untouched Terra baseline test hunks excluded; exact archive and member hashes/preimages verified.",
+    "archive_sha256": "1faaa6b5578b3d165e235ce03c2feace954eb254f083152586a96c81e599305d"
+  },
+  "publication": "Required final guards, genuine hooks, committed4fd and normalpush/readback pending at source receipt creation.",
+  "formal_units_accepted": 0,
+  "open": "Hosted exact correction qualification; BE006 bounded-frontier packet, whole native/providers/production/BG001/S24; no signing/authority expansion/protected entry67 change."
+}

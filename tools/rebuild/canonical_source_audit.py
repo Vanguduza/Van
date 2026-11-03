@@ -446,16 +446,21 @@ def foreground_git_environment(environment):
 def _trusted_bootstrap_environment(effective):
     """Use the already trusted active Python runtime, never caller loader knobs.
 
-    The installed runtime and its non-world/group-writable dependency directory
-    remain prerequisites. This is not a sandbox against a hostile runtime owner.
+    The already loaded installed runtime is a trusted executor prerequisite.
+    File modes are provenance, not proof against a hostile runtime owner or
+    same-user filesystem mutation. Caller loader inputs remain excluded here.
     sysconfig LIBDIR may describe a build machine, so it is not a source here.
     """
     import ctypes
-    executable=Path(sys.executable).resolve(strict=True)
-    active=Path('/proc/self/exe').stat();actual=executable.stat()
-    if (not stat.S_ISREG(actual.st_mode) or (active.st_dev,active.st_ino)!=(actual.st_dev,actual.st_ino)
-        or actual.st_mode & 0o022):
-        raise ProcessSupervisionBlocked('UNQUALIFIED_BOOTSTRAP_EXECUTABLE')
+    try:
+        executable=Path(sys.executable).resolve(strict=True)
+        active=Path('/proc/self/exe').stat();actual=executable.stat()
+    except FileNotFoundError:
+        raise ProcessSupervisionBlocked('DELETED_BOOTSTRAP_EXECUTABLE') from None
+    if not stat.S_ISREG(actual.st_mode):
+        raise ProcessSupervisionBlocked('UNQUALIFIED_BOOTSTRAP_EXECUTABLE_TYPE')
+    if (active.st_dev,active.st_ino)!=(actual.st_dev,actual.st_ino):
+        raise ProcessSupervisionBlocked('REPLACED_BOOTSTRAP_EXECUTABLE_IDENTITY')
     libraries={};api_mapping=None
     api_address=ctypes.cast(ctypes.pythonapi.Py_GetVersion,ctypes.c_void_p).value
     for line in Path('/proc/self/maps').read_text().splitlines():
@@ -471,9 +476,10 @@ def _trusted_bootstrap_environment(effective):
         if name.endswith(' (deleted)'):raise ProcessSupervisionBlocked('DELETED_BOOTSTRAP_LIBRARY')
         library=Path(name).resolve(strict=True);info=library.stat()
         major,minor=(int(value,16) for value in fields[3].split(':'))
-        if (not stat.S_ISREG(info.st_mode) or info.st_mode & 0o022
-            or (os.major(info.st_dev),os.minor(info.st_dev),info.st_ino)!=(major,minor,int(fields[4]))):
-            raise ProcessSupervisionBlocked('REPLACED_BOOTSTRAP_LIBRARY')
+        if not stat.S_ISREG(info.st_mode):
+            raise ProcessSupervisionBlocked('UNQUALIFIED_BOOTSTRAP_LIBRARY_TYPE')
+        if (os.major(info.st_dev),os.minor(info.st_dev),info.st_ino)!=(major,minor,int(fields[4])):
+            raise ProcessSupervisionBlocked('REPLACED_BOOTSTRAP_LIBRARY_IDENTITY')
         libraries[str(library)]=library
     if len(libraries)>1:raise ProcessSupervisionBlocked('AMBIGUOUS_BOOTSTRAP_LIBRARY')
     if api_mapping is None or api_mapping[5].endswith(' (deleted)'):
@@ -489,18 +495,20 @@ def _trusted_bootstrap_environment(effective):
         raise ProcessSupervisionBlocked('UNQUALIFIED_STANDALONE_PYTHON_API')
     bootstrap={key:value for key,value in effective.items()
         if not os.fsdecode(key).startswith('LD_') and os.fsdecode(key) not in {'GCONV_PATH','GLIBC_TUNABLES'}}
-    evidence={'schema':'van.active-python-bootstrap/1','executable':str(executable),
+    evidence={'schema':'van.active-python-bootstrap/2','executable':str(executable),
         'executable_sha256':hashlib.sha256(executable.read_bytes()).hexdigest(),
+        'executable_device':actual.st_dev,'executable_inode':actual.st_ino,
+        'executable_mode':stat.S_IMODE(actual.st_mode),'runtime_trust':'ALREADY_LOADED_INSTALLED_EXECUTOR',
         'library_mode':'STANDALONE_NO_MAPPED_LIBPYTHON','library':None}
     if libraries:
         library=next(iter(libraries.values()));directory=library.parent;info=directory.stat()
-        if (not stat.S_ISDIR(info.st_mode) or info.st_mode & 0o022
+        if (not stat.S_ISDIR(info.st_mode)
             or any(char in str(directory) for char in (':','\n','\r'))):
             raise ProcessSupervisionBlocked('UNQUALIFIED_BOOTSTRAP_LIBRARY_DIRECTORY')
         bootstrap['LD_LIBRARY_PATH']=str(directory)
         evidence.update(library_mode='ACTIVE_MAPPED_LIBPYTHON',library={
             'path':str(library),'sha256':hashlib.sha256(library.read_bytes()).hexdigest(),
-            'device':library.stat().st_dev,'inode':library.stat().st_ino,
+            'device':library.stat().st_dev,'inode':library.stat().st_ino,'mode':stat.S_IMODE(library.stat().st_mode),
             'directory_device':info.st_dev,'directory_inode':info.st_ino,'directory_mode':stat.S_IMODE(info.st_mode)})
     return bootstrap,evidence
 
@@ -816,20 +824,31 @@ def _verify_process_supervision(receipt,state):
         'released':True,'closed':True,'aborted_before_exec':False},'missing exact bound-exec launch gate')
     bootstrap=gate['bootstrap'];environment=gate['exec_environment']
     digest=lambda value:isinstance(value,str) and re.fullmatch('[0-9a-f]{64}',value) is not None
-    require(isinstance(bootstrap,dict) and set(bootstrap)=={'schema','executable','executable_sha256','library_mode','library'}
-        and bootstrap['schema']=='van.active-python-bootstrap/1' and isinstance(bootstrap['executable'],str)
+    modern=isinstance(bootstrap,dict) and bootstrap.get('schema')=='van.active-python-bootstrap/2'
+    bootstrap_keys={'schema','executable','executable_sha256','library_mode','library'}
+    if modern:bootstrap_keys|={'executable_device','executable_inode','executable_mode','runtime_trust'}
+    require(isinstance(bootstrap,dict) and set(bootstrap)==bootstrap_keys
+        and bootstrap['schema'] in {'van.active-python-bootstrap/1','van.active-python-bootstrap/2'} and isinstance(bootstrap['executable'],str)
         and Path(bootstrap['executable']).is_absolute() and digest(bootstrap['executable_sha256']),
         'unproven trusted bootstrap executable')
+    if modern:
+        require(bootstrap['runtime_trust']=='ALREADY_LOADED_INSTALLED_EXECUTOR'
+            and type(bootstrap['executable_device']) is int and bootstrap['executable_device']>=0
+            and type(bootstrap['executable_inode']) is int and bootstrap['executable_inode']>0
+            and type(bootstrap['executable_mode']) is int and 0<=bootstrap['executable_mode']<=0o7777,
+            'unproven installed bootstrap runtime provenance')
     library=bootstrap['library']
     if bootstrap['library_mode']=='STANDALONE_NO_MAPPED_LIBPYTHON':
         require(library is None,'foreign standalone bootstrap library')
     else:
         require(bootstrap['library_mode']=='ACTIVE_MAPPED_LIBPYTHON' and isinstance(library,dict)
-            and set(library)=={'path','sha256','device','inode','directory_device','directory_inode','directory_mode'}
+            and set(library)==({'path','sha256','device','inode','directory_device','directory_inode','directory_mode'}|({'mode'} if modern else set()))
             and isinstance(library['path'],str) and Path(library['path']).is_absolute() and digest(library['sha256'])
             and all(type(library[key]) is int and library[key]>=0 for key in ('device','inode','directory_device','directory_inode','directory_mode'))
-            and library['inode']>0 and library['directory_inode']>0 and not library['directory_mode'] & 0o022,
+            and library['inode']>0 and library['directory_inode']>0 and library['directory_mode']<=0o7777
+            and (modern or not library['directory_mode'] & 0o022),
             'unproven active mapped bootstrap library')
+        if modern:require(type(library['mode']) is int and 0<=library['mode']<=0o7777,'invalid mapped runtime mode provenance')
     require(isinstance(environment,dict) and set(environment)=={'schema','bytes','entries','sealed','parent_closed',
         'read_after_ownership_ack','closed_before_original_exec'}
         and environment['schema']=='van.sealed-exec-environment/1'
