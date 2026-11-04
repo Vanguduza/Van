@@ -25,3 +25,7 @@ Shared physical Postgres, global roles, cluster WAL, filesystem/VM root and shar
 ## Recovery evidence checkpoint
 
 The 4 November isolated drill now proves project-specific logical restore and shared-server restart behavior using real pg_dump/pg_restore/Auth/REST. It does not close whole-VAN off-host restore, target image/architecture, real data-volume, secrets/role custody or production cutover gates. The tooling generates fresh-target plans only and cannot apply them. Require trusted SQL review, original owner admission and a new runtime proof on the target before promotion. See RECOVERY.md and QUALIFICATION_RECOVERY_2026-11-04.md.
+
+## Shared Storage implementation checkpoint
+
+The shared upstream Storage path is now implemented and tested in a disposable two-project environment: 245 real-service checks, 118 tests and 12 effective-model checks. See `SHARED_STORAGE.md` and `QUALIFICATION_STORAGE_2026-11-04.md`. The new shared candidate supersedes the earlier unqualified per-project Storage sketch; do not deploy both. Actual VAN legacy admission, coordinated object/database recovery, container/architecture verification and native deployment gates remain mandatory.

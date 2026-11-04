@@ -1,8 +1,8 @@
 # DIAL Supabase — one installation, independent database/Auth/API projects
 
-**Status: 157 real-service checks and 79 tests passed, including per-project logical backup/restore and shared-server restart recovery. Not deployed to VAN and not a complete production Supabase release.**
+**Status: shared Storage demonstrated with 245 real-service checks, 118 tests and 12 Compose/route checks passing. Earlier database recovery/restart evidence remains retained. Not deployed to VAN and not a complete production Supabase release.**
 
-The owner requirement is one existing managed Supabase installation on `van-trading-core`, one PostgreSQL server, and independently functioning application databases and authentication environments. The candidate does not add a PostgreSQL server, VM or complete Supabase stack per project. It adds small project-specific Auth, REST and router services to the existing Compose model; other services remain separate qualification work.
+The owner requirement is one existing managed Supabase installation on `van-trading-core`, one PostgreSQL server, and independently functioning application databases and authentication environments. The candidate does not add a PostgreSQL server, VM or complete Supabase stack per project. It adds small project-specific Auth, REST and router services to the existing Compose model and reuses one shared Storage service; the remaining shared services need separate qualification.
 
 **REA is optional research support, not an execution or release prerequisite.** The owner authorized direct implementation. No REA investigation result is claimed or needed for the tests below.
 
@@ -21,6 +21,14 @@ This is stronger than the retained 24 October test suite, which checked Nginx ag
 The explicit `tests/rehearse_recovery.py` extends the core rehearsal: restore into a fresh same-server database, compare fixture data/ownership/effective ACLs/RLS, recover Auth credentials and sessions, keep the neighbour usable, and prove both pools reconnect after a shared PostgreSQL restart. Run it with the same arguments as `rehearse_native.py`, using a new report path.
 
 See `RECOVERY.md`, `QUALIFICATION_RECOVERY_2026-11-04.md` and `evidence/2026-11-04-recovery/`. The current capture/readback limits are 256 MiB and 120 seconds; larger production databases require separately admitted custody/resources. Logical archives contain sensitive Auth data and are not encrypted by this candidate. Off-host encryption, cluster roles/secrets, object storage, WAL/PITR and production-volume recovery remain separate requirements. Restoring old Auth state requires explicit revoked-session/password-change reconciliation before reopening traffic.
+
+## Shared Storage milestone
+
+`tools/shared_storage.py` extends the same installation with **one upstream multi-tenant Storage service**, using project metadata schemas and a small registry database on the existing PostgreSQL server. No per-project Storage stack or new PostgreSQL server is added. The staged compiler preserves explicit original native tenant/bucket/mount mappings, verifies project credentials, prepares scoped logins/HBA, and supplies project gateways plus an exact-source legacy Envoy route candidate.
+
+The real test converted a synthetic single-tenant service without moving its original objects or changing its keys. Both projects then passed actual upload/download/list/update/delete, owner-RLS, signed/public URL, wrong-project token, header-spoofing and shared-service restart checks. A local object-restoration drill preserved bytes and extended metadata and left the neighbour's objects unchanged. This is not a coordinated production database-plus-object backup.
+
+See `SHARED_STORAGE.md`, `QUALIFICATION_STORAGE_2026-11-04.md` and `evidence/2026-11-04-storage/`. `tests/rehearse_storage.py` needs the explicit pinned upstream Storage source and Node paths; `tests/check_storage_compose.py` evaluates only a synthetic effective Compose model, without contacting the Docker daemon. The 245-check Storage run includes the 101-check core, not the separate 157-check recovery drill; do not add overlapping check counts.
 
 ## Mandatory database boundary
 
@@ -87,6 +95,6 @@ Production VAN capacity/runtime access was not verified in this change. The DIAL
 
 The native rehearsal uses PostgreSQL 17.11 on amd64, Auth 2.196.0, PostgREST 14.17 and Nginx 1.24.0. The repository donor PostgreSQL image and target architecture, plus the generated Nginx 1.27.5-alpine container, require separate qualification. Existing production binaries were not replaced or upgraded.
 
-Storage, Realtime, Edge Functions, readiness and unqualified OAuth/SAML/verification callback routes return HTTP 503 in the new candidate. No public signup or email autoconfirm is enabled. Studio, Supavisor, Storage, TLS/browser CORS, OAuth/MFA/SMTP, production-scale/off-host recovery, ARM64 and Nissan GTR business-flow qualification remain open.
+The core bootstrap keeps Storage closed until the explicit shared-Storage integration is applied. Realtime, Edge Functions, readiness and unqualified OAuth/SAML/verification callback routes remain HTTP 503. No public signup or email autoconfirm is enabled. Studio, Supavisor, actual VAN Storage activation, TLS/browser CORS, OAuth/MFA/SMTP, production-scale/off-host recovery, ARM64 and Nissan GTR business-flow qualification remain open.
 
 **No live project has been provisioned on `van-trading-core`; Nissan GTR has not been migrated.**

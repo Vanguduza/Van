@@ -80,3 +80,7 @@ J. Deployment: exact Git SHA, signature, Zuul qualification and immutable owner-
 ## Critical boot integration
 
 Existing vati-supabase.service starts Docker Compose using TWO yaml files and --remove-orphans. Project overlays MUST be included in its canonical boot model prior to starting them, OR the composition and lifecycle must be restructured with an explicitly compatible qualified supervisor. Running generated tenant containers directly without a boot fix can cause their removal during subsequent unit start. Do not edit this unit in unqualified state.
+
+## Shared Storage implementation checkpoint
+
+The shared upstream Storage path is now implemented and tested in a disposable two-project environment: 245 real-service checks, 118 tests and 12 effective-model checks. See `SHARED_STORAGE.md` and `QUALIFICATION_STORAGE_2026-11-04.md`. The new shared candidate supersedes the earlier unqualified per-project Storage sketch; do not deploy both. Actual VAN legacy admission, coordinated object/database recovery, container/architecture verification and native deployment gates remain mandatory.
