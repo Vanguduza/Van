@@ -1,11 +1,15 @@
 # One-installation DIAL Supabase Multi-Project Architecture
 
+## Implementation checkpoint — 4 November 2026
+
+The new `tools/bootstrap.py` and explicit `tests/rehearse_native.py` implement and exercise independent project databases, real Auth/REST and API-key-aware routing in a disposable cluster. Storage, shared-service integration and production activation remain open. REA is optional source investigation, not a build or deployment dependency. See `QUALIFICATION_2026-11-04.md`.
+
 ## Hard invariants
 
 - Reuse the already deployed /opt/van-trading/supabase installation on van-trading-core. One Supabase Postgres 17.6 cluster, one resource/accounting/backup infrastructure, one top-level Docker Compose model. An application must NOT receive its own independent Docker Compose Supabase **stack**, PG server, Studio, Realtime, image proxy, connection pooler or management plane.
 - Give each application a distinct PostgreSQL DATABASE, immutable project/tenant UUID, external API origin, JWT keys, GoTrue Auth users/sessions/provider configuration, per-project PostgREST connection/keys, limited database logins, separate Storage backing path/tenant, function namespace, backup and restore unit.
 - Per-project GoTrue and PostgREST service PROCESSES are necessary in the initial implementation because the pinned standard versions use one database URL and JWT issuer per process. These are lightweight service containers in the SAME Compose installation, NOT full duplicated stacks. A single-process multi-DB Auth/REST system would require an independently validated fork; do not assert it exists in the existing images.
-- Per-project Storage service in initial candidate to guarantee isolated functionality. Long-term shared multi-tenant Storage may be adopted from the Gustavo architecture only after runtime tests prove tenant-aware DB and object routing and fail-closed JWT/key validation.
+- Storage is not implemented by the new API/Auth bootstrap. The original per-project Storage configuration is retained only as a proposed future candidate, not a guarantee of isolated functionality. Long-term shared multi-tenant Storage may be adopted from the Gustavo architecture only after runtime tests prove tenant-aware DB and object routing and fail-closed JWT/key validation.
 - VAN/VATI stays on its existing postgres database and restricted VATI ledger schema; never rename its live database, reinitialize the donor, replace the Envoy routes, rotate VAN JWT credentials or expose the loopback ports publicly in the initial build.
 - Separate database != separate physical resources. CPU, PostgreSQL roles, filesystem, replication WAL, root, backups and the shared containers remain common failure domains. Provide quotas and whole-cluster DR plus per-project logical restore.
 
@@ -20,7 +24,7 @@ Project router -> shared Edge runtime with scoped project ID, namespace, JWT, Va
 Shared Studio/pg-meta -> permissioned project selection; administrative metadata MUST NOT become public API.
 Shared Supavisor -> tenant/DB registration and tightly bounded project connection pools.
 
-## REA donor decisions, independently source-verified (not REA receipts)
+## Donor decisions, independently source-reviewed (not REA receipts)
 
 1. GustavoMartins123/supabase-multitenant: PRIMARY ARCHITECTURAL DONOR. One cluster, per-project GoTrue/PostgREST/Nginx, tenant-aware Realtime/Supavisor/Storage, single Studio, project control-plane/host-agent. Adapt the concepts, never run its setup.sh over the live VAN installation.
 2. arunrajiah/supafleet: DATABASE and per-project JWT/DSN/proxy provisioning concepts. Its tenant Compose stack and per-project Storage process remain optional design references.
@@ -33,6 +37,7 @@ Shared Supavisor -> tenant/DB registration and tightly bounded project connectio
 For each new project (e.g. gtr_prod):
 - Check current pg_dumpall globals, server extensions, physical backup and target version.
 - Build a tested project bootstrap that initializes Supabase-owned Auth/Storage roles/schemas/migrations for exactly the NEW DB, not the default VAN database. Do not clone the postgres database: it contains VATI state.
+- The API/Auth implementation keeps new roles NOLOGIN until its exact first-match `pg_hba.conf` prefix is installed, reloaded and independently checked. The prefix permits each login only into its own database and rejects it everywhere else, preserving legacy database grants. PUBLIC CONNECT and shared standard API roles mean SQL grants alone do not establish this boundary.
 - PostgreSQL roles are cluster-global. Deny CONNECT on each project DB to PUBLIC; mint project-only LOGIN roles (Auth, PostgREST authenticator, Storage, migrate/backup). No per-project service may possess a PostgreSQL superuser or global donor password.
 - JWT roles (anon/authenticated/service_role) are global role names; tenant separation depends on per-project JWT issuer/signature AND the project-specific unprivileged PostgREST connection AND least-privilege database grants. Do not grant each project's login CONNECT to unrelated DBs.
 - Preserve auth.uid() and source RLS policy semantics, rewrite storage ownership binding, and prove absence of SECURITY DEFINER/search_path grants that cross boundaries.
@@ -66,7 +71,7 @@ F. Realtime: cross-project publish/subscribe/topic and CDC slots rejected; no ex
 G. Edge: webhook HMAC, per-function JWT, secret vault, SSRF, cross-project invocation, no leakage of process-global secrets.
 H. Migration: restore source DB including exact auth rows, constraints, extensions, policies, triggers, grants, jobs, Supabase migrations and app data; compare hashes/counts and authorization outcomes.
 I. Operations: project logical backup/restore, cluster physical backup/PITR, RPO/RTO drill, credential rotation, schema forward/rollback, workload spike, cross-project noisy-neighbour/fault isolation, upgrading one project without data loss.
-J. Deployment: exact Git SHA, signature, Zul qualification and immutable owner-authorized deployment receipt. No promotion on green placeholder tests.
+J. Deployment: exact Git SHA, signature, Zuul qualification and immutable owner-authorized deployment receipt. No promotion on green placeholder tests.
 
 ## Critical boot integration
 

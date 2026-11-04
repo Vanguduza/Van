@@ -1,0 +1,42 @@
+{
+  "packages": [
+    {
+      "name": "libpq5",
+      "sha256": "b487c5ed2ceb9244c6a9d6ae65818ed6707c3c44a2e14488394ae4194c52c53b",
+      "url": "https://apt.postgresql.org/pub/repos/apt/pool/main/p/postgresql-18/libpq5_18.6-1.pgdg24.04+2_amd64.deb",
+      "version": "18.6-1.pgdg24.04+2"
+    },
+    {
+      "name": "postgresql-17",
+      "sha256": "d5b58058a82a3f344f832aea2cc54badc4f6265c25c960752cb1f5df5d2180ee",
+      "url": "https://apt.postgresql.org/pub/repos/apt/pool/main/p/postgresql-17/postgresql-17_17.11-1.pgdg24.04+2_amd64.deb",
+      "version": "17.11-1.pgdg24.04+2"
+    },
+    {
+      "name": "postgresql-client-17",
+      "sha256": "b3b071b67a814a382516d6f6241b529c52f909672457e2f48083acce047b634f",
+      "url": "https://apt.postgresql.org/pub/repos/apt/pool/main/p/postgresql-17/postgresql-client-17_17.11-1.pgdg24.04+2_amd64.deb",
+      "version": "17.11-1.pgdg24.04+2"
+    },
+    {
+      "name": "auth",
+      "sha256": "0d35d4c06a9ae673d06bc8579aeef6bba6f7551fa7842f9fcdac33ec926e360c",
+      "url": "https://github.com/supabase/auth/releases/download/v2.196.0/auth-v2.196.0-amd64.tar.xz"
+    },
+    {
+      "name": "postgrest",
+      "sha256": "d6e13926457487c99b77366d795dcfa32700554d08d418131d9a4ea3f6ca25e3",
+      "url": "https://github.com/PostgREST/postgrest/releases/download/v14.17/postgrest-v14.17-linux-static-x86-64.tar.xz"
+    },
+    {
+      "name": "nginx",
+      "package_filename": "nginx_1.24.0-2ubuntu7.19_amd64.deb",
+      "sha256": "b9c3476a504c963d8c3cab6540127fa4100ccf6ddf8ee978780bb32f128968d5",
+      "source": "Ubuntu noble-updates/main amd64 via apt-get download; no installation",
+      "version": "1.24.0-2ubuntu7.19"
+    }
+  ],
+  "schema_version": 1,
+  "scope": "NATIVE_AMD64_REHEARSAL_NOT_VAN_DEPLOYMENT",
+  "verification": "Archive SHA-256 matched publisher HTTPS release metadata or package index. Cryptographic attestation-signature verification not asserted. Extracted as ordinary user; no system package installation."
+}

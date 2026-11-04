@@ -1,5 +1,7 @@
 # Source-level adoption evidence (NOT an REA run)
 
+4 November continuation: the owner authorized direct implementation without waiting for REA. Real API/Auth/PostgreSQL evidence is now recorded in QUALIFICATION_2026-11-04.md. The original donor reviews and prepared REA requests remain provenance; they do not gate implementation or release. No REA result is asserted.
+
 REA dispatch was attempted through connected Global DIAL MCP but refused as ROOT_INGRESS_FORWARD_TOOL_NOT_ALLOWED. The dedicated dial_investigation_submit/status/result/reinvestigate tools are declared in Vanguduza/dial-development-system/agent-system/orchestration/sea/rea-investigation-port.mjs but are not available to this ChatGPT connector session. No native REA receipts are claimed here.
 
 ## Pinned sources checked 2026-10-20
@@ -12,7 +14,7 @@ REA dispatch was attempted through connected Global DIAL MCP but refused as ROOT
 - Vanguduza/Van existing production-definition commit 8eb1889822fc8a83f219977c15340172e16acd91: deploy/van-trading-core/supabase/docker-compose.yml defines one PG17, Envoy, GoTrue, PostgREST, Realtime, Storage, Meta, Edge, Studio, Supavisor; systemd/vati-supabase.service includes --remove-orphans; reconcile_vati_ledger.py defines restricted VATI ledger role in default postgres DB.
 - Vanguduza/dial-development-system agent-system/registries/REA_RESOURCE_MANIFEST.json: pinned rea-agents 6.5.0 SHA256 531717a06e92ca651aab52691190f916fac044272c01f875e22c5e293218e699. Host/provider native_qualified false in pinned manifest: declaration is not runtime qualification.
 
-## REA research acceptance before implementation promotion
+## Optional REA research acceptance (not a Supabase release prerequisite)
 
 Each result must bind exact repository commit and content hashes, static SOURCE analysis kind, native owner/lease, pinned rea-agents provider, legitimate isolation proof and original receipt. Submit one per source, inspect status and result without duplicate submission. Preserve unknowns; REA graphs are untrusted input, not code quality or correctness proof. Independently confirm key architecture claims against actual source code and disposable integration fixtures.
 

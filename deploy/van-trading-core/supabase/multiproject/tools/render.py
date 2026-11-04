@@ -245,13 +245,14 @@ def write_bundle(out: pathlib.Path, artifacts: dict[str, str]) -> None:
         if out == pathlib.Path(protected) or pathlib.Path(protected) in out.parents:
             raise CandidateError("OUTPUT_MUST_NOT_BE_ACTIVE_INSTALLATION")
     flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
-    parent_fd = os.open("/", flags)
+    traverse_flags = os.O_PATH | os.O_DIRECTORY | os.O_NOFOLLOW
+    parent_fd = os.open("/", traverse_flags)
     output_fd = None
     written = []
     created = False
     try:
         for component in out.parts[1:-1]:
-            next_fd = os.open(component, flags, dir_fd=parent_fd)
+            next_fd = os.open(component, traverse_flags, dir_fd=parent_fd)
             os.close(parent_fd)
             parent_fd = next_fd
         parent_stat = os.fstat(parent_fd)
@@ -259,6 +260,11 @@ def write_bundle(out: pathlib.Path, artifacts: dict[str, str]) -> None:
             raise CandidateError("OUTPUT_PARENT_MUST_BE_OPERATOR_OWNED")
         if parent_stat.st_mode & (stat.S_IWGRP | stat.S_IWOTH):
             raise CandidateError("OUTPUT_PARENT_MUST_BE_PRIVATE")
+        # Open only the private final parent for fsync; O_PATH above needs
+        # search permission, not directory-list permission on host ancestors.
+        writable_parent_fd = os.open(".", flags, dir_fd=parent_fd)
+        os.close(parent_fd)
+        parent_fd = writable_parent_fd
         try:
             os.mkdir(out.name, mode=0o700, dir_fd=parent_fd)
         except FileExistsError as exc:

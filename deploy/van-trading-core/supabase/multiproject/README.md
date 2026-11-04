@@ -1,43 +1,84 @@
-# DIAL Supabase Multi-Project Fabric — additive candidate
+# DIAL Supabase — one installation, independent database/Auth/API projects
 
-Status: **LOCAL SOURCE/ROUTING TESTED; NOT LIVE, NOT REA-QUALIFIED, NOT SUPABASE-RUNTIME-QUALIFIED.**
+**Status: real two-project PostgreSQL 17 + Supabase Auth + PostgREST rehearsal passed. Not deployed to VAN and not a complete production Supabase release.**
 
-Owner target: one existing Supabase installation on `van-trading-core`, one PostgreSQL 17 cluster, and separate databases that function as independent Supabase Auth/API projects. No complete duplicated Supabase stacks; preserve the existing VAN/VATI database, credentials and ledger.
+The owner requirement is one existing managed Supabase installation on `van-trading-core`, one PostgreSQL server, and independently functioning application databases and authentication environments. The candidate does not add a PostgreSQL server, VM or complete Supabase stack per project. It adds small project-specific Auth, REST and router services to the existing Compose model; other services remain separate qualification work.
 
-## Implemented in this candidate
+**REA is optional research support, not an execution or release prerequisite.** The owner authorized direct implementation. No REA investigation result is claimed or needed for the tests below.
 
-The offline generator validates project identities and emits project-specific GoTrue, PostgREST, Storage and internal router service declarations for the **existing Compose model**. It creates no database, credential, container, network, DNS record or running service. PostgreSQL and the intended shared infrastructure are not duplicated.
+## Implemented and demonstrated
 
-Host routing rejects unknown/foreign hosts and replaces or strips forwarded tenant headers. Unqualified Functions, Realtime and readiness endpoints return HTTP 503. API-key admission, Supabase JWT verification, TLS, DB bootstrap and real isolation are **not proved by the router tests**. The generated router is not a production gateway.
+`tools/bootstrap.py` generates a private, staged bootstrap bundle for fresh project databases. Each project has unique database logins, SCRAM password verifiers, an Auth schema, signing secret, API credentials and gateway configuration. GoTrue performs its real upstream Auth migrations; the code does not imitate its user/session tables. REST keeps standard `anon`, `authenticated`, `service_role` policies and adds an exact project-issuer check.
 
-Output is deterministic and written only to a new private directory, without following parent/output symlinks or overwriting files. Every artifact is bound to its manifest by a SHA-256 receipt. Output into active Supabase paths is refused.
+The native rehearsal creates two synthetic projects in one temporary PostgreSQL cluster, with real Auth, REST and Nginx processes. It exercises independent same-email identities, passwords, refresh sessions, user/service JWTs, RLS ownership, API keys, database login permissions, host/header routing and concurrent requests. The original third fixture database's contents and ACL remain unchanged. See `QUALIFICATION_2026-11-04.md` and the non-secret evidence directory for exact results.
 
-## Run local tests and generate review artifacts
+This is stronger than the retained 24 October test suite, which checked Nginx against labelled HTTP stubs only. Neither test is a production-deployment receipt.
 
-From the repository root, with Python 3.10+:
+## Mandatory database boundary
+
+PostgreSQL role names are cluster-wide. Reusing the standard Supabase API roles preserves source RLS compatibility, but an existing database may grant `CONNECT` to `PUBLIC`. Merely withholding an explicit grant from a new login would not exclude that login.
+
+Consequently the generated roles begin **NOLOGIN**. An exact `pg_hba.conf` prefix allows each project login only into its own database from approved private CIDRs and rejects that login on every other database and Unix socket. Existing rules follow the prefix. The activation SQL requires the exact parsed first-match rules, a reload observation and quarantined nonprivileged roles before enabling login. It does not alter the legacy databases' grants or existing global API roles.
+
+**Do not enable these logins or start project services without this HBA boundary.** The bundle is not a permission to change a running cluster. Production adoption requires whole-instance backups, owner admission, a reviewed HBA placement and actual cross-project connection tests. Restrict and monitor subsequent HBA changes.
+
+## Run offline tests
+
+From the repository root, Python 3.10+ on Linux:
 
 ```sh
 BASE=deploy/van-trading-core/supabase/multiproject
 python3 -m unittest discover -s "$BASE/tests" -v
-python3 "$BASE/tools/render.py" validate --manifest "$BASE/projects.rehearsal.json"
-WORK=$(mktemp -d)
-python3 "$BASE/tools/render.py" render --manifest "$BASE/projects.rehearsal.json" --out "$WORK/candidate"
 ```
 
-The routing tests use a local Nginx executable and six labelled loopback HTTP stubs, not GoTrue/PostgREST/Storage. They skip when Nginx is unavailable; skipped routing tests are NOT routing qualification. They start only their own temporary local processes and clean them up. Nginx 1.26.3 and Python 3.13.5 were used for the recorded 29-test run; the pinned container images have not been executed.
+The four older routing tests use a local Nginx binary and skip if it is absent. A skip is not qualification. The new `tests/rehearse_native.py` is explicit and never runs against a supplied production database.
 
-`projects.rehearsal.json` contains Nissan GTR and a disposable fixture project, with `.invalid` domains. These are test identities, not deployed projects. Do not change `PLANNED` to `LIVE` to bypass validation.
+## Reproduce the native rehearsal
 
-## Deployment gates remain mandatory
+Stage checksum-verified upstream binaries in an isolated non-root workspace; versions and acquisition hashes are recorded in `tests/rehearsal-binaries.lock.json`. No root, Docker socket, existing database endpoint or production credential is needed. Package extraction is not a system installation. Paths below must point at those staged binaries:
 
-1. Complete the five pinned REA investigations through an admitted native runtime; prepared requests and direct source research are not REA results.
-2. Obtain real VM CPU/memory/disk/IO/connection inventory and a verified whole-VAN backup/restore drill.
-3. Bootstrap separate project databases from the matching Supabase version, without copying VAN's existing `postgres` database. Qualify project-only logins, cluster-global role handling and cross-database CONNECT denial.
-4. Prove independent GoTrue users, sessions, signing keys, OAuth configuration, REST/RPC/RLS and Storage behavior using actual services, including cross-project negative tests.
-5. Qualify shared Realtime/Edge/Studio/Supavisor integration, API-key admission, TLS, resource limits and recovery before enabling their routes.
-6. Include every project overlay in the canonical `vati-supabase.service` Compose model before starting services. The existing `--remove-orphans` launch can remove overlays omitted at boot. This patch does not alter that unit.
-7. Qualify Nissan GTR's hosted schema/Auth/Storage/R2/payment migration and rollback, then obtain exact-source Zuul and owner deployment receipts.
+```sh
+python3 "$BASE/tests/rehearse_native.py" \
+  --pg-bin /absolute/staged/postgresql/17/bin \
+  --pg-lib /absolute/staged/lib \
+  --auth-bin /absolute/staged/auth/auth \
+  --rest-bin /absolute/staged/postgrest/postgrest \
+  --nginx /absolute/staged/nginx \
+  --report /absolute/private/new-rehearsal-result.json
+```
 
-See `QUALIFICATION_2026-10-24.md`, `ARCHITECTURE.md`, `INTEGRATION_GATES.md`, `NISSAN_GTR_CUTOVER.md`, `SOURCE_EVIDENCE.md` and `rea-requests.json`.
+The runner creates one new loopback-only temporary cluster, uses random temporary credentials, starts only its own processes and stops them before returning. Success removes the private temporary database; failure retains private diagnostic files after cleanup. Reports omit passwords, signing keys and tokens. The source hashes must remain unchanged throughout the run.
 
-**No live project has been provisioned. No running VAN service has been changed.**
+## Generate an operator-review bundle, without deployment
+
+```sh
+WORK=$(mktemp -d)
+python3 "$BASE/tools/bootstrap.py" \
+  --manifest "$BASE/projects.rehearsal.json" \
+  --client-cidr 127.0.0.1/32 \
+  --out "$WORK/private-bootstrap"
+```
+
+Use the reviewed actual Docker-network CIDR for a future target, not the loopback fixture example. Output is a new directory with mode 0700 and files mode 0600. It contains real randomly generated credentials: **never commit or distribute the bundle, env files or generated Nginx config.** The generator has no apply/start/restart operation. Repeated generation creates different credentials; do not replace an existing project's credentials by regenerating a bundle.
+
+`projects.rehearsal.json` contains `.invalid` hostnames and synthetic project UUIDs. These are examples, not provisioned production identities. The separate original `tools/render.py` is retained for historical candidate comparison; do not combine its unqualified Storage overlay with the new API/Auth-only overlay.
+
+## Staged production adoption — still unperformed
+
+1. Verify VAN host and running donor versions, workload/connection budgets, existing roles, HBA and service model. Back up and restore the whole existing VAN/VATI cluster off-host.
+2. Review and admit exact source. Apply the new roles as NOLOGIN; create fresh project DBs from `template0`, then the scoped schemas. Never clone or restore over VAN's `postgres` DB. Existing names fail rather than being overwritten; interrupted work must be reconciled before retry.
+3. Prepend only the reviewed new-login HBA rules while preserving existing rules, reload and verify. Activate the exact quarantined logins. Run independent negative connection tests against VAN and the other projects.
+4. Start only the project Auth services privately, let the pinned upstream migrations finish, apply the post-migration helpers, then start REST and the API-key-aware gateways. Preserve current global API roles. Production changes must use the existing qualified owner/Root mechanism.
+5. Include all overlay files in the canonical `vati-supabase.service` startup/stop model before enabling project services; its existing `--remove-orphans` invocation must not remove the new services on restart.
+6. Complete real TLS/CORS/rate-limit checks, key rotation, SMTP/OTP/OAuth/MFA, resource and recovery tests; qualify shared Storage, Realtime, Edge Functions, Supavisor and project-aware Studio independently.
+7. Rehearse Nissan GTR schema/history/Auth/Storage/R2/payment migration and rollback, obtain exact-source release/deployment evidence, then perform a controlled cutover.
+
+## Deliberately not claimed
+
+Production VAN capacity/runtime access was not verified in this change. The DIAL estate check was blocked by expired owner-ingress metadata; the legitimate qualification challenge was observed but did not complete Root confirmation. Tests ran through the connected Commander as an unprivileged user on `dial-control`, not through a Root-signed VAN deployment.
+
+The native rehearsal uses PostgreSQL 17.11 on amd64, Auth 2.196.0, PostgREST 14.17 and Nginx 1.24.0. The repository donor PostgreSQL image and target architecture, plus the generated Nginx 1.27.5-alpine container, require separate qualification. Existing production binaries were not replaced or upgraded.
+
+Storage, Realtime, Edge Functions, readiness and unqualified OAuth/SAML/verification callback routes return HTTP 503 in the new candidate. No public signup or email autoconfirm is enabled. Studio, Supavisor, Storage, TLS/browser CORS, OAuth/MFA/SMTP, persistent recovery/restore, ARM64 and Nissan GTR business-flow qualification remain open.
+
+**No live project has been provisioned on `van-trading-core`; Nissan GTR has not been migrated.**

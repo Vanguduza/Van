@@ -55,9 +55,11 @@ class LocalNginxRouting(unittest.TestCase):
                 text=text.replace('tenant-'+project['slug']+'-'+suffix+':'+str(service_port),
                                   '127.0.0.1:'+str(server.server_port))
             configs.append(text)
+        buffers=cls.root/'buffers';buffers.mkdir()
+        temp_settings='\n'.join(k+'_temp_path '+str(buffers/k)+';' for k in ('client_body','proxy','fastcgi','uwsgi','scgi'))
         config='\n'.join(['daemon off;','master_process off;',
             'pid '+str(cls.root/'pid')+';', 'error_log '+str(cls.root/'error.log')+';',
-            'events { worker_connections 128; }','http { access_log off;',*configs,'}'])
+            'events { worker_connections 128; }','http { access_log off;',temp_settings,*configs,'}'])
         path=cls.root/'nginx.conf';path.write_text(config)
         check=subprocess.run(['nginx','-t','-p',str(cls.root)+'/', '-c',str(path)],capture_output=True,text=True,timeout=10)
         if check.returncode:
