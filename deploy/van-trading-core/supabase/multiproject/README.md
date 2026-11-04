@@ -1,8 +1,8 @@
 # DIAL Supabase — one installation, independent database/Auth/API projects
 
-**Status: the combined Auth/REST/shared Storage/shared Realtime candidate passed 345 real-service checks, 164 unit tests and 18 effective Compose/model checks. Earlier per-project backup and restore evidence remains retained. Not deployed to VAN; not a complete production release.**
+**Status: Auth/REST, shared Storage and shared Realtime passed 345 combined real-service checks; the separate Edge Functions rehearsal passed 209 checks (including 101 core checks), 185 unit tests and 16 Compose-model checks. Logical recovery evidence remains retained. These counts overlap; production VAN remains unchanged and unqualified.**
 
-The owner requirement is one existing managed Supabase installation on `van-trading-core`, one PostgreSQL server, and independently functioning application databases and authentication environments. The candidate does not add a PostgreSQL server, VM or complete Supabase stack per project. It adds small project-specific Auth, REST and router services to the existing Compose model and reuses one shared Storage and one shared Realtime service; the remaining shared components still need production qualification.
+The owner requirement is one existing managed Supabase installation on `van-trading-core`, one PostgreSQL server, and independently functioning application databases and authentication environments. The candidate does not add a PostgreSQL server, VM or complete Supabase stack per project. It adds small project-specific Auth, REST and router services to the existing Compose model and reuses one shared Storage, one shared Realtime and one existing Edge Runtime service. Actual production deployment and the remaining Studio/Supavisor components still need qualification.
 
 **REA is optional research support, not an execution or release prerequisite.** The owner authorized direct implementation. No REA investigation result is claimed or needed for the tests below.
 
@@ -37,6 +37,12 @@ See `SHARED_STORAGE.md`, `QUALIFICATION_STORAGE_2026-11-04.md` and `evidence/202
 The exact current candidate passed **164 tests, 345 real-service checks and 18 effective Compose/model checks**. These overlap with earlier Auth/REST/Storage checks and should not be summed with the previous milestones. All native tests ran against temporary local services, not VAN production; the Compose checks used an invalid placeholder for the yet-to-be-built derivative Realtime image.
 
 See `SHARED_REALTIME.md`, `QUALIFICATION_REALTIME_2026-11-04.md`, `evidence/2026-11-04-realtime/`, `tests/rehearse_shared_fabric.py` and `tests/check_realtime_compose.py`. The existing single-tenant donor routing and credentials require separate real-host review before activation; the existing Compose `--remove-orphans` boot model must be reconciled.
+
+## Edge Functions milestone (separate native rehearsal)
+
+`tools/shared_edge.py` and `edge/main/index.ts` adapt the existing **single** Supabase Edge Runtime service to serve separate projects with immutable function definitions, independently verified JWTs, explicit per-function permissions, per-project gateways and worker time/CPU/concurrency limits. No second server or Edge stack is introduced. The original `functions` service and mounts are retained in the Compose model. See `SHARED_EDGE.md`, `QUALIFICATION_EDGE_2026-11-04.md`, and `evidence/2026-11-04-edge/`.
+
+A real isolated Edge runtime passed **209 native checks**; the expanded complete source suite passed **185 unit tests** and **16 effective Compose-model checks**. The separate previously published 345-check Storage/Realtime integrated rehearsal remains valid. **A single native test running Storage, Realtime and Edge concurrently has not been performed**; do not combine the counts as an overall acceptance score. The Edge image is pinned to a verified amd64 digest but must be qualified separately for the actual target architecture. Synthetic functions are not Nissan GTR business functions.
 
 ## Mandatory database boundary
 
@@ -94,7 +100,7 @@ Use the reviewed actual Docker-network CIDR for a future target, not the loopbac
 3. Prepend only the reviewed new-login HBA rules while preserving existing rules, reload and verify. Activate the exact quarantined logins. Run independent negative connection tests against VAN and the other projects.
 4. Start only the project Auth services privately, let the pinned upstream migrations finish, apply the post-migration helpers, then start REST and the API-key-aware gateways. Preserve current global API roles. Production changes must use the existing qualified owner/Root mechanism.
 5. Include all overlay files in the canonical `vati-supabase.service` startup/stop model before enabling project services; its existing `--remove-orphans` invocation must not remove the new services on restart.
-6. Complete real TLS/CORS/rate-limit checks, key rotation, SMTP/OTP/OAuth/MFA, resource and recovery tests; qualify shared Storage and Realtime on the actual donor VM, plus Edge Functions, Supavisor and project-aware Studio independently.
+6. Complete real TLS/CORS/rate-limit checks, key rotation, SMTP/OTP/OAuth/MFA, resource and recovery tests; qualify shared Storage, Realtime and Edge Runtime on the actual donor VM, plus Supavisor and project-aware Studio independently.
 7. Rehearse Nissan GTR schema/history/Auth/Storage/R2/payment migration and rollback, obtain exact-source release/deployment evidence, then perform a controlled cutover.
 
 ## Deliberately not claimed
@@ -103,6 +109,6 @@ Production VAN capacity/runtime access was not verified in this change. The DIAL
 
 The native rehearsal uses PostgreSQL 17.11 on amd64, Auth 2.196.0, PostgREST 14.17 and Nginx 1.24.0. The repository donor PostgreSQL image and target architecture, plus the generated Nginx 1.27.5-alpine container, require separate qualification. Existing production binaries were not replaced or upgraded.
 
-The core bootstrap keeps Storage and Realtime closed until each separately qualified shared-service integration is applied. Edge Functions, readiness and unqualified OAuth/SAML/verification callback routes remain HTTP 503. No public signup or email autoconfirm is enabled. Studio, Supavisor, actual VAN Storage activation, TLS/browser CORS, OAuth/MFA/SMTP, production-scale/off-host recovery, ARM64 and Nissan GTR business-flow qualification remain open.
+The core bootstrap keeps Storage, Realtime and Functions routes closed until each separately qualified shared-service integration is applied. Readiness and unqualified OAuth/SAML/verification callback routes remain HTTP 503. No public signup or email autoconfirm is enabled. Studio, Supavisor, actual VAN Storage activation, TLS/browser CORS, OAuth/MFA/SMTP, production-scale/off-host recovery, ARM64 and Nissan GTR business-flow qualification remain open.
 
 **No live project has been provisioned on `van-trading-core`; Nissan GTR has not been migrated.**

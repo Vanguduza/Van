@@ -1,0 +1,78 @@
+{
+  "earlier_failures_remain_failures": true,
+  "final_exact_source_artifact": "edge-result-09.json",
+  "native_attempts": [
+    {
+      "checks_completed": 101,
+      "cleanup_completed": true,
+      "error": "Failure:SERVICE_EXITED_1",
+      "file": "edge-result-01.json",
+      "sha256": "aa4eb286e2ceba4b996f30fada0a1e1b0feae3e59407a4a278f48877edb88bc0",
+      "state": "FAIL"
+    },
+    {
+      "checks_completed": 145,
+      "cleanup_completed": true,
+      "error": "Failure:fixture-project_function_wall_deadline_bounded",
+      "file": "edge-result-02.json",
+      "sha256": "aaff39779ab62601ebf990a5333b7964d57d68d2573c0d171bcae13a3a08e72f",
+      "state": "FAIL"
+    },
+    {
+      "checks_completed": 148,
+      "cleanup_completed": true,
+      "error": "Failure:fixture-project_unknown_effect_returned_without_secret",
+      "file": "edge-result-03.json",
+      "sha256": "67f26095d05ac1c1603d118e2018220a6e57e70f6ba24f023510bf035a9ae356",
+      "state": "FAIL"
+    },
+    {
+      "checks_completed": 207,
+      "cleanup_completed": true,
+      "error": null,
+      "file": "edge-result-04.json",
+      "sha256": "7e6221e5d2359e3a2fa2868c604f1476a25f022a3f571d43ce3feee29fc8a1d8",
+      "state": "PASS"
+    },
+    {
+      "checks_completed": 207,
+      "cleanup_completed": true,
+      "error": null,
+      "file": "edge-result-05.json",
+      "sha256": "89bda5a297e36c87530102522f7255b11dacd718bf18bcbd993df1b10ee97c65",
+      "state": "PASS"
+    },
+    {
+      "checks_completed": 146,
+      "cleanup_completed": true,
+      "error": "Failure:fixture-project_native_cpu_exhaustion_bounded",
+      "file": "edge-result-06.json",
+      "sha256": "718e9e69f32dba98ca30448e241a576ef97f30f4a2f8dde1cbcc8c5d9c2c062e",
+      "state": "FAIL"
+    },
+    {
+      "checks_completed": 194,
+      "cleanup_completed": true,
+      "error": "Failure:nissan-gtr_native_cpu_exhaustion_bounded",
+      "file": "edge-result-07.json",
+      "sha256": "86d9c4221008e1e6ae18e50aa7cc91c6db788129956f1faccaeee32142dfd39a",
+      "state": "FAIL"
+    },
+    {
+      "checks_completed": 209,
+      "cleanup_completed": true,
+      "error": null,
+      "file": "edge-result-08.json",
+      "sha256": "d3507d07ec9a67af70a26a1358224940a588765b715f0b3e3f202b9a6cd73038",
+      "state": "PASS"
+    },
+    {
+      "checks_completed": 209,
+      "cleanup_completed": true,
+      "error": null,
+      "file": "edge-result-09.json",
+      "sha256": "cc2ce7958efe738a3d0245d0688b66ba2fa8f9505c5131cb002198a43a9b788e",
+      "state": "PASS"
+    }
+  ]
+}

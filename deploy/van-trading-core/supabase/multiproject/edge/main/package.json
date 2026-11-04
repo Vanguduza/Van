@@ -1,0 +1,11 @@
+{
+  "name": "dial-supabase-shared-edge-main",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "build": "esbuild index.ts --bundle --format=esm --platform=neutral --target=es2022 --outfile=dist/index.ts"
+  },
+  "dependencies": {"jose": "6.2.15"},
+  "devDependencies": {"esbuild": "0.28.1"}
+}

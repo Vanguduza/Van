@@ -1,0 +1,8 @@
+
+> dial-supabase-shared-edge-main@0.1.0 build
+> esbuild index.ts --bundle --format=esm --platform=neutral --target=es2022 --outfile=dist/index.ts
+
+
+  dist/index.ts  40.4kb
+
+⚡ Done in 7ms

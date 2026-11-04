@@ -88,3 +88,7 @@ The shared upstream Storage path is now implemented and tested in a disposable t
 ## Shared Realtime integration checkpoint
 
 The owner-requested single installation now has a source-tested shared Realtime implementation alongside the separate project databases/Auth/REST and shared Storage; it does not add a second PostgreSQL server or a Realtime process per project. Native non-root evidence: **164 unit tests, 345 real-service integrated checks, 18 Compose model checks passed**. See `SHARED_REALTIME.md` and `QUALIFICATION_REALTIME_2026-11-04.md`. The derivative Realtime image, original VAN tenancy/credentials and production routes are not admitted. No production change occurred; REA is optional research, not a gate.
+
+## Shared Edge implementation checkpoint
+
+The candidate now reuses the donor's one Edge Runtime `functions` service with a source/credential-scoped trusted main worker and permission-bounded per-project user workers. The real isolated Edge rehearsal passed 209 checks, the expanded offline suite passed 185 tests and the effective donor Compose checks passed 16. These are not a combined three-shared-services native acceptance result, a target ARM64 image proof or a production deploy. See `SHARED_EDGE.md` and `QUALIFICATION_EDGE_2026-11-04.md`. Production VAN tenant identity, CI/review, backup, host capacity and boot-model admission remain required; REA is optional.
