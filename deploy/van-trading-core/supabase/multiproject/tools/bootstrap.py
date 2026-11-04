@@ -116,6 +116,10 @@ def helper_sql(p: dict) -> str:
     ns = names(p); issuer = lit('https://' + p['hostname'] + '/auth/v1')
     sql = ["\\set ON_ERROR_STOP on", 'BEGIN;',
            f"DO $check$ BEGIN IF current_database() <> {lit(p['database'])} THEN RAISE EXCEPTION 'WRONG_PROJECT_DATABASE'; END IF; END $check$;",
+           'CREATE TABLE dial_private.project_identity (singleton boolean PRIMARY KEY DEFAULT true CHECK (singleton),project_uuid uuid NOT NULL,issuer text NOT NULL,layout_version integer NOT NULL CHECK (layout_version=1));',
+           f"INSERT INTO dial_private.project_identity VALUES (true,{lit(p['project_uuid'])}::uuid,{issuer},1);",
+           'ALTER TABLE dial_private.project_identity OWNER TO postgres;',
+           'REVOKE ALL ON TABLE dial_private.project_identity FROM PUBLIC,anon,authenticated,service_role;',
            "CREATE OR REPLACE FUNCTION auth.jwt() RETURNS jsonb LANGUAGE sql STABLE SET search_path=pg_catalog AS $$ SELECT COALESCE(NULLIF(current_setting('request.jwt.claims',true),''),'{}')::jsonb $$;",
            "CREATE OR REPLACE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE SET search_path=pg_catalog AS $$ SELECT COALESCE(NULLIF(current_setting('request.jwt.claim.sub',true),''),auth.jwt()->>'sub')::uuid $$;",
            "CREATE OR REPLACE FUNCTION auth.role() RETURNS text LANGUAGE sql STABLE SET search_path=pg_catalog AS $$ SELECT COALESCE(NULLIF(current_setting('request.jwt.claim.role',true),''),auth.jwt()->>'role') $$;",

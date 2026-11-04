@@ -52,6 +52,7 @@ class Rehearsal:
     def __init__(self,args):
         if os.geteuid()==0: raise Failure('NON_ROOT_REHEARSAL_REQUIRED')
         self.args=args; self.checks=[];self.children=[];self.handles=[];self.pg_started=False
+        self.process_specs={}; self.process_by_label={}
         self.source_hashes={str(path.relative_to(BASE)):hashlib.sha256(path.read_bytes()).hexdigest() for path in [BASE/'tools/bootstrap.py',BASE/'tools/render.py',pathlib.Path(__file__)]}
         self.temp=tempfile.TemporaryDirectory(prefix='dial-supa-auth-')
         self.work=pathlib.Path(self.temp.name);self.work.chmod(0o700)
@@ -83,7 +84,10 @@ class Rehearsal:
         f=open(self.work/(label+'.log'),'w'); self.handles.append(f)
         p=subprocess.Popen([str(x) for x in argv],env={**self.env,**env},
             cwd=cwd or self.work,stdout=f,stderr=subprocess.STDOUT,start_new_session=True)
-        self.children.append(p);return p
+        self.children.append(p)
+        self.process_specs[label]=([str(x) for x in argv],dict(env),cwd)
+        self.process_by_label[label]=p
+        return p
     def wait_http(self,proc,pn,path,headers=None):
         deadline=time.monotonic()+30
         while time.monotonic()<deadline:
@@ -121,7 +125,7 @@ class Rehearsal:
         activate=b.activate_sql(self.projects,expected)
         refused=self.sql(activate,fail_ok=True)
         self.check('activation_refuses_missing_hba_prefix',refused.returncode!=0 and 'EXACT_HBA_PREFIX_REQUIRED' in refused.stderr)
-        hba=self.data/'pg_hba.conf';original=hba.read_text();hba.write_text(fragment+original)
+        hba=self.data/'pg_hba.conf';original=hba.read_text();self.original_hba_suffix=original;hba.write_text(fragment+original)
         r=self.run([self.args.pg_bin/'pg_ctl','-D',self.data,'reload']);self.check('fixture_hba_reload',r.returncode==0)
         time.sleep(.3)
         self.sql(activate)
@@ -242,6 +246,9 @@ class Rehearsal:
             self.check(p['slug']+'_own_refresh_still_works',code==200 and session.get('user',{}).get('id')==self.users[p['slug']])
         self.check('legacy_database_data_untouched',self.sql('SELECT value FROM public.sentinel',db='legacy_van').stdout.strip()=='unchanged-fixture')
         self.check('legacy_database_acl_untouched',self.sql("SELECT coalesce(datacl::text,'NULL') FROM pg_database WHERE datname='legacy_van'").stdout==self.legacy_acl)
+    def additional_evidence(self):
+        return {}
+
     def cleanup(self):
         for child in reversed(self.children):
             if child.poll() is None:
@@ -272,6 +279,7 @@ class Rehearsal:
             'source_sha256':self.source_hashes,'observed_at':datetime.now(timezone.utc).isoformat(),
             'not_tested':['Supabase donor image/ARM64','Storage','Realtime','Edge Functions','Studio','Supavisor','OAuth/MFA/SMTP','live VAN','GTR migration','backup restore'],
             'cleanup_completed':not self.pg_started and all(p.poll() is not None for p in self.children)}
+        result.update(self.additional_evidence())
         fd=os.open(self.args.report,os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW,0o600)
         with os.fdopen(fd,'w') as handle:handle.write(json.dumps(result,indent=2,sort_keys=True)+'\n')
         if error:print('FAIL '+error+' PRIVATE_DIAGNOSTICS='+str(self.work),flush=True)
@@ -280,7 +288,7 @@ class Rehearsal:
         if error:self.temp._finalizer.detach()
         return 0 if error is None else 1
 
-def main():
+def main(rehearsal_class=Rehearsal):
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--pg-bin',type=pathlib.Path,required=True)
     parser.add_argument('--pg-lib',type=pathlib.Path,required=True)
@@ -293,6 +301,6 @@ def main():
     for path in (args.pg_bin/'postgres',args.pg_bin/'initdb',args.auth_bin,args.rest_bin,args.nginx):
         if not path.is_absolute() or not path.is_file() or not os.access(path,os.X_OK):raise Failure('EXACT_EXECUTABLE_REQUIRED')
     if args.report.exists() or not args.report.is_absolute():raise Failure('NEW_ABSOLUTE_REPORT_REQUIRED')
-    return Rehearsal(args).execute()
+    return rehearsal_class(args).execute()
 
 if __name__=='__main__':raise SystemExit(main())

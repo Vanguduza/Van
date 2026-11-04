@@ -1,6 +1,6 @@
 # DIAL Supabase — one installation, independent database/Auth/API projects
 
-**Status: real two-project PostgreSQL 17 + Supabase Auth + PostgREST rehearsal passed. Not deployed to VAN and not a complete production Supabase release.**
+**Status: 157 real-service checks and 79 tests passed, including per-project logical backup/restore and shared-server restart recovery. Not deployed to VAN and not a complete production Supabase release.**
 
 The owner requirement is one existing managed Supabase installation on `van-trading-core`, one PostgreSQL server, and independently functioning application databases and authentication environments. The candidate does not add a PostgreSQL server, VM or complete Supabase stack per project. It adds small project-specific Auth, REST and router services to the existing Compose model; other services remain separate qualification work.
 
@@ -13,6 +13,14 @@ The owner requirement is one existing managed Supabase installation on `van-trad
 The native rehearsal creates two synthetic projects in one temporary PostgreSQL cluster, with real Auth, REST and Nginx processes. It exercises independent same-email identities, passwords, refresh sessions, user/service JWTs, RLS ownership, API keys, database login permissions, host/header routing and concurrent requests. The original third fixture database's contents and ACL remain unchanged. See `QUALIFICATION_2026-11-04.md` and the non-secret evidence directory for exact results.
 
 This is stronger than the retained 24 October test suite, which checked Nginx against labelled HTTP stubs only. Neither test is a production-deployment receipt.
+
+## Project recovery milestone
+
+`tools/recovery.py` now captures a real snapshot-bound logical database backup, validates project/cluster identity and externally retained hashes, and generates only fresh quarantined restore targets. It never applies a restore or overwrites a live database. Verified archive bytes are sealed against modification before they can be supplied to pg_restore.
+
+The explicit `tests/rehearse_recovery.py` extends the core rehearsal: restore into a fresh same-server database, compare fixture data/ownership/effective ACLs/RLS, recover Auth credentials and sessions, keep the neighbour usable, and prove both pools reconnect after a shared PostgreSQL restart. Run it with the same arguments as `rehearse_native.py`, using a new report path.
+
+See `RECOVERY.md`, `QUALIFICATION_RECOVERY_2026-11-04.md` and `evidence/2026-11-04-recovery/`. The current capture/readback limits are 256 MiB and 120 seconds; larger production databases require separately admitted custody/resources. Logical archives contain sensitive Auth data and are not encrypted by this candidate. Off-host encryption, cluster roles/secrets, object storage, WAL/PITR and production-volume recovery remain separate requirements. Restoring old Auth state requires explicit revoked-session/password-change reconciliation before reopening traffic.
 
 ## Mandatory database boundary
 
@@ -79,6 +87,6 @@ Production VAN capacity/runtime access was not verified in this change. The DIAL
 
 The native rehearsal uses PostgreSQL 17.11 on amd64, Auth 2.196.0, PostgREST 14.17 and Nginx 1.24.0. The repository donor PostgreSQL image and target architecture, plus the generated Nginx 1.27.5-alpine container, require separate qualification. Existing production binaries were not replaced or upgraded.
 
-Storage, Realtime, Edge Functions, readiness and unqualified OAuth/SAML/verification callback routes return HTTP 503 in the new candidate. No public signup or email autoconfirm is enabled. Studio, Supavisor, Storage, TLS/browser CORS, OAuth/MFA/SMTP, persistent recovery/restore, ARM64 and Nissan GTR business-flow qualification remain open.
+Storage, Realtime, Edge Functions, readiness and unqualified OAuth/SAML/verification callback routes return HTTP 503 in the new candidate. No public signup or email autoconfirm is enabled. Studio, Supavisor, Storage, TLS/browser CORS, OAuth/MFA/SMTP, production-scale/off-host recovery, ARM64 and Nissan GTR business-flow qualification remain open.
 
 **No live project has been provisioned on `van-trading-core`; Nissan GTR has not been migrated.**

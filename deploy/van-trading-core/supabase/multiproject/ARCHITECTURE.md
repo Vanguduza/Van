@@ -4,6 +4,10 @@
 
 The new `tools/bootstrap.py` and explicit `tests/rehearse_native.py` implement and exercise independent project databases, real Auth/REST and API-key-aware routing in a disposable cluster. Storage, shared-service integration and production activation remain open. REA is optional source investigation, not a build or deployment dependency. See `QUALIFICATION_2026-11-04.md`.
 
+## Recovery checkpoint
+
+The core now also has a real project logical-backup and fresh-database recovery rehearsal, with sealed archive input, same-project Auth/REST activation in a disposable cluster, neighbour preservation and shared-server restart tests. This is not a second PostgreSQL server or a production recovery service. See RECOVERY.md; production backups need independent encrypted custody, roles/secrets/object storage and revocation-aware Auth recovery.
+
 ## Hard invariants
 
 - Reuse the already deployed /opt/van-trading/supabase installation on van-trading-core. One Supabase Postgres 17.6 cluster, one resource/accounting/backup infrastructure, one top-level Docker Compose model. An application must NOT receive its own independent Docker Compose Supabase **stack**, PG server, Studio, Realtime, image proxy, connection pooler or management plane.

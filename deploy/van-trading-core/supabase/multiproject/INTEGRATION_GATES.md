@@ -21,3 +21,7 @@ Every action carries target project UUID, DB name, exact source Git SHA, previou
 ## Not equivalent to full cloud independence
 
 Shared physical Postgres, global roles, cluster WAL, filesystem/VM root and shared services are failure domains. This implementation delivers application/auth/database isolation after runtime qualification, not independent infrastructure availability. Per-project Auth/Rest/Storage run in the SAME Compose installation, which still creates additional lightweight container processes per project.
+
+## Recovery evidence checkpoint
+
+The 4 November isolated drill now proves project-specific logical restore and shared-server restart behavior using real pg_dump/pg_restore/Auth/REST. It does not close whole-VAN off-host restore, target image/architecture, real data-volume, secrets/role custody or production cutover gates. The tooling generates fresh-target plans only and cannot apply them. Require trusted SQL review, original owner admission and a new runtime proof on the target before promotion. See RECOVERY.md and QUALIFICATION_RECOVERY_2026-11-04.md.
