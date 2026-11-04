@@ -10,7 +10,7 @@ The **209** Edge checks include the original 101 database/Auth/REST core checks 
 
 Tests ran as UID 1000 via the connected authorized Commander on **`dial-control`**, within the existing disposable workspace. One temporary PostgreSQL 17.11 server held two independent project databases and a synthetic legacy fixture; real Auth 2.196.0, PostgREST 14.17, Nginx 1.24.0 and one native Edge Runtime v1.76.2 process ran only on private loopback endpoints. No Docker daemon, sudo, system package upgrade, live VAN/OCI, Nissan GTR Cloud connection, credential import or production effect occurred. All successful-run processes were terminated, and the fixture's temporary data was deleted.
 
-The native Edge binary came from the pinned upstream amd64 OCI layer. Its SHA-256 was `ff195e6fb5e6df06541f9c52680368bc0fd24aa8ef8863785f613e710b96e40a`; the pinned image manifest was `sha256:b331c6422f4f4bebd6052357da5f3c87610128c8cb530390ca024eb68cf4bf2e`. Cryptographic release-signature verification and ARM64 qualification were **not** claimed. The Node24/esbuild worker bundle was reproduced byte-for-byte; the private output bundle hash matched the one exercised by the native runtime.
+The native Edge binary came from the pinned upstream amd64 OCI layer. Its SHA-256 was `ff195e6fb5e6df5fd87eef5603cbe8bcc9c7cea7d74f2027c7a7daa1608bcbb0`; the pinned image manifest was `sha256:b331c6422f4f4bebd6052357da5f3c87610128c8cb530390ca024eb68cf4bf2e`. Cryptographic release-signature verification and ARM64 qualification were **not** claimed. The Node24/esbuild worker bundle was reproduced byte-for-byte; the private output bundle hash matched the one exercised by the native runtime.
 
 ## Native verification
 
@@ -28,7 +28,7 @@ The model retained all original services, the unchanged database, original funct
 
 ## Failed attempts and corrective evidence
 
-Earlier native runs returned FAIL at 101, 145 and 148 checks before the first successful 207-check run. The fresh post-unit-test run returned FAIL at 160 after a CPU-bound operation's native capacity remained reserved; an additional source change introduced a bounded read-only capacity reconciliation before the CPU test. Another attempt still failed under native CPU timing for one project; its evidence is retained and no prior PASS was relabelled. The subsequent full fresh execution passed **209** checks with all processes cleaned up.
+Earlier native runs returned FAIL at 101, 145 and 148 checks before the first successful 207-check run. The fresh post-unit-test run returned FAIL at the CPU-bound assertion after a native operation's native capacity remained reserved; an additional source change introduced a bounded read-only capacity reconciliation before the CPU test. Another attempt still failed under native CPU timing for one project; its evidence is retained and no prior PASS was relabelled. The subsequent full fresh execution passed **209** checks with all processes cleaned up.
 
 The final source includes the original SHA-pinned compiled native worker, the compiler, offline source/unit contracts, retained failure attempts and correct status. It is not a guarantee that every native timing will behave identically under production load. Additional soak/load tests are required.
 
@@ -39,3 +39,5 @@ Under `evidence/2026-11-04-edge/`: `native-result.json`, `native-run.txt`, `unit
 The native validation excludes actual donor container activation on `van-trading-core`, target ARM64/AMD64 matching, Root-signed admission, complete combined Storage/Realtime/Edge process coexistence, production tenancy secrets, CRM/payment/webhook functions, scheduler and R2 integrations, unified live Envoy/TLS, full backup/restore, Studio/Supavisor and GTR migration.
 
 **Keep VAN PR #102 draft. No live VAN/VATI or Nissan GTR production state was changed.**
+
+Documentation correction: the native executable digest above was reconciled with the retained raw runtime receipt; the executable and historical JSON evidence were not changed.

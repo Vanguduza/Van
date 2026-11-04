@@ -37,3 +37,7 @@ The owner-requested single installation now has a source-tested shared Realtime 
 ## Shared Edge implementation checkpoint
 
 The candidate now reuses the donor's one Edge Runtime `functions` service with a source/credential-scoped trusted main worker and permission-bounded per-project user workers. The real isolated Edge rehearsal passed 209 checks, the expanded offline suite passed 185 tests and the effective donor Compose checks passed 16. These are not a combined three-shared-services native acceptance result, a target ARM64 image proof or a production deploy. See `SHARED_EDGE.md` and `QUALIFICATION_EDGE_2026-11-04.md`. Production VAN tenant identity, CI/review, backup, host capacity and boot-model admission remain required; REA is optional.
+
+## Shared pooler and scoped administration checkpoint
+
+A single native Supavisor now serves isolated project database credentials, while one private administration gateway reuses the existing Studio/Meta rather than separate consoles per project. The candidate passed 248 native/API/browser checks, 224 Python tests, eight Node admission tests and 26 full effective-model checks. The real Studio browser selected and displayed distinct rows in each project in separate sessions; advanced console functions and actual issuer integration remain gated. Existing registry/Vault preservation, exact scoped HBA, unknown-outcome reconciliation and the original complete Compose/startup model remain mandatory. See `SHARED_MANAGEMENT.md` and `QUALIFICATION_MANAGEMENT_2026-11-04.md`. No live VAN or Nissan GTR state changed.
