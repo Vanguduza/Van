@@ -1,0 +1,13 @@
+{
+  "test_file": "tests/contracts/test_android_overlay_split.py",
+  "test_sha256": "8a06971ff30591feb5ba9e89cd3492638cc7692f9561197c16395ddaab537662",
+  "passed": [
+    "test_no_overlay_file_is_a_god_file",
+    "test_the_service_owns_the_window_and_nothing_draws_in_it",
+    "test_the_surface_cannot_reach_around_its_parameters",
+    "test_the_geometry_lives_where_it_can_be_executed"
+  ],
+  "count": 4,
+  "time": 1793785151.2738194,
+  "service_lines": 436
+}

@@ -1,0 +1,9 @@
+{
+  "time": 1793785420.688981,
+  "stage": "git diff --cached --check before git commit or hook execution",
+  "exit_code": 2,
+  "finding": "new blank line at EOF in newly staged OverlayNativeGestures.kt line78",
+  "before_sha256": "16371aef697c01ea7fa02b15fcf0d34472b590d256850abd6af30aa6f316f3a3",
+  "after_sha256": "f1df39a4cac35d3f49263b9af9d1f73c8e58bc83fb82e2610e78f465aee757be",
+  "correction": "Remove trailing empty EOF line only; repeat exact native component compilation on corrected bytes"
+}

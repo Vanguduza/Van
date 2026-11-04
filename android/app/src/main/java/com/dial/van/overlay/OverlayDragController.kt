@@ -2,149 +2,211 @@ package com.dial.van.overlay
 
 import com.dial.van.visual.VanMotionMap
 
-/**
- * Dragging VAN around the screen.
- *
- * P3-AND-009 and Rev 3.0 s41, which puts gestures with the controller rather than with the
- * service. This was four private methods in a 1,096-line Service, interleaved with window
- * plumbing, and it is the part of the overlay an owner interacts with most and the part
- * that fails most visibly: a drag that walks VAN off the edge, a dismiss target that arms
- * when the finger is nowhere near it, a flick that closes the assistant the owner meant to
- * move.
- *
- * The window work is behind [OverlayWindowPort] rather than removed, because moving a view
- * genuinely does need a WindowManager. What that leaves here is the sequence — when the
- * dismiss target appears, when the haptic fires, when a lift closes the overlay instead of
- * docking it — which is pure, and is executed in `android/verification` against a fake port.
- */
 internal interface OverlayWindowPort {
-    /** The screen the overlay is being dragged around. */
     fun screen(): OverlayScreen
-
-    /** Density-independent pixels to real ones. */
     fun dp(value: Int): Int
-
-    /** Where the overlay window currently sits. */
     fun position(): OverlayPlacement
-
-    /** Move the overlay window. */
     fun moveTo(x: Int, y: Int)
-
-    /** The tick the owner feels when the dismiss target arms. */
     fun armedFeedback()
-
     fun showDismissTarget()
     fun refreshDismissTarget()
     fun hideDismissTarget()
-
-    /** Close the overlay: the owner dropped VAN on the dismiss target. */
     fun dismissOverlay()
-
-    /**
-     * Remember which edge VAN ended up docked to.
-     *
-     * [durationMs] is item 3's velocity-based fling duration ([VanMotionMap.flingDockDurationMs]
-     * — quicker after a fast flick, the ordinary dock speed otherwise, zero under reduced
-     * motion) so a caller that animates the settle rather than snapping it instantly has the
-     * number to animate with.
-     */
     fun dockedTo(edge: DockEdge, durationMs: Int)
-
-    /** DNA §2 — "tick on dock/snap". Fired once a drag actually ends in a dock, never on a dismiss. */
     fun dockFeedback()
+
+    /** Legacy ports retain their square geometry and immediate settle behaviour. */
+    fun size(presentation: VanOverlayPresentation): OverlaySize {
+        val side = VanOverlayController.touchSizeFor(presentation, ::dp)
+        return OverlaySize(side, side)
+    }
+
+    /** Old ports retain centre-based hit testing; native ports use their active pointer. */
+    fun dismissHitTest(size: OverlaySize): Boolean {
+        val at = position()
+        return VanOverlayController.isInsideDismissTarget(
+            at.x, at.y, size.widthPx, size.heightPx, screen(), ::dp,
+        )
+    }
+
+    /** Native ports may revalidate measured geometry before the target is hidden. */
+    fun dismissArmedOnRelease(armed: Boolean): Boolean = armed
+
+    /** Must leave position() at the actual current window, never the pending target. */
+    fun cancelSettle() = Unit
+
+    /** The real window owner animates this; synchronous ports remain source compatible. */
+    fun settleTo(target: OverlayPlacement, edge: DockEdge, durationMs: Int) {
+        moveTo(target.x, target.y)
+        dockedTo(edge, durationMs)
+    }
+}
+
+/** Pure interpolation; Android supplies ValueAnimator's duration-scale-aware fraction. */
+internal class OverlaySettleMotion(
+    private val start: OverlayPlacement,
+    private val target: OverlayPlacement,
+    private val durationMs: Int,
+    private val startedAtMs: Long = System.nanoTime() / 1_000_000L,
+) {
+    private var elapsedMs = 0.0
+    private var progress = 0.0
+    private var current = start
+    private var cancelled = false
+
+    fun position(nowMs: Long = System.nanoTime() / 1_000_000L): OverlayPlacement {
+        if (cancelled) return current
+        elapsedMs = maxOf(elapsedMs, nowMs.toDouble() - startedAtMs.toDouble(), 0.0)
+        return positionAtFraction(if (durationMs <= 0) 1.0 else elapsedMs / durationMs)
+    }
+
+    fun positionAtFraction(fraction: Double): OverlayPlacement {
+        if (cancelled || !fraction.isFinite()) return current
+        val bounded = fraction.coerceIn(0.0, 1.0)
+        if (bounded < progress) return current
+        progress = bounded
+        current = if (progress >= 1.0) target else OverlayPlacement(
+            (start.x.toDouble() + (target.x.toDouble() - start.x) * progress).toInt(),
+            (start.y.toDouble() + (target.y.toDouble() - start.y) * progress).toInt(),
+        )
+        return current
+    }
+
+    fun cancel(): OverlayPlacement {
+        cancelled = true
+        return current
+    }
 }
 
 internal class OverlayDragController(private val window: OverlayWindowPort) {
-
-    /** Smoothed release velocity, in pixels per millisecond, reset at every [begin]. */
     private var velocityX = 0f
     private var velocityY = 0f
-    private var lastDragAtMs = 0L
+    private var lastDragAtMs: Long? = null
+    private var residualX = 0.0
+    private var residualY = 0.0
 
-    fun begin(state: VanOverlayUiState, nowMs: Long = System.currentTimeMillis()): VanOverlayUiState {
-        velocityX = 0f
-        velocityY = 0f
+    fun begin(
+        state: VanOverlayUiState,
+        nowMs: Long = System.nanoTime() / 1_000_000L,
+    ): VanOverlayUiState {
+        window.cancelSettle()
+        resetInput()
         lastDragAtMs = nowMs
+        val at = window.position()
         window.showDismissTarget()
         return state.copy(
-            dragging = true,
-            dismissTargetVisible = true,
-            // Quick controls during a drag are a menu that follows the finger.
+            xPx = at.x, yPx = at.y,
+            dragging = true, dismissTargetVisible = true, dismissTargetArmed = false,
             quickControls = VanQuickControlsState.HIDDEN,
         )
     }
 
-    fun drag(state: VanOverlayUiState, dx: Int, dy: Int, nowMs: Long = System.currentTimeMillis()): VanOverlayUiState {
-        // Item 3 — velocity for the release, exponentially smoothed so one jittery frame
-        // (a pointer sample with an unusually small or large elapsed time) does not by
-        // itself decide whether the release reads as a flick.
-        val elapsedMs = (nowMs - lastDragAtMs).coerceAtLeast(1L)
-        val sampleVx = dx / elapsedMs.toFloat()
-        val sampleVy = dy / elapsedMs.toFloat()
-        velocityX = velocityX * VELOCITY_SMOOTHING + sampleVx * (1f - VELOCITY_SMOOTHING)
-        velocityY = velocityY * VELOCITY_SMOOTHING + sampleVy * (1f - VELOCITY_SMOOTHING)
+    fun drag(
+        state: VanOverlayUiState,
+        dx: Int,
+        dy: Int,
+        nowMs: Long = System.nanoTime() / 1_000_000L,
+    ): VanOverlayUiState = drag(state, dx.toFloat(), dy.toFloat(), nowMs)
+
+    fun drag(
+        state: VanOverlayUiState,
+        dx: Float,
+        dy: Float,
+        nowMs: Long = System.nanoTime() / 1_000_000L,
+    ): VanOverlayUiState {
+        if (!dx.isFinite() || !dy.isFinite()) {
+            resetInput()
+            lastDragAtMs = nowMs
+            val at = window.position()
+            return state.copy(xPx = at.x, yPx = at.y, dismissTargetArmed = false)
+        }
+        val previous = lastDragAtMs
+        val elapsed = if (previous == null) 0.0 else nowMs.toDouble() - previous.toDouble()
+        if (elapsed > 0.0) {
+            val sampleX = (dx.toDouble() / elapsed).toFloat()
+            val sampleY = (dy.toDouble() / elapsed).toFloat()
+            velocityX = velocityX * VELOCITY_SMOOTHING + sampleX * (1f - VELOCITY_SMOOTHING)
+            velocityY = velocityY * VELOCITY_SMOOTHING + sampleY * (1f - VELOCITY_SMOOTHING)
+        } else {
+            velocityX = 0f
+            velocityY = 0f
+        }
         lastDragAtMs = nowMs
 
-        val touch = VanOverlayController.touchSizeFor(state.presentation, window::dp)
+        // Accumulate delta fractions, including negative fractions, before integer placement.
+        val accumulatedX = residualX + dx.toDouble()
+        val accumulatedY = residualY + dy.toDouble()
+        val wholeX = accumulatedX.toInt()
+        val wholeY = accumulatedY.toInt()
+        residualX = if (accumulatedX in Int.MIN_VALUE.toDouble()..Int.MAX_VALUE.toDouble()) {
+            accumulatedX - wholeX
+        } else 0.0
+        residualY = if (accumulatedY in Int.MIN_VALUE.toDouble()..Int.MAX_VALUE.toDouble()) {
+            accumulatedY - wholeY
+        } else 0.0
+        val size = window.size(state.presentation)
         val at = window.position()
-        val placed = VanOverlayController.clamp(at.x + dx, at.y + dy, touch, window.screen())
-        window.moveTo(placed.x, placed.y)
-
-        val armed = VanOverlayController.isInsideDismissTarget(
-            placed.x, placed.y, touch, window.screen(), window::dp,
+        val wantedX = at.x.toDouble() + wholeX
+        val wantedY = at.y.toDouble() + wholeY
+        val placed = VanOverlayController.clamp(
+            wantedX, wantedY, size.widthPx, size.heightPx, window.screen(),
         )
-        // Only on the transition. A tick per frame while the finger hovers the target is a
-        // phone buzzing continuously, which owners read as a fault.
+        if (placed.x.toDouble() != wantedX) residualX = 0.0
+        if (placed.y.toDouble() != wantedY) residualY = 0.0
+        window.moveTo(placed.x, placed.y)
+        val actual = window.position()
+        val armed = window.dismissHitTest(size)
         if (armed && !state.dismissTargetArmed) window.armedFeedback()
         window.refreshDismissTarget()
-        return state.copy(xPx = placed.x, yPx = placed.y, dismissTargetArmed = armed)
+        return state.copy(xPx = actual.x, yPx = actual.y, dismissTargetArmed = armed)
     }
 
-    /**
-     * Returns null when the drag closed the overlay, because there is then no state to
-     * render into: a copy() applied to a service that has just called `stopSelf` is an
-     * update to a window that is going away.
-     *
-     * [reducedMotion] only affects [VanMotionMap.flingDockDurationMs]'s reported duration —
-     * the placement itself (including whether a fast flick docks to an edge it did not
-     * start near) is unaffected, matching DNA §2's rule that reduced motion changes how long
-     * a transition takes, never what it communicates.
-     */
     fun finish(state: VanOverlayUiState, reducedMotion: Boolean = false): VanOverlayUiState? {
+        // Consult the pointer and attached target before hiding releases either of them.
+        val armed = window.dismissArmedOnRelease(state.dismissTargetArmed)
         window.hideDismissTarget()
-        if (state.dismissTargetArmed) {
+        if (armed) {
+            resetInput()
+            window.cancelSettle()
             window.dismissOverlay()
             return null
         }
-        val touch = VanOverlayController.touchSizeFor(state.presentation, window::dp)
+        val size = window.size(state.presentation)
         val at = window.position()
-        val (snapped, edge) = VanOverlayController.settle(at.x, at.y, touch, window.screen(), velocityX, velocityY)
+        val (target, edge) = VanOverlayController.settle(
+            at.x, at.y, size.widthPx, size.heightPx, window.screen(), velocityX, velocityY,
+        )
         val speed = kotlin.math.hypot(velocityX, velocityY)
-        window.moveTo(snapped.x, snapped.y)
-        window.dockedTo(edge, VanMotionMap.flingDockDurationMs(speed, reducedMotion))
+        resetInput()
+        window.settleTo(target, edge, VanMotionMap.flingDockDurationMs(speed, reducedMotion))
         if (edge != DockEdge.NONE) window.dockFeedback()
+        val actual = window.position()
         return state.copy(
-            xPx = snapped.x,
-            yPx = snapped.y,
-            dragging = false,
-            dismissTargetVisible = false,
-            dismissTargetArmed = false,
+            xPx = actual.x, yPx = actual.y, dragging = false,
+            dismissTargetVisible = false, dismissTargetArmed = false,
         )
     }
 
     fun cancel(state: VanOverlayUiState): VanOverlayUiState {
+        window.cancelSettle()
+        resetInput()
         window.hideDismissTarget()
+        val at = window.position()
         return state.copy(
-            dragging = false,
-            dismissTargetVisible = false,
-            // Cleared: a cancelled drag that leaves the target armed is an overlay that
-            // closes on the owner's next, unrelated touch.
-            dismissTargetArmed = false,
+            xPx = at.x, yPx = at.y, dragging = false,
+            dismissTargetVisible = false, dismissTargetArmed = false,
         )
     }
 
+    private fun resetInput() {
+        velocityX = 0f
+        velocityY = 0f
+        lastDragAtMs = null
+        residualX = 0.0
+        residualY = 0.0
+    }
+
     private companion object {
-        /** How much of the previous smoothed velocity survives each new sample. */
         const val VELOCITY_SMOOTHING = 0.7f
     }
 }

@@ -1,0 +1,718 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="JUnit Jupiter" tests="110" skipped="0" failures="0" errors="0" time="0.371" hostname="dial-control" timestamp="2026-11-04T08:41:58">
+<properties>
+<property name="file.encoding" value="UTF-8"/>
+<property name="file.separator" value="/"/>
+<property name="java.class.path" value="/home/ubuntu/work/van-floating-r1-20261104/.git/floating-r1/continued-classes:/home/ubuntu/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-compiler-embeddable/2.0.21/79346ed53db48b18312a472602eb5c057070c54d/kotlin-compiler-embeddable-2.0.21.jar:/home/ubuntu/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.0.21/618b539767b4899b4660a83006e052b63f1db551/kotlin-stdlib-2.0.21.jar:/home/ubuntu/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-script-runtime/2.0.21/c9b044380ad41f89aa89aa896c2d32a8c0b2129d/kotlin-script-runtime-2.0.21.jar:/home/ubuntu/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-reflect/1.6.10/1cbe9c92c12a94eea200d23c2bbaedaf3daf5132/kotlin-reflect-1.6.10.jar:/home/ubuntu/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-daemon-embeddable/2.0.21/c9e933b23287de9b5a17e2116b4657bb91aea72c/kotlin-daemon-embeddable-2.0.21.jar:/home/ubuntu/.gradle/caches/modules-2/files-2.1/org.jetbrains.intellij.deps/trove4j/1.0.20200330/3afb14d5f9ceb459d724e907a21145e8ff394f02/trove4j-1.0.20200330.jar:/home/ubuntu/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-coroutines-core-jvm/1.6.4/2c997cd1c0ef33f3e751d3831929aeff1390cb30/kotlinx-coroutines-core-jvm-1.6.4.jar:/home/ubuntu/.gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/13.0/919f0dfe192fb4e063e7dacadee7f8bb9a2672a9/annotations-13.0.jar:/home/ubuntu/work/van-floating-r1-20261104/.git/floating-r1/tooling/kotlin-test-2.0.21.jar:/home/ubuntu/work/van-floating-r1-20261104/.git/floating-r1/tooling/kotlin-test-junit5-2.0.21.jar:/home/ubuntu/work/van-floating-r1-20261104/.git/floating-r1/tooling/junit-platform-console-standalone-1.10.2.jar"/>
+<property name="java.class.version" value="65.0"/>
+<property name="java.home" value="/usr/lib/jvm/java-21-openjdk-amd64"/>
+<property name="java.io.tmpdir" value="/tmp"/>
+<property name="java.library.path" value="/usr/java/packages/lib:/usr/lib/x86_64-linux-gnu/jni:/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu:/usr/lib/jni:/lib:/usr/lib"/>
+<property name="java.runtime.name" value="OpenJDK Runtime Environment"/>
+<property name="java.runtime.version" value="21.0.12.1+1-1-24.04.4-Ubuntu"/>
+<property name="java.specification.name" value="Java Platform API Specification"/>
+<property name="java.specification.vendor" value="Oracle Corporation"/>
+<property name="java.specification.version" value="21"/>
+<property name="java.vendor" value="Ubuntu"/>
+<property name="java.vendor.url" value="https://ubuntu.com/"/>
+<property name="java.vendor.url.bug" value="https://bugs.launchpad.net/ubuntu/+source/openjdk-21"/>
+<property name="java.version" value="21.0.12.1"/>
+<property name="java.version.date" value="2026-08-18"/>
+<property name="java.vm.compressedOopsMode" value="32-bit"/>
+<property name="java.vm.info" value="mixed mode, sharing"/>
+<property name="java.vm.name" value="OpenJDK 64-Bit Server VM"/>
+<property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
+<property name="java.vm.specification.vendor" value="Oracle Corporation"/>
+<property name="java.vm.specification.version" value="21"/>
+<property name="java.vm.vendor" value="Ubuntu"/>
+<property name="java.vm.version" value="21.0.12.1+1-1-24.04.4-Ubuntu"/>
+<property name="jdk.debug" value="release"/>
+<property name="line.separator" value="
+"/>
+<property name="native.encoding" value="UTF-8"/>
+<property name="os.arch" value="amd64"/>
+<property name="os.name" value="Linux"/>
+<property name="os.version" value="6.8.0-147-generic"/>
+<property name="path.separator" value=":"/>
+<property name="stderr.encoding" value="UTF-8"/>
+<property name="stdout.encoding" value="UTF-8"/>
+<property name="sun.arch.data.model" value="64"/>
+<property name="sun.boot.library.path" value="/usr/lib/jvm/java-21-openjdk-amd64/lib"/>
+<property name="sun.cpu.endian" value="little"/>
+<property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
+<property name="sun.java.command" value="org.junit.platform.console.ConsoleLauncher execute --disable-ansi-colors --select-class com.dial.van.overlay.OverlayContinuationRepairTest --select-class com.dial.van.overlay.OverlayDragControllerTest --select-class com.dial.van.overlay.OverlayVisibilityPolicyTest --select-class com.dial.van.overlay.VanOverlayControllerTest --select-class com.dial.van.visual.VanFrameBudgetTest --select-class com.dial.van.visual.VanFrameBudgetRobustnessTest --select-class com.dial.van.visual.VanAnimationClockTest --select-class com.dial.van.visual.VanMotionLifecycleRepairTest --select-class com.dial.van.visual.VanLiveEffectFeedbackTest --reports-dir /home/ubuntu/work/van-floating-r1-20261104/.git/floating-r1/continued-junit --details tree"/>
+<property name="sun.java.launcher" value="SUN_STANDARD"/>
+<property name="sun.jnu.encoding" value="UTF-8"/>
+<property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
+<property name="user.country" value="US"/>
+<property name="user.dir" value="/home/ubuntu/work/van-floating-r1-20261104"/>
+<property name="user.home" value="/home/ubuntu"/>
+<property name="user.language" value="en"/>
+<property name="user.name" value="ubuntu"/>
+<property name="user.timezone" value="UTC"/>
+</properties>
+<testcase name="a non-monotonic timestamp does not rewind the clock()" classname="com.dial.van.visual.VanAnimationClockTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanAnimationClockTest]/[method:a non-monotonic timestamp does not rewind the clock()]
+display-name: a non-monotonic timestamp does not rewind the clock()
+]]></system-out>
+</testcase>
+<testcase name="fractional and low-power refresh rates remain valid()" classname="com.dial.van.visual.VanLiveEffectFeedbackTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanLiveEffectFeedbackTest]/[method:fractional and low-power refresh rates remain valid()]
+display-name: fractional and low-power refresh rates remain valid()
+]]></system-out>
+</testcase>
+<testcase name="a fast flick toward an edge docks there even released mid-screen()" classname="com.dial.van.overlay.OverlayDragControllerTest" time="0.005">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.OverlayDragControllerTest]/[method:a fast flick toward an edge docks there even released mid-screen()]
+display-name: a fast flick toward an edge docks there even released mid-screen()
+]]></system-out>
+</testcase>
+<testcase name="with no blend in flight the transition starts from what is on screen()" classname="com.dial.van.visual.VanAnimationClockTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanAnimationClockTest]/[method:with no blend in flight the transition starts from what is on screen()]
+display-name: with no blend in flight the transition starts from what is on screen()
+]]></system-out>
+</testcase>
+<testcase name="a slow release mid-screen docks nowhere and ticks nothing()" classname="com.dial.van.overlay.OverlayDragControllerTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.OverlayDragControllerTest]/[method:a slow release mid-screen docks nowhere and ticks nothing()]
+display-name: a slow release mid-screen docks nowhere and ticks nothing()
+]]></system-out>
+</testcase>
+<testcase name="an avatar cannot be dragged off any edge()" classname="com.dial.van.overlay.VanOverlayControllerTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.VanOverlayControllerTest]/[method:an avatar cannot be dragged off any edge()]
+display-name: an avatar cannot be dragged off any edge()
+]]></system-out>
+</testcase>
+<testcase name="destroying wins over everything()" classname="com.dial.van.overlay.OverlayVisibilityPolicyTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.OverlayVisibilityPolicyTest]/[method:destroying wins over everything()]
+display-name: destroying wins over everything()
+]]></system-out>
+</testcase>
+<testcase name="animator fractions advance monotonically independent of wall clock scaling()" classname="com.dial.van.overlay.OverlayContinuationRepairTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.OverlayContinuationRepairTest]/[method:animator fractions advance monotonically independent of wall clock scaling()]
+display-name: animator fractions advance monotonically independent of wall clock scaling()
+]]></system-out>
+</testcase>
+<testcase name="a drag that ends in open space docks to nothing()" classname="com.dial.van.overlay.VanOverlayControllerTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.VanOverlayControllerTest]/[method:a drag that ends in open space docks to nothing()]
+display-name: a drag that ends in open space docks to nothing()
+]]></system-out>
+</testcase>
+<testcase name="pure pointer port dismisses tall clamped board with centre outside target()" classname="com.dial.van.overlay.OverlayContinuationRepairTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.OverlayContinuationRepairTest]/[method:pure pointer port dismisses tall clamped board with centre outside target()]
+display-name: pure pointer port dismisses tall clamped board with centre outside target()
+]]></system-out>
+</testcase>
+<testcase name="pure coordinate composition rejects missing nonfinite and overflowing geometry()" classname="com.dial.van.overlay.OverlayContinuationRepairTest" time="0.037">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.OverlayContinuationRepairTest]/[method:pure coordinate composition rejects missing nonfinite and overflowing geometry()]
+display-name: pure coordinate composition rejects missing nonfinite and overflowing geometry()
+]]></system-out>
+</testcase>
+<testcase name="minimized is a size, not a pause()" classname="com.dial.van.overlay.OverlayVisibilityPolicyTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.OverlayVisibilityPolicyTest]/[method:minimized is a size, not a pause()]
+display-name: minimized is a size, not a pause()
+]]></system-out>
+</testcase>
+<testcase name="an ordinary dock still reports a positive duration()" classname="com.dial.van.overlay.OverlayDragControllerTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.OverlayDragControllerTest]/[method:an ordinary dock still reports a positive duration()]
+display-name: an ordinary dock still reports a positive duration()
+]]></system-out>
+</testcase>
+<testcase name="unknown keyboard geometry cannot invent overlap()" classname="com.dial.van.overlay.OverlayContinuationRepairTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.OverlayContinuationRepairTest]/[method:unknown keyboard geometry cannot invent overlap()]
+display-name: unknown keyboard geometry cannot invent overlap()
+]]></system-out>
+</testcase>
+<testcase name="velocity resets on a new drag so a stale flick cannot dock the next one()" classname="com.dial.van.overlay.OverlayDragControllerTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.OverlayDragControllerTest]/[method:velocity resets on a new drag so a stale flick cannot dock the next one()]
+display-name: velocity resets on a new drag so a stale flick cannot dock the next one()
+]]></system-out>
+</testcase>
+<testcase name="the default budget is one 60Hz frame()" classname="com.dial.van.visual.VanFrameBudgetTest" time="0.038">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanFrameBudgetTest]/[method:the default budget is one 60Hz frame()]
+display-name: the default budget is one 60Hz frame()
+]]></system-out>
+</testcase>
+<testcase name="sustained misses are()" classname="com.dial.van.visual.VanFrameBudgetTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanFrameBudgetTest]/[method:sustained misses are()]
+display-name: sustained misses are()
+]]></system-out>
+</testcase>
+<testcase name="a pause is not a missed frame()" classname="com.dial.van.visual.VanFrameBudgetTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanFrameBudgetTest]/[method:a pause is not a missed frame()]
+display-name: a pause is not a missed frame()
+]]></system-out>
+</testcase>
+<testcase name="pure coordinate composition preserves nested offsets and subtracts view window origin()" classname="com.dial.van.overlay.OverlayContinuationRepairTest" time="0.001">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.OverlayContinuationRepairTest]/[method:pure coordinate composition preserves nested offsets and subtracts view window origin()]
+display-name: pure coordinate composition preserves nested offsets and subtracts view window origin()
+]]></system-out>
+</testcase>
+<testcase name="a blend starts and ends with zero velocity()" classname="com.dial.van.visual.VanAnimationClockTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanAnimationClockTest]/[method:a blend starts and ends with zero velocity()]
+display-name: a blend starts and ends with zero velocity()
+]]></system-out>
+</testcase>
+<testcase name="invalid refresh readings use the explicit fallback()" classname="com.dial.van.visual.VanLiveEffectFeedbackTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanLiveEffectFeedbackTest]/[method:invalid refresh readings use the explicit fallback()]
+display-name: invalid refresh readings use the explicit fallback()
+]]></system-out>
+</testcase>
+<testcase name="a cancelled drag never leaves the overlay armed to close()" classname="com.dial.van.overlay.OverlayDragControllerTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.OverlayDragControllerTest]/[method:a cancelled drag never leaves the overlay armed to close()]
+display-name: a cancelled drag never leaves the overlay armed to close()
+]]></system-out>
+</testcase>
+<testcase name="out-of-order samples cannot move the anchor backward()" classname="com.dial.van.visual.VanLiveEffectFeedbackTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanLiveEffectFeedbackTest]/[method:out-of-order samples cannot move the anchor backward()]
+display-name: out-of-order samples cannot move the anchor backward()
+]]></system-out>
+</testcase>
+<testcase name="a detached view does not animate()" classname="com.dial.van.overlay.OverlayVisibilityPolicyTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.OverlayVisibilityPolicyTest]/[method:a detached view does not animate()]
+display-name: a detached view does not animate()
+]]></system-out>
+</testcase>
+<testcase name="suspendPreservesPhaseAndReanchorsWithoutIntegratingHiddenTime()" classname="com.dial.van.visual.VanMotionLifecycleRepairTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanMotionLifecycleRepairTest]/[method:suspendPreservesPhaseAndReanchorsWithoutIntegratingHiddenTime()]
+display-name: suspendPreservesPhaseAndReanchorsWithoutIntegratingHiddenTime()
+]]></system-out>
+</testcase>
+<testcase name="positive and negative fractions accumulate without per-event truncation()" classname="com.dial.van.overlay.OverlayContinuationRepairTest" time="0.001">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.OverlayContinuationRepairTest]/[method:positive and negative fractions accumulate without per-event truncation()]
+display-name: positive and negative fractions accumulate without per-event truncation()
+]]></system-out>
+</testcase>
+<testcase name="one slow frame is not a degraded device()" classname="com.dial.van.visual.VanFrameBudgetTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanFrameBudgetTest]/[method:one slow frame is not a degraded device()]
+display-name: one slow frame is not a degraded device()
+]]></system-out>
+</testcase>
+<testcase name="pause discards pressure and all hidden callbacks()" classname="com.dial.van.visual.VanLiveEffectFeedbackTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanLiveEffectFeedbackTest]/[method:pause discards pressure and all hidden callbacks()]
+display-name: pause discards pressure and all hidden callbacks()
+]]></system-out>
+</testcase>
+<testcase name="a single slow callback does not degrade the character()" classname="com.dial.van.visual.VanLiveEffectFeedbackTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanLiveEffectFeedbackTest]/[method:a single slow callback does not degrade the character()]
+display-name: a single slow callback does not degrade the character()
+]]></system-out>
+</testcase>
+<testcase name="resume anchors now instead of replaying ten minutes in a pocket()" classname="com.dial.van.visual.VanLiveEffectFeedbackTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanLiveEffectFeedbackTest]/[method:resume anchors now instead of replaying ten minutes in a pocket()]
+display-name: resume anchors now instead of replaying ten minutes in a pocket()
+]]></system-out>
+</testcase>
+<testcase name="docking ticks but dismissing never does()" classname="com.dial.van.overlay.OverlayDragControllerTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.OverlayDragControllerTest]/[method:docking ticks but dismissing never does()]
+display-name: docking ticks but dismissing never does()
+]]></system-out>
+</testcase>
+<testcase name="the keyboard covering VAN pauses the overlay and says why()" classname="com.dial.van.overlay.OverlayVisibilityPolicyTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.OverlayVisibilityPolicyTest]/[method:the keyboard covering VAN pauses the overlay and says why()]
+display-name: the keyboard covering VAN pauses the overlay and says why()
+]]></system-out>
+</testcase>
+<testcase name="a paused overlay is CREATED, not STOPPED or destroyed()" classname="com.dial.van.overlay.OverlayVisibilityPolicyTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.OverlayVisibilityPolicyTest]/[method:a paused overlay is CREATED, not STOPPED or destroyed()]
+display-name: a paused overlay is CREATED, not STOPPED or destroyed()
+]]></system-out>
+</testcase>
+<testcase name="keyboard presence with clear geometry keeps responding and overlap pauses()" classname="com.dial.van.overlay.OverlayContinuationRepairTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.OverlayContinuationRepairTest]/[method:keyboard presence with clear geometry keeps responding and overlap pauses()]
+display-name: keyboard presence with clear geometry keeps responding and overlap pauses()
+]]></system-out>
+</testcase>
+<testcase name="cadence cannot remove a stricter thermal or accessibility ceiling()" classname="com.dial.van.visual.VanLiveEffectFeedbackTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanLiveEffectFeedbackTest]/[method:cadence cannot remove a stricter thermal or accessibility ceiling()]
+display-name: cadence cannot remove a stricter thermal or accessibility ceiling()
+]]></system-out>
+</testcase>
+<testcase name="a spec blend moves the continuous fields and does not invent a colour()" classname="com.dial.van.visual.VanAnimationClockTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanAnimationClockTest]/[method:a spec blend moves the continuous fields and does not invent a colour()]
+display-name: a spec blend moves the continuous fields and does not invent a colour()
+]]></system-out>
+</testcase>
+<testcase name="no judgement before there is a window to judge on()" classname="com.dial.van.visual.VanFrameBudgetTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanFrameBudgetTest]/[method:no judgement before there is a window to judge on()]
+display-name: no judgement before there is a window to judge on()
+]]></system-out>
+</testcase>
+<testcase name="small scheduling jitter does not imitate a missed refresh()" classname="com.dial.van.visual.VanLiveEffectFeedbackTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanLiveEffectFeedbackTest]/[method:small scheduling jitter does not imitate a missed refresh()]
+display-name: small scheduling jitter does not imitate a missed refresh()
+]]></system-out>
+</testcase>
+<testcase name="board fallbacks are rectangular while legacy square API is preserved()" classname="com.dial.van.overlay.OverlayContinuationRepairTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.OverlayContinuationRepairTest]/[method:board fallbacks are rectangular while legacy square API is preserved()]
+display-name: board fallbacks are rectangular while legacy square API is preserved()
+]]></system-out>
+</testcase>
+<testcase name="the dismiss target is taken down however the drag ends()" classname="com.dial.van.overlay.OverlayDragControllerTest" time="0.001">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.OverlayDragControllerTest]/[method:the dismiss target is taken down however the drag ends()]
+display-name: the dismiss target is taken down however the drag ends()
+]]></system-out>
+</testcase>
+<testcase name="visibilityGatePausesEvenForHiddenIntervalsBelowTheDeltaClamp()" classname="com.dial.van.visual.VanMotionLifecycleRepairTest" time="0.001">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanMotionLifecycleRepairTest]/[method:visibilityGatePausesEvenForHiddenIntervalsBelowTheDeltaClamp()]
+display-name: visibilityGatePausesEvenForHiddenIntervalsBelowTheDeltaClamp()
+]]></system-out>
+</testcase>
+<testcase name="constructor rejects nonpositive or nonfinite budgets and nonpositive windows()" classname="com.dial.van.visual.VanFrameBudgetRobustnessTest" time="0.011">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanFrameBudgetRobustnessTest]/[method:constructor rejects nonpositive or nonfinite budgets and nonpositive windows()]
+display-name: constructor rejects nonpositive or nonfinite budgets and nonpositive windows()
+]]></system-out>
+</testcase>
+<testcase name="motionGateCoversEveryBudgetVisibilityAnimationAndReducedMotionCombination()" classname="com.dial.van.visual.VanMotionLifecycleRepairTest" time="0.003">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanMotionLifecycleRepairTest]/[method:motionGateCoversEveryBudgetVisibilityAnimationAndReducedMotionCombination()]
+display-name: motionGateCoversEveryBudgetVisibilityAnimationAndReducedMotionCombination()
+]]></system-out>
+</testcase>
+<testcase name="rectangular safe bounds clamp axes independently including extreme input()" classname="com.dial.van.overlay.OverlayContinuationRepairTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.OverlayContinuationRepairTest]/[method:rectangular safe bounds clamp axes independently including extreme input()]
+display-name: rectangular safe bounds clamp axes independently including extreme input()
+]]></system-out>
+</testcase>
+<testcase name="rectangular dock uses board height for bottom and width for right()" classname="com.dial.van.overlay.OverlayContinuationRepairTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.OverlayContinuationRepairTest]/[method:rectangular dock uses board height for bottom and width for right()]
+display-name: rectangular dock uses board height for bottom and width for right()
+]]></system-out>
+</testcase>
+<testcase name="the old driver's failure is what this replaces()" classname="com.dial.van.visual.VanAnimationClockTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanAnimationClockTest]/[method:the old driver's failure is what this replaces()]
+display-name: the old driver's failure is what this replaces()
+]]></system-out>
+</testcase>
+<testcase name="each presentation is measured by its own touch target()" classname="com.dial.van.overlay.VanOverlayControllerTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.VanOverlayControllerTest]/[method:each presentation is measured by its own touch target()]
+display-name: each presentation is measured by its own touch target()
+]]></system-out>
+</testcase>
+<testcase name="healthy 60Hz callbacks keep full effects()" classname="com.dial.van.visual.VanLiveEffectFeedbackTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanLiveEffectFeedbackTest]/[method:healthy 60Hz callbacks keep full effects()]
+display-name: healthy 60Hz callbacks keep full effects()
+]]></system-out>
+</testcase>
+<testcase name="duplicate obstruction decisions preserve motion and request no reconciliation()" classname="com.dial.van.overlay.OverlayContinuationRepairTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.OverlayContinuationRepairTest]/[method:duplicate obstruction decisions preserve motion and request no reconciliation()]
+display-name: duplicate obstruction decisions preserve motion and request no reconciliation()
+]]></system-out>
+</testcase>
+<testcase name="settling never puts the avatar outside the screen()" classname="com.dial.van.overlay.VanOverlayControllerTest" time="0.003">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.VanOverlayControllerTest]/[method:settling never puts the avatar outside the screen()]
+display-name: settling never puts the avatar outside the screen()
+]]></system-out>
+</testcase>
+<testcase name="release delegates duration without snapping and new drag cancels before position read()" classname="com.dial.van.overlay.OverlayContinuationRepairTest" time="0.001">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.OverlayContinuationRepairTest]/[method:release delegates duration without snapping and new drag cancels before position read()]
+display-name: release delegates duration without snapping and new drag cancels before position read()
+]]></system-out>
+</testcase>
+<testcase name="the screen being off stops the animation()" classname="com.dial.van.overlay.OverlayVisibilityPolicyTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.OverlayVisibilityPolicyTest]/[method:the screen being off stops the animation()]
+display-name: the screen being off stops the animation()
+]]></system-out>
+</testcase>
+<testcase name="backwards drag clock does not manufacture release velocity()" classname="com.dial.van.overlay.OverlayContinuationRepairTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.OverlayContinuationRepairTest]/[method:backwards drag clock does not manufacture release velocity()]
+display-name: backwards drag clock does not manufacture release velocity()
+]]></system-out>
+</testcase>
+<testcase name="no pressure claim before the complete observation window()" classname="com.dial.van.visual.VanLiveEffectFeedbackTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanLiveEffectFeedbackTest]/[method:no pressure claim before the complete observation window()]
+display-name: no pressure claim before the complete observation window()
+]]></system-out>
+</testcase>
+<testcase name="retargeting mid-blend continues from where the field actually is()" classname="com.dial.van.visual.VanAnimationClockTest" time="0.003">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanAnimationClockTest]/[method:retargeting mid-blend continues from where the field actually is()]
+display-name: retargeting mid-blend continues from where the field actually is()
+]]></system-out>
+</testcase>
+<testcase name="display-rate changes discard incomparable history()" classname="com.dial.van.visual.VanLiveEffectFeedbackTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanLiveEffectFeedbackTest]/[method:display-rate changes discard incomparable history()]
+display-name: display-rate changes discard incomparable history()
+]]></system-out>
+</testcase>
+<testcase name="starting a drag puts the dismiss target up and the menu away()" classname="com.dial.van.overlay.OverlayDragControllerTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.OverlayDragControllerTest]/[method:starting a drag puts the dismiss target up and the menu away()]
+display-name: starting a drag puts the dismiss target up and the menu away()
+]]></system-out>
+</testcase>
+<testcase name="a device that cools down gets its field back()" classname="com.dial.van.visual.VanFrameBudgetTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanFrameBudgetTest]/[method:a device that cools down gets its field back()]
+display-name: a device that cools down gets its field back()
+]]></system-out>
+</testcase>
+<testcase name="reduced motion is immediate while dismiss never settles or ticks()" classname="com.dial.van.overlay.OverlayContinuationRepairTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.OverlayContinuationRepairTest]/[method:reduced motion is immediate while dismiss never settles or ticks()]
+display-name: reduced motion is immediate while dismiss never settles or ticks()
+]]></system-out>
+</testcase>
+<testcase name="cancel and new begin clear fractional residuals()" classname="com.dial.van.overlay.OverlayContinuationRepairTest" time="0.001">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.OverlayContinuationRepairTest]/[method:cancel and new begin clear fractional residuals()]
+display-name: cancel and new begin clear fractional residuals()
+]]></system-out>
+</testcase>
+<testcase name="the first frame advances nothing()" classname="com.dial.van.visual.VanAnimationClockTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanAnimationClockTest]/[method:the first frame advances nothing()]
+display-name: the first frame advances nothing()
+]]></system-out>
+</testcase>
+<testcase name="letting go over the target closes the overlay and renders nothing after()" classname="com.dial.van.overlay.OverlayDragControllerTest" time="0.019">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.OverlayDragControllerTest]/[method:letting go over the target closes the overlay and renders nothing after()]
+display-name: letting go over the target closes the overlay and renders nothing after()
+]]></system-out>
+</testcase>
+<testcase name="activeStateChangesUseTheNewPeriodWithoutResettingPhase()" classname="com.dial.van.visual.VanMotionLifecycleRepairTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanMotionLifecycleRepairTest]/[method:activeStateChangesUseTheNewPeriodWithoutResettingPhase()]
+display-name: activeStateChangesUseTheNewPeriodWithoutResettingPhase()
+]]></system-out>
+</testcase>
+<testcase name="a full-screen app in front pauses the overlay and says why()" classname="com.dial.van.overlay.OverlayVisibilityPolicyTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.OverlayVisibilityPolicyTest]/[method:a full-screen app in front pauses the overlay and says why()]
+display-name: a full-screen app in front pauses the overlay and says why()
+]]></system-out>
+</testcase>
+<testcase name="recovery restores the original ceiling not unrestricted quality()" classname="com.dial.van.visual.VanLiveEffectFeedbackTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanLiveEffectFeedbackTest]/[method:recovery restores the original ceiling not unrestricted quality()]
+display-name: recovery restores the original ceiling not unrestricted quality()
+]]></system-out>
+</testcase>
+<testcase name="the phase stays inside zero to one however long it runs()" classname="com.dial.van.visual.VanAnimationClockTest" time="0.005">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanAnimationClockTest]/[method:the phase stays inside zero to one however long it runs()]
+display-name: the phase stays inside zero to one however long it runs()
+]]></system-out>
+</testcase>
+<testcase name="reset clears accepted count window cursor and degraded state()" classname="com.dial.van.visual.VanFrameBudgetRobustnessTest" time="0.002">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanFrameBudgetRobustnessTest]/[method:reset clears accepted count window cursor and degraded state()]
+display-name: reset clears accepted count window cursor and degraded state()
+]]></system-out>
+</testcase>
+<testcase name="arriving at something urgent is fast and settling down is slow()" classname="com.dial.van.visual.VanAnimationClockTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanAnimationClockTest]/[method:arriving at something urgent is fast and settling down is slow()]
+display-name: arriving at something urgent is fast and settling down is slow()
+]]></system-out>
+</testcase>
+<testcase name="letting go anywhere else docks and clears the drag()" classname="com.dial.van.overlay.OverlayDragControllerTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.OverlayDragControllerTest]/[method:letting go anywhere else docks and clears the drag()]
+display-name: letting go anywhere else docks and clears the drag()
+]]></system-out>
+</testcase>
+<testcase name="sameStatePeriodContinuesAcrossSuccessiveFrames()" classname="com.dial.van.visual.VanMotionLifecycleRepairTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanMotionLifecycleRepairTest]/[method:sameStatePeriodContinuesAcrossSuccessiveFrames()]
+display-name: sameStatePeriodContinuesAcrossSuccessiveFrames()
+]]></system-out>
+</testcase>
+<testcase name="a drag moves the window and reports where it ended up()" classname="com.dial.van.overlay.OverlayDragControllerTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.OverlayDragControllerTest]/[method:a drag moves the window and reports where it ended up()]
+display-name: a drag moves the window and reports where it ended up()
+]]></system-out>
+</testcase>
+<testcase name="the dismiss target does not arm from across the screen()" classname="com.dial.van.overlay.VanOverlayControllerTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.VanOverlayControllerTest]/[method:the dismiss target does not arm from across the screen()]
+display-name: the dismiss target does not arm from across the screen()
+]]></system-out>
+</testcase>
+<testcase name="small increasing timestamp differences work at both long extremes and across zero()" classname="com.dial.van.visual.VanFrameBudgetRobustnessTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanFrameBudgetRobustnessTest]/[method:small increasing timestamp differences work at both long extremes and across zero()]
+display-name: small increasing timestamp differences work at both long extremes and across zero()
+]]></system-out>
+</testcase>
+<testcase name="a fully covered overlay does not animate()" classname="com.dial.van.overlay.OverlayVisibilityPolicyTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.OverlayVisibilityPolicyTest]/[method:a fully covered overlay does not animate()]
+display-name: a fully covered overlay does not animate()
+]]></system-out>
+</testcase>
+<testcase name="pause cutoff is inclusive and larger deltas are ignored()" classname="com.dial.van.visual.VanFrameBudgetRobustnessTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanFrameBudgetRobustnessTest]/[method:pause cutoff is inclusive and larger deltas are ignored()]
+display-name: pause cutoff is inclusive and larger deltas are ignored()
+]]></system-out>
+</testcase>
+<testcase name="reduced motion still reports a duration of zero for a fast flick()" classname="com.dial.van.overlay.OverlayDragControllerTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.OverlayDragControllerTest]/[method:reduced motion still reports a duration of zero for a fast flick()]
+display-name: reduced motion still reports a duration of zero for a fast flick()
+]]></system-out>
+</testcase>
+<testcase name="the miss ratio and p95 are inspectable()" classname="com.dial.van.visual.VanFrameBudgetTest" time="0.002">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanFrameBudgetTest]/[method:the miss ratio and p95 are inspectable()]
+display-name: the miss ratio and p95 are inspectable()
+]]></system-out>
+</testcase>
+<testcase name="cancelled interpolation retains its displayed position instead of target()" classname="com.dial.van.overlay.OverlayContinuationRepairTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.OverlayContinuationRepairTest]/[method:cancelled interpolation retains its displayed position instead of target()]
+display-name: cancelled interpolation retains its displayed position instead of target()
+]]></system-out>
+</testcase>
+<testcase name="a hundred pause and refresh cycles retain no stale pressure()" classname="com.dial.van.visual.VanLiveEffectFeedbackTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanLiveEffectFeedbackTest]/[method:a hundred pause and refresh cycles retain no stale pressure()]
+display-name: a hundred pause and refresh cycles retain no stale pressure()
+]]></system-out>
+</testcase>
+<testcase name="rectangular drag arms once at actual centre and cancellation clears dismiss()" classname="com.dial.van.overlay.OverlayContinuationRepairTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.OverlayContinuationRepairTest]/[method:rectangular drag arms once at actual centre and cancellation clears dismiss()]
+display-name: rectangular drag arms once at actual centre and cancellation clears dismiss()
+]]></system-out>
+</testcase>
+<testcase name="zero and finite samples count and retain strict budget comparison()" classname="com.dial.van.visual.VanFrameBudgetRobustnessTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanFrameBudgetRobustnessTest]/[method:zero and finite samples count and retain strict budget comparison()]
+display-name: zero and finite samples count and retain strict budget comparison()
+]]></system-out>
+</testcase>
+<testcase name="a frozen overlay always says why()" classname="com.dial.van.overlay.OverlayVisibilityPolicyTest" time="0.009">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.OverlayVisibilityPolicyTest]/[method:a frozen overlay always says why()]
+display-name: a frozen overlay always says why()
+]]></system-out>
+</testcase>
+<testcase name="settle interpolates for its duration and backwards time cannot reverse it()" classname="com.dial.van.overlay.OverlayContinuationRepairTest" time="0.003">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.OverlayContinuationRepairTest]/[method:settle interpolates for its duration and backwards time cannot reverse it()]
+display-name: settle interpolates for its duration and backwards time cannot reverse it()
+]]></system-out>
+</testcase>
+<testcase name="a drag that ends near an edge snaps to it and reports the same edge()" classname="com.dial.van.overlay.VanOverlayControllerTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.VanOverlayControllerTest]/[method:a drag that ends near an edge snaps to it and reports the same edge()]
+display-name: a drag that ends near an edge snaps to it and reports the same edge()
+]]></system-out>
+</testcase>
+<testcase name="a drag cannot walk VAN off the screen()" classname="com.dial.van.overlay.OverlayDragControllerTest" time="0.004">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.OverlayDragControllerTest]/[method:a drag cannot walk VAN off the screen()]
+display-name: a drag cannot walk VAN off the screen()
+]]></system-out>
+</testcase>
+<testcase name="the haptic fires on arming, once, not on every frame()" classname="com.dial.van.overlay.OverlayDragControllerTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.OverlayDragControllerTest]/[method:the haptic fires on arming, once, not on every frame()]
+display-name: the haptic fires on arming, once, not on every frame()
+]]></system-out>
+</testcase>
+<testcase name="a screen smaller than the avatar still produces a reachable position()" classname="com.dial.van.overlay.VanOverlayControllerTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.VanOverlayControllerTest]/[method:a screen smaller than the avatar still produces a reachable position()]
+display-name: a screen smaller than the avatar still produces a reachable position()
+]]></system-out>
+</testcase>
+<testcase name="misses are relative to the actual display rate()" classname="com.dial.van.visual.VanLiveEffectFeedbackTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanLiveEffectFeedbackTest]/[method:misses are relative to the actual display rate()]
+display-name: misses are relative to the actual display rate()
+]]></system-out>
+</testcase>
+<testcase name="pure coordinate composition preserves negative and fractional positions()" classname="com.dial.van.overlay.OverlayContinuationRepairTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.OverlayContinuationRepairTest]/[method:pure coordinate composition preserves negative and fractional positions()]
+display-name: pure coordinate composition preserves negative and fractional positions()
+]]></system-out>
+</testcase>
+<testcase name="every combination resolves to exactly one target()" classname="com.dial.van.overlay.OverlayVisibilityPolicyTest" time="0.001">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.OverlayVisibilityPolicyTest]/[method:every combination resolves to exactly one target()]
+display-name: every combination resolves to exactly one target()
+]]></system-out>
+</testcase>
+<testcase name="nonincreasing timestamps overflowing differences and pauses do not alter samples()" classname="com.dial.van.visual.VanFrameBudgetRobustnessTest" time="0.002">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanFrameBudgetRobustnessTest]/[method:nonincreasing timestamps overflowing differences and pauses do not alter samples()]
+display-name: nonincreasing timestamps overflowing differences and pauses do not alter samples()
+]]></system-out>
+</testcase>
+<testcase name="ordinary state changes do not clear a bad cadence window()" classname="com.dial.van.visual.VanLiveEffectFeedbackTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanLiveEffectFeedbackTest]/[method:ordinary state changes do not clear a bad cadence window()]
+display-name: ordinary state changes do not clear a bad cadence window()
+]]></system-out>
+</testcase>
+<testcase name="the keyboard and a full-screen app are distinct reasons from being fully occluded()" classname="com.dial.van.overlay.OverlayVisibilityPolicyTest" time="0.006">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.OverlayVisibilityPolicyTest]/[method:the keyboard and a full-screen app are distinct reasons from being fully occluded()]
+display-name: the keyboard and a full-screen app are distinct reasons from being fully occluded()
+]]></system-out>
+</testcase>
+<testcase name="a period change advances the phase differently and never restarts it()" classname="com.dial.van.visual.VanAnimationClockTest" time="0.003">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanAnimationClockTest]/[method:a period change advances the phase differently and never restarts it()]
+display-name: a period change advances the phase differently and never restarts it()
+]]></system-out>
+</testcase>
+<testcase name="long suspended intervals retain the sampler pause convention()" classname="com.dial.van.visual.VanLiveEffectFeedbackTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanLiveEffectFeedbackTest]/[method:long suspended intervals retain the sampler pause convention()]
+display-name: long suspended intervals retain the sampler pause convention()
+]]></system-out>
+</testcase>
+<testcase name="cancelled fraction motion never advances to target()" classname="com.dial.van.overlay.OverlayContinuationRepairTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.OverlayContinuationRepairTest]/[method:cancelled fraction motion never advances to target()]
+display-name: cancelled fraction motion never advances to target()
+]]></system-out>
+</testcase>
+<testcase name="the signal reaches the effect ladder()" classname="com.dial.van.visual.VanFrameBudgetTest" time="0.001">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanFrameBudgetTest]/[method:the signal reaches the effect ladder()]
+display-name: the signal reaches the effect ladder()
+]]></system-out>
+</testcase>
+<testcase name="sustained misses really lower the existing effect policy()" classname="com.dial.van.visual.VanLiveEffectFeedbackTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanLiveEffectFeedbackTest]/[method:sustained misses really lower the existing effect policy()]
+display-name: sustained misses really lower the existing effect policy()
+]]></system-out>
+</testcase>
+<testcase name="healthy 120Hz callbacks keep full effects()" classname="com.dial.van.visual.VanLiveEffectFeedbackTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanLiveEffectFeedbackTest]/[method:healthy 120Hz callbacks keep full effects()]
+display-name: healthy 120Hz callbacks keep full effects()
+]]></system-out>
+</testcase>
+<testcase name="a long pause is clamped rather than spun through hundreds of cycles()" classname="com.dial.van.visual.VanAnimationClockTest" time="0.001">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanAnimationClockTest]/[method:a long pause is clamped rather than spun through hundreds of cycles()]
+display-name: a long pause is clamped rather than spun through hundreds of cycles()
+]]></system-out>
+</testcase>
+<testcase name="invalid samples leave window counters and hysteresis unchanged()" classname="com.dial.van.visual.VanFrameBudgetRobustnessTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanFrameBudgetRobustnessTest]/[method:invalid samples leave window counters and hysteresis unchanged()]
+display-name: invalid samples leave window counters and hysteresis unchanged()
+]]></system-out>
+</testcase>
+<testcase name="nonfinite input cannot move arm or create a fling()" classname="com.dial.van.overlay.OverlayContinuationRepairTest" time="0.004">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.OverlayContinuationRepairTest]/[method:nonfinite input cannot move arm or create a fling()]
+display-name: nonfinite input cannot move arm or create a fling()
+]]></system-out>
+</testcase>
+<testcase name="all original budgets are unchanged without cadence pressure()" classname="com.dial.van.visual.VanLiveEffectFeedbackTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanLiveEffectFeedbackTest]/[method:all original budgets are unchanged without cadence pressure()]
+display-name: all original budgets are unchanged without cadence pressure()
+]]></system-out>
+</testcase>
+<testcase name="live device readings still go through the original whole-runtime owner()" classname="com.dial.van.visual.VanLiveEffectFeedbackTest" time="0.003">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanLiveEffectFeedbackTest]/[method:live device readings still go through the original whole-runtime owner()]
+display-name: live device readings still go through the original whole-runtime owner()
+]]></system-out>
+</testcase>
+<testcase name="the dismiss target arms on the avatar's centre, at every size()" classname="com.dial.van.overlay.VanOverlayControllerTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.VanOverlayControllerTest]/[method:the dismiss target arms on the avatar's centre, at every size()]
+display-name: the dismiss target arms on the avatar's centre, at every size()
+]]></system-out>
+</testcase>
+<testcase name="it does not oscillate at the threshold()" classname="com.dial.van.visual.VanFrameBudgetTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanFrameBudgetTest]/[method:it does not oscillate at the threshold()]
+display-name: it does not oscillate at the threshold()
+]]></system-out>
+</testcase>
+<testcase name="sustained misses trigger at twenty percent and recover at eight percent()" classname="com.dial.van.visual.VanFrameBudgetRobustnessTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanFrameBudgetRobustnessTest]/[method:sustained misses trigger at twenty percent and recover at eight percent()]
+display-name: sustained misses trigger at twenty percent and recover at eight percent()
+]]></system-out>
+</testcase>
+<testcase name="identical specs are not worth blending()" classname="com.dial.van.visual.VanAnimationClockTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanAnimationClockTest]/[method:identical specs are not worth blending()]
+display-name: identical specs are not worth blending()
+]]></system-out>
+</testcase>
+<testcase name="pure pointer port cannot arm unknown target or nonfinite pointer()" classname="com.dial.van.overlay.OverlayContinuationRepairTest" time="0">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.overlay.OverlayContinuationRepairTest]/[method:pure pointer port cannot arm unknown target or nonfinite pointer()]
+display-name: pure pointer port cannot arm unknown target or nonfinite pointer()
+]]></system-out>
+</testcase>
+<testcase name="every blend duration is inside the 120 to 420 ms band()" classname="com.dial.van.visual.VanAnimationClockTest" time="0.003">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:com.dial.van.visual.VanAnimationClockTest]/[method:every blend duration is inside the 120 to 420 ms band()]
+display-name: every blend duration is inside the 120 to 420 ms band()
+]]></system-out>
+</testcase>
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]
+display-name: JUnit Jupiter
+]]></system-out>
+</testsuite>

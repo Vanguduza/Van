@@ -4,16 +4,19 @@ import android.graphics.Bitmap
 import android.view.TextureView
 import android.view.View
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import app.rive.runtime.kotlin.RiveAnimationView
 import app.rive.runtime.kotlin.core.Fit
+import app.rive.runtime.kotlin.core.Direction
 import app.rive.runtime.kotlin.core.Loop
 
 /**
@@ -30,19 +33,44 @@ fun VanRiveAvatar(
     modifier: Modifier = Modifier,
     onLoadFailed: () -> Unit = {},
     onSilhouette: (VanSilhouette) -> Unit = {},
+    animate: Boolean = true,
+    budget: VanEffectBudget = VanEffectBudget.FULL,
+    reducedMotion: Boolean = rememberReducedMotion(),
 ) {
+    val enabled = vanMotionEnabled(budget, animate = animate, reducedMotion = reducedMotion)
+    val currentEnabled by rememberUpdatedState(enabled)
+    val currentOnSilhouette by rememberUpdatedState(onSilhouette)
+    val currentOnLoadFailed by rememberUpdatedState(onLoadFailed)
+    val motionBinding = remember { RiveMotionBinding() }
     var riveView by remember { mutableStateOf<View?>(null) }
+    DisposableEffect(riveView) {
+        val view = riveView as? RiveAnimationView
+        onDispose {
+            runCatching { view?.pause() }
+            if (motionBinding.view === view) {
+                motionBinding.view = null
+                motionBinding.lastEnabled = null
+            }
+        }
+    }
     // Aura Rev 2 — the flames follow the rig: the rendered artboard's alpha is sampled every
     // few frames and turned into the silhouette the aura wraps.
-    LaunchedEffect(riveView) {
+    LaunchedEffect(riveView, enabled) {
+        if (!enabled) return@LaunchedEffect
         val view = riveView as? TextureView ?: return@LaunchedEffect
+        // Composition effects and their cancellation cleanup run on the main dispatcher.
         val sampler = VanRiveSilhouetteSampler()
         var last = 0L
-        while (true) {
-            val now = withFrameNanos { it }
-            if (now - last < VanRiveSilhouetteSampler.INTERVAL_NANOS) continue
-            last = now
-            sampler.sample(view)?.let(onSilhouette)
+        try {
+            while (true) {
+                val now = withFrameNanos { it }
+                if (!currentEnabled) break
+                if (now - last < VanRiveSilhouetteSampler.INTERVAL_NANOS) continue
+                last = now
+                sampler.sample(view)?.let { currentOnSilhouette(it) }
+            }
+        } finally {
+            sampler.recycle()
         }
     }
     AndroidView(
@@ -57,27 +85,56 @@ fun VanRiveAvatar(
                         artboardName = RiveBindingContract.ARTBOARD,
                         stateMachineName = RiveBindingContract.STATE_MACHINE,
                         animationName = null,
-                        autoplay = true,
+                        autoplay = currentEnabled,
                         fit = Fit.CONTAIN,
                         alignment = app.rive.runtime.kotlin.core.Alignment.CENTER,
                         loop = Loop.LOOP,
                     )
-                }.also { riveView = it }
+                }.also {
+                    motionBinding.view = it
+                    motionBinding.lastEnabled = currentEnabled
+                    riveView = it
+                }
             } catch (_: Throwable) {
-                onLoadFailed()
+                currentOnLoadFailed()
                 View(ctx)
             }
         },
         update = { view ->
             if (view is RiveAnimationView) {
                 try {
-                    applyVisualState(view, state)
+                    if (motionBinding.view !== view) {
+                        motionBinding.view = view
+                        motionBinding.lastEnabled = null
+                    }
+                    try {
+                        applyVisualState(view, state)
+                        if (enabled && motionBinding.lastEnabled != true) {
+                            view.play(
+                                loop = Loop.AUTO,
+                                direction = Direction.AUTO,
+                                settleInitialState = true,
+                            )
+                        }
+                        motionBinding.lastEnabled = enabled
+                    } finally {
+                        // Input setters may resume native playback, so pause after inputs.
+                        if (!enabled) view.pause()
+                    }
                 } catch (_: Throwable) {
-                    onLoadFailed()
+                    runCatching { view.pause() }
+                    motionBinding.lastEnabled = false
+                    currentOnLoadFailed()
                 }
             }
         },
     )
+}
+
+/** Composition-owned tracking, bound to the actual Android view rather than global state. */
+private class RiveMotionBinding {
+    var view: RiveAnimationView? = null
+    var lastEnabled: Boolean? = null
 }
 
 private fun applyVisualState(view: RiveAnimationView, state: VanVisualState) {
@@ -119,6 +176,11 @@ class VanRiveSilhouetteSampler {
         } catch (_: Throwable) {
             null
         }
+    }
+
+    /** Called on main after the sampling coroutine has stopped using the bitmap. */
+    fun recycle() {
+        if (!bitmap.isRecycled) bitmap.recycle()
     }
 
     companion object {

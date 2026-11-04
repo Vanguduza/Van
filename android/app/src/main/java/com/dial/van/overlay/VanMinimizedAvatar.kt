@@ -19,6 +19,9 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import com.dial.van.visual.VanGlassTokens
+import com.dial.van.visual.VanEffectBudget
+import com.dial.van.visual.rememberReducedMotion
+import com.dial.van.visual.vanMotionEnabled
 import com.dial.van.visual.VanStatusPalette
 import com.dial.van.visual.VanVisualState
 import kotlin.math.PI
@@ -32,17 +35,26 @@ import kotlin.math.sin
 fun VanMinimizedAvatar(
     state: VanVisualState,
     modifier: Modifier = Modifier.size(64.dp),
+    animate: Boolean = true,
+    budget: VanEffectBudget = VanEffectBudget.FULL,
+    reducedMotion: Boolean = rememberReducedMotion(),
 ) {
-    val transition = rememberInfiniteTransition(label = "van-minimized-life")
-    val phase by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(5_200, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart,
-        ),
-        label = "van-minimized-phase",
-    )
+    val enabled = vanMotionEnabled(budget, animate = animate, reducedMotion = reducedMotion)
+    val phase = if (enabled) {
+        val transition = rememberInfiniteTransition(label = "van-minimized-life")
+        val animatedPhase by transition.animateFloat(
+            initialValue = 0f,
+            targetValue = 1f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(5_200, easing = LinearEasing),
+                repeatMode = RepeatMode.Restart,
+            ),
+            label = "van-minimized-phase",
+        )
+        animatedPhase
+    } else {
+        0f
+    }
     val palette = VanStatusPalette.forState(state.resolvedSemanticState)
     val blink = blinkAmount(phase)
     val rimPulse = 0.38f + 0.14f * sin(phase * (2f * PI).toFloat())

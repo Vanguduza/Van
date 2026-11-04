@@ -28,6 +28,8 @@ internal class OverlayDismissWindow<T>(
 ) where T : Context, T : LifecycleOwner, T : SavedStateRegistryOwner {
 
     private var view: ComposeView? = null
+    // This window owner and its geometry reads are confined to the UI thread.
+    private val location = IntArray(2)
 
     fun show(content: @Composable () -> Unit) {
         if (view != null) return
@@ -52,6 +54,19 @@ internal class OverlayDismissWindow<T>(
         }
         view = composeView
         windowManager.addView(composeView, params)
+    }
+
+    /** Only measured, attached target geometry can arm a native drag. */
+    fun boundsOnScreen(): OverlayRect? {
+        val target = view ?: return null
+        if (!target.isAttachedToWindow || !target.isLaidOut || target.isLayoutRequested ||
+            target.width <= 0 || target.height <= 0) return null
+        target.getLocationOnScreen(location)
+        return OverlayRect(
+            location[0].toDouble(), location[1].toDouble(),
+            location[0].toDouble() + target.width,
+            location[1].toDouble() + target.height,
+        )
     }
 
     /** Compose reads the armed flag; invalidation keeps it in sync without a second window. */

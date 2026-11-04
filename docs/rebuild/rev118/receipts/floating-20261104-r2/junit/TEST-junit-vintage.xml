@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="JUnit Vintage" tests="0" skipped="0" failures="0" errors="0" time="0.001" hostname="dial-control" timestamp="2026-11-04T08:41:58">
+<properties>
+<property name="file.encoding" value="UTF-8"/>
+<property name="file.separator" value="/"/>
+<property name="java.class.path" value="/home/ubuntu/work/van-floating-r1-20261104/.git/floating-r1/continued-classes:/home/ubuntu/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-compiler-embeddable/2.0.21/79346ed53db48b18312a472602eb5c057070c54d/kotlin-compiler-embeddable-2.0.21.jar:/home/ubuntu/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.0.21/618b539767b4899b4660a83006e052b63f1db551/kotlin-stdlib-2.0.21.jar:/home/ubuntu/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-script-runtime/2.0.21/c9b044380ad41f89aa89aa896c2d32a8c0b2129d/kotlin-script-runtime-2.0.21.jar:/home/ubuntu/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-reflect/1.6.10/1cbe9c92c12a94eea200d23c2bbaedaf3daf5132/kotlin-reflect-1.6.10.jar:/home/ubuntu/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-daemon-embeddable/2.0.21/c9e933b23287de9b5a17e2116b4657bb91aea72c/kotlin-daemon-embeddable-2.0.21.jar:/home/ubuntu/.gradle/caches/modules-2/files-2.1/org.jetbrains.intellij.deps/trove4j/1.0.20200330/3afb14d5f9ceb459d724e907a21145e8ff394f02/trove4j-1.0.20200330.jar:/home/ubuntu/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-coroutines-core-jvm/1.6.4/2c997cd1c0ef33f3e751d3831929aeff1390cb30/kotlinx-coroutines-core-jvm-1.6.4.jar:/home/ubuntu/.gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/13.0/919f0dfe192fb4e063e7dacadee7f8bb9a2672a9/annotations-13.0.jar:/home/ubuntu/work/van-floating-r1-20261104/.git/floating-r1/tooling/kotlin-test-2.0.21.jar:/home/ubuntu/work/van-floating-r1-20261104/.git/floating-r1/tooling/kotlin-test-junit5-2.0.21.jar:/home/ubuntu/work/van-floating-r1-20261104/.git/floating-r1/tooling/junit-platform-console-standalone-1.10.2.jar"/>
+<property name="java.class.version" value="65.0"/>
+<property name="java.home" value="/usr/lib/jvm/java-21-openjdk-amd64"/>
+<property name="java.io.tmpdir" value="/tmp"/>
+<property name="java.library.path" value="/usr/java/packages/lib:/usr/lib/x86_64-linux-gnu/jni:/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu:/usr/lib/jni:/lib:/usr/lib"/>
+<property name="java.runtime.name" value="OpenJDK Runtime Environment"/>
+<property name="java.runtime.version" value="21.0.12.1+1-1-24.04.4-Ubuntu"/>
+<property name="java.specification.name" value="Java Platform API Specification"/>
+<property name="java.specification.vendor" value="Oracle Corporation"/>
+<property name="java.specification.version" value="21"/>
+<property name="java.vendor" value="Ubuntu"/>
+<property name="java.vendor.url" value="https://ubuntu.com/"/>
+<property name="java.vendor.url.bug" value="https://bugs.launchpad.net/ubuntu/+source/openjdk-21"/>
+<property name="java.version" value="21.0.12.1"/>
+<property name="java.version.date" value="2026-08-18"/>
+<property name="java.vm.compressedOopsMode" value="32-bit"/>
+<property name="java.vm.info" value="mixed mode, sharing"/>
+<property name="java.vm.name" value="OpenJDK 64-Bit Server VM"/>
+<property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
+<property name="java.vm.specification.vendor" value="Oracle Corporation"/>
+<property name="java.vm.specification.version" value="21"/>
+<property name="java.vm.vendor" value="Ubuntu"/>
+<property name="java.vm.version" value="21.0.12.1+1-1-24.04.4-Ubuntu"/>
+<property name="jdk.debug" value="release"/>
+<property name="line.separator" value="
+"/>
+<property name="native.encoding" value="UTF-8"/>
+<property name="os.arch" value="amd64"/>
+<property name="os.name" value="Linux"/>
+<property name="os.version" value="6.8.0-147-generic"/>
+<property name="path.separator" value=":"/>
+<property name="stderr.encoding" value="UTF-8"/>
+<property name="stdout.encoding" value="UTF-8"/>
+<property name="sun.arch.data.model" value="64"/>
+<property name="sun.boot.library.path" value="/usr/lib/jvm/java-21-openjdk-amd64/lib"/>
+<property name="sun.cpu.endian" value="little"/>
+<property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
+<property name="sun.java.command" value="org.junit.platform.console.ConsoleLauncher execute --disable-ansi-colors --select-class com.dial.van.overlay.OverlayContinuationRepairTest --select-class com.dial.van.overlay.OverlayDragControllerTest --select-class com.dial.van.overlay.OverlayVisibilityPolicyTest --select-class com.dial.van.overlay.VanOverlayControllerTest --select-class com.dial.van.visual.VanFrameBudgetTest --select-class com.dial.van.visual.VanFrameBudgetRobustnessTest --select-class com.dial.van.visual.VanAnimationClockTest --select-class com.dial.van.visual.VanMotionLifecycleRepairTest --select-class com.dial.van.visual.VanLiveEffectFeedbackTest --reports-dir /home/ubuntu/work/van-floating-r1-20261104/.git/floating-r1/continued-junit --details tree"/>
+<property name="sun.java.launcher" value="SUN_STANDARD"/>
+<property name="sun.jnu.encoding" value="UTF-8"/>
+<property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
+<property name="user.country" value="US"/>
+<property name="user.dir" value="/home/ubuntu/work/van-floating-r1-20261104"/>
+<property name="user.home" value="/home/ubuntu"/>
+<property name="user.language" value="en"/>
+<property name="user.name" value="ubuntu"/>
+<property name="user.timezone" value="UTC"/>
+</properties>
+<system-out><![CDATA[
+unique-id: [engine:junit-vintage]
+display-name: JUnit Vintage
+]]></system-out>
+</testsuite>

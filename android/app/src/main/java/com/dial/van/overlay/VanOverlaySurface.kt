@@ -193,7 +193,12 @@ internal fun VanOverlaySurface(
                 accent = chrome.accent,
                 messages = conversation.messages,
             )
-            VanOverlayPresentation.MINIMIZED -> MinimizedPresence(visualState, actions)
+            VanOverlayPresentation.MINIMIZED -> MinimizedPresence(
+                visualState, actions,
+                animate = state.animate,
+                budget = budget,
+                reducedMotion = reducedMotion,
+            )
             VanOverlayPresentation.DOCKED -> DockedPresence(visualState, state, actions)
         }
         }
@@ -275,13 +280,22 @@ internal fun QuickControls(
 }
 
 @Composable
-internal fun MinimizedPresence(visualState: VanVisualState, actions: VanOverlayActions) {
+internal fun MinimizedPresence(
+    visualState: VanVisualState,
+    actions: VanOverlayActions,
+    animate: Boolean = true,
+    budget: com.dial.van.visual.VanEffectBudget = com.dial.van.visual.VanEffectBudget.FULL,
+    reducedMotion: Boolean = rememberReducedMotion(),
+) {
     Box(
         modifier = Modifier.size(OverlayTheme.MINIMIZED_TOUCH_DP.dp),
         contentAlignment = Alignment.Center,
     ) {
         VanMinimizedAvatar(
             state = visualState,
+            animate = animate,
+            budget = budget,
+            reducedMotion = reducedMotion,
             modifier = Modifier
                 .size(OverlayTheme.MINIMIZED_VISUAL_DP.dp)
                 .then(actions.gestures),
