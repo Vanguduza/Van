@@ -1,0 +1,52 @@
+{
+  "compose_first_run": "original test harness incorrectly assumed integer memory limit; corrected to verify effective memory bytes, then 18/18 passed",
+  "final_source_report": "native-result.json",
+  "native_attempts": [
+    {
+      "artifact": "realtime-result-01.json",
+      "check_count": 128,
+      "cleanup_completed": true,
+      "error": "Failure:fixture-project_realtime_gateway_native_config",
+      "sha256": "3a81f1604dea12add2f6185aaf9f3e2f06340bbdcb16f6d55651bb3c539596d1",
+      "state": "FAIL"
+    },
+    {
+      "artifact": "realtime-result-02.json",
+      "check_count": 132,
+      "cleanup_completed": true,
+      "error": "Failure:fixture-project_private_websocket_join",
+      "sha256": "7667c9d9b83e5e07cbdbf7d7fea369aec2ebb784fd4e8b808995a87e69062971",
+      "state": "FAIL"
+    },
+    {
+      "artifact": "realtime-result-03.json",
+      "check_count": 142,
+      "cleanup_completed": true,
+      "error": "Failure:REALTIME_EXPECTED_FRAME_NOT_RECEIVED",
+      "sha256": "2d52cca531307b94966929c95440efe376af3c3590847af6245f5040e5ef1bad",
+      "state": "FAIL"
+    },
+    {
+      "artifact": "realtime-result-04.json",
+      "check_count": 142,
+      "cleanup_completed": true,
+      "error": "Failure:REALTIME_EXPECTED_FRAME_NOT_RECEIVED",
+      "sha256": "970d316ee937685c4be819bef2a7e2525674e48a0bd55d7b22757f48e85b0ac1",
+      "state": "FAIL"
+    },
+    {
+      "artifact": "realtime-result-05.json",
+      "check_count": 192,
+      "cleanup_completed": true,
+      "error": null,
+      "sha256": "96b76722b823c8c69908f0281c1849fd959b739f4acadefeac726477e948cd9c",
+      "state": "PASS"
+    },
+    {
+      "artifact": "fabric-result-01.json",
+      "check_count": 345,
+      "note": "previous source revision; final exact source retested independently by native-result.json",
+      "state": "PASS"
+    }
+  ]
+}

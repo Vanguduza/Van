@@ -84,3 +84,7 @@ Existing vati-supabase.service starts Docker Compose using TWO yaml files and --
 ## Shared Storage implementation checkpoint
 
 The shared upstream Storage path is now implemented and tested in a disposable two-project environment: 245 real-service checks, 118 tests and 12 effective-model checks. See `SHARED_STORAGE.md` and `QUALIFICATION_STORAGE_2026-11-04.md`. The new shared candidate supersedes the earlier unqualified per-project Storage sketch; do not deploy both. Actual VAN legacy admission, coordinated object/database recovery, container/architecture verification and native deployment gates remain mandatory.
+
+## Shared Realtime integration checkpoint
+
+The owner-requested single installation now has a source-tested shared Realtime implementation alongside the separate project databases/Auth/REST and shared Storage; it does not add a second PostgreSQL server or a Realtime process per project. Native non-root evidence: **164 unit tests, 345 real-service integrated checks, 18 Compose model checks passed**. See `SHARED_REALTIME.md` and `QUALIFICATION_REALTIME_2026-11-04.md`. The derivative Realtime image, original VAN tenancy/credentials and production routes are not admitted. No production change occurred; REA is optional research, not a gate.
