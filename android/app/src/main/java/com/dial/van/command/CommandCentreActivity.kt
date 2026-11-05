@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -219,7 +220,7 @@ internal fun CommandCentreScreen(
 
     Scaffold(
         containerColor = Color.Transparent,
-        topBar = { com.dial.van.visual.VanCharacterReviewNotice() },
+        topBar = { com.dial.van.visual.VanCharacterReviewNotice(Modifier.statusBarsPadding().fillMaxWidth()) },
         bottomBar = {
             if (!wide) {
                 CommandBottomBar(currentRoute, onSelect = ::navigateTo, onMore = { moreSheetOpen = true })

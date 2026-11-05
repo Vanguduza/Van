@@ -108,8 +108,17 @@ class ReviewVariantPreparation(unittest.TestCase):
         view=(ROOT/'android/app/src/main/java/com/dial/van/visual/VanRiveAvatar.kt').read_text()
         chooser=(ROOT/'android/app/src/main/java/com/dial/van/visual/VanCanvasFallback.kt').read_text()
         self.assertIn('VanCharacterAssets.load(ctx)',view);self.assertIn('VanCharacterAssets.load(context)',chooser)
+    def test_review_notice_respects_system_insets_and_light_dark_contrast(self):
+        main=(ROOT/'android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt').read_text()
+        notice=(ROOT/'android/app/src/main/java/com/dial/van/visual/VanCharacterReviewNotice.kt').read_text()
+        lab=(ROOT/'android/app/src/debug/java/com/dial/van/visual/CharacterRigLab.kt').read_text()
+        self.assertIn('VanCharacterReviewNotice(Modifier.statusBarsPadding()',main)
+        self.assertIn('MaterialTheme.colorScheme.onSurfaceVariant',notice)
+        self.assertIn('MaterialTheme.colorScheme.surfaceVariant',notice)
+        self.assertIn('.safeDrawingPadding()',lab)
+
     def test_review_notice_is_persistent_and_default_debug_flag_remains_false(self):
         for name in ['overlay/VanOverlayWorkboards.kt','overlay/OverlayPersonalControls.kt','command/CommandCentreActivity.kt']:
-            self.assertIn('VanCharacterReviewNotice()',(ROOT/'android/app/src/main/java/com/dial/van'/name).read_text())
+            self.assertIn('VanCharacterReviewNotice(',(ROOT/'android/app/src/main/java/com/dial/van'/name).read_text())
         s=(ROOT/'android/app/build.gradle.kts').read_text();self.assertIn('buildConfigField("boolean", "VAN_CHARACTER_REVIEW", "false")',s)
 if __name__=='__main__':unittest.main(verbosity=2)
