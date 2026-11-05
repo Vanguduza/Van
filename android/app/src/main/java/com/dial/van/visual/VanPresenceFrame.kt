@@ -189,8 +189,12 @@ object VanPresenceReducer {
 
     fun speechFrame(frame: VanPresenceFrame, mouthOpen: Float, viseme: Int): VanPresenceFrame = frame.copy(
         speech = VanSpeechState.SPEAKING,
-        mouthOpen = mouthOpen.coerceIn(0f, 1f),
-        viseme = viseme.coerceAtLeast(0),
+        mouthOpen = if (mouthOpen.isFinite()) mouthOpen.coerceIn(0f, 1f) else 0f,
+        viseme = when {
+            viseme < 0 -> 0
+            viseme > 4 -> 1 // canonical unknown-positive shape
+            else -> viseme
+        },
     )
 
     fun speechEnded(frame: VanPresenceFrame): VanPresenceFrame = frame.copy(

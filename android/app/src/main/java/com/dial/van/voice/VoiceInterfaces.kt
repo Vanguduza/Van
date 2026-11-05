@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.ParcelFileDescriptor
+import android.os.SystemClock
 import android.speech.AlternativeSpans
 import android.speech.RecognitionListener
 import android.speech.RecognitionPart
@@ -628,6 +629,8 @@ class TtsOutputManager(
     /** Set by [speak] just before Android TextToSpeech.speak, read once in onStart. */
     private var pendingCueTiming: SegmentCueTiming = SegmentCueTiming.EMPTY
     private var activeCueTiming: SegmentCueTiming? = null
+    /** Only the active Android utterance; guarded by playbackLock and cleared on interruption. */
+    private var activeAndroidText: String? = null
     private var cueStartAtMs: Long = 0L
     private var cueGeneration = 0L
 
@@ -705,8 +708,12 @@ class TtsOutputManager(
                     synchronized(playbackLock) {
                         if (playback.current(TtsEngineKind.ANDROID_OFFLINE, utteranceId.orEmpty()) == null ||
                             !speaking.get() || activeCueTiming != null) return@synchronized
-                        val open = ((frame % 10) / 10f).coerceIn(0f, 1f)
-                        val viseme = frame % 15
+                        // The frame index is an audio offset, not a mouth shape.
+                        // When no actual cue/PCM track exists, infer a bounded visual
+                        // approximation from the spoken range; never emit visemes 5..14.
+                        val (viseme, open) = VanRangeCueEstimator.forTextRange(
+                            activeAndroidText.orEmpty(), start, end,
+                        )
                         val sync = SpeechSyncFrame(
                             System.currentTimeMillis(), rmsDb = open, mouthOpen = open, viseme = viseme,
                         )
@@ -805,6 +812,7 @@ class TtsOutputManager(
                     false
                 } else {
                     val token = beginPlayback(TtsEngineKind.ANDROID_OFFLINE, utteranceId, cueTiming)
+                    synchronized(playbackLock) { activeAndroidText = text }
                     val started = try {
                         tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, token.nativeId) == TextToSpeech.SUCCESS
                     } catch (_: Exception) {
@@ -824,6 +832,7 @@ class TtsOutputManager(
         onBargeInRequested()
         return synchronized(playbackLock) {
             activeEngine = engine
+            activeAndroidText = null
             pendingCueTiming = cueTiming
             playback.begin(engine, utteranceId)
         }
@@ -839,7 +848,7 @@ class TtsOutputManager(
         val timing = cueTiming.takeIf { it.cues.isNotEmpty() }
         activeCueTiming = timing
         if (timing != null) {
-            cueStartAtMs = System.currentTimeMillis()
+            cueStartAtMs = SystemClock.elapsedRealtime()
             cueGeneration += 1L
             tickCues(cueGeneration, timing)
         }
@@ -852,6 +861,7 @@ class TtsOutputManager(
         speaking.set(false)
         activeEngine = null
         activeCueTiming = null
+        activeAndroidText = null
         cueGeneration += 1L
         _visualState.value = _visualState.value.copy(
             durableState = VanDurableState.IDLE,
@@ -867,6 +877,7 @@ class TtsOutputManager(
         speaking.set(false)
         activeEngine = null
         activeCueTiming = null
+        activeAndroidText = null
         cueGeneration += 1L
         _visualState.value = _visualState.value.copy(
             durableState = VanDurableState.IDLE,
@@ -888,7 +899,7 @@ class TtsOutputManager(
             !speaking.get() ||
             activeEngine != TtsEngineKind.ANDROID_OFFLINE
         ) return
-        val elapsed = System.currentTimeMillis() - cueStartAtMs
+        val elapsed = SystemClock.elapsedRealtime() - cueStartAtMs
         val (viseme, mouthOpen) = VanCueWalker.cueAt(timing.cues, elapsed)
         callback.onSpeechFrame(
             SpeechSyncFrame(
@@ -914,6 +925,7 @@ class TtsOutputManager(
             speaking.set(false)
             activeEngine = null
             activeCueTiming = null
+            activeAndroidText = null
             cueGeneration += 1L
             if (pending != null || wasSpeaking) {
                 _visualState.value = _visualState.value.copy(

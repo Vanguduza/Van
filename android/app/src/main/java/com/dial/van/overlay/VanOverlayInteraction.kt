@@ -136,3 +136,30 @@ object VanOverlayReducer {
         dismissTargetArmed = armed,
     )
 }
+
+
+/**
+ * A presentation change becomes one optional visual gesture, never a domain command.
+ * Collapsing a large workboard emits CLOSE_PANEL; opening/expanding emits OPEN_PANEL.
+ * Minimized/docked/resting are all unexpanded surfaces, so switching between
+ * those states does not manufacture another gesture.
+ */
+internal object OverlayPresentationMotion {
+    fun expanding(from: VanOverlayPresentation, to: VanOverlayPresentation): Boolean? {
+        fun level(presentation: VanOverlayPresentation): Int = when (presentation) {
+            VanOverlayPresentation.WORKBOARD_COMPACT -> 1
+            VanOverlayPresentation.WORKBOARD_EXPANDED -> 2
+            VanOverlayPresentation.WORKBOARD_MAXIMIZED -> 3
+            VanOverlayPresentation.FULL_FLOATING,
+            VanOverlayPresentation.MINIMIZED,
+            VanOverlayPresentation.DOCKED -> 0
+        }
+        val previous = level(from)
+        val next = level(to)
+        return when {
+            next > previous -> true
+            next < previous -> false
+            else -> null
+        }
+    }
+}

@@ -296,6 +296,10 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
     private fun updateUiState(next: VanOverlayUiState) {
         stopInteraction()
         val presentationChanged = next.presentation != uiState.presentation
+        OverlayVisualCueBridge.publishPresentationChange(
+            previous = uiState.presentation,
+            next = next.presentation,
+        )
         uiState = next.copy(
             xPx = uiState.xPx, yPx = uiState.yPx,
             dragging = false, dismissTargetVisible = false, dismissTargetArmed = false,

@@ -49,11 +49,49 @@ data class SegmentCueTiming(
  */
 object VanCueWalker {
     fun cueAt(cues: List<Triple<Int, Int, Float>>, elapsedMs: Long): Pair<Int, Float> {
-        if (cues.isEmpty()) return 0 to 0f
-        var current = cues.first()
+        if (elapsedMs < 0L) return 0 to 0f
+        // A future cue never becomes active before its actual offset, even when
+        // an upstream packet is out of order or contains invalid numeric values.
+        var current: Triple<Int, Int, Float>? = null
+        var latest = -1
         for (cue in cues) {
-            if (cue.first <= elapsedMs) current = cue else break
+            if (cue.first >= 0 && cue.first <= elapsedMs && cue.first >= latest) {
+                current = cue
+                latest = cue.first
+            }
         }
-        return current.second to current.third.coerceIn(0f, 1f)
+        val chosen = current ?: return 0 to 0f
+        val viseme = when {
+            chosen.second < 0 -> 0
+            chosen.second > 4 -> 1 // canonical unknown positive viseme fallback
+            else -> chosen.second
+        }
+        val open = if (chosen.third.isFinite()) chosen.third.coerceIn(0f, 1f) else 0f
+        return viseme to open
+    }
+}
+
+/**
+ * Android TTS onRangeStart exposes an actual spoken-text range, but no PCM.
+ * This is explicitly an approximate fallback (not audio RMS or phoneme recognition),
+ * used only when there is no upstream cue track or measured local PCM.
+ */
+object VanRangeCueEstimator {
+    fun forTextRange(text: String, start: Int, end: Int): Pair<Int, Float> {
+        if (start < 0 || end <= start || end > text.length) return 0 to 0f
+        val segment = text.substring(start, end).lowercase(java.util.Locale.ROOT)
+        val vowel = segment.firstOrNull { it in "aeiou" }
+        val shape = when (vowel) {
+            'e', 'i' -> 2
+            'a' -> 3
+            'o', 'u' -> 4
+            else -> if (segment.any { it.isLetterOrDigit() }) 1 else 0
+        }
+        val opening = when (shape) {
+            0 -> 0f
+            1 -> 0.28f
+            else -> 0.55f
+        }
+        return shape to opening
     }
 }

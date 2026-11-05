@@ -75,10 +75,13 @@ object VanEmbodimentReducer {
             Effect.Both(VanDurableState.WAITING_FOR_OWNER, VanFiniteAction.CAUTION, urgency = 0.45f)
         "mission.resumed" -> Effect.ToState(VanDurableState.WORKING)
         "mission.verifying" -> Effect.ToState(VanDurableState.WORKING)
+        // Never infer verified success from a missing or unknown completion payload.
         "mission.completed" -> when (stateHint) {
+            "VERIFIED_SUCCESS" -> Effect.Both(VanDurableState.SUCCESS, VanFiniteAction.PRESENT_CARD)
+            "FAILED" -> Effect.ToState(VanDurableState.ERROR, urgency = 0.55f)
             "UNVERIFIABLE", "PARTIAL_SUCCESS" ->
                 Effect.Both(VanDurableState.WARNING, VanFiniteAction.SHRUG, urgency = 0.30f)
-            else -> Effect.Both(VanDurableState.SUCCESS, VanFiniteAction.PRESENT_CARD)
+            else -> Effect.ToState(VanDurableState.WARNING, urgency = 0.30f)
         }
         "mission.failed" -> Effect.ToState(VanDurableState.ERROR, urgency = 0.55f)
         "activity.started" ->

@@ -66,9 +66,16 @@ fun VanAvatar(
     budget: VanEffectBudget = VanEffectBudget.FULL,
     reducedMotion: Boolean = rememberReducedMotion(),
     phase: Float? = null,
+    orbPhase: Float? = null,
 ) {
     val motionEnabled = vanMotionEnabled(budget, animate = animate, reducedMotion = reducedMotion)
-    val effectivePhase = phase ?: vanIdlePhase(state.durableState, reducedMotion, motionEnabled)
+    // In standalone callers one active-time clock supplies BOTH independent phases.
+    // VanEmbodiment passes its existing shared body/slow phases without a second loop.
+    val localMotion = if (phase == null || orbPhase == null) {
+        rememberVanMotionFrame(state.durableState, motionEnabled)
+    } else null
+    val effectivePhase = phase ?: localMotion?.phase ?: 0f
+    val effectiveOrbPhase = orbPhase ?: localMotion?.slowPhase ?: 0f
     val context = LocalContext.current
     var decision by remember(context) { mutableStateOf(resolveRenderer(context)) }
 
@@ -112,6 +119,7 @@ fun VanAvatar(
                 motionEnabled = motionEnabled,
                 reducedMotion = reducedMotion,
                 phase = effectivePhase,
+                orbPhase = effectiveOrbPhase,
             )
         }
     }
@@ -285,6 +293,7 @@ fun VanEmbodiment(
             budget = effectiveBudget,
             reducedMotion = reducedMotion,
             phase = phase,
+            orbPhase = slowPhase,
         )
         // Faint wisps over the legs and forearms, and the rim light on VAN's edge.
         VanAuraLayer(
@@ -461,14 +470,20 @@ fun VanCanvasAvatar(
     motionEnabled: Boolean = true,
     reducedMotion: Boolean = rememberReducedMotion(),
     phase: Float? = null,
+    orbPhase: Float? = null,
 ) {
     val enabled = vanMotionEnabled(VanEffectBudget.FULL, animate = motionEnabled, reducedMotion = reducedMotion)
-    val effectivePhase = phase ?: vanIdlePhase(state.durableState, reducedMotion, enabled)
+    val localMotion = if (phase == null || orbPhase == null) {
+        rememberVanMotionFrame(state.durableState, enabled)
+    } else null
+    val effectivePhase = phase ?: localMotion?.phase ?: 0f
+    val effectiveOrbPhase = orbPhase ?: localMotion?.slowPhase ?: 0f
     val frame = VanSceneFrame(
         presentation = presentation,
         phase = effectivePhase,
         blink = if (enabled) blinkFor(effectivePhase) else 0f,
         reducedMotion = !enabled,
+        orbPhase = effectiveOrbPhase,
     )
     val ops = VanScene.build(state, frame)
     val description = vanContentDescription(state)

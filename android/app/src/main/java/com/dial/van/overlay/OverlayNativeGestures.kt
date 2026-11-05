@@ -14,6 +14,8 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalView
+import com.dial.van.visual.VanLiveVisualState
+import com.dial.van.visual.VanPointerGaze
 
 /** Resolves each materialized gesture node's coordinates before moving its native window. */
 @OptIn(ExperimentalFoundationApi::class)
@@ -46,17 +48,26 @@ internal fun Modifier.vanGestures(
         }.getOrNull()
     }
 
+    fun attendTo(localPosition: Offset) {
+        val bounds = coordinates?.takeIf { it.isAttached }?.size ?: return
+        VanPointerGaze.fromLocal(
+            localPosition.x, localPosition.y, bounds.width.toFloat(), bounds.height.toFloat(),
+        )?.let { (x, y) -> VanLiveVisualState.attention(x, y) }
+    }
+
     this
         .onGloballyPositioned { coordinates = it }
         .pointerInput(view) {
             detectDragGestures(
                 onDragStart = { position ->
                     interaction.captureDragPointer(screenPoint(position))
+                    attendTo(position)
                     interaction.beginDrag()
                 },
                 onDrag = { change, amount ->
-                    // Resolve the event before requesting any window movement.
+                    // Real owner touch in VAN's own node; never infer cross-app focus.
                     interaction.captureDragPointer(screenPoint(change.position))
+                    attendTo(change.position)
                     change.consume()
                     interaction.dragBy(amount.x, amount.y)
                 },
@@ -65,8 +76,12 @@ internal fun Modifier.vanGestures(
                         interaction.captureDragPointer(null)
                     }
                     interaction.finishDrag()
+                    VanLiveVisualState.attention(0f, 0f)
                 },
-                onDragCancel = { interaction.cancelDrag() },
+                onDragCancel = {
+                    interaction.cancelDrag()
+                    VanLiveVisualState.attention(0f, 0f)
+                },
             )
         }
         .combinedClickable(

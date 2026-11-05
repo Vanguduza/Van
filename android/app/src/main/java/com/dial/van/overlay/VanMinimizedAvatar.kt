@@ -19,6 +19,9 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import com.dial.van.visual.VanGlassTokens
+import com.dial.van.visual.VanMinimizedExpressionMap
+import com.dial.van.visual.VanSmallMouth
+import com.dial.van.visual.VanScene
 import com.dial.van.visual.VanEffectBudget
 import com.dial.van.visual.rememberReducedMotion
 import com.dial.van.visual.vanMotionEnabled
@@ -56,6 +59,7 @@ fun VanMinimizedAvatar(
         0f
     }
     val palette = VanStatusPalette.forState(state.resolvedSemanticState)
+    val expression = VanMinimizedExpressionMap.from(state)
     val blink = blinkAmount(phase)
     val rimPulse = 0.38f + 0.14f * sin(phase * (2f * PI).toFloat())
 
@@ -90,17 +94,17 @@ fun VanMinimizedAvatar(
 
         // Ears + solid medium-brown face.
         drawOval(
-            color = Color(0xFFB8853C),
+            color = Color(VanScene.SKIN.toInt()),
             topLeft = Offset(faceCenter.x - faceRx * 1.11f, faceCenter.y - faceRy * 0.18f),
             size = Size(faceRx * 2.22f, faceRy * 0.45f),
         )
         drawOval(
-            color = Color(0xFFB8853C),
+            color = Color(VanScene.SKIN.toInt()),
             topLeft = Offset(faceCenter.x - faceRx, faceCenter.y - faceRy),
             size = Size(faceRx * 2f, faceRy * 2f),
         )
         drawOval(
-            color = Color(0xFF8A5C3A).copy(alpha = 0.30f),
+            color = Color(VanScene.SKIN_SHADOW.toInt()).copy(alpha = 0.30f),
             topLeft = Offset(faceCenter.x - faceRx * 0.88f, faceCenter.y + faceRy * 0.18f),
             size = Size(faceRx * 1.76f, faceRy * 0.76f),
         )
@@ -113,53 +117,104 @@ fun VanMinimizedAvatar(
             quadraticBezierTo(center.x + d * 0.10f, center.y - d * 0.18f, center.x - d * 0.30f, center.y - d * 0.14f)
             close()
         }
-        drawPath(hair, Color(0xFFE9EAF0))
+        drawPath(hair, Color(VanScene.HAIR.toInt()))
         val hairShadow = Path().apply {
             moveTo(center.x - d * 0.25f, center.y - d * 0.15f)
             quadraticBezierTo(center.x, center.y - d * 0.31f, center.x + d * 0.27f, center.y - d * 0.16f)
             quadraticBezierTo(center.x + d * 0.14f, center.y - d * 0.17f, center.x - d * 0.25f, center.y - d * 0.15f)
             close()
         }
-        drawPath(hairShadow, Color(0xFFC2C7D3))
+        drawPath(hairShadow, Color(VanScene.HAIR_SHADOW.toInt()))
+
+        // Independent brow expression shows real owner/task urgency without
+        // changing Candidate B's approved face, hair or visor geometry.
+        val browY = center.y - d * 0.065f
+        listOf(-1f, 1f).forEach { side ->
+            val eyeX = center.x + side * d * 0.105f
+            drawLine(
+                color = Color(VanScene.BROW.toInt()),
+                start = Offset(eyeX + side * d * 0.038f, browY),
+                end = Offset(eyeX - side * d * 0.038f, browY - expression.browLift * d * 0.022f),
+                strokeWidth = (d * 0.017f).coerceAtLeast(1f),
+            )
+        }
 
         // Eyes remain blue and readable under the transparent cyan visor.
         val eyeY = center.y + d * 0.015f
-        val eyeOpen = (1f - blink).coerceIn(0.08f, 1f)
+        val eyeOpen = ((1f - blink) * (1f - 0.55f * expression.eyeNarrow)).coerceIn(0.08f, 1f)
         val gaze = state.attentionX.coerceIn(-1f, 1f) * d * 0.012f
+        val gazeVertical = state.attentionY.coerceIn(-1f, 1f) * d * 0.012f
         listOf(-1f, 1f).forEach { side ->
             val eyeX = center.x + side * d * 0.105f
             drawOval(
-                color = Color(0xFFF2F6FA),
+                color = Color(VanScene.EYE_SCLERA.toInt()),
                 topLeft = Offset(eyeX - d * 0.040f, eyeY - d * 0.026f * eyeOpen),
                 size = Size(d * 0.080f, d * 0.052f * eyeOpen),
             )
             drawCircle(
-                color = Color(0xFF1E88E5),
+                color = Color(VanScene.EYE_IRIS.toInt()),
                 radius = d * 0.021f * eyeOpen,
-                center = Offset(eyeX + gaze, eyeY),
+                center = Offset(eyeX + gaze, eyeY + gazeVertical),
             )
             drawCircle(
                 color = Color(0xFF10233A),
                 radius = d * 0.010f * eyeOpen,
-                center = Offset(eyeX + gaze, eyeY),
+                center = Offset(eyeX + gaze, eyeY + gazeVertical),
             )
         }
 
         // Cyan transparent visor; the face itself remains opaque.
         drawRoundRect(
-            color = Color(0xFF00E5FF).copy(alpha = 0.22f),
+            color = Color(VanScene.VISOR.toInt()).copy(alpha = 0.22f),
             topLeft = Offset(center.x - d * 0.245f, center.y - d * 0.055f),
             size = Size(d * 0.49f, d * 0.16f),
             cornerRadius = androidx.compose.ui.geometry.CornerRadius(d * 0.045f),
         )
         drawRoundRect(
-            color = Color(0xFF62EAF7).copy(alpha = 0.74f),
+            color = Color(VanScene.VISOR_FRAME.toInt()).copy(alpha = 0.74f),
             topLeft = Offset(center.x - d * 0.245f, center.y - d * 0.055f),
             size = Size(d * 0.49f, d * 0.16f),
             cornerRadius = androidx.compose.ui.geometry.CornerRadius(d * 0.045f),
             style = Stroke(width = (d * 0.013f).coerceAtLeast(1f)),
         )
 
+        // Small-scale face-only articulation while the production M2 rig is pending.
+        // Drawn below the visor; no borrowed expressive character or new identity layer.
+        val mouthColor = Color(VanScene.MOUTH.toInt())
+        val mouthY = center.y + d * 0.175f
+        val mouthStroke = Stroke(width = (d * 0.018f).coerceAtLeast(1f))
+        when (expression.mouth) {
+            VanSmallMouth.NEUTRAL -> drawLine(
+                color = mouthColor,
+                start = Offset(center.x - d * 0.030f, mouthY),
+                end = Offset(center.x + d * 0.030f, mouthY),
+                strokeWidth = mouthStroke.width,
+            )
+            VanSmallMouth.SMILE, VanSmallMouth.CONCERN -> drawArc(
+                color = mouthColor,
+                startAngle = if (expression.mouth == VanSmallMouth.SMILE) 0f else 180f,
+                sweepAngle = 180f,
+                useCenter = false,
+                topLeft = Offset(center.x - d * 0.048f, mouthY - d * 0.027f),
+                size = Size(d * 0.096f, d * 0.060f),
+                style = mouthStroke,
+            )
+            VanSmallMouth.SPEECH -> {
+                val widthScale = when (expression.viseme) {
+                    2 -> 0.060f
+                    3 -> 0.050f
+                    4 -> 0.038f
+                    else -> 0.032f
+                }
+                val w = d * widthScale
+                val h = d * (0.012f + 0.075f * expression.speechOpening)
+                drawOval(
+                    color = mouthColor,
+                    topLeft = Offset(center.x - w * 0.5f, mouthY - h * 0.5f),
+                    size = Size(w, h),
+                )
+            }
+        }
     }
 }
 

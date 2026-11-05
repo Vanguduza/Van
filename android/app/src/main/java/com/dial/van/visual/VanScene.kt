@@ -28,6 +28,8 @@ data class VanSceneFrame(
     /** 0f open, 1f fully closed. */
     val blink: Float = 0f,
     val reducedMotion: Boolean = false,
+    /** Independent companion motion, taken from the slow active-time clock. */
+    val orbPhase: Float = 0f,
 )
 
 /**
@@ -121,16 +123,23 @@ object VanScene {
             addAll(hair(pen))
         }.translated(0f, bodyBob + headBob + actionHeadDrop(state) * pen.framing.zoom)
 
-        val orbDrift = sin(frame.phase * tau + 1.9f) * 0.012f * motion * pen.framing.zoom
-        val orb = orb(pen, palette, state, frame)
-            .translated(state.attentionX * pen.l(18f), orbDrift + state.attentionY * pen.l(12f))
-
+        // Orb travels independently of the character's body and attention inputs.
+        // The slow active-time clock is unrelated to the state-dependent body phase.
+        val companion = VanCompanionOrbMotion.sample(
+            phase = frame.orbPhase,
+            homeX = pen.x(ORB_X),
+            homeY = pen.y(ORB_Y),
+            radius = pen.l(ORB_R),
+            reducedMotion = frame.reducedMotion,
+        )
+        val orbDrawing = orb(pen, palette, state, frame, companion.spinDegrees)
+            .translated(companion.centerX - pen.x(ORB_X), companion.centerY - pen.y(ORB_Y))
         val muted = (character + head).muted(palette.desaturation, palette.dim)
-
-        return muted +
-            statusMarks(pen, palette, state, frame) +
-            hologramGlyph(pen, palette, state) +
-            orb
+        val marks = statusMarks(pen, palette, state, frame) + hologramGlyph(pen, palette, state)
+        // On a side-transfer, put the companion behind VAN so it does not pass
+        // in front of his eyes, visor, mouth or the owner's result card.
+        return if (companion.behindVan) orbDrawing + muted + marks
+            else muted + marks + orbDrawing
     }
 
     /**
@@ -488,6 +497,7 @@ object VanScene {
         palette: VanStatusPalette,
         state: VanVisualState,
         frame: VanSceneFrame,
+        spinDegrees: Float,
     ): List<VanDrawOp> {
         val offline = state.durableState == VanDurableState.OFFLINE ||
             state.durableState == VanDurableState.SLEEPING
@@ -502,9 +512,26 @@ object VanScene {
         }
         ops += VanDrawOp.Circle(cx, cy, r, VanColors.of(ORB_BODY))
         ops += VanDrawOp.Circle(cx, cy, r * 0.94f, VanColors.scaleAlpha(eye, 0.70f * alive + 0.15f), strokeWidth = r * 0.06f)
+        // Independent rotating rim catches (not a body/aura ring) visibly express
+        // the companion turning even while VAN is completely idle.
+        if (!frame.reducedMotion && !offline) {
+            ops += VanDrawOp.Arc(
+                cx, cy, r * 0.84f, spinDegrees, 62f,
+                VanColors.scaleAlpha(eye, 0.82f), r * 0.09f,
+            )
+        }
         ops += VanDrawOp.Circle(cx + r * 0.18f, cy - r * 0.04f, r * 0.64f, VanColors.of(ORB_FACE))
-        // Bar eyes squash into a blink with VAN's own blink.
-        val squash = (1f - frame.blink.coerceIn(0f, 1f) * 0.85f)
+        // Companion eyelids blink on a separate slow cadence, not VAN's blink.
+        val independentBlink = if (frame.reducedMotion) 0f else {
+            // Three independent eye cycles per slow orbit (~4 seconds between blinks).
+            val p = if (frame.orbPhase.isFinite()) {
+                (((frame.orbPhase * 3f) % 1f) + 1f) % 1f
+            } else 0f
+            val blinkA = (1f - kotlin.math.abs(p - 0.14f) / 0.012f).coerceIn(0f, 1f)
+            val blinkB = (1f - kotlin.math.abs(p - 0.64f) / 0.012f).coerceIn(0f, 1f)
+            maxOf(blinkA, blinkB)
+        }
+        val squash = 1f - independentBlink * 0.85f
         for (dx in listOf(0.02f, 0.40f)) {
             ops += VanDrawOp.RoundRect(
                 cx = cx + r * dx,

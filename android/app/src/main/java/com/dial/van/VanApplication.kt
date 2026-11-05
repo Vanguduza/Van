@@ -795,7 +795,16 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
             is VanEmbodimentReducer.Effect.ToState ->
                 VanLiveVisualState.transition(state = effect.state, urgency = effect.urgency)
             is VanEmbodimentReducer.Effect.ToAction ->
-                VanLiveVisualState.action(effect.action)
+                VanLiveVisualState.action(
+                    effect.action,
+                    // CELEBRATE is emitted only by the reducer's exact verified
+                    // GOOD_DECISION_GOOD_OUTCOME quadrant, never from P&L alone.
+                    evidence = if (effect.action == com.dial.van.visual.VanFiniteAction.CELEBRATE) {
+                        com.dial.van.visual.VanCueEvidence.VERIFIED_SOURCE
+                    } else {
+                        com.dial.van.visual.VanCueEvidence.LOCAL_UI
+                    },
+                )
             is VanEmbodimentReducer.Effect.Both ->
                 VanLiveVisualState.transition(
                     state = effect.state,
@@ -976,6 +985,8 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
     }
 
     override fun onSpeechFrame(frame: SpeechSyncFrame) {
+        // A late frame from a cancelled utterance must not reopen the mouth.
+        if (!ttsOutput.isSpeaking()) return
         VanLiveVisualState.speechFrame(mouthOpen = frame.mouthOpen, viseme = frame.viseme)
     }
 
@@ -1003,6 +1014,11 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
 
     override fun onUtteranceInterrupted(utteranceId: String) {
         appScope.launch(Dispatchers.Main.immediate) {
+            // Do not clear a newer utterance that already replaced the interrupted one.
+            if (!ttsOutput.isSpeaking()) {
+                VanLiveVisualState.speakingEnded()
+                VanLiveVisualState.clearAction()
+            }
             if (::voiceEdge.isInitialized) voiceEdge.onUtteranceInterrupted(utteranceId)
         }
     }
