@@ -194,17 +194,22 @@ object VanAuraPlanner {
         /** 0..1 white expansion pulse (a closed trade, a success burst). */
         pulse: Float = 0f,
     ): List<VanAuraOp> {
-        if (radius <= 1f || (spec.intensity <= 0.01f && semanticSpec.intensity <= 0.01f)) {
+        if (!radius.isFinite() || !centerX.isFinite() || !centerY.isFinite() || !characterCenterY.isFinite() ||
+            radius <= 1f || (spec.intensity <= 0.01f && semanticSpec.intensity <= 0.01f)) {
             return emptyList()
         }
         val bodyEdge = radius * 2f
-        val motion = VanWindFieldMotion.sample(spec, phase, budget)
+        // Even callers supplying a moving phase cannot animate a still budget.
+        val activePhase = if (budget.allowMotion && phase.isFinite()) VanWindFieldMotion.wrap01(phase) else VanAuraMotionPhase.REST_PHASE
+        val activeSlow = if (budget.allowMotion && slowPhase.isFinite()) VanWindFieldMotion.wrap01(slowPhase) else 0f
+        val activePulse = if (budget.allowMotion && pulse.isFinite()) pulse.coerceIn(0f, 1f) else 0f
+        val motion = VanWindFieldMotion.sample(spec, activePhase, budget)
         val ops = mutableListOf<VanAuraOp>()
 
         ops += zoneA(spec, motion, centerX, centerY, bodyEdge, identityColor)
         ops += VanFlameAura.plan(
-            spec, semanticSpec, centerX, characterCenterY, bodyEdge, budget, phase, identityColor,
-            framing, silhouette, slowPhase, pulse,
+            spec, semanticSpec, centerX, characterCenterY, bodyEdge, budget, activePhase, identityColor,
+            framing, silhouette, activeSlow, activePulse,
         )
 
         // CF-D-06 (owner): the aura is the flame envelope and its embers, nothing else. The

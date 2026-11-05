@@ -33,6 +33,8 @@ internal interface OverlayInteractionHost {
     fun dismissOverlay()
     fun failWindow()
     fun environmentChanged()
+    fun boardSizeChanged(size: OverlaySize?)
+    fun imeObserved(visible: Boolean, topPx: Int)
 }
 
 /** Native interaction/geometry binding. No foreground-service or product authority lives here. */
@@ -55,6 +57,8 @@ internal class OverlayWindowInteraction(private val host: OverlayInteractionHost
     private var settleAnimator: ValueAnimator? = null
     private var settleMotion: OverlaySettleMotion? = null
     private var dragPointer: OverlayPoint? = null
+    private val boards = OverlayWorkboardWindow(host, ::screenBounds, ::windowSize, ::dp)
+    fun preparePresentation(previous: VanOverlayPresentation, next: VanOverlayPresentation) = boards.prepare(previous, next)
     private fun dp(value: Int) = (value * resources.displayMetrics.density).toInt()
     private fun canUseWindow() = host.canUseWindow()
     private fun updateWindow() = host.updateWindow()
@@ -66,8 +70,30 @@ internal class OverlayWindowInteraction(private val host: OverlayInteractionHost
     private fun hideDismissTarget() { dragPointer = null; host.hideDismissTarget() }
     private fun failWindow() = host.failWindow()
     private fun syncPosition() { uiState = uiState.copy(xPx = layoutParams.x, yPx = layoutParams.y) }
+    private fun observeOwnWindowId(view: View) {
+        // Public SDK API: metadata for OUR OWN view only. Do not read text,
+        // children or another application's accessibility nodes.
+        val id = runCatching {
+            val info = view.createAccessibilityNodeInfo()
+            try { info.windowId } finally {
+                @Suppress("DEPRECATION")
+                info.recycle()
+            }
+        }.getOrDefault(-1)
+        OverlayOwnWindowIdentity.observed(id)
+    }
+
     fun onWindowInsets(view: View, insets: WindowInsets): WindowInsets {
+        observeOwnWindowId(view)
         val next = screenBounds()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            val ime = insets.getInsets(WindowInsets.Type.ime())
+            val visible = insets.isVisible(WindowInsets.Type.ime())
+            // Direct insets keep chat keyboard placement working even without the
+            // optional obstruction accessibility service. Never inspect UI content.
+            if (!visible || ime.bottom > 0) host.imeObserved(visible,
+                if (visible) next.heightPx - ime.bottom else Int.MAX_VALUE)
+        }
         if (next != lastScreen) {
             lastScreen = next
             view.post { host.environmentChanged() }
@@ -76,6 +102,7 @@ internal class OverlayWindowInteraction(private val host: OverlayInteractionHost
     }
     val layoutListener = View.OnLayoutChangeListener { _, left, top, right, bottom,
         oldLeft, oldTop, oldRight, oldBottom ->
+        host.view?.let { observeOwnWindowId(it) }
         if (right - left != oldRight - oldLeft || bottom - top != oldBottom - oldTop) {
             stopInteraction()
             reconcileWindow()
@@ -83,8 +110,9 @@ internal class OverlayWindowInteraction(private val host: OverlayInteractionHost
     }
 
     val attachListener = object : View.OnAttachStateChangeListener {
-        override fun onViewAttachedToWindow(view: View) = Unit
+        override fun onViewAttachedToWindow(view: View) { observeOwnWindowId(view) }
         override fun onViewDetachedFromWindow(view: View) {
+            OverlayOwnWindowIdentity.detached()
             if (canUseWindow() && !visibility.destroying) failWindow()
         }
     }
@@ -140,6 +168,9 @@ internal class OverlayWindowInteraction(private val host: OverlayInteractionHost
         if (!canUseWindow()) return
         val screen = screenBounds()
         lastScreen = screen
+        if (boards.reconcile()) {
+            refreshKeyboardOverlap(); applyVisibilityLifecycle(); return
+        }
         val size = windowSize()
         val availableWidth = screen.safeWidth.coerceAtLeast(1)
         val availableHeight = screen.safeHeight.coerceAtLeast(1)
@@ -191,6 +222,7 @@ internal class OverlayWindowInteraction(private val host: OverlayInteractionHost
             return
         }
         // begin cancels the native animator before it reads the actual placement.
+        boards.dragged()
         val next = dragController.begin(uiState, SystemClock.uptimeMillis())
         uiState = if (canUseWindow() && OverlayVisibilityPolicy.shouldAnimate(visibility)) next
         else next.copy(dragging = false, dismissTargetVisible = false, dismissTargetArmed = false)
@@ -201,6 +233,7 @@ internal class OverlayWindowInteraction(private val host: OverlayInteractionHost
     fun dragBy(dx: Float, dy: Float) {
         if (!canUseWindow() || !uiState.dragging) return
         val next = dragController.drag(uiState, dx, dy, SystemClock.uptimeMillis())
+        boards.dragged()
         uiState = if (canUseWindow() && OverlayVisibilityPolicy.shouldAnimate(visibility)) next
         else next.copy(dragging = false, dismissTargetVisible = false, dismissTargetArmed = false)
     }
@@ -272,6 +305,7 @@ internal class OverlayWindowInteraction(private val host: OverlayInteractionHost
     private val dragController = OverlayDragController(dragWindow)
 
     private fun completeDock(edge: DockEdge) {
+        boards.dragged()
         dockEdge = edge
         persistState()
         if (edge != DockEdge.NONE && canUseWindow()) {

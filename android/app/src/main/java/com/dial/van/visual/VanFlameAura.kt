@@ -18,8 +18,7 @@ import kotlin.math.sqrt
  *   energy visibly leaves VAN rather than sitting on him.
  * * **Front/back depth.** A few faint wisps cross in front of the legs and forearms; never
  *   the face. Everything else is behind the opaque body.
- * * **Rim light.** A thin glow along VAN's own edge, in the aura's colour, so the field reads as
- *   light that falls on him.
+ * * **No stroke contour.** Filled flame wisps supply depth; no rim, arcs or field-line bands.
  * * **Embers** rise off the upper flanks.
  * * **Two clocks.** [phase] loops seamlessly; [slowPhase] runs on a long, unrelated period so
  *   the combined motion does not visibly repeat.
@@ -123,7 +122,9 @@ object VanFlameAura {
             val wisps = min(MAX_FRONT_WISPS, (2 + 4 * intensity).toInt())
             ops += frame.frontWisps(wisps, height, mix(color, WHITE, MID_WHITE_MIX), min(FRONT_ALPHA_MAX, 0.08f + 0.18f * intensity))
         }
-        frame.rim(mix(color, WHITE, 0.30f), min(RIM_ALPHA_MAX, 0.12f + 0.40f * intensity))?.let { ops += it }
+        // Owner reaffirmed 2026-11-05: no contour strokes, field arcs or orbiting
+        // aura lines. The opaque body catches light through filled wisps only.
+        // Retained legacy constants/types are never emitted by the live plan.
         return ops
     }
 
@@ -150,7 +151,13 @@ object VanFlameAura {
             val dx = x - cx
             val dy = y - cy
             val d = sqrt(dx * dx + dy * dy)
-            return if (d > reach) (cx + dx / d * reach) to (cy + dy / d * reach) else x to y
+            // A circular hard clamp made saturated tips trace a visible field arc.
+            // Keep the same maximum reach, but soften its boundary with a smooth,
+            // spatially varying flow contour instead of placing tips on a circle.
+            val angle = kotlin.math.atan2(dy, dx)
+            val flow = 0.97f + 0.03f * sin(angle * 5f + TAU * phase + slowPhase)
+            val localReach = reach * flow
+            return if (d > localReach) (cx + dx / d * localReach) to (cy + dy / d * localReach) else x to y
         }
 
         /** A closed ring of flame tongues around the silhouette. */
@@ -205,7 +212,10 @@ object VanFlameAura {
             var total = 0f
             for (k in 0 until tongues) {
                 val h = hash(k * 7.13f + seed * 31f)
-                val centre = (k + 0.5f * hash(k * 3.7f + seed)) / tongues
+                // The flame licks travel slightly along the flank as well as
+                // stretching: an idle aura must not look like a pulsing still.
+                val drift = if (flicker > 0f) 0.25f * sin(TAU * (phase + h) + slowPhase) else 0f
+                val centre = frac((k + 0.5f * hash(k * 3.7f + seed) + drift) / tongues)
                 var d = abs(t - centre)
                 if (d > 0.5f) d = 1f - d
                 val width = (0.38f + 0.42f * hash(k * 1.91f + seed * 5f)) / tongues
@@ -273,40 +283,6 @@ object VanFlameAura {
                 )
             }
             return out
-        }
-
-        /**
-         * Light falling on VAN's own edge: runs of points along the silhouette, broken wherever
-         * the chord between two samples would cross empty space (between the legs, under the
-         * arm) so the rim never becomes a line drawn across the background.
-         */
-        fun rim(color: Int, alpha: Float): VanAuraOp.Rim? {
-            val runs = ArrayList<List<VanFieldPoint>>()
-            var run = ArrayList<VanFieldPoint>()
-            fun flush() {
-                if (run.size >= 3) runs += run
-                run = ArrayList()
-            }
-            for (i in 0..SAMPLES) {
-                val angle = VanSilhouette.angleAt(i)
-                val dy = sin(angle)
-                if (dy > 0.6f) { flush(); continue }  // not along the soles
-                val r = shape.extent(i) * edge - edge * 0.004f
-                val point = VanFieldPoint(originX + cos(angle) * r, originY + dy * r)
-                val prev = run.lastOrNull()
-                if (prev != null) {
-                    val mx = (prev.x + point.x) / 2f
-                    val my = (prev.y + point.y) / 2f
-                    // Nudge the midpoint towards the centre; if that is still outside, the chord spans a gap.
-                    val inX = mx + (originX - mx) * 0.03f
-                    val inY = my + (originY - my) * 0.03f
-                    if (!insideBody(inX, inY)) flush()
-                }
-                run += point
-            }
-            flush()
-            if (runs.isEmpty() || alpha <= 0.01f) return null
-            return VanAuraOp.Rim(runs = runs, color = color, alpha = alpha, width = max(edge * RIM_WIDTH, 1f))
         }
 
         /** Sparks lifting off the upper flanks and fading as they rise. */

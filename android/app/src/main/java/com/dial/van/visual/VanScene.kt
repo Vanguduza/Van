@@ -546,59 +546,11 @@ object VanScene {
         return ops
     }
 
-    /**
-     * State marks are broken arcs and hologram fragments — never a full ring (Gate A).
-     * Distinct shapes carry warning/error/success/urgent/approval in grayscale (Gate E).
-     */
-    private fun statusMarks(
-        pen: Pen,
-        palette: VanStatusPalette,
-        @Suppress("UNUSED_PARAMETER") state: VanVisualState,
-        frame: VanSceneFrame,
-    ): List<VanDrawOp> {
-        val cx = 0.5f
-        val cy = 0.48f
-        val r = 0.47f - 0.012f * (pen.framing.zoom - 1f)
-        val motion = if (frame.reducedMotion) 0f else 1f
-        val spin = frame.phase * 40f * motion
-        val width = 0.018f
-        val ops = mutableListOf<VanDrawOp>()
-        val ink = VanColors.scaleAlpha(palette.accent, 0.88f)
-
-        when (palette.ringStyle) {
-            VanRingStyle.NONE -> Unit
-            VanRingStyle.PROGRESS -> {
-                ops += VanDrawOp.Arc(cx, cy, r, -48f + spin, 86f, ink, width)
-                ops += VanDrawOp.Arc(cx, cy, r * 1.06f, 122f - spin * 0.4f, 54f, VanColors.scaleAlpha(palette.accent, 0.45f), width * 0.8f)
-            }
-            VanRingStyle.DOTS -> {
-                repeat(3) { i ->
-                    val a = Math.toRadians((spin + i * 48f + 18f).toDouble()).toFloat()
-                    ops += VanDrawOp.Circle(
-                        cx + cos(a) * r * 0.92f,
-                        cy + sin(a) * r * 0.78f,
-                        0.016f,
-                        VanColors.scaleAlpha(palette.accent, 0.55f + 0.12f * i),
-                    )
-                }
-            }
-            VanRingStyle.DASHED -> {
-                repeat(5) { i ->
-                    val start = -70f + i * 52f
-                    ops += VanDrawOp.Arc(cx, cy, r, start, 22f, VanColors.scaleAlpha(palette.accent, if (i % 2 == 0) 0.8f else 0.28f), width)
-                }
-            }
-            VanRingStyle.PULSE -> {
-                ops += VanDrawOp.Arc(cx, cy, r, -30f, 72f, ink, width)
-                ops += VanDrawOp.Arc(cx, cy, r * 0.90f, 150f, 64f, VanColors.scaleAlpha(palette.accent, 0.4f), width * 0.8f)
-            }
-            VanRingStyle.DOUBLE -> {
-                ops += VanDrawOp.Arc(cx, cy, r, -150f, 96f, ink, width)
-                ops += VanDrawOp.Arc(cx, cy, r, 28f, 88f, ink, width)
-            }
-        }
-        return ops
-    }
+    /** Owner correction: never surround the fallback character with field arcs.
+     * Critical non-colour semantics remain in hologramGlyph and caption/chrome. */
+    @Suppress("UNUSED_PARAMETER")
+    private fun statusMarks(pen: Pen, palette: VanStatusPalette, state: VanVisualState,
+                            frame: VanSceneFrame): List<VanDrawOp> = emptyList()
 
     private fun hologramGlyph(
         pen: Pen,

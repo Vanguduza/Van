@@ -1,6 +1,7 @@
 package com.dial.van.preview
 
 import com.dial.van.visual.VanAuraDepth
+import com.dial.van.visual.VanAuraMotionPhase
 import com.dial.van.visual.VanAuraSpec
 import com.dial.van.visual.VanAuraSpecs
 import com.dial.van.visual.VanDurableState
@@ -99,7 +100,7 @@ object VanAuraMotion {
         for (state in states) {
             val spec = VanAuraSpecs.forState(state)
             // One fast loop per ~2.6 s, as the shipping clock runs a working VAN.
-            val loopSeconds = 2.6f
+            val loopSeconds = VanAuraMotionPhase.FLOW_PERIOD_NANOS / 1_000_000_000f
             val frames = (0 until seconds * fps).map { f ->
                 val t = f.toFloat() / fps
                 val size = 240

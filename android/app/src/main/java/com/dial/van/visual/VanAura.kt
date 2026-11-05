@@ -7,10 +7,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.Stroke
 import kotlin.math.sqrt
 
 /**
@@ -110,11 +107,11 @@ fun DrawScope.drawAuraOps(ops: List<VanAuraOp>, depth: VanAuraDepth = VanAuraDep
         if (!depth.accepts(op)) continue
         when (op) {
             is VanAuraOp.Radial -> drawRadialOp(op)
-            is VanAuraOp.Polyline -> drawPolylineOp(op)
+            is VanAuraOp.Polyline -> Unit // retired field-line geometry must never reappear
             is VanAuraOp.Dot -> drawDotOp(op)
-            is VanAuraOp.Quad -> drawQuadOp(op)
+            is VanAuraOp.Quad -> Unit // no link/field arc
             is VanAuraOp.Flame -> drawFlameOp(op)
-            is VanAuraOp.Rim -> drawRimOp(op)
+            is VanAuraOp.Rim -> Unit // no silhouette outline masquerading as aura
         }
     }
 }
@@ -132,34 +129,6 @@ private fun DrawScope.drawRadialOp(op: VanAuraOp.Radial) {
     } else {
         drawPath(path = op.clip.toComposePath(), brush = brush)
     }
-}
-
-private fun DrawScope.drawPolylineOp(op: VanAuraOp.Polyline) {
-    if (op.points.size < 2 || op.alpha <= 0.001f) return
-    val path = Path().apply {
-        op.points.forEachIndexed { index, point ->
-            if (index == 0) moveTo(point.x, point.y) else lineTo(point.x, point.y)
-        }
-    }
-    val color = Color(op.color)
-    drawPath(
-        path = path,
-        color = color.copy(alpha = minOf(op.alpha * op.glowAlphaScale, op.glowAlphaCeiling)),
-        style = Stroke(op.glowWidth, cap = StrokeCap.Round, join = StrokeJoin.Round),
-    )
-    val core = op.whiteCoreWidth
-    if (core != null) {
-        drawPath(
-            path = path,
-            color = Color.White.copy(alpha = op.whiteCoreAlpha),
-            style = Stroke(core, cap = StrokeCap.Round, join = StrokeJoin.Round),
-        )
-    }
-    drawPath(
-        path = path,
-        color = color.copy(alpha = op.alpha),
-        style = Stroke(op.width, cap = StrokeCap.Round, join = StrokeJoin.Round),
-    )
 }
 
 private fun DrawScope.drawDotOp(op: VanAuraOp.Dot) {
@@ -184,32 +153,6 @@ private fun DrawScope.drawFlameOp(op: VanAuraOp.Flame) {
         radius = op.gradientRadius,
     )
     drawPath(path = op.path.toComposePath(), brush = brush)
-}
-
-private fun DrawScope.drawRimOp(op: VanAuraOp.Rim) {
-    if (op.alpha <= 0.001f) return
-    val color = Color(op.color)
-    for (run in op.runs) {
-        if (run.size < 2) continue
-        val path = Path().apply {
-            run.forEachIndexed { index, point -> if (index == 0) moveTo(point.x, point.y) else lineTo(point.x, point.y) }
-        }
-        drawPath(path, color.copy(alpha = op.alpha * 0.35f), style = Stroke(op.width * 3f, cap = StrokeCap.Round, join = StrokeJoin.Round))
-        drawPath(path, color.copy(alpha = op.alpha), style = Stroke(op.width, cap = StrokeCap.Round, join = StrokeJoin.Round))
-    }
-}
-
-private fun DrawScope.drawQuadOp(op: VanAuraOp.Quad) {
-    if (op.alpha <= 0.001f) return
-    val path = Path().apply {
-        moveTo(op.startX, op.startY)
-        quadraticBezierTo(op.controlX, op.controlY, op.endX, op.endY)
-    }
-    drawPath(
-        path = path,
-        color = Color(op.color).copy(alpha = op.alpha),
-        style = Stroke(width = op.width, cap = StrokeCap.Round),
-    )
 }
 
 private fun List<VanPathSeg>.toComposePath(): Path = Path().apply {

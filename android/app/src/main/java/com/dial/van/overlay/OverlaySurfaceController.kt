@@ -26,6 +26,9 @@ internal class OverlaySurfaceController {
         widthDp: Float,
         heightDp: Float,
         gestures: Modifier,
+        dragHandle: Modifier = Modifier,
+        boardWidthDp: Float? = null,
+        boardHeightDp: Float? = null,
         onUiChange: (VanOverlayUiState) -> Unit,
         onCommandCentre: (String?) -> Unit,
         onTradingRoute: (String) -> Unit,
@@ -47,7 +50,7 @@ internal class OverlaySurfaceController {
             app.voiceSession.beginOwnerTurn()
         }
         val actions = VanOverlayActions(
-            gestures = gestures,
+            gestures = gestures, dragHandle = dragHandle,
             onQuickControl = { label ->
                 when (label) {
                     "Chat" -> chat(true)
@@ -74,6 +77,8 @@ internal class OverlaySurfaceController {
                 blurBehindActive = blurBehindActive,
                 maximizedWidthDp = widthDp - OverlayTheme.MAXIMIZED_HORIZONTAL_MARGIN_DP * 2,
                 maximizedHeightDp = heightDp * OverlayTheme.MAXIMIZED_HEIGHT_FRACTION,
+                boardWidthDp = boardWidthDp,
+                boardHeightDp = boardHeightDp,
             ),
             actions = actions,
         )

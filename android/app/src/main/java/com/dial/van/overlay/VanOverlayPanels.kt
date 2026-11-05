@@ -3,6 +3,8 @@ package com.dial.van.overlay
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,6 +21,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -35,6 +39,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dial.van.VanApplication
@@ -81,9 +86,9 @@ internal fun ColumnScope.TradesWorkboardPanel(
         )
     }
     Column(modifier = Modifier.fillMaxWidth().weight(1f)) {
-        Row(horizontalArrangement = Arrangement.spacedBy(5.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(5.dp), verticalAlignment = Alignment.CenterVertically) {
             TradeView.entries.forEach { candidate ->
-                WorkChip(candidate.label, accent) { onView(candidate) }
+                WorkChip(candidate.label, accent, selected = candidate == view) { onView(candidate) }
             }
             WorkChip("Refresh", accent) { onRefresh() }
             WorkChip("Open", accent) {
@@ -94,10 +99,10 @@ internal fun ColumnScope.TradesWorkboardPanel(
         when (val current = state) {
             TradeBookState.Loading -> Text("Reading the trading ledger…", color = Color(0xFFB6C2D0), fontSize = 10.sp)
             is TradeBookState.Unavailable ->
-                Text(current.reason, color = Color(0xFFFFB300), fontSize = 10.sp, maxLines = 3)
+                Text(current.reason, color = Color(0xFFFFB300), fontSize = 12.sp, maxLines = 3)
             is TradeBookState.Ready -> {
                 if (!current.ledgerAvailable) {
-                    Text(TradingFormat.unavailableState(null), color = Color(0xFFFFB300), fontSize = 10.sp, maxLines = 3)
+                    Text(TradingFormat.unavailableState(null), color = Color(0xFFFFB300), fontSize = 12.sp, maxLines = 3)
                 } else if (current.rows.isEmpty()) {
                     Text(view.emptyCopy, color = Color(0xFFB6C2D0), fontSize = 10.sp)
                 } else {
@@ -112,7 +117,7 @@ internal fun ColumnScope.TradesWorkboardPanel(
         Text(
             "Shown here only. Van does not place or change trades.",
             color = Color(0xFF7F9099),
-            fontSize = 8.sp,
+            fontSize = 12.sp,
             maxLines = 2,
         )
     }
@@ -138,6 +143,13 @@ internal fun ChatComposer(
     draft: String,
     onDraft: (String) -> Unit,
 ) {
+    fun send() {
+        val text = draft.trim()
+        if (text.isNotEmpty()) {
+            app.commandController.submitText(text, VanCommandSource.CHAT)
+            onDraft("")
+        }
+    }
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(5.dp),
@@ -149,15 +161,11 @@ internal fun ChatComposer(
             modifier = Modifier.weight(1f),
             singleLine = compact,
             maxLines = if (compact) 1 else 3,
-            label = { Text("Command", fontSize = 10.sp) },
+            label = { Text("Message VAN", fontSize = 12.sp) },
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
+            keyboardActions = KeyboardActions(onSend = { send() }),
         )
-        WorkChip("Send", accent) {
-            val text = draft.trim()
-            if (text.isNotEmpty()) {
-                app.commandController.submitText(text, VanCommandSource.CHAT)
-                onDraft("")
-            }
-        }
+        WorkChip("Send", accent, enabled = draft.isNotBlank()) { send() }
     }
 }
 
@@ -176,7 +184,7 @@ internal fun ConversationBubble(role: VanMessageRole, text: String, accent: Int)
             .background(background)
             .padding(8.dp),
     ) {
-        Text(text, color = Color(0xFFF4FCFF), fontSize = 11.sp)
+        Text(text, color = Color(0xFFF4FCFF), fontSize = 13.sp)
     }
 }
 

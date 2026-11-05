@@ -24,6 +24,7 @@ internal fun Modifier.vanGestures(
     onTap: () -> Unit,
     onDoubleTap: () -> Unit,
     onLongPress: () -> Unit,
+    clicks: Boolean = true,
 ): Modifier = composed {
     val view = LocalView.current
     // Each materialized gesture owns its coordinates, including AnimatedContent nodes.
@@ -61,13 +62,13 @@ internal fun Modifier.vanGestures(
             detectDragGestures(
                 onDragStart = { position ->
                     interaction.captureDragPointer(screenPoint(position))
-                    attendTo(position)
+                    if (clicks) attendTo(position)
                     interaction.beginDrag()
                 },
                 onDrag = { change, amount ->
                     // Real owner touch in VAN's own node; never infer cross-app focus.
                     interaction.captureDragPointer(screenPoint(change.position))
-                    attendTo(change.position)
+                    if (clicks) attendTo(change.position)
                     change.consume()
                     interaction.dragBy(amount.x, amount.y)
                 },
@@ -84,9 +85,9 @@ internal fun Modifier.vanGestures(
                 },
             )
         }
-        .combinedClickable(
+        .then(if (clicks) Modifier.combinedClickable(
             onClick = { onTap() },
             onDoubleClick = { onDoubleTap() },
             onLongClick = { onLongPress() },
-        )
+        ) else Modifier)
 }

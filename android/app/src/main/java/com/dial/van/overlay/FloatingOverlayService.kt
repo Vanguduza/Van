@@ -43,6 +43,7 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
     private var uiState by mutableStateOf(VanOverlayUiState())
     private var dockEdge by mutableStateOf(DockEdge.NONE)
     private var blurBehindActive by mutableStateOf(false)
+    private var boardSize by mutableStateOf<OverlaySize?>(null)
     private var visibility by mutableStateOf(OverlayVisibility(attached = false))
 
     private var windowAttached = false
@@ -63,7 +64,7 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
                 keyboardVisible = state.keyboardVisible,
                 fullscreenAppActive = state.fullscreenAppActive,
             )
-            cancelSettle()
+            interaction.cancelSettle()
             reconcileWindow()
             refreshKeyboardOverlap()
             applyVisibilityLifecycle()
@@ -101,14 +102,19 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
         }
         override fun failWindow() = this@FloatingOverlayService.failWindow()
         override fun environmentChanged() = this@FloatingOverlayService.environmentChanged()
+        override fun boardSizeChanged(size: OverlaySize?) { boardSize = size }
+        override fun imeObserved(visible: Boolean, topPx: Int) {
+            if (visibility.keyboardVisible == visible && keyboardTopPx == topPx) return
+            this@FloatingOverlayService.keyboardTopPx = topPx
+            visibility = visibility.copy(keyboardVisible = visible)
+            if (::overlayView.isInitialized) overlayView.post { reconcileWindow() }
+        }
     })
     private val surfaceController = OverlaySurfaceController()
     private fun screenBounds() = interaction.screenBounds()
-    private fun windowSize() = interaction.windowSize()
     private fun refreshKeyboardOverlap() = interaction.refreshKeyboardOverlap()
-    private fun reconcileWindow() = interaction.reconcileWindow()
+    private fun reconcileWindow(): Unit = interaction.reconcileWindow()
     private fun stopInteraction() = interaction.stopInteraction()
-    private fun cancelSettle() = interaction.cancelSettle()
 
     @Composable
     private fun OverlayContent() {
@@ -116,10 +122,14 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
         val gestures = remember {
             Modifier.vanGestures(interaction, ::onVanTap, { openCommandCentre() }, ::showQuickControls)
         }
+        val dragHandle = remember { Modifier.vanGestures(interaction, {}, {}, {}, clicks = false) }
         surfaceController.Content(
+            dragHandle = dragHandle,
             app = application as VanApplication, uiState = uiState, visibility = visibility,
             blurBehindActive = blurBehindActive, widthDp = metrics.widthPixels / metrics.density,
             heightDp = metrics.heightPixels / metrics.density, gestures = gestures,
+            boardWidthDp = boardSize?.widthPx?.div(metrics.density),
+            boardHeightDp = boardSize?.heightPx?.div(metrics.density),
             onUiChange = ::updateUiState, onCommandCentre = ::openCommandCentre,
             onTradingRoute = ::openTradingRoute, onClose = ::stopSelf,
             onBlurAllowed = ::setBlurAllowed,
@@ -279,6 +289,7 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
             overlayView.disposeComposition()
         }
         windowAttached = false
+        OverlayOwnWindowIdentity.detached()
         if (lifecycleRegistry.currentState == Lifecycle.State.INITIALIZED) {
             lifecycleRegistry.currentState = Lifecycle.State.CREATED
         }
@@ -296,6 +307,7 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
     private fun updateUiState(next: VanOverlayUiState) {
         stopInteraction()
         val presentationChanged = next.presentation != uiState.presentation
+        if (presentationChanged && canUseWindow()) interaction.preparePresentation(uiState.presentation, next.presentation)
         OverlayVisualCueBridge.publishPresentationChange(
             previous = uiState.presentation,
             next = next.presentation,
@@ -305,10 +317,6 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
             dragging = false, dismissTargetVisible = false, dismissTargetArmed = false,
         )
         if (canUseWindow()) {
-            if (presentationChanged) {
-                layoutParams.width = WindowManager.LayoutParams.WRAP_CONTENT
-                layoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT
-            }
             applyWindowFlags()
             if (updateWindow()) {
                 reconcileWindow()
@@ -336,7 +344,7 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
 
     private fun recordActualEdge() {
         if (!::layoutParams.isInitialized) return
-        val size = windowSize()
+        val size = interaction.windowSize()
         dockEdge = VanOverlayController.edgeAt(
             layoutParams.x, layoutParams.y, size.widthPx, size.heightPx, screenBounds(),
         )

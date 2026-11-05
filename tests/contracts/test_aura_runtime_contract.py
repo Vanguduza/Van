@@ -109,7 +109,36 @@ def test_always_on_trade_reader_stays_inside_the_contract():
     assert _within(consts["POLL_MS"], reader["poll_ms"]), consts["POLL_MS"]
     overlay = (ROOT / "android/app/src/main/java/com/dial/van/overlay/FloatingOverlayService.kt").read_text(encoding="utf-8")
     # The overlay holds the reader only while it animates, and always lets go on destroy.
-    assert "OverlayTradeAura.hold(application, OverlayVisibilityPolicy.target(visibility) == OverlayLifecycleTarget.ANIMATING)" in overlay
+    lifecycle = overlay[overlay.index("private fun applyVisibilityLifecycle()"):overlay.index("override fun onCreate()")]
+    assert "val target = OverlayVisibilityPolicy.target(visibility)" in lifecycle
+    assert "OverlayTradeAura.hold(application, target == OverlayLifecycleTarget.ANIMATING)" in lifecycle
     assert "OverlayTradeAura.hold(application, visible = false)" in overlay
     route = (ROOT / "android/app/src/main/java/com/dial/van/trading/ui/TradingRoute.kt").read_text(encoding="utf-8")
     assert "VanTradeAuraPublisher.acquire(TRADING_SCREEN_HOLDER, repo, strict = true)" in route
+
+
+def test_both_executors_explicitly_reject_retired_stroked_aura_operations():
+    native = (VIS / "VanAura.kt").read_text(encoding="utf-8")
+    preview = (ROOT / "android/visual-preview/src/main/kotlin/com/dial/van/preview/GlassPainter.kt").read_text(encoding="utf-8")
+    for operation in ("Rim", "Polyline", "Quad"):
+        assert f"is VanAuraOp.{operation} -> Unit" in native
+        assert f"op is VanAuraOp.{operation}" in preview
+    planner = (VIS / "VanFlameAura.kt").read_text(encoding="utf-8")
+    assert "frame.rim(" not in planner
+    assert "VanAuraOp.Rim(" not in planner
+
+
+def test_existing_clock_drives_a_dedicated_aura_phase_without_a_second_loop():
+    source = (VIS / "VanCanvasFallback.kt").read_text(encoding="utf-8")
+    assert "VanAuraMotionPhase.at(clock.elapsedNanos)" in source
+    assert source.count("phase = sharedMotion.auraPhase") == 2
+    policy = (VIS / "VanAuraMotionPhase.kt").read_text(encoding="utf-8")
+    assert "withFrameNanos" not in policy and "rememberInfiniteTransition" not in policy
+
+
+def test_fallback_status_marks_cannot_restore_rejected_field_arcs():
+    scene = (VIS / "VanScene.kt").read_text(encoding="utf-8")
+    marks = scene[scene.index("private fun statusMarks("):scene.index("private fun hologramGlyph(")]
+    assert "emptyList()" in marks
+    assert "VanDrawOp.Arc(" not in marks
+    assert "VanDurableState.WAITING_FOR_OWNER ->" in scene[scene.index("private fun hologramGlyph("):]

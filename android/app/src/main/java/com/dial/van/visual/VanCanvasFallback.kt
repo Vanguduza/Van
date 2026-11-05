@@ -273,7 +273,7 @@ fun VanEmbodiment(
         VanAuraLayer(
             spec = activitySpec,
             semanticSpec = semanticSpec,
-            phase = phase,
+            phase = sharedMotion.auraPhase,
             budget = effectiveBudget,
             characterScale = body,
             framing = framing,
@@ -295,11 +295,11 @@ fun VanEmbodiment(
             phase = phase,
             orbPhase = slowPhase,
         )
-        // Faint wisps over the legs and forearms, and the rim light on VAN's edge.
+        // Faint FILLED wisps over lower limbs; no stroked aura rim or field arcs.
         VanAuraLayer(
             spec = activitySpec,
             semanticSpec = semanticSpec,
-            phase = phase,
+            phase = sharedMotion.auraPhase,
             budget = effectiveBudget,
             characterScale = body,
             framing = framing,
@@ -516,7 +516,7 @@ private fun vanIdlePhase(
     return rememberVanMotionFrame(state, animate && !reducedMotion, sampler).phase
 }
 
-private data class VanMotionFrame(val phase: Float, val slowPhase: Float)
+private data class VanMotionFrame(val phase: Float, val slowPhase: Float, val auraPhase: Float = VanAuraMotionPhase.REST_PHASE)
 
 @Composable
 private fun rememberVanMotionFrame(
@@ -553,7 +553,7 @@ private fun rememberVanMotionFrame(
                     }
                     val phase = clock.advance(frameNanos, period)
                     val slow = (clock.elapsedNanos % 23_700_000_000L).toFloat() / 23_700_000_000f
-                    frame = VanMotionFrame(phase, slow)
+                    frame = VanMotionFrame(phase, slow, VanAuraMotionPhase.at(clock.elapsedNanos))
                 }
             }
         } finally {

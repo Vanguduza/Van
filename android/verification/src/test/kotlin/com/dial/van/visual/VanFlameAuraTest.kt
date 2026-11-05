@@ -191,18 +191,11 @@ class VanFlameAuraTest {
     }
 
     @Test
-    fun `the rim lights VAN's edge and never bridges a gap across the background`() {
-        val rim = ops(VanDurableState.WORKING).filterIsInstance<VanAuraOp.Rim>().single()
-        assertTrue(rim.alpha <= VanFlameAura.RIM_ALPHA_MAX + 1e-4f)
-        assertTrue(rim.runs.size >= 2, "one continuous rim would have to cross the gap between the legs")
-        for (run in rim.runs) {
-            for ((a, b) in run.zipWithNext()) {
-                val mx = (a.x + b.x) / 2f; val my = (a.y + b.y) / 2f
-                val gap = kotlin.math.hypot(b.x - a.x, b.y - a.y)
-                assertTrue(gap < edge * 0.08f, "rim chord of $gap px spans empty space")
-                assertTrue(insideBody(mx + (cx - mx) * 0.05f, my + (cy - my) * 0.05f) || insideBody(mx, my) ||
-                    gap < edge * 0.02f, "rim chord crosses the background at ($mx,$my)")
-            }
+    fun `owner rejected every stroked rim and field arc`() {
+        for (state in VanDurableState.entries) for (budget in VanEffectBudget.entries) {
+            val plan = ops(state, budget = budget)
+            assertTrue(plan.none { it is VanAuraOp.Rim || it is VanAuraOp.Quad || it is VanAuraOp.Polyline },
+                "$state / $budget reintroduced a rejected stroke")
         }
     }
 

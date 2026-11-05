@@ -11,13 +11,10 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
-import kotlin.math.min
 
 /**
  * Optical glass used only for VAN's interface surfaces.
@@ -133,39 +130,18 @@ fun VanGlassSurface(
                     )
                 }
 
+                // A soft rectangular edge reflection, never the rejected oval
+                // field arcs that previously crossed the workboard's content.
                 if (style.specularAlpha > 0f) {
-                    val inset = min(size.minDimension * 0.04f, 8f)
-                    val arcSize = Size(
-                        (size.width - inset * 2f).coerceAtLeast(1f),
-                        (size.height - inset * 2f).coerceAtLeast(1f),
-                    )
-                    drawArc(
-                        color = iceCyan.copy(alpha = style.specularAlpha),
-                        startAngle = 200f,
-                        sweepAngle = 78f,
-                        useCenter = false,
-                        topLeft = Offset(inset, inset),
-                        size = arcSize,
-                        style = Stroke(
-                            width = style.borderWidthDp.dp.toPx() * 1.6f,
-                            cap = StrokeCap.Round,
+                    drawRoundRect(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(iceCyan.copy(alpha = style.specularAlpha * 0.55f), Color.Transparent),
+                            startY = 0f, endY = (size.height * 0.16f).coerceAtLeast(1f),
                         ),
+                        cornerRadius = radius,
                     )
-                    if (style.activeGlowAlpha > 0f) {
-                        drawArc(
-                            color = edge.copy(alpha = style.activeGlowAlpha),
-                            startAngle = 208f,
-                            sweepAngle = 52f,
-                            useCenter = false,
-                            topLeft = Offset(inset, inset),
-                            size = arcSize,
-                            style = Stroke(
-                                width = style.borderWidthDp.dp.toPx() * 2.2f,
-                                cap = StrokeCap.Round,
-                            ),
-                        )
-                    }
                 }
+
             },
         content = content,
     )

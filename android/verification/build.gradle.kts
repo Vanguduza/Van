@@ -75,6 +75,7 @@ sourceSets {
             // be executed here rather than only reasoned about.
             "com/dial/van/visual/RiveContract.kt",
             "com/dial/van/visual/VanAnimationClock.kt",
+            "com/dial/van/visual/VanAuraMotionPhase.kt",
             "com/dial/van/visual/VanAuraPlan.kt",
             "com/dial/van/visual/VanAuraSpec.kt",
             "com/dial/van/visual/VanExclusionPrimitive.kt",
@@ -133,6 +134,8 @@ sourceSets {
             "com/dial/van/overlay/OverlayVisibilityPolicy.kt",
             "com/dial/van/overlay/OverlayDragController.kt",
             "com/dial/van/overlay/VanOverlayController.kt",
+            "com/dial/van/overlay/WorkboardPlacement.kt",
+            "com/dial/van/overlay/OverlayWindowAwareness.kt",
             "com/dial/van/overlay/VanOverlayInteraction.kt",
             // Replaces CommandModule.kt/CommandCentreNav.kt (P3-AND-009's flat 17-module
             // grid) — the typed DNA §4 route registry and the pure nav model built on it:

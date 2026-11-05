@@ -90,6 +90,8 @@ internal data class VanOverlaySurfaceState(
     /** Measured from the window, because only the service has one. */
     val maximizedWidthDp: Float,
     val maximizedHeightDp: Float,
+    val boardWidthDp: Float? = null,
+    val boardHeightDp: Float? = null,
 )
 
 /**
@@ -111,6 +113,7 @@ internal class VanOverlayActions(
     val onTradeView: (TradeView) -> Unit,
     val onTradeRefresh: () -> Unit,
     val onDraft: (String) -> Unit,
+    val dragHandle: Modifier = Modifier,
 )
 
 @Composable
@@ -169,6 +172,7 @@ internal fun VanOverlaySurface(
                 healthLine = chrome.healthLine,
                 accent = chrome.accent,
                 latestMessage = conversation.messages.lastOrNull()?.text,
+                messages = conversation.messages,
             )
             VanOverlayPresentation.WORKBOARD_EXPANDED -> ExpandedWorkboard(
                 state = state,
@@ -216,7 +220,7 @@ internal fun FullFloatingPresence(
     Box(
         modifier = Modifier
             .width(width.dp)
-            .height(OverlayTheme.RESTING_HIT_DP.dp),
+            .height((if (showControls) 336 else OverlayTheme.RESTING_HIT_DP).dp),
         contentAlignment = Alignment.TopStart,
     ) {
         val budget = rememberVanEffectBudget()
@@ -265,7 +269,7 @@ internal fun QuickControls(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(30.dp)
+                        .height(48.dp)
                         .clip(RoundedCornerShape(9.dp))
                         .background(Color(VanGlassTokens.BABY_CYAN).copy(alpha = 0.10f))
                         .combinedClickable(onClick = { onQuickControl(label) })

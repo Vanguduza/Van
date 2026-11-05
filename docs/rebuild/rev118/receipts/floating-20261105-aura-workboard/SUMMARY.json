@@ -1,0 +1,96 @@
+{
+  "status": "LIVE_AURA_ADAPTIVE_WORKBOARD_SOURCE_VALIDATED_NOT_HANDSET_ACCEPTED",
+  "recorded_at": "2026-11-05T13:04:48.287454+00:00",
+  "base_head": "65235979f42f704b268493138e9f7aad6b89fe89",
+  "owner_correction": "Remove previously rejected field arcs/rims; visible live aura; improve existing workboard presentation/adaptability/interaction and choose available screen space on opening.",
+  "removed_arc_routes": [
+    "native stroked aura rim",
+    "procedural fallback exterior status arcs",
+    "workboard oval specular arcs"
+  ],
+  "aura_flow_period_seconds": 3.6,
+  "extra_render_loops_added": false,
+  "visible_fullscreen_logic": "known own overlay layer above full-screen background does not pause; unknown or covering-window metadata preserves conservative pause",
+  "external_node_content_read": false,
+  "workboard_placement": "measured safe insets and IME; evaluate right/left/below/above; bounded fallback; preserve resting anchor and manual placement",
+  "requested_placement_scenarios": 20000,
+  "focused_kotlin_tests": 186,
+  "original_r2_tests": 110,
+  "original_render_identity_tests": 19,
+  "aura_contract_tests": 10,
+  "original_architecture_tests": 4,
+  "registry_preflight": {
+    "cases": 374,
+    "edits": 383,
+    "findings": 0,
+    "all_mutations_executed_this_pass": false
+  },
+  "full_kotlin_compile": {
+    "inputs": 377,
+    "classes": 5572,
+    "status": "PASSED",
+    "scope": "stable original Kotlin1.9.24/SDK36/Compose1.5.14/Rive9.13.10; Kotlin+generatedJava input, not APK"
+  },
+  "final_cleanup_compile": {
+    "real_sources": 78,
+    "classes": 605,
+    "status": "PASSED",
+    "delta_from_full_run": "remove2single-use service delegation wrappers; source remains below original450line cap",
+    "current_all_input_hashes_verified": true
+  },
+  "source_render_preview": {
+    "frames": 144,
+    "states": [
+      "IDLE",
+      "WORKING",
+      "ERROR"
+    ],
+    "all_frames_unique_within_each_state": true,
+    "renderer": "original Java2D executor of shipping Kotlin plan over original Candidate B PNG",
+    "native_S24_capture": false
+  },
+  "source_sha256": {
+    "android/app/src/main/java/com/dial/van/overlay/OverlayWindowAwareness.kt": "595fea0a8d91a47dab391e10aee1a09dff5825d285207d17e0bcb8396af912a4",
+    "android/app/src/main/java/com/dial/van/overlay/OverlayWorkboardWindow.kt": "49bd0da2f0e0099c317dac8a63172e274a058eb01fb62445fd2b1e065260e8b9",
+    "android/app/src/main/java/com/dial/van/overlay/WorkboardPlacement.kt": "7d2044343da7e43b5a1917485630a7fcd545fc6b0a67e81b986966df782d8ad7",
+    "android/app/src/main/java/com/dial/van/visual/VanAuraMotionPhase.kt": "02b400772235bc43d5c5d8cc1e7378115d9adb07ef5899870b9e3875ac30cc8b",
+    "android/verification/src/test/kotlin/com/dial/van/overlay/WorkboardPlacementTest.kt": "ec521cd2375e49a8ae29631ae83002f7d3d2a8a9d60812875cecbe7374e7470e",
+    "android/verification/src/test/kotlin/com/dial/van/visual/VanAuraNoFieldLinesTest.kt": "e49f584081b5c8b80296e942133af1e6bc97415b267a6a9a05967d08f2220227",
+    "android/app/src/main/java/com/dial/van/overlay/FloatingOverlayService.kt": "eb6763053c8f7f56c7166b36c337008bb3f4d345a3a4e38bded0e1a2a17a9cce",
+    "android/app/src/main/java/com/dial/van/overlay/OverlayNativeGestures.kt": "a0c1a407938bda36dd1626bb8f6dd3a62bd7fa2cafa9b8b996ddbbedff4d1895",
+    "android/app/src/main/java/com/dial/van/overlay/OverlaySurfaceController.kt": "5d7f18b84cb3919167fe21a67727edf810d0a9546c1ebcd69e76d2427861f494",
+    "android/app/src/main/java/com/dial/van/overlay/OverlayTheme.kt": "d1273f6b79469bfead0c552a6eed5fc20db097c839c3062c1d6025650abe1d45",
+    "android/app/src/main/java/com/dial/van/overlay/OverlayWindowInteraction.kt": "52d184c3eb4ac23ed1f0fc8dd2318616e5f3ddc0bd7c7023470c06e99a3ff832",
+    "android/app/src/main/java/com/dial/van/overlay/VanGuidedControls.kt": "cb0a17c2f40affde7f772f0ff12298ae75c4a81351df27c9014f6484167af644",
+    "android/app/src/main/java/com/dial/van/overlay/VanObstructionAccessibilityService.kt": "2912e7f8d31b2219a80354fffffb1ef28e13175c729a8bb6e7ad8bc8972e74d1",
+    "android/app/src/main/java/com/dial/van/overlay/VanOverlayPanels.kt": "4e621b44a15dd5d63cfba5a280fbe5ee73825a26f50cb1ec1ef06184155e6acd",
+    "android/app/src/main/java/com/dial/van/overlay/VanOverlaySurface.kt": "bd981bf2546b2bf091e1a7a30dafd67b6301b9359448c5baef3c212a2e9816d6",
+    "android/app/src/main/java/com/dial/van/overlay/VanOverlayWorkboards.kt": "1b85b7d125344ba63f88836661908d7b958ca4bc004cc1a0ea8375dd62513654",
+    "android/app/src/main/java/com/dial/van/visual/VanAura.kt": "949179b4e5d4f26d0940a3bfcb1af5e2ae6c50fb71de427b812dee3d2e6564bb",
+    "android/app/src/main/java/com/dial/van/visual/VanAuraPlan.kt": "b28e5704531e031753c417500640f412debe1d8aa826cd338bb5fd06eb40df08",
+    "android/app/src/main/java/com/dial/van/visual/VanCanvasFallback.kt": "95d81e8e7a8fc0d7038b7e84f2348ebdb34a1ac3d1d82439256230c790a92d92",
+    "android/app/src/main/java/com/dial/van/visual/VanFlameAura.kt": "80368bf959cb26500979d2702747d235eb6de76bd93feab986d38d1292b59552",
+    "android/app/src/main/java/com/dial/van/visual/VanGlassSurface.kt": "75d4dbd84e442b313e22db94e815f865c163c640d4d423e1d415255e89bdbb37",
+    "android/app/src/main/java/com/dial/van/visual/VanScene.kt": "08bf999390fa7e227ca9d95f2579488cbb447452cafd6267bf293d6c124d943b",
+    "android/verification/build.gradle.kts": "fcd81ea41044cd9bd9cd47721997b7643ab38f3cfca03f11be17cd71e7e9661a",
+    "android/verification/src/test/kotlin/com/dial/van/visual/VanFlameAuraTest.kt": "bf2d9d6120925d9fe2895e01e0c3b01c97b17d5de87f905b9fbce427b22ea571",
+    "android/visual-preview/build.gradle.kts": "f8ef5eaabf5d5faf31b713f908795eb7bbe141959af809362bec21708f7f4f2b",
+    "android/visual-preview/src/main/kotlin/com/dial/van/preview/GlassPainter.kt": "f248c1b21d562875767917e2f3145fc7a121e64700b1f1fa81f2c28847e8edb6",
+    "android/visual-preview/src/main/kotlin/com/dial/van/preview/VanAuraMotion.kt": "e072bb0daec123218422921ceaef2971e0f443f611d2fc5e214b1ece3760d1b0",
+    "tests/contracts/test_aura_runtime_contract.py": "29e628023fa00c26daef6c5b2a40721b0da0d4a998d992108d72ceba40a03fa9"
+  },
+  "unchanged_Rive_sha256": "8e9ecab7ab90e318b7b43ef90588feb015fdb225881416028e119b7dc5c40b59",
+  "unchanged_locked_aura_contract_sha256": "e4a410ae97fa3f5921a983996b8322dd3d5ef967d9975ab226355c2a108a39ea",
+  "raw_archive_sha256": "a46e78b32d17baeeff38509f7916a223c4c3853bdc28e1d5cd0ac5c6e6e2de05",
+  "raw_archive_bytes": 10702488,
+  "raw_archive_members": 174,
+  "native_APK_assembled": false,
+  "installed_on_S24": false,
+  "physical_performance_measured": false,
+  "owner_visual_acceptance": false,
+  "remaining": [
+    "complete APK/native runtime and actual S24 visual/touch/IME/font-scale review",
+    "device frame/power/soak qualification",
+    "original Rive exact asset/layer/owner admission; new Rive candidate unchanged this pass"
+  ]
+}
