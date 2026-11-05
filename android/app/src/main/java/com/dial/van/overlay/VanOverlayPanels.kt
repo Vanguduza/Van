@@ -181,40 +181,7 @@ internal fun ConversationBubble(role: VanMessageRole, text: String, accent: Int)
 }
 
 
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-internal fun ContextAction(title: String, detail: String, onClick: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(10.dp))
-            .background(Color(VanGlassTokens.BABY_CYAN).copy(alpha = 0.08f))
-            .combinedClickable(onClick = onClick)
-            .padding(9.dp),
-    ) {
-        Column {
-            Text(title, color = Color.White, fontWeight = FontWeight.SemiBold, fontSize = 12.sp)
-            Text(detail, color = Color(0xFFB8CBD2), fontSize = 10.sp)
-        }
-    }
-}
 
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-internal fun WorkChip(label: String, accent: Int, onClick: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .height(30.dp)
-            .clip(RoundedCornerShape(9.dp))
-            .background(Color(accent).copy(alpha = 0.16f))
-            .combinedClickable(onClick = onClick)
-            .padding(horizontal = 7.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(label, color = Color(0xFFF4FCFF), fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
-    }
-}
 
 
 @Composable

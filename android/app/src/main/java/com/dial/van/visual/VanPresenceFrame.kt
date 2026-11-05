@@ -27,6 +27,7 @@ data class VanPresenceFrame(
     val viseme: Int = 0,
     val urgency: Float = 0f,
     val actionCode: Int = 0,
+    val contextCode: Int = 0,
     /**
      * P1-AURA-003 — live trading state, as a semantic fact alongside the others.
      *
@@ -112,6 +113,7 @@ data class VanPresenceFrame(
         urgency = urgency.coerceIn(0f, 1f),
         viseme = if (health == VanHealthState.OFFLINE) 0 else viseme.coerceAtLeast(0),
         actionCode = actionCode,
+        contextCode = contextCode,
         trade = tradeAuraSemantic(),
         auraPulseGeneration = tradeClosePulse,
     )

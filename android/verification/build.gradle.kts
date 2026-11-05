@@ -92,6 +92,9 @@ sourceSets {
             // existing visual codes. They run in verification rather than needing an
             // Android runtime, while their native consumers retain handset gates.
             "com/dial/van/visual/VanGestureDirector.kt",
+            "com/dial/van/visual/VanUiTargetRegistry.kt",
+            "com/dial/van/visual/VanContextGesture.kt",
+            "com/dial/van/visual/VanRiveContextCapabilities.kt",
             "com/dial/van/visual/VanMinimizedExpression.kt",
             "com/dial/van/visual/VanCompanionOrbMotion.kt",
             // §2/§6 — overlay/action motion timing, kept pure so the durations that decide

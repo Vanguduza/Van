@@ -109,6 +109,8 @@ data class VanVisualState(
     val urgency: Float = 0f,
     val viseme: Int = 0,
     val actionCode: Int = 0,
+    /** Optional extension remains separate from original action_code fallback. */
+    val contextCode: Int = 0,
     /**
      * Aura Rev 2 — the live trade the outer field should show, already resolved against
      * authority, health and offline truth by [VanPresenceFrame]. Renderer-only: never sent to Rive.

@@ -34,12 +34,19 @@ object VanLiveVisualState {
     val current: VanVisualState
         get() = frame.toVisualState()
 
-    fun listeningStarted() = mutate { VanPresenceReducer.listeningStarted(it) }
+    fun listeningStarted() = onMain {
+        val beginning = frame.speech != VanSpeechState.LISTENING
+        mutate { VanPresenceReducer.listeningStarted(it) }
+        if (beginning) contextual(VanContextGesture.LISTEN_EMPHASIS)
+    }
 
     /** Ending microphone capture does not settle the owner turn to idle. */
     fun listeningEnded() = mutate { VanPresenceReducer.listeningEnded(it) }
 
-    fun finalTranscript(hasText: Boolean) = mutate { VanPresenceReducer.finalTranscript(it, hasText) }
+    fun finalTranscript(hasText: Boolean) = onMain {
+        mutate { VanPresenceReducer.finalTranscript(it, hasText) }
+        if (hasText) contextual(VanContextGesture.THINK_CHIN)
+    }
 
     fun dispatchStarted() = mutate { VanPresenceReducer.dispatchStarted(it) }
 
@@ -96,7 +103,11 @@ object VanLiveVisualState {
         VanPresenceReducer.authority(it, VanAuthorityState.URGENT)
     }.also { action(VanFiniteAction.CAUTION) }
 
-    fun speakingStarted() = mutate { VanPresenceReducer.speechStarted(it) }
+    fun speakingStarted() = onMain {
+        val beginning = frame.speech != VanSpeechState.SPEAKING
+        mutate { VanPresenceReducer.speechStarted(it) }
+        if (beginning) contextual(VanContextGesture.EXPLAIN_OPEN_PALMS)
+    }
 
     fun speakingEnded() = mutate { VanPresenceReducer.speechEnded(it) }
 
@@ -157,6 +168,7 @@ object VanLiveVisualState {
         if (finiteAction != null) {
             action(
                 finiteAction,
+                context = if (state == VanDurableState.SUCCESS && finiteAction == VanFiniteAction.PRESENT_CARD) VanContextGesture.HANDOFF_RESULT else null,
                 evidence = if (state == VanDurableState.SUCCESS) {
                     VanCueEvidence.VERIFIED_SOURCE
                 } else {
@@ -227,6 +239,9 @@ object VanLiveVisualState {
         source: String = "device",
         eventId: String? = null,
         sourceRevision: Long? = null,
+        attentionOverride: Pair<Float, Float>? = null,
+        onApplied: ((Long) -> Unit)? = null,
+        context: VanContextGesture? = null,
     ) = onMain {
         val now = SystemClock.uptimeMillis()
         val id = eventId ?: ("local-" + (++localCueSequence))
@@ -234,26 +249,45 @@ object VanLiveVisualState {
             VanGestureCue(
                 source = source, eventId = id, emittedAtMs = now,
                 expiresAtMs = now + 2_500L, action = action,
-                revision = sourceRevision, evidence = evidence, target = target,
+                revision = sourceRevision, evidence = evidence, target = target, context = context,
             ),
             pose = frame.poseState,
             nowMs = now,
         )
         if (!decision.accepted) return@onMain
+        val aim = attentionOverride?.takeIf { it.first.isFinite() && it.second.isFinite() }
         frame = frame.copy(
             actionCode = decision.action?.code ?: 0,
-            attentionX = decision.attention?.first ?: frame.attentionX,
-            attentionY = decision.attention?.second ?: frame.attentionY,
+            contextCode = decision.context?.code ?: 0,
+            attentionX = aim?.first?.coerceIn(-1f, 1f) ?: decision.attention?.first ?: frame.attentionX,
+            attentionY = aim?.second?.coerceIn(-1f, 1f) ?: decision.attention?.second ?: frame.attentionY,
         )
         actionGeneration += 1L
+        onApplied?.invoke(actionGeneration)
         if (decision.action != null) {
             val token = actionGeneration
             main.postDelayed({
                 if (token != actionGeneration) return@postDelayed
-                frame = frame.copy(actionCode = 0)
-            }, VanMotionMap.actionDurationMs(decision.action))
+                frame = frame.copy(actionCode = 0, contextCode = 0)
+            }, decision.context?.durationMs ?: VanMotionMap.actionDurationMs(decision.action))
         }
     }
+
+    fun retargetPointing(token: Long, x: Float, y: Float) = onMain {
+        if (token == actionGeneration && frame.actionCode == VanFiniteAction.POINT_TARGET.code && x.isFinite() && y.isFinite()) {
+            frame = frame.copy(attentionX = x.coerceIn(-1f, 1f), attentionY = y.coerceIn(-1f, 1f))
+        }
+    }
+
+    fun clearPointing(token: Long) = onMain {
+        if (token == actionGeneration && frame.actionCode == VanFiniteAction.POINT_TARGET.code) clearAction()
+    }
+
+    fun contextual(
+        gesture: VanContextGesture,
+        evidence: VanCueEvidence = VanCueEvidence.LOCAL_UI,
+        target: VanCueTarget? = null,
+    ) = action(gesture.legacyAction, evidence = evidence, target = target, context = gesture)
 
     fun clearAction() = action(null)
 
@@ -276,6 +310,8 @@ object VanLiveVisualState {
     private fun reconcileActionWithPose() {
         val active = VanFiniteAction.fromCode(frame.actionCode) ?: return
         val pose = frame.poseState
+        val context = VanContextGesture.fromCode(frame.contextCode)
+        if (context != null && !context.allows(pose)) { clearAction(); return }
         val allowed = when (pose) {
             VanDurableState.URGENT, VanDurableState.ERROR, VanDurableState.WAITING_FOR_OWNER ->
                 active == VanFiniteAction.CAUTION

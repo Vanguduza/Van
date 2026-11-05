@@ -1,0 +1,200 @@
+{
+  "archive_sha256": "62cf963c126c9223d0a6fd6fb64f27fcbeb68304fad4c2759b5495e2203ce12b",
+  "entries": [
+    {
+      "path": ".git/floating-r5/joint-work/ARTICULATION_ACTUAL_RUNTIME_REVIEW.png",
+      "bytes": 493315,
+      "sha256": "e0126037404a10ced39ab7642076456ab75a237b802b635dc8a8ea5bca6a5aef"
+    },
+    {
+      "path": ".git/floating-r5/joint-work/actual-articulation-binary/context-15-EXPLAIN_OPEN_PALMS.png",
+      "bytes": 239032,
+      "sha256": "bc07bc6a751830a41b2718c79192b913765f2395071f70dc0b186c8826c84280"
+    },
+    {
+      "path": ".git/floating-r5/joint-work/actual-articulation-binary/context-16-COMPARE_OPTIONS.png",
+      "bytes": 240527,
+      "sha256": "78293de2ea7fdfed7c554387beaa1254e833d920a08f85e3f5a8131c0750bf32"
+    },
+    {
+      "path": ".git/floating-r5/joint-work/actual-articulation-binary/context-17-THINK_CHIN.png",
+      "bytes": 237306,
+      "sha256": "116dcbc1c72a97e3ca3f9e5f75644cf3c6e1daeb7e76380a8975a678de090066"
+    },
+    {
+      "path": ".git/floating-r5/joint-work/actual-articulation-binary/context-18-INSPECT_TARGET.png",
+      "bytes": 233335,
+      "sha256": "e58189c41597c53eaaf2c89e604dc92c450d4989679bcace743856dfe2794bad"
+    },
+    {
+      "path": ".git/floating-r5/joint-work/actual-articulation-binary/context-19-LISTEN_EMPHASIS.png",
+      "bytes": 238091,
+      "sha256": "13b0f6c89f0dba02bc7f23d3c160fd4a6455cccb9872bf1a12b17239cfc637fe"
+    },
+    {
+      "path": ".git/floating-r5/joint-work/actual-articulation-binary/context-20-POLITE_REFUSAL.png",
+      "bytes": 236635,
+      "sha256": "94ba41c3ea3edce49a5b849a7d5689a52daa54b7829b2fa087bcc52d15ab40ba"
+    },
+    {
+      "path": ".git/floating-r5/joint-work/actual-articulation-binary/context-21-ACKNOWLEDGE_ERROR.png",
+      "bytes": 233189,
+      "sha256": "599217cc041b2044370abf99e0cb5246d017b53a532fd4b1a90186d83e3f3210"
+    },
+    {
+      "path": ".git/floating-r5/joint-work/actual-articulation-binary/context-22-YIELD_TO_INTERRUPTION.png",
+      "bytes": 238251,
+      "sha256": "558f37ed3ebc93c5d4a32c4ff82c383bf4f8d28285f39d0a3adf01e44896acc7"
+    },
+    {
+      "path": ".git/floating-r5/joint-work/actual-articulation-binary/context-23-REQUEST_CLARIFICATION.png",
+      "bytes": 235658,
+      "sha256": "6e5932b697c13385db2bfa6bbd669559b1d7a4505f0353d4e5749431a7e69300"
+    },
+    {
+      "path": ".git/floating-r5/joint-work/actual-articulation-binary/context-24-HANDOFF_RESULT.png",
+      "bytes": 237977,
+      "sha256": "fa16cc7eb2ba3189aa951760180c1010fa04fb822aedd9e099cebb1b167da2d4"
+    },
+    {
+      "path": ".git/floating-r5/joint-work/actual-articulation-binary/context-25-RECOVERY_READY.png",
+      "bytes": 237909,
+      "sha256": "b977b3c6e914d7a68ba724a909045313b3bc50a6d38913580b949baac50a327a"
+    },
+    {
+      "path": ".git/floating-r5/joint-work/actual-articulation-binary/context-26-GUIDE_NEXT_STEP.png",
+      "bytes": 234113,
+      "sha256": "d2b7774576642335b1344b4e6c464a632e9d9a02b8ffbdd9e818281030dcfbc9"
+    },
+    {
+      "path": ".git/floating-r5/joint-work/actual-articulation-binary/joint-review-17.png",
+      "bytes": 235486,
+      "sha256": "8887a5af082f0b724d7a5ab3fda539cb67a81803f096633b650aa7be14767770"
+    },
+    {
+      "path": ".git/floating-r5/joint-work/actual-articulation-binary/joint-review-26.png",
+      "bytes": 233003,
+      "sha256": "2b0bfceed597f213063dd58cfc951b7f85dbaa4b237a196cd443dfa6c50583e0"
+    },
+    {
+      "path": ".git/floating-r5/joint-work/actual-articulation-binary/joint-review-3.png",
+      "bytes": 229153,
+      "sha256": "4de67a5e5096e88e7b02a97589e69b5f62606fc7dff7120be48e883899c73212"
+    },
+    {
+      "path": ".git/floating-r5/joint-work/actual-articulation-binary/joint-review-4.png",
+      "bytes": 235206,
+      "sha256": "008634ccde7000ebad57da5dc77e5a21d80e358969da7920502ee199e5104ffb"
+    },
+    {
+      "path": ".git/floating-r5/joint-work/actual-articulation-binary/joint-review-5.png",
+      "bytes": 229385,
+      "sha256": "57afae315476aca60ded56999dc0424eaddbf95fca539d57d156cffa2b0d1ff8"
+    },
+    {
+      "path": ".git/floating-r5/joint-work/actual-articulation-binary/joint-review-8.png",
+      "bytes": 230336,
+      "sha256": "7f914aba09a7e7a186f2afe6577ccce3e42b6620838b582a7cefdc3c076c1fe0"
+    },
+    {
+      "path": ".git/floating-r5/joint-work/actual-articulation-binary/receipt.json",
+      "bytes": 124125,
+      "sha256": "bff0164f2ff04af6a9fe8eec1278eb7bbb55471bed2ad3b80fa4bfdf1d3c36ef"
+    },
+    {
+      "path": ".git/floating-r5/joint-work/articulation-final-source.log",
+      "bytes": 2548,
+      "sha256": "256032d34648a231204dff5c44ab4b9aa672c0ddd2ca6ecd06391e879114fe53"
+    },
+    {
+      "path": ".git/floating-r5/joint-work/before-connectivity.json",
+      "bytes": 2717,
+      "sha256": "a1e191a060a1a3bbd3ce06fc75f667c5af55cc09c0f23a0b1cdd823ef27d3edb"
+    },
+    {
+      "path": ".git/floating-r5/joint-work/context-tests/initial-test-syntax.log",
+      "bytes": 7982,
+      "sha256": "2121fbef44857d53bcc3b194226fc063f82198c6c8be95c1d5e80e10f1adfd6e"
+    },
+    {
+      "path": ".git/floating-r5/joint-work/context-tests/integration-receipt.json",
+      "bytes": 5877,
+      "sha256": "d0f8f1e33ddfaec4d3d67fbe8300687b0793d64f681a058fb6776dbdd8e0aaff"
+    },
+    {
+      "path": ".git/floating-r5/joint-work/context-tests/tests-integration.log",
+      "bytes": 547,
+      "sha256": "6766aa15fa7960bc87c19ec26b5f090c9c93db56a80feb53d5c3fe08963267fb"
+    },
+    {
+      "path": ".git/floating-r5/joint-work/full-android/receipt.json",
+      "bytes": 54040,
+      "sha256": "c38f58fa5f8946afac17f6f33882c950ffefab93eb1b521281e29bec67f9f7f0"
+    },
+    {
+      "path": ".git/floating-r5/joint-work/full-android-complete/receipt.json",
+      "bytes": 54334,
+      "sha256": "fb9cba42853683da98287086f4691961bf3aabef8792caadbfeae7a8a312cb23"
+    },
+    {
+      "path": ".git/floating-r5/joint-work/native-articulation-controls/native-visual-compile.log",
+      "bytes": 1938,
+      "sha256": "b4f87e540fa8ceea6549fc334b8a0a24030691172cd88ab4e55f5e09954d4616"
+    },
+    {
+      "path": ".git/floating-r5/joint-work/native-articulation-controls/native-visual-receipt.json",
+      "bytes": 13149,
+      "sha256": "c56a2bce4a36f4298efcb90b877d5fa8e172c049a399f0c0cc005a26d02d9a35"
+    },
+    {
+      "path": ".git/floating-r5/joint-work/original-behavior-current.json",
+      "bytes": 4246,
+      "sha256": "c80ca843f59dd1ca70d6786f3468dda3c733600d57e24a2c672dfc9556809fcc"
+    },
+    {
+      "path": ".git/floating-r5/joint-work/physical-test-compile/compile.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".git/floating-r5/joint-work/physical-test-compile/receipt.json",
+      "bytes": 1462,
+      "sha256": "b8fcc013fd45a9a37a73bd8df4bf2f331efc23e2d81e2322b095dd74dc9c418a"
+    },
+    {
+      "path": ".git/floating-r5/joint-work/r2-current-run.log",
+      "bytes": 9884,
+      "sha256": "f908c929d31770f1e63bac48c9512b18044bff1a2822e83839552b191d29618e"
+    },
+    {
+      "path": ".git/floating-r5/joint-work/r4-final-source.log",
+      "bytes": 3929,
+      "sha256": "6293cf09566d28359f594469268baf0f51ba5539facef5207e4479bcc2a3a055"
+    },
+    {
+      "path": ".git/floating-r5/joint-work/r5-final-source.log",
+      "bytes": 2892,
+      "sha256": "ed2b53c8660497e9727bdf0e60484388872a9aea2819e350a1c45aa5feab2703"
+    },
+    {
+      "path": ".git/floating-r5/joint-work/remote-full-build-receipts/COMPILATION_RECEIPT.json",
+      "bytes": 56133,
+      "sha256": "69b448e0d10179d1d79ee733fcd1f34485a76e2c58ab36380b7d460885bae1d3"
+    },
+    {
+      "path": ".git/floating-r5/joint-work/remote-full-build-receipts/COMPILATION_RECEIPT_DEFAULT_JIT.json",
+      "bytes": 56133,
+      "sha256": "63c79af6b638f685c3ad818355d11fcd9ab2b0e2b5e45f0aeb6bab153bf00a55"
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/source-receipt.json",
+      "bytes": 10713,
+      "sha256": "67aa4e7c82fec0f341292ba740fe0b6fd353c212d56c987b80523b333f5bd29a"
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/van.context.json",
+      "bytes": 1743,
+      "sha256": "80a4000a525426a8647232a06875cd70de01ee1714ea4f70219c87d294e8de40"
+    }
+  ]
+}

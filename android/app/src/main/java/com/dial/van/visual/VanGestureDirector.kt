@@ -24,6 +24,7 @@ enum class VanCueOutcome {
     EXPIRED,
     INVALID_SOURCE,
     INVALID_TARGET,
+    INVALID_CONTEXT,
     UNVERIFIED_RESULT,
     CRITICAL_STATE,
     ANTICIPATION_HELD,
@@ -67,12 +68,14 @@ data class VanGestureCue(
     val expiresAtMs: Long? = null,
     val evidence: VanCueEvidence = VanCueEvidence.UNVERIFIED,
     val target: VanCueTarget? = null,
+    val context: VanContextGesture? = null,
 )
 
 data class VanGestureDecision(
     val outcome: VanCueOutcome,
     val action: VanFiniteAction? = null,
     val attention: Pair<Float, Float>? = null,
+    val context: VanContextGesture? = null,
 ) {
     val accepted: Boolean get() = outcome == VanCueOutcome.PLAY || outcome == VanCueOutcome.CLEAR
 }
@@ -84,6 +87,7 @@ data class VanGestureDecision(
 class VanGestureDirector(private val recentLimit: Int = 256) {
     private data class Active(
         val action: VanFiniteAction,
+        val identity: Int,
         val startedAtMs: Long,
         val endsAtMs: Long,
         val priority: Int,
@@ -121,7 +125,12 @@ class VanGestureDirector(private val recentLimit: Int = 256) {
             return VanGestureDecision(VanCueOutcome.CLEAR)
         }
 
-        if (proposed in POSITIVE_RESULTS && cue.evidence != VanCueEvidence.VERIFIED_SOURCE) {
+        val contextual = cue.context
+        if (contextual != null && (proposed != contextual.legacyAction ||
+                !contextual.allows(pose) || cue.evidence == VanCueEvidence.UNVERIFIED)) {
+            return VanGestureDecision(VanCueOutcome.INVALID_CONTEXT)
+        }
+        if ((proposed in POSITIVE_RESULTS || contextual?.requiresVerifiedResult == true) && cue.evidence != VanCueEvidence.VERIFIED_SOURCE) {
             return VanGestureDecision(VanCueOutcome.UNVERIFIED_RESULT)
         }
 
@@ -139,8 +148,9 @@ class VanGestureDirector(private val recentLimit: Int = 256) {
         if (proposed in POINTING && mapped == null) return VanGestureDecision(VanCueOutcome.INVALID_TARGET)
 
         val current = active?.takeIf { nowMs < it.endsAtMs }
-        val nextPriority = priority(proposed)
-        if (current != null && current.action != proposed) {
+        val identity = contextual?.code ?: proposed.code
+        val nextPriority = contextual?.priority ?: priority(proposed)
+        if (current != null && current.identity != identity) {
             val anticipationEnd = current.startedAtMs + ((current.endsAtMs - current.startedAtMs) * 15 / 100)
             // Critical caution must interrupt immediately; other gestures respect anticipation.
             if (proposed != VanFiniteAction.CAUTION && nowMs < anticipationEnd) {
@@ -149,18 +159,19 @@ class VanGestureDirector(private val recentLimit: Int = 256) {
             if (nextPriority < current.priority && proposed != VanFiniteAction.CAUTION) {
                 return VanGestureDecision(VanCueOutcome.LOWER_PRIORITY_HELD)
             }
-        } else if (current?.action == proposed) {
+        } else if (current?.identity == identity) {
             // Repeating a gesture while it is already playing is not visible expressiveness.
             return VanGestureDecision(VanCueOutcome.DUPLICATE)
         }
 
         active = Active(
             action = proposed,
+            identity = identity,
             startedAtMs = nowMs,
-            endsAtMs = nowMs + VanMotionMap.actionDurationMs(proposed),
+            endsAtMs = nowMs + (contextual?.durationMs ?: VanMotionMap.actionDurationMs(proposed)),
             priority = nextPriority,
         )
-        return VanGestureDecision(VanCueOutcome.PLAY, proposed, mapped)
+        return VanGestureDecision(VanCueOutcome.PLAY, proposed, mapped, contextual)
     }
 
     fun activeAt(nowMs: Long): VanFiniteAction? = active?.takeIf { nowMs < it.endsAtMs }?.action

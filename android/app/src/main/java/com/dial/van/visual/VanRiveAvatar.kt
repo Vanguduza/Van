@@ -74,12 +74,16 @@ fun VanRiveAvatar(
         }
     }
     AndroidView(
-        modifier = modifier,
+        modifier = modifier.vanLivePointingAnchor(ready = riveView is RiveAnimationView),
         factory = { ctx ->
             try {
                 VanRiveRuntime.ensure(ctx.applicationContext)
                 RiveAnimationView(ctx).apply {
                     val bytes = ctx.assets.open(RiveBindingContract.ASSET_FILE).use { it.readBytes() }
+                    val metadata = runCatching {
+                        ctx.assets.open(VanRiveContextCapabilities.ASSET_FILE).bufferedReader().use { it.readText() }
+                    }.getOrNull()
+                    motionBinding.contextCodes = VanRiveContextCapabilities.resolve(bytes, metadata)
                     setRiveBytes(
                         bytes,
                         artboardName = RiveBindingContract.ARTBOARD,
@@ -108,7 +112,7 @@ fun VanRiveAvatar(
                         motionBinding.lastEnabled = null
                     }
                     try {
-                        applyVisualState(view, state)
+                        applyVisualState(view, state, motionBinding.contextCodes)
                         if (enabled && motionBinding.lastEnabled != true) {
                             view.play(
                                 loop = Loop.AUTO,
@@ -135,9 +139,10 @@ fun VanRiveAvatar(
 private class RiveMotionBinding {
     var view: RiveAnimationView? = null
     var lastEnabled: Boolean? = null
+    var contextCodes: Set<Int> = emptySet()
 }
 
-private fun applyVisualState(view: RiveAnimationView, state: VanVisualState) {
+private fun applyVisualState(view: RiveAnimationView, state: VanVisualState, contexts: Set<Int>) {
     val sm = RiveBindingContract.STATE_MACHINE
     state.toRiveInputs().forEach { (input, value) ->
         when (input) {
@@ -149,7 +154,7 @@ private fun applyVisualState(view: RiveAnimationView, state: VanVisualState) {
             VanInput.MOUTH_OPEN -> view.setNumberState(sm, input.wireName, value as Float)
             VanInput.URGENCY -> view.setNumberState(sm, input.wireName, value as Float)
             VanInput.VISEME -> view.setNumberState(sm, input.wireName, (value as Number).toFloat())
-            VanInput.ACTION_CODE -> view.setNumberState(sm, input.wireName, (value as Number).toFloat())
+            VanInput.ACTION_CODE -> view.setNumberState(sm, input.wireName, VanRiveContextCapabilities.actionCode((value as Number).toInt(), state.contextCode, contexts).toFloat())
         }
     }
 }

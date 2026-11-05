@@ -1018,6 +1018,7 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
             if (!ttsOutput.isSpeaking()) {
                 VanLiveVisualState.speakingEnded()
                 VanLiveVisualState.clearAction()
+                VanLiveVisualState.contextual(com.dial.van.visual.VanContextGesture.YIELD_TO_INTERRUPTION)
             }
             if (::voiceEdge.isInitialized) voiceEdge.onUtteranceInterrupted(utteranceId)
         }
