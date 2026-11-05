@@ -1,6 +1,6 @@
 {
   "schema": "van.refined-character-integration-readiness/1",
-  "status": "NATIVE_CORE_DIAGNOSTIC_COMPLETE_ORIGINAL_ADMISSION_STILL_PENDING",
+  "status": "OWNER_APPROVED_ISOLATED_DEBUG_REVIEW_SEQUENCE_IMPLEMENTING",
   "source_head": "dd3573aca5e5a49becea2c064bad6d11c7096729",
   "pinned_runtime": {
     "actual_app": "9.13.10",
@@ -97,9 +97,11 @@
   "sequencing_conflict": {
     "owner_instruction": "Physical testing last; close implementation and software checks first.",
     "existing_flow": "Full-rig staging requires M2. Existing core-validation handoff requests the owner to view the core on S24 and records its owner verdict before advancing to full rig.",
-    "amendment_status": "NOT_APPROVED_OR_EXECUTED; no gate, authorization or workflow changed"
+    "amendment_status": "APPROVED_BY_SUBSEQUENT_OWNER_PROCEED_FOR_UNACCEPTED_DEBUG_REVIEW_ONLY",
+    "approval_record": "docs/rebuild/rev118/character-review/OWNER_INSTRUCTION.json"
   },
   "physical_testing": "DEFERRED_FINAL_STAGE",
   "production_asset_staged": false,
-  "application_renderer": "Existing admitted fallback, unchanged"
+  "application_renderer": "Existing admitted fallback, unchanged",
+  "candidate_review_reconciliation": "docs/rebuild/rev118/character-review/SOURCE_INVENTORY.json"
 }

@@ -42,10 +42,15 @@ class PhysicalS24MotionPerformanceTest {
         val expected = args.getString("vanCandidateSha256") ?: error("Exact candidate SHA256 is required")
         assertTrue("Expected SHA must be exact", expected.matches(Regex("[0-9a-f]{64}")))
         val context = instrumentation.targetContext
-        val bytes = context.assets.open("van_candidate.riv").use { it.readBytes() }
+        val review = if (com.dial.van.visual.VanCharacterAssets.reviewBuild) com.dial.van.visual.VanCharacterAssets.load(context) else null
+        val bytes = review?.bytes ?: context.assets.open("van_candidate.riv").use {
+            com.dial.van.visual.VanAssetReadLimits.read(it, com.dial.van.visual.VanAssetReadLimits.RIVE_BYTES)
+        }
         val digest = MessageDigest.getInstance("SHA-256").digest(bytes).joinToString("") { "%02x".format(it) }
         assertEquals("Unrelated candidate cannot be qualified", expected, digest)
-        val metadata = context.assets.open("van_candidate.context.json").bufferedReader().use { it.readText() }
+        val metadata = review?.metadata ?: context.assets.open("van_candidate.context.json").use {
+            com.dial.van.visual.VanAssetReadLimits.read(it, com.dial.van.visual.VanAssetReadLimits.CONTEXT_BYTES).toString(Charsets.UTF_8)
+        }
         assertEquals("Full contextual extension must match the exact staged binary", (15..26).toSet(), VanRiveContextCapabilities.resolve(bytes, metadata))
 
         val samples = Collections.synchronizedList(mutableListOf<Pair<Long, Long>>())

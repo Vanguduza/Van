@@ -88,10 +88,9 @@ fun VanRiveAvatar(
                 VanRiveRuntime.ensure(ctx.applicationContext)
                 VanBoundedRiveView(ctx).apply {
                     onNativeFailure = { currentOnLoadFailed() }
-                    val bytes = ctx.assets.open(RiveBindingContract.ASSET_FILE).use { VanAssetReadLimits.read(it, VanAssetReadLimits.RIVE_BYTES) }
-                    val metadata = runCatching {
-                        ctx.assets.open(VanRiveContextCapabilities.ASSET_FILE).use { VanAssetReadLimits.read(it, VanAssetReadLimits.CONTEXT_BYTES).toString(Charsets.UTF_8) }
-                    }.getOrNull()
+                    val asset = VanCharacterAssets.load(ctx)
+                    val bytes = asset.bytes
+                    val metadata = asset.metadata
                     motionBinding.contextCodes = VanRiveContextCapabilities.resolve(bytes, metadata)
                     setRiveBytes(
                         bytes,

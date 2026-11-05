@@ -1,0 +1,70 @@
+{
+  "archive_sha256": "cdbfea6c14ca762c2bd412940ae69f69772a24b5f7e5d8d9029a67f24375be33",
+  "members": [
+    {
+      "path": ".git/approved-character-review-20261105/pure/integration-receipt.json",
+      "sha256": "48a9e87ba4b4160b3a7a36c090ca32bef8a7085e4d9c5b3b7d14157f27f45305",
+      "bytes": 13256
+    },
+    {
+      "path": ".git/approved-character-review-20261105/pure/compile-integration.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": ".git/approved-character-review-20261105/pure/tests-integration.log",
+      "sha256": "6de025c09d33860e712e30c3b936dd39bb1ca092ab44cefa2e5ca2f986c9ecae",
+      "bytes": 548
+    },
+    {
+      "path": ".git/approved-character-review-20261105/package-tests.log",
+      "sha256": "114ede81cef06915a1b5e18cd9ed780af2ba00e5e9745101b15697addffb5a8d",
+      "bytes": 4811
+    },
+    {
+      "path": ".git/approved-character-review-20261105/package-tests.initial-fixture-error.log",
+      "sha256": "6994ea41ea34752bee5233a87dcaefa180dc3d12337536920523a1be5f8d5086",
+      "bytes": 5339
+    },
+    {
+      "path": ".git/approved-character-review-20261105/retained-hardening.initial.log",
+      "sha256": "a9f58d066ee8a523e2f06536fd66ca6b3520a65576db25337449c7cb16ec1142",
+      "bytes": 13230
+    },
+    {
+      "path": ".git/approved-character-review-20261105/retained-hardening.log",
+      "sha256": "1331946639429c77b692d0659773c164e91133717103817b1b75a7680711ebda",
+      "bytes": 2933
+    },
+    {
+      "path": ".git/approved-character-review-20261105/retained-usability.log",
+      "sha256": "cca89a0256565c3ec1edf04e2c5ed7bcd998678d6e163b3dade891d7e2c4d79d",
+      "bytes": 2998
+    },
+    {
+      "path": ".git/approved-character-review-20261105/retained-independent.log",
+      "sha256": "3f6b77a2d2334f9156937d74a003f73197b47c02f46a279e9a4fdc2a2e32dc74",
+      "bytes": 1736
+    },
+    {
+      "path": ".git/approved-character-review-20261105/retained-aura-architecture.json",
+      "sha256": "19f90cf108383923c0a4c8ef3ac8fcca8db7984a103e4de88a1bd8457a69cbc3",
+      "bytes": 2235
+    },
+    {
+      "path": ".git/approved-character-review-20261105/pure/integration-junit/TEST-junit-jupiter.xml",
+      "sha256": "4d6937fb8d910a23ec40df305a14beeeadd1e5b6d1e3f14b984946067e346906",
+      "bytes": 150985
+    },
+    {
+      "path": ".git/approved-character-review-20261105/pure/integration-junit/TEST-junit-platform-suite.xml",
+      "sha256": "7804ed948842a8d70ca0548b16dd3ba0f0329dcd82e37da323fca9a64182cd55",
+      "bytes": 7090
+    },
+    {
+      "path": ".git/approved-character-review-20261105/pure/integration-junit/TEST-junit-vintage.xml",
+      "sha256": "7ac6b78c26ee6b64d5b2e579e1dc7e68587029f704b344697acc5466f5d55524",
+      "bytes": 7069
+    }
+  ]
+}

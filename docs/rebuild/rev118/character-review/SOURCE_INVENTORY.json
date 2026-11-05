@@ -1,0 +1,444 @@
+{
+  "schema": "van.character-review.source-inventory/1",
+  "purpose": "Candidate-only reviewed source reconciliation; does not claim global source completeness or independent artwork acceptance",
+  "owner_instruction_sha256": "61292e682bc9f0b2124fd2ad7e21a18a64b68961682670b92184a3b465586338",
+  "request_sha256": "f24194ff22c77ebfdef09f5357bd6e8deb3a7d9b450058a437237d0b2dee8d84",
+  "source_packet_sha256": "c484243f7e5bf060f5d5828a36d7e75cd5ce99179f32dc0006f997204d8d5087",
+  "adopted_identity_decision": "CF-D-05-REV2_1",
+  "adopted_master": {
+    "path": "visual-authority/character-forge/01-master-candidates/van_master_source_candidate_b.png",
+    "sha256": "cf7f51793692bfe8ea2e5f58f1a12e64d3a76468a85cb19d76d0db64ccef374c",
+    "matches_existing_owner_identity": true
+  },
+  "rig_source_files": [
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/00_hair_back.png",
+      "sha256": "03effddde2104a4167caefeab915d53be0b24bf5ff6a7d30ec0d139c2f74c523",
+      "bytes": 29555
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/01_jacket_back.png",
+      "sha256": "46c366412e88872733abc2240d593f4e7fce6e9788c6547f83a685969460199c",
+      "bytes": 16842
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/02_underlayer.png",
+      "sha256": "eb070714c6d45e5e44a108049984cb3f576cd33a241ef9c5f06c2b36404ff905",
+      "bytes": 34217
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/03_leg_l_upper.png",
+      "sha256": "502d72b578f4f4e09785231f72cd2325e90aa554a18c5ece326b700c315a3387",
+      "bytes": 16751
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/04_leg_l_lower.png",
+      "sha256": "d7cc7f3bc76e19c50e3d04d3e71f1a7a996edafeb13cb146c0def681df870acb",
+      "bytes": 6816
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/05_boot_l.png",
+      "sha256": "730c77a615c01fb5830fe969093741cc8820f308032be08824ff3bd6f0af229f",
+      "bytes": 16713
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/06_leg_r_upper.png",
+      "sha256": "f46b90b71e2f0225e27e139b9fd350c7eb22ae62646ba9abd29abca95635b434",
+      "bytes": 15423
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/07_leg_r_lower.png",
+      "sha256": "9f2c763bece85c581961ab577a943d5f739eb9853883730b38710619cacbb78d",
+      "bytes": 10360
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/08_boot_r.png",
+      "sha256": "87f8143c7951a77c46ff9fa339e89138097a4f8073ab94ebe609a1fd2f61dcf2",
+      "bytes": 12899
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/09_neck.png",
+      "sha256": "097db3ecf5d6e73d862b9ad087bbe3bd52161271dc4f1c288e3c8bcf3ffff169",
+      "bytes": 7111
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/10_jacket.png",
+      "sha256": "080847d46b26f9a7d9b824422941f71b3c84ac95c5eee6ff7550bbb85d96a16c",
+      "bytes": 50510
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/11_arm_l_upper.png",
+      "sha256": "d8ff64b4d8d5d324ca43cbcc926bf95fc77f65c38b0b207c36ecaff90f9ca5bf",
+      "bytes": 11421
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/12_arm_l_fore.png",
+      "sha256": "5e2b5547ff4ae85e45daa6d590516a4570cdae188c138213dae70c82f620026d",
+      "bytes": 8484
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/13_hand_l.png",
+      "sha256": "048b011b04c67d6ab40250be1cf34b1780ef6b4d73e1ccc5c16b34e3c60d247d",
+      "bytes": 8636
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/14_arm_r_upper.png",
+      "sha256": "6d7a3f5415bec0e77c2202d3319bd06958bdb4ae4b1dcd279f5fe250620f93bd",
+      "bytes": 12013
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/15_arm_r_fore.png",
+      "sha256": "0e27121e6805c2f7e825fefc75adfa47ce4c54dea5d6a2c9ad2be74cb465fe7e",
+      "bytes": 8685
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/16_hand_r.png",
+      "sha256": "f27f7668bedb8fd42f80dbfbd86bf1a931f026eef972f6c05403909435c6289f",
+      "bytes": 9258
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/17_face.png",
+      "sha256": "9fb09f5c00a2342c8f32cffcdc722d500f6f85d9b0199a311fec9f0b29312772",
+      "bytes": 45608
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/18_sclera_l.png",
+      "sha256": "6d7f4e03df2bfee8f478968d57c04b6244760f0672bef82e07a078fecbda44cf",
+      "bytes": 1445
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/19_eye_l.png",
+      "sha256": "7fa4fa86e7735d737b6f04e4c5fe60a4ba87fc25f6644a010a60b54d23394818",
+      "bytes": 1063
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/20_lid_l.png",
+      "sha256": "bfd082d33bb602b762e5d7d9a550a3f5345bd98bd80a645f1fe162954f45a82e",
+      "bytes": 552
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/21_sclera_r.png",
+      "sha256": "9be9a50c7ca02978b3131833177e98ed75e3c4e58dc5cc0b73c98a97ca9862b7",
+      "bytes": 1608
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/22_eye_r.png",
+      "sha256": "9881cb50840d99d61553d5ae597cb33f2ad4ea850e6b56e36db1de65564bba78",
+      "bytes": 1098
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/23_lid_r.png",
+      "sha256": "1eb86bffc97413a4b145e15e16dcc7aa8fb860b404915967f716cef726a02737",
+      "bytes": 443
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/24_brow_l.png",
+      "sha256": "791bed432cd431119dfac63b66629cbad4369eae5adce1da9dae8099608f03c9",
+      "bytes": 920
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/25_brow_r.png",
+      "sha256": "87aa5888087970002f65226fdd2ae1e539b0a8e0f0a65bef4da5d40370f55fa3",
+      "bytes": 995
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/26_mouth.png",
+      "sha256": "03418c7e1b7c596453c1de674335cf111e4cb2c45c5e0bd5659cfc6d4da019ba",
+      "bytes": 1928
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/27_visor_lens.png",
+      "sha256": "49457ef52f88699fe6b2b35c79e001b383ce09d88f564b16a0dfa69a6a57ada2",
+      "bytes": 939
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/28_visor_frame.png",
+      "sha256": "bfcdfde3ad5a982a571918e798e66d5d50d772ff7c6df0bb09803ee97cb24586",
+      "bytes": 9096
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/29_hair.png",
+      "sha256": "19801c2ecc3320ed3d2c6304f60287e4351f1e04c97efbe9294c38f8db355779",
+      "bytes": 34952
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/30_orb_shell.png",
+      "sha256": "d29b4b067a3fd7b220c80ac3066c8003532f1b58da9cd02165febdf96dafedf9",
+      "bytes": 20288
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/31_orb_core.png",
+      "sha256": "8d5ca4e812b9b255068051188ae5f07695234da98d014e47fddf1f5dd9f8953a",
+      "bytes": 797
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/eye_cover_l.png",
+      "sha256": "460b34543b15075eae270132ca37b8b622e0725c9b0ed09fdd78b0083c290b52",
+      "bytes": 4150
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/eye_cover_r.png",
+      "sha256": "9e1f70f218f0d55f1170696761cec92a4789bd9cb89cb6ab699e82ac92f6cb83",
+      "bytes": 3339
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/eyelid_l.png",
+      "sha256": "7e7f5063dddc7b7a4b2a61072146efb789aae72625f8e117344e44d93c717370",
+      "bytes": 2786
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/eyelid_l_over.png",
+      "sha256": "77b30507310272c697fafeb6a78670049bf05907e0e4da9ae5e8c05e9e1d4bdc",
+      "bytes": 1537
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/eyelid_r.png",
+      "sha256": "f919210cc3656125143dc2e43e4a3ebda8e9eae4f078c0f58c9fd96f040b9bb6",
+      "bytes": 3067
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/eyelid_r_over.png",
+      "sha256": "3d99e1490b151f229aaa21c589b307f7bb3570e3ff9795b813a8f650e270ceef",
+      "bytes": 1035
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/r5_hand_l_index_prox.png",
+      "sha256": "3fb65e2adccc3902b0b7d61c5cc609eef7cc44093688262105c5b463b9e4b4ff",
+      "bytes": 891
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/r5_hand_l_index_tip.png",
+      "sha256": "6d011c2a6f73d6e2da5469d792f16aaede3285185575a18d7cae221b4660aee3",
+      "bytes": 847
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/r5_hand_l_little.png",
+      "sha256": "4f7a2157818713b04332559e08f529d8807d5b46b9862654ab1e643c3fa7d9f2",
+      "bytes": 590
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/r5_hand_l_middle.png",
+      "sha256": "46e4ff0b7132e065f1b4705551d69ce1a84794bd8a2c348f87349e59a99d8bd6",
+      "bytes": 684
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/r5_hand_l_palm.png",
+      "sha256": "5d44524690db6440af20128129825f78025fda1c32a3c3d3252d49766cfc306a",
+      "bytes": 5088
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/r5_hand_l_ring.png",
+      "sha256": "b0b38e8357e736124e736582832a49d13b5ea78e7f4294ff20aff0de08e44e04",
+      "bytes": 806
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/r5_hand_l_thumb.png",
+      "sha256": "b06d20dbf1d0b3295a93fae41105416d2578b0029a51e4d18c3d7e2a3bc83a1f",
+      "bytes": 1543
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/r5_hand_r_index_prox.png",
+      "sha256": "e74fef68e891d0dcd4d361374fa7ad99e1f9f5b921ea5e9432a8cf3cac689f5e",
+      "bytes": 742
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/r5_hand_r_index_tip.png",
+      "sha256": "8da788a32c6a4403e4da49c360eaf2a917d82c6b7a22ada01853c421e434770e",
+      "bytes": 741
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/r5_hand_r_little.png",
+      "sha256": "7be8e17ece1e5082253b8d244c78590a0fb2030f58164ff2ca3f1dfaa0ece7c6",
+      "bytes": 553
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/r5_hand_r_middle.png",
+      "sha256": "9da1e6131c2872f561281be0550d80a733a115e85f4bbe9ca25237e50b6a4073",
+      "bytes": 1072
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/r5_hand_r_palm.png",
+      "sha256": "725e15047760be48917f8db32c196041cbff7760fab327ee5add4e2de3e4bed4",
+      "bytes": 5283
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/r5_hand_r_ring.png",
+      "sha256": "22972c43ffeef0e7df79afa90a65f9a2124fb5fef5a54b8f9247b21b65f7a571",
+      "bytes": 786
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/layers/r5_hand_r_thumb.png",
+      "sha256": "0cd9d0c2e66d293129aefb4f6d9aa5f149bad441d6468445dcd0177765c6bb9e",
+      "bytes": 1905
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/rive.yaml",
+      "sha256": "c888133fbb933eda417f3727d9c170b837430c499f02ea2d109976fbb5ef4b76",
+      "bytes": 53
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/scene.rml",
+      "sha256": "af23eec96fc24300f598c050ac9a35a1d610588cb441257a4d23021e1b48f42b",
+      "bytes": 922761
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/source-receipt.json",
+      "sha256": "15f014c879fc2d5f19e85e261c8014bf5306fb9235094a3b56f4f11a95d0db36",
+      "bytes": 14517
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/van.context.json",
+      "sha256": "39a5d1947c9dd057e6616eb2656042945fbe098bc1ec13339d9f3bc74c5342ed",
+      "bytes": 1784
+    }
+  ],
+  "original_identity_images": {
+    "layers/00_hair_back.png": "03effddde2104a4167caefeab915d53be0b24bf5ff6a7d30ec0d139c2f74c523",
+    "layers/01_jacket_back.png": "46c366412e88872733abc2240d593f4e7fce6e9788c6547f83a685969460199c",
+    "layers/02_underlayer.png": "eb070714c6d45e5e44a108049984cb3f576cd33a241ef9c5f06c2b36404ff905",
+    "layers/03_leg_l_upper.png": "502d72b578f4f4e09785231f72cd2325e90aa554a18c5ece326b700c315a3387",
+    "layers/04_leg_l_lower.png": "d7cc7f3bc76e19c50e3d04d3e71f1a7a996edafeb13cb146c0def681df870acb",
+    "layers/05_boot_l.png": "730c77a615c01fb5830fe969093741cc8820f308032be08824ff3bd6f0af229f",
+    "layers/06_leg_r_upper.png": "f46b90b71e2f0225e27e139b9fd350c7eb22ae62646ba9abd29abca95635b434",
+    "layers/07_leg_r_lower.png": "9f2c763bece85c581961ab577a943d5f739eb9853883730b38710619cacbb78d",
+    "layers/08_boot_r.png": "87f8143c7951a77c46ff9fa339e89138097a4f8073ab94ebe609a1fd2f61dcf2",
+    "layers/09_neck.png": "097db3ecf5d6e73d862b9ad087bbe3bd52161271dc4f1c288e3c8bcf3ffff169",
+    "layers/10_jacket.png": "080847d46b26f9a7d9b824422941f71b3c84ac95c5eee6ff7550bbb85d96a16c",
+    "layers/11_arm_l_upper.png": "d8ff64b4d8d5d324ca43cbcc926bf95fc77f65c38b0b207c36ecaff90f9ca5bf",
+    "layers/12_arm_l_fore.png": "5e2b5547ff4ae85e45daa6d590516a4570cdae188c138213dae70c82f620026d",
+    "layers/13_hand_l.png": "048b011b04c67d6ab40250be1cf34b1780ef6b4d73e1ccc5c16b34e3c60d247d",
+    "layers/14_arm_r_upper.png": "6d7a3f5415bec0e77c2202d3319bd06958bdb4ae4b1dcd279f5fe250620f93bd",
+    "layers/15_arm_r_fore.png": "0e27121e6805c2f7e825fefc75adfa47ce4c54dea5d6a2c9ad2be74cb465fe7e",
+    "layers/16_hand_r.png": "f27f7668bedb8fd42f80dbfbd86bf1a931f026eef972f6c05403909435c6289f",
+    "layers/17_face.png": "9fb09f5c00a2342c8f32cffcdc722d500f6f85d9b0199a311fec9f0b29312772",
+    "layers/18_sclera_l.png": "6d7f4e03df2bfee8f478968d57c04b6244760f0672bef82e07a078fecbda44cf",
+    "layers/19_eye_l.png": "7fa4fa86e7735d737b6f04e4c5fe60a4ba87fc25f6644a010a60b54d23394818",
+    "layers/20_lid_l.png": "bfd082d33bb602b762e5d7d9a550a3f5345bd98bd80a645f1fe162954f45a82e",
+    "layers/21_sclera_r.png": "9be9a50c7ca02978b3131833177e98ed75e3c4e58dc5cc0b73c98a97ca9862b7",
+    "layers/22_eye_r.png": "9881cb50840d99d61553d5ae597cb33f2ad4ea850e6b56e36db1de65564bba78",
+    "layers/23_lid_r.png": "1eb86bffc97413a4b145e15e16dcc7aa8fb860b404915967f716cef726a02737",
+    "layers/24_brow_l.png": "791bed432cd431119dfac63b66629cbad4369eae5adce1da9dae8099608f03c9",
+    "layers/25_brow_r.png": "87aa5888087970002f65226fdd2ae1e539b0a8e0f0a65bef4da5d40370f55fa3",
+    "layers/26_mouth.png": "03418c7e1b7c596453c1de674335cf111e4cb2c45c5e0bd5659cfc6d4da019ba",
+    "layers/27_visor_lens.png": "49457ef52f88699fe6b2b35c79e001b383ce09d88f564b16a0dfa69a6a57ada2",
+    "layers/28_visor_frame.png": "bfcdfde3ad5a982a571918e798e66d5d50d772ff7c6df0bb09803ee97cb24586",
+    "layers/29_hair.png": "19801c2ecc3320ed3d2c6304f60287e4351f1e04c97efbe9294c38f8db355779",
+    "layers/30_orb_shell.png": "d29b4b067a3fd7b220c80ac3066c8003532f1b58da9cd02165febdf96dafedf9",
+    "layers/31_orb_core.png": "8d5ca4e812b9b255068051188ae5f07695234da98d014e47fddf1f5dd9f8953a",
+    "layers/eye_cover_l.png": "460b34543b15075eae270132ca37b8b622e0725c9b0ed09fdd78b0083c290b52",
+    "layers/eye_cover_r.png": "9e1f70f218f0d55f1170696761cec92a4789bd9cb89cb6ab699e82ac92f6cb83",
+    "layers/eyelid_l.png": "7e7f5063dddc7b7a4b2a61072146efb789aae72625f8e117344e44d93c717370",
+    "layers/eyelid_l_over.png": "77b30507310272c697fafeb6a78670049bf05907e0e4da9ae5e8c05e9e1d4bdc",
+    "layers/eyelid_r.png": "f919210cc3656125143dc2e43e4a3ebda8e9eae4f078c0f58c9fd96f040b9bb6",
+    "layers/eyelid_r_over.png": "3d99e1490b151f229aaa21c589b307f7bb3570e3ff9795b813a8f650e270ceef"
+  },
+  "derived_glove_parts": {
+    "r5_hand_r_index_prox.png": {
+      "sha256": "e74fef68e891d0dcd4d361374fa7ad99e1f9f5b921ea5e9432a8cf3cac689f5e",
+      "source_png": "16_hand_r.png",
+      "source_sha256": "f27f7668bedb8fd42f80dbfbd86bf1a931f026eef972f6c05403909435c6289f",
+      "part": "index_prox",
+      "pixels_preserved": true
+    },
+    "r5_hand_r_index_tip.png": {
+      "sha256": "8da788a32c6a4403e4da49c360eaf2a917d82c6b7a22ada01853c421e434770e",
+      "source_png": "16_hand_r.png",
+      "source_sha256": "f27f7668bedb8fd42f80dbfbd86bf1a931f026eef972f6c05403909435c6289f",
+      "part": "index_tip",
+      "pixels_preserved": true
+    },
+    "r5_hand_r_thumb.png": {
+      "sha256": "0cd9d0c2e66d293129aefb4f6d9aa5f149bad441d6468445dcd0177765c6bb9e",
+      "source_png": "16_hand_r.png",
+      "source_sha256": "f27f7668bedb8fd42f80dbfbd86bf1a931f026eef972f6c05403909435c6289f",
+      "part": "thumb",
+      "pixels_preserved": true
+    },
+    "r5_hand_r_middle.png": {
+      "sha256": "9da1e6131c2872f561281be0550d80a733a115e85f4bbe9ca25237e50b6a4073",
+      "source_png": "16_hand_r.png",
+      "source_sha256": "f27f7668bedb8fd42f80dbfbd86bf1a931f026eef972f6c05403909435c6289f",
+      "part": "middle",
+      "pixels_preserved": true
+    },
+    "r5_hand_r_ring.png": {
+      "sha256": "22972c43ffeef0e7df79afa90a65f9a2124fb5fef5a54b8f9247b21b65f7a571",
+      "source_png": "16_hand_r.png",
+      "source_sha256": "f27f7668bedb8fd42f80dbfbd86bf1a931f026eef972f6c05403909435c6289f",
+      "part": "ring",
+      "pixels_preserved": true
+    },
+    "r5_hand_r_little.png": {
+      "sha256": "7be8e17ece1e5082253b8d244c78590a0fb2030f58164ff2ca3f1dfaa0ece7c6",
+      "source_png": "16_hand_r.png",
+      "source_sha256": "f27f7668bedb8fd42f80dbfbd86bf1a931f026eef972f6c05403909435c6289f",
+      "part": "little",
+      "pixels_preserved": true
+    },
+    "r5_hand_r_palm.png": {
+      "sha256": "725e15047760be48917f8db32c196041cbff7760fab327ee5add4e2de3e4bed4",
+      "source_png": "16_hand_r.png",
+      "source_sha256": "f27f7668bedb8fd42f80dbfbd86bf1a931f026eef972f6c05403909435c6289f",
+      "part": "palm",
+      "pixels_preserved": true
+    },
+    "r5_hand_l_index_prox.png": {
+      "sha256": "3fb65e2adccc3902b0b7d61c5cc609eef7cc44093688262105c5b463b9e4b4ff",
+      "source_png": "13_hand_l.png",
+      "source_sha256": "048b011b04c67d6ab40250be1cf34b1780ef6b4d73e1ccc5c16b34e3c60d247d",
+      "part": "index_prox",
+      "pixels_preserved": true
+    },
+    "r5_hand_l_index_tip.png": {
+      "sha256": "6d011c2a6f73d6e2da5469d792f16aaede3285185575a18d7cae221b4660aee3",
+      "source_png": "13_hand_l.png",
+      "source_sha256": "048b011b04c67d6ab40250be1cf34b1780ef6b4d73e1ccc5c16b34e3c60d247d",
+      "part": "index_tip",
+      "pixels_preserved": true
+    },
+    "r5_hand_l_thumb.png": {
+      "sha256": "b06d20dbf1d0b3295a93fae41105416d2578b0029a51e4d18c3d7e2a3bc83a1f",
+      "source_png": "13_hand_l.png",
+      "source_sha256": "048b011b04c67d6ab40250be1cf34b1780ef6b4d73e1ccc5c16b34e3c60d247d",
+      "part": "thumb",
+      "pixels_preserved": true
+    },
+    "r5_hand_l_middle.png": {
+      "sha256": "46e4ff0b7132e065f1b4705551d69ce1a84794bd8a2c348f87349e59a99d8bd6",
+      "source_png": "13_hand_l.png",
+      "source_sha256": "048b011b04c67d6ab40250be1cf34b1780ef6b4d73e1ccc5c16b34e3c60d247d",
+      "part": "middle",
+      "pixels_preserved": true
+    },
+    "r5_hand_l_ring.png": {
+      "sha256": "b0b38e8357e736124e736582832a49d13b5ea78e7f4294ff20aff0de08e44e04",
+      "source_png": "13_hand_l.png",
+      "source_sha256": "048b011b04c67d6ab40250be1cf34b1780ef6b4d73e1ccc5c16b34e3c60d247d",
+      "part": "ring",
+      "pixels_preserved": true
+    },
+    "r5_hand_l_little.png": {
+      "sha256": "4f7a2157818713b04332559e08f529d8807d5b46b9862654ab1e643c3fa7d9f2",
+      "source_png": "13_hand_l.png",
+      "source_sha256": "048b011b04c67d6ab40250be1cf34b1780ef6b4d73e1ccc5c16b34e3c60d247d",
+      "part": "little",
+      "pixels_preserved": true
+    },
+    "r5_hand_l_palm.png": {
+      "sha256": "5d44524690db6440af20128129825f78025fda1c32a3c3d3252d49766cfc306a",
+      "source_png": "13_hand_l.png",
+      "source_sha256": "048b011b04c67d6ab40250be1cf34b1780ef6b4d73e1ccc5c16b34e3c60d247d",
+      "part": "palm",
+      "pixels_preserved": true
+    }
+  },
+  "runtime_reconciliation": {
+    "application": "9.13.10",
+    "candidate_review": "9.13.10",
+    "historical_forge_record": "9.6.5",
+    "historical_record_retained_as_unaccepted_legacy": "No modification or false original M0 approval. This explicit review sequence uses the actual published application dependency."
+  },
+  "source_owner_accepted_complete": false,
+  "independent_visual_accepted": false,
+  "production_accepted": false
+}

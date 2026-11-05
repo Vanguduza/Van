@@ -25,6 +25,7 @@ import com.dial.van.visual.VanExpressionLevel
 internal fun OverlayPersonalControls(state: VanOverlaySurfaceState, actions: VanOverlayActions, accent: Int) {
     val p = state.preferences
     Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        com.dial.van.visual.VanCharacterReviewNotice()
         Text("VAN behaviour", color = Color(accent), fontSize = 16.sp)
         Text("Warnings, approvals and explicit guidance stay visible in every mode.", color = Color(0xFFB8CBD2), fontSize = 12.sp)
         Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(5.dp)) {

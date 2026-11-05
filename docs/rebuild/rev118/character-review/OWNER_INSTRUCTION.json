@@ -1,0 +1,35 @@
+{
+  "schema": "van.character-review.owner-instruction/1",
+  "id": "van-owner-debug-character-review-20261105",
+  "recorded_at": "2026-11-05T20:34:51.609027+00:00",
+  "base_head": "0cf47a7e54517a12c297e488ceaf0a34b72a6d1e",
+  "question": "Do you approve that candidate-only sequencing change, so I can put the refined character into the software-review build without declaring it production-approved?",
+  "owner_response": "Proceed",
+  "source": "Current ChatGPT owner conversation; explicit response to the immediately preceding scoped approval request",
+  "approved_scope": [
+    "Reconcile exact Candidate B source and actual pinned runtime for candidate review",
+    "Create an explicitly unaccepted debug-only review build containing the exact refined character",
+    "Run software and Android-native checks before physical testing",
+    "Keep physical S24 testing and signed owner/artwork/release acceptance last"
+  ],
+  "not_granted": [
+    "Production promotion",
+    "Protected-main merge",
+    "Final artwork or source-completeness acceptance",
+    "Independent or native CI pass without actual evidence",
+    "Physical device testing now",
+    "Credential or security-policy changes"
+  ],
+  "cryptographic_owner_signature_claimed": false,
+  "production_accepted": false,
+  "physical_testing": "DEFERRED_FINAL_STAGE",
+  "exact_candidate_scope": {
+    "rive_sha256": "a5b848a02887de309d2ee4db2dbc167efaeb123ca0078278155c8b7b4bb8f5dc",
+    "context_sha256": "39a5d1947c9dd057e6616eb2656042945fbe098bc1ec13339d9f3bc74c5342ed",
+    "source_packet_sha256": "c484243f7e5bf060f5d5828a36d7e75cd5ce99179f32dc0006f997204d8d5087",
+    "runtime": "9.13.10",
+    "application_id": "com.dial.van.characterreview",
+    "build_type": "characterReview",
+    "derivation": "These byte identities are the already-verified refined Candidate B in the scoped proposal immediately preceding the owner response, not newly invented signed owner claims."
+  }
+}

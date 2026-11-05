@@ -394,6 +394,12 @@ private fun rememberBlendedAura(
 fun rememberVanEffectBudget(): VanEffectBudget = rememberObservedVanEffectBudget()
 
 private fun resolveRenderer(context: Context): VanRenderDecision {
+    // Review resolution validates the entire exact bundle before selecting Rive.
+    // Invalid/missing review data falls back visibly; it never borrows production assets.
+    if (com.dial.van.BuildConfig.VAN_CHARACTER_REVIEW) {
+        val size = runCatching { VanCharacterAssets.load(context).bytes.size.toLong() }.getOrDefault(0L)
+        return VanVisualRuntime.decide(size, riveRuntimeAvailable(), candidateBAvailable = true)
+    }
     val bytes = try {
         context.assets.open(RiveBindingContract.ASSET_FILE).use { stream ->
             var total = 0L

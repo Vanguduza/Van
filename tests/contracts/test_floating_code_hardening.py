@@ -75,10 +75,13 @@ class FloatingCodeHardening(unittest.TestCase):
         self.assertNotIn('Compare these choices',s)
         self.assertIn('value.expiresAtUnix',s)
     def test_native_asset_reads_are_bounded_before_decode(self):
-        s=(VIS/'VanRiveAvatar.kt').read_text()
+        renderer=(VIS/'VanRiveAvatar.kt').read_text()
+        self.assertIn('VanCharacterAssets.load(ctx)',renderer)
+        s=(VIS/'VanCharacterAssets.kt').read_text()
         self.assertIn('VanAssetReadLimits.read(it, VanAssetReadLimits.RIVE_BYTES)',s)
         self.assertIn('VanAssetReadLimits.read(it, VanAssetReadLimits.CONTEXT_BYTES)',s)
         self.assertNotIn('it.readBytes()',s)
+        self.assertIn('VanCharacterReviewPolicy.validate',s)
     def test_still_pose_uses_render_thread_bounded_steps_and_no_handler_loop(self):
         s=(VIS/'VanBoundedRiveView.kt').read_text()
         self.assertIn('override fun advance(elapsed: Float)',s)

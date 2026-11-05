@@ -219,6 +219,7 @@ internal fun CommandCentreScreen(
 
     Scaffold(
         containerColor = Color.Transparent,
+        topBar = { com.dial.van.visual.VanCharacterReviewNotice() },
         bottomBar = {
             if (!wide) {
                 CommandBottomBar(currentRoute, onSelect = ::navigateTo, onMore = { moreSheetOpen = true })

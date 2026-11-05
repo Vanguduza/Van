@@ -109,6 +109,7 @@ fun CharacterRigLab(bytes: ByteArray, supportedContextCodes: Set<Int> = emptySet
     ) {
         Text("VAN Candidate B — Character Rig Lab")
         Text("LIVE .RIV • animated mechanics prototype • debug only")
+        VanCharacterReviewNotice()
         Text(if (supportedContextCodes.size == VanContextGesture.entries.size)
             "Exact binary metadata verified: 14 original + 12 contextual gestures"
             else "Legacy gesture surface: contextual metadata absent or invalid; extension disabled")

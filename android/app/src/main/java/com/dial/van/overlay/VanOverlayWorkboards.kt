@@ -99,6 +99,7 @@ private fun AdaptiveWorkboard(
                 LazyColumn(Modifier.fillMaxSize().padding(8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     item { Text("VAN · $headline", color = Color(accent), fontSize = 14.sp, fontWeight = FontWeight.Bold,
                         modifier = Modifier.then(actions.dragHandle).vanAccessibleMovement(actions).semantics { contentDescription = "Drag VAN workboard" }) }
+                    item { com.dial.van.visual.VanCharacterReviewNotice() }
                     item { Text("Limited screen space", color = Color(0xFFB8CBD2), fontSize = 12.sp) }
                     item { WorkChip("Open full view", accent) { actions.onCommandCentre(null) } }
                     item { WorkChip("Return to VAN", accent) { actions.onPresentation(VanOverlayPresentation.FULL_FLOATING) } }
@@ -107,6 +108,7 @@ private fun AdaptiveWorkboard(
             } else {
                 Column(Modifier.fillMaxSize().padding(10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     BoardHeader(state, actions, visualState, headline, caption, accent, compact)
+                    com.dial.van.visual.VanCharacterReviewNotice()
                     Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         WorkChip("Overview", accent, selected = state.workboardMode == VanWorkboardMode.CONTEXT) { actions.onWorkboardMode(VanWorkboardMode.CONTEXT) }
                         WorkChip("Chat", accent, selected = state.workboardMode == VanWorkboardMode.CHAT) { actions.onWorkboardMode(VanWorkboardMode.CHAT) }

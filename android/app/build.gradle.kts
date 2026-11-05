@@ -7,6 +7,7 @@ plugins {
 import java.util.Properties
 import java.security.MessageDigest
 import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
 import com.dial.van.buildconfig.VanProductionTarget
 
 // The admitted handset remains arm64. CI's x86_64 emulator needs matching native
@@ -113,8 +114,29 @@ val generateVanBuildProvenance = tasks.register("generateVanBuildProvenance") {
     }
 }
 
+// Owner-approved unaccepted review sequence. This is an isolated debuggable
+// package, not a production Rive admission and never an alias for release.
+val characterReviewRequestFile = rootProject.file("character-review/REVIEW_REQUEST.json")
+val characterReviewRequest = JsonSlurper().parse(characterReviewRequestFile) as Map<*, *>
+require(characterReviewRequest["review_only"] == true && characterReviewRequest["production_accepted"] == false)
+val characterReviewRequestSha = publicInputSha256(characterReviewRequestFile.readText(Charsets.UTF_8))
+val characterReviewAssets = layout.buildDirectory.dir("generated/van-character-review")
+val prepareCharacterReview = tasks.register<Exec>("prepareCharacterReview") {
+    dependsOn(generateVanBuildProvenance)
+    workingDir(rootProject.projectDir.parentFile)
+    commandLine("python3", "android/tools/prepare_character_review.py", "prepare",
+        "--output", characterReviewAssets.get().asFile.absolutePath,
+        "--provenance", vanBuildProvenanceAsset.get().asFile.absolutePath)
+    outputs.dir(characterReviewAssets)
+    // Revalidate exact source/owner scope/runtime and payload bytes on every build.
+    outputs.upToDateWhen { false }
+}
+
 android {
     namespace = "com.dial.van"
+    val instrumentationVariant = providers.gradleProperty("VAN_INSTRUMENTATION_BUILD_TYPE").orElse("debug").get()
+    require(instrumentationVariant in setOf("debug", "characterReview")) { "Instrumentation may target debug or unaccepted characterReview only" }
+    testBuildType = instrumentationVariant
     compileSdk = 36
     // Large acoustic weights are prepared from the source-pinned lock before
     // building. They are embedded in the signed APK, then installed privately
@@ -138,6 +160,10 @@ android {
         targetSdk = 36
         versionCode = 7
         versionName = "0.6.0-canon-rc1"
+        buildConfigField("boolean", "VAN_CHARACTER_REVIEW", "false")
+        buildConfigField("String", "VAN_CHARACTER_REVIEW_REQUEST_SHA", "\"\"")
+        buildConfigField("String", "VAN_CHARACTER_REVIEW_RIVE_SHA", "\"\"")
+        buildConfigField("String", "VAN_CHARACTER_REVIEW_CONTEXT_SHA", "\"\"")
         buildConfigField("String", "VAN_SOURCE_SHA", "\"$vanSourceSha\"")
         buildConfigField("String", "VAN_GATEWAY_BASE_URL", "\"$escapedVanGatewayBaseUrl\"")
         buildConfigField("String", "VAN_GATEWAY_CA_PEM_B64", "\"$vanGatewayCaPemB64\"")
@@ -200,6 +226,25 @@ android {
         debug {
             isMinifyEnabled = false
         }
+        create("characterReview") {
+            initWith(getByName("debug"))
+            isDebuggable = true
+            applicationIdSuffix = ".characterreview"
+            versionNameSuffix = "-character-review-unaccepted"
+            matchingFallbacks += listOf("debug")
+            buildConfigField("boolean", "VAN_CHARACTER_REVIEW", "true")
+            buildConfigField("String", "VAN_CHARACTER_REVIEW_REQUEST_SHA", "\"$characterReviewRequestSha\"")
+            buildConfigField("String", "VAN_CHARACTER_REVIEW_RIVE_SHA", "\"${characterReviewRequest["rive_sha256"]}\"")
+            buildConfigField("String", "VAN_CHARACTER_REVIEW_CONTEXT_SHA", "\"${characterReviewRequest["context_sha256"]}\"")
+        }
+    }
+    // No review assets are added to main/debug/release. Only this separate
+    // build type reuses the existing debug rig lab and generated review pair.
+    sourceSets.getByName("characterReview") {
+        java.srcDir("src/debug/java")
+        res.srcDirs("src/debug/res", "src/characterReview/res")
+        manifest.srcFile("src/characterReview/AndroidManifest.xml")
+        assets.srcDir(prepareCharacterReview.map { characterReviewAssets.get() })
     }
 
     // Fail closed: never ship an unsigned production APK/AAB.
@@ -211,7 +256,19 @@ android {
         require(vanTestAbi == null || !releaseRequested) {
             "Release ABI refused: VAN_TEST_ABI is test-only"
         }
+        require(!releaseRequested || allTasks.none { it.project == project && it.name.contains("CharacterReview") }) {
+            "Character review and release may not share a task invocation"
+        }
         if (releaseRequested) {
+            // Reject accidental direct source copying before any signing gate.
+            val forbiddenReviewNames = setOf("van_review.riv", "van_review.context.json", "van-character-review.json")
+            for (name in listOf("main", "release")) {
+                for (directory in sourceSets.getByName(name).assets.srcDirs) {
+                    require(!directory.exists() || directory.walkTopDown().none { it.isFile && it.name in forbiddenReviewNames }) {
+                        "Review-only asset found in production source set"
+                    }
+                }
+            }
             try {
                 VanProductionTarget.requireReleaseProfile(
                     productionGatewayProfile,
@@ -322,6 +379,23 @@ android {
             isIncludeAndroidResources = true
         }
     }
+}
+
+androidComponents.onVariants { variant ->
+    val cap = variant.name.replaceFirstChar { it.uppercase() }
+    val isReview = variant.name == "characterReview"
+    if (isReview) {
+        tasks.matching { it.name == "merge${cap}Assets" }.configureEach { dependsOn(prepareCharacterReview) }
+    }
+    val inspect = tasks.register<Exec>("assert${cap}CharacterAssetIsolation") {
+        dependsOn("merge${cap}Assets")
+        workingDir(rootProject.projectDir.parentFile)
+        commandLine("python3", "android/tools/prepare_character_review.py", "guard",
+            "--variant", variant.name,
+            "--assets", layout.buildDirectory.dir("intermediates/assets/${variant.name}/merge${cap}Assets").get().asFile.absolutePath)
+        outputs.upToDateWhen { false }
+    }
+    tasks.matching { it.name == "package$cap" || it.name == "bundle$cap" }.configureEach { dependsOn(inspect) }
 }
 
 dependencies {
