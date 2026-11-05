@@ -38,7 +38,7 @@ class PoolerRehearsal(Rehearsal):
             ERL_FLAGS='+S 2:2 +SDcpu 1 +SDio 1',
             ERL_EPMD_ADDRESS='127.0.0.1',ERL_EPMD_PORT=str(port()),ERL_CRASH_DUMP=str(self.work/'pooler-crash.dump'))
         return env
-    def admin(self,path,method='GET',body=None,token=None):
+    def pooler_admin(self,path,method='GET',body=None,token=None):
         return request(self.pool_ports['management'],path,method,body,{'Authorization':'Bearer '+(pool.management_token(self.shared_pool['admin_secret']) if token is None else token)})
     def pooled(self,p,sql,mode='transaction',*,password=None,username=None,database=None,fail_ok=False):
         pn=self.pool_ports[mode];s=self.shared_pool['projects'][p['project_uuid']]
@@ -55,7 +55,7 @@ class PoolerRehearsal(Rehearsal):
         while time.monotonic()<end:
             if child.poll() is not None:raise Failure('POOLER_NATIVE_EXIT')
             try:
-                status,_=self.admin('/api/health')
+                status,_=self.pooler_admin('/api/health')
                 if status==204:break
             except (OSError,TimeoutError):pass
             time.sleep(.2)
@@ -74,9 +74,13 @@ class PoolerRehearsal(Rehearsal):
             observed.append({'purpose':name,'loopback':True})
         self.pool_receipts['private_listeners']=observed
     def setup_pooler(self):
-        self.sql('ALTER SYSTEM SET max_connections=64')
-        r=self.run([self.args.pg_bin/'pg_ctl','-D',self.data,'-l',self.work/'postgres.log','-w','restart'],timeout=30)
-        self.check('temporary_pg_pool_capacity',r.returncode==0)
+        # Do not shrink/restart an already sufficient shared fixture. Its other
+        # native consumers may have a larger independently bounded connection budget.
+        if int(self.sql('SHOW max_connections').stdout)<64:
+            self.sql('ALTER SYSTEM SET max_connections=64')
+            r=self.run([self.args.pg_bin/'pg_ctl','-D',self.data,'-l',self.work/'postgres.log','-w','restart'],timeout=30)
+            if r.returncode:raise Failure('TEMPORARY_POOL_CAPACITY_RESTART_FAILED')
+        self.check('temporary_pg_pool_capacity',int(self.sql('SHOW max_connections').stdout)>=64)
         for p in self.projects:
             self.sql(pool.project_roles_sql(p,self.shared_pool['projects'][p['project_uuid']]),db=p['database'])
             self.sql(f'CREATE TABLE public.pool_fixture(id integer PRIMARY KEY,value text NOT NULL); INSERT INTO public.pool_fixture VALUES(1,{b.lit(p["slug"])}); GRANT SELECT,INSERT,UPDATE,DELETE ON public.pool_fixture TO {b.ident(pool.role(p))}; ALTER TABLE public.pool_fixture OWNER TO {b.ident(b.names(p)["owner"])};',db=p['database'])
@@ -91,12 +95,12 @@ class PoolerRehearsal(Rehearsal):
         (self.work/'pooler-migration.log').write_text(result.stdout+result.stderr)
         self.check('real_supavisor_registry_migrations',result.returncode==0)
         self.start_pooler()
-        self.check('shared_pooler_admin_rejects_project_service_key',self.admin('/api/tenants/unknown',token=self.keys[self.projects[0]['slug']]['service_role'])[0]==403)
-        self.check('shared_pooler_admin_requires_token',self.admin('/api/tenants/unknown',token='')[0]==403)
+        self.check('shared_pooler_admin_rejects_project_service_key',self.pooler_admin('/api/tenants/unknown',token=self.keys[self.projects[0]['slug']]['service_role'])[0]==403)
+        self.check('shared_pooler_admin_requires_token',self.pooler_admin('/api/tenants/unknown',token='')[0]==403)
         for p in self.projects:
-            tid=pool.tenant_id(p);self.check(p['slug']+'_pool_tenant_not_existing',self.admin('/api/tenants/'+tid)[0]==404)
+            tid=pool.tenant_id(p);self.check(p['slug']+'_pool_tenant_not_existing',self.pooler_admin('/api/tenants/'+tid)[0]==404)
             body=pool.registration(p,self.shared_pool['projects'][p['project_uuid']]['pool'],db_host='127.0.0.1',db_port=self.pgport,client_cidrs=['127.0.0.1/32'],upstream_ssl=False,enforce_ssl=False)
-            code,value=self.admin('/api/tenants/'+tid,'PUT',body)
+            code,value=self.pooler_admin('/api/tenants/'+tid,'PUT',body)
             self.check(p['slug']+'_native_pool_tenant_registered',code==201)
             self.check(p['slug']+'_pool_config_uses_own_database',value.get('data',{}).get('db_database')==p['database'])
             self.check(p['slug']+'_native_management_readback_requires_secret_redaction',self.shared_pool['projects'][p['project_uuid']]['pool'] in json.dumps(value))

@@ -1,10 +1,20 @@
 # DIAL Supabase — one installation, independent database/Auth/API projects
 
-**Status: shared Supavisor and scoped Studio/Meta administration passed 248 real native/API/browser assertions, 224 Python tests, eight Node admission tests and 26 complete Compose-model checks. Earlier Storage/Realtime, Edge and recovery evidence remains retained. These are overlapping isolated milestones, not live VAN or migration acceptance.**
+**Status: ALL shared native services ran concurrently on one disposable PostgreSQL server. The final integration passed 681 real-service assertions; 245 Python tests, eight Node tests, 26 complete Compose-model checks and 28 canonical-lifecycle checks also passed. No live VAN deployment or Nissan GTR migration has occurred.**
 
 The owner requirement is one existing managed Supabase installation on `van-trading-core`, one PostgreSQL server, and independently functioning application databases and authentication environments. The candidate does not add a PostgreSQL server, VM or complete Supabase stack per project. It adds small project-specific Auth, REST and router services to the existing Compose model and reuses one shared Storage, one shared Realtime and one existing Edge Runtime service. The candidate also reuses the original Supavisor, Studio and Meta services behind one private project-administration gateway. Production rollout, actual operator-issuer integration and full Studio coverage still need qualification.
 
 **REA is optional research support, not an execution or release prerequisite.** The owner authorized direct implementation. No REA investigation result is claimed or needed for the tests below.
+
+## Complete installation integration and guarded lifecycle
+
+The previous component-by-component limitation is now closed for a bounded native HTTP/data-plane workload. Thirteen actual service processes (two Auth/REST/project gateways and one each of Storage, Realtime, Edge, Supavisor, Meta, original Studio and private admin) remained alive concurrently around the SAME PostgreSQL server.
+
+A real authenticated Edge function wrote a row and an object through its own project APIs; Realtime delivered that exact row; Storage, Supavisor and Meta returned the matching data. Concurrent probes preserved the same live process identities. Selected Edge/pooler outages did not take down the other services, did not reroute failed requests, and replaced only the intended process on restart. The synthetic legacy database and existing 768 MiB cgroup cap were preserved. This is a small integration test, not production throughput or simultaneous browser-rendering acceptance.
+
+`tools/compose_lifecycle.py` now binds both startup and shutdown of the existing `vati-supabase.service` to the same complete Compose/project/env model, with checksum guards and original-unit/source checks. The compiler never applies the drop-in, changes systemd or grants Root authority. The actual systemd parser and checksum verifier accepted correct private inputs and refused missing/tampered ones. See `CANONICAL_LIFECYCLE.md` for the original-owner release contract.
+
+Current evidence: `QUALIFICATION_INSTALLATION_2026-11-05.md` and `evidence/2026-11-05-installation/`. This supersedes earlier guide statements that all components had only separate native coverage; earlier dated qualification files remain accurate historical records. The real target architecture, images, credentials, operator issuer, off-host recovery and Nissan GTR migration remain unqualified. Counts overlap and must not be added across milestones.
 
 ## Implemented and demonstrated
 
@@ -42,7 +52,7 @@ See `SHARED_REALTIME.md`, `QUALIFICATION_REALTIME_2026-11-04.md`, `evidence/2026
 
 `tools/shared_edge.py` and `edge/main/index.ts` adapt the existing **single** Supabase Edge Runtime service to serve separate projects with immutable function definitions, independently verified JWTs, explicit per-function permissions, per-project gateways and worker time/CPU/concurrency limits. No second server or Edge stack is introduced. The original `functions` service and mounts are retained in the Compose model. See `SHARED_EDGE.md`, `QUALIFICATION_EDGE_2026-11-04.md`, and `evidence/2026-11-04-edge/`.
 
-A real isolated Edge runtime passed **209 native checks**; the expanded complete source suite passed **185 unit tests** and **16 effective Compose-model checks**. The separate previously published 345-check Storage/Realtime integrated rehearsal remains valid. **A single native test running Storage, Realtime and Edge concurrently has not been performed**; do not combine the counts as an overall acceptance score. The Edge image is pinned to a verified amd64 digest but must be qualified separately for the actual target architecture. Synthetic functions are not Nissan GTR business functions.
+A real isolated Edge runtime passed **209 native checks**; the expanded complete source suite passed **185 unit tests** and **16 effective Compose-model checks**. The separate previously published 345-check Storage/Realtime integrated rehearsal remains valid. The later complete-installation rehearsal now runs Storage, Realtime, Edge, Supavisor, Meta and Studio HTTP concurrently; this earlier Edge count remains a separate overlapping checkpoint. The Edge image is pinned to a verified amd64 digest but must be qualified separately for the actual target architecture. Synthetic functions are not Nissan GTR business functions.
 
 ## Shared pooler and project-aware administration milestone
 

@@ -84,3 +84,7 @@ python3 "$BASE/tests/check_management_compose.py" \
 ```
 
 `tests/rehearse_pooler.py` and `tests/rehearse_admin.py` require the exact existing native-fixture arguments plus explicit staged `DIAL_REHEARSAL_POOLER_RELEASE`, `DIAL_REHEARSAL_POOLER_LIB`, `DIAL_REHEARSAL_ADMIN_NODE`, `DIAL_REHEARSAL_META_SOURCE`, `DIAL_REHEARSAL_STUDIO_ROOT` and optional qualified browser driver/cache. They never accept an existing production database endpoint. Generated private bundles must not be committed, logged or shared.
+
+## Complete simultaneous installation checkpoint
+
+The newer `QUALIFICATION_INSTALLATION_2026-11-05.md` records 681 passing real assertions with every shared service and both projects' Auth/REST/gateways simultaneously alive on one private PostgreSQL server. It includes exact cross-service data flow, bounded concurrency and selected failure isolation. The canonical lifecycle candidate passed native systemd/integrity checks without being installed. This supersedes earlier *separate-only service coverage* limitations in this guide, but NOT the limitations on production deployment, original operator issuer, target images, advanced/full-browser Studio usage, actual-volume/off-host recovery or Nissan GTR migration. No production or cgroup-policy changes occurred.

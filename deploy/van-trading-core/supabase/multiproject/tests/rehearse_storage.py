@@ -40,9 +40,9 @@ def raw_http(pn,path,method='GET',body=None,headers=None):
 class StorageRehearsal(Rehearsal):
     def __init__(self,args):
         super().__init__(args)
-        self.node=pathlib.Path(os.environ.get('DIAL_REHEARSAL_STORAGE_NODE',''))
+        self.storage_node=pathlib.Path(os.environ.get('DIAL_REHEARSAL_STORAGE_NODE',''))
         self.storage_source=pathlib.Path(os.environ.get('DIAL_REHEARSAL_STORAGE_SOURCE',''))
-        if not self.node.is_absolute() or not self.node.is_file() or not os.access(self.node,os.X_OK):raise Failure('EXACT_STORAGE_NODE_REQUIRED')
+        if not self.storage_node.is_absolute() or not self.storage_node.is_file() or not os.access(self.storage_node,os.X_OK):raise Failure('EXACT_STORAGE_NODE_REQUIRED')
         if not self.storage_source.is_absolute() or not (self.storage_source/'dist/start/server.js').is_file():raise Failure('BUILT_UPSTREAM_STORAGE_REQUIRED')
         rev=self.run(['git','-C',self.storage_source,'rev-parse','HEAD']).stdout.strip()
         dirty=self.run(['git','-C',self.storage_source,'status','--porcelain','--untracked-files=no']).stdout.strip()
@@ -51,7 +51,7 @@ class StorageRehearsal(Rehearsal):
         self.storage_lock_hash=hashlib.sha256((self.storage_source/'package-lock.json').read_bytes()).hexdigest()
         for path in (BASE/'tools/shared_storage.py',pathlib.Path(__file__)):
             self.source_hashes[str(path.relative_to(BASE))]=hashlib.sha256(path.read_bytes()).hexdigest()
-        self.storage_port=port();self.admin_port=port();self.objects=self.work/'objects';self.objects.mkdir()
+        self.storage_port=port();self.storage_admin_port=port();self.objects=self.work/'objects';self.objects.mkdir()
         self.shared=st.new_secrets(self.projects)
         self.native_tenants={p['slug']:("legacy-stub" if i==0 else st.tenant_id(p)) for i,p in enumerate(self.projects)}
         self.object_bucket='preserved-fixture-bucket'
@@ -69,7 +69,7 @@ class StorageRehearsal(Rehearsal):
             try:p.wait(timeout=12)
             except subprocess.TimeoutExpired:raise Failure('FIXTURE_PROCESS_DID_NOT_STOP_'+label)
     def admin(self,path,method='GET',body=None,key=None):
-        return raw_http(self.admin_port,path,method,body,{'apikey':self.shared['admin_key'] if key is None else key})
+        return raw_http(self.storage_admin_port,path,method,body,{'apikey':self.shared['admin_key'] if key is None else key})
     def storage(self,p,path,method='GET',body=None,bearer=None,key=None,anonymous=False,extra=None):
         headers={'Host':p['hostname']}
         if not anonymous:
@@ -79,11 +79,11 @@ class StorageRehearsal(Rehearsal):
         return raw_http(self.endpoints[p['slug']]['api'],'/storage/v1'+path,method,body,headers)
     def start_storage(self):
         env=st.environment(self.shared,str(self.objects),'127.0.0.1',self.pgport,object_bucket=self.object_bucket,preserved_tenants=self.native_tenants.values())
-        env.update(SERVER_HOST='127.0.0.1',SERVER_PORT=str(self.storage_port),SERVER_ADMIN_PORT=str(self.admin_port),
+        env.update(SERVER_HOST='127.0.0.1',SERVER_PORT=str(self.storage_port),SERVER_ADMIN_PORT=str(self.storage_admin_port),
             NODE_ENV='production',NODE_OPTIONS='--max-old-space-size=256',UV_THREADPOOL_SIZE='2')
         self.storage_env=env
-        proc=self.spawn([self.node,self.storage_source/'dist/start/server.js'],env,'shared-storage',self.storage_source)
-        self.wait_http(proc,self.admin_port,'/status')
+        proc=self.spawn([self.storage_node,self.storage_source/'dist/start/server.js'],env,'shared-storage',self.storage_source)
+        self.wait_http(proc,self.storage_admin_port,'/status')
         self.check('one_actual_multitenant_storage_process_started',proc.poll() is None)
     def configure_gateways(self):
         for p in self.projects:
@@ -106,7 +106,7 @@ class StorageRehearsal(Rehearsal):
             DATABASE_URL=st.dsn(p['database'],st.role(p),self.shared['projects'][st.tenant_id(p)],'127.0.0.1',self.pgport),
             ANON_KEY=self.keys[slug]['anon'],SERVICE_KEY=self.keys[slug]['service_role'],AUTH_JWT_SECRET=self.secret[slug]['jwt'],
             SERVER_HOST='127.0.0.1',SERVER_PORT=str(self.storage_port),NODE_ENV='production',NODE_OPTIONS='--max-old-space-size=256',UV_THREADPOOL_SIZE='2')
-        proc=self.spawn([self.node,self.storage_source/'dist/start/server.js'],env,'legacy-single-storage',self.storage_source)
+        proc=self.spawn([self.storage_node,self.storage_source/'dist/start/server.js'],env,'legacy-single-storage',self.storage_source)
         self.wait_http(proc,self.storage_port,'/status')
         self.check('original_single_tenant_storage_started_with_preserved_namespace',proc.poll() is None)
         h={'Authorization':'Bearer '+self.keys[slug]['service_role']}
@@ -358,7 +358,7 @@ class StorageRehearsal(Rehearsal):
         return {'scope':'REAL_SHARED_STORAGE_PLUS_TWO_PROJECT_AUTH_REST_DISPOSABLE_PG17',
             'storage_source_commit':st.STORAGE_REF,'storage_source_tag':'v1.74.0',
             'storage_dist_sha256':self.storage_tree_hash,'storage_lock_sha256':self.storage_lock_hash,
-            'node_binary_sha256':hashlib.sha256(self.node.read_bytes()).hexdigest(),
+            'node_binary_sha256':hashlib.sha256(self.storage_node.read_bytes()).hexdigest(),
             'storage_instances':1,'postgres_instances':1,'object_restore':getattr(self,'object_restore_evidence',{}),
             'not_tested':['live VAN single-to-multi Storage conversion (synthetic transition tested)','Storage donor container/ARM64','Realtime','Edge Functions','Studio','Supavisor','OAuth/MFA/SMTP','GTR migration','off-host backup','consistent production database-and-object recovery']}
 
