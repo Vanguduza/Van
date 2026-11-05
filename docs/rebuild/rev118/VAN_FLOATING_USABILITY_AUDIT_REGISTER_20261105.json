@@ -90,8 +90,8 @@
       "priority": "RELEASE",
       "area": "Native APK/device",
       "finding": "No physical result in this audit",
-      "action": "Complete original Gradle assembly and inspect the exact debug artifact; native source compilation and all new code are present. Device execution is the final stage.",
-      "status": "SOFTWARE_BUILD_IN_PROGRESS_PHYSICAL_DEFERRED"
+      "action": "Original app:assembleDebug and assembleDebugAndroidTest succeeded from exact committed source d78368f2. Main APK passed89 static checks and test APK signature/classes verified. Refined Rive still awaits its separate original native/artwork admission; physical execution remains last.",
+      "status": "APKS_ASSEMBLED_STATICALLY_VERIFIED_NATIVE_ARTWORK_ACCEPTANCE_PENDING"
     },
     {
       "id": "G02",
@@ -149,8 +149,12 @@
       "natural_motion": 24
     },
     "physical_testing": "DEFERRED_FINAL_STAGE",
-    "debug_apk": "ASSEMBLY_IN_PROGRESS",
-    "source_publication": "CANDIDATE_PENDING_NORMAL_HOOKS"
+    "debug_apk": "BUILT_SIGNED_STATICALLY_VERIFIED",
+    "source_publication": "LOCAL_NORMAL_HOOK_COMMIT_READY_FOR_FINAL_HISTORY_AND_PUSH",
+    "application_source_commit": "d78368f2df1426a124072e7e04d703327f229ccd",
+    "debug_apk_sha256": "8e7e0b3e920a61710378230eb52c8d32cb69c50434ce86bda968822e1d004a8a",
+    "instrumentation_apk": "BUILT_NOT_EXECUTED",
+    "instrumentation_apk_sha256": "4466d4a31571ba54e6878e6619c4aed4fda48650c6e9d37fe8f7537e40ebfbe6"
   },
   "code_closure_owner_instruction": "Physical testing last; finish implementation and software verification first."
 }

@@ -1,0 +1,12 @@
+{
+  "archive_path": "/home/ubuntu/work/van-floating-gradle-hardening-20261105/SOFTWARE_APK_BUILD_EVIDENCE_20261105.zip",
+  "archive_sha256": "96d330a438ea61c5a622db05002f0419f9ea23758df368053c3e4a15ef2588fd",
+  "archive_bytes": 246273,
+  "members": 30,
+  "archive_verified": true,
+  "source_commit": "d78368f2df1426a124072e7e04d703327f229ccd",
+  "main_apk_sha256": "8e7e0b3e920a61710378230eb52c8d32cb69c50434ce86bda968822e1d004a8a",
+  "test_apk_sha256": "4466d4a31571ba54e6878e6619c4aed4fda48650c6e9d37fe8f7537e40ebfbe6",
+  "installed": false,
+  "physical_executed": false
+}

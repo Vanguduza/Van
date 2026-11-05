@@ -1,0 +1,68 @@
+{
+  "schema": "van.floating.signed-software-build/1",
+  "status": "MAIN_AND_INSTRUMENTATION_APKS_ASSEMBLED_STATICALLY_VERIFIED_PHYSICAL_DEFERRED",
+  "recorded_at": "2026-11-05T17:58:52.016566+00:00",
+  "application_source_commit": "d78368f2df1426a124072e7e04d703327f229ccd",
+  "application_build": {
+    "task": ":app:assembleDebug",
+    "exit_code": 0,
+    "seconds": 397.16,
+    "source_unchanged": true,
+    "apk_bytes": 321041411,
+    "apk_sha256": "8e7e0b3e920a61710378230eb52c8d32cb69c50434ce86bda968822e1d004a8a",
+    "signature_verified": true,
+    "static_checks_passed": 89,
+    "compiled_dex_classes": 33748,
+    "voice_bundle_files": 45,
+    "voice_bundle_bytes": 224852871,
+    "owner_voice_profile_included": false
+  },
+  "instrumentation_build": {
+    "task": ":app:assembleDebugAndroidTest",
+    "exit_code": 0,
+    "apk_bytes": 2341198,
+    "apk_sha256": "4466d4a31571ba54e6878e6619c4aed4fda48650c6e9d37fe8f7537e40ebfbe6",
+    "same_certificate_as_app": true,
+    "test_classes_present": [
+      "PhysicalS24MotionPerformanceTest",
+      "RiveContractTest"
+    ],
+    "test_execution": false
+  },
+  "certificate_sha256": "318316323489b0d216c3f25cff1184e3b1d3bcc32760f8d793fb578939057061",
+  "signing_scope": "ordinary debug candidate, not release signing or device upgrade approval",
+  "refined_rive_in_application": false,
+  "active_character_asset": "existing admitted fallback; refined Candidate B Rive and matching context metadata remain review-only",
+  "prototype_rive_sha256": "a5b848a02887de309d2ee4db2dbc167efaeb123ca0078278155c8b7b4bb8f5dc",
+  "software_tests": {
+    "focused_jvm": 345,
+    "packaging_workflow": 32,
+    "compiled_rive_original": 45,
+    "compiled_rive_articulation": 151,
+    "compiled_rive_natural_motion": 24
+  },
+  "original_required_history": {
+    "baseline": "4fd466dec3910ed5de614bfbf95887ad619df5ca",
+    "commits": 263,
+    "findings": 0,
+    "status": "GREEN",
+    "source_commit": "d78368f2df1426a124072e7e04d703327f229ccd"
+  },
+  "physical_testing": "DEFERRED_FINAL_STAGE_BY_OWNER",
+  "installed": false,
+  "native_refined_character_runtime_accepted": false,
+  "artwork_owner_accepted": false,
+  "production_merged": false,
+  "build_transport": "Original pinned Android aapt2 on authorized ARM VM through extracted user-mode compatibility, original configured repositories for missing declared runtime jar; no source/SDK-version/resource-policy/security-gate substitutions",
+  "raw_evidence": {
+    "archive_sha256": "96d330a438ea61c5a622db05002f0419f9ea23758df368053c3e4a15ef2588fd",
+    "archive_bytes": 246273,
+    "members": 30
+  },
+  "remaining_boundaries": [
+    "normal source publication readback",
+    "separate applicable review/admission of exact Rive authoring and Forge tool source retained in review packet",
+    "exact refined Rive native-runtime/artwork gate before promotion",
+    "physical S24 acceptance remains final and unexecuted"
+  ]
+}

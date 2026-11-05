@@ -1,6 +1,6 @@
 {
   "schema": "van.floating.code-closure/1",
-  "status": "IMPLEMENTATION_SOFTWARE_VERIFIED_APK_ASSEMBLY_PENDING",
+  "status": "IMPLEMENTATION_SOFTWARE_VERIFIED_SIGNED_APK_RECEIPT_AVAILABLE",
   "created_at": "2026-11-05T17:38:35.883700+00:00",
   "base_head": "d195220109bbaae94ec7ac2114aa7f06c7d84f93",
   "focused_jvm_tests": 345,
@@ -189,5 +189,7 @@
   },
   "software_evidence_archive_sha256": "24071999f2206a6044ad17330a085c9e0a1546fc90f1c809892b8acaae6097e3",
   "software_evidence_archive_bytes": 4314557,
-  "source_scope_limits": "Android source and supporting tests/docs can use existing candidate authorization; Rive authoring/Forge mutations outside it are retained as an exact review packet, not silently committed/admitted."
+  "source_scope_limits": "Android source and supporting tests/docs can use existing candidate authorization; Rive authoring/Forge mutations outside it are retained as an exact review packet, not silently committed/admitted.",
+  "final_signed_artifact_receipt": "docs/rebuild/rev118/receipts/floating-20261105-apk-software-closure/SUMMARY.json",
+  "application_source_commit": "d78368f2df1426a124072e7e04d703327f229ccd"
 }
