@@ -14,6 +14,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.semantics.Role
 import com.dial.van.visual.VanLiveVisualState
 import com.dial.van.visual.VanPointerGaze
 
@@ -86,6 +87,9 @@ internal fun Modifier.vanGestures(
             )
         }
         .then(if (clicks) Modifier.combinedClickable(
+            role = Role.Button,
+            onClickLabel = "Open or close VAN workboard",
+            onLongClickLabel = "Show assistant actions",
             onClick = { onTap() },
             onDoubleClick = { onDoubleTap() },
             onLongClick = { onLongPress() },

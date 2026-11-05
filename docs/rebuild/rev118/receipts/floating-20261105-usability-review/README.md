@@ -1,0 +1,7 @@
+# Floating assistant usability audit — executed scope and limits
+
+The exact current source passed245 focused Kotlin checks,110 original R2 regressions,45 retained actual Rive-binary checks,10 original aura contract assertions,8 independent wiring checks and4 original architecture checks. Tests cover10,000 transient visual samples and5,000 history/accessibility-policy samples inside their respective test methods; sample loops are not additional tests.
+
+Native evidence is a successful87-source visual/overlay compile against actual prior application classes, followed by exactly3 final fixes compiled against those actual classes and the original pinned compiler/runtime inputs. All386 current main/debug/generated-source hashes are reconciled. This does not claim a fresh whole-app386-source build, APK, physical Android event handling, S24 performance or industry superiority. The earlier native240second timeout and incoming383-source900second timeout are retained. An initial wrong unittest-discovery invocation ran0tests and failed; the original10 top-level assertions were then actually executed and passed, with both results preserved.
+
+The source-based benchmark audit and register compare documented interaction patterns rather than inventing competitor timing. The original Rive asset, rejected-arc removal, approvals, Project Truth history, privacy and physical-device gates are unchanged. No source byte lacking matching current test/compile evidence is admitted by this receipt.

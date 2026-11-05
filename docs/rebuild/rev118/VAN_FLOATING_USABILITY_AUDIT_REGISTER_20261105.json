@@ -1,0 +1,137 @@
+{
+  "schema": "van.floating-usability-audit/1",
+  "date": "2026-11-05",
+  "baseline": "2b1da2775ea7b0e8c3893cc259e469bd78e1c2bd",
+  "industry_superiority_demonstrated": false,
+  "physical_comparison_performed": false,
+  "rows": [
+    {
+      "id": "U01",
+      "priority": "P1",
+      "area": "Voice tab versus actual capture",
+      "finding": "Original tab could start another turn",
+      "action": "Select view without capture; guarded explicit start, visible actual status and Stop voice",
+      "status": "SOURCE_TESTED_NATIVE_COMPILED_PHYSICAL_PENDING"
+    },
+    {
+      "id": "U02",
+      "priority": "P1",
+      "area": "Back and escape",
+      "finding": "No complete native dismissal path",
+      "action": "Own-window system Back, IME first, hardware escape fallback",
+      "status": "SOURCE_TESTED_NATIVE_COMPILED_PHYSICAL_PENDING"
+    },
+    {
+      "id": "U03",
+      "priority": "P1",
+      "area": "Non-obstruction",
+      "finding": "Focused board could block outside touches",
+      "action": "NOT_TOUCH_MODAL outside window; no covered-pixel bypass",
+      "status": "SOURCE_TESTED_NATIVE_COMPILED_PHYSICAL_PENDING"
+    },
+    {
+      "id": "U04",
+      "priority": "P1",
+      "area": "Accessible actions/movement",
+      "finding": "Hidden gestures and precision drag",
+      "action": "Named roles/actions plus bounded directional movement",
+      "status": "SOURCE_TESTED_NATIVE_COMPILED_PHYSICAL_PENDING"
+    },
+    {
+      "id": "U05",
+      "priority": "P1",
+      "area": "Conversation continuity",
+      "finding": "Truncation and follow-tail errors",
+      "action": "Virtualized full history, deliberate-reading priority, explicit Latest",
+      "status": "SOURCE_TESTED_NATIVE_COMPILED_PHYSICAL_PENDING"
+    },
+    {
+      "id": "U06",
+      "priority": "P1",
+      "area": "Draft correctness",
+      "finding": "Stale callback/duplicate local record risk",
+      "action": "Revision-bound submit, actual local record required before clear",
+      "status": "SOURCE_TESTED_NATIVE_COMPILED_PHYSICAL_PENDING"
+    },
+    {
+      "id": "U07",
+      "priority": "P1",
+      "area": "Data freshness",
+      "finding": "Previous filter rows or cancelled reads could mislead",
+      "action": "Reset Loading, propagate cancellation, check active result",
+      "status": "SOURCE_TESTED_NATIVE_COMPILED_PHYSICAL_PENDING"
+    },
+    {
+      "id": "U08",
+      "priority": "P2",
+      "area": "Adaptive quick controls",
+      "finding": "Fixed right popup overflow",
+      "action": "Bounded scrollable existing menu, explicit return",
+      "status": "SOURCE_TESTED_NATIVE_COMPILED_PHYSICAL_PENDING"
+    },
+    {
+      "id": "U09",
+      "priority": "P2",
+      "area": "Animation/board isolation",
+      "finding": "Lip/gaze samples invalidated broad UI",
+      "action": "Derived semantic chrome snapshot; separate live character scope",
+      "status": "SOURCE_TESTED_NATIVE_COMPILED_PHYSICAL_PENDING"
+    },
+    {
+      "id": "U10",
+      "priority": "P1",
+      "area": "Visual-authority regression",
+      "finding": "Rejected field arcs must stay absent",
+      "action": "Retain prior line-free aura and exact character identity; no asset promotion",
+      "status": "ORIGINAL_REPAIR_RETAINED"
+    },
+    {
+      "id": "G01",
+      "priority": "RELEASE",
+      "area": "Native APK/device",
+      "finding": "No physical result in this audit",
+      "action": "Complete APK/native import and exact source readback",
+      "status": "OPEN"
+    },
+    {
+      "id": "G02",
+      "priority": "RELEASE",
+      "area": "S24 frame/power/accessibility",
+      "finding": "No physical comparative benchmark",
+      "action": "Run recorded same-device protocol with actual deadlines",
+      "status": "OPEN"
+    },
+    {
+      "id": "G03",
+      "priority": "P2",
+      "area": "All screen-specific gestures and finger/micro catalogue",
+      "finding": "Partial admitted producer/rig coverage",
+      "action": "Finish remaining producer/acting/individual finger work under original gates",
+      "status": "OPEN"
+    },
+    {
+      "id": "G04",
+      "priority": "P2",
+      "area": "Durable draft recovery/customization",
+      "finding": "In-process state is not durable recovery",
+      "action": "Specify/test process-death recovery and approved personal controls",
+      "status": "OPEN"
+    }
+  ],
+  "validation_summary": {
+    "focused_jvm_tests_passed": 245,
+    "original_r2_tests_passed": 110,
+    "retained_actual_rive_binary_tests_passed": 45,
+    "original_aura_tests_passed": 10,
+    "independent_wiring_tests_passed": 8,
+    "original_architecture_tests_passed": 4,
+    "native_review_sources": 87,
+    "native_classes": 690,
+    "final_delta_sources": 3,
+    "final_delta_classes": 49,
+    "final_all_source_map_count": 386,
+    "new_complete_apk": false,
+    "physical_s24_tested": false,
+    "industry_superiority_demonstrated": false
+  }
+}

@@ -38,7 +38,7 @@ internal fun ContextAction(title: String, detail: String, onClick: () -> Unit) {
             .clip(RoundedCornerShape(10.dp))
             .background(Color(VanGlassTokens.BABY_CYAN).copy(alpha = 0.08f))
             .then(guidance.modifier)
-            .combinedClickable(onClick = onClick, onLongClick = guidance.point, onLongClickLabel = "Ask VAN to point here")
+            .combinedClickable(role = Role.Button, onClick = onClick, onLongClick = guidance.point, onLongClickLabel = "Ask VAN to point here")
             .padding(9.dp),
     ) {
         Column {
@@ -51,10 +51,10 @@ internal fun ContextAction(title: String, detail: String, onClick: () -> Unit) {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-internal fun WorkChip(label: String, accent: Int, selected: Boolean = false, enabled: Boolean = true, onClick: () -> Unit) {
+internal fun WorkChip(label: String, accent: Int, selected: Boolean = false, enabled: Boolean = true, modifier: Modifier = Modifier, onClick: () -> Unit) {
     val guidance = rememberVanGuidanceTarget("overlay-chip:$label")
     Box(
-        modifier = Modifier
+        modifier = modifier
             .heightIn(min = 48.dp)
             .widthIn(min = 48.dp)
             .clip(RoundedCornerShape(9.dp))

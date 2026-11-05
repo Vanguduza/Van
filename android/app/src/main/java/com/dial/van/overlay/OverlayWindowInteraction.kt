@@ -210,6 +210,26 @@ internal class OverlayWindowInteraction(private val host: OverlayInteractionHost
         applyVisibilityLifecycle()
     }
 
+    /** TalkBack/Switch Access movement has the same screen/IME bounds as dragging. */
+    fun moveAccessibly(dx: Int, dy: Int): Boolean {
+        if (!canUseWindow() || !visibility.screenOn || visibility.destroying) return false
+        stopInteraction()
+        val direction = when {
+            dx == -1 && dy == 0 -> OverlayMoveDirection.LEFT
+            dx == 1 && dy == 0 -> OverlayMoveDirection.RIGHT
+            dx == 0 && dy == -1 -> OverlayMoveDirection.UP
+            dx == 0 && dy == 1 -> OverlayMoveDirection.DOWN
+            else -> return false
+        }
+        val next = OverlayAccessibleMovement.target(
+            OverlayPlacement(layoutParams.x, layoutParams.y), windowSize(), screenBounds(), direction, dp(48),
+            keyboardTopPx.takeIf { visibility.keyboardVisible && it != Int.MAX_VALUE },
+        )
+        val moved = moveWindow(next)
+        if (moved) { boards.dragged(); recordActualEdge(); persistState() }
+        return moved
+    }
+
     fun captureDragPointer(point: OverlayPoint?) {
         dragPointer = point?.takeIf {
             canUseWindow() && overlayView.isAttachedToWindow && it.x.isFinite() && it.y.isFinite()

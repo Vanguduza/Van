@@ -18,6 +18,11 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.distinctUntilChanged
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,7 +36,6 @@ import androidx.compose.ui.unit.sp
 import com.dial.van.VanApplication
 import com.dial.van.control.VanConversationMessage
 import com.dial.van.trading.TradingCommandCentreActivity
-import com.dial.van.visual.VanEmbodiment
 import com.dial.van.visual.VanGlassStyle
 import com.dial.van.visual.VanGlassSurface
 import com.dial.van.visual.VanPresentation
@@ -70,6 +74,10 @@ private fun AdaptiveWorkboard(
     systemLine: String, accent: Int, messages: List<VanConversationMessage>, latestMessage: String?,
 ) {
     val compact = state.presentation == VanOverlayPresentation.WORKBOARD_COMPACT
+    val listening by remember(app) { app.voiceUi.state.map { it.listening }.distinctUntilChanged() }.collectAsState(false)
+    val voiceTurn by app.voiceSession.ownerTurnActive.collectAsState()
+    val speaking by remember(app) { app.ttsOutput.visualState.map { it.speaking }.distinctUntilChanged() }.collectAsState(false)
+    val voiceActive = listening || voiceTurn || speaking
     val fallbackWidth = when (state.presentation) {
         VanOverlayPresentation.WORKBOARD_MAXIMIZED -> state.maximizedWidthDp
         VanOverlayPresentation.WORKBOARD_EXPANDED -> OverlayTheme.EXPANDED_WIDTH_DP.toFloat()
@@ -83,16 +91,17 @@ private fun AdaptiveWorkboard(
     BoxWithConstraints(Modifier.width((state.boardWidthDp ?: fallbackWidth).coerceAtLeast(1f).dp)
         .height((state.boardHeightDp ?: fallbackHeight).coerceAtLeast(1f).dp)) {
         val verySmall = maxHeight < (180f + 80f * LocalDensity.current.fontScale.coerceIn(1f, 2f)).dp || maxWidth < 220.dp
-        VanGlassSurface(style = glass, modifier = Modifier.fillMaxSize()) {
+        VanGlassSurface(style = glass, modifier = Modifier.fillMaxSize().vanWorkboardKeyboard(state, actions)) {
             if (verySmall) {
                 // With a large IME / split window, controls remain scrollable and
                 // actionable rather than drawing beyond the allocated native window.
                 LazyColumn(Modifier.fillMaxSize().padding(8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     item { Text("VAN · $headline", color = Color(accent), fontSize = 14.sp, fontWeight = FontWeight.Bold,
-                        modifier = Modifier.then(actions.dragHandle).semantics { contentDescription = "Drag VAN workboard" }) }
+                        modifier = Modifier.then(actions.dragHandle).vanAccessibleMovement(actions).semantics { contentDescription = "Drag VAN workboard" }) }
                     item { Text("Limited screen space", color = Color(0xFFB8CBD2), fontSize = 12.sp) }
                     item { WorkChip("Open full view", accent) { actions.onCommandCentre(null) } }
                     item { WorkChip("Return to VAN", accent) { actions.onPresentation(VanOverlayPresentation.FULL_FLOATING) } }
+                    if (voiceActive) item { WorkChip("Stop voice", accent) { actions.onStopVoice() } }
                 }
             } else {
                 Column(Modifier.fillMaxSize().padding(10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -100,9 +109,10 @@ private fun AdaptiveWorkboard(
                     Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         WorkChip("Overview", accent, selected = state.workboardMode == VanWorkboardMode.CONTEXT) { actions.onWorkboardMode(VanWorkboardMode.CONTEXT) }
                         WorkChip("Chat", accent, selected = state.workboardMode == VanWorkboardMode.CHAT) { actions.onWorkboardMode(VanWorkboardMode.CHAT) }
-                        WorkChip("Voice", accent, selected = state.workboardMode == VanWorkboardMode.VOICE) { actions.onVoice() }
+                        WorkChip("Voice", accent, selected = state.workboardMode == VanWorkboardMode.VOICE) { actions.onWorkboardMode(VanWorkboardMode.VOICE) }
                         WorkChip("Trades", accent, selected = state.workboardMode == VanWorkboardMode.TRADES) { actions.onWorkboardMode(VanWorkboardMode.TRADES) }
                     }
+                    if (state.workboardMode == VanWorkboardMode.VOICE || voiceActive) WorkboardVoiceControls(app, actions, accent)
                     when (state.workboardMode) {
                         VanWorkboardMode.CONTEXT -> {
                             LazyColumn(Modifier.weight(1f).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(7.dp)) {
@@ -119,27 +129,7 @@ private fun AdaptiveWorkboard(
                         VanWorkboardMode.TRADES -> TradesWorkboardPanel(app, accent, state.tradeView, state.tradeRefreshTick,
                             actions.onTradeView, actions.onTradeRefresh, actions.onTradingRoute)
                         VanWorkboardMode.CHAT, VanWorkboardMode.VOICE -> {
-                            val scroll = rememberLazyListState()
-                            val shown = if (compact) messages.takeLast(8) else messages.takeLast(50)
-                            LaunchedEffect(shown.lastOrNull()?.id) {
-                                // Never pull the owner's scroll position away from older messages.
-                                val last = scroll.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-                                if (shown.isNotEmpty() && !scroll.isScrollInProgress && last >= shown.lastIndex - 2) {
-                                    scroll.animateScrollToItem(shown.lastIndex)
-                                }
-                            }
-                            LazyColumn(Modifier.weight(1f).fillMaxWidth(), state = scroll,
-                                verticalArrangement = Arrangement.spacedBy(7.dp)) {
-                                if (state.workboardMode == VanWorkboardMode.VOICE) item {
-                                    Text(caption, color = Color(accent), fontSize = 13.sp)
-                                }
-                                if (shown.isEmpty()) item {
-                                    Text(latestMessage ?: "Ask VAN a question or describe what you need done.",
-                                        color = Color(0xFFB8CBD2), fontSize = 13.sp)
-                                }
-                                items(shown, key = { it.id }) { message -> ConversationBubble(message.role, message.text, accent) }
-                                if (systemLine.isNotBlank()) item { Text(systemLine, color = Color(0xFFB8CBD2), fontSize = 12.sp) }
-                            }
+                            WorkboardConversation(messages, latestMessage, accent, systemLine)
                             ChatComposer(app, accent, compact = compact, draft = state.chatDraft, onDraft = actions.onDraft)
                         }
                     }
@@ -155,10 +145,10 @@ private fun BoardHeader(state: VanOverlaySurfaceState, actions: VanOverlayAction
     val budget = rememberVanEffectBudget()
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        VanEmbodiment(state = visualState, animate = state.animate, budget = budget,
+        LiveOverlayEmbodiment(state = visualState, animate = state.animate, budget = budget,
             presentation = VanPresentation.COMPACT, characterFraction = 0.55f,
-            modifier = Modifier.size(if (compact) 64.dp else 76.dp).then(actions.gestures))
-        Column(Modifier.weight(1f).then(actions.dragHandle)
+            modifier = Modifier.size(if (compact) 64.dp else 76.dp).then(actions.gestures).vanAccessibleCharacter(visualState, actions))
+        Column(Modifier.weight(1f).then(actions.dragHandle).vanAccessibleMovement(actions)
             .semantics { contentDescription = "Drag workboard. $headline. $caption" }) {
             Text(headline, color = Color(accent), fontSize = 14.sp, fontWeight = FontWeight.Bold, maxLines = 2)
             if (!compact) Text(caption, color = Color(0xFFB8CBD2), fontSize = 12.sp, maxLines = 2)

@@ -125,6 +125,7 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
         val dragHandle = remember { Modifier.vanGestures(interaction, {}, {}, {}, clicks = false) }
         surfaceController.Content(
             dragHandle = dragHandle,
+            onMove = interaction::moveAccessibly,
             app = application as VanApplication, uiState = uiState, visibility = visibility,
             blurBehindActive = blurBehindActive, widthDp = metrics.widthPixels / metrics.density,
             heightDp = metrics.heightPixels / metrics.density, gestures = gestures,

@@ -27,6 +27,7 @@ internal class OverlaySurfaceController {
         heightDp: Float,
         gestures: Modifier,
         dragHandle: Modifier = Modifier,
+        onMove: (Int, Int) -> Boolean = { _, _ -> false },
         boardWidthDp: Float? = null,
         boardHeightDp: Float? = null,
         onUiChange: (VanOverlayUiState) -> Unit,
@@ -44,13 +45,18 @@ internal class OverlaySurfaceController {
             workboardMode = VanWorkboardMode.CHAT
             present(if (expanded) VanOverlayPresentation.WORKBOARD_EXPANDED else VanOverlayPresentation.WORKBOARD_COMPACT)
         }
+        fun stopVoice() {
+            app.commandController.invalidateVoiceContext()
+            app.voiceSession.cancelOwnerTurn()
+            app.ttsOutput.onBargeInRequested()
+        }
         fun voice() {
             workboardMode = VanWorkboardMode.VOICE
             present(VanOverlayPresentation.WORKBOARD_EXPANDED)
-            app.voiceSession.beginOwnerTurn()
+            if (!app.voiceSession.ownerTurnActive.value) app.voiceSession.beginOwnerTurn()
         }
         val actions = VanOverlayActions(
-            gestures = gestures, dragHandle = dragHandle,
+            gestures = gestures, dragHandle = dragHandle, onMove = onMove,
             onQuickControl = { label ->
                 when (label) {
                     "Chat" -> chat(true)
@@ -58,12 +64,17 @@ internal class OverlaySurfaceController {
                     "Minimize" -> onUiChange(VanOverlayReducer.minimize(uiState))
                     "Command Centre" -> onCommandCentre(null)
                     "Dock" -> onUiChange(VanOverlayReducer.dock(uiState))
-                    "Close" -> onClose()
+                    "Close" -> { stopVoice(); onClose() }
                 }
             },
-            onChat = ::chat, onVoice = ::voice, onPresentation = ::present,
+            onChat = ::chat, onVoice = ::voice, onStopVoice = ::stopVoice, onPresentation = ::present,
             onCommandCentre = onCommandCentre, onTradingRoute = onTradingRoute,
-            onWorkboardMode = { workboardMode = it }, onTradeView = { tradeView = it },
+            onWorkboardMode = {
+                workboardMode = it
+                if (it == VanWorkboardMode.VOICE && uiState.presentation == VanOverlayPresentation.WORKBOARD_COMPACT) {
+                    present(VanOverlayPresentation.WORKBOARD_EXPANDED)
+                }
+            }, onTradeView = { tradeView = it },
             onTradeRefresh = { tradeRefreshTick += 1 }, onDraft = { chatDraft = it },
         )
         VanOverlaySurface(
@@ -79,6 +90,7 @@ internal class OverlaySurfaceController {
                 maximizedHeightDp = heightDp * OverlayTheme.MAXIMIZED_HEIGHT_FRACTION,
                 boardWidthDp = boardWidthDp,
                 boardHeightDp = boardHeightDp,
+                keyboardVisible = visibility.keyboardVisible,
             ),
             actions = actions,
         )

@@ -135,6 +135,10 @@ sourceSets {
             "com/dial/van/overlay/OverlayDragController.kt",
             "com/dial/van/overlay/VanOverlayController.kt",
             "com/dial/van/overlay/WorkboardPlacement.kt",
+            "com/dial/van/overlay/OverlayUsabilityPolicy.kt",
+            "com/dial/van/overlay/OverlayAccessibleMovement.kt",
+            "com/dial/van/overlay/OverlaySubmissionGuard.kt",
+            "com/dial/van/overlay/OverlayPresentationFrame.kt",
             "com/dial/van/overlay/OverlayWindowAwareness.kt",
             "com/dial/van/overlay/VanOverlayInteraction.kt",
             // Replaces CommandModule.kt/CommandCentreNav.kt (P3-AND-009's flat 17-module

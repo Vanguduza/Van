@@ -6,6 +6,10 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.Row
+import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -25,6 +29,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,7 +41,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dial.van.VanApplication
 import com.dial.van.trading.TradeView
-import com.dial.van.visual.VanEmbodiment
 import com.dial.van.visual.VanGlassSurface
 import com.dial.van.visual.VanGlassTokens
 import com.dial.van.visual.VanLiveVisualState
@@ -92,6 +97,7 @@ internal data class VanOverlaySurfaceState(
     val maximizedHeightDp: Float,
     val boardWidthDp: Float? = null,
     val boardHeightDp: Float? = null,
+    val keyboardVisible: Boolean = false,
 )
 
 /**
@@ -114,6 +120,8 @@ internal class VanOverlayActions(
     val onTradeRefresh: () -> Unit,
     val onDraft: (String) -> Unit,
     val dragHandle: Modifier = Modifier,
+    val onStopVoice: () -> Unit = {},
+    val onMove: (Int, Int) -> Boolean = { _, _ -> false },
 )
 
 @Composable
@@ -123,7 +131,7 @@ internal fun VanOverlaySurface(
     actions: VanOverlayActions,
 ) {
     val degraded by app.degradedModeStore.state.collectAsState()
-    val liveFrame = VanLiveVisualState.frame
+    val liveFrame by remember { derivedStateOf { OverlayPresentationFrame.chrome(VanLiveVisualState.frame) } }
     val cue = VanPresence.cue(degraded, live = liveFrame)
     val visualState = VanPresence.visualState(cue, liveFrame)
     val chrome = VanOverlayChrome.resolve(
@@ -216,15 +224,34 @@ internal fun FullFloatingPresence(
     state: VanOverlaySurfaceState,
     actions: VanOverlayActions,
 ) {
-    val width = if (showControls) 360 else OverlayTheme.RESTING_HIT_DP
+    if (showControls) {
+        // The old fixed right-hand menu overflowed narrow/split-screen windows.
+        // Keep the existing actions in one bounded scrollable native-size panel.
+        QuickControls(
+            modifier = Modifier.width(OverlayUsabilityPolicy.quickControlsWidth(state.maximizedWidthDp).dp)
+                .height(OverlayUsabilityPolicy.quickControlsHeight(state.maximizedHeightDp).dp),
+            blurBehindActive = state.blurBehindActive,
+            onQuickControl = actions.onQuickControl,
+            header = {
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    LiveOverlayEmbodiment(state = visualState, animate = state.animate, budget = rememberVanEffectBudget(),
+                        presentation = VanPresentation.COMPACT, modifier = Modifier.size(96.dp)
+                            .then(actions.gestures).vanAccessibleCharacter(visualState, actions))
+                    WorkChip("Return to VAN", VanGlassTokens.BABY_CYAN) { actions.onPresentation(VanOverlayPresentation.FULL_FLOATING) }
+                }
+            },
+        )
+        return
+    }
+    val width = OverlayTheme.RESTING_HIT_DP
     Box(
         modifier = Modifier
             .width(width.dp)
-            .height((if (showControls) 336 else OverlayTheme.RESTING_HIT_DP).dp),
+            .height(OverlayTheme.RESTING_HIT_DP.dp),
         contentAlignment = Alignment.TopStart,
     ) {
         val budget = rememberVanEffectBudget()
-        VanEmbodiment(
+        LiveOverlayEmbodiment(
             animate = state.animate,
             state = visualState,
             budget = budget,
@@ -233,17 +260,8 @@ internal fun FullFloatingPresence(
             modifier = Modifier
                 .size(OverlayTheme.RESTING_HIT_DP.dp)
                 .semantics { contentDescription = "Van floating assistant" }
-                .then(actions.gestures),
+                .then(actions.gestures).vanAccessibleCharacter(visualState, actions),
         )
-        if (showControls) {
-            QuickControls(
-                modifier = Modifier
-                    .offset(x = 176.dp, y = 4.dp)
-                    .width(176.dp),
-                blurBehindActive = state.blurBehindActive,
-                onQuickControl = actions.onQuickControl,
-            )
-        }
     }
 }
 
@@ -253,6 +271,7 @@ internal fun QuickControls(
     modifier: Modifier = Modifier,
     blurBehindActive: Boolean,
     onQuickControl: (String) -> Unit,
+    header: @Composable () -> Unit = {},
 ) {
     VanGlassSurface(
         style = VanGlassTokens.forState(
@@ -261,23 +280,13 @@ internal fun QuickControls(
         ),
         modifier = modifier,
     ) {
-        Column(
-            modifier = Modifier.padding(8.dp),
+        LazyColumn(
+            modifier = Modifier.fillMaxSize().padding(8.dp).semantics { paneTitle = "VAN assistant actions" },
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            OverlayTheme.QUICK_CONTROLS.forEach { label ->
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp)
-                        .clip(RoundedCornerShape(9.dp))
-                        .background(Color(VanGlassTokens.BABY_CYAN).copy(alpha = 0.10f))
-                        .combinedClickable(onClick = { onQuickControl(label) })
-                        .padding(horizontal = 8.dp),
-                    contentAlignment = Alignment.CenterStart,
-                ) {
-                    Text(label, color = Color(0xFFF4FCFF), fontSize = 11.sp)
-                }
+            item(key = "header") { header() }
+            items(OverlayTheme.QUICK_CONTROLS, key = { it }) { label ->
+                WorkChip(label, VanGlassTokens.BABY_CYAN, modifier = Modifier.fillMaxWidth()) { onQuickControl(label) }
             }
         }
     }
@@ -292,17 +301,17 @@ internal fun MinimizedPresence(
     reducedMotion: Boolean = rememberReducedMotion(),
 ) {
     Box(
-        modifier = Modifier.size(OverlayTheme.MINIMIZED_TOUCH_DP.dp),
+        modifier = Modifier.size(OverlayTheme.MINIMIZED_TOUCH_DP.dp)
+            .then(actions.gestures).vanAccessibleCharacter(visualState, actions),
         contentAlignment = Alignment.Center,
     ) {
         VanMinimizedAvatar(
-            state = visualState,
+            state = OverlayPresentationFrame.character(visualState, VanLiveVisualState.frame),
             animate = animate,
             budget = budget,
             reducedMotion = reducedMotion,
             modifier = Modifier
-                .size(OverlayTheme.MINIMIZED_VISUAL_DP.dp)
-                .then(actions.gestures),
+                .size(OverlayTheme.MINIMIZED_VISUAL_DP.dp),
         )
     }
 }
@@ -330,7 +339,7 @@ internal fun DockedPresence(
             }
             drawPath(path, field)
         }
-        VanEmbodiment(
+        LiveOverlayEmbodiment(
             animate = state.animate,
             state = visualState,
             budget = budget,
@@ -339,7 +348,7 @@ internal fun DockedPresence(
                 .size(OverlayTheme.DOCK_CHARACTER_DP.dp)
                 .align(Alignment.TopCenter)
                 .offset(y = (-4).dp)
-                .then(actions.gestures),
+                .then(actions.gestures).vanAccessibleCharacter(visualState, actions),
         )
     }
 }
