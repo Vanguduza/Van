@@ -2,6 +2,7 @@ package com.dial.van.overlay
 
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -113,7 +114,10 @@ private fun AdaptiveWorkboard(
                         WorkChip("Trades", accent, selected = state.workboardMode == VanWorkboardMode.TRADES) { actions.onWorkboardMode(VanWorkboardMode.TRADES) }
                     }
                     if (state.workboardMode == VanWorkboardMode.VOICE || voiceActive) WorkboardVoiceControls(app, actions, accent)
-                    when (state.workboardMode) {
+                    if (!state.ownerScopeValid) {
+                        Text("The enrolled owner changed. Close and reopen VAN before viewing local work.", color = Color(0xFFFFB300), fontSize = 13.sp)
+                        WorkChip("Close VAN", accent) { actions.onQuickControl("Close") }
+                    } else when (state.workboardMode) {
                         VanWorkboardMode.CONTEXT -> {
                             LazyColumn(Modifier.weight(1f).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(7.dp)) {
                                 if (systemLine.isNotBlank()) item { Text(systemLine, color = Color(0xFFB8CBD2), fontSize = 12.sp) }
@@ -123,14 +127,17 @@ private fun AdaptiveWorkboard(
                                 item { ContextAction("Decisions", "Your approvals and outstanding decisions") { actions.onCommandCentre("decisions") } }
                                 item { ContextAction("Systems", "Connection and service health") { actions.onCommandCentre("systems") } }
                                 item { ContextAction("Trading", "Portfolio, risk and accounts") { actions.onTradingRoute(TradingCommandCentreActivity.ROUTE_OVERVIEW) } }
+                                item { ContextAction("VAN settings", "Motion, visibility and encrypted draft recovery") { actions.onWorkboardMode(VanWorkboardMode.SETTINGS) } }
                                 item { ContextAction("Command Centre", "Open the complete workspace") { actions.onCommandCentre(null) } }
                             }
                         }
+                        VanWorkboardMode.SETTINGS -> Box(Modifier.weight(1f)) { OverlayPersonalControls(state, actions, accent) }
                         VanWorkboardMode.TRADES -> TradesWorkboardPanel(app, accent, state.tradeView, state.tradeRefreshTick,
                             actions.onTradeView, actions.onTradeRefresh, actions.onTradingRoute)
                         VanWorkboardMode.CHAT, VanWorkboardMode.VOICE -> {
                             WorkboardConversation(messages, latestMessage, accent, systemLine)
-                            ChatComposer(app, accent, compact = compact, draft = state.chatDraft, onDraft = actions.onDraft)
+                            OverlayDraftRecovery(state, actions, accent)
+                            ChatComposer(app, accent, compact = compact, draft = state.chatDraft, onDraft = actions.onDraft, localReady = state.localReady)
                         }
                     }
                 }

@@ -35,6 +35,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import com.dial.van.visual.LocalVanPresentationPreferences
+import com.dial.van.visual.VanPersonalPresentation
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -47,6 +50,7 @@ import com.dial.van.visual.VanLiveVisualState
 import com.dial.van.visual.VanPresence
 import com.dial.van.visual.VanPresentation
 import com.dial.van.visual.VanVisualState
+import com.dial.van.visual.VanPresentationPreferences
 import com.dial.van.design.VanMotionSpec
 import com.dial.van.visual.rememberReducedMotion
 import com.dial.van.visual.rememberVanEffectBudget
@@ -73,7 +77,7 @@ import com.dial.van.visual.rememberVanEffectBudget
  *
  * Was `private` inside the service, which is why nothing outside it could render it.
  */
-internal enum class VanWorkboardMode { CONTEXT, CHAT, VOICE, TRADES }
+internal enum class VanWorkboardMode { CONTEXT, CHAT, VOICE, TRADES, SETTINGS }
 
 /**
  * Everything the surface draws from, measured by the service.
@@ -98,6 +102,11 @@ internal data class VanOverlaySurfaceState(
     val boardWidthDp: Float? = null,
     val boardHeightDp: Float? = null,
     val keyboardVisible: Boolean = false,
+    val preferences: VanPresentationPreferences = VanPresentationPreferences(),
+    val localReady: Boolean = true,
+    val ownerScopeValid: Boolean = true,
+    val recoveredDraftAvailable: Boolean = false,
+    val storageMessage: String = "",
 )
 
 /**
@@ -122,6 +131,10 @@ internal class VanOverlayActions(
     val dragHandle: Modifier = Modifier,
     val onStopVoice: () -> Unit = {},
     val onMove: (Int, Int) -> Boolean = { _, _ -> false },
+    val onPreferences: (VanPresentationPreferences) -> Unit = {},
+    val onResumeDraft: () -> Unit = {},
+    val onDiscardDraft: () -> Unit = {},
+    val onRetrySave: () -> Unit = {},
 )
 
 @Composable
@@ -257,6 +270,7 @@ internal fun FullFloatingPresence(
             budget = budget,
             presentation = VanPresentation.COMPACT,
             characterFraction = OverlayTheme.RESTING_AVATAR_DP / OverlayTheme.RESTING_HIT_DP.toFloat(),
+            passive = true,
             modifier = Modifier
                 .size(OverlayTheme.RESTING_HIT_DP.dp)
                 .semantics { contentDescription = "Van floating assistant" }
@@ -300,14 +314,17 @@ internal fun MinimizedPresence(
     budget: com.dial.van.visual.VanEffectBudget = com.dial.van.visual.VanEffectBudget.FULL,
     reducedMotion: Boolean = rememberReducedMotion(),
 ) {
+    val personal = LocalVanPresentationPreferences.current
+    val rendered = VanPersonalPresentation.project(OverlayPresentationFrame.character(visualState, VanLiveVisualState.frame), personal)
     Box(
         modifier = Modifier.size(OverlayTheme.MINIMIZED_TOUCH_DP.dp)
+            .graphicsLayer { alpha = VanPersonalPresentation.opacity(rendered, personal, passive = true) }
             .then(actions.gestures).vanAccessibleCharacter(visualState, actions),
         contentAlignment = Alignment.Center,
     ) {
         VanMinimizedAvatar(
-            state = OverlayPresentationFrame.character(visualState, VanLiveVisualState.frame),
-            animate = animate,
+            state = rendered,
+            animate = VanPersonalPresentation.motionAllowed(rendered, personal, animate),
             budget = budget,
             reducedMotion = reducedMotion,
             modifier = Modifier

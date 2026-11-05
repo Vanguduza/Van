@@ -37,7 +37,6 @@ internal fun WorkboardVoiceControls(app: VanApplication, actions: VanOverlayActi
             else WorkChip("Start listening", accent, enabled = !turnPending) { actions.onVoice() }
             WorkChip("Stop voice", accent, enabled = input.listening || turnPending || speaking) { actions.onStopVoice() }
         }
-        if (input.errorCode != null) Text("Voice input unavailable. Try again or type a message.", color = Color(0xFFFFB300), fontSize = 12.sp)
         if (input.errorCode != null) Text("Voice input stopped. Retry when ready or use text.",
             color = Color(0xFFFFC166), fontSize = 12.sp,
             modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })

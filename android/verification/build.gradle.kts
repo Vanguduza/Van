@@ -138,6 +138,14 @@ sourceSets {
             "com/dial/van/overlay/OverlayUsabilityPolicy.kt",
             "com/dial/van/overlay/OverlayAccessibleMovement.kt",
             "com/dial/van/overlay/OverlaySubmissionGuard.kt",
+            "com/dial/van/overlay/OverlayLocalSession.kt",
+            "com/dial/van/overlay/OverlaySessionWriter.kt",
+            "com/dial/van/overlay/OverlaySnapshotOwnership.kt",
+            "com/dial/van/visual/VanPresentationPreferences.kt",
+            "com/dial/van/visual/VanOwnedScreenContext.kt",
+            "com/dial/van/visual/VanAssetReadLimits.kt",
+            "com/dial/van/visual/VanInteractionResponse.kt",
+            "com/dial/van/visual/VanRiveUpdateGate.kt",
             "com/dial/van/overlay/OverlayPresentationFrame.kt",
             "com/dial/van/overlay/OverlayWindowAwareness.kt",
             "com/dial/van/overlay/VanOverlayInteraction.kt",
@@ -215,6 +223,7 @@ sourceSets {
             // GAP-F-013 — the device-side cue timing model and the pure lookup
             // TtsOutputManager drives it with.
             "com/dial/van/voice/SpeechCueTiming.kt",
+            "com/dial/van/voice/PcmPlaybackVisual.kt",
             "com/dial/van/voice/LocalTtsRouter.kt",
             "com/dial/van/voice/AndroidOfflineTtsReadiness.kt",
             "com/dial/van/voice/VoiceAudioPolicy.kt",

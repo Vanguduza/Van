@@ -385,9 +385,10 @@ class VoiceInputManager(
     }
 
     /** Discard this turn, including a final already queued for local evidence processing. */
-    fun cancelListening(preserveCapture: Boolean = false) {
+    fun cancelListening(preserveCapture: Boolean = false, expectedTurnId: String? = null) {
         mainHandler.post {
-            val cancelled = turnLifecycle.cancel()
+            val cancelled = if (expectedTurnId != null) turnLifecycle.cancelIf(expectedTurnId) ?: return@post
+                else turnLifecycle.cancel()
             _ownerTurnActive.value = false
             runCatching { recognizer?.cancel() }
             cleanupTurn(preserveCapture)
@@ -707,7 +708,10 @@ class TtsOutputManager(
                 main.post {
                     synchronized(playbackLock) {
                         if (playback.current(TtsEngineKind.ANDROID_OFFLINE, utteranceId.orEmpty()) == null ||
-                            !speaking.get() || activeCueTiming != null) return@synchronized
+                            !speaking.get()) return@synchronized
+                        // A genuine platform playback-range callback outranks an
+                        // estimated gateway timeline for this local voice engine.
+                        if (activeCueTiming != null) { activeCueTiming = null; cueGeneration += 1L }
                         // The frame index is an audio offset, not a mouth shape.
                         // When no actual cue/PCM track exists, infer a bounded visual
                         // approximation from the spoken range; never emit visemes 5..14.
@@ -867,6 +871,7 @@ class TtsOutputManager(
             durableState = VanDurableState.IDLE,
             speaking = false,
             mouthOpen = 0f,
+            viseme = 0,
         )
         callback.onSpeakingChanged(false)
         callback.onUtteranceDone(token.utteranceId)
@@ -883,6 +888,7 @@ class TtsOutputManager(
             durableState = VanDurableState.IDLE,
             speaking = false,
             mouthOpen = 0f,
+            viseme = 0,
         )
         callback.onSpeakingChanged(false)
         if (interrupted) callback.onUtteranceInterrupted(token.utteranceId)
@@ -929,7 +935,7 @@ class TtsOutputManager(
             cueGeneration += 1L
             if (pending != null || wasSpeaking) {
                 _visualState.value = _visualState.value.copy(
-                    speaking = false, mouthOpen = 0f, durableState = VanDurableState.LISTENING,
+                    speaking = false, mouthOpen = 0f, viseme = 0, durableState = VanDurableState.LISTENING,
                 )
                 callback.onSpeakingChanged(false)
             }
@@ -977,5 +983,10 @@ class VoiceSessionCoordinator(
 
     fun cancelOwnerTurn(preserveCapture: Boolean = false) {
         input.cancelListening(preserveCapture = preserveCapture)
+    }
+
+    /** Lifecycle cleanup of one UI-owned UUID cannot cancel a newer voice owner. */
+    fun cancelOwnerTurnIf(turnId: String) {
+        if (turnId.isNotBlank()) input.cancelListening(expectedTurnId = turnId)
     }
 }

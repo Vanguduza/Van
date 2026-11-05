@@ -90,32 +90,40 @@
       "priority": "RELEASE",
       "area": "Native APK/device",
       "finding": "No physical result in this audit",
-      "action": "Complete APK/native import and exact source readback",
-      "status": "OPEN"
+      "action": "Complete original Gradle assembly and inspect the exact debug artifact; native source compilation and all new code are present. Device execution is the final stage.",
+      "status": "SOFTWARE_BUILD_IN_PROGRESS_PHYSICAL_DEFERRED"
     },
     {
       "id": "G02",
       "priority": "RELEASE",
       "area": "S24 frame/power/accessibility",
       "finding": "No physical comparative benchmark",
-      "action": "Run recorded same-device protocol with actual deadlines",
-      "status": "OPEN"
+      "action": "Physical S24 frame/power/accessibility comparison explicitly deferred by owner until after code closure; no measurement asserted.",
+      "status": "DEFERRED_FINAL_PHYSICAL_STAGE"
     },
     {
       "id": "G03",
       "priority": "P2",
       "area": "All screen-specific gestures and finger/micro catalogue",
       "finding": "Partial admitted producer/rig coverage",
-      "action": "Finish remaining producer/acting/individual finger work under original gates",
-      "status": "OPEN"
+      "action": "Implemented all19 canonical owned-screen contexts, actual guarded event producers, allfive fingers per hand and the16-category micro catalogue. Exact new Rive remains an unadmitted source-review candidate; original artwork/native/device gates remain separate.",
+      "status": "IMPLEMENTED_SOFTWARE_TESTED_REVIEW_PENDING"
     },
     {
       "id": "G04",
       "priority": "P2",
       "area": "Durable draft recovery/customization",
       "finding": "In-process state is not durable recovery",
-      "action": "Specify/test process-death recovery and approved personal controls",
-      "status": "OPEN"
+      "action": "Implemented encrypted owner-scoped process-death draft recovery, revisioned and generation-safe background persistence, explicit Resume/Discard, owner invalidation, safe restart and personal controls; no automatic replay or capture.",
+      "status": "IMPLEMENTED_SOFTWARE_TESTED"
+    },
+    {
+      "id": "G05",
+      "priority": "P2",
+      "area": "Contextual Rive package continuity",
+      "finding": "Original receipt/stage/integrate route omitted the hash-bound12-gesture sidecar and debug review only exposed14actions",
+      "action": "Added bounded exact metadata validation, receipt binding, interrupted-copy safety, metadata-aware original gates, release hash and26-action debug catalogue;32temporary-fixture tests and345actual focused JVM tests pass. Tool/rig source outside existing reusable publication scope is preserved for review, not silently admitted.",
+      "status": "IMPLEMENTED_SOFTWARE_TESTED_REVIEW_PENDING"
     }
   ],
   "validation_summary": {
@@ -132,6 +140,17 @@
     "final_all_source_map_count": 386,
     "new_complete_apk": false,
     "physical_s24_tested": false,
-    "industry_superiority_demonstrated": false
-  }
+    "industry_superiority_demonstrated": false,
+    "current_focused_kotlin_tests": 345,
+    "context_package_tests": 32,
+    "actual_rive_binary_tests": {
+      "original": 45,
+      "articulation": 151,
+      "natural_motion": 24
+    },
+    "physical_testing": "DEFERRED_FINAL_STAGE",
+    "debug_apk": "ASSEMBLY_IN_PROGRESS",
+    "source_publication": "CANDIDATE_PENDING_NORMAL_HOOKS"
+  },
+  "code_closure_owner_instruction": "Physical testing last; finish implementation and software verification first."
 }

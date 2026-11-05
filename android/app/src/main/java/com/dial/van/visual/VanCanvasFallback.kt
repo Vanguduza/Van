@@ -86,7 +86,9 @@ fun VanAvatar(
             state = state,
             modifier = modifier,
             onSilhouette = onSilhouette,
-            animate = motionEnabled,
+            // Visibility and animation policy are separate: a visible still
+            // character must refresh a changed status without an idle loop.
+            animate = animate,
             budget = budget,
             reducedMotion = reducedMotion,
             onLoadFailed = {
@@ -289,7 +291,7 @@ fun VanEmbodiment(
             presentation = presentation,
             onDecision = onDecision,
             onSilhouette = { silhouette = it },
-            animate = motionEnabled,
+            animate = animate,
             budget = effectiveBudget,
             reducedMotion = reducedMotion,
             phase = phase,
@@ -400,6 +402,7 @@ private fun resolveRenderer(context: Context): VanRenderDecision {
                 val read = stream.read(buffer)
                 if (read <= 0) break
                 total += read
+                if (total > VanAssetReadLimits.RIVE_BYTES) break
             }
             total
         }
@@ -459,7 +462,7 @@ fun rememberReducedMotion(): Boolean {
             if (registered) runCatching { resolver.unregisterContentObserver(observer) }
         }
     }
-    return reducedMotion
+    return reducedMotion || LocalVanPresentationPreferences.current.reducedMotion
 }
 
 @Composable

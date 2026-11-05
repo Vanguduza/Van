@@ -61,12 +61,13 @@ fun RiveCandidateFrame(
     viseme: Int = 0,
     actionCode: Int = 0,
     trigger: String? = null,
+    supportedContextCodes: Set<Int> = emptySet(),
 ) {
     AndroidView(
         modifier = modifier,
         factory = { context ->
             VanRiveRuntime.ensure(context.applicationContext)
-            RiveAnimationView(context).apply {
+            ForgePreviewView(context).apply {
                 layoutParams = android.view.ViewGroup.LayoutParams(
                     (size.value * resources.displayMetrics.density).toInt(),
                     (size.value * resources.displayMetrics.density).toInt(),
@@ -84,7 +85,7 @@ fun RiveCandidateFrame(
             }
         },
         update = { view ->
-            view.postDelayed({
+            view.enqueueLatestInputs {
                 val sm = RiveBindingContract.STATE_MACHINE
                 view.setNumberState(sm, VanInput.STATE.wireName, stateCode.toFloat())
                 view.setBooleanState(sm, VanInput.SPEAKING.wireName, speaking)
@@ -94,11 +95,30 @@ fun RiveCandidateFrame(
                 view.setNumberState(sm, VanInput.MOUTH_OPEN.wireName, mouthOpen)
                 view.setNumberState(sm, VanInput.URGENCY.wireName, urgency)
                 view.setNumberState(sm, VanInput.VISEME.wireName, viseme.toFloat())
-                view.setNumberState(sm, VanInput.ACTION_CODE.wireName, actionCode.toFloat())
-                trigger?.let { view.fireState(sm, it) }
-            }, 250L)
+                view.setNumberState(sm, VanInput.ACTION_CODE.wireName, VanRiveContextCapabilities.candidateAction(actionCode, supportedContextCodes).toFloat())
+                trigger?.takeIf { value -> VanTrigger.entries.any { it.wireName == value } }?.let { view.fireState(sm, it) }
+            }
         },
     )
+}
+
+private class ForgePreviewView(context: Context) : RiveAnimationView(context) {
+    private var pending: Runnable? = null
+    private var initializedInputs = false
+    fun enqueueLatestInputs(apply: () -> Unit) {
+        pending?.let(::removeCallbacks)
+        val task = Runnable {
+            pending = null
+            if (isAttachedToWindow) { apply(); initializedInputs = true }
+        }
+        pending = task
+        postDelayed(task, if (initializedInputs) 0L else 250L)
+    }
+    override fun onDetachedFromWindow() {
+        pending?.let(::removeCallbacks); pending = null
+        pause()
+        super.onDetachedFromWindow()
+    }
 }
 
 object VanRiveRuntime {

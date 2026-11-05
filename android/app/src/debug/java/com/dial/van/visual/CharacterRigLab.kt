@@ -47,7 +47,7 @@ import kotlinx.coroutines.yield
  * Nothing here is compiled into release builds.
  */
 @Composable
-fun CharacterRigLab(bytes: ByteArray) {
+fun CharacterRigLab(bytes: ByteArray, supportedContextCodes: Set<Int> = emptySet()) {
     var stateCode by remember { mutableIntStateOf(VanDurableState.IDLE.code) }
     var actionCode by remember { mutableIntStateOf(0) }
     var viseme by remember { mutableIntStateOf(0) }
@@ -63,10 +63,11 @@ fun CharacterRigLab(bytes: ByteArray) {
 
     val scope = rememberCoroutineScope()
     val durable = VanDurableState.fromCode(stateCode)
-    val actionName = VanFiniteAction.fromCode(actionCode)?.name ?: "NONE"
+    val availableActions = remember(supportedContextCodes) { VanRiveContextCapabilities.candidateActions(supportedContextCodes) }
+    val actionName = VanFiniteAction.fromCode(actionCode)?.name ?: VanContextGesture.fromCode(actionCode)?.name ?: "NONE"
     val visemeName = listOf("neutral_closed", "small_neutral", "medium_spread", "wide_vertical", "rounded")[viseme.coerceIn(0, 4)]
 
-    LaunchedEffect(autoDemo) {
+    LaunchedEffect(autoDemo, supportedContextCodes) {
         if (!autoDemo) return@LaunchedEffect
         while (true) {
             for (code in 0..17) {
@@ -88,9 +89,11 @@ fun CharacterRigLab(bytes: ByteArray) {
             attentionX = 0f
             attentionY = 0f
             urgency = 0f
-            for (code in 1..14) {
+            for (code in availableActions.filter { it != 0 }) {
                 actionCode = code
-                delay(900)
+                delay(VanContextGesture.fromCode(code)?.durationMs ?: VanFiniteAction.fromCode(code)?.let { VanMotionMap.actionDurationMs(it) } ?: 900L)
+                actionCode = 0
+                delay(120L)
             }
             actionCode = 0
         }
@@ -106,6 +109,9 @@ fun CharacterRigLab(bytes: ByteArray) {
     ) {
         Text("VAN Candidate B — Character Rig Lab")
         Text("LIVE .RIV • animated mechanics prototype • debug only")
+        Text(if (supportedContextCodes.size == VanContextGesture.entries.size)
+            "Exact binary metadata verified: 14 original + 12 contextual gestures"
+            else "Legacy gesture surface: contextual metadata absent or invalid; extension disabled")
         Text("State: ${durable.name}  •  Action: $actionName  •  Viseme: $viseme $visemeName")
 
         BoxWithConstraints(
@@ -147,6 +153,7 @@ fun CharacterRigLab(bytes: ByteArray) {
                     urgency = urgency,
                     viseme = viseme,
                     actionCode = actionCode,
+                    supportedContextCodes = supportedContextCodes,
                     trigger = trigger,
                 )
                 if (showAura) {
@@ -190,11 +197,11 @@ fun CharacterRigLab(bytes: ByteArray) {
             onNext = { stateCode = (stateCode + 1).coerceAtMost(17) },
         )
 
-        Text("Finite action — all 14")
+        Text("Action catalogue — ${availableActions.size - 1} verified clips")
         Stepper(
             label = actionName,
-            onPrevious = { actionCode = (actionCode - 1).coerceAtLeast(0) },
-            onNext = { actionCode = (actionCode + 1).coerceAtMost(14) },
+            onPrevious = { actionCode = availableActions[(availableActions.indexOf(actionCode) - 1).coerceAtLeast(0)] },
+            onNext = { actionCode = availableActions[(availableActions.indexOf(actionCode) + 1).coerceAtMost(availableActions.lastIndex)] },
         )
 
         Text("Speech viseme — all 5")
@@ -259,6 +266,7 @@ fun CharacterRigLab(bytes: ByteArray) {
                 urgency = urgency,
                 viseme = viseme,
                 actionCode = actionCode,
+                    supportedContextCodes = supportedContextCodes,
             )
             RiveCandidateFrame(
                 bytes = bytes,
@@ -272,6 +280,7 @@ fun CharacterRigLab(bytes: ByteArray) {
                 urgency = urgency,
                 viseme = viseme,
                 actionCode = actionCode,
+                    supportedContextCodes = supportedContextCodes,
             )
         }
 

@@ -296,6 +296,7 @@ class VanGatewayClient(context: Context) {
         if (next.version == signedRouting?.version) return false
         require(next.version > (signedRouting?.version ?: 0)) { "connectivity_manifest_rollback" }
         signedRouting = next
+        localIdentityObservers.forEach { observer -> runCatching { observer() } }
         return true
     }
 
@@ -1843,6 +1844,22 @@ class VanGatewayClient(context: Context) {
     fun permissionProfileIdentity(): String = java.security.MessageDigest.getInstance("SHA-256")
         .digest(baseUrl.toByteArray(Charsets.UTF_8)).joinToString("") { "%02x".format(it) }
 
+    private val localIdentityObservers = java.util.concurrent.CopyOnWriteArraySet<() -> Unit>()
+
+    /** Invalidation only: no credential values, identity grants or commands leave the client. */
+    fun observeLocalOwnerIdentity(changed: () -> Unit): () -> Unit {
+        val listener = android.content.SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+            if (key == null || key in setOf(KEY_BASE, KEY_DEVICE, KEY_SECRET)) changed()
+        }
+        localIdentityObservers.add(changed)
+        prefs.registerOnSharedPreferenceChangeListener(listener)
+        return {
+            prefs.unregisterOnSharedPreferenceChangeListener(listener)
+            localIdentityObservers.remove(changed)
+            Unit
+        }
+    }
+
     suspend fun revokePermission(grantId: String, reviewed: JSONObject, reviewedProfile: String): JSONObject = withContext(Dispatchers.IO) {
         val owner = deviceId ?: error("The active owner changed. Review the permission again.")
         try {
@@ -2584,6 +2601,9 @@ class VanGatewayClient(context: Context) {
 
             "denied", "expired", "conflict", "rejected", "rejected_untrusted", "failed", "error" -> {
                 VanLiveVisualState.warning(urgency = 0.40f)
+                com.dial.van.visual.VanContextEventPolicy.command(response.optString("status"))?.let {
+                    VanLiveVisualState.observedContext(it, "command-response", java.util.UUID.randomUUID().toString())
+                }
                 VanLiveVisualState.settleToIdle(delayMs = 1_800L, allowCritical = true)
             }
 

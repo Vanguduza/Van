@@ -187,6 +187,7 @@ internal fun CommandCentreScreen(
     remember(viewModel) { viewModel.also { it.start(initial) } }
     val nav = rememberNavController()
     val currentRoute by viewModel.currentRoute.collectAsState()
+    com.dial.van.visual.ObserveVanOwnedScreen(currentRoute)
     var moreSheetOpen by remember { mutableStateOf(false) }
 
     LaunchedEffect(nav) {

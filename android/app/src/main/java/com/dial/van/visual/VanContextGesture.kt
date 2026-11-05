@@ -24,7 +24,7 @@ enum class VanContextGesture(
 
     fun allows(state: VanDurableState): Boolean = when (this) {
         EXPLAIN_OPEN_PALMS -> state in setOf(VanDurableState.SPEAKING, VanDurableState.WORKING, VanDurableState.ATTENTIVE)
-        COMPARE_OPTIONS -> state in setOf(VanDurableState.SPEAKING, VanDurableState.THINKING, VanDurableState.ATTENTIVE)
+        COMPARE_OPTIONS -> state in setOf(VanDurableState.SPEAKING, VanDurableState.THINKING, VanDurableState.ATTENTIVE, VanDurableState.WORKING)
         THINK_CHIN -> state == VanDurableState.THINKING
         INSPECT_TARGET -> state in setOf(VanDurableState.IDLE, VanDurableState.WORKING, VanDurableState.SEARCHING, VanDurableState.ATTENTIVE, VanDurableState.SPEAKING)
         LISTEN_EMPHASIS -> state == VanDurableState.LISTENING

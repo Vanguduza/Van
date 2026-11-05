@@ -158,12 +158,14 @@ internal fun ChatComposer(
     compact: Boolean,
     draft: String,
     onDraft: (String) -> Unit,
+    localReady: Boolean = true,
 ) {
     val conversation by app.commandController.state.collectAsState()
     var sendError by remember { mutableStateOf<String?>(null) }
     val draftGate = remember { OverlaySubmissionGuard() }
     val draftLease = draftGate.observe(draft)
     fun send() {
+        if (!localReady) return
         // Read the controller now, not a stale composition. The controller marks
         // submitting synchronously, so a double-click/IME replay cannot resend.
         runCatching {
@@ -195,6 +197,7 @@ internal fun ChatComposer(
     ) {
         OutlinedTextField(
             value = draft,
+            enabled = localReady,
             onValueChange = { draftGate.observe(it); sendError = null; onDraft(it) },
             modifier = Modifier.weight(1f),
             singleLine = compact,
@@ -203,7 +206,7 @@ internal fun ChatComposer(
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
             keyboardActions = KeyboardActions(onSend = { send() }),
         )
-        WorkChip("Send", accent, enabled = OverlayUsabilityPolicy.canSubmit(draft, conversation.submitting)) { send() }
+        WorkChip("Send", accent, enabled = localReady && OverlayUsabilityPolicy.canSubmit(draft, conversation.submitting)) { send() }
     }
     }
 }

@@ -2,6 +2,7 @@ package com.dial.van.overlay
 
 import com.dial.van.visual.VanEmbodimentReducer
 import com.dial.van.visual.VanLiveVisualState
+import com.dial.van.visual.VanLiveInteractionResponse
 
 /**
  * Device-only presentation→animation bridge.
@@ -11,6 +12,9 @@ import com.dial.van.visual.VanLiveVisualState
  * instead of letting the service own character semantics or renderable components.
  */
 internal object OverlayVisualCueBridge {
+    fun dragSample(dx: Float, dy: Float, density: Float) = VanLiveInteractionResponse.drag(dx,dy,density)
+    fun restAfterInteraction() = VanLiveInteractionResponse.release()
+
     fun publishPresentationChange(
         previous: VanOverlayPresentation,
         next: VanOverlayPresentation,

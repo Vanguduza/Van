@@ -15,7 +15,8 @@ import com.k2fsa.sherpa.onnx.OfflineTtsVitsModelConfig
 import org.json.JSONObject
 import java.io.File
 import java.util.concurrent.Executors
-import kotlin.math.sqrt
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * Real sherpa-onnx local synthesis and PCM playback.
@@ -152,6 +153,8 @@ class SherpaLocalTtsRuntime(context: Context) {
         if (!canSpeak(text)) return false
         val epoch = playback.snapshot()
         executor.execute {
+            var visualTick: Runnable? = null
+            val visualActive = AtomicBoolean(true)
             try {
                 if (!playback.isCurrent(epoch)) return@execute
                 val audio = localEngine.generate(text = text, sid = speakerId, speed = speed)
@@ -170,7 +173,24 @@ class SherpaLocalTtsRuntime(context: Context) {
                     }
                 }
                 if (!started) { player.release(); return@execute }
-                main.post { if (playback.isCurrent(epoch)) onStart() }
+                val submitted = AtomicInteger()
+                val visualClock = PcmPlaybackVisualClock()
+                val pump = object : Runnable {
+                    override fun run() {
+                        if (!visualActive.get() || !playback.isCurrent(epoch) || track !== player) return
+                        val head = runCatching { player.playbackHeadPosition.toLong() and 0xffffffffL }.getOrNull() ?: return
+                        val visual = visualClock.sample(audio.samples, audio.sampleRate, head, submitted.get(), SystemClock.elapsedRealtime())
+                        onFrame(SpeechSyncFrame(System.currentTimeMillis(), visual.rms, visual.mouthOpen, visual.viseme))
+                        if (visualActive.get() && playback.isCurrent(epoch)) main.postDelayed(this, 40L)
+                    }
+                }
+                visualTick = pump
+                main.post {
+                    if (playback.isCurrent(epoch)) {
+                        onStart()
+                        if (visualActive.get()) pump.run()
+                    }
+                }
 
                 var offset = 0
                 while (offset < audio.samples.size && playback.isCurrent(epoch)) {
@@ -182,16 +202,8 @@ class SherpaLocalTtsRuntime(context: Context) {
                         AudioTrack.WRITE_BLOCKING,
                     )
                     if (written <= 0) error("sherpa_tts_audio_write_failed:$written")
-                    val rms = rms(audio.samples, offset, written)
-                    val open = (rms * RMS_GAIN).coerceIn(0f, 1f)
-                    val frame = SpeechSyncFrame(
-                        timestampMs = System.currentTimeMillis(),
-                        rmsDb = rms,
-                        mouthOpen = open,
-                        viseme = ((offset / CHUNK_SAMPLES) % 15),
-                    )
-                    main.post { if (playback.isCurrent(epoch)) onFrame(frame) }
                     offset += written
+                    submitted.set(offset)
                 }
 
                 val drained = awaitSpeechPlaybackDrain(
@@ -211,6 +223,8 @@ class SherpaLocalTtsRuntime(context: Context) {
                     main.post { if (playback.isCurrent(epoch)) onError(t.message ?: "sherpa_tts_failed") }
                 }
             } finally {
+                visualActive.set(false)
+                visualTick?.let { main.removeCallbacks(it) }
                 synchronized(playbackLock) {
                     runCatching { track?.release() }
                     track = null
@@ -264,19 +278,8 @@ class SherpaLocalTtsRuntime(context: Context) {
             .build()
     }
 
-    private fun rms(samples: FloatArray, offset: Int, count: Int): Float {
-        if (count <= 0) return 0f
-        var sum = 0.0
-        for (i in offset until offset + count) {
-            val value = samples[i].toDouble()
-            sum += value * value
-        }
-        return sqrt(sum / count).toFloat()
-    }
-
     companion object {
         const val CONFIG_PATH = "voice/tts/runtime.json"
         private const val CHUNK_SAMPLES = 1024
-        private const val RMS_GAIN = 5.5f
     }
 }

@@ -16,13 +16,13 @@ import app.rive.runtime.kotlin.renderers.RiveArtboardRenderer
  * Activity launch latency cannot change its animation time. No shipping renderer uses this.
  */
 @Composable
-internal fun FixedTimeRiveFrame(bytes: ByteArray, intent: Intent) {
+internal fun FixedTimeRiveFrame(bytes: ByteArray, intent: Intent, supportedContextCodes: Set<Int> = emptySet()) {
     val sampleMs = intent.getLongExtra(RiveCandidateHostActivity.EXTRA_SAMPLE_TIME_MS, 850L)
     require(sampleMs in 250L..5_000L)
     val size = intent.getIntExtra(RiveCandidateHostActivity.EXTRA_SIZE_DP, 320).dp
     AndroidView(factory = { context ->
         VanRiveRuntime.ensure(context.applicationContext)
-        FixedTimeRiveView(context, intent, sampleMs).apply {
+        FixedTimeRiveView(context, intent, sampleMs, supportedContextCodes).apply {
             val pixels = (size.value * resources.displayMetrics.density).toInt()
             layoutParams = android.view.ViewGroup.LayoutParams(pixels, pixels)
             setRiveBytes(bytes, artboardName = RiveBindingContract.ARTBOARD,
@@ -36,6 +36,7 @@ private class FixedTimeRiveView(
     context: Context,
     private val inputs: Intent,
     private val sampleMs: Long,
+    private val supportedContextCodes: Set<Int>,
 ) : RiveAnimationView(context) {
     override fun createRenderer(): Renderer = object : RiveArtboardRenderer(
         controller = controller,
@@ -66,7 +67,7 @@ private class FixedTimeRiveView(
             controller.setNumberState(sm, VanInput.VISEME.wireName,
                 inputs.getIntExtra(RiveCandidateHostActivity.EXTRA_VISEME, 0).toFloat())
             controller.setNumberState(sm, VanInput.ACTION_CODE.wireName,
-                inputs.getIntExtra(RiveCandidateHostActivity.EXTRA_ACTION, 0).toFloat())
+                VanRiveContextCapabilities.candidateAction(inputs.getIntExtra(RiveCandidateHostActivity.EXTRA_ACTION, 0), supportedContextCodes).toFloat())
             inputs.getStringExtra(RiveCandidateHostActivity.EXTRA_TRIGGER)?.let { controller.fireState(sm, it) }
             controller.advance(0f)
             val duration = (sampleMs - 250L) / 1_000f

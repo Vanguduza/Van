@@ -103,6 +103,27 @@ class VanContextGestureTest {
             assertEquals(0, VanRiveContextCapabilities.actionCode(0, g.code, supported))
         }
     }
+    @Test fun debugCatalogueCannotExposeUnadvertisedContextCodes() {
+        assertEquals((0..14).toList(), VanRiveContextCapabilities.candidateActions(emptySet()))
+        assertEquals((0..26).toList(), VanRiveContextCapabilities.candidateActions((15..26).toSet()))
+        assertEquals((0..14).toList() + listOf(15, 26), VanRiveContextCapabilities.candidateActions(setOf(-1, 15, 26, 99)))
+    }
+    @Test fun debugRequestedCodeIsClampedToTheExactResolvedCapability() {
+        for (code in listOf(-1, 15, 26, 99)) assertEquals(0, VanRiveContextCapabilities.candidateAction(code, emptySet()))
+        for (code in 0..26) assertEquals(code, VanRiveContextCapabilities.candidateAction(code, (15..26).toSet()))
+    }
+    @Test fun metadataNumbersMustNotBeStringBooleanFractionOrOverflow() {
+        for ((key, value) in listOf("code" to "15", "code" to true, "code" to 15.25,
+            "duration_ms" to "1400", "duration_ms" to 1400.25, "legacy_action" to "2", "legacy_action" to 4_294_967_298L)) {
+            val m = manifest(); m.getJSONArray("gestures").getJSONObject(0).put(key, value)
+            assertTrue(VanRiveContextCapabilities.resolve(binary, m.toString()).isEmpty(), "$key=$value")
+        }
+    }
+    @Test fun candidateMetadataFilenameIsDistinctFromTheProductionAsset() {
+        assertEquals("van.context.json", VanRiveContextCapabilities.ASSET_FILE)
+        assertEquals("van_candidate.context.json", VanRiveContextCapabilities.CANDIDATE_ASSET_FILE)
+    }
+
     @Test fun ordinaryStateMappingDoesNotSilentlyEmitExtendedCodes() {
         val frame = VanPresenceFrame(actionCode = VanFiniteAction.ACK_NOD.code, contextCode = VanContextGesture.THINK_CHIN.code)
         val visual = frame.toVisualState()

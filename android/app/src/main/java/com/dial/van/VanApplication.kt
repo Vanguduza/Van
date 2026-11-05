@@ -782,6 +782,20 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
      */
     private fun startEmbodimentEventWatch() {
         appScope.launch {
+            var previous: com.dial.van.visual.VanHealthState? = null
+            var observation = 0L
+            degradedModeStore.state.collect { mode ->
+                val current = com.dial.van.visual.VanPresence.cue(mode).health
+                if (com.dial.van.visual.VanContextEventPolicy.recovered(previous, current)) {
+                    com.dial.van.visual.VanLiveVisualState.observedContext(
+                        com.dial.van.visual.VanContextGesture.RECOVERY_READY, "observed-health-edge", "health:${++observation}",
+                        evidence = com.dial.van.visual.VanCueEvidence.VERIFIED_SOURCE,
+                    )
+                }
+                previous = current
+            }
+        }
+        appScope.launch {
             eventStream.newRecords.collect { record ->
                 applyEmbodimentEffect(VanEmbodimentReducer.forMissionEvent(record.type, record.payloadJson))
                 applyEmbodimentEffect(VanEmbodimentReducer.forAttentionEventJson(record.type, record.payloadJson))

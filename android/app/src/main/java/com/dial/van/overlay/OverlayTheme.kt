@@ -44,5 +44,5 @@ object OverlayTheme {
     const val DISMISS_BOTTOM_MARGIN_DP: Int = 24
 
     val COMPACT_ACTIONS: List<String> = listOf("Chat", "Voice", "Projects", "Tasks", "Decisions")
-    val QUICK_CONTROLS: List<String> = listOf("Chat", "Voice", "Minimize", "Command Centre", "Dock", "Close")
+    val QUICK_CONTROLS: List<String> = listOf("Chat", "Voice", "Settings", "Minimize", "Command Centre", "Dock", "Close")
 }

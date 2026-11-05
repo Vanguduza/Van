@@ -29,5 +29,8 @@ class VoiceTurnLifecycle {
         return true
     }
 
+    /** A closing UI can abandon only the unique turn it started, not a replacement. */
+    fun cancelIf(turnId: String): Token? = if (active?.turnId == turnId) cancel() else null
+
     fun cancel(): Token? = active.also { active = null; processing = false }
 }

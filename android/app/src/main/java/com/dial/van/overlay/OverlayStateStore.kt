@@ -22,16 +22,25 @@ class OverlayStateStore(context: Context) {
      * one storage policy is easier to audit than one-with-an-exception, and the same
      * Keystore-backed scheme the gateway client uses costs nothing here.
      */
-    private val prefs: SharedPreferences = EncryptedSharedPreferences.create(
+    private val prefs: SharedPreferences? = runCatching { EncryptedSharedPreferences.create(
         context.applicationContext,
         PREFS,
         MasterKey.Builder(context.applicationContext).setKeyScheme(MasterKey.KeyScheme.AES256_GCM).build(),
         EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM,
-    )
+    ) }.getOrNull()
+
+    val localStorageAvailable: Boolean get() = prefs != null
+    fun acquireLocalSession(): Long = localOwnership.acquire()
+    fun currentLocalSession(lease: Long): Boolean = localOwnership.current(lease)
+    fun readLocalSession(lease: Long): String? = localOwnership.read(lease) { prefs?.getString("local_session_v1", null) }
+    /** Called only by the ordered background writer; old service generations are refused. */
+    fun writeLocalSession(lease: Long, value: String): Boolean = localOwnership.write(lease) {
+        prefs?.edit()?.putString("local_session_v1", value)?.commit() == true
+    }
 
     fun save(state: OverlayPersistedState) {
-        prefs.edit {
+        prefs?.edit {
             putInt(KEY_X, state.x)
             putInt(KEY_Y, state.y)
             putString(KEY_PRESENTATION, state.presentation.name)
@@ -43,24 +52,24 @@ class OverlayStateStore(context: Context) {
     fun load(defaultX: Int, defaultY: Int): OverlayPersistedState {
         val presentation = runCatching {
             VanOverlayPresentation.valueOf(
-                prefs.getString(KEY_PRESENTATION, null)
-                    ?: legacyPresentation(prefs.getString(KEY_LEGACY_MODE, null)).name,
+                prefs?.getString(KEY_PRESENTATION, null)
+                    ?: legacyPresentation(prefs?.getString(KEY_LEGACY_MODE, null)).name,
             )
         }.getOrDefault(VanOverlayPresentation.FULL_FLOATING)
 
         return OverlayPersistedState(
-            x = prefs.getInt(KEY_X, defaultX),
-            y = prefs.getInt(KEY_Y, defaultY),
+            x = runCatching { prefs?.getInt(KEY_X, defaultX) ?: defaultX }.getOrDefault(defaultX),
+            y = runCatching { prefs?.getInt(KEY_Y, defaultY) ?: defaultY }.getOrDefault(defaultY),
             presentation = presentation,
             dock = runCatching {
-                DockEdge.valueOf(prefs.getString(KEY_DOCK, DockEdge.NONE.name)!!)
+                DockEdge.valueOf(prefs?.getString(KEY_DOCK, DockEdge.NONE.name)!!)
             }.getOrDefault(DockEdge.NONE),
-            serviceRunning = prefs.getBoolean(KEY_RUNNING, false),
+            serviceRunning = runCatching { prefs?.getBoolean(KEY_RUNNING, false) ?: false }.getOrDefault(false),
         )
     }
 
     fun markRunning(running: Boolean) {
-        prefs.edit { putBoolean(KEY_RUNNING, running) }
+        prefs?.edit { putBoolean(KEY_RUNNING, running) }
     }
 
     private fun legacyPresentation(value: String?): VanOverlayPresentation = when (value) {
@@ -71,6 +80,7 @@ class OverlayStateStore(context: Context) {
     }
 
     companion object {
+        private val localOwnership = OverlaySnapshotOwnership()
         private const val PREFS = "van_overlay_state"
         private const val KEY_X = "x"
         private const val KEY_Y = "y"

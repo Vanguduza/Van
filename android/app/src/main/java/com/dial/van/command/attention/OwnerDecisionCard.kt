@@ -43,6 +43,14 @@ internal fun OwnerDecisionCard(app: VanApplication, record: JSONObject, onOpenRo
     var now by remember { mutableStateOf(System.currentTimeMillis() / 1000L) }
     LaunchedEffect(id) { while (true) { now = System.currentTimeMillis() / 1000L; delay(1_000L) } }
 
+    LaunchedEffect(id, current?.revision, current?.status) {
+        val value = current ?: return@LaunchedEffect
+        com.dial.van.visual.VanContextEventPolicy.decision(value.status == "OPEN", value.choices.size,
+            value.expiresAtUnix?.let { now >= it } == true)?.let {
+            com.dial.van.visual.VanLiveVisualState.observedContext(it, "owned-decision", "decision:${value.id}:${value.revision}")
+        }
+    }
+
     suspend fun readAnswer(): OwnerDecision {
         val fresh = OwnerDecision.parse(app.gatewayClient.decision(id))
         check(fresh.id == id) { "The decision readback did not match." }

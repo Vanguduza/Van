@@ -63,7 +63,7 @@ object VanVisualRuntime {
         val reason = when {
             loadFailed -> VanCanvasReason.LOAD_FAILED
             assetBytes == null -> VanCanvasReason.ASSET_MISSING
-            assetBytes < MIN_ARTBOARD_BYTES -> VanCanvasReason.ASSET_UNUSABLE
+            assetBytes < MIN_ARTBOARD_BYTES || assetBytes > VanAssetReadLimits.RIVE_BYTES -> VanCanvasReason.ASSET_UNUSABLE
             !riveRuntimeAvailable -> VanCanvasReason.RUNTIME_UNAVAILABLE
             else -> return VanRenderDecision(VanRenderer.RIVE, VanCanvasReason.NOT_APPLICABLE)
         }
@@ -82,7 +82,7 @@ object VanVisualRuntime {
     fun describe(reason: VanCanvasReason): String = when (reason) {
         VanCanvasReason.NOT_APPLICABLE -> "Rive artboard active"
         VanCanvasReason.ASSET_MISSING -> "authored van.riv not installed"
-        VanCanvasReason.ASSET_UNUSABLE -> "van.riv too small to be a real artboard"
+        VanCanvasReason.ASSET_UNUSABLE -> "van.riv size is outside its safe runtime bounds"
         VanCanvasReason.RUNTIME_UNAVAILABLE -> "Rive runtime unavailable on this device"
         VanCanvasReason.LOAD_FAILED -> "Rive artboard failed to load"
     }

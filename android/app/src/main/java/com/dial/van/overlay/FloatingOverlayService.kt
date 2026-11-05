@@ -7,7 +7,6 @@ import android.content.IntentFilter
 import android.content.res.Configuration
 import android.graphics.PixelFormat
 import android.os.IBinder
-import android.os.PowerManager
 import android.provider.Settings
 import android.view.Gravity
 import android.view.WindowManager
@@ -120,7 +119,7 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
     private fun OverlayContent() {
         val metrics = resources.displayMetrics
         val gestures = remember {
-            Modifier.vanGestures(interaction, ::onVanTap, { openCommandCentre() }, ::showQuickControls)
+            Modifier.vanGestures(interaction, ::onVanTap, { surfaceController.onDoubleTap(uiState, ::updateUiState) { openCommandCentre() } }, ::showQuickControls)
         }
         val dragHandle = remember { Modifier.vanGestures(interaction, {}, {}, {}, clicks = false) }
         surfaceController.Content(
@@ -158,10 +157,15 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
         super.onConfigurationChanged(newConfig)
         environmentChanged()
     }
-
     private fun setScreenOn(on: Boolean) {
-        visibility = visibility.copy(screenOn = on)
-        if (on && canUseWindow()) reconcileWindow()
+        val visible = on && OverlayPrivacyVisibility.interactiveAndUnlocked(this)
+        visibility = visibility.copy(screenOn = visible)
+        if (::overlayView.isInitialized) overlayView.visibility = if (visible) android.view.View.VISIBLE else android.view.View.GONE
+        if (!visible) {
+            surfaceController.pauseOwnerCapture()
+            if (uiState.presentation in OverlayWindowFlags.WORKBOARDS) updateUiState(uiState.copy(presentation = VanOverlayPresentation.FULL_FLOATING, quickControls = VanQuickControlsState.HIDDEN))
+        }
+        if (visible && canUseWindow()) reconcileWindow()
         applyVisibilityLifecycle()
     }
 
@@ -185,6 +189,7 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
             savedStateController.performRestore(null)
             lifecycleRegistry.currentState = Lifecycle.State.CREATED
             stateStore = OverlayStateStore(this)
+            surfaceController.attach(application as VanApplication, stateStore)
             stateStore.markRunning(false)
             if (!Settings.canDrawOverlays(this)) {
                 stopSelf()
@@ -193,7 +198,8 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
             windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
             dismissWindow = OverlayDismissWindow(this, windowManager, ::dp)
             val screen = screenBounds()
-            val restored = stateStore.load(screen.widthPx / 2, screen.heightPx / 3)
+            val saved = stateStore.load(screen.widthPx / 2, screen.heightPx / 3)
+            val restored = saved.copy(presentation = OverlayRestartPresentation.safe(saved.presentation))
             val fallback = VanOverlayController.fallbackSizeFor(restored.presentation, ::dp, screen)
             val placement = VanOverlayController.clamp(
                 restored.x, restored.y, fallback.widthPx, fallback.heightPx, screen,
@@ -227,8 +233,8 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
             }
             windowManager.addView(overlayView, layoutParams)
             windowAttached = true
-            val power = getSystemService(PowerManager::class.java)
-            visibility = visibility.copy(attached = true, screenOn = power?.isInteractive != false)
+            visibility = visibility.copy(attached = true)
+            setScreenOn(OverlayPrivacyVisibility.interactiveAndUnlocked(this))
             registerReceiver(
                 screenReceiver,
                 IntentFilter().apply {
@@ -268,6 +274,7 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
     override fun onDestroy() {
         visibility = visibility.copy(destroying = true, attached = false)
         running = false
+        surfaceController.close()
         stopInteraction()
         if (screenReceiverRegistered) {
             runCatching { unregisterReceiver(screenReceiver) }
@@ -343,14 +350,6 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
         uiState = uiState.copy(xPx = layoutParams.x, yPx = layoutParams.y)
     }
 
-    private fun recordActualEdge() {
-        if (!::layoutParams.isInitialized) return
-        val size = interaction.windowSize()
-        dockEdge = VanOverlayController.edgeAt(
-            layoutParams.x, layoutParams.y, size.widthPx, size.heightPx, screenBounds(),
-        )
-    }
-
     /** Failed updates retain the last successfully applied coordinates and stop once. */
     private fun updateWindow(): Boolean {
         if (!canUseWindow()) return false
@@ -381,7 +380,6 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
         if (lifecycleRegistry.currentState != Lifecycle.State.INITIALIZED) applyVisibilityLifecycle()
         stopSelf()
     }
-
     private fun showDismissTarget() {
         if (canUseWindow() && ::dismissWindow.isInitialized) {
             runCatching { dismissWindow.show { DismissTarget(uiState.dismissTargetArmed) } }

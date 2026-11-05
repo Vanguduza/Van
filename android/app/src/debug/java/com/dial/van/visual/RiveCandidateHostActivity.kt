@@ -21,7 +21,13 @@ class RiveCandidateHostActivity : ComponentActivity() {
         lastSampleTimeMs = null
         val production = intent.getBooleanExtra(EXTRA_PRODUCTION, false)
         val asset = if (production) RiveBindingContract.ASSET_FILE else "van_candidate.riv"
-        val bytes = runCatching { assets.open(asset).use { it.readBytes() } }.getOrNull()
+        val bytes = runCatching { assets.open(asset).use { VanAssetReadLimits.read(it, VanAssetReadLimits.RIVE_BYTES) } }.getOrNull()
+        val sidecar = if (production) VanRiveContextCapabilities.ASSET_FILE else VanRiveContextCapabilities.CANDIDATE_ASSET_FILE
+        val metadata = runCatching { assets.open(sidecar).use {
+            VanAssetReadLimits.read(it, VanAssetReadLimits.CONTEXT_BYTES).toString(Charsets.UTF_8)
+        } }.getOrNull()
+        val supportedContexts = bytes?.let { VanRiveContextCapabilities.resolve(it, metadata) }.orEmpty()
+        lastContextCodes = supportedContexts
         setContent {
             VanTheme {
                 if (intent.getBooleanExtra(EXTRA_PRODUCTION_PATH, false)) {
@@ -69,7 +75,7 @@ class RiveCandidateHostActivity : ComponentActivity() {
                             else -> Box(Modifier.fillMaxSize().background(Color(0xFF0B0F14)))
                         }
                         if (intent.hasExtra(EXTRA_SAMPLE_TIME_MS)) {
-                            FixedTimeRiveFrame(bytes, intent)
+                            FixedTimeRiveFrame(bytes, intent, supportedContexts)
                         } else RiveCandidateFrame(
                             bytes = bytes,
                             size = intent.getIntExtra(EXTRA_SIZE_DP, 320).dp,
@@ -83,10 +89,11 @@ class RiveCandidateHostActivity : ComponentActivity() {
                             viseme = intent.getIntExtra(EXTRA_VISEME, 0),
                             actionCode = intent.getIntExtra(EXTRA_ACTION, 0),
                             trigger = intent.getStringExtra(EXTRA_TRIGGER),
+                            supportedContextCodes = supportedContexts,
                         )
                     }
                 } else {
-                    CharacterRigLab(bytes = bytes)
+                    CharacterRigLab(bytes = bytes, supportedContextCodes = supportedContexts)
                 }
             }
         }
@@ -95,6 +102,8 @@ class RiveCandidateHostActivity : ComponentActivity() {
     companion object {
         /** Last decision the production VanAvatar reported; read by RiveContractTest. */
         @Volatile var lastProductionDecision: VanRenderDecision? = null
+        /** Exact hash-bound candidate extension exposed to debug instrumentation only. */
+        @Volatile var lastContextCodes: Set<Int> = emptySet()
         /** Set by the debug renderer after drawing the requested fixed animation time. */
         @Volatile var lastSampleTimeMs: Long? = null
         const val EXTRA_SAMPLE_TIME_MS = "forge.sampleTimeMs"

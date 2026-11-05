@@ -3,6 +3,9 @@ package com.dial.van.visual
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 
 /** Native main-thread ownership shell for measured VAN-owned UI targets. */
 object VanLivePointing {
@@ -13,6 +16,7 @@ object VanLivePointing {
     private val probes = LinkedHashMap<String, Probe>()
     private var avatar: Probe? = null
     private var active: Active? = null
+    var highlightedTarget by mutableStateOf<Pair<String, Long>?>(null); private set
     private var eventSequence = 0L
 
     fun registerTarget(id: String, lease: Long, provider: () -> VanOwnedLayout?) = onMain {
@@ -58,6 +62,7 @@ object VanLivePointing {
     fun pointAt(id: String) = onMain {
         val now = SystemClock.uptimeMillis()
         val target = refresh(id, now) ?: return@onMain
+        val gesture = VanOwnedScreenContext.pointing(VanNativeScreenContext.current)
         VanLiveVisualState.action(
             action = VanFiniteAction.POINT_TARGET,
             evidence = VanCueEvidence.LOCAL_UI,
@@ -65,11 +70,12 @@ object VanLivePointing {
             source = "owned-ui-target:$id",
             eventId = "layout-point-${++eventSequence}",
             sourceRevision = target.revision,
-            context = VanContextGesture.GUIDE_NEXT_STEP,
+            context = gesture,
             attentionOverride = target.directionX to target.directionY,
             onApplied = { token ->
-                val duration = VanContextGesture.GUIDE_NEXT_STEP.durationMs
+                val duration = gesture.durationMs
                 active = Active(id, target.lease, token, now + duration)
+                highlightedTarget = id to target.lease
                 main.postDelayed({ if (active?.actionGeneration == token) stop() }, duration + 1)
             },
         )
@@ -85,8 +91,14 @@ object VanLivePointing {
         return registry.resolve(id, now)
     }
 
+    /** A higher-priority gesture immediately withdraws an old visual highlight. */
+    fun actionChanged(token: Long) {
+        if (active?.let { it.actionGeneration != token } == true) stop()
+    }
+
     private fun stop() {
         val previous = active; active = null
+        highlightedTarget = null
         if (previous != null) VanLiveVisualState.clearPointing(previous.actionGeneration)
     }
     private fun onMain(block: () -> Unit) {

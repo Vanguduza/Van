@@ -252,6 +252,7 @@ internal class OverlayWindowInteraction(private val host: OverlayInteractionHost
 
     fun dragBy(dx: Float, dy: Float) {
         if (!canUseWindow() || !uiState.dragging) return
+        OverlayVisualCueBridge.dragSample(dx,dy,resources.displayMetrics.density)
         val next = dragController.drag(uiState, dx, dy, SystemClock.uptimeMillis())
         boards.dragged()
         uiState = if (canUseWindow() && OverlayVisibilityPolicy.shouldAnimate(visibility)) next
@@ -267,10 +268,12 @@ internal class OverlayWindowInteraction(private val host: OverlayInteractionHost
             )
         } finally {
             dragPointer = null
+            OverlayVisualCueBridge.restAfterInteraction()
         }
     }
 
     fun cancelDrag() {
+        OverlayVisualCueBridge.restAfterInteraction()
         dragPointer = null
         if (!(host.params != null)) return
         uiState = dragController.cancel(uiState)
@@ -278,6 +281,7 @@ internal class OverlayWindowInteraction(private val host: OverlayInteractionHost
     }
 
     fun stopInteraction() {
+        OverlayVisualCueBridge.restAfterInteraction()
         cancelSettle()
         if (uiState.dragging && (host.params != null)) {
             uiState = dragController.cancel(uiState)

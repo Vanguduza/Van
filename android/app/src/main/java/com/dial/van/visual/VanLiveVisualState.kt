@@ -91,7 +91,7 @@ object VanLiveVisualState {
 
     fun error(urgency: Float = 0.75f) = mutate {
         VanPresenceReducer.authority(it, VanAuthorityState.ERROR).copy(urgency = urgency.coerceIn(0f, 1f))
-    }
+    }.also { contextual(VanContextGesture.ACKNOWLEDGE_ERROR) }
 
     /**
      * GAP-F-012 — URGENT's producer is `VanEmbodimentReducer.forAttentionEvent` reacting to
@@ -165,6 +165,7 @@ object VanLiveVisualState {
         }
         // An old happy/waving gesture must never visually survive an authoritative alert.
         reconcileActionWithPose()
+        if (finiteAction == null && state == VanDurableState.ERROR) contextual(VanContextGesture.ACKNOWLEDGE_ERROR)
         if (finiteAction != null) {
             action(
                 finiteAction,
@@ -209,7 +210,7 @@ object VanLiveVisualState {
     }
 
     fun attention(x: Float, y: Float) = mutate {
-        it.copy(attentionX = x.coerceIn(-1f, 1f), attentionY = y.coerceIn(-1f, 1f))
+        it.copy(attentionX = if (x.isFinite()) x.coerceIn(-1f, 1f) else 0f, attentionY = if (y.isFinite()) y.coerceIn(-1f, 1f) else 0f)
     }
 
     /**
@@ -263,6 +264,7 @@ object VanLiveVisualState {
             attentionY = aim?.second?.coerceIn(-1f, 1f) ?: decision.attention?.second ?: frame.attentionY,
         )
         actionGeneration += 1L
+        VanLivePointing.actionChanged(actionGeneration)
         onApplied?.invoke(actionGeneration)
         if (decision.action != null) {
             val token = actionGeneration
@@ -288,6 +290,16 @@ object VanLiveVisualState {
         evidence: VanCueEvidence = VanCueEvidence.LOCAL_UI,
         target: VanCueTarget? = null,
     ) = action(gesture.legacyAction, evidence = evidence, target = target, context = gesture)
+
+    /** A visible local decision may ask for attention, never grant execution authority. */
+    fun observedContext(gesture: VanContextGesture, source: String, eventId: String,
+                        evidence: VanCueEvidence = VanCueEvidence.LOCAL_UI) = onMain {
+        if (frame.activity == VanDurableState.IDLE && frame.authority == VanAuthorityState.NONE &&
+            frame.speech == VanSpeechState.QUIET && frame.turn == VanTurnPhase.IDLE && frame.health == VanHealthState.NOMINAL) {
+            frame = frame.copy(activity = VanDurableState.ATTENTIVE)
+        }
+        action(gesture.legacyAction, evidence = evidence, source = source, eventId = eventId, context = gesture)
+    }
 
     fun clearAction() = action(null)
 

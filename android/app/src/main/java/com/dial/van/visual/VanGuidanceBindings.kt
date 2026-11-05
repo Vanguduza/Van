@@ -7,6 +7,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.unit.dp
+
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.boundsInWindow
@@ -44,11 +51,14 @@ fun rememberVanGuidanceTarget(id: String): VanGuidanceBinding {
         VanLivePointing.registerTarget(id, lease) { probe.measure() }
         onDispose { VanLivePointing.unregisterTarget(id, lease); probe.coordinates = null }
     }
-    return remember(id, lease) {
-        VanGuidanceBinding(Modifier.onGloballyPositioned {
-            probe.coordinates = it; VanLivePointing.changed(id)
-        }, point = { VanLivePointing.pointAt(id) })
+    val highlighted = VanLivePointing.highlightedTarget == (id to lease)
+    val placement = remember(id, lease) {
+        Modifier.onGloballyPositioned { probe.coordinates = it; VanLivePointing.changed(id) }
     }
+    val guidance = placement.drawBehind {
+        if (highlighted) drawRoundRect(Color(0xFF8ED9EF).copy(alpha = .24f), cornerRadius = CornerRadius(12.dp.toPx()))
+    }.semantics { if (highlighted) stateDescription = "VAN is pointing to this control" }
+    return VanGuidanceBinding(guidance) { VanLivePointing.pointAt(id) }
 }
 
 /** Only a loaded real Rive renderer registers the arm's artboard-to-window map. */

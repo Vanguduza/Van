@@ -3,6 +3,8 @@ package com.dial.van.visual
 import android.graphics.Bitmap
 import android.view.TextureView
 import android.view.View
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -38,6 +40,12 @@ fun VanRiveAvatar(
     reducedMotion: Boolean = rememberReducedMotion(),
 ) {
     val enabled = vanMotionEnabled(budget, animate = animate, reducedMotion = reducedMotion)
+    val smoothGaze = enabled && VanInteractionResponsePolicy.compatible(state)
+    val rendered = if (smoothGaze) {
+        val x by animateFloatAsState(if (state.attentionX.isFinite()) state.attentionX.coerceIn(-1f,1f) else 0f, tween(100), label = "van-gaze-x")
+        val y by animateFloatAsState(if (state.attentionY.isFinite()) state.attentionY.coerceIn(-1f,1f) else 0f, tween(100), label = "van-gaze-y")
+        state.copy(attentionX = x, attentionY = y)
+    } else state
     val currentEnabled by rememberUpdatedState(enabled)
     val currentOnSilhouette by rememberUpdatedState(onSilhouette)
     val currentOnLoadFailed by rememberUpdatedState(onLoadFailed)
@@ -78,10 +86,11 @@ fun VanRiveAvatar(
         factory = { ctx ->
             try {
                 VanRiveRuntime.ensure(ctx.applicationContext)
-                RiveAnimationView(ctx).apply {
-                    val bytes = ctx.assets.open(RiveBindingContract.ASSET_FILE).use { it.readBytes() }
+                VanBoundedRiveView(ctx).apply {
+                    onNativeFailure = { currentOnLoadFailed() }
+                    val bytes = ctx.assets.open(RiveBindingContract.ASSET_FILE).use { VanAssetReadLimits.read(it, VanAssetReadLimits.RIVE_BYTES) }
                     val metadata = runCatching {
-                        ctx.assets.open(VanRiveContextCapabilities.ASSET_FILE).bufferedReader().use { it.readText() }
+                        ctx.assets.open(VanRiveContextCapabilities.ASSET_FILE).use { VanAssetReadLimits.read(it, VanAssetReadLimits.CONTEXT_BYTES).toString(Charsets.UTF_8) }
                     }.getOrNull()
                     motionBinding.contextCodes = VanRiveContextCapabilities.resolve(bytes, metadata)
                     setRiveBytes(
@@ -110,9 +119,12 @@ fun VanRiveAvatar(
                     if (motionBinding.view !== view) {
                         motionBinding.view = view
                         motionBinding.lastEnabled = null
+                        motionBinding.updates.reset()
                     }
-                    try {
-                        applyVisualState(view, state, motionBinding.contextCodes)
+                    val update = motionBinding.updates.next(rendered, animate, enabled)
+                    (view as? VanBoundedRiveView)?.prepareDraw(animate, enabled, update != null)
+                    if (update != null) {
+                        applyVisualState(view, update, motionBinding.contextCodes)
                         if (enabled && motionBinding.lastEnabled != true) {
                             view.play(
                                 loop = Loop.AUTO,
@@ -120,11 +132,11 @@ fun VanRiveAvatar(
                                 settleInitialState = true,
                             )
                         }
-                        motionBinding.lastEnabled = enabled
-                    } finally {
-                        // Input setters may resume native playback, so pause after inputs.
-                        if (!enabled) view.pause()
                     }
+                    motionBinding.lastEnabled = enabled
+                    // Hidden compositions are stopped immediately. Visible still-mode
+                    // inputs get one bounded native pose draw before its own pause.
+                    if (!animate) view.pause()
                 } catch (_: Throwable) {
                     runCatching { view.pause() }
                     motionBinding.lastEnabled = false
@@ -140,6 +152,7 @@ private class RiveMotionBinding {
     var view: RiveAnimationView? = null
     var lastEnabled: Boolean? = null
     var contextCodes: Set<Int> = emptySet()
+    val updates = VanRiveUpdateGate()
 }
 
 private fun applyVisualState(view: RiveAnimationView, state: VanVisualState, contexts: Set<Int>) {
