@@ -1,0 +1,61 @@
+{
+  "admin_port_bindings": {
+    "meta": [],
+    "project-admin": [],
+    "studio": [
+      {
+        "host_ip": "127.0.0.1",
+        "mode": "ingress",
+        "protocol": "tcp",
+        "published": "3000",
+        "target": 3000
+      }
+    ]
+  },
+  "check_count": 26,
+  "checks": {
+    "admin_gateway_nonroot_readonly_candidate": true,
+    "admin_gateway_source_image_not_claimed_built": true,
+    "all_original_services_retained": true,
+    "edge_registry_hash_bound": true,
+    "existing_registry_compiler_creates_no_database": true,
+    "meta_crypto_key_preserved_for_native_envelope": true,
+    "new_admin_gateway_has_no_published_ports": true,
+    "new_component_limits_present": true,
+    "one_storage_realtime_functions_pooler_service": true,
+    "only_project_auth_rest_routers_and_one_admin_added": true,
+    "original_pg_meta_unchanged": true,
+    "original_postgresql_unchanged": true,
+    "original_studio_unchanged": true,
+    "other_original_services_unchanged": true,
+    "pooler_default_tenant_not_reseeded": true,
+    "pooler_original_port_bindings_preserved": true,
+    "pooler_original_registry_url_preserved": true,
+    "pooler_original_vault_key_preserved": true,
+    "pooler_original_volumes_preserved": true,
+    "project_gateways_include_all_three_shared_routes": true,
+    "project_gateways_loopback_only": true,
+    "realtime_derivative_image_not_claimed_built": true,
+    "shared_functions_storage_realtime_not_public": true,
+    "studio_meta_original_bindings_remain_loopback": true,
+    "studio_meta_original_port_bindings_preserved": true,
+    "supavisor_and_edge_exact_tested_amd64_digests": true
+  },
+  "containers_started": false,
+  "docker_daemon_used": false,
+  "donor_ref": "348bb5ace86dce85410978cdd4c458a928843354",
+  "placeholder_images_unbuilt": true,
+  "production_deployed": false,
+  "service_count": 18,
+  "simultaneous_native_runtime_test": false,
+  "source_sha256": {
+    "tests/check_management_compose.py": "4d08672cc52afad4bd0f913d198b3366877541985a94a39da0c1fc6f4f2df3e5",
+    "tools/bootstrap.py": "d1872afa590b3c0dd8705d470c26c69c5b1d1c19fcbb216d9e9ffea988b7acb0",
+    "tools/shared_admin.py": "94690adde2e883f2528262eef48852250a5006afa83c070a20f524966aff7f41",
+    "tools/shared_edge.py": "ebe5fee85a64ced5d0ecc84f1c8f32e5d996aa9248d747c7499d4712b35fd0ec",
+    "tools/shared_pooler.py": "956e060df88d4b83f63a1e4744fbe2e8e82daee465cb8a7417b04ee31cf13f42",
+    "tools/shared_realtime.py": "d143a3c3841c44fb17dd3ba675bdd8d58ff3415972b0219145c419e8e3d0463c",
+    "tools/shared_storage.py": "280f63b634a3a376016e8c5f26164a5337dd9116fda82efe3c42bffa1c0a88fa"
+  },
+  "state": "PASS"
+}

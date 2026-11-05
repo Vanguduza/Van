@@ -1,0 +1,20 @@
+{
+  "binary_signature_verified": false,
+  "derivative_build_files": {
+    "Dockerfile": "554b517028856b3aa6f28ebe70140a70fa1dcf649bfc5998366a2b511d4cc43d",
+    "compile_patch.exs": "35431720320dac93a12a191c3c7bacf6dcb1df8d52934df1cb95f755ba3fcf7e"
+  },
+  "original_replication_source_sha256": "8bf4a4a66683e6ae3348234d24551a6d06fef0059364335017fcb043b6236c5a",
+  "patched_source_sha256": "246686ac944ac3a342d34527d0de38e2b2bdce290bbe2156ade23e898025c81d",
+  "production_deployed": false,
+  "production_image_built": false,
+  "role": "NONROOT_ISOLATED_REALTIME_SOURCE_AND_RUNTIME_PROVENANCE",
+  "root_signed_qualification": false,
+  "runtime_schema_sha256": "1c03ab307e3df0799040e839cf696a9e316a2c432c42c85a2135b57764ba2efe",
+  "schema_version": 1,
+  "staged_patched_beam_sha256": "3855a2681cbbf5f57e93d9e3abe931bca7056dc1d7cb8f4478c5336b63354dc2",
+  "upstream_commit": "c8b27c7a37a5c60fee5b5a11632231d8e2c0a8c9",
+  "upstream_lock_sha256": "b9b9d4ead6394ce6853bb67c2ce025a5644c66b4845425c8dccef7613f353f8b",
+  "upstream_source_unchanged": true,
+  "upstream_tag": "v2.152.0"
+}

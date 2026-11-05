@@ -1,0 +1,426 @@
+{
+  "blocked": [],
+  "browser_engine": "firefox",
+  "browser_version": "142.0.1",
+  "checks": [
+    {
+      "check": "fixture-project_session_selector_contains_fixture-project",
+      "pass": true
+    },
+    {
+      "check": "fixture-project_session_selector_contains_nissan-gtr",
+      "pass": true
+    },
+    {
+      "check": "fixture-project_native_page_not_error",
+      "pass": true
+    },
+    {
+      "check": "fixture-project_rendered_table_editor_lists_fixture",
+      "pass": true
+    },
+    {
+      "check": "fixture-project_native_table_click_succeeds",
+      "pass": true
+    },
+    {
+      "check": "fixture-project_native_table_click_displays_own_row",
+      "pass": true
+    },
+    {
+      "check": "fixture-project_browser_cookie_catalogue",
+      "pass": true
+    },
+    {
+      "check": "fixture-project_browser_native_table_metadata",
+      "pass": true
+    },
+    {
+      "check": "fixture-project_browser_scoped_sql_response",
+      "pass": true
+    },
+    {
+      "check": "nissan-gtr_session_selector_contains_fixture-project",
+      "pass": true
+    },
+    {
+      "check": "nissan-gtr_session_selector_contains_nissan-gtr",
+      "pass": true
+    },
+    {
+      "check": "nissan-gtr_native_page_not_error",
+      "pass": true
+    },
+    {
+      "check": "nissan-gtr_rendered_table_editor_lists_fixture",
+      "pass": true
+    },
+    {
+      "check": "nissan-gtr_native_table_click_succeeds",
+      "pass": true
+    },
+    {
+      "check": "nissan-gtr_native_table_click_displays_own_row",
+      "pass": true
+    },
+    {
+      "check": "nissan-gtr_browser_cookie_catalogue",
+      "pass": true
+    },
+    {
+      "check": "nissan-gtr_browser_native_table_metadata",
+      "pass": true
+    },
+    {
+      "check": "nissan-gtr_browser_scoped_sql_response",
+      "pass": true
+    }
+  ],
+  "chromium_sandbox_required": true,
+  "errors": [],
+  "fixture_network_only": true,
+  "full_studio_ui_qualified": false,
+  "pages": [
+    {
+      "body": "Skip to content\nBack to organization home\nfixture-project\nConnect\n\nSearch...\n\nCtrl K\nHelp\nAdvisor Center\nSQL Editor\nAI Assistant\nSettings\nProject Overview\nTable Editor\nSQL Editor\nDatabase\nAuthentication\nStorage\nEdge Functions\nRealtime\nAdvisors\nObservability\nLogs\nIntegrations\nProject Settings\nTable Editor\n\nschema\n\npublic\n\nNew table\nSearch tables\nadmin_fixture\npool_fixture\nCollapse sidebar\nCreate a table\n\nDesign and create a new database table\n\nRecent items\n\nNo recent items yet\n\nItems will appear here as you browse through your project\n\nNEW\nname\u00b7where id = 10\n-\nRed\n+\nBlue\n\nQueue row edits in Table Editor\n\nBatch multiple row edits and review them before saving to your database\n\nEnable in preferences\n\nTable Editor | Supabase",
+      "ref": "5238a352-e1e1-4c5a-8e15-b39320fd00ad",
+      "title": "Table Editor | fixture-project | DIAL Projects | Supabase"
+    },
+    {
+      "ref": "5238a352-e1e1-4c5a-8e15-b39320fd00ad",
+      "table_url": "/project/5238a352-e1e1-4c5a-8e15-b39320fd00ad/editor/17659",
+      "table_view": "Skip to content\nBack to organization home\nfixture-project\nConnect\n\nSearch...\n\nCtrl K\nHelp\nAdvisor Center\nSQL Editor\nAI Assistant\nSettings\nProject Overview\nTable Editor\nSQL Editor\nDatabase\nAuthentication\nStorage\nEdge Functions\nRealtime\nAdvisors\nObservability\nLogs\nIntegrations\nProject Settings\nTable Editor\n\nschema\n\npublic\n\nNew table\nSearch tables\nadmin_fixture\npool_fixture\nCollapse sidebar\nadmin_fixture\nSort\nRole\npostgres\nInsert\nid\nint4\n17\n\nPage\n\nof 1\n\n100 rows\n\n1 record\n\nDefinition\nData\nNEW\nname\u00b7where id = 10\n-\nRed\n+\nBlue\n\nQueue row edits in Table Editor\n\nBatch multiple row edits and review them before saving to your database\n\nEnable in preferences\n\nTable Editor | fixture-project | DIAL Projects | Supabase"
+    },
+    {
+      "body": "Skip to content\nBack to organization home\nnissan-gtr\nConnect\n\nSearch...\n\nCtrl K\nHelp\nAdvisor Center\nSQL Editor\nAI Assistant\nSettings\nProject Overview\nTable Editor\nSQL Editor\nDatabase\nAuthentication\nStorage\nEdge Functions\nRealtime\nAdvisors\nObservability\nLogs\nIntegrations\nProject Settings\nTable Editor\n\nschema\n\npublic\n\nNew table\nSearch tables\nadmin_fixture\npool_fixture\nCollapse sidebar\nCreate a table\n\nDesign and create a new database table\n\nRecent items\n\nNo recent items yet\n\nItems will appear here as you browse through your project\n\nNEW\nname\u00b7where id = 10\n-\nRed\n+\nBlue\n\nQueue row edits in Table Editor\n\nBatch multiple row edits and review them before saving to your database\n\nEnable in preferences\n\nTable Editor | Supabase",
+      "ref": "53d39b5d-bf19-4cf1-9a5b-0904192d90d1",
+      "title": "Table Editor | nissan-gtr | DIAL Projects | Supabase"
+    },
+    {
+      "ref": "53d39b5d-bf19-4cf1-9a5b-0904192d90d1",
+      "table_url": "/project/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/editor/17664",
+      "table_view": "Skip to content\nBack to organization home\nnissan-gtr\nConnect\n\nSearch...\n\nCtrl K\nHelp\nAdvisor Center\nSQL Editor\nAI Assistant\nSettings\nProject Overview\nTable Editor\nSQL Editor\nDatabase\nAuthentication\nStorage\nEdge Functions\nRealtime\nAdvisors\nObservability\nLogs\nIntegrations\nProject Settings\nTable Editor\n\nschema\n\npublic\n\nNew table\nSearch tables\nadmin_fixture\npool_fixture\nCollapse sidebar\nadmin_fixture\nSort\nRole\npostgres\nInsert\nid\nint4\n29\n\nPage\n\nof 1\n\n100 rows\n\n1 record\n\nDefinition\nData\nNEW\nname\u00b7where id = 10\n-\nRed\n+\nBlue\n\nQueue row edits in Table Editor\n\nBatch multiple row edits and review them before saving to your database\n\nEnable in preferences\n\nTable Editor | nissan-gtr | DIAL Projects | Supabase"
+    }
+  ],
+  "requests": [
+    {
+      "path": "/api/cli-release-version",
+      "status": 501
+    },
+    {
+      "path": "/api/get-deployment-commit",
+      "status": 200
+    },
+    {
+      "path": "/api/cli-release-version",
+      "status": 501
+    },
+    {
+      "path": "/api/enabled-features-overrides",
+      "status": 200
+    },
+    {
+      "path": "/api/platform/deployment-mode",
+      "status": 200
+    },
+    {
+      "path": "/api/platform/projects/5238a352-e1e1-4c5a-8e15-b39320fd00ad",
+      "status": 200
+    },
+    {
+      "path": "/api/platform/profile",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/projects/5238a352-e1e1-4c5a-8e15-b39320fd00ad/api-keys",
+      "status": 501
+    },
+    {
+      "path": "/api/platform/integrations/github/authorization",
+      "status": 501
+    },
+    {
+      "path": "/api/platform/projects/5238a352-e1e1-4c5a-8e15-b39320fd00ad/databases",
+      "status": 200
+    },
+    {
+      "path": "/api/platform/projects/5238a352-e1e1-4c5a-8e15-b39320fd00ad/run-lints",
+      "status": 501
+    },
+    {
+      "path": "/api/platform/pg-meta/5238a352-e1e1-4c5a-8e15-b39320fd00ad/query",
+      "status": 200
+    },
+    {
+      "path": "/api/platform/pg-meta/5238a352-e1e1-4c5a-8e15-b39320fd00ad/query",
+      "status": 200
+    },
+    {
+      "path": "/api/platform/pg-meta/5238a352-e1e1-4c5a-8e15-b39320fd00ad/query",
+      "status": 200
+    },
+    {
+      "path": "/api/platform/organizations",
+      "status": 200
+    },
+    {
+      "path": "/api/platform/pg-meta/5238a352-e1e1-4c5a-8e15-b39320fd00ad/query",
+      "status": 200
+    },
+    {
+      "path": "/api/platform/pg-meta/5238a352-e1e1-4c5a-8e15-b39320fd00ad/query",
+      "status": 200
+    },
+    {
+      "path": "/api/platform/projects/5238a352-e1e1-4c5a-8e15-b39320fd00ad/config/postgrest",
+      "status": 501
+    },
+    {
+      "path": "/api/v1/projects/5238a352-e1e1-4c5a-8e15-b39320fd00ad/api-keys",
+      "status": 501
+    },
+    {
+      "path": "/api/platform/pg-meta/5238a352-e1e1-4c5a-8e15-b39320fd00ad/query",
+      "status": 200
+    },
+    {
+      "path": "/api/platform/projects/5238a352-e1e1-4c5a-8e15-b39320fd00ad/run-lints",
+      "status": 501
+    },
+    {
+      "path": "/api/platform/projects/5238a352-e1e1-4c5a-8e15-b39320fd00ad/config/postgrest",
+      "status": 501
+    },
+    {
+      "path": "/api/v1/projects/5238a352-e1e1-4c5a-8e15-b39320fd00ad/api-keys",
+      "status": 501
+    },
+    {
+      "path": "/api/platform/projects/5238a352-e1e1-4c5a-8e15-b39320fd00ad/run-lints",
+      "status": 501
+    },
+    {
+      "path": "/api/platform/pg-meta/5238a352-e1e1-4c5a-8e15-b39320fd00ad/query",
+      "status": 200
+    },
+    {
+      "path": "/api/platform/pg-meta/5238a352-e1e1-4c5a-8e15-b39320fd00ad/query",
+      "status": 200
+    },
+    {
+      "path": "/api/platform/pg-meta/5238a352-e1e1-4c5a-8e15-b39320fd00ad/query",
+      "status": 200
+    },
+    {
+      "path": "/api/platform/pg-meta/5238a352-e1e1-4c5a-8e15-b39320fd00ad/query",
+      "status": 200
+    },
+    {
+      "path": "/api/platform/pg-meta/5238a352-e1e1-4c5a-8e15-b39320fd00ad/query",
+      "status": 200
+    },
+    {
+      "path": "/api/platform/pg-meta/5238a352-e1e1-4c5a-8e15-b39320fd00ad/query",
+      "status": 200
+    },
+    {
+      "path": "/api/platform/pg-meta/5238a352-e1e1-4c5a-8e15-b39320fd00ad/query",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/projects/5238a352-e1e1-4c5a-8e15-b39320fd00ad/api-keys",
+      "status": 501
+    },
+    {
+      "path": "/api/platform/projects/5238a352-e1e1-4c5a-8e15-b39320fd00ad/settings",
+      "status": 501
+    },
+    {
+      "path": "/api/platform/projects/5238a352-e1e1-4c5a-8e15-b39320fd00ad/config/postgrest",
+      "status": 501
+    },
+    {
+      "path": "/api/platform/projects",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/projects/5238a352-e1e1-4c5a-8e15-b39320fd00ad/api-keys",
+      "status": 501
+    },
+    {
+      "path": "/api/platform/projects/5238a352-e1e1-4c5a-8e15-b39320fd00ad/settings",
+      "status": 501
+    },
+    {
+      "path": "/api/platform/pg-meta/5238a352-e1e1-4c5a-8e15-b39320fd00ad/tables",
+      "status": 200
+    },
+    {
+      "path": "/api/platform/pg-meta/5238a352-e1e1-4c5a-8e15-b39320fd00ad/query",
+      "status": 200
+    },
+    {
+      "path": "/api/cli-release-version",
+      "status": 501
+    },
+    {
+      "path": "/api/get-deployment-commit",
+      "status": 200
+    },
+    {
+      "path": "/api/cli-release-version",
+      "status": 501
+    },
+    {
+      "path": "/api/enabled-features-overrides",
+      "status": 200
+    },
+    {
+      "path": "/api/platform/deployment-mode",
+      "status": 200
+    },
+    {
+      "path": "/api/platform/projects/53d39b5d-bf19-4cf1-9a5b-0904192d90d1",
+      "status": 200
+    },
+    {
+      "path": "/api/platform/profile",
+      "status": 200
+    },
+    {
+      "path": "/api/platform/projects/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/databases",
+      "status": 200
+    },
+    {
+      "path": "/api/platform/integrations/github/authorization",
+      "status": 501
+    },
+    {
+      "path": "/api/v1/projects/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/api-keys",
+      "status": 501
+    },
+    {
+      "path": "/api/platform/pg-meta/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/query",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/projects/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/api-keys",
+      "status": 501
+    },
+    {
+      "path": "/api/platform/organizations",
+      "status": 200
+    },
+    {
+      "path": "/api/platform/pg-meta/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/query",
+      "status": 200
+    },
+    {
+      "path": "/api/platform/pg-meta/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/query",
+      "status": 200
+    },
+    {
+      "path": "/api/platform/pg-meta/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/query",
+      "status": 200
+    },
+    {
+      "path": "/api/platform/projects/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/run-lints",
+      "status": 501
+    },
+    {
+      "path": "/api/platform/pg-meta/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/query",
+      "status": 200
+    },
+    {
+      "path": "/api/platform/projects/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/config/postgrest",
+      "status": 501
+    },
+    {
+      "path": "/api/platform/pg-meta/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/query",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/projects/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/api-keys",
+      "status": 501
+    },
+    {
+      "path": "/api/platform/projects/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/run-lints",
+      "status": 501
+    },
+    {
+      "path": "/api/platform/projects/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/config/postgrest",
+      "status": 501
+    },
+    {
+      "path": "/api/platform/pg-meta/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/query",
+      "status": 200
+    },
+    {
+      "path": "/api/platform/pg-meta/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/query",
+      "status": 200
+    },
+    {
+      "path": "/api/platform/pg-meta/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/query",
+      "status": 200
+    },
+    {
+      "path": "/api/platform/pg-meta/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/query",
+      "status": 200
+    },
+    {
+      "path": "/api/platform/pg-meta/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/query",
+      "status": 200
+    },
+    {
+      "path": "/api/platform/pg-meta/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/query",
+      "status": 200
+    },
+    {
+      "path": "/api/platform/projects/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/run-lints",
+      "status": 501
+    },
+    {
+      "path": "/api/platform/pg-meta/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/query",
+      "status": 200
+    },
+    {
+      "path": "/api/platform/projects/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/settings",
+      "status": 501
+    },
+    {
+      "path": "/api/v1/projects/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/api-keys",
+      "status": 501
+    },
+    {
+      "path": "/api/platform/projects/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/config/postgrest",
+      "status": 501
+    },
+    {
+      "path": "/api/v1/projects/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/api-keys",
+      "status": 501
+    },
+    {
+      "path": "/api/platform/projects/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/settings",
+      "status": 501
+    },
+    {
+      "path": "/api/v1/projects/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/api-keys",
+      "status": 501
+    },
+    {
+      "path": "/api/platform/projects",
+      "status": 200
+    },
+    {
+      "path": "/api/platform/pg-meta/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/tables",
+      "status": 200
+    },
+    {
+      "path": "/api/platform/pg-meta/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/query",
+      "status": 200
+    }
+  ],
+  "sandbox_explicitly_disabled": false,
+  "separate_browser_sessions": true,
+  "state": "PASS"
+}

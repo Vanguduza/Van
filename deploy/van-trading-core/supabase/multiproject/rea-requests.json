@@ -1,0 +1,148 @@
+{
+  "schema_version": 1,
+  "contract_kind": "REA_INVESTIGATION_BATCH_TEMPLATE",
+  "status": "READY_TO_SUBMIT_ONLY__NOT_EXECUTED",
+  "tool": "dial_investigation_submit",
+  "requests": [
+    {
+      "request_id": "rea_supabase_01_20261020",
+      "subject": {
+        "software_id": "GustavoMartins123/supabase-multitenant",
+        "version": "b38071fc93361c8f91e8032af798dcb7fadef4a1",
+        "artifact": {
+          "schema_version": 1,
+          "contract_kind": "ARTIFACT_REFERENCE",
+          "reference": "https://github.com/GustavoMartins123/supabase-multitenant/tree/b38071fc93361c8f91e8032af798dcb7fadef4a1",
+          "digest_algorithm": "GIT_COMMIT",
+          "digest": "b38071fc93361c8f91e8032af798dcb7fadef4a1"
+        }
+      },
+      "mode": "STATIC",
+      "analysis_kind": "SOURCE",
+      "objective": "Inspect the immutable source tree and accurately classify whether it can extend the single existing VAN Supabase PG17 Docker Compose installation to host independently functioning database, Auth, REST, Realtime, Storage, Edge, keys and Studio for multiple projects without an extra complete stack. Identify exact implementation surfaces, versions, licensing, upgrade/migration risk, tests and feature gaps. Only return evidence-bound observations and unknowns; do not execute, deploy, mutate or assume authority.",
+      "focus": [
+        "PostgreSQL one server many independent databases",
+        "GoTrue per-project database and JWT binding",
+        "PostgREST independent database routes",
+        "storage tenant/project isolation",
+        "Realtime tenant DB and issuer",
+        "Edge secrets/project isolation",
+        "Control plane and scope/rollbacks",
+        "No impact to VAN/VATI default database"
+      ],
+      "project_id": "van"
+    },
+    {
+      "request_id": "rea_supabase_02_20261020",
+      "subject": {
+        "software_id": "arunrajiah/supafleet",
+        "version": "f41443b15be3ab4dac70b38d7b9e02007af85337",
+        "artifact": {
+          "schema_version": 1,
+          "contract_kind": "ARTIFACT_REFERENCE",
+          "reference": "https://github.com/arunrajiah/supafleet/tree/f41443b15be3ab4dac70b38d7b9e02007af85337",
+          "digest_algorithm": "GIT_COMMIT",
+          "digest": "f41443b15be3ab4dac70b38d7b9e02007af85337"
+        }
+      },
+      "mode": "STATIC",
+      "analysis_kind": "SOURCE",
+      "objective": "Inspect the immutable source tree and accurately classify whether it can extend the single existing VAN Supabase PG17 Docker Compose installation to host independently functioning database, Auth, REST, Realtime, Storage, Edge, keys and Studio for multiple projects without an extra complete stack. Identify exact implementation surfaces, versions, licensing, upgrade/migration risk, tests and feature gaps. Only return evidence-bound observations and unknowns; do not execute, deploy, mutate or assume authority.",
+      "focus": [
+        "PostgreSQL one server many independent databases",
+        "GoTrue per-project database and JWT binding",
+        "PostgREST independent database routes",
+        "storage tenant/project isolation",
+        "Realtime tenant DB and issuer",
+        "Edge secrets/project isolation",
+        "Control plane and scope/rollbacks",
+        "No impact to VAN/VATI default database"
+      ],
+      "project_id": "van"
+    },
+    {
+      "request_id": "rea_supabase_03_20261020",
+      "subject": {
+        "software_id": "flamingrubberduck/supabase-studio-multi-head",
+        "version": "f88e4b4e6ba2f331ab1b2466cf7d120aaf9d47a2",
+        "artifact": {
+          "schema_version": 1,
+          "contract_kind": "ARTIFACT_REFERENCE",
+          "reference": "https://github.com/flamingrubberduck/supabase-studio-multi-head/tree/f88e4b4e6ba2f331ab1b2466cf7d120aaf9d47a2",
+          "digest_algorithm": "GIT_COMMIT",
+          "digest": "f88e4b4e6ba2f331ab1b2466cf7d120aaf9d47a2"
+        }
+      },
+      "mode": "STATIC",
+      "analysis_kind": "SOURCE",
+      "objective": "Inspect the immutable source tree and accurately classify whether it can extend the single existing VAN Supabase PG17 Docker Compose installation to host independently functioning database, Auth, REST, Realtime, Storage, Edge, keys and Studio for multiple projects without an extra complete stack. Identify exact implementation surfaces, versions, licensing, upgrade/migration risk, tests and feature gaps. Only return evidence-bound observations and unknowns; do not execute, deploy, mutate or assume authority.",
+      "focus": [
+        "PostgreSQL one server many independent databases",
+        "GoTrue per-project database and JWT binding",
+        "PostgREST independent database routes",
+        "storage tenant/project isolation",
+        "Realtime tenant DB and issuer",
+        "Edge secrets/project isolation",
+        "Control plane and scope/rollbacks",
+        "No impact to VAN/VATI default database"
+      ],
+      "project_id": "van"
+    },
+    {
+      "request_id": "rea_supabase_04_20261020",
+      "subject": {
+        "software_id": "supabase-multitenant/supabase-multitenant",
+        "version": "92457a517bec281286963d6ab29d89275c350420",
+        "artifact": {
+          "schema_version": 1,
+          "contract_kind": "ARTIFACT_REFERENCE",
+          "reference": "https://github.com/supabase-multitenant/supabase-multitenant/tree/92457a517bec281286963d6ab29d89275c350420",
+          "digest_algorithm": "GIT_COMMIT",
+          "digest": "92457a517bec281286963d6ab29d89275c350420"
+        }
+      },
+      "mode": "STATIC",
+      "analysis_kind": "SOURCE",
+      "objective": "Inspect the immutable source tree and accurately classify whether it can extend the single existing VAN Supabase PG17 Docker Compose installation to host independently functioning database, Auth, REST, Realtime, Storage, Edge, keys and Studio for multiple projects without an extra complete stack. Identify exact implementation surfaces, versions, licensing, upgrade/migration risk, tests and feature gaps. Only return evidence-bound observations and unknowns; do not execute, deploy, mutate or assume authority.",
+      "focus": [
+        "PostgreSQL one server many independent databases",
+        "GoTrue per-project database and JWT binding",
+        "PostgREST independent database routes",
+        "storage tenant/project isolation",
+        "Realtime tenant DB and issuer",
+        "Edge secrets/project isolation",
+        "Control plane and scope/rollbacks",
+        "No impact to VAN/VATI default database"
+      ],
+      "project_id": "van"
+    },
+    {
+      "request_id": "rea_supabase_05_20261020",
+      "subject": {
+        "software_id": "M7MMAD-OMAR/sbarbase",
+        "version": "84fcea3b59bba8fa160aae1e559bedc2a4b57c2b",
+        "artifact": {
+          "schema_version": 1,
+          "contract_kind": "ARTIFACT_REFERENCE",
+          "reference": "https://github.com/M7MMAD-OMAR/sbarbase/tree/84fcea3b59bba8fa160aae1e559bedc2a4b57c2b",
+          "digest_algorithm": "GIT_COMMIT",
+          "digest": "84fcea3b59bba8fa160aae1e559bedc2a4b57c2b"
+        }
+      },
+      "mode": "STATIC",
+      "analysis_kind": "SOURCE",
+      "objective": "Inspect the immutable source tree and accurately classify whether it can extend the single existing VAN Supabase PG17 Docker Compose installation to host independently functioning database, Auth, REST, Realtime, Storage, Edge, keys and Studio for multiple projects without an extra complete stack. Identify exact implementation surfaces, versions, licensing, upgrade/migration risk, tests and feature gaps. Only return evidence-bound observations and unknowns; do not execute, deploy, mutate or assume authority.",
+      "focus": [
+        "PostgreSQL one server many independent databases",
+        "GoTrue per-project database and JWT binding",
+        "PostgREST independent database routes",
+        "storage tenant/project isolation",
+        "Realtime tenant DB and issuer",
+        "Edge secrets/project isolation",
+        "Control plane and scope/rollbacks",
+        "No impact to VAN/VATI default database"
+      ],
+      "project_id": "van"
+    }
+  ]
+}

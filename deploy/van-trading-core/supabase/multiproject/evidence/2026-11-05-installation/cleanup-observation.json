@@ -1,0 +1,29 @@
+{
+  "kind": "SCOPED_NONROOT_CLEANUP_OBSERVATION",
+  "native_tracked_cleanup": true,
+  "observed_at": "2026-11-05T04:24:10.110810+00:00",
+  "original_observed_service_pids": [
+    357230,
+    357257,
+    357323,
+    357351,
+    358237,
+    359326,
+    359659,
+    359664,
+    360002,
+    360200,
+    360359,
+    360494,
+    360773,
+    361177,
+    361305
+  ],
+  "original_pids_remaining": [],
+  "private_failed_fixtures_removed_after_checks": [
+    "dial-supa-auth-fj_athvz"
+  ],
+  "schema_version": 1,
+  "staged_native_executables_remaining": [],
+  "unrelated_processes_signalled": false
+}

@@ -1,0 +1,58 @@
+{
+  "base_commit": "58e7040342bfd7137fb9227d9709fd4287172574",
+  "commands": [
+    "python3 -m unittest discover -s deploy/van-trading-core/supabase/multiproject/tests -v",
+    "python3 deploy/van-trading-core/supabase/multiproject/tests/rehearse_recovery.py --pg-bin <same-pinned-PG17-bin> --pg-lib <same-staged-lib> --auth-bin <pinned-Auth> --rest-bin <pinned-PostgREST> --nginx <staged-Nginx> --report <new-private-report>"
+  ],
+  "evidence_sha256": {
+    "attempts.json": "1b9e86b1987e20864e2979181ee51caf32fc47e984cbfd8981b50374fa0b0af6",
+    "native-result.json": "ec8cc9b6eb666adb665d5eb29c3ac2fef73391fc7b63e275ef7f94a11255480b",
+    "native-run.txt": "eae439367422b8d8a2af36d936f7a9cbc1379e444c91c07a6b182b712b3d9c55",
+    "unit-tests.txt": "c2441bceaf88c731e3dbe49aed26510e47420cf0b1bbe1e482f14428bb0c4ef3"
+  },
+  "execution_route": "REMOTE_DESKTOP_COMMANDER_NONROOT_DISPOSABLE_REHEARSAL",
+  "host": "dial-control",
+  "native_checks": {
+    "failed": 0,
+    "passed": 157
+  },
+  "production_deployed": false,
+  "python": "3.12.3",
+  "rea_used": false,
+  "recorded_at": "2026-11-04T06:36:52.239721+00:00",
+  "repository": "Vanguduza/Van",
+  "root_signed_qualification": false,
+  "schema_version": 1,
+  "source_sha256": {
+    "ARCHITECTURE.md": "9538ccafa6e980bd96497f0a3fc73e63dc6d42f735940f02019d646c34f3f5ac",
+    "INTEGRATION_GATES.md": "140a0057439b5ffa885115fe72b6acb78749b7f490d2e216bb5d8b8c10523d62",
+    "NISSAN_GTR_CUTOVER.md": "68b1335ea08fab2bf7d3d8750871fbb73b2cede6a05b2b07ed731d41065967ac",
+    "QUALIFICATION_2026-10-24.md": "085455da197f3d781d25dfc2c2a16d4e29ec4e852daa773006ba8edfb521065b",
+    "QUALIFICATION_2026-11-04.md": "8ef9fc17e8b753d0db2b5110c0f800418f616dc4a972ff57c41c1349a2eb2227",
+    "QUALIFICATION_RECOVERY_2026-11-04.md": "5fdb49eea5602ad2f59175c5406c8951ed827cac886b43833ed0cc32676ffb08",
+    "README.md": "a0b72ca22f2a296ce91f49904cc66af211753e8e8aa365bea71c6b204d7cf072",
+    "RECOVERY.md": "588345cba17f09df083ffae8f4773834229aa43727b5d0c664be58f8e8cb52fd",
+    "SOURCE_EVIDENCE.md": "126bdab19a7186b9dcd96a0879bddc66dbe44eefbaa7a24011474b87200423e0",
+    "projects.example.json": "8548a9e8a5a3cf6b1030e473394795a302b8caf6b58ed776ca9b268522872306",
+    "projects.rehearsal.json": "b8ae6d7768cf189ce7a11c568d6431fb49ac9da947d1e074706aba07eca4d040",
+    "rea-requests.json": "909c46b89aa00b88f5914fbdd481fbc37ca49fdcde6d86bca9a05256ba6f5be2",
+    "tests/rehearsal-binaries.lock.json": "ddfd0561289abe20e8531f085d856739f2d1579f907eb01dcd3391bfce3d975e",
+    "tests/rehearse_native.py": "3ff2f03dde0a6f2969acc87c2ebd04ab47ef056debd4ce7b03edd34435f2d778",
+    "tests/rehearse_recovery.py": "10b925e5fd9816942e11a49301926d3861bdbb2f99d3d393b20b07ad6fdb46c7",
+    "tests/test_bootstrap.py": "2da4619fd810a71faa23f4a6ecb2f416c07bb1915309c4aa6cfe269e6cdbc01d",
+    "tests/test_hardening.py": "eede0c901023c1b07e31244f5e8bbd0bb83835042af866785aa1ca5d07c95fe8",
+    "tests/test_recovery.py": "3aa657f4ac69b0e1b1373c2e6f5d95b4be6617174e9102881758b54294befe3f",
+    "tests/test_render.py": "a76c55dfea2a6973474f970c995a450716edc34c00f347ee54d21b9809d43d26",
+    "tests/test_routing_local.py": "c9c0477c96b64fa5a3f0942000d531b6f05de32b6ece2c53bf740cf77b8eeee5",
+    "tools/bootstrap.py": "d1872afa590b3c0dd8705d470c26c69c5b1d1c19fcbb216d9e9ffea988b7acb0",
+    "tools/recovery.py": "8469564472ca44e2c7967e7bad224beb589601e82220e60bc44a0798951d7180",
+    "tools/render.py": "1084c47d632c24cd0e0f1d55b50b64a7889583e19b50f5cb65a4847e5b5dd836"
+  },
+  "tests": {
+    "errors": 0,
+    "failures": 0,
+    "run": 79,
+    "skipped": 0
+  },
+  "uid": 1000
+}

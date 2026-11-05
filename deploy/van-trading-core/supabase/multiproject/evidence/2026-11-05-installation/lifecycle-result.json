@@ -1,0 +1,57 @@
+{
+  "actual_host_observation": false,
+  "check_count": 28,
+  "checks": {
+    "all_eight_compose_inputs_in_both_actions": true,
+    "all_expected_private_fixture_files_verified": true,
+    "all_five_env_inputs_in_both_actions": true,
+    "complete_native_systemd_verification": true,
+    "explicit_original_project_and_local_daemon": true,
+    "missing_input_refused": true,
+    "no_deployment_or_authority_claim": true,
+    "one_canonical_start_command": true,
+    "original_fixture_inputs_reverified_after_test": true,
+    "original_native_systemd_verification": true,
+    "same_full_model_used_by_stop": true,
+    "stop_also_checks_pinned_inputs": true,
+    "tamper_refused_0": true,
+    "tamper_refused_1": true,
+    "tamper_refused_10": true,
+    "tamper_refused_11": true,
+    "tamper_refused_12": true,
+    "tamper_refused_13": true,
+    "tamper_refused_14": true,
+    "tamper_refused_15": true,
+    "tamper_refused_2": true,
+    "tamper_refused_3": true,
+    "tamper_refused_4": true,
+    "tamper_refused_5": true,
+    "tamper_refused_6": true,
+    "tamper_refused_7": true,
+    "tamper_refused_8": true,
+    "tamper_refused_9": true
+  },
+  "container_daemon_used": false,
+  "donor_ref": "348bb5ace86dce85410978cdd4c458a928843354",
+  "native_parser_diagnostics": {
+    "complete": {
+      "exit_code": 0,
+      "stderr": "dial-dds-native-coldboot-restore.service: Failed to open /etc/systemd/system/dial-dds-native-coldboot-restore.service: Permission denied\nvar-lib-dial\\x2dnative\\x2dplatform-staging-dds\\x2dupstream-manager\\x2dhermes\\x2dinputs-53215d7c625c2d2fa8b1349fd999441eaf3c385a6a327113fbb991b99070bced.mount: Failed to open /etc/systemd/system/var-lib-dial\\x2dnative\\x2dplatform-staging-dds\\x2dupstream-manager\\x2dhermes\\x2dinputs-53215d7c625c2d2fa8b1349fd999441eaf3c385a6a327113fbb991b99070bced.mount: Permission denied\nvar-lib-dial\\x2dnative\\x2dplatform-staging-dds\\x2dupstream-manager\\x2dhermes\\x2dcomponents.mount: Failed to open /etc/systemd/system/var-lib-dial\\x2dnative\\x2dplatform-staging-dds\\x2dupstream-manager\\x2dhermes\\x2dcomponents.mount: Permission denied\nvar-lib-dial\\x2destate\\x2dauthority-owner\\x2dadmin\\x2droute-releases-fbea030e83892d16bb9b0108ba91b389330391b4-files.mount: Failed to open /etc/systemd/system/var-lib-dial\\x2destate\\x2dauthority-owner\\x2dadmin\\x2droute-releases-fbea030e83892d16bb9b0108ba91b389330391b4-files.mount: Permission denied\nvar-lib-dial\\x2destate\\x2dauthority-owner\\x2dadmin\\x2droute-releases-f6d78293247668eea685b5770e51f52a4c8654d2-files.mount: Failed to open /etc/systemd/system/var-lib-dial\\x2destate\\x2dauthority-owner\\x2dadmin\\x2droute-releases-f6d78293247668eea685b5770e51f52a4c8654d2-files.mount: Permission denied\nvar-lib-dial\\x2destate\\x2dauthority-owner\\x2dadmin\\x2droute-releases-f0b5a18239a3a50aa56157d3587ffb67e99f5ca1-files.mount: Failed to open /etc/systemd/system/var-lib-dial\\x2destate\\x2dauthority-owner\\x2dadmin\\x2droute-releases-f0b5a18239a3a50aa56157d3587ffb67e99f5ca1-files.mount: Permission denied\nvar-lib-dial\\x2destate\\x2dauthority-owner\\x2dadmin\\x2droute-releases-eadf8fd1ab9e024e367539c4ebaf08aa8a0e5cdf-files.mount: Failed to open /etc/systemd/system/var-lib-dial\\x2destate\\x2dauthority-owner\\x2dadmin\\x2droute-releases-eadf8fd1ab9e024e367539c4ebaf08aa8a0e5cdf-files.mount: Permission denied\nvar-lib-dial\\x2destate\\x2dauthority-owner\\x2dadmin\\x2droute-releases-e3b77df4ee048eba03d8e531f27972875f9aacc5-files.mount: Failed to open /etc/systemd/system/var-lib-dial\\x2destate\\x2dauthority-owner\\x2dadmin\\x2droute-releases-e3b77df4ee048eba03d8e531f27972875f9aacc5-files.mount: Permission denied\nvar-lib-dial\\x2destate\\x2dauthority-owner\\x2dadmin\\x2droute-releases-dea304bb1d839c45167573a8b0fd03d2771b1e0d-files.mount: Failed to open /etc/systemd/system/var-lib-dial\\x2destate\\x2dauthority-owner\\x2dadmin\\x2droute-releases-dea304bb1d839c45167573a8b0fd03d2771b1e0d-files.mount: Permission denied\nvar-lib-dial\\x2destate\\x2dauthority-owner\\x2dadmin\\x2droute-releases-ccfab7abab90e44eb50a4c70358fb7606e6e874c-files.mount: Failed to open /etc/systemd/system/var-lib-dial\\x2destate\\x2dauthority-owner\\x2dadmin\\x2droute-releases-ccfab7abab90e44eb50a4c70358fb7606e6e874c-files.mount: Permission denied\nvar-lib-dial\\x2destate\\x2dauthority-owner\\x2dadmin\\x2droute-releases-c8b15c0b3922bd3959774dedb3b2df13c807ca33-files.mount: Failed to open /etc/systemd/system/var-lib-dial\\x2destate\\x2dauthority-owner\\x2dadmin\\x2droute-releases-c8b15c0b3922bd3959774dedb3b2df13c807ca33-files.mount: Permission denied\nvar-lib-dial\\x2destate\\x2dauthority-owner\\x2dadmin\\x2droute-releases-c40196d8febd4249fda721d807f5cc5a7ee9860c-files.mount: Failed to open /etc/systemd/system/var-lib-dial\\x2destate\\x2dauthority-owner\\x2dadmin\\x2droute-releases-c40196d8febd4249fda721d807f5cc5a7ee9860c-files.mount: Permission denied\nvar-lib-dial\\x2destate\\x2dauthority-owner\\x2dadmin\\x2droute-releases-b6def55c5dec3f91ef899caf4d9707d858591617-files.mount: Failed to open /etc/systemd/system/var-lib-dial\\x2destate\\x2dauthority-owner\\x2dadmin\\x2droute-releases-b6def55c5dec3f91ef899caf4d9707d858591617-files.mount: Permission denied\nvar-lib-dial\\x2destate\\x2dauthority-owner\\x2dadmin\\x2droute-releases-ad9c4bad81afde14a5233861833e570b7cd3352e-files.mount: Failed to open /etc/systemd/system/var-lib-dial\\x2destate\\x2dauthority-owner\\x2dadmin\\x2droute-releases-ad9c4bad81afde14a523386183"
+    },
+    "original": {
+      "exit_code": 0,
+      "stderr": "dial-dds-native-coldboot-restore.service: Failed to open /etc/systemd/system/dial-dds-native-coldboot-restore.service: Permission denied\nvar-lib-dial\\x2dnative\\x2dplatform-staging-dds\\x2dupstream-manager\\x2dhermes\\x2dinputs-53215d7c625c2d2fa8b1349fd999441eaf3c385a6a327113fbb991b99070bced.mount: Failed to open /etc/systemd/system/var-lib-dial\\x2dnative\\x2dplatform-staging-dds\\x2dupstream-manager\\x2dhermes\\x2dinputs-53215d7c625c2d2fa8b1349fd999441eaf3c385a6a327113fbb991b99070bced.mount: Permission denied\nvar-lib-dial\\x2dnative\\x2dplatform-staging-dds\\x2dupstream-manager\\x2dhermes\\x2dcomponents.mount: Failed to open /etc/systemd/system/var-lib-dial\\x2dnative\\x2dplatform-staging-dds\\x2dupstream-manager\\x2dhermes\\x2dcomponents.mount: Permission denied\nvar-lib-dial\\x2destate\\x2dauthority-owner\\x2dadmin\\x2droute-releases-fbea030e83892d16bb9b0108ba91b389330391b4-files.mount: Failed to open /etc/systemd/system/var-lib-dial\\x2destate\\x2dauthority-owner\\x2dadmin\\x2droute-releases-fbea030e83892d16bb9b0108ba91b389330391b4-files.mount: Permission denied\nvar-lib-dial\\x2destate\\x2dauthority-owner\\x2dadmin\\x2droute-releases-f6d78293247668eea685b5770e51f52a4c8654d2-files.mount: Failed to open /etc/systemd/system/var-lib-dial\\x2destate\\x2dauthority-owner\\x2dadmin\\x2droute-releases-f6d78293247668eea685b5770e51f52a4c8654d2-files.mount: Permission denied\nvar-lib-dial\\x2destate\\x2dauthority-owner\\x2dadmin\\x2droute-releases-f0b5a18239a3a50aa56157d3587ffb67e99f5ca1-files.mount: Failed to open /etc/systemd/system/var-lib-dial\\x2destate\\x2dauthority-owner\\x2dadmin\\x2droute-releases-f0b5a18239a3a50aa56157d3587ffb67e99f5ca1-files.mount: Permission denied\nvar-lib-dial\\x2destate\\x2dauthority-owner\\x2dadmin\\x2droute-releases-eadf8fd1ab9e024e367539c4ebaf08aa8a0e5cdf-files.mount: Failed to open /etc/systemd/system/var-lib-dial\\x2destate\\x2dauthority-owner\\x2dadmin\\x2droute-releases-eadf8fd1ab9e024e367539c4ebaf08aa8a0e5cdf-files.mount: Permission denied\nvar-lib-dial\\x2destate\\x2dauthority-owner\\x2dadmin\\x2droute-releases-e3b77df4ee048eba03d8e531f27972875f9aacc5-files.mount: Failed to open /etc/systemd/system/var-lib-dial\\x2destate\\x2dauthority-owner\\x2dadmin\\x2droute-releases-e3b77df4ee048eba03d8e531f27972875f9aacc5-files.mount: Permission denied\nvar-lib-dial\\x2destate\\x2dauthority-owner\\x2dadmin\\x2droute-releases-dea304bb1d839c45167573a8b0fd03d2771b1e0d-files.mount: Failed to open /etc/systemd/system/var-lib-dial\\x2destate\\x2dauthority-owner\\x2dadmin\\x2droute-releases-dea304bb1d839c45167573a8b0fd03d2771b1e0d-files.mount: Permission denied\nvar-lib-dial\\x2destate\\x2dauthority-owner\\x2dadmin\\x2droute-releases-ccfab7abab90e44eb50a4c70358fb7606e6e874c-files.mount: Failed to open /etc/systemd/system/var-lib-dial\\x2destate\\x2dauthority-owner\\x2dadmin\\x2droute-releases-ccfab7abab90e44eb50a4c70358fb7606e6e874c-files.mount: Permission denied\nvar-lib-dial\\x2destate\\x2dauthority-owner\\x2dadmin\\x2droute-releases-c8b15c0b3922bd3959774dedb3b2df13c807ca33-files.mount: Failed to open /etc/systemd/system/var-lib-dial\\x2destate\\x2dauthority-owner\\x2dadmin\\x2droute-releases-c8b15c0b3922bd3959774dedb3b2df13c807ca33-files.mount: Permission denied\nvar-lib-dial\\x2destate\\x2dauthority-owner\\x2dadmin\\x2droute-releases-c40196d8febd4249fda721d807f5cc5a7ee9860c-files.mount: Failed to open /etc/systemd/system/var-lib-dial\\x2destate\\x2dauthority-owner\\x2dadmin\\x2droute-releases-c40196d8febd4249fda721d807f5cc5a7ee9860c-files.mount: Permission denied\nvar-lib-dial\\x2destate\\x2dauthority-owner\\x2dadmin\\x2droute-releases-b6def55c5dec3f91ef899caf4d9707d858591617-files.mount: Failed to open /etc/systemd/system/var-lib-dial\\x2destate\\x2dauthority-owner\\x2dadmin\\x2droute-releases-b6def55c5dec3f91ef899caf4d9707d858591617-files.mount: Permission denied\nvar-lib-dial\\x2destate\\x2dauthority-owner\\x2dadmin\\x2droute-releases-ad9c4bad81afde14a5233861833e570b7cd3352e-files.mount: Failed to open /etc/systemd/system/var-lib-dial\\x2destate\\x2dauthority-owner\\x2dadmin\\x2droute-releases-ad9c4bad81afde14a523386183"
+    }
+  },
+  "native_systemd": "systemd 255 (255.4-1ubuntu8.18)",
+  "original_unit_sha256": "ebadc3c846ace0bbfb85e4a7b72635c7f40b09c52ed8e1c8daa8677057598a14",
+  "production_unit_changed": false,
+  "service_manager_reloaded": false,
+  "source_sha256": {
+    "tests/check_lifecycle.py": "7007ff6d3aba7ac594045d6f774c5103865cd83f15efd93ed912ff5f27bc2912",
+    "tests/test_compose_lifecycle.py": "2a99056861fb4a85972d5381669ae69c22559bfc79764e25062dd48f9639d2d4",
+    "tools/compose_lifecycle.py": "7a9764e5c0f52f4cc50a8592216eef711c318b0272e99df468ba73a5e69bfd27"
+  },
+  "state": "PASS",
+  "synthetic_file_content": true
+}

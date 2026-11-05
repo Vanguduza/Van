@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "target_installation": "/opt/van-trading/supabase",
+  "allowed_postgres_service": "db",
+  "projects": [
+    {
+      "slug": "nissan-gtr",
+      "database": "gtr_prod",
+      "project_uuid": "53d39b5d-bf19-4cf1-9a5b-0904192d90d1",
+      "hostname": "nissan-gtr-api.example.invalid",
+      "loopback_port": 18081,
+      "status": "PLANNED"
+    },
+    {
+      "slug": "fixture-project",
+      "database": "fixture_db",
+      "project_uuid": "5238a352-e1e1-4c5a-8e15-b39320fd00ad",
+      "hostname": "fixture-api.example.invalid",
+      "loopback_port": 18082,
+      "status": "PLANNED"
+    }
+  ]
+}

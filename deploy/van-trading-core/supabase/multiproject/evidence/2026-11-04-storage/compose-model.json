@@ -1,0 +1,43 @@
+{
+  "check_count": 12,
+  "checks": {
+    "every_other_service_unchanged": true,
+    "image_transform_explicitly_disabled": true,
+    "legacy_bucket_preserved": true,
+    "legacy_envoy_candidate_exact_source_bound": true,
+    "legacy_single_credentials_not_used": true,
+    "multitenant_true": true,
+    "no_storage_published_ports": true,
+    "one_existing_storage_service": true,
+    "postgres_service_unchanged": true,
+    "private_tenant_pattern_exact_canonical_literal": true,
+    "service_names_preserved": true,
+    "storage_volume_mount_unchanged": true
+  },
+  "compose_version": "Docker Compose version 2.40.3+ds1-0ubuntu1~24.04.1",
+  "containers_started": false,
+  "docker_daemon_used": false,
+  "donor_commit": "4ab8760d19fd74ed18c2d321258bd8bdd1d83626",
+  "envoy_candidate": {
+    "changed_route": "/storage/v1/",
+    "deployed": false,
+    "kind": "LEGACY_STORAGE_GATEWAY_CANDIDATE_ONLY",
+    "other_routes_byte_preserved": true,
+    "preserved_native_tenant_id": "original-tenant",
+    "requires": [
+      "original_tenant_and_keys_registered",
+      "original_object_bucket_and_mount_preserved",
+      "Envoy_native_config_validation",
+      "owner_release_admission"
+    ],
+    "result_sha256": "5fd14ce58cf583e97b6559d256e7a8fdd138ab0c9eb90b40efb34d9ea67b01a7",
+    "schema_version": 1,
+    "source_sha256": "9d9a6d6ea0a372be99e165d995f012d383d5cc8473b92a06b7aa0bbd73566c3d"
+  },
+  "native_envoy_validation": false,
+  "source_sha256": {
+    "tests/check_storage_compose.py": "300f859dc0cc5586a24a8afe5cadcdc10742dc489cef34dcedc7361257bbffc7",
+    "tools/shared_storage.py": "280f63b634a3a376016e8c5f26164a5337dd9116fda82efe3c42bffa1c0a88fa"
+  },
+  "state": "PASS"
+}

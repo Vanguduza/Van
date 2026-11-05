@@ -1,0 +1,30 @@
+{
+  "failed_outcomes_remain_failures": true,
+  "final_exact_source_report": "installation-result-03.json",
+  "native_attempts": [
+    {
+      "artifact": "installation-result-01.json",
+      "checks_completed": 585,
+      "cleanup_completed": true,
+      "error": "Failure:fixture-project_pooler_reads_same_project_edge_write",
+      "sha256": "487d6c2f2efdb7aff82ac92821f8f185a1ffb256a63c3c6d5f851f7f73020dbc",
+      "state": "FAIL"
+    },
+    {
+      "artifact": "installation-result-02.json",
+      "checks_completed": 628,
+      "cleanup_completed": true,
+      "error": null,
+      "sha256": "8878e5d9d8fcb67d03981dad4077f7565bd57e52d65c551c970d69bd8eb03134",
+      "state": "PASS"
+    },
+    {
+      "artifact": "installation-result-03.json",
+      "checks_completed": 681,
+      "cleanup_completed": true,
+      "error": null,
+      "sha256": "a23080c91332de26e8cc9c4aed01c773a4323b93ccdc55c49e2697a776219fc1",
+      "state": "PASS"
+    }
+  ]
+}

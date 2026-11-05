@@ -1,0 +1,65 @@
+{
+  "compose_model_attempt": "storage-compose-check-01.json: exact dollar escaping assertion corrected; no deployment occurred",
+  "native_attempts": [
+    {
+      "checks_completed": 116,
+      "cleanup_completed": true,
+      "error": "Failure:SERVICE_EXITED_1",
+      "file": "storage-result-01.json",
+      "sha256": "47d83157fcc86e334b6f62a44fe02a60f17638e65b2418412d559f31a156005f",
+      "state": "FAIL"
+    },
+    {
+      "checks_completed": 124,
+      "cleanup_completed": true,
+      "error": "Failure:fixture-project_shared_storage_gateway_syntax",
+      "file": "storage-result-02.json",
+      "sha256": "39bfa0a5e88b141655659209491d5c47fa6ae8ea6be4a28bee321f0aa34446f7",
+      "state": "FAIL"
+    },
+    {
+      "checks_completed": 174,
+      "cleanup_completed": true,
+      "error": null,
+      "file": "storage-result-03.json",
+      "sha256": "78f806ce6342cdd0e5290389449fc688a77c787753c4ffb251dd4030478b15d5",
+      "state": "PASS"
+    },
+    {
+      "checks_completed": 183,
+      "cleanup_completed": true,
+      "error": null,
+      "file": "storage-result-04.json",
+      "sha256": "ea7894e5678c7c4fb4aa8ef00517bd30e17125bbe0b6d940bf2fec9b72aaf721",
+      "state": "PASS"
+    },
+    {
+      "checks_completed": 160,
+      "cleanup_completed": true,
+      "error": "Failure:fixture-project_tampered_signed_url_denied",
+      "file": "storage-result-05.json",
+      "sha256": "b4fb7aff07e68511a0e2f2c3ba56df297c0d7933030287b035a49100c779f711",
+      "state": "FAIL"
+    },
+    {
+      "checks_completed": 245,
+      "cleanup_completed": true,
+      "error": null,
+      "file": "storage-result-06.json",
+      "sha256": "5fc93c608747b2833867c37b8380bb73c9aca664331c583f52bb7ea9b5434b8b",
+      "state": "PASS"
+    },
+    {
+      "checks_completed": 245,
+      "cleanup_completed": true,
+      "error": null,
+      "file": "storage-result-07.json",
+      "sha256": "7472027f9517349410b85f8ebffcd8dc0c66ca84c50c0536d0c7b6e51c9bb821",
+      "state": "PASS"
+    }
+  ],
+  "retained_unit_failures": [
+    "storage-unit-01.log: generic environment writer rejected the required regex end anchor",
+    "storage-unit-03.log: minimal legacy-route fixture exposed newline boundary"
+  ]
+}
