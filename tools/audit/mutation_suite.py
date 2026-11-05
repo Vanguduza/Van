@@ -1131,7 +1131,8 @@ ROOT_LEVEL = [
  # Python half: whether anything in the shipping app actually asks it. A fully tested
  # envelope that no production path reaches is the audit's most common defect shape.
  (["tests/contracts/test_the_runtime_envelope_governs.py"], [
-   (f"{APP_KT}/visual/VanCanvasFallback.kt", "VanResourceEnvelope.effectBudget(",
+   # The native subscription now owns this call; same mutation, same invariant.
+   (f"{APP_KT}/visual/VanEffectObservations.kt", "VanResourceEnvelope.effectBudget(",
     "VanEffectPolicy.resolve(", "C14 the embodiment resolves its own budget again"),
    (f"{APP_KT}/command/modules/WorkModules.kt",
     "stream, truncated, DeviceRuntimeReadings.pressure(context),", "stream, truncated,",
