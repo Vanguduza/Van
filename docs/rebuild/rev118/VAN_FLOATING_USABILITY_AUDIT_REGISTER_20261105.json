@@ -90,8 +90,8 @@
       "priority": "RELEASE",
       "area": "Native APK/device",
       "finding": "No physical result in this audit",
-      "action": "Original app:assembleDebug and assembleDebugAndroidTest succeeded from exact committed source d78368f2. Main APK passed89 static checks and test APK signature/classes verified. Refined Rive still awaits its separate original native/artwork admission; physical execution remains last.",
-      "status": "APKS_ASSEMBLED_STATICALLY_VERIFIED_NATIVE_ARTWORK_ACCEPTANCE_PENDING"
+      "action": "Complete app/test APKs already assembled and statically verified. Refined Rive now additionally passes122checks against the exact pinned native C++ core with53clean-rebuild-identical CPU frames. This is not Android JNI/Skia/PLS/emulator acceptance. Source intake, toolchain metadata, original independent/owner review and candidate staging sequence still require resolution; physical testing stays last.",
+      "status": "APKS_AND_PINNED_CORE_VERIFIED_NATIVE_BACKEND_AND_ADMISSION_PENDING"
     },
     {
       "id": "G02",
@@ -154,7 +154,17 @@
     "application_source_commit": "d78368f2df1426a124072e7e04d703327f229ccd",
     "debug_apk_sha256": "8e7e0b3e920a61710378230eb52c8d32cb69c50434ce86bda968822e1d004a8a",
     "instrumentation_apk": "BUILT_NOT_EXECUTED",
-    "instrumentation_apk_sha256": "4466d4a31571ba54e6878e6619c4aed4fda48650c6e9d37fe8f7537e40ebfbe6"
+    "instrumentation_apk_sha256": "4466d4a31571ba54e6878e6619c4aed4fda48650c6e9d37fe8f7537e40ebfbe6",
+    "pinned_native_core_compatibility": {
+      "runtime": "Android9.13.10 exact C++ core ff495d263f5ec29d8986dc16d49f5ed8ea22ca33",
+      "tests": 122,
+      "passed": 122,
+      "native_frames": 53,
+      "clean_rebuild_identical_frames": 53,
+      "android_backend_qualified": false,
+      "physical_tested": false,
+      "receipt": "docs/rebuild/rev118/receipts/floating-20261105-pinned-native-core/SUMMARY.json"
+    }
   },
   "code_closure_owner_instruction": "Physical testing last; finish implementation and software verification first."
 }

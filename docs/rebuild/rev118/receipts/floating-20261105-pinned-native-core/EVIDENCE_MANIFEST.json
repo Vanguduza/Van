@@ -1,0 +1,465 @@
+{
+  "archive_sha256": "5cf183458d3ea92000c2f5911ed5f09165a714792154f0ca518d2875f706eb3a",
+  "entries": [
+    {
+      "path": ".git/refined-native-20261105/CORE_BUILD_RECEIPT.json",
+      "sha256": "02d762fbee818d2e8e3047b0d7feceb8a0b91921e619dfd619c36c4f48c8ed4c",
+      "bytes": 175725
+    },
+    {
+      "path": ".git/refined-native-20261105/EXACT_UPSTREAM_BLOB_VERIFICATION.json",
+      "sha256": "3bf84df939f091d5bf50f27a08e1ffe24cb3fcd4147e13480ba2c9d4c767b00a",
+      "bytes": 329220
+    },
+    {
+      "path": ".git/refined-native-20261105/NATIVE_CORE_CHARACTER_REVIEW.png",
+      "sha256": "76c51b301e7de43f109327049c63ab06e8e8937d5dcd983aee66749bb9644f47",
+      "bytes": 427525
+    },
+    {
+      "path": ".git/refined-native-20261105/ORIGINAL_GATES_BEFORE.json",
+      "sha256": "e3bd8a8a44a8bf85f79f3093812b43c21db75a928b1ba5342a6593068454d909",
+      "bytes": 1755
+    },
+    {
+      "path": ".git/refined-native-20261105/UPSTREAM_SOURCE_RECEIPT.json",
+      "sha256": "b0967a49590d4279ed4596a3a8caa4ba323547dab1edbdd3b48c7b2cfb4c7426",
+      "bytes": 588
+    },
+    {
+      "path": ".git/refined-native-20261105/candidate-native/EXECUTION_RECEIPT.json",
+      "sha256": "bac9f3326f0dc52626a4dcd6f2e04bfbce7b4c989f2975726283db3ed660ca1b",
+      "bytes": 631
+    },
+    {
+      "path": ".git/refined-native-20261105/candidate-native/runtime.stderr",
+      "sha256": "15db9f65762b7ccefc36f488481bdd843f378ee64967d1fab1730afe2c4a26e8",
+      "bytes": 41
+    },
+    {
+      "path": ".git/refined-native-20261105/host-toolchain/RECEIPT.json",
+      "sha256": "69f8972b1c1dfdac2947241b1c0c2150e72478d588f7d42b40bb6a94e9e28cf7",
+      "bytes": 650
+    },
+    {
+      "path": ".git/refined-native-20261105/native-core-build.log",
+      "sha256": "9c55b8769cf53283bb5e3c478e5d1aae6782c5f3a7be60968198451968748d26",
+      "bytes": 82923
+    },
+    {
+      "path": ".git/refined-native-20261105/native-probe-initial-name-collision.log",
+      "sha256": "cb6dc6962003068b634a6e64be1bdea16d64aecafb813a626c017d8a66236acd",
+      "bytes": 12437
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/COMPATIBILITY.json",
+      "sha256": "d451c32f8be6128c1441204d0911c79ef4ec70263f15ce26ecbd039a35c148f1",
+      "bytes": 25154
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/RUN_RECEIPT.json",
+      "sha256": "8a89d6d1c8b90a014103b9159559ec97e71f5ba048c82fb2c947d16951aaebe1",
+      "bytes": 186734
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/EXECUTION_RECEIPT.json",
+      "sha256": "43ad217c35c3264ec84eb69f16cb5202a736a2c8d91069a6e950c11deed91378",
+      "bytes": 1055
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/action-1.png",
+      "sha256": "1bb052ac8b8cb4df28e7faad57b6f0bd6922b31dce00c0a11d80606a233b2651",
+      "bytes": 237848
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/action-10.png",
+      "sha256": "a761d7ad306e9e18627c56c2423c71d8c8817ea9a8b3b64e45925296f3e464c4",
+      "bytes": 238391
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/action-11.png",
+      "sha256": "8d395c8b1f7f1e58b88bc3d1c7b1bf381d3cdad3a28982e53129e314ac9ebe2e",
+      "bytes": 236171
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/action-12.png",
+      "sha256": "789c6f7adf89fdc4d2aa2143cd22f8b4d62d433ac546cee7da4661323672afae",
+      "bytes": 238497
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/action-13.png",
+      "sha256": "efb890fe4da7fb26e7864dd17d2589ffb72493c162611c63246fb1a6aa31a72e",
+      "bytes": 239239
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/action-14.png",
+      "sha256": "c554d2d275e7bf5d86d81b0936ce05e8128607baf4534b40531180a6849c9142",
+      "bytes": 225721
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/action-15.png",
+      "sha256": "b08d0b4f0b2377b2c6902e7977f6b5f38e41ea466bbdef4279e3dc34944fe7a8",
+      "bytes": 238783
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/action-16.png",
+      "sha256": "024e12f68f36251a2a9ed6e350aeb622c0f856dcc9e35cbb306a74f656fe5c41",
+      "bytes": 239684
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/action-17.png",
+      "sha256": "072dc221ce3ea6614d08f00b6c24b5e68803f069a46598d8085c6c1ff17db9a2",
+      "bytes": 237521
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/action-18.png",
+      "sha256": "0e1885074270c32abbfbe4d392a885805b2f2e5e92482792546ec3bd47b41a9e",
+      "bytes": 233655
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/action-19.png",
+      "sha256": "f03d7723bfb8d9484d74aa76e40ddd551de6675622ab552201a043c17699672a",
+      "bytes": 238694
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/action-2.png",
+      "sha256": "72b033c771085765f7f2369e258b38d8f98746cc3b6b26dfdb679dcd7dadbfbf",
+      "bytes": 234261
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/action-20.png",
+      "sha256": "2866b34af884670b2101cfa4fa80e58c3f78386c07be44ea48df7dd41d99abf1",
+      "bytes": 237503
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/action-21.png",
+      "sha256": "1bcb568c99e9373727306f2c711e1a67d6f846bc836bb0610d019b60cd23066b",
+      "bytes": 233310
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/action-22.png",
+      "sha256": "724524d5193ccfaf1023aa1738eb61ef696f1c3a4ae0e136f3d876b51bfb3fb5",
+      "bytes": 238894
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/action-23.png",
+      "sha256": "a74cf4f1e8f2404aa860b8c1d0be47221f6a1ac82b05c83a9457165090ac1118",
+      "bytes": 237680
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/action-24.png",
+      "sha256": "3deb3601bc7db30d0f8af5c5eb2376a646d1579616bd60ab956fa7d7bf3dff96",
+      "bytes": 238207
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/action-25.png",
+      "sha256": "195e0359169a05fd8d87af468cefa8e30ae8f0173984cc64c0b59989cc260a5e",
+      "bytes": 238461
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/action-26.png",
+      "sha256": "f330c3d75fcf7bdeb86bae36be9a6c0626fe3c6c539398cbb27b6403e89cb2bc",
+      "bytes": 234375
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/action-3.png",
+      "sha256": "6ff044530b505213dd9485858ea8cd47f602c17cd98d9a42482f970983de5a97",
+      "bytes": 230021
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/action-4.png",
+      "sha256": "b68c4222671e30db3e2f608c50907c4495ace90b0c833778fbfeb74e381774d5",
+      "bytes": 235913
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/action-5.png",
+      "sha256": "a7e3ac0941ab90bec21c2d9756d24fe4e6abedfbe491b51503b339f003fbc3c7",
+      "bytes": 229664
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/action-6.png",
+      "sha256": "88932e81cea96da51da86140128bd35ba9e8b1ee506ce458b0f5c2989e340d38",
+      "bytes": 230242
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/action-7.png",
+      "sha256": "f7575a26a54d41b1df0131a4c1ae48b2f7c23e578ab0a6b3e5bc6ded3f52da31",
+      "bytes": 233363
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/action-8.png",
+      "sha256": "1c9c8309737a77a5d19ac9f39f4848711cce478c84f9747517306ab304da9585",
+      "bytes": 232328
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/action-9.png",
+      "sha256": "d1af6eb0ce666b92602b3a5f1eb406e9d9686c556efb0ac308c9b9179ce80ae0",
+      "bytes": 235127
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/legacy-wave.png",
+      "sha256": "e7e0963f995dd8860e4a334dab13b65273c00f0ce3a09659522c2e101c881bba",
+      "bytes": 238768
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/mouth-0.png",
+      "sha256": "b0fe6ac058705d4f6432ff2eada24746eb79c8e78251231264d259b3775c7970",
+      "bytes": 233235
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/mouth-1.png",
+      "sha256": "02784dcce6cff1e5e61d4ee579878b08e1888c29f5c2e841d848bb27893a39a7",
+      "bytes": 233199
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/mouth-2.png",
+      "sha256": "c3c6ee758dd3140f00a5e524fa279172f35f2ee8dfdd8048d0ed76b81145999e",
+      "bytes": 233181
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/mouth-3.png",
+      "sha256": "b646da11aaae2bc0e4959df768b6f3b9c01749ba5b407f7c2a1ccafe192a32df",
+      "bytes": 233224
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/mouth-4.png",
+      "sha256": "23d09b2487e19ffa3ef325640155807678f667390d33c9519e37424ace60a9c9",
+      "bytes": 233239
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/orb-other-side.png",
+      "sha256": "5ddc2ff56fca811bb4e739222df9cc902dd9045228f93d5a873cfe2617790624",
+      "bytes": 244216
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/orb-return.png",
+      "sha256": "baf9de6f0abd3bb4d025d4906dadb1b99a32a81566aa6eaaa571713560901e0a",
+      "bytes": 244954
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/orb-start.png",
+      "sha256": "e8a5212686f31d4f035a454f6e0120e6b83b510c7f41ce075876563af2201719",
+      "bytes": 243250
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/runtime.jsonl",
+      "sha256": "59146c656aa29374383a6182c1b4dd5e99f1cd715d5168b238b799193383f79e",
+      "bytes": 254027
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/runtime.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/state-0.png",
+      "sha256": "098522e13098ac6d11c27f10fa1e2f5c07b1c44467c4613572f8d323336e05f5",
+      "bytes": 234305
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/state-1.png",
+      "sha256": "7c56b86ba02373bc7c1cc868486b83772236a1afa51f91a8ae22ca5743ce21f4",
+      "bytes": 233747
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/state-10.png",
+      "sha256": "2b3c9fadccbd7d18e1fe39784c729cb64b5e65412179960f945c920d53560bd6",
+      "bytes": 233835
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/state-11.png",
+      "sha256": "716df51e6495fba12d2824e62443af4c35a33e1c4969b0f3f10bbfbb581971a6",
+      "bytes": 234147
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/state-12.png",
+      "sha256": "3ab461906906c9df0affbe35fd15a7cc831dfeafe72490ea5dea63b86dca44f5",
+      "bytes": 234008
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/state-13.png",
+      "sha256": "896d341e105e0a0deec996d54975658be0e3e1167033ad2bdbcbcc7dc462f99a",
+      "bytes": 234124
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/state-14.png",
+      "sha256": "8807f154ec094156e10afbd1db408cab20bb355caae349b8fbf67b84926fcb6a",
+      "bytes": 234207
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/state-15.png",
+      "sha256": "02c5bc3d276e718c60155273e3e977531caf6641ae5190d8ebaf82d86adbcdce",
+      "bytes": 233992
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/state-16.png",
+      "sha256": "47ecdcc12a185b2bd1fac1901f5fe1c74bca9d914a1070d416bb956bf90abbd1",
+      "bytes": 234072
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/state-17.png",
+      "sha256": "a3912334da759b905c14f75a996b6675b24df24930d33bb52f4d506753163b25",
+      "bytes": 232812
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/state-2.png",
+      "sha256": "b0fa3eef29b587ff3a4d9c23dd02f29e35ad911db8c847eabece5855cb4cda40",
+      "bytes": 233394
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/state-3.png",
+      "sha256": "64aed02c0736729f86dbfe97237c68ea148dd15441754d9b436c059c73145489",
+      "bytes": 233898
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/state-4.png",
+      "sha256": "0a3acc8529672845844bb6eea412ea1b37ff5d3499537e54e4e3637a3827781d",
+      "bytes": 233816
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/state-5.png",
+      "sha256": "691275a3e73b867df3435de972e4afd6371cb946903d221b22dbb70145e516ba",
+      "bytes": 233994
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/state-6.png",
+      "sha256": "eff513bb6d51f28c5a696b84d577fe6e655ad66ae61aa5ba8ad6afd028857ad2",
+      "bytes": 233768
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/state-7.png",
+      "sha256": "2acbe9f50e8555c639d56febe067514538a4080122016addfce4d4ba57f79e75",
+      "bytes": 233974
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/state-8.png",
+      "sha256": "4fd02ecb865865df47a217f89a99077f9bb81a63c3e0149979a98fe64e8abf70",
+      "bytes": 233923
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/candidate/state-9.png",
+      "sha256": "51970786775d22166586d9fb540a0f994710bcde1d1b37070318f90db148e449",
+      "bytes": 233609
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/compile.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/compile.stdout",
+      "sha256": "37dbe5a3e971807bf90efc182f19ffc0f5d025449d8bc97d92da2beb73b467f3",
+      "bytes": 115733
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/configure.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/configure.stdout",
+      "sha256": "cca98485fad1e54191aa168c411aa80a851509205778ff7deca2fafde346bfbe",
+      "bytes": 567
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/positive-control/EXECUTION_RECEIPT.json",
+      "sha256": "01156f9dc9f98618c7aebe34168589f2f4e584a3d24d178bbe61f7a358eb83b9",
+      "bytes": 1018
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/positive-control/positive-control.png",
+      "sha256": "094e879496fb26ad3a9756a943da33b9fd7c797995034a6914ed5cf3ca15a3fa",
+      "bytes": 20592
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/positive-control/runtime.jsonl",
+      "sha256": "bb97c2a3f7e371a971d211da56e54435e2c20b65a1793a4e9cca0b41b909afea",
+      "bytes": 202
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-final/positive-control/runtime.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-run/RUN_RECEIPT.json",
+      "sha256": "f1aab21e9c84fe3b23cb2c494ada4c46592026f2214fc38c806463bd346d9bbe",
+      "bytes": 185116
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-run/compile.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": ".git/refined-native-20261105/reproducible-native-run/compile.stdout",
+      "sha256": "8cad121f57b94319de0391f73ed13baddb5ae55b3630f2979d0f145c305f7510",
+      "bytes": 116389
+    },
+    {
+      "path": ".git/refined-native-20261105/run.initial-c-driver-selection.py",
+      "sha256": "67106e874c8c3100e9559172db9667668e629500b20ef4ad8af6d4984a65317c",
+      "bytes": 9528
+    },
+    {
+      "path": ".git/refined-native-20261105/upstream/android-CMakeLists.txt",
+      "sha256": "8e74c82b4ba0f6b02017bb43b0754b96ef3c3dbc66f30a0e9d0a4f7971eb5317",
+      "bytes": 4167
+    },
+    {
+      "path": ".git/refined-native-20261105/upstream/android-tag-tree.json",
+      "sha256": "7f7b11c61fc1ae6cb882d2c8634f4efe4825c9e6d404858d71725fa00b738810",
+      "bytes": 242485
+    },
+    {
+      "path": ".git/refined-native-20261105/upstream/core-git-tree.json",
+      "sha256": "a12025f933b58e6f74e694b41d2c96c0dd78cfd0b08a7a6b67f8f9c015adcb5e",
+      "bytes": 587165
+    },
+    {
+      "path": ".git/refined-native-20261105/verifier-unit-tests.log",
+      "sha256": "05428aaeaedac6b9ab3960ad41b600086fedd76606cbbc31014901a0aeedfe5b",
+      "bytes": 5292
+    },
+    {
+      "path": "docs/rebuild/rev118/refined-character-native/READINESS.json",
+      "sha256": "ba816d8411b2842a74037675fa97b690dd478d0e12aa2ba843f1bfb660f3b238",
+      "bytes": 4620
+    },
+    {
+      "path": "tests/contracts/test_native_rive_compatibility_tool.py",
+      "sha256": "64d9925c33d035c21b7ff58b19f5433520b28b5ae0d4dd4bb399120aa7f132d5",
+      "bytes": 10150
+    },
+    {
+      "path": "tools/rebuild/native_rive_compatibility/CMakeLists.txt",
+      "sha256": "f58a51fee0576047a746d5266d832afbdc20c5499a7a70db84284ba62c72bab6",
+      "bytes": 1348
+    },
+    {
+      "path": "tools/rebuild/native_rive_compatibility/README.md",
+      "sha256": "c888b4fa455b58b168cc17a7d4390b4c5d36b7d2174d8c7d3454a86c8f9a5478",
+      "bytes": 4776
+    },
+    {
+      "path": "tools/rebuild/native_rive_compatibility/SOURCE_LOCK.json",
+      "sha256": "6bea6d92e10fdc3c54872c6fc161f795b1260ace5fed1f086f323ceb11bcd972",
+      "bytes": 1421
+    },
+    {
+      "path": "tools/rebuild/native_rive_compatibility/native_probe.cpp",
+      "sha256": "ccdc91b6d863b350e9e3092c01d715225d7b68a1f63e3c73ddc89bac6e859c4c",
+      "bytes": 20204
+    },
+    {
+      "path": "tools/rebuild/native_rive_compatibility/run.py",
+      "sha256": "3bcb3a0ff908e33645a93179cbcf21786ae3ef2b1c9620eac1c2eea227732b9c",
+      "bytes": 10229
+    },
+    {
+      "path": "tools/rebuild/native_rive_compatibility/verify_result.py",
+      "sha256": "3924bc7b82d7e9ba5a26ed8ddb464abb2eee58873cf33620984709f5c5134d38",
+      "bytes": 10873
+    }
+  ]
+}

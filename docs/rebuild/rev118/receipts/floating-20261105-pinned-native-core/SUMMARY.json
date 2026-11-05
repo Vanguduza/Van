@@ -1,0 +1,63 @@
+{
+  "schema": "van.pinned-native-core-evidence/1",
+  "status": "PINNED_NATIVE_CORE_SOFTWARE_COMPATIBILITY_VERIFIED_NOT_ANDROID_ADMITTED",
+  "recorded_at": "2026-11-05T20:02:27.551270+00:00",
+  "base_head": "dd3573aca5e5a49becea2c064bad6d11c7096729",
+  "candidate_binary_sha256": "a5b848a02887de309d2ee4db2dbc167efaeb123ca0078278155c8b7b4bb8f5dc",
+  "candidate_rml_sha256": "af23eec96fc24300f598c050ac9a35a1d610588cb441257a4d23021e1b48f42b",
+  "candidate_context_sha256": "39a5d1947c9dd057e6616eb2656042945fbe098bc1ec13339d9f3bc74c5342ed",
+  "android_dependency": "app.rive:rive-android:9.13.10",
+  "android_tag_commit": "43fd047149b2656e44664a5da18505d5a0f803cd",
+  "native_core_commit": "ff495d263f5ec29d8986dc16d49f5ed8ea22ca33",
+  "upstream_files_git_blob_verified": 1500,
+  "original_cpp_files_compiled": 468,
+  "upstream_source_modified": false,
+  "native_behavior_tests": 122,
+  "native_behavior_passed": 122,
+  "tool_provenance_safety_tests": 29,
+  "candidate_native_png_captures": 53,
+  "decoded_png_assets": 52,
+  "decoded_pixels": 339750,
+  "state_machine_inputs_and_triggers": 17,
+  "animations": 95,
+  "scope": "Real native Linux original Rive C++ core with a diagnostic Cairo CPU path/PNG/mesh transport. Not RML reconstruction or a mocked state machine. Not Android JNI/Skia/PLS, native emulator CI or physical S24 acceptance.",
+  "excluded_features": [
+    "Rive text",
+    "Rive audio",
+    "flex-layout behavior"
+  ],
+  "default_artboard_layout_style": "Only empty default Artboard LayoutComponentStyle occurs in this candidate; flex-layout child behavior not qualified.",
+  "native_tool_source_sha256": {
+    "tools/rebuild/native_rive_compatibility/verify_result.py": "3924bc7b82d7e9ba5a26ed8ddb464abb2eee58873cf33620984709f5c5134d38",
+    "tools/rebuild/native_rive_compatibility/README.md": "c888b4fa455b58b168cc17a7d4390b4c5d36b7d2174d8c7d3454a86c8f9a5478",
+    "tools/rebuild/native_rive_compatibility/native_probe.cpp": "ccdc91b6d863b350e9e3092c01d715225d7b68a1f63e3c73ddc89bac6e859c4c",
+    "tools/rebuild/native_rive_compatibility/SOURCE_LOCK.json": "6bea6d92e10fdc3c54872c6fc161f795b1260ace5fed1f086f323ceb11bcd972",
+    "tools/rebuild/native_rive_compatibility/CMakeLists.txt": "f58a51fee0576047a746d5266d832afbdc20c5499a7a70db84284ba62c72bab6",
+    "tools/rebuild/native_rive_compatibility/run.py": "3bcb3a0ff908e33645a93179cbcf21786ae3ef2b1c9620eac1c2eea227732b9c",
+    "tests/contracts/test_native_rive_compatibility_tool.py": "64d9925c33d035c21b7ff58b19f5433520b28b5ae0d4dd4bb399120aa7f132d5"
+  },
+  "reproducible_run_receipt_sha256": "8a89d6d1c8b90a014103b9159559ec97e71f5ba048c82fb2c947d16951aaebe1",
+  "native_probe_executable_sha256": "b52bffee2926cb52e91415a32194de485a549b47f6132525dfc5861f5b0f9356",
+  "original_gates_unchanged": true,
+  "physical_stage": "DEFERRED_FINAL_STAGE_BY_OWNER",
+  "android_source_changed": false,
+  "application_apk_changed": false,
+  "character_promoted": false,
+  "owner_source_or_artwork_accepted": false,
+  "remaining_admission_findings": {
+    "currently_admitted_files": 0,
+    "current_original_inventory_count": 8,
+    "owner_confirmed_complete": false,
+    "adopted_candidate_master_in_current_original_inventory": false,
+    "finding": "The original source inventory does not include the adopted Candidate B master path. Source intake requires reconciliation before an honest complete-source confirmation, not an inferred owner approval."
+  },
+  "legacy_tool_pin_mismatch": {
+    "actual_app": "9.13.10",
+    "legacy_forge_record": "9.6.5",
+    "mismatch_is_not_a_native_import_failure": true
+  },
+  "candidate_review_sequencing_proposal": "Recorded in docs/rebuild/rev118/refined-character-native/INTEGRATION_READINESS.md; NOT APPROVED OR EXECUTED.",
+  "evidence_archive_sha256": "5cf183458d3ea92000c2f5911ed5f09165a714792154f0ca518d2875f706eb3a",
+  "evidence_archive_bytes": 13435637,
+  "evidence_member_count": 92
+}

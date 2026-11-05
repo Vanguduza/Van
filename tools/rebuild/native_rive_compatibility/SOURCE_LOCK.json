@@ -1,0 +1,18 @@
+{
+  "schema": "van.native-rive-core-lock/1",
+  "android_version": "9.13.10",
+  "android_commit": "43fd047149b2656e44664a5da18505d5a0f803cd",
+  "android_tree_response_sha256": "7f7b11c61fc1ae6cb882d2c8634f4efe4825c9e6d404858d71725fa00b738810",
+  "android_tree_url": "https://api.github.com/repos/rive-app/rive-android/git/trees/9.13.10?recursive=1",
+  "core_commit": "ff495d263f5ec29d8986dc16d49f5ed8ea22ca33",
+  "core_tree_response_sha256": "a12025f933b58e6f74e694b41d2c96c0dd78cfd0b08a7a6b67f8f9c015adcb5e",
+  "core_tree_url": "https://api.github.com/repos/rive-app/rive-runtime/git/trees/ff495d263f5ec29d8986dc16d49f5ed8ea22ca33?recursive=1",
+  "core_archive_sha256": "1f350c0047a79e38aebd8b195a548385601298be6e4a1a4b678fa1beab2f1389",
+  "core_archive_url": "https://codeload.github.com/rive-app/rive-runtime/tar.gz/ff495d263f5ec29d8986dc16d49f5ed8ea22ca33",
+  "cpp_sources": 468,
+  "positive_control_sha256": "46bb250cde0b0223a15faddac33d08fa00d4b6acebc2e4e827391ae0113768a3",
+  "positive_control_url": "https://cdn.rive.app/animations/vehicles.riv",
+  "renderer_scope": "Original native C++ core plus diagnostic Cairo CPU transport, not Android JNI/Skia/PLS or device acceptance.",
+  "excluded_features": ["Rive text", "Rive audio", "flex-layout behavior"],
+  "default_artboard_style_note": "The candidate has a default empty Artboard LayoutComponentStyle. No flex children/text/audio are qualified by this probe."
+}
