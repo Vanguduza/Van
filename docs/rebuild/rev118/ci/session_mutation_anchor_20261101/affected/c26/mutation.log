@@ -1,0 +1,22 @@
+............................F..                                          [100%]
+=================================== FAILURES ===================================
+_______ TestSessionRouter.test_an_expired_envelope_is_not_executed_late ________
+
+self = <test_van_hermes_session.TestSessionRouter object at 0x7f5b3624b590>
+tmp_path = PosixPath('/tmp/van-recovery-mutation-c26-20261101/test_an_expired_envelope_is_no0')
+
+    async def test_an_expired_envelope_is_not_executed_late(self, tmp_path):
+        """§20.14 — a command worth doing twenty minutes ago may not be worth doing now."""
+        service, router = await self._router(tmp_path)
+        session, epoch = await service.open(device_id=DEVICE, path=_path(), now_ms=1_000)
+        routed = await router.route(
+            _envelope(session, epoch, expires_at_ms=5_000), now_ms=6_000
+        )
+>       assert routed.accepted is False
+E       AssertionError: assert True is False
+E        +  where True = RoutedResult(accepted=True, kind='command.submit', result={'command_id': 'cmd_1', 'status': 'accepted'}, refusal=None, admission=<CommandAdmission.ADMITTED: 'ADMITTED'>).accepted
+
+tests/test_van_hermes_session.py:566: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_van_hermes_session.py::TestSessionRouter::test_an_expired_envelope_is_not_executed_late
+1 failed, 30 passed in 4.85s

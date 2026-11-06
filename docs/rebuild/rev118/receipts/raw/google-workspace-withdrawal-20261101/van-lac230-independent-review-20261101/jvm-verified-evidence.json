@@ -1,0 +1,22 @@
+{
+  "receipt": "/workspace/van-google-withdrawal-20261101/JVM_FINAL_RECEIPT.json",
+  "terminal_exit": 0,
+  "frozen12pins_unchanged": true,
+  "xml": [
+    {
+      "file": "TEST-com.dial.van.command.connected.ConnectedReadbackTest.xml",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "TEST-com.dial.van.gateway.GoogleWithdrawalOperationsTest.xml",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "executed_by": "integration owner serially; reviewer independently read/parsed actual receipt and XML; no Gradle launched"
+}

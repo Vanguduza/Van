@@ -1,0 +1,25 @@
+{
+  "command": [
+    "env",
+    "DIAL_REPO=/workspace/van-review-2026-10-18/dial-development-system",
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "/workspace/van-run-reaped.py",
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "tools/rebuild/source_storage_audit.py",
+    "--report",
+    "/workspace/van-native-risk-context-rebuild-final-20261027-audit.json",
+    "tests/rebuild",
+    "tests/contracts/test_van_private_core_topology.py",
+    "--junitxml=/workspace/van-native-risk-context-rebuild-final-20261027.xml",
+    "-q"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 1150952,
+  "started_at_utc": "2026-10-27T08:57:50.418691+00:00",
+  "timeout_seconds": 600,
+  "state": "COMPLETED",
+  "command_pid": 1150954,
+  "exit": 0,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-27T09:01:22.897936+00:00"
+}

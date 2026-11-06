@@ -1,0 +1,24 @@
+{
+  "address_codec_version": "fixture-evm/1",
+  "asset_id": "eip155:8453:0x1111111111111111111111111111111111111111",
+  "available_at": "2026-10-17T10:00:00Z",
+  "canonical_token_address": "0x1111111111111111111111111111111111111111",
+  "chain_family": "EVM",
+  "chain_id": "eip155:8453",
+  "decision_cutoff": "2026-10-17T10:01:00Z",
+  "expires_at": "2026-10-17T10:05:00Z",
+  "implementation_evidence_level": "SPEC_ONLY",
+  "pool_ids": [
+    "fixture:pool:1"
+  ],
+  "raw_token_address": "0x1111111111111111111111111111111111111111",
+  "reality": "SYNTHETIC",
+  "record_id": "fixture:ChainAssetIdentity:1",
+  "research_source_class": "SYNTHETIC",
+  "schema_version": "1.0",
+  "source_refs": [
+    "fixture:controlled-input-only"
+  ],
+  "ticker": "EXAMPLE",
+  "trade_authorized": false
+}

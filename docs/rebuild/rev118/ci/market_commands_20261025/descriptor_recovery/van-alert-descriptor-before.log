@@ -1,0 +1,30 @@
+.......F..................                                               [100%]
+=================================== FAILURES ===================================
+_ TestEveryRegisteredActionHasOneDescriptor.test_a_mutating_action_has_a_decided_reversibility _
+
+self = <test_authority_descriptor.TestEveryRegisteredActionHasOneDescriptor object at 0x7f733aec4440>
+
+    def test_a_mutating_action_has_a_decided_reversibility(self):
+        """UNDECLARED is the honest answer for something nobody has decided, and it must
+        not be where a mutating action quietly lands.
+    
+        The alternative — inferring reversibility from the action class — would be wrong in
+        both directions: an A3 note create is reversible and an A4 delete is not, and both
+        would be guessed the same way.
+        """
+        undecided = [
+            d.action_id for d in BUILTIN_ACTIONS
+            if d.mutates_state
+            and describe_action(d).reversibility is Reversibility.UNDECLARED
+        ]
+>       assert undecided == [], f"reversibility undecided for {undecided}"
+E       AssertionError: reversibility undecided for ['trading.alert.pause', 'trading.alert.restart', 'trading.alert.delete']
+E       assert ['trading.ale...alert.delete'] == []
+E         
+E         Left contains 3 more items, first extra item: 'trading.alert.pause'
+E         Use -v to get more diff
+
+backend/tests/test_authority_descriptor.py:151: AssertionError
+=========================== short test summary info ============================
+FAILED backend/tests/test_authority_descriptor.py::TestEveryRegisteredActionHasOneDescriptor::test_a_mutating_action_has_a_decided_reversibility
+1 failed, 25 passed in 1.83s

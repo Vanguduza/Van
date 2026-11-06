@@ -1,0 +1,18 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.1.1, pluggy-1.6.0 -- /workspace/van-backend-venv-20261025/bin/python
+cachedir: .pytest_cache
+rootdir: /workspace/van-review-2026-10-18/publish
+configfile: pytest.ini
+plugins: asyncio-1.4.0, anyio-4.15.1
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collecting ... collected 6 items
+
+trading/tests/test_dataset_manifest_candidates.py::test_raw_byte_boundary_refuses_duplicate_keys_nonfinite_invalid_and_oversize_input[duplicate-key] PASSED [ 16%]
+trading/tests/test_dataset_manifest_candidates.py::test_raw_byte_boundary_refuses_duplicate_keys_nonfinite_invalid_and_oversize_input[nan] PASSED [ 33%]
+trading/tests/test_dataset_manifest_candidates.py::test_raw_byte_boundary_refuses_duplicate_keys_nonfinite_invalid_and_oversize_input[infinity] PASSED [ 50%]
+trading/tests/test_dataset_manifest_candidates.py::test_raw_byte_boundary_refuses_duplicate_keys_nonfinite_invalid_and_oversize_input[invalid-utf8] PASSED [ 66%]
+trading/tests/test_dataset_manifest_candidates.py::test_raw_byte_boundary_refuses_duplicate_keys_nonfinite_invalid_and_oversize_input[wrong-shape] PASSED [ 83%]
+trading/tests/test_dataset_manifest_candidates.py::test_raw_byte_boundary_refuses_duplicate_keys_nonfinite_invalid_and_oversize_input[over-byte-capacity] PASSED [100%]
+
+--- generated xml file: /workspace/van-dataset-param-ids-after-20261026.xml ----
+============================== 6 passed in 0.86s ===============================

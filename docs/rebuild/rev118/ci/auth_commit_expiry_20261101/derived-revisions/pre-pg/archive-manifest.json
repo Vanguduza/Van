@@ -1,0 +1,15 @@
+{
+  "archive": "/workspace/van-auth-pre-pg-derived-evidence-20261101.zip",
+  "sha256": "4edff0e0a071614f9d2a06f164d29f0e53b8d0033927adb3e2dd25a61d7356a0",
+  "files": {
+    "docs/rebuild/rev118/receipts/AUTH_COMMIT_EXPIRY_SOURCE_20261101.json": "dd092b266ac68fb21fe646efed184179f346749044386bd6ddf5e8dd6265017b",
+    "docs/rebuild/rev118/backend/BE-002_003_AUTH_COMMIT_EXPIRY.md": "93d3372f7eb8f9c36357044df1629bcf1e3d450723ce9e5091fcbc5994991bf6",
+    "docs/rebuild/rev118/CANDIDATE_SOURCE_PROGRESS.json": "29e4f424861aca39d18bec32482770a8ebda643e32d5855840a34be7c935c22b"
+  },
+  "qualification_before_supplement": {
+    "tests": 5943,
+    "passed": 5770,
+    "skipped": 173
+  },
+  "original_finalizer_exit": 0
+}

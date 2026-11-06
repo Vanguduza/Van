@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "authorization_id": "auth-20260930-owner-derived-network-guard-scope-test-merge",
+  "project": "van",
+  "authority": "OWNER_DERIVED",
+  "owner_instruction_sha256": "1fc63b2f9355a9c8534003a65e0bd8550288092795b4d07d2dcb2dec371107b0",
+  "owner_instruction_digest_input": "UTF-8 bytes of the verbatim selected answer label \"Network-effect guard (Recommended)\" with no quotes and no trailing newline",
+  "owner_instruction_record": "docs/decisions/OWNER-DECISION-20260930-NETWORK-EFFECT-GUARD.md",
+  "owner_instruction_excerpt": "Network-effect guard (Recommended)",
+  "source": {
+    "kind": "owner_session_instruction",
+    "channel": "claude_code",
+    "request_id": "claude-code-session_01ELKqm4GCPmPvF3ggKkgB1J-20260930",
+    "owner_attested": true,
+    "device_signature_claimed": false,
+    "cryptographic_signature_claimed": false,
+    "signed_ingress_claimed": false
+  },
+  "signature_note": "Derived authority; no signature of any kind is claimed. The owner chose the network-effect guard; adjusting unit G9b's two landing tests so they accept the guard's earlier NAVIGATION_OUT_OF_SCOPE block (the page is still closed in both) is a necessary consequence of integrating that guard with G9b's landing check. The owner did not review this test diff.",
+  "purpose": "Cover unit G9c's adjustment of backend/tests/test_browser_review_i6_scope.py, made in G9c's merge of G9b (fb3887f2) and carried into Programme B by the integration merge (b5d0f9b7). Neither G9b's record (scoped to G9b's own commits) nor the network-guard record (paths unchanged by the owner-approved binding) lists this file.",
+  "authorized_paths": [
+    "backend/tests/test_browser_review_i6_scope.py"
+  ],
+  "commit_scope": {
+    "commits": [
+      "fb3887f28499c146a96fd2c46bed7a8fdedfe91c",
+      "b5d0f9b7829478ec5732f8513477cce545fda480"
+    ]
+  },
+  "limits": [
+    "Covers only this one test file in only the two listed merge commits.",
+    "The test still asserts the page is closed after an out-of-scope landing; it may not weaken any scope or guard assertion beyond accepting the guard's earlier block code.",
+    "Opens no production gate; not reusable."
+  ],
+  "issued_at_utc": "2026-09-30T00:00:00Z",
+  "recorded_by": "integrator (session_01ELKqm4GCPmPvF3ggKkgB1J)",
+  "material_scope_expansion": false,
+  "feature_removal": false,
+  "business_model_change": false,
+  "security_authority_change": false,
+  "owner_control_boundary_change": false,
+  "legal_position_change": false,
+  "money_or_custody_model_change": false,
+  "locked_provider_change": false,
+  "reusable": false,
+  "revoked": false
+}

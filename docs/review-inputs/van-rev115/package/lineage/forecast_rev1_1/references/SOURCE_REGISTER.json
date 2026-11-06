@@ -1,0 +1,558 @@
+{
+  "status": "RESEARCH_REFERENCES_NOT_RUNTIME_PROOF",
+  "sources": [
+    {
+      "id": "S01",
+      "title": "VAN Next Rev1.10 master blueprint",
+      "source_type": "USER_LIBRARY",
+      "locations": [
+        "VAN_NEXT_MASTER_BLUEPRINT_REV1_10_20261017.md"
+      ],
+      "observed_on": "2026-10-17",
+      "observed_fingerprint": "dba347b9f02831d1a3a2d9570b4434f6a8b4b98f6f47862c830ff6784cb56f51",
+      "scope_note": "Actual Library version1 read, 285201 bytes. Whole-backend barrier, service ownership, state/financial rules and native-consumption contracts.",
+      "installation_status": "NOT_INSTALLED_BY_THIS_TASK",
+      "evidence_status": "OBSERVATION_OR_DOCUMENTATION_NOT_QUALIFICATION"
+    },
+    {
+      "id": "S02",
+      "title": "VAN Next Rev1.10 development plan",
+      "source_type": "USER_LIBRARY",
+      "locations": [
+        "VAN_NEXT_DEVELOPMENT_PLAN_REV1_10.md"
+      ],
+      "observed_on": "2026-10-17",
+      "observed_fingerprint": "1b367e7507f2d371230891458ca1efc05c6fbb343b712d97ca170cecebbbc6e2",
+      "scope_note": "Actual Library version1 read, 75332 bytes. All76 parent packets and dependency/exit obligations.",
+      "installation_status": "NOT_INSTALLED_BY_THIS_TASK",
+      "evidence_status": "OBSERVATION_OR_DOCUMENTATION_NOT_QUALIFICATION"
+    },
+    {
+      "id": "S03",
+      "title": "VAN main identity and selected stack",
+      "source_type": "CONNECTED_GITHUB",
+      "locations": [
+        "https://api.github.com/repos/Vanguduza/Van/commits/main",
+        "https://github.com/Vanguduza/Van/blob/8eb1889822fc8a83f219977c15340172e16acd91/trading/architecture/stack_lock.json"
+      ],
+      "observed_on": "2026-10-17",
+      "observed_fingerprint": "git-blob:53cae7532b16d88ef6a106c43aa460822636ec40",
+      "scope_note": "Observed main8eb1889822fc8a83f219977c15340172e16acd91. Read stack lines170–241; Qlib/Optuna/Feast/MLflow selected not started, Qlib execution prohibited, alias not authority.",
+      "installation_status": "NOT_INSTALLED_BY_THIS_TASK",
+      "evidence_status": "OBSERVATION_OR_DOCUMENTATION_NOT_QUALIFICATION"
+    },
+    {
+      "id": "S04",
+      "title": "VAN BacktestEngine",
+      "source_type": "CONNECTED_GITHUB",
+      "locations": [
+        "https://github.com/Vanguduza/Van/blob/8eb1889822fc8a83f219977c15340172e16acd91/trading/vati/backtest/engine.py"
+      ],
+      "observed_on": "2026-10-17",
+      "observed_fingerprint": "git-blob:0e43a0c75269f608b74e0c9b12c1e4d731da377c",
+      "scope_note": "Actual91-line source re-read. Single-symbol cycle, fixed OHLC path and terminal liquidation after last curve point. No tests run.",
+      "installation_status": "NOT_INSTALLED_BY_THIS_TASK",
+      "evidence_status": "OBSERVATION_OR_DOCUMENTATION_NOT_QUALIFICATION"
+    },
+    {
+      "id": "S05",
+      "title": "VAN existing conformal risk component",
+      "source_type": "CONNECTED_GITHUB",
+      "locations": [
+        "https://github.com/Vanguduza/Van/blob/8eb1889822fc8a83f219977c15340172e16acd91/trading/vati/risk/conformal.py"
+      ],
+      "observed_on": "2026-10-17",
+      "observed_fingerprint": "git-blob:fc5dbbc8bf705d93d3665308980be2f58b8910f5",
+      "scope_note": "Read lines1–180. Existing residual intervals, lower-bound admission, age and coverage semantics; wording needs assumption-aware review.",
+      "installation_status": "NOT_INSTALLED_BY_THIS_TASK",
+      "evidence_status": "OBSERVATION_OR_DOCUMENTATION_NOT_QUALIFICATION"
+    },
+    {
+      "id": "S06",
+      "title": "VAN validation policy",
+      "source_type": "CONNECTED_GITHUB",
+      "locations": [
+        "https://github.com/Vanguduza/Van/blob/8eb1889822fc8a83f219977c15340172e16acd91/trading/vati/validation/policy.py"
+      ],
+      "observed_on": "2026-10-17",
+      "observed_fingerprint": "git-blob:e5b46de556b2925ee0fae5b7e3b204bfd0c8333e",
+      "scope_note": "Read lines22–66; DSR probability.95, PBO.10, min30 observations and3 walk-forward windows. These are existing thresholds, not adequacy guarantees.",
+      "installation_status": "NOT_INSTALLED_BY_THIS_TASK",
+      "evidence_status": "OBSERVATION_OR_DOCUMENTATION_NOT_QUALIFICATION"
+    },
+    {
+      "id": "S07",
+      "title": "Qlib data layer",
+      "source_type": "OFFICIAL_DOCUMENTATION",
+      "locations": [
+        "https://qlib.readthedocs.io/en/latest/component/data.html"
+      ],
+      "observed_on": "2026-10-17",
+      "observed_fingerprint": null,
+      "scope_note": "DataLoader, DataHandlerLP processing, inference/learning keys, custom datasets and fitted bounds.",
+      "installation_status": "NOT_INSTALLED_BY_THIS_TASK",
+      "evidence_status": "OBSERVATION_OR_DOCUMENTATION_NOT_QUALIFICATION"
+    },
+    {
+      "id": "S08",
+      "title": "Qlib Recorder and MLflow experiment manager",
+      "source_type": "OFFICIAL_DOCUMENTATION",
+      "locations": [
+        "https://qlib.readthedocs.io/en/latest/component/recorder.html"
+      ],
+      "observed_on": "2026-10-17",
+      "observed_fingerprint": null,
+      "scope_note": "Recorder/run interfaces and MLflowExpManager support; no trading authority implied.",
+      "installation_status": "NOT_INSTALLED_BY_THIS_TASK",
+      "evidence_status": "OBSERVATION_OR_DOCUMENTATION_NOT_QUALIFICATION"
+    },
+    {
+      "id": "S09",
+      "title": "Qlib LightGBM wrapper",
+      "source_type": "CONNECTED_GITHUB",
+      "locations": [
+        "https://github.com/microsoft/qlib/blob/main/qlib/contrib/model/gbdt.py"
+      ],
+      "observed_on": "2026-10-17",
+      "observed_fingerprint": "git-blob:950baa904ba2fae19bd0ab0dc655dff209e324e6",
+      "scope_note": "Actual source fetched. Stock loss is mse or binary; single label; DK_L train/DK_I predict; MIT header. Default branch observation is not a production pin.",
+      "installation_status": "NOT_INSTALLED_BY_THIS_TASK",
+      "evidence_status": "OBSERVATION_OR_DOCUMENTATION_NOT_QUALIFICATION"
+    },
+    {
+      "id": "S10",
+      "title": "Freqtrade lookahead analysis",
+      "source_type": "OFFICIAL_DOCUMENTATION",
+      "locations": [
+        "https://www.freqtrade.io/en/stable/lookahead-analysis/"
+      ],
+      "observed_on": "2026-10-17",
+      "observed_fingerprint": null,
+      "scope_note": "Behavioral donor for full-versus-sliced diagnostic testing, not universal leakage proof.",
+      "installation_status": "NOT_INSTALLED_BY_THIS_TASK",
+      "evidence_status": "OBSERVATION_OR_DOCUMENTATION_NOT_QUALIFICATION"
+    },
+    {
+      "id": "S11",
+      "title": "Freqtrade recursive analysis",
+      "source_type": "OFFICIAL_DOCUMENTATION",
+      "locations": [
+        "https://www.freqtrade.io/en/stable/recursive-analysis/"
+      ],
+      "observed_on": "2026-10-17",
+      "observed_fingerprint": null,
+      "scope_note": "Startup-history sensitivity and convergence analysis.",
+      "installation_status": "NOT_INSTALLED_BY_THIS_TASK",
+      "evidence_status": "OBSERVATION_OR_DOCUMENTATION_NOT_QUALIFICATION"
+    },
+    {
+      "id": "S12",
+      "title": "FreqAI features and model lifecycle",
+      "source_type": "OFFICIAL_DOCUMENTATION",
+      "locations": [
+        "https://www.freqtrade.io/en/stable/freqai-feature-engineering/",
+        "https://www.freqtrade.io/en/stable/freqai-running/"
+      ],
+      "observed_on": "2026-10-17",
+      "observed_fingerprint": null,
+      "scope_note": "Feature expansion, outlier transforms, retraining, expiration and persisted forecast/model concepts.",
+      "installation_status": "NOT_INSTALLED_BY_THIS_TASK",
+      "evidence_status": "OBSERVATION_OR_DOCUMENTATION_NOT_QUALIFICATION"
+    },
+    {
+      "id": "S13",
+      "title": "Freqtrade backtesting",
+      "source_type": "OFFICIAL_DOCUMENTATION",
+      "locations": [
+        "https://www.freqtrade.io/en/stable/backtesting/"
+      ],
+      "observed_on": "2026-10-17",
+      "observed_fingerprint": null,
+      "scope_note": "Fee/execution/detail-timeframe assumptions and simulation limits; not proof of profitability.",
+      "installation_status": "NOT_INSTALLED_BY_THIS_TASK",
+      "evidence_status": "OBSERVATION_OR_DOCUMENTATION_NOT_QUALIFICATION"
+    },
+    {
+      "id": "S14",
+      "title": "LightGBM parameters",
+      "source_type": "OFFICIAL_DOCUMENTATION",
+      "locations": [
+        "https://lightgbm.readthedocs.io/en/stable/Parameters.html"
+      ],
+      "observed_on": "2026-10-17",
+      "observed_fingerprint": null,
+      "scope_note": "Objective semantics and CPU determinism/force-col-or-row controls; displayed4.7.0 docs not a tested VAN dependency pin.",
+      "installation_status": "NOT_INSTALLED_BY_THIS_TASK",
+      "evidence_status": "OBSERVATION_OR_DOCUMENTATION_NOT_QUALIFICATION"
+    },
+    {
+      "id": "S15",
+      "title": "Freqtrade Hyperopt and protections",
+      "source_type": "OFFICIAL_DOCUMENTATION",
+      "locations": [
+        "https://www.freqtrade.io/en/stable/hyperopt/",
+        "https://www.freqtrade.io/en/stable/plugins/"
+      ],
+      "observed_on": "2026-10-17",
+      "observed_fingerprint": null,
+      "scope_note": "Donor workflows for optimization and complementary cooldown/loss/profit guards.",
+      "installation_status": "NOT_INSTALLED_BY_THIS_TASK",
+      "evidence_status": "OBSERVATION_OR_DOCUMENTATION_NOT_QUALIFICATION"
+    },
+    {
+      "id": "S16",
+      "title": "NeuralForecast chronological cross-validation",
+      "source_type": "OFFICIAL_DOCUMENTATION",
+      "locations": [
+        "https://nixtlaverse.nixtla.io/neuralforecast/docs/capabilities/cross_validation.html"
+      ],
+      "observed_on": "2026-10-17",
+      "observed_fingerprint": null,
+      "scope_note": "Repeated prediction versus refit cadence; does not replace VAN label-maturity and purging rules.",
+      "installation_status": "NOT_INSTALLED_BY_THIS_TASK",
+      "evidence_status": "OBSERVATION_OR_DOCUMENTATION_NOT_QUALIFICATION"
+    },
+    {
+      "id": "S17",
+      "title": "NeuralForecast exogenous variables",
+      "source_type": "OFFICIAL_DOCUMENTATION",
+      "locations": [
+        "https://nixtlaverse.nixtla.io/neuralforecast/docs/capabilities/exogenous_variables.html"
+      ],
+      "observed_on": "2026-10-17",
+      "observed_fingerprint": null,
+      "scope_note": "Historical/future/static input distinctions; VAN must enforce information availability.",
+      "installation_status": "NOT_INSTALLED_BY_THIS_TASK",
+      "evidence_status": "OBSERVATION_OR_DOCUMENTATION_NOT_QUALIFICATION"
+    },
+    {
+      "id": "S18",
+      "title": "NeuralForecast model capabilities",
+      "source_type": "OFFICIAL_DOCUMENTATION",
+      "locations": [
+        "https://nixtlaverse.nixtla.io/neuralforecast/models.nhits.html",
+        "https://nixtlaverse.nixtla.io/neuralforecast/models.nbeatsx.html",
+        "https://nixtlaverse.nixtla.io/neuralforecast/models.deepar.html",
+        "https://nixtlaverse.nixtla.io/neuralforecast/docs/capabilities/overview.html"
+      ],
+      "observed_on": "2026-10-17",
+      "observed_fingerprint": null,
+      "scope_note": "Primary models, interfaces and architecture capabilities. Some explanatory text and API signatures differ; inspect the pinned implementation and test capabilities.",
+      "installation_status": "NOT_INSTALLED_BY_THIS_TASK",
+      "evidence_status": "OBSERVATION_OR_DOCUMENTATION_NOT_QUALIFICATION"
+    },
+    {
+      "id": "S19",
+      "title": "NeuralForecast loss functions",
+      "source_type": "OFFICIAL_DOCUMENTATION",
+      "locations": [
+        "https://nixtlaverse.nixtla.io/neuralforecast/losses.pytorch.html"
+      ],
+      "observed_on": "2026-10-17",
+      "observed_fingerprint": null,
+      "scope_note": "Point, quantile, robust and distributional loss interfaces.",
+      "installation_status": "NOT_INSTALLED_BY_THIS_TASK",
+      "evidence_status": "OBSERVATION_OR_DOCUMENTATION_NOT_QUALIFICATION"
+    },
+    {
+      "id": "S20",
+      "title": "NeuralForecast safe save/load",
+      "source_type": "OFFICIAL_DOCUMENTATION",
+      "locations": [
+        "https://nixtlaverse.nixtla.io/neuralforecast/docs/capabilities/save_load_models.html"
+      ],
+      "observed_on": "2026-10-17",
+      "observed_fingerprint": null,
+      "scope_note": "Documents3.3.0+ safetensors/JSON format, legacy pickle opt-in, closed registry and remote-loading controls; exact release compatibility still needs admission.",
+      "installation_status": "NOT_INSTALLED_BY_THIS_TASK",
+      "evidence_status": "OBSERVATION_OR_DOCUMENTATION_NOT_QUALIFICATION"
+    },
+    {
+      "id": "S21",
+      "title": "Freqtrade licence",
+      "source_type": "CONNECTED_GITHUB",
+      "locations": [
+        "https://github.com/freqtrade/freqtrade/blob/develop/LICENSE"
+      ],
+      "observed_on": "2026-10-17",
+      "observed_fingerprint": "git-blob:9cecc1d4669ee8af2ca727a5d8cde10cd8b2d7cc",
+      "scope_note": "GPLv3 licence header read; actual direct source adoption must retain applicable terms.",
+      "installation_status": "NOT_INSTALLED_BY_THIS_TASK",
+      "evidence_status": "OBSERVATION_OR_DOCUMENTATION_NOT_QUALIFICATION"
+    },
+    {
+      "id": "S22",
+      "title": "NeuralForecast licence",
+      "source_type": "PRIMARY_UPSTREAM",
+      "locations": [
+        "https://github.com/Nixtla/neuralforecast/blob/main/LICENSE"
+      ],
+      "observed_on": "2026-10-17",
+      "observed_fingerprint": null,
+      "scope_note": "Apache2.0 licence; dependent artifact/source terms still recorded.",
+      "installation_status": "NOT_INSTALLED_BY_THIS_TASK",
+      "evidence_status": "OBSERVATION_OR_DOCUMENTATION_NOT_QUALIFICATION"
+    },
+    {
+      "id": "S23",
+      "title": "LightGBM licence",
+      "source_type": "PRIMARY_UPSTREAM",
+      "locations": [
+        "https://github.com/lightgbm-org/LightGBM/blob/main/LICENSE"
+      ],
+      "observed_on": "2026-10-17",
+      "observed_fingerprint": null,
+      "scope_note": "MIT. Requested Microsoft/master URL redirected to this observed current location; verify immutable source identity at pinning.",
+      "installation_status": "NOT_INSTALLED_BY_THIS_TASK",
+      "evidence_status": "OBSERVATION_OR_DOCUMENTATION_NOT_QUALIFICATION"
+    },
+    {
+      "id": "S24",
+      "title": "Conformal prediction assumptions",
+      "source_type": "PRIMARY_RESEARCH",
+      "locations": [
+        "https://arxiv.org/abs/2107.07511"
+      ],
+      "observed_on": "2026-10-17",
+      "observed_fingerprint": null,
+      "scope_note": "Angelopoulos and Bates, A Gentle Introduction to Conformal Prediction and Distribution-Free Uncertainty Quantification. Used for assumption-aware marginal coverage; not a VAN finance benchmark.",
+      "installation_status": "NOT_INSTALLED_BY_THIS_TASK",
+      "evidence_status": "OBSERVATION_OR_DOCUMENTATION_NOT_QUALIFICATION"
+    },
+    {
+      "id": "S25",
+      "title": "DIAL current control and VAN project context",
+      "source_type": "CONNECTED_RUNTIME_OBSERVATION",
+      "locations": [],
+      "observed_on": "2026-10-17",
+      "observed_fingerprint": null,
+      "scope_note": "Global_DIAL.dial_global_status observed2026-10-17T09:45:47.292Z; serving route does not establish model deployment/capacity. Tracker VAN project16f2f43a-8d8b-4f18-a6ac-5bd8df620414 rev3, cursor954; receipt b68fd9bf-eab7-4d6a-8614-dfd464510df6 acknowledged. Rev1.10 preparation is reported, not application qualification.",
+      "installation_status": "NOT_INSTALLED_BY_THIS_TASK",
+      "evidence_status": "OBSERVATION_OR_DOCUMENTATION_NOT_QUALIFICATION"
+    },
+    {
+      "id": "S26",
+      "title": "Current owner direction: hosted execution and no licence procurement",
+      "source_type": "OWNER_INSTRUCTION",
+      "locations": [
+        "scope/OWNER_DIRECTION.md"
+      ],
+      "observed_on": "2026-10-17",
+      "observed_fingerprint": null,
+      "scope_note": "Integrate the prediction-market recommendations into this blueprint; Netcup/Oracle are the intended compute environment. No procurement or live financial action is requested. This does not establish provider permission or operator eligibility.",
+      "installation_status": "NOT_INSTALLED_BY_THIS_TASK",
+      "evidence_status": "OBSERVATION_OR_DOCUMENTATION_NOT_QUALIFICATION"
+    },
+    {
+      "id": "S27",
+      "title": "Kalshi market-data quick start",
+      "source_type": "OFFICIAL_DOCUMENTATION",
+      "locations": [
+        "https://docs.kalshi.com/getting_started/quick_start_market_data"
+      ],
+      "observed_on": "2026-10-17",
+      "observed_fingerprint": null,
+      "scope_note": "Public unauthenticated REST metadata/order-book access and current endpoint shape. Technical availability is distinct from data-use terms; authentication and limits must be checked for the exact interface.",
+      "installation_status": "NOT_INSTALLED_BY_THIS_TASK",
+      "evidence_status": "OBSERVATION_OR_DOCUMENTATION_NOT_QUALIFICATION"
+    },
+    {
+      "id": "S28",
+      "title": "Kalshi order-book response semantics",
+      "source_type": "OFFICIAL_DOCUMENTATION",
+      "locations": [
+        "https://docs.kalshi.com/getting_started/orderbook_responses"
+      ],
+      "observed_on": "2026-10-17",
+      "observed_fingerprint": null,
+      "scope_note": "YES/NO bid ladders, complementary asks, fixed-point price and quantity strings. Executable price is not last trade or midpoint.",
+      "installation_status": "NOT_INSTALLED_BY_THIS_TASK",
+      "evidence_status": "OBSERVATION_OR_DOCUMENTATION_NOT_QUALIFICATION"
+    },
+    {
+      "id": "S29",
+      "title": "Kalshi historical data and cutoff partition",
+      "source_type": "OFFICIAL_DOCUMENTATION",
+      "locations": [
+        "https://docs.kalshi.com/getting_started/historical_data"
+      ],
+      "observed_on": "2026-10-17",
+      "observed_fingerprint": null,
+      "scope_note": "Separate live/historical data boundaries and historical endpoints. The adapter must reconcile cutoffs and pagination; candles do not establish historical order queue position.",
+      "installation_status": "NOT_INSTALLED_BY_THIS_TASK",
+      "evidence_status": "OBSERVATION_OR_DOCUMENTATION_NOT_QUALIFICATION"
+    },
+    {
+      "id": "S30",
+      "title": "Kalshi fee rounding",
+      "source_type": "OFFICIAL_DOCUMENTATION",
+      "locations": [
+        "https://docs.kalshi.com/getting_started/fee_rounding"
+      ],
+      "observed_on": "2026-10-17",
+      "observed_fingerprint": null,
+      "scope_note": "Fee rounding depends on balance precision and accumulation rules. Pin the applicable fee formula, series settings and effective time separately; synthetic examples in this pack are not a quote of current fees.",
+      "installation_status": "NOT_INSTALLED_BY_THIS_TASK",
+      "evidence_status": "OBSERVATION_OR_DOCUMENTATION_NOT_QUALIFICATION"
+    },
+    {
+      "id": "S31",
+      "title": "Kalshi WebSocket order-book updates",
+      "source_type": "OFFICIAL_DOCUMENTATION",
+      "locations": [
+        "https://docs.kalshi.com/websockets/orderbook-updates"
+      ],
+      "observed_on": "2026-10-17",
+      "observed_fingerprint": null,
+      "scope_note": "Authenticated snapshot/update stream and sequence-bearing book observations. Reconstruct only with a valid snapshot and coherent update stream.",
+      "installation_status": "NOT_INSTALLED_BY_THIS_TASK",
+      "evidence_status": "OBSERVATION_OR_DOCUMENTATION_NOT_QUALIFICATION"
+    },
+    {
+      "id": "S32",
+      "title": "Polymarket market-resolution rules",
+      "source_type": "OFFICIAL_DOCUMENTATION",
+      "locations": [
+        "https://docs.polymarket.com/polymarket-learn/markets/how-are-markets-resolved",
+        "https://help.polymarket.com/en/articles/13364518-how-are-prediction-markets-resolved"
+      ],
+      "observed_on": "2026-10-17",
+      "observed_fingerprint": null,
+      "scope_note": "Settlement depends on exact predefined market rules and a resolution/dispute process. Similar titles do not prove economically complementary contracts.",
+      "installation_status": "NOT_INSTALLED_BY_THIS_TASK",
+      "evidence_status": "OBSERVATION_OR_DOCUMENTATION_NOT_QUALIFICATION"
+    },
+    {
+      "id": "S33",
+      "title": "Kalshi and the Rise of Macro Markets",
+      "source_type": "ORIGINAL_RESEARCH",
+      "locations": [
+        "https://www.federalreserve.gov/econres/feds/kalshi-and-the-rise-of-macro-markets.htm"
+      ],
+      "observed_on": "2026-10-17",
+      "observed_fingerprint": null,
+      "scope_note": "Federal Reserve FEDS2026-010, Diercks, Katz and Wright. Evaluates macroeconomic market-implied expectations. Forecasting evidence motivates replication, not a claim of VAN profits.",
+      "installation_status": "NOT_INSTALLED_BY_THIS_TASK",
+      "evidence_status": "OBSERVATION_OR_DOCUMENTATION_NOT_QUALIFICATION"
+    },
+    {
+      "id": "S34",
+      "title": "Do Prediction Markets Forecast Cryptocurrency Volatility?",
+      "source_type": "RESEARCH_PREPRINT",
+      "locations": [
+        "https://arxiv.org/abs/2604.01431"
+      ],
+      "observed_on": "2026-10-17",
+      "observed_fingerprint": null,
+      "scope_note": "Mohanty and Krishnamachari, 2026. Reports conditional and mixed out-of-sample results for Kalshi macro signals and cryptocurrency volatility; not an independently replicated VAN trading result.",
+      "installation_status": "NOT_INSTALLED_BY_THIS_TASK",
+      "evidence_status": "OBSERVATION_OR_DOCUMENTATION_NOT_QUALIFICATION"
+    },
+    {
+      "id": "S35",
+      "title": "Unravelling the Probabilistic Forest: Arbitrage in Prediction Markets",
+      "source_type": "PEER_REVIEWED_ORIGINAL_RESEARCH",
+      "locations": [
+        "https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.AFT.2025.27"
+      ],
+      "observed_on": "2026-10-17",
+      "observed_fingerprint": null,
+      "scope_note": "AFT2025 study of Polymarket inconsistencies and measured arbitrage activity. It does not establish accessible Kalshi–Polymarket arbitrage for this owner.",
+      "installation_status": "NOT_INSTALLED_BY_THIS_TASK",
+      "evidence_status": "OBSERVATION_OR_DOCUMENTATION_NOT_QUALIFICATION"
+    },
+    {
+      "id": "S36",
+      "title": "Risk-Constrained Kelly Gambling",
+      "source_type": "ORIGINAL_RESEARCH",
+      "locations": [
+        "https://arxiv.org/abs/1603.06183"
+      ],
+      "observed_on": "2026-10-17",
+      "observed_fingerprint": null,
+      "scope_note": "Formal growth/drawdown trade-offs under modeled assumptions. No model-confidence output becomes an automatic Kelly allocation or overrides VAN risk limits.",
+      "installation_status": "NOT_INSTALLED_BY_THIS_TASK",
+      "evidence_status": "OBSERVATION_OR_DOCUMENTATION_NOT_QUALIFICATION"
+    },
+    {
+      "id": "S37",
+      "title": "Kalshi calibration research",
+      "source_type": "EXCHANGE_AUTHORED_RESEARCH",
+      "locations": [
+        "https://kalshi.com/research/publications/calibration"
+      ],
+      "observed_on": "2026-10-17",
+      "observed_fingerprint": null,
+      "scope_note": "Exchange-produced aggregate calibration evidence. Event categories, participation and timing require separate evaluation; aggregate accuracy is not an early tradable edge.",
+      "installation_status": "NOT_INSTALLED_BY_THIS_TASK",
+      "evidence_status": "OBSERVATION_OR_DOCUMENTATION_NOT_QUALIFICATION"
+    },
+    {
+      "id": "S38",
+      "title": "The economics of Kalshi prediction market",
+      "source_type": "AUTHOR_RESEARCH_SUMMARY",
+      "locations": [
+        "https://cepr.org/voxeu/columns/economics-kalshi-prediction-market"
+      ],
+      "observed_on": "2026-10-17",
+      "observed_fingerprint": null,
+      "scope_note": "Author summary of research including favourite–longshot bias and maker/taker differences. Supports subgroup calibration and execution-aware rather than universal probability claims.",
+      "installation_status": "NOT_INSTALLED_BY_THIS_TASK",
+      "evidence_status": "OBSERVATION_OR_DOCUMENTATION_NOT_QUALIFICATION"
+    },
+    {
+      "id": "S39",
+      "title": "Kalshi Developer Agreement",
+      "source_type": "PROVIDER_TERMS",
+      "locations": [
+        "https://assets.kalshi.com/Kalshi-Developer-Agreement.pdf"
+      ],
+      "observed_on": "2026-10-17",
+      "observed_fingerprint": null,
+      "scope_note": "Ordinary API use is contractually scoped; public access is not unrestricted downstream reuse. Licence procurement is outside this phase. Actual source-use scope remains a recorded operational fact, not assumed by hosting.",
+      "installation_status": "NOT_INSTALLED_BY_THIS_TASK",
+      "evidence_status": "OBSERVATION_OR_DOCUMENTATION_NOT_QUALIFICATION"
+    },
+    {
+      "id": "S40",
+      "title": "Kalshi Member Agreement",
+      "source_type": "PROVIDER_TERMS",
+      "locations": [
+        "https://kalshi.com/docs/kalshi-member-agreement.pdf"
+      ],
+      "observed_on": "2026-10-17",
+      "observed_fingerprint": null,
+      "scope_note": "Eligibility is not determined solely by server address. The agreement distinguishes event-contract trading from non-trading access. No eligibility conclusion, registration or live activation is issued by this pack.",
+      "installation_status": "NOT_INSTALLED_BY_THIS_TASK",
+      "evidence_status": "OBSERVATION_OR_DOCUMENTATION_NOT_QUALIFICATION"
+    },
+    {
+      "id": "S41",
+      "title": "Global DIAL gateway observation during Rev1.1 preparation",
+      "source_type": "CONNECTED_RUNTIME_OBSERVATION",
+      "locations": [
+        "Global_DIAL.dial_global_status @ 2026-10-17T11:08:33.890Z"
+      ],
+      "observed_on": "2026-10-17",
+      "observed_fingerprint": null,
+      "scope_note": "Serving gateway and authenticated owner route observed. Other broad projections included stale/readiness limitations. No prediction-market worker, region, account, financial action or model performance was qualified.",
+      "installation_status": "NOT_INSTALLED_BY_THIS_TASK",
+      "evidence_status": "OBSERVATION_OR_DOCUMENTATION_NOT_QUALIFICATION"
+    },
+    {
+      "id": "S42",
+      "title": "Parent prediction-market and news-path obligations re-read",
+      "source_type": "USER_LIBRARY",
+      "locations": [
+        "VAN_NEXT_MASTER_BLUEPRINT_REV1_10_20261017.md §§8.2,8.4,8.5,16–17"
+      ],
+      "observed_on": "2026-10-17",
+      "observed_fingerprint": null,
+      "scope_note": "Parent VAN-NX-036/OD-14 includes Kalshi and Polymarket, liquidity and matching expectations. D1–D6 remain restrictive; D7 owns new event-strategy risk. Full backend BG-001 remains mandatory.",
+      "installation_status": "NOT_INSTALLED_BY_THIS_TASK",
+      "evidence_status": "OBSERVATION_OR_DOCUMENTATION_NOT_QUALIFICATION"
+    }
+  ],
+  "revision": "1.1",
+  "inherited_observation_policy": "S01–S25 preserve Rev1 observations. They are not a new whole-repository audit in Rev1.1. S26–S42 record the current revision inputs."
+}

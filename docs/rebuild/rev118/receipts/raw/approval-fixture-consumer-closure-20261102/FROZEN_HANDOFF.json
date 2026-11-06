@@ -1,0 +1,1208 @@
+{
+  "status": "FROZEN_TEST_ONLY_CANDIDATE_REQUIRES_INDEPENDENT_REVIEW_NO_COMMIT",
+  "at": "2026-11-02T06:11:43.458081+00:00",
+  "base": "23a570cf3f4f6e67fee69a2f8d845c7a8f03d244",
+  "source_paths": {
+    "backend/tests/test_account_resource_binding.py": {
+      "before_sha256": "fc3fc4b8a094cc49f9cb96736f08131deb80f4fcd762bb1342c51c08d19b06ee",
+      "after_sha256": "a4f3ee16f83ffea31a7d2cc2b0273022e00e49f7d892211c2c4a2dc09fa8ab19",
+      "import_changes": [
+        [
+          "test_trading_api",
+          "backend.tests.test_trading_api"
+        ],
+        [
+          "test_trading_oauth_scope",
+          "backend.tests.test_trading_oauth_scope"
+        ]
+      ],
+      "all_other_AST_exact": true,
+      "assertions": 30
+    },
+    "backend/tests/test_account_operation_recovery.py": {
+      "before_sha256": "dab4bb9906c89d682afdb04221c6c586192ee86aeaed032eeb36f1a0caf2aa7d",
+      "after_sha256": "f1046879664f961a43453e87e1abcb968029f1fd29dc7ca98f57d374c7cef3c8",
+      "import_changes": [
+        [
+          "test_trading_api",
+          "backend.tests.test_trading_api"
+        ],
+        [
+          "test_trading_oauth_scope",
+          "backend.tests.test_trading_oauth_scope"
+        ],
+        [
+          "test_account_resource_binding",
+          "backend.tests.test_account_resource_binding"
+        ],
+        [
+          "test_trading_api",
+          "backend.tests.test_trading_api"
+        ]
+      ],
+      "all_other_AST_exact": true,
+      "assertions": 52
+    },
+    "backend/tests/test_trading_oauth_effects.py": {
+      "before_sha256": "f032a701cea8f2a1b874b994451094f4d049e7a227f5387188b9ac6ccdd1ae14",
+      "after_sha256": "aeba2b7bf488983ca3090334c5581de7274de507cd936800bd29491f4e78a5dd",
+      "import_changes": [
+        [
+          "test_trading_api",
+          "backend.tests.test_trading_api"
+        ],
+        [
+          "test_trading_oauth_scope",
+          "backend.tests.test_trading_oauth_scope"
+        ]
+      ],
+      "all_other_AST_exact": true,
+      "assertions": 74
+    },
+    "backend/tests/test_stateful_link_binding.py": {
+      "before_sha256": "63720c50d1ee5bba47bd6307a47a651ae96a778d0b32426e72b3ac5c7016a657",
+      "after_sha256": "3318a8063954c01d4e582ce47585412606981b77d172c46e36939c017c1d3e79",
+      "import_changes": [
+        [
+          6,
+          "test_trading_api",
+          "backend.tests.test_trading_api"
+        ],
+        [
+          7,
+          "test_trading_oauth_scope",
+          "backend.tests.test_trading_oauth_scope"
+        ],
+        [
+          8,
+          "test_account_resource_binding",
+          "backend.tests.test_account_resource_binding"
+        ],
+        [
+          201,
+          "test_trading_api",
+          "backend.tests.test_trading_api"
+        ]
+      ],
+      "all_other_AST_exact": true,
+      "assertions": 93
+    }
+  },
+  "assertions_preserved": 249,
+  "all_nonimport_AST_and_child_script_waits_exact": true,
+  "source14exact": true,
+  "only4trackedtestmutations": true,
+  "export": {
+    "patch": "/workspace/van-approval-fixture-identity-integration-20261102/IMPORT4.patch",
+    "patch_sha256": "5e399c2c2a0c13f2315a870de22f6f51c4c64e1fc81aff960310b3f1a7ef106d",
+    "zip": "/workspace/van-approval-fixture-identity-integration-20261102/IMPORT4_SOURCE_ONLY.zip",
+    "zip_sha256": "b3aa0f9fc48f2ccf96e4be7992d88ea409b237c4d94119ccf44d99764a90f7a3",
+    "members_sha256": {
+      "before/backend/tests/test_account_resource_binding.py": "fc3fc4b8a094cc49f9cb96736f08131deb80f4fcd762bb1342c51c08d19b06ee",
+      "source/backend/tests/test_account_resource_binding.py": "a4f3ee16f83ffea31a7d2cc2b0273022e00e49f7d892211c2c4a2dc09fa8ab19",
+      "before/backend/tests/test_account_operation_recovery.py": "dab4bb9906c89d682afdb04221c6c586192ee86aeaed032eeb36f1a0caf2aa7d",
+      "source/backend/tests/test_account_operation_recovery.py": "f1046879664f961a43453e87e1abcb968029f1fd29dc7ca98f57d374c7cef3c8",
+      "before/backend/tests/test_trading_oauth_effects.py": "f032a701cea8f2a1b874b994451094f4d049e7a227f5387188b9ac6ccdd1ae14",
+      "source/backend/tests/test_trading_oauth_effects.py": "aeba2b7bf488983ca3090334c5581de7274de507cd936800bd29491f4e78a5dd",
+      "before/backend/tests/test_stateful_link_binding.py": "63720c50d1ee5bba47bd6307a47a651ae96a778d0b32426e72b3ac5c7016a657",
+      "source/backend/tests/test_stateful_link_binding.py": "3318a8063954c01d4e582ce47585412606981b77d172c46e36939c017c1d3e79"
+    },
+    "CRC_verified": true,
+    "baseline_git_apply_check0": true
+  },
+  "full_affected_runtime": {
+    "actual_PASS_executions": 160,
+    "actual_unique_cases": 80,
+    "each_cwd_PASS": 80,
+    "skip": 0,
+    "failures": 0,
+    "all32owned_runs_terminal0": true,
+    "actual_inputs": "FROZEN_CLOSURE_INPUTS.json",
+    "mapping": [
+      {
+        "tag": "closure-root-00",
+        "cwd": "/workspace/van-review-2026-10-18/publish",
+        "receipt": "/tmp/van-approval-fixture-proof-20261102/closure-root-00/receipt.json",
+        "junit": "/tmp/van-approval-fixture-proof-20261102/closure-root-00/junit.xml",
+        "junit_sha256": "3302d09d614ad4923eec153c08f680d31f54b2c1211ea6ec75813526026fd3f0",
+        "raw": "/tmp/van-approval-fixture-proof-20261102/closure-root-00/raw.txt",
+        "raw_sha256": "bb50af5b268f57d3c3fc252462af43f1b8b93d2acc7fa2ccdaa33eab4346e38e",
+        "actual_cases": [
+          [
+            "backend.tests.test_account_resource_binding",
+            "test_delayed_owner_approval_cannot_overwrite_a_newer_account[account_upsert]"
+          ],
+          [
+            "backend.tests.test_account_resource_binding",
+            "test_delayed_owner_approval_cannot_overwrite_a_newer_account[account_remove]"
+          ],
+          [
+            "backend.tests.test_account_resource_binding",
+            "test_approval_for_an_absent_alias_cannot_replace_a_later_registration"
+          ],
+          [
+            "backend.tests.test_account_resource_binding",
+            "test_native_cas_still_checks_changes_after_gateway_proof_verification"
+          ],
+          [
+            "backend.tests.test_account_resource_binding",
+            "test_credential_generation_change_invalidates_a_pending_local_edit"
+          ]
+        ],
+        "source_pins": "FROZEN_CLOSURE_INPUTS.json"
+      },
+      {
+        "tag": "closure-root-01",
+        "cwd": "/workspace/van-review-2026-10-18/publish",
+        "receipt": "/tmp/van-approval-fixture-proof-20261102/closure-root-01/receipt.json",
+        "junit": "/tmp/van-approval-fixture-proof-20261102/closure-root-01/junit.xml",
+        "junit_sha256": "3933cd22e93c17291fa258dc0e91eddec71dff486cbfae5b711df1b619c31d43",
+        "raw": "/tmp/van-approval-fixture-proof-20261102/closure-root-01/raw.txt",
+        "raw_sha256": "63debbb729358efe83768bfad29c9ef6cb7f2248ea96ab7f4df4f932c32a8194",
+        "actual_cases": [
+          [
+            "backend.tests.test_account_resource_binding",
+            "test_a_disjoint_owner_edit_does_not_invalidate_this_account_approval"
+          ],
+          [
+            "backend.tests.test_account_resource_binding",
+            "test_restoring_old_metadata_does_not_restore_an_obsolete_approval"
+          ],
+          [
+            "backend.tests.test_account_resource_binding",
+            "test_device_cannot_supply_the_gateways_internal_resource_binding"
+          ],
+          [
+            "backend.tests.test_account_resource_binding",
+            "test_failed_native_readback_returns_refused_without_dispatching_a_change"
+          ],
+          [
+            "backend.tests.test_account_operation_recovery",
+            "test_authenticated_namespace_is_bound_to_approval_native_intent_and_original_read"
+          ]
+        ],
+        "source_pins": "FROZEN_CLOSURE_INPUTS.json"
+      },
+      {
+        "tag": "closure-root-02",
+        "cwd": "/workspace/van-review-2026-10-18/publish",
+        "receipt": "/tmp/van-approval-fixture-proof-20261102/closure-root-02/receipt.json",
+        "junit": "/tmp/van-approval-fixture-proof-20261102/closure-root-02/junit.xml",
+        "junit_sha256": "876bcef36d7b4bf29b39455c06bb2fa74f6c4340db33edfe4d2c2d4e555fb3da",
+        "raw": "/tmp/van-approval-fixture-proof-20261102/closure-root-02/raw.txt",
+        "raw_sha256": "6d9b67a4ef9ddda6a08bc5e723c07600f173b7f3db06adc8272a32c0515dbbe1",
+        "actual_cases": [
+          [
+            "backend.tests.test_account_operation_recovery",
+            "test_native_writer_rechecks_descriptor_after_gateway_approval_consumption"
+          ],
+          [
+            "backend.tests.test_account_operation_recovery",
+            "test_original_demo_creation_runs_through_paired_a4_signed_commander_and_readback[provider_reply]"
+          ],
+          [
+            "backend.tests.test_account_operation_recovery",
+            "test_original_demo_creation_runs_through_paired_a4_signed_commander_and_readback[native_http_reply]"
+          ],
+          [
+            "backend.tests.test_account_operation_recovery",
+            "test_original_demo_creation_runs_through_paired_a4_signed_commander_and_readback[none]"
+          ],
+          [
+            "backend.tests.test_account_operation_recovery",
+            "test_lost_reply_is_unknown_then_native_readback_confirms_original_issue"
+          ]
+        ],
+        "source_pins": "FROZEN_CLOSURE_INPUTS.json"
+      },
+      {
+        "tag": "closure-root-03",
+        "cwd": "/workspace/van-review-2026-10-18/publish",
+        "receipt": "/tmp/van-approval-fixture-proof-20261102/closure-root-03/receipt.json",
+        "junit": "/tmp/van-approval-fixture-proof-20261102/closure-root-03/junit.xml",
+        "junit_sha256": "ffe0ca54bc95ca7f91e16aa5c86f787b966b7644a754eea026a4d5863f2294ee",
+        "raw": "/tmp/van-approval-fixture-proof-20261102/closure-root-03/raw.txt",
+        "raw_sha256": "8514697fc562a3088fab71447bd4090df4fc40d0cc18f8dbef8bd798c0d23790",
+        "actual_cases": [
+          [
+            "backend.tests.test_account_operation_recovery",
+            "test_failed_native_completion_blocks_new_approval_but_disjoint_account_works"
+          ],
+          [
+            "backend.tests.test_account_operation_recovery",
+            "test_absence_of_a_native_record_is_never_evidence_of_no_effect"
+          ],
+          [
+            "backend.tests.test_account_operation_recovery",
+            "test_operation_readback_uses_current_authenticated_device_not_a_query_override"
+          ],
+          [
+            "backend.tests.test_account_operation_recovery",
+            "test_device_cannot_inject_a_native_operation_context"
+          ],
+          [
+            "backend.tests.test_account_operation_recovery",
+            "test_approval_response_preserves_original_timestamp_across_biometric_delay"
+          ]
+        ],
+        "source_pins": "FROZEN_CLOSURE_INPUTS.json"
+      },
+      {
+        "tag": "closure-root-04",
+        "cwd": "/workspace/van-review-2026-10-18/publish",
+        "receipt": "/tmp/van-approval-fixture-proof-20261102/closure-root-04/receipt.json",
+        "junit": "/tmp/van-approval-fixture-proof-20261102/closure-root-04/junit.xml",
+        "junit_sha256": "c5ec52c18d1db95296334a41e6990a40dc4cf013befbba1a5678b3300a5ab981",
+        "raw": "/tmp/van-approval-fixture-proof-20261102/closure-root-04/raw.txt",
+        "raw_sha256": "b5240a59955b55fca3583c6a562bfe95870a4948257c6b9b4ac328aff09cef79",
+        "actual_cases": [
+          [
+            "backend.tests.test_account_operation_recovery",
+            "test_signed_remote_commander_lost_reply_is_recovered_by_original_native_identity[lost]"
+          ],
+          [
+            "backend.tests.test_account_operation_recovery",
+            "test_signed_remote_commander_lost_reply_is_recovered_by_original_native_identity[wrong-command]"
+          ],
+          [
+            "backend.tests.test_trading_oauth_effects",
+            "test_exact_callback_retry_does_not_exchange_a_provider_code_twice"
+          ],
+          [
+            "backend.tests.test_trading_oauth_effects",
+            "test_conflicting_callback_cannot_replace_the_first_accepted_credentials"
+          ],
+          [
+            "backend.tests.test_trading_oauth_effects",
+            "test_link_retry_after_a_lost_reply_returns_receipt_without_repeating_the_local_effect"
+          ]
+        ],
+        "source_pins": "FROZEN_CLOSURE_INPUTS.json"
+      },
+      {
+        "tag": "closure-root-05",
+        "cwd": "/workspace/van-review-2026-10-18/publish",
+        "receipt": "/tmp/van-approval-fixture-proof-20261102/closure-root-05/receipt.json",
+        "junit": "/tmp/van-approval-fixture-proof-20261102/closure-root-05/junit.xml",
+        "junit_sha256": "9f3e501034a74e67a5dc739eb44b09dc307a7862a585c01a5a0a3fbda2805ec3",
+        "raw": "/tmp/van-approval-fixture-proof-20261102/closure-root-05/raw.txt",
+        "raw_sha256": "90c736f0716aafc2ba80b0fe3357da5ad6e5b8b091ce2c531e23601d12f02c6f",
+        "actual_cases": [
+          [
+            "backend.tests.test_trading_oauth_effects",
+            "test_concurrent_callback_is_refused_while_owner_polling_and_event_loop_remain_responsive"
+          ],
+          [
+            "backend.tests.test_trading_oauth_effects",
+            "test_cancelled_token_exchange_keeps_unknown_and_a_new_state_cannot_reuse_the_code"
+          ],
+          [
+            "backend.tests.test_trading_oauth_effects",
+            "test_link_effect_without_a_committed_receipt_is_not_repeated_or_bypassed_by_new_state[after_material_before_receipt]"
+          ],
+          [
+            "backend.tests.test_trading_oauth_effects",
+            "test_link_effect_without_a_committed_receipt_is_not_repeated_or_bypassed_by_new_state[after_receipt_before_commit]"
+          ],
+          [
+            "backend.tests.test_trading_oauth_effects",
+            "test_committed_link_receipt_survives_a_lost_response_and_a_new_reader"
+          ]
+        ],
+        "source_pins": "FROZEN_CLOSURE_INPUTS.json"
+      },
+      {
+        "tag": "closure-root-06",
+        "cwd": "/workspace/van-review-2026-10-18/publish",
+        "receipt": "/tmp/van-approval-fixture-proof-20261102/closure-root-06/receipt.json",
+        "junit": "/tmp/van-approval-fixture-proof-20261102/closure-root-06/junit.xml",
+        "junit_sha256": "9f780191cd88663529a124277cc8f018318c47151c7c1c83811a7169f312fec0",
+        "raw": "/tmp/van-approval-fixture-proof-20261102/closure-root-06/raw.txt",
+        "raw_sha256": "f8ae9726debf5dfc8f422bd8724dce8c0ef403fb78b8c0c54891db3e25930fa8",
+        "actual_cases": [
+          [
+            "backend.tests.test_trading_oauth_effects",
+            "test_real_process_death_after_claim_leaves_unconfirmed_work_without_reexchange"
+          ],
+          [
+            "backend.tests.test_trading_oauth_effects",
+            "test_invalid_link_alias_is_refused_before_claim_and_can_be_corrected"
+          ],
+          [
+            "backend.tests.test_trading_oauth_effects",
+            "test_incomplete_provider_token_response_stays_unknown_and_cannot_be_reexchanged"
+          ],
+          [
+            "backend.tests.test_trading_oauth_effects",
+            "test_missing_native_authorization_material_cannot_create_a_ready_account[acct1]"
+          ],
+          [
+            "backend.tests.test_trading_oauth_effects",
+            "test_missing_native_authorization_material_cannot_create_a_ready_account[token1]"
+          ]
+        ],
+        "source_pins": "FROZEN_CLOSURE_INPUTS.json"
+      },
+      {
+        "tag": "closure-root-07",
+        "cwd": "/workspace/van-review-2026-10-18/publish",
+        "receipt": "/tmp/van-approval-fixture-proof-20261102/closure-root-07/receipt.json",
+        "junit": "/tmp/van-approval-fixture-proof-20261102/closure-root-07/junit.xml",
+        "junit_sha256": "50318783af43b2d4e4f8f621a43b85439cf0f11a5f8b3400b225034635b17bbe",
+        "raw": "/tmp/van-approval-fixture-proof-20261102/closure-root-07/raw.txt",
+        "raw_sha256": "14643bff9606121f65756f62351a1fa4341a8e36643b4790b1884f5e746d0a54",
+        "actual_cases": [
+          [
+            "backend.tests.test_trading_oauth_effects",
+            "test_missing_native_authorization_material_cannot_create_a_ready_account[cur1]"
+          ],
+          [
+            "backend.tests.test_trading_oauth_effects",
+            "test_an_encrypted_receipt_cannot_be_transplanted_to_another_link"
+          ],
+          [
+            "backend.tests.test_trading_oauth_effects",
+            "test_encrypted_authorization_material_cannot_move_to_a_different_state"
+          ],
+          [
+            "backend.tests.test_trading_oauth_effects",
+            "test_mismatched_native_link_receipt_stays_unconfirmed[change0]"
+          ],
+          [
+            "backend.tests.test_trading_oauth_effects",
+            "test_mismatched_native_link_receipt_stays_unconfirmed[change1]"
+          ]
+        ],
+        "source_pins": "FROZEN_CLOSURE_INPUTS.json"
+      },
+      {
+        "tag": "closure-root-08",
+        "cwd": "/workspace/van-review-2026-10-18/publish",
+        "receipt": "/tmp/van-approval-fixture-proof-20261102/closure-root-08/receipt.json",
+        "junit": "/tmp/van-approval-fixture-proof-20261102/closure-root-08/junit.xml",
+        "junit_sha256": "86becca557e775bf69c78062120bb1955f3d6be47f1a4c070d06d4e0e5117128",
+        "raw": "/tmp/van-approval-fixture-proof-20261102/closure-root-08/raw.txt",
+        "raw_sha256": "54e4ad7827d343f9c639f2878d4b8823db7e07236e287e9a6dd161763ff230b8",
+        "actual_cases": [
+          [
+            "backend.tests.test_trading_oauth_effects",
+            "test_mismatched_native_link_receipt_stays_unconfirmed[change2]"
+          ],
+          [
+            "backend.tests.test_trading_oauth_effects",
+            "test_a_new_link_cannot_replace_a_registered_alias_without_an_original_unresolved_effect"
+          ],
+          [
+            "backend.tests.test_trading_oauth_effects",
+            "test_original_unconfirmed_link_read_does_not_depend_on_current_native_inventory"
+          ],
+          [
+            "backend.tests.test_stateful_link_binding",
+            "test_original_oauth_link_domain_cannot_retarget_another_native_state"
+          ],
+          [
+            "backend.tests.test_stateful_link_binding",
+            "test_original_link_result_is_bound_durable_and_readable_after_ack_loss[deriv]"
+          ]
+        ],
+        "source_pins": "FROZEN_CLOSURE_INPUTS.json"
+      },
+      {
+        "tag": "closure-root-09",
+        "cwd": "/workspace/van-review-2026-10-18/publish",
+        "receipt": "/tmp/van-approval-fixture-proof-20261102/closure-root-09/receipt.json",
+        "junit": "/tmp/van-approval-fixture-proof-20261102/closure-root-09/junit.xml",
+        "junit_sha256": "ed2c745987a8a4cd43b234615d884dcb7f00585b7acb9aec4632950ad5cf7531",
+        "raw": "/tmp/van-approval-fixture-proof-20261102/closure-root-09/raw.txt",
+        "raw_sha256": "c460566003089618808b16bc392b771e26c55c328c89473ad6b679b12ccb3725",
+        "actual_cases": [
+          [
+            "backend.tests.test_stateful_link_binding",
+            "test_original_link_result_is_bound_durable_and_readable_after_ack_loss[ctrader]"
+          ],
+          [
+            "backend.tests.test_stateful_link_binding",
+            "test_legacy_unbound_link_is_never_adopted_into_current_namespace[UNKNOWN]"
+          ],
+          [
+            "backend.tests.test_stateful_link_binding",
+            "test_legacy_unbound_link_is_never_adopted_into_current_namespace[APPLIED]"
+          ],
+          [
+            "backend.tests.test_stateful_link_binding",
+            "test_partial_link_holds_original_and_only_proved_other_native_domain_is_independent"
+          ],
+          [
+            "backend.tests.test_stateful_link_binding",
+            "test_cached_receipt_fields_cannot_change_original_bound_scope[native_resource_version]"
+          ]
+        ],
+        "source_pins": "FROZEN_CLOSURE_INPUTS.json"
+      },
+      {
+        "tag": "closure-root-10",
+        "cwd": "/workspace/van-review-2026-10-18/publish",
+        "receipt": "/tmp/van-approval-fixture-proof-20261102/closure-root-10/receipt.json",
+        "junit": "/tmp/van-approval-fixture-proof-20261102/closure-root-10/junit.xml",
+        "junit_sha256": "9422ed57e58003769aed68d07190c38fe8a68a9fb391b77c788eaab371d9c3a5",
+        "raw": "/tmp/van-approval-fixture-proof-20261102/closure-root-10/raw.txt",
+        "raw_sha256": "e2d64d4f9e91534c2808bf261230f8d1415dab4a7bc5cd29ed5fab384c413a4b",
+        "actual_cases": [
+          [
+            "backend.tests.test_stateful_link_binding",
+            "test_cached_receipt_fields_cannot_change_original_bound_scope[account_control_domain]"
+          ],
+          [
+            "backend.tests.test_stateful_link_binding",
+            "test_cached_receipt_fields_cannot_change_original_bound_scope[oauth_state]"
+          ],
+          [
+            "backend.tests.test_stateful_link_binding",
+            "test_real_link_process_death_keeps_bound_original_unknown_without_native_resend"
+          ],
+          [
+            "backend.tests.test_stateful_link_binding",
+            "test_authorization_readiness_is_not_link_completion_and_expired_prepared_grant_can_be_reconfirmed"
+          ],
+          [
+            "backend.tests.test_stateful_link_binding",
+            "test_delayed_original_and_explicit_resume_arbitrate_one_immutable_original[True]"
+          ]
+        ],
+        "source_pins": "FROZEN_CLOSURE_INPUTS.json"
+      },
+      {
+        "tag": "closure-root-11",
+        "cwd": "/workspace/van-review-2026-10-18/publish",
+        "receipt": "/tmp/van-approval-fixture-proof-20261102/closure-root-11/receipt.json",
+        "junit": "/tmp/van-approval-fixture-proof-20261102/closure-root-11/junit.xml",
+        "junit_sha256": "5073110914b19098ab39ead1d266ce3235c57abb7398c2c6c80eb6517da8993d",
+        "raw": "/tmp/van-approval-fixture-proof-20261102/closure-root-11/raw.txt",
+        "raw_sha256": "e13041d75ecf05c0950cf656920c4a5cf57d102148aa808468db1a9685792b6c",
+        "actual_cases": [
+          [
+            "backend.tests.test_stateful_link_binding",
+            "test_delayed_original_and_explicit_resume_arbitrate_one_immutable_original[False]"
+          ],
+          [
+            "backend.tests.test_stateful_link_binding",
+            "test_resume_id_cannot_adopt_a_different_original_winning_before_sql_claim"
+          ],
+          [
+            "backend.tests.test_stateful_link_binding",
+            "test_prepared_resume_joins_immutable_actual_a4_without_rebasing[generation]"
+          ],
+          [
+            "backend.tests.test_stateful_link_binding",
+            "test_prepared_resume_joins_immutable_actual_a4_without_rebasing[forged_generation]"
+          ],
+          [
+            "backend.tests.test_stateful_link_binding",
+            "test_prepared_resume_joins_immutable_actual_a4_without_rebasing[body]"
+          ]
+        ],
+        "source_pins": "FROZEN_CLOSURE_INPUTS.json"
+      },
+      {
+        "tag": "closure-root-12",
+        "cwd": "/workspace/van-review-2026-10-18/publish",
+        "receipt": "/tmp/van-approval-fixture-proof-20261102/closure-root-12/receipt.json",
+        "junit": "/tmp/van-approval-fixture-proof-20261102/closure-root-12/junit.xml",
+        "junit_sha256": "fe62ca28a71c9988385adb54185db156e75547547b429be89d909b0a8e0474ab",
+        "raw": "/tmp/van-approval-fixture-proof-20261102/closure-root-12/raw.txt",
+        "raw_sha256": "5b64f1ab93dab919dd152d2b917ecb1b50739a8b6142ca40ac843d2ffc6cbc21",
+        "actual_cases": [
+          [
+            "backend.tests.test_stateful_link_binding",
+            "test_prepared_resume_joins_immutable_actual_a4_without_rebasing[issued]"
+          ],
+          [
+            "backend.tests.test_stateful_link_binding",
+            "test_prepared_resume_joins_immutable_actual_a4_without_rebasing[domain]"
+          ],
+          [
+            "backend.tests.test_stateful_link_binding",
+            "test_prepared_resume_joins_immutable_actual_a4_without_rebasing[missing]"
+          ],
+          [
+            "backend.tests.test_stateful_link_binding",
+            "test_prepared_resume_joins_immutable_actual_a4_without_rebasing[canonical]"
+          ],
+          [
+            "backend.tests.test_stateful_link_binding",
+            "test_prepared_resume_joins_immutable_actual_a4_without_rebasing[parameters]"
+          ]
+        ],
+        "source_pins": "FROZEN_CLOSURE_INPUTS.json"
+      },
+      {
+        "tag": "closure-root-13",
+        "cwd": "/workspace/van-review-2026-10-18/publish",
+        "receipt": "/tmp/van-approval-fixture-proof-20261102/closure-root-13/receipt.json",
+        "junit": "/tmp/van-approval-fixture-proof-20261102/closure-root-13/junit.xml",
+        "junit_sha256": "b9fa53f397c81ed87c8b8d5cb4c75f9f6b36b97348f0a9f9fe4a36779a179921",
+        "raw": "/tmp/van-approval-fixture-proof-20261102/closure-root-13/raw.txt",
+        "raw_sha256": "073bb267066c4fdd4e57ad54a7f47f0257e992ce1adb6152c9b014c4d293e71f",
+        "actual_cases": [
+          [
+            "backend.tests.test_stateful_link_binding",
+            "test_prepared_resume_joins_immutable_actual_a4_without_rebasing[device]"
+          ],
+          [
+            "backend.tests.test_stateful_link_binding",
+            "test_prepared_resume_joins_immutable_actual_a4_without_rebasing[legacy]"
+          ],
+          [
+            "backend.tests.test_trading_oauth_scope",
+            "test_missing_deriv_state_cannot_be_substituted_with_the_latest_owner_flow"
+          ],
+          [
+            "backend.tests.test_trading_oauth_scope",
+            "test_one_brokers_callback_cannot_populate_another_brokers_state"
+          ],
+          [
+            "backend.tests.test_trading_oauth_scope",
+            "test_pending_state_is_owned_by_the_device_that_started_it"
+          ]
+        ],
+        "source_pins": "FROZEN_CLOSURE_INPUTS.json"
+      },
+      {
+        "tag": "closure-root-14",
+        "cwd": "/workspace/van-review-2026-10-18/publish",
+        "receipt": "/tmp/van-approval-fixture-proof-20261102/closure-root-14/receipt.json",
+        "junit": "/tmp/van-approval-fixture-proof-20261102/closure-root-14/junit.xml",
+        "junit_sha256": "fc871844cc35c6d34287be8eae94784636b9ab92cd43339ae21f2f29112b9dc5",
+        "raw": "/tmp/van-approval-fixture-proof-20261102/closure-root-14/raw.txt",
+        "raw_sha256": "d70d7a48ed3685ada2c7637ffe4ffda92a1311c9ce32d8d41d33963dd1827fc4",
+        "actual_cases": [
+          [
+            "backend.tests.test_trading_oauth_scope",
+            "test_legacy_unbound_state_is_not_adopted_by_the_current_device"
+          ],
+          [
+            "backend.tests.test_trading_oauth_scope",
+            "test_a_restarted_pending_reader_preserves_the_original_device_owner"
+          ],
+          [
+            "backend.tests.test_trading_oauth_scope",
+            "test_unreadable_encrypted_pending_state_is_an_explicit_error_not_an_empty_flow"
+          ],
+          [
+            "backend.tests.test_trading_oauth_scope",
+            "test_expired_state_refuses_the_callback_and_releases_no_account_identifiers"
+          ],
+          [
+            "backend.tests.test_trading_api",
+            "test_account_onboarding_is_device_signed_and_forwards_without_storing_secrets"
+          ]
+        ],
+        "source_pins": "FROZEN_CLOSURE_INPUTS.json"
+      },
+      {
+        "tag": "closure-root-15",
+        "cwd": "/workspace/van-review-2026-10-18/publish",
+        "receipt": "/tmp/van-approval-fixture-proof-20261102/closure-root-15/receipt.json",
+        "junit": "/tmp/van-approval-fixture-proof-20261102/closure-root-15/junit.xml",
+        "junit_sha256": "203564f45105dc8babfdaa7835aa56867d2485d38c159f2771871359b717f47f",
+        "raw": "/tmp/van-approval-fixture-proof-20261102/closure-root-15/raw.txt",
+        "raw_sha256": "868c46e285758b1369a5362988b08298b532b1836b41ab6afda0b6e6dcf2b3d4",
+        "actual_cases": [
+          [
+            "backend.tests.test_trading_api",
+            "test_strategy_promotion_requires_exact_device_signature_and_a4_proof"
+          ],
+          [
+            "backend.tests.test_account_update_review",
+            "test_exact_native_before_after_is_signed_and_applied_without_losing_connection"
+          ],
+          [
+            "backend.tests.test_account_unlink_review",
+            "test_signed_unlink_keeps_native_history_and_never_reports_broker_closure"
+          ],
+          [
+            "trading.tests.test_account_unlink_currentness",
+            "test_actual_registered_unlink_rechecks_current_envelope_at_writer_and_retains_original_history[healthy_cached]"
+          ],
+          [
+            "backend.tests.test_native_owner_key_revocation",
+            "test_revoking_phone_key_prevents_a_queued_native_recovery_effect"
+          ]
+        ],
+        "source_pins": "FROZEN_CLOSURE_INPUTS.json"
+      },
+      {
+        "tag": "closure-backend-00",
+        "cwd": "/workspace/van-review-2026-10-18/publish/backend",
+        "receipt": "/tmp/van-approval-fixture-proof-20261102/closure-backend-00/receipt.json",
+        "junit": "/tmp/van-approval-fixture-proof-20261102/closure-backend-00/junit.xml",
+        "junit_sha256": "b07beb1dc37fa85db593890d7bf3eefe7521940a14e42f6905342d8ab6a409cd",
+        "raw": "/tmp/van-approval-fixture-proof-20261102/closure-backend-00/raw.txt",
+        "raw_sha256": "ecbd4ab6dbd54e36d8871c6ed7a104c48b5c976b18fabcd897d5a095143896f2",
+        "actual_cases": [
+          [
+            "backend.tests.test_account_resource_binding",
+            "test_delayed_owner_approval_cannot_overwrite_a_newer_account[account_upsert]"
+          ],
+          [
+            "backend.tests.test_account_resource_binding",
+            "test_delayed_owner_approval_cannot_overwrite_a_newer_account[account_remove]"
+          ],
+          [
+            "backend.tests.test_account_resource_binding",
+            "test_approval_for_an_absent_alias_cannot_replace_a_later_registration"
+          ],
+          [
+            "backend.tests.test_account_resource_binding",
+            "test_native_cas_still_checks_changes_after_gateway_proof_verification"
+          ],
+          [
+            "backend.tests.test_account_resource_binding",
+            "test_credential_generation_change_invalidates_a_pending_local_edit"
+          ]
+        ],
+        "source_pins": "FROZEN_CLOSURE_INPUTS.json"
+      },
+      {
+        "tag": "closure-backend-01",
+        "cwd": "/workspace/van-review-2026-10-18/publish/backend",
+        "receipt": "/tmp/van-approval-fixture-proof-20261102/closure-backend-01/receipt.json",
+        "junit": "/tmp/van-approval-fixture-proof-20261102/closure-backend-01/junit.xml",
+        "junit_sha256": "80f2ff6548297c54d8058109bbe95cb1f588a3a27a2f8cad5664714c9a78d20b",
+        "raw": "/tmp/van-approval-fixture-proof-20261102/closure-backend-01/raw.txt",
+        "raw_sha256": "259586dab1cb0ac09c3f489d95f3eeb163c52efa3aeb0feb31a4cf5aee5f5992",
+        "actual_cases": [
+          [
+            "backend.tests.test_account_resource_binding",
+            "test_a_disjoint_owner_edit_does_not_invalidate_this_account_approval"
+          ],
+          [
+            "backend.tests.test_account_resource_binding",
+            "test_restoring_old_metadata_does_not_restore_an_obsolete_approval"
+          ],
+          [
+            "backend.tests.test_account_resource_binding",
+            "test_device_cannot_supply_the_gateways_internal_resource_binding"
+          ],
+          [
+            "backend.tests.test_account_resource_binding",
+            "test_failed_native_readback_returns_refused_without_dispatching_a_change"
+          ],
+          [
+            "backend.tests.test_account_operation_recovery",
+            "test_authenticated_namespace_is_bound_to_approval_native_intent_and_original_read"
+          ]
+        ],
+        "source_pins": "FROZEN_CLOSURE_INPUTS.json"
+      },
+      {
+        "tag": "closure-backend-02",
+        "cwd": "/workspace/van-review-2026-10-18/publish/backend",
+        "receipt": "/tmp/van-approval-fixture-proof-20261102/closure-backend-02/receipt.json",
+        "junit": "/tmp/van-approval-fixture-proof-20261102/closure-backend-02/junit.xml",
+        "junit_sha256": "8815fe272132fbf88e44bfe589588f57f83329678ab39599d78de992f91f7704",
+        "raw": "/tmp/van-approval-fixture-proof-20261102/closure-backend-02/raw.txt",
+        "raw_sha256": "bf9a16600a9ca58ca425764f12b72f97e421da97829db7810c52ff24f6949386",
+        "actual_cases": [
+          [
+            "backend.tests.test_account_operation_recovery",
+            "test_native_writer_rechecks_descriptor_after_gateway_approval_consumption"
+          ],
+          [
+            "backend.tests.test_account_operation_recovery",
+            "test_original_demo_creation_runs_through_paired_a4_signed_commander_and_readback[provider_reply]"
+          ],
+          [
+            "backend.tests.test_account_operation_recovery",
+            "test_original_demo_creation_runs_through_paired_a4_signed_commander_and_readback[native_http_reply]"
+          ],
+          [
+            "backend.tests.test_account_operation_recovery",
+            "test_original_demo_creation_runs_through_paired_a4_signed_commander_and_readback[none]"
+          ],
+          [
+            "backend.tests.test_account_operation_recovery",
+            "test_lost_reply_is_unknown_then_native_readback_confirms_original_issue"
+          ]
+        ],
+        "source_pins": "FROZEN_CLOSURE_INPUTS.json"
+      },
+      {
+        "tag": "closure-backend-03",
+        "cwd": "/workspace/van-review-2026-10-18/publish/backend",
+        "receipt": "/tmp/van-approval-fixture-proof-20261102/closure-backend-03/receipt.json",
+        "junit": "/tmp/van-approval-fixture-proof-20261102/closure-backend-03/junit.xml",
+        "junit_sha256": "607a9311a35a56a70c9d0b491c9801b0a92922a23e7c8945eb51812008810d27",
+        "raw": "/tmp/van-approval-fixture-proof-20261102/closure-backend-03/raw.txt",
+        "raw_sha256": "4eadfe57487aae8f8eebbca8de8ea920f6c9cd8c7ba1d70cd49a0e2c905095ff",
+        "actual_cases": [
+          [
+            "backend.tests.test_account_operation_recovery",
+            "test_failed_native_completion_blocks_new_approval_but_disjoint_account_works"
+          ],
+          [
+            "backend.tests.test_account_operation_recovery",
+            "test_absence_of_a_native_record_is_never_evidence_of_no_effect"
+          ],
+          [
+            "backend.tests.test_account_operation_recovery",
+            "test_operation_readback_uses_current_authenticated_device_not_a_query_override"
+          ],
+          [
+            "backend.tests.test_account_operation_recovery",
+            "test_device_cannot_inject_a_native_operation_context"
+          ],
+          [
+            "backend.tests.test_account_operation_recovery",
+            "test_approval_response_preserves_original_timestamp_across_biometric_delay"
+          ]
+        ],
+        "source_pins": "FROZEN_CLOSURE_INPUTS.json"
+      },
+      {
+        "tag": "closure-backend-04",
+        "cwd": "/workspace/van-review-2026-10-18/publish/backend",
+        "receipt": "/tmp/van-approval-fixture-proof-20261102/closure-backend-04/receipt.json",
+        "junit": "/tmp/van-approval-fixture-proof-20261102/closure-backend-04/junit.xml",
+        "junit_sha256": "ef03a4e9515686f713ce732e9dda743ab96069013e1bde7de3afa9e6e7b3f5d2",
+        "raw": "/tmp/van-approval-fixture-proof-20261102/closure-backend-04/raw.txt",
+        "raw_sha256": "6cc34fd2ea330e508faec24a9ae26d5a714276fc6dcd13c6e8f20979fb6f1c35",
+        "actual_cases": [
+          [
+            "backend.tests.test_account_operation_recovery",
+            "test_signed_remote_commander_lost_reply_is_recovered_by_original_native_identity[lost]"
+          ],
+          [
+            "backend.tests.test_account_operation_recovery",
+            "test_signed_remote_commander_lost_reply_is_recovered_by_original_native_identity[wrong-command]"
+          ],
+          [
+            "backend.tests.test_trading_oauth_effects",
+            "test_exact_callback_retry_does_not_exchange_a_provider_code_twice"
+          ],
+          [
+            "backend.tests.test_trading_oauth_effects",
+            "test_conflicting_callback_cannot_replace_the_first_accepted_credentials"
+          ],
+          [
+            "backend.tests.test_trading_oauth_effects",
+            "test_link_retry_after_a_lost_reply_returns_receipt_without_repeating_the_local_effect"
+          ]
+        ],
+        "source_pins": "FROZEN_CLOSURE_INPUTS.json"
+      },
+      {
+        "tag": "closure-backend-05",
+        "cwd": "/workspace/van-review-2026-10-18/publish/backend",
+        "receipt": "/tmp/van-approval-fixture-proof-20261102/closure-backend-05/receipt.json",
+        "junit": "/tmp/van-approval-fixture-proof-20261102/closure-backend-05/junit.xml",
+        "junit_sha256": "354e98ff58cf74f416a82bd2736336b0ca9e8d9a0abb0a898bfeb6362c04ecdf",
+        "raw": "/tmp/van-approval-fixture-proof-20261102/closure-backend-05/raw.txt",
+        "raw_sha256": "48cbe7402d6eb5dbb3818ecab8c9806d841f80eb776a0a44c289cb92f7b04488",
+        "actual_cases": [
+          [
+            "backend.tests.test_trading_oauth_effects",
+            "test_concurrent_callback_is_refused_while_owner_polling_and_event_loop_remain_responsive"
+          ],
+          [
+            "backend.tests.test_trading_oauth_effects",
+            "test_cancelled_token_exchange_keeps_unknown_and_a_new_state_cannot_reuse_the_code"
+          ],
+          [
+            "backend.tests.test_trading_oauth_effects",
+            "test_link_effect_without_a_committed_receipt_is_not_repeated_or_bypassed_by_new_state[after_material_before_receipt]"
+          ],
+          [
+            "backend.tests.test_trading_oauth_effects",
+            "test_link_effect_without_a_committed_receipt_is_not_repeated_or_bypassed_by_new_state[after_receipt_before_commit]"
+          ],
+          [
+            "backend.tests.test_trading_oauth_effects",
+            "test_committed_link_receipt_survives_a_lost_response_and_a_new_reader"
+          ]
+        ],
+        "source_pins": "FROZEN_CLOSURE_INPUTS.json"
+      },
+      {
+        "tag": "closure-backend-06",
+        "cwd": "/workspace/van-review-2026-10-18/publish/backend",
+        "receipt": "/tmp/van-approval-fixture-proof-20261102/closure-backend-06/receipt.json",
+        "junit": "/tmp/van-approval-fixture-proof-20261102/closure-backend-06/junit.xml",
+        "junit_sha256": "abb44a6923e6a94a27ac0a985bc9ff539b672ab2f191a1f7016c4525be47a6f4",
+        "raw": "/tmp/van-approval-fixture-proof-20261102/closure-backend-06/raw.txt",
+        "raw_sha256": "25536580a6f7c26e211179a6020fa193db34f6b474ea052c7f785cca705c3ad6",
+        "actual_cases": [
+          [
+            "backend.tests.test_trading_oauth_effects",
+            "test_real_process_death_after_claim_leaves_unconfirmed_work_without_reexchange"
+          ],
+          [
+            "backend.tests.test_trading_oauth_effects",
+            "test_invalid_link_alias_is_refused_before_claim_and_can_be_corrected"
+          ],
+          [
+            "backend.tests.test_trading_oauth_effects",
+            "test_incomplete_provider_token_response_stays_unknown_and_cannot_be_reexchanged"
+          ],
+          [
+            "backend.tests.test_trading_oauth_effects",
+            "test_missing_native_authorization_material_cannot_create_a_ready_account[acct1]"
+          ],
+          [
+            "backend.tests.test_trading_oauth_effects",
+            "test_missing_native_authorization_material_cannot_create_a_ready_account[token1]"
+          ]
+        ],
+        "source_pins": "FROZEN_CLOSURE_INPUTS.json"
+      },
+      {
+        "tag": "closure-backend-07",
+        "cwd": "/workspace/van-review-2026-10-18/publish/backend",
+        "receipt": "/tmp/van-approval-fixture-proof-20261102/closure-backend-07/receipt.json",
+        "junit": "/tmp/van-approval-fixture-proof-20261102/closure-backend-07/junit.xml",
+        "junit_sha256": "7f8dfdd859873fb43fa32c53318d4e8398ad9cd1d96313c50d7879d1b9c3757b",
+        "raw": "/tmp/van-approval-fixture-proof-20261102/closure-backend-07/raw.txt",
+        "raw_sha256": "1ea11fe49c8c6e795db42b0a6b3dec700c9d43dc71c10b609ead419ac7ed5fc9",
+        "actual_cases": [
+          [
+            "backend.tests.test_trading_oauth_effects",
+            "test_missing_native_authorization_material_cannot_create_a_ready_account[cur1]"
+          ],
+          [
+            "backend.tests.test_trading_oauth_effects",
+            "test_an_encrypted_receipt_cannot_be_transplanted_to_another_link"
+          ],
+          [
+            "backend.tests.test_trading_oauth_effects",
+            "test_encrypted_authorization_material_cannot_move_to_a_different_state"
+          ],
+          [
+            "backend.tests.test_trading_oauth_effects",
+            "test_mismatched_native_link_receipt_stays_unconfirmed[change0]"
+          ],
+          [
+            "backend.tests.test_trading_oauth_effects",
+            "test_mismatched_native_link_receipt_stays_unconfirmed[change1]"
+          ]
+        ],
+        "source_pins": "FROZEN_CLOSURE_INPUTS.json"
+      },
+      {
+        "tag": "closure-backend-08",
+        "cwd": "/workspace/van-review-2026-10-18/publish/backend",
+        "receipt": "/tmp/van-approval-fixture-proof-20261102/closure-backend-08/receipt.json",
+        "junit": "/tmp/van-approval-fixture-proof-20261102/closure-backend-08/junit.xml",
+        "junit_sha256": "4a4d3d0138d6c18b7b06dfcc68737700c728388ef84d12d4c21cb7c62a179127",
+        "raw": "/tmp/van-approval-fixture-proof-20261102/closure-backend-08/raw.txt",
+        "raw_sha256": "1010e36f72a04af467ead23c3443bf2b2954df6fea478189e9727eac5ac620f4",
+        "actual_cases": [
+          [
+            "backend.tests.test_trading_oauth_effects",
+            "test_mismatched_native_link_receipt_stays_unconfirmed[change2]"
+          ],
+          [
+            "backend.tests.test_trading_oauth_effects",
+            "test_a_new_link_cannot_replace_a_registered_alias_without_an_original_unresolved_effect"
+          ],
+          [
+            "backend.tests.test_trading_oauth_effects",
+            "test_original_unconfirmed_link_read_does_not_depend_on_current_native_inventory"
+          ],
+          [
+            "backend.tests.test_stateful_link_binding",
+            "test_original_oauth_link_domain_cannot_retarget_another_native_state"
+          ],
+          [
+            "backend.tests.test_stateful_link_binding",
+            "test_original_link_result_is_bound_durable_and_readable_after_ack_loss[deriv]"
+          ]
+        ],
+        "source_pins": "FROZEN_CLOSURE_INPUTS.json"
+      },
+      {
+        "tag": "closure-backend-09",
+        "cwd": "/workspace/van-review-2026-10-18/publish/backend",
+        "receipt": "/tmp/van-approval-fixture-proof-20261102/closure-backend-09/receipt.json",
+        "junit": "/tmp/van-approval-fixture-proof-20261102/closure-backend-09/junit.xml",
+        "junit_sha256": "8199874e201104fb647645f0a8a8250c7e81a22ce18d0a8039e697a546fd552f",
+        "raw": "/tmp/van-approval-fixture-proof-20261102/closure-backend-09/raw.txt",
+        "raw_sha256": "22285dad57997eaa76ed9fd9084e1302fc2487a1b25bccfaf66ed1cfe5420d48",
+        "actual_cases": [
+          [
+            "backend.tests.test_stateful_link_binding",
+            "test_original_link_result_is_bound_durable_and_readable_after_ack_loss[ctrader]"
+          ],
+          [
+            "backend.tests.test_stateful_link_binding",
+            "test_legacy_unbound_link_is_never_adopted_into_current_namespace[UNKNOWN]"
+          ],
+          [
+            "backend.tests.test_stateful_link_binding",
+            "test_legacy_unbound_link_is_never_adopted_into_current_namespace[APPLIED]"
+          ],
+          [
+            "backend.tests.test_stateful_link_binding",
+            "test_partial_link_holds_original_and_only_proved_other_native_domain_is_independent"
+          ],
+          [
+            "backend.tests.test_stateful_link_binding",
+            "test_cached_receipt_fields_cannot_change_original_bound_scope[native_resource_version]"
+          ]
+        ],
+        "source_pins": "FROZEN_CLOSURE_INPUTS.json"
+      },
+      {
+        "tag": "closure-backend-10",
+        "cwd": "/workspace/van-review-2026-10-18/publish/backend",
+        "receipt": "/tmp/van-approval-fixture-proof-20261102/closure-backend-10/receipt.json",
+        "junit": "/tmp/van-approval-fixture-proof-20261102/closure-backend-10/junit.xml",
+        "junit_sha256": "655e2cd5ead7a0c58e5aafbd5dceacafc120707985b95bbb28b94d64c3062c06",
+        "raw": "/tmp/van-approval-fixture-proof-20261102/closure-backend-10/raw.txt",
+        "raw_sha256": "6e7e0cedeb3297f7d36ba58b704e821cccd4cd146276ca667d0fbff430a98096",
+        "actual_cases": [
+          [
+            "backend.tests.test_stateful_link_binding",
+            "test_cached_receipt_fields_cannot_change_original_bound_scope[account_control_domain]"
+          ],
+          [
+            "backend.tests.test_stateful_link_binding",
+            "test_cached_receipt_fields_cannot_change_original_bound_scope[oauth_state]"
+          ],
+          [
+            "backend.tests.test_stateful_link_binding",
+            "test_real_link_process_death_keeps_bound_original_unknown_without_native_resend"
+          ],
+          [
+            "backend.tests.test_stateful_link_binding",
+            "test_authorization_readiness_is_not_link_completion_and_expired_prepared_grant_can_be_reconfirmed"
+          ],
+          [
+            "backend.tests.test_stateful_link_binding",
+            "test_delayed_original_and_explicit_resume_arbitrate_one_immutable_original[True]"
+          ]
+        ],
+        "source_pins": "FROZEN_CLOSURE_INPUTS.json"
+      },
+      {
+        "tag": "closure-backend-11",
+        "cwd": "/workspace/van-review-2026-10-18/publish/backend",
+        "receipt": "/tmp/van-approval-fixture-proof-20261102/closure-backend-11/receipt.json",
+        "junit": "/tmp/van-approval-fixture-proof-20261102/closure-backend-11/junit.xml",
+        "junit_sha256": "f54f9dc005983699224d3875bf1e21bebc5d03839443ec25b0d96341d28ffa69",
+        "raw": "/tmp/van-approval-fixture-proof-20261102/closure-backend-11/raw.txt",
+        "raw_sha256": "049cfeb1edb78c461dfe4f5e15261da11304020671bb5163df4413cc84571aea",
+        "actual_cases": [
+          [
+            "backend.tests.test_stateful_link_binding",
+            "test_delayed_original_and_explicit_resume_arbitrate_one_immutable_original[False]"
+          ],
+          [
+            "backend.tests.test_stateful_link_binding",
+            "test_resume_id_cannot_adopt_a_different_original_winning_before_sql_claim"
+          ],
+          [
+            "backend.tests.test_stateful_link_binding",
+            "test_prepared_resume_joins_immutable_actual_a4_without_rebasing[generation]"
+          ],
+          [
+            "backend.tests.test_stateful_link_binding",
+            "test_prepared_resume_joins_immutable_actual_a4_without_rebasing[forged_generation]"
+          ],
+          [
+            "backend.tests.test_stateful_link_binding",
+            "test_prepared_resume_joins_immutable_actual_a4_without_rebasing[body]"
+          ]
+        ],
+        "source_pins": "FROZEN_CLOSURE_INPUTS.json"
+      },
+      {
+        "tag": "closure-backend-12",
+        "cwd": "/workspace/van-review-2026-10-18/publish/backend",
+        "receipt": "/tmp/van-approval-fixture-proof-20261102/closure-backend-12/receipt.json",
+        "junit": "/tmp/van-approval-fixture-proof-20261102/closure-backend-12/junit.xml",
+        "junit_sha256": "a5b7494f6ec60205176673c968204ac996e4c81d86a34a4f0e6cab7154da96ad",
+        "raw": "/tmp/van-approval-fixture-proof-20261102/closure-backend-12/raw.txt",
+        "raw_sha256": "dc520caa81e823e89a00749eb16f5d06722a2ad6d84ed830ef518ec58834528f",
+        "actual_cases": [
+          [
+            "backend.tests.test_stateful_link_binding",
+            "test_prepared_resume_joins_immutable_actual_a4_without_rebasing[issued]"
+          ],
+          [
+            "backend.tests.test_stateful_link_binding",
+            "test_prepared_resume_joins_immutable_actual_a4_without_rebasing[domain]"
+          ],
+          [
+            "backend.tests.test_stateful_link_binding",
+            "test_prepared_resume_joins_immutable_actual_a4_without_rebasing[missing]"
+          ],
+          [
+            "backend.tests.test_stateful_link_binding",
+            "test_prepared_resume_joins_immutable_actual_a4_without_rebasing[canonical]"
+          ],
+          [
+            "backend.tests.test_stateful_link_binding",
+            "test_prepared_resume_joins_immutable_actual_a4_without_rebasing[parameters]"
+          ]
+        ],
+        "source_pins": "FROZEN_CLOSURE_INPUTS.json"
+      },
+      {
+        "tag": "closure-backend-13",
+        "cwd": "/workspace/van-review-2026-10-18/publish/backend",
+        "receipt": "/tmp/van-approval-fixture-proof-20261102/closure-backend-13/receipt.json",
+        "junit": "/tmp/van-approval-fixture-proof-20261102/closure-backend-13/junit.xml",
+        "junit_sha256": "020091dc26ff88b4f81b0475018dc77b1a3ad772131323e26d113086681bb2fd",
+        "raw": "/tmp/van-approval-fixture-proof-20261102/closure-backend-13/raw.txt",
+        "raw_sha256": "e55993220e69455c29c67bc0712a9863f154e55406df581d78d8cb361c3a9d12",
+        "actual_cases": [
+          [
+            "backend.tests.test_stateful_link_binding",
+            "test_prepared_resume_joins_immutable_actual_a4_without_rebasing[device]"
+          ],
+          [
+            "backend.tests.test_stateful_link_binding",
+            "test_prepared_resume_joins_immutable_actual_a4_without_rebasing[legacy]"
+          ],
+          [
+            "backend.tests.test_trading_oauth_scope",
+            "test_missing_deriv_state_cannot_be_substituted_with_the_latest_owner_flow"
+          ],
+          [
+            "backend.tests.test_trading_oauth_scope",
+            "test_one_brokers_callback_cannot_populate_another_brokers_state"
+          ],
+          [
+            "backend.tests.test_trading_oauth_scope",
+            "test_pending_state_is_owned_by_the_device_that_started_it"
+          ]
+        ],
+        "source_pins": "FROZEN_CLOSURE_INPUTS.json"
+      },
+      {
+        "tag": "closure-backend-14",
+        "cwd": "/workspace/van-review-2026-10-18/publish/backend",
+        "receipt": "/tmp/van-approval-fixture-proof-20261102/closure-backend-14/receipt.json",
+        "junit": "/tmp/van-approval-fixture-proof-20261102/closure-backend-14/junit.xml",
+        "junit_sha256": "be8357f296973f70727b9c8b8c289019c834bb7a62af35414fe7d7157d2a19ca",
+        "raw": "/tmp/van-approval-fixture-proof-20261102/closure-backend-14/raw.txt",
+        "raw_sha256": "c558ff6b0ae0890a9a9caea6d2403f4ea38d1c3e10b68ebf6a8671eec7ca477f",
+        "actual_cases": [
+          [
+            "backend.tests.test_trading_oauth_scope",
+            "test_legacy_unbound_state_is_not_adopted_by_the_current_device"
+          ],
+          [
+            "backend.tests.test_trading_oauth_scope",
+            "test_a_restarted_pending_reader_preserves_the_original_device_owner"
+          ],
+          [
+            "backend.tests.test_trading_oauth_scope",
+            "test_unreadable_encrypted_pending_state_is_an_explicit_error_not_an_empty_flow"
+          ],
+          [
+            "backend.tests.test_trading_oauth_scope",
+            "test_expired_state_refuses_the_callback_and_releases_no_account_identifiers"
+          ],
+          [
+            "backend.tests.test_trading_api",
+            "test_account_onboarding_is_device_signed_and_forwards_without_storing_secrets"
+          ]
+        ],
+        "source_pins": "FROZEN_CLOSURE_INPUTS.json"
+      },
+      {
+        "tag": "closure-backend-15",
+        "cwd": "/workspace/van-review-2026-10-18/publish/backend",
+        "receipt": "/tmp/van-approval-fixture-proof-20261102/closure-backend-15/receipt.json",
+        "junit": "/tmp/van-approval-fixture-proof-20261102/closure-backend-15/junit.xml",
+        "junit_sha256": "41e40127762a2c3ad0523f36161024fe6c1b11d1d4564b66c67132e17e150f90",
+        "raw": "/tmp/van-approval-fixture-proof-20261102/closure-backend-15/raw.txt",
+        "raw_sha256": "cf69252a651dce05b6eb5966a0c8a967beef65f3962f5d45487b8b585025dab1",
+        "actual_cases": [
+          [
+            "backend.tests.test_trading_api",
+            "test_strategy_promotion_requires_exact_device_signature_and_a4_proof"
+          ],
+          [
+            "backend.tests.test_account_update_review",
+            "test_exact_native_before_after_is_signed_and_applied_without_losing_connection"
+          ],
+          [
+            "backend.tests.test_account_unlink_review",
+            "test_signed_unlink_keeps_native_history_and_never_reports_broker_closure"
+          ],
+          [
+            "trading.tests.test_account_unlink_currentness",
+            "test_actual_registered_unlink_rechecks_current_envelope_at_writer_and_retains_original_history[healthy_cached]"
+          ],
+          [
+            "backend.tests.test_native_owner_key_revocation",
+            "test_revoking_phone_key_prevents_a_queued_native_recovery_effect"
+          ]
+        ],
+        "source_pins": "FROZEN_CLOSURE_INPUTS.json"
+      }
+    ],
+    "qualification": "Serialized disjoint five-case batches in each actual cwd, not one fullsuite. All four changed modules are complete; added fixture/signature/native-call controls explicitly selected."
+  },
+  "paired_probe_counts": {
+    "before-root": {
+      "passed": 0,
+      "failed": 2,
+      "error": 0,
+      "skipped": 0
+    },
+    "before-backend": {
+      "passed": 0,
+      "failed": 2,
+      "error": 0,
+      "skipped": 0
+    },
+    "after-root": {
+      "passed": 2,
+      "failed": 0,
+      "error": 0,
+      "skipped": 0
+    },
+    "after-backend": {
+      "passed": 2,
+      "failed": 0,
+      "error": 0,
+      "skipped": 0
+    },
+    "before-fourth-root": {
+      "passed": 0,
+      "failed": 2,
+      "error": 0,
+      "skipped": 0
+    },
+    "after-fourth-root": {
+      "passed": 2,
+      "failed": 0,
+      "error": 0,
+      "skipped": 0
+    },
+    "after-fourth-backend": {
+      "passed": 2,
+      "failed": 0,
+      "error": 0,
+      "skipped": 0
+    }
+  },
+  "paired_probes": "PAIRED_ALL_BEFORE_AFTER.json; sourcebefore failures preserved/coldfixtures retained. Resource paired oracle same bytes before+after; fourth same oracle before+after. Public-key hashes only; actual EC verification, no hardware/native qualification.",
+  "actual_total_current_unique_passes": 82,
+  "actual_total_current_PASS_executions": 168,
+  "reuse_conditions": "Earlier after-root/backend paired2case probes were before fourth source fix; their consumed resource/scope/API owners and all product bytes remained exact and do not import stateful_link_binding. Full4 selected runtime uses final4bytes. No before failure or old CI count relabeled currentpass.",
+  "closure_preflight": "FIXTURE_KEY_PROVENANCE_CLOSURE.json:21 recursive consumers; only4actual mixed-key files changed. No new helper/key/mode/sys.path alias; unchanged bare cohorts selfconsistent.",
+  "ci_failure_inventory": "CI_23A_COMPLETE_FAILURE_CLASSIFICATION.json:all6failedsourceworkers decoded,53primaryunique fixture IDs all selected;2protectedentry67 andotherDDS/trustedmain/union/matrix gates unwaived. Original41job result28success13failure remainsfailed.",
+  "process_resource": "Every run exclusiveverified0600no-symlink flock,32MiBaggregate/8MiBfile/600s/global2GiB/workspace64MiB admission; real group absent/children waited. Only completed-success fixtures archived(memberSHA+CRC),FDchecked then reclaimed; failedbeforecoldstores untouched.",
+  "watch": "Original88283observedterminalexit1andwaited once; no restart/cancel/duplicate. No newwatch until authorized publication.",
+  "open_gates": [
+    "Independentreview/committed4fd/publicationpending",
+    "No fullbackend/wholematrix/native/provider/hardware/PG/S24/formalunit acceptance from this packet",
+    "OriginalPR106unmerged/unused;protectedentry67/DDS/trustedmain unwaived",
+    "Cleanuppeer sourceexclusive;BE0087WIPpausedunchanged"
+  ],
+  "next": "Independent read/reproduction before any commit. Then required existing guards/manifest/staging tracked-artifact audit, genuine hook commit/required4fd verify/normalpush/exactreadback/newheadCI+onewatch. No product fix or issuer change."
+}

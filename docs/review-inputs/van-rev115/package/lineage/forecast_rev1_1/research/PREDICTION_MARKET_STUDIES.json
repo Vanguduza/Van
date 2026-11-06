@@ -1,0 +1,296 @@
+{
+  "revision": "1.1",
+  "type": "IMPLEMENTATION_PROTOCOL_TEMPLATES_NOT_OBSERVED_RESULTS",
+  "studies": [
+    {
+      "status": "PREREGISTRATION_TEMPLATE_NOT_EXECUTED",
+      "application_result": "NOT_RUN",
+      "authority_effect": "NONE",
+      "instrument_cohort": null,
+      "historical_dataset_id": null,
+      "final_holdout": null,
+      "calibration_slice": null,
+      "execution_entry_rule": "FREEZE_NEXT_ACTUALLY_EXECUTABLE_EVENT_AFTER_RECEIPT_AND_DECISION_LATENCY",
+      "cohort_choice": "EXISTING_VAN_SCOPE_FIRST_NO_NEW_LIVE_ACCOUNT_IMPLIED",
+      "splitting": "UNDERLYING_EVENT_AND_CHRONOLOGICAL_TIME_BLOCK",
+      "minimum_effect_threshold": null,
+      "risk_noninferiority_limit": null,
+      "resolved_before_holdout": [
+        "instrument_cohort",
+        "historical_dataset_id",
+        "final_holdout",
+        "calibration_slice",
+        "minimum_effect_threshold",
+        "risk_noninferiority_limit",
+        "effective_sample_and_power_plan"
+      ],
+      "effective_sample_and_power_plan": null,
+      "independence_unit": "UNDERLYING_EVENT_OR_JUSTIFIED_TIME_BLOCK_NOT_QUOTES_OR_THRESHOLD_CONTRACTS",
+      "all_trials_preserved": true,
+      "whole_account_replay": true,
+      "exposure_matched_control": true,
+      "future_probability_covariates_allowed": false,
+      "negative_controls": [
+        "SHUFFLED_EVENT_ID",
+        "ADDITIONAL_INFORMATION_LAG",
+        "FUTURE_RELEASE_VINTAGE_POISON",
+        "CONTRACT_ROLL_MISJOIN",
+        "DUPLICATE_SOURCE_CONFIRMATION"
+      ],
+      "cost_policy": "ACTUAL_DESTINATION_INSTRUMENT_TIMING_FEES_SPREAD_SLIPPAGE_FINANCING_NO_DOUBLE_COUNT",
+      "source_mode": "FIXTURE_REPLAY_OR_EXISTING_PERMISSIONED_DATA",
+      "new_licence_procurement": false,
+      "prospective_policy": "SEAL_EXPECTATION_FORECAST_AND_DECISION_BEFORE_OUTCOME; SHADOW_FILLS_STAY_SIMULATED",
+      "economic_outcomes": [
+        "QUALIFIED",
+        "REJECTED",
+        "INCONCLUSIVE"
+      ],
+      "source_unavailable_behavior": "SOURCE_SPECIFIC_PROOF_OUTSTANDING_CONTINUE_OTHER_AUTHORIZED_ENGINEERING",
+      "live_promotion": "SEPARATE_EXISTING_OWNER_MODEL_STRATEGY_ACCOUNT_SCOPE_NEVER_AUTOMATIC",
+      "study_id": "PM-STUDY-01-RISK",
+      "experiment": "RISK_FILTER",
+      "hypothesis": "Does event uncertainty identify adverse conditions beyond ordinary calendar caution?",
+      "feature_groups": [
+        "distribution_width",
+        "coherent_tail_mass",
+        "time_to_release",
+        "probability_change_same_event",
+        "quality_and_liquidity"
+      ],
+      "comparators": [
+        "INCUMBENT",
+        "CALENDAR_ONLY_BLACKOUT",
+        "UNIFORM_EXPOSURE_MATCHED",
+        "INCUMBENT_PLUS_EVENT_FEATURES"
+      ],
+      "metrics": [
+        "net_account_utility",
+        "drawdown_and_tail_noninferiority",
+        "gains_missed",
+        "losses_avoided",
+        "realized_exposure",
+        "abstention_by_event"
+      ],
+      "consumer": "D1/D2/D3/D6 restrictive proposals only; D4/D5 only for permitted managed positions."
+    },
+    {
+      "status": "PREREGISTRATION_TEMPLATE_NOT_EXECUTED",
+      "application_result": "NOT_RUN",
+      "authority_effect": "NONE",
+      "instrument_cohort": null,
+      "historical_dataset_id": null,
+      "final_holdout": null,
+      "calibration_slice": null,
+      "execution_entry_rule": "FREEZE_NEXT_ACTUALLY_EXECUTABLE_EVENT_AFTER_RECEIPT_AND_DECISION_LATENCY",
+      "cohort_choice": "EXISTING_VAN_SCOPE_FIRST_NO_NEW_LIVE_ACCOUNT_IMPLIED",
+      "splitting": "UNDERLYING_EVENT_AND_CHRONOLOGICAL_TIME_BLOCK",
+      "minimum_effect_threshold": null,
+      "risk_noninferiority_limit": null,
+      "resolved_before_holdout": [
+        "instrument_cohort",
+        "historical_dataset_id",
+        "final_holdout",
+        "calibration_slice",
+        "minimum_effect_threshold",
+        "risk_noninferiority_limit",
+        "effective_sample_and_power_plan"
+      ],
+      "effective_sample_and_power_plan": null,
+      "independence_unit": "UNDERLYING_EVENT_OR_JUSTIFIED_TIME_BLOCK_NOT_QUOTES_OR_THRESHOLD_CONTRACTS",
+      "all_trials_preserved": true,
+      "whole_account_replay": true,
+      "exposure_matched_control": true,
+      "future_probability_covariates_allowed": false,
+      "negative_controls": [
+        "SHUFFLED_EVENT_ID",
+        "ADDITIONAL_INFORMATION_LAG",
+        "FUTURE_RELEASE_VINTAGE_POISON",
+        "CONTRACT_ROLL_MISJOIN",
+        "DUPLICATE_SOURCE_CONFIRMATION"
+      ],
+      "cost_policy": "ACTUAL_DESTINATION_INSTRUMENT_TIMING_FEES_SPREAD_SLIPPAGE_FINANCING_NO_DOUBLE_COUNT",
+      "source_mode": "FIXTURE_REPLAY_OR_EXISTING_PERMISSIONED_DATA",
+      "new_licence_procurement": false,
+      "prospective_policy": "SEAL_EXPECTATION_FORECAST_AND_DECISION_BEFORE_OUTCOME; SHADOW_FILLS_STAY_SIMULATED",
+      "economic_outcomes": [
+        "QUALIFIED",
+        "REJECTED",
+        "INCONCLUSIVE"
+      ],
+      "source_unavailable_behavior": "SOURCE_SPECIFIC_PROOF_OUTSTANDING_CONTINUE_OTHER_AUTHORIZED_ENGINEERING",
+      "live_promotion": "SEPARATE_EXISTING_OWNER_MODEL_STRATEGY_ACCOUNT_SCOPE_NEVER_AUTOMATIC",
+      "study_id": "PM-STUDY-02-SURPRISE",
+      "experiment": "SURPRISE",
+      "hypothesis": "Does the frozen market distribution improve post-release interpretation beyond conventional consensus?",
+      "feature_groups": [
+        "frozen_pre_release_probabilities",
+        "first_official_actual",
+        "point_in_time_consensus",
+        "historical_conditional_response"
+      ],
+      "comparators": [
+        "CONSENSUS_ONLY",
+        "EXISTING_EVENT_HISTORY",
+        "CONSENSUS_PLUS_MARKET_DISTRIBUTION"
+      ],
+      "metrics": [
+        "proper_probability_score",
+        "conditional_asset_forecast_loss",
+        "delay_sensitivity",
+        "net_account_utility",
+        "event_cluster_uncertainty"
+      ],
+      "consumer": "Existing history/research consumer first; new event trades only through separately admitted D7."
+    },
+    {
+      "status": "PREREGISTRATION_TEMPLATE_NOT_EXECUTED",
+      "application_result": "NOT_RUN",
+      "authority_effect": "NONE",
+      "instrument_cohort": null,
+      "historical_dataset_id": null,
+      "final_holdout": null,
+      "calibration_slice": null,
+      "execution_entry_rule": "FREEZE_NEXT_ACTUALLY_EXECUTABLE_EVENT_AFTER_RECEIPT_AND_DECISION_LATENCY",
+      "cohort_choice": "EXISTING_VAN_SCOPE_FIRST_NO_NEW_LIVE_ACCOUNT_IMPLIED",
+      "splitting": "UNDERLYING_EVENT_AND_CHRONOLOGICAL_TIME_BLOCK",
+      "minimum_effect_threshold": null,
+      "risk_noninferiority_limit": null,
+      "resolved_before_holdout": [
+        "instrument_cohort",
+        "historical_dataset_id",
+        "final_holdout",
+        "calibration_slice",
+        "minimum_effect_threshold",
+        "risk_noninferiority_limit",
+        "effective_sample_and_power_plan"
+      ],
+      "effective_sample_and_power_plan": null,
+      "independence_unit": "UNDERLYING_EVENT_OR_JUSTIFIED_TIME_BLOCK_NOT_QUOTES_OR_THRESHOLD_CONTRACTS",
+      "all_trials_preserved": true,
+      "whole_account_replay": true,
+      "exposure_matched_control": true,
+      "future_probability_covariates_allowed": false,
+      "negative_controls": [
+        "SHUFFLED_EVENT_ID",
+        "ADDITIONAL_INFORMATION_LAG",
+        "FUTURE_RELEASE_VINTAGE_POISON",
+        "CONTRACT_ROLL_MISJOIN",
+        "DUPLICATE_SOURCE_CONFIRMATION"
+      ],
+      "cost_policy": "ACTUAL_DESTINATION_INSTRUMENT_TIMING_FEES_SPREAD_SLIPPAGE_FINANCING_NO_DOUBLE_COUNT",
+      "source_mode": "FIXTURE_REPLAY_OR_EXISTING_PERMISSIONED_DATA",
+      "new_licence_procurement": false,
+      "prospective_policy": "SEAL_EXPECTATION_FORECAST_AND_DECISION_BEFORE_OUTCOME; SHADOW_FILLS_STAY_SIMULATED",
+      "economic_outcomes": [
+        "QUALIFIED",
+        "REJECTED",
+        "INCONCLUSIVE"
+      ],
+      "source_unavailable_behavior": "SOURCE_SPECIFIC_PROOF_OUTSTANDING_CONTINUE_OTHER_AUTHORIZED_ENGINEERING",
+      "live_promotion": "SEPARATE_EXISTING_OWNER_MODEL_STRATEGY_ACCOUNT_SCOPE_NEVER_AUTOMATIC",
+      "study_id": "PM-STUDY-03-VOLATILITY",
+      "experiment": "VOLATILITY",
+      "hypothesis": "Do event-price changes and uncertainty add useful multi-horizon volatility information?",
+      "feature_groups": [
+        "historical_returns",
+        "historical_volatility",
+        "event_probability_history",
+        "event_uncertainty",
+        "market_state"
+      ],
+      "comparators": [
+        "TRAILING_VOLATILITY",
+        "HAR_GARCH_WHERE_APPROPRIATE",
+        "STRONGEST_INCUMBENT_MODEL",
+        "SAME_MODEL_PLUS_EVENT_FEATURES"
+      ],
+      "metrics": [
+        "original_domain_loss",
+        "QLIKE_WHERE_DOMAIN_VALID",
+        "coverage_and_violation_clustering",
+        "sizing_policy_utility",
+        "incremental_compute_cost"
+      ],
+      "consumer": "Volatility research and bounded risk evidence, not directional certainty or size authority."
+    },
+    {
+      "status": "PREREGISTRATION_TEMPLATE_NOT_EXECUTED",
+      "application_result": "NOT_RUN",
+      "authority_effect": "NONE",
+      "instrument_cohort": null,
+      "historical_dataset_id": null,
+      "final_holdout": null,
+      "calibration_slice": null,
+      "execution_entry_rule": "FREEZE_NEXT_ACTUALLY_EXECUTABLE_EVENT_AFTER_RECEIPT_AND_DECISION_LATENCY",
+      "cohort_choice": "EXISTING_VAN_SCOPE_FIRST_NO_NEW_LIVE_ACCOUNT_IMPLIED",
+      "splitting": "UNDERLYING_EVENT_AND_CHRONOLOGICAL_TIME_BLOCK",
+      "minimum_effect_threshold": null,
+      "risk_noninferiority_limit": null,
+      "resolved_before_holdout": [
+        "instrument_cohort",
+        "historical_dataset_id",
+        "final_holdout",
+        "calibration_slice",
+        "minimum_effect_threshold",
+        "risk_noninferiority_limit",
+        "effective_sample_and_power_plan"
+      ],
+      "effective_sample_and_power_plan": null,
+      "independence_unit": "UNDERLYING_EVENT_OR_JUSTIFIED_TIME_BLOCK_NOT_QUOTES_OR_THRESHOLD_CONTRACTS",
+      "all_trials_preserved": true,
+      "whole_account_replay": true,
+      "exposure_matched_control": true,
+      "future_probability_covariates_allowed": false,
+      "negative_controls": [
+        "SHUFFLED_EVENT_ID",
+        "ADDITIONAL_INFORMATION_LAG",
+        "FUTURE_RELEASE_VINTAGE_POISON",
+        "CONTRACT_ROLL_MISJOIN",
+        "DUPLICATE_SOURCE_CONFIRMATION"
+      ],
+      "cost_policy": "ACTUAL_DESTINATION_INSTRUMENT_TIMING_FEES_SPREAD_SLIPPAGE_FINANCING_NO_DOUBLE_COUNT",
+      "source_mode": "FIXTURE_REPLAY_OR_EXISTING_PERMISSIONED_DATA",
+      "new_licence_procurement": false,
+      "prospective_policy": "SEAL_EXPECTATION_FORECAST_AND_DECISION_BEFORE_OUTCOME; SHADOW_FILLS_STAY_SIMULATED",
+      "economic_outcomes": [
+        "QUALIFIED",
+        "REJECTED",
+        "INCONCLUSIVE"
+      ],
+      "source_unavailable_behavior": "SOURCE_SPECIFIC_PROOF_OUTSTANDING_CONTINUE_OTHER_AUTHORIZED_ENGINEERING",
+      "live_promotion": "SEPARATE_EXISTING_OWNER_MODEL_STRATEGY_ACCOUNT_SCOPE_NEVER_AUTOMATIC",
+      "study_id": "PM-STUDY-04-RANKING",
+      "experiment": "RANKING",
+      "hypothesis": "Does event information improve selection among otherwise eligible opportunities under fixed risk and capital?",
+      "feature_groups": [
+        "existing_setup_features",
+        "event_asset_response",
+        "calibrated_event_features",
+        "same_cutoff_universe"
+      ],
+      "comparators": [
+        "INCUMBENT_RANKING",
+        "STRONGEST_TABULAR_BASELINE",
+        "SAME_MODEL_PLUS_EVENT_FEATURES",
+        "EXPOSURE_MATCHED_CONTROL"
+      ],
+      "metrics": [
+        "rank_quality",
+        "turnover",
+        "full_account_net_utility",
+        "capacity",
+        "profit_concentration",
+        "worst_regime_performance"
+      ],
+      "consumer": "Existing arbiter only; no new universe/account or enlarged mandate; preserve D6 versus D7 distinction."
+    }
+  ],
+  "lab_scope": {
+    "binary_value": "COMPLETE_RESEARCH_IMPLEMENTATION",
+    "event_execution": "COMPLETE_RESEARCH_IMPLEMENTATION",
+    "cross_venue_arbitrage": "COMPLETE_RESEARCH_IMPLEMENTATION",
+    "inventory_market_making": "COMPLETE_RESEARCH_IMPLEMENTATION",
+    "live_event_order_sender": "NOT_INCLUDED"
+  }
+}

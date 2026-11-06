@@ -1,0 +1,13 @@
+diff --git a/android/app/src/test/java/com/dial/van/trading/AccountOperationRecoveryTest.kt b/android/app/src/test/java/com/dial/van/trading/AccountOperationRecoveryTest.kt
+index 4f700c20..08cc33e8 100644
+--- a/android/app/src/test/java/com/dial/van/trading/AccountOperationRecoveryTest.kt
++++ b/android/app/src/test/java/com/dial/van/trading/AccountOperationRecoveryTest.kt
+@@ -47,7 +47,7 @@ class AccountOperationRecoveryTest {
+         assertEquals(1, links); assertEquals(listOf(sent), history.pending(value.deviceId))
+     }
+ 
+-    @Test fun durablePossibleSendMarkerPrecedesConnectionAndItsUncertainAckCannotAuthorizeResume() = runBlocking {
++    @Test fun durablePossibleSendMarkerPrecedesConnectionAndItsUncertainAckCannotAuthorizeResume(): Unit = runBlocking {
+         var text: String? = null; var writes = 0
+         val store = object : AccountOperationStore {
+             override fun load() = text

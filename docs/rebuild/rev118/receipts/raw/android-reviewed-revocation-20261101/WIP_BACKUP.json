@@ -1,0 +1,16 @@
+{
+  "sha256": "edbb34da54a2a51012cc24a9b7f75881deea679f287968dbfe983fb09943fc8b",
+  "files": [
+    "android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt",
+    "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
+    "docs/rebuild/rev118/BUILD_EXECUTION_PLAN.md",
+    "docs/rebuild/rev118/SOURCE_WORKMAP.json",
+    "docs/rebuild/rev118/backend/OWNER_FRONTEND_SCREEN_REGISTRY.md",
+    "docs/rebuild/rev118/backend/OWNER_REGISTRY_GENERATION.json",
+    "docs/rebuild/rev118/backend/OWNER_REGISTRY_SOURCE_REFRESH_20261022.json",
+    "registries/owner_features.json",
+    "registries/owner_screens.json",
+    "tools/rebuild/refresh_owner_source_contracts.py"
+  ],
+  "verified": true
+}

@@ -1,0 +1,35 @@
+.F
+=================================== FAILURES ===================================
+_______ test_another_native_scope_cannot_reuse_a_saved_ladder[changed1] ________
+
+client = (<httpx.AsyncClient object at 0x7fcc42a6c380>, <fastapi.applications.FastAPI object at 0x7fcc404c0110>)
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-575/test_another_native_scope_cann1')
+changed = {'native_account_id': '124'}
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize('changed',[{'environment':'LIVE'},{'native_account_id':'124'},{'native_symbol_id':'13'}])
+    async def test_another_native_scope_cannot_reuse_a_saved_ladder(client,tmp_path,changed):
+        ac,app=client;root,c,first=seed(tmp_path);app.state.trading.native_source_root=str(root)
+        result=await ac.get(PATH,params={**QUERY,**changed})
+>       assert result.status_code==200 and result.json()['state']=='NO_CAPTURE' and result.json()['snapshot'] is None
+E       AssertionError: assert (200 == 200 and 'HISTORICAL_P...E_UNQUALIFIED' == 'NO_CAPTURE'
+E        +  where 200 = <Response [200 OK]>.status_code
+E         
+E         - NO_CAPTURE
+E         + HISTORICAL_PARTIAL_DEPTH_CAPTURE_UNQUALIFIED)
+
+backend/tests/test_native_depth_history.py:63: AssertionError
+---------------------------- Captured stdout setup -----------------------------
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 615.09, "method": "POST", "route": "/v1/devices/pairing-ticket"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-10-26T22:27:42.827Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 72.13, "method": "POST", "route": "/v1/devices/pair"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-10-26T22:27:42.904Z"}
+------------------------------ Captured log setup ------------------------------
+INFO     van.request:logging.py:112 request
+INFO     van.request:logging.py:112 request
+----------------------------- Captured stdout call -----------------------------
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 27.07, "method": "GET", "route": "/v1/trading/market/depth-history"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-10-26T22:27:42.976Z"}
+------------------------------ Captured log call -------------------------------
+INFO     van.request:logging.py:112 request
+=========================== short test summary info ============================
+FAILED backend/tests/test_native_depth_history.py::test_another_native_scope_cannot_reuse_a_saved_ladder[changed1]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 1 passed in 11.95s

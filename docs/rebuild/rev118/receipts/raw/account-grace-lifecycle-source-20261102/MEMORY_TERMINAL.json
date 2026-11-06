@@ -1,0 +1,22 @@
+{
+  "method": "NON-SENSITIVE IN-MEMORY callbacks and source AST only",
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "-B",
+    "/dev/shm/van-be004-grace-source-20261102/R5_SAFE_METHOD/MEMORY_VALIDATION.py"
+  ],
+  "source_unchanged": true,
+  "file_cap_bytes": 32768,
+  "run_cap_bytes": 65536,
+  "reason": null,
+  "elapsed_s": 1.0155598709970945,
+  "child_pid": 1765686,
+  "child_exit": 0,
+  "waited": true,
+  "group_absent": true,
+  "feature_tests_after_R5": "UNEXECUTED",
+  "active_credential_key_lock_probe": "NOT_RETRIED_NOT_RELOCATED",
+  "production_native_provider_integration_qualification": "OPEN_UNEXECUTED",
+  "current_R5_pure_checks": 14,
+  "historical_R4_in_memory_reference_checks": 1
+}

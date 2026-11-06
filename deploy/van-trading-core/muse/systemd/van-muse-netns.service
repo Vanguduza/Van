@@ -1,0 +1,16 @@
+[Unit]
+Description=VAN Muse isolated WireGuard namespace
+After=network-online.target
+Wants=network-online.target
+Before=van-muse-socks.service van-muse-bridge.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/sbin/van-muse-netns-up
+ExecStop=/usr/local/sbin/van-muse-netns-down
+TimeoutStartSec=30
+TimeoutStopSec=15
+
+[Install]
+WantedBy=multi-user.target

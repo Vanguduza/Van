@@ -1,0 +1,89 @@
+{
+  "qualification": "Supplemental source controls; separate from canonical374/native acceptance",
+  "positive": {
+    "exit": 0,
+    "cases": 48,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "failure_messages": []
+  },
+  "faults": [
+    {
+      "name": "source-qualification-flags",
+      "exit": 1,
+      "cases": 2,
+      "failures": 1,
+      "errors": 0,
+      "skips": 0,
+      "failure_messages": [
+        "Failed: DID NOT RAISE NativeArchiveError"
+      ]
+    },
+    {
+      "name": "noncanonical-price-text",
+      "exit": 1,
+      "cases": 23,
+      "failures": 1,
+      "errors": 0,
+      "skips": 0,
+      "failure_messages": [
+        "Failed: DID NOT RAISE NativeArchiveError"
+      ]
+    },
+    {
+      "name": "scope-binding",
+      "exit": 1,
+      "cases": 9,
+      "failures": 1,
+      "errors": 0,
+      "skips": 0,
+      "failure_messages": [
+        "Failed: DID NOT RAISE NativeArchiveError"
+      ]
+    },
+    {
+      "name": "original-display-policy",
+      "exit": 1,
+      "cases": 31,
+      "failures": 1,
+      "errors": 0,
+      "skips": 0,
+      "failure_messages": [
+        "Failed: DID NOT RAISE NativeArchiveError"
+      ]
+    },
+    {
+      "name": "close-before-publication",
+      "exit": 1,
+      "cases": 39,
+      "failures": 1,
+      "errors": 0,
+      "skips": 0,
+      "failure_messages": [
+        "AssertionError: assert (True and {'reads': 1, 'closes': 0} == {'reads': 1, 'closes': 1}\n +  where True = all(<generator object test_concurrent_collection_makes_one_original_native_read_and_revision.<locals>.<genexpr> at 0x7f67ca6f4740>)\n  \n  Omitting 1 identical items, use -vv to show\n  Differing items:\n  {'closes': 0} != {'closes': 1}\n  Use -v to get more diff)"
+      ]
+    },
+    {
+      "name": "read-capacity",
+      "exit": 1,
+      "cases": 28,
+      "failures": 1,
+      "errors": 0,
+      "skips": 0,
+      "failure_messages": [
+        "Failed: DID NOT RAISE NativeArchiveError"
+      ]
+    }
+  ],
+  "all_restored": true,
+  "restored": {
+    "exit": 0,
+    "cases": 48,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "failure_messages": []
+  },
+  "source_sha256": "0ee15738cfb7ff8705ee5feee1f0b08e9808d0ed0f6b7df06f4337805a447409"
+}

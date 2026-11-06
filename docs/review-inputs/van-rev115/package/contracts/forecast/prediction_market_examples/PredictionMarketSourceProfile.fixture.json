@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "record_id": "fixture:PredictionMarketSourceProfile",
+  "environment": "FIXTURE",
+  "authority_effect": "NONE",
+  "evidence_refs": [
+    "fixture:synthetic-only-not-real-evidence"
+  ],
+  "source_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "source_name": "KALSHI",
+  "execution_provider": "ORACLE",
+  "runtime_region": "FIXTURE_UNRESOLVED_ACTUAL_REGION",
+  "licence_procurement_required": false,
+  "procurement_in_this_phase": false,
+  "new_purchase_budget_usd": "0.00",
+  "operator_eligibility": "NOT_ASSERTED",
+  "eligibility_inferred_from_host": false,
+  "acquisition_mode": "FIXTURE_REPLAY",
+  "allowed_uses": [
+    "FIXTURE_REPLAY"
+  ],
+  "permission_state": "FIXTURE_ONLY",
+  "permission_ref": null,
+  "terms_revision_ref": "fixture:terms-not-live-permission",
+  "live_order_submission": false
+}

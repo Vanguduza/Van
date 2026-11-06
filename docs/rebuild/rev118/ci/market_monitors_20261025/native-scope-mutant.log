@@ -1,0 +1,28 @@
+FFF.                                                                     [100%]
+=================================== FAILURES ===================================
+_ test_full_scope_and_actual_availability_refusals[change0-SOURCE_SCOPE_MISMATCH] _
+backend/tests/test_market_monitor_measurements.py:55: in test_full_scope_and_actual_availability_refusals
+    assert not fire and actual.state == 'UNAVAILABLE' and actual.reason == reason
+E   AssertionError: assert (not False and 'BASELINE' == 'UNAVAILABLE'
+E     
+E     - UNAVAILABLE
+E     + BASELINE)
+_ test_full_scope_and_actual_availability_refusals[change1-SOURCE_SCOPE_MISMATCH] _
+backend/tests/test_market_monitor_measurements.py:55: in test_full_scope_and_actual_availability_refusals
+    assert not fire and actual.state == 'UNAVAILABLE' and actual.reason == reason
+E   AssertionError: assert (not False and 'BASELINE' == 'UNAVAILABLE'
+E     
+E     - UNAVAILABLE
+E     + BASELINE)
+_ test_full_scope_and_actual_availability_refusals[change2-SOURCE_SCOPE_MISMATCH] _
+backend/tests/test_market_monitor_measurements.py:55: in test_full_scope_and_actual_availability_refusals
+    assert not fire and actual.state == 'UNAVAILABLE' and actual.reason == reason
+E   AssertionError: assert (not False and 'BASELINE' == 'UNAVAILABLE'
+E     
+E     - UNAVAILABLE
+E     + BASELINE)
+=========================== short test summary info ============================
+FAILED backend/tests/test_market_monitor_measurements.py::test_full_scope_and_actual_availability_refusals[change0-SOURCE_SCOPE_MISMATCH]
+FAILED backend/tests/test_market_monitor_measurements.py::test_full_scope_and_actual_availability_refusals[change1-SOURCE_SCOPE_MISMATCH]
+FAILED backend/tests/test_market_monitor_measurements.py::test_full_scope_and_actual_availability_refusals[change2-SOURCE_SCOPE_MISMATCH]
+3 failed, 1 passed in 0.22s

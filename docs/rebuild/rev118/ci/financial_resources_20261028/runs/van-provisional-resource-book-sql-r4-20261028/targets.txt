@@ -1,0 +1,10 @@
+trading/tests/test_entry_resource_groups.py
+trading/tests/test_heat_governor.py
+trading/tests/test_provisional_resource_book.py
+trading/tests/test_provisional_resource_book_postgres.py
+trading/tests/test_entry_resource_projection.py
+trading/tests/test_current_entry_risk_source.py
+trading/tests/test_current_entry_risk_source_postgres.py
+trading/tests/test_entry_margin_binding.py
+trading/tests/test_entry_margin_binding_postgres.py
+trading/tests/test_dispatch_current_risk.py

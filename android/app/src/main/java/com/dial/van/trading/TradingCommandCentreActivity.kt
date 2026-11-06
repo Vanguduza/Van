@@ -14,11 +14,8 @@ import com.dial.van.visual.VanTheme
  * live in one `NavHost` hosted by [TradingRoute]; this activity's whole job is to host that
  * composable inside [VanTheme] and forward old deep-link intents.
  *
- * `EXTRA_ROUTE` is accepted for compatibility with existing deep links/shortcuts but is not
- * threaded further yet — [TradingRoute] always starts at its overview destination. A caller
- * that needs a specific inner route (e.g. a position) should prefer
- * `TradingCommandCentreActivity` staying on Overview and using in-app navigation, since the
- * inner `NavHost`'s graph is private to [TradingRoute].
+ * `EXTRA_ROUTE` preserves the overlay's selected view or trade. Unknown links resolve to
+ * Overview; trade links use the existing detail screen, which also reads closed trades.
  */
 class TradingCommandCentreActivity : FragmentActivity() {
 
@@ -27,7 +24,7 @@ class TradingCommandCentreActivity : FragmentActivity() {
         val app = application as VanApplication
         setContent {
             VanTheme {
-                TradingRoute(app, onBack = { finish() })
+                TradingRoute(app, onBack = { finish() }, initialRoute = intent.getStringExtra(EXTRA_ROUTE))
             }
         }
     }
@@ -35,8 +32,7 @@ class TradingCommandCentreActivity : FragmentActivity() {
     companion object {
         const val EXTRA_ROUTE = "route"
 
-        /** Kept for `overlay/`'s existing call sites (`VanOverlayWorkboards.kt`); this activity
-         * always opens on the overview destination regardless of the value passed. */
+        /** Default for `overlay/`'s workboard entry points. */
         const val ROUTE_OVERVIEW = "overview"
 
         fun intent(context: Context, route: String = ROUTE_OVERVIEW): Intent =

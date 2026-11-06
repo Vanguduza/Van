@@ -1,0 +1,10 @@
+{
+  "note": "Rev1.13 inherits every Rev1.12 member unless explicitly modified by manifest diff. No owner visual signature or native app testing inferred.",
+  "parent_sha256_master": "442d6a1d843d035651a239112372825b2f6a0a0cdc6cd4cc15044c68eaac4414",
+  "parent_zip_name": "VAN_NEXT_UNIFIED_REBUILD_BLUEPRINT_PACK_REV1_12_20261017.zip",
+  "parent_zip_sha256": "d898f2a46904a558fa45658543fc142069739e72498ac0ad58ec851529747a99",
+  "rev112_original_files_preserved": true,
+  "rev112_pack_files": 272,
+  "schema": "van.reconciliation.parent/1.0",
+  "style_reference_sha256": "d3dba734dc307ccff5ba033ca3d0a61fead93b6acf6185a3903456b63d03c22a"
+}

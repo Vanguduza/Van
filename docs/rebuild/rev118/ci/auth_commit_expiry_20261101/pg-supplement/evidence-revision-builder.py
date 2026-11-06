@@ -1,0 +1,46 @@
+"""Documented derived revision; preserves pre-supplement outputs and every original run."""
+from pathlib import Path
+import json,hashlib,copy,shutil,datetime,xml.etree.ElementTree as ET,sys,subprocess
+W=Path('/workspace');R=W/'van-review-2026-10-18/publish';RAW='docs/rebuild/rev118/ci/auth_commit_expiry_20261101';RECEIPT='docs/rebuild/rev118/receipts/AUTH_COMMIT_EXPIRY_SOURCE_20261101.json';DOC='docs/rebuild/rev118/backend/BE-002_003_AUTH_COMMIT_EXPIRY.md';PROGRESS='docs/rebuild/rev118/CANDIDATE_SOURCE_PROGRESS.json'
+def read(p):return json.loads(Path(p).read_text())
+def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+def require(ok,msg):
+ if not ok:raise RuntimeError(msg)
+backup=read(W/'van-auth-pre-pg-derived-evidence-20261101.json');require(sha(backup['archive'])==backup['sha256'],'Derived backup drift')
+for rel,h in backup['files'].items():require(sha(R/rel)==h,'Uncommitted derived output moved: '+rel)
+old=read(R/RECEIPT);require(old['selected_suite']['tests']==5943 and old['selected_suite']['passed']==5770 and old['selected_suite']['skipped']==173,'Unexpected pre-supplement result')
+for rel,h in old['raw_files'].items():require(sha(R/rel)==h,'Original raw evidence changed: '+rel)
+require(subprocess.check_output(['git','rev-parse','HEAD'],cwd=R,text=True).strip()==old['source_parent'],'Candidate parent changed')
+sys.path.insert(0,str(W));from van_source_composite_coverage_20261101 import auth,key,outcomes
+base=auth(W/'van-auth-selected-storage-recovery-r1-20261101',W/'van-auth-remainder-storage-recovery-r1-20261101',W/'van-auth-corrected-source-pins-20261101.json',W/'van-auth-corrected-collection-r2-20261101',W/'van-auth-erasure-isolated-storage-recovery-r1-20261101')
+require(base==old['sharded_coverage'],'Pre-supplement composite replay differs')
+P=W/'van-auth-pg-supplement-20261101';terminal=read(P/'receipt.json');plan=read(W/'van-auth-pg-supplement-plan-20261101.json');targets=plan['targets'];require(len(targets)==len(set(targets))==13,'Wrong PG supplement scope');require(terminal['completed'] and terminal['exit']==0 and terminal['cleaned'] and terminal['owned_fixture_independently_absent'] and terminal['owned_temp_cleanup']['independently_absent'],'PG supplement incomplete or not cleaned');require(terminal['supplement_plan_sha256']==sha(W/'van-auth-pg-supplement-plan-20261101.json'),'Wrong PG plan');require((P/'targets.txt').read_text().splitlines()==targets,'Actual PG targets differ');require(read(P/'storage-audit.json')['forbidden_events']==[],'PG storage audit violation')
+pins=read(W/'van-auth-corrected-source-pins-20261101.json')['files'];frozen=W/'van-lanes-20261101/auth-final'
+for f,h in pins.items():require(terminal['source_sha256'][f]==h==sha(frozen/f)==sha(R/f),'PG/integrated source drift: '+f)
+lookup={key(n.removeprefix('backend/')):n for n in targets};actual=outcomes(P/'full-trading.xml',lookup);require(set(actual)==set(targets) and all(not x['bad'] and not x['skipped'] for x in actual.values()),'PG cases are not exact all-pass')
+require(set(targets)<={x['name'] for x in base['skip_cases']},'PG supplement does not match historical declared skips')
+coverage=copy.deepcopy(base);coverage['schema']='van.auth-exact-composite-source-coverage/2';coverage['pre_pg_summary']={k:base[k] for k in ['tests','passed','failures','errors','skipped']};coverage['passed']+=len(actual);coverage['skipped']-=len(actual);coverage['skip_cases']=[x for x in coverage['skip_cases'] if x['name'] not in actual]
+proof={'targets':targets,'passed':len(actual),'failures':0,'errors':0,'skipped':0,'terminal_sha256':sha(P/'receipt.json'),'xml_sha256':sha(P/'full-trading.xml'),'plan_sha256':sha(W/'van-auth-pg-supplement-plan-20261101.json'),'source_pins_match':len(pins),'owned_pg_and_temp_independently_absent':True,'native_qualification_claimed':False,'controller_label_note':'Inherited generic FAMILY_AND_SESSION_BOUNDARY_SOURCE_NOT_NATIVE_QUALIFICATION label is not a scope claim; actual auth-final source and exact13target identities are bound independently.'}
+coverage['supplemental_pg']=proof
+for row in coverage['shards']:
+ overlap={x['name'] for x in row['skip_cases']} & set(actual)
+ if overlap:
+  row['passed']+=len(overlap);row['skipped']-=len(overlap);row['skip_cases']=[x for x in row['skip_cases'] if x['name'] not in overlap];row['historical_skips_superseded_only_in_effective_composite_by_actual_pg_pass']=sorted(overlap);row['supplemental_pg']=proof
+require(coverage['tests']==coverage['passed']+coverage['skipped']==5943 and len(coverage['skip_cases'])==coverage['skipped'],'Composite outcome partition mismatch')
+new=copy.deepcopy(old);now=datetime.datetime.now(datetime.timezone.utc).isoformat();new['schema']='van.rebuild.auth-commit-expiry-source/3';new['at_utc']=now;new['qualification_scope']='full-backend-composite-recovery-with-exact-pg-supplement';new['qualification_label']='Complete corrected backend composite source coverage with exact13PostgreSQL supplemental variants';new['sharded_coverage']=coverage;new['selected_suite']={k:coverage[k] for k in ['tests','passed','failures','errors','skipped','skip_cases']};new['selected_suite']['failure_cases']=[];new['supplemental_pg']=proof;new['derived_revision']={'number':2,'previous_receipt_sha256':backup['files'][RECEIPT],'previous_derived_archive_sha256':backup['sha256'],'previous_result':coverage['pre_pg_summary'],'reason':'Root required actual execution of13affected PostgreSQL variants before auth publication. Original173skip outputs and all failed runs remain preserved; this is a documented derived revision, not a rewritten execution claim.','builder':RAW+'/pg-supplement/evidence-revision-builder.py'}
+new['limitations'].append('The13supplemental PostgreSQL source cases ran against a fresh owned pinned fixture. Remaining'+str(coverage['skipped'])+'declared skips retain their exact original reasons. No native, production, full-unit or performance qualification is issued.')
+progress=read(R/PROGRESS);summary=None
+for uid in ['BE-002','BE-003']:
+ found=[m for m in progress['units'][uid]['milestones'] if Path(RECEIPT).name in m.get('evidence','')];require(len(found)==1,'Auth milestone missing/duplicate');m=found[0];needle='5770 passed, 0 failures, 0 errors, 173 declared skips';require(m['description'].count(needle)==1,'Previous milestone summary differs');m['description']=m['description'].replace(needle,f"{coverage['passed']} passed, 0 failures, 0 errors, {coverage['skipped']} declared skips")+' Exact13PostgreSQL supplemental variants passed with clean audit and owned fixture cleanup; pre-supplement173skip evidence remains retained as an explicit derived revision. Known10second erasure timing sensitivity is preserved; no performance guarantee.';summary=m['description']
+progress['updated_at_utc']=now
+document='# Pairing and grant authority through writer admission\n\n'+summary+'\n\n[Source receipt](../receipts/AUTH_COMMIT_EXPIRY_SOURCE_20261101.json) independently binds exact5943collected identities, source pins, all original failed/interrupted outcomes, exact recovery runs and the13actual PostgreSQL supplemental variants. This is composite source coverage, not a single successful full-suite run. The pre-supplement derived receipt, document and progress are retained in a hashed archive; every original173skip raw run remains unchanged. The signed10second erasure case expired under prior load and passed unchanged in isolation in5.337seconds; exact timestamps retain that timing sensitivity.\n\n'+'\n'.join('- '+x for x in new['limitations'])+'\n'
+copies=[]
+for path in sorted(P.iterdir()):
+ if path.is_file():copies.append((path,Path('pg-supplement')/path.name))
+for src,dest in [(W/'van-auth-pg-supplement-20261101.py','pg-supplement/controller.py'),(W/'van-auth-pg-supplement-plan-20261101.json','pg-supplement/plan.json'),(Path(__file__),'pg-supplement/evidence-revision-builder.py'),(W/'van-auth-pre-pg-derived-evidence-20261101.zip','derived-revisions/pre-pg/derived-evidence.zip'),(W/'van-auth-pre-pg-derived-evidence-20261101.json','derived-revisions/pre-pg/archive-manifest.json'),(W/'van-auth-finalization-command-20261101.json','derived-revisions/pre-pg/finalization-command.json'),(W/'van-auth-finalization-20261101.log','derived-revisions/pre-pg/finalization.log')]:copies.append((src,Path(dest)))
+require(len({str(d) for _,d in copies})==len(copies),'Duplicate supplemental evidence destination')
+for src,dest in copies:require(src.is_file() and not (R/RAW/dest).exists(),'Missing input or duplicate supplemental output: '+str(dest))
+# All validation precedes mutation. Existing raw outputs are never overwritten.
+for src,dest in copies:
+ path=R/RAW/dest;path.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(src,path);require(sha(path)==sha(src),'Supplement copy drift');new['raw_files'][str(Path(RAW)/dest)]=sha(path)
+(R/RECEIPT).write_text(json.dumps(new,indent=2)+'\n');(R/DOC).write_text(document);(R/PROGRESS).write_text(json.dumps(progress,indent=2)+'\n');(W/'van-auth-final-composite-source-coverage-20261101.json').write_text(json.dumps(coverage,indent=2)+'\n');print(json.dumps({'revision':2,'tests':coverage['tests'],'passed':coverage['passed'],'skipped':coverage['skipped'],'raw_originals_unchanged':len(old['raw_files']),'supplemental_files':len(copies),'acceptance_issued':False}))

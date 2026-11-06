@@ -36,15 +36,22 @@ class FakeMt5:
     def __init__(self):
         self.login_calls, self.sent = [], []
         self.pos = {}
+        self.deals = []
         self.trade_allowed = True
+        self.expert_allowed = True
+        self.connected = True
+        self.terminal_trade_allowed = True
+        self.tradeapi_disabled = False
         self._login = 12345678
 
     def initialize(self): return True
     def login(self, login, password=None, server=None): self.login_calls.append((login, server, "pw-redacted")); return login == self._login and password == "s3cret"
-    def account_info(self): return NS(login=self._login, equity=10_250.5, balance=10_000.0, currency="USD", margin_free=9_000.0, leverage=30, margin_mode=2, trade_allowed=self.trade_allowed)
+    def account_info(self): return NS(login=self._login, server="Broker-Demo", trade_mode=0, equity=10_250.5, balance=10_000.0, currency="USD", credit=0.0, currency_digits=2, margin=0.0, margin_level=0.0, margin_free=9_000.0, leverage=30, margin_mode=2, trade_allowed=self.trade_allowed,trade_expert=self.expert_allowed)
+    def terminal_info(self): return NS(connected=self.connected,trade_allowed=self.terminal_trade_allowed,tradeapi_disabled=self.tradeapi_disabled)
     def symbol_info(self, s): return NS(volume_min=0.01, volume_step=0.01, volume_max=100.0, trade_stops_level=5, point=0.00001, digits=5, trade_contract_size=100000.0, trade_tick_value=1.0, trade_tick_size=0.00001, spread=8, trade_mode=4)
     def symbol_info_tick(self, s): return NS(bid=1.10000, ask=1.10008)
     def order_check(self, req): return NS(retcode=0, comment="ok", margin=33.0, margin_free=8967.0)
+    def order_calc_margin(self, side, symbol, volume, price): return 33.0
     def order_send(self, req):
         self.sent.append(req)
         if req["action"] == self.TRADE_ACTION_SLTP:
@@ -52,16 +59,17 @@ class FakeMt5:
         if req["action"] == self.TRADE_ACTION_DEAL and req.get("position"):
             self.pos.pop(req["position"]); return NS(retcode=self.TRADE_RETCODE_DONE, comment="closed", volume=req["volume"], price=req["price"])
         ticket = 700 + len(self.pos)
-        self.pos[ticket] = NS(ticket=ticket, symbol=req["symbol"], type=req["type"], volume=req["volume"], price_open=req["price"], sl=req["sl"], tp=req.get("tp", 0.0), comment=req["comment"], magic=req["magic"], profit=0.0)
-        return NS(retcode=self.TRADE_RETCODE_DONE, comment="done", order=ticket, volume=req["volume"], price=req["price"])
+        self.pos[ticket] = NS(ticket=ticket, identifier=ticket, symbol=req["symbol"], type=req["type"], volume=req["volume"], price_open=req["price"], sl=req["sl"], tp=req.get("tp", 0.0), comment=req["comment"], magic=req["magic"], profit=0.0)
+        self.deals.append(NS(ticket=ticket+10000,order=ticket,position_id=ticket,symbol=req['symbol']))
+        return NS(retcode=self.TRADE_RETCODE_DONE, comment="done", order=ticket, deal=ticket+10000, volume=req["volume"], price=req["price"])
     def positions_get(self, ticket=None): return [p for p in self.pos.values() if ticket is None or p.ticket == ticket]
-    def orders_get(self): return []
-    def history_deals_get(self, a, b): return []
+    def orders_get(self, **kwargs): return []
+    def history_deals_get(self, *args, **kwargs): return [d for d in self.deals if d.order==kwargs['ticket']] if 'ticket' in kwargs else []
 
 
 def make_worker(tmp_path, clock):
     pw = tmp_path / "fx.pw"; pw.write_text("s3cret\n")
-    cfg = {"accounts": {"fx_primary": {"login": 12345678, "server": "Broker-Demo", "password_file": str(pw)}}}
+    cfg = {"nonce_store":str(tmp_path/'worker-nonces.sqlite'),"accounts": {"fx_primary": {"login": 12345678, "server": "Broker-Demo", "currency": "USD", "demo": True, "password_file": str(pw)}}}
     return worker_mod.Worker(cfg, worker_mod.Terminal(FakeMt5()), KEY, clock=clock), cfg
 
 
@@ -141,5 +149,15 @@ def test_full_mtls_round_trip_client_transport_to_worker_https_server(tmp_path):
         # wrong signing key on the client side → the worker answers "bad signature" and the adapter's sync raises KeyError→ treated as fault by callers
         bad = Mt5BridgeClient(signing_key=b"x" * 32, transport=t)
         assert bad.call("positions", {"alias": "fx_primary"}, now_ms=int(time.time() * 1000))["error"] == "bad signature"
+        # The optional core deadline survives real TLS/JSON/HMAC transport and
+        # the actual worker dispatch path. The terminal SDK is the fixture.
+        live_now=int(time.time()*1000)
+        cmd=OrderCommand('deadline-tls','d'*64,'original','fx_primary','mt5','EURUSD',Direction.LONG,
+            'MARKET',D('.1'),D('1.1'),D('1.09'),StopMode.VENUE,LossModel.STOP_DISTANCE,
+            expires_at_ms=live_now+5000).sealed()
+        assert adapter.submit(cmd,now_ms=live_now).status=='FILLED'
+        actual=[r for r in adapter.client.sent if r.op=='order_send_expiring']
+        assert len(actual)==1 and actual[0].body['expires_at_ms']==cmd.expires_at_ms
+        assert adapter.client.verify(actual[0]) and len(w.t.mt5.sent)==1
     finally:
         srv.shutdown()

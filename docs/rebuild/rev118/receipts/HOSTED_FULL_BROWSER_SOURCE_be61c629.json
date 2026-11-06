@@ -1,0 +1,138 @@
+{
+  "schema": "van.rebuild.hosted-full-browser-source/1",
+  "source_head": "be61c629ffdfaf3db71b084e9cae1acb9d6ea31c",
+  "tested_merge": "81bbb4978c6ea8dfedd2e10c6a6b63e282bb7835",
+  "run_id": 40115383483,
+  "job_id": 120935476862,
+  "job_conclusion": "success",
+  "reports": {
+    "report.xml": {
+      "tests": 11,
+      "passed": 11,
+      "failed": [],
+      "errors": 0,
+      "skipped": [],
+      "sha256": "3cb253226dd3c537f76be25c36da3607496129cf64e7a7e67aa6ca7ebbf4ac1c"
+    },
+    "full-report.xml": {
+      "tests": 1543,
+      "passed": 1542,
+      "failed": [],
+      "errors": 0,
+      "skipped": [
+        {
+          "id": "tests.test_browser_egress_proxy_i8::test_only_the_configured_client_uid_may_use_a_listener",
+          "reason": "needs root and setpriv"
+        }
+      ],
+      "sha256": "480ab3bcaaad765859387fddd569f975c7b9054dd693517b5e17a5c426370190"
+    },
+    "uid-report.xml": {
+      "tests": 1,
+      "passed": 1,
+      "failed": [],
+      "errors": 0,
+      "skipped": [],
+      "sha256": "b37657f14ed727bf87917664c01bee668cf1d24de8588a0dd125dbeee0c2ec66"
+    },
+    "firewall-report.xml": {
+      "tests": 10,
+      "passed": 10,
+      "failed": [],
+      "errors": 0,
+      "skipped": [],
+      "sha256": "f77f48a81738af63848e84cb1e95f4c4f3e7f2ee70b3f0e079b57cdac5a83a3c"
+    }
+  },
+  "source_files": [
+    "backend/tests/test_browser_action_plans.py",
+    "backend/tests/test_browser_api.py",
+    "backend/tests/test_browser_artifact_admission.py",
+    "backend/tests/test_browser_artifact_owner_http_e2e.py",
+    "backend/tests/test_browser_artifact_provider.py",
+    "backend/tests/test_browser_assignment_execution.py",
+    "backend/tests/test_browser_canary_origin.py",
+    "backend/tests/test_browser_completion_requires_verification.py",
+    "backend/tests/test_browser_egress_proxy.py",
+    "backend/tests/test_browser_egress_proxy_i8.py",
+    "backend/tests/test_browser_egress_proxy_i9.py",
+    "backend/tests/test_browser_escalation_boundary.py",
+    "backend/tests/test_browser_fabric.py",
+    "backend/tests/test_browser_flood_bounds.py",
+    "backend/tests/test_browser_guard_lost_regression.py",
+    "backend/tests/test_browser_i5_integration_g8.py",
+    "backend/tests/test_browser_injection_containment.py",
+    "backend/tests/test_browser_input_protocol.py",
+    "backend/tests/test_browser_interaction_router.py",
+    "backend/tests/test_browser_interactive_worker.py",
+    "backend/tests/test_browser_late_block_callers.py",
+    "backend/tests/test_browser_mission_binding_regression.py",
+    "backend/tests/test_browser_network_effect_guard.py",
+    "backend/tests/test_browser_network_guard_lease.py",
+    "backend/tests/test_browser_owner_command_e2e.py",
+    "backend/tests/test_browser_owner_file_grants.py",
+    "backend/tests/test_browser_owner_preemption.py",
+    "backend/tests/test_browser_producer_api.py",
+    "backend/tests/test_browser_quality_api.py",
+    "backend/tests/test_browser_repeated_owner_work.py",
+    "backend/tests/test_browser_review_i2_lifecycle.py",
+    "backend/tests/test_browser_review_i2_router.py",
+    "backend/tests/test_browser_review_i3.py",
+    "backend/tests/test_browser_review_i3_classifier.py",
+    "backend/tests/test_browser_review_i4_fail_safe_classifier.py",
+    "backend/tests/test_browser_review_i4_fence.py",
+    "backend/tests/test_browser_review_i5_fence.py",
+    "backend/tests/test_browser_review_i5_task_scope.py",
+    "backend/tests/test_browser_review_i6_scope.py",
+    "backend/tests/test_browser_sealed_resume.py",
+    "backend/tests/test_browser_semantic_worker.py",
+    "backend/tests/test_browser_subagent.py",
+    "backend/tests/test_browser_takeover_and_downloads.py",
+    "backend/tests/test_browser_task_preparation.py",
+    "backend/tests/test_browser_task_read_auth.py",
+    "backend/tests/test_browser_task_tombstones.py",
+    "backend/tests/test_harness_chromium_argv.py",
+    "backend/tests/test_harness_elements.py",
+    "backend/tests/test_harness_i5_redaction.py",
+    "backend/tests/test_harness_pseudo_hit_ownership.py"
+  ],
+  "chromium": "Google Chrome for Testing 153.0.8010.12",
+  "kernel": "Linux 6.17.0-1022-azure",
+  "nft": "nftables v1.0.9 (Old Doc Yak #3)",
+  "archive_sha256": "e72212c22ad6efddfdf9886390eddb4e8e68d08b2c47541107039da133943f24",
+  "storage_audits": {
+    "uid-storage-audit.json": {
+      "schema": "van.source-storage-audit/1",
+      "forbidden_events": [],
+      "source_sha256": "d4e270150fb0da6e8d79b449dd0de68fd1f97b3ccea3d282f31d91297edbd495",
+      "root": "/home/runner/work/Van/Van",
+      "scope": "SQLite opens, path-based writable opens and directory/link/rename/delete events under data and backend/data",
+      "limits": "Python audit events only; existing fd writes, native-library raw I/O and external processes are not an OS sandbox. Git state is checked separately."
+    },
+    "storage-audit.json": {
+      "schema": "van.source-storage-audit/1",
+      "forbidden_events": [],
+      "source_sha256": "d4e270150fb0da6e8d79b449dd0de68fd1f97b3ccea3d282f31d91297edbd495",
+      "root": "/home/runner/work/Van/Van",
+      "scope": "SQLite opens, path-based writable opens and directory/link/rename/delete events under data and backend/data",
+      "limits": "Python audit events only; existing fd writes, native-library raw I/O and external processes are not an OS sandbox. Git state is checked separately."
+    },
+    "full-storage-audit.json": {
+      "schema": "van.source-storage-audit/1",
+      "forbidden_events": [],
+      "source_sha256": "d4e270150fb0da6e8d79b449dd0de68fd1f97b3ccea3d282f31d91297edbd495",
+      "root": "/home/runner/work/Van/Van",
+      "scope": "SQLite opens, path-based writable opens and directory/link/rename/delete events under data and backend/data",
+      "limits": "Python audit events only; existing fd writes, native-library raw I/O and external processes are not an OS sandbox. Git state is checked separately."
+    },
+    "firewall-storage-audit.json": {
+      "schema": "van.source-storage-audit/1",
+      "forbidden_events": [],
+      "source_sha256": "d4e270150fb0da6e8d79b449dd0de68fd1f97b3ccea3d282f31d91297edbd495",
+      "root": "/home/runner/work/Van/Van",
+      "scope": "SQLite opens, path-based writable opens and directory/link/rename/delete events under data and backend/data",
+      "limits": "Python audit events only; existing fd writes, native-library raw I/O and external processes are not an OS sandbox. Git state is checked separately."
+    }
+  },
+  "limits": "Fresh hosted source qualification. Root UID is separately reexecuted and actual disposable namespaces are used; no deployed DIAL/host firewall or handset result."
+}

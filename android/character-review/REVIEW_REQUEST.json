@@ -1,0 +1,25 @@
+{
+  "schema": "van.character-review.request/1",
+  "id": "van-owner-debug-character-review-20261105",
+  "application_id": "com.dial.van.characterreview",
+  "build_type": "characterReview",
+  "review_only": true,
+  "production_accepted": false,
+  "physical_accepted": false,
+  "owner_instruction_path": "docs/rebuild/rev118/character-review/OWNER_INSTRUCTION.json",
+  "owner_instruction_sha256": "61292e682bc9f0b2124fd2ad7e21a18a64b68961682670b92184a3b465586338",
+  "source_packet_path": "docs/rebuild/rev118/floating-hardening/RIVE_AUTHORING_AND_PACKAGING_REVIEW_20261105.zip",
+  "source_packet_sha256": "c484243f7e5bf060f5d5828a36d7e75cd5ce99179f32dc0006f997204d8d5087",
+  "rive_sha256": "a5b848a02887de309d2ee4db2dbc167efaeb123ca0078278155c8b7b4bb8f5dc",
+  "rml_sha256": "af23eec96fc24300f598c050ac9a35a1d610588cb441257a4d23021e1b48f42b",
+  "context_sha256": "39a5d1947c9dd057e6616eb2656042945fbe098bc1ec13339d9f3bc74c5342ed",
+  "rive_runtime": "9.13.10",
+  "native_core": "ff495d263f5ec29d8986dc16d49f5ed8ea22ca33",
+  "native_software_receipt": "docs/rebuild/rev118/receipts/floating-20261105-pinned-native-core/SUMMARY.json",
+  "native_software_receipt_sha256": "9fc38e7646fd47bd0a250633fc98187463680c99e5d689a4f8466a693c5616c3",
+  "asset_names": {
+    "rive": "van_review.riv",
+    "context": "van_review.context.json",
+    "marker": "van-character-review.json"
+  }
+}

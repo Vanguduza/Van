@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="47" time="1.121" timestamp="2026-10-25T16:45:41.979879+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_wrong_response_scope_or_missing_series_is_an_explicit_native_refusal[changes0]" time="0.014" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_wrong_response_scope_or_missing_series_is_an_explicit_native_refusal[changes1]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_wrong_response_scope_or_missing_series_is_an_explicit_native_refusal[changes2]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_wrong_response_scope_or_missing_series_is_an_explicit_native_refusal[changes3]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_wrong_response_scope_or_missing_series_is_an_explicit_native_refusal[changes4]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_wrong_response_scope_or_missing_series_is_an_explicit_native_refusal[changes5]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_wrong_native_response_type_is_refused" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_absent_native_fields_never_become_zero_market_facts[volume]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_absent_native_fields_never_become_zero_market_facts[low]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_absent_native_fields_never_become_zero_market_facts[deltaOpen]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_absent_native_fields_never_become_zero_market_facts[deltaHigh]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_absent_native_fields_never_become_zero_market_facts[deltaClose]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_absent_native_fields_never_become_zero_market_facts[utcTimestampInMinutes]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_malformed_native_integers_and_incoherent_prices_are_refused[volume--1]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_malformed_native_integers_and_incoherent_prices_are_refused[volume-True]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_malformed_native_integers_and_incoherent_prices_are_refused[low-1.2]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_malformed_native_integers_and_incoherent_prices_are_refused[deltaOpen--1]" time="0.002" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_malformed_native_integers_and_incoherent_prices_are_refused[deltaHigh-4]" time="0.002" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_malformed_native_integers_and_incoherent_prices_are_refused[deltaClose-21]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_malformed_native_integers_and_incoherent_prices_are_refused[utcTimestampInMinutes-True]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_malformed_native_integers_and_incoherent_prices_are_refused[deltaOpen-18446744073709551616]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_malformed_native_integers_and_incoherent_prices_are_refused[low-9223372036854775808]" time="0.002" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_duplicate_and_outside_request_bars_do_not_enter_the_series[minutes0]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_duplicate_and_outside_request_bars_do_not_enter_the_series[minutes1]" time="0.002" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_duplicate_and_outside_request_bars_do_not_enter_the_series[minutes2]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_only_closed_bars_are_returned_and_native_tick_volume_is_not_one" time="0.000" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_exact_native_price_conversion_does_not_depend_on_ambient_decimal_precision" time="0.002" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_invalid_request_refuses_before_native_io[kwargs0]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_invalid_request_refuses_before_native_io[kwargs1]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_invalid_request_refuses_before_native_io[kwargs2]" time="0.000" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_invalid_request_refuses_before_native_io[kwargs3]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_native_symbol_registry_never_publishes_wrong_scope_partial_or_default_contracts[list_account]" time="0.000" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_native_symbol_registry_never_publishes_wrong_scope_partial_or_default_contracts[full_account]" time="0.000" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_native_symbol_registry_never_publishes_wrong_scope_partial_or_default_contracts[wrong_type]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_native_symbol_registry_never_publishes_wrong_scope_partial_or_default_contracts[duplicate_id]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_native_symbol_registry_never_publishes_wrong_scope_partial_or_default_contracts[alias_collision]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_native_symbol_registry_never_publishes_wrong_scope_partial_or_default_contracts[missing_detail]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_native_symbol_registry_never_publishes_wrong_scope_partial_or_default_contracts[unsolicited_detail]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_native_symbol_registry_never_publishes_wrong_scope_partial_or_default_contracts[missing_lot]" time="0.003" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_native_symbol_registry_never_publishes_wrong_scope_partial_or_default_contracts[zero_step]" time="0.004" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_native_symbol_registry_never_publishes_wrong_scope_partial_or_default_contracts[bool_precision]" time="0.002" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_symbol_refresh_failure_preserves_original_cache_but_refuses_its_use_until_recovery" time="0.002" /><testcase classname="trading.tests.test_ctrader" name="test_codec_matches_hand_verified_wire_bytes" time="0.004" /><testcase classname="trading.tests.test_ctrader" name="test_adapter_authenticates_reads_and_trades_with_stop_in_the_same_request" time="0.080"><failure message="vati.execution.base.VenueUnavailable: cTrader native trendbar scope, window or market fields invalid">adapter = CtraderAdapter(transport=&lt;vati.execution.ctrader.transport.CtraderTransport object at 0x7fbbbeef1970&gt;, client_id='app-... _symbol_snapshot_valid=True, _money_digits=2, _currency='USD', _last_spot={1: (Decimal('1.101'), Decimal('1.10108'))})
+symbol = 'EURUSD', timeframe = 'H1', from_ms = 0, to_ms = 10, count = 500
+
+    def read_trendbars(adapter, symbol: str, timeframe: str, *, from_ms: int, to_ms: int,
+                      count: int = 500) -&gt; TrendbarObservation:
+        if not isinstance(symbol, str) or not symbol or len(symbol) &gt; 256:
+            raise ValueError("native bar symbol required")
+        if not isinstance(timeframe, str) or timeframe not in PERIOD:
+            raise ValueError("unsupported native bar timeframe")
+        native_integer(from_ms, maximum=MAX_TIMESTAMP)
+        native_integer(to_ms, minimum=from_ms, maximum=MAX_TIMESTAMP)
+        native_integer(count, minimum=1, maximum=2001)
+        account = native_integer(adapter.ctid_trader_account_id, minimum=1)
+        period, step = PERIOD[timeframe]
+        adapter._ensure_auth()
+        sym = adapter.symbol(symbol)
+        product = native_integer(sym.symbol_id, minimum=1)
+        name, response = adapter.transport.call("ProtoOAGetTrendbarsReq", {
+            "ctidTraderAccountId": account, "fromTimestamp": from_ms, "toTimestamp": to_ms,
+            "period": period, "symbolId": product, "count": count})
+        try:
+            # The deprecated response timestamp must not redefine the original window.
+            if (name != "ProtoOAGetTrendbarsRes" or not isinstance(response,dict)
+                    or native_integer(response["ctidTraderAccountId"],minimum=1) != account
+                    or native_integer(response["symbolId"],minimum=1) != product
+                    or response["period"] != period):
+                raise ValueError("native response scope mismatch")
+            more = response.get("hasMore")
+            if more is not None and type(more) is not bool:
+                raise ValueError("native pagination state invalid")
+            rows = response.get("trendbar", [])
+            if not isinstance(rows,list) or len(rows) &gt; count:
+                raise ValueError("native bar count invalid")
+            out, seen, excluded = [], set(), 0
+            with localcontext() as context:
+                context.prec = 80
+                for row in rows:
+                    if not isinstance(row,dict): raise ValueError("native bar invalid")
+                    low = native_integer(row["low"],minimum=-(2**63))
+                    opening, closing, high = [native_integer(row[k],maximum=2**64-1)
+                        for k in ("deltaOpen","deltaClose","deltaHigh")]
+                    volume = native_integer(row["volume"])
+                    start = native_integer(row["utcTimestampInMinutes"],maximum=2**32-1)*60_000
+                    if high &lt; max(opening,closing): raise ValueError("native OHLC incoherent")
+                    if start in seen or not from_ms &lt;= start &lt;= to_ms:
+&gt;                       raise ValueError("duplicate or outside-window native bar")
+E                       ValueError: duplicate or outside-window native bar
+
+trading/vati/execution/ctrader/feed.py:101: ValueError
+
+The above exception was the direct cause of the following exception:
+
+    def test_adapter_authenticates_reads_and_trades_with_stop_in_the_same_request():
+        fake = FakeCtrader(); ad = make_adapter(fake)
+        acct = ad.sync_account()
+        assert acct.equity == D("10053.09") and acct.balance == D("10053.09") and acct.verified and fake.host == "demo.ctraderapi.com"
+        assert [n for n, _ in fake.requests[:2]] == ["ProtoOAApplicationAuthReq", "ProtoOAAccountAuthReq"]
+        assert ad.symbols["EURUSD"].symbol_id == 1 and ad.symbols["EURUSD"].lots_to_volume(D("0.10")) == 1_000_000 and ad.symbols["XAUUSD"].lots_to_volume(D("0.5")) == 5000
+        assert ad.heartbeat(now_ms=1).connected and ad.positions() == []
+        cmd = OrderCommand("intent-42", "d" * 64, "k", "ct_demo", "ctrader", "EURUSD", Direction.LONG, "MARKET", D("0.10"), D("1.10008"), D("1.09808"), StopMode.VENUE, LossModel.STOP_DISTANCE, targets=(D("1.10608"),), strategy_id="FX-TREND-PULLBACK-01").sealed()
+        rec = ad.submit(cmd, now_ms=5)
+        assert rec.status == "FILLED" and rec.filled_qty == D("0.10") and rec.average_fill == D("1.10008") and rec.protective_stop_confirmed and rec.protective_stop_price == D("1.09808") and rec.broker_position_id == "100"
+        assert rec.fees == D("3.5")
+        req = next(b for n, b in fake.requests if n == "ProtoOANewOrderReq")
+        assert req["relativeStopLoss"] == 200 and req["relativeTakeProfit"] == 600 and req["label"] == "vati:intent-42" and req["clientOrderId"] == "intent-42" and req["volume"] == 1_000_000 and "stopLoss" not in req
+        pos = ad.positions()
+        assert len(pos) == 1 and pos[0].trade_intent_id == "intent-42" and pos[0].quantity == D("0.10") and pos[0].stop_price == D("1.09808") and pos[0].direction is Direction.LONG
+        # stops only tighten
+        assert ad.modify_stop("100", D("1.09900"), now_ms=6).status == "ACCEPTED"
+        assert ad.modify_stop("100", D("1.09000"), now_ms=7).reject_reason == "refusing to widen protective stop"
+        assert ad.modify_stop("999", D("1.1"), now_ms=7).status == "REJECTED"
+        closed = ad.close("100", None, now_ms=8, reason="TARGET")
+        assert closed.status == "FILLED" and closed.average_fill == D("1.1050") and ad.positions() == []
+        # rejections come back as receipts, never exceptions
+        assert ad.submit(OrderCommand(**{**cmd.__dict__, "protective_stop": None, "command_hash": ""}).sealed(), now_ms=9).reject_reason.startswith("cTrader orders require")
+        fake.reject_next_order = True
+        r2 = ad.submit(cmd, now_ms=10)
+        assert r2.status == "REJECTED" and r2.reject_reason == "NOT_ENOUGH_MONEY"
+        tiny = OrderCommand(**{**cmd.__dict__, "quantity": D("0.001"), "command_hash": ""}).sealed()
+        assert "below venue minimum" in ad.submit(tiny, now_ms=11).reject_reason
+        assert ad.submit(OrderCommand(**{**cmd.__dict__, "symbol": "GBPJPY", "command_hash": ""}).sealed(), now_ms=12).reject_reason.startswith("symbol GBPJPY not available")
+        # spots + trendbars
+        ad.subscribe_spots("EURUSD"); time.sleep(0.05)
+        assert ad.spot("EURUSD") == (D("1.101"), D("1.10108"))
+&gt;       bars = trendbars(ad, "EURUSD", "H1", from_ms=0, to_ms=10)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_ctrader.py:173: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/execution/ctrader/feed.py:124: in trendbars
+    return list(read_trendbars(adapter,symbol,timeframe,from_ms=from_ms,to_ms=to_ms,count=count).bars)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+adapter = CtraderAdapter(transport=&lt;vati.execution.ctrader.transport.CtraderTransport object at 0x7fbbbeef1970&gt;, client_id='app-... _symbol_snapshot_valid=True, _money_digits=2, _currency='USD', _last_spot={1: (Decimal('1.101'), Decimal('1.10108'))})
+symbol = 'EURUSD', timeframe = 'H1', from_ms = 0, to_ms = 10, count = 500
+
+    def read_trendbars(adapter, symbol: str, timeframe: str, *, from_ms: int, to_ms: int,
+                      count: int = 500) -&gt; TrendbarObservation:
+        if not isinstance(symbol, str) or not symbol or len(symbol) &gt; 256:
+            raise ValueError("native bar symbol required")
+        if not isinstance(timeframe, str) or timeframe not in PERIOD:
+            raise ValueError("unsupported native bar timeframe")
+        native_integer(from_ms, maximum=MAX_TIMESTAMP)
+        native_integer(to_ms, minimum=from_ms, maximum=MAX_TIMESTAMP)
+        native_integer(count, minimum=1, maximum=2001)
+        account = native_integer(adapter.ctid_trader_account_id, minimum=1)
+        period, step = PERIOD[timeframe]
+        adapter._ensure_auth()
+        sym = adapter.symbol(symbol)
+        product = native_integer(sym.symbol_id, minimum=1)
+        name, response = adapter.transport.call("ProtoOAGetTrendbarsReq", {
+            "ctidTraderAccountId": account, "fromTimestamp": from_ms, "toTimestamp": to_ms,
+            "period": period, "symbolId": product, "count": count})
+        try:
+            # The deprecated response timestamp must not redefine the original window.
+            if (name != "ProtoOAGetTrendbarsRes" or not isinstance(response,dict)
+                    or native_integer(response["ctidTraderAccountId"],minimum=1) != account
+                    or native_integer(response["symbolId"],minimum=1) != product
+                    or response["period"] != period):
+                raise ValueError("native response scope mismatch")
+            more = response.get("hasMore")
+            if more is not None and type(more) is not bool:
+                raise ValueError("native pagination state invalid")
+            rows = response.get("trendbar", [])
+            if not isinstance(rows,list) or len(rows) &gt; count:
+                raise ValueError("native bar count invalid")
+            out, seen, excluded = [], set(), 0
+            with localcontext() as context:
+                context.prec = 80
+                for row in rows:
+                    if not isinstance(row,dict): raise ValueError("native bar invalid")
+                    low = native_integer(row["low"],minimum=-(2**63))
+                    opening, closing, high = [native_integer(row[k],maximum=2**64-1)
+                        for k in ("deltaOpen","deltaClose","deltaHigh")]
+                    volume = native_integer(row["volume"])
+                    start = native_integer(row["utcTimestampInMinutes"],maximum=2**32-1)*60_000
+                    if high &lt; max(opening,closing): raise ValueError("native OHLC incoherent")
+                    if start in seen or not from_ms &lt;= start &lt;= to_ms:
+                        raise ValueError("duplicate or outside-window native bar")
+                    seen.add(start)
+                    if start+step &gt; to_ms:
+                        excluded += 1
+                        continue
+                    out.append(Bar(symbol.upper(),start,start+step,Decimal(low+opening)/SCALE,
+                        Decimal(low+high)/SCALE,Decimal(low)/SCALE,Decimal(low+closing)/SCALE,
+                        Decimal(volume),volume,Decimal("0")))
+            received = native_integer(adapter.clock(),maximum=253402300799000)
+            return TrendbarObservation(account,product,symbol.upper(),timeframe,from_ms,to_ms,received,
+                getattr(adapter.transport,"host",None),getattr(sym,"contract_revision",None),more,
+                tuple(sorted(out,key=lambda b:b.start_ms)),excluded)
+        except (KeyError,TypeError,ValueError,ArithmeticError) as exc:
+&gt;           raise VenueUnavailable("cTrader native trendbar scope, window or market fields invalid") from exc
+E           vati.execution.base.VenueUnavailable: cTrader native trendbar scope, window or market fields invalid
+
+trading/vati/execution/ctrader/feed.py:114: VenueUnavailable</failure></testcase><testcase classname="trading.tests.test_ctrader" name="test_bad_credentials_and_disconnect_fail_closed" time="0.030" /><testcase classname="trading.tests.test_ctrader" name="test_oauth_helpers_and_account_discovery" time="0.004" /><testcase classname="trading.tests.test_ctrader" name="test_registry_and_service_know_ctrader" time="0.317" /></testsuite></testsuites>

@@ -1,0 +1,2655 @@
+{
+  "$defs": {
+    "CryptoVenueProfile": {
+      "additionalProperties": false,
+      "properties": {
+        "amend_semantics_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "api_family": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "api_version": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "base_asset": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "base_step": {
+          "pattern": "^(?:0\\.[0-9]*[1-9][0-9]*|[1-9][0-9]*(?:\\.[0-9]+)?)$",
+          "type": "string"
+        },
+        "book_recovery_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "cancel_scope": {
+          "enum": [
+            "ORDER",
+            "ACCOUNT_WIDE",
+            "SUBACCOUNT",
+            "UNCONFIRMED"
+          ],
+          "type": "string"
+        },
+        "environment": {
+          "enum": [
+            "FIXTURE",
+            "SIMULATION",
+            "PAPER",
+            "DEMO",
+            "SHADOW",
+            "LIVE"
+          ],
+          "type": "string"
+        },
+        "fee_schedule_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "maximum_quantity_base": {
+          "pattern": "^(?:0\\.[0-9]*[1-9][0-9]*|[1-9][0-9]*(?:\\.[0-9]+)?)$",
+          "type": "string"
+        },
+        "minimum_notional_quote": {
+          "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$",
+          "type": "string"
+        },
+        "native_product_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "order_capabilities": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+            "type": "string"
+          },
+          "type": "array",
+          "uniqueItems": true
+        },
+        "price_tick": {
+          "pattern": "^(?:0\\.[0-9]*[1-9][0-9]*|[1-9][0-9]*(?:\\.[0-9]+)?)$",
+          "type": "string"
+        },
+        "private_recovery_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "product_revision": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "product_status": {
+          "enum": [
+            "TRADING",
+            "HALTED",
+            "MAINTENANCE",
+            "DELISTED",
+            "UNKNOWN"
+          ],
+          "type": "string"
+        },
+        "protection_impact_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "provider_access_state": {
+          "enum": [
+            "UNCONFIRMED",
+            "READ_ONLY",
+            "TEST_MATCHING",
+            "LIVE_ELIGIBLE"
+          ],
+          "type": "string"
+        },
+        "provider_test_kind": {
+          "enum": [
+            "MOCKED_STATIC",
+            "LOCAL_SIMULATOR",
+            "ACTUAL_VENUE_TEST",
+            "ACTUAL_PERMISSIONED_LIVE_READ_ONLY",
+            "ACTUAL_PERMISSIONED_LIVE_TRADING"
+          ],
+          "type": "string"
+        },
+        "qualified_adapter_ref": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "quote_asset": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "record_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "record_type": {
+          "const": "CryptoVenueProfile"
+        },
+        "schema_version": {
+          "const": 2
+        },
+        "scope": {
+          "additionalProperties": false,
+          "properties": {
+            "account_id": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            },
+            "market_type": {
+              "const": "CRYPTO_SPOT"
+            },
+            "ownership": {
+              "enum": [
+                "OWNER_MANUAL",
+                "VATI_MANAGED"
+              ],
+              "type": "string"
+            },
+            "product_id": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            },
+            "scope_hash": {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "strategy_id": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            },
+            "venue_id": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            }
+          },
+          "required": [
+            "account_id",
+            "strategy_id",
+            "venue_id",
+            "product_id",
+            "market_type",
+            "ownership",
+            "scope_hash"
+          ],
+          "type": "object"
+        },
+        "spot_only": {
+          "const": true
+        },
+        "trade_key_withdrawal_permission": {
+          "const": false
+        }
+      },
+      "required": [
+        "record_type",
+        "record_id",
+        "schema_version",
+        "environment",
+        "scope",
+        "api_family",
+        "api_version",
+        "provider_access_state",
+        "provider_test_kind",
+        "native_product_id",
+        "base_asset",
+        "quote_asset",
+        "price_tick",
+        "base_step",
+        "minimum_notional_quote",
+        "maximum_quantity_base",
+        "product_status",
+        "product_revision",
+        "order_capabilities",
+        "amend_semantics_ref",
+        "book_recovery_ref",
+        "private_recovery_ref",
+        "fee_schedule_ref",
+        "cancel_scope",
+        "protection_impact_ref",
+        "trade_key_withdrawal_permission",
+        "spot_only",
+        "qualified_adapter_ref"
+      ],
+      "type": "object"
+    },
+    "DesignChangeProposal": {
+      "additionalProperties": false,
+      "properties": {
+        "acceptance_test_refs": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+            "type": "string"
+          },
+          "type": "array",
+          "uniqueItems": true
+        },
+        "comparison_refs": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+            "type": "string"
+          },
+          "type": "array",
+          "uniqueItems": true
+        },
+        "complexity_ledger_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "data_evaluator_refs": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+            "type": "string"
+          },
+          "type": "array",
+          "uniqueItems": true
+        },
+        "economic_result_ref": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "environment": {
+          "enum": [
+            "FIXTURE",
+            "SIMULATION",
+            "PAPER",
+            "DEMO",
+            "SHADOW",
+            "LIVE"
+          ],
+          "type": "string"
+        },
+        "financial_activation": {
+          "const": "NONE"
+        },
+        "hypothesis_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "preserved_requirement_refs": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+            "type": "string"
+          },
+          "type": "array",
+          "uniqueItems": true
+        },
+        "problem_class": {
+          "enum": [
+            "IMPLEMENTATION_DEFECT",
+            "ECONOMIC_EVIDENCE_GAP",
+            "UNJUSTIFIED_COMPLEXITY",
+            "REQUIRED_CAPABILITY_GAP"
+          ],
+          "type": "string"
+        },
+        "proposed_contract_changes": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+            "type": "string"
+          },
+          "type": "array",
+          "uniqueItems": true
+        },
+        "record_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "record_type": {
+          "const": "DesignChangeProposal"
+        },
+        "required_authority_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "safety_result_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": 2
+        },
+        "scope": {
+          "additionalProperties": false,
+          "properties": {
+            "account_id": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            },
+            "market_type": {
+              "enum": [
+                "CRYPTO_SPOT",
+                "FX",
+                "CFD",
+                "FUTURE",
+                "DERIV_NONLINEAR",
+                "OWNER_TICKET",
+                "PREDICTION_RESEARCH"
+              ],
+              "type": "string"
+            },
+            "ownership": {
+              "enum": [
+                "OWNER_MANUAL",
+                "VATI_MANAGED"
+              ],
+              "type": "string"
+            },
+            "product_id": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            },
+            "scope_hash": {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "strategy_id": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            },
+            "venue_id": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            }
+          },
+          "required": [
+            "account_id",
+            "strategy_id",
+            "venue_id",
+            "product_id",
+            "market_type",
+            "ownership",
+            "scope_hash"
+          ],
+          "type": "object"
+        },
+        "source_commit": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "PROPOSED",
+            "REJECTED",
+            "ADMITTED_FOR_SPECIFICATION",
+            "NEEDS_EVIDENCE"
+          ],
+          "type": "string"
+        },
+        "uncertainty_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "record_type",
+        "record_id",
+        "schema_version",
+        "environment",
+        "scope",
+        "problem_class",
+        "hypothesis_ref",
+        "comparison_refs",
+        "source_commit",
+        "data_evaluator_refs",
+        "proposed_contract_changes",
+        "preserved_requirement_refs",
+        "complexity_ledger_ref",
+        "economic_result_ref",
+        "safety_result_ref",
+        "uncertainty_ref",
+        "acceptance_test_refs",
+        "required_authority_ref",
+        "status",
+        "financial_activation"
+      ],
+      "type": "object"
+    },
+    "ExecutionDecision": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "enum": [
+            "WORK_OBJECTIVE",
+            "QUALIFIED_FALLBACK",
+            "SUPPRESS_ENTRY",
+            "EMERGENCY_PROTOCOL"
+          ],
+          "type": "string"
+        },
+        "decision_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "eligible_methods": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+            "type": "string"
+          },
+          "type": "array",
+          "uniqueItems": true
+        },
+        "environment": {
+          "enum": [
+            "FIXTURE",
+            "SIMULATION",
+            "PAPER",
+            "DEMO",
+            "SHADOW",
+            "LIVE"
+          ],
+          "type": "string"
+        },
+        "estimated_cost_bps": {
+          "anyOf": [
+            {
+              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "evidence_snapshot_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "grant_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "information_cutoff_ms": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "input_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "journal_cursor": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "objective_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "parameter_profile": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "policy_binding_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "reason_codes": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+            "type": "string"
+          },
+          "type": "array",
+          "uniqueItems": true
+        },
+        "record_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "record_type": {
+          "const": "ExecutionDecision"
+        },
+        "rejected_methods": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "method": {
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+                "type": "string"
+              },
+              "reason": {
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+                "type": "string"
+              }
+            },
+            "required": [
+              "method",
+              "reason"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "schema_version": {
+          "const": 2
+        },
+        "scope": {
+          "additionalProperties": false,
+          "properties": {
+            "account_id": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            },
+            "market_type": {
+              "enum": [
+                "CRYPTO_SPOT",
+                "FX",
+                "CFD",
+                "FUTURE",
+                "DERIV_NONLINEAR",
+                "OWNER_TICKET",
+                "PREDICTION_RESEARCH"
+              ],
+              "type": "string"
+            },
+            "ownership": {
+              "enum": [
+                "OWNER_MANUAL",
+                "VATI_MANAGED"
+              ],
+              "type": "string"
+            },
+            "product_id": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            },
+            "scope_hash": {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "strategy_id": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            },
+            "venue_id": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            }
+          },
+          "required": [
+            "account_id",
+            "strategy_id",
+            "venue_id",
+            "product_id",
+            "market_type",
+            "ownership",
+            "scope_hash"
+          ],
+          "type": "object"
+        },
+        "selected_method": {
+          "anyOf": [
+            {
+              "additionalProperties": false,
+              "properties": {
+                "algorithm_id": {
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+                  "type": "string"
+                },
+                "algorithm_version": {
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+                  "type": "string"
+                },
+                "artifact_sha256": {
+                  "pattern": "^[0-9a-f]{64}$",
+                  "type": "string"
+                },
+                "joint_parameter_profile": {
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+                  "type": "string"
+                },
+                "qualification_ref": {
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "algorithm_id",
+                "algorithm_version",
+                "artifact_sha256",
+                "qualification_ref",
+                "joint_parameter_profile"
+              ],
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "uncertainty_ref": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "record_type",
+        "record_id",
+        "schema_version",
+        "environment",
+        "scope",
+        "objective_ref",
+        "policy_binding_ref",
+        "grant_ref",
+        "input_hash",
+        "information_cutoff_ms",
+        "journal_cursor",
+        "evidence_snapshot_ref",
+        "eligible_methods",
+        "rejected_methods",
+        "selected_method",
+        "action",
+        "reason_codes",
+        "parameter_profile",
+        "estimated_cost_bps",
+        "uncertainty_ref",
+        "decision_sha256"
+      ],
+      "type": "object"
+    },
+    "ExecutionEvidenceSnapshot": {
+      "additionalProperties": false,
+      "properties": {
+        "created_ms": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "eligible_observation_refs": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+            "type": "string"
+          },
+          "type": "array",
+          "uniqueItems": true
+        },
+        "environment": {
+          "enum": [
+            "FIXTURE",
+            "SIMULATION",
+            "PAPER",
+            "DEMO",
+            "SHADOW",
+            "LIVE"
+          ],
+          "type": "string"
+        },
+        "excluded_observation_reasons": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "reason": {
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+                "type": "string"
+              },
+              "ref": {
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+                "type": "string"
+              }
+            },
+            "required": [
+              "ref",
+              "reason"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "expires_at_ms": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "independent_parent_count": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "method_statistics": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "cohort_ref": {
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+                "type": "string"
+              },
+              "cost_estimate_bps": {
+                "anyOf": [
+                  {
+                    "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "effective_sample_size": {
+                "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$",
+                "type": "string"
+              },
+              "maturity_policy_ref": {
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+                "type": "string"
+              },
+              "method_ref": {
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+                "type": "string"
+              },
+              "uncertainty_ref": {
+                "anyOf": [
+                  {
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "method_ref",
+              "cohort_ref",
+              "effective_sample_size",
+              "cost_estimate_bps",
+              "uncertainty_ref",
+              "maturity_policy_ref"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "observation_set_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "record_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "record_type": {
+          "const": "ExecutionEvidenceSnapshot"
+        },
+        "schema_version": {
+          "const": 2
+        },
+        "scope": {
+          "additionalProperties": false,
+          "properties": {
+            "account_id": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            },
+            "market_type": {
+              "enum": [
+                "CRYPTO_SPOT",
+                "FX",
+                "CFD",
+                "FUTURE",
+                "DERIV_NONLINEAR",
+                "OWNER_TICKET",
+                "PREDICTION_RESEARCH"
+              ],
+              "type": "string"
+            },
+            "ownership": {
+              "enum": [
+                "OWNER_MANUAL",
+                "VATI_MANAGED"
+              ],
+              "type": "string"
+            },
+            "product_id": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            },
+            "scope_hash": {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "strategy_id": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            },
+            "venue_id": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            }
+          },
+          "required": [
+            "account_id",
+            "strategy_id",
+            "venue_id",
+            "product_id",
+            "market_type",
+            "ownership",
+            "scope_hash"
+          ],
+          "type": "object"
+        },
+        "snapshot_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "source_available_cutoff_ms": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "source_cutoff_cursor": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "update_rule_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "record_type",
+        "record_id",
+        "schema_version",
+        "environment",
+        "scope",
+        "update_rule_sha256",
+        "observation_set_sha256",
+        "source_cutoff_cursor",
+        "source_available_cutoff_ms",
+        "created_ms",
+        "expires_at_ms",
+        "independent_parent_count",
+        "eligible_observation_refs",
+        "excluded_observation_reasons",
+        "method_statistics",
+        "snapshot_sha256"
+      ],
+      "type": "object"
+    },
+    "ExecutionObjective": {
+      "additionalProperties": false,
+      "properties": {
+        "allowed_method_refs": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+            "type": "string"
+          },
+          "type": "array",
+          "uniqueItems": true
+        },
+        "deadline_ms": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "environment": {
+          "enum": [
+            "FIXTURE",
+            "SIMULATION",
+            "PAPER",
+            "DEMO",
+            "SHADOW",
+            "LIVE"
+          ],
+          "type": "string"
+        },
+        "fence_epoch": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "mandate_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "max_notional_quote": {
+          "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$",
+          "type": "string"
+        },
+        "operational_grant_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "payload_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "policy_binding_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "price_limit": {
+          "anyOf": [
+            {
+              "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "protection_requirement_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "purpose": {
+          "enum": [
+            "ENTRY",
+            "INCREASE",
+            "REDUCE",
+            "PROTECTIVE_EXIT"
+          ],
+          "type": "string"
+        },
+        "quantity_base": {
+          "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$",
+          "type": "string"
+        },
+        "record_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "record_type": {
+          "const": "ExecutionObjective"
+        },
+        "reference_price": {
+          "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$",
+          "type": "string"
+        },
+        "reference_time_ms": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "reservation_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "reservation_version": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "risk_approval_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": 2
+        },
+        "scope": {
+          "additionalProperties": false,
+          "properties": {
+            "account_id": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            },
+            "market_type": {
+              "enum": [
+                "CRYPTO_SPOT",
+                "FX",
+                "CFD",
+                "FUTURE",
+                "DERIV_NONLINEAR",
+                "OWNER_TICKET",
+                "PREDICTION_RESEARCH"
+              ],
+              "type": "string"
+            },
+            "ownership": {
+              "enum": [
+                "OWNER_MANUAL",
+                "VATI_MANAGED"
+              ],
+              "type": "string"
+            },
+            "product_id": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            },
+            "scope_hash": {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "strategy_id": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            },
+            "venue_id": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            }
+          },
+          "required": [
+            "account_id",
+            "strategy_id",
+            "venue_id",
+            "product_id",
+            "market_type",
+            "ownership",
+            "scope_hash"
+          ],
+          "type": "object"
+        },
+        "side": {
+          "enum": [
+            "BUY",
+            "SELL"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "record_type",
+        "record_id",
+        "schema_version",
+        "environment",
+        "scope",
+        "side",
+        "purpose",
+        "quantity_base",
+        "max_notional_quote",
+        "price_limit",
+        "reference_price",
+        "reference_time_ms",
+        "deadline_ms",
+        "risk_approval_ref",
+        "mandate_ref",
+        "reservation_ref",
+        "reservation_version",
+        "fence_epoch",
+        "operational_grant_ref",
+        "policy_binding_ref",
+        "allowed_method_refs",
+        "protection_requirement_ref",
+        "payload_sha256"
+      ],
+      "type": "object"
+    },
+    "ExecutionOutcome": {
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "maturity": {
+                "properties": {
+                  "eligible_for_estimator": {
+                    "const": true
+                  }
+                },
+                "required": [
+                  "eligible_for_estimator"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "cost_measurement_ref": {
+                "type": "string"
+              },
+              "maturity": {
+                "properties": {
+                  "fees_complete": {
+                    "const": true
+                  },
+                  "markout_complete": {
+                    "const": true
+                  },
+                  "order_final": {
+                    "const": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "properties": {
+        "available_ms": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "cash_state": {
+          "enum": [
+            "UNRECONCILED",
+            "RECONCILED",
+            "CORRECTED"
+          ],
+          "type": "string"
+        },
+        "cost_measurement_ref": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "environment": {
+          "enum": [
+            "FIXTURE",
+            "SIMULATION",
+            "PAPER",
+            "DEMO",
+            "SHADOW",
+            "LIVE"
+          ],
+          "type": "string"
+        },
+        "fills": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "evidence_ref": {
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+                "type": "string"
+              },
+              "fee_amount": {
+                "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$",
+                "type": "string"
+              },
+              "fee_asset": {
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+                "type": "string"
+              },
+              "order_id": {
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+                "type": "string"
+              },
+              "price_quote": {
+                "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$",
+                "type": "string"
+              },
+              "quantity_base": {
+                "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$",
+                "type": "string"
+              },
+              "revision": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "van_available_ms": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "venue_event_ms": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "venue_fill_id": {
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+                "type": "string"
+              }
+            },
+            "required": [
+              "venue_fill_id",
+              "revision",
+              "order_id",
+              "quantity_base",
+              "price_quote",
+              "fee_amount",
+              "fee_asset",
+              "venue_event_ms",
+              "van_available_ms",
+              "evidence_ref"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "maturity": {
+          "additionalProperties": false,
+          "properties": {
+            "eligible_for_estimator": {
+              "type": "boolean"
+            },
+            "fees_complete": {
+              "type": "boolean"
+            },
+            "markout_complete": {
+              "type": "boolean"
+            },
+            "order_final": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "order_final",
+            "fees_complete",
+            "markout_complete",
+            "eligible_for_estimator"
+          ],
+          "type": "object"
+        },
+        "objective_quantity_base": {
+          "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$",
+          "type": "string"
+        },
+        "objective_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "observation_revision": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "order_state": {
+          "enum": [
+            "WORKING",
+            "PARTIALLY_FILLED",
+            "FILLED",
+            "CANCEL_PENDING",
+            "CANCELLED",
+            "EXPIRED",
+            "REJECTED",
+            "OUTCOME_UNKNOWN",
+            "RECONCILED"
+          ],
+          "type": "string"
+        },
+        "parent_cluster_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "policy_binding_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "protection_state": {
+          "enum": [
+            "NOT_REQUIRED",
+            "REQUESTED",
+            "CONFIRMED",
+            "RECOVERY_REQUIRED",
+            "UNRESOLVED"
+          ],
+          "type": "string"
+        },
+        "record_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "record_type": {
+          "const": "ExecutionOutcome"
+        },
+        "schema_version": {
+          "const": 2
+        },
+        "scope": {
+          "additionalProperties": false,
+          "properties": {
+            "account_id": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            },
+            "market_type": {
+              "enum": [
+                "CRYPTO_SPOT",
+                "FX",
+                "CFD",
+                "FUTURE",
+                "DERIV_NONLINEAR",
+                "OWNER_TICKET",
+                "PREDICTION_RESEARCH"
+              ],
+              "type": "string"
+            },
+            "ownership": {
+              "enum": [
+                "OWNER_MANUAL",
+                "VATI_MANAGED"
+              ],
+              "type": "string"
+            },
+            "product_id": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            },
+            "scope_hash": {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "strategy_id": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            },
+            "venue_id": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            }
+          },
+          "required": [
+            "account_id",
+            "strategy_id",
+            "venue_id",
+            "product_id",
+            "market_type",
+            "ownership",
+            "scope_hash"
+          ],
+          "type": "object"
+        },
+        "source_evidence_refs": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+            "type": "string"
+          },
+          "type": "array",
+          "uniqueItems": true
+        },
+        "supersedes_observation_ref": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "unknown_possible_base": {
+          "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$",
+          "type": "string"
+        },
+        "working_remaining_base": {
+          "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "record_type",
+        "record_id",
+        "schema_version",
+        "environment",
+        "scope",
+        "objective_ref",
+        "policy_binding_ref",
+        "objective_quantity_base",
+        "fills",
+        "working_remaining_base",
+        "unknown_possible_base",
+        "order_state",
+        "protection_state",
+        "cash_state",
+        "maturity",
+        "parent_cluster_id",
+        "observation_revision",
+        "supersedes_observation_ref",
+        "source_evidence_refs",
+        "available_ms",
+        "cost_measurement_ref"
+      ],
+      "type": "object"
+    },
+    "ExecutionPolicyCandidate": {
+      "additionalProperties": false,
+      "properties": {
+        "action_set_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "all_attempt_refs": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+            "type": "string"
+          },
+          "type": "array",
+          "uniqueItems": true
+        },
+        "artifact_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "environment": {
+          "enum": [
+            "FIXTURE",
+            "SIMULATION",
+            "PAPER",
+            "DEMO",
+            "SHADOW",
+            "LIVE"
+          ],
+          "type": "string"
+        },
+        "feature_definition_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "hypothesis_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "objective_definition_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "parent_policy_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "promotion_authorization_ref": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "qualification_ref": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "record_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "record_type": {
+          "const": "ExecutionPolicyCandidate"
+        },
+        "research_only": {
+          "const": true
+        },
+        "schema_version": {
+          "const": 2
+        },
+        "scope": {
+          "additionalProperties": false,
+          "properties": {
+            "account_id": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            },
+            "market_type": {
+              "enum": [
+                "CRYPTO_SPOT",
+                "FX",
+                "CFD",
+                "FUTURE",
+                "DERIV_NONLINEAR",
+                "OWNER_TICKET",
+                "PREDICTION_RESEARCH"
+              ],
+              "type": "string"
+            },
+            "ownership": {
+              "enum": [
+                "OWNER_MANUAL",
+                "VATI_MANAGED"
+              ],
+              "type": "string"
+            },
+            "product_id": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            },
+            "scope_hash": {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "strategy_id": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            },
+            "venue_id": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            }
+          },
+          "required": [
+            "account_id",
+            "strategy_id",
+            "venue_id",
+            "product_id",
+            "market_type",
+            "ownership",
+            "scope_hash"
+          ],
+          "type": "object"
+        },
+        "stage": {
+          "enum": [
+            "HYPOTHESIS_REGISTERED",
+            "BUILDING",
+            "OFFLINE_EVALUATING",
+            "OFFLINE_ACCEPTED",
+            "PROSPECTIVE_EVALUATING",
+            "QUALIFIED_CANDIDATE",
+            "AWAITING_AUTHORIZATION",
+            "AUTHORIZED",
+            "REJECTED",
+            "INCONCLUSIVE",
+            "FAILED",
+            "CANCELLED",
+            "RETIRED"
+          ],
+          "type": "string"
+        },
+        "study_refs": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+            "type": "string"
+          },
+          "type": "array",
+          "uniqueItems": true
+        },
+        "update_rule_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "record_type",
+        "record_id",
+        "schema_version",
+        "environment",
+        "scope",
+        "hypothesis_ref",
+        "parent_policy_ref",
+        "artifact_sha256",
+        "feature_definition_ref",
+        "objective_definition_ref",
+        "update_rule_ref",
+        "action_set_ref",
+        "stage",
+        "study_refs",
+        "all_attempt_refs",
+        "qualification_ref",
+        "promotion_authorization_ref",
+        "research_only"
+      ],
+      "type": "object"
+    },
+    "ExecutionQualityMeasurement": {
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "measurement_state": {
+                "const": "MATURE"
+              }
+            },
+            "required": [
+              "measurement_state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "explicit_nonembedded_cost_quote": {
+                "type": "string"
+              },
+              "filled_cost_quote": {
+                "type": "string"
+              },
+              "residual_opportunity_quote": {
+                "type": "string"
+              },
+              "total_benchmark_loss_quote": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      ],
+      "properties": {
+        "actual_cash_ledger_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "benchmark_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "environment": {
+          "enum": [
+            "FIXTURE",
+            "SIMULATION",
+            "PAPER",
+            "DEMO",
+            "SHADOW",
+            "LIVE"
+          ],
+          "type": "string"
+        },
+        "evaluation_horizon_ms": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "evidence_refs": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+            "type": "string"
+          },
+          "type": "array",
+          "uniqueItems": true
+        },
+        "explicit_nonembedded_cost_quote": {
+          "anyOf": [
+            {
+              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fees_embedded_convention_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "filled_cost_quote": {
+          "anyOf": [
+            {
+              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "markout_refs": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+            "type": "string"
+          },
+          "type": "array",
+          "uniqueItems": true
+        },
+        "measurement_state": {
+          "enum": [
+            "MATURE",
+            "PARTIAL",
+            "CENSORED",
+            "UNKNOWN",
+            "CORRECTED"
+          ],
+          "type": "string"
+        },
+        "objective_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "record_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "record_type": {
+          "const": "ExecutionQualityMeasurement"
+        },
+        "residual_opportunity_quote": {
+          "anyOf": [
+            {
+              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "schema_version": {
+          "const": 2
+        },
+        "scope": {
+          "additionalProperties": false,
+          "properties": {
+            "account_id": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            },
+            "market_type": {
+              "enum": [
+                "CRYPTO_SPOT",
+                "FX",
+                "CFD",
+                "FUTURE",
+                "DERIV_NONLINEAR",
+                "OWNER_TICKET",
+                "PREDICTION_RESEARCH"
+              ],
+              "type": "string"
+            },
+            "ownership": {
+              "enum": [
+                "OWNER_MANUAL",
+                "VATI_MANAGED"
+              ],
+              "type": "string"
+            },
+            "product_id": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            },
+            "scope_hash": {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "strategy_id": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            },
+            "venue_id": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            }
+          },
+          "required": [
+            "account_id",
+            "strategy_id",
+            "venue_id",
+            "product_id",
+            "market_type",
+            "ownership",
+            "scope_hash"
+          ],
+          "type": "object"
+        },
+        "total_benchmark_loss_quote": {
+          "anyOf": [
+            {
+              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "uncertainty_ref": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "record_type",
+        "record_id",
+        "schema_version",
+        "environment",
+        "scope",
+        "objective_ref",
+        "benchmark_ref",
+        "evaluation_horizon_ms",
+        "filled_cost_quote",
+        "residual_opportunity_quote",
+        "explicit_nonembedded_cost_quote",
+        "total_benchmark_loss_quote",
+        "actual_cash_ledger_ref",
+        "measurement_state",
+        "markout_refs",
+        "fees_embedded_convention_ref",
+        "uncertainty_ref",
+        "evidence_refs"
+      ],
+      "type": "object"
+    },
+    "ExecutionStudySpec": {
+      "additionalProperties": false,
+      "properties": {
+        "account_replay_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "all_trial_census_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "baseline_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "candidate_refs": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+            "type": "string"
+          },
+          "type": "array",
+          "uniqueItems": true
+        },
+        "cohort_definition_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "cost_model_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "dataset_manifest_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "dependence_method_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "environment": {
+          "enum": [
+            "FIXTURE",
+            "SIMULATION",
+            "PAPER",
+            "DEMO",
+            "SHADOW",
+            "LIVE"
+          ],
+          "type": "string"
+        },
+        "evaluator_artifact_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "fold_records_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "holdout_lock_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "hypothesis_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "live_exploration_authorization_ref": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "materiality_policy_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "objective_definition_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "off_policy_assumptions_ref": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "prospective_plan_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "record_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "record_type": {
+          "const": "ExecutionStudySpec"
+        },
+        "resource_budget_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": 2
+        },
+        "scope": {
+          "additionalProperties": false,
+          "properties": {
+            "account_id": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            },
+            "market_type": {
+              "enum": [
+                "CRYPTO_SPOT",
+                "FX",
+                "CFD",
+                "FUTURE",
+                "DERIV_NONLINEAR",
+                "OWNER_TICKET",
+                "PREDICTION_RESEARCH"
+              ],
+              "type": "string"
+            },
+            "ownership": {
+              "enum": [
+                "OWNER_MANUAL",
+                "VATI_MANAGED"
+              ],
+              "type": "string"
+            },
+            "product_id": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            },
+            "scope_hash": {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "strategy_id": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            },
+            "venue_id": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            }
+          },
+          "required": [
+            "account_id",
+            "strategy_id",
+            "venue_id",
+            "product_id",
+            "market_type",
+            "ownership",
+            "scope_hash"
+          ],
+          "type": "object"
+        },
+        "stopping_rule_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "record_type",
+        "record_id",
+        "schema_version",
+        "environment",
+        "scope",
+        "hypothesis_ref",
+        "candidate_refs",
+        "baseline_ref",
+        "dataset_manifest_sha256",
+        "evaluator_artifact_sha256",
+        "objective_definition_ref",
+        "cohort_definition_ref",
+        "fold_records_ref",
+        "holdout_lock_ref",
+        "all_trial_census_ref",
+        "cost_model_ref",
+        "account_replay_ref",
+        "stopping_rule_ref",
+        "dependence_method_ref",
+        "materiality_policy_ref",
+        "prospective_plan_ref",
+        "off_policy_assumptions_ref",
+        "live_exploration_authorization_ref",
+        "resource_budget_ref"
+      ],
+      "type": "object"
+    },
+    "OperationalOptimizationGrant": {
+      "additionalProperties": false,
+      "properties": {
+        "allowed_methods": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "algorithm_id": {
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+                "type": "string"
+              },
+              "algorithm_version": {
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+                "type": "string"
+              },
+              "artifact_sha256": {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              "joint_parameter_profile": {
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+                "type": "string"
+              },
+              "qualification_ref": {
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+                "type": "string"
+              }
+            },
+            "required": [
+              "algorithm_id",
+              "algorithm_version",
+              "artifact_sha256",
+              "qualification_ref",
+              "joint_parameter_profile"
+            ],
+            "type": "object"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "allowed_operations": {
+          "items": {
+            "enum": [
+              "SELECT_QUALIFIED_METHOD",
+              "ADJUST_QUALIFIED_PROFILE",
+              "QUALIFIED_FALLBACK",
+              "SUPPRESS_ENTRY"
+            ],
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "authorization_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "environment": {
+          "enum": [
+            "FIXTURE",
+            "SIMULATION",
+            "PAPER",
+            "DEMO",
+            "SHADOW",
+            "LIVE"
+          ],
+          "type": "string"
+        },
+        "estimator_rule_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "evidence_use_policy_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "expires_at_ms": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "fallback_order": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+            "type": "string"
+          },
+          "type": "array",
+          "uniqueItems": true
+        },
+        "financial_authority_source": {
+          "const": "EXISTING_OWNER_ACCOUNT_RISK_MANDATE"
+        },
+        "mandatory_risk_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "max_switches_per_parent": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "no_new_policy_promotion": {
+          "const": true
+        },
+        "no_withdrawal_authority": {
+          "const": true
+        },
+        "policy_artifact_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "qualification_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "qualified_at_ms": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "record_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "record_type": {
+          "const": "OperationalOptimizationGrant"
+        },
+        "revocation_epoch": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "schema_version": {
+          "const": 2
+        },
+        "scope": {
+          "additionalProperties": false,
+          "properties": {
+            "account_id": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            },
+            "market_type": {
+              "enum": [
+                "CRYPTO_SPOT",
+                "FX",
+                "CFD",
+                "FUTURE",
+                "DERIV_NONLINEAR",
+                "OWNER_TICKET",
+                "PREDICTION_RESEARCH"
+              ],
+              "type": "string"
+            },
+            "ownership": {
+              "enum": [
+                "OWNER_MANUAL",
+                "VATI_MANAGED"
+              ],
+              "type": "string"
+            },
+            "product_id": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            },
+            "scope_hash": {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "strategy_id": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            },
+            "venue_id": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            }
+          },
+          "required": [
+            "account_id",
+            "strategy_id",
+            "venue_id",
+            "product_id",
+            "market_type",
+            "ownership",
+            "scope_hash"
+          ],
+          "type": "object"
+        },
+        "valid_from_ms": {
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "record_type",
+        "record_id",
+        "schema_version",
+        "environment",
+        "scope",
+        "policy_artifact_sha256",
+        "estimator_rule_ref",
+        "evidence_use_policy_ref",
+        "allowed_methods",
+        "allowed_operations",
+        "fallback_order",
+        "max_switches_per_parent",
+        "mandatory_risk_ref",
+        "qualified_at_ms",
+        "valid_from_ms",
+        "expires_at_ms",
+        "revocation_epoch",
+        "qualification_ref",
+        "authorization_ref",
+        "financial_authority_source",
+        "no_new_policy_promotion",
+        "no_withdrawal_authority"
+      ],
+      "type": "object"
+    },
+    "PolicyBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "activation_cursor": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "activation_epoch": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "activation_readback_ref": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "compatible_fallback_refs": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+            "type": "string"
+          },
+          "type": "array",
+          "uniqueItems": true
+        },
+        "environment": {
+          "enum": [
+            "FIXTURE",
+            "SIMULATION",
+            "PAPER",
+            "DEMO",
+            "SHADOW",
+            "LIVE"
+          ],
+          "type": "string"
+        },
+        "mandate_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "open_parent_migration_ref": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "operational_grant_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "policy_artifact_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "promotion_authorization_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "qualification_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "record_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "record_type": {
+          "const": "PolicyBinding"
+        },
+        "revocation_epoch": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "schema_version": {
+          "const": 2
+        },
+        "scope": {
+          "additionalProperties": false,
+          "properties": {
+            "account_id": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            },
+            "market_type": {
+              "enum": [
+                "CRYPTO_SPOT",
+                "FX",
+                "CFD",
+                "FUTURE",
+                "DERIV_NONLINEAR",
+                "OWNER_TICKET",
+                "PREDICTION_RESEARCH"
+              ],
+              "type": "string"
+            },
+            "ownership": {
+              "enum": [
+                "OWNER_MANUAL",
+                "VATI_MANAGED"
+              ],
+              "type": "string"
+            },
+            "product_id": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            },
+            "scope_hash": {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "strategy_id": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            },
+            "venue_id": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            }
+          },
+          "required": [
+            "account_id",
+            "strategy_id",
+            "venue_id",
+            "product_id",
+            "market_type",
+            "ownership",
+            "scope_hash"
+          ],
+          "type": "object"
+        },
+        "state": {
+          "enum": [
+            "PROPOSED",
+            "AUTHORIZED",
+            "ACTIVE",
+            "DRAINING",
+            "SUSPENDED",
+            "REVOKED",
+            "RETIRED"
+          ],
+          "type": "string"
+        },
+        "valid_until_ms": {
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "record_type",
+        "record_id",
+        "schema_version",
+        "environment",
+        "scope",
+        "policy_artifact_sha256",
+        "qualification_ref",
+        "promotion_authorization_ref",
+        "mandate_ref",
+        "operational_grant_ref",
+        "activation_epoch",
+        "activation_cursor",
+        "state",
+        "compatible_fallback_refs",
+        "open_parent_migration_ref",
+        "activation_readback_ref",
+        "valid_until_ms",
+        "revocation_epoch"
+      ],
+      "type": "object"
+    },
+    "PolicyQualification": {
+      "additionalProperties": false,
+      "properties": {
+        "baseline_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "candidate_artifact_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "candidate_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "dataset_manifest_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "environment": {
+          "enum": [
+            "FIXTURE",
+            "SIMULATION",
+            "PAPER",
+            "DEMO",
+            "SHADOW",
+            "LIVE"
+          ],
+          "type": "string"
+        },
+        "evaluator_artifact_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "evidence_refs": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+            "type": "string"
+          },
+          "type": "array",
+          "uniqueItems": true
+        },
+        "expires_at_ms": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "grants_financial_authority": {
+          "const": false
+        },
+        "independent_issuer_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "issued_ms": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "materiality_policy_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "record_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "record_type": {
+          "const": "PolicyQualification"
+        },
+        "resource_measurement_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "result": {
+          "enum": [
+            "QUALIFIED",
+            "REJECTED",
+            "INCONCLUSIVE"
+          ],
+          "type": "string"
+        },
+        "safety_noninferiority_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": 2
+        },
+        "scope": {
+          "additionalProperties": false,
+          "properties": {
+            "account_id": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            },
+            "market_type": {
+              "enum": [
+                "CRYPTO_SPOT",
+                "FX",
+                "CFD",
+                "FUTURE",
+                "DERIV_NONLINEAR",
+                "OWNER_TICKET",
+                "PREDICTION_RESEARCH"
+              ],
+              "type": "string"
+            },
+            "ownership": {
+              "enum": [
+                "OWNER_MANUAL",
+                "VATI_MANAGED"
+              ],
+              "type": "string"
+            },
+            "product_id": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            },
+            "scope_hash": {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "strategy_id": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            },
+            "venue_id": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+              "type": "string"
+            }
+          },
+          "required": [
+            "account_id",
+            "strategy_id",
+            "venue_id",
+            "product_id",
+            "market_type",
+            "ownership",
+            "scope_hash"
+          ],
+          "type": "object"
+        },
+        "signature_artifact_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "study_protocol_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        },
+        "utility_definition_ref": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]{1,159}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "record_type",
+        "record_id",
+        "schema_version",
+        "environment",
+        "scope",
+        "candidate_ref",
+        "candidate_artifact_sha256",
+        "evaluator_artifact_sha256",
+        "dataset_manifest_sha256",
+        "study_protocol_ref",
+        "baseline_ref",
+        "result",
+        "evidence_refs",
+        "utility_definition_ref",
+        "materiality_policy_ref",
+        "safety_noninferiority_ref",
+        "resource_measurement_ref",
+        "issued_ms",
+        "expires_at_ms",
+        "independent_issuer_ref",
+        "signature_artifact_ref",
+        "grants_financial_authority"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "urn:van:rev114:self-optimization:contracts",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Design-time shapes. Actual runtime proof verification, monetary invariants, chronology and source access are mandatory separate contracts.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/ExecutionObjective"
+    },
+    {
+      "$ref": "#/$defs/OperationalOptimizationGrant"
+    },
+    {
+      "$ref": "#/$defs/ExecutionDecision"
+    },
+    {
+      "$ref": "#/$defs/ExecutionOutcome"
+    },
+    {
+      "$ref": "#/$defs/ExecutionEvidenceSnapshot"
+    },
+    {
+      "$ref": "#/$defs/ExecutionPolicyCandidate"
+    },
+    {
+      "$ref": "#/$defs/PolicyQualification"
+    },
+    {
+      "$ref": "#/$defs/PolicyBinding"
+    },
+    {
+      "$ref": "#/$defs/CryptoVenueProfile"
+    },
+    {
+      "$ref": "#/$defs/ExecutionStudySpec"
+    },
+    {
+      "$ref": "#/$defs/ExecutionQualityMeasurement"
+    },
+    {
+      "$ref": "#/$defs/DesignChangeProposal"
+    }
+  ],
+  "title": "VATI self-optimization and crypto spot typed records"
+}

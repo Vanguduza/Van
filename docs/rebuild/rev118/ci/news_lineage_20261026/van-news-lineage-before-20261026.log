@@ -1,0 +1,257 @@
+FFFFFFFFFFF                                                              [100%]
+=================================== FAILURES ===================================
+_________ test_rewritten_syndicated_stories_form_one_declared_cluster __________
+
+ledger = <vati.core.ledger.Ledger object at 0x7f231f1e11f0>
+
+    def test_rewritten_syndicated_stories_form_one_declared_cluster(ledger):
+        news = NewsIngress(ledger=ledger)
+        assert news.ingest_rows([row(), row('wire-b', 'Central bank publishes its policy decision')], now_ms=NOW)['accepted'] == 2
+>       report = lineage(news)
+                 ^^^^^^^^^^^^^
+
+trading/tests/test_news_publisher_lineage.py:41: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+news = <vati.events.news_ingress.NewsIngress object at 0x7f231f0eb3e0>
+now = 1800000000000
+
+    def lineage(news, now=NOW):
+        result = news.report(now_ms=now)
+>       assert 'publisher_lineage' in result, 'original publisher lineage is absent from the actual ingress report'
+E       AssertionError: original publisher lineage is absent from the actual ingress report
+E       assert 'publisher_lineage' in {'ingress_version': 'news-ingress/5.1.2', 'headlines': 2, 'by_trust': {'UNTRUSTED': 2}, 'sources': [], ...}
+
+trading/tests/test_news_publisher_lineage.py:30: AssertionError
+_ test_invalid_explicit_origin_is_skipped_without_publishing_a_headline[None] __
+
+ledger = <vati.core.ledger.Ledger object at 0x7f231efee7b0>, origin = None
+
+    @pytest.mark.parametrize('origin', [None, {}, {'publisher_id': 'bank'},
+        {'publisher_id': True, 'story_id': 'r'}, {'publisher_id': 'bank', 'story_id': ''},
+        {'publisher_id': 'bank', 'story_id': 'r', 'qualified': True}])
+    def test_invalid_explicit_origin_is_skipped_without_publishing_a_headline(ledger, origin):
+        news = NewsIngress(ledger=ledger)
+        counts = news.ingest_rows([row(original_publisher=origin)], now_ms=NOW)
+>       assert counts == {'accepted': 0, 'duplicates': 0, 'skipped': 1}
+E       AssertionError: assert {'accepted': ... 'skipped': 0} == {'accepted': ... 'skipped': 1}
+E         
+E         Omitting 1 identical items, use -vv to show
+E         Differing items:
+E         {'skipped': 0} != {'skipped': 1}
+E         {'accepted': 1} != {'accepted': 0}
+E         Use -v to get more diff
+
+trading/tests/test_news_publisher_lineage.py:57: AssertionError
+_ test_invalid_explicit_origin_is_skipped_without_publishing_a_headline[origin1] _
+
+ledger = <vati.core.ledger.Ledger object at 0x7f231efedb20>, origin = {}
+
+    @pytest.mark.parametrize('origin', [None, {}, {'publisher_id': 'bank'},
+        {'publisher_id': True, 'story_id': 'r'}, {'publisher_id': 'bank', 'story_id': ''},
+        {'publisher_id': 'bank', 'story_id': 'r', 'qualified': True}])
+    def test_invalid_explicit_origin_is_skipped_without_publishing_a_headline(ledger, origin):
+        news = NewsIngress(ledger=ledger)
+        counts = news.ingest_rows([row(original_publisher=origin)], now_ms=NOW)
+>       assert counts == {'accepted': 0, 'duplicates': 0, 'skipped': 1}
+E       AssertionError: assert {'accepted': ... 'skipped': 0} == {'accepted': ... 'skipped': 1}
+E         
+E         Omitting 1 identical items, use -vv to show
+E         Differing items:
+E         {'skipped': 0} != {'skipped': 1}
+E         {'accepted': 1} != {'accepted': 0}
+E         Use -v to get more diff
+
+trading/tests/test_news_publisher_lineage.py:57: AssertionError
+_ test_invalid_explicit_origin_is_skipped_without_publishing_a_headline[origin2] _
+
+ledger = <vati.core.ledger.Ledger object at 0x7f231efee2d0>
+origin = {'publisher_id': 'bank'}
+
+    @pytest.mark.parametrize('origin', [None, {}, {'publisher_id': 'bank'},
+        {'publisher_id': True, 'story_id': 'r'}, {'publisher_id': 'bank', 'story_id': ''},
+        {'publisher_id': 'bank', 'story_id': 'r', 'qualified': True}])
+    def test_invalid_explicit_origin_is_skipped_without_publishing_a_headline(ledger, origin):
+        news = NewsIngress(ledger=ledger)
+        counts = news.ingest_rows([row(original_publisher=origin)], now_ms=NOW)
+>       assert counts == {'accepted': 0, 'duplicates': 0, 'skipped': 1}
+E       AssertionError: assert {'accepted': ... 'skipped': 0} == {'accepted': ... 'skipped': 1}
+E         
+E         Omitting 1 identical items, use -vv to show
+E         Differing items:
+E         {'skipped': 0} != {'skipped': 1}
+E         {'accepted': 1} != {'accepted': 0}
+E         Use -v to get more diff
+
+trading/tests/test_news_publisher_lineage.py:57: AssertionError
+_ test_invalid_explicit_origin_is_skipped_without_publishing_a_headline[origin3] _
+
+ledger = <vati.core.ledger.Ledger object at 0x7f231efeee40>
+origin = {'publisher_id': True, 'story_id': 'r'}
+
+    @pytest.mark.parametrize('origin', [None, {}, {'publisher_id': 'bank'},
+        {'publisher_id': True, 'story_id': 'r'}, {'publisher_id': 'bank', 'story_id': ''},
+        {'publisher_id': 'bank', 'story_id': 'r', 'qualified': True}])
+    def test_invalid_explicit_origin_is_skipped_without_publishing_a_headline(ledger, origin):
+        news = NewsIngress(ledger=ledger)
+        counts = news.ingest_rows([row(original_publisher=origin)], now_ms=NOW)
+>       assert counts == {'accepted': 0, 'duplicates': 0, 'skipped': 1}
+E       AssertionError: assert {'accepted': ... 'skipped': 0} == {'accepted': ... 'skipped': 1}
+E         
+E         Omitting 1 identical items, use -vv to show
+E         Differing items:
+E         {'skipped': 0} != {'skipped': 1}
+E         {'accepted': 1} != {'accepted': 0}
+E         Use -v to get more diff
+
+trading/tests/test_news_publisher_lineage.py:57: AssertionError
+_ test_invalid_explicit_origin_is_skipped_without_publishing_a_headline[origin4] _
+
+ledger = <vati.core.ledger.Ledger object at 0x7f231efefd40>
+origin = {'publisher_id': 'bank', 'story_id': ''}
+
+    @pytest.mark.parametrize('origin', [None, {}, {'publisher_id': 'bank'},
+        {'publisher_id': True, 'story_id': 'r'}, {'publisher_id': 'bank', 'story_id': ''},
+        {'publisher_id': 'bank', 'story_id': 'r', 'qualified': True}])
+    def test_invalid_explicit_origin_is_skipped_without_publishing_a_headline(ledger, origin):
+        news = NewsIngress(ledger=ledger)
+        counts = news.ingest_rows([row(original_publisher=origin)], now_ms=NOW)
+>       assert counts == {'accepted': 0, 'duplicates': 0, 'skipped': 1}
+E       AssertionError: assert {'accepted': ... 'skipped': 0} == {'accepted': ... 'skipped': 1}
+E         
+E         Omitting 1 identical items, use -vv to show
+E         Differing items:
+E         {'skipped': 0} != {'skipped': 1}
+E         {'accepted': 1} != {'accepted': 0}
+E         Use -v to get more diff
+
+trading/tests/test_news_publisher_lineage.py:57: AssertionError
+_ test_invalid_explicit_origin_is_skipped_without_publishing_a_headline[origin5] _
+
+ledger = <vati.core.ledger.Ledger object at 0x7f231f03b350>
+origin = {'publisher_id': 'bank', 'story_id': 'r', 'qualified': True}
+
+    @pytest.mark.parametrize('origin', [None, {}, {'publisher_id': 'bank'},
+        {'publisher_id': True, 'story_id': 'r'}, {'publisher_id': 'bank', 'story_id': ''},
+        {'publisher_id': 'bank', 'story_id': 'r', 'qualified': True}])
+    def test_invalid_explicit_origin_is_skipped_without_publishing_a_headline(ledger, origin):
+        news = NewsIngress(ledger=ledger)
+        counts = news.ingest_rows([row(original_publisher=origin)], now_ms=NOW)
+>       assert counts == {'accepted': 0, 'duplicates': 0, 'skipped': 1}
+E       AssertionError: assert {'accepted': ... 'skipped': 0} == {'accepted': ... 'skipped': 1}
+E         
+E         Omitting 1 identical items, use -vv to show
+E         Differing items:
+E         {'skipped': 0} != {'skipped': 1}
+E         {'accepted': 1} != {'accepted': 0}
+E         Use -v to get more diff
+
+trading/tests/test_news_publisher_lineage.py:57: AssertionError
+_ test_originless_legacy_rows_stay_unknown_and_do_not_infer_publisher_from_transport _
+
+ledger = <vati.core.ledger.Ledger object at 0x7f231f03bf80>
+
+    def test_originless_legacy_rows_stay_unknown_and_do_not_infer_publisher_from_transport(ledger):
+        news = NewsIngress(ledger=ledger)
+        value = row(); value.pop('original_publisher')
+        news.ingest_rows([value], now_ms=NOW)
+>       report = lineage(news)
+                 ^^^^^^^^^^^^^
+
+trading/tests/test_news_publisher_lineage.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+news = <vati.events.news_ingress.NewsIngress object at 0x7f231f03b020>
+now = 1800000000000
+
+    def lineage(news, now=NOW):
+        result = news.report(now_ms=now)
+>       assert 'publisher_lineage' in result, 'original publisher lineage is absent from the actual ingress report'
+E       AssertionError: original publisher lineage is absent from the actual ingress report
+E       assert 'publisher_lineage' in {'ingress_version': 'news-ingress/5.1.2', 'headlines': 1, 'by_trust': {'UNTRUSTED': 1}, 'sources': [], ...}
+
+trading/tests/test_news_publisher_lineage.py:30: AssertionError
+______ test_cold_recovery_restores_lineage_without_republishing_originals ______
+
+ledger = <vati.core.ledger.Ledger object at 0x7f231f03ba10>
+
+    def test_cold_recovery_restores_lineage_without_republishing_originals(ledger):
+        news = NewsIngress(ledger=ledger)
+        news.ingest_rows([row(), row('wire-b', 'Policy announcement')], now_ms=NOW)
+        head = ledger.head(); count = ledger.count()
+>       expected = lineage(news)
+                   ^^^^^^^^^^^^^
+
+trading/tests/test_news_publisher_lineage.py:75: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+news = <vati.events.news_ingress.NewsIngress object at 0x7f231f0397f0>
+now = 1800000000000
+
+    def lineage(news, now=NOW):
+        result = news.report(now_ms=now)
+>       assert 'publisher_lineage' in result, 'original publisher lineage is absent from the actual ingress report'
+E       AssertionError: original publisher lineage is absent from the actual ingress report
+E       assert 'publisher_lineage' in {'ingress_version': 'news-ingress/5.1.2', 'headlines': 2, 'by_trust': {'UNTRUSTED': 2}, 'sources': [], ...}
+
+trading/tests/test_news_publisher_lineage.py:30: AssertionError
+______ test_declared_origin_does_not_backdate_earlier_unknown_observation ______
+
+ledger = <vati.core.ledger.Ledger object at 0x7f231f35b0b0>
+
+    def test_declared_origin_does_not_backdate_earlier_unknown_observation(ledger):
+        news = NewsIngress(ledger=ledger)
+        value = row(); value.pop('original_publisher')
+        news.ingest_rows([value], now_ms=NOW)
+        news.ingest_rows([row()], now_ms=NOW+10)
+>       assert lineage(news, NOW)['unknown_origin_observations'] == 1
+               ^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_news_publisher_lineage.py:88: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+news = <vati.events.news_ingress.NewsIngress object at 0x7f231f35b020>
+now = 1800000000000
+
+    def lineage(news, now=NOW):
+        result = news.report(now_ms=now)
+>       assert 'publisher_lineage' in result, 'original publisher lineage is absent from the actual ingress report'
+E       AssertionError: original publisher lineage is absent from the actual ingress report
+E       assert 'publisher_lineage' in {'ingress_version': 'news-ingress/5.1.2', 'headlines': 1, 'by_trust': {'UNTRUSTED': 1}, 'sources': [], ...}
+
+trading/tests/test_news_publisher_lineage.py:30: AssertionError
+_____________ test_lineage_result_cannot_mutate_original_evidence ______________
+
+ledger = <vati.core.ledger.Ledger object at 0x7f231f2d90a0>
+
+    def test_lineage_result_cannot_mutate_original_evidence(ledger):
+        news = NewsIngress(ledger=ledger); news.ingest_rows([row()], now_ms=NOW)
+>       before = deepcopy(lineage(news))
+                          ^^^^^^^^^^^^^
+
+trading/tests/test_news_publisher_lineage.py:95: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+news = <vati.events.news_ingress.NewsIngress object at 0x7f231f2d8cb0>
+now = 1800000000000
+
+    def lineage(news, now=NOW):
+        result = news.report(now_ms=now)
+>       assert 'publisher_lineage' in result, 'original publisher lineage is absent from the actual ingress report'
+E       AssertionError: original publisher lineage is absent from the actual ingress report
+E       assert 'publisher_lineage' in {'ingress_version': 'news-ingress/5.1.2', 'headlines': 1, 'by_trust': {'UNTRUSTED': 1}, 'sources': [], ...}
+
+trading/tests/test_news_publisher_lineage.py:30: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_news_publisher_lineage.py::test_rewritten_syndicated_stories_form_one_declared_cluster
+FAILED trading/tests/test_news_publisher_lineage.py::test_invalid_explicit_origin_is_skipped_without_publishing_a_headline[None]
+FAILED trading/tests/test_news_publisher_lineage.py::test_invalid_explicit_origin_is_skipped_without_publishing_a_headline[origin1]
+FAILED trading/tests/test_news_publisher_lineage.py::test_invalid_explicit_origin_is_skipped_without_publishing_a_headline[origin2]
+FAILED trading/tests/test_news_publisher_lineage.py::test_invalid_explicit_origin_is_skipped_without_publishing_a_headline[origin3]
+FAILED trading/tests/test_news_publisher_lineage.py::test_invalid_explicit_origin_is_skipped_without_publishing_a_headline[origin4]
+FAILED trading/tests/test_news_publisher_lineage.py::test_invalid_explicit_origin_is_skipped_without_publishing_a_headline[origin5]
+FAILED trading/tests/test_news_publisher_lineage.py::test_originless_legacy_rows_stay_unknown_and_do_not_infer_publisher_from_transport
+FAILED trading/tests/test_news_publisher_lineage.py::test_cold_recovery_restores_lineage_without_republishing_originals
+FAILED trading/tests/test_news_publisher_lineage.py::test_declared_origin_does_not_backdate_earlier_unknown_observation
+FAILED trading/tests/test_news_publisher_lineage.py::test_lineage_result_cannot_mutate_original_evidence
+11 failed in 0.75s

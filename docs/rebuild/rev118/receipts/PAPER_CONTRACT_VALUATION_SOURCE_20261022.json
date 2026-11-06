@@ -1,0 +1,206 @@
+{
+  "schema": "van.rebuild.paper-contract-valuation-source/1",
+  "source_parent": "9ea88ce2e0385ef014b7229f5f6fe1cdc9526685",
+  "source_sha256": {
+    "trading/vati/execution/paper.py": "ac0f9f206b444759521cb651930dee1e1ae7511a28e0e814997a78d6c829317d",
+    "trading/vati/app/service.py": "4c176b8f1c69872f3504081eacde2fd0fdd38d6aef6fa8fe4345628190636e2d",
+    "trading/vati/app/account_service.py": "8d1c5a5323bb92fd1b76d11eba0ba191627c0bfcc5853f041e2d994c256ed0a2",
+    "trading/vati/backtest/engine.py": "7648fc23c6a984af71022e0aaeb97680b141988fcd0e0f52094c7d0924f9abca",
+    "trading/tests/test_paper_contract_valuation.py": "baf419cbd467155937eec565a4ea812944c9f5436766abaade4706e2c4899184"
+  },
+  "valid_initial_counterexamples": {
+    "tests": 4,
+    "failures": 4,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "fe235a8c4b838eddf7db5f382b75b73c4e3766627c2bdc7f7c28f0e671a5a81f"
+  },
+  "full_trading_real_private_postgresql": {
+    "tests": 2001,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "6c15aad74501cc17f09e58dd9b9ff458c0619aa4bdae70b55c76b6a2eb318645"
+  },
+  "expanded_focus": {
+    "tests": 11,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1,
+    "sha256": "dfe487fb04cb3361449edc0fc5dae8e442ead3824a3745cdd723314867e3cdba"
+  },
+  "broader_focus": {
+    "tests": 58,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 2,
+    "sha256": "688beef79eb5a049614ed5ae4d8da86b47177db3e43f1ef53cb81a53b12340e3"
+  },
+  "rebuild": {
+    "tests": 78,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "c2c64a9b1cfd0049e07e1c1ced342d1d611929a2c0b242198ed50faa66a7386c"
+  },
+  "source_faults": {
+    "records": [
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "1143d3f93005e53b59586d8cc955c265e59394c06be2ddca362a498b81ab4d9d"
+      },
+      {
+        "phase": "mutation",
+        "why": "price every configured symbol with the old fixed FX lot value",
+        "returncode": 1,
+        "log_sha256": "5765514a7f0f10b92f332629e9ffb28b0a18b75784e4df80ab068ad9daae1eca"
+      },
+      {
+        "phase": "mutation",
+        "why": "disconnect both actual single-symbol contract-binding paths",
+        "returncode": 1,
+        "log_sha256": "60b78bb2d6694931eb63d013585c72d52a58dc72418d49ec8569c9cf19202de7"
+      },
+      {
+        "phase": "mutation",
+        "why": "disconnect both actual multi-instrument contract-binding paths",
+        "returncode": 1,
+        "log_sha256": "ecd17b7ad7d1916f2ea36333bbb2ec581e34024080a0901c98a78ed71218f4f0"
+      },
+      {
+        "phase": "mutation",
+        "why": "label foreign-currency contract values as the registered account currency",
+        "returncode": 1,
+        "log_sha256": "3b3835a38ef76d74cc228f562d036e9cba2c2560e4c864f17f5a4eeb0b88f963"
+      },
+      {
+        "phase": "mutation",
+        "why": "allow reconfiguration to rescale an already pending entry",
+        "returncode": 1,
+        "log_sha256": "53228dab7972af952e64122bb03b77cede49beeacfe048e46bb5da4903f2be1e"
+      },
+      {
+        "phase": "mutation",
+        "why": "leave the actual backtest account currency and contract binding at legacy defaults",
+        "returncode": 1,
+        "log_sha256": "b91d7c86ac8c93f0d9c847380f06dd50b30763a3f6da70131a865b60f6b2a174"
+      },
+      {
+        "phase": "mutation",
+        "why": "admit non-finite or non-positive simulated money units",
+        "returncode": 1,
+        "log_sha256": "cc83e6f9d62de63d8a2aaa79226e2fceec8076f7998bce47e701a0e0b58b566a"
+      }
+    ],
+    "definitions": [
+      [
+        "trading/vati/execution/paper.py",
+        "self._contract_values[cmd.symbol.upper()][1] if self._contract_values is not None else self.value_per_price_unit_per_lot if cmd.loss_model is LossModel.STOP_DISTANCE else Decimal(1)",
+        "self.value_per_price_unit_per_lot if cmd.loss_model is LossModel.STOP_DISTANCE else Decimal(1)",
+        "price every configured symbol with the old fixed FX lot value"
+      ],
+      [
+        [
+          [
+            "trading/vati/app/service.py",
+            "build_adapter(account, registry, symbol_contracts={c.symbol: contract})",
+            "build_adapter(account, registry)"
+          ],
+          [
+            "trading/vati/app/service.py",
+            "            self.adapter.bind_contracts({c.symbol: contract})",
+            "            pass"
+          ]
+        ],
+        "disconnect both actual single-symbol contract-binding paths"
+      ],
+      [
+        [
+          [
+            "trading/vati/app/account_service.py",
+            "build_adapter(account, registry, symbol_contracts=self.contracts)",
+            "build_adapter(account, registry)"
+          ],
+          [
+            "trading/vati/app/account_service.py",
+            "            self.adapter.bind_contracts(self.contracts)",
+            "            pass"
+          ]
+        ],
+        "disconnect both actual multi-instrument contract-binding paths"
+      ],
+      [
+        "trading/vati/execution/paper.py",
+        "if contract.account_currency != self.currency:",
+        "if False:",
+        "label foreign-currency contract values as the registered account currency"
+      ],
+      [
+        "trading/vati/execution/paper.py",
+        "if values.get(cmd.symbol.upper()) != previous:",
+        "if False:",
+        "allow reconfiguration to rescale an already pending entry"
+      ],
+      [
+        [
+          [
+            "trading/vati/backtest/engine.py",
+            "account_alias=cfg.account_alias, currency=cfg.contract.account_currency,",
+            "account_alias=cfg.account_alias,"
+          ],
+          [
+            "trading/vati/backtest/engine.py",
+            "symbol_contracts={cfg.symbol: cfg.contract})",
+            "symbol_contracts=None)"
+          ]
+        ],
+        "leave the actual backtest account currency and contract binding at legacy defaults"
+      ],
+      [
+        "trading/vati/execution/paper.py",
+        "if (not contract.tick_size.is_finite() or contract.tick_size <= ZERO\n                or not contract.tick_value.is_finite() or contract.tick_value <= ZERO):",
+        "if False:",
+        "admit non-finite or non-positive simulated money units"
+      ]
+    ],
+    "source_before_sha256": {
+      "trading/vati/app/account_service.py": "8d1c5a5323bb92fd1b76d11eba0ba191627c0bfcc5853f041e2d994c256ed0a2",
+      "trading/vati/app/service.py": "4c176b8f1c69872f3504081eacde2fd0fdd38d6aef6fa8fe4345628190636e2d",
+      "trading/vati/backtest/engine.py": "7648fc23c6a984af71022e0aaeb97680b141988fcd0e0f52094c7d0924f9abca",
+      "trading/vati/execution/paper.py": "ac0f9f206b444759521cb651930dee1e1ae7511a28e0e814997a78d6c829317d"
+    },
+    "source_after_sha256": {
+      "trading/vati/app/account_service.py": "8d1c5a5323bb92fd1b76d11eba0ba191627c0bfcc5853f041e2d994c256ed0a2",
+      "trading/vati/app/service.py": "4c176b8f1c69872f3504081eacde2fd0fdd38d6aef6fa8fe4345628190636e2d",
+      "trading/vati/backtest/engine.py": "7648fc23c6a984af71022e0aaeb97680b141988fcd0e0f52094c7d0924f9abca",
+      "trading/vati/execution/paper.py": "ac0f9f206b444759521cb651930dee1e1ae7511a28e0e814997a78d6c829317d"
+    },
+    "source_restored": true,
+    "journal_present": false
+  },
+  "fault_control": "11 passed with actual isolated PostgreSQL-backed book constructor; no skip",
+  "private_fixture_cleanup": {
+    "final": {
+      "stopped": true,
+      "removed": true
+    },
+    "fault-fixture": {
+      "stopped": true,
+      "removed": true
+    }
+  },
+  "registry_refresh": "--check unchanged; original439endpoints262schemas and identity/history/authority retained",
+  "native_host_actions_executed": 0,
+  "physical_s24_cases_executed": 0,
+  "unit_acceptance": "NOT_ISSUED",
+  "release_qualified": false,
+  "limits": [
+    "configured simulation valuations, not observed venue spread/cost/payoff qualification",
+    "standalone legacy scalar adapter seam retained; actual production/backtest factories bind contracts",
+    "no invented currency conversion or fixed-payout model",
+    "persistent paper and native single-symbol restart recovery remain",
+    "original physical identity, safe retirement, provider, independent, production, signing and handset gates remain"
+  ]
+}

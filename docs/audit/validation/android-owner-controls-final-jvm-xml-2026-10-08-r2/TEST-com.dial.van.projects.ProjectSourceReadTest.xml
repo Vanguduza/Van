@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.projects.ProjectSourceReadTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-08T04:57:38" hostname="052fefa249ff" time="0.005">
+  <properties/>
+  <testcase name="partial health never reports quiet active stale or at risk as complete()" classname="com.dial.van.projects.ProjectSourceReadTest" time="0.0"/>
+  <testcase name="cancellation is not a failed project source()" classname="com.dial.van.projects.ProjectSourceReadTest" time="0.004"/>
+  <testcase name="missing phase inputs never produce idle from empty defaults()" classname="com.dial.van.projects.ProjectSourceReadTest" time="0.0"/>
+  <testcase name="confirmed empty source is distinct from source failure()" classname="com.dial.van.projects.ProjectSourceReadTest" time="0.001"/>
+  <testcase name="failed source remains unavailable and later independent sources can be read()" classname="com.dial.van.projects.ProjectSourceReadTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

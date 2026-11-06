@@ -1,0 +1,75 @@
+{
+  "classification": "REVIEWED_PUBLISHED_FOUNDATION_ONLY_NOT_AUTHOR_DELTA",
+  "base": "23a570cf3f4f6e67fee69a2f8d845c7a8f03d244",
+  "published": "9cfde69c38bc39a54875c2a9bf60c6269f363d64",
+  "paths": [
+    {
+      "path": "backend/tests/test_account_operation_recovery.py",
+      "base_sha256": "dab4bb9906c89d682afdb04221c6c586192ee86aeaed032eeb36f1a0caf2aa7d",
+      "published_sha256": "f1046879664f961a43453e87e1abcb968029f1fd29dc7ca98f57d374c7cef3c8"
+    },
+    {
+      "path": "backend/tests/test_account_resource_binding.py",
+      "base_sha256": "fc3fc4b8a094cc49f9cb96736f08131deb80f4fcd762bb1342c51c08d19b06ee",
+      "published_sha256": "a4f3ee16f83ffea31a7d2cc2b0273022e00e49f7d892211c2c4a2dc09fa8ab19"
+    },
+    {
+      "path": "backend/tests/test_native_depth_history.py",
+      "base_sha256": "3925d399516cd3f8fca1430c655ba9b330d30285b138f8fd5e257df3423194c0",
+      "published_sha256": "2aca6ce56272061bdcec59fd58a48fcdfc372bff1f8ff5f14cacc9665b943ded"
+    },
+    {
+      "path": "backend/tests/test_stateful_link_binding.py",
+      "base_sha256": "63720c50d1ee5bba47bd6307a47a651ae96a778d0b32426e72b3ac5c7016a657",
+      "published_sha256": "3318a8063954c01d4e582ce47585412606981b77d172c46e36939c017c1d3e79"
+    },
+    {
+      "path": "backend/tests/test_trading_oauth_effects.py",
+      "base_sha256": "f032a701cea8f2a1b874b994451094f4d049e7a227f5387188b9ac6ccdd1ae14",
+      "published_sha256": "aeba2b7bf488983ca3090334c5581de7274de507cd936800bd29491f4e78a5dd"
+    },
+    {
+      "path": "trading/tests/test_native_depth_runtime.py",
+      "base_sha256": null,
+      "published_sha256": "68e3da5f304d3af7956710d2f93478af874510923b40529ce973743ccd143a54"
+    },
+    {
+      "path": "trading/tests/test_native_depth_worker.py",
+      "base_sha256": null,
+      "published_sha256": "2c176c46a5effa35726b45a2e2293e69952e736c15a1a1feae7e72de6af84c67"
+    },
+    {
+      "path": "trading/vati/app/account_service.py",
+      "base_sha256": "1469ca9a3fc419754999a9e9575f08b3f396cc429763906afb1d0c285c1abc45",
+      "published_sha256": "39b8c26e182e15648f3fab6043fc2c68bec3e07d3280548c892da1253cc7a269"
+    },
+    {
+      "path": "trading/vati/app/service.py",
+      "base_sha256": "1fbf30ce7b79620b759fa11c20f6daad48dd2bcccba2388174c13a1316fbe5e6",
+      "published_sha256": "6963646da556143ae23f6e9e464d85288a3d4630d3e585f15edf9fc189d9d582"
+    },
+    {
+      "path": "trading/vati/market_data/feeds/lake.py",
+      "base_sha256": "a7deb3f0aeb8508df01c47bdbac5ec34f13e1846f8f94f50f9024156809f6fba",
+      "published_sha256": "09572049f5aa06b50dd7795abee3a02bf220c74c768b7b49ce2a593c2897aa8e"
+    },
+    {
+      "path": "trading/vati/market_data/native_archive.py",
+      "base_sha256": "6551356e82cd61dfcbaec836098c861df93575c97cb61635331e75439bda9b3d",
+      "published_sha256": "86f4b63b242a07b1a6afde3bca5b78c067d16ee4997fbbaee3a2a9c27ba3e5fc"
+    },
+    {
+      "path": "trading/vati/market_data/native_depth.py",
+      "base_sha256": "0ee15738cfb7ff8705ee5feee1f0b08e9808d0ed0f6b7df06f4337805a447409",
+      "published_sha256": "3d4fde40bb27a82fa70cf41713a65e976400b462ba2ea1276a2766f19d8349fd"
+    },
+    {
+      "path": "trading/vati/market_data/native_depth_worker.py",
+      "base_sha256": null,
+      "published_sha256": "f817d207f66b6f432d0023a25dc392a540d8849551c7fba600b0ad9834db1534"
+    }
+  ],
+  "source_bytes": 285978,
+  "own16_unchanged": true,
+  "prior_attempt": "Conservative256KiB size assertion refused before any materialization; actual285978B admitted under384KiB+64KiB margin and48MiB source-copy limit."
+}

@@ -1,0 +1,5104 @@
+{
+  "all_required_units_full": true,
+  "backend_gate": "BG-001",
+  "f15_gate": "PRE-003",
+  "frontend_start": "UX-001",
+  "owner_questions": [
+    {
+      "gate": "LIVE",
+      "id": "OQ-01",
+      "status": "UNRESOLVED_IN_SOURCE_NO_OWNER_SIGNATURE_INFERRED",
+      "text": "Manual per-strategy budget",
+      "units": [
+        "BE-011"
+      ]
+    },
+    {
+      "gate": "START",
+      "id": "OQ-02",
+      "status": "UNRESOLVED_IN_SOURCE_NO_OWNER_SIGNATURE_INFERRED",
+      "text": "ATR stop policy per instrument class",
+      "units": [
+        "BE-009",
+        "BE-011"
+      ]
+    },
+    {
+      "gate": "LIVE",
+      "id": "OQ-03",
+      "status": "UNRESOLVED_IN_SOURCE_NO_OWNER_SIGNATURE_INFERRED",
+      "text": "Manual demo acceptance period",
+      "units": [
+        "BE-011"
+      ]
+    },
+    {
+      "gate": "F15",
+      "id": "OQ-05",
+      "status": "UNRESOLVED_IN_SOURCE_NO_OWNER_SIGNATURE_INFERRED",
+      "text": "Exact product/lock signature for formal predevelopment",
+      "units": [
+        "PRE-003"
+      ]
+    },
+    {
+      "gate": "START",
+      "id": "OQ-06",
+      "status": "UNRESOLVED_IN_SOURCE_NO_OWNER_SIGNATURE_INFERRED",
+      "text": "Licensed news/calendar provider selection",
+      "units": [
+        "BE-014"
+      ]
+    },
+    {
+      "gate": "START",
+      "id": "OQ-07",
+      "status": "UNRESOLVED_IN_SOURCE_NO_OWNER_SIGNATURE_INFERRED",
+      "text": "Automated missing-stop reattach versus immediate flatten policy",
+      "units": [
+        "BE-010",
+        "BE-011"
+      ]
+    },
+    {
+      "gate": "LIVE",
+      "id": "OQ-08",
+      "status": "UNRESOLVED_IN_SOURCE_NO_OWNER_SIGNATURE_INFERRED",
+      "text": "Promote each news path from shadow",
+      "units": [
+        "BE-016"
+      ]
+    },
+    {
+      "gate": "START",
+      "id": "OQ-09",
+      "status": "UNRESOLVED_IN_SOURCE_NO_OWNER_SIGNATURE_INFERRED",
+      "text": "No direct news risk increase; resolve signed final policy",
+      "units": [
+        "BE-016"
+      ]
+    },
+    {
+      "gate": "START",
+      "id": "OQ-11",
+      "status": "UNRESOLVED_IN_SOURCE_NO_OWNER_SIGNATURE_INFERRED",
+      "text": "Feed bundle and authorized budget",
+      "units": [
+        "BE-014"
+      ]
+    },
+    {
+      "gate": "START",
+      "id": "OQ-12",
+      "status": "UNRESOLVED_IN_SOURCE_NO_OWNER_SIGNATURE_INFERRED",
+      "text": "Event strategies, budget, daily cap and first classes",
+      "units": [
+        "BE-017"
+      ]
+    },
+    {
+      "gate": "START",
+      "id": "OQ-13",
+      "status": "UNRESOLVED_IN_SOURCE_NO_OWNER_SIGNATURE_INFERRED",
+      "text": "Behaviour notice wording and calibration",
+      "units": [
+        "BE-022"
+      ]
+    },
+    {
+      "gate": "START",
+      "id": "OQ-14",
+      "status": "UNRESOLVED_IN_SOURCE_NO_OWNER_SIGNATURE_INFERRED",
+      "text": "Native versus qualified web chart renderer, measured after BG-001; existing spike unqualified and not evidence of completed native UI.",
+      "units": [
+        "UX-002",
+        "FE-007"
+      ]
+    },
+    {
+      "gate": "START",
+      "id": "OQ-15",
+      "status": "UNRESOLVED_IN_SOURCE_NO_OWNER_SIGNATURE_INFERRED",
+      "text": "Owner-approved deletion/archive/retention grace: source record recommends 30 days while older text said 7; no implicit value chosen.",
+      "units": [
+        "BE-004"
+      ]
+    },
+    {
+      "gate": "START",
+      "id": "OQ-16",
+      "status": "UNRESOLVED_IN_SOURCE_NO_OWNER_SIGNATURE_INFERRED",
+      "text": "Portfolio reporting currency",
+      "units": [
+        "BE-006",
+        "BE-012"
+      ]
+    },
+    {
+      "gate": "START",
+      "id": "OQ-17",
+      "status": "UNRESOLVED_IN_SOURCE_NO_OWNER_SIGNATURE_INFERRED",
+      "text": "Simulated replay practice actions scope",
+      "units": [
+        "BE-019"
+      ]
+    },
+    {
+      "gate": "START",
+      "id": "OQ-18",
+      "status": "UNRESOLVED_IN_SOURCE_NO_OWNER_SIGNATURE_INFERRED",
+      "text": "Premature accounts branch disposition",
+      "units": [
+        "BE-001",
+        "BE-004"
+      ]
+    },
+    {
+      "gate": "START",
+      "id": "OQ-19",
+      "status": "UNRESOLVED_IN_SOURCE_NO_OWNER_SIGNATURE_INFERRED",
+      "text": "First admitted funding provider rail and sandbox authority",
+      "units": [
+        "BE-007"
+      ]
+    },
+    {
+      "gate": "LIVE",
+      "id": "OQ-20",
+      "status": "UNRESOLVED_IN_SOURCE_NO_OWNER_SIGNATURE_INFERRED",
+      "text": "Temperament percentages and evidence thresholds for live",
+      "units": [
+        "BE-013"
+      ]
+    },
+    {
+      "gate": "DECIDED_VALUES_RUNTIME_SIGNATURE_STILL_REQUIRED",
+      "id": "OQ-21",
+      "status": "VALUES_ACCEPTED_OD39_NOT_RUNTIME_ACTIVATION",
+      "text": "24h cooldown; 0.5 probation; >2 cooldowns/7d escalation; retain stated scopes under OD-38/39",
+      "units": [
+        "BE-009",
+        "BE-013"
+      ]
+    }
+  ],
+  "project_id": "16f2f43a-8d8b-4f18-a6ac-5bd8df620414",
+  "required_backend_ids": [
+    "BE-001",
+    "BE-002",
+    "BE-003",
+    "BE-004",
+    "BE-005",
+    "BE-006",
+    "BE-007",
+    "BE-008",
+    "BE-009",
+    "BE-010",
+    "BE-011",
+    "BE-012",
+    "BE-013",
+    "BE-014",
+    "BE-015",
+    "BE-016",
+    "BE-017",
+    "BE-018",
+    "BE-019",
+    "BE-020",
+    "BE-021",
+    "BE-022",
+    "BE-023",
+    "BE-024",
+    "BE-025",
+    "BE-026",
+    "BE-027",
+    "BE-028",
+    "BE-029",
+    "BE-030",
+    "BE-031",
+    "BE-032",
+    "BE-033",
+    "BE-034",
+    "BE-035",
+    "BE-036",
+    "VAN-ML-PKT-004",
+    "VAN-ML-PKT-005",
+    "VAN-ML-PKT-006",
+    "VAN-ML-PKT-007",
+    "VAN-ML-PKT-008",
+    "VAN-ML-PKT-009",
+    "VAN-ML-PKT-010",
+    "VAN-ML-PKT-011",
+    "VAN-ML-PKT-012",
+    "VAN-ML-PKT-013",
+    "VAN-ML-PKT-014",
+    "VAN-ML-PKT-015",
+    "VAN-ML-PKT-016",
+    "VAN-ML-PKT-017",
+    "VAN-ML-PKT-018",
+    "VAN-ML-PKT-019",
+    "VAN-ML-PKT-020",
+    "VAN-ML-PKT-021",
+    "VAN-ML-PKT-022",
+    "VAN-ML-PKT-023",
+    "VAN-ML-PKT-024",
+    "VAN-ML-PKT-025",
+    "VAN-ML-PKT-026",
+    "VAN-ML-PKT-027",
+    "VAN-ML-PKT-028",
+    "VAN-ML-PKT-029",
+    "VAN-ML-PKT-037",
+    "VAN-ML-PKT-038",
+    "VAN-ML-PKT-039",
+    "VAN-ML-PKT-040",
+    "VAN-ML-PKT-041",
+    "VAN-ML-PKT-042",
+    "VAN-ML-PKT-043",
+    "VAN-ML-PKT-044",
+    "VAN-ML-PKT-045",
+    "VAN-ML-PKT-046",
+    "VAN-ML-PKT-047",
+    "VAN-ML-PKT-048"
+  ],
+  "required_backend_verification_ids": [
+    "BQ-001",
+    "BQ-002",
+    "BQ-003",
+    "BQ-004",
+    "BQ-005",
+    "BQ-006",
+    "BQ-007",
+    "VAN-ML-PKT-030",
+    "VAN-ML-PKT-031",
+    "VAN-ML-PKT-032"
+  ],
+  "requirement_ownership": {
+    "BE-001": [
+      "VAN-CX-002",
+      "VAN-NX-023",
+      "VAN-NX-028",
+      "VAN-NX-029",
+      "VAN-NX-039",
+      "VAN-NX-BF-012"
+    ],
+    "BE-002": [
+      "VAN-CX-009",
+      "VAN-CX-015",
+      "VAN-NX-007",
+      "VAN-NX-021",
+      "VAN-NX-023",
+      "VAN-NX-029",
+      "VAN-NX-039",
+      "VAN-NX-077"
+    ],
+    "BE-003": [
+      "VAN-CX-006",
+      "VAN-CX-008",
+      "VAN-NX-021",
+      "VAN-NX-023",
+      "VAN-NX-029",
+      "VAN-NX-039",
+      "VAN-NX-040",
+      "VAN-NX-073"
+    ],
+    "BE-004": [
+      "VAN-CX-016",
+      "VAN-NX-048",
+      "VAN-NX-049",
+      "VAN-NX-050",
+      "VAN-NX-056",
+      "VAN-NX-057",
+      "VAN-NX-064"
+    ],
+    "BE-005": [
+      "VAN-CX-016",
+      "VAN-NX-048",
+      "VAN-NX-049",
+      "VAN-NX-050",
+      "VAN-NX-056",
+      "VAN-NX-057",
+      "VAN-NX-064"
+    ],
+    "BE-006": [
+      "VAN-CX-009",
+      "VAN-CX-016",
+      "VAN-NX-051",
+      "VAN-NX-059",
+      "VAN-NX-077"
+    ],
+    "BE-007": [
+      "VAN-CX-016",
+      "VAN-NX-055"
+    ],
+    "BE-008": [
+      "VAN-CX-004",
+      "VAN-CX-007",
+      "VAN-CX-012",
+      "VAN-NX-008",
+      "VAN-NX-009",
+      "VAN-NX-011",
+      "VAN-NX-040",
+      "VAN-NX-041",
+      "VAN-NX-042",
+      "VAN-NX-074",
+      "VAN-NX-075"
+    ],
+    "BE-009": [
+      "VAN-CX-007",
+      "VAN-CX-008",
+      "VAN-CX-009",
+      "VAN-CX-016",
+      "VAN-NX-027",
+      "VAN-NX-051",
+      "VAN-NX-059",
+      "VAN-NX-074",
+      "VAN-NX-075",
+      "VAN-NX-076",
+      "VAN-NX-077"
+    ],
+    "BE-010": [
+      "VAN-CX-003",
+      "VAN-CX-004",
+      "VAN-CX-005",
+      "VAN-CX-006",
+      "VAN-CX-007",
+      "VAN-NX-010",
+      "VAN-NX-027",
+      "VAN-NX-045",
+      "VAN-NX-061",
+      "VAN-NX-062",
+      "VAN-NX-074",
+      "VAN-NX-075",
+      "VAN-NX-076"
+    ],
+    "BE-011": [
+      "VAN-CX-009",
+      "VAN-NX-010",
+      "VAN-NX-027",
+      "VAN-NX-031",
+      "VAN-NX-061",
+      "VAN-NX-062",
+      "VAN-NX-077"
+    ],
+    "BE-012": [
+      "VAN-CX-003",
+      "VAN-CX-006",
+      "VAN-NX-008",
+      "VAN-NX-010",
+      "VAN-NX-040",
+      "VAN-NX-052",
+      "VAN-NX-061",
+      "VAN-NX-062",
+      "VAN-NX-076"
+    ],
+    "BE-013": [
+      "VAN-CX-009",
+      "VAN-CX-014",
+      "VAN-CX-018",
+      "VAN-NX-008",
+      "VAN-NX-058",
+      "VAN-NX-072",
+      "VAN-NX-077"
+    ],
+    "BE-014": [
+      "VAN-CX-005",
+      "VAN-NX-013",
+      "VAN-NX-038"
+    ],
+    "BE-015": [
+      "VAN-NX-013",
+      "VAN-NX-036",
+      "VAN-NX-037"
+    ],
+    "BE-016": [
+      "VAN-CX-005",
+      "VAN-NX-013",
+      "VAN-NX-032"
+    ],
+    "BE-017": [
+      "VAN-CX-015",
+      "VAN-NX-033",
+      "VAN-NX-BF-016"
+    ],
+    "BE-018": [
+      "VAN-NX-009",
+      "VAN-NX-041",
+      "VAN-NX-042",
+      "VAN-NX-043"
+    ],
+    "BE-019": [
+      "VAN-CX-004",
+      "VAN-CX-005",
+      "VAN-CX-010",
+      "VAN-CX-012",
+      "VAN-NX-044",
+      "VAN-NX-076"
+    ],
+    "BE-020": [
+      "VAN-NX-008",
+      "VAN-NX-011",
+      "VAN-NX-047"
+    ],
+    "BE-021": [
+      "VAN-CX-018",
+      "VAN-NX-012",
+      "VAN-NX-013",
+      "VAN-NX-046",
+      "VAN-NX-065"
+    ],
+    "BE-022": [
+      "VAN-CX-014",
+      "VAN-NX-034",
+      "VAN-NX-035",
+      "VAN-NX-072"
+    ],
+    "BE-023": [
+      "VAN-NX-014",
+      "VAN-NX-015"
+    ],
+    "BE-024": [
+      "VAN-NX-016",
+      "VAN-NX-017"
+    ],
+    "BE-025": [
+      "VAN-NX-020",
+      "VAN-NX-069"
+    ],
+    "BE-026": [
+      "VAN-NX-020",
+      "VAN-NX-069",
+      "VAN-NX-BF-013"
+    ],
+    "BE-027": [
+      "VAN-NX-018",
+      "VAN-NX-066",
+      "VAN-NX-067",
+      "VAN-NX-068"
+    ],
+    "BE-028": [
+      "VAN-CX-014",
+      "VAN-NX-018",
+      "VAN-NX-066",
+      "VAN-NX-067",
+      "VAN-NX-068",
+      "VAN-NX-072"
+    ],
+    "BE-029": [
+      "VAN-NX-006",
+      "VAN-NX-020",
+      "VAN-NX-069"
+    ],
+    "BE-030": [
+      "VAN-NX-004",
+      "VAN-NX-005",
+      "VAN-NX-006",
+      "VAN-NX-007",
+      "VAN-NX-063"
+    ],
+    "BE-031": [
+      "VAN-NX-006",
+      "VAN-NX-019"
+    ],
+    "BE-032": [
+      "VAN-CX-006",
+      "VAN-CX-017",
+      "VAN-CX-018",
+      "VAN-NX-003",
+      "VAN-NX-005",
+      "VAN-NX-008",
+      "VAN-NX-063",
+      "VAN-NX-BF-006"
+    ],
+    "BE-033": [
+      "VAN-CX-008",
+      "VAN-NX-021",
+      "VAN-NX-022",
+      "VAN-NX-060",
+      "VAN-NX-073"
+    ],
+    "BE-034": [
+      "VAN-NX-020",
+      "VAN-NX-069"
+    ],
+    "BE-035": [
+      "VAN-CX-003",
+      "VAN-CX-004",
+      "VAN-CX-005",
+      "VAN-CX-010",
+      "VAN-CX-011",
+      "VAN-CX-012",
+      "VAN-CX-013",
+      "VAN-CX-014",
+      "VAN-NX-072",
+      "VAN-NX-076"
+    ],
+    "BE-036": [
+      "VAN-CX-010",
+      "VAN-CX-011",
+      "VAN-CX-013",
+      "VAN-CX-014",
+      "VAN-NX-072"
+    ],
+    "BG-001": [
+      "VAN-CX-001",
+      "VAN-CX-017",
+      "VAN-CX-018",
+      "VAN-CX-019",
+      "VAN-ML-REQ-057",
+      "VAN-NX-BF-001",
+      "VAN-NX-BF-002",
+      "VAN-NX-BF-008",
+      "VAN-NX-BF-010"
+    ],
+    "BQ-002": [
+      "VAN-NX-BF-017"
+    ],
+    "BQ-005": [
+      "VAN-NX-021",
+      "VAN-NX-022",
+      "VAN-NX-060"
+    ],
+    "BQ-006": [
+      "VAN-CX-019",
+      "VAN-NX-024",
+      "VAN-NX-BF-005"
+    ],
+    "BQ-007": [
+      "VAN-CX-019",
+      "VAN-NX-072",
+      "VAN-NX-073",
+      "VAN-NX-074",
+      "VAN-NX-075",
+      "VAN-NX-076",
+      "VAN-NX-077"
+    ],
+    "FE-001": [
+      "VAN-NX-003",
+      "VAN-NX-023",
+      "VAN-NX-029",
+      "VAN-NX-039",
+      "VAN-NX-040"
+    ],
+    "FE-002": [
+      "VAN-NX-001",
+      "VAN-NX-002",
+      "VAN-NX-023",
+      "VAN-NX-029",
+      "VAN-NX-030",
+      "VAN-NX-039"
+    ],
+    "FE-003": [
+      "VAN-NX-003"
+    ],
+    "FE-004": [
+      "VAN-NX-004",
+      "VAN-NX-005",
+      "VAN-NX-007",
+      "VAN-NX-063"
+    ],
+    "FE-005": [
+      "VAN-NX-006"
+    ],
+    "FE-006": [
+      "VAN-NX-008",
+      "VAN-NX-011",
+      "VAN-NX-040",
+      "VAN-NX-047"
+    ],
+    "FE-007": [
+      "VAN-NX-009",
+      "VAN-NX-041",
+      "VAN-NX-042"
+    ],
+    "FE-008": [
+      "VAN-NX-043",
+      "VAN-NX-044"
+    ],
+    "FE-009": [
+      "VAN-NX-010",
+      "VAN-NX-027",
+      "VAN-NX-031",
+      "VAN-NX-045",
+      "VAN-NX-061",
+      "VAN-NX-062",
+      "VAN-NX-074",
+      "VAN-NX-075",
+      "VAN-NX-076",
+      "VAN-NX-077"
+    ],
+    "FE-010": [
+      "VAN-NX-048",
+      "VAN-NX-049",
+      "VAN-NX-050",
+      "VAN-NX-051",
+      "VAN-NX-055",
+      "VAN-NX-056",
+      "VAN-NX-057",
+      "VAN-NX-059",
+      "VAN-NX-064"
+    ],
+    "FE-011": [
+      "VAN-NX-010",
+      "VAN-NX-051",
+      "VAN-NX-052",
+      "VAN-NX-059",
+      "VAN-NX-061",
+      "VAN-NX-062",
+      "VAN-NX-074",
+      "VAN-NX-076",
+      "VAN-NX-077"
+    ],
+    "FE-012": [
+      "VAN-NX-058",
+      "VAN-NX-072",
+      "VAN-NX-077"
+    ],
+    "FE-013": [
+      "VAN-NX-013",
+      "VAN-NX-032",
+      "VAN-NX-033"
+    ],
+    "FE-014": [
+      "VAN-NX-012",
+      "VAN-NX-013",
+      "VAN-NX-034",
+      "VAN-NX-035",
+      "VAN-NX-046",
+      "VAN-NX-065",
+      "VAN-NX-072"
+    ],
+    "FE-015": [
+      "VAN-NX-014",
+      "VAN-NX-015"
+    ],
+    "FE-016": [
+      "VAN-NX-016",
+      "VAN-NX-017"
+    ],
+    "FE-017": [
+      "VAN-NX-020",
+      "VAN-NX-069"
+    ],
+    "FE-018": [
+      "VAN-NX-020",
+      "VAN-NX-069"
+    ],
+    "FE-019": [
+      "VAN-NX-018",
+      "VAN-NX-066",
+      "VAN-NX-067",
+      "VAN-NX-068"
+    ],
+    "FE-020": [
+      "VAN-NX-018",
+      "VAN-NX-066",
+      "VAN-NX-067",
+      "VAN-NX-068"
+    ],
+    "FE-021": [
+      "VAN-NX-006",
+      "VAN-NX-020",
+      "VAN-NX-069"
+    ],
+    "FE-022": [
+      "VAN-NX-019",
+      "VAN-NX-073"
+    ],
+    "FE-023": [
+      "VAN-CX-020",
+      "VAN-ML-REQ-058",
+      "VAN-NX-072"
+    ],
+    "PRE-001": [
+      "VAN-CX-002",
+      "VAN-ML-REQ-001",
+      "VAN-NX-071",
+      "VAN-NX-BF-015"
+    ],
+    "PRE-002": [
+      "VAN-CX-001",
+      "VAN-CX-002",
+      "VAN-CX-015",
+      "VAN-ML-REQ-002",
+      "VAN-NX-026",
+      "VAN-NX-053",
+      "VAN-NX-BF-003",
+      "VAN-NX-BF-004",
+      "VAN-NX-BF-018"
+    ],
+    "PRE-003": [
+      "VAN-CX-001",
+      "VAN-CX-019",
+      "VAN-ML-REQ-003",
+      "VAN-NX-070",
+      "VAN-NX-BF-009",
+      "VAN-NX-BF-011"
+    ],
+    "QA-001": [
+      "VAN-CX-020",
+      "VAN-NX-023",
+      "VAN-NX-024",
+      "VAN-NX-029",
+      "VAN-NX-039",
+      "VAN-NX-BF-014"
+    ],
+    "QA-002": [
+      "VAN-NX-024"
+    ],
+    "QA-003": [
+      "VAN-NX-021",
+      "VAN-NX-024"
+    ],
+    "QA-004": [
+      "VAN-CX-020",
+      "VAN-NX-022",
+      "VAN-NX-024",
+      "VAN-NX-025",
+      "VAN-NX-060"
+    ],
+    "QA-005": [
+      "VAN-CX-019",
+      "VAN-ML-REQ-059",
+      "VAN-NX-024",
+      "VAN-NX-025"
+    ],
+    "REL-001": [
+      "VAN-ML-REQ-060",
+      "VAN-NX-054"
+    ],
+    "REL-002": [
+      "VAN-NX-054"
+    ],
+    "UX-001": [
+      "VAN-CX-017",
+      "VAN-NX-001",
+      "VAN-NX-030"
+    ],
+    "UX-002": [
+      "VAN-CX-020",
+      "VAN-NX-001",
+      "VAN-NX-002",
+      "VAN-NX-030"
+    ],
+    "UX-003": [
+      "VAN-CX-017",
+      "VAN-CX-020",
+      "VAN-NX-003",
+      "VAN-NX-BF-007"
+    ],
+    "VAN-ML-PKT-004": [
+      "VAN-ML-REQ-004"
+    ],
+    "VAN-ML-PKT-005": [
+      "VAN-ML-REQ-005",
+      "VAN-ML-REQ-006",
+      "VAN-ML-REQ-007"
+    ],
+    "VAN-ML-PKT-006": [
+      "VAN-CX-012",
+      "VAN-ML-REQ-008",
+      "VAN-ML-REQ-009",
+      "VAN-ML-REQ-010"
+    ],
+    "VAN-ML-PKT-007": [
+      "VAN-ML-REQ-011",
+      "VAN-ML-REQ-012",
+      "VAN-ML-REQ-013"
+    ],
+    "VAN-ML-PKT-008": [
+      "VAN-CX-011",
+      "VAN-ML-REQ-014",
+      "VAN-ML-REQ-015",
+      "VAN-ML-REQ-016"
+    ],
+    "VAN-ML-PKT-009": [
+      "VAN-ML-REQ-017",
+      "VAN-ML-REQ-018",
+      "VAN-ML-REQ-019"
+    ],
+    "VAN-ML-PKT-010": [
+      "VAN-ML-REQ-020",
+      "VAN-ML-REQ-021"
+    ],
+    "VAN-ML-PKT-011": [
+      "VAN-ML-REQ-022"
+    ],
+    "VAN-ML-PKT-012": [
+      "VAN-ML-REQ-023"
+    ],
+    "VAN-ML-PKT-013": [
+      "VAN-ML-REQ-024"
+    ],
+    "VAN-ML-PKT-014": [
+      "VAN-ML-REQ-025",
+      "VAN-ML-REQ-026"
+    ],
+    "VAN-ML-PKT-015": [
+      "VAN-ML-REQ-027"
+    ],
+    "VAN-ML-PKT-016": [
+      "VAN-ML-REQ-028",
+      "VAN-ML-REQ-029"
+    ],
+    "VAN-ML-PKT-017": [
+      "VAN-ML-REQ-030"
+    ],
+    "VAN-ML-PKT-018": [
+      "VAN-ML-REQ-031"
+    ],
+    "VAN-ML-PKT-019": [
+      "VAN-ML-REQ-032"
+    ],
+    "VAN-ML-PKT-020": [
+      "VAN-CX-013",
+      "VAN-ML-REQ-033",
+      "VAN-ML-REQ-034",
+      "VAN-ML-REQ-035"
+    ],
+    "VAN-ML-PKT-021": [
+      "VAN-CX-011",
+      "VAN-CX-013",
+      "VAN-ML-REQ-036"
+    ],
+    "VAN-ML-PKT-022": [
+      "VAN-ML-REQ-037",
+      "VAN-ML-REQ-038"
+    ],
+    "VAN-ML-PKT-023": [
+      "VAN-ML-REQ-039",
+      "VAN-ML-REQ-040"
+    ],
+    "VAN-ML-PKT-024": [
+      "VAN-ML-REQ-041",
+      "VAN-ML-REQ-042",
+      "VAN-ML-REQ-043"
+    ],
+    "VAN-ML-PKT-025": [
+      "VAN-ML-REQ-044",
+      "VAN-ML-REQ-045",
+      "VAN-ML-REQ-046"
+    ],
+    "VAN-ML-PKT-026": [
+      "VAN-ML-REQ-047"
+    ],
+    "VAN-ML-PKT-027": [
+      "VAN-ML-REQ-048",
+      "VAN-ML-REQ-049"
+    ],
+    "VAN-ML-PKT-028": [
+      "VAN-ML-REQ-050",
+      "VAN-ML-REQ-051"
+    ],
+    "VAN-ML-PKT-029": [
+      "VAN-ML-REQ-052",
+      "VAN-ML-REQ-053"
+    ],
+    "VAN-ML-PKT-030": [
+      "VAN-ML-REQ-054"
+    ],
+    "VAN-ML-PKT-031": [
+      "VAN-ML-REQ-055"
+    ],
+    "VAN-ML-PKT-032": [
+      "VAN-ML-REQ-056"
+    ],
+    "VAN-ML-PKT-037": [
+      "VAN-ML-REQ-061",
+      "VAN-ML-REQ-062"
+    ],
+    "VAN-ML-PKT-038": [
+      "VAN-ML-REQ-063",
+      "VAN-ML-REQ-064",
+      "VAN-ML-REQ-065",
+      "VAN-ML-REQ-066"
+    ],
+    "VAN-ML-PKT-039": [
+      "VAN-ML-REQ-067",
+      "VAN-ML-REQ-068"
+    ],
+    "VAN-ML-PKT-040": [
+      "VAN-ML-REQ-069",
+      "VAN-ML-REQ-070",
+      "VAN-ML-REQ-071",
+      "VAN-ML-REQ-073"
+    ],
+    "VAN-ML-PKT-041": [
+      "VAN-ML-REQ-072",
+      "VAN-ML-REQ-074",
+      "VAN-ML-REQ-075"
+    ],
+    "VAN-ML-PKT-042": [
+      "VAN-ML-REQ-076",
+      "VAN-ML-REQ-077"
+    ],
+    "VAN-ML-PKT-043": [
+      "VAN-ML-REQ-078",
+      "VAN-ML-REQ-079",
+      "VAN-ML-REQ-080"
+    ],
+    "VAN-ML-PKT-044": [
+      "VAN-ML-REQ-081",
+      "VAN-ML-REQ-082"
+    ],
+    "VAN-ML-PKT-045": [
+      "VAN-ML-REQ-083",
+      "VAN-ML-REQ-084"
+    ],
+    "VAN-ML-PKT-046": [
+      "VAN-ML-REQ-085",
+      "VAN-ML-REQ-086"
+    ],
+    "VAN-ML-PKT-047": [
+      "VAN-ML-REQ-087",
+      "VAN-ML-REQ-088"
+    ],
+    "VAN-ML-PKT-048": [
+      "VAN-CX-018",
+      "VAN-ML-REQ-089",
+      "VAN-ML-REQ-090"
+    ]
+  },
+  "revision": "1.11",
+  "schema": "van.canonical.rebuild.plan/1.1",
+  "source_alias_semantics": "Prior packet IDs retained in crosswalks; one active generated VAN-PKT sequence; child F15/BG/release IDs are aliases, not extra authorization paths.",
+  "source_commit": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+  "status": "CANONICAL_CONSOLIDATION_CANDIDATE_NOT_F15",
+  "units": [
+    {
+      "completion": "FULL",
+      "dependencies": [],
+      "exit_contract": "Frozen source hashes, complete function/branch ledger, classification and provenance. Current instruction permits document/evidence preparation, not a claim that formal packet approval or signature has occurred.",
+      "id": "PRE-001",
+      "implementation_evidence": [],
+      "kind": "PREDEVELOPMENT",
+      "legacy_packet_id": "BF-PKT-001",
+      "merged_obligations": [
+        {
+          "deliverables": [
+            "Freeze main and every relevant feature-bearing candidate branch; compare parent Rev1.10 and current source",
+            "Create function-level retain/adapt/replace/extend mapping, existing conformal and feature ownership, provider/asset scope and licence provenance",
+            "Write proposed additive-to-parent requirement and packet patch without modifying signed parent inputs",
+            "Reconcile prediction-market parent §8.2/§8.4/§8.5, VAN-NX-036 and actual NewsIngress/CalendarRecorder owners; keep source observations dated."
+          ],
+          "exit_evidence": [
+            "Independently reviewed no-loss mapping, source hashes and conflict register",
+            "A missing inherited action or PR-only feature must invalidate the proposed merge"
+          ],
+          "source_packet": "VAN-ML-PKT-001"
+        }
+      ],
+      "packet_id": "VAN-PKT-001",
+      "receipt_required": true,
+      "sequence": 1,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 0,
+      "status": "NOT_STARTED",
+      "title": "Read-only complete evidence and feature inventory"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "PRE-001"
+      ],
+      "exit_contract": "171 atoms,115 contexts,78 surfaces,349 actions,71 inherited requirements and new backend-first clauses all author-reviewed and independently challenged; exact owner decisions and schema/authority contracts resolved where prerequisite.",
+      "id": "PRE-002",
+      "implementation_evidence": [],
+      "kind": "PREDEVELOPMENT",
+      "legacy_packet_id": "BF-PKT-002",
+      "merged_obligations": [
+        {
+          "deliverables": [
+            "Admit TargetSpecs, cohort/universe definitions, permitted data, validation protocol and research budgets",
+            "Resolve runtime consumers, status/error semantics, numerical boundaries and authority contracts",
+            "Pre-register all required model families, tests, losses, baselines and final holdout access policy",
+            "Apply current no-procurement and Netcup/Oracle owner scope; neither source licence purchases nor direct event-contract eligibility is a prerequisite for adapter/fixture development."
+          ],
+          "exit_evidence": [
+            "All affected owner decisions identified by exact scope and gate",
+            "No unresolved START prerequisite hidden by a default; no application PASS claims"
+          ],
+          "source_packet": "VAN-ML-PKT-002"
+        }
+      ],
+      "packet_id": "VAN-PKT-002",
+      "receipt_required": true,
+      "sequence": 2,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 0,
+      "status": "NOT_STARTED",
+      "title": "Whole-product semantic reconciliation and packet contracts"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "PRE-002"
+      ],
+      "exit_contract": "Independent verifier issues current project-scoped F15; all preparation blockers closed; owner signature valid. No Android or production readiness claim.",
+      "id": "PRE-003",
+      "implementation_evidence": [],
+      "kind": "PREDEVELOPMENT_GATE",
+      "legacy_packet_id": "BF-PKT-003",
+      "merged_obligations": [
+        {
+          "deliverables": [
+            "Integrate amended requirements into the parent predevelopment evidence and obtain genuine independent F15 for the admitted source/scope",
+            "Register all code-bearing child packets and parent dependency changes"
+          ],
+          "exit_evidence": [
+            "Trusted issuer verifies exact source/scope and owner signature",
+            "A generated JSON PASS, hash or this pack checker cannot issue F15"
+          ],
+          "source_packet": "VAN-ML-PKT-003"
+        }
+      ],
+      "packet_id": "VAN-PKT-003",
+      "receipt_required": true,
+      "sequence": 3,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 0,
+      "status": "NOT_STARTED",
+      "title": "Independent DIAL F0–F15 build-ready certification"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "PRE-003"
+      ],
+      "exit_contract": "admit exact feature-bearing diffs; retain old app unchanged; register every provider caller; construct and falsify parity oracle. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Remove a PR-only action: parity fails; unreviewed duplicate implementation cannot merge",
+      "id": "BE-001",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "legacy_packet_id": "BF-PKT-004",
+      "packet_id": "VAN-PKT-004",
+      "receipt_required": true,
+      "sequence": 4,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Source consolidation and preservation oracle"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-001",
+        "PRE-003"
+      ],
+      "exit_contract": "pair/provision/revoke; validate signed exact intents; issue challenges; expire and fence sessions; protect account and task scopes. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Replayed nonce, cross-device signature, stale mandate or changed arguments refuse before effect",
+      "id": "BE-002",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "legacy_packet_id": "BF-PKT-005",
+      "packet_id": "VAN-PKT-005",
+      "receipt_required": true,
+      "sequence": 5,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Device identity, bounded authority and intent fencing"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-002",
+        "PRE-003"
+      ],
+      "exit_contract": "append events; deduplicate; process outbox; serve cursor snapshots; reconcile uncertain outcomes; redact evidence. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Crash after external submission, duplicate delivery, source-epoch change and out-of-order readback never duplicate an effect",
+      "id": "BE-003",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "legacy_packet_id": "BF-PKT-006",
+      "packet_id": "VAN-PKT-006",
+      "receipt_required": true,
+      "sequence": 6,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Durable event, readback and projection infrastructure"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-002",
+        "BE-003",
+        "PRE-003"
+      ],
+      "exit_contract": "discover; create demo; request live application; link; edit local/profile where entitled; restrict; unlink; request remote closure. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Local unlink never reports remote closure; active exposure, unknown funds or stale readback blocks deletion",
+      "id": "BE-004",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "legacy_packet_id": "BF-PKT-007",
+      "packet_id": "VAN-PKT-007",
+      "receipt_required": true,
+      "sequence": 7,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Accounts, broker directory and operation capabilities"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-004",
+        "PRE-003"
+      ],
+      "exit_contract": "OAuth start/callback/cancel/recover; discover accounts; rotate and verify secrets; renew; detect migration; QR bridge pairing. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Process death, callback collision, expired token, investor read-only credential and failed swap remain fail closed",
+      "id": "BE-005",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "legacy_packet_id": "BF-PKT-008",
+      "packet_id": "VAN-PKT-008",
+      "receipt_required": true,
+      "sequence": 8,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Broker authentication, credential rotation and health"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-003",
+        "BE-004",
+        "PRE-003"
+      ],
+      "exit_contract": "ingest provider cash movements; classify and reconcile; post reversals; calculate flow-adjusted returns/drawdown; expose statement lineage. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Withdrawals are not losses; deposits do not erase losses; unknown or non-withdrawable credit is not risk capital",
+      "id": "BE-006",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "legacy_packet_id": "BF-PKT-009",
+      "packet_id": "VAN-PKT-009",
+      "receipt_required": true,
+      "sequence": 9,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Exact funding ledger and flow-adjusted accounting"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-005",
+        "BE-006",
+        "PRE-003"
+      ],
+      "exit_contract": "quote; verify beneficiary; approve; reserve; submit; reconcile; settle; compensate; expose hosted handoff with verified origin. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Changed fees need new approval; redirect is not settlement; unknown send never blindly retries; simultaneous withdrawal/order reservations cannot overdraw margin",
+      "id": "BE-007",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "legacy_packet_id": "BF-PKT-010",
+      "packet_id": "VAN-PKT-010",
+      "receipt_required": true,
+      "sequence": 10,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Deposits, withdrawals, transfers and provider rails"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-003",
+        "BE-005",
+        "PRE-003"
+      ],
+      "exit_contract": "resolve aliases; discover tradable instruments; subscribe once; aggregate bars; revision snapshots; recover gaps; publish genuine depth. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Identical ticker with different contracts cannot collide; stale feed never returns synthetic LIVE; bad sequence triggers snapshot recovery",
+      "id": "BE-008",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "legacy_packet_id": "BF-PKT-011",
+      "packet_id": "VAN-PKT-011",
+      "receipt_required": true,
+      "sequence": 11,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Instrument identity, market feeds, bars and depth"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-002",
+        "BE-006",
+        "BE-008",
+        "PRE-003"
+      ],
+      "exit_contract": "verify mandate; calculate stop/size; reserve worst-case pending risk; enforce drawdown, concentration, correlation and margin; deny new entries while allow risk reduction. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. No float monetary sizing; rounding down; competing intents cannot exceed family/account limits; flow adjustment cannot increase absolute available collateral",
+      "id": "BE-009",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "legacy_packet_id": "BF-PKT-012",
+      "packet_id": "VAN-PKT-012",
+      "receipt_required": true,
+      "sequence": 12,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Mandates, risk, sizing and portfolio reservations"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-005",
+        "BE-008",
+        "BE-009",
+        "PRE-003"
+      ],
+      "exit_contract": "submit market/limit/stop/stop-limit where available; modify; cancel; read fills; map provider states; reconcile unknowns. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Cancel/fill race keeps broker truth; partial fill retains exposure; atomic request includes stop but protection requires independent readback",
+      "id": "BE-010",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "legacy_packet_id": "BF-PKT-013",
+      "packet_id": "VAN-PKT-013",
+      "receipt_required": true,
+      "sequence": 13,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Venue execution, canonical orders and reconciliation"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-009",
+        "BE-010",
+        "PRE-003"
+      ],
+      "exit_contract": "preview/submit manual entry; winning-only add; close/partial; tighten; TP changes; hand to VAN; take back with management epoch. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Winning at approval AND submission; never widen stop; take-back fences future commands and reconciles already-sent commands instead of claiming instant cancellation",
+      "id": "BE-011",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "legacy_packet_id": "BF-PKT-014",
+      "packet_id": "VAN-PKT-014",
+      "receipt_required": true,
+      "sequence": 14,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Manual trading, adds and management handover"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-006",
+        "BE-010",
+        "BE-011",
+        "PRE-003"
+      ],
+      "exit_contract": "serve canonical positions; protect; build history/statement projections; compute sourced execution cost; report risk current/limit/remaining. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Unconfirmed stop never shown protected; every TCA value has units and benchmark timestamp; demo/live totals never mix",
+      "id": "BE-012",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "legacy_packet_id": "BF-PKT-015",
+      "packet_id": "VAN-PKT-015",
+      "receipt_required": true,
+      "sequence": 15,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Positions, protection, portfolio, history and TCA"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-003",
+        "BE-008",
+        "PRE-003"
+      ],
+      "exit_contract": "admit feeds; collect scheduled values and headlines; canonicalize identities; track original publisher, entitlements, clocks and source failures. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Syndicated copies count once; preliminary/forecast/revised previous is not actual; unsupported licence or failed feed does not fake coverage",
+      "id": "BE-014",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "legacy_packet_id": "BF-PKT-017",
+      "packet_id": "VAN-PKT-016",
+      "receipt_required": true,
+      "sequence": 16,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "News, calendar and source-health ingestion"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-014",
+        "PRE-003"
+      ],
+      "exit_contract": "cluster/correct/retract; classify; measure reactions; build history; retrieve analogues; join prediction-market expectations only when admitted. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. No look-ahead; missing market marks stay missing; thin sample cannot become calibrated probability; source corrections invalidate descendants",
+      "id": "BE-015",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "legacy_packet_id": "BF-PKT-018",
+      "packet_id": "VAN-PKT-017",
+      "receipt_required": true,
+      "sequence": 17,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Event analysis, history, analogues and expectations"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-003",
+        "BE-008",
+        "PRE-003"
+      ],
+      "exit_contract": "serve chart capability contract; persist indicator instances/drawing anchors/layouts; revise settings; calculate certified server indicators; sync conflicts. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. No rendered pixels as canonical geometry; parameter versions and price/time anchors round-trip; cross-device edit conflict explicit; no server dependency on a new renderer",
+      "id": "BE-018",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "legacy_packet_id": "BF-PKT-021",
+      "packet_id": "VAN-PKT-018",
+      "receipt_required": true,
+      "sequence": 18,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Chart data contracts, indicators, drawings and workspaces"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-008",
+        "BE-018",
+        "PRE-003"
+      ],
+      "exit_contract": "create deterministic replay sessions; step/seek; store paper actions separately; return outcomes and provenance. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Replay cannot resolve an execution route or grant; future bars invisible; reset/seek reproducible; practice never enters live P&L or strategy promotion statistics",
+      "id": "BE-019",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "legacy_packet_id": "BF-PKT-022",
+      "packet_id": "VAN-PKT-019",
+      "receipt_required": true,
+      "sequence": 19,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Historical replay, simulation and isolated practice data"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-003",
+        "BE-008",
+        "BE-014",
+        "BE-018",
+        "PRE-003"
+      ],
+      "exit_contract": "CRUD lists; evaluate price/indicator/drawing/news alerts on server; pause/restart/delete; scan instruments; emit canonical notifications. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. One trigger identity across devices/restart; stale data cannot trigger a live market fact; alert never trades; scan quotas enforced",
+      "id": "BE-020",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "legacy_packet_id": "BF-PKT-023",
+      "packet_id": "VAN-PKT-020",
+      "receipt_required": true,
+      "sequence": 20,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Watchlists, persistent alerts and typed screening"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-012",
+        "BE-015",
+        "BE-018",
+        "BE-019",
+        "PRE-003"
+      ],
+      "exit_contract": "ingest consented chart observations and notes; join news/portfolio; generate fact-bound explanations; track contradiction; provide evidence artifacts. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Chart payload injection and model-added numbers rejected; retention/erasure honoured; all contributing revisions recorded; headless producer proves intake before UI exists",
+      "id": "BE-021",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "legacy_packet_id": "BF-PKT-024",
+      "packet_id": "VAN-PKT-021",
+      "receipt_required": true,
+      "sequence": 21,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Analyst, chart observations and cross-signal intelligence"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-002",
+        "BE-003",
+        "PRE-003"
+      ],
+      "exit_contract": "create/read/update permitted tasks; stream mission progress; join stage evidence; compute dependency graph/critical path; expose stable node/edge IDs. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Cycles/orphans/conflicting actors visible; no completion from agent RUNNING; graph drag has no authority; observed task state not fabricated by layout",
+      "id": "BE-023",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "legacy_packet_id": "BF-PKT-026",
+      "packet_id": "VAN-PKT-022",
+      "receipt_required": true,
+      "sequence": 22,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Projects, tasks, missions and truthful workflow graphs"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-002",
+        "BE-003",
+        "BE-023",
+        "PRE-003"
+      ],
+      "exit_contract": "assign/steer/cancel under lease; native conversation protocol; provider-bound allow/deny; reconcile job/task/artifact outcomes. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Expired lease, duplicate allow, late callback and task scope mismatch refuse; GUI click is not success; integration must be real, not an unbound client stub",
+      "id": "BE-024",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "legacy_packet_id": "BF-PKT-027",
+      "packet_id": "VAN-PKT-023",
+      "receipt_required": true,
+      "sequence": 23,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Agents, Hermes, Muse and provider-bound interventions"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-002",
+        "BE-003",
+        "BE-024",
+        "PRE-003"
+      ],
+      "exit_contract": "lease session; observe viewport; submit exact plan; upload/download with admission; report action outcome; revoke; bind file destination. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. No broad host command from UI; before/after target changes invalidate intent; file destination substitution denied; retained source content is untrusted data",
+      "id": "BE-025",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "legacy_packet_id": "BF-PKT-028",
+      "packet_id": "VAN-PKT-024",
+      "receipt_required": true,
+      "sequence": 24,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Browser, remote interaction, artifact and share intake"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-002",
+        "BE-003",
+        "BE-023",
+        "BE-025",
+        "PRE-003"
+      ],
+      "exit_contract": "enumerate qualified devices; version plans; queue/observe/cancel tests; preserve captures; publish pass/fail/unknown and build IDs. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. An emulator cannot issue S24 acceptance; missing capture means unknown; old APK test cannot certify new build; server protocol testable with existing authorised clients",
+      "id": "BE-026",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "legacy_packet_id": "BF-PKT-029",
+      "packet_id": "VAN-PKT-025",
+      "receipt_required": true,
+      "sequence": 25,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "ARTEMIS device tests and independent evidence services"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-002",
+        "BE-003",
+        "PRE-003"
+      ],
+      "exit_contract": "search/correct/retract facts; retain provenance; inspect history; edit goals; review/rollback adaptation; erase scoped records and derivatives. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Deleting source is not model unlearning; revoked context excluded from research; erasure includes caches/derived artifacts or declares verified retention exception",
+      "id": "BE-027",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "legacy_packet_id": "BF-PKT-030",
+      "packet_id": "VAN-PKT-026",
+      "receipt_required": true,
+      "sequence": 26,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Memory, knowledge, goals, privacy and erasure"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-002",
+        "BE-003",
+        "BE-023",
+        "BE-027",
+        "PRE-003"
+      ],
+      "exit_contract": "candidate/admit/version workflows; bind standing authority; schedule; report next/last run; execute through domain adapters; retry safely. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Failed run never silently success; timezone/DST/misfire specified; schedules never mint grants; unknown effect reconciled before retry",
+      "id": "BE-028",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "legacy_packet_id": "BF-PKT-031",
+      "packet_id": "VAN-PKT-027",
+      "receipt_required": true,
+      "sequence": 27,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Automation, reminders and schedules"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-002",
+        "BE-003",
+        "BE-027",
+        "PRE-003"
+      ],
+      "exit_contract": "create turns; stream transcript/audio; interrupt; retain history; manage speaker consent/erase; expose speech and task context. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Mic permission denial propagates; interrupted response not completion; no speaker identity assertion without enrollment; obsolete consent cannot reopen microphone",
+      "id": "BE-029",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "legacy_packet_id": "BF-PKT-032",
+      "packet_id": "VAN-PKT-028",
+      "receipt_required": true,
+      "sequence": 28,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Conversation, voice and speaker-profile services"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-003",
+        "BE-012",
+        "BE-020",
+        "BE-023",
+        "BE-024",
+        "BE-028",
+        "BE-029",
+        "PRE-003"
+      ],
+      "exit_contract": "aggregate typed events; arbitrate severity/freshness; dedupe delivery; persist acknowledgement; project orb semantics and compact hub summaries. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Risk preempts celebration; snooze never clears incident; no state legend or route action executes; stale health never healthy idle; one event per channel identity",
+      "id": "BE-030",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "legacy_packet_id": "BF-PKT-033",
+      "packet_id": "VAN-PKT-029",
+      "receipt_required": true,
+      "sequence": 29,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Attention, notifications, presence and compact summaries"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-002",
+        "BE-003",
+        "BE-005",
+        "BE-024",
+        "BE-025",
+        "BE-029",
+        "PRE-003"
+      ],
+      "exit_contract": "serve provider readiness and scopes; version settings; manage device inventory/provisioning; expose connection correlations; privacy defaults. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Connection health is not action authority; no manual raw host/token forms; no leaked secrets in telemetry; native permission completion deferred to actual OS readback",
+      "id": "BE-031",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "legacy_packet_id": "BF-PKT-034",
+      "packet_id": "VAN-PKT-030",
+      "receipt_required": true,
+      "sequence": 30,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Connected providers, settings, devices and diagnostics"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-023",
+        "BE-024",
+        "BE-025",
+        "BE-026",
+        "PRE-003"
+      ],
+      "exit_contract": "project/read stage plans; expose design/research/security/CI evidence; admit cinematic/studio workspace candidate APIs and native-control bindings. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. PR98/99 and later candidates are evaluated, not assumed; UI workspace cannot mint build/deploy authority; external partial services block required backend integration",
+      "id": "BE-034",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "legacy_packet_id": "BF-PKT-035",
+      "packet_id": "VAN-PKT-031",
+      "receipt_required": true,
+      "sequence": 31,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Development studio, CI/security and evidence-workspace adapters"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-003",
+        "BE-008",
+        "BE-009",
+        "BE-010",
+        "BE-012",
+        "BE-019",
+        "PRE-003"
+      ],
+      "exit_contract": "All VAN-CX-003–013 evaluator obligations; executable matching/chronology fixtures; actual folds and data manifests; deployment-faithful and isolation experiments separated; independent adversarial oracle.",
+      "id": "BE-035",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "packet_id": "VAN-PKT-032",
+      "receipt_required": true,
+      "sequence": 32,
+      "source_origin": "OPUS_RESEARCH_RECONCILED",
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Qualified chronological strategy evaluator and simulator oracle"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-009",
+        "BE-010",
+        "BE-035",
+        "PRE-003"
+      ],
+      "exit_contract": "list/inspect/promote qualified strategies; produce edge admission evidence; apply Normal/Risky/Aggressive requests; reconcile restart; attribution. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Aggressive without admitted edge refuses; mode never raises signed ceilings; both evidence producer and refusal path must be implemented Economic evidence and mode producers are admitted through BE-035 and the forecast integration; no standalone code default substitutes for a signed policy.",
+      "id": "BE-013",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "legacy_packet_id": "BF-PKT-016",
+      "packet_id": "VAN-PKT-033",
+      "receipt_required": true,
+      "sequence": 33,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Strategy registry, signed trading modes and qualified edge-consumer contracts"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-009",
+        "BE-012",
+        "BE-013",
+        "BE-015",
+        "PRE-003"
+      ],
+      "exit_contract": "compute shadow decisions; reduce size/timing/rank; preserve VAN-managed positions; validate event strategies; admit per-path promotions. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. D1–D6 cannot increase risk; owner-managed trades get proposals not silent exits; D7 requires strategy evidence; news corrections retract pending eligibility",
+      "id": "BE-016",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "legacy_packet_id": "BF-PKT-019",
+      "packet_id": "VAN-PKT-034",
+      "receipt_required": true,
+      "sequence": 34,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Governed news effects D1–D7 and news strategy lifecycle"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-002",
+        "BE-010",
+        "BE-016",
+        "PRE-003"
+      ],
+      "exit_contract": "prepare/sign/arm/revalidate/disarm/use; persist nonce; record latency; enforce two-source agreement at execution; reconcile submission. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. SIGNED is not readiness; expired/changed policy/account/health disarms; a future release can be armed before actual values arrive, but use cannot precede required agreement",
+      "id": "BE-017",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "legacy_packet_id": "BF-PKT-020",
+      "packet_id": "VAN-PKT-035",
+      "receipt_required": true,
+      "sequence": 35,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Armed news tickets, readiness and single-use execution"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-011",
+        "BE-013",
+        "BE-019",
+        "BE-021",
+        "PRE-003"
+      ],
+      "exit_contract": "analyse all manual trades; display soft behaviour findings; extract entry-time features; validate new candidates; track counterfactuals. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Post-entry holding duration is outcome metadata, not an entry feature; losing trades retained; insufficient sample no assertion; candidate never automatically promoted Loss diagnostics use all-trade and opportunity denominators. Predictive deterioration and input drift are different states.",
+      "id": "BE-022",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "legacy_packet_id": "BF-PKT-025",
+      "packet_id": "VAN-PKT-036",
+      "receipt_required": true,
+      "sequence": 36,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Owner diagnostics, pattern discovery and learning review"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-001",
+        "BE-002",
+        "BE-003",
+        "PRE-003"
+      ],
+      "exit_contract": "Actual train/export/load smoke with locked upstream libraries on an authorized VM; Import-boundary tests reject heavy model imports and broker credentials in the T0 runtime",
+      "full_deliverables": [
+        "Lock Qlib, LightGBM, NeuralForecast, XGBoost, Optuna, Feast/MLflow and transitive dependencies by tested version/hash",
+        "Build separate CPU research/inference environments, wheel/architecture matrix, resource and network policy",
+        "Register worker bootstrap, SBOM and safe model-parser compatibility"
+      ],
+      "id": "VAN-ML-PKT-004",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "packet_id": "VAN-PKT-037",
+      "receipt_required": true,
+      "receipt_scope": "EXACT_CAPABILITY_OUTCOMES",
+      "sequence": 37,
+      "source_origin": "FORECAST_REV1.1",
+      "source_parent_duties": [
+        "BE-001",
+        "BE-033",
+        "BE-034"
+      ],
+      "source_requirement_ids": [
+        "VAN-ML-REQ-004"
+      ],
+      "source_test_ids": [
+        "VAN-ML-AT-004-P",
+        "VAN-ML-AT-004-N"
+      ],
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Pinned dependencies and isolated research runtime"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-001",
+        "BE-008",
+        "BE-010",
+        "PRE-003",
+        "VAN-ML-PKT-004"
+      ],
+      "exit_contract": "Replay a revision, delisting and late release: past snapshot remains unchanged; Reject cross-venue collisions, incomplete bars and unknown-use entitlements",
+      "full_deliverables": [
+        "Implement immutable source vintages, availability clocks, calendars, instrument identity and point-in-time universe",
+        "Join licensed market/news/expectation features without revised-future leakage; distinguish observed and reconstructed availability",
+        "Materialize versioned Parquet research snapshots from the existing data owners"
+      ],
+      "id": "VAN-ML-PKT-005",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "packet_id": "VAN-PKT-038",
+      "receipt_required": true,
+      "receipt_scope": "EXACT_CAPABILITY_OUTCOMES",
+      "sequence": 38,
+      "source_origin": "FORECAST_REV1.1",
+      "source_parent_duties": [
+        "BE-008",
+        "BE-014",
+        "BE-015"
+      ],
+      "source_requirement_ids": [
+        "VAN-ML-REQ-005",
+        "VAN-ML-REQ-006",
+        "VAN-ML-REQ-007"
+      ],
+      "source_test_ids": [
+        "VAN-ML-AT-005-P",
+        "VAN-ML-AT-005-N",
+        "VAN-ML-AT-006-P",
+        "VAN-ML-AT-006-N",
+        "VAN-ML-AT-007-P",
+        "VAN-ML-AT-007-N"
+      ],
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Point-in-time market dataset and universe snapshots"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-001",
+        "BE-003",
+        "BE-008",
+        "PRE-003",
+        "VAN-ML-PKT-005"
+      ],
+      "exit_contract": "Offline/online values and units match within declared tolerances; Shift peer data, change column order or fit a scaler on validation: qualification fails",
+      "full_deliverables": [
+        "Extend existing FeatureRegistry and feature contracts; compile offline/online transformations from one version",
+        "Implement lag/timeframe/peer expansion, fold-fitted preprocessing and aligned row masks",
+        "Integrate scoped Feast feature views/materialization and deterministic local inference snapshots"
+      ],
+      "id": "VAN-ML-PKT-006",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "packet_id": "VAN-PKT-039",
+      "receipt_required": true,
+      "receipt_scope": "EXACT_CAPABILITY_OUTCOMES",
+      "sequence": 39,
+      "source_origin": "FORECAST_REV1.1",
+      "source_parent_duties": [
+        "BE-008",
+        "BE-018"
+      ],
+      "source_requirement_ids": [
+        "VAN-ML-REQ-008",
+        "VAN-ML-REQ-009",
+        "VAN-ML-REQ-010"
+      ],
+      "source_test_ids": [
+        "VAN-ML-AT-008-P",
+        "VAN-ML-AT-008-N",
+        "VAN-ML-AT-009-P",
+        "VAN-ML-AT-009-N",
+        "VAN-ML-AT-010-P",
+        "VAN-ML-AT-010-N"
+      ],
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Shared feature definitions and Feast parity"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-001",
+        "BE-008",
+        "BE-018",
+        "PRE-003",
+        "VAN-ML-PKT-005",
+        "VAN-ML-PKT-006"
+      ],
+      "exit_contract": "Labels cannot mature before horizon/outcome availability; Gross/net/cost conventions reconcile; future holding duration cannot become an entry feature",
+      "full_deliverables": [
+        "Build returns, setup-event, ranking, realized-volatility, cost and excursion targets with explicit label intervals",
+        "Keep market observations, actual fills, synthetic controls, practice and counterfactual outcomes in separate namespaces",
+        "Preserve candidate sampling, rejection reason and censoring to expose selection bias"
+      ],
+      "id": "VAN-ML-PKT-007",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "packet_id": "VAN-PKT-040",
+      "receipt_required": true,
+      "receipt_scope": "EXACT_CAPABILITY_OUTCOMES",
+      "sequence": 40,
+      "source_origin": "FORECAST_REV1.1",
+      "source_parent_duties": [
+        "BE-013",
+        "BE-022"
+      ],
+      "source_requirement_ids": [
+        "VAN-ML-REQ-011",
+        "VAN-ML-REQ-012",
+        "VAN-ML-REQ-013"
+      ],
+      "source_test_ids": [
+        "VAN-ML-AT-011-P",
+        "VAN-ML-AT-011-N",
+        "VAN-ML-AT-012-P",
+        "VAN-ML-AT-012-N",
+        "VAN-ML-AT-013-P",
+        "VAN-ML-AT-013-N"
+      ],
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Targets, executable labels and outcome provenance"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-001",
+        "BE-035",
+        "PRE-003",
+        "VAN-ML-PKT-006",
+        "VAN-ML-PKT-007"
+      ],
+      "exit_contract": "Leakage, full-data normalization, random splits and future exogenous values are detected; Overlapping horizons do not inflate independent sample counts",
+      "full_deliverables": [
+        "Implement FoldPlan with interval purging, cohort-coherent cutoffs, calibration slices and embargo policy",
+        "Build full-versus-prefix and positive-poison diagnostics inspired by Freqtrade",
+        "Measure indicator/model feature convergence versus warmup and cache identity"
+      ],
+      "id": "VAN-ML-PKT-008",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "packet_id": "VAN-PKT-041",
+      "receipt_required": true,
+      "receipt_scope": "EXACT_CAPABILITY_OUTCOMES",
+      "sequence": 41,
+      "source_origin": "FORECAST_REV1.1",
+      "source_parent_duties": [
+        "BE-013",
+        "BE-019",
+        "BE-022"
+      ],
+      "source_requirement_ids": [
+        "VAN-ML-REQ-014",
+        "VAN-ML-REQ-015",
+        "VAN-ML-REQ-016"
+      ],
+      "source_test_ids": [
+        "VAN-ML-AT-014-P",
+        "VAN-ML-AT-014-N",
+        "VAN-ML-AT-015-P",
+        "VAN-ML-AT-015-N",
+        "VAN-ML-AT-016-P",
+        "VAN-ML-AT-016-N"
+      ],
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Chronological folds, lookahead and warmup diagnostics"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-001",
+        "BE-035",
+        "PRE-003",
+        "VAN-ML-PKT-005",
+        "VAN-ML-PKT-007"
+      ],
+      "exit_contract": "Long/short both-hit, gap-stop, same-close latency, funding boundary and partial-fill cases reconcile; Closed-trade metrics and pre-flatten final equity cannot certify economic performance",
+      "full_deliverables": [
+        "Reproduce and close scoped main-source findings; implement observed intrabar ordering or explicit uncertainty bounds",
+        "Debit commission, financing, borrow/roll and conversion costs exactly once alongside fill spread/slippage",
+        "Produce post-liquidation MTM equity, drawdown and cash-flow-neutral performance with pending risk"
+      ],
+      "id": "VAN-ML-PKT-009",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "packet_id": "VAN-PKT-042",
+      "receipt_required": true,
+      "receipt_scope": "EXACT_CAPABILITY_OUTCOMES",
+      "sequence": 42,
+      "source_origin": "FORECAST_REV1.1",
+      "source_parent_duties": [
+        "BE-006",
+        "BE-010",
+        "BE-012",
+        "BE-019"
+      ],
+      "source_requirement_ids": [
+        "VAN-ML-REQ-017",
+        "VAN-ML-REQ-018",
+        "VAN-ML-REQ-019"
+      ],
+      "source_test_ids": [
+        "VAN-ML-AT-017-P",
+        "VAN-ML-AT-017-N",
+        "VAN-ML-AT-018-P",
+        "VAN-ML-AT-018-N",
+        "VAN-ML-AT-019-P",
+        "VAN-ML-AT-019-N"
+      ],
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Simulation accounting, intrabar and timing corrections"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-001",
+        "BE-012",
+        "BE-035",
+        "PRE-003",
+        "VAN-ML-PKT-008",
+        "VAN-ML-PKT-009"
+      ],
+      "exit_contract": "Concurrent orders/cancel-fill races and capital contention have equivalent risk decisions; Zero-trade replay does not stand in for exercised approval, rejection and protection paths",
+      "full_deliverables": [
+        "Replay through the shared account coordinator/risk/reservation/route policy, not only independent single-symbol cycles",
+        "Build comparable event streams, symbol calendars, margin and instrument specifications",
+        "Provide independent oracle export and documented comparator differences; no second live sender"
+      ],
+      "id": "VAN-ML-PKT-010",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "packet_id": "VAN-PKT-043",
+      "receipt_required": true,
+      "receipt_scope": "EXACT_CAPABILITY_OUTCOMES",
+      "sequence": 43,
+      "source_origin": "FORECAST_REV1.1",
+      "source_parent_duties": [
+        "BE-009",
+        "BE-010",
+        "BE-012",
+        "BE-019"
+      ],
+      "source_requirement_ids": [
+        "VAN-ML-REQ-020",
+        "VAN-ML-REQ-021"
+      ],
+      "source_test_ids": [
+        "VAN-ML-AT-020-P",
+        "VAN-ML-AT-020-N",
+        "VAN-ML-AT-021-P",
+        "VAN-ML-AT-021-N"
+      ],
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Account-wide replay and execution-policy parity"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-001",
+        "PRE-003",
+        "VAN-ML-PKT-004",
+        "VAN-ML-PKT-006",
+        "VAN-ML-PKT-007",
+        "VAN-ML-PKT-008"
+      ],
+      "exit_contract": "DK_L/DK_I separation, train-only processor fitting and prediction index identity verified; Qlib default execution path and unrestricted YAML imports are rejected",
+      "full_deliverables": [
+        "Implement VanQlibDataLoader and fold-scoped DataHandlerLP/DatasetH adapter over VAN-owned snapshots",
+        "Register T3 training tasks and explicit Qlib Recorder/MLflow run binding",
+        "Use model APIs only; disable Qlib execution/exchange and default equity-region semantics in VAN runtime"
+      ],
+      "id": "VAN-ML-PKT-011",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "packet_id": "VAN-PKT-044",
+      "receipt_required": true,
+      "receipt_scope": "EXACT_CAPABILITY_OUTCOMES",
+      "sequence": 44,
+      "source_origin": "FORECAST_REV1.1",
+      "source_parent_duties": [
+        "BE-013",
+        "BE-022"
+      ],
+      "source_requirement_ids": [
+        "VAN-ML-REQ-022"
+      ],
+      "source_test_ids": [
+        "VAN-ML-AT-022-P",
+        "VAN-ML-AT-022-N"
+      ],
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Qlib data, processor and recorder integration"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-001",
+        "PRE-003",
+        "VAN-ML-PKT-010",
+        "VAN-ML-PKT-011"
+      ],
+      "exit_contract": "Reproducible fixed-environment fits; native export/import numerical equivalence; Data/feature order mismatch and net-cost double subtraction fail tests",
+      "full_deliverables": [
+        "Train horizon/cohort-specific regression baselines with explicit cost conventions and objective semantics",
+        "Export native Booster plus feature/target/preprocessor manifests",
+        "Implement out-of-fold predictions, stopping, uncertainty comparison and diagnostic explanations"
+      ],
+      "id": "VAN-ML-PKT-012",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "packet_id": "VAN-PKT-045",
+      "receipt_required": true,
+      "receipt_scope": "EXACT_CAPABILITY_OUTCOMES",
+      "sequence": 45,
+      "source_origin": "FORECAST_REV1.1",
+      "source_parent_duties": [
+        "BE-013"
+      ],
+      "source_requirement_ids": [
+        "VAN-ML-REQ-023"
+      ],
+      "source_test_ids": [
+        "VAN-ML-AT-023-P",
+        "VAN-ML-AT-023-N"
+      ],
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "LightGBM expected-return and net-edge regressors"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-001",
+        "PRE-003",
+        "VAN-ML-PKT-010",
+        "VAN-ML-PKT-011"
+      ],
+      "exit_contract": "Class score is not called win probability until packet020 calibration passes; Unmatured labels, resampling bias and leaked outcome fields fail",
+      "full_deliverables": [
+        "Implement binary event targets and raw-probability output with defined censor/tie behavior",
+        "Create disjoint calibration handoff, imbalance controls and reliability metadata",
+        "Compare against event base rate and existing rules on the same candidate population"
+      ],
+      "id": "VAN-ML-PKT-013",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "packet_id": "VAN-PKT-046",
+      "receipt_required": true,
+      "receipt_scope": "EXACT_CAPABILITY_OUTCOMES",
+      "sequence": 46,
+      "source_origin": "FORECAST_REV1.1",
+      "source_parent_duties": [
+        "BE-013"
+      ],
+      "source_requirement_ids": [
+        "VAN-ML-REQ-024"
+      ],
+      "source_test_ids": [
+        "VAN-ML-AT-024-P",
+        "VAN-ML-AT-024-N"
+      ],
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "LightGBM setup-event classification"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-001",
+        "PRE-003",
+        "VAN-ML-PKT-010",
+        "VAN-ML-PKT-011"
+      ],
+      "exit_contract": "Stock LGBModel wrapper is not used with unsupported loss values; Negative regression labels passed as rank relevance and cross-date groups are rejected",
+      "full_deliverables": [
+        "Implement VAN-owned Qlib-compatible/direct-LightGBM adapters for quantile and ranking objectives",
+        "Train explicit alpha/horizon quantiles and grouped cutoff/universe ranking with integer relevance rules",
+        "Validate quantile order, group contiguity and units; rank score remains ordinal"
+      ],
+      "id": "VAN-ML-PKT-014",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "packet_id": "VAN-PKT-047",
+      "receipt_required": true,
+      "receipt_scope": "EXACT_CAPABILITY_OUTCOMES",
+      "sequence": 47,
+      "source_origin": "FORECAST_REV1.1",
+      "source_parent_duties": [
+        "BE-013"
+      ],
+      "source_requirement_ids": [
+        "VAN-ML-REQ-025",
+        "VAN-ML-REQ-026"
+      ],
+      "source_test_ids": [
+        "VAN-ML-AT-025-P",
+        "VAN-ML-AT-025-N",
+        "VAN-ML-AT-026-P",
+        "VAN-ML-AT-026-N"
+      ],
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "LightGBM quantile and grouped ranking adapters"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-001",
+        "PRE-003",
+        "VAN-ML-PKT-010",
+        "VAN-ML-PKT-011"
+      ],
+      "exit_contract": "Every mandatory task has a meaningful naive and incumbent comparison; Different horizons, price units, sample windows or costs cannot be compared as like-for-like",
+      "full_deliverables": [
+        "Integrate XGBoost as a comparable tabular challenger and linear/logistic/persistence/ranking baselines",
+        "Include HAR-style realized-volatility and authorized GARCH implementations with identical data cutoffs",
+        "Version each baseline and preserve failed/no-skill results"
+      ],
+      "id": "VAN-ML-PKT-015",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "packet_id": "VAN-PKT-048",
+      "receipt_required": true,
+      "receipt_scope": "EXACT_CAPABILITY_OUTCOMES",
+      "sequence": 48,
+      "source_origin": "FORECAST_REV1.1",
+      "source_parent_duties": [
+        "BE-013",
+        "BE-022"
+      ],
+      "source_requirement_ids": [
+        "VAN-ML-REQ-027"
+      ],
+      "source_test_ids": [
+        "VAN-ML-AT-027-P",
+        "VAN-ML-AT-027-N"
+      ],
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Challenger and simple baseline suite"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-001",
+        "PRE-003",
+        "VAN-ML-PKT-004",
+        "VAN-ML-PKT-006",
+        "VAN-ML-PKT-007",
+        "VAN-ML-PKT-008",
+        "VAN-ML-PKT-010"
+      ],
+      "exit_contract": "Actual locked-library training/inference on admitted data; Calendar gaps, unavailable future values and scaler refits at prediction fail",
+      "full_deliverables": [
+        "Implement canonical unique_id/ds/y and historical/future/static exogenous mapping",
+        "Integrate NHITS multi-horizon training, native validation and fold-scoped scaling",
+        "Capture native outputs and learned preprocessing in the shared experiment/artifact contract"
+      ],
+      "id": "VAN-ML-PKT-016",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "packet_id": "VAN-PKT-049",
+      "receipt_required": true,
+      "receipt_scope": "EXACT_CAPABILITY_OUTCOMES",
+      "sequence": 49,
+      "source_origin": "FORECAST_REV1.1",
+      "source_parent_duties": [
+        "BE-013",
+        "BE-022"
+      ],
+      "source_requirement_ids": [
+        "VAN-ML-REQ-028",
+        "VAN-ML-REQ-029"
+      ],
+      "source_test_ids": [
+        "VAN-ML-AT-028-P",
+        "VAN-ML-AT-028-N",
+        "VAN-ML-AT-029-P",
+        "VAN-ML-AT-029-N"
+      ],
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "NeuralForecast bridge and N-HiTS"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-001",
+        "PRE-003",
+        "VAN-ML-PKT-016"
+      ],
+      "exit_contract": "Actual contextual prediction and decomposition round trip; Explanations cannot claim causal drivers or invent contributions for an unsupported configuration",
+      "full_deliverables": [
+        "Implement NBEATSx model plugin and valid exogenous capabilities",
+        "Expose trend/seasonality/exogenous decomposition only when the chosen architecture supports it",
+        "Measure contextual ablation and explanatory output stability"
+      ],
+      "id": "VAN-ML-PKT-017",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "packet_id": "VAN-PKT-050",
+      "receipt_required": true,
+      "receipt_scope": "EXACT_CAPABILITY_OUTCOMES",
+      "sequence": 50,
+      "source_origin": "FORECAST_REV1.1",
+      "source_parent_duties": [
+        "BE-013",
+        "BE-021"
+      ],
+      "source_requirement_ids": [
+        "VAN-ML-REQ-030"
+      ],
+      "source_test_ids": [
+        "VAN-ML-AT-030-P",
+        "VAN-ML-AT-030-N"
+      ],
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "N-BEATSx contextual forecasts and decomposition"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-001",
+        "PRE-003",
+        "VAN-ML-PKT-016"
+      ],
+      "exit_contract": "Distribution support and raw-path dimensions verified with a real model; Averaged trajectories cannot masquerade as samples; independent assets cannot claim joint portfolio coverage",
+      "full_deliverables": [
+        "Integrate DeepAR distribution loss, target-domain checks and pinned RNG/sample manifests",
+        "Retain individual trajectories through a tested adapter, or expose UNSUPPORTED_RAW_PATHS for a pinned API while implementing the documented retained-path adapter before closure",
+        "Keep marginal intervals separate from temporal and cross-asset joint-scenario claims"
+      ],
+      "id": "VAN-ML-PKT-018",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "packet_id": "VAN-PKT-051",
+      "receipt_required": true,
+      "receipt_scope": "EXACT_CAPABILITY_OUTCOMES",
+      "sequence": 51,
+      "source_origin": "FORECAST_REV1.1",
+      "source_parent_duties": [
+        "BE-013",
+        "BE-019"
+      ],
+      "source_requirement_ids": [
+        "VAN-ML-REQ-031"
+      ],
+      "source_test_ids": [
+        "VAN-ML-AT-031-P",
+        "VAN-ML-AT-031-N"
+      ],
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "DeepAR distributional forecasts and retained scenarios"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-001",
+        "PRE-003",
+        "VAN-ML-PKT-016",
+        "VAN-ML-PKT-017",
+        "VAN-ML-PKT-018"
+      ],
+      "exit_contract": "Do not infer support from constructor argument names alone; Global shared weights are not labelled joint dependence, and invalid capabilities fail before training",
+      "full_deliverables": [
+        "Provide usable research plugins for TFT, PatchTST and iTransformer with capability introspection and target compatibility",
+        "Bound cross-market cohorts, missing histories, architecture-specific exogenous support and compute budgets",
+        "Test each admitted plugin in training/export/load/inference; economic admission remains conditional"
+      ],
+      "id": "VAN-ML-PKT-019",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "packet_id": "VAN-PKT-052",
+      "receipt_required": true,
+      "receipt_scope": "EXACT_CAPABILITY_OUTCOMES",
+      "sequence": 52,
+      "source_origin": "FORECAST_REV1.1",
+      "source_parent_duties": [
+        "BE-013",
+        "BE-021",
+        "BE-022"
+      ],
+      "source_requirement_ids": [
+        "VAN-ML-REQ-032"
+      ],
+      "source_test_ids": [
+        "VAN-ML-AT-032-P",
+        "VAN-ML-AT-032-N"
+      ],
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Contextual and multivariate neural challengers"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-001",
+        "PRE-003",
+        "VAN-ML-PKT-012",
+        "VAN-ML-PKT-013",
+        "VAN-ML-PKT-014",
+        "VAN-ML-PKT-015",
+        "VAN-ML-PKT-016",
+        "VAN-ML-PKT-017",
+        "VAN-ML-PKT-018",
+        "VAN-ML-PKT-019"
+      ],
+      "exit_contract": "Calibration/test separation and stale/mismatched residual refusal verified; Nine residuals or nominal coverage alone cannot establish reliable trading confidence",
+      "full_deliverables": [
+        "Extend existing vati.risk.conformal through separate forecast calibration producers and source-bound buckets",
+        "Implement probability calibration, quantile evaluation, optional conformalized intervals and realized coverage monitoring",
+        "Bind residuals to model/target/cohort/horizon and invalidate on refit; correct guarantee language"
+      ],
+      "id": "VAN-ML-PKT-020",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "packet_id": "VAN-PKT-053",
+      "receipt_required": true,
+      "receipt_scope": "EXACT_CAPABILITY_OUTCOMES",
+      "sequence": 53,
+      "source_origin": "FORECAST_REV1.1",
+      "source_parent_duties": [
+        "BE-009",
+        "BE-013",
+        "BE-021"
+      ],
+      "source_requirement_ids": [
+        "VAN-ML-REQ-033",
+        "VAN-ML-REQ-034",
+        "VAN-ML-REQ-035"
+      ],
+      "source_test_ids": [
+        "VAN-ML-AT-033-P",
+        "VAN-ML-AT-033-N",
+        "VAN-ML-AT-034-P",
+        "VAN-ML-AT-034-N",
+        "VAN-ML-AT-035-P",
+        "VAN-ML-AT-035-N"
+      ],
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "One calibration and uncertainty-validation boundary"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-001",
+        "PRE-003",
+        "VAN-ML-PKT-008",
+        "VAN-ML-PKT-011",
+        "VAN-ML-PKT-015",
+        "VAN-ML-PKT-019",
+        "VAN-ML-PKT-020"
+      ],
+      "exit_contract": "Search cannot observe final holdout or mutate live aliases; Repeat study from snapshot and detect data, target, trial-count and environment changes",
+      "full_deliverables": [
+        "Use one study/budget/trial ledger for Qlib, native LightGBM and NeuralForecast candidates",
+        "Implement bounded neural Auto/Optuna adapter, nested temporal selection and independent final holdout",
+        "Preserve all tried configurations, early/pruned failures and comparison lineage"
+      ],
+      "id": "VAN-ML-PKT-021",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "packet_id": "VAN-PKT-054",
+      "receipt_required": true,
+      "receipt_scope": "EXACT_CAPABILITY_OUTCOMES",
+      "sequence": 54,
+      "source_origin": "FORECAST_REV1.1",
+      "source_parent_duties": [
+        "BE-013",
+        "BE-022",
+        "BE-028"
+      ],
+      "source_requirement_ids": [
+        "VAN-ML-REQ-036"
+      ],
+      "source_test_ids": [
+        "VAN-ML-AT-036-P",
+        "VAN-ML-AT-036-N"
+      ],
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Unified Optuna and rolling research studies"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-001",
+        "PRE-003",
+        "VAN-ML-PKT-004",
+        "VAN-ML-PKT-011",
+        "VAN-ML-PKT-020",
+        "VAN-ML-PKT-021"
+      ],
+      "exit_contract": "No untrusted pickle, unapproved dynamic imports or unchecked remote model URI; Changing registry alias cannot change admitted runtime model without a valid binding",
+      "full_deliverables": [
+        "Implement native Booster and safe neural artifact formats with verified source/configuration/manifests",
+        "Connect MLflow versions/runs and immutable VAN admission records; aliases remain advisory",
+        "Implement atomic stage transitions, CAS deployment binding and rollback compatibility"
+      ],
+      "id": "VAN-ML-PKT-022",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "packet_id": "VAN-PKT-055",
+      "receipt_required": true,
+      "receipt_scope": "EXACT_CAPABILITY_OUTCOMES",
+      "sequence": 55,
+      "source_origin": "FORECAST_REV1.1",
+      "source_parent_duties": [
+        "BE-013",
+        "BE-031",
+        "BE-033"
+      ],
+      "source_requirement_ids": [
+        "VAN-ML-REQ-037",
+        "VAN-ML-REQ-038"
+      ],
+      "source_test_ids": [
+        "VAN-ML-AT-037-P",
+        "VAN-ML-AT-037-N",
+        "VAN-ML-AT-038-P",
+        "VAN-ML-AT-038-N"
+      ],
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Safe model artifacts and candidate registry"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-001",
+        "BE-028",
+        "PRE-003",
+        "VAN-ML-PKT-021",
+        "VAN-ML-PKT-022"
+      ],
+      "exit_contract": "Kill/restart trainer and duplicate trigger produce no duplicate publication; Old model remains only while valid; training completion never means approved deployment",
+      "full_deliverables": [
+        "Implement FreqAI-inspired retraining cadence, drift-triggered jobs, expiry and per-scope queues",
+        "Use existing durable workflow/scheduler owner, bounded retries, resumable checkpoints and worker leases",
+        "Finish candidate fits without automatic promotion; prioritize inference/protection over training"
+      ],
+      "id": "VAN-ML-PKT-023",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "packet_id": "VAN-PKT-056",
+      "receipt_required": true,
+      "receipt_scope": "EXACT_CAPABILITY_OUTCOMES",
+      "sequence": 56,
+      "source_origin": "FORECAST_REV1.1",
+      "source_parent_duties": [
+        "BE-013",
+        "BE-028",
+        "BE-033"
+      ],
+      "source_requirement_ids": [
+        "VAN-ML-REQ-039",
+        "VAN-ML-REQ-040"
+      ],
+      "source_test_ids": [
+        "VAN-ML-AT-039-P",
+        "VAN-ML-AT-039-N",
+        "VAN-ML-AT-040-P",
+        "VAN-ML-AT-040-N"
+      ],
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Adaptive retraining scheduler and lifecycle"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-001",
+        "PRE-003",
+        "VAN-ML-PKT-006",
+        "VAN-ML-PKT-020",
+        "VAN-ML-PKT-022",
+        "VAN-ML-PKT-023"
+      ],
+      "exit_contract": "Timeout, corrupt model, OOD, stale feed, changed feature order and queue saturation return truthful abstention; No synchronous network/model load can enter T0 risk or protection",
+      "full_deliverables": [
+        "Implement typed bounded ForecastService and immutable cache keys tied to actual material inputs",
+        "Add model/data/calibration freshness, schema validation, DI-style novelty and optional SVM/DBSCAN/PCA ablations",
+        "Persist accepted and abstained outputs with explicit reason and identity; no order fields"
+      ],
+      "id": "VAN-ML-PKT-024",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "packet_id": "VAN-PKT-057",
+      "receipt_required": true,
+      "receipt_scope": "EXACT_CAPABILITY_OUTCOMES",
+      "sequence": 57,
+      "source_origin": "FORECAST_REV1.1",
+      "source_parent_duties": [
+        "BE-008",
+        "BE-013",
+        "BE-031",
+        "BE-033"
+      ],
+      "source_requirement_ids": [
+        "VAN-ML-REQ-041",
+        "VAN-ML-REQ-042",
+        "VAN-ML-REQ-043"
+      ],
+      "source_test_ids": [
+        "VAN-ML-AT-041-P",
+        "VAN-ML-AT-041-N",
+        "VAN-ML-AT-042-P",
+        "VAN-ML-AT-042-N",
+        "VAN-ML-AT-043-P",
+        "VAN-ML-AT-043-N"
+      ],
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Forecast serving, cache, freshness and novelty gates"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-001",
+        "BE-013",
+        "PRE-003",
+        "VAN-ML-PKT-010",
+        "VAN-ML-PKT-012",
+        "VAN-ML-PKT-013",
+        "VAN-ML-PKT-014",
+        "VAN-ML-PKT-019",
+        "VAN-ML-PKT-020",
+        "VAN-ML-PKT-024"
+      ],
+      "exit_contract": "Model disagreement, duplicate-signal confidence, missing edge and mid-cycle model change are handled; Arbiter output still requires new TradeIntent, RiskSnapshot, RiskAuthority and sole router",
+      "full_deliverables": [
+        "Join forecasts into existing OpportunityEngine/MetaLabeler and account coordinator through versioned evidence inputs",
+        "Train fusion only on OOF predictions, measure redundancy, preserve baseline fallback policies",
+        "Bind independent economic admission producer to Normal/Risky/Aggressive use; never modify signed ceilings"
+      ],
+      "id": "VAN-ML-PKT-025",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "packet_id": "VAN-PKT-058",
+      "receipt_required": true,
+      "receipt_scope": "EXACT_CAPABILITY_OUTCOMES",
+      "sequence": 58,
+      "source_origin": "FORECAST_REV1.1",
+      "source_parent_duties": [
+        "BE-009",
+        "BE-013",
+        "BE-016",
+        "BE-021"
+      ],
+      "source_requirement_ids": [
+        "VAN-ML-REQ-044",
+        "VAN-ML-REQ-045",
+        "VAN-ML-REQ-046"
+      ],
+      "source_test_ids": [
+        "VAN-ML-AT-044-P",
+        "VAN-ML-AT-044-N",
+        "VAN-ML-AT-045-P",
+        "VAN-ML-AT-045-N",
+        "VAN-ML-AT-046-P",
+        "VAN-ML-AT-046-N"
+      ],
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Forecast fusion, arbiter and mode evidence integration"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-001",
+        "BE-012",
+        "PRE-003",
+        "VAN-ML-PKT-010",
+        "VAN-ML-PKT-025"
+      ],
+      "exit_contract": "Partial fills do not multiply loss counts; restarts cannot erase locks; All entry blocks preserve authorized reductions, stop protection and manual control ownership",
+      "full_deliverables": [
+        "Add native cooldown, stop-loss streak and low-profit suppression proposals inspired by Freqtrade",
+        "Reuse existing drawdown/kill/health controls and resolve overlapping suppression deterministically",
+        "Persist per-account/environment/strategy/instrument/direction state and reasons"
+      ],
+      "id": "VAN-ML-PKT-026",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "packet_id": "VAN-PKT-059",
+      "receipt_required": true,
+      "receipt_scope": "EXACT_CAPABILITY_OUTCOMES",
+      "sequence": 59,
+      "source_origin": "FORECAST_REV1.1",
+      "source_parent_duties": [
+        "BE-009",
+        "BE-012",
+        "BE-013"
+      ],
+      "source_requirement_ids": [
+        "VAN-ML-REQ-047"
+      ],
+      "source_test_ids": [
+        "VAN-ML-AT-047-P",
+        "VAN-ML-AT-047-N"
+      ],
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Instrument and strategy protection policies"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-001",
+        "PRE-003",
+        "VAN-ML-PKT-007",
+        "VAN-ML-PKT-023",
+        "VAN-ML-PKT-024",
+        "VAN-ML-PKT-025",
+        "VAN-ML-PKT-026"
+      ],
+      "exit_contract": "Deletion/correction invalidates affected derived models without pretending unlearning; Feature drift triggers candidate work or abstention, never unilateral risk expansion",
+      "full_deliverables": [
+        "Persist input-to-forecast-to-decision-to-outcome attribution and counterfactual separation",
+        "Connect existing drift/health/replay and observed broker costs to candidate retraining requests",
+        "Implement privacy/retention/correction invalidation, consented manual-trade datasets and no-survivor bias"
+      ],
+      "id": "VAN-ML-PKT-027",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "packet_id": "VAN-PKT-060",
+      "receipt_required": true,
+      "receipt_scope": "EXACT_CAPABILITY_OUTCOMES",
+      "sequence": 60,
+      "source_origin": "FORECAST_REV1.1",
+      "source_parent_duties": [
+        "BE-012",
+        "BE-013",
+        "BE-022",
+        "BE-027"
+      ],
+      "source_requirement_ids": [
+        "VAN-ML-REQ-048",
+        "VAN-ML-REQ-049"
+      ],
+      "source_test_ids": [
+        "VAN-ML-AT-048-P",
+        "VAN-ML-AT-048-N",
+        "VAN-ML-AT-049-P",
+        "VAN-ML-AT-049-N"
+      ],
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Outcome ledger, drift and proprietary learning data"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-001",
+        "BE-021",
+        "PRE-003",
+        "VAN-ML-PKT-024",
+        "VAN-ML-PKT-025",
+        "VAN-ML-PKT-026",
+        "VAN-ML-PKT-027"
+      ],
+      "exit_contract": "Real authenticated headless caller exercises every registered operation; Uncalibrated scores never exposed as win probabilities; hidden unsupported flags cannot omit required functions",
+      "full_deliverables": [
+        "Extend genuine gateway operations for forecasts, experiments, diagnostics, proposals, retraining and receipts",
+        "Publish complete typed states/actions/eligibility/readback, cancellation and source-age contract",
+        "Map all forecast features to existing Trading/Analyst/Strategy/Risk/Settings/Work surfaces without new frontend code"
+      ],
+      "id": "VAN-ML-PKT-028",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "packet_id": "VAN-PKT-061",
+      "receipt_required": true,
+      "receipt_scope": "EXACT_CAPABILITY_OUTCOMES",
+      "sequence": 61,
+      "source_origin": "FORECAST_REV1.1",
+      "source_parent_duties": [
+        "BE-020",
+        "BE-021",
+        "BE-022",
+        "BE-030",
+        "BE-031",
+        "BE-032"
+      ],
+      "source_requirement_ids": [
+        "VAN-ML-REQ-050",
+        "VAN-ML-REQ-051"
+      ],
+      "source_test_ids": [
+        "VAN-ML-AT-050-P",
+        "VAN-ML-AT-050-N",
+        "VAN-ML-AT-051-P",
+        "VAN-ML-AT-051-N"
+      ],
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Complete backend APIs and future-screen consumption"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-001",
+        "PRE-003",
+        "VAN-ML-PKT-022",
+        "VAN-ML-PKT-023",
+        "VAN-ML-PKT-024",
+        "VAN-ML-PKT-028"
+      ],
+      "exit_contract": "Kill/pressure/full-disk/mismatched build and lost-receipt drills with actual services; T0 deadline/protection noninterference and immutable ledger survival independently measured",
+      "full_deliverables": [
+        "Build approved VM service manifests with isolated users/quotas/secrets/network and capacity admission",
+        "Exercise install, migration, backup/restore, rollback, model hot-swap and telemetry retention",
+        "Use Global DIAL and Zuul routes; do not run on forbidden desktop or silently substitute local compute"
+      ],
+      "id": "VAN-ML-PKT-029",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "packet_id": "VAN-PKT-062",
+      "receipt_required": true,
+      "receipt_scope": "EXACT_CAPABILITY_OUTCOMES",
+      "sequence": 62,
+      "source_origin": "FORECAST_REV1.1",
+      "source_parent_duties": [
+        "BE-033",
+        "BE-034"
+      ],
+      "source_requirement_ids": [
+        "VAN-ML-REQ-052",
+        "VAN-ML-REQ-053"
+      ],
+      "source_test_ids": [
+        "VAN-ML-AT-052-P",
+        "VAN-ML-AT-052-N",
+        "VAN-ML-AT-053-P",
+        "VAN-ML-AT-053-N"
+      ],
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "VM deployment, isolation, recovery and service operations"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-001",
+        "BE-002",
+        "BE-014",
+        "PRE-003",
+        "VAN-ML-PKT-004",
+        "VAN-ML-PKT-005"
+      ],
+      "exit_contract": "Positive adapter/replay calls and explicit source-unavailable readback through actual services; source access unresolved must not become a coding prerequisite.; No country-spoofing, proxy workaround, account creation, trade credential requirement or inferred live permission.",
+      "full_deliverables": [
+        "Implement reusable source/provider contracts with separate technical reachability, allowed data uses, observed terms reference and acquisition mode; no licence-purchase workflow or external spending.",
+        "Provide Netcup and Oracle worker profiles, actual region/host metadata and Global DIAL placement; distinguish operator/account eligibility from machine location.",
+        "Deliver a no-network fixture/replay path and real read-only adapter path using existing source permissions where established; unavailable access affects that source, never erases other engineering scope."
+      ],
+      "id": "VAN-ML-PKT-037",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "packet_id": "VAN-PKT-063",
+      "receipt_required": true,
+      "receipt_scope": "EXACT_CAPABILITY_OUTCOMES",
+      "sequence": 63,
+      "source_origin": "FORECAST_REV1.1",
+      "source_parent_duties": [
+        "BE-003",
+        "BE-008",
+        "BE-014",
+        "BE-015",
+        "BE-033"
+      ],
+      "source_requirement_ids": [
+        "VAN-ML-REQ-061",
+        "VAN-ML-REQ-062"
+      ],
+      "source_test_ids": [
+        "VAN-ML-AT-061-P",
+        "VAN-ML-AT-061-N",
+        "VAN-ML-AT-062-P",
+        "VAN-ML-AT-062-N"
+      ],
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Prediction-market scope, VM profiles and source capability contracts"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-001",
+        "BE-003",
+        "BE-014",
+        "PRE-003",
+        "VAN-ML-PKT-037"
+      ],
+      "exit_contract": "Contract-compatible positive integration plus pagination, archive handoff, reconnect, duplicate and precision counterexamples.; Any genuine provider capture has explicit permission/method and timing provenance; fixtures never count as historical/live captures.",
+      "full_deliverables": [
+        "Implement versioned REST pagination, public metadata/books/trades and historical-boundary reconciliation plus authenticated read-only stream support where available.",
+        "Normalize exact fixed-point YES/NO bids; derive opposite asks, book depth and quote-quality metadata without float cash arithmetic.",
+        "Persist idempotent events with provider time, received time, available_at, source revision and gap/late-message state; stream gaps force resnapshot before usability."
+      ],
+      "id": "VAN-ML-PKT-038",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "packet_id": "VAN-PKT-064",
+      "receipt_required": true,
+      "receipt_scope": "EXACT_CAPABILITY_OUTCOMES",
+      "sequence": 64,
+      "source_origin": "FORECAST_REV1.1",
+      "source_parent_duties": [
+        "BE-003",
+        "BE-008",
+        "BE-014",
+        "BE-015"
+      ],
+      "source_requirement_ids": [
+        "VAN-ML-REQ-063",
+        "VAN-ML-REQ-064",
+        "VAN-ML-REQ-065",
+        "VAN-ML-REQ-066"
+      ],
+      "source_test_ids": [
+        "VAN-ML-AT-063-P",
+        "VAN-ML-AT-063-N",
+        "VAN-ML-AT-064-P",
+        "VAN-ML-AT-064-N",
+        "VAN-ML-AT-065-P",
+        "VAN-ML-AT-065-N",
+        "VAN-ML-AT-066-P",
+        "VAN-ML-AT-066-N"
+      ],
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Kalshi and comparison-provider ingestion, depth and history"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-001",
+        "BE-015",
+        "PRE-003",
+        "VAN-ML-PKT-037"
+      ],
+      "exit_contract": "Same-title/different-rule, initial/revised-release, strict/inclusive threshold and settlement-delay cases produce distinct identities.; Positive exact/complement mapping is usable in research with reviewed evidence; unresolved mapping is explicit, not a permanent empty implementation.",
+      "full_deliverables": [
+        "Add versioned event-contract definitions: exact proposition, units, comparator, thresholds, time window, timezone, official source/vintage, rounding, resolution, cancellation and dispute rules.",
+        "Implement contract relation graph and reviewed exact/complement/overlap/non-equivalent mappings; semantic proposals from models cannot certify equivalence.",
+        "Keep event occurrence, official publication, trade close and settlement as distinct states/clocks; corrected or cancelled outcomes create new versions and invalidation edges."
+      ],
+      "id": "VAN-ML-PKT-039",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "packet_id": "VAN-PKT-065",
+      "receipt_required": true,
+      "receipt_scope": "EXACT_CAPABILITY_OUTCOMES",
+      "sequence": 65,
+      "source_origin": "FORECAST_REV1.1",
+      "source_parent_duties": [
+        "BE-008",
+        "BE-014",
+        "BE-015",
+        "BE-016"
+      ],
+      "source_requirement_ids": [
+        "VAN-ML-REQ-067",
+        "VAN-ML-REQ-068"
+      ],
+      "source_test_ids": [
+        "VAN-ML-AT-067-P",
+        "VAN-ML-AT-067-N",
+        "VAN-ML-AT-068-P",
+        "VAN-ML-AT-068-N"
+      ],
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Event semantics, settlement and cross-venue equivalence"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-001",
+        "PRE-003",
+        "VAN-ML-PKT-006",
+        "VAN-ML-PKT-038",
+        "VAN-ML-PKT-039"
+      ],
+      "exit_contract": "Finite coherent full distributions, correctly differenced threshold masses, explicit unavailable/partial distributions and deterministic same-input outputs.; Low-depth/outdated/crossed or mismatched books cannot become confident features through averaging or silent normalization.",
+      "full_deliverables": [
+        "Implement binary, mutually exclusive outcome and threshold distribution builders; explicit raw versus adjusted estimates, monotonicity, missing bins and open-tail policies.",
+        "Register probability levels/changes, entropy, tail mass, dispersion, consensus differences, spread/depth and freshness as distinct features; fit all transforms on permitted history.",
+        "Prevent artificial jumps at contract roll; compare aligned maturity/proposition only; preserve Kalshi/Polymarket agreement as consistency, not independent-probability multiplication."
+      ],
+      "id": "VAN-ML-PKT-040",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "packet_id": "VAN-PKT-066",
+      "receipt_required": true,
+      "receipt_scope": "EXACT_CAPABILITY_OUTCOMES",
+      "sequence": 66,
+      "source_origin": "FORECAST_REV1.1",
+      "source_parent_duties": [
+        "BE-014",
+        "BE-015",
+        "BE-016",
+        "BE-018"
+      ],
+      "source_requirement_ids": [
+        "VAN-ML-REQ-069",
+        "VAN-ML-REQ-070",
+        "VAN-ML-REQ-071",
+        "VAN-ML-REQ-073"
+      ],
+      "source_test_ids": [
+        "VAN-ML-AT-069-P",
+        "VAN-ML-AT-069-N",
+        "VAN-ML-AT-070-P",
+        "VAN-ML-AT-070-N",
+        "VAN-ML-AT-071-P",
+        "VAN-ML-AT-071-N",
+        "VAN-ML-AT-073-P",
+        "VAN-ML-AT-073-N"
+      ],
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Coherent event distributions, quality and probability features"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-001",
+        "PRE-003",
+        "VAN-ML-PKT-008",
+        "VAN-ML-PKT-020",
+        "VAN-ML-PKT-040"
+      ],
+      "exit_contract": "Positive matured-label/calibration workflow and real producer binding through existing service.; Post-release input, correlated snapshots split randomly, unsupported probability claims and stale calibration fail qualification.",
+      "full_deliverables": [
+        "Extend existing calibration by event family, horizon and liquidity cohort; retain market-implied values separately from calibrated physical-event probabilities.",
+        "Freeze admissible pre-release expectations and calculate surprise only once the correct official release becomes available; preserve every later revision separately.",
+        "Group training/calibration/testing by underlying event and aligned cross-market folds; report event-effective sample size, proper scores and concentration, not inflated quote counts."
+      ],
+      "id": "VAN-ML-PKT-041",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "packet_id": "VAN-PKT-067",
+      "receipt_required": true,
+      "receipt_scope": "EXACT_CAPABILITY_OUTCOMES",
+      "sequence": 67,
+      "source_origin": "FORECAST_REV1.1",
+      "source_parent_duties": [
+        "BE-015",
+        "BE-016",
+        "BE-021",
+        "BE-022"
+      ],
+      "source_requirement_ids": [
+        "VAN-ML-REQ-072",
+        "VAN-ML-REQ-074",
+        "VAN-ML-REQ-075"
+      ],
+      "source_test_ids": [
+        "VAN-ML-AT-072-P",
+        "VAN-ML-AT-072-N",
+        "VAN-ML-AT-074-P",
+        "VAN-ML-AT-074-N",
+        "VAN-ML-AT-075-P",
+        "VAN-ML-AT-075-N"
+      ],
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Event calibration, grouped chronology and frozen surprise"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-001",
+        "PRE-003",
+        "VAN-ML-PKT-012",
+        "VAN-ML-PKT-013",
+        "VAN-ML-PKT-014",
+        "VAN-ML-PKT-017",
+        "VAN-ML-PKT-018",
+        "VAN-ML-PKT-024",
+        "VAN-ML-PKT-025",
+        "VAN-ML-PKT-041"
+      ],
+      "exit_contract": "Actual fitted-model export/load/inference on adequate permitted research data with predictions joined to exact available event snapshots.; Event probability cannot be copied into asset-direction or trade-win probability; incapable NF configurations reject unsupported exogenous fields.",
+      "full_deliverables": [
+        "Join point-in-time event features into existing Qlib tabular tasks and model-supported NeuralForecast historical exogenous inputs; future probability trajectories are never known covariates.",
+        "Implement conditional asset-response targets for returns, volatility, adverse excursion and trade quality by instrument/horizon/session, with simple market/calendar baselines.",
+        "Use out-of-fold predictions in fusion, measure incremental information beyond price/news/consensus inputs and preserve shared-source dependencies across model families."
+      ],
+      "id": "VAN-ML-PKT-042",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "packet_id": "VAN-PKT-068",
+      "receipt_required": true,
+      "receipt_scope": "EXACT_CAPABILITY_OUTCOMES",
+      "sequence": 68,
+      "source_origin": "FORECAST_REV1.1",
+      "source_parent_duties": [
+        "BE-013",
+        "BE-015",
+        "BE-016",
+        "BE-021",
+        "BE-022"
+      ],
+      "source_requirement_ids": [
+        "VAN-ML-REQ-076",
+        "VAN-ML-REQ-077"
+      ],
+      "source_test_ids": [
+        "VAN-ML-AT-076-P",
+        "VAN-ML-AT-076-N",
+        "VAN-ML-AT-077-P",
+        "VAN-ML-AT-077-N"
+      ],
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Conditional asset-response models and forecast-stack integration"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-001",
+        "BE-009",
+        "BE-016",
+        "PRE-003",
+        "VAN-ML-PKT-010",
+        "VAN-ML-PKT-025",
+        "VAN-ML-PKT-041",
+        "VAN-ML-PKT-042"
+      ],
+      "exit_contract": "Positive admitted sandbox evidence consumed by risk evaluation and negative stale/unknown/wrong-use cases, with exact source and independent receipt bindings.; No live event-contract adapter is registered; event-risk proposals cannot raise existing news multipliers or treat stop distance as maximum binary loss.",
+      "full_deliverables": [
+        "Implement external-asset evidence integration through inherited D1–D7 policies and preserve manual-position ownership, no stop widening, calendar blackouts and two-source armed expectations.",
+        "Implement sandbox binary-contract value calculations for held-to-settlement and exit-before-settlement strategies with explicit depth/fees/currency/capital lockup; probabilities must be independently calibrated.",
+        "Implement maximum-loss/event-family portfolio stress and constrained Kelly-style research comparisons; output only bounded proposals, never final authority, actual order instructions or self-promotion."
+      ],
+      "id": "VAN-ML-PKT-043",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "packet_id": "VAN-PKT-069",
+      "receipt_required": true,
+      "receipt_scope": "EXACT_CAPABILITY_OUTCOMES",
+      "sequence": 69,
+      "source_origin": "FORECAST_REV1.1",
+      "source_parent_duties": [
+        "BE-009",
+        "BE-011",
+        "BE-013",
+        "BE-015",
+        "BE-016",
+        "BE-017"
+      ],
+      "source_requirement_ids": [
+        "VAN-ML-REQ-078",
+        "VAN-ML-REQ-079",
+        "VAN-ML-REQ-080"
+      ],
+      "source_test_ids": [
+        "VAN-ML-AT-078-P",
+        "VAN-ML-AT-078-N",
+        "VAN-ML-AT-079-P",
+        "VAN-ML-AT-079-N",
+        "VAN-ML-AT-080-P",
+        "VAN-ML-AT-080-N"
+      ],
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Calibrated event value and bounded position evidence"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-001",
+        "PRE-003",
+        "VAN-ML-PKT-009",
+        "VAN-ML-PKT-010",
+        "VAN-ML-PKT-038",
+        "VAN-ML-PKT-039"
+      ],
+      "exit_contract": "Deterministic accounting identities and counterexamples for touch-not-fill, queue loss, partial fill/cancel races, settlement delay and fee fragmentation.; External-asset evaluation uses the actual destination broker model instead of charging hypothetical Kalshi trades.",
+      "full_deliverables": [
+        "Extend the existing replay adapter family with decimal cash, depth/partial-fill logic, order activation/cancel timing, queue uncertainty and trade/bid/ask distinction.",
+        "Bind versioned per-series/per-account fee precision and accumulator semantics; include settlement/dispute/cancel outcomes, venue cash reservations, financing and conversion costs where applicable.",
+        "Keep all positions on one coherent event/book path and reconcile final liquidation/settlement equity; sparse history returns evidence limitations rather than guaranteed maker fills."
+      ],
+      "id": "VAN-ML-PKT-044",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "packet_id": "VAN-PKT-070",
+      "receipt_required": true,
+      "receipt_scope": "EXACT_CAPABILITY_OUTCOMES",
+      "sequence": 70,
+      "source_origin": "FORECAST_REV1.1",
+      "source_parent_duties": [
+        "BE-006",
+        "BE-009",
+        "BE-010",
+        "BE-011",
+        "BE-012",
+        "BE-019"
+      ],
+      "source_requirement_ids": [
+        "VAN-ML-REQ-081",
+        "VAN-ML-REQ-082"
+      ],
+      "source_test_ids": [
+        "VAN-ML-AT-081-P",
+        "VAN-ML-AT-081-N",
+        "VAN-ML-AT-082-P",
+        "VAN-ML-AT-082-N"
+      ],
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Execution-realistic prediction-contract replay"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-001",
+        "PRE-003",
+        "VAN-ML-PKT-039",
+        "VAN-ML-PKT-040",
+        "VAN-ML-PKT-044"
+      ],
+      "exit_contract": "Positive synthetic hedged-payoff case and near-match false-arbitrage/one-leg-failure cases with source-bound research reports.; No new arbitrage order sender; cashflows and margin do not assume default-free settlement or fabricate a USD-stablecoin equivalence.",
+      "full_deliverables": [
+        "Implement candidate discovery and exact payoff-state matrices for complementary and related contracts; title embeddings only shortlist candidates.",
+        "Compute worst-case payout/net margin at executable quantities across success/void/cancel/dispute states; separate conditional payoff hedge from guaranteed real execution.",
+        "Simulate venue-specific cash, collateral/currency haircut, settlement delay, partial first-leg fill, failed hedge and feasible unwind; do not assume cross-exchange atomicity or transferable immediate collateral."
+      ],
+      "id": "VAN-ML-PKT-045",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "packet_id": "VAN-PKT-071",
+      "receipt_required": true,
+      "receipt_scope": "EXACT_CAPABILITY_OUTCOMES",
+      "sequence": 71,
+      "source_origin": "FORECAST_REV1.1",
+      "source_parent_duties": [
+        "BE-009",
+        "BE-012",
+        "BE-019",
+        "BE-021",
+        "BE-022"
+      ],
+      "source_requirement_ids": [
+        "VAN-ML-REQ-083",
+        "VAN-ML-REQ-084"
+      ],
+      "source_test_ids": [
+        "VAN-ML-AT-083-P",
+        "VAN-ML-AT-083-N",
+        "VAN-ML-AT-084-P",
+        "VAN-ML-AT-084-N"
+      ],
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Contract-consistency and non-atomic arbitrage research laboratory"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-001",
+        "PRE-003",
+        "VAN-ML-PKT-026",
+        "VAN-ML-PKT-041",
+        "VAN-ML-PKT-044"
+      ],
+      "exit_contract": "Positive simulated quoting/fill/inventory roundtrip and adverse-selection/cancel-race/queue-loss stress evidence.; Conditional value uses outcomes after actual modeled fills; unconditional spread capture or touched quotes do not qualify profitability.",
+      "full_deliverables": [
+        "Implement bounded inventory-aware two-sided quoting simulations with jump risk, time-to-event, event-family exposure, toxicity and fill-conditional expected value.",
+        "Compare no-quote, fixed-spread and inventory-aware policies; measure queue dependence, inventory age, markout at several horizons, fee/rebate assumptions and cancel effectiveness.",
+        "Implement research stop/quote-reduction on stale/gapped books and official-release risk; simulate pending cancels and retain exposure until confirmed. No spoofing/wash-trade logic or assumed special market-maker privileges."
+      ],
+      "id": "VAN-ML-PKT-046",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "packet_id": "VAN-PKT-072",
+      "receipt_required": true,
+      "receipt_scope": "EXACT_CAPABILITY_OUTCOMES",
+      "sequence": 72,
+      "source_origin": "FORECAST_REV1.1",
+      "source_parent_duties": [
+        "BE-009",
+        "BE-010",
+        "BE-012",
+        "BE-019",
+        "BE-021",
+        "BE-022"
+      ],
+      "source_requirement_ids": [
+        "VAN-ML-REQ-085",
+        "VAN-ML-REQ-086"
+      ],
+      "source_test_ids": [
+        "VAN-ML-AT-085-P",
+        "VAN-ML-AT-085-N",
+        "VAN-ML-AT-086-P",
+        "VAN-ML-AT-086-N"
+      ],
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Inventory-aware event market-making research laboratory"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-001",
+        "PRE-003",
+        "VAN-ML-PKT-021",
+        "VAN-ML-PKT-027",
+        "VAN-ML-PKT-042",
+        "VAN-ML-PKT-043",
+        "VAN-ML-PKT-044",
+        "VAN-ML-PKT-045",
+        "VAN-ML-PKT-046"
+      ],
+      "exit_contract": "Actual comparison/report pipelines with positive and deliberately no-edge fixtures; actual market claims require permitted untouched and prospective observations.; Fewer trades or reduced capital alone cannot be advertised as superior intelligence; insufficient independent events remains inconclusive.",
+      "full_deliverables": [
+        "Implement four frozen studies: pre-event risk, surprise interpretation, volatility and opportunity ranking, all paired against the same incumbent and exposure-matched/simple controls.",
+        "Include dependency-aware uncertainty, trial census, event counts, publication/acquisition/execution lag tests, shuffled/lagged controls, full-account accounting and operating costs.",
+        "Deliver prospective forecast sealing, outcome maturation and per-use decisions QUALIFIED/REJECTED/INCONCLUSIVE/UNAVAILABLE; useful context is not automatically trading edge."
+      ],
+      "id": "VAN-ML-PKT-047",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "packet_id": "VAN-PKT-073",
+      "receipt_required": true,
+      "receipt_scope": "EXACT_CAPABILITY_OUTCOMES",
+      "sequence": 73,
+      "source_origin": "FORECAST_REV1.1",
+      "source_parent_duties": [
+        "BE-016",
+        "BE-021",
+        "BE-022",
+        "BQ-001",
+        "BQ-002",
+        "BQ-003"
+      ],
+      "source_requirement_ids": [
+        "VAN-ML-REQ-087",
+        "VAN-ML-REQ-088"
+      ],
+      "source_test_ids": [
+        "VAN-ML-AT-087-P",
+        "VAN-ML-AT-087-N",
+        "VAN-ML-AT-088-P",
+        "VAN-ML-AT-088-N"
+      ],
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Prediction-market incremental-value and prospective study programme"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-013",
+        "BE-022",
+        "BE-028",
+        "BE-035",
+        "PRE-003",
+        "VAN-ML-PKT-021",
+        "VAN-ML-PKT-022",
+        "VAN-ML-PKT-023",
+        "VAN-ML-PKT-025",
+        "VAN-ML-PKT-027",
+        "VAN-ML-PKT-047"
+      ],
+      "exit_contract": "OD-37 automatic offline review/candidate/evaluation under bounded research grants; complete experiment lineage; exact owner promotion and admitted demotion; qualified evaluator dependency; no qualified candidate is a truthful result.",
+      "id": "BE-036",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "packet_id": "VAN-PKT-074",
+      "receipt_required": true,
+      "sequence": 74,
+      "source_origin": "OD-37_VAN-NX-072",
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Continuous governed strategy-development service and outcome reporting"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-001",
+        "PRE-003",
+        "VAN-ML-PKT-028",
+        "VAN-ML-PKT-029",
+        "VAN-ML-PKT-037",
+        "VAN-ML-PKT-038",
+        "VAN-ML-PKT-039",
+        "VAN-ML-PKT-040",
+        "VAN-ML-PKT-041",
+        "VAN-ML-PKT-042",
+        "VAN-ML-PKT-043",
+        "VAN-ML-PKT-044",
+        "VAN-ML-PKT-045",
+        "VAN-ML-PKT-046",
+        "VAN-ML-PKT-047"
+      ],
+      "exit_contract": "Headless real-service positive/recovery/error readbacks; all new requirements join independent packet032 closure and parent033/BG-001.; No background order enablement, licence purchase, new account, cloud bill, fixture-to-live promotion or false full-provider-ready claim.",
+      "full_deliverables": [
+        "Wire all data, probability, comparison, research-lab and evidence states into existing APIs, capability catalogue, alerts, logs and later-screen contracts; no early frontend.",
+        "Exercise Netcup/Oracle host profiles, endpoint changes, stream gaps, source revocation, disk/backlog pressure, restart, duplicate/unknown publication and schema rollback with no T0/provider network coupling.",
+        "Provide honest per-source integration state and no-procurement development path; all mandatory backend/parent obligations remain visible and source-specific real-data gates cannot be replaced by fixtures."
+      ],
+      "id": "VAN-ML-PKT-048",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "packet_id": "VAN-PKT-075",
+      "receipt_required": true,
+      "receipt_scope": "EXACT_CAPABILITY_OUTCOMES",
+      "sequence": 75,
+      "source_origin": "FORECAST_REV1.1",
+      "source_parent_duties": [
+        "BE-003",
+        "BE-015",
+        "BE-016",
+        "BE-017",
+        "BE-030",
+        "BE-031",
+        "BE-032",
+        "BE-033",
+        "BE-034",
+        "BQ-001",
+        "BQ-005",
+        "BQ-006"
+      ],
+      "source_requirement_ids": [
+        "VAN-ML-REQ-089",
+        "VAN-ML-REQ-090"
+      ],
+      "source_test_ids": [
+        "VAN-ML-AT-089-P",
+        "VAN-ML-AT-089-N",
+        "VAN-ML-AT-090-P",
+        "VAN-ML-AT-090-N"
+      ],
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Prediction-market consumers, operations and complete backend integration"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-004",
+        "BE-007",
+        "BE-012",
+        "BE-013",
+        "BE-017",
+        "BE-018",
+        "BE-019",
+        "BE-020",
+        "BE-021",
+        "BE-022",
+        "BE-023",
+        "BE-024",
+        "BE-025",
+        "BE-026",
+        "BE-027",
+        "BE-028",
+        "BE-029",
+        "BE-030",
+        "BE-031",
+        "BE-034",
+        "BE-036",
+        "PRE-003",
+        "VAN-ML-PKT-028",
+        "VAN-ML-PKT-048"
+      ],
+      "exit_contract": "publish complete versioned capability inventory; bind every action to input/state/error/authority/readback; expose display projections and navigable subjects. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. No required feature missing or hidden by unsupported label; every read/write contract has a genuine caller harness and known error set; catalog cannot send arbitrary frontend code",
+      "id": "BE-032",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "legacy_packet_id": "BF-PKT-036",
+      "packet_id": "VAN-PKT-076",
+      "receipt_required": true,
+      "sequence": 76,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Whole-product capability, action and UI-consumption catalog"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-032",
+        "PRE-003"
+      ],
+      "exit_contract": "build reproducible service artifacts; configure staging; restore backups; migrate schema; prove rollback; quotas; bounded queues; alert health. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. No production credentials in preparation; restart does not replay effects; resource pressure backpressure not data loss; rollback retains newer financial ledger safely",
+      "id": "BE-033",
+      "implementation_evidence": [],
+      "kind": "BACKEND",
+      "legacy_packet_id": "BF-PKT-037",
+      "packet_id": "VAN-PKT-077",
+      "receipt_required": true,
+      "sequence": 77,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 1,
+      "status": "NOT_STARTED",
+      "title": "Backend deployment, recovery, capacity and observability"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-001",
+        "BE-002",
+        "BE-003",
+        "BE-004",
+        "BE-005",
+        "BE-006",
+        "BE-007",
+        "BE-008",
+        "BE-009",
+        "BE-010",
+        "BE-011",
+        "BE-012",
+        "BE-013",
+        "BE-014",
+        "BE-015",
+        "BE-016",
+        "BE-017",
+        "BE-018",
+        "BE-019",
+        "BE-020",
+        "BE-021",
+        "BE-022",
+        "BE-023",
+        "BE-024",
+        "BE-025",
+        "BE-026",
+        "BE-027",
+        "BE-028",
+        "BE-029",
+        "BE-030",
+        "BE-031",
+        "BE-032",
+        "BE-033",
+        "BE-034",
+        "BE-035",
+        "BE-036",
+        "VAN-ML-PKT-004",
+        "VAN-ML-PKT-005",
+        "VAN-ML-PKT-006",
+        "VAN-ML-PKT-007",
+        "VAN-ML-PKT-008",
+        "VAN-ML-PKT-009",
+        "VAN-ML-PKT-010",
+        "VAN-ML-PKT-011",
+        "VAN-ML-PKT-012",
+        "VAN-ML-PKT-013",
+        "VAN-ML-PKT-014",
+        "VAN-ML-PKT-015",
+        "VAN-ML-PKT-016",
+        "VAN-ML-PKT-017",
+        "VAN-ML-PKT-018",
+        "VAN-ML-PKT-019",
+        "VAN-ML-PKT-020",
+        "VAN-ML-PKT-021",
+        "VAN-ML-PKT-022",
+        "VAN-ML-PKT-023",
+        "VAN-ML-PKT-024",
+        "VAN-ML-PKT-025",
+        "VAN-ML-PKT-026",
+        "VAN-ML-PKT-027",
+        "VAN-ML-PKT-028",
+        "VAN-ML-PKT-029",
+        "VAN-ML-PKT-037",
+        "VAN-ML-PKT-038",
+        "VAN-ML-PKT-039",
+        "VAN-ML-PKT-040",
+        "VAN-ML-PKT-041",
+        "VAN-ML-PKT-042",
+        "VAN-ML-PKT-043",
+        "VAN-ML-PKT-044",
+        "VAN-ML-PKT-045",
+        "VAN-ML-PKT-046",
+        "VAN-ML-PKT-047",
+        "VAN-ML-PKT-048"
+      ],
+      "exit_contract": "No required backend feature partial; verified provider or service outcomes, ledger state and fault-injection receipts; exact source/artifact/config identity. Headless harness is not new UI. No synthetic success.",
+      "id": "BQ-001",
+      "implementation_evidence": [],
+      "kind": "BACKEND_VERIFICATION",
+      "legacy_packet_id": "BF-PKT-038",
+      "packet_id": "VAN-PKT-078",
+      "receipt_required": true,
+      "sequence": 78,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 2,
+      "status": "NOT_STARTED",
+      "title": "Trade/account/market/risk/execution headless end-to-end"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-001",
+        "BE-002",
+        "BE-003",
+        "BE-004",
+        "BE-005",
+        "BE-006",
+        "BE-007",
+        "BE-008",
+        "BE-009",
+        "BE-010",
+        "BE-011",
+        "BE-012",
+        "BE-013",
+        "BE-014",
+        "BE-015",
+        "BE-016",
+        "BE-017",
+        "BE-018",
+        "BE-019",
+        "BE-020",
+        "BE-021",
+        "BE-022",
+        "BE-023",
+        "BE-024",
+        "BE-025",
+        "BE-026",
+        "BE-027",
+        "BE-028",
+        "BE-029",
+        "BE-030",
+        "BE-031",
+        "BE-032",
+        "BE-033",
+        "BE-034",
+        "BE-035",
+        "BE-036",
+        "VAN-ML-PKT-004",
+        "VAN-ML-PKT-005",
+        "VAN-ML-PKT-006",
+        "VAN-ML-PKT-007",
+        "VAN-ML-PKT-008",
+        "VAN-ML-PKT-009",
+        "VAN-ML-PKT-010",
+        "VAN-ML-PKT-011",
+        "VAN-ML-PKT-012",
+        "VAN-ML-PKT-013",
+        "VAN-ML-PKT-014",
+        "VAN-ML-PKT-015",
+        "VAN-ML-PKT-016",
+        "VAN-ML-PKT-017",
+        "VAN-ML-PKT-018",
+        "VAN-ML-PKT-019",
+        "VAN-ML-PKT-020",
+        "VAN-ML-PKT-021",
+        "VAN-ML-PKT-022",
+        "VAN-ML-PKT-023",
+        "VAN-ML-PKT-024",
+        "VAN-ML-PKT-025",
+        "VAN-ML-PKT-026",
+        "VAN-ML-PKT-027",
+        "VAN-ML-PKT-028",
+        "VAN-ML-PKT-029",
+        "VAN-ML-PKT-037",
+        "VAN-ML-PKT-038",
+        "VAN-ML-PKT-039",
+        "VAN-ML-PKT-040",
+        "VAN-ML-PKT-041",
+        "VAN-ML-PKT-042",
+        "VAN-ML-PKT-043",
+        "VAN-ML-PKT-044",
+        "VAN-ML-PKT-045",
+        "VAN-ML-PKT-046",
+        "VAN-ML-PKT-047",
+        "VAN-ML-PKT-048"
+      ],
+      "exit_contract": "No required backend feature partial; verified provider or service outcomes, ledger state and fault-injection receipts; exact source/artifact/config identity. Headless harness is not new UI. No synthetic success.",
+      "id": "BQ-002",
+      "implementation_evidence": [],
+      "kind": "BACKEND_VERIFICATION",
+      "legacy_packet_id": "BF-PKT-039",
+      "packet_id": "VAN-PKT-079",
+      "receipt_required": true,
+      "sequence": 79,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 2,
+      "status": "NOT_STARTED",
+      "title": "Provider accounts/funds/settlement and concurrent risk qualification"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-001",
+        "BE-002",
+        "BE-003",
+        "BE-004",
+        "BE-005",
+        "BE-006",
+        "BE-007",
+        "BE-008",
+        "BE-009",
+        "BE-010",
+        "BE-011",
+        "BE-012",
+        "BE-013",
+        "BE-014",
+        "BE-015",
+        "BE-016",
+        "BE-017",
+        "BE-018",
+        "BE-019",
+        "BE-020",
+        "BE-021",
+        "BE-022",
+        "BE-023",
+        "BE-024",
+        "BE-025",
+        "BE-026",
+        "BE-027",
+        "BE-028",
+        "BE-029",
+        "BE-030",
+        "BE-031",
+        "BE-032",
+        "BE-033",
+        "BE-034",
+        "BE-035",
+        "BE-036",
+        "VAN-ML-PKT-004",
+        "VAN-ML-PKT-005",
+        "VAN-ML-PKT-006",
+        "VAN-ML-PKT-007",
+        "VAN-ML-PKT-008",
+        "VAN-ML-PKT-009",
+        "VAN-ML-PKT-010",
+        "VAN-ML-PKT-011",
+        "VAN-ML-PKT-012",
+        "VAN-ML-PKT-013",
+        "VAN-ML-PKT-014",
+        "VAN-ML-PKT-015",
+        "VAN-ML-PKT-016",
+        "VAN-ML-PKT-017",
+        "VAN-ML-PKT-018",
+        "VAN-ML-PKT-019",
+        "VAN-ML-PKT-020",
+        "VAN-ML-PKT-021",
+        "VAN-ML-PKT-022",
+        "VAN-ML-PKT-023",
+        "VAN-ML-PKT-024",
+        "VAN-ML-PKT-025",
+        "VAN-ML-PKT-026",
+        "VAN-ML-PKT-027",
+        "VAN-ML-PKT-028",
+        "VAN-ML-PKT-029",
+        "VAN-ML-PKT-037",
+        "VAN-ML-PKT-038",
+        "VAN-ML-PKT-039",
+        "VAN-ML-PKT-040",
+        "VAN-ML-PKT-041",
+        "VAN-ML-PKT-042",
+        "VAN-ML-PKT-043",
+        "VAN-ML-PKT-044",
+        "VAN-ML-PKT-045",
+        "VAN-ML-PKT-046",
+        "VAN-ML-PKT-047",
+        "VAN-ML-PKT-048"
+      ],
+      "exit_contract": "No required backend feature partial; verified provider or service outcomes, ledger state and fault-injection receipts; exact source/artifact/config identity. Headless harness is not new UI. No synthetic success.",
+      "id": "BQ-003",
+      "implementation_evidence": [],
+      "kind": "BACKEND_VERIFICATION",
+      "legacy_packet_id": "BF-PKT-040",
+      "packet_id": "VAN-PKT-080",
+      "receipt_required": true,
+      "sequence": 80,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 2,
+      "status": "NOT_STARTED",
+      "title": "News/history/armed grants/chart-observation headless intelligence"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-001",
+        "BE-002",
+        "BE-003",
+        "BE-004",
+        "BE-005",
+        "BE-006",
+        "BE-007",
+        "BE-008",
+        "BE-009",
+        "BE-010",
+        "BE-011",
+        "BE-012",
+        "BE-013",
+        "BE-014",
+        "BE-015",
+        "BE-016",
+        "BE-017",
+        "BE-018",
+        "BE-019",
+        "BE-020",
+        "BE-021",
+        "BE-022",
+        "BE-023",
+        "BE-024",
+        "BE-025",
+        "BE-026",
+        "BE-027",
+        "BE-028",
+        "BE-029",
+        "BE-030",
+        "BE-031",
+        "BE-032",
+        "BE-033",
+        "BE-034",
+        "BE-035",
+        "BE-036",
+        "VAN-ML-PKT-004",
+        "VAN-ML-PKT-005",
+        "VAN-ML-PKT-006",
+        "VAN-ML-PKT-007",
+        "VAN-ML-PKT-008",
+        "VAN-ML-PKT-009",
+        "VAN-ML-PKT-010",
+        "VAN-ML-PKT-011",
+        "VAN-ML-PKT-012",
+        "VAN-ML-PKT-013",
+        "VAN-ML-PKT-014",
+        "VAN-ML-PKT-015",
+        "VAN-ML-PKT-016",
+        "VAN-ML-PKT-017",
+        "VAN-ML-PKT-018",
+        "VAN-ML-PKT-019",
+        "VAN-ML-PKT-020",
+        "VAN-ML-PKT-021",
+        "VAN-ML-PKT-022",
+        "VAN-ML-PKT-023",
+        "VAN-ML-PKT-024",
+        "VAN-ML-PKT-025",
+        "VAN-ML-PKT-026",
+        "VAN-ML-PKT-027",
+        "VAN-ML-PKT-028",
+        "VAN-ML-PKT-029",
+        "VAN-ML-PKT-037",
+        "VAN-ML-PKT-038",
+        "VAN-ML-PKT-039",
+        "VAN-ML-PKT-040",
+        "VAN-ML-PKT-041",
+        "VAN-ML-PKT-042",
+        "VAN-ML-PKT-043",
+        "VAN-ML-PKT-044",
+        "VAN-ML-PKT-045",
+        "VAN-ML-PKT-046",
+        "VAN-ML-PKT-047",
+        "VAN-ML-PKT-048"
+      ],
+      "exit_contract": "No required backend feature partial; verified provider or service outcomes, ledger state and fault-injection receipts; exact source/artifact/config identity. Headless harness is not new UI. No synthetic success.",
+      "id": "BQ-004",
+      "implementation_evidence": [],
+      "kind": "BACKEND_VERIFICATION",
+      "legacy_packet_id": "BF-PKT-041",
+      "packet_id": "VAN-PKT-081",
+      "receipt_required": true,
+      "sequence": 81,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 2,
+      "status": "NOT_STARTED",
+      "title": "Work/agents/Muse/browser/voice/memory/automation service integration"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-001",
+        "BE-002",
+        "BE-003",
+        "BE-004",
+        "BE-005",
+        "BE-006",
+        "BE-007",
+        "BE-008",
+        "BE-009",
+        "BE-010",
+        "BE-011",
+        "BE-012",
+        "BE-013",
+        "BE-014",
+        "BE-015",
+        "BE-016",
+        "BE-017",
+        "BE-018",
+        "BE-019",
+        "BE-020",
+        "BE-021",
+        "BE-022",
+        "BE-023",
+        "BE-024",
+        "BE-025",
+        "BE-026",
+        "BE-027",
+        "BE-028",
+        "BE-029",
+        "BE-030",
+        "BE-031",
+        "BE-032",
+        "BE-033",
+        "BE-034",
+        "BE-035",
+        "BE-036",
+        "VAN-ML-PKT-004",
+        "VAN-ML-PKT-005",
+        "VAN-ML-PKT-006",
+        "VAN-ML-PKT-007",
+        "VAN-ML-PKT-008",
+        "VAN-ML-PKT-009",
+        "VAN-ML-PKT-010",
+        "VAN-ML-PKT-011",
+        "VAN-ML-PKT-012",
+        "VAN-ML-PKT-013",
+        "VAN-ML-PKT-014",
+        "VAN-ML-PKT-015",
+        "VAN-ML-PKT-016",
+        "VAN-ML-PKT-017",
+        "VAN-ML-PKT-018",
+        "VAN-ML-PKT-019",
+        "VAN-ML-PKT-020",
+        "VAN-ML-PKT-021",
+        "VAN-ML-PKT-022",
+        "VAN-ML-PKT-023",
+        "VAN-ML-PKT-024",
+        "VAN-ML-PKT-025",
+        "VAN-ML-PKT-026",
+        "VAN-ML-PKT-027",
+        "VAN-ML-PKT-028",
+        "VAN-ML-PKT-029",
+        "VAN-ML-PKT-037",
+        "VAN-ML-PKT-038",
+        "VAN-ML-PKT-039",
+        "VAN-ML-PKT-040",
+        "VAN-ML-PKT-041",
+        "VAN-ML-PKT-042",
+        "VAN-ML-PKT-043",
+        "VAN-ML-PKT-044",
+        "VAN-ML-PKT-045",
+        "VAN-ML-PKT-046",
+        "VAN-ML-PKT-047",
+        "VAN-ML-PKT-048"
+      ],
+      "exit_contract": "No required backend feature partial; verified provider or service outcomes, ledger state and fault-injection receipts; exact source/artifact/config identity. Headless harness is not new UI. No synthetic success.",
+      "id": "BQ-005",
+      "implementation_evidence": [],
+      "kind": "BACKEND_VERIFICATION",
+      "legacy_packet_id": "BF-PKT-042",
+      "packet_id": "VAN-PKT-082",
+      "receipt_required": true,
+      "sequence": 82,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 2,
+      "status": "NOT_STARTED",
+      "title": "Backend privacy, recovery, capacity, restart and source fault injection"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-001",
+        "PRE-003",
+        "VAN-ML-PKT-009",
+        "VAN-ML-PKT-010",
+        "VAN-ML-PKT-020",
+        "VAN-ML-PKT-021",
+        "VAN-ML-PKT-025",
+        "VAN-ML-PKT-026",
+        "VAN-ML-PKT-027",
+        "VAN-ML-PKT-047",
+        "VAN-ML-PKT-048"
+      ],
+      "exit_contract": "Positive, negative and no-edge reporting pathways all exercised; No raw accuracy, favorable chart, in-sample fit or historic literature metric certifies VAN alpha",
+      "full_deliverables": [
+        "Execute matched baseline/ablation/cost-stress/rank/return/volatility/calibration studies",
+        "Build source-bound certificates from actual outputs, effective sample sizes and uncertainty; report rejected/inconclusive cases honestly",
+        "Independently reproduce selected results and attach immutable artifact/dataset/config evidence"
+      ],
+      "id": "VAN-ML-PKT-030",
+      "implementation_evidence": [],
+      "kind": "BACKEND_VERIFICATION",
+      "packet_id": "VAN-PKT-083",
+      "receipt_required": true,
+      "receipt_scope": "EXACT_CAPABILITY_OUTCOMES",
+      "sequence": 83,
+      "source_origin": "FORECAST_REV1.1",
+      "source_parent_duties": [
+        "BQ-001",
+        "BQ-002",
+        "BQ-003"
+      ],
+      "source_requirement_ids": [
+        "VAN-ML-REQ-054"
+      ],
+      "source_test_ids": [
+        "VAN-ML-AT-054-P",
+        "VAN-ML-AT-054-N"
+      ],
+      "stage": 2,
+      "status": "NOT_STARTED",
+      "title": "Reproducible forecast and economic qualification reports"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-001",
+        "PRE-003",
+        "VAN-ML-PKT-028",
+        "VAN-ML-PKT-029",
+        "VAN-ML-PKT-030"
+      ],
+      "exit_contract": "Same gateway/service path supplies genuine scoped receipts before BG; A fixture-approved model cannot enter a live binding; real-paper evidence is not booked as live profit",
+      "full_deliverables": [
+        "Exercise real incoming-data shadow recording and full sandbox train-to-inference-to-arbiter-to-paper lifecycle",
+        "Test trusted sandbox admission, revocation, fallback and rollbacks without live financial authority",
+        "Implement continuing prospective economic review windows and no-edge terminal decisions",
+        "Include prediction-market per-source integration and frozen prospective expectations; source-unavailable cannot be reported as an actual Kalshi data qualification."
+      ],
+      "id": "VAN-ML-PKT-031",
+      "implementation_evidence": [],
+      "kind": "BACKEND_VERIFICATION",
+      "packet_id": "VAN-PKT-084",
+      "receipt_required": true,
+      "receipt_scope": "EXACT_CAPABILITY_OUTCOMES",
+      "sequence": 84,
+      "source_origin": "FORECAST_REV1.1",
+      "source_parent_duties": [
+        "BQ-001",
+        "BQ-002",
+        "BQ-003",
+        "BQ-005"
+      ],
+      "source_requirement_ids": [
+        "VAN-ML-REQ-055"
+      ],
+      "source_test_ids": [
+        "VAN-ML-AT-055-P",
+        "VAN-ML-AT-055-N"
+      ],
+      "stage": 2,
+      "status": "NOT_STARTED",
+      "title": "Prospective shadow and controlled sandbox admission"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-035",
+        "BE-036",
+        "VAN-ML-PKT-030",
+        "VAN-ML-PKT-031"
+      ],
+      "exit_contract": "Prove each source defect fails on its original counterexample and passes only on admitted correction; compare retained source suites and independent oracles; all runtime-policy activation fields bind the approved mandate; skip differences explained.",
+      "id": "BQ-007",
+      "implementation_evidence": [],
+      "kind": "BACKEND_VERIFICATION",
+      "packet_id": "VAN-PKT-085",
+      "receipt_required": true,
+      "sequence": 85,
+      "source_origin": "PR101_AND_RESEARCH_CORRECTION",
+      "stage": 2,
+      "status": "NOT_STARTED",
+      "title": "Independent Opus remediation, evaluator and signed-risk regression qualification"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-001",
+        "PRE-003",
+        "VAN-ML-PKT-004",
+        "VAN-ML-PKT-005",
+        "VAN-ML-PKT-006",
+        "VAN-ML-PKT-007",
+        "VAN-ML-PKT-008",
+        "VAN-ML-PKT-009",
+        "VAN-ML-PKT-010",
+        "VAN-ML-PKT-011",
+        "VAN-ML-PKT-012",
+        "VAN-ML-PKT-013",
+        "VAN-ML-PKT-014",
+        "VAN-ML-PKT-015",
+        "VAN-ML-PKT-016",
+        "VAN-ML-PKT-017",
+        "VAN-ML-PKT-018",
+        "VAN-ML-PKT-019",
+        "VAN-ML-PKT-020",
+        "VAN-ML-PKT-021",
+        "VAN-ML-PKT-022",
+        "VAN-ML-PKT-023",
+        "VAN-ML-PKT-024",
+        "VAN-ML-PKT-025",
+        "VAN-ML-PKT-026",
+        "VAN-ML-PKT-027",
+        "VAN-ML-PKT-028",
+        "VAN-ML-PKT-029",
+        "VAN-ML-PKT-030",
+        "VAN-ML-PKT-031",
+        "VAN-ML-PKT-037",
+        "VAN-ML-PKT-038",
+        "VAN-ML-PKT-039",
+        "VAN-ML-PKT-040",
+        "VAN-ML-PKT-041",
+        "VAN-ML-PKT-042",
+        "VAN-ML-PKT-043",
+        "VAN-ML-PKT-044",
+        "VAN-ML-PKT-045",
+        "VAN-ML-PKT-046",
+        "VAN-ML-PKT-047",
+        "VAN-ML-PKT-048"
+      ],
+      "exit_contract": "All backend requirements/tests trace to source-bound results, not this document checker; Economic rejection is distinct from missing software; false-complete mutation must fail",
+      "full_deliverables": [
+        "Audit every requirement, real provider/model integration, registered consumer and failure/recovery record",
+        "Verify source/runtime identity, no unclosed mandatory implementation gaps and all selected model plugins operational",
+        "Issue independent additive technical closure only through the genuine trusted authority",
+        "Include all12 prediction-market backend packets, all30 added requirements, research labs, real consumer paths and truthful source-specific limitations."
+      ],
+      "id": "VAN-ML-PKT-032",
+      "implementation_evidence": [],
+      "kind": "BACKEND_VERIFICATION",
+      "packet_id": "VAN-PKT-086",
+      "receipt_required": true,
+      "receipt_scope": "COMPONENT_QUALIFICATION_ONLY_NOT_GLOBAL_GATE",
+      "sequence": 86,
+      "source_origin": "FORECAST_REV1.1",
+      "source_parent_duties": [
+        "BQ-006"
+      ],
+      "source_requirement_ids": [
+        "VAN-ML-REQ-056"
+      ],
+      "source_test_ids": [
+        "VAN-ML-AT-056-P",
+        "VAN-ML-AT-056-N"
+      ],
+      "stage": 2,
+      "status": "NOT_STARTED",
+      "title": "Independent additive backend closure"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BQ-001",
+        "BQ-002",
+        "BQ-003",
+        "BQ-004",
+        "BQ-005",
+        "BQ-007",
+        "VAN-ML-PKT-032"
+      ],
+      "exit_contract": "No required backend feature partial; verified provider or service outcomes, ledger state and fault-injection receipts; exact source/artifact/config identity. Headless harness is not new UI. No synthetic success.",
+      "id": "BQ-006",
+      "implementation_evidence": [],
+      "kind": "BACKEND_VERIFICATION",
+      "legacy_packet_id": "BF-PKT-043",
+      "packet_id": "VAN-PKT-087",
+      "receipt_required": true,
+      "sequence": 87,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 2,
+      "status": "NOT_STARTED",
+      "title": "Whole-product backend feature/action/caller and independent Zuul audit"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BE-001",
+        "BE-002",
+        "BE-003",
+        "BE-004",
+        "BE-005",
+        "BE-006",
+        "BE-007",
+        "BE-008",
+        "BE-009",
+        "BE-010",
+        "BE-011",
+        "BE-012",
+        "BE-013",
+        "BE-014",
+        "BE-015",
+        "BE-016",
+        "BE-017",
+        "BE-018",
+        "BE-019",
+        "BE-020",
+        "BE-021",
+        "BE-022",
+        "BE-023",
+        "BE-024",
+        "BE-025",
+        "BE-026",
+        "BE-027",
+        "BE-028",
+        "BE-029",
+        "BE-030",
+        "BE-031",
+        "BE-032",
+        "BE-033",
+        "BE-034",
+        "BE-035",
+        "BE-036",
+        "BQ-001",
+        "BQ-002",
+        "BQ-003",
+        "BQ-004",
+        "BQ-005",
+        "BQ-006",
+        "BQ-007",
+        "VAN-ML-PKT-004",
+        "VAN-ML-PKT-005",
+        "VAN-ML-PKT-006",
+        "VAN-ML-PKT-007",
+        "VAN-ML-PKT-008",
+        "VAN-ML-PKT-009",
+        "VAN-ML-PKT-010",
+        "VAN-ML-PKT-011",
+        "VAN-ML-PKT-012",
+        "VAN-ML-PKT-013",
+        "VAN-ML-PKT-014",
+        "VAN-ML-PKT-015",
+        "VAN-ML-PKT-016",
+        "VAN-ML-PKT-017",
+        "VAN-ML-PKT-018",
+        "VAN-ML-PKT-019",
+        "VAN-ML-PKT-020",
+        "VAN-ML-PKT-021",
+        "VAN-ML-PKT-022",
+        "VAN-ML-PKT-023",
+        "VAN-ML-PKT-024",
+        "VAN-ML-PKT-025",
+        "VAN-ML-PKT-026",
+        "VAN-ML-PKT-027",
+        "VAN-ML-PKT-028",
+        "VAN-ML-PKT-029",
+        "VAN-ML-PKT-030",
+        "VAN-ML-PKT-031",
+        "VAN-ML-PKT-032",
+        "VAN-ML-PKT-037",
+        "VAN-ML-PKT-038",
+        "VAN-ML-PKT-039",
+        "VAN-ML-PKT-040",
+        "VAN-ML-PKT-041",
+        "VAN-ML-PKT-042",
+        "VAN-ML-PKT-043",
+        "VAN-ML-PKT-044",
+        "VAN-ML-PKT-045",
+        "VAN-ML-PKT-046",
+        "VAN-ML-PKT-047",
+        "VAN-ML-PKT-048"
+      ],
+      "exit_contract": "Independent BACKEND_COMPLETE certificate binds every mandatory capability and service receipt, closed backend gaps, published consumer contract bundle and compatibility baseline; no partial or unverified required backend accepted.",
+      "id": "BG-001",
+      "implementation_evidence": [],
+      "kind": "BACKEND_GATE",
+      "legacy_packet_id": "BF-PKT-044",
+      "merged_obligations": [
+        {
+          "deliverables": [
+            "Merge additive evidence and catalogue into parent units and regenerate exact whole-product scope/contract hashes",
+            "Require every original parent backend obligation plus this additive before parent BG-001",
+            "Produce frontend consumption handoff; do not self-issue the global certificate",
+            "Apply the supplied prediction-market parent delta under actual independent admission; preserve VAN-NX-036, OD-14, D1–D7 and original parent IDs."
+          ],
+          "exit_evidence": [
+            "No additive-only receipt can unlock parent UX",
+            "Existing backend/parent requirement removal, signature substitution or affected stale receipt blocks entry"
+          ],
+          "source_packet": "VAN-ML-PKT-033"
+        }
+      ],
+      "packet_id": "VAN-PKT-088",
+      "receipt_required": true,
+      "sequence": 88,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 3,
+      "status": "NOT_STARTED",
+      "title": "Global Backend Complete / Frontend Entry Certificate"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BG-001"
+      ],
+      "exit_contract": "Consume complete capability catalog and every context/action; review whole-app route and progressive disclosure, no five-flow scope ceiling.",
+      "id": "UX-001",
+      "implementation_evidence": [],
+      "kind": "FRONTEND_DESIGN",
+      "legacy_packet_id": "BF-PKT-045",
+      "packet_id": "VAN-PKT-089",
+      "receipt_required": true,
+      "sequence": 89,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 4,
+      "status": "NOT_STARTED",
+      "title": "Full-product information architecture from the complete backend"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BG-001",
+        "UX-001"
+      ],
+      "exit_contract": "Owner reviews native prototypes in both themes; approved tokens/geometry/material/motion/accessibility; no old UI import or regenerated replacement of locked images.",
+      "id": "UX-002",
+      "implementation_evidence": [],
+      "kind": "FRONTEND_DESIGN",
+      "legacy_packet_id": "BF-PKT-046",
+      "packet_id": "VAN-PKT-090",
+      "receipt_required": true,
+      "sequence": 90,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 4,
+      "status": "NOT_STARTED",
+      "title": "Locked dark/light native material and component goldens"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BG-001",
+        "UX-001",
+        "UX-002"
+      ],
+      "exit_contract": "Each retained/additive surface has complete backend fields/actions/states, matching design family, dark/light acceptance and physical test plan; no action omitted for visual simplicity.",
+      "id": "UX-003",
+      "implementation_evidence": [],
+      "kind": "FRONTEND_DESIGN",
+      "legacy_packet_id": "BF-PKT-047",
+      "packet_id": "VAN-PKT-091",
+      "receipt_required": true,
+      "sequence": 91,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 4,
+      "status": "NOT_STARTED",
+      "title": "Every-screen and action design contract acceptance"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BG-001",
+        "UX-003"
+      ],
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "id": "FE-001",
+      "implementation_evidence": [],
+      "kind": "FRONTEND",
+      "legacy_packet_id": "BF-PKT-048",
+      "packet_id": "VAN-PKT-092",
+      "receipt_required": true,
+      "sequence": 92,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 5,
+      "status": "NOT_STARTED",
+      "title": "Native typed ports, reactive client store, offline cache and device plumbing"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001"
+      ],
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "id": "FE-002",
+      "implementation_evidence": [],
+      "kind": "FRONTEND",
+      "legacy_packet_id": "BF-PKT-049",
+      "packet_id": "VAN-PKT-093",
+      "receipt_required": true,
+      "sequence": 93,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 5,
+      "status": "NOT_STARTED",
+      "title": "Tactile Spatial components, tokens, isolation and accessibility semantics"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002"
+      ],
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "id": "FE-003",
+      "implementation_evidence": [],
+      "kind": "FRONTEND",
+      "legacy_packet_id": "BF-PKT-050",
+      "packet_id": "VAN-PKT-094",
+      "receipt_required": true,
+      "sequence": 94,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 5,
+      "status": "NOT_STARTED",
+      "title": "Adaptive shell, deep links, shared intakes and full navigation"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "id": "FE-004",
+      "implementation_evidence": [],
+      "kind": "FRONTEND",
+      "legacy_packet_id": "BF-PKT-051",
+      "packet_id": "VAN-PKT-095",
+      "receipt_required": true,
+      "sequence": 95,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 5,
+      "status": "NOT_STARTED",
+      "title": "Home, metallic orb, compact Quick Hub and Attention"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "id": "FE-005",
+      "implementation_evidence": [],
+      "kind": "FRONTEND",
+      "legacy_packet_id": "BF-PKT-052",
+      "packet_id": "VAN-PKT-096",
+      "receipt_required": true,
+      "sequence": 96,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 5,
+      "status": "NOT_STARTED",
+      "title": "Floating VAN, gestures, dock/workboards and lifecycle"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "id": "FE-006",
+      "implementation_evidence": [],
+      "kind": "FRONTEND",
+      "legacy_packet_id": "BF-PKT-053",
+      "packet_id": "VAN-PKT-097",
+      "receipt_required": true,
+      "sequence": 97,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 5,
+      "status": "NOT_STARTED",
+      "title": "Trading Home, Markets, Watchlists, screener and Alerts"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "id": "FE-007",
+      "implementation_evidence": [],
+      "kind": "FRONTEND",
+      "legacy_packet_id": "BF-PKT-054",
+      "packet_id": "VAN-PKT-098",
+      "receipt_required": true,
+      "sequence": 98,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 5,
+      "status": "NOT_STARTED",
+      "title": "Native previews and professional chart renderer/bridge"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003",
+        "FE-007"
+      ],
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "id": "FE-008",
+      "implementation_evidence": [],
+      "kind": "FRONTEND",
+      "legacy_packet_id": "BF-PKT-055",
+      "packet_id": "VAN-PKT-099",
+      "receipt_required": true,
+      "sequence": 99,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 5,
+      "status": "NOT_STARTED",
+      "title": "Indicators, drawings, workspaces, depth and replay controls"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "id": "FE-009",
+      "implementation_evidence": [],
+      "kind": "FRONTEND",
+      "legacy_packet_id": "BF-PKT-056",
+      "packet_id": "VAN-PKT-100",
+      "receipt_required": true,
+      "sequence": 100,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 5,
+      "status": "NOT_STARTED",
+      "title": "Orders, manual review, positions, protection and handover"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "id": "FE-010",
+      "implementation_evidence": [],
+      "kind": "FRONTEND",
+      "legacy_packet_id": "BF-PKT-057",
+      "packet_id": "VAN-PKT-101",
+      "receipt_required": true,
+      "sequence": 101,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 5,
+      "status": "NOT_STARTED",
+      "title": "Accounts and Funds, provider-hosted flows and receipts"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "id": "FE-011",
+      "implementation_evidence": [],
+      "kind": "FRONTEND",
+      "legacy_packet_id": "BF-PKT-058",
+      "packet_id": "VAN-PKT-102",
+      "receipt_required": true,
+      "sequence": 102,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 5,
+      "status": "NOT_STARTED",
+      "title": "Portfolio, history, statements, TCA and Risk Command Centre"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "id": "FE-012",
+      "implementation_evidence": [],
+      "kind": "FRONTEND",
+      "legacy_packet_id": "BF-PKT-059",
+      "packet_id": "VAN-PKT-103",
+      "receipt_required": true,
+      "sequence": 103,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 5,
+      "status": "NOT_STARTED",
+      "title": "Strategies, trading modes and evidence/promotion views"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "id": "FE-013",
+      "implementation_evidence": [],
+      "kind": "FRONTEND",
+      "legacy_packet_id": "BF-PKT-060",
+      "packet_id": "VAN-PKT-104",
+      "receipt_required": true,
+      "sequence": 104,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 5,
+      "status": "NOT_STARTED",
+      "title": "News, calendar, history profiles and armed news ticket views"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "id": "FE-014",
+      "implementation_evidence": [],
+      "kind": "FRONTEND",
+      "legacy_packet_id": "BF-PKT-061",
+      "packet_id": "VAN-PKT-105",
+      "receipt_required": true,
+      "sequence": 105,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 5,
+      "status": "NOT_STARTED",
+      "title": "Analyst, chart observations, behaviour diagnostics and research"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "id": "FE-015",
+      "implementation_evidence": [],
+      "kind": "FRONTEND",
+      "legacy_packet_id": "BF-PKT-062",
+      "packet_id": "VAN-PKT-106",
+      "receipt_required": true,
+      "sequence": 106,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 5,
+      "status": "NOT_STARTED",
+      "title": "Work, Projects, tasks and live dependency diagrams"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "id": "FE-016",
+      "implementation_evidence": [],
+      "kind": "FRONTEND",
+      "legacy_packet_id": "BF-PKT-063",
+      "packet_id": "VAN-PKT-107",
+      "receipt_required": true,
+      "sequence": 107,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 5,
+      "status": "NOT_STARTED",
+      "title": "Agents, Muse/Hermes interactions and handoff maps"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "id": "FE-017",
+      "implementation_evidence": [],
+      "kind": "FRONTEND",
+      "legacy_packet_id": "BF-PKT-064",
+      "packet_id": "VAN-PKT-108",
+      "receipt_required": true,
+      "sequence": 108,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 5,
+      "status": "NOT_STARTED",
+      "title": "Browser/remote sessions, files, share and provider outcome views"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "id": "FE-018",
+      "implementation_evidence": [],
+      "kind": "FRONTEND",
+      "legacy_packet_id": "BF-PKT-065",
+      "packet_id": "VAN-PKT-109",
+      "receipt_required": true,
+      "sequence": 109,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 5,
+      "status": "NOT_STARTED",
+      "title": "ARTEMIS, development/studio, CI/security and evidence workspaces"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "id": "FE-019",
+      "implementation_evidence": [],
+      "kind": "FRONTEND",
+      "legacy_packet_id": "BF-PKT-066",
+      "packet_id": "VAN-PKT-110",
+      "receipt_required": true,
+      "sequence": 110,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 5,
+      "status": "NOT_STARTED",
+      "title": "Memory, citations, privacy/erasure, learning goals and adaptations"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "id": "FE-020",
+      "implementation_evidence": [],
+      "kind": "FRONTEND",
+      "legacy_packet_id": "BF-PKT-067",
+      "packet_id": "VAN-PKT-111",
+      "receipt_required": true,
+      "sequence": 111,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 5,
+      "status": "NOT_STARTED",
+      "title": "Automation, reminders, standing permissions and schedules"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "id": "FE-021",
+      "implementation_evidence": [],
+      "kind": "FRONTEND",
+      "legacy_packet_id": "BF-PKT-068",
+      "packet_id": "VAN-PKT-112",
+      "receipt_required": true,
+      "sequence": 112,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 5,
+      "status": "NOT_STARTED",
+      "title": "Conversation, voice and speaker consent workflows"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "id": "FE-022",
+      "implementation_evidence": [],
+      "kind": "FRONTEND",
+      "legacy_packet_id": "BF-PKT-069",
+      "packet_id": "VAN-PKT-113",
+      "receipt_required": true,
+      "sequence": 113,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 5,
+      "status": "NOT_STARTED",
+      "title": "Connected, settings, device provisioning, notifications and diagnostics"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003",
+        "FE-012",
+        "FE-013",
+        "FE-014"
+      ],
+      "exit_contract": "All model/research contexts, candidate registry, trial reports, source health and calibrated expectation views consume the complete backend catalogue; no research view can grant execution.",
+      "id": "FE-023",
+      "implementation_evidence": [],
+      "kind": "FRONTEND",
+      "merged_obligations": [
+        {
+          "deliverables": [
+            "After current BG and parent UX acceptance, implement every mapped projection/control in the locked two-theme design",
+            "Deliver context-specific uncertainty, source age, model/strategy distinction, experiment and review flows",
+            "No dashboards on Home by default, no mobile training or broker authority in charts",
+            "Complete News/Event context, probability/source-age, frozen expectation, research payoff/quote diagnostics and per-use evidence readbacks without enabling live event-contract trading."
+          ],
+          "exit_evidence": [
+            "Both-theme/state/action parity, accessibility, lifecycle and offline restoration",
+            "Model version changes and stale bands never leave an enabled misleading action"
+          ],
+          "source_packet": "VAN-ML-PKT-034"
+        }
+      ],
+      "packet_id": "VAN-PKT-114",
+      "receipt_required": true,
+      "sequence": 114,
+      "source_origin": "FORECAST_CHILD_034_AND_OD37",
+      "stage": 5,
+      "status": "NOT_STARTED",
+      "title": "Native model, strategy-development and prediction-research views"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "FE-001",
+        "FE-002",
+        "FE-003",
+        "FE-004",
+        "FE-005",
+        "FE-006",
+        "FE-007",
+        "FE-008",
+        "FE-009",
+        "FE-010",
+        "FE-011",
+        "FE-012",
+        "FE-013",
+        "FE-014",
+        "FE-015",
+        "FE-016",
+        "FE-017",
+        "FE-018",
+        "FE-019",
+        "FE-020",
+        "FE-021",
+        "FE-022",
+        "FE-023"
+      ],
+      "exit_contract": "Every applicable acceptance receipt current and exact-source; independently reviewed; actual S24 where required. No feature removed or shortened to make tests pass.",
+      "id": "QA-001",
+      "implementation_evidence": [],
+      "kind": "FINAL_QUALIFICATION",
+      "legacy_packet_id": "BF-PKT-070",
+      "packet_id": "VAN-PKT-115",
+      "receipt_required": true,
+      "sequence": 115,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 6,
+      "status": "NOT_STARTED",
+      "title": "All-feature/surface/action parity and no-loss reverse coverage"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "FE-001",
+        "FE-002",
+        "FE-003",
+        "FE-004",
+        "FE-005",
+        "FE-006",
+        "FE-007",
+        "FE-008",
+        "FE-009",
+        "FE-010",
+        "FE-011",
+        "FE-012",
+        "FE-013",
+        "FE-014",
+        "FE-015",
+        "FE-016",
+        "FE-017",
+        "FE-018",
+        "FE-019",
+        "FE-020",
+        "FE-021",
+        "FE-022",
+        "FE-023"
+      ],
+      "exit_contract": "Every applicable acceptance receipt current and exact-source; independently reviewed; actual S24 where required. No feature removed or shortened to make tests pass.",
+      "id": "QA-002",
+      "implementation_evidence": [],
+      "kind": "FINAL_QUALIFICATION",
+      "legacy_packet_id": "BF-PKT-071",
+      "packet_id": "VAN-PKT-116",
+      "receipt_required": true,
+      "sequence": 116,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 6,
+      "status": "NOT_STARTED",
+      "title": "Real gateway/provider integration through the new signed app"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "FE-001",
+        "FE-002",
+        "FE-003",
+        "FE-004",
+        "FE-005",
+        "FE-006",
+        "FE-007",
+        "FE-008",
+        "FE-009",
+        "FE-010",
+        "FE-011",
+        "FE-012",
+        "FE-013",
+        "FE-014",
+        "FE-015",
+        "FE-016",
+        "FE-017",
+        "FE-018",
+        "FE-019",
+        "FE-020",
+        "FE-021",
+        "FE-022",
+        "FE-023"
+      ],
+      "exit_contract": "Every applicable acceptance receipt current and exact-source; independently reviewed; actual S24 where required. No feature removed or shortened to make tests pass.",
+      "id": "QA-003",
+      "implementation_evidence": [],
+      "kind": "FINAL_QUALIFICATION",
+      "legacy_packet_id": "BF-PKT-072",
+      "packet_id": "VAN-PKT-117",
+      "receipt_required": true,
+      "sequence": 117,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 6,
+      "status": "NOT_STARTED",
+      "title": "Cross-domain adversarial security, authority and recovery"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "FE-001",
+        "FE-002",
+        "FE-003",
+        "FE-004",
+        "FE-005",
+        "FE-006",
+        "FE-007",
+        "FE-008",
+        "FE-009",
+        "FE-010",
+        "FE-011",
+        "FE-012",
+        "FE-013",
+        "FE-014",
+        "FE-015",
+        "FE-016",
+        "FE-017",
+        "FE-018",
+        "FE-019",
+        "FE-020",
+        "FE-021",
+        "FE-022",
+        "FE-023"
+      ],
+      "exit_contract": "Every applicable acceptance receipt current and exact-source; independently reviewed; actual S24 where required. No feature removed or shortened to make tests pass.",
+      "id": "QA-004",
+      "implementation_evidence": [],
+      "kind": "FINAL_QUALIFICATION",
+      "legacy_packet_id": "BF-PKT-073",
+      "packet_id": "VAN-PKT-118",
+      "receipt_required": true,
+      "sequence": 118,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 6,
+      "status": "NOT_STARTED",
+      "title": "Physical S24 performance, thermal, accessibility and both-theme visual acceptance"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "QA-001",
+        "QA-002",
+        "QA-003",
+        "QA-004"
+      ],
+      "exit_contract": "Every applicable acceptance receipt current and exact-source; independently reviewed; actual S24 where required. No feature removed or shortened to make tests pass.",
+      "id": "QA-005",
+      "implementation_evidence": [],
+      "kind": "FINAL_QUALIFICATION",
+      "legacy_packet_id": "BF-PKT-074",
+      "merged_obligations": [
+        {
+          "deliverables": [
+            "Run actual signed-app/gateway/provider round trips, physical S24 performance and accessibility acceptance",
+            "Verify original and additive action coverage, telemetry privacy and all recovery cases",
+            "Obtain independent owner acceptance without replacing parent evidence"
+          ],
+          "exit_evidence": [
+            "Physical device evidence cannot be substituted by emulator or headless tests",
+            "Removing any inherited or additive action fails coverage"
+          ],
+          "source_packet": "VAN-ML-PKT-035"
+        }
+      ],
+      "packet_id": "VAN-PKT-119",
+      "receipt_required": true,
+      "sequence": 119,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 6,
+      "status": "NOT_STARTED",
+      "title": "Independent Zuul, exact APK and whole-product owner acceptance"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "QA-005"
+      ],
+      "exit_contract": "Owner release authorization; same admitted app identity; staged safe rollout; rollback preserves stores and outstanding intents; no implicit network/provider mutation.",
+      "id": "REL-001",
+      "implementation_evidence": [],
+      "kind": "RELEASE",
+      "legacy_packet_id": "BF-PKT-075",
+      "merged_obligations": [
+        {
+          "deliverables": [
+            "Release only exact accepted software under owner-approved rollout and proven rollback",
+            "Promote each economically qualified model/strategy/account/horizon separately using live mandate and prospective evidence",
+            "Retire old presentation only after whole-product parity; retain evidence and qualified baseline fallback"
+          ],
+          "exit_evidence": [
+            "Software release does not auto-enable new trading risk",
+            "Rejected/inconclusive models remain available for research, disabled for consequential influence"
+          ],
+          "source_packet": "VAN-ML-PKT-036"
+        }
+      ],
+      "packet_id": "VAN-PKT-120",
+      "receipt_required": true,
+      "sequence": 120,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 7,
+      "status": "NOT_STARTED",
+      "title": "Controlled signed release and proven rollback"
+    },
+    {
+      "completion": "FULL",
+      "dependencies": [
+        "REL-001"
+      ],
+      "exit_contract": "Separate owner-approved retirement review; all retained behaviours reached in new app; remove only old presentation, retain functional services and evidence.",
+      "id": "REL-002",
+      "implementation_evidence": [],
+      "kind": "RETIREMENT",
+      "legacy_packet_id": "BF-PKT-076",
+      "packet_id": "VAN-PKT-121",
+      "receipt_required": true,
+      "sequence": 121,
+      "source_origin": "REV1.10_PARENT",
+      "stage": 8,
+      "status": "NOT_STARTED",
+      "title": "Legacy presentation retirement after full parity"
+    }
+  ]
+}

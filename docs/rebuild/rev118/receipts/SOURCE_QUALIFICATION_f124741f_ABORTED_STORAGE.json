@@ -1,0 +1,24 @@
+{
+  "schema": "van.rebuild.source-qualification-aborted/1",
+  "source_head": "f124741f2d176f005ab19578f104c446de8a0bc8",
+  "state": "ABORTED_STORAGE_EXHAUSTION_NOT_QUALIFIED",
+  "backend_exit_code": 1,
+  "backend_log_sha256": "f90c1e1574e0c5bad3b50a34f8c9bc6f45e424505417c20cc24572d7595e1e9c",
+  "driver_log_sha256": "3ef5583d3638a58d21494c7d47b0b727756c445acfda314b31fbeff4f397bb94",
+  "junit": "Incomplete/unusable after ENOSPC; no passed counts inferred from progress output. Five failures occurred during exhaustion and require a fresh run; not declared product failures or successes.",
+  "storage_audit": "No valid completed report: report callback itself failed during shutdown. Zero forbidden events is not claimed.",
+  "cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "fixture_cleanup": {
+    "fixture": "/tmp/pytest-of-agent/pytest-2053",
+    "root_entries": 5817,
+    "no_live_cwd_or_open_fd_under_fixture": true,
+    "observed_at_utc": "2026-10-23T17:35:29.246010+00:00",
+    "qualification": "Synthetic temporary output of interrupted f124741f broad run; source/logs/XML preserved separately, not accepted as passing evidence."
+  },
+  "frozen_source_clean": true,
+  "rerun": "Same source and committed audit instrument; new isolated private PostgreSQL, explicit /tmp/van-f124741f-r1-pytest root, separate logs and XML. Outcome pending.",
+  "observed_at_utc": "2026-10-23T17:35:46.418257+00:00"
+}

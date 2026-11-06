@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.session.HttpSessionCarrierTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-08T04:57:38" hostname="052fefa249ff" time="0.078">
+  <properties/>
+  <testcase name="ambiguous POST failure closes carrier without inventing an acknowledgement()" classname="com.dial.van.session.HttpSessionCarrierTest" time="0.055"/>
+  <testcase name="SSE comments and multiline data preserve a single durable event()" classname="com.dial.van.session.HttpSessionCarrierTest" time="0.003"/>
+  <testcase name="HTTP admission event pages and POST acknowledgement use existing frame identities()" classname="com.dial.van.session.HttpSessionCarrierTest" time="0.017"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

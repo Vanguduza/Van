@@ -1,0 +1,18 @@
+.......F...                                                              [100%]
+=================================== FAILURES ===================================
+_________ test_hash_mismatch_and_symlink_refuse_before_native_loading __________
+
+bundle = (PosixPath('/tmp/pytest-of-agent/pytest-307/test_hash_mismatch_and_symlink0/bundle'), {'format': 'van.fixed-fixture-model-bundle/1', 'data_environment': 'FIXTURE', 'execution_authority': False, 'economic_admission': False, ...})
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-307/test_hash_mismatch_and_symlink0')
+
+    def test_hash_mismatch_and_symlink_refuse_before_native_loading(bundle,tmp_path):
+        root,manifest=bundle;original=(root/'xgboost.json').read_bytes()
+        (root/'xgboost.json').write_bytes(b'corrupt')
+>       with pytest.raises(WorkerBoundaryError,match='HASH_MISMATCH'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE WorkerBoundaryError
+
+trading/tests/test_forecast_fixture_artifacts.py:61: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_forecast_fixture_artifacts.py::test_hash_mismatch_and_symlink_refuse_before_native_loading
+1 failed, 10 passed in 0.45s

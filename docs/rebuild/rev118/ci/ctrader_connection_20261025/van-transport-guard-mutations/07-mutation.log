@@ -1,0 +1,23 @@
+................F...                                                     [100%]
+=================================== FAILURES ===================================
+__ test_contract_refresh_across_connection_change_keeps_old_bytes_unavailable __
+
+    def test_contract_refresh_across_connection_change_keeps_old_bytes_unavailable():
+        adapter, transport, responses, calls = fixture()
+        adapter._ensure_auth()
+        previous = dict(adapter.symbols)
+        original = transport.call
+        def changed(name, body):
+            result = original(name, body)
+            if name == 'ProtoOASymbolByIdReq':
+                transport.connection_id += 1
+            return result
+        transport.call = changed
+>       with pytest.raises(VenueUnavailable):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_ctrader_connection_auth.py:86: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_ctrader_connection_auth.py::test_contract_refresh_across_connection_change_keeps_old_bytes_unavailable
+1 failed, 19 passed in 0.82s

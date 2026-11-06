@@ -1,0 +1,161 @@
+{
+  "directory": "/tmp/van-recovery-family-two-leg-workflow-r2-20261101",
+  "at_utc": "2026-11-01T04:11:45.703947+00:00",
+  "files": [
+    {
+      "path": "test_capsule_health_is_driven_0/vati.sqlite",
+      "bytes": 1396736,
+      "sha256": "69d10ec3bc8a917baa06de323f7a4afbdf7949884d314583666d17a98addf4a1"
+    },
+    {
+      "path": "test_the_same_path_refuses_to_0/vati.sqlite",
+      "bytes": 40960,
+      "sha256": "633dd5dc31bc4f572672c4f5c86cba101cea85c34a50fc9c8035982c0bed17c6"
+    },
+    {
+      "path": "test_one_trade_from_sealed_cla0/vati.sqlite",
+      "bytes": 69632,
+      "sha256": "1f99b9275973673ad9c0a3a5383e94a1f359629c8de7fdca9f4cdaace9e3a51c"
+    },
+    {
+      "path": "test_original_child_close_surv0/membership.sqlite",
+      "bytes": 45056,
+      "sha256": "3b994cf21a4fe48f0b0032b387e2c53c67f7dcbaf37941dd63dc64a9836bb735"
+    },
+    {
+      "path": "test_a_netted_position_cannot_0/membership.sqlite",
+      "bytes": 40960,
+      "sha256": "e6b42dd0f487e7fb4c5aca88b9f3b6dc853a0bfc69f00771fb1d4463b591a139"
+    },
+    {
+      "path": "test_current_unknown_or_foreig3/membership.sqlite",
+      "bytes": 40960,
+      "sha256": "fdfc461533cb2465c2490d003a8cd4bec6a6e9fa56ea94f03fba6a93c81d5e1f"
+    },
+    {
+      "path": "test_current_unknown_or_foreig2/membership.sqlite",
+      "bytes": 40960,
+      "sha256": "fdfc461533cb2465c2490d003a8cd4bec6a6e9fa56ea94f03fba6a93c81d5e1f"
+    },
+    {
+      "path": "test_current_unknown_or_foreig1/membership.sqlite",
+      "bytes": 40960,
+      "sha256": "fdfc461533cb2465c2490d003a8cd4bec6a6e9fa56ea94f03fba6a93c81d5e1f"
+    },
+    {
+      "path": "test_current_unknown_or_foreig0/membership.sqlite",
+      "bytes": 40960,
+      "sha256": "fdfc461533cb2465c2490d003a8cd4bec6a6e9fa56ea94f03fba6a93c81d5e1f"
+    },
+    {
+      "path": "test_original_hedged_legs_keep0/membership.sqlite",
+      "bytes": 40960,
+      "sha256": "fdfc461533cb2465c2490d003a8cd4bec6a6e9fa56ea94f03fba6a93c81d5e1f"
+    },
+    {
+      "path": "test_native_stop_observer_refu3/stops.sqlite",
+      "bytes": 40960,
+      "sha256": "fdfc461533cb2465c2490d003a8cd4bec6a6e9fa56ea94f03fba6a93c81d5e1f"
+    },
+    {
+      "path": "test_native_stop_observer_refu2/stops.sqlite",
+      "bytes": 40960,
+      "sha256": "fdfc461533cb2465c2490d003a8cd4bec6a6e9fa56ea94f03fba6a93c81d5e1f"
+    },
+    {
+      "path": "test_native_stop_observer_refu1/stops.sqlite",
+      "bytes": 40960,
+      "sha256": "fdfc461533cb2465c2490d003a8cd4bec6a6e9fa56ea94f03fba6a93c81d5e1f"
+    },
+    {
+      "path": "test_native_stop_observer_refu0/stops.sqlite",
+      "bytes": 40960,
+      "sha256": "fdfc461533cb2465c2490d003a8cd4bec6a6e9fa56ea94f03fba6a93c81d5e1f"
+    },
+    {
+      "path": "test_one_native_stop_leaves_ot0/stops.sqlite",
+      "bytes": 49152,
+      "sha256": "2eed88aebb186a1ecb600b1229a20cd199cbb3aa08b01d321b6570f8a417a651"
+    },
+    {
+      "path": "test_real_add_then_proportiona0/vati.sqlite",
+      "bytes": 61440,
+      "sha256": "849a653e76cc6bbcabf9cdee19b2c7f6ca1248e210d11faa38e4fbfd624b2ead"
+    },
+    {
+      "path": "test_real_lifecycle_caller_use0/vati.sqlite",
+      "bytes": 53248,
+      "sha256": "5e3ba3b9d895e2256afaeede1fad7573a38c6324470b261ed315fe1d9601931c"
+    },
+    {
+      "path": "test_admitted_partial_effect_i0/vati.sqlite",
+      "bytes": 53248,
+      "sha256": "d5d342d46cbb406e2cc804bc312f8954f75d9b2f0ecc5002d652bbcf767a42fc"
+    },
+    {
+      "path": "test_current_effect_context_ca9/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "74cd1d1656e531a2d60b65fad3e59a4437063079afadd6d736c4c73048210af6"
+    },
+    {
+      "path": "test_current_effect_context_ca8/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "f54da260437e4adc83f809597dbd33ca68f3870f2bc776bb31e2b5bc71c718e7"
+    },
+    {
+      "path": "test_current_effect_context_ca7/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "fc81ef408c135c323c3f36cb7c89631b5de7b0a9facd8004e3f6ee673d3afdc5"
+    },
+    {
+      "path": "test_current_effect_context_ca6/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "33de41c37eaaf23a4884c6334848aafd3320ae4646d56c9b616a9d987e7dbb71"
+    },
+    {
+      "path": "test_current_effect_context_ca5/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "35bcce17c5c81a78a4e1c176c286b5025af9b551a9622ab8b650c3dfd00f4904"
+    },
+    {
+      "path": "test_current_effect_context_ca4/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "8b097964b48149c8ef6b5eb7692e32d19c352dcdccec7ff6324629ebcd3e1faf"
+    },
+    {
+      "path": "test_current_effect_context_ca3/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "a0f8a403debcac89d8fc18c3f270bf1d60a34a896e74e29664bc7e847a93d5e3"
+    },
+    {
+      "path": "test_current_effect_context_ca2/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "af5b9e923f8efa56a54eac6e75d4892d75b6b98aabae0afb8f40942cb8c59d9a"
+    },
+    {
+      "path": "test_current_effect_context_ca1/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "ffca43722298b67919e87270d3537de4c424ec8ae0da31684def300efc9b11df"
+    },
+    {
+      "path": "test_current_effect_context_ca0/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "1966646c1e4bd3883713b7fb38d234801e6f67019ae81c4ec969e90fa95b83b6"
+    },
+    {
+      "path": "test_real_current_mandate_orig0/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "dfb71c605f1635817c9b84b7cdc5c1f78399984a866752cdb7b87e88a77b51ab"
+    },
+    {
+      "path": "owner-authority0/owner_authority_keys.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "owner-authority0/owner_authority_keys.json",
+      "bytes": 212,
+      "sha256": "59f641f3256009bb9f3e7002ff044867f1ab529f35b46d42471c0c4b7cf02589"
+    }
+  ]
+}

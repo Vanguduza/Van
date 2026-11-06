@@ -1,0 +1,10 @@
+{
+  "package": "PyYAML",
+  "version": "6.0.3",
+  "filename": "pyyaml-6.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+  "bytes": 807870,
+  "sha256": "ba1cc08a7ccde2d2ec775841541641e4548226580ab850948cbfda66a1befcdc",
+  "official_metadata_sha256": "c3f35597bc2f08cc990c2a5fe57bef6687b3a3d7c61d8b0ba4cc067777eb1def",
+  "official_tls_metadata_and_wheel_hosts_verified": true,
+  "requires_dist": []
+}

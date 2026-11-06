@@ -1,0 +1,43 @@
+{
+  "schema": "van.auth-corrected-disjoint-collection/1",
+  "at_utc": "2026-11-01T01:28:05.071642+00:00",
+  "full_nodeids": 5943,
+  "selected_nodeids": 1527,
+  "remaining_nodeids": 4416,
+  "selected_files": 111,
+  "remaining_files": 213,
+  "full_equals_disjoint_union": true,
+  "source_pins": "/workspace/van-auth-corrected-source-pins-20261101.json",
+  "source_pins_sha256": "7fd5c7b2571ebf6738509a4e74ded7bf2721c4b08e27b78555eb05fbe0ac2fe9",
+  "manifests": {
+    "remainder-audit.json": "375194117403f658166c72593b6b0d527021c4d1dff9729f24b929c317a1c867",
+    "full.json": "795e89934c6ec7335fa926fee2d3bfefc3cfda9d4d5aabeb172c649a1dbd6a4d",
+    "remainder.json": "e39545f22d7923ac59ff4d2316abce436bffb02f4fbdb55b300bfa59cb49bd8d",
+    "selected-audit.json": "375194117403f658166c72593b6b0d527021c4d1dff9729f24b929c317a1c867",
+    "full-audit.json": "375194117403f658166c72593b6b0d527021c4d1dff9729f24b929c317a1c867",
+    "selected.json": "8a4d80b97b44ecda30788dd1a40937d10781c89a9ac34efc0a584bc59a0837ba"
+  },
+  "original_full_terminal": {
+    "command": [
+      "/workspace/van-backend-venv-20261025/bin/python",
+      "tools/rebuild/source_storage_audit.py",
+      "--report",
+      "/workspace/van-auth-integrated-backend-full-audit-20261101.json",
+      "backend/tests",
+      "--junitxml=/workspace/van-auth-integrated-backend-full-20261101.xml",
+      "-q"
+    ],
+    "cwd": "/workspace/van-review-2026-10-18/publish",
+    "controller_pid": 5171,
+    "started_at_utc": "2026-11-01T00:46:25.816945+00:00",
+    "timeout_seconds": 2400,
+    "state": "COMPLETED",
+    "command_pid": 5177,
+    "timed_out": true,
+    "exit": -15,
+    "adopted_children_reaped": [],
+    "finished_at_utc": "2026-11-01T01:26:26.041009+00:00"
+  },
+  "collection_plugin_sha256": "864115e2823117ea03be9b2a474356b888f47c71d47c25c299cc5120121e0819",
+  "no_test_execution": true
+}

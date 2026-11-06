@@ -1,0 +1,156 @@
+{
+  "examples": [
+    {
+      "account_scope": "fixture:account_scope",
+      "as_of": "2026-10-18T00:00:00Z",
+      "decision_at": "2026-10-18T00:00:00Z",
+      "decision_evidence_ref": "fixture:decision_evidence_ref",
+      "decision_id": "fixture:decision_id",
+      "environment": "SYNTHETIC_DOCUMENT_FIXTURE",
+      "feature_snapshot_ref": "fixture:feature_snapshot_ref",
+      "opportunity_id": "fixture:opportunity_id",
+      "opportunity_state": "TRADED",
+      "outcome_journal_ref": "fixture:outcome_journal_ref",
+      "outcome_maturity": "PENDING",
+      "policy_ref": "fixture:policy_ref",
+      "reconciled_economics_ref": null,
+      "record_id": "fixture:record_id",
+      "record_type": "TradeExperience",
+      "regime_definition_ref": null,
+      "revision": 1,
+      "setup_definition_ref": "fixture:setup_definition_ref",
+      "source_refs": [
+        "fixture:source_refs"
+      ],
+      "supersedes_record_ref": null
+    },
+    {
+      "account_scope": "fixture:account_scope",
+      "alternative_explanations": [
+        "fixture:alternative_explanations"
+      ],
+      "as_of": "2026-10-18T00:00:00Z",
+      "causal_identification_ref": null,
+      "claim_type": "ACCOUNTING",
+      "cohort_ref": null,
+      "conclusion": "EXPECTED_LOSS_WITH_SUPPORTED_STRATEGY",
+      "environment": "SYNTHETIC_DOCUMENT_FIXTURE",
+      "experience_ref": "fixture:experience_ref",
+      "financial_decomposition_ref": null,
+      "limitations": [
+        "fixture:limitations"
+      ],
+      "method_ref": "fixture:method_ref",
+      "observed_vs_simulated_refs": [
+        "fixture:observed_vs_simulated_refs"
+      ],
+      "record_id": "fixture:record_id",
+      "record_type": "TradeDiagnosis",
+      "revision": 1,
+      "source_refs": [
+        "fixture:source_refs"
+      ],
+      "uncertainty_ref": "fixture:uncertainty_ref"
+    },
+    {
+      "account_scope": "fixture:account_scope",
+      "as_of": "2026-10-18T00:00:00Z",
+      "cohort_definition_ref": "fixture:cohort_definition_ref",
+      "comparator_ref": "fixture:comparator_ref",
+      "development_data_ref": "fixture:development_data_ref",
+      "diagnosis_refs": [
+        "fixture:diagnosis_refs"
+      ],
+      "economic_limits_ref": "fixture:economic_limits_ref",
+      "environment": "SYNTHETIC_DOCUMENT_FIXTURE",
+      "falsifiable_question": "fixture:falsifiable_question",
+      "protected_evaluation_ref": "fixture:protected_evaluation_ref",
+      "record_id": "fixture:record_id",
+      "record_type": "LearningHypothesis",
+      "refutation_conditions": [
+        "fixture:refutation_conditions"
+      ],
+      "registration_ref": "fixture:registration_ref",
+      "research_grant_ref": "fixture:research_grant_ref",
+      "revision": 1,
+      "source_refs": [
+        "fixture:source_refs"
+      ],
+      "statistical_protocol_ref": "fixture:statistical_protocol_ref",
+      "target": "STRATEGY",
+      "trial_ledger_ref": "fixture:trial_ledger_ref"
+    },
+    {
+      "account_scope": "fixture:account_scope",
+      "as_of": "2026-10-18T00:00:00Z",
+      "assessment_state": "SUPPORTED",
+      "claim_scope_ref": "fixture:claim_scope_ref",
+      "environment": "SYNTHETIC_DOCUMENT_FIXTURE",
+      "hypothesis_ref": "fixture:hypothesis_ref",
+      "independent_review_ref": "fixture:independent_review_ref",
+      "independent_sample_definition_ref": "fixture:independent_sample_definition_ref",
+      "invalidation_reason": null,
+      "net_economics_ref": "fixture:net_economics_ref",
+      "null_control_results_ref": "fixture:null_control_results_ref",
+      "power_control_results_ref": "fixture:power_control_results_ref",
+      "prospective_evidence_ref": "fixture:prospective_evidence_ref",
+      "qualification_ref": "fixture:qualification_ref",
+      "record_id": "fixture:record_id",
+      "record_type": "EvidenceAssessment",
+      "revision": 1,
+      "selection_adjustment_ref": "fixture:selection_adjustment_ref",
+      "source_refs": [
+        "fixture:source_refs"
+      ],
+      "split_manifest_ref": "fixture:split_manifest_ref",
+      "trial_ledger_ref": "fixture:trial_ledger_ref",
+      "uncertainty_ref": "fixture:uncertainty_ref"
+    },
+    {
+      "account_scope": "fixture:account_scope",
+      "as_of": "2026-10-18T00:00:00Z",
+      "assessment_ref": "fixture:assessment_ref",
+      "binding_readback_ref": "fixture:binding_readback_ref",
+      "binding_state": "ACTIVE",
+      "change_kind": "POLICY_EVOLUTION",
+      "consumer_receipt_ref": "fixture:consumer_receipt_ref",
+      "environment": "SYNTHETIC_DOCUMENT_FIXTURE",
+      "exact_diff_ref": "fixture:exact_diff_ref",
+      "fallback_ref": "fixture:fallback_ref",
+      "hypothesis_ref": "fixture:hypothesis_ref",
+      "monitoring_protocol_ref": "fixture:monitoring_protocol_ref",
+      "new_artifact_ref": "fixture:new_artifact_ref",
+      "old_artifact_ref": "fixture:old_artifact_ref",
+      "promotion_authority_ref": "fixture:promotion_authority_ref",
+      "record_id": "fixture:record_id",
+      "record_type": "LearningChange",
+      "revision": 1,
+      "snapshot_ref": "fixture:snapshot_ref",
+      "source_refs": [
+        "fixture:source_refs"
+      ],
+      "target": "STRATEGY",
+      "update_rule_qualification_ref": "fixture:update_rule_qualification_ref"
+    },
+    {
+      "account_scope": "fixture:account_scope",
+      "actor_ref": "fixture:actor_ref",
+      "authority_ref": "fixture:authority_ref",
+      "expected_revision": 1,
+      "idempotency_key": "fixture:idempotency_key",
+      "operation_id": "EL-OP-005",
+      "reason": "fixture:reason",
+      "target_ref": "fixture:target_ref"
+    },
+    {
+      "account_scope": "fixture:account_scope",
+      "command_id": "fixture:command_id",
+      "error_code": null,
+      "operation_id": "EL-OP-005",
+      "readback_ref": null,
+      "result_ref": null,
+      "status": "ACCEPTED"
+    }
+  ],
+  "scope": "SYNTHETIC_DOCUMENT_FIXTURES_ONLY; reference strings do not prove facts or authority"
+}

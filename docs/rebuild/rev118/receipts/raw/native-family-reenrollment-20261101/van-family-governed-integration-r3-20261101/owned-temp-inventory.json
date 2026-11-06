@@ -1,0 +1,596 @@
+{
+  "directory": "/tmp/van-recovery-family-governed-integration-r3-20261101",
+  "at_utc": "2026-11-01T04:07:12.169737+00:00",
+  "files": [
+    {
+      "path": "test_invalid_contract_money_un3/accounts.json",
+      "bytes": 496,
+      "sha256": "fecfa8badb050c508a4cb876e63191a30465e4c668febf341ca7c9222b5c76fa"
+    },
+    {
+      "path": "test_invalid_contract_money_un3/accounts.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_invalid_contract_money_un3/accounts.json.operation.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_invalid_contract_money_un2/accounts.json",
+      "bytes": 496,
+      "sha256": "fecfa8badb050c508a4cb876e63191a30465e4c668febf341ca7c9222b5c76fa"
+    },
+    {
+      "path": "test_invalid_contract_money_un2/accounts.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_invalid_contract_money_un2/accounts.json.operation.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_invalid_contract_money_un1/accounts.json",
+      "bytes": 496,
+      "sha256": "fecfa8badb050c508a4cb876e63191a30465e4c668febf341ca7c9222b5c76fa"
+    },
+    {
+      "path": "test_invalid_contract_money_un1/accounts.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_invalid_contract_money_un1/accounts.json.operation.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_invalid_contract_money_un0/accounts.json",
+      "bytes": 496,
+      "sha256": "fecfa8badb050c508a4cb876e63191a30465e4c668febf341ca7c9222b5c76fa"
+    },
+    {
+      "path": "test_invalid_contract_money_un0/accounts.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_invalid_contract_money_un0/accounts.json.operation.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_runtime_does_not_label_fo0/accounts.json",
+      "bytes": 496,
+      "sha256": "fecfa8badb050c508a4cb876e63191a30465e4c668febf341ca7c9222b5c76fa"
+    },
+    {
+      "path": "test_runtime_does_not_label_fo0/accounts.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_runtime_does_not_label_fo0/accounts.json.operation.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_real_runtime_refuses_an_u0/native.sqlite",
+      "bytes": 49152,
+      "sha256": "63e01516b0b47d2b59b737e3e19676297afe05c51fe1d08ed3d3dc8d6de56612"
+    },
+    {
+      "path": "test_real_runtime_refuses_an_u0/accounts.json",
+      "bytes": 496,
+      "sha256": "fecfa8badb050c508a4cb876e63191a30465e4c668febf341ca7c9222b5c76fa"
+    },
+    {
+      "path": "test_real_runtime_refuses_an_u0/accounts.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_real_runtime_refuses_an_u0/accounts.json.operation.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_actual_single_runtime_mar1/native.sqlite",
+      "bytes": 49152,
+      "sha256": "cdf2626e84e1d578032a277ca20900808335f77102342c573e0475c5d18e9897"
+    },
+    {
+      "path": "test_actual_single_runtime_mar1/accounts.json",
+      "bytes": 496,
+      "sha256": "fecfa8badb050c508a4cb876e63191a30465e4c668febf341ca7c9222b5c76fa"
+    },
+    {
+      "path": "test_actual_single_runtime_mar1/accounts.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_actual_single_runtime_mar1/accounts.json.operation.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_actual_single_runtime_mar0/native.sqlite",
+      "bytes": 49152,
+      "sha256": "cdf2626e84e1d578032a277ca20900808335f77102342c573e0475c5d18e9897"
+    },
+    {
+      "path": "test_actual_single_runtime_mar0/accounts.json",
+      "bytes": 496,
+      "sha256": "fecfa8badb050c508a4cb876e63191a30465e4c668febf341ca7c9222b5c76fa"
+    },
+    {
+      "path": "test_actual_single_runtime_mar0/accounts.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_actual_single_runtime_mar0/accounts.json.operation.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_stale_capsule_state_event0/vati.sqlite",
+      "bytes": 24576,
+      "sha256": "9049a1d6ac9b44ac15ca9ced24c6a4ff2b51c5fa5b487849df70918f95928cfc"
+    },
+    {
+      "path": "test_ledgered_owner_promotion_0/vati.sqlite",
+      "bytes": 24576,
+      "sha256": "f58388e2e3ac254404506b7dbd639dc3ce26113a0ee6a99e528bc8a78625bc88"
+    },
+    {
+      "path": "test_expired_promotion_token_c0/vati.sqlite",
+      "bytes": 24576,
+      "sha256": "47d387291b833bf3a1d30e8be6b0978f1002105cf03ef77b44b316053d81df92"
+    },
+    {
+      "path": "test_promotion_token_replay_is0/vati.sqlite",
+      "bytes": 24576,
+      "sha256": "827c435b482ac6868fec11be384a26ca3ff50ef19be27037e0c3c33715085c14"
+    },
+    {
+      "path": "test_capsule_promotion_is_hidd0/vati.sqlite",
+      "bytes": 24576,
+      "sha256": "4696b756b5a9de50846b8c4c0630b7d1187da6d6a29642f47a3b0fd57508b381"
+    },
+    {
+      "path": "test_promotion_candidates_are_0/vati.sqlite",
+      "bytes": 24576,
+      "sha256": "3c3755c422bf58e49780707e87257faf2643904a243556ace773e8bfbfb716e8"
+    },
+    {
+      "path": "test_owner_authority_enrollmen0/owner-authority.json",
+      "bytes": 281,
+      "sha256": "76ea3370277ec4b19d8a68aebc7f1c36cf3395185177b413090af301b8337325"
+    },
+    {
+      "path": "test_owner_authority_enrollmen0/owner-authority.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_owner_authority_enrollmen0/vati.sqlite",
+      "bytes": 24576,
+      "sha256": "47d387291b833bf3a1d30e8be6b0978f1002105cf03ef77b44b316053d81df92"
+    },
+    {
+      "path": "test_real_lifecycle_caller_use0/vati.sqlite",
+      "bytes": 53248,
+      "sha256": "ed0ffce81d83a79e58b1dd785b067007f95513a994e48270075dcfa78ca963ac"
+    },
+    {
+      "path": "test_admitted_partial_effect_i0/vati.sqlite",
+      "bytes": 53248,
+      "sha256": "42d80236fc3696abe1473a7071a394ff0dcf63deb1b1e72c63f5450db59d5b89"
+    },
+    {
+      "path": "test_current_effect_context_ca9/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "2e69de0d05c288ec809fe7a59575ef3dcdbe5c8e7f74a4b46356f3d8f82aacde"
+    },
+    {
+      "path": "test_current_effect_context_ca8/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "62ebfb7be256003260e6d42e23f8f238ca4b5f3f1fcbdc43dd1a149bcf297d00"
+    },
+    {
+      "path": "test_current_effect_context_ca7/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "becc6bfa0750ce6e389f151c37300f91adfd521c3cfb1cdaa94f3a1cac0fbf54"
+    },
+    {
+      "path": "test_current_effect_context_ca6/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "cd5da0875f42bb06173bb4521a694f256ba06f21b019341175cca5b9004f3bea"
+    },
+    {
+      "path": "test_current_effect_context_ca5/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "510b9b3f8e5e8bbd33d6eecb6945ee8986e8b00ef79223ec79a099b8ed93b5c4"
+    },
+    {
+      "path": "test_current_effect_context_ca4/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "44eb795314d097e3c90f85a20b98eec3504f6f7a5e166bdaf84fe862b355099a"
+    },
+    {
+      "path": "test_current_effect_context_ca3/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "ffc16014183bd3c0f86461995cbec49236b20b96cd43dd24667646f31797f61d"
+    },
+    {
+      "path": "test_current_effect_context_ca2/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "728cc57184b1233fafc5a106b21541c920b9e6869345f302e04b64ef4f6ab25f"
+    },
+    {
+      "path": "test_current_effect_context_ca1/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "ecc180c8215a918163cb16356b59344656fc0219b85b774fa77a6331ccaca720"
+    },
+    {
+      "path": "test_current_effect_context_ca0/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "6d57cd2948ece1facad6644fbccb3d1f808f25bcd5970876d54313518d38a7cb"
+    },
+    {
+      "path": "test_real_current_mandate_orig0/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "59d02a11bdbbd7f4ec927f678eb7d328320b88fa73b8daffe8f8271c8c3b7eaa"
+    },
+    {
+      "path": "test_last_fence_read_expiry_an0/grant.sqlite",
+      "bytes": 24576,
+      "sha256": "fbe5cae56b9bd7b059d92a19b211ad6f7321792a3daf024bb31474bcf55f682f"
+    },
+    {
+      "path": "test_revoke_is_current_owner_s0/grant.sqlite",
+      "bytes": 24576,
+      "sha256": "5645514c8c72ca4f8268124c56dd93dc98d8ad8e7ddae8fdd3a5df793a65c209"
+    },
+    {
+      "path": "test_no_boolean_or_self_signed6/grant.sqlite",
+      "bytes": 24576,
+      "sha256": "47d387291b833bf3a1d30e8be6b0978f1002105cf03ef77b44b316053d81df92"
+    },
+    {
+      "path": "test_no_boolean_or_self_signed5/grant.sqlite",
+      "bytes": 24576,
+      "sha256": "47d387291b833bf3a1d30e8be6b0978f1002105cf03ef77b44b316053d81df92"
+    },
+    {
+      "path": "test_no_boolean_or_self_signed4/grant.sqlite",
+      "bytes": 24576,
+      "sha256": "47d387291b833bf3a1d30e8be6b0978f1002105cf03ef77b44b316053d81df92"
+    },
+    {
+      "path": "test_no_boolean_or_self_signed3/grant.sqlite",
+      "bytes": 24576,
+      "sha256": "47d387291b833bf3a1d30e8be6b0978f1002105cf03ef77b44b316053d81df92"
+    },
+    {
+      "path": "test_no_boolean_or_self_signed2/grant.sqlite",
+      "bytes": 24576,
+      "sha256": "47d387291b833bf3a1d30e8be6b0978f1002105cf03ef77b44b316053d81df92"
+    },
+    {
+      "path": "test_no_boolean_or_self_signed1/grant.sqlite",
+      "bytes": 24576,
+      "sha256": "47d387291b833bf3a1d30e8be6b0978f1002105cf03ef77b44b316053d81df92"
+    },
+    {
+      "path": "test_no_boolean_or_self_signed0/grant.sqlite",
+      "bytes": 24576,
+      "sha256": "47d387291b833bf3a1d30e8be6b0978f1002105cf03ef77b44b316053d81df92"
+    },
+    {
+      "path": "test_synthetic_source_admissio0/grant.sqlite",
+      "bytes": 24576,
+      "sha256": "26f5cc98293a83cc68e67f6d8b0ccac169bcec94e8bd9bc38d199d6add2eee2e"
+    },
+    {
+      "path": "test_internal_control_uses_ori0/private-grant.sqlite",
+      "bytes": 24576,
+      "sha256": "00ab4870180a268271f951a1adba3e64b16d5c9c43f28578b40bbae21da21fa4"
+    },
+    {
+      "path": "owner-authority0/owner_authority_keys.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "owner-authority0/owner_authority_keys.json",
+      "bytes": 212,
+      "sha256": "7f4ebba3e9547fe12a483dc9b73caaf8bb70782990d1a852bc945b92732179f3"
+    },
+    {
+      "path": "test_stale_capsule_state_event0/log/commander-audit.jsonl",
+      "bytes": 1289,
+      "sha256": "a02866f7da0b26ea375ed5bb1efa2193732419d32f0e69bfe71b69eb93921f4e"
+    },
+    {
+      "path": "test_stale_capsule_state_event0/capsules/FX-TREND-PULLBACK-01.json",
+      "bytes": 1591,
+      "sha256": "802cdec0d45c6951724a5ac74db219bc3dcbabba8bcd76e00340dcaba880da23"
+    },
+    {
+      "path": "test_stale_capsule_state_event0/capsules/.promotion.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_stale_capsule_state_event0/capsules/ZSE-VALUE-ROTATION-01.json",
+      "bytes": 1335,
+      "sha256": "809b00ee7dfaf97453a539720b9f8be6cdaa9851330cd34fab74c1b94763f2b9"
+    },
+    {
+      "path": "test_stale_capsule_state_event0/capsules/FX-LONDON-BREAKOUT-01.json",
+      "bytes": 1185,
+      "sha256": "fa46c3444a5940687a46cbe714d21a5e9d91b6acd0b6c275603725bc46caa97e"
+    },
+    {
+      "path": "test_stale_capsule_state_event0/capsules/GOLD-TREND-POSITION-01.json",
+      "bytes": 1133,
+      "sha256": "cdedad8b54f912f894b829b90540a33284f179a699299fbc7843f4684cc76a31"
+    },
+    {
+      "path": "test_stale_capsule_state_event0/capsules/ZSE-LIQUIDITY-PROVISION-01.json",
+      "bytes": 1176,
+      "sha256": "7c6941e3fb2d5ba0c19b3348248cb77582ba22c337a934d1f44a405c6caf05fe"
+    },
+    {
+      "path": "test_stale_capsule_state_event0/capsules/FX-EVENT-DRIFT-01.json",
+      "bytes": 1182,
+      "sha256": "3e0354a574cb9d6b60e18f41bbcdcb7a5d78d5ec65cc0a320e4e4d1f8d757392"
+    },
+    {
+      "path": "test_ledgered_owner_promotion_0/log/commander-audit.jsonl",
+      "bytes": 1289,
+      "sha256": "a02866f7da0b26ea375ed5bb1efa2193732419d32f0e69bfe71b69eb93921f4e"
+    },
+    {
+      "path": "test_ledgered_owner_promotion_0/capsules/FX-TREND-PULLBACK-01.json",
+      "bytes": 1271,
+      "sha256": "f0ea7f00d5bc486c359a849f9bf19a1cd1f244bc3b604d90769a778ab76078e3"
+    },
+    {
+      "path": "test_ledgered_owner_promotion_0/capsules/.promotion.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_ledgered_owner_promotion_0/capsules/ZSE-VALUE-ROTATION-01.json",
+      "bytes": 1335,
+      "sha256": "809b00ee7dfaf97453a539720b9f8be6cdaa9851330cd34fab74c1b94763f2b9"
+    },
+    {
+      "path": "test_ledgered_owner_promotion_0/capsules/FX-LONDON-BREAKOUT-01.json",
+      "bytes": 1185,
+      "sha256": "fa46c3444a5940687a46cbe714d21a5e9d91b6acd0b6c275603725bc46caa97e"
+    },
+    {
+      "path": "test_ledgered_owner_promotion_0/capsules/GOLD-TREND-POSITION-01.json",
+      "bytes": 1133,
+      "sha256": "cdedad8b54f912f894b829b90540a33284f179a699299fbc7843f4684cc76a31"
+    },
+    {
+      "path": "test_ledgered_owner_promotion_0/capsules/ZSE-LIQUIDITY-PROVISION-01.json",
+      "bytes": 1176,
+      "sha256": "7c6941e3fb2d5ba0c19b3348248cb77582ba22c337a934d1f44a405c6caf05fe"
+    },
+    {
+      "path": "test_ledgered_owner_promotion_0/capsules/FX-EVENT-DRIFT-01.json",
+      "bytes": 1182,
+      "sha256": "3e0354a574cb9d6b60e18f41bbcdcb7a5d78d5ec65cc0a320e4e4d1f8d757392"
+    },
+    {
+      "path": "test_expired_promotion_token_c0/log/commander-audit.jsonl",
+      "bytes": 2784,
+      "sha256": "bbbe82efc98c247bdc55781a018b37e3ffe6e5ef76f216f4d5c1f82aeb333208"
+    },
+    {
+      "path": "test_expired_promotion_token_c0/capsules/.promotion.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_expired_promotion_token_c0/capsules/ZSE-VALUE-ROTATION-01.json",
+      "bytes": 1335,
+      "sha256": "809b00ee7dfaf97453a539720b9f8be6cdaa9851330cd34fab74c1b94763f2b9"
+    },
+    {
+      "path": "test_expired_promotion_token_c0/capsules/FX-LONDON-BREAKOUT-01.json",
+      "bytes": 1185,
+      "sha256": "fa46c3444a5940687a46cbe714d21a5e9d91b6acd0b6c275603725bc46caa97e"
+    },
+    {
+      "path": "test_expired_promotion_token_c0/capsules/FX-TREND-PULLBACK-01.json",
+      "bytes": 1271,
+      "sha256": "f0ea7f00d5bc486c359a849f9bf19a1cd1f244bc3b604d90769a778ab76078e3"
+    },
+    {
+      "path": "test_expired_promotion_token_c0/capsules/GOLD-TREND-POSITION-01.json",
+      "bytes": 1133,
+      "sha256": "cdedad8b54f912f894b829b90540a33284f179a699299fbc7843f4684cc76a31"
+    },
+    {
+      "path": "test_expired_promotion_token_c0/capsules/ZSE-LIQUIDITY-PROVISION-01.json",
+      "bytes": 1176,
+      "sha256": "7c6941e3fb2d5ba0c19b3348248cb77582ba22c337a934d1f44a405c6caf05fe"
+    },
+    {
+      "path": "test_expired_promotion_token_c0/capsules/FX-EVENT-DRIFT-01.json",
+      "bytes": 1182,
+      "sha256": "3e0354a574cb9d6b60e18f41bbcdcb7a5d78d5ec65cc0a320e4e4d1f8d757392"
+    },
+    {
+      "path": "test_promotion_token_replay_is0/log2/commander-audit.jsonl",
+      "bytes": 2710,
+      "sha256": "17ecf6b99dba46773a2fa696310201f058c2882bcd9d9962dfa13fbbdac44d1f"
+    },
+    {
+      "path": "test_promotion_token_replay_is0/log/commander-audit.jsonl",
+      "bytes": 1289,
+      "sha256": "2f272b44b1eb4c87530cb24fd78190155c8b31b73501b652122bb22c19938b1e"
+    },
+    {
+      "path": "test_promotion_token_replay_is0/capsules/FX-TREND-PULLBACK-01.json",
+      "bytes": 1271,
+      "sha256": "f0ea7f00d5bc486c359a849f9bf19a1cd1f244bc3b604d90769a778ab76078e3"
+    },
+    {
+      "path": "test_promotion_token_replay_is0/capsules/.promotion.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_promotion_token_replay_is0/capsules/ZSE-VALUE-ROTATION-01.json",
+      "bytes": 1335,
+      "sha256": "809b00ee7dfaf97453a539720b9f8be6cdaa9851330cd34fab74c1b94763f2b9"
+    },
+    {
+      "path": "test_promotion_token_replay_is0/capsules/FX-LONDON-BREAKOUT-01.json",
+      "bytes": 1185,
+      "sha256": "fa46c3444a5940687a46cbe714d21a5e9d91b6acd0b6c275603725bc46caa97e"
+    },
+    {
+      "path": "test_promotion_token_replay_is0/capsules/GOLD-TREND-POSITION-01.json",
+      "bytes": 1133,
+      "sha256": "cdedad8b54f912f894b829b90540a33284f179a699299fbc7843f4684cc76a31"
+    },
+    {
+      "path": "test_promotion_token_replay_is0/capsules/ZSE-LIQUIDITY-PROVISION-01.json",
+      "bytes": 1176,
+      "sha256": "7c6941e3fb2d5ba0c19b3348248cb77582ba22c337a934d1f44a405c6caf05fe"
+    },
+    {
+      "path": "test_promotion_token_replay_is0/capsules/FX-EVENT-DRIFT-01.json",
+      "bytes": 1182,
+      "sha256": "3e0354a574cb9d6b60e18f41bbcdcb7a5d78d5ec65cc0a320e4e4d1f8d757392"
+    },
+    {
+      "path": "test_capsule_promotion_is_hidd0/log/commander-audit.jsonl",
+      "bytes": 2591,
+      "sha256": "2a2f3b5a67f3e0a5c8592211ac7b0cb582444354501a8e077e3db788965a3bdc"
+    },
+    {
+      "path": "test_capsule_promotion_is_hidd0/capsules/FX-TREND-PULLBACK-01.json",
+      "bytes": 1591,
+      "sha256": "4c3bce53ec7d1224fa404dd615473d6c86080815a2f700029e2e5f06ad410618"
+    },
+    {
+      "path": "test_capsule_promotion_is_hidd0/capsules/.promotion.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_capsule_promotion_is_hidd0/capsules/ZSE-VALUE-ROTATION-01.json",
+      "bytes": 1335,
+      "sha256": "809b00ee7dfaf97453a539720b9f8be6cdaa9851330cd34fab74c1b94763f2b9"
+    },
+    {
+      "path": "test_capsule_promotion_is_hidd0/capsules/FX-LONDON-BREAKOUT-01.json",
+      "bytes": 1185,
+      "sha256": "fa46c3444a5940687a46cbe714d21a5e9d91b6acd0b6c275603725bc46caa97e"
+    },
+    {
+      "path": "test_capsule_promotion_is_hidd0/capsules/GOLD-TREND-POSITION-01.json",
+      "bytes": 1133,
+      "sha256": "cdedad8b54f912f894b829b90540a33284f179a699299fbc7843f4684cc76a31"
+    },
+    {
+      "path": "test_capsule_promotion_is_hidd0/capsules/ZSE-LIQUIDITY-PROVISION-01.json",
+      "bytes": 1176,
+      "sha256": "7c6941e3fb2d5ba0c19b3348248cb77582ba22c337a934d1f44a405c6caf05fe"
+    },
+    {
+      "path": "test_capsule_promotion_is_hidd0/capsules/FX-EVENT-DRIFT-01.json",
+      "bytes": 1182,
+      "sha256": "3e0354a574cb9d6b60e18f41bbcdcb7a5d78d5ec65cc0a320e4e4d1f8d757392"
+    },
+    {
+      "path": "test_promotion_candidates_are_0/log-candidates/commander-audit.jsonl",
+      "bytes": 214,
+      "sha256": "5a21557d93749fe2116e583aff7fe0f4df1c655b7ef67fb3bd71bb5e4b14038c"
+    },
+    {
+      "path": "test_promotion_candidates_are_0/capsules/.promotion.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_promotion_candidates_are_0/capsules/ZSE-VALUE-ROTATION-01.json",
+      "bytes": 1335,
+      "sha256": "809b00ee7dfaf97453a539720b9f8be6cdaa9851330cd34fab74c1b94763f2b9"
+    },
+    {
+      "path": "test_promotion_candidates_are_0/capsules/FX-LONDON-BREAKOUT-01.json",
+      "bytes": 1185,
+      "sha256": "fa46c3444a5940687a46cbe714d21a5e9d91b6acd0b6c275603725bc46caa97e"
+    },
+    {
+      "path": "test_promotion_candidates_are_0/capsules/FX-TREND-PULLBACK-01.json",
+      "bytes": 1367,
+      "sha256": "abf1b944267f7fcc49ce30a1de027ba767399be8de5410babefbc3b137aee492"
+    },
+    {
+      "path": "test_promotion_candidates_are_0/capsules/GOLD-TREND-POSITION-01.json",
+      "bytes": 1133,
+      "sha256": "cdedad8b54f912f894b829b90540a33284f179a699299fbc7843f4684cc76a31"
+    },
+    {
+      "path": "test_promotion_candidates_are_0/capsules/ZSE-LIQUIDITY-PROVISION-01.json",
+      "bytes": 1176,
+      "sha256": "7c6941e3fb2d5ba0c19b3348248cb77582ba22c337a934d1f44a405c6caf05fe"
+    },
+    {
+      "path": "test_promotion_candidates_are_0/capsules/FX-EVENT-DRIFT-01.json",
+      "bytes": 1182,
+      "sha256": "3e0354a574cb9d6b60e18f41bbcdcb7a5d78d5ec65cc0a320e4e4d1f8d757392"
+    },
+    {
+      "path": "test_owner_authority_enrollmen0/log-enroll/commander-audit.jsonl",
+      "bytes": 2032,
+      "sha256": "9a4f9f6f6350a6bad568ef21ed75e0e946b61c6025c9afa9411a065d9a05bd75"
+    },
+    {
+      "path": "test_owner_authority_enrollmen0/capsules/ZSE-VALUE-ROTATION-01.json",
+      "bytes": 1335,
+      "sha256": "809b00ee7dfaf97453a539720b9f8be6cdaa9851330cd34fab74c1b94763f2b9"
+    },
+    {
+      "path": "test_owner_authority_enrollmen0/capsules/FX-LONDON-BREAKOUT-01.json",
+      "bytes": 1185,
+      "sha256": "fa46c3444a5940687a46cbe714d21a5e9d91b6acd0b6c275603725bc46caa97e"
+    },
+    {
+      "path": "test_owner_authority_enrollmen0/capsules/FX-TREND-PULLBACK-01.json",
+      "bytes": 1271,
+      "sha256": "f0ea7f00d5bc486c359a849f9bf19a1cd1f244bc3b604d90769a778ab76078e3"
+    },
+    {
+      "path": "test_owner_authority_enrollmen0/capsules/GOLD-TREND-POSITION-01.json",
+      "bytes": 1133,
+      "sha256": "cdedad8b54f912f894b829b90540a33284f179a699299fbc7843f4684cc76a31"
+    },
+    {
+      "path": "test_owner_authority_enrollmen0/capsules/ZSE-LIQUIDITY-PROVISION-01.json",
+      "bytes": 1176,
+      "sha256": "7c6941e3fb2d5ba0c19b3348248cb77582ba22c337a934d1f44a405c6caf05fe"
+    },
+    {
+      "path": "test_owner_authority_enrollmen0/capsules/FX-EVENT-DRIFT-01.json",
+      "bytes": 1182,
+      "sha256": "3e0354a574cb9d6b60e18f41bbcdcb7a5d78d5ec65cc0a320e4e4d1f8d757392"
+    }
+  ]
+}

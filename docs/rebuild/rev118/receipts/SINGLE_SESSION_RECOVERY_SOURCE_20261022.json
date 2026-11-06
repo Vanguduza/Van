@@ -1,0 +1,241 @@
+{
+  "schema": "van.rebuild.single-session-recovery-source/1",
+  "source_parent": "181a11007591c53417cbb1fd902a340c4ab0548d",
+  "source_sha256": {
+    "trading/vati/app/cycle.py": "a88efc04d2bdf9744e20adba902bf51816b31a64e06818ba84a86ca03c99c544",
+    "trading/vati/app/runner.py": "c08dc2ba55335f72ed819fd5f999f3ae372c27bbc48bcf3ef6f2b4bbeae00958",
+    "trading/vati/app/session_recovery.py": "899c58060782b2634bd2fa6583a907dc94ca22052b9a136e9a3e8de16f6f7222",
+    "trading/vati/execution/reconciliation.py": "37bedd6ef6b2177d0033645689b5fbb327bdccaeccacd5e04d34bba069d6f2d4",
+    "trading/vati/execution/recovery_scope.py": "cdf41cd4ee3b8b54b5881ecfd2e5e049ed7d6ca022a3777240fed56604eab62e",
+    "trading/tests/test_single_session_recovery.py": "027fc45853791083d16de422bfab63b05f471484b44e06e2e2440b1c69120055",
+    "trading/tests/test_native_position_recovery_scope.py": "75ebdd0987b51fbab3d835f44ac572e185daf05150b4fd1419128494a7eee810"
+  },
+  "initial_startup_counterexamples": {
+    "tests": 6,
+    "failures": 6,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "62930a290f0fb3536f00573dae0e9a921cdd495dc2b6c540c3e16acee9567471"
+  },
+  "additional_ambiguous_verification_counterexample": {
+    "tests": 14,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "7b7dbac72f14d9750d63727601393a4bba3c06aa90e7c79703895e31381fa4da"
+  },
+  "additional_missing_native_position_id_counterexample": {
+    "tests": 1,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "7c471389b81797ac58b819226796d28c65c37486cd971e63f983590467a994b4"
+  },
+  "full_trading_real_private_postgresql": {
+    "tests": 2032,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "8840c7a28a71ce26b006b3b69bb32a9f9de621779f2e98baed06b732d8f916d1"
+  },
+  "focused_after_source_restoration": {
+    "tests": 56,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 2,
+    "sha256": "ff6956e5abf0b6299a307bfdf5ec1982bc30b212eb0e89f59ff0117c5a53545f"
+  },
+  "rebuild": {
+    "tests": 78,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "3d7b7ae44e181803c7ae27ff40bad0608b7e254e7b29c1183e7ca0d598bc1f99"
+  },
+  "source_faults": {
+    "records": [
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "8f5239883bf186e59860cba87b06dfc8ac16e9ef5b3e88b27b2829f1c6dd4257"
+      },
+      {
+        "phase": "mutation",
+        "why": "replace actual startup native recovery with empty process memory",
+        "returncode": 1,
+        "log_sha256": "23d00fa9650baedf520bee339533eeb7e4caba804057ec585ad0efbae7807a71"
+      },
+      {
+        "phase": "mutation",
+        "why": "omit the original pre-dispatch setup publication",
+        "returncode": 1,
+        "log_sha256": "82085ede431c2bc9832cddaf43d567db1a4c1a33f7f3104951d39feef6f27289"
+      },
+      {
+        "phase": "mutation",
+        "why": "adopt setup context appended after the original native command",
+        "returncode": 1,
+        "log_sha256": "6423b1019474f2326546ab25e7cc4549bddfb30d305c01ccec9310fc3d1d89b9"
+      },
+      {
+        "phase": "mutation",
+        "why": "drop outstanding native filled/pending/unknown history on cold startup",
+        "returncode": 1,
+        "log_sha256": "e5a645bae53fa60d7c9ec1dc941518e876effd9c046237654ed8abe73dd401f6"
+      },
+      {
+        "phase": "mutation",
+        "why": "declare incomplete historical setup ready for new orders",
+        "returncode": 1,
+        "log_sha256": "e36ee42388b57859cbede1df685aecbd908b3e14fbb893161e2ee87eace10e66"
+      },
+      {
+        "phase": "mutation",
+        "why": "ignore current native account identity and money denomination",
+        "returncode": 1,
+        "log_sha256": "a5d7cf2bb28b29b191806246ac2f041b210400add0d38ebe3e8d55515ce752d3"
+      },
+      {
+        "phase": "mutation",
+        "why": "treat a verification string as an actual verified account",
+        "returncode": 1,
+        "log_sha256": "fd44322d5311cfd80a2fba12098218aa3167641e1a34a0a386e0c737b90819e3"
+      },
+      {
+        "phase": "mutation",
+        "why": "resume without restoring the actual local protective controller",
+        "returncode": 1,
+        "log_sha256": "bcd7605258c842e84b49511b306ab372788cbbde169eee84f2e560245b182c8f"
+      },
+      {
+        "phase": "mutation",
+        "why": "infer setup quality and learning from incomplete historical context",
+        "returncode": 1,
+        "log_sha256": "7dbc7ff4eac2a891108f612cc439ea05fd2df1adee99b4c7952dbd5064763444"
+      },
+      {
+        "phase": "mutation",
+        "why": "reopen a genuinely completed native review as historical exposure",
+        "returncode": 1,
+        "log_sha256": "87018324516db140f321e7ad8eca6a602722567c7e80adc6b0b0db5aca068d59"
+      },
+      {
+        "phase": "mutation",
+        "why": "adopt a current position with no native position identity",
+        "returncode": 1,
+        "log_sha256": "07110008885fe3bc8b3adc299b497130088e3420baae2e5321bfeb172519ff91"
+      }
+    ],
+    "definitions": [
+      [
+        "trading/vati/app/runner.py",
+        "ledger_positions,c.recovery_unresolved=recover_session(c,native_positions)",
+        "ledger_positions,c.recovery_unresolved=(),()",
+        "replace actual startup native recovery with empty process memory"
+      ],
+      [
+        "trading/vati/app/cycle.py",
+        "'event':'ENTRY_CONTEXT','schema':'vati.entry-context/1'",
+        "'event':'ENTRY_CONTEXT_SKIPPED','schema':'vati.entry-context/1'",
+        "omit the original pre-dispatch setup publication"
+      ],
+      [
+        "trading/vati/app/session_recovery.py",
+        "if event.hash==history.command_refs[iid]:",
+        "if False:",
+        "adopt setup context appended after the original native command"
+      ],
+      [
+        "trading/vati/app/session_recovery.py",
+        "if iid in restored or iid in closed:continue",
+        "if True:continue",
+        "drop outstanding native filled/pending/unknown history on cold startup"
+      ],
+      [
+        "trading/vati/app/session_recovery.py",
+        "complete=(context is not None and thesis is not None and thesis.entry==position.entry_price\n                      and risk is not None and iid in tca and iid not in closed)",
+        "complete=True",
+        "declare incomplete historical setup ready for new orders"
+      ],
+      [
+        "trading/vati/app/runner.py",
+        "account_verified=(acct.verified is True and acct.account_alias==c.cfg.account_alias\n                          and acct.currency==c.cfg.contract.account_currency)",
+        "account_verified=acct.verified",
+        "ignore current native account identity and money denomination"
+      ],
+      [
+        "trading/vati/app/runner.py",
+        "acct.verified is True and acct.account_alias",
+        "acct.verified and acct.account_alias",
+        "treat a verification string as an actual verified account"
+      ],
+      [
+        "trading/vati/app/session_recovery.py",
+        "                cycle.protection.restore(position.position_id,",
+        "                False and cycle.protection.restore(position.position_id,",
+        "resume without restoring the actual local protective controller"
+      ],
+      [
+        [
+          [
+            "trading/vati/app/cycle.py",
+            "if e.get('recovery_context_complete') is not False:",
+            "if True:"
+          ],
+          [
+            "trading/vati/app/cycle.py",
+            "and rv.outcome in STRATEGY_LEARNING_OUTCOMES and e.get('recovery_context_complete') is not False:",
+            "and rv.outcome in STRATEGY_LEARNING_OUTCOMES:"
+          ]
+        ],
+        "infer setup quality and learning from incomplete historical context"
+      ],
+      [
+        "trading/vati/app/session_recovery.py",
+        "if iid in restored or iid in closed:continue",
+        "if iid in restored:continue",
+        "reopen a genuinely completed native review as historical exposure"
+      ],
+      [
+        "trading/vati/execution/recovery_scope.py",
+        "if not isinstance(position.position_id,str) or not position.position_id:",
+        "if False:",
+        "adopt a current position with no native position identity"
+      ]
+    ],
+    "source_before_sha256": {
+      "trading/vati/app/cycle.py": "a88efc04d2bdf9744e20adba902bf51816b31a64e06818ba84a86ca03c99c544",
+      "trading/vati/app/runner.py": "c08dc2ba55335f72ed819fd5f999f3ae372c27bbc48bcf3ef6f2b4bbeae00958",
+      "trading/vati/app/session_recovery.py": "899c58060782b2634bd2fa6583a907dc94ca22052b9a136e9a3e8de16f6f7222",
+      "trading/vati/execution/recovery_scope.py": "cdf41cd4ee3b8b54b5881ecfd2e5e049ed7d6ca022a3777240fed56604eab62e"
+    },
+    "source_after_sha256": {
+      "trading/vati/app/cycle.py": "a88efc04d2bdf9744e20adba902bf51816b31a64e06818ba84a86ca03c99c544",
+      "trading/vati/app/runner.py": "c08dc2ba55335f72ed819fd5f999f3ae372c27bbc48bcf3ef6f2b4bbeae00958",
+      "trading/vati/app/session_recovery.py": "899c58060782b2634bd2fa6583a907dc94ca22052b9a136e9a3e8de16f6f7222",
+      "trading/vati/execution/recovery_scope.py": "cdf41cd4ee3b8b54b5881ecfd2e5e049ed7d6ca022a3777240fed56604eab62e"
+    },
+    "source_restored": true,
+    "journal_present": false
+  },
+  "fault_control": "31 passing source cases, then11assertion-detected faults; source restored and no journal",
+  "private_fixture_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "registry_refresh": "--check unchanged439endpoints262schemas; original IDs/history/authority retained",
+  "legacy_preflight": "374identities383edits,registrySHA35d10c7b0f2b8319b7f7305828262c972b2a6451139d75b9e83c7d0062282955; anchors valid, current full hosted rerun remains separate",
+  "native_host_actions_executed": 0,
+  "physical_s24_cases_executed": 0,
+  "unit_acceptance": "NOT_ISSUED",
+  "release_qualified": false,
+  "remaining": [
+    "persistent paper state; no fake venue hydration from historical entries",
+    "native pending/late/expiry/partial-fill reconciliation and adjudication",
+    "missing original TCA gap repair and provable legacy context migration",
+    "provider economic finality, fees/cash and consistent financial risk consequences",
+    "native physical-account uniqueness/device epochs/migration/safe retirement",
+    "original independent, provider, production, signing and handset gates"
+  ]
+}

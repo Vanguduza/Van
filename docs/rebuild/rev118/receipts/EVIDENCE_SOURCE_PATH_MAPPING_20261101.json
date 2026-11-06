@@ -1,0 +1,20 @@
+{
+  "schema": "van.historical-evidence-path-mapping/1",
+  "at_utc": "2026-11-01T06:21:36.562609+00:00",
+  "source_parent": "ca135eb7d8d3635d52b9e49d51eee8e9a870d3a1",
+  "reason": "Historical baseline source snapshot was packaged with an active .py suffix and correctly rejected by unchanged private-core topology discovery. It is evidence data, not an additional application store owner.",
+  "path_mappings": [
+    {
+      "historical_recorded_path": "docs/rebuild/rev118/receipts/raw/native-family-reenrollment-20261101/van-reenrollment-recovery-evidence-20261101/baseline_db_2728.py",
+      "current_packaged_path": "docs/rebuild/rev118/receipts/raw/native-family-reenrollment-20261101/van-reenrollment-recovery-evidence-20261101/baseline_db_2728.py.txt",
+      "sha256_before": "7ba9ea1135da9068c388ae0901fb846854847f803a690bd82ce7c9ac83a61de5",
+      "sha256_after": "7ba9ea1135da9068c388ae0901fb846854847f803a690bd82ce7c9ac83a61de5",
+      "bytes": 132494,
+      "role": "HISTORICAL_2728_DATABASE_SOURCE_FOR_MIGRATION_SQL_IDENTITY",
+      "byte_changes": false
+    }
+  ],
+  "historical_receipts_and_commands": "UNCHANGED: resolve original recorded path through this map. For deliberate historical command replay use a disposable directory with the recorded filename; do not restore an active source copy into the candidate.",
+  "unchanged_original_receipt": "docs/rebuild/rev118/receipts/ORIGINAL_NATIVE_FAMILY_AND_REENROLLMENT_SOURCE_20261101.json",
+  "test_guard_or_application_changes": false
+}

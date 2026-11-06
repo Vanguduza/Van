@@ -10,7 +10,7 @@ it, with no residual and no smoothing:
 
 * **edge** — what the decision itself was worth: decision price to exit.
 * **execution** — what the fill gave away or won against the decision price.
-* **cost** — commissions, spread and fees, as charged.
+* **cost** — explicit nonembedded net charges; fill prices already contain spread.
 * **carry** — swap and funding, as credited or debited.
 
 The sum identity is checked, not assumed. If the four do not reconstruct the
@@ -38,7 +38,7 @@ from vati.core.events import EventKind, make_event
 from vati.risk.contracts import Direction
 
 PRODUCER = "vati-pnl-attribution"
-ATTRIBUTION_VERSION = "pnl-attribution/5.1.0"
+ATTRIBUTION_VERSION = "pnl-attribution/5.1.1"
 
 ZERO = Decimal("0")
 ONE_MULT = Decimal("1")
@@ -73,12 +73,25 @@ class TradeFacts:
     fill_price: Decimal            # where it actually filled
     exit_price: Decimal            # where it actually closed
     money_risk: Decimal            # initial risk in account currency; the R unit
-    costs: Decimal = ZERO          # commissions + spread paid, positive number
+    costs: Decimal = ZERO          # explicit nonembedded net fees, in account currency
     carry: Decimal = ZERO          # swap/funding, signed
     opened_ms: int = 0
     closed_ms: int = 0
+    contract_value_per_price_unit: Decimal = ONE_MULT
+    account_currency: str = ""
+    reported_net_pnl: Decimal | None = None
 
     def __post_init__(self) -> None:
+        if any(not isinstance(value, Decimal) or not value.is_finite() for value in
+               (self.money_risk, self.quantity, self.decision_price, self.fill_price,
+                self.exit_price, self.costs, self.carry, self.contract_value_per_price_unit)):
+            raise AttributionError("attribution requires finite Decimal economic inputs")
+        if not isinstance(self.direction, Direction):
+            raise AttributionError("attribution direction must be LONG or SHORT")
+        if self.contract_value_per_price_unit <= ZERO:
+            raise AttributionError("attribution contract value must be positive")
+        if self.reported_net_pnl is not None and (not isinstance(self.reported_net_pnl, Decimal) or not self.reported_net_pnl.is_finite()):
+            raise AttributionError("reported net PnL must be a finite Decimal")
         if self.money_risk <= ZERO:
             raise AttributionError(
                 f"{self.trade_intent_id} has money_risk {self.money_risk}; R is undefined")
@@ -108,6 +121,9 @@ class Attribution:
     counterfactual_basis: CounterfactualBasis
     model_id: str = ""
     attribution_version: str = ATTRIBUTION_VERSION
+    contract_value_per_price_unit: Decimal = ONE_MULT
+    account_currency: str = ""
+    reconciliation_basis: str = "PRICE_MODEL_ONLY"
 
     def _r(self, money: Decimal) -> Decimal:
         return money / self.money_risk
@@ -147,6 +163,10 @@ class Attribution:
             "symbol": self.symbol,
             "strategy_id": self.strategy_id,
             "money_risk": str(self.money_risk),
+            "contract_value_per_price_unit": str(self.contract_value_per_price_unit),
+            "account_currency": self.account_currency,
+            "explanation_basis": "DESCRIPTIVE_PRICE_DECOMPOSITION_NOT_CAUSAL_PROOF",
+            "reconciliation_basis": self.reconciliation_basis,
             "realised": {"money": str(self.realised_money), "r": str(self.realised_r)},
             "buckets": {
                 "edge": {"money": str(self.edge_money), "r": str(self.edge_r)},
@@ -180,7 +200,7 @@ class AttributionEngine:
     def attribute(self, facts: TradeFacts, *,
                   shadow_entry: Optional[ShadowEntry] = None,
                   now_ms: Optional[int] = None) -> Attribution:
-        s, q = facts.sign, facts.quantity
+        s, q = facts.sign, facts.quantity * facts.contract_value_per_price_unit
 
         # What the decision was worth, independent of how it filled.
         edge = s * (facts.exit_price - facts.decision_price) * q
@@ -190,6 +210,8 @@ class AttributionEngine:
         carry = facts.carry
 
         realised = s * (facts.exit_price - facts.fill_price) * q - facts.costs + facts.carry
+        if facts.reported_net_pnl is not None and abs(realised-facts.reported_net_pnl) > SUM_TOLERANCE:
+            raise AttributionError("price/fee attribution does not reconcile to caller net PnL")
         if abs((edge + execution + cost + carry) - realised) > SUM_TOLERANCE:
             # A residual bucket is where attribution errors go to be forgotten.
             raise AttributionError(
@@ -213,7 +235,10 @@ class AttributionEngine:
             strategy_id=facts.strategy_id, edge_money=edge, execution_money=execution,
             cost_money=cost, carry_money=carry, realised_money=realised,
             money_risk=facts.money_risk, cognition_delta_r=delta_r,
-            counterfactual_basis=basis, model_id=model_id)
+            counterfactual_basis=basis, model_id=model_id,
+            contract_value_per_price_unit=facts.contract_value_per_price_unit,
+            account_currency=facts.account_currency,
+            reconciliation_basis="CALLER_NET_PNL_MATCHED" if facts.reported_net_pnl is not None else "PRICE_MODEL_ONLY")
         self._by_trade[facts.trade_intent_id] = att
 
         if self._ledger is not None:
@@ -279,9 +304,9 @@ whole point:
   it again, and the next one will not be lucky. It **must** reduce capsule
   health.
 * `GOOD_DECISION_BAD_OUTCOME` — the honest loss. Sound thesis, disciplined
-  risk, policy followed, blackout respected; the market disagreed. It **must
-  not** reduce capsule health, because degrading a strategy for variance is
-  how a system talks itself out of a real edge.
+  risk, policy followed, blackout respected. This process-only multiplier
+  does not decrease; separate cohort expectancy and drift checks still may.
+  One trade does not establish variance, causality or a profitable edge.
 
 So `capsule_health` is fed from the *decision-quality* axis alone. The R axis
 is still recorded, still surfaced and still drives expectancy tracking — it
@@ -313,6 +338,7 @@ class DecisionQuality(str, Enum):
 class OutcomeQuality(str, Enum):
     GOOD = "GOOD_OUTCOME"
     BAD = "BAD_OUTCOME"
+    UNKNOWN = "UNKNOWN_OUTCOME"
 
 
 class Quadrant(str, Enum):
@@ -320,6 +346,8 @@ class Quadrant(str, Enum):
     GOOD_DECISION_BAD_OUTCOME = "GOOD_DECISION_BAD_OUTCOME"
     BAD_DECISION_GOOD_OUTCOME = "BAD_DECISION_GOOD_OUTCOME"
     BAD_DECISION_BAD_OUTCOME = "BAD_DECISION_BAD_OUTCOME"
+    GOOD_DECISION_UNKNOWN_OUTCOME = "GOOD_DECISION_UNKNOWN_OUTCOME"
+    BAD_DECISION_UNKNOWN_OUTCOME = "BAD_DECISION_UNKNOWN_OUTCOME"
 
     @property
     def decision(self) -> DecisionQuality:
@@ -327,11 +355,13 @@ class Quadrant(str, Enum):
 
     @property
     def outcome(self) -> OutcomeQuality:
+        if self.value.endswith("UNKNOWN_OUTCOME"):
+            return OutcomeQuality.UNKNOWN
         return OutcomeQuality.GOOD if self.value.endswith("GOOD_OUTCOME") else OutcomeQuality.BAD
 
     @property
     def is_lucky(self) -> bool:
-        """A result the process did not earn. The most dangerous kind."""
+        """Legacy label: profit with a process breach, not proof of randomness."""
         return self is Quadrant.BAD_DECISION_GOOD_OUTCOME
 
     @property
@@ -425,6 +455,7 @@ class DecisionQualityInputs:
             "stop_widened": self.stop_widened,
             "execution_policy_applied": self.execution_policy_applied,
             "cost_ratio": None if self.cost_ratio is None else str(self.cost_ratio),
+            "max_cost_ratio": str(self.max_cost_ratio),
             "opened_in_blackout": self.opened_in_blackout,
             "event_certified": self.event_certified,
         }
@@ -443,14 +474,14 @@ class QuadrantVerdict:
     inputs: Mapping[str, Any]
     evidence_refs: tuple[str, ...]
     assessed_ms: int
-    version: str = "decision-quadrant/5.1.0"
+    version: str = "decision-quadrant/5.1.1"
 
     @property
     def decision_quality(self) -> DecisionQuality:
         return self.quadrant.decision
 
     def body(self) -> dict[str, Any]:
-        return {
+        result = {
             "trade_intent_id": self.trade_intent_id,
             "strategy_id": self.strategy_id,
             "symbol": self.symbol,
@@ -459,7 +490,7 @@ class QuadrantVerdict:
             "outcome_quality": self.quadrant.outcome.value,
             "faults": list(self.faults),
             "fault_detail": [PROCESS_FAULTS[f] for f in self.faults],
-            "r_multiple": str(self.r_multiple),
+            "r_multiple": None if self.quadrant.outcome is OutcomeQuality.UNKNOWN else str(self.r_multiple),
             "is_lucky": self.quadrant.is_lucky,
             "is_unlucky": self.quadrant.is_unlucky,
             "inputs": dict(sorted(self.inputs.items())),
@@ -467,16 +498,20 @@ class QuadrantVerdict:
             "assessed_ms": self.assessed_ms,
             "version": self.version,
         }
+        if self.version != "decision-quadrant/5.1.0":
+            result["luck_inference"] = "NOT_ESTABLISHED_FROM_ONE_TRADE"
+        return result
 
     @property
     def digest(self) -> str:
         return canonical_hash(self.body())
 
 
-def classify(inputs: DecisionQualityInputs, *, r_multiple: Decimal) -> Quadrant:
+def classify(inputs: DecisionQualityInputs, *, r_multiple: Decimal, outcome_known: bool = True) -> Quadrant:
     """The quadrant, from process on one axis and money on the other."""
     decision = inputs.quality
-    outcome = OutcomeQuality.GOOD if r_multiple > OUTCOME_GOOD_R else OutcomeQuality.BAD
+    outcome = (OutcomeQuality.UNKNOWN if not outcome_known else
+               OutcomeQuality.GOOD if r_multiple > OUTCOME_GOOD_R else OutcomeQuality.BAD)
     return Quadrant(f"{decision.value}_{outcome.value}")
 
 
@@ -493,38 +528,99 @@ class DecisionQualityLedger:
     """
 
     def __init__(self, *, ledger=None, producer: str = "vati-decision-quality",
-                 window: int = 60) -> None:
+                 window: int = 60, scope=None) -> None:
+        self.scope = scope
         self._ledger = ledger
         self._producer = producer
         self.window = window
         self._by_strategy: dict[str, list[QuadrantVerdict]] = {}
         self._by_trade: dict[str, QuadrantVerdict] = {}
+        self.replay_rejections: list[dict[str, str]] = []
 
     def record(self, inputs: DecisionQualityInputs, *, symbol: str,
                r_multiple: Decimal, now_ms: int,
-               evidence_refs: tuple[str, ...] = ()) -> QuadrantVerdict:
+               evidence_refs: tuple[str, ...] = (), outcome_known: bool = True) -> QuadrantVerdict:
+        if type(outcome_known) is not bool or not isinstance(r_multiple, Decimal) or not r_multiple.is_finite():
+            raise ValueError("decision-quality return must be a finite Decimal")
+        if self.scope is not None:
+            history = list(self._ledger.iter(correlation_id=inputs.trade_intent_id))
+            if not history or not self.scope.admit(history[-1]):
+                raise ValueError("decision-quality input has no admitted native account/cohort")
         verdict = QuadrantVerdict(
             trade_intent_id=inputs.trade_intent_id,
             strategy_id=inputs.strategy_id,
             symbol=symbol,
-            quadrant=classify(inputs, r_multiple=r_multiple),
+            quadrant=classify(inputs, r_multiple=r_multiple, outcome_known=outcome_known),
             faults=inputs.faults(),
             r_multiple=r_multiple,
             inputs=inputs.body(),
             evidence_refs=evidence_refs,
             assessed_ms=now_ms,
         )
-        rows = self._by_strategy.setdefault(inputs.strategy_id, [])
-        rows.append(verdict)
-        del rows[:-self.window]
-        self._by_trade[inputs.trade_intent_id] = verdict
+        previous = self._by_trade.get(inputs.trade_intent_id)
+        if previous is not None:
+            if previous.digest != verdict.digest:
+                raise ValueError("conflicting decision-quality result requires an explicit correction")
+            return previous
         if self._ledger is not None:
             self._ledger.append(make_event(
                 EventKind.DECISION_QUADRANT, self._producer,
                 verdict.body() | {"verdict_hash": verdict.digest},
                 event_time_ms=now_ms, received_time_ms=now_ms,
                 correlation_id=inputs.trade_intent_id))
+        self._remember(verdict)
         return verdict
+
+    def _remember(self, verdict: QuadrantVerdict) -> bool:
+        previous = self._by_trade.get(verdict.trade_intent_id)
+        if previous is not None:
+            if previous.digest != verdict.digest:
+                raise ValueError("conflicting decision-quality result")
+            return False
+        rows = self._by_strategy.setdefault(verdict.strategy_id, [])
+        rows.append(verdict)
+        del rows[:-self.window]
+        self._by_trade[verdict.trade_intent_id] = verdict
+        return True
+
+    def restore_from_ledger(self, ledger) -> int:
+        """Restore actual native, sealed process observations without appending rows."""
+        restored = 0
+        for event in ledger.iter(EventKind.DECISION_QUADRANT):
+            if self.scope is not None and not self.scope.admit(event):
+                continue
+            try:
+                p = event.payload
+                if event.producer != self._producer or event.hash != canonical_hash(event.body()):
+                    raise ValueError("non-native or corrupt decision-quality event")
+                if p["version"] not in {"decision-quadrant/5.1.0", "decision-quadrant/5.1.1"}:
+                    raise ValueError("unsupported decision-quality version")
+                raw = dict(p["inputs"])
+                for key in ("approved_risk_pct", "mandate_max_risk_pct", "cost_ratio", "max_cost_ratio"):
+                    if key in raw and raw[key] is not None:
+                        raw[key] = Decimal(str(raw[key]))
+                        if raw[key].is_nan() or (key != "cost_ratio" and not raw[key].is_finite()) or raw[key] == Decimal("-Infinity"):
+                            raise ValueError("nonfinite decision-quality input")
+                boolean_fields = ("thesis_sealed", "thesis_falsifiable", "thesis_intact_at_entry", "protective_stop_confirmed",
+                    "stop_widened", "execution_policy_applied", "opened_in_blackout", "event_certified")
+                if any(type(raw.get(key)) is not bool for key in boolean_fields) or type(p["assessed_ms"]) is not int or p["assessed_ms"] < 0:
+                    raise ValueError("untyped decision-quality input")
+                inputs = DecisionQualityInputs(trade_intent_id=p["trade_intent_id"], strategy_id=p["strategy_id"], **raw)
+                quadrant = Quadrant(p["quadrant"])
+                known = quadrant.outcome is not OutcomeQuality.UNKNOWN
+                if not known and p["version"] == "decision-quadrant/5.1.0":
+                    raise ValueError("unknown outcome is not a legacy record state")
+                value = Decimal(str(p["r_multiple"])) if known else ZERO
+                if not value.is_finite() or tuple(p["faults"]) != inputs.faults() or classify(inputs, r_multiple=value, outcome_known=known) is not quadrant:
+                    raise ValueError("decision-quality facts disagree")
+                verdict = QuadrantVerdict(p["trade_intent_id"], p["strategy_id"], p["symbol"], quadrant,
+                    tuple(p["faults"]), value, p["inputs"], tuple(p["evidence_refs"]), p["assessed_ms"], p["version"])
+                if verdict.digest != p["verdict_hash"] or event.correlation_id != verdict.trade_intent_id:
+                    raise ValueError("decision-quality seal mismatch")
+                restored += int(self._remember(verdict))
+            except (ValueError, TypeError, KeyError, ArithmeticError) as exc:
+                self.replay_rejections.append({"event_hash": event.hash, "reason": str(exc)[:120]})
+        return restored
 
     def get(self, trade_intent_id: str) -> Optional[QuadrantVerdict]:
         return self._by_trade.get(trade_intent_id)

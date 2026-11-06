@@ -1,0 +1,14 @@
+.E                                                                       [100%]
+==================================== ERRORS ====================================
+_______________________ ERROR at teardown of test_case_0 _______________________
+
+    @pytest.fixture(autouse=True)
+    def guard():
+        yield
+>       raise AssertionError("actual teardown failure")
+E       AssertionError: actual teardown failure
+
+backend/tests/test_case_0.py:5: AssertionError
+=========================== short test summary info ============================
+ERROR backend/tests/test_case_0.py::test_case_0 - AssertionError: actual tear...
+1 passed, 3 deselected, 1 error in 0.11s

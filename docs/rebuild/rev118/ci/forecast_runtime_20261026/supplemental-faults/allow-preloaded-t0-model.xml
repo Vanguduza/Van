@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="9" time="6.237" timestamp="2026-10-26T04:58:49.942678+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_ml_runtime_boundary" name="test_actual_serve_entrypoint_refuses_model_import_before_model_code_executes[qlib]" time="0.657" /><testcase classname="trading.tests.test_ml_runtime_boundary" name="test_actual_serve_entrypoint_refuses_model_import_before_model_code_executes[lightgbm]" time="0.596" /><testcase classname="trading.tests.test_ml_runtime_boundary" name="test_actual_serve_entrypoint_refuses_model_import_before_model_code_executes[neuralforecast]" time="0.481" /><testcase classname="trading.tests.test_ml_runtime_boundary" name="test_actual_serve_entrypoint_refuses_model_import_before_model_code_executes[xgboost]" time="0.564" /><testcase classname="trading.tests.test_ml_runtime_boundary" name="test_actual_serve_entrypoint_refuses_model_import_before_model_code_executes[optuna]" time="0.505" /><testcase classname="trading.tests.test_ml_runtime_boundary" name="test_actual_serve_entrypoint_refuses_model_import_before_model_code_executes[feast]" time="0.687" /><testcase classname="trading.tests.test_ml_runtime_boundary" name="test_actual_serve_entrypoint_refuses_model_import_before_model_code_executes[mlflow]" time="1.078" /><testcase classname="trading.tests.test_ml_runtime_boundary" name="test_actual_serve_entrypoint_refuses_model_import_before_model_code_executes[torch]" time="0.645" /><testcase classname="trading.tests.test_ml_runtime_boundary" name="test_serve_refuses_a_preloaded_model_before_loading_account_configuration" time="0.877"><failure message="AssertionError: assert 'CONFIGURATION_WAS_READ' == 2">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-304/test_serve_refuses_a_preloaded0')
+
+    def test_serve_refuses_a_preloaded_model_before_loading_account_configuration(tmp_path):
+        code='''
+    from argparse import Namespace
+    import json,sys,types
+    sys.modules['torch']=types.ModuleType('torch')
+    from vati.__main__ import cmd_serve
+    try:result=cmd_serve(Namespace(config=sys.argv[1],once=True))
+    except FileNotFoundError:result='CONFIGURATION_WAS_READ'
+    print(json.dumps({'result':result}))
+    '''
+        child=subprocess.run([sys.executable,'-c',code,str(tmp_path/'absent-profile.json')],
+            env=dict(os.environ,PYTHONPATH=str(Path(__file__).resolve().parents[1])),
+            capture_output=True,text=True,timeout=30)
+        assert child.returncode==0,child.stderr
+&gt;       assert json.loads(child.stdout.splitlines()[-1])['result']==2
+E       AssertionError: assert 'CONFIGURATION_WAS_READ' == 2
+
+trading/tests/test_ml_runtime_boundary.py:49: AssertionError</failure></testcase></testsuite></testsuites>

@@ -1,0 +1,163 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:van:forecast:prediction-market:EventPositionProposal:1.0",
+  "title": "EventPositionProposal",
+  "description": "Proposed VAN contract. JSON shape/local arithmetic is not evidence admission, source permission or financial authority.",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "record_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "environment": {
+      "enum": [
+        "FIXTURE",
+        "RESEARCH",
+        "SHADOW"
+      ]
+    },
+    "authority_effect": {
+      "const": "NONE"
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0
+    },
+    "source_digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "canonical_event_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "response_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "use_scope": {
+      "enum": [
+        "EXTERNAL_ASSET_RESEARCH",
+        "BINARY_CONTRACT_RESEARCH"
+      ]
+    },
+    "live_enabled": {
+      "const": false
+    },
+    "risk_authority": {
+      "const": "VATI.RiskAuthority"
+    },
+    "order_sender": {
+      "const": "VATI.ExecutionRouter"
+    },
+    "news_path": {
+      "enum": [
+        "NONE",
+        "D1",
+        "D2",
+        "D3",
+        "D4",
+        "D5",
+        "D6",
+        "D7"
+      ]
+    },
+    "news_multiplier": {
+      "type": "string",
+      "pattern": "^-?[0-9]+(?:\\.[0-9]+)?$"
+    },
+    "risk_request_fraction": {
+      "type": "string",
+      "pattern": "^-?[0-9]+(?:\\.[0-9]+)?$"
+    },
+    "currency": {
+      "type": "string",
+      "minLength": 1
+    },
+    "valuation_basis": {
+      "enum": [
+        "SETTLEMENT",
+        "EXECUTABLE_EARLY_EXIT",
+        "EXTERNAL_ASSET_RESPONSE"
+      ]
+    },
+    "analysis_contract_count": {
+      "type": "string",
+      "pattern": "^-?[0-9]+(?:\\.[0-9]+)?$"
+    },
+    "analysis_success_probability": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "entry_cost_total": {
+      "type": "string",
+      "pattern": "^-?[0-9]+(?:\\.[0-9]+)?$"
+    },
+    "fees_total": {
+      "type": "string",
+      "pattern": "^-?[0-9]+(?:\\.[0-9]+)?$"
+    },
+    "other_costs_total": {
+      "type": "string",
+      "pattern": "^-?[0-9]+(?:\\.[0-9]+)?$"
+    },
+    "expected_payout_total": {
+      "type": "string",
+      "pattern": "^-?[0-9]+(?:\\.[0-9]+)?$"
+    },
+    "expected_net_value": {
+      "type": "string",
+      "pattern": "^-?[0-9]+(?:\\.[0-9]+)?$"
+    },
+    "maximum_loss_bound": {
+      "type": "string",
+      "pattern": "^-?[0-9]+(?:\\.[0-9]+)?$"
+    },
+    "policy_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "independent_calibration_ref": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "required": [
+    "schema_version",
+    "record_id",
+    "environment",
+    "authority_effect",
+    "evidence_refs",
+    "source_digest",
+    "canonical_event_id",
+    "response_ref",
+    "use_scope",
+    "live_enabled",
+    "risk_authority",
+    "order_sender",
+    "news_path",
+    "news_multiplier",
+    "risk_request_fraction",
+    "currency",
+    "valuation_basis",
+    "analysis_contract_count",
+    "analysis_success_probability",
+    "entry_cost_total",
+    "fees_total",
+    "other_costs_total",
+    "expected_payout_total",
+    "expected_net_value",
+    "maximum_loss_bound",
+    "policy_ref",
+    "independent_calibration_ref"
+  ],
+  "additionalProperties": false
+}

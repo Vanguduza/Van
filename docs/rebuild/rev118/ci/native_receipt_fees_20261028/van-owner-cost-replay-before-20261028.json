@@ -1,0 +1,21 @@
+{
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "-m",
+    "pytest",
+    "/workspace/test_van_owner_cost_replay_20261028.py",
+    "-q",
+    "-o",
+    "pythonpath=trading trading/tests /workspace",
+    "--junitxml=/workspace/van-owner-cost-replay-before-20261028.xml"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 846420,
+  "started_at_utc": "2026-10-28T23:16:50.632022+00:00",
+  "timeout_seconds": 60,
+  "state": "COMPLETED",
+  "command_pid": 846425,
+  "exit": 1,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-28T23:16:52.301853+00:00"
+}

@@ -1,0 +1,16 @@
+{
+  "command": [
+    "python3",
+    "tools/rebuild/workmap.py",
+    "--check"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 439862,
+  "started_at_utc": "2026-10-28T12:22:30.311539+00:00",
+  "timeout_seconds": 300,
+  "state": "COMPLETED",
+  "command_pid": 439875,
+  "exit": 0,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-28T12:22:31.129645+00:00"
+}

@@ -1,0 +1,152 @@
+﻿2026-10-26T02:40:00.4446388Z Current runner version: '2.338.0'
+2026-10-26T02:40:00.4483003Z ##[group]Runner Image Provisioner
+2026-10-26T02:40:00.4483557Z Hosted Compute Agent
+2026-10-26T02:40:00.4483979Z Version: 20261021.618
+2026-10-26T02:40:00.4484361Z Commit: 21505ad2541d5be6135ed84fc33697146cf75b8e
+2026-10-26T02:40:00.4484853Z Build Date: 2026-10-21T00:45:21Z
+2026-10-26T02:40:00.4485301Z Worker ID: {8f57f670-4de8-4ef2-9796-3e60227fcda3}
+2026-10-26T02:40:00.4485726Z Region: southcentralus
+2026-10-26T02:40:00.4486111Z Cloud: Azure
+2026-10-26T02:40:00.4486444Z ##[endgroup]
+2026-10-26T02:40:00.4487398Z ##[group]Operating System
+2026-10-26T02:40:00.4487859Z Ubuntu
+2026-10-26T02:40:00.4488176Z 24.04.5
+2026-10-26T02:40:00.4488515Z LTS
+2026-10-26T02:40:00.4488840Z ##[endgroup]
+2026-10-26T02:40:00.4489175Z ##[group]Runner Image
+2026-10-26T02:40:00.4489637Z Image: ubuntu-24.04
+2026-10-26T02:40:00.4490024Z Version: 20261012.334.1
+2026-10-26T02:40:00.4490863Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261012.334/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-26T02:40:00.4491793Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261012.334
+2026-10-26T02:40:00.4492424Z ##[endgroup]
+2026-10-26T02:40:00.4493125Z ##[group]GITHUB_TOKEN Permissions
+2026-10-26T02:40:00.4494366Z Contents: read
+2026-10-26T02:40:00.4494714Z Metadata: read
+2026-10-26T02:40:00.4495099Z Packages: read
+2026-10-26T02:40:00.4495483Z ##[endgroup]
+2026-10-26T02:40:00.4496804Z Secret source: Actions
+2026-10-26T02:40:00.4497569Z Cache mode: write
+2026-10-26T02:40:00.4497988Z Prepare workflow directory
+2026-10-26T02:40:00.4718910Z Prepare all required actions
+2026-10-26T02:40:00.4750539Z Getting action download info
+2026-10-26T02:40:00.7231771Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-26T02:40:00.8230155Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+2026-10-26T02:40:00.9200194Z Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+2026-10-26T02:40:01.0173846Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-10-26T02:40:01.2114343Z Complete job name: backend
+2026-10-26T02:40:01.2773144Z ##[group]Run actions/checkout@v4
+2026-10-26T02:40:01.2773555Z with:
+2026-10-26T02:40:01.2773792Z   repository: Vanguduza/Van
+2026-10-26T02:40:01.2776059Z   token: ***
+2026-10-26T02:40:01.2776288Z   ssh-strict: true
+2026-10-26T02:40:01.2776525Z   ssh-user: git
+2026-10-26T02:40:01.2776768Z   persist-credentials: true
+2026-10-26T02:40:01.2777160Z   clean: true
+2026-10-26T02:40:01.2777400Z   sparse-checkout-cone-mode: true
+2026-10-26T02:40:01.2777681Z   fetch-depth: 1
+2026-10-26T02:40:01.2777912Z   fetch-tags: false
+2026-10-26T02:40:01.2778150Z   show-progress: true
+2026-10-26T02:40:01.2778385Z   lfs: false
+2026-10-26T02:40:01.2778605Z   submodules: false
+2026-10-26T02:40:01.2778846Z   set-safe-directory: true
+2026-10-26T02:40:01.2779136Z   allow-unsafe-pr-checkout: false
+2026-10-26T02:40:01.2779593Z ##[endgroup]
+2026-10-26T02:40:01.3462843Z Syncing repository: Vanguduza/Van
+2026-10-26T02:40:01.3464496Z ##[group]Getting Git version info
+2026-10-26T02:40:01.3465140Z Working directory is '/home/runner/work/Van/Van'
+2026-10-26T02:40:01.3465935Z [command]/usr/bin/git version
+2026-10-26T02:40:01.3563980Z git version 2.55.0
+2026-10-26T02:40:01.3580278Z ##[endgroup]
+2026-10-26T02:40:01.3587105Z Temporarily overriding HOME='/home/runner/work/_temp/1f66ba5a-5728-4ea8-9172-da82be673039' before making global git config changes
+2026-10-26T02:40:01.3588314Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-26T02:40:01.3589903Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Van/Van
+2026-10-26T02:40:01.3642454Z Deleting the contents of '/home/runner/work/Van/Van'
+2026-10-26T02:40:01.3657996Z ##[group]Initializing the repository
+2026-10-26T02:40:01.3658864Z [command]/usr/bin/git init /home/runner/work/Van/Van
+2026-10-26T02:40:01.3745815Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-26T02:40:01.3748789Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-26T02:40:01.3750159Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-26T02:40:01.3751002Z hint: call:
+2026-10-26T02:40:01.3751339Z hint:
+2026-10-26T02:40:01.3751787Z hint: 	git config --global init.defaultBranch <name>
+2026-10-26T02:40:01.3752305Z hint:
+2026-10-26T02:40:01.3752783Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-26T02:40:01.3753599Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-26T02:40:01.3754262Z hint:
+2026-10-26T02:40:01.3754639Z hint: 	git branch -m <name>
+2026-10-26T02:40:01.3755024Z hint:
+2026-10-26T02:40:01.3755538Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-26T02:40:01.3756383Z Initialized empty Git repository in /home/runner/work/Van/Van/.git/
+2026-10-26T02:40:01.3761002Z [command]/usr/bin/git remote add origin https://github.com/Vanguduza/Van
+2026-10-26T02:40:01.3808806Z ##[endgroup]
+2026-10-26T02:40:01.3809490Z ##[group]Disabling automatic garbage collection
+2026-10-26T02:40:01.3812011Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-26T02:40:01.3851182Z ##[endgroup]
+2026-10-26T02:40:01.3851801Z ##[group]Setting up auth
+2026-10-26T02:40:01.3858194Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-26T02:40:01.3888854Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-26T02:40:01.4215949Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-26T02:40:01.4256032Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-26T02:40:01.4471139Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-26T02:40:01.4503593Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-26T02:40:01.4701553Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-26T02:40:01.4738988Z ##[endgroup]
+2026-10-26T02:40:01.4739704Z ##[group]Fetching the repository
+2026-10-26T02:40:01.4756658Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +8e60293e9d764e6c6d7d05b5ae518be804bba885:refs/remotes/pull/105/merge
+2026-10-26T02:40:04.2585196Z From https://github.com/Vanguduza/Van
+2026-10-26T02:40:04.2586012Z  * [new ref]         8e60293e9d764e6c6d7d05b5ae518be804bba885 -> pull/105/merge
+2026-10-26T02:40:04.2588239Z ##[endgroup]
+2026-10-26T02:40:04.2588999Z ##[group]Determining the checkout info
+2026-10-26T02:40:04.2594937Z ##[endgroup]
+2026-10-26T02:40:04.2596441Z [command]/usr/bin/git sparse-checkout disable
+2026-10-26T02:40:04.2645697Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-26T02:40:04.2673563Z ##[group]Checking out the ref
+2026-10-26T02:40:04.2676216Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/105/merge
+2026-10-26T02:40:05.0206626Z Note: switching to 'refs/remotes/pull/105/merge'.
+2026-10-26T02:40:05.0207275Z 
+2026-10-26T02:40:05.0207514Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-10-26T02:40:05.0208013Z changes and commit them, and you can discard any commits you make in this
+2026-10-26T02:40:05.0208547Z state without impacting any branches by switching back to a branch.
+2026-10-26T02:40:05.0208827Z 
+2026-10-26T02:40:05.0209053Z If you want to create a new branch to retain commits you create, you may
+2026-10-26T02:40:05.0209900Z do so (now or later) by using -c with the switch command. Example:
+2026-10-26T02:40:05.0210155Z 
+2026-10-26T02:40:05.0210277Z   git switch -c <new-branch-name>
+2026-10-26T02:40:05.0210468Z 
+2026-10-26T02:40:05.0210635Z Or undo this operation with:
+2026-10-26T02:40:05.0210802Z 
+2026-10-26T02:40:05.0210902Z   git switch -
+2026-10-26T02:40:05.0211051Z 
+2026-10-26T02:40:05.0211338Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-10-26T02:40:05.0211617Z 
+2026-10-26T02:40:05.0211963Z HEAD is now at 8e60293 Merge 1f4ecbf748b870b3187ac33ccdac734e375e541c into 8eb1889822fc8a83f219977c15340172e16acd91
+2026-10-26T02:40:05.0271517Z ##[endgroup]
+2026-10-26T02:40:05.0313926Z [command]/usr/bin/git log -1 --format=%H
+2026-10-26T02:40:05.0339103Z 8e60293e9d764e6c6d7d05b5ae518be804bba885
+2026-10-26T02:40:05.0528685Z ##[group]Run test -n "$DDS_KEY" || {
+2026-10-26T02:40:05.0529030Z [36;1mtest -n "$DDS_KEY" || {[0m
+2026-10-26T02:40:05.0529522Z [36;1m  echo "::error::secret DDS_CONTRACT_READ_DEPLOY_KEY is not provisioned: add a read-only deploy key on Vanguduza/dial-development-system and store its private half in this repository's Actions secrets"[0m
+2026-10-26T02:40:05.0530023Z [36;1m  exit 1[0m
+2026-10-26T02:40:05.0530168Z [36;1m}[0m
+2026-10-26T02:40:05.0765978Z shell: /usr/bin/bash -e {0}
+2026-10-26T02:40:05.0766269Z env:
+2026-10-26T02:40:05.0766476Z   DDS_KEY: 
+2026-10-26T02:40:05.0766624Z ##[endgroup]
+2026-10-26T02:40:05.0872144Z ##[error]secret DDS_CONTRACT_READ_DEPLOY_KEY is not provisioned: add a read-only deploy key on Vanguduza/dial-development-system and store its private half in this repository's Actions secrets
+2026-10-26T02:40:05.0879701Z ##[error]Process completed with exit code 1.
+2026-10-26T02:40:05.1073117Z Post job cleanup.
+2026-10-26T02:40:05.1684854Z [command]/usr/bin/git version
+2026-10-26T02:40:05.1719019Z git version 2.55.0
+2026-10-26T02:40:05.1744420Z Temporarily overriding HOME='/home/runner/work/_temp/5357cccd-ebed-45f7-a5e1-5551d2e9d31c' before making global git config changes
+2026-10-26T02:40:05.1745239Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-26T02:40:05.1749004Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Van/Van
+2026-10-26T02:40:05.1787220Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-26T02:40:05.1819959Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-26T02:40:05.2044086Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-26T02:40:05.2073745Z http.https://github.com/.extraheader
+2026-10-26T02:40:05.2092586Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-26T02:40:05.2126459Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-26T02:40:05.2340093Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-26T02:40:05.2371350Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-26T02:40:05.2682210Z Cleaning up orphan processes
+2026-10-26T02:40:05.2942947Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

@@ -1,0 +1,16 @@
+{
+  "at_utc": "2026-11-01T11:13:57.155675+00:00",
+  "head": "34466d65da8bcce6ba7ee092edcda7f5fa025a79",
+  "working_tree": "CLEAN",
+  "owned_prior_sessions": "All terminal/reaped; none duplicated",
+  "normal_push": "NOT_ATTEMPTED",
+  "genuine_commit_exit": 0,
+  "final_manifest_exit": 0,
+  "final_manifest": {
+    "mismatches": [],
+    "files": 12766
+  },
+  "preserved_transport_orchestration_error": "Premature redirected JSON read failed JSONDecodeError before manifest writer terminal; shell proceeded into genuine hook. Manifest later terminal0; committed baseline verification still required before push. Future dependent operations run sequentially/check=True.",
+  "original_pins_sha256": "506ccce6748b4ecfdfd4059b047c17a2783b34745607f86b888119c632056594",
+  "source_review": "Original8 reviewed frozen source bytes retained; only verified dependency supplement to be proposed after actual fresh-lock failure."
+}

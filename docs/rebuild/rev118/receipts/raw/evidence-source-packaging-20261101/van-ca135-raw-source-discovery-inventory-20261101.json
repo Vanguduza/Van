@@ -1,0 +1,86 @@
+{
+  "source_head": "ca135eb7d8d3635d52b9e49d51eee8e9a870d3a1",
+  "guard_sha256": "b2e9c4a6160182db77b92f8bdaaf103549cb7385cbdb1f23abfa08185dd1f8fc",
+  "source_suffixes": [
+    ".env",
+    ".example",
+    ".js",
+    ".kt",
+    ".mjs",
+    ".mq5",
+    ".ps1",
+    ".py",
+    ".service",
+    ".sh",
+    ".sql",
+    ".tpl",
+    ".ts",
+    ".yaml",
+    ".yml"
+  ],
+  "raw_files_seen_by_unchanged_discovery": [
+    {
+      "path": "docs/rebuild/rev118/receipts/raw/native-family-reenrollment-20261101/van-reenrollment-independent-review-20261101/probe.py",
+      "sha256": "133071d18b32dc011b575fc69436e6421f5fc77c034bbfe1c14176f156b2a339",
+      "bytes": 1797,
+      "protected_table_hits": [],
+      "deployment_marker_hits": []
+    },
+    {
+      "path": "docs/rebuild/rev118/receipts/raw/native-family-reenrollment-20261101/van-reenrollment-recovery-evidence-20261101/baseline_db_2728.py",
+      "sha256": "7ba9ea1135da9068c388ae0901fb846854847f803a690bd82ce7c9ac83a61de5",
+      "bytes": 132494,
+      "protected_table_hits": [
+        "FROM owner_cognitive_model",
+        "FROM owner_model_episodes",
+        "FROM owner_model_revisions",
+        "INTO owner_model_episodes",
+        "INTO owner_model_outbox",
+        "INTO owner_model_revisions",
+        "JOIN owner_cognitive_model",
+        "ON owner_cognitive_model",
+        "ON owner_model_episodes",
+        "ON owner_model_outbox",
+        "TABLE IF NOT EXISTS owner_cognitive_model",
+        "TABLE IF NOT EXISTS owner_model_episodes",
+        "TABLE IF NOT EXISTS owner_model_outbox",
+        "TABLE IF NOT EXISTS owner_model_revisions",
+        "TABLE owner_model_outbox",
+        "UPDATE owner_cognitive_model",
+        "UPDATE owner_model_revisions"
+      ],
+      "deployment_marker_hits": []
+    },
+    {
+      "path": "docs/rebuild/rev118/receipts/raw/native-family-reenrollment-20261101/van-combined-import-proof-20261101/sitecustomize.py",
+      "sha256": "0c8f57e393339279dc694418252690d513d82e309db107a6b91493db8ed35814",
+      "bytes": 1031,
+      "protected_table_hits": [],
+      "deployment_marker_hits": []
+    },
+    {
+      "path": "docs/rebuild/rev118/receipts/raw/native-family-reenrollment-20261101/van-family-frozen-independent-recheck-r2-20261101/probe.py",
+      "sha256": "9694641eb255501b73aa5c5112ae6c4a639d6f49ff053eea57372217d9593a1a",
+      "bytes": 6120,
+      "protected_table_hits": [],
+      "deployment_marker_hits": []
+    },
+    {
+      "path": "docs/rebuild/rev118/receipts/raw/native-family-reenrollment-20261101/van-family-frozen-independent-review-20261101/probe-preexisting-unknown.py",
+      "sha256": "8bf4c1a7310e552ab7de451111a0aeda0612f9f2f9c7ea7342d692ae410f6e88",
+      "bytes": 2066,
+      "protected_table_hits": [],
+      "deployment_marker_hits": []
+    },
+    {
+      "path": "docs/rebuild/rev118/receipts/raw/native-family-reenrollment-20261101/van-family-frozen-independent-review-20261101/probe.py",
+      "sha256": "e7b3ba23cf5cc2482f694796eddd744f1f2dd77d1ea3202420bbc03583446e30",
+      "bytes": 3655,
+      "protected_table_hits": [],
+      "deployment_marker_hits": []
+    }
+  ],
+  "packaging_candidates": [
+    "docs/rebuild/rev118/receipts/raw/native-family-reenrollment-20261101/van-reenrollment-recovery-evidence-20261101/baseline_db_2728.py"
+  ]
+}

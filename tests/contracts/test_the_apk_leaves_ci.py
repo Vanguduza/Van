@@ -15,6 +15,7 @@ would pass forever while the artifact step failed on every run.
 from __future__ import annotations
 
 from pathlib import Path
+import subprocess
 
 ROOT = Path(__file__).resolve().parents[2]
 LIVE = ROOT / ".github" / "workflows" / "van-ci.yml"
@@ -83,7 +84,8 @@ def test_the_apk_is_a_ci_artefact_and_not_something_committed():
     """The repository ignores *.apk, so the only honest source of one is a CI run."""
     ignored = (ROOT / ".gitignore").read_text(encoding="utf-8").splitlines()
     assert "*.apk" in [line.strip() for line in ignored]
-    assert not list(ROOT.glob("**/*.apk")), (
+    tracked = subprocess.check_output(["git", "ls-files", "-z"], cwd=ROOT).decode().split("\0")
+    assert not [path for path in tracked if path.lower().endswith(".apk")], (
         "an APK is checked in somewhere; a committed binary is not evidence that the "
         "current tree builds, and Gate 14 must install what CI produced."
     )

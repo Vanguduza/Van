@@ -1,0 +1,85 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+_____ test_original_oauth_link_domain_cannot_retarget_another_native_state _____
+
+client = (<httpx.AsyncClient object at 0x7f025918e600>, <fastapi.applications.FastAPI object at 0x7f0258fb7260>)
+tmp_path = PosixPath('/tmp/van-approval-fixture-proof-20261102/before-fourth-root/fixtures/test_original_oauth_link_domai0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f025918ede0>
+
+    @pytest.mark.asyncio
+    async def test_original_oauth_link_domain_cannot_retarget_another_native_state(client,tmp_path,monkeypatch):
+        ac,app=client;peer=FakeDeriv()
+        def control(name):return LocalAccountControl(str(tmp_path/(name+'-accounts.json')),str(tmp_path/(name+'-secrets')),
+            operation_ledger=str(tmp_path/(name+'-native.sqlite')),deriv_connector=peer.connector)
+        original=control('original');other=control('other')
+        app.state.onboarding.control=original
+        expected=original.domain();actual=other.domain();assert expected!=actual
+        started=await act(ac,'oauth_start',{'broker':'deriv','app_id':'1089'})
+>       assert started.status_code==200,started.text
+E       AssertionError: {"detail":"approval_signature_invalid"}
+E       assert 403 == 200
+E        +  where 403 = <Response [403 Forbidden]>.status_code
+
+backend/tests/test_stateful_link_binding.py:32: AssertionError
+---------------------------- Captured stdout setup -----------------------------
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 335.78, "method": "POST", "route": "/v1/devices/pairing-ticket"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-11-02T05:54:10.701Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 23.02, "method": "POST", "route": "/v1/devices/pair"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-11-02T05:54:10.726Z"}
+----------------------------- Captured stdout call -----------------------------
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 32.46, "method": "POST", "route": "/v1/trading/accounts/challenge"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-11-02T05:54:10.773Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 26.89, "method": "POST", "route": "/v1/trading/accounts/action"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "403", "service": "van-gateway", "ts": "2026-11-02T05:54:10.820Z"}
+------------------------------ Captured log call -------------------------------
+INFO     van.request:logging.py:112 request
+INFO     van.request:logging.py:112 request
+______ test_actual_stateful_client_enrolls_the_key_used_by_its_act_helper ______
+
+client = (<httpx.AsyncClient object at 0x7f02595a3650>, <fastapi.applications.FastAPI object at 0x7f0251c8e300>)
+tmp_path = PosixPath('/tmp/van-approval-fixture-proof-20261102/before-fourth-root/fixtures/test_actual_stateful_client_en0')
+
+    @pytest.mark.asyncio
+    async def test_actual_stateful_client_enrolls_the_key_used_by_its_act_helper(client,tmp_path):
+        ac,app=client
+        app.state.onboarding.control=LocalAccountControl(str(tmp_path/'accounts.json'),str(tmp_path/'secrets'),operation_ledger=str(tmp_path/'native.sqlite'))
+        bare=importlib.import_module('test_trading_api')
+        canonical=importlib.import_module('backend.tests.test_trading_api')
+        record=await app.state.store.fetchone('SELECT public_key_pem FROM devices WHERE device_id=?',('test-device',))
+        enrolled=hashlib.sha256(record['public_key_pem'].encode()).hexdigest()
+        response=await act(ac,'oauth_start',{'broker':'deriv'})
+        observation={'actual_fixture_owner':'backend.tests.test_stateful_link_binding.client',
+            'bare_module':bare.__name__,'canonical_module':canonical.__name__,'same_module':bare is canonical,
+            'bare_public_key_sha256':hashlib.sha256(bare.DEVICE_PEM.encode()).hexdigest(),
+            'canonical_public_key_sha256':hashlib.sha256(canonical.DEVICE_PEM.encode()).hexdigest(),
+            'enrolled_public_key_sha256':enrolled,'act_proof_module':act.__globals__['_approval_proof'].__module__,
+            'HTTP_status':response.status_code,'detail':response.json().get('detail')}
+        (tmp_path.parent/'STATEFUL_PUBLIC_KEY_OBSERVATION.json').write_text(json.dumps(observation,indent=2)+'\n')
+>       assert response.status_code==200,response.text
+E       AssertionError: {"detail":"approval_signature_invalid"}
+E       assert 403 == 200
+E        +  where 403 = <Response [403 Forbidden]>.status_code
+
+/tmp/van-approval-fixture-stateful-probe-20261102.py:23: AssertionError
+---------------------------- Captured stdout setup -----------------------------
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 461.1, "method": "POST", "route": "/v1/devices/pairing-ticket"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-11-02T05:54:12.235Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 20.46, "method": "POST", "route": "/v1/devices/pair"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-11-02T05:54:12.257Z"}
+------------------------------ Captured log setup ------------------------------
+INFO     van.request:logging.py:112 request
+INFO     van.request:logging.py:112 request
+----------------------------- Captured stdout call -----------------------------
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 39.89, "method": "POST", "route": "/v1/trading/accounts/challenge"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-11-02T05:54:12.345Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 34.63, "method": "POST", "route": "/v1/trading/accounts/action"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "403", "service": "van-gateway", "ts": "2026-11-02T05:54:12.385Z"}
+------------------------------ Captured log call -------------------------------
+INFO     van.request:logging.py:112 request
+INFO     van.request:logging.py:112 request
+=============================== warnings summary ===============================
+../../van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py:53
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED backend/tests/test_stateful_link_binding.py::test_original_oauth_link_domain_cannot_retarget_another_native_state
+FAILED ::test_actual_stateful_client_enrolls_the_key_used_by_its_act_helper
+2 failed, 2 warnings in 5.57s

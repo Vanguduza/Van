@@ -1,0 +1,61 @@
+{
+  "readback_at_utc": "2026-11-01T03:33:04Z",
+  "repository": "Vanguduza/Van",
+  "commit": "d43bd396765204a4843cdb7485535e9fcd7af3ce",
+  "main_run_id": 41266388959,
+  "exact_head_runs": {
+    "counts": {"terminal": 7, "running": 0, "queued": 0},
+    "runs": [
+      {"id": 41266388844, "name": "van-forecast-runtime-source", "event": "pull_request", "status": "completed", "conclusion": "success"},
+      {"id": 41266388860, "name": "cognitive-fabric-r161-van", "event": "pull_request", "status": "completed", "conclusion": "success"},
+      {"id": 41266388907, "name": "van-mql-native-source", "event": "pull_request", "status": "completed", "conclusion": "success"},
+      {"id": 41266388815, "name": "van-kernel-source", "event": "pull_request", "status": "completed", "conclusion": "success"},
+      {"id": 41266388959, "name": "van-ci", "event": "pull_request", "status": "completed", "conclusion": "failure"},
+      {"id": 41266385212, "name": "canonical-tree-guard", "event": "pull_request_target", "status": "completed", "conclusion": "success"},
+      {"id": 41266380817, "name": "cognitive-fabric-r161-van", "event": "push", "status": "completed", "conclusion": "success"}
+    ]
+  },
+  "main_run": {
+    "job_counts": {"terminal": 19, "running": 0, "queued": 0},
+    "failed_jobs": [
+      {"name": "project-truth-ledger", "failed_step": "Project Truth ledger (trusted checker, every new commit has an authorized row)"},
+      {"name": "backend-public-source", "failed_steps": ["Execute remaining backend, contract and Hermes source cases", "Require complete selected coverage and exact declared prerequisite skips"]},
+      {"name": "backend", "failed_step": "Require the DDS contract read key"}
+    ],
+    "source_jobs": [
+      {"name": "backend-public-source", "conclusion": "failure"},
+      {"name": "browser-guard-source", "conclusion": "success"},
+      {"name": "market-monitor-source", "conclusion": "success"},
+      {"name": "native-source-parquet", "conclusion": "success"},
+      {"name": "cpu-source-runtime", "conclusion": "success"}
+    ],
+    "mutation_jobs": {
+      "counts": {"total": 9, "terminal_success": 9, "failed": 0, "running": 0, "queued": 0},
+      "log_summary_counts_by_shard": {
+        "python-2": {"executed": 58, "caught": 58},
+        "kotlin-0": {"executed": 29, "caught": 29},
+        "python-0": {"executed": 59, "caught": 59},
+        "python-1": {"executed": 58, "caught": 58},
+        "kotlin-2": {"executed": 29, "caught": 29},
+        "kotlin-3": {"executed": 29, "caught": 29},
+        "kotlin-1": {"executed": 29, "caught": 29},
+        "browser-agent": {"executed": 26, "caught": 26},
+        "python-3": {"executed": 57, "caught": 57}
+      },
+      "aggregate_from_completed_job_log_summaries": {"executed": 374, "caught": 374, "survivors": 0},
+      "survivor_evidence": "Each shard log ended with an empty SURVIVORS section; no survivor entries were exposed.",
+      "distinction": "Counts come from completed shard job logs, not from registry-consistency or mutation-count metadata."
+    }
+  },
+  "watcher": {
+    "receipt_path": "/workspace/van-d43-exact-ci-watch-20261101.json",
+    "log_path": "/workspace/van-d43-exact-ci-watch-20261101.log",
+    "command_kind": "gh run watch for run 41266388959 with --exit-status",
+    "receipt_state": "COMPLETED",
+    "exit": 1,
+    "finished_at_utc": "2026-11-01T03:28:13.572921Z",
+    "interpretation": "Watcher reached a terminal failure and exited nonzero; earlier RUNNING_NOT_COMPLETE observation was stale. No separate watcher script was found in the scoped workspace search."
+  },
+  "artifact_access": "Artifact ZIP redirect/download was unavailable through gh in this environment. Mutation totals were established from the available completed job log summaries instead.",
+  "scope": "Read-only exact-head reconciliation. No workflow dispatch/cancel, polling loop, repository edit, source execution, or access to /workspace/Van."
+}

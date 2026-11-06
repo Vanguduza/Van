@@ -1,0 +1,514 @@
+FFFFFFFFF.                                                               [100%]
+=================================== FAILURES ===================================
+_____ test_actual_cli_records_original_rss_and_reports_first_batch_counts ______
+
+files = (PosixPath('/tmp/pytest-of-agent/pytest-313/test_actual_cli_records_origin0/news.json'), PosixPath('/tmp/pytest-of-age...records_origin0/feed.xml'), PosixPath('/tmp/pytest-of-agent/pytest-313/test_actual_cli_records_origin0/ledger.sqlite'))
+capsys = <_pytest.capture.CaptureFixture object at 0x7f813452e660>
+
+    def test_actual_cli_records_original_rss_and_reports_first_batch_counts(files,capsys):
+>       code,report=invoke(files,capsys)
+                    ^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_news_cli_source.py:31: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_news_cli_source.py:27: in invoke
+    result=main(args);return result,json.loads(capsys.readouterr().out)
+           ^^^^^^^^^^
+trading/vati/__main__.py:287: in main
+    return a.fn(a)
+           ^^^^^^^
+trading/vati/__main__.py:217: in cmd_news_ingest
+    counts = ingress.ingest_rows(rows_from_file(path), now_ms=now_ms)
+                                 ^^^^^^^^^^^^^^^^^^^^
+trading/vati/events/news_ingress.py:1096: in rows_from_file
+    return rows_from_text(text,suffix=p.suffix,key=key)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/events/news_ingress.py:1114: in rows_from_text
+    data = json.loads(text)
+           ^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/__init__.py:346: in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/decoder.py:338: in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <json.decoder.JSONDecoder object at 0x7f81368327b0>
+s = '<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>Declared primary feed</title><item><title>Po...-7</guid><link>https://publisher.test/r7</link><pubDate>Fri, 16 Oct 2026 15:00:00 GMT</pubDate></item></channel></rss>'
+idx = 0
+
+    def raw_decode(self, s, idx=0):
+        """Decode a JSON document from ``s`` (a ``str`` beginning with
+        a JSON document) and return a 2-tuple of the Python
+        representation and the index in ``s`` where the document ended.
+    
+        This can be used to decode a JSON document from a string that may
+        have extraneous data at the end.
+    
+        """
+        try:
+            obj, end = self.scan_once(s, idx)
+        except StopIteration as err:
+>           raise JSONDecodeError("Expecting value", s, err.value) from None
+E           json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/decoder.py:356: JSONDecodeError
+__ test_actual_cli_cold_replay_reuses_original_capture_without_growing_ledger __
+
+files = (PosixPath('/tmp/pytest-of-agent/pytest-313/test_actual_cli_cold_replay_re0/news.json'), PosixPath('/tmp/pytest-of-age...cold_replay_re0/feed.xml'), PosixPath('/tmp/pytest-of-agent/pytest-313/test_actual_cli_cold_replay_re0/ledger.sqlite'))
+capsys = <_pytest.capture.CaptureFixture object at 0x7f81343e2ed0>
+
+    def test_actual_cli_cold_replay_reuses_original_capture_without_growing_ledger(files,capsys):
+>       assert invoke(files,capsys)[0]==0
+               ^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_news_cli_source.py:42: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_news_cli_source.py:27: in invoke
+    result=main(args);return result,json.loads(capsys.readouterr().out)
+           ^^^^^^^^^^
+trading/vati/__main__.py:287: in main
+    return a.fn(a)
+           ^^^^^^^
+trading/vati/__main__.py:217: in cmd_news_ingest
+    counts = ingress.ingest_rows(rows_from_file(path), now_ms=now_ms)
+                                 ^^^^^^^^^^^^^^^^^^^^
+trading/vati/events/news_ingress.py:1096: in rows_from_file
+    return rows_from_text(text,suffix=p.suffix,key=key)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/events/news_ingress.py:1114: in rows_from_text
+    data = json.loads(text)
+           ^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/__init__.py:346: in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/decoder.py:338: in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <json.decoder.JSONDecoder object at 0x7f81368327b0>
+s = '<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>Declared primary feed</title><item><title>Po...-7</guid><link>https://publisher.test/r7</link><pubDate>Fri, 16 Oct 2026 15:00:00 GMT</pubDate></item></channel></rss>'
+idx = 0
+
+    def raw_decode(self, s, idx=0):
+        """Decode a JSON document from ``s`` (a ``str`` beginning with
+        a JSON document) and return a 2-tuple of the Python
+        representation and the index in ``s`` where the document ended.
+    
+        This can be used to decode a JSON document from a string that may
+        have extraneous data at the end.
+    
+        """
+        try:
+            obj, end = self.scan_once(s, idx)
+        except StopIteration as err:
+>           raise JSONDecodeError("Expecting value", s, err.value) from None
+E           json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/decoder.py:356: JSONDecodeError
+_______ test_actual_cli_uses_explicit_file_override_in_snapshot_profile ________
+
+files = (PosixPath('/tmp/pytest-of-agent/pytest-313/test_actual_cli_uses_explicit_0/news.json'), PosixPath('/tmp/pytest-of-age...uses_explicit_0/feed.xml'), PosixPath('/tmp/pytest-of-agent/pytest-313/test_actual_cli_uses_explicit_0/ledger.sqlite'))
+capsys = <_pytest.capture.CaptureFixture object at 0x7f81344074a0>
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-313/test_actual_cli_uses_explicit_0')
+
+    def test_actual_cli_uses_explicit_file_override_in_snapshot_profile(files,capsys,tmp_path):
+        other=tmp_path/'override.xml';other.write_bytes(rss().replace(b'Policy decision',b'Overridden source'))
+>       code,report=invoke(files,capsys,extra=['--file',str(other)])
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_news_cli_source.py:53: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_news_cli_source.py:27: in invoke
+    result=main(args);return result,json.loads(capsys.readouterr().out)
+           ^^^^^^^^^^
+trading/vati/__main__.py:287: in main
+    return a.fn(a)
+           ^^^^^^^
+trading/vati/__main__.py:217: in cmd_news_ingest
+    counts = ingress.ingest_rows(rows_from_file(path), now_ms=now_ms)
+                                 ^^^^^^^^^^^^^^^^^^^^
+trading/vati/events/news_ingress.py:1096: in rows_from_file
+    return rows_from_text(text,suffix=p.suffix,key=key)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/events/news_ingress.py:1114: in rows_from_text
+    data = json.loads(text)
+           ^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/__init__.py:346: in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/decoder.py:338: in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <json.decoder.JSONDecoder object at 0x7f81368327b0>
+s = '<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>Declared primary feed</title><item><title>Ov...-7</guid><link>https://publisher.test/r7</link><pubDate>Fri, 16 Oct 2026 15:00:00 GMT</pubDate></item></channel></rss>'
+idx = 0
+
+    def raw_decode(self, s, idx=0):
+        """Decode a JSON document from ``s`` (a ``str`` beginning with
+        a JSON document) and return a 2-tuple of the Python
+        representation and the index in ``s`` where the document ended.
+    
+        This can be used to decode a JSON document from a string that may
+        have extraneous data at the end.
+    
+        """
+        try:
+            obj, end = self.scan_once(s, idx)
+        except StopIteration as err:
+>           raise JSONDecodeError("Expecting value", s, err.value) from None
+E           json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/decoder.py:356: JSONDecodeError
+_ test_actual_cli_retains_bad_original_bytes_and_refuses_empty_success[<rss><broken] _
+
+files = (PosixPath('/tmp/pytest-of-agent/pytest-313/test_actual_cli_retains_bad_or0/news.json'), PosixPath('/tmp/pytest-of-age...retains_bad_or0/feed.xml'), PosixPath('/tmp/pytest-of-agent/pytest-313/test_actual_cli_retains_bad_or0/ledger.sqlite'))
+capsys = <_pytest.capture.CaptureFixture object at 0x7f81343554f0>
+raw = b'<rss><broken'
+
+    @pytest.mark.parametrize('raw',[b'<rss><broken',b'<!DOCTYPE rss SYSTEM "file:///etc/passwd"><rss/>'])
+    def test_actual_cli_retains_bad_original_bytes_and_refuses_empty_success(files,capsys,raw):
+>       files[1].write_bytes(raw);code,report=invoke(files,capsys)
+                                              ^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_news_cli_source.py:62: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_news_cli_source.py:27: in invoke
+    result=main(args);return result,json.loads(capsys.readouterr().out)
+           ^^^^^^^^^^
+trading/vati/__main__.py:287: in main
+    return a.fn(a)
+           ^^^^^^^
+trading/vati/__main__.py:217: in cmd_news_ingest
+    counts = ingress.ingest_rows(rows_from_file(path), now_ms=now_ms)
+                                 ^^^^^^^^^^^^^^^^^^^^
+trading/vati/events/news_ingress.py:1096: in rows_from_file
+    return rows_from_text(text,suffix=p.suffix,key=key)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/events/news_ingress.py:1114: in rows_from_text
+    data = json.loads(text)
+           ^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/__init__.py:346: in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/decoder.py:338: in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <json.decoder.JSONDecoder object at 0x7f81368327b0>, s = '<rss><broken'
+idx = 0
+
+    def raw_decode(self, s, idx=0):
+        """Decode a JSON document from ``s`` (a ``str`` beginning with
+        a JSON document) and return a 2-tuple of the Python
+        representation and the index in ``s`` where the document ended.
+    
+        This can be used to decode a JSON document from a string that may
+        have extraneous data at the end.
+    
+        """
+        try:
+            obj, end = self.scan_once(s, idx)
+        except StopIteration as err:
+>           raise JSONDecodeError("Expecting value", s, err.value) from None
+E           json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/decoder.py:356: JSONDecodeError
+_ test_actual_cli_retains_bad_original_bytes_and_refuses_empty_success[<!DOCTYPE rss SYSTEM "file:///etc/passwd"><rss/>] _
+
+files = (PosixPath('/tmp/pytest-of-agent/pytest-313/test_actual_cli_retains_bad_or1/news.json'), PosixPath('/tmp/pytest-of-age...retains_bad_or1/feed.xml'), PosixPath('/tmp/pytest-of-agent/pytest-313/test_actual_cli_retains_bad_or1/ledger.sqlite'))
+capsys = <_pytest.capture.CaptureFixture object at 0x7f8134431580>
+raw = b'<!DOCTYPE rss SYSTEM "file:///etc/passwd"><rss/>'
+
+    @pytest.mark.parametrize('raw',[b'<rss><broken',b'<!DOCTYPE rss SYSTEM "file:///etc/passwd"><rss/>'])
+    def test_actual_cli_retains_bad_original_bytes_and_refuses_empty_success(files,capsys,raw):
+>       files[1].write_bytes(raw);code,report=invoke(files,capsys)
+                                              ^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_news_cli_source.py:62: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_news_cli_source.py:27: in invoke
+    result=main(args);return result,json.loads(capsys.readouterr().out)
+           ^^^^^^^^^^
+trading/vati/__main__.py:287: in main
+    return a.fn(a)
+           ^^^^^^^
+trading/vati/__main__.py:217: in cmd_news_ingest
+    counts = ingress.ingest_rows(rows_from_file(path), now_ms=now_ms)
+                                 ^^^^^^^^^^^^^^^^^^^^
+trading/vati/events/news_ingress.py:1096: in rows_from_file
+    return rows_from_text(text,suffix=p.suffix,key=key)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/events/news_ingress.py:1114: in rows_from_text
+    data = json.loads(text)
+           ^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/__init__.py:346: in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/decoder.py:338: in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <json.decoder.JSONDecoder object at 0x7f81368327b0>
+s = '<!DOCTYPE rss SYSTEM "file:///etc/passwd"><rss/>', idx = 0
+
+    def raw_decode(self, s, idx=0):
+        """Decode a JSON document from ``s`` (a ``str`` beginning with
+        a JSON document) and return a 2-tuple of the Python
+        representation and the index in ``s`` where the document ended.
+    
+        This can be used to decode a JSON document from a string that may
+        have extraneous data at the end.
+    
+        """
+        try:
+            obj, end = self.scan_once(s, idx)
+        except StopIteration as err:
+>           raise JSONDecodeError("Expecting value", s, err.value) from None
+E           json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/decoder.py:356: JSONDecodeError
+______ test_actual_cli_preserves_valid_neighbor_and_nonzero_partial_exit _______
+
+files = (PosixPath('/tmp/pytest-of-agent/pytest-313/test_actual_cli_preserves_vali0/news.json'), PosixPath('/tmp/pytest-of-age...preserves_vali0/feed.xml'), PosixPath('/tmp/pytest-of-agent/pytest-313/test_actual_cli_preserves_vali0/ledger.sqlite'))
+capsys = <_pytest.capture.CaptureFixture object at 0x7f81344334a0>
+
+    def test_actual_cli_preserves_valid_neighbor_and_nonzero_partial_exit(files,capsys):
+        valid=rss().decode().split('<item>',1)[1].split('</item>',1)[0]
+        files[1].write_bytes(rss('<item>'+valid+'</item><item><title>Missing original identity</title></item>'))
+>       code,report=invoke(files,capsys)
+                    ^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_news_cli_source.py:74: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_news_cli_source.py:27: in invoke
+    result=main(args);return result,json.loads(capsys.readouterr().out)
+           ^^^^^^^^^^
+trading/vati/__main__.py:287: in main
+    return a.fn(a)
+           ^^^^^^^
+trading/vati/__main__.py:217: in cmd_news_ingest
+    counts = ingress.ingest_rows(rows_from_file(path), now_ms=now_ms)
+                                 ^^^^^^^^^^^^^^^^^^^^
+trading/vati/events/news_ingress.py:1096: in rows_from_file
+    return rows_from_text(text,suffix=p.suffix,key=key)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/events/news_ingress.py:1114: in rows_from_text
+    data = json.loads(text)
+           ^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/__init__.py:346: in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/decoder.py:338: in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <json.decoder.JSONDecoder object at 0x7f81368327b0>
+s = '<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>Declared primary feed</title><item><title>Po...te>Fri, 16 Oct 2026 15:00:00 GMT</pubDate></item><item><title>Missing original identity</title></item></channel></rss>'
+idx = 0
+
+    def raw_decode(self, s, idx=0):
+        """Decode a JSON document from ``s`` (a ``str`` beginning with
+        a JSON document) and return a 2-tuple of the Python
+        representation and the index in ``s`` where the document ended.
+    
+        This can be used to decode a JSON document from a string that may
+        have extraneous data at the end.
+    
+        """
+        try:
+            obj, end = self.scan_once(s, idx)
+        except StopIteration as err:
+>           raise JSONDecodeError("Expecting value", s, err.value) from None
+E           json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/decoder.py:356: JSONDecodeError
+_______ test_rss_cli_requires_original_durable_sink_before_reading_feed ________
+
+files = (PosixPath('/tmp/pytest-of-agent/pytest-313/test_rss_cli_requires_original0/news.json'), PosixPath('/tmp/pytest-of-age...uires_original0/feed.xml'), PosixPath('/tmp/pytest-of-agent/pytest-313/test_rss_cli_requires_original0/ledger.sqlite'))
+capsys = <_pytest.capture.CaptureFixture object at 0x7f8134432390>
+
+    def test_rss_cli_requires_original_durable_sink_before_reading_feed(files,capsys):
+>       code,report=invoke(files,capsys,ledger=False)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_news_cli_source.py:80: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_news_cli_source.py:27: in invoke
+    result=main(args);return result,json.loads(capsys.readouterr().out)
+           ^^^^^^^^^^
+trading/vati/__main__.py:287: in main
+    return a.fn(a)
+           ^^^^^^^
+trading/vati/__main__.py:217: in cmd_news_ingest
+    counts = ingress.ingest_rows(rows_from_file(path), now_ms=now_ms)
+                                 ^^^^^^^^^^^^^^^^^^^^
+trading/vati/events/news_ingress.py:1096: in rows_from_file
+    return rows_from_text(text,suffix=p.suffix,key=key)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/events/news_ingress.py:1114: in rows_from_text
+    data = json.loads(text)
+           ^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/__init__.py:346: in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/decoder.py:338: in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <json.decoder.JSONDecoder object at 0x7f81368327b0>
+s = '<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>Declared primary feed</title><item><title>Po...-7</guid><link>https://publisher.test/r7</link><pubDate>Fri, 16 Oct 2026 15:00:00 GMT</pubDate></item></channel></rss>'
+idx = 0
+
+    def raw_decode(self, s, idx=0):
+        """Decode a JSON document from ``s`` (a ``str`` beginning with
+        a JSON document) and return a 2-tuple of the Python
+        representation and the index in ``s`` where the document ended.
+    
+        This can be used to decode a JSON document from a string that may
+        have extraneous data at the end.
+    
+        """
+        try:
+            obj, end = self.scan_once(s, idx)
+        except StopIteration as err:
+>           raise JSONDecodeError("Expecting value", s, err.value) from None
+E           json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/decoder.py:356: JSONDecodeError
+________ test_unknown_cli_input_format_is_explicit_configuration_error _________
+
+files = (PosixPath('/tmp/pytest-of-agent/pytest-313/test_unknown_cli_input_format_0/news.json'), PosixPath('/tmp/pytest-of-age..._input_format_0/feed.xml'), PosixPath('/tmp/pytest-of-agent/pytest-313/test_unknown_cli_input_format_0/ledger.sqlite'))
+capsys = <_pytest.capture.CaptureFixture object at 0x7f81341d3e30>
+
+    def test_unknown_cli_input_format_is_explicit_configuration_error(files,capsys):
+        value=json.loads(files[0].read_text());value['input_format']='future-reader';files[0].write_text(json.dumps(value))
+>       code,report=invoke(files,capsys)
+                    ^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_news_cli_source.py:87: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_news_cli_source.py:27: in invoke
+    result=main(args);return result,json.loads(capsys.readouterr().out)
+           ^^^^^^^^^^
+trading/vati/__main__.py:287: in main
+    return a.fn(a)
+           ^^^^^^^
+trading/vati/__main__.py:217: in cmd_news_ingest
+    counts = ingress.ingest_rows(rows_from_file(path), now_ms=now_ms)
+                                 ^^^^^^^^^^^^^^^^^^^^
+trading/vati/events/news_ingress.py:1096: in rows_from_file
+    return rows_from_text(text,suffix=p.suffix,key=key)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/events/news_ingress.py:1114: in rows_from_text
+    data = json.loads(text)
+           ^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/__init__.py:346: in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/decoder.py:338: in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <json.decoder.JSONDecoder object at 0x7f81368327b0>
+s = '<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>Declared primary feed</title><item><title>Po...-7</guid><link>https://publisher.test/r7</link><pubDate>Fri, 16 Oct 2026 15:00:00 GMT</pubDate></item></channel></rss>'
+idx = 0
+
+    def raw_decode(self, s, idx=0):
+        """Decode a JSON document from ``s`` (a ``str`` beginning with
+        a JSON document) and return a 2-tuple of the Python
+        representation and the index in ``s`` where the document ended.
+    
+        This can be used to decode a JSON document from a string that may
+        have extraneous data at the end.
+    
+        """
+        try:
+            obj, end = self.scan_once(s, idx)
+        except StopIteration as err:
+>           raise JSONDecodeError("Expecting value", s, err.value) from None
+E           json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/decoder.py:356: JSONDecodeError
+___ test_actual_cli_lost_raw_ack_remains_unknown_and_recovers_original_once ____
+
+files = (PosixPath('/tmp/pytest-of-agent/pytest-313/test_actual_cli_lost_raw_ack_r0/news.json'), PosixPath('/tmp/pytest-of-age...lost_raw_ack_r0/feed.xml'), PosixPath('/tmp/pytest-of-agent/pytest-313/test_actual_cli_lost_raw_ack_r0/ledger.sqlite'))
+capsys = <_pytest.capture.CaptureFixture object at 0x7f81341d3650>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f81341d3a70>
+
+    def test_actual_cli_lost_raw_ack_remains_unknown_and_recovers_original_once(files,capsys,monkeypatch):
+        atomic=Ledger.atomic
+        @contextmanager
+        def lost(self):
+            outer=not self._conn.in_transaction;before=self.count(EventKind.NEWS_SOURCE_SNAPSHOT)
+            with atomic(self):yield self
+            if outer and self.count(EventKind.NEWS_SOURCE_SNAPSHOT)>before:raise OSError('fixture raw commit ACK lost')
+        with monkeypatch.context() as patch:
+>           patch.setattr(Ledger,'atomic',lost);code,report=invoke(files,capsys)
+                                                            ^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_news_cli_source.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_news_cli_source.py:27: in invoke
+    result=main(args);return result,json.loads(capsys.readouterr().out)
+           ^^^^^^^^^^
+trading/vati/__main__.py:287: in main
+    return a.fn(a)
+           ^^^^^^^
+trading/vati/__main__.py:217: in cmd_news_ingest
+    counts = ingress.ingest_rows(rows_from_file(path), now_ms=now_ms)
+                                 ^^^^^^^^^^^^^^^^^^^^
+trading/vati/events/news_ingress.py:1096: in rows_from_file
+    return rows_from_text(text,suffix=p.suffix,key=key)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/events/news_ingress.py:1114: in rows_from_text
+    data = json.loads(text)
+           ^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/__init__.py:346: in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/decoder.py:338: in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <json.decoder.JSONDecoder object at 0x7f81368327b0>
+s = '<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>Declared primary feed</title><item><title>Po...-7</guid><link>https://publisher.test/r7</link><pubDate>Fri, 16 Oct 2026 15:00:00 GMT</pubDate></item></channel></rss>'
+idx = 0
+
+    def raw_decode(self, s, idx=0):
+        """Decode a JSON document from ``s`` (a ``str`` beginning with
+        a JSON document) and return a 2-tuple of the Python
+        representation and the index in ``s`` where the document ended.
+    
+        This can be used to decode a JSON document from a string that may
+        have extraneous data at the end.
+    
+        """
+        try:
+            obj, end = self.scan_once(s, idx)
+        except StopIteration as err:
+>           raise JSONDecodeError("Expecting value", s, err.value) from None
+E           json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/decoder.py:356: JSONDecodeError
+=========================== short test summary info ============================
+FAILED trading/tests/test_news_cli_source.py::test_actual_cli_records_original_rss_and_reports_first_batch_counts
+FAILED trading/tests/test_news_cli_source.py::test_actual_cli_cold_replay_reuses_original_capture_without_growing_ledger
+FAILED trading/tests/test_news_cli_source.py::test_actual_cli_uses_explicit_file_override_in_snapshot_profile
+FAILED trading/tests/test_news_cli_source.py::test_actual_cli_retains_bad_original_bytes_and_refuses_empty_success[<rss><broken]
+FAILED trading/tests/test_news_cli_source.py::test_actual_cli_retains_bad_original_bytes_and_refuses_empty_success[<!DOCTYPE rss SYSTEM "file:///etc/passwd"><rss/>]
+FAILED trading/tests/test_news_cli_source.py::test_actual_cli_preserves_valid_neighbor_and_nonzero_partial_exit
+FAILED trading/tests/test_news_cli_source.py::test_rss_cli_requires_original_durable_sink_before_reading_feed
+FAILED trading/tests/test_news_cli_source.py::test_unknown_cli_input_format_is_explicit_configuration_error
+FAILED trading/tests/test_news_cli_source.py::test_actual_cli_lost_raw_ack_remains_unknown_and_recovers_original_once
+9 failed, 1 passed in 1.25s

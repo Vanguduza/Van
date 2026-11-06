@@ -766,7 +766,7 @@
     {
       "n": 36,
       "component": "Browser Harness worker",
-      "path": "deploy/van-trading-core/browser/harness_service.py",
+      "path": "deploy/van-browser-core/browser/harness_service.py",
       "maturity_class": "IMPLEMENTED_EXTERNAL_RUNTIME",
       "disposition": "COMPLETE",
       "rationale": "The private Browser Harness worker is now in-repository with pinned dependency, loopback service, systemd unit, bootstrap and health qualification. Live Trading Core execution remains external.",
@@ -783,7 +783,7 @@
     {
       "n": 37,
       "component": "Stagehand worker",
-      "path": "deploy/van-trading-core/browser/stagehand_service.mjs",
+      "path": "deploy/van-browser-core/browser/stagehand_service.mjs",
       "maturity_class": "IMPLEMENTED_EXTERNAL_RUNTIME",
       "disposition": "COMPLETE",
       "rationale": "The private Stagehand 4.1.0 semantic worker is now in-repository. It exposes bounded observe/extract/act primitives and refuses direct agent loops; live model/provider qualification remains external.",

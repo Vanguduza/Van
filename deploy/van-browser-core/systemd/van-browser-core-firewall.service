@@ -1,0 +1,20 @@
+[Unit]
+Description=VAN browser-core zone firewall (browser user: UDP only DNS to the resolver, TCP only loopback)
+Documentation=file:///opt/van-browser-core/README.md
+# Unit G12 (owner answer 2026-09-30 after review I7, "Firewall UDP in zone (Recommended)").
+# The Harness, Stagehand and egress proxy units are bound to this one: without the ruleset
+# loaded none of them runs.
+DefaultDependencies=no
+Before=network-pre.target van-browser-harness.service van-stagehand.service van-browser-egress.service
+Wants=network-pre.target
+ConditionPathExists=/etc/van-browser-core/zone
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStartPre=/usr/sbin/nft -c -f /etc/van-browser-core/firewall.nft
+ExecStart=/usr/sbin/nft -f /etc/van-browser-core/firewall.nft
+ExecStop=/usr/sbin/nft delete table inet van_browser_core
+
+[Install]
+WantedBy=multi-user.target

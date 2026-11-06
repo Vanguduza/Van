@@ -1,0 +1,83 @@
+{
+  "source_head": "bf41e16b0213431eeaeb33da96676cfb7dc47477",
+  "remote_exact_head_verified": true,
+  "committed_ledger": "GREEN190",
+  "required_baseline": "4fd466dec3910ed5de614bfbf95887ad619df5ca",
+  "commands": {
+    "genuine-commit": {
+      "command": [
+        "python3",
+        "/workspace/van-run-reaped.py",
+        "git",
+        "commit",
+        "-m",
+        "Expose original native instrument discovery with exact alias identity and revision-bound owner pages"
+      ],
+      "cwd": "/workspace/van-review-2026-10-18/publish",
+      "controller_pid": 411284,
+      "started_at_utc": "2026-10-28T11:35:37.268484+00:00",
+      "timeout_seconds": 1200,
+      "state": "COMPLETED",
+      "command_pid": 411288,
+      "exit": 0,
+      "adopted_children_reaped": [],
+      "finished_at_utc": "2026-10-28T11:35:39.997367+00:00"
+    },
+    "committed-verify": {
+      "command": [
+        "/workspace/van-backend-venv-20261025/bin/python",
+        "tools/ci/project_truth_ledger.py",
+        "verify",
+        "--committed",
+        "--baseline",
+        "4fd466dec3910ed5de614bfbf95887ad619df5ca"
+      ],
+      "cwd": "/workspace/van-review-2026-10-18/publish",
+      "controller_pid": 411601,
+      "started_at_utc": "2026-10-28T11:36:04.076499+00:00",
+      "timeout_seconds": 1200,
+      "state": "COMPLETED",
+      "command_pid": 411606,
+      "exit": 0,
+      "adopted_children_reaped": [],
+      "finished_at_utc": "2026-10-28T11:39:28.110964+00:00"
+    },
+    "normal-push": {
+      "command": [
+        "git",
+        "push",
+        "origin",
+        "ccr-9e07e1af-8mgz1p"
+      ],
+      "cwd": "/workspace/van-review-2026-10-18/publish",
+      "controller_pid": 438476,
+      "started_at_utc": "2026-10-28T11:52:04.844449+00:00",
+      "timeout_seconds": 300,
+      "state": "COMPLETED",
+      "command_pid": 438481,
+      "exit": 0,
+      "adopted_children_reaped": [],
+      "finished_at_utc": "2026-10-28T11:52:10.141357+00:00"
+    },
+    "remote-readback": {
+      "command": [
+        "git",
+        "ls-remote",
+        "origin",
+        "refs/heads/ccr-9e07e1af-8mgz1p"
+      ],
+      "cwd": "/workspace/van-review-2026-10-18/publish",
+      "controller_pid": 438576,
+      "started_at_utc": "2026-10-28T11:53:24.552222+00:00",
+      "timeout_seconds": 180,
+      "state": "COMPLETED",
+      "command_pid": 438580,
+      "exit": 0,
+      "adopted_children_reaped": [],
+      "finished_at_utc": "2026-10-28T11:53:25.372837+00:00"
+    }
+  },
+  "source_receipt": "docs/rebuild/rev118/receipts/NATIVE_INSTRUMENT_CATALOG_SOURCE_20261028.json",
+  "qualification_method": "Broad run retained5159pass1strictinventoryfailure; soleASTcorrection2explicitreadonlyexpectedmembers; targetedrealSQL_HTTP228pass0skip/fail;1255finalinputsmatchcommittedGit;5160uniquecaseidentitiescovered; notonecleanfullrerun",
+  "formal_acceptances_issued": 0
+}

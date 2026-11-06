@@ -1,0 +1,9 @@
+{
+  "controls_passed": 3,
+  "semantic_assertion_faults_caught": 10,
+  "runtime_crash_credit": 0,
+  "syntax_failure_credit": 0,
+  "source_snapshot": "Before original-tick new-position aggregation fix",
+  "canonical374execution": false,
+  "output": "/workspace/van-risk-arithmetic-invariant-faults-valid-owner-r2-20261027.txt"
+}

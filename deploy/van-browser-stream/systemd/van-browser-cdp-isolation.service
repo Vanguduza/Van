@@ -1,0 +1,14 @@
+[Unit]
+Description=VAN per-profile UID-scoped loopback CDP isolation
+Before=van-browser-chromium@public.service van-browser-chromium@owner.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=true
+ExecStart=/usr/sbin/nft -f /etc/van-browser-stream/cdp-isolation.nft
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target

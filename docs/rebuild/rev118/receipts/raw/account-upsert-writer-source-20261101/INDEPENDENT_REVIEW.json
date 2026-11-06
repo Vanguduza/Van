@@ -1,0 +1,148 @@
+{
+  "disposition": "NO_BLOCKING_FINDING_IN_BOUNDED_LOCAL_EDIT_PREWRITE_EXPIRY_SOURCE_REVIEW",
+  "accepted_gap_closed": "BE004-LOCAL-EDIT-PREWRITE-EXPIRY-01",
+  "source_fingerprint": "f303441c2dacfadcb4fe8107f9bf218fc46d38699197f2d172e3a69971cea652",
+  "source6_before_after": {
+    "trading/commander/accounts.py": "6b20d5ae1ee01f00672287bb0d9183f41083c57874b5c53afa1ea339f648082a",
+    "trading/commander/account_effects.py": "8a842f27aa24bce106371cfb454c1feb224a494665e69645f6979f0c476487a2",
+    "trading/commander/app.py": "aa353acaa9ac8d74a51e6f2e500cae7ecdbc382e64413da4ccfae75fdbd85540",
+    "trading/vati/accounts/registry.py": "e7925dc1cacb1ce84af601fbbfb870220f43e6bd423fa52855d4900ce96f0be9",
+    "backend/tests/test_account_update_review.py": "c4fa99375516fd0c52833ff4dc941c7e68dc1d6e185418e4093c489606b25d0b",
+    "trading/tests/test_account_registry_atomic_rea.py": "0f371d8d35d609d585fd615b6e0393298749b839608bea3ac66f85a858a53674"
+  },
+  "patch_sha256": "975a810bf7a56ffc5cecb35249429b43a433a822bcf27a59f674dc50bf38062f",
+  "export": "Exactly6patch members; independently applied6a baseline and verified resulting6hashes; no runtime identity/source transfer. Other laneWIP untouched.",
+  "main_observation": {
+    "HEAD": "4c410418bf8f809b1df0e3eb3edfb85422c77f5c",
+    "actual_preimages": {
+      "trading/commander/accounts.py": "641d924886c388391dbc09631cf774a8f741b12e9c1ded9f70fc18f19807103d",
+      "trading/commander/account_effects.py": "d6be385b527a6ea180023208dadfc2b1f815bfa5ea4c0a9af0aa574457a028b6",
+      "trading/commander/app.py": "aded70458e7e2c0a8b7cd015518318ea7eb056602e02c628558ca5175c91120c",
+      "trading/vati/accounts/registry.py": "081300e109e82049d5fc7a068df22dce4f854b8e4cae873afb1dc6e66553ca39",
+      "backend/tests/test_account_update_review.py": "3011c269ee3ab22cdf8c17c1e4a21b1c186abdcb84d7ea776c8d6a3dbe84deff",
+      "trading/tests/test_account_registry_atomic_rea.py": "c58e7c03f727a36bb5e9d943db5aa6b5a8d30a44f14ace73f04e9bfb3d489cff"
+    },
+    "equal6a": {
+      "trading/commander/accounts.py": true,
+      "trading/commander/account_effects.py": true,
+      "trading/commander/app.py": true,
+      "trading/vati/accounts/registry.py": true,
+      "backend/tests/test_account_update_review.py": true,
+      "trading/tests/test_account_registry_atomic_rea.py": true
+    }
+  },
+  "source_review": {
+    "registry": "Optional trusted before_replace defaultsNone, no reverse Commander/authority import. Invoked under alias+global registry locks after serialization/fsync/chmod immediately before os.replace. Refusal removes staging file and restores in-memory accounts/revision; default add/replace/remove/save semantics retained.",
+    "upsert": "Server-injected callback rechecks original version+current namespace and registered signed Commander keys/time. Consumed original expiry checked via existing operation context at actual registry or empty credential replacement; no second A4 or nonce consume. Pure prepare guard and before_effect marker are distinct.",
+    "truthfulness": "Before any swap, guard refusal yields durable REFUSED and no registry/credential mutation. If empty credential already committed, later registry refusal remains UNKNOWN/original fenced; no resend or blind rollback. Existing completed original returns immutable cached result after expiry under current lawful transport authentication.",
+    "LINK_demo": "LINK registry guard now reaches actual final replacement, and owned post-registry revision remains distinct from original approved version for subsequent credentials. Demo original version guard remains at remote-send boundary, not newly applied after its own local completion. No widened authority or provider contract.",
+    "tests": "Both prior test files retain full original byte prefix; tests only append assertions/oracles."
+  },
+  "independent_actual": {
+    "PASS": 9,
+    "skip": 0,
+    "exit": 0,
+    "seconds": 33.550684213638306,
+    "terminal_receipt": "/tmp/van-be004-upsert-review-nj2y1epz/terminal.json",
+    "terminal_sha256": "865485ce06e760b9f8d703f4b364b57670a5b4cc76de8d83a59e1d4cd7df600c",
+    "raw": "/tmp/van-be004-upsert-review-nj2y1epz/raw.log",
+    "raw_sha256": "9c95a70047d2c89c5fc8b96cf14ffeff05a045f2d08df2f068b86374757bc68f",
+    "junit": "/tmp/van-be004-upsert-review-nj2y1epz/junit.xml",
+    "junit_sha256": "6ed1086b46d76e1661a0a906a8af5eac4dfcec0d404b1ed22bcc2625f44b7710",
+    "critical_observation": {
+      "published": "6a0196a951dfb62413f76d3d91ceb855b16f6030",
+      "paired_authenticated_device_and_actual_A4": true,
+      "action": "account_upsert",
+      "requested_change": [
+        "label"
+      ],
+      "same_original_identity_at_claim": true,
+      "native_claim_observations": [
+        {
+          "original_operation_id": "qIwJoTIAvIPGUktEfI9o-_s5SiB9qjng",
+          "claim_expiry": 1793577123,
+          "before_first_effect": true
+        },
+        {
+          "original_operation_id": "qIwJoTIAvIPGUktEfI9o-_s5SiB9qjng",
+          "claim_expiry": 1793577123,
+          "before_first_effect": true
+        }
+      ],
+      "original_expiry": 1793577123,
+      "native_clock_after_resolution": 1793577123,
+      "response_status": 403,
+      "response_effect_state": null,
+      "before_label": "Original",
+      "current_label": "Original",
+      "independent_original_status": 200,
+      "independent_original_effect_state": "REFUSED",
+      "independent_original_id_matches": true,
+      "owned_cold_fixture": "/tmp/van-be004-upsert-review-nj2y1epz/fixtures/test_actual_entitled_label_edi0",
+      "no_provider_connector_or_financial_effect": true
+    },
+    "probe_source": "/tmp/van-be004-upsert-independent-review-20261101/test_original_expiry.py",
+    "probe_sha256": "10133bf17a3906703ec8dbdfa9b7b1e68aa87297a3ddf181147a8e926af48a34",
+    "original_failure_oracle_preserved": "Exact original probe source SHA matches immutable diagnosis. Independent copy changes only observation destination to new owned fixture; no overwritten original output and no changed assertion/oracle.",
+    "other_cases": [
+      "::test_actual_entitled_label_edit_cannot_write_after_consumed_owner_expiry",
+      "tests.test_account_update_review::test_real_queued_registry_writer_cannot_outwait_original_authority",
+      "::test_optional_trusted_guard_runs_after_fsync_and_refusal_preserves_bytes_revision_and_memory[add]",
+      "::test_optional_trusted_guard_runs_after_fsync_and_refusal_preserves_bytes_revision_and_memory[replace]",
+      "tests.test_account_update_review::test_actual_registered_writer_preserves_authority_partial_and_cached_history[current_key]",
+      "tests.test_account_update_review::test_actual_registered_writer_preserves_authority_partial_and_cached_history[namespace]",
+      "tests.test_account_update_review::test_actual_registered_writer_preserves_authority_partial_and_cached_history[partial_credentials]",
+      "tests.test_account_update_review::test_actual_registered_writer_preserves_authority_partial_and_cached_history[empty_credential_expiry]",
+      "tests.test_account_update_review::test_actual_registered_writer_preserves_authority_partial_and_cached_history[healthy_cached]"
+    ],
+    "scope": "Actual paired sealedA4/SQLite, controlled local signed Commander HTTP seam/registry. No real external provider/network/native financial effect.",
+    "retention": "All9 completed cold fixtures/raw/XML/new observation retained; terminal inventory binds per-fileSHA256/CRC32/UID/GID/mode/exactpath. No cleanup/prefix deletion.",
+    "fixture_bytes": 14554382,
+    "child_reaped": true,
+    "process_group_absent": true,
+    "limit_reason": null
+  },
+  "author_fresh_evidence_verified": {
+    "groups": [
+      {
+        "label": "final-backend",
+        "PASS": 56,
+        "PGskip": 0,
+        "raw_sha256": "51ed58527d0ef3b7c1c310b78e4cfae7af52012b4aa160503d66b0408e1ab297",
+        "junit_sha256": "14934f280603e014277a3027717a2010bfa9f65f0199f9241ced59071d40c94c"
+      },
+      {
+        "label": "final-native",
+        "PASS": 151,
+        "PGskip": 2,
+        "raw_sha256": "4bd02e4462bd722f97c7e6956d6f43d8447c0f0a7d42c4f79dc5425841760a4b",
+        "junit_sha256": "d60cbd29038e5d913d3463d11b222fab3505284df1a0cc3779ff22b56dc1f15d"
+      },
+      {
+        "label": "final-scope",
+        "PASS": 53,
+        "PGskip": 0,
+        "raw_sha256": "b5256c8fd4c2ce79c529bd7aec8859c8df9c8a2dcb654b38bb36dbfd266a8873",
+        "junit_sha256": "d61b1ba84cb0fb76a862c1ef7d1b09516e59893f0a97f627991c8c25f486f8f8"
+      }
+    ],
+    "PASS": 260,
+    "declaredPGskip": 2,
+    "distinct_ids": 262,
+    "mapping_matches_actual_XML": true,
+    "all_fresh_frozen_serial_not_one_terminal": true,
+    "no_reused_native_input_pass_claim": true
+  },
+  "history": {
+    "diagnosis_sha256": "220ede66bf94af3250e297de476656c41e00b60c6c6d0bce2343b2003c34e0b8",
+    "original_raw_JUnit_failure_verified": true,
+    "original_cold_fixture_present": true,
+    "standalone_observation_overwrite": "Author disclosure retained. Original logical observation embedded in immutable diagnosis/extracted copy is NOT restoration of overwritten file. Independent new output separate.",
+    "original_claim_vs_after": "Before actual200/APPLIED at consumed expiry; after actual403 and independent originalREFUSED with unchanged label."
+  },
+  "limits": [
+    "SOURCE-only repair; fullBE004/unit/provider/native/PG/S24/formal admission remains OPEN.",
+    "No AndroidSDK/wholeapp/native/financial qualification inferred from controlled local source HTTP or serial tests.",
+    "Integration must apply exact6preimages with genuine hooks/derived reconciliation/actualhead validation; no source/main writes, commits, push, CI, authrecords, canon/protected evidence edits or subagents by reviewer."
+  ]
+}

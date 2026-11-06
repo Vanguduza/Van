@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.visual.VanAuraVoiceReactivityTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-08T06:47:30" hostname="052fefa249ff" time="0.002">
+  <properties/>
+  <testcase name="amplitude above one is clamped the same as exactly one()" classname="com.dial.van.visual.VanAuraVoiceReactivityTest" time="0.001"/>
+  <testcase name="a negative amplitude is treated as zero()" classname="com.dial.van.visual.VanAuraVoiceReactivityTest" time="0.0"/>
+  <testcase name="intensity never exceeds the face-safe ceiling regardless of amplitude()" classname="com.dial.van.visual.VanAuraVoiceReactivityTest" time="0.0"/>
+  <testcase name="zero amplitude leaves the spec unchanged()" classname="com.dial.van.visual.VanAuraVoiceReactivityTest" time="0.0"/>
+  <testcase name="a louder voice brightens intensity, arc activity and spark rate()" classname="com.dial.van.visual.VanAuraVoiceReactivityTest" time="0.001"/>
+  <testcase name="topology fields — filaments, envelope, semantic colour — are untouched()" classname="com.dial.van.visual.VanAuraVoiceReactivityTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

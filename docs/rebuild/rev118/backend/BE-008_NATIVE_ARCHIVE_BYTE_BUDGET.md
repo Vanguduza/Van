@@ -1,0 +1,13 @@
+# Bounded native archive verification
+
+Source component of BE-008; the unit remains IN_PROGRESS and acceptance is NOT_ISSUED.
+
+Before exposing historical source reads through a request path, inspection found that NativeMarketArchive checked file size around an unbounded `read_bytes()` call. A controlled growth-window probe against unchanged committed c08 source used a real 5,000-byte file, a 64-byte limit and a deliberately small pre-read stat. The original call refused the oversized result, but its actual read request was `-1` (unbounded). This is a reproduced I/O boundary failure; no natural race, memory exhaustion, worker quota or host qualification is claimed. The other eight initial failures exercised the newly requested optional-budget API before implementation.
+
+The existing owner now bounds the actual file read to the remaining limit plus one sentinel byte. Per-record limits and canonical-byte verification remain. An optional `max_history_bytes` bounds cumulative immutable records and the derived index. It accepts positive integers up to 256 MiB; the existing default `None` preserves legacy cumulative-capacity behavior. This is an encoded-byte policy, not an RSS, CPU, network or production-capacity certificate.
+
+Configured publication capacity is checked before a new record commits, including the prospective index. Index recovery checks capacity before replacing its head. Refusals preserve original records, do not truncate or evict history, and never trigger replacement broker reads. A caller can select an adequate explicit budget and recover the original request. Record/head schemas, revision hashes, original availability and default collector behavior remain unchanged.
+
+Evidence: 11 new cases; 155 focused archive/collector checks; final 797 combined SQLite/PostgreSQL passes, zero skips or storage-audit violations, all 495 runtime/test hashes matching and the owned fixture independently absent. Exact record-plus-head limits, cumulative multi-record accounting, revision9-to10 index growth and precommit refusal are exercised. Four supplemental faults were caught, with 11 positive and 11 restored controls and exact source restoration. Counts overlap; supplemental controls are separate from the canonical mutation corpus.
+
+The historical owner read service/API is still to be implemented. Source price semantics, provider rights/health/continuity, existing-screen consumption, all remaining backend/ML/assistant/financial operations, independent/native admission, provisioning/signing/deployment and Android/Artemis/S24 acceptance remain required. No frontend feature, native source activation, financial action or unit certificate is enabled by this component.

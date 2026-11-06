@@ -1,0 +1,65 @@
+{
+  "readback_at_utc": "2026-11-01T04:29:50Z",
+  "repository": "Vanguduza/Van",
+  "commit": "2728a83ce203fec867dc536c8d4341c2ce4415cb",
+  "main_run_id": 41270444672,
+  "exact_head_runs": {
+    "counts": {"terminal": 7, "running": 0, "queued": 0},
+    "runs": [
+      {"id": 41270444469, "name": "van-kernel-source", "status": "completed", "conclusion": "success"},
+      {"id": 41270444649, "name": "van-mql-native-source", "status": "completed", "conclusion": "success"},
+      {"id": 41270444519, "name": "van-forecast-runtime-source", "status": "completed", "conclusion": "success"},
+      {"id": 41270444624, "name": "cognitive-fabric-r161-van", "status": "completed", "conclusion": "success"},
+      {"id": 41270444672, "name": "van-ci", "status": "completed", "conclusion": "failure"},
+      {"id": 41270440291, "name": "canonical-tree-guard", "status": "completed", "conclusion": "success"},
+      {"id": 41270433817, "name": "cognitive-fabric-r161-van", "status": "completed", "conclusion": "success"}
+    ]
+  },
+  "main_run": {
+    "job_counts": {"terminal": 19, "running": 0, "queued": 0},
+    "failed_jobs": [
+      {"id": 124741944321, "name": "project-truth-ledger", "failed_step": "Project Truth ledger (trusted checker, every new commit has an authorized row)"},
+      {"id": 124741944413, "name": "backend", "failed_step": "Require the DDS contract read key"}
+    ],
+    "backend_public_source": {
+      "job_id": 124741944282,
+      "conclusion": "success",
+      "pytest_summary": {"passed": 5898, "failed": 0, "errors": 0, "skipped": 7, "warnings": 7, "duration_seconds": 1759.78},
+      "followup_verification_summary": {"passed": 198, "failed": 0, "duration_seconds": 2.60},
+      "failed_node_ids": [],
+      "coverage_and_prerequisite_skip_gate": "Completed successfully; exact coverage verification reported 198 passed."
+    },
+    "other_source_jobs": [
+      {"name": "browser-guard-source", "conclusion": "success"},
+      {"name": "market-monitor-source", "conclusion": "success"},
+      {"name": "native-source-parquet", "conclusion": "success", "run_id": 41270444519},
+      {"name": "cpu-source-runtime", "conclusion": "success", "run_id": 41270444519}
+    ],
+    "mutation_jobs": {
+      "counts": {"total": 9, "terminal_success": 9, "failed": 0, "running": 0, "queued": 0},
+      "log_summary_counts_by_shard": {
+        "kotlin-0": {"executed": 29, "caught": 29},
+        "browser-agent": {"executed": 26, "caught": 26},
+        "python-3": {"executed": 57, "caught": 57},
+        "kotlin-2": {"executed": 29, "caught": 29},
+        "python-2": {"executed": 58, "caught": 58},
+        "kotlin-3": {"executed": 29, "caught": 29},
+        "kotlin-1": {"executed": 29, "caught": 29},
+        "python-0": {"executed": 59, "caught": 59},
+        "python-1": {"executed": 58, "caught": 58}
+      },
+      "aggregate_from_this_commit_completed_job_logs": {"executed": 374, "caught": 374, "survivors": 0},
+      "survivor_evidence": "All nine current-commit logs show empty SURVIVORS sections and no survivor entries.",
+      "source": "Actual completed job logs; not inferred from registry consistency or earlier commit results."
+    }
+  },
+  "watcher_receipt": {
+    "path": "/workspace/van-2728-exact-ci-watch-20261101.json",
+    "state": "COMPLETED",
+    "exit": 1,
+    "finished_at_utc": "2026-11-01T04:16:55.145776Z",
+    "interpretation": "Watcher exited nonzero after van-ci reached terminal failure; fresh GitHub snapshot agrees."
+  },
+  "result": "backend-public-source and all mutation jobs passed. The only failed van-ci jobs in this snapshot are the trusted Project Truth checker and unmet DDS read-key prerequisite. No d43 results were reused.",
+  "scope": "One paginated exact-head run/job snapshot plus terminal backend-public and mutation job log summaries. No polling loop, workflow changes, source edits, tests, secrets access, or /workspace/Van access."
+}

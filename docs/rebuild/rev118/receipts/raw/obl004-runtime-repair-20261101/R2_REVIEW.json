@@ -1,0 +1,74 @@
+{
+  "disposition": "NO_BLOCKING_FINDING_IN_R2_RECHECK",
+  "resolved": "OBL004-SETUP-REVIEW01",
+  "base": "4084a0bd04fd507889fe61b426c8f96bea29c054",
+  "pins_before": {
+    ".github/workflows/van-ci.yml": "3ab3df781f9bb1444bd853f1b5035fb3a57db51a422aed9c7708738b7ac5d407",
+    "tools/ci/github-actions-ci.yml": "3ab3df781f9bb1444bd853f1b5035fb3a57db51a422aed9c7708738b7ac5d407",
+    "tests/rebuild/test_canonical_source_audit.py": "356ae77d9d5e5dc71400f936cd5cffd032ee7567a339c0bc21b71e2f77c167e8",
+    "tools/rebuild/canonical_source_audit.py": "99f63c207d917daa0fc59b7038f1534fff3aa0ceccaaf3581f7710152f1a33b6"
+  },
+  "pins_after": {
+    ".github/workflows/van-ci.yml": "3ab3df781f9bb1444bd853f1b5035fb3a57db51a422aed9c7708738b7ac5d407",
+    "tools/ci/github-actions-ci.yml": "3ab3df781f9bb1444bd853f1b5035fb3a57db51a422aed9c7708738b7ac5d407",
+    "tests/rebuild/test_canonical_source_audit.py": "356ae77d9d5e5dc71400f936cd5cffd032ee7567a339c0bc21b71e2f77c167e8",
+    "tools/rebuild/canonical_source_audit.py": "99f63c207d917daa0fc59b7038f1534fff3aa0ceccaaf3581f7710152f1a33b6"
+  },
+  "archive_sha256": "1f7a75f32611f2f02e5b51313d6ebdd90406b75ddf23913367124bcd469ae84b",
+  "patch_sha256": "59e686739d1b74c326eea0f4711b068de0f96d6a6daefd341cf1bcb30c96b8cb",
+  "actual_callable_probes": [
+    {
+      "case": "producer_and_verifier6.0.3",
+      "accepted": true
+    },
+    {
+      "case": "producer6.0.2",
+      "refused": "original runtime lock version mismatch: PyYAML"
+    },
+    {
+      "case": "both-version2",
+      "refused": "locked package mismatch"
+    },
+    {
+      "case": "package2-field3",
+      "refused": "locked package mismatch"
+    },
+    {
+      "case": "package3-field2",
+      "refused": "missing additive backend-locked AGP runtime"
+    },
+    {
+      "case": "wrong-lock",
+      "refused": "wrong runtime lock inputs"
+    }
+  ],
+  "probe_scope": "Actual production environment() and verify_environment() on complete modeled backend distribution metadata, modeled Java17 result, actual owned wrapper bytes; no real Java/AGP/native proof. No pip/network/Gradle run.",
+  "producer_import": "/workspace/van-review-2026-10-18/publish/tools/rebuild/canonical_source_audit.py",
+  "scope_checks": {
+    "both_validators_exact_shared6.0.3_declaration": true,
+    "backend_lock_unchanged": true,
+    "original12_jobs_equal53c": true,
+    "head_only_scenarios_job_setup_changed": true,
+    "all_nonjob_fields_equal": true,
+    "original_AGP6.0.2_overlay_unchanged": true,
+    "mirror_exact": true,
+    "no_other_helpers_or_native_prerequisites_changed": true
+  },
+  "author_current_terminal": {
+    "actual_cases": 72,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "exit": 0,
+    "audit_forbidden_events": 0,
+    "pins_unchanged": true
+  },
+  "historical_evidence": "R1 blocked receipt and genuine minimal pip3\u21922\u21923 preserved separately; not relabeled current/native proof. Prior rejected positive under old hardcoded2 preserved by author.",
+  "limits": [
+    "Full hosted matrix remains unqualified; all fullroot/cwd/native/formal/snapshot/backup gates remain separate.",
+    "No new CI/install/network/provider/native effects, main writes/commits, or peer cleanup.",
+    "Private DDS missing prerequisite BLOCKED state remains required.",
+    "Current watch and PR106 untouched."
+  ],
+  "owned_fixture_removed": true
+}

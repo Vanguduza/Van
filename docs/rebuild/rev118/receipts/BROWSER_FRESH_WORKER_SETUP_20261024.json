@@ -1,0 +1,31 @@
+{
+  "schema": "van.rebuild.browser-source-qualification-setup/1",
+  "observed_at_utc": "2026-10-24T10:49:23.044727+00:00",
+  "source_parent": "43582a3a5e80bbb4eb01b8c139bacfcd048b31d2",
+  "workflow_sha256": "107537144e5b3b3b4d9d6e2a9ebf4cc44135621391076f19a3f209e4c8482a8f",
+  "original_jobs_preserved": [
+    "rebuild-documentary",
+    "project-truth-ledger",
+    "postgres-ledger",
+    "backend",
+    "android-and-visual-evidence",
+    "android-instrumentation",
+    "character-forge-gate",
+    "mutation"
+  ],
+  "original_jobs_canonical_sha256": "849726c8d456a3efea5a1a7a2ee61aa24ff959876dfe4aba6b936d92ce6d939e",
+  "shell_syntax_checked": true,
+  "dds_guard_regressions": {
+    "tests": 7,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0
+  },
+  "dds_guard_report_sha256": "20bd30f18660c7e154b963265f452e465ba6b1b9331b8e8c77ca28c575ac3b4d",
+  "test_scope": "All original11 cases in backend/tests/test_browser_guard_lost_regression.py; lock-selected actual Chromium, local HTTPS server postconditions, audited storage, no skipped cases accepted.",
+  "hosted_execution": "NOT_RUN_AT_COMMIT",
+  "full_backend_qualification": "NOT_ISSUED",
+  "no_native_host_or_device_acceptance": true,
+  "known_prior_failures": "receipts/SOURCE_QUALIFICATION_a1867df4_RESOURCE_FAILED.json",
+  "limits": "Additional public-source job; all existing private DDS, Project Truth, backend, mutation and release gates retained. No new feature or provider/handset claim."
+}

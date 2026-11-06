@@ -1,0 +1,32 @@
+{
+  "schema": "van.completed-failed-proof-venv-cold-relocation/1",
+  "state": "SPECIFIC_COMPLETED_ENV_REMOVED_AFTER_VERIFIED_COLD_ARCHIVE",
+  "original_path": "/workspace/van-ci-shards-documentary-dependency-20261101/original-venv",
+  "volatile_cold_archive": "/tmp/van-recovery-ba817-cwd-repair-20261101/completed-original-proof-venv.zip",
+  "archive_bytes": 10219726,
+  "archive_sha256": "73db9e5430c4f426043f1f32622fcb65861d9fed8a7544f0000047de8621db66",
+  "entry_count": 2270,
+  "regular_files": 2063,
+  "symlinks": 4,
+  "completed_provenance": {
+    "install_receipt": "/workspace/van-ci-shards-documentary-dependency-20261101/original-install-receipt.json",
+    "install_receipt_sha256": "4e66f666ef4ccd982ce289ce49378b3bd57d8d7c2b87d625d2d86a8bb4bb2d4a",
+    "failed_proof": "/workspace/van-ci-shards-documentary-dependency-20261101/original-instrument/receipt.json",
+    "failed_proof_sha256": "b6712a33cdfd14e93a73a5b5533238a0784b8193e3048779dfd01e09ad62b549",
+    "state": "Original75case73PASS2FAIL staysFAILED; not currentruntime, no retroqualification."
+  },
+  "active_consumers": [],
+  "own_archiver_pid_exclusions": [
+    445,
+    865823
+  ],
+  "unreadable_system_proc_not_claimed": true,
+  "all_regular_sha_symlink_target_mode_crc_verified": true,
+  "before_workspace_free": 63422464,
+  "before_tmp_free": 4120272896,
+  "limits": "Specific root-granted completedproof environment only; installedsystem/main/currentfreshvenvs, wheelhouse, SDK/JDK/cache/peer untouched. Cold nonportable runtime archive preserves absolute shebang/symlink/pyvenvcfg bytes; cannot claim executable relocatedenv. Any restore requires exactpath/mode and separate verified lifecycle. Rawtmp may be lost withenvironment replacement.",
+  "at_utc": "2026-11-01T20:00:51.305307+00:00",
+  "after_workspace_free": 95842304,
+  "after_tmp_free": 4119756800,
+  "full_inventory_receipt": "/tmp/van-recovery-ba817-cwd-repair-20261101/COMPLETED_ORIGINAL_ENV_COLD_RELOCATION.json"
+}

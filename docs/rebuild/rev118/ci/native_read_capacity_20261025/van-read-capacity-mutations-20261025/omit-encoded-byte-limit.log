@@ -1,0 +1,37 @@
+...............F.....F..                                                 [100%]
+=================================== FAILURES ===================================
+________ test_encoded_byte_limit_refuses_the_payload_before_reading_it _________
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7efcfd916c30>
+
+    def test_encoded_byte_limit_refuses_the_payload_before_reading_it(harness):
+        transport,server=source(harness,max_read_bytes=1)
+        transport.connect();worker=transport._reader
+        server.sendall(struct.pack('>I',2))
+        worker.join(.5)
+>       assert not worker.is_alive() and not transport.connected
+E       assert (not True)
+E        +  where True = is_alive()
+E        +    where is_alive = <Thread(Thread-2 (_read_loop), started daemon 139625050924736)>.is_alive
+
+trading/tests/test_ctrader_read_capacity.py:50: AssertionError
+___________ test_multiple_small_frames_share_one_encoded_byte_budget ___________
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7efcfd917680>
+
+    def test_multiple_small_frames_share_one_encoded_byte_budget(harness):
+        frame=SCHEMA.wrap('ProtoHeartbeatEvent',{});size=len(frame)
+        transport,server=source(harness,max_read_bytes=size*2-1)
+        transport.connect();worker=transport._reader
+        server.sendall(struct.pack('>I',size)+frame+struct.pack('>I',size))
+>       worker.join(.5);assert not worker.is_alive()
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       assert not True
+E        +  where True = is_alive()
+E        +    where is_alive = <Thread(Thread-9 (_read_loop), started daemon 139625042532032)>.is_alive
+
+trading/tests/test_ctrader_read_capacity.py:114: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_ctrader_read_capacity.py::test_encoded_byte_limit_refuses_the_payload_before_reading_it
+FAILED trading/tests/test_ctrader_read_capacity.py::test_multiple_small_frames_share_one_encoded_byte_budget
+2 failed, 22 passed in 2.06s

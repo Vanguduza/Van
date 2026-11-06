@@ -1,0 +1,380 @@
+{
+  "scope": "DOCUMENT_ONLY_NOT_APPLICATION_OR_ECONOMIC_VALIDATION",
+  "passed": 66,
+  "total": 66,
+  "application_tests_executed": 0,
+  "cases": [
+    {
+      "id": "EXACT_PARENT_ARCHIVE",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "PARENT_MEMBERS",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "PRESERVE_requirements",
+      "passed": true,
+      "detail": {
+        "parent": 301,
+        "current": 309
+      }
+    },
+    {
+      "id": "PRESERVE_tests",
+      "passed": true,
+      "detail": {
+        "parent": 1520,
+        "current": 1544
+      }
+    },
+    {
+      "id": "PRESERVE_actions",
+      "passed": true,
+      "detail": {
+        "parent": 349,
+        "current": 349
+      }
+    },
+    {
+      "id": "PRESERVE_truth_atoms",
+      "passed": true,
+      "detail": {
+        "parent": 22,
+        "current": 22
+      }
+    },
+    {
+      "id": "PRESERVE_surfaces",
+      "passed": true,
+      "detail": {
+        "parent": 234,
+        "current": 234
+      }
+    },
+    {
+      "id": "PRESERVE_UNIT_IDENTITIES",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "VISUAL_VAN_LOCKED_DARK.png",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "VISUAL_VAN_LOCKED_LIGHT.png",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "VISUAL_VAN_MATERIAL_TOKENS_REV2.json",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "SEMANTIC_DISPATCH_WITH_LOCKS_RESEALED",
+      "passed": true,
+      "detail": [
+        "CRITICAL_EDGE_PROOF_MISSING:SO-CHILD-T002:POLICY_QUALIFIED"
+      ]
+    },
+    {
+      "id": "SEMANTIC_DROP_CANCEL_SCOPE_AUTHORIZED",
+      "passed": true,
+      "detail": [
+        "CRITICAL_EDGE_PROOF_MISSING:SO-CHILD-T016:CANCEL_SCOPE_AUTHORIZED"
+      ]
+    },
+    {
+      "id": "SEMANTIC_DROP_BINDING_EXPIRED",
+      "passed": true,
+      "detail": [
+        "CRITICAL_EDGE_PROOF_MISSING:SO-BINDING-T009:BINDING_EXPIRED",
+        "INVALID_PROOF_SET:SO-BINDING-T009"
+      ]
+    },
+    {
+      "id": "SEMANTIC_DROP_RESEARCH_STOP_AUTHORIZED",
+      "passed": true,
+      "detail": [
+        "CRITICAL_EDGE_PROOF_MISSING:SO-CANDIDATE-T014:RESEARCH_STOP_AUTHORIZED",
+        "INVALID_PROOF_SET:SO-CANDIDATE-T014"
+      ]
+    },
+    {
+      "id": "SEMANTIC_EXPIRY_AUTHORIZED",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "SEMANTIC_EXPIRY_ACTIVE",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "SEMANTIC_EXPIRY_SUSPENDED",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "SEMANTIC_EXPIRY_DRAINING",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "SEMANTIC_REMOVE_OUTCOME_UNKNOWN_CANCELLED",
+      "passed": true,
+      "detail": [
+        "MISSING_UNKNOWN_RECOVERY:OUTCOME_UNKNOWN:CANCELLED"
+      ]
+    },
+    {
+      "id": "SEMANTIC_REMOVE_OUTCOME_UNKNOWN_EXPIRED",
+      "passed": true,
+      "detail": [
+        "MISSING_UNKNOWN_RECOVERY:OUTCOME_UNKNOWN:EXPIRED"
+      ]
+    },
+    {
+      "id": "SEMANTIC_REMOVE_CANCEL_REQUESTED_OUTCOME_UNKNOWN",
+      "passed": true,
+      "detail": [
+        "MISSING_UNKNOWN_RECOVERY:CANCEL_REQUESTED:OUTCOME_UNKNOWN"
+      ]
+    },
+    {
+      "id": "SEMANTIC_REMOVE_FILLED_OUTCOME_UNKNOWN",
+      "passed": true,
+      "detail": [
+        "MISSING_UNKNOWN_RECOVERY:FILLED:OUTCOME_UNKNOWN"
+      ]
+    },
+    {
+      "id": "ALL_POSITIVE_SCHEMA_FIXTURES",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "ZERO_REJECTED_price_tick",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "POSITIVE_DECIMAL_price_tick",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "ZERO_REJECTED_base_step",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "POSITIVE_DECIMAL_base_step",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "ZERO_REJECTED_maximum_quantity_base",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "POSITIVE_DECIMAL_maximum_quantity_base",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "MATURE_UNKNOWN_COST_REJECTED",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "UNKNOWN_COST_PRESERVED",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "IMMATURE_ELIGIBILITY_REJECTED",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "POSITIVE_REFERENCE_LOOP",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "STALE_REVISION_DOES_NOT_CHANGE_CHOICE",
+      "passed": true,
+      "detail": {
+        "before": {
+          "A": "0.20",
+          "B": "0.65"
+        },
+        "after": {
+          "A": "0.20",
+          "B": "0.65"
+        }
+      }
+    },
+    {
+      "id": "REFERENCE_REPLAY",
+      "passed": true,
+      "detail": "Fresh-memory reference replay only; actual process durability NOT_TESTED"
+    },
+    {
+      "id": "EQUAL_REVISION_CONFLICT",
+      "passed": true,
+      "detail": "CONFLICTING_REVISION"
+    },
+    {
+      "id": "NEW_REQUIREMENT_VAN-RV-001",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "NEW_REQUIREMENT_VAN-RV-002",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "NEW_REQUIREMENT_VAN-RV-003",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "NEW_REQUIREMENT_VAN-RV-004",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "NEW_REQUIREMENT_VAN-RV-005",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "NEW_REQUIREMENT_VAN-RV-006",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "NEW_REQUIREMENT_VAN-RV-007",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "NEW_REQUIREMENT_VAN-RV-008",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "COUNTS",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "COMPONENT_VAN-RV-001",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "COMPONENT_VAN-RV-002",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "COMPONENT_VAN-RV-003",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "COMPONENT_VAN-RV-004",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "COMPONENT_VAN-RV-005",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "COMPONENT_VAN-RV-006",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "COMPONENT_VAN-RV-007",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "COMPONENT_VAN-RV-008",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "NO_CERTIFICATES_OR_APP_RESULTS",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "DCP_LINKS_DCP-001",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "DCP_LINKS_DCP-002",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "DCP_LINKS_DCP-003",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "DCP_LINKS_DCP-004",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "DCP_LINKS_DCP-005",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "DCP_LINKS_DCP-006",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "DCP_LINKS_DCP-007",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "DCP_LINKS_DCP-008",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "MASTER_EMBEDS_FOCUSED_SPEC",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "NO_NET_INVENTORY_BUDGET_FORMULA",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "NO_EXTRA_DEPLOYABLES",
+      "passed": true,
+      "detail": null
+    }
+  ]
+}

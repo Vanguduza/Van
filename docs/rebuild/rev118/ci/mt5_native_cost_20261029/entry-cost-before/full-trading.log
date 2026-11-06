@@ -1,0 +1,64 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+_ test_later_zero_effect_receipt_cannot_replace_original_entry_charge_knowledge[CANCELLED] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-245/test_later_zero_effect_receipt0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+later_status = 'CANCELLED'
+
+    @pytest.mark.parametrize('later_status', ['CANCELLED','REJECTED'])
+    def test_later_zero_effect_receipt_cannot_replace_original_entry_charge_knowledge(tmp_path, eurusd, later_status):
+        with delayed_native_session(tmp_path,eurusd,recorded_costs=False) as (service,bars,index,clock,poll,orders,result,queue,delivered):
+            original, native, ack = fill_original(clock,poll,orders,delivered)
+            poll(results=[ack],positions=[native]);service.step_once()
+            entry = next(e for e in service._ledger.iter(EventKind.EXECUTION_RECEIPT,correlation_id=original)
+                if e.payload.get('status') == 'FILLED')
+            receipt = AccountTradeLifecycle._receipt_from_payload(entry.payload)
+            later = replace(receipt,status=later_status,filled_qty=D('0'),average_fill=None,fees=D('0'),receipt_hash='').sealed()
+            clock['ms'] += 1
+            service._ledger.append(make_event(EventKind.EXECUTION_RECEIPT,'vati-cycle',asdict(later),
+                event_time_ms=clock['ms'],received_time_ms=clock['ms'],correlation_id=original))
+            recover_session(service.runner.cycle,service.adapter.positions())
+            row = service.runner.cycle._entries[original]
+>           assert row['fees'] is None and row['quantity'] > 0
+E           AssertionError: assert ('0' is None)
+
+trading/tests/test_mt5_cost_availability_recovery.py:101: AssertionError
+_ test_later_zero_effect_receipt_cannot_replace_original_entry_charge_knowledge[REJECTED] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-245/test_later_zero_effect_receipt1')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+later_status = 'REJECTED'
+
+    @pytest.mark.parametrize('later_status', ['CANCELLED','REJECTED'])
+    def test_later_zero_effect_receipt_cannot_replace_original_entry_charge_knowledge(tmp_path, eurusd, later_status):
+        with delayed_native_session(tmp_path,eurusd,recorded_costs=False) as (service,bars,index,clock,poll,orders,result,queue,delivered):
+            original, native, ack = fill_original(clock,poll,orders,delivered)
+            poll(results=[ack],positions=[native]);service.step_once()
+            entry = next(e for e in service._ledger.iter(EventKind.EXECUTION_RECEIPT,correlation_id=original)
+                if e.payload.get('status') == 'FILLED')
+            receipt = AccountTradeLifecycle._receipt_from_payload(entry.payload)
+            later = replace(receipt,status=later_status,filled_qty=D('0'),average_fill=None,fees=D('0'),receipt_hash='').sealed()
+            clock['ms'] += 1
+            service._ledger.append(make_event(EventKind.EXECUTION_RECEIPT,'vati-cycle',asdict(later),
+                event_time_ms=clock['ms'],received_time_ms=clock['ms'],correlation_id=original))
+            recover_session(service.runner.cycle,service.adapter.positions())
+            row = service.runner.cycle._entries[original]
+>           assert row['fees'] is None and row['quantity'] > 0
+E           AssertionError: assert ('0' is None)
+
+trading/tests/test_mt5_cost_availability_recovery.py:101: AssertionError
+=============================== warnings summary ===============================
+../../van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py:53
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED trading/tests/test_mt5_cost_availability_recovery.py::test_later_zero_effect_receipt_cannot_replace_original_entry_charge_knowledge[CANCELLED]
+FAILED trading/tests/test_mt5_cost_availability_recovery.py::test_later_zero_effect_receipt_cannot_replace_original_entry_charge_knowledge[REJECTED]
+2 failed, 2 warnings in 8.99s

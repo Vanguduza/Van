@@ -1,0 +1,9 @@
+{
+  "parent": 580265,
+  "owned_test_pid": 580552,
+  "parentage_and_exact_cmdline_verified": true,
+  "command_sha256": "05e678cee5dcee8958e81bedf2b3ba8170778da294ba346e1604ec8f2cc07934",
+  "signal": "SIGINT",
+  "reason": "Real PG binding tests pass; existing uncertain-entry native fixture lacks the newly required read-only margin protocol. Nine failed service cases observed; stop owned partial run before extending fixture producer, preserve all original assertions.",
+  "unrelated_processes_signalled": false
+}

@@ -1,0 +1,48 @@
+{
+  "artifact_id": 13097064761,
+  "official_sha256": "e9fec3429f6d2bd323e812b22f9020a9ae8af5f84636da5d24140d128f9e0e70",
+  "states": [
+    {
+      "member": "collect/receipt.json",
+      "state": "TERMINAL",
+      "profile": "android_guards",
+      "cwd": "backend",
+      "collect_only": true,
+      "exit": 0,
+      "reason_type": null,
+      "reason": null,
+      "cleanup_error": null
+    },
+    {
+      "member": "execute/receipt.json",
+      "state": "BLOCKED",
+      "profile": "android_guards",
+      "cwd": "backend",
+      "collect_only": false,
+      "exit": 1,
+      "reason_type": "ValueError",
+      "reason": "uncommitted executable/config/fixture inputs outside explicit inert outputs: android/.gradle/8.11.1/checksums/checksums.lock, android/.gradle/8.11.1/checksums/md5-checksums.bin, android/.gradle/8.11.1/checksums/sha1-checksums.bin, android/.gradle/8.11.1/fileChanges/last-build.bin, android/.gradle/8.11.1/fileHashes/fileHashes.bin, android/.gradle/8.11.1/fileHashes/fileHashes.lock, android/.gradle/8.11.1/fileHashes/resourceHashesCache.bin, android/.gradle/8.11.1/gc.properties, android/.gradle/buildOutputCleanup/buildOutputCleanup.lock, android/.gradle/buildOutputCleanup/cache.properties",
+      "cleanup_error": null
+    }
+  ],
+  "junit": [
+    {
+      "member": "execute/report.xml",
+      "cases": 2,
+      "failures": 0,
+      "errors": 0,
+      "skips": 0,
+      "bad": []
+    }
+  ],
+  "summary": [
+    {
+      "member": "collect/pytest.log",
+      "lines": []
+    },
+    {
+      "member": "execute/pytest.log",
+      "lines": []
+    }
+  ]
+}

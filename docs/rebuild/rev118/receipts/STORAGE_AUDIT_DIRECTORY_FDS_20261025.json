@@ -1,0 +1,22 @@
+{
+  "schema": "van.rebuild.storage-audit-fd-recovery/1",
+  "status": "SOURCE_TESTED_INSTRUMENT_NOT_NATIVE_SECURITY_QUALIFICATION",
+  "source_sha256": {
+    "tools/rebuild/source_storage_audit.py": "4cc5cc653c4ec97966044fd3b87ac1b0f81b81acfe409ba250a0b51e96970402",
+    "tests/rebuild/test_source_storage_audit.py": "f6bf7f503a3f51d59721d3ef1830b8316b00125a6ec8eeb9b4cb37e2984fc1c2"
+  },
+  "before": "9fail/1pass: seven real directory-FD bypasses, one false-positive external data directory, missing report after __file__ clearing",
+  "isolated_qa_initial": "8fail/2pass: invoked from product cwd, importing the old instrument; retained",
+  "isolated_qa_correct_scope": "10pass",
+  "actual_source": "10pass; original14misuse probes retained",
+  "final_source_selections": {
+    "monitor_descriptor": 258,
+    "native_integrations": 173,
+    "rebuild": 108,
+    "failures": 0,
+    "skips": 0,
+    "forbidden_storage_events": 0
+  },
+  "limits": "Python audit instrumentation; directory-FD-relative open lacks directory association, existing-fd/native/external-process I/O is not an OS sandbox. No hook/security/permission bypass.",
+  "evidence": "ci/storage_audit_dirfd_20261025"
+}

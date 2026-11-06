@@ -1,0 +1,15 @@
+{
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "/workspace/van-entry-margin-binding-full-sql-r1-20261028.py"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 596418,
+  "started_at_utc": "2026-10-28T16:24:59.693359+00:00",
+  "timeout_seconds": 1900,
+  "state": "COMPLETED",
+  "command_pid": 596445,
+  "exit": 2,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-28T16:30:06.705683+00:00"
+}

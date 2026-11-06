@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.browser.BrowserTabsTest" tests="13" skipped="0" failures="0" errors="0" timestamp="2026-10-08T04:57:37" hostname="052fefa249ff" time="0.011">
+  <properties/>
+  <testcase name="activating an unknown target adopts it rather than losing the owner()" classname="com.dial.van.browser.BrowserTabsTest" time="0.002"/>
+  <testcase name="closing an inactive tab does not move the owner()" classname="com.dial.van.browser.BrowserTabsTest" time="0.001"/>
+  <testcase name="closing the only tab leaves nothing active rather than a dangling id()" classname="com.dial.van.browser.BrowserTabsTest" time="0.0"/>
+  <testcase name="closing the active tab lands on its neighbour, not on the first()" classname="com.dial.van.browser.BrowserTabsTest" time="0.0"/>
+  <testcase name="a created tab is not an activated tab()" classname="com.dial.van.browser.BrowserTabsTest" time="0.0"/>
+  <testcase name="an update for a tab we never saw created creates it()" classname="com.dial.van.browser.BrowserTabsTest" time="0.0"/>
+  <testcase name="a duplicate create is not a second tab()" classname="com.dial.van.browser.BrowserTabsTest" time="0.0"/>
+  <testcase name="a close for a tab that is already gone changes nothing()" classname="com.dial.van.browser.BrowserTabsTest" time="0.001"/>
+  <testcase name="closing the last tab falls back to the one before it()" classname="com.dial.van.browser.BrowserTabsTest" time="0.001"/>
+  <testcase name="a tab opened from another lands next to it()" classname="com.dial.van.browser.BrowserTabsTest" time="0.001"/>
+  <testcase name="the label falls back through title, url and loading()" classname="com.dial.van.browser.BrowserTabsTest" time="0.001"/>
+  <testcase name="an unknown opener puts the tab at the end rather than nowhere()" classname="com.dial.van.browser.BrowserTabsTest" time="0.0"/>
+  <testcase name="an update carries only what it names()" classname="com.dial.van.browser.BrowserTabsTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

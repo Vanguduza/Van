@@ -1,0 +1,17 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_ test_source_reference_and_native_scope_cannot_be_replaced_by_matching_alias[sqlite] _
+
+original = (<vati.core.ledger.Ledger object at 0x7fd3b20fc560>, Event(kind=<EventKind.ACCOUNT_SNAPSHOT: 'ACCOUNT_SNAPSHOT'>, prod...ce_version=1, manager_bonus=Decimal('3.01'), ib_bonus=None, nonwithdrawable_bonus=Decimal('5'), registered_at_ms=None))
+
+    def test_source_reference_and_native_scope_cannot_be_replaced_by_matching_alias(original):
+        ledger,event,point=original;before=ledger.head(),ledger.count()
+        with pytest.raises(UnitError,match='SOURCE_UNAVAILABLE'):read(original,source_ref='0'*64)
+>       with pytest.raises(UnitError,match='SCOPE_MISMATCH'):read(original,scope_hash='f'*64)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE UnitError
+
+trading/tests/test_native_valuation.py:62: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_native_valuation.py::test_source_reference_and_native_scope_cannot_be_replaced_by_matching_alias[sqlite]
+1 failed, 1 deselected in 1.99s

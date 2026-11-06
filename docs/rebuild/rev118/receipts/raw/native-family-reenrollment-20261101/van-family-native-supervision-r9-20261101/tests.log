@@ -1,0 +1,649 @@
+........................................................................ [ 34%]
+........................................................................ [ 69%]
+........FFFFFFFF...........F..FFFF.............................          [100%]
+=================================== FAILURES ===================================
+_________ test_unknown_close_does_not_retry_on_the_next_market_update __________
+
+    def test_unknown_close_does_not_retry_on_the_next_market_update():
+        adapter = CloseProbe()
+        router = build(Ledger(), adapter)
+>       assert mark(router)[0].status == "UNKNOWN"
+               ^^^^^^^^^^^^
+
+trading/tests/test_exit_uncertainty.py:54: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_exit_uncertainty.py:48: in mark
+    return router.apply_exits("probe", "TEST", D("89"), D("90"), now_ms=when)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/router.py:915: in apply_exits
+    r = self._send_close(venue, position_id=ins.position_id, trade_intent_id="",
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.router.ExecutionRouter object at 0x7fd0358f7cb0>
+venue = 'probe', position_id = 'position', trade_intent_id = '', quantity = None
+action = 'FULL_CLOSE', reason = 'STRUCTURE', now_ms = 1
+family_action_ref = None, family_target_ref = None, family_effect_guard = None
+
+    def _send_close(self, venue: str, *, position_id: str, trade_intent_id: str,
+                    quantity: Optional[Decimal], action: str, reason: str, now_ms: int,
+                    family_action_ref=None, family_target_ref=None, family_effect_guard=None) -> ExecutionReceipt:
+        # ProtectionManager addresses a native position, rather than an intent.
+        # Join its close to the original managed entry before publishing the
+        # request. An empty request identity must not orphan a valid child-leg
+        # receipt from its family after restart. Unresolved legacy protection
+        # retains its existing urgent path and remains unqualified family data.
+        if not trade_intent_id:
+            from vati.execution.recovery_scope import NativePositionHistory, PositionRecoveryError
+            from vati.core.ledger import LedgerError
+            try:
+                adapter=self.adapters[venue]
+>               positions=[p for p in adapter.positions() if p.position_id==position_id]
+                                      ^^^^^^^^^^^^^^^^^
+E               AttributeError: 'CloseProbe' object has no attribute 'positions'
+
+trading/vati/execution/router.py:354: AttributeError
+___________ test_transport_exception_cannot_turn_into_a_blind_retry ____________
+
+    def test_transport_exception_cannot_turn_into_a_blind_retry():
+        adapter = CloseProbe(error=TimeoutError("response lost after venue may have applied close"))
+        router = build(Ledger(), adapter)
+        with pytest.raises(TimeoutError):
+>           mark(router)
+
+trading/tests/test_exit_uncertainty.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_exit_uncertainty.py:48: in mark
+    return router.apply_exits("probe", "TEST", D("89"), D("90"), now_ms=when)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/router.py:915: in apply_exits
+    r = self._send_close(venue, position_id=ins.position_id, trade_intent_id="",
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.router.ExecutionRouter object at 0x7fd0357e2120>
+venue = 'probe', position_id = 'position', trade_intent_id = '', quantity = None
+action = 'FULL_CLOSE', reason = 'STRUCTURE', now_ms = 1
+family_action_ref = None, family_target_ref = None, family_effect_guard = None
+
+    def _send_close(self, venue: str, *, position_id: str, trade_intent_id: str,
+                    quantity: Optional[Decimal], action: str, reason: str, now_ms: int,
+                    family_action_ref=None, family_target_ref=None, family_effect_guard=None) -> ExecutionReceipt:
+        # ProtectionManager addresses a native position, rather than an intent.
+        # Join its close to the original managed entry before publishing the
+        # request. An empty request identity must not orphan a valid child-leg
+        # receipt from its family after restart. Unresolved legacy protection
+        # retains its existing urgent path and remains unqualified family data.
+        if not trade_intent_id:
+            from vati.execution.recovery_scope import NativePositionHistory, PositionRecoveryError
+            from vati.core.ledger import LedgerError
+            try:
+                adapter=self.adapters[venue]
+>               positions=[p for p in adapter.positions() if p.position_id==position_id]
+                                      ^^^^^^^^^^^^^^^^^
+E               AttributeError: 'CloseProbe' object has no attribute 'positions'
+
+trading/vati/execution/router.py:354: AttributeError
+___________ test_receipt_and_exit_disposition_are_committed_together ___________
+
+    def test_receipt_and_exit_disposition_are_committed_together():
+        class FailingLedger(Ledger):
+            fail_once = True
+    
+            def append(self, event):
+                if event.kind is EventKind.EXIT_ATTEMPT and event.payload["state"] != "REQUESTED" and self.fail_once:
+                    self.fail_once = False
+                    raise OSError("injected disk failure after receipt insert")
+                return super().append(event)
+        adapter = CloseProbe()
+        ledger = FailingLedger()
+        router = build(ledger, adapter)
+        with pytest.raises(OSError, match="disk failure"):
+>           mark(router)
+
+trading/tests/test_exit_uncertainty.py:83: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_exit_uncertainty.py:48: in mark
+    return router.apply_exits("probe", "TEST", D("89"), D("90"), now_ms=when)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/router.py:915: in apply_exits
+    r = self._send_close(venue, position_id=ins.position_id, trade_intent_id="",
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.router.ExecutionRouter object at 0x7fd035708290>
+venue = 'probe', position_id = 'position', trade_intent_id = '', quantity = None
+action = 'FULL_CLOSE', reason = 'STRUCTURE', now_ms = 1
+family_action_ref = None, family_target_ref = None, family_effect_guard = None
+
+    def _send_close(self, venue: str, *, position_id: str, trade_intent_id: str,
+                    quantity: Optional[Decimal], action: str, reason: str, now_ms: int,
+                    family_action_ref=None, family_target_ref=None, family_effect_guard=None) -> ExecutionReceipt:
+        # ProtectionManager addresses a native position, rather than an intent.
+        # Join its close to the original managed entry before publishing the
+        # request. An empty request identity must not orphan a valid child-leg
+        # receipt from its family after restart. Unresolved legacy protection
+        # retains its existing urgent path and remains unqualified family data.
+        if not trade_intent_id:
+            from vati.execution.recovery_scope import NativePositionHistory, PositionRecoveryError
+            from vati.core.ledger import LedgerError
+            try:
+                adapter=self.adapters[venue]
+>               positions=[p for p in adapter.positions() if p.position_id==position_id]
+                                      ^^^^^^^^^^^^^^^^^
+E               AttributeError: 'CloseProbe' object has no attribute 'positions'
+
+trading/vati/execution/router.py:354: AttributeError
+_________ test_two_ledger_writers_cannot_send_the_same_position_close __________
+
+tmp_path = PosixPath('/tmp/van-recovery-family-native-supervision-r9-20261101/test_two_ledger_writers_cannot0')
+
+    def test_two_ledger_writers_cannot_send_the_same_position_close(tmp_path):
+        entered, release = threading.Event(), threading.Event()
+        class Blocking(CloseProbe):
+            def close(self, *args, **kwargs):
+                entered.set()
+                assert release.wait(10)
+                return super().close(*args, **kwargs)
+        adapter, path = Blocking(), tmp_path/"writers.sqlite"
+        def run(when):
+            return mark(build(Ledger(path), adapter), when)
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            first = pool.submit(run, 1)
+>           assert entered.wait(10)
+E           assert False
+E            +  where False = wait(10)
+E            +    where wait = <threading.Event at 0x7fd0356311f0: unset>.wait
+
+trading/tests/test_exit_uncertainty.py:102: AssertionError
+____ test_process_death_keeps_the_original_attempt_fenced[after_request-0] _____
+
+tmp_path = PosixPath('/tmp/van-recovery-family-native-supervision-r9-20261101/test_process_death_keeps_the_o0')
+stage = 'after_request', effects = 0
+
+    @pytest.mark.parametrize("stage,effects", [("after_request", 0), ("after_effect", 1),
+        ("before_receipt_commit", 1), ("after_receipt_commit", 1)])
+    def test_process_death_keeps_the_original_attempt_fenced(tmp_path, stage, effects):
+        database, effect = tmp_path/"death.sqlite", tmp_path/"venue-effects.txt"
+        script = '''
+    import os,sys
+    from pathlib import Path
+    from decimal import Decimal as D
+    from vati.core.ledger import Ledger
+    from vati.core.events import EventKind
+    from vati.execution.router import ExecutionRouter
+    from vati.execution.protection import ProtectionManager
+    from vati.execution.base import ExecutionReceipt
+    from vati.risk import KillSwitch
+    from vati.risk.contracts import Direction
+    path,effect,stage=sys.argv[1:]
+    ledger=Ledger(path)
+    protection=ProtectionManager()
+    protection.register('position',symbol='TEST',direction=Direction.LONG,entry=D('100'),stop=D('90'),target=None,opened_ms=0)
+    class Adapter:
+        venue='probe'
+        def close(self,position_id,quantity,*,now_ms,reason):
+            with Path(effect).open('a') as stream:stream.write('applied\\n')
+            if stage=='after_effect':os._exit(23)
+            return ExecutionReceipt('intent','','probe','FILLED',D('1'),D('89'),D('100'),D('100'),D('100'),True,now_ms,now_ms,broker_position_id='position').sealed()
+    router=ExecutionRouter(ledger=ledger,adapters={'probe':Adapter()},kill_switch=KillSwitch(),protection=protection)
+    if stage=='after_request':
+        original=router.exit_journal.begin
+        def begin(**kwargs):
+            original(**kwargs)
+            os._exit(23)
+        router.exit_journal.begin=begin
+    if stage=='before_receipt_commit':
+        original=ledger.append
+        def append(event):
+            if event.kind is EventKind.EXIT_ATTEMPT and event.payload['state']=='CONFIRMED':os._exit(23)
+            return original(event)
+        ledger.append=append
+    if stage=='after_receipt_commit':protection.close_confirmed=lambda position_id:os._exit(23)
+    router.apply_exits('probe','TEST',D('89'),D('90'),now_ms=1)
+    raise AssertionError('crash injection not reached')
+    '''
+        result = subprocess.run([sys.executable,"-c",script,str(database),str(effect),stage],
+            cwd=Path(__file__).resolve().parents[2], text=True, capture_output=True)
+>       assert result.returncode == 23, result.stderr
+E       AssertionError: Traceback (most recent call last):
+E           File "<string>", line 36, in <module>
+E           File "/workspace/van-lanes-20261101/family-multiposition/trading/vati/execution/router.py", line 915, in apply_exits
+E             r = self._send_close(venue, position_id=ins.position_id, trade_intent_id="",
+E                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           File "/workspace/van-lanes-20261101/family-multiposition/trading/vati/execution/router.py", line 354, in _send_close
+E             positions=[p for p in adapter.positions() if p.position_id==position_id]
+E                                   ^^^^^^^^^^^^^^^^^
+E         AttributeError: 'Adapter' object has no attribute 'positions'
+E         
+E       assert 1 == 23
+E        +  where 1 = CompletedProcess(args=['/workspace/van-backend-venv-20261025/bin/python', '-c', "\nimport os,sys\nfrom pathlib import ...id]\n                          ^^^^^^^^^^^^^^^^^\nAttributeError: \'Adapter\' object has no attribute \'positions\'\n').returncode
+
+trading/tests/test_exit_uncertainty.py:156: AssertionError
+_____ test_process_death_keeps_the_original_attempt_fenced[after_effect-1] _____
+
+tmp_path = PosixPath('/tmp/van-recovery-family-native-supervision-r9-20261101/test_process_death_keeps_the_o1')
+stage = 'after_effect', effects = 1
+
+    @pytest.mark.parametrize("stage,effects", [("after_request", 0), ("after_effect", 1),
+        ("before_receipt_commit", 1), ("after_receipt_commit", 1)])
+    def test_process_death_keeps_the_original_attempt_fenced(tmp_path, stage, effects):
+        database, effect = tmp_path/"death.sqlite", tmp_path/"venue-effects.txt"
+        script = '''
+    import os,sys
+    from pathlib import Path
+    from decimal import Decimal as D
+    from vati.core.ledger import Ledger
+    from vati.core.events import EventKind
+    from vati.execution.router import ExecutionRouter
+    from vati.execution.protection import ProtectionManager
+    from vati.execution.base import ExecutionReceipt
+    from vati.risk import KillSwitch
+    from vati.risk.contracts import Direction
+    path,effect,stage=sys.argv[1:]
+    ledger=Ledger(path)
+    protection=ProtectionManager()
+    protection.register('position',symbol='TEST',direction=Direction.LONG,entry=D('100'),stop=D('90'),target=None,opened_ms=0)
+    class Adapter:
+        venue='probe'
+        def close(self,position_id,quantity,*,now_ms,reason):
+            with Path(effect).open('a') as stream:stream.write('applied\\n')
+            if stage=='after_effect':os._exit(23)
+            return ExecutionReceipt('intent','','probe','FILLED',D('1'),D('89'),D('100'),D('100'),D('100'),True,now_ms,now_ms,broker_position_id='position').sealed()
+    router=ExecutionRouter(ledger=ledger,adapters={'probe':Adapter()},kill_switch=KillSwitch(),protection=protection)
+    if stage=='after_request':
+        original=router.exit_journal.begin
+        def begin(**kwargs):
+            original(**kwargs)
+            os._exit(23)
+        router.exit_journal.begin=begin
+    if stage=='before_receipt_commit':
+        original=ledger.append
+        def append(event):
+            if event.kind is EventKind.EXIT_ATTEMPT and event.payload['state']=='CONFIRMED':os._exit(23)
+            return original(event)
+        ledger.append=append
+    if stage=='after_receipt_commit':protection.close_confirmed=lambda position_id:os._exit(23)
+    router.apply_exits('probe','TEST',D('89'),D('90'),now_ms=1)
+    raise AssertionError('crash injection not reached')
+    '''
+        result = subprocess.run([sys.executable,"-c",script,str(database),str(effect),stage],
+            cwd=Path(__file__).resolve().parents[2], text=True, capture_output=True)
+>       assert result.returncode == 23, result.stderr
+E       AssertionError: Traceback (most recent call last):
+E           File "<string>", line 36, in <module>
+E           File "/workspace/van-lanes-20261101/family-multiposition/trading/vati/execution/router.py", line 915, in apply_exits
+E             r = self._send_close(venue, position_id=ins.position_id, trade_intent_id="",
+E                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           File "/workspace/van-lanes-20261101/family-multiposition/trading/vati/execution/router.py", line 354, in _send_close
+E             positions=[p for p in adapter.positions() if p.position_id==position_id]
+E                                   ^^^^^^^^^^^^^^^^^
+E         AttributeError: 'Adapter' object has no attribute 'positions'
+E         
+E       assert 1 == 23
+E        +  where 1 = CompletedProcess(args=['/workspace/van-backend-venv-20261025/bin/python', '-c', "\nimport os,sys\nfrom pathlib import ...id]\n                          ^^^^^^^^^^^^^^^^^\nAttributeError: \'Adapter\' object has no attribute \'positions\'\n').returncode
+
+trading/tests/test_exit_uncertainty.py:156: AssertionError
+_ test_process_death_keeps_the_original_attempt_fenced[before_receipt_commit-1] _
+
+tmp_path = PosixPath('/tmp/van-recovery-family-native-supervision-r9-20261101/test_process_death_keeps_the_o2')
+stage = 'before_receipt_commit', effects = 1
+
+    @pytest.mark.parametrize("stage,effects", [("after_request", 0), ("after_effect", 1),
+        ("before_receipt_commit", 1), ("after_receipt_commit", 1)])
+    def test_process_death_keeps_the_original_attempt_fenced(tmp_path, stage, effects):
+        database, effect = tmp_path/"death.sqlite", tmp_path/"venue-effects.txt"
+        script = '''
+    import os,sys
+    from pathlib import Path
+    from decimal import Decimal as D
+    from vati.core.ledger import Ledger
+    from vati.core.events import EventKind
+    from vati.execution.router import ExecutionRouter
+    from vati.execution.protection import ProtectionManager
+    from vati.execution.base import ExecutionReceipt
+    from vati.risk import KillSwitch
+    from vati.risk.contracts import Direction
+    path,effect,stage=sys.argv[1:]
+    ledger=Ledger(path)
+    protection=ProtectionManager()
+    protection.register('position',symbol='TEST',direction=Direction.LONG,entry=D('100'),stop=D('90'),target=None,opened_ms=0)
+    class Adapter:
+        venue='probe'
+        def close(self,position_id,quantity,*,now_ms,reason):
+            with Path(effect).open('a') as stream:stream.write('applied\\n')
+            if stage=='after_effect':os._exit(23)
+            return ExecutionReceipt('intent','','probe','FILLED',D('1'),D('89'),D('100'),D('100'),D('100'),True,now_ms,now_ms,broker_position_id='position').sealed()
+    router=ExecutionRouter(ledger=ledger,adapters={'probe':Adapter()},kill_switch=KillSwitch(),protection=protection)
+    if stage=='after_request':
+        original=router.exit_journal.begin
+        def begin(**kwargs):
+            original(**kwargs)
+            os._exit(23)
+        router.exit_journal.begin=begin
+    if stage=='before_receipt_commit':
+        original=ledger.append
+        def append(event):
+            if event.kind is EventKind.EXIT_ATTEMPT and event.payload['state']=='CONFIRMED':os._exit(23)
+            return original(event)
+        ledger.append=append
+    if stage=='after_receipt_commit':protection.close_confirmed=lambda position_id:os._exit(23)
+    router.apply_exits('probe','TEST',D('89'),D('90'),now_ms=1)
+    raise AssertionError('crash injection not reached')
+    '''
+        result = subprocess.run([sys.executable,"-c",script,str(database),str(effect),stage],
+            cwd=Path(__file__).resolve().parents[2], text=True, capture_output=True)
+>       assert result.returncode == 23, result.stderr
+E       AssertionError: Traceback (most recent call last):
+E           File "<string>", line 36, in <module>
+E           File "/workspace/van-lanes-20261101/family-multiposition/trading/vati/execution/router.py", line 915, in apply_exits
+E             r = self._send_close(venue, position_id=ins.position_id, trade_intent_id="",
+E                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           File "/workspace/van-lanes-20261101/family-multiposition/trading/vati/execution/router.py", line 354, in _send_close
+E             positions=[p for p in adapter.positions() if p.position_id==position_id]
+E                                   ^^^^^^^^^^^^^^^^^
+E         AttributeError: 'Adapter' object has no attribute 'positions'
+E         
+E       assert 1 == 23
+E        +  where 1 = CompletedProcess(args=['/workspace/van-backend-venv-20261025/bin/python', '-c', "\nimport os,sys\nfrom pathlib import ...id]\n                          ^^^^^^^^^^^^^^^^^\nAttributeError: \'Adapter\' object has no attribute \'positions\'\n').returncode
+
+trading/tests/test_exit_uncertainty.py:156: AssertionError
+_ test_process_death_keeps_the_original_attempt_fenced[after_receipt_commit-1] _
+
+tmp_path = PosixPath('/tmp/van-recovery-family-native-supervision-r9-20261101/test_process_death_keeps_the_o3')
+stage = 'after_receipt_commit', effects = 1
+
+    @pytest.mark.parametrize("stage,effects", [("after_request", 0), ("after_effect", 1),
+        ("before_receipt_commit", 1), ("after_receipt_commit", 1)])
+    def test_process_death_keeps_the_original_attempt_fenced(tmp_path, stage, effects):
+        database, effect = tmp_path/"death.sqlite", tmp_path/"venue-effects.txt"
+        script = '''
+    import os,sys
+    from pathlib import Path
+    from decimal import Decimal as D
+    from vati.core.ledger import Ledger
+    from vati.core.events import EventKind
+    from vati.execution.router import ExecutionRouter
+    from vati.execution.protection import ProtectionManager
+    from vati.execution.base import ExecutionReceipt
+    from vati.risk import KillSwitch
+    from vati.risk.contracts import Direction
+    path,effect,stage=sys.argv[1:]
+    ledger=Ledger(path)
+    protection=ProtectionManager()
+    protection.register('position',symbol='TEST',direction=Direction.LONG,entry=D('100'),stop=D('90'),target=None,opened_ms=0)
+    class Adapter:
+        venue='probe'
+        def close(self,position_id,quantity,*,now_ms,reason):
+            with Path(effect).open('a') as stream:stream.write('applied\\n')
+            if stage=='after_effect':os._exit(23)
+            return ExecutionReceipt('intent','','probe','FILLED',D('1'),D('89'),D('100'),D('100'),D('100'),True,now_ms,now_ms,broker_position_id='position').sealed()
+    router=ExecutionRouter(ledger=ledger,adapters={'probe':Adapter()},kill_switch=KillSwitch(),protection=protection)
+    if stage=='after_request':
+        original=router.exit_journal.begin
+        def begin(**kwargs):
+            original(**kwargs)
+            os._exit(23)
+        router.exit_journal.begin=begin
+    if stage=='before_receipt_commit':
+        original=ledger.append
+        def append(event):
+            if event.kind is EventKind.EXIT_ATTEMPT and event.payload['state']=='CONFIRMED':os._exit(23)
+            return original(event)
+        ledger.append=append
+    if stage=='after_receipt_commit':protection.close_confirmed=lambda position_id:os._exit(23)
+    router.apply_exits('probe','TEST',D('89'),D('90'),now_ms=1)
+    raise AssertionError('crash injection not reached')
+    '''
+        result = subprocess.run([sys.executable,"-c",script,str(database),str(effect),stage],
+            cwd=Path(__file__).resolve().parents[2], text=True, capture_output=True)
+>       assert result.returncode == 23, result.stderr
+E       AssertionError: Traceback (most recent call last):
+E           File "<string>", line 36, in <module>
+E           File "/workspace/van-lanes-20261101/family-multiposition/trading/vati/execution/router.py", line 915, in apply_exits
+E             r = self._send_close(venue, position_id=ins.position_id, trade_intent_id="",
+E                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           File "/workspace/van-lanes-20261101/family-multiposition/trading/vati/execution/router.py", line 354, in _send_close
+E             positions=[p for p in adapter.positions() if p.position_id==position_id]
+E                                   ^^^^^^^^^^^^^^^^^
+E         AttributeError: 'Adapter' object has no attribute 'positions'
+E         
+E       assert 1 == 23
+E        +  where 1 = CompletedProcess(args=['/workspace/van-backend-venv-20261025/bin/python', '-c', "\nimport os,sys\nfrom pathlib import ...id]\n                          ^^^^^^^^^^^^^^^^^\nAttributeError: \'Adapter\' object has no attribute \'positions\'\n').returncode
+
+trading/tests/test_exit_uncertainty.py:156: AssertionError
+__ test_restart_preserves_uncertainty_even_with_a_fresh_protection_projection __
+
+tmp_path = PosixPath('/tmp/van-recovery-family-native-supervision-r9-20261101/test_restart_preserves_uncerta0')
+
+    def test_restart_preserves_uncertainty_even_with_a_fresh_protection_projection(tmp_path):
+        path = tmp_path/"uncertain.sqlite"
+        adapter = CloseProbe()
+        original = build(Ledger(path), adapter)
+>       mark(original)
+
+trading/tests/test_exit_uncertainty.py:263: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_exit_uncertainty.py:48: in mark
+    return router.apply_exits("probe", "TEST", D("89"), D("90"), now_ms=when)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/router.py:915: in apply_exits
+    r = self._send_close(venue, position_id=ins.position_id, trade_intent_id="",
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.router.ExecutionRouter object at 0x7fd0355d89b0>
+venue = 'probe', position_id = 'position', trade_intent_id = '', quantity = None
+action = 'FULL_CLOSE', reason = 'STRUCTURE', now_ms = 1
+family_action_ref = None, family_target_ref = None, family_effect_guard = None
+
+    def _send_close(self, venue: str, *, position_id: str, trade_intent_id: str,
+                    quantity: Optional[Decimal], action: str, reason: str, now_ms: int,
+                    family_action_ref=None, family_target_ref=None, family_effect_guard=None) -> ExecutionReceipt:
+        # ProtectionManager addresses a native position, rather than an intent.
+        # Join its close to the original managed entry before publishing the
+        # request. An empty request identity must not orphan a valid child-leg
+        # receipt from its family after restart. Unresolved legacy protection
+        # retains its existing urgent path and remains unqualified family data.
+        if not trade_intent_id:
+            from vati.execution.recovery_scope import NativePositionHistory, PositionRecoveryError
+            from vati.core.ledger import LedgerError
+            try:
+                adapter=self.adapters[venue]
+>               positions=[p for p in adapter.positions() if p.position_id==position_id]
+                                      ^^^^^^^^^^^^^^^^^
+E               AttributeError: 'CloseProbe' object has no attribute 'positions'
+
+trading/vati/execution/router.py:354: AttributeError
+______ test_definitive_zero_fill_refusal_allows_a_later_protective_retry _______
+
+    def test_definitive_zero_fill_refusal_allows_a_later_protective_retry():
+        adapter = CloseProbe(status="REJECTED")
+        router = build(Ledger(), adapter)
+>       assert mark(router)[0].status == "REJECTED"
+               ^^^^^^^^^^^^
+
+trading/tests/test_exit_uncertainty.py:300: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_exit_uncertainty.py:48: in mark
+    return router.apply_exits("probe", "TEST", D("89"), D("90"), now_ms=when)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/router.py:915: in apply_exits
+    r = self._send_close(venue, position_id=ins.position_id, trade_intent_id="",
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.router.ExecutionRouter object at 0x7fd035698d70>
+venue = 'probe', position_id = 'position', trade_intent_id = '', quantity = None
+action = 'FULL_CLOSE', reason = 'STRUCTURE', now_ms = 1
+family_action_ref = None, family_target_ref = None, family_effect_guard = None
+
+    def _send_close(self, venue: str, *, position_id: str, trade_intent_id: str,
+                    quantity: Optional[Decimal], action: str, reason: str, now_ms: int,
+                    family_action_ref=None, family_target_ref=None, family_effect_guard=None) -> ExecutionReceipt:
+        # ProtectionManager addresses a native position, rather than an intent.
+        # Join its close to the original managed entry before publishing the
+        # request. An empty request identity must not orphan a valid child-leg
+        # receipt from its family after restart. Unresolved legacy protection
+        # retains its existing urgent path and remains unqualified family data.
+        if not trade_intent_id:
+            from vati.execution.recovery_scope import NativePositionHistory, PositionRecoveryError
+            from vati.core.ledger import LedgerError
+            try:
+                adapter=self.adapters[venue]
+>               positions=[p for p in adapter.positions() if p.position_id==position_id]
+                                      ^^^^^^^^^^^^^^^^^
+E               AttributeError: 'CloseProbe' object has no attribute 'positions'
+
+trading/vati/execution/router.py:354: AttributeError
+__ test_incomplete_or_wrong_position_receipt_cannot_remove_protection[patch0] __
+
+patch = {'status': 'FILLED'}
+
+    @pytest.mark.parametrize("patch", [dict(status="FILLED"), dict(status="CANCELLED",filled_qty=D("1")),
+        dict(status="FILLED",filled_qty=D("1"),average_fill=D("99"),broker_position_id="another")])
+    def test_incomplete_or_wrong_position_receipt_cannot_remove_protection(patch):
+        class Malformed(CloseProbe):
+            def close(self, *args, **kwargs):
+                return replace(super().close(*args, **kwargs), **patch).sealed()
+        adapter = Malformed()
+        router = build(Ledger(), adapter)
+        with pytest.raises(RouterError, match="reconcil"):
+>           mark(router)
+
+trading/tests/test_exit_uncertainty.py:315: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_exit_uncertainty.py:48: in mark
+    return router.apply_exits("probe", "TEST", D("89"), D("90"), now_ms=when)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/router.py:915: in apply_exits
+    r = self._send_close(venue, position_id=ins.position_id, trade_intent_id="",
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.router.ExecutionRouter object at 0x7fd0356306e0>
+venue = 'probe', position_id = 'position', trade_intent_id = '', quantity = None
+action = 'FULL_CLOSE', reason = 'STRUCTURE', now_ms = 1
+family_action_ref = None, family_target_ref = None, family_effect_guard = None
+
+    def _send_close(self, venue: str, *, position_id: str, trade_intent_id: str,
+                    quantity: Optional[Decimal], action: str, reason: str, now_ms: int,
+                    family_action_ref=None, family_target_ref=None, family_effect_guard=None) -> ExecutionReceipt:
+        # ProtectionManager addresses a native position, rather than an intent.
+        # Join its close to the original managed entry before publishing the
+        # request. An empty request identity must not orphan a valid child-leg
+        # receipt from its family after restart. Unresolved legacy protection
+        # retains its existing urgent path and remains unqualified family data.
+        if not trade_intent_id:
+            from vati.execution.recovery_scope import NativePositionHistory, PositionRecoveryError
+            from vati.core.ledger import LedgerError
+            try:
+                adapter=self.adapters[venue]
+>               positions=[p for p in adapter.positions() if p.position_id==position_id]
+                                      ^^^^^^^^^^^^^^^^^
+E               AttributeError: 'Malformed' object has no attribute 'positions'
+
+trading/vati/execution/router.py:354: AttributeError
+__ test_incomplete_or_wrong_position_receipt_cannot_remove_protection[patch1] __
+
+patch = {'status': 'CANCELLED', 'filled_qty': Decimal('1')}
+
+    @pytest.mark.parametrize("patch", [dict(status="FILLED"), dict(status="CANCELLED",filled_qty=D("1")),
+        dict(status="FILLED",filled_qty=D("1"),average_fill=D("99"),broker_position_id="another")])
+    def test_incomplete_or_wrong_position_receipt_cannot_remove_protection(patch):
+        class Malformed(CloseProbe):
+            def close(self, *args, **kwargs):
+                return replace(super().close(*args, **kwargs), **patch).sealed()
+        adapter = Malformed()
+        router = build(Ledger(), adapter)
+        with pytest.raises(RouterError, match="reconcil"):
+>           mark(router)
+
+trading/tests/test_exit_uncertainty.py:315: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_exit_uncertainty.py:48: in mark
+    return router.apply_exits("probe", "TEST", D("89"), D("90"), now_ms=when)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/router.py:915: in apply_exits
+    r = self._send_close(venue, position_id=ins.position_id, trade_intent_id="",
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.router.ExecutionRouter object at 0x7fd0355daa20>
+venue = 'probe', position_id = 'position', trade_intent_id = '', quantity = None
+action = 'FULL_CLOSE', reason = 'STRUCTURE', now_ms = 1
+family_action_ref = None, family_target_ref = None, family_effect_guard = None
+
+    def _send_close(self, venue: str, *, position_id: str, trade_intent_id: str,
+                    quantity: Optional[Decimal], action: str, reason: str, now_ms: int,
+                    family_action_ref=None, family_target_ref=None, family_effect_guard=None) -> ExecutionReceipt:
+        # ProtectionManager addresses a native position, rather than an intent.
+        # Join its close to the original managed entry before publishing the
+        # request. An empty request identity must not orphan a valid child-leg
+        # receipt from its family after restart. Unresolved legacy protection
+        # retains its existing urgent path and remains unqualified family data.
+        if not trade_intent_id:
+            from vati.execution.recovery_scope import NativePositionHistory, PositionRecoveryError
+            from vati.core.ledger import LedgerError
+            try:
+                adapter=self.adapters[venue]
+>               positions=[p for p in adapter.positions() if p.position_id==position_id]
+                                      ^^^^^^^^^^^^^^^^^
+E               AttributeError: 'Malformed' object has no attribute 'positions'
+
+trading/vati/execution/router.py:354: AttributeError
+__ test_incomplete_or_wrong_position_receipt_cannot_remove_protection[patch2] __
+
+patch = {'status': 'FILLED', 'filled_qty': Decimal('1'), 'average_fill': Decimal('99'), 'broker_position_id': 'another'}
+
+    @pytest.mark.parametrize("patch", [dict(status="FILLED"), dict(status="CANCELLED",filled_qty=D("1")),
+        dict(status="FILLED",filled_qty=D("1"),average_fill=D("99"),broker_position_id="another")])
+    def test_incomplete_or_wrong_position_receipt_cannot_remove_protection(patch):
+        class Malformed(CloseProbe):
+            def close(self, *args, **kwargs):
+                return replace(super().close(*args, **kwargs), **patch).sealed()
+        adapter = Malformed()
+        router = build(Ledger(), adapter)
+        with pytest.raises(RouterError, match="reconcil"):
+>           mark(router)
+
+trading/tests/test_exit_uncertainty.py:315: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_exit_uncertainty.py:48: in mark
+    return router.apply_exits("probe", "TEST", D("89"), D("90"), now_ms=when)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/router.py:915: in apply_exits
+    r = self._send_close(venue, position_id=ins.position_id, trade_intent_id="",
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.router.ExecutionRouter object at 0x7fd0355d98b0>
+venue = 'probe', position_id = 'position', trade_intent_id = '', quantity = None
+action = 'FULL_CLOSE', reason = 'STRUCTURE', now_ms = 1
+family_action_ref = None, family_target_ref = None, family_effect_guard = None
+
+    def _send_close(self, venue: str, *, position_id: str, trade_intent_id: str,
+                    quantity: Optional[Decimal], action: str, reason: str, now_ms: int,
+                    family_action_ref=None, family_target_ref=None, family_effect_guard=None) -> ExecutionReceipt:
+        # ProtectionManager addresses a native position, rather than an intent.
+        # Join its close to the original managed entry before publishing the
+        # request. An empty request identity must not orphan a valid child-leg
+        # receipt from its family after restart. Unresolved legacy protection
+        # retains its existing urgent path and remains unqualified family data.
+        if not trade_intent_id:
+            from vati.execution.recovery_scope import NativePositionHistory, PositionRecoveryError
+            from vati.core.ledger import LedgerError
+            try:
+                adapter=self.adapters[venue]
+>               positions=[p for p in adapter.positions() if p.position_id==position_id]
+                                      ^^^^^^^^^^^^^^^^^
+E               AttributeError: 'Malformed' object has no attribute 'positions'
+
+trading/vati/execution/router.py:354: AttributeError
+=========================== short test summary info ============================
+FAILED trading/tests/test_exit_uncertainty.py::test_unknown_close_does_not_retry_on_the_next_market_update
+FAILED trading/tests/test_exit_uncertainty.py::test_transport_exception_cannot_turn_into_a_blind_retry
+FAILED trading/tests/test_exit_uncertainty.py::test_receipt_and_exit_disposition_are_committed_together
+FAILED trading/tests/test_exit_uncertainty.py::test_two_ledger_writers_cannot_send_the_same_position_close
+FAILED trading/tests/test_exit_uncertainty.py::test_process_death_keeps_the_original_attempt_fenced[after_request-0]
+FAILED trading/tests/test_exit_uncertainty.py::test_process_death_keeps_the_original_attempt_fenced[after_effect-1]
+FAILED trading/tests/test_exit_uncertainty.py::test_process_death_keeps_the_original_attempt_fenced[before_receipt_commit-1]
+FAILED trading/tests/test_exit_uncertainty.py::test_process_death_keeps_the_original_attempt_fenced[after_receipt_commit-1]
+FAILED trading/tests/test_exit_uncertainty.py::test_restart_preserves_uncertainty_even_with_a_fresh_protection_projection
+FAILED trading/tests/test_exit_uncertainty.py::test_definitive_zero_fill_refusal_allows_a_later_protective_retry
+FAILED trading/tests/test_exit_uncertainty.py::test_incomplete_or_wrong_position_receipt_cannot_remove_protection[patch0]
+FAILED trading/tests/test_exit_uncertainty.py::test_incomplete_or_wrong_position_receipt_cannot_remove_protection[patch1]
+FAILED trading/tests/test_exit_uncertainty.py::test_incomplete_or_wrong_position_receipt_cannot_remove_protection[patch2]
+13 failed, 194 passed in 16.98s

@@ -1,0 +1,64 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_ test_full_paper_session_builder_survives_bad_news_and_keeps_the_same_cycle_binding _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-239/test_full_paper_session_builde0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_full_paper_session_builder_survives_bad_news_and_keeps_the_same_cycle_binding(tmp_path,eurusd):
+        from conftest import mandate_dict
+        from test_backtest_runner_cli import synthetic_bars
+        from vati.accounts import Account,AccountRegistry
+        from vati.app.service import ServiceConfig,lake_bar_source
+        from vati.market_data.feeds import BarLake
+        from vati.risk.serde import contract_to_dict
+        AccountRegistry(tmp_path/'accounts.json').add(Account(alias='paper_lab',broker='PAPER',mode='DEMO_TRADER',currency='USD'))
+        lake=BarLake(tmp_path/'lake');bars=synthetic_bars();lake.write(bars,symbol='EURUSD',timeframe='H1',source='fixture',provenance='SYNTHETIC')
+        path=tmp_path/'news.json';path.write_text('{');at=bars[100].end_ms
+        cfg=ServiceConfig(account_alias='paper_lab',symbol='EURUSD',base='EUR',quote='USD',timeframe='H1',
+            contract=contract_to_dict(eurusd),mandate=mandate_dict(venue='paper',mode='DEMO_TRADER',account_alias='paper_lab',allowed_strategies=['FX-TREND-PULLBACK-01']),
+            capsules=['FX-TREND-PULLBACK-01'],registry_path=str(tmp_path/'accounts.json'),ledger=str(tmp_path/'session.sqlite'),
+            lake_root=str(tmp_path/'lake'),heartbeat_path=str(tmp_path/'heartbeat.json'),news=configured(path))
+        value=SessionService(cfg,lake_bar_source(lake,'EURUSD','H1'),clock=lambda:at)
+        try:
+            value.build()
+            assert value.news.source_health['state']=='UNREADABLE' and value.runner.cycle.news is value.news
+            value._heartbeat('BUILT')
+>           heartbeat=json.loads(Path(cfg.heartbeat_path).read_text())
+                                 ^^^^
+E           NameError: name 'Path' is not defined
+
+trading/tests/test_news_runtime_health.py:338: NameError
+_ test_account_owner_heartbeat_reports_news_state_before_the_first_bar[False] __
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-239/test_account_owner_heartbeat_r0')
+ledger = <vati.core.ledger.Ledger object at 0x7f11678d3e30>, enabled = False
+
+    @pytest.mark.parametrize('enabled',[False,True])
+    def test_account_owner_heartbeat_reports_news_state_before_the_first_bar(tmp_path,ledger,enabled):
+        value=service('account',ledger,configured(tmp_path/'missing.json') if enabled else {})
+        value.cfg.heartbeat_path=str(tmp_path/'heartbeat.json');build(value,'account')
+>       value._heartbeat('BUILT');heartbeat=json.loads(Path(value.cfg.heartbeat_path).read_text())
+                                                       ^^^^
+E       NameError: name 'Path' is not defined
+
+trading/tests/test_news_runtime_health.py:355: NameError
+__ test_account_owner_heartbeat_reports_news_state_before_the_first_bar[True] __
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-239/test_account_owner_heartbeat_r1')
+ledger = <vati.core.ledger.Ledger object at 0x7f116792eff0>, enabled = True
+
+    @pytest.mark.parametrize('enabled',[False,True])
+    def test_account_owner_heartbeat_reports_news_state_before_the_first_bar(tmp_path,ledger,enabled):
+        value=service('account',ledger,configured(tmp_path/'missing.json') if enabled else {})
+        value.cfg.heartbeat_path=str(tmp_path/'heartbeat.json');build(value,'account')
+>       value._heartbeat('BUILT');heartbeat=json.loads(Path(value.cfg.heartbeat_path).read_text())
+                                                       ^^^^
+E       NameError: name 'Path' is not defined
+
+trading/tests/test_news_runtime_health.py:355: NameError
+=========================== short test summary info ============================
+FAILED trading/tests/test_news_runtime_health.py::test_full_paper_session_builder_survives_bad_news_and_keeps_the_same_cycle_binding
+FAILED trading/tests/test_news_runtime_health.py::test_account_owner_heartbeat_reports_news_state_before_the_first_bar[False]
+FAILED trading/tests/test_news_runtime_health.py::test_account_owner_heartbeat_reports_news_state_before_the_first_bar[True]
+3 failed, 40 deselected in 0.85s

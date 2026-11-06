@@ -1,0 +1,8 @@
+[Unit]
+Description=Verify VAN Muse fixed egress and fail closed on mismatch
+After=van-muse-bridge.service
+Requires=van-muse-bridge.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/van-muse-egress-check

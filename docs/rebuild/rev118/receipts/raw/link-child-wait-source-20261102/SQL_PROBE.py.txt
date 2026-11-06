@@ -1,0 +1,47 @@
+"""Controlled SOURCE proof: actual original owner test, actual SQLite and child."""
+import asyncio,json,os,signal,subprocess,time
+from pathlib import Path
+import aiosqlite
+import pytest
+from test_trading_api import client,_env
+import test_stateful_link_binding as owner
+
+@pytest.mark.asyncio
+async def test_actual_original_process_death_with_parent_writer_release(client,tmp_path,monkeypatch):
+    _,app=client;original_approved=owner.approved;events=[];releases=[];children=[]
+    real_popen=subprocess.Popen
+    def capture(*args,**kwargs):
+        child=real_popen(*args,**kwargs)
+        command=args[0] if args else kwargs.get('args',[])
+        if isinstance(command,list) and len(command)>2 and command[1]=='-c' and 'exit_after_claim' in command[2]:
+            assert kwargs['start_new_session'] is True
+            children.append(child)
+        return child
+    monkeypatch.setattr(subprocess,'Popen',capture)
+    async def hold_after_real_approval(*args,**kwargs):
+        body=await original_approved(*args,**kwargs)
+        db=await aiosqlite.connect(app.state.store.path)
+        await db.execute('BEGIN IMMEDIATE')
+        events.append({'event':'parent_actual_sqlite_writer_held','at':time.monotonic()})
+        async def release():
+            try:
+                await asyncio.sleep(.25)
+                events.append({'event':'parent_event_loop_release_ran','at':time.monotonic()})
+                await db.commit()
+                events.append({'event':'parent_actual_sqlite_writer_released','at':time.monotonic()})
+            finally:await db.close()
+        releases.append(asyncio.create_task(release()))
+        return body
+    monkeypatch.setattr(owner,'approved',hold_after_real_approval)
+    try:
+        await owner.test_real_link_process_death_keeps_bound_original_unknown_without_native_resend(client,tmp_path,monkeypatch)
+    finally:
+        events.append({'event':'original_test_returned_or_raised','at':time.monotonic()})
+        await asyncio.gather(*releases)
+        assert len(children)==1 and children[0].returncode is not None
+        try:os.waitpid(children[0].pid,os.WNOHANG)
+        except ChildProcessError:reaped=True
+        else:reaped=False
+        diagnostic={'events':events,'child_pid':children[0].pid,'child_returncode':children[0].returncode,'child_already_reaped':reaped,'scope':'Actual original test/real signedA4/client/ownedSQLite/realchild; hookonly holds an empty parent writer after realapproval and schedules .25s release. No timeout/assertion/authority/childscript changes.'}
+        (tmp_path/'writer-loop-diagnostic.json').write_text(json.dumps(diagnostic,indent=2)+'\n')
+        assert reaped

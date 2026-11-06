@@ -1,0 +1,374 @@
+{
+  "schema": "van.native-depth-producer-source-handoff/1",
+  "state": "FROZEN_FOR_REVIEW_RESOURCE_DEVIATION_DISCLOSED",
+  "utc": "2026-11-02T08:09:44.941938+00:00",
+  "base": "56dec626ffa0f6a9f52545e890344ebf0c737c24",
+  "lane": "/tmp/van-native-depth-source-lane-20261102",
+  "frozen": "FROZEN.json",
+  "source_export": "EXACT9 allowlistedsourcepaths, sixbefore+nineafter ZIPmembers; no runtime/privatevault/mainchanges",
+  "zip_members_sha256": {
+    "after/trading/vati/app/service.py": "6963646da556143ae23f6e9e464d85288a3d4630d3e585f15edf9fc189d9d582",
+    "before/trading/vati/app/service.py": "1fbf30ce7b79620b759fa11c20f6daad48dd2bcccba2388174c13a1316fbe5e6",
+    "after/trading/vati/app/account_service.py": "39b8c26e182e15648f3fab6043fc2c68bec3e07d3280548c892da1253cc7a269",
+    "before/trading/vati/app/account_service.py": "1469ca9a3fc419754999a9e9575f08b3f396cc429763906afb1d0c285c1abc45",
+    "after/trading/vati/market_data/native_depth_worker.py": "f817d207f66b6f432d0023a25dc392a540d8849551c7fba600b0ad9834db1534",
+    "after/trading/vati/market_data/native_depth.py": "3d4fde40bb27a82fa70cf41713a65e976400b462ba2ea1276a2766f19d8349fd",
+    "before/trading/vati/market_data/native_depth.py": "0ee15738cfb7ff8705ee5feee1f0b08e9808d0ed0f6b7df06f4337805a447409",
+    "after/trading/vati/market_data/native_archive.py": "86f4b63b242a07b1a6afde3bca5b78c067d16ee4997fbbaee3a2a9c27ba3e5fc",
+    "before/trading/vati/market_data/native_archive.py": "6551356e82cd61dfcbaec836098c861df93575c97cb61635331e75439bda9b3d",
+    "after/trading/vati/market_data/feeds/lake.py": "09572049f5aa06b50dd7795abee3a02bf220c74c768b7b49ce2a593c2897aa8e",
+    "before/trading/vati/market_data/feeds/lake.py": "a7deb3f0aeb8508df01c47bdbac5ec34f13e1846f8f94f50f9024156809f6fba",
+    "after/trading/tests/test_native_depth_worker.py": "2c176c46a5effa35726b45a2e2293e69952e736c15a1a1feae7e72de6af84c67",
+    "after/trading/tests/test_native_depth_runtime.py": "68e3da5f304d3af7956710d2f93478af874510923b40529ce973743ccd143a54",
+    "after/backend/tests/test_native_depth_history.py": "2aca6ce56272061bdcec59fd58a48fcdfc372bff1f8ff5f14cacc9665b943ded",
+    "before/backend/tests/test_native_depth_history.py": "3925d399516cd3f8fca1430c655ba9b330d30285b138f8fd5e257df3423194c0"
+  },
+  "final_proofs": [
+    {
+      "tag": "FINAL_PRODUCER13",
+      "exit": 0,
+      "limit_reason": null,
+      "seconds": 12.859,
+      "owned_peak_allocated": 10674176,
+      "owned_budget": 16777216,
+      "group_absent": true,
+      "counts": {
+        "passed": 40,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "fs_memory_pins": {
+        "device": 26,
+        "tmp_device": 34,
+        "workspace_device": 27,
+        "memory_max": 17179869184,
+        "memory_current_before": 10851545088,
+        "memory_events_before": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+        "source_only_tmpfs_not_reboot_durability": true
+      },
+      "memory_current_after": 10859286528,
+      "memory_events_after": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "command": [
+        "/workspace/van-backend-venv-20261025/bin/python",
+        "-B",
+        "-m",
+        "pytest",
+        "trading/tests/test_native_depth_worker.py",
+        "trading/tests/test_native_depth_runtime.py",
+        "backend/tests/test_native_depth_history.py::test_configured_runtime_original_is_independently_read_by_paired_history_without_capture",
+        "--rootdir=/tmp/van-native-depth-source-lane-20261102",
+        "-c",
+        "/tmp/van-native-depth-source-lane-20261102/pytest.ini",
+        "-p",
+        "pytest_asyncio.plugin",
+        "-p",
+        "anyio.pytest_plugin",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "asyncio_mode=auto",
+        "-q",
+        "--basetemp=/dev/shm/van-depth-source-test-20261102/FINAL_PRODUCER13/fixtures",
+        "--junitxml=/dev/shm/van-depth-source-test-20261102/FINAL_PRODUCER13/junit.xml"
+      ],
+      "directory": "/dev/shm/van-depth-source-test-20261102/FINAL_PRODUCER13",
+      "receipt_sha256": "29c6a3b3569515dd209d25530b98620cf34bc44a1d8f6a6ff330c0114968137f",
+      "raw_sha256": "b25f9515d54a57e9b1b5e93235cee51b8dd6559b5a46decda158a0bbb18c852d",
+      "junit_sha256": "5512b8b0ea8a4b5ca88c87b1a247cc2611dda8538f1c266007d64da0ddb13dd7",
+      "case_ids_sha256": "0812f7621050f9eaff44c28936f8728308d2c9377443630ff96871835450130a"
+    },
+    {
+      "tag": "FINAL_ARCHIVE14",
+      "exit": 0,
+      "limit_reason": null,
+      "seconds": 6.654,
+      "owned_peak_allocated": 733184,
+      "owned_budget": 16777216,
+      "group_absent": true,
+      "counts": {
+        "passed": 158,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "fs_memory_pins": {
+        "device": 26,
+        "tmp_device": 34,
+        "workspace_device": 27,
+        "memory_max": 17179869184,
+        "memory_current_before": 10859397120,
+        "memory_events_before": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+        "source_only_tmpfs_not_reboot_durability": true
+      },
+      "memory_current_after": 10860613632,
+      "memory_events_after": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "command": [
+        "/workspace/van-backend-venv-20261025/bin/python",
+        "-B",
+        "-m",
+        "pytest",
+        "trading/tests/test_native_depth_archive.py",
+        "trading/tests/test_native_archive_read_budget.py",
+        "trading/tests/test_native_market_archive.py",
+        "trading/tests/test_bar_lake_integrity.py",
+        "trading/tests/test_ctrader_native_depth.py",
+        "--rootdir=/tmp/van-native-depth-source-lane-20261102",
+        "-c",
+        "/tmp/van-native-depth-source-lane-20261102/pytest.ini",
+        "-p",
+        "pytest_asyncio.plugin",
+        "-p",
+        "anyio.pytest_plugin",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "asyncio_mode=auto",
+        "-q",
+        "--basetemp=/dev/shm/van-depth-source-test-20261102/FINAL_ARCHIVE14/fixtures",
+        "--junitxml=/dev/shm/van-depth-source-test-20261102/FINAL_ARCHIVE14/junit.xml"
+      ],
+      "directory": "/dev/shm/van-depth-source-test-20261102/FINAL_ARCHIVE14",
+      "receipt_sha256": "4cbf67f5d74ebae9d8a14d0fa7d6bedfa538f02792d4818585b0c674296f1f4f",
+      "raw_sha256": "cadcbb0e7873e373c437b17b638481fcbc713f9e9fc198d2f6a782a2f189844a",
+      "junit_sha256": "61f83f624f4060a50bd23642b8100859c20ffbb34bf9f7504149ca4fc40210c5",
+      "case_ids_sha256": "1d1d3d8852992aa5c44dfb5cd1d641f07ddb51eb80ba11f491e04f3e7e273e82"
+    }
+  ],
+  "actual_unique_PASS": 198,
+  "actual_exec": 198,
+  "SKIP": 0,
+  "overlap": 0,
+  "reuse": "NONE for final198; historical executions separately retained",
+  "earlier_runs": [
+    {
+      "tag": "DURABLE05",
+      "receipt": "/tmp/van-native-depth-proof-20261102/DURABLE05/receipt.json",
+      "exit": 0,
+      "counts": {
+        "passed": 9,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "limit_reason": null
+    },
+    {
+      "tag": "FIRST01",
+      "receipt": "/tmp/van-native-depth-proof-20261102/FIRST01/receipt.json",
+      "exit": 0,
+      "counts": {
+        "passed": 1,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "limit_reason": null
+    },
+    {
+      "tag": "RUNTIME03",
+      "receipt": "/tmp/van-native-depth-proof-20261102/RUNTIME03/receipt.json",
+      "exit": 1,
+      "counts": {
+        "passed": 0,
+        "failed": 3,
+        "error": 0,
+        "skipped": 0
+      },
+      "limit_reason": null
+    },
+    {
+      "tag": "RUNTIME04",
+      "receipt": "/tmp/van-native-depth-proof-20261102/RUNTIME04/receipt.json",
+      "exit": 0,
+      "counts": {
+        "passed": 3,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "limit_reason": null
+    },
+    {
+      "tag": "WORKER02",
+      "receipt": "/tmp/van-native-depth-proof-20261102/WORKER02/receipt.json",
+      "exit": 0,
+      "counts": {
+        "passed": 23,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "limit_reason": null
+    },
+    {
+      "tag": "HTTP06",
+      "receipt": "/workspace/van-native-depth-http-proof-20261102/HTTP06/receipt.json",
+      "exit": 1,
+      "counts": {
+        "passed": 0,
+        "failed": 0,
+        "error": 1,
+        "skipped": 0
+      },
+      "limit_reason": null
+    },
+    {
+      "tag": "HTTP07",
+      "receipt": "/workspace/van-native-depth-http-proof-20261102/HTTP07/receipt.json",
+      "exit": 1,
+      "counts": {
+        "passed": 0,
+        "failed": 0,
+        "error": 1,
+        "skipped": 0
+      },
+      "limit_reason": null
+    },
+    {
+      "tag": "HTTP08",
+      "receipt": "/workspace/van-native-depth-http-proof-20261102/HTTP08/receipt.json",
+      "exit": -15,
+      "counts": {
+        "passed": 0,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "limit_reason": "OWNED_AGGREGATE_CAP"
+    },
+    {
+      "tag": "HTTP09",
+      "receipt": "/workspace/van-native-depth-http-proof-20261102/HTTP09/receipt.json",
+      "exit": 1,
+      "counts": {
+        "passed": 0,
+        "failed": 0,
+        "error": 1,
+        "skipped": 0
+      },
+      "limit_reason": null
+    },
+    {
+      "tag": "HTTP10",
+      "receipt": "/dev/shm/van-depth-source-test-20261102/HTTP10/receipt.json",
+      "exit": 0,
+      "counts": {
+        "passed": 1,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "limit_reason": null
+    },
+    {
+      "tag": "SERVICE_HTTP11",
+      "receipt": "/dev/shm/van-depth-source-test-20261102/SERVICE_HTTP11/receipt.json",
+      "exit": 4,
+      "counts": {
+        "passed": 0,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "limit_reason": null
+    },
+    {
+      "tag": "SERVICE_HTTP12",
+      "receipt": "/dev/shm/van-depth-source-test-20261102/SERVICE_HTTP12/receipt.json",
+      "exit": 0,
+      "counts": {
+        "passed": 2,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "limit_reason": null
+    }
+  ],
+  "chain": "ExplicitServiceConfig.depth_capture defaultNone/OFF -> both actualSessionService/AccountCoordinatorService build/start/step/close -> singleboundedseparatereader +crossprocessphysicalsource lock -> durableoriginalrequest PREPARED/READ_MAY_HAVE_OCCURRED/CAPTURED/UNCERTAIN/REFUSED in SAME NativeDepthArchive -> currentregistry/key/profile/contract/expiry AFTERwaits +insidewriter/afterfsync beforeos.replace -> immutableoriginal/derivedindex -> independentcoldarchive +pairedGET sameoriginalrevision/asof. READpossible withoutoriginalbytes neverrecaptures. ExplicitNEW ID only. No HTTPGET/constructor/import collection.",
+  "resource_deviation": "198 genuine functionalPASS. GLOBAL64MiBworkspace batchadmission WAS NOT MET; SHM controller omittedglobalworkspace64 check. NO retroactive resourcecompliance claim. Workspace32MiBhardfloor not approached. Exact fs/cgroup/tmp pins remain original receipts.",
+  "prospective_root_amendment": "Root approvedscratch-onlyroute AFTERresults: workspaceINPUTSreadonly; alltests/temp/cache/bytecode/output ownedSHM(PYTHONDONTWRITEBYTECODE=1/cacheofforrouted/TMPDIR+XDG_CACHE_HOME scopedSHM); workspace32MiBHARDfloor stays;64MiB mandatoryANYworkspace-growingcopy/test/export/integrationbatch; SHM>=2GiB+cap,cgroupheadroom>=4GiB,sharedflock,ownedcleanup; tmp2GiB forsmallcheckpoints. Prospective runtime amendment only, notcanon/authority/nativeadmission. No furthertests/sourceenhancement. Oldcontroller didnotrouteTMPDIR/XDG_CACHE_HOME; correct beforeany prospective reuse.",
+  "temporary_evidence": "SHM processdeath/coldreopen SOURCE only, volatile, not persistentbackup/reboot/diskdurability. Raw/XML/coldstores retained.",
+  "failed_history": "RUNTIME03 3newfixturebadassertions countedallnative(funding+depth)readers; fixedtestcountsdepthsubscriptions. HTTP06 missingbaselinefixtureinputs materializedexact3registries;HTTP07 1MiBfilecapSQLiteIOerror;HTTP08 4MiBaggregate interrupted;HTTP09 bodyPASS+teardownERROR fromoverbroadnewthreadownership correctedtoexactownednativepeer/socketthreads. SERVICE_HTTP11 exit4/notests afterfailedliteralrefactor (no sourcewrite) andshellcontinued; laterstagescheckedseparately. Allraw/JUnit/coldfailuresretained, no relabeling.",
+  "owned_cleanup": "/tmp/van-native-depth-proof-20261102/OWN_SUCCESS_CLEANUP.json records4verifiedsuccessfulfixtureZIPs SHA/memberCRC/noFD thenoriginalremove; failures unchanged. Allfinalchildren/groupwaited/reaped; no activeflock/process.",
+  "consumed_dependency": "FROZEN.json20actualdependencysha inclregistryproducer;23a\u219256equivalence verified. Peer cleanup candidate NOTconsumed; combinedintegrationmustcheckitsregistryproducer/currentness semantics againstexactpinnedbaseline.",
+  "qualification": "HISTORICAL_PARTIAL_DEPTH_CAPTURE_UNQUALIFIED. Rawuint64/IDs>2^53 retained; sourceDATA grantsnoauthority/rights/tradability. No sequence/checksum/nativeclock/price-scale/fullbook/emptybook/currentliquidity/provider/hardware/native/S24 qualification. ActualCoordinator storeconstructors injectedrealSQLite, NOT realPGsharedauthorityproof.",
+  "configuration": "Owner mustprovision SAME archive_root asexisting Gateway vati_native_source_root/historyowner. No arbitraryrequestroot/URL. One-shotonly, explicitqueue/frame/byte/time/maxage/limit/history/requestcountbounds; nocadence/all-symboldefault.",
+  "lifecycle_limit": "Uninterruptiblehostconnector/reader/state-lockwait can retainSTOP_PENDING; boundedclose doesnot fakekill/releasecapacity or replaceworker untilactualexit.",
+  "canonical_BE008": {
+    "id": "BE-008",
+    "packet_id": "VAN-PKT-011",
+    "sequence": 11,
+    "dependencies": [
+      "BE-003",
+      "BE-005",
+      "PRE-003"
+    ],
+    "exit_contract": "resolve aliases; discover tradable instruments; subscribe once; aggregate bars; revision snapshots; recover gaps; publish genuine depth. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Identical ticker with different contracts cannot collide; stale feed never returns synthetic LIVE; bad sequence triggers snapshot recovery Rev1.14: every applicable self-optimization/crypto/lean contract and its real evidence must pass; automatic operation and policy evolution are separately qualified. Rev1.18: apply whole-product protocol and effective acceptance refinements for every owned feature/context/action; use actual native source/provider/consumer and independently observed postconditions. Document closure alone cannot satisfy runtime gates.",
+    "acceptance_test_ids": [
+      "T-BE-008-POS",
+      "T-BE-008-NEG",
+      "T-BE-008-REC",
+      "T-BE-008-SEC",
+      "T-BE-008-INT",
+      "T-NX-074",
+      "T-NX-075",
+      "T-VAN-CX-004-POS",
+      "T-VAN-CX-004-NEG",
+      "T-VAN-CX-004-REC",
+      "T-VAN-CX-007-POS",
+      "T-VAN-CX-007-NEG",
+      "T-VAN-CX-007-REC",
+      "T-VAN-CX-012-POS",
+      "T-VAN-CX-012-NEG",
+      "T-VAN-CX-012-REC",
+      "T-REV113-007",
+      "T-VAN-SO-009-POS",
+      "T-VAN-SO-009-NEG",
+      "T-VAN-SO-009-REC",
+      "T-VAN-CRYPTO-002-POS",
+      "T-VAN-CRYPTO-002-NEG",
+      "T-VAN-CRYPTO-002-REC",
+      "T-VAN-CRYPTO-003-POS",
+      "T-VAN-CRYPTO-003-NEG",
+      "T-VAN-CRYPTO-003-REC",
+      "T-VAN-CRYPTO-006-POS",
+      "T-VAN-CRYPTO-006-NEG",
+      "T-VAN-CRYPTO-006-REC",
+      "T-VAN-CRYPTO-008-POS",
+      "T-VAN-CRYPTO-008-NEG",
+      "T-VAN-CRYPTO-008-REC"
+    ],
+    "full_deliverables": [
+      "VAN-SO-009: Version canonical bucket key, product, side, amount/participation, fees, volatility, event and regime.",
+      "VAN-CRYPTO-002: API family, account/subaccount, native product, spot type, base/quote/network identities are versioned.",
+      "VAN-CRYPTO-003: Tick/step/min-notional/max limits and fee reserves apply before exact risk approval.",
+      "VAN-CRYPTO-006: Sequence/checksum, timestamps, snapshot boundaries, fill IDs and resync per selected provider.",
+      "VAN-CRYPTO-008: 24/7 operation still handles maintenance; nonce/clock constraints; cancel/query headroom protected."
+    ],
+    "requirement_ids": [
+      "VAN-NX-008",
+      "VAN-NX-009",
+      "VAN-NX-011",
+      "VAN-NX-040",
+      "VAN-NX-041",
+      "VAN-NX-042",
+      "VAN-NX-074",
+      "VAN-NX-075",
+      "VAN-CX-004",
+      "VAN-CX-007",
+      "VAN-CX-012",
+      "VAN-SO-009",
+      "VAN-CRYPTO-002",
+      "VAN-CRYPTO-003",
+      "VAN-CRYPTO-006",
+      "VAN-CRYPTO-008"
+    ]
+  },
+  "remaining": "FullcanonicalBE008/qualifieddepth/UI/provider/native/formalPRE/BG001/alloriginalsuboperations OPEN; no unitaccepted. BE006positive reversal needsactualimmutableprovideroriginal/reversalrelation; labels/oppositeamount/sameIDchangedbody notproof.",
+  "current_CI": "/tmp/van-depth-ci41405437330-terminal-summary-20261102.json:41405437330 attempt1 complete41=32success9failure; original73187exit1/ownedwaitedONCE. All8gatewayprimaryshards6success+2entry67only; prior53fixturedefectsabsent, notoverallGREEN. DDS/trustedmain/protectedentry67+aggregation gatesunwaived. No artifactdownload/newwatch.",
+  "DIAL_root_reported_072906": "ProjectTruthDEVELOPMENT_BLOCKED despite recordedPRODUCTION_GREEN; Hermesqualification/controlfingerprintunsatisfied. GeneralcomputeACTIVE onlynonprojectnetworkNONE256MiBsandbox/NOT_LIVE_QUALIFIED, no projectauthority; ARTEMIS/ORCANOT_OBSERVED; no new nativeproof.",
+  "PR106_root_readback": "OPEN/mergedfalse/mergeabletrue/headf20dce7ecc982ececc73bb3b338f9309bdb4ae22/reviews[]; PROPOSEDownercodeownerreview+programmebranchmerge required; unused/noauthority.",
+  "author": "No mainwrites/generators/commit/push/provider/native/SDK/CI effects. IDLE afterhandoff."
+}

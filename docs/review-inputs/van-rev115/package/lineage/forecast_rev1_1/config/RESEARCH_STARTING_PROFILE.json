@@ -1,0 +1,101 @@
+{
+  "profile_id": "VAN-ML-RESEARCH-STARTING-EXAMPLE-1",
+  "status": "ILLUSTRATIVE_NOT_AUTHORIZED_OR_OPTIMIZED",
+  "environment": "RESEARCH",
+  "live_enabled": false,
+  "scope_admission": "REQUIRED_BEFORE_USE",
+  "instrument_ids": [],
+  "data_entitlement_refs": [],
+  "resource_admission_ref": null,
+  "paid_compute_budget": null,
+  "cohort_rule": "Select from existing owner-admitted instrument/provider scope. Empty means unresolved, not all assets.",
+  "example_bar_interval": "H1",
+  "example_horizons_bars": [
+    1,
+    4,
+    16
+  ],
+  "target_definitions_required": true,
+  "seed_list": [
+    17,
+    29,
+    43
+  ],
+  "lightgbm": {
+    "device_type": "cpu",
+    "deterministic": true,
+    "force_col_wise": true,
+    "num_threads": 2,
+    "learning_rate": 0.03,
+    "num_leaves": 31,
+    "max_depth": 6,
+    "min_data_in_leaf": 200,
+    "lambda_l1": 0.0,
+    "lambda_l2": 1.0,
+    "feature_fraction": 1.0,
+    "bagging_fraction": 1.0,
+    "num_boost_round": 1000,
+    "early_stopping_rounds": 50,
+    "quantile_alphas": [
+      0.05,
+      0.5,
+      0.95
+    ],
+    "note": "Adapter maps objective per TargetSpec; quantile and ranking use VAN adapters, not unsupported Qlib loss values. Dataset suitability is checked, never silently changed."
+  },
+  "neural": {
+    "primary_plugins": [
+      "NHITS",
+      "NBEATSx",
+      "DeepAR"
+    ],
+    "required_research_challengers": [
+      "TFT",
+      "PatchTST",
+      "iTransformer"
+    ],
+    "example_input_size": 256,
+    "example_h": 16,
+    "max_steps": 1000,
+    "val_check_steps": 50,
+    "early_stop_patience_steps": 5,
+    "example_windows_batch_size": 128,
+    "example_trajectory_samples": 100,
+    "scaler_rule": "Fit only permitted fold or context-local statistics; never final holdout. Persist exact transform.",
+    "note": "Shared values are provider-adapter configuration, not arguments blindly valid for every class. Each plugin has its own checked capabilities and valid loss/parameter mapping."
+  },
+  "study": {
+    "optimizer": "Optuna through VAN StudyController",
+    "initial_trial_budget": 20,
+    "max_parallel_trials": 1,
+    "expand_budget_requires_admission": true,
+    "final_holdout_read_for_tuning": false,
+    "retention": "Preserve every trial including pruned, rejected, failed and insufficient-data cases"
+  },
+  "retraining": {
+    "cadence": "Must be admitted per cohort/horizon after latency/drift study",
+    "automatic_live_promotion": false,
+    "model_expiry": "Set independently of job cadence and enforce even if training is delayed"
+  },
+  "economic_policy": {
+    "source": "Reuse actual VAN validation policy plus preregistered task-specific statistical power, materiality and risk conditions",
+    "accuracy_threshold": null,
+    "live_risk_percentages": null
+  },
+  "dependency_pins": {
+    "status": "UNRESOLVED_TEST_AND_LOCK_AT_ADOPTION",
+    "required_packages": [
+      "pyqlib",
+      "lightgbm",
+      "neuralforecast",
+      "torch",
+      "xgboost",
+      "optuna",
+      "feast",
+      "mlflow"
+    ],
+    "note": "Documentation version labels and historical stack-lock observed versions are not tested dependency locks."
+  },
+  "prediction_market_profile_ref": "PREDICTION_MARKET_PROFILE.json",
+  "prediction_market_future_exogenous_probabilities_allowed": false
+}

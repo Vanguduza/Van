@@ -1,0 +1,72 @@
+...............................................................F.....FF. [ 57%]
+......................................................                   [100%]
+=================================== FAILURES ===================================
+____ test_actual_lost_commit_ack_keeps_the_original_durable_request[sqlite] ____
+
+drafts = (<vati.core.ledger.Ledger object at 0x7f486e798e90>, <vati.funding.payment_drafts.PaymentDraftBook object at 0x7f486e79b8c0>, <function drafts.<locals>.<lambda> at 0x7f486e768e00>, {'now': 1500})
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f486e79b7d0>
+
+    def test_actual_lost_commit_ack_keeps_the_original_durable_request(drafts,monkeypatch):
+        ledger,book,fresh,_=drafts;atomic=ledger.atomic
+        @contextmanager
+        def lost():
+            with atomic() as value:yield value
+            raise OSError('fixture lost committed draft ACK')
+        with monkeypatch.context() as patch:
+            patch.setattr(ledger,'atomic',lost)
+            with pytest.raises(PaymentDraftUnknown):book.publish('owner:one',intent())
+        with closing(fresh()) as cold:
+            receipt=PaymentDraftBook(cold,privacy_guard=guard_payment_draft).lookup('owner:one','request:original')
+>       assert receipt and book.publish('owner:one',intent())==receipt and state(ledger)[1]==1
+E       assert (None)
+
+trading/tests/test_payment_draft_journal.py:109: AssertionError
+_ test_queued_expiry_rechecks_after_the_actual_SQL_writer_is_acquired[sqlite] __
+
+drafts = (<vati.core.ledger.Ledger object at 0x7f486e7b41d0>, <vati.funding.payment_drafts.PaymentDraftBook object at 0x7f486e7b4b30>, <function drafts.<locals>.<lambda> at 0x7f486e7ca0c0>, {'now': 1500})
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f486e7b52b0>
+
+    def test_queued_expiry_rechecks_after_the_actual_SQL_writer_is_acquired(drafts,monkeypatch):
+        ledger,book,fresh,clock=drafts;ready=threading.Event();atomic=ledger.atomic
+        @contextmanager
+        def queued():
+            ready.set()
+            with atomic() as value:yield value
+        with closing(fresh()) as blocker,ThreadPoolExecutor(max_workers=1) as pool,monkeypatch.context() as patch:
+            patch.setattr(ledger,'atomic',queued)
+            with blocker.atomic():
+                future=pool.submit(book.publish,'owner:one',intent())
+>               assert ready.wait(5),'draft never reached the real SQL writer admission'
+E               AssertionError: draft never reached the real SQL writer admission
+E               assert False
+E                +  where False = wait(5)
+E                +    where wait = <threading.Event at 0x7f486e7b5d00: unset>.wait
+
+trading/tests/test_payment_draft_journal.py:141: AssertionError
+_ test_queued_expiry_rechecks_after_the_actual_SQL_writer_is_acquired[postgres] _
+
+drafts = (<vati.core.ledger_pg.PostgresLedger object at 0x7f486e7b5730>, <vati.funding.payment_drafts.PaymentDraftBook object at 0x7f486e7b63f0>, <function drafts.<locals>.<lambda> at 0x7f486e7ca3e0>, {'now': 2000})
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f486e79bdd0>
+
+    def test_queued_expiry_rechecks_after_the_actual_SQL_writer_is_acquired(drafts,monkeypatch):
+        ledger,book,fresh,clock=drafts;ready=threading.Event();atomic=ledger.atomic
+        @contextmanager
+        def queued():
+            ready.set()
+            with atomic() as value:yield value
+        with closing(fresh()) as blocker,ThreadPoolExecutor(max_workers=1) as pool,monkeypatch.context() as patch:
+            patch.setattr(ledger,'atomic',queued)
+            with blocker.atomic():
+                future=pool.submit(book.publish,'owner:one',intent())
+                assert ready.wait(5),'draft never reached the real SQL writer admission'
+                clock['now']=2000
+>           with pytest.raises(PaymentContractError,match='EXPIRED'):future.result(5)
+                               ^^^^^^^^^^^^^^^^^^^^
+E           NameError: name 'PaymentContractError' is not defined
+
+trading/tests/test_payment_draft_journal.py:143: NameError
+=========================== short test summary info ============================
+FAILED trading/tests/test_payment_draft_journal.py::test_actual_lost_commit_ack_keeps_the_original_durable_request[sqlite]
+FAILED trading/tests/test_payment_draft_journal.py::test_queued_expiry_rechecks_after_the_actual_SQL_writer_is_acquired[sqlite]
+FAILED trading/tests/test_payment_draft_journal.py::test_queued_expiry_rechecks_after_the_actual_SQL_writer_is_acquired[postgres]
+3 failed, 123 passed in 11.48s

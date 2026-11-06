@@ -1,0 +1,12 @@
+{
+  "base": "524e1ca2aadc076642b5e237e0b9765065610927",
+  "inherited_test_files": 316,
+  "byte_identical": 315,
+  "changed_only_deferred_optional_import": [
+    "trading/tests/test_entry_dispatch_commit_fence_postgres.py"
+  ],
+  "all_original_test_signatures_preserved": true,
+  "all_original_assertions_preserved": true,
+  "original_test_functions": 3100,
+  "original_assertions": 7651
+}

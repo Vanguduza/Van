@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/workspace/van-bar-aggregation-faults-20261026.py", line 32, in <module>
+    assert any('assert' in t.lower() for t in result['failure_text'])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

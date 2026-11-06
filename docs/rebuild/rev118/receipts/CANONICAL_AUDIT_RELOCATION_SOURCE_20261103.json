@@ -1,0 +1,92 @@
+{
+  "schema": "van.canonical-audit-relocation-source/1",
+  "created_utc": "2026-11-03T09:21:35.852502+00:00",
+  "base": "29b931f172316a833d572ee338e05519bbe6a7e5",
+  "qualification": "SOURCE_CANDIDATE_ONLY",
+  "problem": "Original producer receipts contain absolute report/state/JUnit paths under obl004-audit. The matrix consumer extracts artifacts under obl004-profiles, then incorrectly reconstructs expected invocation with the consumer path, refusing unchanged original invocations.",
+  "behavior": "Read/hash artifacts at their downloaded location. Validate original producer output as absolute normalized nonroot outside checkout, bind output/root/schema/profile/cwd/commit/execution/workflow/phase/manifest/actualcwd across receipt, terminal, input and collection, then reconstruct exact invocation from that original path. Do not normalize or discard argv.",
+  "preserved": "Exact original selectors/options/config/plugins/basetemp, wrapper/storage, current workflow/commit/source/manifest/cwd, phase/JUnit/collector identities, artifact hashes and exact canonical execution union remain mandatory. No workflow change, issuer, certificate or acceptance.",
+  "actual_evidence": {
+    "retained_failed_selected_tree": {
+      "run": "verifier-safe",
+      "passed": 123,
+      "failed": 11,
+      "exit": 1,
+      "skipped": 0,
+      "qualification": "Failed fullfile run, not a clean suite. Changed physical-relocation positives and resealed negatives passed. These11 errors identify missing selected-tree files/Git history; actual-main dependency cases still required.",
+      "exact_failed_cases": [
+        {
+          "case": "test_workflow_preserves_original_gate_and_adds_distinct_fixture_owned_matrix",
+          "actual_error": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/van-be004-disconnect-20261103/source/.github/workflows/van-ci.yml'"
+        },
+        {
+          "case": "test_actual_closed_jobset_guard_allows_only_the_nine_bound_additions[None]",
+          "actual_error": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/van-be004-disconnect-20261103/source/tests/contracts/test_ci_public_source_shards.py'"
+        },
+        {
+          "case": "test_actual_closed_jobset_guard_allows_only_the_nine_bound_additions[arbitrary-extra]",
+          "actual_error": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/van-be004-disconnect-20261103/source/tests/contracts/test_ci_public_source_shards.py'"
+        },
+        {
+          "case": "test_actual_closed_jobset_guard_allows_only_the_nine_bound_additions[original-object]",
+          "actual_error": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/van-be004-disconnect-20261103/source/tests/contracts/test_ci_public_source_shards.py'"
+        },
+        {
+          "case": "test_actual_closed_jobset_guard_allows_only_the_nine_bound_additions[concurrency]",
+          "actual_error": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/van-be004-disconnect-20261103/source/tests/contracts/test_ci_public_source_shards.py'"
+        },
+        {
+          "case": "test_exact_native_prerequisite_nodes_have_real_existing_owner_selectors",
+          "actual_error": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/van-be004-disconnect-20261103/source/.github/workflows/van-ci.yml'"
+        },
+        {
+          "case": "test_added_profile_install_overlays_preserve_their_declared_lock_versions",
+          "actual_error": "subprocess.CalledProcessError: Command '['git', 'show', '53c3457c417a8545380ab8c4e538c727c862dfba:.github/workflows/van-ci.yml']' returned non-zero exit status 128."
+        },
+        {
+          "case": "test_original_agp_invocations_route_only_project_cache_to_owned_external_fixture[test_android_instrumentation_abi.py-test_actual_agp_direct_package_release_refuses_missing_core_deployment_profile-Release deployment target refused: VAN_DEPLOYMENT_PROFILE_FILE is required for van-trading-core releases-False]",
+          "actual_error": "subprocess.CalledProcessError: Command '['git', 'show', 'ba817c4a6aeaf9a8272d81270f6d0abaf7c18feb:tests/contracts/test_android_instrumentation_abi.py']' returned non-zero exit status 128."
+        },
+        {
+          "case": "test_original_agp_invocations_route_only_project_cache_to_owned_external_fixture[test_android_production_target.py-test_actual_agp_valid_target_still_refuses_missing_production_signing-Release signing refused: android/keystore.properties missing.-True]",
+          "actual_error": "subprocess.CalledProcessError: Command '['git', 'show', 'ba817c4a6aeaf9a8272d81270f6d0abaf7c18feb:tests/contracts/test_android_production_target.py']' returned non-zero exit status 128."
+        },
+        {
+          "case": "test_vtil_resolver_alone_uses_private_owner_and_join_assignment",
+          "actual_error": "subprocess.CalledProcessError: Command '['git', 'show', 'ba817c4a6aeaf9a8272d81270f6d0abaf7c18feb:tools/rebuild/canonical_source_audit.py']' returned non-zero exit status 128."
+        },
+        {
+          "case": "test_vtil_workflow_declares_only_pinned_private_sibling_and_preserves_existing_jobs",
+          "actual_error": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/van-be004-disconnect-20261103/source/.github/workflows/van-ci.yml'"
+        }
+      ]
+    },
+    "original_hosted_artifact": {
+      "head": "71106689891a742ff76bb19efe400755b91c436a",
+      "run": 41602207393,
+      "attempt": 1,
+      "artifact_id": 13215655890,
+      "zip_sha256": "635039f71eef0b529192e61dc0b283a9ea45764d9466a9666ad9e6a0a0f30465",
+      "crc": "PASS",
+      "readback_runner": "verifier-actual-artifact",
+      "exit": 0,
+      "result": "Both original collect+execute invocations fail old consumer-path equality and match bound original-output full argv exactly; only identity/argv compatibility, not full profile/environment verification."
+    },
+    "actual_main": "Required final real-Git source suite and normal guards; results retained externally after this evidence freezes."
+  },
+  "prior_source": {
+    "OBSERVE_head": "29b931f172316a833d572ee338e05519bbe6a7e5",
+    "baseline": "GREEN244",
+    "CI_run": 41609149775,
+    "CI": "Required current-source results or confirmed inherited current-source correction evidence before next push; no cancellation or waiver.",
+    "ownership_parent": "711 actual hosted5894PASS1declaredSKIP including original shared-reference and PostgreSQL competing-actor cases."
+  },
+  "limits": {
+    "matrix": "Original711failed18invocationcells retained; no assumption all18 otherwise valid. Missing privateDDS terminal/publicworker gate failures remain open.",
+    "full_BE004": "OPEN eight verbs/11requirements/21acceptances/20contexts/6actions;0formalnativeacceptance. OBSERVE provider-positive/Android qualification remains tied to exact hosted source.",
+    "scope": "Tools verifier/test and required generated workmap/PRE003/docs evidence only; no application runtime or protected entry67 change.",
+    "safety": "No credential/private-key-lock/destruction/provider/financial probe, new authority or changed hosted job."
+  },
+  "model_usage": null,
+  "cost": null
+}

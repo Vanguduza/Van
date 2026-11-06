@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.command.settings.DomainAutonomyCommandTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-08T04:43:33" hostname="052fefa249ff" time="0.003">
+  <properties/>
+  <testcase name="unavailableDiscoveryCannotCreateOwnerChoices()" classname="com.dial.van.command.settings.DomainAutonomyCommandTest" time="0.001"/>
+  <testcase name="preservesOwnerChoiceForTheSealedCommand()" classname="com.dial.van.command.settings.DomainAutonomyCommandTest" time="0.001"/>
+  <testcase name="rejectsAnUnlistedDomainAndUnsupportedEscalation()" classname="com.dial.van.command.settings.DomainAutonomyCommandTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

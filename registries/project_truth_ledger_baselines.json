@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "purpose": "Enforcement baselines for tools/ci/project_truth_ledger.py. Every commit after a lineage's baseline must carry a LOCAL_CHANGE_LEDGER.jsonl row whose diff digest matches and whose authorization ids cover every changed file. Commits at or before a baseline are not checked.",
+  "ledger": "docs/project-state/LOCAL_CHANGE_LEDGER.jsonl",
+  "authorizations_dir": "docs/project-state/authorizations",
+  "allowed_authorities": [
+    "OWNER_EXPLICIT",
+    "OWNER_DERIVED",
+    "OWNER_DELEGATED_AUTONOMY"
+  ],
+  "diff_recipe": "sha256(git diff --binary --no-ext-diff --no-renames <parent_sha> <commit_sha> -- . ':(exclude)docs/project-state/LOCAL_CHANGE_LEDGER.jsonl'); first parent for merges",
+  "baseline_selection": "verify without --baseline uses the lineage whose baseline_sha is an ancestor of HEAD with the fewest commits between it and HEAD. verify-pr starts at merge-base(base, HEAD), or at that baseline if the merge-base is older, and reports the skipped range as unenforced.",
+  "lineages": [
+    {
+      "id": "programme-b-jev-openmuse-convergence-r1",
+      "branch": "gpt/jev-openmuse-convergence-r1-van-20260929",
+      "baseline_sha": "a16f7cb80b0169f93471d71bf6adab6cf03f7bf5",
+      "baseline_reason": "First commit of Programme B on VAN (mission provenance record). Unit G6c wrote retroactive rows for every commit after it; unit G7 added supersession rows so each of those commits is covered."
+    },
+    {
+      "id": "programme-a-memory-fabric-rev1-2",
+      "branch": "gpt/memory-fabric-rev1-2-van-20260929",
+      "baseline_sha": "12feb9033dfc1dd68d7b4d41ac477f0d9dbbc4af",
+      "baseline_reason": "VAN main at the 2026-09-29 mission start (MISSION_PROVENANCE_MEMORY_FABRIC_JEV_20260929.md). Programme A branches from it; unit G7 wrote rows for every commit after it."
+    }
+  ],
+  "unenforced_history": {
+    "status": "KNOWN_GAP_NOT_ENFORCED",
+    "ledger_last_changed_before_baselines": {
+      "commit": "9237c88bf04127e556f3dd8f1a7faba52b0b53d4",
+      "committed_at": "2026-09-18T07:59:06+02:00"
+    },
+    "ranges_without_rows": [
+      {
+        "range": "9237c88bf04127e556f3dd8f1a7faba52b0b53d4..12feb9033dfc1dd68d7b4d41ac477f0d9dbbc4af",
+        "commits": 959,
+        "applies_to": "both lineages (VAN main up to the Programme A baseline)"
+      },
+      {
+        "range": "9237c88bf04127e556f3dd8f1a7faba52b0b53d4..a16f7cb80b0169f93471d71bf6adab6cf03f7bf5",
+        "commits": 1155,
+        "applies_to": "Programme B (the 959 above plus 196 commits 12feb903..a16f7cb)"
+      }
+    ],
+    "rows_before_the_gap": "The 27 schema_version 1 rows from the vanguduza-control pre-commit hook (2026-09-15 to 2026-09-18) carry staged_diff_sha256 digests whose recipe could not be reproduced (unit G6c). They are kept unchanged and are not verified.",
+    "policy": "No rows are fabricated for these commits. They were made without a ledger row and without a checker reading the ledger. This range is recorded as unenforced; it is not certified, and nothing in it is claimed to be owner-authorized by this file.",
+    "counts_derived_by": "git rev-list --count <range>"
+  }
+}

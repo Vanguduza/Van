@@ -1,0 +1,464 @@
+{
+  "schema": "van.rebuild.current-mandate-signer-source/1",
+  "observed_at_utc": "2026-10-23T07:44:41.987916+00:00",
+  "source_parent": "f35bf94b6f098f0d2ac8ee2aab77b5864dfb3aa0",
+  "source_provenance": "Current candidate patch bound by source hashes; full trading/recovery suite completed after the final source and fixture changes. No unmodified exact-commit full backend qualification claimed.",
+  "source_sha256": {
+    "trading/vati/authority.py": "d70ec9008851b33430bb721361a4296d0085536805c225255f0ffbacdcb2219a",
+    "trading/vati/risk/mandate.py": "013a9b329f0478bc238f2927b9f1debe469956ae223b41782b63c7bcb5c118be",
+    "trading/vati/risk/authority.py": "5f9138a434cc22dcdbd0493a01b0cb5d6bdc0726b9beab560ac8f6e8e8f62f15",
+    "trading/vati/execution/router.py": "a7608280be50695249b76ea29867839a8cfed71cd0ef25e1aa1428c9d1dec73d",
+    "trading/vati/app/service.py": "9d96fa29bc3275a8aad65a1a82f73ee871ba55cac725e1b00cde4067c2e3aa1b",
+    "trading/vati/app/account_service.py": "d9e3e8931453b53729486c096248bfb3eeedcd9a24cab18c733f26c76fbf848e",
+    "trading/tests/test_mandate_current_signer.py": "2f34b564e29b9d5014c21ef004197772970f06aa683f4daf0009d4717440beea"
+  },
+  "full_private_postgresql": {
+    "tests": 2535,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 623.59,
+    "sha256": "4de2e8e20692c4a61dda65da5651538b325215931863d744a7e3e8311bd3f726"
+  },
+  "private_fixture_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "executions": {
+    "before": {
+      "tests": 8,
+      "failures": 7,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.112,
+      "sha256": "9ee5fde96d7ddea7be3350aa1a322a97d1322c0c9cd90666c9cbc792e1a786f5"
+    },
+    "first": {
+      "tests": 79,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.42,
+      "sha256": "cc47fd80caa4c2d53e129698cf01176fd8ffe2915673fd51e44b02cd8b7d66dc"
+    },
+    "expanded": {
+      "tests": 11,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 2.15,
+      "sha256": "5cc91327c0a1452906aa83c5fbc408f5050aba53749177721f3f56b6774df95d"
+    },
+    "service": {
+      "tests": 22,
+      "failures": 12,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 3.588,
+      "sha256": "e2727aee5226144508cc5f921f504e0f3cb5d1f4c69a48dade61910ab9ce4b3a"
+    },
+    "corrected": {
+      "tests": 75,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 4.411,
+      "sha256": "89c16892b1c5aedf671a3bb39b6ab2165106bce55f9c6a31a85ba4bc978330ba"
+    },
+    "pg-focused": {
+      "tests": 25,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 4.407,
+      "sha256": "d6b44150437d2b069d11a15cf8111f19d30b96d6a5c8f3d83708d56732fe7261"
+    },
+    "rebuild": {
+      "tests": 78,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 33.713,
+      "sha256": "475b4a5a2212728dd69f05bbfb10a84d30c2fb356f01cc96a7bbc9b230bbd280"
+    },
+    "owner-corrected": {
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.018,
+      "sha256": "f45f41b1ba868f4f7882eaaa44a3b6dbda4154706eaed597e37cc3f39e7ecbfc"
+    }
+  },
+  "retained_fixture_corrections": [
+    "Temperament grant must bind the final base signature; corrected test signing order.",
+    "SQLite sender connection must be created in its worker thread; corrected fixture ownership.",
+    "StopMode is defined in execution.base; corrected fixture import.",
+    "Running session test now retires its own issuer file rather than the session-shared test issuer.",
+    "Explicit revocation fixture assigns a new frozen set rather than mutating a frozenset."
+  ],
+  "retained_invalid_attempts": [
+    {
+      "log": "/tmp/van-mandate-current-signer-owner.txt",
+      "sha256": "cda8c1530b8a8264fc6090ae917fbec521d7267880e077c7e57da928218d80e1",
+      "reason": "Requested nonexistent owner-contract test filename; no tests collected; corrected actual registry suite separately."
+    },
+    {
+      "log": "/tmp/van-mandate-current-signer-mutations.txt",
+      "sha256": "4ad8aaa3d9aa360a9ac685c44e3df7dcef1e2ace5bd401318a68cd554da47682",
+      "reason": "Seven real faults caught before a new fixture failed its baseline; aborted with source restored. Only the final complete nine-fault run is counted."
+    }
+  ],
+  "faults": {
+    "definitions": [
+      [
+        [
+          "trading/vati/risk/authority.py",
+          "        if not m.owner_keys_current():\n            return rej('MANDATE_SIGNER_UNAVAILABLE','current owner signer is not registered or changed; re-admission required')",
+          "        pass",
+          "approve new risk after standing signer retirement"
+        ],
+        "trading/tests/test_mandate_current_signer.py::test_key_retirement_rejects_new_risk_under_an_already_admitted_policy"
+      ],
+      [
+        [
+          [
+            [
+              "trading/vati/execution/router.py",
+              "        if not mandate.owner_keys_current():\n            raise RouterError('current mandate owner signer is unavailable; re-admission required')",
+              "        pass"
+            ],
+            [
+              "trading/vati/execution/router.py",
+              "            if not owner_key_ok:\n                raise RouterError('current mandate owner signer is unavailable; re-admission required')",
+              "            pass"
+            ]
+          ],
+          "send an old approval after standing signer retirement"
+        ],
+        "trading/tests/test_mandate_current_signer.py::test_key_retirement_invalidates_an_old_risk_approval_before_actual_send"
+      ],
+      [
+        [
+          "trading/vati/authority.py",
+          "keys=load_owner_keys(self.registry_path) if self.registry_path is not None else self._source.keys",
+          "keys=self._source.keys",
+          "trust cached standing-policy issuers after their file becomes unreadable"
+        ],
+        "trading/tests/test_mandate_current_signer.py::test_unavailable_or_unreadable_current_issuer_never_allows_new_risk"
+      ],
+      [
+        [
+          "trading/vati/authority.py",
+          "hashlib.sha256(der).hexdigest()==self.public_key_sha256",
+          "True",
+          "reuse a label whose public key material changed"
+        ],
+        "trading/tests/test_mandate_current_signer.py::test_replacing_key_material_under_the_same_label_does_not_keep_old_policy_authority"
+      ],
+      [
+        [
+          "trading/vati/risk/mandate.py",
+          "grants=(verified,) if verified_profile is None else (verified,verified_profile)",
+          "grants=(verified,)",
+          "ignore independent temperament signer retirement"
+        ],
+        "trading/tests/test_mandate_current_signer.py::test_optional_temperament_signer_is_current_independently_of_the_base_policy"
+      ],
+      [
+        [
+          "trading/vati/risk/mandate.py",
+          "for path in paths:stack.enter_context(exclusive_state_lock(path))",
+          "for path in []:stack.enter_context(exclusive_state_lock(path))",
+          "acknowledge native retirement while an already admitted send still executes"
+        ],
+        "trading/tests/test_mandate_current_signer.py::test_key_guard_serializes_native_submission_before_acknowledged_retirement"
+      ],
+      [
+        [
+          "trading/vati/authority.py",
+          "load_owner_keys(self.registry_path) if self.registry_path is not None else self._source.keys",
+          "load_owner_keys(self._source.registry_path) if self.registry_path is not None else self._source.keys",
+          "silently rebind an admitted policy to a reconfigured verifier source"
+        ],
+        "trading/tests/test_mandate_current_signer.py::test_current_admission_keeps_the_actual_verified_source_when_the_verifier_is_reconfigured"
+      ],
+      [
+        [
+          "trading/vati/authority.py",
+          "if self.key_id in self._source.revoked_key_ids:",
+          "if False:",
+          "ignore explicit issuer retirement for an in-memory trust view"
+        ],
+        "trading/tests/test_mandate_current_signer.py::test_in_memory_signer_retirement_also_invalidates_explicit_trust_admission"
+      ],
+      [
+        [
+          "trading/vati/app/service.py",
+          "self.runner.cycle.mandate.sends_orders() and self.runner.cycle.mandate.owner_keys_current()",
+          "self.runner.cycle.mandate.sends_orders()",
+          "publish running entry permission after signer retirement"
+        ],
+        "trading/tests/test_mandate_current_signer.py::test_running_session_exposes_owner_signer_hold_without_erasing_position_protection"
+      ]
+    ],
+    "records": [
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "log_sha256": "e596cce97643441f2f2c7ef01ee068b6705ce1e028a07a32ba3bd3b3d35d7353",
+        "xml_sha256": "966efe389a0463eac40f2d027134872286d9b86ab5ab2e67aecdf9a6b7074dc7"
+      },
+      {
+        "phase": "mutation",
+        "why": "approve new risk after standing signer retirement",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "log_sha256": "ef2b4748ac1ef4079f405852da057d23fe2ef3697f80ccf0cd118144a0472221",
+        "xml_sha256": "b3e9db9ffb24a135ac7dfff9bb43e2e295557036248947ffddbfe9d73915516d"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "log_sha256": "4e8b6c5a89da44bf05d17100903172be04033067c113a6831bdfafbd42b7da52",
+        "xml_sha256": "703ff61261949395e4043cf080d14b84fbd7e8064eec8ceaa0c2a89a6ba2b1cd"
+      },
+      {
+        "phase": "mutation",
+        "why": "send an old approval after standing signer retirement",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "log_sha256": "1e5ce33ce5532557d9f94f999fc988465353c7eef65a90ef075e72651d637f9f",
+        "xml_sha256": "a94dad75acf5465da19a5ca6a5cf61876b0648932a6d11bbcb613241f5fcb2b2"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "log_sha256": "c91dad03511eb111dba9f317cdb7962c64ec389c7d259de488e167c78aac1b31",
+        "xml_sha256": "5aa4f161635d5beafbc5f1c82d93519544d0d1fc31da4e98ae75ced44a47e5ab"
+      },
+      {
+        "phase": "mutation",
+        "why": "trust cached standing-policy issuers after their file becomes unreadable",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "log_sha256": "be9351c939f575925571c985173e1dbe8c38ca11822dc30d92bd4a13c1a8af97",
+        "xml_sha256": "6df01cdba14e7b2d65d621db5f90c99339ec408c83e8c5879a150cd6aee220a1"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "log_sha256": "c91dad03511eb111dba9f317cdb7962c64ec389c7d259de488e167c78aac1b31",
+        "xml_sha256": "d5cbd9dd9194788d41083ef3d54eec4bac8117564597329f48a90efbd3d8d481"
+      },
+      {
+        "phase": "mutation",
+        "why": "reuse a label whose public key material changed",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "log_sha256": "a6358f6ee3ed35dd2686c7fc76e0fad986bc8be249ad1437012723b65b202bc8",
+        "xml_sha256": "e32853a5507ad80ef7e824fbdcf55489300ecad2bc896e784676b65b98138eee"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "log_sha256": "c91dad03511eb111dba9f317cdb7962c64ec389c7d259de488e167c78aac1b31",
+        "xml_sha256": "830cc7c64cabf6aab3f7c6d88db5b7d41b3ae99c4ee804c8efbf6be5be4dd695"
+      },
+      {
+        "phase": "mutation",
+        "why": "ignore independent temperament signer retirement",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "log_sha256": "17f70e2e07ef54edad9535f492108c36d986da6b29c371690a9e5debe4b9fb91",
+        "xml_sha256": "0fffc5b7c46c7e2e27598b204e95ac0472ca136b2191b0eb6daeda044d84c80a"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "log_sha256": "3a6504404ab639ac8fe2940ac1654603c072a999c0ae65ca7ef9701ab97a0954",
+        "xml_sha256": "3273d5e4bf76c3a001ff91feb03acd57beec9615be9e052faef30a7df0146931"
+      },
+      {
+        "phase": "mutation",
+        "why": "acknowledge native retirement while an already admitted send still executes",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "log_sha256": "83ccff37120122a0103f8965d23acc1187481e74cec5dd2ebad8d08c69b0a478",
+        "xml_sha256": "7596c042657c2ce6a30cfc0516935aca38c6ef497b9de2ecd4bceec27e053160"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "log_sha256": "4e8b6c5a89da44bf05d17100903172be04033067c113a6831bdfafbd42b7da52",
+        "xml_sha256": "663455858d56b1df56175888b7a1046cbb6e7121254e58c8d538e18f4be7f734"
+      },
+      {
+        "phase": "mutation",
+        "why": "silently rebind an admitted policy to a reconfigured verifier source",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "log_sha256": "eb71fee7664729c1d8ce6c0961757708fcc613598d1a3342a15242e5a803281d",
+        "xml_sha256": "5bf286ffe9ce57fdbc16300bae7740e1b00c974fb3c9828454bd4a182b4f4697"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "log_sha256": "c91dad03511eb111dba9f317cdb7962c64ec389c7d259de488e167c78aac1b31",
+        "xml_sha256": "e763b89f9fc4e5015b62dbc3baaeb9c919e2b9cbfbc377735004881072a8efd1"
+      },
+      {
+        "phase": "mutation",
+        "why": "ignore explicit issuer retirement for an in-memory trust view",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "log_sha256": "7d40609dd62c0e4ac65f6eaed9b221c41ae1d757dcfc82f6a01b0db598dfd45d",
+        "xml_sha256": "b7340f4cc8e57600c00fa23ee3f95b2a6cfbc64fcd5f17a093eaa0523289cb3d"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "log_sha256": "f110ea65f6d33cdc6322b155f056abd01a7abd63e18b0f61e05569402024ad9d",
+        "xml_sha256": "59a0a78d956243614b60bdc471a4162a3118d5d2adabccfba9c9325fa1604dba"
+      },
+      {
+        "phase": "mutation",
+        "why": "publish running entry permission after signer retirement",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "log_sha256": "89bac1cd9dc1f4e306f2e2aa735afb2fa5bf170749c8903b9b75adb8e6b9c6fe",
+        "xml_sha256": "0382153e675bb91ecb8fc9dbe8a0c3eba99a9c397f84314754c5eb37b5577d8b"
+      }
+    ],
+    "source_before_sha256": {
+      "trading/vati/authority.py": "d70ec9008851b33430bb721361a4296d0085536805c225255f0ffbacdcb2219a",
+      "trading/vati/risk/mandate.py": "013a9b329f0478bc238f2927b9f1debe469956ae223b41782b63c7bcb5c118be",
+      "trading/vati/risk/authority.py": "5f9138a434cc22dcdbd0493a01b0cb5d6bdc0726b9beab560ac8f6e8e8f62f15",
+      "trading/vati/execution/router.py": "a7608280be50695249b76ea29867839a8cfed71cd0ef25e1aa1428c9d1dec73d",
+      "trading/vati/app/service.py": "9d96fa29bc3275a8aad65a1a82f73ee871ba55cac725e1b00cde4067c2e3aa1b"
+    },
+    "source_after_sha256": {
+      "trading/vati/authority.py": "d70ec9008851b33430bb721361a4296d0085536805c225255f0ffbacdcb2219a",
+      "trading/vati/risk/mandate.py": "013a9b329f0478bc238f2927b9f1debe469956ae223b41782b63c7bcb5c118be",
+      "trading/vati/risk/authority.py": "5f9138a434cc22dcdbd0493a01b0cb5d6bdc0726b9beab560ac8f6e8e8f62f15",
+      "trading/vati/execution/router.py": "a7608280be50695249b76ea29867839a8cfed71cd0ef25e1aa1428c9d1dec73d",
+      "trading/vati/app/service.py": "9d96fa29bc3275a8aad65a1a82f73ee871ba55cac725e1b00cde4067c2e3aa1b"
+    },
+    "source_restored": true,
+    "journal_present": false
+  },
+  "owner_contract_derivation": {
+    "changed": [],
+    "applied": false,
+    "scope": "SOURCE_CONTRACTS_ONLY"
+  },
+  "qualified": "Source regression only. No standing financial permission is created. No whole-unit, native identity, deferred provider, deployment, signed release, profitability, independent certificate or S24 acceptance issued."
+}

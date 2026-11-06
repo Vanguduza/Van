@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "twin_id": "twin:van",
+  "twin_kind": "DEVELOPMENT",
+  "scope_id": "van",
+  "project_truth_hash": "sha256:truth",
+  "repository_sha": "abc",
+  "source_cursors": {},
+  "facts": [
+    {
+      "id": "repo",
+      "classification": "PUBLIC",
+      "authority": "CANONICAL",
+      "evidence_refs": [
+        "git:abc"
+      ]
+    }
+  ],
+  "derived_current_state": [],
+  "attention": [],
+  "evidence_refs": [
+    "git:abc"
+  ],
+  "projection_revision": "sha256:fb52a5d11e0a792f2447577e21011a04b9204488e7d631709ef9846efa8fa6cd",
+  "machine_facts_hash": "sha256:8a9493a7abf773f47fa628f0ae84d332ce9765b29b65e2b6ad17c4010f16931f",
+  "generated_at": "2026-10-06T12:00:00Z",
+  "freshness": {
+    "state": "CURRENT",
+    "expires_at": "2026-10-06T12:05:00.000Z"
+  },
+  "dot_synthesis": {
+    "observations": [],
+    "hypotheses": [
+      {
+        "id": "h1",
+        "classification": "INTERNAL_SANITIZED",
+        "authority": "DERIVED",
+        "hypothesis": "check",
+        "evidence_refs": [
+          "git:abc"
+        ]
+      }
+    ]
+  },
+  "owner_annotations": [],
+  "open_questions": [],
+  "decisions_required": [],
+  "redaction": {
+    "target": "LOCAL",
+    "removed_records": 0
+  }
+}

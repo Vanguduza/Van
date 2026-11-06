@@ -1,0 +1,78 @@
+{
+  "state": "TERMINAL",
+  "source_before": {
+    "backend/tests/test_stateful_link_binding.py": "63720c50d1ee5bba47bd6307a47a651ae96a778d0b32426e72b3ac5c7016a657"
+  },
+  "scope": "Actual completecanonical/workflowcontrols oncombined6sourcepaths; exactownedAGPoutputinit setup/argv/coreASTcontrol +allVTIL controls retained. Controlledfixturemodels only; no newAGP/SDK/platformNode/hosted/privatequalification. Earlier136VTIL4 run retainedonitsoriginalinputpins, not silentlyreusedastestfileunchanged.",
+  "outer_node_inputs_shape": {
+    "NODE_OPTIONS": {
+      "present": false,
+      "nonempty": false,
+      "sha256": null
+    },
+    "NODE_PATH": {
+      "present": true,
+      "nonempty": true,
+      "sha256": "dbc7bc884f72c70bb3d320e868da710a56a621286fba48b3c6b610776b41b4fd"
+    },
+    "NODE_COMPILE_CACHE": {
+      "present": false,
+      "nonempty": false,
+      "sha256": null
+    },
+    "NODE_DISABLE_COMPILE_CACHE": {
+      "present": false,
+      "nonempty": false,
+      "sha256": null
+    }
+  },
+  "tmp_reserve": 2147483648,
+  "owned_run_budget": 134217728,
+  "file_cap": 8388608,
+  "started": "2026-11-02T00:37:55.802244+00:00",
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "-B",
+    "/workspace/van-review-2026-10-18/publish/tools/rebuild/source_storage_audit.py",
+    "--checkout-root",
+    "/workspace/van-review-2026-10-18/publish",
+    "--report",
+    "/tmp/van-recovery-link-child-wait-20261102/AFTER_SQL/audit.json",
+    "/tmp/test_van_link_child_wait_sqlite_20261102.py",
+    "--rootdir=/workspace/van-review-2026-10-18/publish",
+    "-c",
+    "/workspace/van-review-2026-10-18/publish/pytest.ini",
+    "-p",
+    "pytest_asyncio.plugin",
+    "-p",
+    "anyio.pytest_plugin",
+    "--basetemp=/tmp/van-recovery-pytest-link-child-after-20261102",
+    "--junitxml=/tmp/van-recovery-link-child-wait-20261102/AFTER_SQL/tests.xml",
+    "-q"
+  ],
+  "exit": 0,
+  "child_pid": 1271155,
+  "child_waited": true,
+  "peak_owned_bytes": 2142520,
+  "seconds": 21.598633910005447,
+  "children_remaining": [],
+  "tests": 1,
+  "failures": 0,
+  "errors": 0,
+  "skips": 0,
+  "cleanup": {
+    "path": "/tmp/van-recovery-pytest-link-child-after-20261102",
+    "files": 7,
+    "inventory": "/tmp/van-recovery-link-child-wait-20261102/AFTER_SQL/owned-temp-inventory.json",
+    "inventory_sha256": "9ef2c740bd4009e848af5782dddd3b25c58a3e6477a03060ad44bb4d36d489af",
+    "free_bytes_before_cleanup": 2319106048,
+    "free_bytes_after_cleanup": 2321190912,
+    "free_inodes_after": 2201329,
+    "independently_absent": true
+  },
+  "source_after": {
+    "backend/tests/test_stateful_link_binding.py": "63720c50d1ee5bba47bd6307a47a651ae96a778d0b32426e72b3ac5c7016a657"
+  },
+  "outer_node_environment_unchanged": true,
+  "completed": "2026-11-02T00:38:17.475521+00:00"
+}

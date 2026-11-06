@@ -1,0 +1,41 @@
+{
+  "trading/tests/test_account_unlink_currentness.py": {
+    "before_sha256": "4abd5642062e30f5e23fd953b3c30b5517eb12b5e8f39c27dc0497fa6097f00d",
+    "after_sha256": "aae58de4d30a746c783fbb9d76b5675174501aff8ddb303829c4f6c52d585e0f",
+    "exact_import_module_changes": {
+      "test_account_unlink_review": "backend.tests.test_account_unlink_review"
+    },
+    "all_other_ast_exact": true,
+    "all_asserts": 31
+  },
+  "backend/tests/test_account_unlink_review.py": {
+    "before_sha256": "b57fd1b21f979f18d06f22c0bc2833bb3febcd4135ccf830c9412867751d7cf2",
+    "after_sha256": "8b0412a56980c1c5cbbc12af45217fb41e839ef698b06507837a067919d14fba",
+    "exact_import_module_changes": {
+      "test_trading_api": "backend.tests.test_trading_api",
+      "test_account_update_review": "backend.tests.test_account_update_review",
+      "test_trading_oauth_scope": "backend.tests.test_trading_oauth_scope"
+    },
+    "all_other_ast_exact": true,
+    "all_asserts": 54
+  },
+  "backend/tests/test_account_update_review.py": {
+    "before_sha256": "c4fa99375516fd0c52833ff4dc941c7e68dc1d6e185418e4093c489606b25d0b",
+    "after_sha256": "eaa45b4b612213b74783d8e951fb02d42400f56037ae4b8c67bb2769a20c704f",
+    "exact_import_module_changes": {
+      "test_trading_api": "backend.tests.test_trading_api",
+      "test_trading_oauth_scope": "backend.tests.test_trading_oauth_scope"
+    },
+    "all_other_ast_exact": true,
+    "all_asserts": 56
+  },
+  "backend/tests/test_trading_oauth_scope.py": {
+    "before_sha256": "d14de3b0bba7d523beda7dbc3143bf83080c5a6ddb0be5670768b0d150636c00",
+    "after_sha256": "54267a0f3e82d51c10395defffeb579e4b094009449f42e3c0a3757b3d111920",
+    "exact_import_module_changes": {
+      "test_trading_api": "backend.tests.test_trading_api"
+    },
+    "all_other_ast_exact": true,
+    "all_asserts": 20
+  }
+}

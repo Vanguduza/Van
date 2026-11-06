@@ -1,0 +1,14 @@
+{
+  "qualification": "Supplemental aggregation assertion faults;not canonical374 or native/unit acceptance",
+  "positive": {
+    "exit": 0,
+    "cases": 26,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "failure_text": []
+  },
+  "faults": [],
+  "all_restored": true,
+  "source_sha256": "1696a9535cf30d8260b5868ac3c28bc48e17ea60c92deccfe3ae45789e474526"
+}

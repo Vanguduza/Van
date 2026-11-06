@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="6" time="0.336" timestamp="2026-10-26T04:59:08.303112+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_forecast_runtime_supervisor" name="test_unknown_creation_keeps_original_identity_and_never_creates_again" time="0.157"><failure message="Failed: DID NOT RAISE RuntimeError">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-309/test_unknown_creation_keeps_or0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7fa99b560680&gt;
+
+    def test_unknown_creation_keeps_original_identity_and_never_creates_again(tmp_path,monkeypatch):
+        worker=fixture(tmp_path);calls=[]
+        def call(args,**kwargs):
+            calls.append(args)
+            if args[0]=='image':return subprocess.CompletedProcess(args,0,json.dumps([{'Size':0}]),'')
+            if args[0]=='create':raise subprocess.TimeoutExpired('docker create',600)
+            raise AssertionError(args)
+        monkeypatch.setattr(worker,'call',call);monkeypatch.setattr(worker,'inspect',lambda:None)
+        with pytest.raises(RuntimeError,match='CONTAINER_CREATE_UNKNOWN'):worker.execute()
+        intent=json.loads((tmp_path/'research_fixture_smoke-intent.json').read_text())
+        receipt=json.loads((tmp_path/'research_fixture_smoke-supervisor.json').read_text())
+        assert receipt['container']==intent['container']==worker.name
+        assert receipt['status']=='CREATE_UNKNOWN_RECONCILE_ORIGINAL_NAME' and receipt['removed'] is False
+        assert sum(args[0]=='create' for args in calls)==1
+&gt;       with pytest.raises(RuntimeError,match='CLEANUP_NOT_CONFIRMED'):controller.require_completed_worker(receipt)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE RuntimeError
+
+trading/tests/test_forecast_runtime_supervisor.py:36: Failed</failure></testcase><testcase classname="trading.tests.test_forecast_runtime_supervisor" name="test_cleanup_failure_retains_receipt_and_original_execution_failure" time="0.003"><failure message="Failed: DID NOT RAISE RuntimeError">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-309/test_cleanup_failure_retains_r0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7fa99b35f950&gt;
+
+    def test_cleanup_failure_retains_receipt_and_original_execution_failure(tmp_path,monkeypatch):
+        worker=fixture(tmp_path)
+        def call(args,**kwargs):
+            if args[0]=='image':return subprocess.CompletedProcess(args,0,json.dumps([{'Size':0}]),'')
+            if args[0]=='create':raise subprocess.TimeoutExpired('docker create',600)
+            if args[0]=='rm':raise subprocess.TimeoutExpired('docker rm',180)
+            raise AssertionError(args)
+        monkeypatch.setattr(worker,'call',call)
+        monkeypatch.setattr(worker,'inspect',lambda:{'State':{'Status':'removing'}})
+        with pytest.raises(RuntimeError,match='CONTAINER_CREATE_STATE_UNKNOWN'):worker.execute()
+        receipt=json.loads((tmp_path/'research_fixture_smoke-supervisor.json').read_text())
+        assert receipt['container']==worker.name and receipt['removed'] is False
+        assert receipt['cleanup_error_type']=='TimeoutExpired'
+&gt;       with pytest.raises(RuntimeError,match='CLEANUP_NOT_CONFIRMED'):controller.require_completed_worker(receipt)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE RuntimeError
+
+trading/tests/test_forecast_runtime_supervisor.py:52: Failed</failure></testcase><testcase classname="trading.tests.test_forecast_runtime_supervisor" name="test_changed_source_snapshot_refuses_success[changed]" time="0.003" /><testcase classname="trading.tests.test_forecast_runtime_supervisor" name="test_changed_source_snapshot_refuses_success[missing]" time="0.003" /><testcase classname="trading.tests.test_forecast_runtime_supervisor" name="test_changed_source_snapshot_refuses_success[symlink]" time="0.006" /><testcase classname="trading.tests.test_forecast_runtime_supervisor" name="test_controller_does_not_forward_host_environment_to_model" time="0.005" /></testsuite></testsuites>

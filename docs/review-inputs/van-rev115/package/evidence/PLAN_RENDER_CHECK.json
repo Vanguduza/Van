@@ -1,0 +1,5 @@
+{
+  "exit_code": 0,
+  "output": "0 findings: rendered plan and input provenance match",
+  "scope": "Local document rendering and input provenance only."
+}

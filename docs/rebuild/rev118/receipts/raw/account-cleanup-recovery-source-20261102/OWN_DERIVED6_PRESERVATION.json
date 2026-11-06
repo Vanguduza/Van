@@ -1,0 +1,16 @@
+{
+  "only_owned6_preliminary_outputs": true,
+  "archive": "/dev/shm/van-cleanup-main-integration-20261102/OWN_PRELIMINARY_GENERATED6.zip",
+  "archive_sha256": "b28c7552076b267c7e5106ed3989c32b398a4ba959b6f686d369a7026c989d2d",
+  "members_sha256": {
+    "registries/owner_endpoints.json": "afb95fbcf431762bd0bf30e45f4a7b806f9f8d30088eebbc033c6959549843ee",
+    "registries/owner_endpoint_schemas.json": "b6dd330fa4a075c4745421a4363da5b624404f279a15c598e852d28f36f0dc3b",
+    "registries/owner_features.json": "a95532795cc1fc52418b48a9d74cc29d1de48801bd1d9a3484dae1b18c5091f0",
+    "registries/owner_screens.json": "1456a2ab346203a0bb316b4252f49d51e580776bd40f4f68205f70f7dd05093e",
+    "docs/rebuild/rev118/backend/OWNER_REGISTRY_SOURCE_REFRESH_20261022.json": "e01c36ad9c8acb214f582cb0fe311d6c2a62c7f6396f3e5e8767cef63c8d52ee",
+    "docs/rebuild/rev118/backend/OWNER_REGISTRY_GENERATION.json": "090fbf37f0ce5f8fa0b008bbc0e37364127966274c84d425cab6752fdbc44ab4"
+  },
+  "CRC_verified": true,
+  "restored_only6_to": "9cfde69c38bc39a54875c2a9bf60c6269f363d64",
+  "reason": "Existingstrictcommittedgenerationpreimageguard preserved; no guard/matcher/hook change."
+}

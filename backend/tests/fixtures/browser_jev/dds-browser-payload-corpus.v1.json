@@ -1,0 +1,1016 @@
+{
+  "corpus": "van.browser.jev_eligibility.fixture_corpus.v1",
+  "fixtures": [
+    {
+      "category": "public_search",
+      "data_class": "PUBLIC",
+      "eligibility": "PUBLIC_ELIGIBLE",
+      "expected": "PUBLIC_ELIGIBLE",
+      "fixture": "pub-01",
+      "jev_payload": {
+        "action_class_ceiling": "A1",
+        "closed_operation_set": [
+          "click",
+          "fill",
+          "select",
+          "scroll",
+          "press_key",
+          "done",
+          "abstain"
+        ],
+        "effect_direction": "PROPOSE_ACTION",
+        "observation_epoch": "e_743f1bc68977081c",
+        "origin_class": "PUBLIC_ALLOWLISTED",
+        "payload_schema": "van.browser.action_payload.v1",
+        "targets": [
+          {
+            "label": "Search",
+            "role": "searchbox",
+            "target_id": "t_ac23f92e1054119b"
+          },
+          {
+            "label": "Search",
+            "role": "button",
+            "target_id": "t_6ebae2f91dad973b"
+          },
+          {
+            "label": "Images",
+            "role": "link",
+            "target_id": "t_f8401a64a9b4a657"
+          }
+        ]
+      },
+      "reasons": [
+        "PUBLIC_ALLOWLISTED_ORIGIN"
+      ]
+    },
+    {
+      "category": "public_docs",
+      "data_class": "PUBLIC",
+      "eligibility": "PUBLIC_ELIGIBLE",
+      "expected": "PUBLIC_ELIGIBLE",
+      "fixture": "pub-02",
+      "jev_payload": {
+        "action_class_ceiling": "A1",
+        "closed_operation_set": [
+          "click",
+          "fill",
+          "select",
+          "scroll",
+          "press_key",
+          "done",
+          "abstain"
+        ],
+        "effect_direction": "PROPOSE_ACTION",
+        "observation_epoch": "e_7713477a6eea22d3",
+        "origin_class": "PUBLIC_ALLOWLISTED",
+        "payload_schema": "van.browser.action_payload.v1",
+        "targets": [
+          {
+            "label": "json \u2014 JSON encoder and decoder",
+            "role": "link",
+            "target_id": "t_471673219b3671f3"
+          },
+          {
+            "label": "Next topic",
+            "role": "link",
+            "target_id": "t_a9c9e7339227b657"
+          },
+          {
+            "label": "Quick search",
+            "role": "searchbox",
+            "target_id": "t_23e52337a9bcb00f"
+          }
+        ]
+      },
+      "reasons": [
+        "PUBLIC_ALLOWLISTED_ORIGIN"
+      ]
+    },
+    {
+      "category": "public_docs",
+      "data_class": "PUBLIC",
+      "eligibility": "PUBLIC_ELIGIBLE",
+      "expected": "PUBLIC_ELIGIBLE",
+      "fixture": "pub-03",
+      "jev_payload": {
+        "action_class_ceiling": "A1",
+        "closed_operation_set": [
+          "click",
+          "fill",
+          "select",
+          "scroll",
+          "press_key",
+          "done",
+          "abstain"
+        ],
+        "effect_direction": "PROPOSE_ACTION",
+        "observation_epoch": "e_a5f9af19042f3866",
+        "origin_class": "PUBLIC_ALLOWLISTED",
+        "payload_schema": "van.browser.action_payload.v1",
+        "targets": [
+          {
+            "label": "References",
+            "role": "link",
+            "target_id": "t_61c66dcc2c513f1a"
+          },
+          {
+            "label": "Guides",
+            "role": "link",
+            "target_id": "t_7382e149a5afbd13"
+          },
+          {
+            "label": "Filter",
+            "role": "textbox",
+            "target_id": "t_df25fee166a67b5b"
+          }
+        ]
+      },
+      "reasons": [
+        "PUBLIC_ALLOWLISTED_ORIGIN"
+      ]
+    },
+    {
+      "category": "public_reference",
+      "data_class": "PUBLIC",
+      "eligibility": "PUBLIC_ELIGIBLE",
+      "expected": "PUBLIC_ELIGIBLE",
+      "fixture": "pub-04",
+      "jev_payload": {
+        "action_class_ceiling": "A1",
+        "closed_operation_set": [
+          "click",
+          "fill",
+          "select",
+          "scroll",
+          "press_key",
+          "done",
+          "abstain"
+        ],
+        "effect_direction": "PROPOSE_ACTION",
+        "observation_epoch": "e_1a18ba58dadf5722",
+        "origin_class": "PUBLIC_ALLOWLISTED",
+        "payload_schema": "van.browser.action_payload.v1",
+        "targets": [
+          {
+            "label": "History",
+            "role": "link",
+            "target_id": "t_cff5dbc1f546b702"
+          },
+          {
+            "label": "Climate",
+            "role": "link",
+            "target_id": "t_9a5d8d0b01da5c57"
+          },
+          {
+            "label": "Search Wikipedia",
+            "role": "searchbox",
+            "target_id": "t_d3ec1f342933ae59"
+          }
+        ]
+      },
+      "reasons": [
+        "PUBLIC_ALLOWLISTED_ORIGIN"
+      ]
+    },
+    {
+      "category": "public_news",
+      "data_class": "PUBLIC",
+      "eligibility": "PUBLIC_ELIGIBLE",
+      "expected": "PUBLIC_ELIGIBLE",
+      "fixture": "pub-05",
+      "jev_payload": {
+        "action_class_ceiling": "A1",
+        "closed_operation_set": [
+          "click",
+          "fill",
+          "select",
+          "scroll",
+          "press_key",
+          "done",
+          "abstain"
+        ],
+        "effect_direction": "PROPOSE_ACTION",
+        "observation_epoch": "e_a5ad01a3c7706f3c",
+        "origin_class": "PUBLIC_ALLOWLISTED",
+        "payload_schema": "van.browser.action_payload.v1",
+        "targets": [
+          {
+            "label": "World",
+            "role": "link",
+            "target_id": "t_b9fc0619ea17cb6e"
+          },
+          {
+            "label": "Business",
+            "role": "link",
+            "target_id": "t_79c968dfd83cc4c6"
+          },
+          {
+            "label": "Technology",
+            "role": "link",
+            "target_id": "t_ee110770043ede78"
+          }
+        ]
+      },
+      "reasons": [
+        "PUBLIC_ALLOWLISTED_ORIGIN"
+      ]
+    },
+    {
+      "category": "public_news",
+      "data_class": "PUBLIC",
+      "eligibility": "PUBLIC_ELIGIBLE",
+      "expected": "PUBLIC_ELIGIBLE",
+      "fixture": "pub-06",
+      "jev_payload": {
+        "action_class_ceiling": "A1",
+        "closed_operation_set": [
+          "click",
+          "fill",
+          "select",
+          "scroll",
+          "press_key",
+          "done",
+          "abstain"
+        ],
+        "effect_direction": "PROPOSE_ACTION",
+        "observation_epoch": "e_1839e5bbcd711394",
+        "origin_class": "PUBLIC_ALLOWLISTED",
+        "payload_schema": "van.browser.action_payload.v1",
+        "targets": [
+          {
+            "label": "Markets",
+            "role": "link",
+            "target_id": "t_96417c98200cce97"
+          },
+          {
+            "label": "Read more",
+            "role": "link",
+            "target_id": "t_6c4b1f889f5a2f96"
+          }
+        ]
+      },
+      "reasons": [
+        "PUBLIC_ALLOWLISTED_ORIGIN"
+      ]
+    },
+    {
+      "category": "public_docs",
+      "data_class": "PUBLIC",
+      "eligibility": "PUBLIC_ELIGIBLE",
+      "expected": "PUBLIC_ELIGIBLE",
+      "fixture": "pub-07",
+      "jev_payload": {
+        "action_class_ceiling": "A1",
+        "closed_operation_set": [
+          "click",
+          "fill",
+          "select",
+          "scroll",
+          "press_key",
+          "done",
+          "abstain"
+        ],
+        "effect_direction": "PROPOSE_ACTION",
+        "observation_epoch": "e_1ab8f77d5496319d",
+        "origin_class": "PUBLIC_ALLOWLISTED",
+        "payload_schema": "van.browser.action_payload.v1",
+        "targets": [
+          {
+            "label": "Release history",
+            "role": "link",
+            "target_id": "t_0b48b4bce70d625e"
+          },
+          {
+            "label": "Download files",
+            "role": "link",
+            "target_id": "t_db69e5af539895e6"
+          }
+        ]
+      },
+      "reasons": [
+        "PUBLIC_ALLOWLISTED_ORIGIN"
+      ]
+    },
+    {
+      "category": "public_news_signin_link",
+      "data_class": "INTERNAL_SANITIZED",
+      "eligibility": "SANITIZABLE_ELIGIBLE",
+      "expected": "SANITIZABLE_ELIGIBLE",
+      "fixture": "pub-08",
+      "jev_payload": {
+        "action_class_ceiling": "A1",
+        "closed_operation_set": [
+          "click",
+          "fill",
+          "select",
+          "scroll",
+          "press_key",
+          "done",
+          "abstain"
+        ],
+        "effect_direction": "PROPOSE_ACTION",
+        "observation_epoch": "e_033f8d8bd6dd0a52",
+        "origin_class": "PUBLIC_ALLOWLISTED",
+        "payload_schema": "van.browser.action_payload.v1",
+        "targets": [
+          {
+            "label": "new",
+            "role": "link",
+            "target_id": "t_839cd4fb2f6ea80a"
+          },
+          {
+            "label": "past",
+            "role": "link",
+            "target_id": "t_bb237c3e2fb21b18"
+          }
+        ]
+      },
+      "reasons": [
+        "PUBLIC_ALLOWLISTED_ORIGIN",
+        "TARGETS_WITHHELD:1"
+      ]
+    },
+    {
+      "category": "public_unlisted",
+      "data_class": "INTERNAL_SANITIZED",
+      "eligibility": "SANITIZABLE_ELIGIBLE",
+      "expected": "SANITIZABLE_ELIGIBLE",
+      "fixture": "pub-09",
+      "jev_payload": {
+        "action_class_ceiling": "A1",
+        "closed_operation_set": [
+          "click",
+          "fill",
+          "select",
+          "scroll",
+          "press_key",
+          "done",
+          "abstain"
+        ],
+        "effect_direction": "PROPOSE_ACTION",
+        "observation_epoch": "e_8e212f4faf208d3e",
+        "origin_class": "PUBLIC_UNLISTED",
+        "payload_schema": "van.browser.action_payload.v1",
+        "targets": [
+          {
+            "label": "Print recipe",
+            "role": "button",
+            "target_id": "t_67ebceed41e84f00"
+          },
+          {
+            "label": "Jump to method",
+            "role": "link",
+            "target_id": "t_d20dcf2beb682f80"
+          }
+        ]
+      },
+      "reasons": [
+        "PUBLIC_UNLISTED_ORIGIN"
+      ]
+    },
+    {
+      "category": "public_unlisted_stagehand",
+      "data_class": "INTERNAL_SANITIZED",
+      "eligibility": "SANITIZABLE_ELIGIBLE",
+      "expected": "SANITIZABLE_ELIGIBLE",
+      "fixture": "pub-10",
+      "jev_payload": {
+        "action_class_ceiling": "A1",
+        "closed_operation_set": [
+          "click",
+          "fill",
+          "select",
+          "scroll",
+          "press_key",
+          "done",
+          "abstain"
+        ],
+        "effect_direction": "PROPOSE_ACTION",
+        "observation_epoch": "e_92cd00b0cfa2647d",
+        "origin_class": "PUBLIC_UNLISTED",
+        "payload_schema": "van.browser.action_payload.v1",
+        "targets": [
+          {
+            "label": "Open the next article",
+            "role": "button",
+            "target_id": "t_1732bb6f00866c56"
+          }
+        ]
+      },
+      "reasons": [
+        "PUBLIC_UNLISTED_ORIGIN"
+      ]
+    },
+    {
+      "category": "public_unlisted",
+      "data_class": "INTERNAL_SANITIZED",
+      "eligibility": "SANITIZABLE_ELIGIBLE",
+      "expected": "SANITIZABLE_ELIGIBLE",
+      "fixture": "pub-11",
+      "jev_payload": {
+        "action_class_ceiling": "A1",
+        "closed_operation_set": [
+          "click",
+          "fill",
+          "select",
+          "scroll",
+          "press_key",
+          "done",
+          "abstain"
+        ],
+        "effect_direction": "PROPOSE_ACTION",
+        "observation_epoch": "e_4a818db74953a8b6",
+        "origin_class": "PUBLIC_UNLISTED",
+        "payload_schema": "van.browser.action_payload.v1",
+        "targets": [
+          {
+            "label": "Next 7 days",
+            "role": "tab",
+            "target_id": "t_3a64085823b52a65"
+          },
+          {
+            "label": "Hourly",
+            "role": "tab",
+            "target_id": "t_4fee8bc5a4e1ec4f"
+          }
+        ]
+      },
+      "reasons": [
+        "PUBLIC_UNLISTED_ORIGIN"
+      ]
+    },
+    {
+      "category": "public_docs",
+      "data_class": "PUBLIC",
+      "eligibility": "PUBLIC_ELIGIBLE",
+      "expected": "PUBLIC_ELIGIBLE",
+      "fixture": "pub-12",
+      "jev_payload": {
+        "action_class_ceiling": "A1",
+        "closed_operation_set": [
+          "click",
+          "fill",
+          "select",
+          "scroll",
+          "press_key",
+          "done",
+          "abstain"
+        ],
+        "effect_direction": "PROPOSE_ACTION",
+        "observation_epoch": "e_bf514db476196af3",
+        "origin_class": "PUBLIC_ALLOWLISTED",
+        "payload_schema": "van.browser.action_payload.v1",
+        "targets": [
+          {
+            "label": "File system",
+            "role": "link",
+            "target_id": "t_03598f61148ee6d7"
+          },
+          {
+            "label": "Stability index",
+            "role": "link",
+            "target_id": "t_b3da0c28346521d3"
+          }
+        ]
+      },
+      "reasons": [
+        "PUBLIC_ALLOWLISTED_ORIGIN"
+      ]
+    },
+    {
+      "category": "owner_email",
+      "data_class": null,
+      "eligibility": "OWNER_PRIVATE",
+      "expected": "OWNER_PRIVATE",
+      "fixture": "own-01",
+      "jev_payload": null,
+      "reasons": [
+        "OWNER_AUTHENTICATED_SESSION",
+        "OWNER_PROFILE_NOT_PUBLIC",
+        "OWNER_ACCOUNT_ORIGIN",
+        "OWNER_ACCOUNT_PATH"
+      ]
+    },
+    {
+      "category": "owner_drive",
+      "data_class": null,
+      "eligibility": "OWNER_PRIVATE",
+      "expected": "OWNER_PRIVATE",
+      "fixture": "own-02",
+      "jev_payload": null,
+      "reasons": [
+        "OWNER_AUTHENTICATED_SESSION",
+        "OWNER_PROFILE_NOT_PUBLIC",
+        "OWNER_ACCOUNT_ORIGIN"
+      ]
+    },
+    {
+      "category": "owner_calendar",
+      "data_class": null,
+      "eligibility": "OWNER_PRIVATE",
+      "expected": "OWNER_PRIVATE",
+      "fixture": "own-03",
+      "jev_payload": null,
+      "reasons": [
+        "OWNER_AUTHENTICATED_SESSION",
+        "OWNER_PROFILE_NOT_PUBLIC",
+        "OWNER_ACCOUNT_ORIGIN"
+      ]
+    },
+    {
+      "category": "owner_email_public_profile",
+      "data_class": null,
+      "eligibility": "OWNER_PRIVATE",
+      "expected": "OWNER_PRIVATE",
+      "fixture": "own-04",
+      "jev_payload": null,
+      "reasons": [
+        "OWNER_ACCOUNT_ORIGIN",
+        "OWNER_ACCOUNT_PATH"
+      ]
+    },
+    {
+      "category": "owner_docs",
+      "data_class": null,
+      "eligibility": "OWNER_PRIVATE",
+      "expected": "OWNER_PRIVATE",
+      "fixture": "own-05",
+      "jev_payload": null,
+      "reasons": [
+        "OWNER_AUTHENTICATED_SESSION",
+        "OWNER_PROFILE_NOT_PUBLIC",
+        "OWNER_ACCOUNT_ORIGIN"
+      ]
+    },
+    {
+      "category": "owner_authenticated_unlisted",
+      "data_class": null,
+      "eligibility": "OWNER_PRIVATE",
+      "expected": "OWNER_PRIVATE",
+      "fixture": "own-06",
+      "jev_payload": null,
+      "reasons": [
+        "OWNER_AUTHENTICATED_SESSION",
+        "OWNER_PROFILE_NOT_PUBLIC"
+      ]
+    },
+    {
+      "category": "owner_signed_in_evidence",
+      "data_class": null,
+      "eligibility": "OWNER_PRIVATE",
+      "expected": "OWNER_PRIVATE",
+      "fixture": "own-07",
+      "jev_payload": null,
+      "reasons": [
+        "OWNER_SIGNED_IN_EVIDENCE"
+      ]
+    },
+    {
+      "category": "owner_account_path",
+      "data_class": null,
+      "eligibility": "OWNER_PRIVATE",
+      "expected": "OWNER_PRIVATE",
+      "fixture": "own-08",
+      "jev_payload": null,
+      "reasons": [
+        "OWNER_ACCOUNT_PATH"
+      ]
+    },
+    {
+      "category": "login",
+      "data_class": null,
+      "eligibility": "CREDENTIAL",
+      "expected": "CREDENTIAL",
+      "fixture": "cred-01",
+      "jev_payload": null,
+      "reasons": [
+        "CREDENTIAL_AUTH_FLOW_ORIGIN",
+        "OWNER_ACCOUNT_ORIGIN"
+      ]
+    },
+    {
+      "category": "password",
+      "data_class": null,
+      "eligibility": "CREDENTIAL",
+      "expected": "CREDENTIAL",
+      "fixture": "cred-02",
+      "jev_payload": null,
+      "reasons": [
+        "CREDENTIAL_AUTH_FLOW_ORIGIN",
+        "CREDENTIAL_FIELD"
+      ]
+    },
+    {
+      "category": "otp",
+      "data_class": null,
+      "eligibility": "CREDENTIAL",
+      "expected": "CREDENTIAL",
+      "fixture": "cred-03",
+      "jev_payload": null,
+      "reasons": [
+        "CREDENTIAL_AUTH_FLOW_ORIGIN",
+        "CREDENTIAL_FIELD"
+      ]
+    },
+    {
+      "category": "2fa_unlisted_path",
+      "data_class": null,
+      "eligibility": "CREDENTIAL",
+      "expected": "CREDENTIAL",
+      "fixture": "cred-04",
+      "jev_payload": null,
+      "reasons": [
+        "CREDENTIAL_FIELD"
+      ]
+    },
+    {
+      "category": "password_hidden_label",
+      "data_class": null,
+      "eligibility": "CREDENTIAL",
+      "expected": "CREDENTIAL",
+      "fixture": "cred-05",
+      "jev_payload": null,
+      "reasons": [
+        "CREDENTIAL_FIELD"
+      ]
+    },
+    {
+      "category": "secret_in_page",
+      "data_class": null,
+      "eligibility": "CREDENTIAL",
+      "expected": "CREDENTIAL",
+      "fixture": "cred-06",
+      "jev_payload": null,
+      "reasons": [
+        "CREDENTIAL_SECRET_MATERIAL"
+      ]
+    },
+    {
+      "category": "card_checkout",
+      "data_class": null,
+      "eligibility": "CREDENTIAL",
+      "expected": "CREDENTIAL",
+      "fixture": "card-01",
+      "jev_payload": null,
+      "reasons": [
+        "CREDENTIAL_AUTH_FLOW_ORIGIN",
+        "CREDENTIAL_FIELD",
+        "CREDENTIAL_PAYMENT_CONTROL"
+      ]
+    },
+    {
+      "category": "card_fields_unlisted_path",
+      "data_class": null,
+      "eligibility": "CREDENTIAL",
+      "expected": "CREDENTIAL",
+      "fixture": "card-02",
+      "jev_payload": null,
+      "reasons": [
+        "CREDENTIAL_FIELD"
+      ]
+    },
+    {
+      "category": "payment_button",
+      "data_class": null,
+      "eligibility": "CREDENTIAL",
+      "expected": "CREDENTIAL",
+      "fixture": "card-03",
+      "jev_payload": null,
+      "reasons": [
+        "CREDENTIAL_PAYMENT_CONTROL"
+      ]
+    },
+    {
+      "category": "broker",
+      "data_class": null,
+      "eligibility": "TRADING_PROTECTED",
+      "expected": "TRADING_PROTECTED",
+      "fixture": "trade-01",
+      "jev_payload": null,
+      "reasons": [
+        "TRADING_FINANCIAL_ORIGIN"
+      ]
+    },
+    {
+      "category": "trading_chart",
+      "data_class": null,
+      "eligibility": "TRADING_PROTECTED",
+      "expected": "TRADING_PROTECTED",
+      "fixture": "trade-02",
+      "jev_payload": null,
+      "reasons": [
+        "TRADING_FINANCIAL_ORIGIN"
+      ]
+    },
+    {
+      "category": "bank",
+      "data_class": null,
+      "eligibility": "TRADING_PROTECTED",
+      "expected": "TRADING_PROTECTED",
+      "fixture": "trade-03",
+      "jev_payload": null,
+      "reasons": [
+        "TRADING_FINANCIAL_ORIGIN"
+      ]
+    },
+    {
+      "category": "bank_token_host",
+      "data_class": null,
+      "eligibility": "TRADING_PROTECTED",
+      "expected": "TRADING_PROTECTED",
+      "fixture": "trade-04",
+      "jev_payload": null,
+      "reasons": [
+        "TRADING_FINANCIAL_ORIGIN"
+      ]
+    },
+    {
+      "category": "trading_controls_unlisted",
+      "data_class": null,
+      "eligibility": "TRADING_PROTECTED",
+      "expected": "TRADING_PROTECTED",
+      "fixture": "trade-05",
+      "jev_payload": null,
+      "reasons": [
+        "TRADING_CONTROL"
+      ]
+    },
+    {
+      "category": "crypto_exchange",
+      "data_class": null,
+      "eligibility": "TRADING_PROTECTED",
+      "expected": "TRADING_PROTECTED",
+      "fixture": "trade-06",
+      "jev_payload": null,
+      "reasons": [
+        "TRADING_FINANCIAL_ORIGIN"
+      ]
+    },
+    {
+      "category": "vati_surface",
+      "data_class": null,
+      "eligibility": "TRADING_PROTECTED",
+      "expected": "TRADING_PROTECTED",
+      "fixture": "trade-07",
+      "jev_payload": null,
+      "reasons": [
+        "TRADING_FINANCIAL_ORIGIN"
+      ]
+    },
+    {
+      "category": "label_email",
+      "data_class": null,
+      "eligibility": "OWNER_PRIVATE",
+      "expected": "OWNER_PRIVATE",
+      "fixture": "lbl-01",
+      "jev_payload": null,
+      "reasons": [
+        "OWNER_PRIVATE_LABEL:EMAIL,OWNER_PROFILE_TERM"
+      ]
+    },
+    {
+      "category": "label_phone",
+      "data_class": null,
+      "eligibility": "OWNER_PRIVATE",
+      "expected": "OWNER_PRIVATE",
+      "fixture": "lbl-02",
+      "jev_payload": null,
+      "reasons": [
+        "OWNER_PRIVATE_LABEL:DIGIT_RUN"
+      ]
+    },
+    {
+      "category": "label_owner_name",
+      "data_class": null,
+      "eligibility": "OWNER_PRIVATE",
+      "expected": "OWNER_PRIVATE",
+      "fixture": "lbl-03",
+      "jev_payload": null,
+      "reasons": [
+        "OWNER_PRIVATE_LABEL:OWNER_PROFILE_TERM"
+      ]
+    },
+    {
+      "category": "label_account_number",
+      "data_class": null,
+      "eligibility": "OWNER_PRIVATE",
+      "expected": "OWNER_PRIVATE",
+      "fixture": "lbl-04",
+      "jev_payload": null,
+      "reasons": [
+        "OWNER_PRIVATE_LABEL:ACCOUNT_LIKE_TOKEN,DIGIT_RUN"
+      ]
+    },
+    {
+      "category": "label_timestamp",
+      "data_class": null,
+      "eligibility": "OWNER_PRIVATE",
+      "expected": "OWNER_PRIVATE",
+      "fixture": "lbl-05",
+      "jev_payload": null,
+      "reasons": [
+        "OWNER_PRIVATE_LABEL:TIMESTAMP"
+      ]
+    },
+    {
+      "category": "label_handle",
+      "data_class": null,
+      "eligibility": "OWNER_PRIVATE",
+      "expected": "OWNER_PRIVATE",
+      "fixture": "lbl-06",
+      "jev_payload": null,
+      "reasons": [
+        "OWNER_PRIVATE_LABEL:HANDLE"
+      ]
+    },
+    {
+      "category": "title_owner_name",
+      "data_class": null,
+      "eligibility": "OWNER_PRIVATE",
+      "expected": "OWNER_PRIVATE",
+      "fixture": "lbl-07",
+      "jev_payload": null,
+      "reasons": [
+        "OWNER_PRIVATE_TITLE"
+      ]
+    },
+    {
+      "category": "cloud_console",
+      "data_class": null,
+      "eligibility": "OWNER_PRIVATE",
+      "expected": "OWNER_PRIVATE",
+      "fixture": "adm-01",
+      "jev_payload": null,
+      "reasons": [
+        "OWNER_AUTHENTICATED_SESSION",
+        "OWNER_PROFILE_NOT_PUBLIC",
+        "OWNER_ACCOUNT_ORIGIN"
+      ]
+    },
+    {
+      "category": "wp_admin",
+      "data_class": null,
+      "eligibility": "OWNER_PRIVATE",
+      "expected": "OWNER_PRIVATE",
+      "fixture": "adm-02",
+      "jev_payload": null,
+      "reasons": [
+        "OWNER_ACCOUNT_PATH"
+      ]
+    },
+    {
+      "category": "admin_host",
+      "data_class": null,
+      "eligibility": "OWNER_PRIVATE",
+      "expected": "OWNER_PRIVATE",
+      "fixture": "adm-03",
+      "jev_payload": null,
+      "reasons": [
+        "OWNER_ACCOUNT_ORIGIN"
+      ]
+    },
+    {
+      "category": "file_scheme",
+      "data_class": null,
+      "eligibility": "POLICY_DENIED",
+      "expected": "POLICY_DENIED",
+      "fixture": "pol-01",
+      "jev_payload": null,
+      "reasons": [
+        "POLICY_SCHEME_NOT_NAVIGABLE"
+      ]
+    },
+    {
+      "category": "javascript_scheme",
+      "data_class": null,
+      "eligibility": "POLICY_DENIED",
+      "expected": "POLICY_DENIED",
+      "fixture": "pol-02",
+      "jev_payload": null,
+      "reasons": [
+        "POLICY_SCHEME_NOT_NAVIGABLE"
+      ]
+    },
+    {
+      "category": "literal_ip",
+      "data_class": null,
+      "eligibility": "POLICY_DENIED",
+      "expected": "POLICY_DENIED",
+      "fixture": "pol-03",
+      "jev_payload": null,
+      "reasons": [
+        "POLICY_HOST_NOT_PLAUSIBLE"
+      ]
+    },
+    {
+      "category": "localhost",
+      "data_class": null,
+      "eligibility": "POLICY_DENIED",
+      "expected": "POLICY_DENIED",
+      "fixture": "pol-04",
+      "jev_payload": null,
+      "reasons": [
+        "POLICY_HOST_NOT_PLAUSIBLE",
+        "POLICY_HOST_DENIED"
+      ]
+    },
+    {
+      "category": "internal_tld",
+      "data_class": null,
+      "eligibility": "POLICY_DENIED",
+      "expected": "POLICY_DENIED",
+      "fixture": "pol-05",
+      "jev_payload": null,
+      "reasons": [
+        "POLICY_HOST_DENIED"
+      ]
+    },
+    {
+      "category": "injection",
+      "data_class": null,
+      "eligibility": "POLICY_DENIED",
+      "expected": "POLICY_DENIED",
+      "fixture": "pol-06",
+      "jev_payload": null,
+      "reasons": [
+        "POLICY_INJECTION_SUSPECTED"
+      ]
+    },
+    {
+      "category": "adapter_flagged_injection",
+      "data_class": null,
+      "eligibility": "POLICY_DENIED",
+      "expected": "POLICY_DENIED",
+      "fixture": "pol-07",
+      "jev_payload": null,
+      "reasons": [
+        "POLICY_INJECTION_SUSPECTED"
+      ]
+    },
+    {
+      "category": "unknown_profile",
+      "data_class": null,
+      "eligibility": "POLICY_DENIED",
+      "expected": "POLICY_DENIED",
+      "fixture": "amb-01",
+      "jev_payload": null,
+      "reasons": [
+        "AMBIGUOUS_PROFILE_NOT_ADMITTED",
+        "OWNER_AUTHENTICATED_SESSION",
+        "OWNER_PROFILE_NOT_PUBLIC"
+      ]
+    },
+    {
+      "category": "unknown_auth_owner_profile",
+      "data_class": null,
+      "eligibility": "OWNER_PRIVATE",
+      "expected": "OWNER_PRIVATE",
+      "fixture": "amb-02",
+      "jev_payload": null,
+      "reasons": [
+        "OWNER_AUTHENTICATED_SESSION",
+        "OWNER_PROFILE_NOT_PUBLIC"
+      ]
+    },
+    {
+      "category": "too_many_targets",
+      "data_class": null,
+      "eligibility": "POLICY_DENIED",
+      "expected": "POLICY_DENIED",
+      "fixture": "amb-03",
+      "jev_payload": null,
+      "reasons": [
+        "AMBIGUOUS_TOO_MANY_TARGETS"
+      ]
+    },
+    {
+      "category": "empty_url",
+      "data_class": null,
+      "eligibility": "POLICY_DENIED",
+      "expected": "POLICY_DENIED",
+      "fixture": "amb-04",
+      "jev_payload": null,
+      "reasons": [
+        "POLICY_SCHEME_NOT_NAVIGABLE"
+      ]
+    }
+  ],
+  "metrics": {
+    "eligibility_rate": 0.2105,
+    "eligible": 12,
+    "measurement_kind": "FIXTURE_CORPUS_NOT_LIVE",
+    "per_class": {
+      "CREDENTIAL": 9,
+      "OWNER_PRIVATE": 19,
+      "POLICY_DENIED": 10,
+      "PUBLIC_ELIGIBLE": 8,
+      "SANITIZABLE_ELIGIBLE": 4,
+      "TRADING_PROTECTED": 7
+    },
+    "policy_rejection_rate": 0.1754,
+    "privacy_rejection_rate": 0.614,
+    "total": 57
+  },
+  "module": "van.browser.ultrafast.action.v1"
+}

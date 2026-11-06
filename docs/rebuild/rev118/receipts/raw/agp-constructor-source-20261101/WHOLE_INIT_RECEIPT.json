@@ -1,0 +1,107 @@
+{
+  "state": "TERMINAL_PASS",
+  "scope": "Whole actual generated init literal executed with genuine cachedGroovy; controlled beforeProject/project/layout receivers, not Gradle/AGP/native qualification",
+  "java_version": "openjdk version \"21.0.13\" 2026-10-20 LTS\nOpenJDK Runtime Environment Temurin-21.0.13+9 (build 21.0.13+9-LTS)\nOpenJDK 64-Bit Server VM Temurin-21.0.13+9 (build 21.0.13+9-LTS, mixed mode, sharing)\n",
+  "groovy_version": "3.0.22",
+  "groovy_jar": "/tmp/van-permission-revocation-gradle/wrapper/dists/gradle-8.11.1-bin/bpt9gzteqjrbo1mjrsomdt32c/gradle-8.11.1/lib/groovy-3.0.22.jar",
+  "jar_sha256": "c92c92c4b9b183f9981ba7399f36592e5e3ad6f4cdac7101b5a22cc17998d13f",
+  "receiver_sha256": "a7974aab3ffa7da3a42a5bb52fbd1269b6ce5a5cbdd63c588103cae9f9f80117",
+  "results": [
+    {
+      "owner": "tests/contracts/test_android_instrumentation_abi.py",
+      "state": "before",
+      "path_case": "ordinary",
+      "exit": 1,
+      "actual_paths": [],
+      "init_sha256": "ff532441e13362f579754feacfecee974b6f96235006c90c4c76d6f906db7ee1",
+      "error_kind": "File(URI,String) constructor refusal"
+    },
+    {
+      "owner": "tests/contracts/test_android_instrumentation_abi.py",
+      "state": "before",
+      "path_case": "quoted $ '\"",
+      "exit": 1,
+      "actual_paths": [],
+      "init_sha256": "2d1dd07eb3c5ee7a90946d7b64ed49d31355914878b931ca433c96c0c847990a",
+      "error_kind": "File(URI,String) constructor refusal"
+    },
+    {
+      "owner": "tests/contracts/test_android_instrumentation_abi.py",
+      "state": "after",
+      "path_case": "ordinary",
+      "exit": 0,
+      "actual_paths": [
+        "/tmp/van-recovery-dce-ci-diagnosis-20261101/whole-init/test_android_instrumentation_abi.py-after-0 ordinary/gradle-build-outputs/Van_",
+        "/tmp/van-recovery-dce-ci-diagnosis-20261101/whole-init/test_android_instrumentation_abi.py-after-0 ordinary/gradle-build-outputs/buildSrc_",
+        "/tmp/van-recovery-dce-ci-diagnosis-20261101/whole-init/test_android_instrumentation_abi.py-after-0 ordinary/gradle-build-outputs/Van_app"
+      ],
+      "init_sha256": "cea81993452b5f728b29ed71dc87ccba93f799ba7a488a3eafc036f9a8d74d68",
+      "error_kind": null
+    },
+    {
+      "owner": "tests/contracts/test_android_instrumentation_abi.py",
+      "state": "after",
+      "path_case": "quoted $ '\"",
+      "exit": 0,
+      "actual_paths": [
+        "/tmp/van-recovery-dce-ci-diagnosis-20261101/whole-init/test_android_instrumentation_abi.py-after-1 quoted $ '\"/gradle-build-outputs/Van_",
+        "/tmp/van-recovery-dce-ci-diagnosis-20261101/whole-init/test_android_instrumentation_abi.py-after-1 quoted $ '\"/gradle-build-outputs/buildSrc_",
+        "/tmp/van-recovery-dce-ci-diagnosis-20261101/whole-init/test_android_instrumentation_abi.py-after-1 quoted $ '\"/gradle-build-outputs/Van_app"
+      ],
+      "init_sha256": "a96f40f0c7549a6c3dab782466bb1e10ede78c6a5837a71f86b21a1b9bbf5563",
+      "error_kind": null
+    },
+    {
+      "owner": "tests/contracts/test_android_production_target.py",
+      "state": "before",
+      "path_case": "ordinary",
+      "exit": 1,
+      "actual_paths": [],
+      "init_sha256": "9e75f962df485887e219cca43f15d106095dc9e664c0cd9eb756b36838349394",
+      "error_kind": "File(URI,String) constructor refusal"
+    },
+    {
+      "owner": "tests/contracts/test_android_production_target.py",
+      "state": "before",
+      "path_case": "quoted $ '\"",
+      "exit": 1,
+      "actual_paths": [],
+      "init_sha256": "a1db2bc31395aa3a0493d1cca7183acdafd60f5c058b7e1b5aaf9f21a0147319",
+      "error_kind": "File(URI,String) constructor refusal"
+    },
+    {
+      "owner": "tests/contracts/test_android_production_target.py",
+      "state": "after",
+      "path_case": "ordinary",
+      "exit": 0,
+      "actual_paths": [
+        "/tmp/van-recovery-dce-ci-diagnosis-20261101/whole-init/test_android_production_target.py-after-0 ordinary/gradle-build-outputs/Van_",
+        "/tmp/van-recovery-dce-ci-diagnosis-20261101/whole-init/test_android_production_target.py-after-0 ordinary/gradle-build-outputs/buildSrc_",
+        "/tmp/van-recovery-dce-ci-diagnosis-20261101/whole-init/test_android_production_target.py-after-0 ordinary/gradle-build-outputs/Van_app"
+      ],
+      "init_sha256": "91d1edf2c40595db677bf829dd72ca90d71a8d6e0f0b9206593c702062e2aba7",
+      "error_kind": null
+    },
+    {
+      "owner": "tests/contracts/test_android_production_target.py",
+      "state": "after",
+      "path_case": "quoted $ '\"",
+      "exit": 0,
+      "actual_paths": [
+        "/tmp/van-recovery-dce-ci-diagnosis-20261101/whole-init/test_android_production_target.py-after-1 quoted $ '\"/gradle-build-outputs/Van_",
+        "/tmp/van-recovery-dce-ci-diagnosis-20261101/whole-init/test_android_production_target.py-after-1 quoted $ '\"/gradle-build-outputs/buildSrc_",
+        "/tmp/van-recovery-dce-ci-diagnosis-20261101/whole-init/test_android_production_target.py-after-1 quoted $ '\"/gradle-build-outputs/Van_app"
+      ],
+      "init_sha256": "00844932f5f7afc03090bfe657e01123ecfe8db2dc92f2f591a348ca01773c13",
+      "error_kind": null
+    }
+  ],
+  "source_after": {
+    "tests/contracts/test_android_instrumentation_abi.py": "9879d8fdc9b6f0c1f92865addd81a0c0c8a774bb5efbeae74bdd082c366078ab",
+    "tests/contracts/test_android_production_target.py": "e7211f3a430fdfea9bcefa9b97313f4b702bbfca7d46614aff60d6d5bc96f24c",
+    "tests/rebuild/test_canonical_source_audit.py": "5a34cbbfacb136d305764408a413e85f02346cf730b1e855400afc4f33b6d227"
+  },
+  "network_or_gradle_or_sdk": false,
+  "owned_bytes": 7914,
+  "at": "2026-11-01T21:47:25.791307+00:00"
+}

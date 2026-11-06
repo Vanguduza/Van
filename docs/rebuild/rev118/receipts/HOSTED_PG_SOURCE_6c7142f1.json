@@ -1,0 +1,18 @@
+{
+  "schema": "van.rebuild.hosted-postgres-trading-voice/1",
+  "source_head": "6c7142f126b206ba7f6aeefccb922cc51545c27c",
+  "run": 40377218997,
+  "job": 121763455436,
+  "job_status": "SUCCESS",
+  "main_workflow": "IN_PROGRESS_AT_CAPTURE_TWO_MANDATORY_PREREQUISITES_FAILED_UNWAIVED",
+  "actual_trading_passed": 3940,
+  "declared_private_DDS_skip": 1,
+  "actual_postgres_passed": 26,
+  "actual_voice_passed": 117,
+  "junit_failures_errors": 0,
+  "verified_archive_size_SHA_CRC_paths": true,
+  "actual_trading_suite_seconds": 340.893,
+  "maximum_trading_log_line_characters": 4209,
+  "qualification": "Published6c71 source only;not later native valuation candidate or unit/native/device/productionacceptance",
+  "evidence": "ci/pg_hosted_6c7142f1_20261026"
+}

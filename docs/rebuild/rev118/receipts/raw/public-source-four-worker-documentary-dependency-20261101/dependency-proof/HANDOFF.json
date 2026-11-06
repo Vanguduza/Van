@@ -1,0 +1,105 @@
+{
+  "schema": "van.public-source-shard-documentary-dependency-supplement/1",
+  "at_utc": "2026-11-01T11:18:21.817005+00:00",
+  "state": "DEPENDENCY_ONLY_FROZEN_FOR_INDEPENDENT_REVIEW_UNCOMMITTED_UNPUSHED",
+  "base": "34466d65da8bcce6ba7ee092edcda7f5fa025a79",
+  "published_base": "fd33b0759b9ae170f8bdfdf27f9afe7082da7830",
+  "paths": {
+    "tools/rebuild/requirements.lock": "95504e01ef04029f410b2b23dc7fff3e02d7e7327513388a3b065f1a87ce9941"
+  },
+  "before_sha256": {
+    "tools/rebuild/requirements.lock": "506ccce6748b4ecfdfd4059b047c17a2783b34745607f86b888119c632056594"
+  },
+  "original_reviewed8_source_pins": {
+    ".github/workflows/van-ci.yml": "d01072bb9580f97191c42887f66edb0bc4b67e52790c971e548987f079e54292",
+    "tools/ci/github-actions-ci.yml": "d01072bb9580f97191c42887f66edb0bc4b67e52790c971e548987f079e54292",
+    "tools/rebuild/backend_public_source.py": "36d743ea8489c39b67cda800b0b1016cb32b0b3df779a5714d6d5288b06cac0b",
+    "tools/rebuild/public_source_shards.py": "cbab1119dfbe47c7d7a27b45590c009559d60d719a6483c761f37b48ed8b4973",
+    "tools/rebuild/backend_public_source_costs.json": "87bea238bd0bbd85bc75bf5a3f1271284d2da7d8833a60ef2805e5f9220f1779",
+    "tests/rebuild/test_public_source_shards.py": "ae895b4887587e8df0a4ed9d687b7b9139ec3b6975b107af2933cd8cb4cf75fc",
+    "tests/contracts/test_ci_public_source_shards.py": "5d80f268b9af8b9827e025af3c9fd2f37edbd110301be6257568190fcb5eb87a",
+    "docs/rebuild/rev118/ci/PUBLIC_SOURCE_SHARDS_20261101.md": "9f81c330dff73bf9124f8808ea46c0b9191ba6de7fc083cc57908e8ce3331177"
+  },
+  "original_reviewed8_unchanged": true,
+  "patch_sha256": "0598f0c8c7f7d79b5be7dc428f1043ff27df3725a2cd01817ab662864f21aa5e",
+  "source_archive_sha256": "992cec923169b6d3172980d58f59e6181db8e1fedd7f3deff2dc64850539165a",
+  "archive_readback_and_cached_applycheck": "PASS no index mutation",
+  "scope": "Existing tools/rebuild verification dependency owner; every original pin retained exactly, adds anyio4.15.1+idna3.20 for the real gateway-instrument subprocess fixtures. No source/test/skip/plugin-semantic fallback, workflow body change or application effect.",
+  "actual_original_failure": {
+    "cases": 75,
+    "passed": 73,
+    "failed": 2,
+    "errors": 0,
+    "skipped": 0,
+    "cause": "The two real gateway instrument subprocess tests cannot import original native gateway plugin anyio.pytest_plugin in the documentary-only original lock. This is actual fresh-lock execution failure, not an application/source-gate acceptance.",
+    "receipt": "original-instrument/receipt.json",
+    "raw_log": "original-instrument/tests.log",
+    "junit": "original-instrument/tests.xml"
+  },
+  "actual_corrected_run": {
+    "cases": 75,
+    "passed": 75,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 15.03,
+    "receipt": "fixed-instrument/receipt.json",
+    "raw_log": "fixed-instrument/tests.log",
+    "junit": "fixed-instrument/tests.xml",
+    "source_inputs_before_after_unchanged": true,
+    "original8_reviewed_source_unchanged": true
+  },
+  "dependency_integrity": {
+    "original_install": "original-install-receipt.json",
+    "fixed_install": "fixed-install-receipt.json",
+    "both_fresh_require_hashes_offline_installs": "terminal0",
+    "official_artifacts": "OFFICIAL_ARTIFACT_DIGESTS.json",
+    "artifacts_verified": 14,
+    "actual_all_wheel_hashes_match_official_TLS_release_metadata": true,
+    "source_lock_projection": "PROPOSED_HASHED.lock preserves EXACT source name/version specs, adds official verified wheel SHA256 for proof install; source lock retains its existing pin-only format.",
+    "installed_package_versions_exactly_source_specs_except_pip_bootstrap": true
+  },
+  "genuine_commit_and_manifest": {
+    "local_commit": "34466d65da8bcce6ba7ee092edcda7f5fa025a79",
+    "normal_push": "NOT_ATTEMPTED",
+    "final_original_manifest": "terminal0/12766files0mismatch before lock supplement; must refresh after supplement review",
+    "premature_receipt_read": "INITIAL_STATE.json preserves JSONDecodeError caused by reading live writer; later writer reaped terminal0. No current final-manifest or committed-baseline success inferred.",
+    "required_baseline": "4fd466dec3910ed5de614bfbf95887ad619df5ca",
+    "committed_baseline_verification": "PENDING_FINAL_SUPPLEMENT_REVIEW_AND_COMMIT"
+  },
+  "raw_sha256": {
+    "PROPOSED_PINS.lock": "449961403d22e29b1b4c9e181d0a4d0417c05a81f756533a74dc6cc1c75aa12a",
+    "wheel-download.log": "65f3be9cc7c58752287830eabc1ef22056da3288ec3fd21f91d32166756b77fd",
+    "OFFICIAL_ARTIFACT_DIGESTS.json": "cd1ca73c689a3ab1c7e036276ed2c78d79181bec349b10527ae34d3d79fe22bf",
+    "original-install-receipt.json": "4e66f666ef4ccd982ce289ce49378b3bd57d8d7c2b87d625d2d86a8bb4bb2d4a",
+    "INITIAL_STATE.json": "3d3c7f0af4309c8c618ecd2865475c058022442119e4f636e966c6cfd6f57ca9",
+    "run_instrument.py": "f50756980f70af178b87c27304fb92f138e3fe57cb217d19227e8a23b6b4ea93",
+    "hash-provisioning.log": "0c6d2c4b05679282f2f52adda407c0df9c0e79c701a27d43dfdd591fd128e638",
+    "DEPENDENCY_SUPPLEMENT.patch": "0598f0c8c7f7d79b5be7dc428f1043ff27df3725a2cd01817ab662864f21aa5e",
+    "ORIGINAL_HASHED.lock": "64a3c5932fc188de0316e615d90a44f84c4a9d8e752df19ec5963d90b4779c82",
+    "fixed-install-receipt.json": "4cea6c3287236c43b4ee89fd80bf2a56a65927ecf3d385699f23da713d1ee527",
+    "SOURCE_SUPPLEMENT.zip": "992cec923169b6d3172980d58f59e6181db8e1fedd7f3deff2dc64850539165a",
+    "original-install.log": "98081f3a62b63fdd1816358319117963dc7b4e87bef1336026a96a0a5339f56f",
+    "PROPOSED_HASHED.lock": "6afd4e890b9ca3f522b2b3e096609f538d61bc7223e55f883d9bb6dcc8e1c3ae",
+    "ORIGINAL_PINS.lock": "506ccce6748b4ecfdfd4059b047c17a2783b34745607f86b888119c632056594",
+    "fixed-install.log": "b46b92d27c7cb5e446c220e0909261f008db1e594fa055d3f65139e4e768658a",
+    "prepare_hashes.py": "58ff86f3d2aa31141d99e235c19700a6e7191e047c85fd98d5400d696a9b82a4",
+    "fixed-instrument/owned-temp-inventory.json": "ec86286507484baeb00a75d4530d1717f5d60e213378409961e3577c9405ddaa",
+    "fixed-instrument/tests.xml": "dad61f8af020d1beed3efba8d7c6aef86f40023a1cbddcc121dda9142026570a",
+    "fixed-instrument/storage-audit.json": "03b5b2afac2978cda8a845c9a6eec9e8d20b13abe2960e09fcc8f1fccbcc2cb7",
+    "fixed-instrument/receipt.json": "f4b990b7e6b6594ea35228925bb3ebd80bf9c4d2eea99cc0b15918c9a320d931",
+    "fixed-instrument/tests.log": "477030f3f062ee0d12704cbe79e31a4ac47acd6e8a1a68c80eaf4184e82ea043",
+    "original-instrument/owned-temp-inventory.json": "758fa7d50146f20e7bd07b64ba90aa7154c34c852bb98e8e0bb3e34c0bf58f25",
+    "original-instrument/tests.xml": "8102b499d81411e55d9d8d705c7fc92d4837e1ffc4a7839fd9e9480063bbc93b",
+    "original-instrument/storage-audit.json": "03b5b2afac2978cda8a845c9a6eec9e8d20b13abe2960e09fcc8f1fccbcc2cb7",
+    "original-instrument/receipt.json": "b6712a33cdfd14e93a73a5b5533238a0784b8193e3048779dfd01e09ad62b549",
+    "original-instrument/tests.log": "8dc629348e104966f4883563efe3bf5f96c133c3d1c65ad4f760221390d6865e"
+  },
+  "owned_jobs": "All provisioning/instrument controllers terminal/reaped; both test basetemps inventoried and removed; installed proof venvs and official wheels retained for review. SDK/JDK/shared Gradle and queue owner files untouched.",
+  "remaining": [
+    "Independent dependency-only review before any publication",
+    "After review: archive truthful supplement evidence, refresh final manifest, genuine normal corrective commit (no rewriting34466), required committed4fd baseline terminal0",
+    "Fresh remote check, normal push/readback, actual future exact-head4-worker execution/union/timing; no source/native speed qualification until observed"
+  ],
+  "qualifications_issued": []
+}

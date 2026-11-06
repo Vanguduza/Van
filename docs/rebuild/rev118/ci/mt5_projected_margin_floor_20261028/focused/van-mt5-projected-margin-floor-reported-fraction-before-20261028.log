@@ -1,0 +1,23 @@
+.F                                                                       [100%]
+=================================== FAILURES ===================================
+______ test_signed_sdk_retains_the_same_strictly_above_reported_fraction _______
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-125/test_signed_sdk_retains_the_sa0')
+
+    def test_signed_sdk_retains_the_same_strictly_above_reported_fraction(tmp_path):
+        sdk=EntryCashSdk(equity=1000.,credit=0.,used=100.,reported_free=900.);original=sdk.account_info
+        def account():
+            a=original();a.margin_level=220.005;return a
+        sdk.account_info=account;sdk.margin_value=10.
+        sdk,worker,adapter,now=connection(tmp_path,sdk)
+        receipt=adapter.submit(command(adapter.account_alias),now_ms=now['ms'])
+>       assert receipt.status=='FILLED' and len(sdk.sent)==1
+E       AssertionError: assert ('REJECTED' == 'FILLED'
+E         
+E         - FILLED
+E         + REJECTED)
+
+../../test_van_mt5_reported_fraction_20261028.py:19: AssertionError
+=========================== short test summary info ============================
+FAILED ../../test_van_mt5_reported_fraction_20261028.py::test_signed_sdk_retains_the_same_strictly_above_reported_fraction
+1 failed, 1 passed in 3.71s

@@ -1,0 +1,109 @@
+{
+  "schema": "van.rebuild.account-persistence-source/1",
+  "source_parent": "b1ab08bddd1ca9a101e51eb07f74d28d3eb70767",
+  "source_sha256": {
+    "trading/vati/accounts/registry.py": "d4a95e88516c90af6f14cb52cd7a88f2007ba7bd2fc361a9971fcf1e5ea86a06",
+    "trading/vati/core/file_lock.py": "319e716ae0b886037692c3e637bc9087743a3bdf88a1010f1d861822057bd916",
+    "trading/commander/accounts.py": "6ae4d8b7033fae07a36614678bb0eed2fd38dec95a23273f9042dd079d4a65a1",
+    "trading/tests/test_account_registry_concurrency.py": "b2785e1977836e4639eba3511f9a1ec37267d075fe5894e4bd93d22b1070ad14",
+    "trading/tests/test_account_credential_atomicity.py": "7bee636de07e7c6148bd343834ecf3e043ba59f823e976a6f3b53a4ee207a407",
+    "trading/tests/test_commander_accounts.py": "0c3eb4bd94742e64730b08b57eaa2d44b53b283a10e77e50c5cec7617096a956"
+  },
+  "initial_counterexamples": {
+    "registry": 6,
+    "credential_files": 2
+  },
+  "full_trading_real_postgresql": {
+    "tests": 1825,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "939869b0f0d1c73fbe85651f766165a38734188569c6895d7a89a503225903c9"
+  },
+  "focused_account_and_credential": {
+    "tests": 36,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "fc69c82dff159f2b4c6d2d98a1e8034f85584675a66a943b3cbb0819202190c1"
+  },
+  "gateway_a4_and_owner_reads": {
+    "tests": 46,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "9f02f7161e592e8f85b3d886a364b6e7169f1330de78b6fec412fa38bb0e319d"
+  },
+  "custom_mutants": {
+    "detected": 4,
+    "survived": 0,
+    "source_restored": true,
+    "rows": [
+      {
+        "kind": "baseline",
+        "mutation": null,
+        "exit_code": 0,
+        "log": "/tmp/van-account-persistence-mutant-0.txt",
+        "sha256": "34829a45ee96dc135e19772677b79442250868578c4fc49c2afccc242e6fde92"
+      },
+      {
+        "kind": "mutation",
+        "mutation": "use a stale account cache for a registry mutation",
+        "exit_code": 1,
+        "log": "/tmp/van-account-persistence-mutant-1.txt",
+        "sha256": "0a6615be1a0d77bb913e7b578f51bd73b083a01746c4ec5a405c377784988d70"
+      },
+      {
+        "kind": "mutation",
+        "mutation": "drop prior credential keys during rotation",
+        "exit_code": 1,
+        "log": "/tmp/van-account-persistence-mutant-2.txt",
+        "sha256": "3c51f30511d763c07f65f1470ae66a7d002a92445d127336c65fcec5e52250e2"
+      },
+      {
+        "kind": "mutation",
+        "mutation": "unlink races past an in-flight credential mutation",
+        "exit_code": 1,
+        "log": "/tmp/van-account-persistence-mutant-3.txt",
+        "sha256": "24173dbcc8a85be7edec5dd7767aaf4b489e8f90d569319187975098ecf05cfe"
+      },
+      {
+        "kind": "mutation",
+        "mutation": "bypass atomic secret replacement and its failure boundary",
+        "exit_code": 1,
+        "log": "/tmp/van-account-persistence-mutant-4.txt",
+        "sha256": "ea484489d14d00bb32e17512a00fc3199a54f36fac6c6560964fa98ae592cc79"
+      }
+    ]
+  },
+  "legacy_mutation_preflight": {
+    "schema": "van.rebuild.mutation-registry-preflight/1",
+    "registry_sha256": "35d10c7b0f2b8319b7f7305828262c972b2a6451139d75b9e83c7d0062282955",
+    "mutation_count": 374,
+    "edit_count": 383,
+    "findings": [],
+    "execution_state": "NOT_RUN",
+    "status": "ANCHORS_VALID_BASELINES_AND_MUTATIONS_NOT_EXECUTED"
+  },
+  "owner_registry_check": {
+    "changed": [],
+    "applied": false,
+    "scope": "SOURCE_CONTRACTS_ONLY"
+  },
+  "private_fixture_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "platform_observed": "Linux; real fork-independent spawned processes and threads",
+  "windows_locking": "NOT_RUN",
+  "whole_unit_acceptance": "NOT_ISSUED",
+  "live_provider_qualification": false,
+  "remaining": [
+    "OAuth exact state/broker/device binding and callback recovery",
+    "Provider verified credential swap/rollback",
+    "Authoritative native live/demo/read-only identity",
+    "Exposure/lease/funds-safe unlink",
+    "Real eligible CEX spot integration and funding contracts",
+    "Independent admission and live/handset acceptance"
+  ]
+}

@@ -1,0 +1,3 @@
+{"duration": 0.07042999900295399, "nodeid": "trading/tests/test_single_session_unknown_entry.py::test_current_empty_positions_do_not_release_original_unresolved_entry_risk", "outcome": "passed", "phase": "setup"}
+{"duration": 174.86253329299507, "nodeid": "trading/tests/test_single_session_unknown_entry.py::test_current_empty_positions_do_not_release_original_unresolved_entry_risk", "outcome": "passed", "phase": "call"}
+{"duration": 0.0013472610007738695, "nodeid": "trading/tests/test_single_session_unknown_entry.py::test_current_empty_positions_do_not_release_original_unresolved_entry_risk", "outcome": "passed", "phase": "teardown"}

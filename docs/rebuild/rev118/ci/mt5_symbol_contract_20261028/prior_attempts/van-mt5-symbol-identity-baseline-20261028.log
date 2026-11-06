@@ -1,0 +1,52 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+_ test_actual_signed_symbol_read_rechecks_native_identity_after_sdk_access[login] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-79/test_actual_signed_symbol_read0')
+change = 'login'
+
+    @pytest.mark.parametrize('change',['login','currency'])
+    def test_actual_signed_symbol_read_rechecks_native_identity_after_sdk_access(tmp_path,change):
+        sdk,worker,adapter,now=connection(tmp_path,CashMt5())
+        symbol=sdk.symbol_info;account=sdk.account_info;changed={'yes':False}
+        def switched_symbol(name):
+            changed['yes']=True
+            if change=='login':sdk._login=87654321
+            return symbol(name)
+        def current_account():
+            value=account()
+            if changed['yes'] and change=='currency':value.currency='EUR'
+            return value
+        sdk.symbol_info=switched_symbol;sdk.account_info=current_account
+>       with pytest.raises(VenueUnavailable,match='identity|account'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_mt5_symbol_read_identity.py:21: Failed
+_ test_actual_signed_symbol_read_rechecks_native_identity_after_sdk_access[currency] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-79/test_actual_signed_symbol_read1')
+change = 'currency'
+
+    @pytest.mark.parametrize('change',['login','currency'])
+    def test_actual_signed_symbol_read_rechecks_native_identity_after_sdk_access(tmp_path,change):
+        sdk,worker,adapter,now=connection(tmp_path,CashMt5())
+        symbol=sdk.symbol_info;account=sdk.account_info;changed={'yes':False}
+        def switched_symbol(name):
+            changed['yes']=True
+            if change=='login':sdk._login=87654321
+            return symbol(name)
+        def current_account():
+            value=account()
+            if changed['yes'] and change=='currency':value.currency='EUR'
+            return value
+        sdk.symbol_info=switched_symbol;sdk.account_info=current_account
+>       with pytest.raises(VenueUnavailable,match='identity|account'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_mt5_symbol_read_identity.py:21: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_mt5_symbol_read_identity.py::test_actual_signed_symbol_read_rechecks_native_identity_after_sdk_access[login]
+FAILED trading/tests/test_mt5_symbol_read_identity.py::test_actual_signed_symbol_read_rechecks_native_identity_after_sdk_access[currency]
+2 failed in 0.24s

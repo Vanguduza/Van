@@ -1,0 +1,67 @@
+{
+  "schema": "van.rev118.mt5-projected-margin-floor-source/1",
+  "source_parent": "d53eea63539d5829ff0ac4f5aa7b55155a3c7491",
+  "observed_at_utc": "2026-10-28T14:37:55.804477+00:00",
+  "source_files_sha256": {
+    "deploy/van-trading-core/mql5/VanBridgeEA.mq5": "a7a4f9ed47012d07e5f284654d625cbb149015c4bd25e555e2a523ff086afead",
+    "deploy/van-trading-core/windows/mt5_worker/README.md": "62eaf5e09ae40264bd717365f8848f71073c41bb0546845a992482ed4602fc80",
+    "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py": "cb92a91db9085219f3bfc4246e5e4aabb1bb9f40e0ed1e440bee061cbbd989a4",
+    "tests/rebuild/test_mt5_cash_unit_source.py": "ff36153f08b9dfc1d287ae7816dd97147b42fd1432929a2b15ea43510869dcaa",
+    "trading/tests/mql_terminal_fixture.cpp": "8f76e54c6aa5e8eee5e1e148d1ece9b914e8681a482a2ecb4aceb470d4d05f01",
+    "trading/tests/test_mql_native_function_bodies.py": "5a72be258755e3b69e12d909d092803adf7bcf74cb30efd9a64ab3202ccbca62",
+    "trading/tests/test_mt5_final_cash_margin.py": "c77e33aedf702d6bab41f778e0c95f2ec5770723b7be2d21e98a7c8a70ae22cc",
+    "trading/tests/test_mt5_projected_margin_floor.py": "cb7f612dc46c8ca5840e4a7635fc98119b19311be62ddaa1d945c86dacf686ce"
+  },
+  "implementation": "Both native MT5 entry paths now preserve the existing RiskAuthority200% minimum after adding the original proposed isolated margin to native committed margin. Original cash excludes credit; money bounds round conservatively, and equality refuses. The lower original broker-reported level also remains binding. SDK uses exact Fraction; EA retains full original decimal mantissas/exponents and integer-string products, including sub-minor used margin and strictly above-floor reported fractions. Before/after/final facts cannot renew an originally insufficient margin budget. Known floor breach, insufficient free cash and unavailable facts remain distinct. Healthy/zero-requirement entries and protective tighten/close retain their existing paths. Neither path sizes or grants execution. Final full source qualification:5314passed0skip/fail/error/audit,actualinner/outerexit0,everycallonce,all1260inputhashesmatchplus2legacyfixtures,ownedPostgreSQLindependentlyabsent. 2951 original trading/rebuild test functions retain identical AST. New actual EA MetaEditor compilation PENDING exact-source hosted job. Shared reservations, fee/fill contingencies, native working-order and economic finality remain open.0formal/native/production/S24acceptancesissued.",
+  "source_result": {
+    "actual_inner_exit": 0,
+    "actual_outer_exit": 0,
+    "passed": 5314,
+    "skipped": 0,
+    "failures": 0,
+    "errors": 0,
+    "audit_violations": 0,
+    "unique_calls_once": 5314,
+    "pinned_inputs_matched": 1260,
+    "additional_legacy_fixtures_matched": 2,
+    "original_test_functions_AST_preserved": 2951,
+    "owned_postgres_independently_absent": true,
+    "raw": "ci/mt5_projected_margin_floor_20261028/sql_r2"
+  },
+  "source_authorizations": [
+    "auth-20261022-owner-autonomous-candidate-build",
+    "auth-20261023-owner-native-worker-source"
+  ],
+  "retained_failures": [
+    "Baseline actualexit1:7 simulated unsafe native sends,2 healthy controls passed. Both source transports admitted entry at/below the existing projected floor. No real broker effect.",
+    "Focusedr1 actualexit1:180passed1failed. EA healthy399.99 fixture crossed to original17digit text above399.99 and rounded required margin up to400 at declared2decimal units. Exactly representable399.5 restored the healthy control;399.99 remains a held boundary. No production rounding loosened.",
+    "Independent reported-fraction boundary actualexit1:1EAhelperpassed/1SDKfailed. SDK unnecessarily quantized percentage-derived capacity a second time; the exact ratio now remains Fraction, while original cash/money rounding stays conservative. Final independent2-case comparison passes.",
+    "First broadSQLr1 deliberately interrupted after reproducing the SDK positive-boundary defect, before modifying source. Only the exact owned audit process was signalled after PID/parentage/cmdline verification. Actual inner/outerexit2, partial evidence retained, ownedPostgreSQL independently absent; no full-run PASS."
+  ],
+  "fixture_preservation": "Original test functions/assertions remain. EntryCashSdk now supplies its explicit original reported margin level consistently with simulated equity/used facts; exact EA dependency extraction and C++ API model expand for original helpers. These remain declared source fixtures.",
+  "native_EA_compilation": "PENDING_EXACT_MODIFIED_SOURCE_HOSTED_JOB",
+  "formal_acceptances_issued": 0,
+  "published_parent_hosted_logs": {
+    "head": "d53eea63539d5829ff0ac4f5aa7b55155a3c7491",
+    "run": 40700452416,
+    "job": 122858524607,
+    "trading_passed": 5044,
+    "declared_private_DDS_skips": 1,
+    "postgres_passed": 26,
+    "voice_passed": 117,
+    "original_JUnit_archive_verified": false,
+    "supporting_workflows_succeeded": 4,
+    "mandatory_prerequisites_failed": [
+      "trusted-main ledger checker absent",
+      "DDS read deploy key unprovisioned"
+    ]
+  },
+  "limitations": [
+    "The200% value is the existing RiskAuthority starting floor, not a new owner decision, measured optimum or profitability guarantee. Source guards bind both native constants to that owner; stricter current policy retains its existing owner.",
+    "These are projected original isolated-margin refusal fences. Native account reads are bracketed, not atomic. Actual fill prices, fees, changing portfolio offsets and post-fill economic margin require their complete qualification.",
+    "Shared all-origin transactional cash/margin/stop-risk reservations, qualified FX/contracts, current-policy arbitration, native working-order/partial-fill/cancel and funding/payment settlement remain required. No pending order acknowledgment releases funds.",
+    "EA helpers/entry bodies execute in an explicit C++ API model, not MetaTrader runtime. Modified EA native compilation is pending; no connected terminal/account/provider/device or production acceptance.",
+    "Every remaining backend/forecast/learning/crypto/assistant/operations and Android requirement remains required. Profitability needs evidence, never a guarantee."
+  ],
+  "next": "Genuine hooks, mandatory committed verification against4fd466de, normal push and independent exact remote readback after current parent public jobs finish. Inspect exact new hosted source and official MetaEditor evidence. Continue shared all-origin reservations/current-policy/native reconciliation and full backend-to-Android programme."
+}

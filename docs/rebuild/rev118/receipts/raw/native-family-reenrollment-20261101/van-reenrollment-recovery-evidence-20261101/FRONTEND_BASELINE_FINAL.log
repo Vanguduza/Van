@@ -1,0 +1,17 @@
+Traceback (most recent call last):
+  File "/workspace/van-lanes-20261101/reenrollment/tools/rebuild/render_frontend_registry.py", line 125, in <module>
+    if __name__=='__main__':raise SystemExit(main())
+                                             ^^^^^^
+  File "/workspace/van-lanes-20261101/reenrollment/tools/rebuild/render_frontend_registry.py", line 119, in main
+    content=render();changed=not OUTPUT.is_file() or OUTPUT.read_text()!=content
+            ^^^^^^^^
+  File "/workspace/van-lanes-20261101/reenrollment/tools/rebuild/render_frontend_registry.py", line 94, in render
+    planned=json.loads(planned_path.read_text())
+                       ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py", line 1027, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py", line 1013, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/workspace/van-lanes-20261101/reenrollment/docs/review-inputs/van-rev115/package/reference/REV2_FEATURE_REGISTRY.json'

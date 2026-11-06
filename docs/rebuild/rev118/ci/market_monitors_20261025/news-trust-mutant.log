@@ -1,0 +1,9 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_ test_literal_news_keyword_matching_preserves_trust_freshness_time_and_declared_relevance _
+backend/tests/test_market_monitor_measurements.py:138: in test_literal_news_keyword_matching_preserves_trust_freshness_time_and_declared_relevance
+    assert not fire and current.state=='NO_MATCH'
+E   assert (not True)
+=========================== short test summary info ============================
+FAILED backend/tests/test_market_monitor_measurements.py::test_literal_news_keyword_matching_preserves_trust_freshness_time_and_declared_relevance
+1 failed in 0.19s

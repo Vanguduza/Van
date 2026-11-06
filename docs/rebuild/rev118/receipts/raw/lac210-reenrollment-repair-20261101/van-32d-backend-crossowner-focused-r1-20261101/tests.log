@@ -1,0 +1,31 @@
+......................................F................................. [100%]
+=================================== FAILURES ===================================
+_ test_age_prune_and_inferred_memory_forget_do_not_erase_pending_original_security_fences _
+
+tmp_path = PosixPath('/tmp/van-recovery-32d-backend-crossowner-focused-r1-20261101/test_age_prune_and_inferred_me0')
+
+    async def test_age_prune_and_inferred_memory_forget_do_not_erase_pending_original_security_fences(tmp_path):
+        f=await setup(tmp_path);original=await f.service.start(**f.request)
+        before=await f.store.fetchone('SELECT * FROM owner_device_reenrollments')
+        retirement=await f.store.fetchone('SELECT * FROM device_certificate_retirements')
+        future=original['expires_at_ms']+366*86400000
+        await RetentionService(f.store).prune(now_ms=future,tables=('owner_device_reenrollments','device_certificate_retirements'))
+        report=await OwnerMemory(f.store).forget_all()
+        assert set(report['removed'])=={entry.table for entry in FORGETTABLE}
+        assert 'owner_device_reenrollments' not in report['removed'] and 'device_certificate_retirements' not in report['removed']
+        assert dict(await f.store.fetchone('SELECT * FROM owner_device_reenrollments'))==dict(before)
+        assert dict(await f.store.fetchone('SELECT * FROM device_certificate_retirements'))==dict(retirement)
+        expired=await f.service.start(**f.request,now_ms=future)
+>       assert expired['phase']=='EXPIRED' and expired['bootstrap_token'] is None
+E       AssertionError: assert ('RETIRING' == 'EXPIRED'
+E         
+E         - EXPIRED
+E         + RETIRING)
+
+backend/tests/test_reenrollment_crossowner_invariants.py:60: AssertionError
+------------------------------ Captured log call -------------------------------
+WARNING  van_gateway.auth.native_revocation:native_revocation.py:137 native owner-key revocation remains pending
+WARNING  van_gateway.auth.native_revocation:native_revocation.py:137 native owner-key revocation remains pending
+=========================== short test summary info ============================
+FAILED backend/tests/test_reenrollment_crossowner_invariants.py::test_age_prune_and_inferred_memory_forget_do_not_erase_pending_original_security_fences
+1 failed, 71 passed in 17.45s

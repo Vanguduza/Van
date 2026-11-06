@@ -1,0 +1,38 @@
+{
+  "imports": {
+    "owner_permissions": "/workspace/van-lanes-20261101/permission-revocation/backend/van_gateway/capability/owner_permissions.py",
+    "registry": "/workspace/van-lanes-20261101/permission-revocation/backend/van_gateway/capability/permissions.py"
+  },
+  "results": [
+    {
+      "case": "cross-device historical revoked issuer defensive cleanup",
+      "result": "PASS",
+      "extra": null
+    },
+    {
+      "case": "corrupt target inspectable effective0 actual guard refuses but cleanup allowed",
+      "result": "PASS",
+      "extra": null
+    },
+    {
+      "case": "same-generation admission increment cannot starve revocation; future use blocked",
+      "result": "PASS",
+      "extra": null
+    },
+    {
+      "case": "HTTP authentication then caller retirement writer race refuses",
+      "result": "PASS",
+      "extra": null
+    },
+    {
+      "case": "completed exact original recovery after lawful same-owner token renewal",
+      "result": "PASS",
+      "extra": {
+        "same_original_receipt_after_newtoken": true,
+        "operation_id": "permission-revoke-60bdfc7cc44749b38c63569772a7ec58"
+      }
+    }
+  ],
+  "source_pins_unchanged": true,
+  "owned_tmp_cleanup": true
+}

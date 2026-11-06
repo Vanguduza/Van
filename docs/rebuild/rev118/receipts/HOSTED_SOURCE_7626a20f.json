@@ -1,0 +1,129 @@
+{
+  "schema": "van.rebuild.hosted-source/1",
+  "run_id": 39759009412,
+  "source_head": "7626a20f1063f71dd7cb7e590450911cba7e3ed5",
+  "tested_merge": "0e0b9e09abd976cf7ff8b58ec579760f5a53be48",
+  "identical_source_tree": "ad9f152890a73290db890f8378d615ce39c26f1b",
+  "jobs": [
+    {
+      "id": 119758198576,
+      "name": "rebuild-documentary",
+      "conclusion": "success"
+    },
+    {
+      "id": 119758198944,
+      "name": "android-instrumentation",
+      "conclusion": "failure"
+    },
+    {
+      "id": 119758198958,
+      "name": "project-truth-ledger",
+      "conclusion": "failure"
+    },
+    {
+      "id": 119758199045,
+      "name": "postgres-ledger",
+      "conclusion": "success"
+    },
+    {
+      "id": 119758199094,
+      "name": "android-and-visual-evidence",
+      "conclusion": "success"
+    },
+    {
+      "id": 119758199113,
+      "name": "mutation (kotlin-0, kotlin, 0/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119758199133,
+      "name": "backend",
+      "conclusion": "failure"
+    },
+    {
+      "id": 119758199164,
+      "name": "mutation (python-3, python, 3/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119758199294,
+      "name": "mutation (browser-agent, browser-agent, 0/1)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119758199339,
+      "name": "mutation (kotlin-3, kotlin, 3/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119758199359,
+      "name": "mutation (kotlin-2, kotlin, 2/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119758199390,
+      "name": "mutation (python-0, python, 0/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119758199471,
+      "name": "mutation (kotlin-1, kotlin, 1/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119758199475,
+      "name": "mutation (python-2, python, 2/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119758199479,
+      "name": "mutation (python-1, python, 1/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119763793124,
+      "name": "character-forge-gate",
+      "conclusion": "success"
+    }
+  ],
+  "public_reports": {
+    "postgres-ledger-report.xml": {
+      "tests": 26,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "f22dc779d50f132bc9e64948124290cf400befafb7fff57310949295522830fa"
+    },
+    "trading-source-report.xml": {
+      "tests": 1741,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "sha256": "99f00f1cbfe1e75dbeaf05b50825a876adf489f6744e1ec6dc69204ccb82a0e7"
+    },
+    "voice-source-report.xml": {
+      "tests": 48,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "1ac445c2da52ce6f9b9e0f7474c8519f89097e6c501653b97d6a9ac99b04b4f4"
+    }
+  },
+  "mutations": "ci/MUTATION_CORPUS_7626a20f.json",
+  "instrumentation": {
+    "collected": 21,
+    "passed": 16,
+    "failed": 1,
+    "skipped": 4,
+    "new_voice_runtime_cases_executed": 0,
+    "failure": "JUnit4 rejected a String-returning test before class execution",
+    "summary_sha256": "88e0f3a9dcbf62a3fcc0373ee61453cfc142cdc8c0ee226045081aa4335a47f0",
+    "failure_report_sha256": "3677daf6e50e2fe93197d5c69a4b97cf71f4392d323132e03fc8012671a67a01",
+    "job_log_sha256": "2921392c4c461e22dc962aefbb6d9f0f2d711a017ebcbf87bc97486efba19093"
+  },
+  "remaining_external_job_failures": [
+    "Private DDS read key absent",
+    "Trusted-main Project Truth bootstrap absent"
+  ],
+  "qualification": "Native voice fixture failed; no native voice PASS or handset result inferred."
+}

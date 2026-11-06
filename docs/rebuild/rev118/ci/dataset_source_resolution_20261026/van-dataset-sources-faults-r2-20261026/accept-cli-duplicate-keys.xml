@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="10.614" timestamp="2026-10-26T09:30:33.394923+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_dataset_manifest_candidates" name="test_actual_research_cli_refuses_nested_duplicate_keys_before_any_reference_resolution[dataset_manifest_check]" time="5.377"><failure message="assert (0 != 0)&#10; +  where 0 = CompletedProcess(args=['/workspace/van-backend-venv-20261025/bin/python', '-m', 'vati', 'research', '--spec', '/tmp/py..._AND_SOURCE_USE_NOT_VERIFIED&quot;,\n      &quot;SOURCE_CLOCKS_ROWS_CALENDAR_UNIVERSE_NOT_VERIFIED&quot;\n    ]\n  }\n}\n', stderr='').returncode">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-404/test_actual_research_cli_refus0')
+operation = 'dataset_manifest_check'
+
+    @pytest.mark.parametrize('operation',['dataset_manifest_check','dataset_source_inspect'])
+    def test_actual_research_cli_refuses_nested_duplicate_keys_before_any_reference_resolution(tmp_path,operation):
+        spec_body={'operation':operation,'manifest':fixture()}
+        if operation=='dataset_source_inspect':
+            spec_body['expected_scope']={'provider':'CTRADER','environment':'DEMO','transport_host':'demo.ctraderapi.com',
+                'native_account_id':123,'native_symbol_id':12}
+        raw=json.dumps(spec_body)
+        assert raw.count('"row_count": 3')==1
+        raw=raw.replace('"row_count": 3','"row_count": 3, "row_count": 4')
+        spec=tmp_path/'ambiguous.json';spec.write_text(raw)
+        child=subprocess.run([sys.executable,'-m','vati','research','--spec',str(spec)],
+            env=dict(os.environ,PYTHONPATH=str(Path(__file__).resolve().parents[1])),capture_output=True,text=True,timeout=30)
+&gt;       assert child.returncode!=0 and 'RESEARCH_DUPLICATE_JSON_KEY' in child.stderr
+E       assert (0 != 0)
+E        +  where 0 = CompletedProcess(args=['/workspace/van-backend-venv-20261025/bin/python', '-m', 'vati', 'research', '--spec', '/tmp/py..._AND_SOURCE_USE_NOT_VERIFIED",\n      "SOURCE_CLOCKS_ROWS_CALENDAR_UNIVERSE_NOT_VERIFIED"\n    ]\n  }\n}\n', stderr='').returncode
+
+trading/tests/test_dataset_manifest_candidates.py:139: AssertionError</failure></testcase><testcase classname="trading.tests.test_dataset_manifest_candidates" name="test_actual_research_cli_refuses_nested_duplicate_keys_before_any_reference_resolution[dataset_source_inspect]" time="2.618"><failure message="assert (1 != 0 and 'RESEARCH_DUPLICATE_JSON_KEY' in 'Traceback (most recent call last):\n  File &quot;&lt;frozen runpy&gt;&quot;, line 198, in _run_module_as_main\n  File &quot;&lt;frozen runpy&gt;...T_SOURCE_OWNER_UNAVAILABLE\')\nvati.research.dataset_manifest.DatasetContractError: DATASET_SOURCE_OWNER_UNAVAILABLE\n')&#10; +  where 1 = CompletedProcess(args=['/workspace/van-backend-venv-20261025/bin/python', '-m', 'vati', 'research', '--spec', '/tmp/py..._SOURCE_OWNER_UNAVAILABLE\')\nvati.research.dataset_manifest.DatasetContractError: DATASET_SOURCE_OWNER_UNAVAILABLE\n').returncode&#10; +  and   'Traceback (most recent call last):\n  File &quot;&lt;frozen runpy&gt;&quot;, line 198, in _run_module_as_main\n  File &quot;&lt;frozen runpy&gt;...T_SOURCE_OWNER_UNAVAILABLE\')\nvati.research.dataset_manifest.DatasetContractError: DATASET_SOURCE_OWNER_UNAVAILABLE\n' = CompletedProcess(args=['/workspace/van-backend-venv-20261025/bin/python', '-m', 'vati', 'research', '--spec', '/tmp/py..._SOURCE_OWNER_UNAVAILABLE\')\nvati.research.dataset_manifest.DatasetContractError: DATASET_SOURCE_OWNER_UNAVAILABLE\n').stderr">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-404/test_actual_research_cli_refus1')
+operation = 'dataset_source_inspect'
+
+    @pytest.mark.parametrize('operation',['dataset_manifest_check','dataset_source_inspect'])
+    def test_actual_research_cli_refuses_nested_duplicate_keys_before_any_reference_resolution(tmp_path,operation):
+        spec_body={'operation':operation,'manifest':fixture()}
+        if operation=='dataset_source_inspect':
+            spec_body['expected_scope']={'provider':'CTRADER','environment':'DEMO','transport_host':'demo.ctraderapi.com',
+                'native_account_id':123,'native_symbol_id':12}
+        raw=json.dumps(spec_body)
+        assert raw.count('"row_count": 3')==1
+        raw=raw.replace('"row_count": 3','"row_count": 3, "row_count": 4')
+        spec=tmp_path/'ambiguous.json';spec.write_text(raw)
+        child=subprocess.run([sys.executable,'-m','vati','research','--spec',str(spec)],
+            env=dict(os.environ,PYTHONPATH=str(Path(__file__).resolve().parents[1])),capture_output=True,text=True,timeout=30)
+&gt;       assert child.returncode!=0 and 'RESEARCH_DUPLICATE_JSON_KEY' in child.stderr
+E       assert (1 != 0 and 'RESEARCH_DUPLICATE_JSON_KEY' in 'Traceback (most recent call last):\n  File "&lt;frozen runpy&gt;", line 198, in _run_module_as_main\n  File "&lt;frozen runpy&gt;...T_SOURCE_OWNER_UNAVAILABLE\')\nvati.research.dataset_manifest.DatasetContractError: DATASET_SOURCE_OWNER_UNAVAILABLE\n')
+E        +  where 1 = CompletedProcess(args=['/workspace/van-backend-venv-20261025/bin/python', '-m', 'vati', 'research', '--spec', '/tmp/py..._SOURCE_OWNER_UNAVAILABLE\')\nvati.research.dataset_manifest.DatasetContractError: DATASET_SOURCE_OWNER_UNAVAILABLE\n').returncode
+E        +  and   'Traceback (most recent call last):\n  File "&lt;frozen runpy&gt;", line 198, in _run_module_as_main\n  File "&lt;frozen runpy&gt;...T_SOURCE_OWNER_UNAVAILABLE\')\nvati.research.dataset_manifest.DatasetContractError: DATASET_SOURCE_OWNER_UNAVAILABLE\n' = CompletedProcess(args=['/workspace/van-backend-venv-20261025/bin/python', '-m', 'vati', 'research', '--spec', '/tmp/py..._SOURCE_OWNER_UNAVAILABLE\')\nvati.research.dataset_manifest.DatasetContractError: DATASET_SOURCE_OWNER_UNAVAILABLE\n').stderr
+
+trading/tests/test_dataset_manifest_candidates.py:139: AssertionError</failure></testcase></testsuite></testsuites>

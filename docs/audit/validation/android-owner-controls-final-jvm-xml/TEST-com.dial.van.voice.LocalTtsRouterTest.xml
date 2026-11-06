@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.voice.LocalTtsRouterTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:57:34" hostname="052fefa249ff" time="0.003">
+  <properties/>
+  <testcase name="a missed budget names the stage rather than saying voice was slow()" classname="com.dial.van.voice.LocalTtsRouterTest" time="0.0"/>
+  <testcase name="a critical phrase with no bank falls through to the best real synthesiser()" classname="com.dial.van.voice.LocalTtsRouterTest" time="0.0"/>
+  <testcase name="the wake path can ask whether it will be able to acknowledge()" classname="com.dial.van.voice.LocalTtsRouterTest" time="0.0"/>
+  <testcase name="the sherpa voice can speak with no Android offline voice installed()" classname="com.dial.van.voice.LocalTtsRouterTest" time="0.0"/>
+  <testcase name="an android engine whose offline data vanished is named rather than tried()" classname="com.dial.van.voice.LocalTtsRouterTest" time="0.0"/>
+  <testcase name="the wake acknowledgement comes from the phrase bank, not a synthesiser()" classname="com.dial.van.voice.LocalTtsRouterTest" time="0.0"/>
+  <testcase name="android is used only when its offline data is verified()" classname="com.dial.van.voice.LocalTtsRouterTest" time="0.0"/>
+  <testcase name="a stage inside its budget is not reported()" classname="com.dial.van.voice.LocalTtsRouterTest" time="0.0"/>
+  <testcase name="a prepared sherpa voice is preferred over Android for assistant answers()" classname="com.dial.van.voice.LocalTtsRouterTest" time="0.0"/>
+  <testcase name="the wake acknowledgement phrase is the one the owner contract names()" classname="com.dial.van.voice.LocalTtsRouterTest" time="0.001"/>
+  <testcase name="no engine at all says so instead of failing silently()" classname="com.dial.van.voice.LocalTtsRouterTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

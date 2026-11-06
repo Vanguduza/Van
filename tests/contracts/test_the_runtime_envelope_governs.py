@@ -97,10 +97,22 @@ def test_the_embodiment_resolves_through_the_envelope_and_not_beside_it():
     restored, with every envelope test still passing.
     """
     fallback = (APP / "visual" / "VanCanvasFallback.kt").read_text(encoding="utf-8")
-    assert "VanResourceEnvelope.effectBudget(" in fallback
-    assert "VanEffectPolicy.resolve(" not in fallback, (
-        "the embodiment resolves its own budget again; the envelope no longer governs it"
-    )
+    observation = (APP / "visual" / "VanEffectObservations.kt").read_text(encoding="utf-8")
+    # The refactor retained the public Compose entry point but moved native
+    # observation/subscription ownership out of the renderer. Check the entire
+    # real path; checking only the old filename mistakes a correct move for a
+    # bypass, while checking only the new helper misses a disconnected caller.
+    assert "budget: VanEffectBudget = rememberVanEffectBudget()" in fallback
+    assert "fun rememberVanEffectBudget(): VanEffectBudget = rememberObservedVanEffectBudget()" in fallback
+    assert "internal fun rememberObservedVanEffectBudget(): VanEffectBudget" in observation
+    assert "return VanResourceEnvelope.effectBudget(" in observation
+    for source in (fallback, observation):
+        assert "VanEffectPolicy.resolve(" not in source, (
+            "the embodiment resolves its own budget again; the envelope no longer governs it"
+        )
+    assert "VanEffectObservations.subscribe(app) { snapshot = it }" in observation
+    assert "onDispose { subscription.close() }" in observation
+    assert "snapshot.runtime," in observation, "the envelope no longer sees the live device reading"
 
 
 def test_the_pollers_pass_a_real_reading_rather_than_the_default():

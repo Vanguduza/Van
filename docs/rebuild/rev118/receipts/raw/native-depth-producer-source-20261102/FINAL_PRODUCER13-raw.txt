@@ -1,0 +1,14 @@
+........................................                                 [100%]
+=============================== warnings summary ===============================
+trading/tests/test_native_depth_worker.py::test_real_process_death_after_possible_read_retains_original_unknown
+trading/tests/test_native_depth_worker.py::test_two_real_processes_arbitrate_one_original_one_native_reader
+trading/tests/test_native_depth_worker.py::test_two_real_processes_arbitrate_one_original_one_native_reader
+trading/tests/test_native_depth_worker.py::test_real_process_death_recovers_only_actual_original_bytes[after_read]
+trading/tests/test_native_depth_worker.py::test_real_process_death_recovers_only_actual_original_bytes[after_record]
+trading/tests/test_native_depth_worker.py::test_real_process_death_recovers_only_actual_original_bytes[after_index]
+trading/tests/test_native_depth_worker.py::test_source_read_slot_wait_rechecks_expiry_before_any_reader
+  /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/multiprocessing/popen_fork.py:66: DeprecationWarning: This process (pid=1523185) is multi-threaded, use of fork() may lead to deadlocks in the child.
+    self.pid = os.fork()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+40 passed, 7 warnings in 11.17s

@@ -1,0 +1,32 @@
+{
+  "at_utc": "2026-11-01T07:49:55.705030+00:00",
+  "scope": "Official isolated Android compilation setup only; no emulator, keystore, signing or native device effects.",
+  "network": "Session unrestricted proxy with verified system CA; no TLS bypass or token changes.",
+  "command_tools_metadata": {
+    "package": "cmdline-tools;latest",
+    "url": "https://dl.google.com/android/repository/commandlinetools-linux-16111833_latest.zip",
+    "checksum": "e025545c62a8e64c7559119566a569fb1dec5f60",
+    "checksum_type": {
+      "type": "sha1"
+    },
+    "size": "181052239"
+  },
+  "sdk_root": "/tmp/van-android-sdk-20261101/sdk",
+  "components": {
+    "build-tools/35.0.0/source.properties": "Pkg.UserSrc=false\nPkg.Revision=35.0.0\n#Pkg.Revision=35.0.0 rc4\n",
+    "build-tools/36.0.0/source.properties": "Pkg.UserSrc=false\nPkg.Revision=36.0.0\n#Pkg.Revision=36.0.0 rc5",
+    "cmdline-tools/latest/source.properties": "Pkg.Revision=23.0\nPkg.Path=cmdline-tools;23.0\nPkg.Desc=Android SDK Command-line Tools\n",
+    "platform-tools/source.properties": "Pkg.UserSrc=false\nPkg.Revision=37.0.1\n",
+    "platforms/android-36/source.properties": "Pkg.Desc=Android SDK Platform 16\nPkg.UserSrc=false\nPlatform.Version=16\nPlatform.CodeName=\nPkg.Revision=2\nAndroidVersion.ApiLevel=36\nAndroidVersion.ExtensionLevel=17\nAndroidVersion.IsBaseSdk=true\nLayoutlib.Api=15\nLayoutlib.Revision=1\nPlatform.MinToolsRev=22\n"
+  },
+  "jdk": "/tmp/van-permission-revocation-jdk/jdk-21.0.13+9",
+  "gradle_user_home": "/tmp/van-permission-revocation-gradle",
+  "declared": "compileSdk36; workflowbuildtools36.0.0; actualAGP8.10.1 automatically requested buildtools35.0.0/platformtools37.0.1",
+  "build_output_redirect": {
+    "init": "gradle.beforeProject { project ->\n    project.layout.buildDirectory.set(new File('/tmp/van-android-sdk-20261101/app-build', project.path.replace(':', '_')))\n}\n",
+    "qualification": "Only output locations redirected to ownedtmp; production inputs and compilation guards unchanged."
+  },
+  "compile_state": "TERMINAL0_ACTUAL_APP_COMPILE_PASS",
+  "install_exit": 0,
+  "capacity": "Filesystem       1B-blocks        Used  Available Use% Mounted on\nnone            9441329152  4257648640 5183680512  46% /tmp\noverlay        33770192896 31067303936  968126464  97% /\n"
+}

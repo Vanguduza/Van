@@ -1,0 +1,11 @@
+CAUGHT             retired socket may retire replacement
+CAUGHT             close returns before owned reader finishes
+CAUGHT             pending original is not woken on close
+CAUGHT             TLS refusal leaks raw socket
+CAUGHT             cached authentication ignores replacement connection
+CAUGHT             native account authentication accepts another account
+CAUGHT             mixed-connection contract snapshot is published
+CAUGHT             reconnect reuses original quote cache
+CAUGHT             retired subscription quote is delivered after reconnect
+
+9/9 caught

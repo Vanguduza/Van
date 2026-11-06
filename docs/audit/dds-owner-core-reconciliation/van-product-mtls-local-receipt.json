@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "observed_at": "2026-10-07T10:54:54.078632+00:00",
+  "status": "TESTED_LOCAL_PRODUCT_MTLS_NOT_LIVE",
+  "deployed": false,
+  "live_qualified": false,
+  "device_tested": false,
+  "scope": "DEC-056 VAN gateway to oracle-admin typed DIAL proxy",
+  "new_cases_current_file": 17,
+  "new_cases_passed": 17,
+  "new_cases_duration_seconds": 8.8,
+  "related_run_before_last_settings_case": {
+    "passed": 164,
+    "duration_seconds": 55.13,
+    "new_cases": 16,
+    "existing_cases": 148,
+    "includes_current_case_total": false
+  },
+  "assertions": [
+    "actual_TLS_1_3_GET_and_SSE_present_client_identity_and_bearer",
+    "wrong_CA_client_identity_and_hostname_fail_without_HTTP_effect",
+    "production_bad_route_refusal_before_transport",
+    "production_complete_TLS_and_private_key_permissions",
+    "real_Settings_bind_product_identity",
+    "malformed_private_key_no_fallback"
+  ],
+  "current_input_sha256_observed_after_execution": {
+    "backend/van_gateway/config.py": "ca7829308ef07bcbfff0258634efc7192d5d4aa91112aa7b580fd7c98ec756c7",
+    "backend/van_gateway/dial_dev/config.py": "8f195b981c5834915f881782f722636205c0d7b65faa0522348061656279966c",
+    "backend/van_gateway/dial_dev/client.py": "3bac23f1bd97bfd81635824147031c56cf04cee2216eb5aa328bfbc4a3daaf95",
+    "backend/tests/test_dial_dev_product_mtls.py": "0c6b4bcc63960b211f22932a91cc94a166fc9751900f1233ff1e8fd5a2656d4a"
+  },
+  "frozen_before_after_snapshot_claim": false,
+  "logs": {
+    "van-dial-product-mtls-related-tests.log": "42dd3fb6890a41d1864df18a7123f9d4bbd27389b6d30576d870411497b81286",
+    "van-dial-product-mtls-final-tests.log": "ac9ed171c3a7aabf8a39ba81c8a838e7f4e16c5be8536497173c8b4c8835bae8"
+  }
+}

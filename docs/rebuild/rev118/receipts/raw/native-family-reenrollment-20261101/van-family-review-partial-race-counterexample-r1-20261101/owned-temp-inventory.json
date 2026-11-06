@@ -1,0 +1,21 @@
+{
+  "directory": "/tmp/van-recovery-family-review-partial-race-counterexample-r1-20261101",
+  "at_utc": "2026-11-01T05:50:11.055404+00:00",
+  "files": [
+    {
+      "path": "test_partial_dispatch_rereads_0/vati.sqlite",
+      "bytes": 69632,
+      "sha256": "b478e1cfe33f8043f0135e0dbae0f1394b28cc8a5130e203315f0882bda06d23"
+    },
+    {
+      "path": "owner-authority0/owner_authority_keys.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "owner-authority0/owner_authority_keys.json",
+      "bytes": 212,
+      "sha256": "4fc0006fd18c8910f40b03c9f742f7533c21001564caf71b39de602aa4e0499d"
+    }
+  ]
+}

@@ -1,0 +1,786 @@
+{
+  "schema": "van.rebuild.account-retirement-source/1",
+  "observed_at_utc": "2026-10-23T11:30:23.134620+00:00",
+  "source_parent": "d88d6678008d7c2b264913e5d90671fa04f0fa39",
+  "source_sha256": {
+    "android/app/src/main/java/com/dial/van/trading/AccountOnboarding.kt": "178b90d24a7727412f3dbc8855c0d21c536d080ab306f048cf8733a6f53d927a",
+    "android/app/src/main/java/com/dial/van/trading/ui/AccountOnboardingScreen.kt": "59cb2169e0c2fc05d7e898f2fb9347702d99a3a680dfd05df56ab1560355569d",
+    "backend/van_gateway/app.py": "18d527438ddf21cd1afb404d8089cb6353a4094909761f9733b5667099490e01",
+    "backend/van_gateway/trading/account_contracts.py": "5bad06799c586f8b0d10571dba38433ee18e07c7c2663f8c95b2289809414c11",
+    "backend/van_gateway/trading/accounts.py": "2524ec5735d8ca4d988041d13f678a0403390922b2ed7fbdcc6a81a295ce578d",
+    "deploy/van-trading-core/mql5/VanBridgeEA.mq5": "dc9c2a4aa0989df1e1f07263c355bde87931bede71da64c417b0b90c831f4d56",
+    "registries/owner_endpoint_schemas.json": "87cac862d7e389b561787f9fb3ede7b89b0ce7be3edb1366779bbdbb8e288674",
+    "registries/owner_features.json": "88b52ccd4d4e8919f1f1a8f43cba6ff3d26ec927871a94e23630c6c979f77cab",
+    "registries/owner_screens.json": "19c9f180c740c7e82c6542ce41e0c4b37f78b05b4a7fd8d64b31ac4a2a1c4f69",
+    "trading/commander/accounts.py": "c49292484fe79f7961c3c7d5102eb653c2a1010b63c76c71b9d7c478be033446",
+    "trading/tests/mql_terminal_fixture.cpp": "463f9b332f9609f27db951fea2c46ba5dad3d52f20c3518d29e80910775472b4",
+    "trading/tests/test_account_credential_atomicity.py": "cdaf7f277d8d87b71a0c79d722d4435c1ee37ebde74d7a6603f5e91c1749ac83",
+    "trading/tests/test_commander.py": "98116bd5ec73c52809313b72ed4596bb5b4f499bbd5723a0734dad2148313673",
+    "trading/tests/test_commander_accounts.py": "3bf7cf6138f75ded4bf6ede179342560c9d8c5956c7ea57da0e66d74d0fa4d2f",
+    "trading/tests/test_ctrader.py": "25ef884473bfbf353e06323eca87297d92c5a7cb1ab0b2fe91fa4cc7b495436c",
+    "trading/tests/test_mql_native_function_bodies.py": "bd99a01b210323ba31626d65cb36483dc16143204c4096458c514d43cc3b3390",
+    "trading/vati/execution/ctrader/adapter.py": "0ae0eafb312fabea1983ca04471170dd9a235bf0870d858fa45863c0210caed6",
+    "trading/vati/execution/deriv.py": "30fcd305bd43bac4e125d8c6354254dd570c0cc6733c93b3999efda18e71a4cf",
+    "trading/vati/execution/mt5_bridge.py": "254b723e2c770e1b5fa6c8b30e5cea29911be86c36ccb6577c4449fbc9dd534a",
+    "trading/vati/execution/mt5_pull.py": "d861b35e9153c60b23dc6528c43635de61f8d70626d869299ae0afcc37432c4a",
+    "android/app/src/test/java/com/dial/van/trading/AccountUnlinkReviewTest.kt": "d8aab312d0fc8c574c537c53f5f3d76c7f2121d30ba33b22ab065076bc626acb",
+    "backend/tests/test_account_unlink_review.py": "745d96d603d9468b27acd463245bc9194c8a12c83d8b4c93cac0e0a1de6c2af9",
+    "trading/commander/account_retirement.py": "702636bfaa18b74315b2194eaac858ec93495e53d2a4b7861f1c5afa767ebd94",
+    "trading/tests/test_account_retirement_native_guards.py": "cca045735bd4b1a603fab62c5648e565e26dad19d71c80cef98d68bcf42d1341",
+    "trading/tests/test_account_retirement_pg.py": "bbff00a3a36dcc2e1b23b16c741200031933d999611b8fdaf7517e710cb8d023",
+    "trading/tests/test_retirement_venue_observations.py": "596d20978547698432df780f129bdf612ba5336715c62a762bb1481d6f316492"
+  },
+  "executions": {
+    "valid-before": {
+      "tests": 7,
+      "failures": 7,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.485,
+      "sha256": "d456a89c05dffa36502df8dac4b0ac23e0d68bd121d9a145f325bfaf915c5831"
+    },
+    "funds-before": {
+      "tests": 6,
+      "failures": 4,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.323,
+      "sha256": "0f8b65365c13814a1bb00c3b624e9f3aaf11ae4ba91ea732f8faf43584949845"
+    },
+    "unbound-exit-before": {
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.451,
+      "sha256": "90ec18cb16cb76201f9a975234d4a83ee833aeb8ad24aa9759ba4b029139113c"
+    },
+    "paper-before": {
+      "tests": 2,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 1.665,
+      "sha256": "93f46f53a738ec2476b95fc46c3023275fabbfc78a22d282b768e716b7320e76"
+    },
+    "shared-before": {
+      "tests": 2,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.732,
+      "sha256": "e100bef2a7d8034aab94b391e288df848d8a3ec3eb782a60178383f131cb5ec6"
+    },
+    "wiring-first": {
+      "tests": 65,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 7.709,
+      "sha256": "462cd2c17eff47a3ac7a4ddcbdaa2f5c9086bd68b84804fd476988f587b69bd0"
+    },
+    "final-focused": {
+      "tests": 91,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 17.323,
+      "sha256": "148284363ec1119640d52460a447f9e250205f0e78a30f73309aa437fb7bc0a2"
+    },
+    "final-writer": {
+      "tests": 29,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 16.938,
+      "sha256": "98f97b0c66bb9196734d1a2ae5321bf2d873e964fd2a0c567a399def241cd413"
+    },
+    "pg-full-pg": {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.659,
+      "sha256": "ccf13a423a9697cb0a91581d51775a40a0e8e6a8f2401872774311bf9d9e50c5"
+    },
+    "rebuild": {
+      "tests": 78,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 31.098,
+      "sha256": "ec8c65862e9071ae2ddd9597340b191adcf7dc1c273891c822298fc3d155b940"
+    },
+    "initial-full": {
+      "tests": 2675,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 582.837,
+      "sha256": "08638ac30b217bebab9071545390268895ef1c33f6664cb6f7671d24ab926172"
+    },
+    "first-fixture": {
+      "tests": 36,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 8.874,
+      "sha256": "a9ca811f47775f09773fe96da7234b485a212e5aa86e0253ae153789b9f1f283"
+    },
+    "final-fixture": {
+      "tests": 50,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 8.548,
+      "sha256": "f4f6950a20850ba9c01be0b481ca3ecab0d8ebdd24f1362064111a00b10fa81e"
+    },
+    "owner-contracts": {
+      "tests": 35,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 3.843,
+      "sha256": "6df353706cf31762ea6d382d8d1070c487c491ba1f67012a772a3741efdec6a1"
+    }
+  },
+  "full_private_postgresql": {
+    "tests": 2675,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 582.425,
+    "sha256": "8417a237c95752e83529a900f6926cf9578f4be7b54adee5b281ea2d92b61314"
+  },
+  "fixture_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "faults": {
+    "mutations": {
+      "definitions": [
+        [
+          [
+            "trading/commander/account_retirement.py",
+            "if (not isinstance(positions,list) or not isinstance(orders,list) or positions or orders):",
+            "if False:",
+            "unlink with an open native position"
+          ],
+          "trading/tests/test_account_retirement_native_guards.py::test_native_unlink_retains_profile_and_protection_credentials_when_not_safe[position]"
+        ],
+        [
+          [
+            "trading/commander/account_retirement.py",
+            "or not isinstance(state.balance,Decimal) or not state.balance.is_finite()",
+            "or not isinstance(state.balance,Decimal)",
+            "unlink while native balance is unknown"
+          ],
+          "trading/tests/test_account_retirement_native_guards.py::test_native_unlink_retains_profile_and_protection_credentials_when_not_safe[funds]"
+        ],
+        [
+          [
+            "trading/commander/account_retirement.py",
+            "if not events:raise HTTPException(409,'An original native order outcome is unknown; local link retained')",
+            "if not events:continue",
+            "erase an account with an unresolved original order"
+          ],
+          "trading/tests/test_account_retirement_native_guards.py::test_native_unlink_retains_profile_and_protection_credentials_when_not_safe[original-unknown]"
+        ],
+        [
+          [
+            "trading/commander/accounts.py",
+            "with retirement_scope(st,alias),reg().operation_lock(alias):",
+            "with __import__('contextlib').nullcontext(),reg().operation_lock(alias):",
+            "remove the account and protection credentials under an active runtime"
+          ],
+          "trading/tests/test_account_retirement_native_guards.py::test_native_unlink_retains_profile_and_protection_credentials_when_not_safe[lease]"
+        ],
+        [
+          [
+            "trading/commander/accounts.py",
+            "if ('_native_operation' in a or '_expected_review_digest' in a) and a.get('_expected_review_digest')!=review['review_digest']:",
+            "if False:",
+            "accept changed native funds after exact owner review"
+          ],
+          "backend/tests/test_account_unlink_review.py::test_native_funds_changing_after_gateway_preflight_requires_fresh_review"
+        ],
+        [
+          [
+            "backend/van_gateway/trading/account_contracts.py",
+            "if self.action=='account_upsert':values.pop('retirement',None)",
+            "if self.action=='account_upsert':pass",
+            "inject an unsigned null field into the published canonical review"
+          ],
+          "backend/tests/test_account_update_review.py::test_exact_native_before_after_is_signed_and_applied_without_losing_connection"
+        ],
+        [
+          [
+            "trading/vati/execution/ctrader/adapter.py",
+            "self._currency=matches[0]['name'];self._money_digits=digits",
+            "self._currency='USD';self._money_digits=digits",
+            "guess native account currency as USD"
+          ],
+          "trading/tests/test_retirement_venue_observations.py::test_native_ctrader_currency_is_resolved_from_deposit_asset_not_default_usd"
+        ],
+        [
+          [
+            "trading/vati/execution/ctrader/adapter.py",
+            "or r['ctidTraderAccountId']!=self.ctid_trader_account_id or t['ctidTraderAccountId']!=self.ctid_trader_account_id",
+            "or r['ctidTraderAccountId']!=self.ctid_trader_account_id",
+            "accept a foreign native trader identity as current funds"
+          ],
+          "trading/tests/test_retirement_venue_observations.py::test_missing_or_mismatched_native_funds_are_not_healthy_defaults[identity]"
+        ],
+        [
+          [
+            "trading/vati/execution/deriv.py",
+            "balance=Decimal(str(a['balance']))",
+            "balance=Decimal(str(a.get('balance','0')))",
+            "invent a zero native balance when the provider omitted it"
+          ],
+          "trading/tests/test_retirement_venue_observations.py::test_missing_deriv_native_balance_cannot_be_guessed_zero"
+        ],
+        [
+          [
+            "trading/vati/execution/mt5_pull.py",
+            "orders=self._state().get('orders')",
+            "orders=self._state().get('orders') or []",
+            "infer empty orders from an older terminal without order observations"
+          ],
+          "trading/tests/test_retirement_venue_observations.py::test_legacy_ea_snapshot_has_unknown_orders_until_explicit_observation"
+        ],
+        [
+          [
+            "deploy/van-trading-core/mql5/VanBridgeEA.mq5",
+            "{ orders = \"null\"; break; }",
+            "{ orders = \"[]\"; break; }",
+            "erase an unreadable native pending order snapshot"
+          ],
+          "trading/tests/test_mql_native_function_bodies.py::test_failed_native_pending_order_read_stays_unknown"
+        ],
+        [
+          [
+            "trading/commander/account_retirement.py",
+            "if event.payload.get('venue')==account.router_venue:",
+            "if False:",
+            "ignore an unbound uncertain protective exit"
+          ],
+          "trading/tests/test_account_retirement_native_guards.py::test_unbound_original_protective_exit_cannot_be_assumed_to_belong_to_another_account"
+        ],
+        [
+          [
+            "trading/commander/account_retirement.py",
+            "if shared:return 'KEEP_SHARED',None",
+            "if False:return 'KEEP_SHARED',None",
+            "destroy another account shared credentials during local unlink"
+          ],
+          "trading/tests/test_account_retirement_native_guards.py::test_unlink_does_not_destroy_credentials_shared_with_another_native_account"
+        ],
+        [
+          [
+            "trading/commander/accounts.py",
+            "if cleanup!=review['retirement']['credential_cleanup']:",
+            "if False:",
+            "report old credential ownership after a late shared reference"
+          ],
+          "trading/tests/test_account_retirement_native_guards.py::test_a_shared_reference_added_after_native_readback_is_rechecked_before_deletion"
+        ],
+        [
+          [
+            "trading/commander/account_retirement.py",
+            "if admission.outcome is LeaseOutcome.STORE_UNREACHABLE:",
+            "if False:",
+            "claim observed lease exclusion when authority was unreachable"
+          ],
+          "trading/tests/test_account_retirement_native_guards.py::test_unreachable_authority_is_not_reported_as_observed_lease_exclusion"
+        ]
+      ],
+      "records": [
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "xml_sha256": "5574f88418890b5505c48439cab882742ec9c37060deb25beadc7a4548244aeb",
+          "log_sha256": "63203b4ec2b29e7ab8c45616e4d500960794bb60488784fb13fb7fe05b0386bf"
+        },
+        {
+          "phase": "mutation",
+          "why": "unlink with an open native position",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "xml_sha256": "802fc9d14e2e8aca0a90a25bc3a844bf1f1e3ba006b1c69870139aaafbee0ecc",
+          "log_sha256": "975cd7cff2ffa3c9f941349202aea9d171b8d9b51f9b57948feabda7149fb5ba"
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "xml_sha256": "cc54600d52883bd4248afbcba33ec17528c97422346c4df124ff66bbc650d5e7",
+          "log_sha256": "63203b4ec2b29e7ab8c45616e4d500960794bb60488784fb13fb7fe05b0386bf"
+        },
+        {
+          "phase": "mutation",
+          "why": "unlink while native balance is unknown",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "xml_sha256": "ba081b4256c5144023aeddebc1fc4eac96c5648c04a6b6949855a3e53fd71b6e",
+          "log_sha256": "d279f2f59f03bfe1912021c87c60b0269161d82c410ff17f5fe193b5ce7c22b0"
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "xml_sha256": "9b63a2d67673844b0479a63e90e04ff4fd104c6a713e016a44ca6b215d4b0180",
+          "log_sha256": "3dd8a455f93386b2d78b9d5605f1c2f52fd55f0962f89b0bd7d602cae0ead952"
+        },
+        {
+          "phase": "mutation",
+          "why": "erase an account with an unresolved original order",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "xml_sha256": "1060e48ebca91d090dc824c99ea721c900ea61287e85aece727b59e8da906e05",
+          "log_sha256": "50f911b01e06832eb7fb848eab41e87ee8b60e1daa266cdd007d5ae293869df2"
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "xml_sha256": "2d1474cdeb926d331de9a3b7c373133f6f83aed051a3245614fe743ccc6a8c26",
+          "log_sha256": "06254aecdf245cc6f8784e134e36703bcc595ac0578b8c5f7f3591bcb399781b"
+        },
+        {
+          "phase": "mutation",
+          "why": "remove the account and protection credentials under an active runtime",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "xml_sha256": "75aaca94d516e6fc6c335087fd954c152ed8bf2114e91af4c6483d09e2efcc24",
+          "log_sha256": "e61ca8fb982fc7aaaa44116db6ce22107de9f9d062ba55a9953451af7b8b8c05"
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "xml_sha256": "6b953aed673374b1472a6f097e932de5c22e275e7ef83425f06db70f88ada945",
+          "log_sha256": "3129db56f6717c462667ee92103905da4e35cb8e696e9daffbf9b4e702cd5c22"
+        },
+        {
+          "phase": "mutation",
+          "why": "accept changed native funds after exact owner review",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "xml_sha256": "8d49d0fee49de7a5366ac508faa1296dae50c2f007f116fad0a005cdbbbf3f21",
+          "log_sha256": "d07115a8f6c132a876e173687330833ca8f792c660e0dc83bdac84311c50d1ca"
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "xml_sha256": "c9f34a4cf07839bcc6b707dd70c05280c8dd190f806baa4f48d43753d2f72dbe",
+          "log_sha256": "15c1f9766a752d537c868e95dea240bda32e2aa54c99d2fe779e5b71c481236a"
+        },
+        {
+          "phase": "mutation",
+          "why": "inject an unsigned null field into the published canonical review",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "xml_sha256": "85d22318b4ae833c5c1f10b0f721799a5d3562f6dc5f9496da668efe1d9d2985",
+          "log_sha256": "3f5852c0967e12fc8cf2c8f97d1eb701fc62264b789bbd3f622338f711cbe311"
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "xml_sha256": "867579e7c4351e4c09c977d24c7dbb46d0f2aad014163aaebe94f55bb803130e",
+          "log_sha256": "3b4ad3097d7020cd8b172384869bd1db1102ffc4c9316bde31fef1b3bcacf9c6"
+        },
+        {
+          "phase": "mutation",
+          "why": "guess native account currency as USD",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "xml_sha256": "cc8be0e439145ad67bca4127c4e37d35dc24b645faf653cda767739a69ee3fcf",
+          "log_sha256": "2128a7277123ed32176dce5c7e58ac57f6ab3561821817d0f70e9a31d470c41e"
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "xml_sha256": "3a7923372bc6bb5c2f8b70794e2e679230875df67139ac40bf9423312d9a61ae",
+          "log_sha256": "d2d744b6b2df2bbb0d73cb7a43f6675bd03881bc2a2c2a74e54ecf18667789e2"
+        },
+        {
+          "phase": "mutation",
+          "why": "accept a foreign native trader identity as current funds",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "xml_sha256": "83b6d1dc95bd81894bf5b748e19c3f610abaade0b2bc9280d907f8952a822f12",
+          "log_sha256": "965a9331fb45549955c018258d152969cb026da28346bea6cff466ccde16407d"
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "xml_sha256": "f1a847f28baec55ae62fca043db24fd4263f31e7a2780f5eb7c2f9866fcf6136",
+          "log_sha256": "f574bf83729b682055fea4742e2eec06cd32be9f8694d8319d5361875228ed00"
+        },
+        {
+          "phase": "mutation",
+          "why": "invent a zero native balance when the provider omitted it",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "xml_sha256": "7907bb2cfdd0cc2e421d1be990ba71be91ff9e1ae4a9e92e594e72ecb680815e",
+          "log_sha256": "ee12d52fe4342895927c0ee9bca9bc940b1f1127f9c8f47910922c3e81f221a0"
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "xml_sha256": "bd05e3090b9be7aa4c9cdf82898e82c5169a93fa5f1eeaa4bf71ec6e08c29ec9",
+          "log_sha256": "d907fec0e0445cfe67a7272e864304e81194b234052d6bdfcb6ec87c0b123e62"
+        },
+        {
+          "phase": "mutation",
+          "why": "infer empty orders from an older terminal without order observations",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "xml_sha256": "a7e3530861304a48887bc231eda87d930dc66586da9eb6c316e9168e00d1cc45",
+          "log_sha256": "609951b69e691ae5edd1370567c364c9ae48142615bf3a4988ce5881adfd79ce"
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "xml_sha256": "c304fb27590ca2b5bc15ee9f1def81d990032e308dd7082f34a886799efeb29d",
+          "log_sha256": "2826a5e72c9f873a0370a41fe46a67989c4a682af951a8514eeb48dfd0b0e61b"
+        },
+        {
+          "phase": "mutation",
+          "why": "erase an unreadable native pending order snapshot",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "xml_sha256": "e7e31d8f04431f74dd2675b4b6c7201317768b71a9f7c3178bac15ddd8317a66",
+          "log_sha256": "904bcb7aed4b569e203fd1b1294e299373138ba2f09a01aeab1617841403ac15"
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "xml_sha256": "70f305214935f335aa81ead5b973b923c307a4455c8410fd07aea7a7bb804611",
+          "log_sha256": "730410d23add507d10274b5400f29dd16f80db2f65bf9ef1c50a875848f3486b"
+        },
+        {
+          "phase": "mutation",
+          "why": "ignore an unbound uncertain protective exit",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "xml_sha256": "36a03502a14dea6d56680c6e4255cc6200bf164f21dce03ee6020c1966f83265",
+          "log_sha256": "5cf1bd9a62ac4847eb9e47ed4bb253a99740633c75eb46e07b2bd631c9260582"
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "xml_sha256": "b8a191d9479b0ca6460bc6d87ad49448e50d3c7d84b325d54c1fc5f7d63358ce",
+          "log_sha256": "06254aecdf245cc6f8784e134e36703bcc595ac0578b8c5f7f3591bcb399781b"
+        },
+        {
+          "phase": "mutation",
+          "why": "destroy another account shared credentials during local unlink",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "xml_sha256": "d5a95feb6735f44e835187fa2acef677d028354780b63deffcf55a8ba84fac72",
+          "log_sha256": "52ad874bf04cc40b18f76033f70f417eb467a1c56f22a34be13f6e572f9eb372"
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "xml_sha256": "507c61eda0d8c299d4a05db77fff7d1dc7e0bea31d6b649100c4d980ae02833e",
+          "log_sha256": "866432d567eb30f716ad0380ad29e9453b6fd80645780de4fbe94565dc3eab20"
+        },
+        {
+          "phase": "mutation",
+          "why": "report old credential ownership after a late shared reference",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "xml_sha256": "633df408219cf60357afd53b33f9c5517a41dca045fe3a1c9a7cd0a4c178825d",
+          "log_sha256": "9fdcfa0cc9d6cfcd0226335ab754ebd24df0d926b8bb076029947decbc6acd85"
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "xml_sha256": "c740a75995622498b6ae6ffad7bd6754bfca8be1e5ee224df735bd5c4713e51d",
+          "log_sha256": "866432d567eb30f716ad0380ad29e9453b6fd80645780de4fbe94565dc3eab20"
+        },
+        {
+          "phase": "mutation",
+          "why": "claim observed lease exclusion when authority was unreachable",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "xml_sha256": "eb5352645a6addc70958b93756a1ef5d2b6f47147acc528da2b38fe9be5b7569",
+          "log_sha256": "c784327acabb265e869113cf10d8cc95b4dac41451735b90d9a3b4421da570bc"
+        }
+      ],
+      "source_before_sha256": {
+        "backend/van_gateway/trading/account_contracts.py": "5bad06799c586f8b0d10571dba38433ee18e07c7c2663f8c95b2289809414c11",
+        "deploy/van-trading-core/mql5/VanBridgeEA.mq5": "dc9c2a4aa0989df1e1f07263c355bde87931bede71da64c417b0b90c831f4d56",
+        "trading/commander/account_retirement.py": "702636bfaa18b74315b2194eaac858ec93495e53d2a4b7861f1c5afa767ebd94",
+        "trading/commander/accounts.py": "c49292484fe79f7961c3c7d5102eb653c2a1010b63c76c71b9d7c478be033446",
+        "trading/vati/execution/ctrader/adapter.py": "0ae0eafb312fabea1983ca04471170dd9a235bf0870d858fa45863c0210caed6",
+        "trading/vati/execution/deriv.py": "30fcd305bd43bac4e125d8c6354254dd570c0cc6733c93b3999efda18e71a4cf",
+        "trading/vati/execution/mt5_pull.py": "d861b35e9153c60b23dc6528c43635de61f8d70626d869299ae0afcc37432c4a"
+      },
+      "source_after_sha256": {
+        "backend/van_gateway/trading/account_contracts.py": "5bad06799c586f8b0d10571dba38433ee18e07c7c2663f8c95b2289809414c11",
+        "deploy/van-trading-core/mql5/VanBridgeEA.mq5": "dc9c2a4aa0989df1e1f07263c355bde87931bede71da64c417b0b90c831f4d56",
+        "trading/commander/account_retirement.py": "702636bfaa18b74315b2194eaac858ec93495e53d2a4b7861f1c5afa767ebd94",
+        "trading/commander/accounts.py": "c49292484fe79f7961c3c7d5102eb653c2a1010b63c76c71b9d7c478be033446",
+        "trading/vati/execution/ctrader/adapter.py": "0ae0eafb312fabea1983ca04471170dd9a235bf0870d858fa45863c0210caed6",
+        "trading/vati/execution/deriv.py": "30fcd305bd43bac4e125d8c6354254dd570c0cc6733c93b3999efda18e71a4cf",
+        "trading/vati/execution/mt5_pull.py": "d861b35e9153c60b23dc6528c43635de61f8d70626d869299ae0afcc37432c4a"
+      },
+      "source_restored": true,
+      "journal_present": false
+    },
+    "row-mutations": {
+      "definitions": [
+        [
+          [
+            "trading/commander/account_retirement.py",
+            "with lease.submission_guard(lease.epoch) as held:",
+            "with __import__('contextlib').nullcontext(True) as held:",
+            "allow another native actor to acquire the account during destructive unlink"
+          ],
+          "/tmp/van-retirement-row-fault.py"
+        ]
+      ],
+      "records": [
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "xml_sha256": "630c32fc93a3f28eb46ee95cd31b2f2a3965c49bf62e99bddd7af58ca4b50f2f",
+          "log_sha256": "b92ee97af9a786baae2bdf7e23f1ea4c38e5f3b66bce02edb0bf875c736f5c2f"
+        },
+        {
+          "phase": "mutation",
+          "why": "allow another native actor to acquire the account during destructive unlink",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "xml_sha256": "45da28484b2ad69b42b1db4e55d2904f4320ebac7fb31ec82b17539e849c26c3",
+          "log_sha256": "fd75db7a687085e450f8c298efbab4fe66430ddc177be5f3a3136cd391e83516"
+        }
+      ],
+      "source_before_sha256": {
+        "trading/commander/account_retirement.py": "702636bfaa18b74315b2194eaac858ec93495e53d2a4b7861f1c5afa767ebd94"
+      },
+      "source_after_sha256": {
+        "trading/commander/account_retirement.py": "702636bfaa18b74315b2194eaac858ec93495e53d2a4b7861f1c5afa767ebd94"
+      },
+      "source_restored": true,
+      "journal_present": false
+    }
+  },
+  "android": {
+    "tests": 222,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "reports": 38,
+    "lint": {
+      "Warning": 82,
+      "Hint": 22
+    },
+    "artifacts": {
+      "outputs/apk/debug/app-debug.apk": {
+        "sha256": "d022072dcb19e5bcef2d857148b4edb0de31ca8946352da8851b4bd57d937868",
+        "bytes": 318145709
+      },
+      "outputs/apk/androidTest/debug/app-debug-androidTest.apk": {
+        "sha256": "8b78e654b6dd230532afd90c529491e12bbe534ae4e9f287f023c864a74195ab",
+        "bytes": 2323970
+      }
+    },
+    "log_sha256": "009d65fa84bba7c8ffffe60ac51f08767219f2ef10e28698e59d2bd1735ee5ec",
+    "scope": "JVM tests, APK assembly and lint on the byte-identical owned worktree; no device instrumentation or release signing."
+  },
+  "instrument_correction": "First full run2674pass1failure. Older Commander producer attached resolved reviews only to upserts and Deriv fixture omitted portfolio observation. Updated both native test producers to bind unlink review and added explicit native empty portfolio reply; retained deletion/credential protection assertions and added status diagnostic. First fixture-only attempt still failed on required review; subsequent50affected and full2675 pass. Product guards unchanged.",
+  "qualification": "Source-level paired gateway/P256/native operation and controlled venue IO, real isolated PostgreSQL lease contention, exact EA bodies in controlled terminal fixture. No broker, deployed service, financial authority, whole-unit, profitability, release or S24 acceptance. Completed real-provider trade finality remains unavailable; unlink refuses it. New EA pending-orders snapshot needs its own published native MetaEditor run."
+}

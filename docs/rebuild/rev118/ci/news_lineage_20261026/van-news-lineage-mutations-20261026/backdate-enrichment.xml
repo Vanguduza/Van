@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="34" time="0.880" timestamp="2026-10-26T01:56:45.195280+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_news_publisher_lineage" name="test_rewritten_syndicated_stories_form_one_declared_cluster" time="0.109" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_invalid_explicit_origin_is_skipped_without_publishing_a_headline[None]" time="0.004" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_invalid_explicit_origin_is_skipped_without_publishing_a_headline[origin1]" time="0.004" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_invalid_explicit_origin_is_skipped_without_publishing_a_headline[origin2]" time="0.003" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_invalid_explicit_origin_is_skipped_without_publishing_a_headline[origin3]" time="0.003" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_invalid_explicit_origin_is_skipped_without_publishing_a_headline[origin4]" time="0.003" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_invalid_explicit_origin_is_skipped_without_publishing_a_headline[origin5]" time="0.004" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_originless_legacy_rows_stay_unknown_and_do_not_infer_publisher_from_transport" time="0.005" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_cold_recovery_restores_lineage_without_republishing_originals" time="0.012" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_declared_origin_does_not_backdate_earlier_unknown_observation" time="0.006" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_lineage_result_cannot_mutate_original_evidence" time="0.005" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_origin_enrichment_cannot_precede_the_original_observations_availability" time="0.004"><failure message="vati.events.news_ingress.NewsIngressError: news publisher lineage original availability conflicts">ledger = &lt;vati.core.ledger.Ledger object at 0x7fd420f916a0&gt;
+
+    def test_origin_enrichment_cannot_precede_the_original_observations_availability(ledger):
+        news = NewsIngress(ledger=ledger)
+        value = row(); value.pop('original_publisher')
+        news.ingest_rows([value], now_ms=NOW+20)
+&gt;       news.ingest_rows([row()], now_ms=NOW)
+
+trading/tests/test_news_publisher_lineage.py:104: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/events/news_ingress.py:643: in ingest_rows
+    if self.ingest(headline, now_ms=now_ms,original_publisher=origin) is None:
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/events/news_ingress.py:511: in ingest
+    event,created,available_ms,origin=self._publish_headline(headline,available_ms,now_ms,original_publisher)
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;vati.events.news_ingress.NewsIngress object at 0x7fd420f927b0&gt;
+headline = Headline(source_id='wire-a', trust=&lt;SourceTrust.UNTRUSTED: 'UNTRUSTED'&gt;, published_ms=1800000000000, observed_ms=18000...t_classes=(), symbols=(), event_class='', severity=None, concern=&lt;Concern.UNCLEAR: 'UNCLEAR'&gt;, url='', body_excerpt='')
+available_ms = 1800000000000, ingress_ms = 1800000000000
+origin = PublisherOrigin(publisher_id='central-bank', story_id='release-7')
+
+    def _publish_headline(self,headline: Headline,available_ms: int,ingress_ms,origin=None):
+        hid=headline.headline_id
+        oid=_observation_id(headline)
+        def read():
+            found=None
+            for event in self._ledger.iter(EventKind.NEWS_HEADLINE,correlation_id=hid):
+                if event.producer!=self._producer:continue
+                if event.hash!=canonical_hash(event.body()):
+                    raise NewsIngressError('news original publication is corrupt')
+                stored=_headline_from_original(event.payload)
+                if (stored.dedupe_hash!=headline.dedupe_hash or event.event_time_ms!=stored.published_ms):
+                    raise NewsIngressError('news original publication scope conflicts')
+                _original_available_ms(event,stored)
+                if found is not None:
+                    raise NewsIngressError('news original publication is ambiguous')
+                found=event
+            return found
+        created=False
+        def read_observation(target_id=oid,expected=headline):
+            found=None
+            for event in self._ledger.iter(EventKind.NEWS_OBSERVATION,correlation_id=hid):
+                if event.producer!=self._producer:continue
+                stored,at=_observation_from_event(event)
+                if event.payload['observation_id']!=target_id:continue
+                if stored!=expected:
+                    raise NewsIngressError('news observation original terms conflict')
+                if found is not None:raise NewsIngressError('news observation original is ambiguous')
+                found=(event,at)
+            return found
+        with self._ledger.atomic():
+            original=read()
+            if original is None:
+                orphaned=any(event.producer==self._producer for kind in
+                    (EventKind.NEWS_OBSERVATION,EventKind.NEWS_LINEAGE)
+                    for event in self._ledger.iter(kind,correlation_id=hid))
+                if hid in self._headlines or orphaned:
+                    raise NewsIngressError('news original publication missing; not recreated')
+                self._ledger.append(make_event(EventKind.NEWS_HEADLINE,self._producer,
+                    headline.body()|{'relayed_by':[headline.source_id],
+                    'full_claim':_full_claim(headline),'original_available_ms':available_ms,
+                    'native_clock_qualified':False},event_time_ms=headline.published_ms,
+                    received_time_ms=available_ms,correlation_id=hid))
+                created=True
+            elif 'full_claim' in original.payload:
+                first=_headline_from_original(original.payload)
+                first_observation=read_observation(_observation_id(first),first)
+                if first_observation is None:
+                    raise NewsIngressError('news required original observation missing; not recreated')
+                required=first_observation[0].payload.get('original_publisher')
+                if required is not None:
+                    first_origin=read_lineage(self._ledger,self._producer,_observation_id(first),hid)
+                    if first_origin is None:raise NewsIngressError('news publisher lineage required original missing')
+                    if first_origin['origin']!=required:raise NewsIngressError('news publisher lineage required original conflicts')
+                    if first_origin['available_ms']&lt;first_observation[1]:
+                        raise NewsIngressError('news publisher lineage original availability conflicts')
+            existing_observation=read_observation()
+            if existing_observation is None:
+                if oid in self._published_observations:
+                    raise NewsIngressError('news observation original missing; not recreated')
+                observation_payload={'format':'news-observation/1','observation_id':oid,
+                     'headline_id':hid,'dedupe_hash':headline.dedupe_hash,
+                     'full_claim':_full_claim(headline),'available_ms':available_ms,
+                     'supplied_ingress_ms':ingress_ms,'provider_qualified':False,'authority_effect':'NONE'}
+                if origin is not None:
+                    observation_payload.update(format='news-observation/2',original_publisher=origin.body())
+                self._ledger.append(make_event(EventKind.NEWS_OBSERVATION,self._producer,observation_payload,
+                    event_time_ms=headline.published_ms,received_time_ms=available_ms,correlation_id=hid))
+            lineage=read_lineage(self._ledger,self._producer,oid,hid)
+            if lineage is None:
+                if oid in self._origins or (existing_observation is not None
+                        and existing_observation[0].payload.get('format')=='news-observation/2'):
+                    raise NewsIngressError('news publisher lineage original missing; not recreated')
+                if origin is not None:
+                    at=available_ms
+                    lineage=append_lineage(self._ledger,self._producer,origin,oid,hid,at)
+            elif origin is not None and lineage['origin']!=origin.body():
+                raise NewsIngressError('news original publisher declaration conflicts')
+            if (existing_observation is not None
+                    and existing_observation[0].payload.get('format')=='news-observation/2'
+                    and lineage['origin']!=existing_observation[0].payload['original_publisher']):
+                raise NewsIngressError('news publisher lineage required original conflicts')
+            if existing_observation is not None and lineage is not None and lineage['available_ms']&lt;existing_observation[1]:
+&gt;               raise NewsIngressError('news publisher lineage original availability conflicts')
+E               vati.events.news_ingress.NewsIngressError: news publisher lineage original availability conflicts
+
+trading/vati/events/news_ingress.py:619: NewsIngressError</failure></testcase><testcase classname="trading.tests.test_news_publisher_lineage" name="test_lineage_append_failure_rolls_back_headline_and_observation_before_memory" time="0.006" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_lost_sql_commit_reply_keeps_memory_unknown_and_cold_replay_reads_original" time="0.007" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_lineage_requires_independent_readback_before_memory_success" time="0.006" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_conflicting_origin_cannot_rewrite_an_original_observation" time="0.005" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_exact_title_with_contradictory_origins_is_one_conflicted_cluster" time="0.006" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_future_origin_does_not_reveal_future_publisher_or_transport" time="0.005" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_atomic_origin_marker_refuses_deleted_lineage_after_cold_start" time="0.006" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_even_correctly_sealed_invalid_or_orphaned_lineage_is_refused[change0]" time="0.008" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_even_correctly_sealed_invalid_or_orphaned_lineage_is_refused[change1]" time="0.006" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_even_correctly_sealed_invalid_or_orphaned_lineage_is_refused[change2]" time="0.008" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_even_correctly_sealed_invalid_or_orphaned_lineage_is_refused[change3]" time="0.006" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_even_correctly_sealed_invalid_or_orphaned_lineage_is_refused[change4]" time="0.008" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_even_correctly_sealed_invalid_or_orphaned_lineage_is_refused[change5]" time="0.006" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_even_correctly_sealed_invalid_or_orphaned_lineage_is_refused[change6]" time="0.006" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_ambiguous_duplicate_lineage_refuses_recovery_and_replay" time="0.006" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_recovery_capacity_includes_lineage_receipts" time="0.005" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_actual_service_file_builder_exposes_lineage_and_recovers_it" time="0.011" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_real_sql_lineage_commit_reply_loss_is_reconciled[sqlite]" time="0.007" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_concurrent_native_publishers_retain_one_original_lineage[sqlite]" time="0.026" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_actual_child_death_after_sql_commit_restores_lineage_once" time="0.285" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_sealed_backdated_lineage_cannot_be_replayed_as_a_valid_original" time="0.010" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_orphaned_lineage_cannot_recreate_missing_headline_and_observation" time="0.010" /></testsuite></testsuites>

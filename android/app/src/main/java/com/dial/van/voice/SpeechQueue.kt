@@ -78,11 +78,14 @@ class SpeechQueue {
      *   overlap is expected, not an error.
      */
     fun offer(segment: SpeechSegment): Boolean {
+        if (segment.segmentIndex < 0 || segment.segmentId.isBlank() ||
+            segment.responseId.isBlank() || segment.speechStreamId.isBlank()) return false
         // A segment from another answer is not late, it is unrelated. Accepting it would
         // interleave two answers in one queue and compare their indexes as if they were
         // the same sequence, which is meaningless.
         val current = speechStreamId
         if (current != null && segment.speechStreamId != current) return false
+        if (responseId != null && segment.responseId != responseId) return false
 
         if (segments.containsKey(segment.segmentId)) return false
 
@@ -96,6 +99,7 @@ class SpeechQueue {
         // new id for text the owner has already heard. The ids differ, so only the index
         // says anything.
         if (segment.segmentIndex <= lastSpokenIndex) return false
+        if (segments.values.any { it.segmentIndex == segment.segmentIndex }) return false
         segments[segment.segmentId] = segment
         responseId = segment.responseId
         speechStreamId = segment.speechStreamId
@@ -105,17 +109,23 @@ class SpeechQueue {
 
     fun mark(segmentId: String, state: SpeechSegmentState) {
         val segment = segments[segmentId] ?: return
+        if (segment.state in setOf(SpeechSegmentState.SPOKEN, SpeechSegmentState.INTERRUPTED, SpeechSegmentState.FAILED)) return
         segments[segmentId] = segment.copy(state = state)
-        if (state == SpeechSegmentState.SPOKEN && segment.segmentIndex > lastSpokenIndex) {
-            lastSpokenIndex = segment.segmentIndex
+        if (state == SpeechSegmentState.SPOKEN) {
+            while (segments.values.any { it.segmentIndex == lastSpokenIndex + 1 && it.state == SpeechSegmentState.SPOKEN }) {
+                lastSpokenIndex += 1
+            }
         }
     }
 
     /** The next segment to speak: the lowest-indexed one that is ready and unspoken. */
     fun nextToSpeak(): SpeechSegment? =
         segments.values
-            .filter { it.state == SpeechSegmentState.READY }
-            .minByOrNull { it.segmentIndex }
+            .firstOrNull { it.segmentIndex == lastSpokenIndex + 1 && it.state == SpeechSegmentState.READY }
+
+    /** Text awaiting the engine which synthesizes and plays it as one operation. */
+    fun nextForSynthesis(): SpeechSegment? =
+        segments.values.firstOrNull { it.segmentIndex == lastSpokenIndex + 1 && it.state == SpeechSegmentState.RECEIVED }
 
     /**
      * §21.17 — how many segments to synthesise ahead.
@@ -130,11 +140,21 @@ class SpeechQueue {
 
     fun shouldSynthesiseMore(): Boolean = readyCount() < SYNTHESIS_LOOKAHEAD
 
+    /** Restore only a prefix the owner reported heard, before any segment is accepted. */
+    fun restoreHeardPrefix(response: String, stream: String, heard: Int): Boolean {
+        if (segments.isNotEmpty() || response.isBlank() || stream.isBlank() || heard < -1) return false
+        responseId = response
+        speechStreamId = stream
+        lastSpokenIndex = heard
+        lastReceivedIndex = heard
+        return true
+    }
+
     fun cursors(): SpeechCursors = SpeechCursors(
         responseId = responseId,
         speechStreamId = speechStreamId,
-        lastReceivedSegment = lastReceivedIndex.coerceAtLeast(0),
-        lastSpokenSegment = lastSpokenIndex.coerceAtLeast(0),
+        lastReceivedSegment = lastReceivedIndex,
+        lastSpokenSegment = lastSpokenIndex,
     )
 
     /**
@@ -157,7 +177,7 @@ class SpeechQueue {
 
     /** Whether the answer finished, which needs a final segment that was actually spoken. */
     fun completed(): Boolean =
-        segments.values.any { it.final && it.state == SpeechSegmentState.SPOKEN }
+        segments.values.any { it.final && it.state == SpeechSegmentState.SPOKEN && it.segmentIndex <= lastSpokenIndex && it.segmentIndex == lastReceivedIndex }
 
     fun snapshot(): List<SpeechSegment> = segments.values.sortedBy { it.segmentIndex }
 
@@ -209,7 +229,7 @@ object DelayedAnswerPolicy {
         policyPermitsUnpromptedSpeech: Boolean = false,
     ): DelayedAnswerAction {
         val elapsed = completedAtMs - askedAtMs
-        if (ownerStillInVoiceContext && elapsed <= SAME_CONTEXT_WINDOW_MS) {
+        if (ownerStillInVoiceContext && elapsed in 0..SAME_CONTEXT_WINDOW_MS) {
             return DelayedAnswerAction.SPEAK_NOW
         }
         if (policyPermitsUnpromptedSpeech && screenInteractive) {

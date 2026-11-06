@@ -1,0 +1,39 @@
+import asyncio,hashlib,importlib.util,json,os,secrets,sys,tempfile,zipfile
+from pathlib import Path
+import pytest
+from test_google_owner_revoke_and_scrub import client,_settings
+from test_google_owner_withdrawal_recovery import SCOPE
+OUT=Path('/workspace/van-lac230-independent-recheck-r2-20261101');E=Path('/workspace/van-google-withdrawal-20261101')
+async def main():
+ results=[]
+ with tempfile.TemporaryDirectory(prefix='van-lac230-r1sealed-review-',dir='/tmp') as temp:
+  p=Path(temp);module_path=p/'review_r1_google_service.py'
+  r1manifest=json.loads((E/'HANDOFF.json').read_text())
+  with zipfile.ZipFile(E/r1manifest['archive']) as z:oldsource=z.read('backend/van_gateway/google/service.py')
+  assert hashlib.sha256(oldsource).hexdigest()==r1manifest['source_files']['backend/van_gateway/google/service.py'];module_path.write_bytes(oldsource)
+  spec=importlib.util.spec_from_file_location('review_r1_google_service',module_path);module=importlib.util.module_from_spec(spec);sys.modules[spec.name]=module;spec.loader.exec_module(module)
+  with pytest.MonkeyPatch.context() as mp:
+   settings=_settings.__wrapped__(p,mp);next(settings);fixture=client.__wrapped__();ac,app=await anext(fixture)
+   try:
+    old=module.GoogleService(app.state.store,os.environ['VAN_GOOGLE_TOKEN_FERNET_KEY'])
+    for terminal in ('APPLIED','REFUSED'):
+     await old.store_refresh_token('owner','SOURCE-r1-producer-original',[SCOPE])
+     detail=await old.withdrawal_detail(device_id='phone');request=detail['withdrawal_request']
+     if terminal=='REFUSED':await old.store_refresh_token('owner','SOURCE-r1-producer-replacement',[SCOPE])
+     produced=await old.withdraw_selected(request,device_id='phone');assert produced['state']==terminal
+     key=old._withdrawal_key(request['operation_id']);cipher=(await app.state.store.fetchone('SELECT value FROM runtime_meta WHERE key=?',(key,)))['value'];cipherhash=hashlib.sha256(cipher.encode()).hexdigest()
+     credential_before=dict(await app.state.store.fetchone("SELECT * FROM google_connections WHERE owner_id='owner'"))
+     newtoken=secrets.token_urlsafe(32);await app.state.store.execute('UPDATE devices SET access_token_hash=? WHERE device_id=?',(hashlib.sha256(newtoken.encode()).hexdigest(),'phone'));ac.headers['X-Van-Device-Token']=newtoken
+     assert (await app.state.auth.require_access_token(newtoken)).device_id=='phone'
+     observed=await ac.get('/v1/google/owner-revocations/'+request['operation_id']);assert observed.status_code==200 and observed.json()==produced,observed.text
+     replay=await ac.post('/v1/google/owner-revoke',json=request);assert replay.status_code==(200 if terminal=='APPLIED' else 409) and replay.json()['withdrawal_receipt']==produced,replay.text
+     assert (await app.state.store.fetchone('SELECT value FROM runtime_meta WHERE key=?',(key,)))['value']==cipher
+     assert dict(await app.state.store.fetchone("SELECT * FROM google_connections WHERE owner_id='owner'"))==credential_before
+     results.append({'state':terminal,'result':'PASS','producer':'Actual frozen R1 GoogleService imported from preserved archive (SOURCE fixture)','producer_sha256':hashlib.sha256(oldsource).hexdigest(),'original_cipher_sha256_unchanged':cipherhash,'r2_get_status':observed.status_code,'r2_post_status':replay.status_code,'modeled_trusted_current_token_replacement_not_public_rotation':True})
+   finally:
+    try:await anext(fixture)
+    except StopAsyncIteration:pass
+    try:next(settings)
+    except StopIteration:pass
+ return results
+r=asyncio.run(main());(OUT/'r1-sealed-compatibility-results.json').write_text(json.dumps({'results':r,'owned_tmp_cleanup':True},indent=2));print(json.dumps(r))

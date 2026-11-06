@@ -1,0 +1,33 @@
+{
+  "action": "SUPPRESS_ENTRY",
+  "decision_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+  "eligible_methods": [],
+  "environment": "FIXTURE",
+  "estimated_cost_bps": null,
+  "evidence_snapshot_ref": "FIXTURE_EVIDENCE_SNAPSHOT_REF",
+  "grant_ref": "FIXTURE_GRANT_REF",
+  "information_cutoff_ms": 1000,
+  "input_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+  "journal_cursor": 0,
+  "objective_ref": "FIXTURE_OBJECTIVE_REF",
+  "parameter_profile": null,
+  "policy_binding_ref": "FIXTURE_POLICY_BINDING_REF",
+  "reason_codes": [
+    "FIXTURE_NO_QUALIFIED_METHOD"
+  ],
+  "record_id": "FIXTURE_ExecutionDecision",
+  "record_type": "ExecutionDecision",
+  "rejected_methods": [],
+  "schema_version": 2,
+  "scope": {
+    "account_id": "FIXTURE_ACCOUNT",
+    "market_type": "CRYPTO_SPOT",
+    "ownership": "OWNER_MANUAL",
+    "product_id": "FIXTURE_PRODUCT_ID",
+    "scope_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+    "strategy_id": "FIXTURE_STRATEGY_ID",
+    "venue_id": "FIXTURE_VENUE"
+  },
+  "selected_method": null,
+  "uncertainty_ref": null
+}

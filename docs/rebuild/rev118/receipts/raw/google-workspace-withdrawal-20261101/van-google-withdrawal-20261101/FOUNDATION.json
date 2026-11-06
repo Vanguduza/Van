@@ -1,0 +1,12 @@
+{
+  "base": "32d519332ecd251d932e841db84ca0a25712b255",
+  "lane": "/workspace/van-lanes-20261101/google-withdrawal",
+  "created_at_utc": "2026-11-01T07:34:43.531548+00:00",
+  "baseline_sha256": {
+    "backend/van_gateway/google/service.py": "fe7150002185f86fddce456799167666fa475acc2c464e440f5e5f0b17651eaa",
+    "backend/van_gateway/google/mesh.py": "40a96b730ca461a42bbe51fed44b8b3f51cf4ac216a5926f8ad7a5540e51391a"
+  },
+  "repro": "COUNTEREXAMPLE_03.log",
+  "repro_source": "COUNTEREXAMPLE_03_SOURCE.py.txt",
+  "limitations": "Fixtures only. No native OAuth/provider/network effects. No source acceptance."
+}

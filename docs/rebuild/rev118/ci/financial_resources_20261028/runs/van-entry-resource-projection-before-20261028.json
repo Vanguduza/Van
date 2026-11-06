@@ -1,0 +1,20 @@
+{
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "tools/rebuild/source_storage_audit.py",
+    "--report",
+    "/workspace/van-entry-resource-projection-before-20261028-audit.json",
+    "trading/tests/test_entry_resource_projection.py",
+    "--junitxml=/workspace/van-entry-resource-projection-before-20261028.xml",
+    "-q"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 646673,
+  "started_at_utc": "2026-10-28T17:44:00.103451+00:00",
+  "timeout_seconds": 120,
+  "state": "COMPLETED",
+  "command_pid": 646683,
+  "exit": 1,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-28T17:44:02.064532+00:00"
+}

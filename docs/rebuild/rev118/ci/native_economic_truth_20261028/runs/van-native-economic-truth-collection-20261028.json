@@ -1,0 +1,25 @@
+{
+  "command": [
+    "env",
+    "PYTHONPATH=backend:backend/tests:trading:trading/tests:.",
+    "DIAL_REPO=/workspace/van-review-2026-10-18/dial-development-system",
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "-m",
+    "pytest",
+    "trading/tests",
+    "backend/tests/test_trading_api.py",
+    "backend/tests/test_van_private_core_service.py",
+    "tests/rebuild/test_mt5_cash_unit_source.py",
+    "--collect-only",
+    "-q"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 800780,
+  "started_at_utc": "2026-10-28T22:05:47.719332+00:00",
+  "timeout_seconds": 120,
+  "state": "COMPLETED",
+  "command_pid": 800783,
+  "exit": 0,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-28T22:05:53.687605+00:00"
+}

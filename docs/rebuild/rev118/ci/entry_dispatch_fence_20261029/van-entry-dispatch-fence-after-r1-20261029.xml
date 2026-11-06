@@ -1,0 +1,1231 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="17" skipped="1" tests="52" time="3.274" timestamp="2026-10-29T01:28:44.155258+00:00" hostname="6e9feff21467"><testcase classname="trading.tests.test_entry_dispatch_commit_fence" name="test_preexisting_independent_routers_cannot_dispatch_the_same_original_twice" time="0.367"><failure message="vati.execution.router.EntryDispatchUnknown: entry command commit/readback unavailable; reconcile original idempotency key before retry">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-250/test_preexisting_independent_r0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_preexisting_independent_routers_cannot_dispatch_the_same_original_twice(tmp_path, eurusd):
+        mandate, trade, decision = approved_entry(eurusd)
+        path = tmp_path/'entry.sqlite'
+        first, second = Ledger(path), Ledger(path)
+        left, right = PaperAdapter(), PaperAdapter()
+        try:
+            a, b = sender(first, left), sender(second, right)
+&gt;           a.execute(trade, decision, mandate, now_ms=NOW*1000)
+
+trading/tests/test_entry_dispatch_commit_fence.py:30: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/execution/router.py:656: in execute
+    now_ms = self._commit_entry_command(cmd, {
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;vati.execution.router.ExecutionRouter object at 0x7fdc5f8ef5f0&gt;
+command = OrderCommand(trade_intent_id='ti-1', decision_hash='08e3a838ec64bdcabbb8b9e2ed682edaa56c4b27a5cf7f344faae3d13310a459',...egy_version='4.2.1', lease_epoch=None, command_hash='bc00d616bd376c6a6d5ddf05cfdd579c9f6195cf4d00b3bbe3bb53d63a120561')
+payload = {'trade_intent_id': 'ti-1', 'decision_hash': '08e3a838ec64bdcabbb8b9e2ed682edaa56c4b27a5cf7f344faae3d13310a459', 'idempotency_key': 'idem-1', 'account_alias': 'fx_primary', ...}
+mandate = TradingMandate(mandate_id='mandate-fx-primary', version='1.0.0', account_alias='fx_primary', venue='paper', mode=&lt;Auth...se)), strategy_risk_budgets={}, trading_temperament=None, strategy_temperaments={}, temperament_owner_signature_ref='')
+now_ms = 1800000000000, decision_time_ms = 1800000000000
+recheck = &lt;function ExecutionRouter.execute.&lt;locals&gt;.recheck_after_writer at 0x7fdc5f744b80&gt;
+
+    def _commit_entry_command(self, command, payload, mandate, *, now_ms, decision_time_ms,
+                              recheck):
+        """Serialize the final duplicate check and commit before any transport.
+    
+        The in-memory set is an early refusal cache only. A second, already
+        constructed router must observe the original durable command under the
+        same SQL writer. A caller transaction cannot publish an uncommitted
+        command then roll it back after an irreversible native submission.
+        This entry fence is not a financial reservation or parent budget.
+        """
+        require_committed_source_read(self.ledger)
+        if getattr(self.ledger, '_read_snapshot_depth', 0):
+            raise RouterError('entry dispatch requires its own committed writer')
+        started = False
+        try:
+            with self.ledger.atomic():
+                if not self.ledger.verify_incremental()[0]:
+                    raise RouterError('entry command journal invalid; reconciliation required')
+                if any(e.payload.get('idempotency_key') == command.idempotency_key
+                       for e in self.ledger.iter(EventKind.ORDER_COMMAND)):
+                    self._seen.add(command.idempotency_key)
+                    raise RouterError('duplicate idempotency key in committed entry journal')
+                # Writer acquisition may block. Recheck the original grant,
+                # lease, kill state, command controls and deadlines after it.
+                now_ms = recheck(now_ms)
+                event = make_event(EventKind.ORDER_COMMAND, self.producer, payload,
+                    event_time_ms=now_ms, received_time_ms=now_ms,
+                    decision_time_ms=decision_time_ms, correlation_id=command.trade_intent_id)
+                started = True
+                ref = self._log(EventKind.ORDER_COMMAND, payload, now_ms=now_ms,
+                    corr=command.trade_intent_id, decision_time=decision_time_ms)
+                if ref != event.hash:
+                    raise RouterError('entry command publication identity changed')
+            # This is a new, read-only transaction after the writer committed.
+            # A lost commit ACK or failed readback cannot authorize transport.
+            with committed_source_snapshot(self.ledger):
+                rows = [e for e in self.ledger.iter(EventKind.ORDER_COMMAND)
+                        if e.payload.get('idempotency_key') == command.idempotency_key]
+                if (len(rows) != 1 or rows[0].hash != event.hash
+                    or rows[0].hash != canonical_hash(rows[0].body())
+                    or rows[0].body() != event.body()):
+                    raise RouterError('original committed entry command readback differs')
+            self._seen.add(command.idempotency_key)
+            return now_ms
+        except Exception:
+            if started:
+                self._seen.add(command.idempotency_key)
+&gt;               raise EntryDispatchUnknown(command) from None
+E               vati.execution.router.EntryDispatchUnknown: entry command commit/readback unavailable; reconcile original idempotency key before retry
+
+trading/vati/execution/router.py:176: EntryDispatchUnknown</failure></testcase><testcase classname="trading.tests.test_entry_dispatch_commit_fence" name="test_ambient_transaction_cannot_send_before_its_command_is_committed" time="0.004" /><testcase classname="trading.tests.test_execution" name="test_router_holds_submission_guard_through_command_submit_receipt_and_protection" time="0.006"><failure message="vati.execution.router.EntryDispatchUnknown: entry command commit/readback unavailable; reconcile original idempotency key before retry">mandate = TradingMandate(mandate_id='mandate-fx-primary', version='1.0.0', account_alias='fx_primary', venue='mt5', mode=&lt;Author...se)), strategy_risk_budgets={}, trading_temperament=None, strategy_temperaments={}, temperament_owner_signature_ref='')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_router_holds_submission_guard_through_command_submit_receipt_and_protection(mandate, eurusd):
+        active = {"guard": False}
+        observed = []
+    
+        @contextmanager
+        def submission_guard(epoch):
+            assert epoch == 7
+            active["guard"] = True
+            try:
+                yield True
+            finally:
+                active["guard"] = False
+    
+        class ProbeLedger(Ledger):
+            def append(self, event):
+                if event.kind in (EventKind.ORDER_COMMAND, EventKind.EXECUTION_RECEIPT):
+                    observed.append((event.kind.value, active["guard"]))
+                    assert active["guard"], f"{event.kind.value} escaped the submission guard"
+                return super().append(event)
+    
+        class ProbeProtection(ProtectionManager):
+            def register(self, *args, **kwargs):
+                observed.append(("PROTECTION_REGISTER", active["guard"]))
+                assert active["guard"], "protection registration escaped the submission guard"
+                return super().register(*args, **kwargs)
+    
+        class ProbePaper(PaperAdapter):
+            def submit(self, cmd, *, now_ms):
+                observed.append(("ADAPTER_SUBMIT", active["guard"], cmd.lease_epoch))
+                assert active["guard"], "adapter.submit escaped the lease submission guard"
+                return super().submit(cmd, now_ms=now_ms)
+    
+        m = TradingMandate.from_mapping(
+            mandate_dict(venue="paper", mode="DEMO_TRADER"))
+        contract = SymbolContract(**{**eurusd.__dict__, "venue": "paper"})
+        i, d = approved(
+            m, contract, venue="paper", strategy_state=StrategyState.DEMO)
+        adapter = ProbePaper()
+        ledger = ProbeLedger()
+        protection = ProbeProtection()
+        r = ExecutionRouter(
+            ledger=ledger,
+            adapters={"paper": adapter},
+            kill_switch=KillSwitch(),
+            protection=protection,
+            lease_fence=lambda epoch: epoch == 7,
+            lease_submission_guard=submission_guard,
+        )
+&gt;       rec = r.execute(i, d, m, now_ms=NOW, lease_epoch=7)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_execution.py:82: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/execution/router.py:656: in execute
+    now_ms = self._commit_entry_command(cmd, {
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;vati.execution.router.ExecutionRouter object at 0x7fdc5ee47b60&gt;
+command = OrderCommand(trade_intent_id='ti-1', decision_hash='f7438455ed7f3d974031b0f0e64c771f1f5cfb56fdac42db2da042128cfde6c4',...rategy_version='4.2.1', lease_epoch=7, command_hash='472ab81ecbe59644df04b006ed3243b7860e9cd269161a8cb0b1acca85ff4032')
+payload = {'trade_intent_id': 'ti-1', 'decision_hash': 'f7438455ed7f3d974031b0f0e64c771f1f5cfb56fdac42db2da042128cfde6c4', 'idempotency_key': 'idem-1', 'account_alias': 'fx_primary', ...}
+mandate = TradingMandate(mandate_id='mandate-fx-primary', version='1.0.0', account_alias='fx_primary', venue='paper', mode=&lt;Auth...se)), strategy_risk_budgets={}, trading_temperament=None, strategy_temperaments={}, temperament_owner_signature_ref='')
+now_ms = 1800000000000, decision_time_ms = 1800000000000
+recheck = &lt;function ExecutionRouter.execute.&lt;locals&gt;.recheck_after_writer at 0x7fdc5ee700e0&gt;
+
+    def _commit_entry_command(self, command, payload, mandate, *, now_ms, decision_time_ms,
+                              recheck):
+        """Serialize the final duplicate check and commit before any transport.
+    
+        The in-memory set is an early refusal cache only. A second, already
+        constructed router must observe the original durable command under the
+        same SQL writer. A caller transaction cannot publish an uncommitted
+        command then roll it back after an irreversible native submission.
+        This entry fence is not a financial reservation or parent budget.
+        """
+        require_committed_source_read(self.ledger)
+        if getattr(self.ledger, '_read_snapshot_depth', 0):
+            raise RouterError('entry dispatch requires its own committed writer')
+        started = False
+        try:
+            with self.ledger.atomic():
+                if not self.ledger.verify_incremental()[0]:
+                    raise RouterError('entry command journal invalid; reconciliation required')
+                if any(e.payload.get('idempotency_key') == command.idempotency_key
+                       for e in self.ledger.iter(EventKind.ORDER_COMMAND)):
+                    self._seen.add(command.idempotency_key)
+                    raise RouterError('duplicate idempotency key in committed entry journal')
+                # Writer acquisition may block. Recheck the original grant,
+                # lease, kill state, command controls and deadlines after it.
+                now_ms = recheck(now_ms)
+                event = make_event(EventKind.ORDER_COMMAND, self.producer, payload,
+                    event_time_ms=now_ms, received_time_ms=now_ms,
+                    decision_time_ms=decision_time_ms, correlation_id=command.trade_intent_id)
+                started = True
+                ref = self._log(EventKind.ORDER_COMMAND, payload, now_ms=now_ms,
+                    corr=command.trade_intent_id, decision_time=decision_time_ms)
+                if ref != event.hash:
+                    raise RouterError('entry command publication identity changed')
+            # This is a new, read-only transaction after the writer committed.
+            # A lost commit ACK or failed readback cannot authorize transport.
+            with committed_source_snapshot(self.ledger):
+                rows = [e for e in self.ledger.iter(EventKind.ORDER_COMMAND)
+                        if e.payload.get('idempotency_key') == command.idempotency_key]
+                if (len(rows) != 1 or rows[0].hash != event.hash
+                    or rows[0].hash != canonical_hash(rows[0].body())
+                    or rows[0].body() != event.body()):
+                    raise RouterError('original committed entry command readback differs')
+            self._seen.add(command.idempotency_key)
+            return now_ms
+        except Exception:
+            if started:
+                self._seen.add(command.idempotency_key)
+&gt;               raise EntryDispatchUnknown(command) from None
+E               vati.execution.router.EntryDispatchUnknown: entry command commit/readback unavailable; reconcile original idempotency key before retry
+
+trading/vati/execution/router.py:176: EntryDispatchUnknown</failure></testcase><testcase classname="trading.tests.test_execution" name="test_router_happy_path_paper" time="0.005"><failure message="vati.execution.router.EntryDispatchUnknown: entry command commit/readback unavailable; reconcile original idempotency key before retry">mandate = TradingMandate(mandate_id='mandate-fx-primary', version='1.0.0', account_alias='fx_primary', venue='mt5', mode=&lt;Author...se)), strategy_risk_budgets={}, trading_temperament=None, strategy_temperaments={}, temperament_owner_signature_ref='')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_router_happy_path_paper(mandate, eurusd):
+        m = TradingMandate.from_mapping(mandate_dict(venue="paper", mode="DEMO_TRADER"))
+        i, d = approved(m, SymbolContract(**{**eurusd.__dict__, "venue": "paper"}), venue="paper", strategy_state=StrategyState.DEMO)
+        pa = PaperAdapter()
+        r, led = router(pa)
+&gt;       rec = r.execute(i, d, m, now_ms=NOW, targets=(Decimal("1.10340"),))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_execution.py:98: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/execution/router.py:656: in execute
+    now_ms = self._commit_entry_command(cmd, {
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;vati.execution.router.ExecutionRouter object at 0x7fdc5eec1580&gt;
+command = OrderCommand(trade_intent_id='ti-1', decision_hash='2f9acd2267a82eb342b732c04396250120926dc416b900f7d4e4d48933b28e68',...egy_version='4.2.1', lease_epoch=None, command_hash='534d66065ec4aad84d38e200fe2a25279155d48e899cba1c0bfad9165b4a0ecc')
+payload = {'trade_intent_id': 'ti-1', 'decision_hash': '2f9acd2267a82eb342b732c04396250120926dc416b900f7d4e4d48933b28e68', 'idempotency_key': 'idem-1', 'account_alias': 'fx_primary', ...}
+mandate = TradingMandate(mandate_id='mandate-fx-primary', version='1.0.0', account_alias='fx_primary', venue='paper', mode=&lt;Auth...se)), strategy_risk_budgets={}, trading_temperament=None, strategy_temperaments={}, temperament_owner_signature_ref='')
+now_ms = 1800000000000, decision_time_ms = 1800000000000
+recheck = &lt;function ExecutionRouter.execute.&lt;locals&gt;.recheck_after_writer at 0x7fdc5ee71120&gt;
+
+    def _commit_entry_command(self, command, payload, mandate, *, now_ms, decision_time_ms,
+                              recheck):
+        """Serialize the final duplicate check and commit before any transport.
+    
+        The in-memory set is an early refusal cache only. A second, already
+        constructed router must observe the original durable command under the
+        same SQL writer. A caller transaction cannot publish an uncommitted
+        command then roll it back after an irreversible native submission.
+        This entry fence is not a financial reservation or parent budget.
+        """
+        require_committed_source_read(self.ledger)
+        if getattr(self.ledger, '_read_snapshot_depth', 0):
+            raise RouterError('entry dispatch requires its own committed writer')
+        started = False
+        try:
+            with self.ledger.atomic():
+                if not self.ledger.verify_incremental()[0]:
+                    raise RouterError('entry command journal invalid; reconciliation required')
+                if any(e.payload.get('idempotency_key') == command.idempotency_key
+                       for e in self.ledger.iter(EventKind.ORDER_COMMAND)):
+                    self._seen.add(command.idempotency_key)
+                    raise RouterError('duplicate idempotency key in committed entry journal')
+                # Writer acquisition may block. Recheck the original grant,
+                # lease, kill state, command controls and deadlines after it.
+                now_ms = recheck(now_ms)
+                event = make_event(EventKind.ORDER_COMMAND, self.producer, payload,
+                    event_time_ms=now_ms, received_time_ms=now_ms,
+                    decision_time_ms=decision_time_ms, correlation_id=command.trade_intent_id)
+                started = True
+                ref = self._log(EventKind.ORDER_COMMAND, payload, now_ms=now_ms,
+                    corr=command.trade_intent_id, decision_time=decision_time_ms)
+                if ref != event.hash:
+                    raise RouterError('entry command publication identity changed')
+            # This is a new, read-only transaction after the writer committed.
+            # A lost commit ACK or failed readback cannot authorize transport.
+            with committed_source_snapshot(self.ledger):
+                rows = [e for e in self.ledger.iter(EventKind.ORDER_COMMAND)
+                        if e.payload.get('idempotency_key') == command.idempotency_key]
+                if (len(rows) != 1 or rows[0].hash != event.hash
+                    or rows[0].hash != canonical_hash(rows[0].body())
+                    or rows[0].body() != event.body()):
+                    raise RouterError('original committed entry command readback differs')
+            self._seen.add(command.idempotency_key)
+            return now_ms
+        except Exception:
+            if started:
+                self._seen.add(command.idempotency_key)
+&gt;               raise EntryDispatchUnknown(command) from None
+E               vati.execution.router.EntryDispatchUnknown: entry command commit/readback unavailable; reconcile original idempotency key before retry
+
+trading/vati/execution/router.py:176: EntryDispatchUnknown</failure></testcase><testcase classname="trading.tests.test_execution" name="test_router_refuses_tampered_or_rejected_decisions" time="0.007" /><testcase classname="trading.tests.test_execution" name="test_router_flattens_when_stop_rejected_and_trips_kill_switch" time="0.006"><failure message="AssertionError: Regex pattern did not match.&#10;  Expected regex: 'protective stop not confirmed'&#10;  Actual message: 'entry command commit/readback unavailable; reconcile original idempotency key before retry'">mandate = TradingMandate(mandate_id='mandate-fx-primary', version='1.0.0', account_alias='fx_primary', venue='mt5', mode=&lt;Author...se)), strategy_risk_budgets={}, trading_temperament=None, strategy_temperaments={}, temperament_owner_signature_ref='')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_router_flattens_when_stop_rejected_and_trips_kill_switch(mandate, eurusd):
+        m = TradingMandate.from_mapping(mandate_dict(venue="paper", mode="DEMO_TRADER"))
+        i, d = approved(m, SymbolContract(**{**eurusd.__dict__, "venue": "paper"}), venue="paper", strategy_state=StrategyState.DEMO)
+        pa = PaperAdapter(inject_reject_stop=True)
+        ks = KillSwitch()
+        r, led = router(pa, ks=ks)
+&gt;       with pytest.raises(RouterError, match="protective stop not confirmed"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'protective stop not confirmed'
+E         Actual message: 'entry command commit/readback unavailable; reconcile original idempotency key before retry'
+
+trading/tests/test_execution.py:132: AssertionError</failure></testcase><testcase classname="trading.tests.test_execution" name="test_router_disconnect_trips_kill_switch" time="0.004" /><testcase classname="trading.tests.test_execution" name="test_paper_marks_fire_stops_and_targets_and_protection_only_tightens" time="0.006"><failure message="vati.execution.router.EntryDispatchUnknown: entry command commit/readback unavailable; reconcile original idempotency key before retry">mandate = TradingMandate(mandate_id='mandate-fx-primary', version='1.0.0', account_alias='fx_primary', venue='mt5', mode=&lt;Author...se)), strategy_risk_budgets={}, trading_temperament=None, strategy_temperaments={}, temperament_owner_signature_ref='')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_paper_marks_fire_stops_and_targets_and_protection_only_tightens(mandate, eurusd):
+        m = TradingMandate.from_mapping(mandate_dict(venue="paper", mode="DEMO_TRADER"))
+        i, d = approved(m, SymbolContract(**{**eurusd.__dict__, "venue": "paper"}), venue="paper", strategy_state=StrategyState.DEMO)
+        pa = PaperAdapter()
+        r, led = router(pa)
+&gt;       rec = r.execute(i, d, m, now_ms=NOW, targets=(Decimal("1.10340"),))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_execution.py:154: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/execution/router.py:656: in execute
+    now_ms = self._commit_entry_command(cmd, {
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;vati.execution.router.ExecutionRouter object at 0x7fdc5eea1ca0&gt;
+command = OrderCommand(trade_intent_id='ti-1', decision_hash='3833bee550fd1d40ebb9e71b69c9141da2e401c0f23ea435f1c696bb3cd7c333',...egy_version='4.2.1', lease_epoch=None, command_hash='c452fb913835d43edf13487059a44ded9d3bdb46e4e755e96b5d8820bcaa9d20')
+payload = {'trade_intent_id': 'ti-1', 'decision_hash': '3833bee550fd1d40ebb9e71b69c9141da2e401c0f23ea435f1c696bb3cd7c333', 'idempotency_key': 'idem-1', 'account_alias': 'fx_primary', ...}
+mandate = TradingMandate(mandate_id='mandate-fx-primary', version='1.0.0', account_alias='fx_primary', venue='paper', mode=&lt;Auth...se)), strategy_risk_budgets={}, trading_temperament=None, strategy_temperaments={}, temperament_owner_signature_ref='')
+now_ms = 1800000000000, decision_time_ms = 1800000000000
+recheck = &lt;function ExecutionRouter.execute.&lt;locals&gt;.recheck_after_writer at 0x7fdc5ee714e0&gt;
+
+    def _commit_entry_command(self, command, payload, mandate, *, now_ms, decision_time_ms,
+                              recheck):
+        """Serialize the final duplicate check and commit before any transport.
+    
+        The in-memory set is an early refusal cache only. A second, already
+        constructed router must observe the original durable command under the
+        same SQL writer. A caller transaction cannot publish an uncommitted
+        command then roll it back after an irreversible native submission.
+        This entry fence is not a financial reservation or parent budget.
+        """
+        require_committed_source_read(self.ledger)
+        if getattr(self.ledger, '_read_snapshot_depth', 0):
+            raise RouterError('entry dispatch requires its own committed writer')
+        started = False
+        try:
+            with self.ledger.atomic():
+                if not self.ledger.verify_incremental()[0]:
+                    raise RouterError('entry command journal invalid; reconciliation required')
+                if any(e.payload.get('idempotency_key') == command.idempotency_key
+                       for e in self.ledger.iter(EventKind.ORDER_COMMAND)):
+                    self._seen.add(command.idempotency_key)
+                    raise RouterError('duplicate idempotency key in committed entry journal')
+                # Writer acquisition may block. Recheck the original grant,
+                # lease, kill state, command controls and deadlines after it.
+                now_ms = recheck(now_ms)
+                event = make_event(EventKind.ORDER_COMMAND, self.producer, payload,
+                    event_time_ms=now_ms, received_time_ms=now_ms,
+                    decision_time_ms=decision_time_ms, correlation_id=command.trade_intent_id)
+                started = True
+                ref = self._log(EventKind.ORDER_COMMAND, payload, now_ms=now_ms,
+                    corr=command.trade_intent_id, decision_time=decision_time_ms)
+                if ref != event.hash:
+                    raise RouterError('entry command publication identity changed')
+            # This is a new, read-only transaction after the writer committed.
+            # A lost commit ACK or failed readback cannot authorize transport.
+            with committed_source_snapshot(self.ledger):
+                rows = [e for e in self.ledger.iter(EventKind.ORDER_COMMAND)
+                        if e.payload.get('idempotency_key') == command.idempotency_key]
+                if (len(rows) != 1 or rows[0].hash != event.hash
+                    or rows[0].hash != canonical_hash(rows[0].body())
+                    or rows[0].body() != event.body()):
+                    raise RouterError('original committed entry command readback differs')
+            self._seen.add(command.idempotency_key)
+            return now_ms
+        except Exception:
+            if started:
+                self._seen.add(command.idempotency_key)
+&gt;               raise EntryDispatchUnknown(command) from None
+E               vati.execution.router.EntryDispatchUnknown: entry command commit/readback unavailable; reconcile original idempotency key before retry
+
+trading/vati/execution/router.py:176: EntryDispatchUnknown</failure></testcase><testcase classname="trading.tests.test_execution" name="test_protection_break_even_and_trailing" time="0.001" /><testcase classname="trading.tests.test_execution" name="test_rejected_venue_stop_tighten_rolls_back_local_truth_and_halts" time="0.006"><failure message="vati.execution.router.EntryDispatchUnknown: entry command commit/readback unavailable; reconcile original idempotency key before retry">mandate = TradingMandate(mandate_id='mandate-fx-primary', version='1.0.0', account_alias='fx_primary', venue='mt5', mode=&lt;Author...se)), strategy_risk_budgets={}, trading_temperament=None, strategy_temperaments={}, temperament_owner_signature_ref='')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_rejected_venue_stop_tighten_rolls_back_local_truth_and_halts(mandate, eurusd):
+        class RejectModifyPaper(PaperAdapter):
+            def modify_stop(self, position_id, new_stop, *, now_ms):
+                p = self._positions[position_id]
+                return ExecutionReceipt(
+                    p["intent"], "", self.venue, "REJECTED", Decimal("0"), None,
+                    p["entry"], p["entry"], p["entry"], True, now_ms, now_ms,
+                    broker_position_id=position_id,
+                    protective_stop_price=p["stop"],
+                    reject_reason="injected_stop_modify_reject",
+                ).sealed()
+    
+        m = TradingMandate.from_mapping(
+            mandate_dict(venue="paper", mode="DEMO_TRADER"))
+        i, d = approved(
+            m, SymbolContract(**{**eurusd.__dict__, "venue": "paper"}),
+            venue="paper", strategy_state=StrategyState.DEMO)
+        ad = RejectModifyPaper()
+        ks = KillSwitch()
+        r, led = router(ad, ks=ks)
+&gt;       rec = r.execute(i, d, m, now_ms=NOW)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_execution.py:211: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/execution/router.py:656: in execute
+    now_ms = self._commit_entry_command(cmd, {
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;vati.execution.router.ExecutionRouter object at 0x7fdc5eec1a00&gt;
+command = OrderCommand(trade_intent_id='ti-1', decision_hash='604c41a52223978c2c964025d3e40474e8d77507367a5bd4025e9c76afd83f81',...egy_version='4.2.1', lease_epoch=None, command_hash='e3bc9d4ab51161a66b4de8673e83e11e9a689ea4da0dad44b233e7324dd10a94')
+payload = {'trade_intent_id': 'ti-1', 'decision_hash': '604c41a52223978c2c964025d3e40474e8d77507367a5bd4025e9c76afd83f81', 'idempotency_key': 'idem-1', 'account_alias': 'fx_primary', ...}
+mandate = TradingMandate(mandate_id='mandate-fx-primary', version='1.0.0', account_alias='fx_primary', venue='paper', mode=&lt;Auth...se)), strategy_risk_budgets={}, trading_temperament=None, strategy_temperaments={}, temperament_owner_signature_ref='')
+now_ms = 1800000000000, decision_time_ms = 1800000000000
+recheck = &lt;function ExecutionRouter.execute.&lt;locals&gt;.recheck_after_writer at 0x7fdc5ee72980&gt;
+
+    def _commit_entry_command(self, command, payload, mandate, *, now_ms, decision_time_ms,
+                              recheck):
+        """Serialize the final duplicate check and commit before any transport.
+    
+        The in-memory set is an early refusal cache only. A second, already
+        constructed router must observe the original durable command under the
+        same SQL writer. A caller transaction cannot publish an uncommitted
+        command then roll it back after an irreversible native submission.
+        This entry fence is not a financial reservation or parent budget.
+        """
+        require_committed_source_read(self.ledger)
+        if getattr(self.ledger, '_read_snapshot_depth', 0):
+            raise RouterError('entry dispatch requires its own committed writer')
+        started = False
+        try:
+            with self.ledger.atomic():
+                if not self.ledger.verify_incremental()[0]:
+                    raise RouterError('entry command journal invalid; reconciliation required')
+                if any(e.payload.get('idempotency_key') == command.idempotency_key
+                       for e in self.ledger.iter(EventKind.ORDER_COMMAND)):
+                    self._seen.add(command.idempotency_key)
+                    raise RouterError('duplicate idempotency key in committed entry journal')
+                # Writer acquisition may block. Recheck the original grant,
+                # lease, kill state, command controls and deadlines after it.
+                now_ms = recheck(now_ms)
+                event = make_event(EventKind.ORDER_COMMAND, self.producer, payload,
+                    event_time_ms=now_ms, received_time_ms=now_ms,
+                    decision_time_ms=decision_time_ms, correlation_id=command.trade_intent_id)
+                started = True
+                ref = self._log(EventKind.ORDER_COMMAND, payload, now_ms=now_ms,
+                    corr=command.trade_intent_id, decision_time=decision_time_ms)
+                if ref != event.hash:
+                    raise RouterError('entry command publication identity changed')
+            # This is a new, read-only transaction after the writer committed.
+            # A lost commit ACK or failed readback cannot authorize transport.
+            with committed_source_snapshot(self.ledger):
+                rows = [e for e in self.ledger.iter(EventKind.ORDER_COMMAND)
+                        if e.payload.get('idempotency_key') == command.idempotency_key]
+                if (len(rows) != 1 or rows[0].hash != event.hash
+                    or rows[0].hash != canonical_hash(rows[0].body())
+                    or rows[0].body() != event.body()):
+                    raise RouterError('original committed entry command readback differs')
+            self._seen.add(command.idempotency_key)
+            return now_ms
+        except Exception:
+            if started:
+                self._seen.add(command.idempotency_key)
+&gt;               raise EntryDispatchUnknown(command) from None
+E               vati.execution.router.EntryDispatchUnknown: entry command commit/readback unavailable; reconcile original idempotency key before retry
+
+trading/vati/execution/router.py:176: EntryDispatchUnknown</failure></testcase><testcase classname="trading.tests.test_execution" name="test_owner_ticket_channel_for_zse" time="0.004"><failure message="vati.execution.router.EntryDispatchUnknown: entry command commit/readback unavailable; reconcile original idempotency key before retry">def test_owner_ticket_channel_for_zse():
+        ad = OwnerTicketAdapter(equity=Decimal("1000000"), csd_verified=True)
+        m = TradingMandate.from_mapping(mandate_dict(venue="zse", instruments=["DELTA"], allowed_strategies=["ZSE-VALUE-01"], mode="LIMITED_LIVE", weekend_hold_allowed=True, max_open_stop_risk="0.02", max_risk_per_trade="0.01", account_alias="zse_primary"))
+        c = SymbolContract(symbol="DELTA", venue="zse", base_currency="DELTA", quote_currency="ZiG", account_currency="ZiG", contract_size=Decimal("1"), tick_size=Decimal("0.01"), tick_value=Decimal("0.01"),
+                           volume_min=Decimal("100"), volume_step=Decimal("100"), volume_max=Decimal("10000000"), min_stop_distance=Decimal("0"), trade_mode="LONG_ONLY", loss_model=LossModel.ILLIQUID_EQUITY,
+                           board_lot=Decimal("100"), adv_20d=Decimal("120000"), liquidity_haircut=Decimal("0.03"), round_trip_cost_pct=Decimal("0.0714"))
+        i = intent(venue="zse", symbol="DELTA", strategy_id="ZSE-VALUE-01", strategy_state=StrategyState.CERTIFIED_LIVE, entry=Decimal("25.00"), stop=Decimal("22.50"),
+                   requested_risk_pct=Decimal("0.005"), holds_over_weekend=True, expected_gross_move_pct=Decimal("0.20"), account_alias="zse_primary")
+        snap = snapshot(c, account_alias="zse_primary", equity=Decimal("1000000"), balance=Decimal("1000000"), peak_equity=Decimal("1000000"), day_start_equity=Decimal("1000000"), week_start_equity=Decimal("1000000"))
+        d = RiskAuthority(m).evaluate(i, snap)
+        assert d.decision is Decision.APPROVED and d.approved_size == Decimal("1500")
+        r, led = router(ad)
+&gt;       rec = r.execute(i, d, m, now_ms=NOW, time_in_force="GTC30")
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_execution.py:240: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/execution/router.py:656: in execute
+    now_ms = self._commit_entry_command(cmd, {
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;vati.execution.router.ExecutionRouter object at 0x7fdc5fd38e00&gt;
+command = OrderCommand(trade_intent_id='ti-1', decision_hash='326809386407fb274b2e7e37c6fc26061afa095db124e68bac9532cb8edd0b83',...egy_version='4.2.1', lease_epoch=None, command_hash='03c216ac2a706b85afe5d9178c59f56a12b77f0d3718f3bb0ae5190b0646b6fb')
+payload = {'trade_intent_id': 'ti-1', 'decision_hash': '326809386407fb274b2e7e37c6fc26061afa095db124e68bac9532cb8edd0b83', 'idempotency_key': 'idem-1', 'account_alias': 'zse_primary', ...}
+mandate = TradingMandate(mandate_id='mandate-fx-primary', version='1.0.0', account_alias='zse_primary', venue='zse', mode=&lt;Autho...se)), strategy_risk_budgets={}, trading_temperament=None, strategy_temperaments={}, temperament_owner_signature_ref='')
+now_ms = 1800000000000, decision_time_ms = 1800000000000
+recheck = &lt;function ExecutionRouter.execute.&lt;locals&gt;.recheck_after_writer at 0x7fdc5ee72d40&gt;
+
+    def _commit_entry_command(self, command, payload, mandate, *, now_ms, decision_time_ms,
+                              recheck):
+        """Serialize the final duplicate check and commit before any transport.
+    
+        The in-memory set is an early refusal cache only. A second, already
+        constructed router must observe the original durable command under the
+        same SQL writer. A caller transaction cannot publish an uncommitted
+        command then roll it back after an irreversible native submission.
+        This entry fence is not a financial reservation or parent budget.
+        """
+        require_committed_source_read(self.ledger)
+        if getattr(self.ledger, '_read_snapshot_depth', 0):
+            raise RouterError('entry dispatch requires its own committed writer')
+        started = False
+        try:
+            with self.ledger.atomic():
+                if not self.ledger.verify_incremental()[0]:
+                    raise RouterError('entry command journal invalid; reconciliation required')
+                if any(e.payload.get('idempotency_key') == command.idempotency_key
+                       for e in self.ledger.iter(EventKind.ORDER_COMMAND)):
+                    self._seen.add(command.idempotency_key)
+                    raise RouterError('duplicate idempotency key in committed entry journal')
+                # Writer acquisition may block. Recheck the original grant,
+                # lease, kill state, command controls and deadlines after it.
+                now_ms = recheck(now_ms)
+                event = make_event(EventKind.ORDER_COMMAND, self.producer, payload,
+                    event_time_ms=now_ms, received_time_ms=now_ms,
+                    decision_time_ms=decision_time_ms, correlation_id=command.trade_intent_id)
+                started = True
+                ref = self._log(EventKind.ORDER_COMMAND, payload, now_ms=now_ms,
+                    corr=command.trade_intent_id, decision_time=decision_time_ms)
+                if ref != event.hash:
+                    raise RouterError('entry command publication identity changed')
+            # This is a new, read-only transaction after the writer committed.
+            # A lost commit ACK or failed readback cannot authorize transport.
+            with committed_source_snapshot(self.ledger):
+                rows = [e for e in self.ledger.iter(EventKind.ORDER_COMMAND)
+                        if e.payload.get('idempotency_key') == command.idempotency_key]
+                if (len(rows) != 1 or rows[0].hash != event.hash
+                    or rows[0].hash != canonical_hash(rows[0].body())
+                    or rows[0].body() != event.body()):
+                    raise RouterError('original committed entry command readback differs')
+            self._seen.add(command.idempotency_key)
+            return now_ms
+        except Exception:
+            if started:
+                self._seen.add(command.idempotency_key)
+&gt;               raise EntryDispatchUnknown(command) from None
+E               vati.execution.router.EntryDispatchUnknown: entry command commit/readback unavailable; reconcile original idempotency key before retry
+
+trading/vati/execution/router.py:176: EntryDispatchUnknown</failure></testcase><testcase classname="trading.tests.test_execution" name="test_mt5_bridge_fails_closed_and_signs" time="0.001" /><testcase classname="trading.tests.test_execution" name="test_deriv_adapter_mapping_and_synthetic_refusal" time="0.001" /><testcase classname="trading.tests.test_execution" name="test_reconciliation_classes_and_gate" time="0.000" /><testcase classname="trading.tests.test_execution" name="test_tca_and_review_and_admission" time="0.001" /><testcase classname="trading.tests.test_mandate_dispatch_validity" name="test_a_future_signed_policy_cannot_approve_current_risk" time="0.003" /><testcase classname="trading.tests.test_mandate_dispatch_validity" name="test_a_genuine_snapshot_approval_cannot_send_outside_its_mandate_lifetime[before-signing]" time="0.004" /><testcase classname="trading.tests.test_mandate_dispatch_validity" name="test_a_genuine_snapshot_approval_cannot_send_outside_its_mandate_lifetime[at-expiry]" time="0.004" /><testcase classname="trading.tests.test_mandate_dispatch_validity" name="test_expiry_while_acquiring_native_submission_authority_is_rechecked_before_effect" time="0.004" /><testcase classname="trading.tests.test_mandate_dispatch_validity" name="test_current_grant_boundaries_still_reach_the_real_sender[start]" time="0.005"><failure message="vati.execution.router.EntryDispatchUnknown: entry command commit/readback unavailable; reconcile original idempotency key before retry">eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+boundary = 'start'
+
+    @pytest.mark.parametrize('boundary',['start','last-millisecond'])
+    def test_current_grant_boundaries_still_reach_the_real_sender(eurusd,boundary):
+        m,trade,native=flow(eurusd);decision=RiskAuthority(m).evaluate_safe(trade,native)
+        paper,ledger,router=sender(m)
+        now=m.signed_at_unix*1000 if boundary=='start' else m.expires_at_unix*1000-1
+&gt;       receipt=router.execute(trade,decision,m,now_ms=now)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_mandate_dispatch_validity.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/execution/router.py:656: in execute
+    now_ms = self._commit_entry_command(cmd, {
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;vati.execution.router.ExecutionRouter object at 0x7fdc5ed5c680&gt;
+command = OrderCommand(trade_intent_id='ti-1', decision_hash='f3c49355ff2c116a389828faab840a1be8ab06903db1f0f224d1d44b70c8b9bb',...egy_version='4.2.1', lease_epoch=None, command_hash='b95a89d69af975a751a34838005b1219dfbe4437d3cd3c8508bee0d67d6470cd')
+payload = {'trade_intent_id': 'ti-1', 'decision_hash': 'f3c49355ff2c116a389828faab840a1be8ab06903db1f0f224d1d44b70c8b9bb', 'idempotency_key': 'idem-1', 'account_alias': 'fx_primary', ...}
+mandate = TradingMandate(mandate_id='mandate-fx-primary', version='1.0.0', account_alias='fx_primary', venue='paper', mode=&lt;Auth...se)), strategy_risk_budgets={}, trading_temperament=None, strategy_temperaments={}, temperament_owner_signature_ref='')
+now_ms = 1799996400000, decision_time_ms = 1799996400000
+recheck = &lt;function ExecutionRouter.execute.&lt;locals&gt;.recheck_after_writer at 0x7fdc5ee731a0&gt;
+
+    def _commit_entry_command(self, command, payload, mandate, *, now_ms, decision_time_ms,
+                              recheck):
+        """Serialize the final duplicate check and commit before any transport.
+    
+        The in-memory set is an early refusal cache only. A second, already
+        constructed router must observe the original durable command under the
+        same SQL writer. A caller transaction cannot publish an uncommitted
+        command then roll it back after an irreversible native submission.
+        This entry fence is not a financial reservation or parent budget.
+        """
+        require_committed_source_read(self.ledger)
+        if getattr(self.ledger, '_read_snapshot_depth', 0):
+            raise RouterError('entry dispatch requires its own committed writer')
+        started = False
+        try:
+            with self.ledger.atomic():
+                if not self.ledger.verify_incremental()[0]:
+                    raise RouterError('entry command journal invalid; reconciliation required')
+                if any(e.payload.get('idempotency_key') == command.idempotency_key
+                       for e in self.ledger.iter(EventKind.ORDER_COMMAND)):
+                    self._seen.add(command.idempotency_key)
+                    raise RouterError('duplicate idempotency key in committed entry journal')
+                # Writer acquisition may block. Recheck the original grant,
+                # lease, kill state, command controls and deadlines after it.
+                now_ms = recheck(now_ms)
+                event = make_event(EventKind.ORDER_COMMAND, self.producer, payload,
+                    event_time_ms=now_ms, received_time_ms=now_ms,
+                    decision_time_ms=decision_time_ms, correlation_id=command.trade_intent_id)
+                started = True
+                ref = self._log(EventKind.ORDER_COMMAND, payload, now_ms=now_ms,
+                    corr=command.trade_intent_id, decision_time=decision_time_ms)
+                if ref != event.hash:
+                    raise RouterError('entry command publication identity changed')
+            # This is a new, read-only transaction after the writer committed.
+            # A lost commit ACK or failed readback cannot authorize transport.
+            with committed_source_snapshot(self.ledger):
+                rows = [e for e in self.ledger.iter(EventKind.ORDER_COMMAND)
+                        if e.payload.get('idempotency_key') == command.idempotency_key]
+                if (len(rows) != 1 or rows[0].hash != event.hash
+                    or rows[0].hash != canonical_hash(rows[0].body())
+                    or rows[0].body() != event.body()):
+                    raise RouterError('original committed entry command readback differs')
+            self._seen.add(command.idempotency_key)
+            return now_ms
+        except Exception:
+            if started:
+                self._seen.add(command.idempotency_key)
+&gt;               raise EntryDispatchUnknown(command) from None
+E               vati.execution.router.EntryDispatchUnknown: entry command commit/readback unavailable; reconcile original idempotency key before retry
+
+trading/vati/execution/router.py:176: EntryDispatchUnknown</failure></testcase><testcase classname="trading.tests.test_mandate_dispatch_validity" name="test_current_grant_boundaries_still_reach_the_real_sender[last-millisecond]" time="0.008"><failure message="vati.execution.router.EntryDispatchUnknown: entry command commit/readback unavailable; reconcile original idempotency key before retry">eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+boundary = 'last-millisecond'
+
+    @pytest.mark.parametrize('boundary',['start','last-millisecond'])
+    def test_current_grant_boundaries_still_reach_the_real_sender(eurusd,boundary):
+        m,trade,native=flow(eurusd);decision=RiskAuthority(m).evaluate_safe(trade,native)
+        paper,ledger,router=sender(m)
+        now=m.signed_at_unix*1000 if boundary=='start' else m.expires_at_unix*1000-1
+&gt;       receipt=router.execute(trade,decision,m,now_ms=now)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_mandate_dispatch_validity.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/execution/router.py:656: in execute
+    now_ms = self._commit_entry_command(cmd, {
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;vati.execution.router.ExecutionRouter object at 0x7fdc5ed5dac0&gt;
+command = OrderCommand(trade_intent_id='ti-1', decision_hash='80eefded2b126dda0cbf98b380f665b385dfb1e53e09b4ee3ff7b3be497bdf10',...egy_version='4.2.1', lease_epoch=None, command_hash='26eb3006792859c3e412c27045da523fe87d380c461e3eb42650462b85ecb97a')
+payload = {'trade_intent_id': 'ti-1', 'decision_hash': '80eefded2b126dda0cbf98b380f665b385dfb1e53e09b4ee3ff7b3be497bdf10', 'idempotency_key': 'idem-1', 'account_alias': 'fx_primary', ...}
+mandate = TradingMandate(mandate_id='mandate-fx-primary', version='1.0.0', account_alias='fx_primary', venue='paper', mode=&lt;Auth...se)), strategy_risk_budgets={}, trading_temperament=None, strategy_temperaments={}, temperament_owner_signature_ref='')
+now_ms = 1802591999999, decision_time_ms = 1802591999999
+recheck = &lt;function ExecutionRouter.execute.&lt;locals&gt;.recheck_after_writer at 0x7fdc5ee71da0&gt;
+
+    def _commit_entry_command(self, command, payload, mandate, *, now_ms, decision_time_ms,
+                              recheck):
+        """Serialize the final duplicate check and commit before any transport.
+    
+        The in-memory set is an early refusal cache only. A second, already
+        constructed router must observe the original durable command under the
+        same SQL writer. A caller transaction cannot publish an uncommitted
+        command then roll it back after an irreversible native submission.
+        This entry fence is not a financial reservation or parent budget.
+        """
+        require_committed_source_read(self.ledger)
+        if getattr(self.ledger, '_read_snapshot_depth', 0):
+            raise RouterError('entry dispatch requires its own committed writer')
+        started = False
+        try:
+            with self.ledger.atomic():
+                if not self.ledger.verify_incremental()[0]:
+                    raise RouterError('entry command journal invalid; reconciliation required')
+                if any(e.payload.get('idempotency_key') == command.idempotency_key
+                       for e in self.ledger.iter(EventKind.ORDER_COMMAND)):
+                    self._seen.add(command.idempotency_key)
+                    raise RouterError('duplicate idempotency key in committed entry journal')
+                # Writer acquisition may block. Recheck the original grant,
+                # lease, kill state, command controls and deadlines after it.
+                now_ms = recheck(now_ms)
+                event = make_event(EventKind.ORDER_COMMAND, self.producer, payload,
+                    event_time_ms=now_ms, received_time_ms=now_ms,
+                    decision_time_ms=decision_time_ms, correlation_id=command.trade_intent_id)
+                started = True
+                ref = self._log(EventKind.ORDER_COMMAND, payload, now_ms=now_ms,
+                    corr=command.trade_intent_id, decision_time=decision_time_ms)
+                if ref != event.hash:
+                    raise RouterError('entry command publication identity changed')
+            # This is a new, read-only transaction after the writer committed.
+            # A lost commit ACK or failed readback cannot authorize transport.
+            with committed_source_snapshot(self.ledger):
+                rows = [e for e in self.ledger.iter(EventKind.ORDER_COMMAND)
+                        if e.payload.get('idempotency_key') == command.idempotency_key]
+                if (len(rows) != 1 or rows[0].hash != event.hash
+                    or rows[0].hash != canonical_hash(rows[0].body())
+                    or rows[0].body() != event.body()):
+                    raise RouterError('original committed entry command readback differs')
+            self._seen.add(command.idempotency_key)
+            return now_ms
+        except Exception:
+            if started:
+                self._seen.add(command.idempotency_key)
+&gt;               raise EntryDispatchUnknown(command) from None
+E               vati.execution.router.EntryDispatchUnknown: entry command commit/readback unavailable; reconcile original idempotency key before retry
+
+trading/vati/execution/router.py:176: EntryDispatchUnknown</failure></testcase><testcase classname="trading.tests.test_mandate_dispatch_validity" name="test_dispatch_receipt_and_native_command_keep_the_observed_send_and_original_decision_times" time="0.006"><failure message="vati.execution.router.EntryDispatchUnknown: entry command commit/readback unavailable; reconcile original idempotency key before retry">eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_dispatch_receipt_and_native_command_keep_the_observed_send_and_original_decision_times(eurusd):
+        m,trade,native=flow(eurusd);decision=RiskAuthority(m).evaluate_safe(trade,native)
+        paper,ledger,router=sender(m);router.clock=lambda:NOW*1000+25
+&gt;       receipt=router.execute(trade,decision,m,now_ms=NOW*1000)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_mandate_dispatch_validity.py:75: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/execution/router.py:656: in execute
+    now_ms = self._commit_entry_command(cmd, {
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;vati.execution.router.ExecutionRouter object at 0x7fdc5ed5f710&gt;
+command = OrderCommand(trade_intent_id='ti-1', decision_hash='6cbe379bafe6a5b75eb5444efc31bdb6ada53966d9dd1e1cd3c1f510bdf9674b',...egy_version='4.2.1', lease_epoch=None, command_hash='22f6f7b843343d7b576f1ef725e6e4296e4be6ab431e3ac2b686cbdba75c3bfd')
+payload = {'trade_intent_id': 'ti-1', 'decision_hash': '6cbe379bafe6a5b75eb5444efc31bdb6ada53966d9dd1e1cd3c1f510bdf9674b', 'idempotency_key': 'idem-1', 'account_alias': 'fx_primary', ...}
+mandate = TradingMandate(mandate_id='mandate-fx-primary', version='1.0.0', account_alias='fx_primary', venue='paper', mode=&lt;Auth...se)), strategy_risk_budgets={}, trading_temperament=None, strategy_temperaments={}, temperament_owner_signature_ref='')
+now_ms = 1800000000025, decision_time_ms = 1800000000000
+recheck = &lt;function ExecutionRouter.execute.&lt;locals&gt;.recheck_after_writer at 0x7fdc5ee71940&gt;
+
+    def _commit_entry_command(self, command, payload, mandate, *, now_ms, decision_time_ms,
+                              recheck):
+        """Serialize the final duplicate check and commit before any transport.
+    
+        The in-memory set is an early refusal cache only. A second, already
+        constructed router must observe the original durable command under the
+        same SQL writer. A caller transaction cannot publish an uncommitted
+        command then roll it back after an irreversible native submission.
+        This entry fence is not a financial reservation or parent budget.
+        """
+        require_committed_source_read(self.ledger)
+        if getattr(self.ledger, '_read_snapshot_depth', 0):
+            raise RouterError('entry dispatch requires its own committed writer')
+        started = False
+        try:
+            with self.ledger.atomic():
+                if not self.ledger.verify_incremental()[0]:
+                    raise RouterError('entry command journal invalid; reconciliation required')
+                if any(e.payload.get('idempotency_key') == command.idempotency_key
+                       for e in self.ledger.iter(EventKind.ORDER_COMMAND)):
+                    self._seen.add(command.idempotency_key)
+                    raise RouterError('duplicate idempotency key in committed entry journal')
+                # Writer acquisition may block. Recheck the original grant,
+                # lease, kill state, command controls and deadlines after it.
+                now_ms = recheck(now_ms)
+                event = make_event(EventKind.ORDER_COMMAND, self.producer, payload,
+                    event_time_ms=now_ms, received_time_ms=now_ms,
+                    decision_time_ms=decision_time_ms, correlation_id=command.trade_intent_id)
+                started = True
+                ref = self._log(EventKind.ORDER_COMMAND, payload, now_ms=now_ms,
+                    corr=command.trade_intent_id, decision_time=decision_time_ms)
+                if ref != event.hash:
+                    raise RouterError('entry command publication identity changed')
+            # This is a new, read-only transaction after the writer committed.
+            # A lost commit ACK or failed readback cannot authorize transport.
+            with committed_source_snapshot(self.ledger):
+                rows = [e for e in self.ledger.iter(EventKind.ORDER_COMMAND)
+                        if e.payload.get('idempotency_key') == command.idempotency_key]
+                if (len(rows) != 1 or rows[0].hash != event.hash
+                    or rows[0].hash != canonical_hash(rows[0].body())
+                    or rows[0].body() != event.body()):
+                    raise RouterError('original committed entry command readback differs')
+            self._seen.add(command.idempotency_key)
+            return now_ms
+        except Exception:
+            if started:
+                self._seen.add(command.idempotency_key)
+&gt;               raise EntryDispatchUnknown(command) from None
+E               vati.execution.router.EntryDispatchUnknown: entry command commit/readback unavailable; reconcile original idempotency key before retry
+
+trading/vati/execution/router.py:176: EntryDispatchUnknown</failure></testcase><testcase classname="trading.tests.test_mandate_dispatch_validity" name="test_unknown_or_backward_current_clock_cannot_send[None]" time="0.004" /><testcase classname="trading.tests.test_mandate_dispatch_validity" name="test_unknown_or_backward_current_clock_cannot_send[True]" time="0.004" /><testcase classname="trading.tests.test_mandate_dispatch_validity" name="test_unknown_or_backward_current_clock_cannot_send[1799999999999]" time="0.003" /><testcase classname="trading.tests.test_mandate_dispatch_validity" name="test_refusal_before_dispatch_does_not_consume_the_intent_and_expiry_keeps_protective_exit_available" time="0.005"><failure message="vati.execution.router.EntryDispatchUnknown: entry command commit/readback unavailable; reconcile original idempotency key before retry">eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_refusal_before_dispatch_does_not_consume_the_intent_and_expiry_keeps_protective_exit_available(eurusd):
+        from vati.execution import RouterError
+        m,trade,native=flow(eurusd);decision=RiskAuthority(m).evaluate_safe(trade,native)
+        paper,ledger,router=sender(m);clock={'now':NOW*1000};router.clock=lambda:clock['now']
+        @contextmanager
+        def guard(epoch):
+            clock['now']=True
+            yield True
+        router.lease_submission_guard=guard
+        with pytest.raises(RouterError,match='clock'):router.execute(trade,decision,m,now_ms=NOW*1000)
+        assert not paper.positions() and ledger.count(EventKind.ORDER_COMMAND)==0
+        router.lease_submission_guard=None;clock['now']=NOW*1000
+&gt;       receipt=router.execute(trade,decision,m,now_ms=NOW*1000)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_mandate_dispatch_validity.py:103: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/execution/router.py:656: in execute
+    now_ms = self._commit_entry_command(cmd, {
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;vati.execution.router.ExecutionRouter object at 0x7fdc5eda2a50&gt;
+command = OrderCommand(trade_intent_id='ti-1', decision_hash='5a8019a55b6f797c897806ca14f2d731e7735297088e9432838ae703d5028026',...egy_version='4.2.1', lease_epoch=None, command_hash='7914ec4859bff60710416081798468182f88536e709ecd77b4ea1667ecc83932')
+payload = {'trade_intent_id': 'ti-1', 'decision_hash': '5a8019a55b6f797c897806ca14f2d731e7735297088e9432838ae703d5028026', 'idempotency_key': 'idem-1', 'account_alias': 'fx_primary', ...}
+mandate = TradingMandate(mandate_id='mandate-fx-primary', version='1.0.0', account_alias='fx_primary', venue='paper', mode=&lt;Auth...se)), strategy_risk_budgets={}, trading_temperament=None, strategy_temperaments={}, temperament_owner_signature_ref='')
+now_ms = 1800000000000, decision_time_ms = 1800000000000
+recheck = &lt;function ExecutionRouter.execute.&lt;locals&gt;.recheck_after_writer at 0x7fdc5ecdcb80&gt;
+
+    def _commit_entry_command(self, command, payload, mandate, *, now_ms, decision_time_ms,
+                              recheck):
+        """Serialize the final duplicate check and commit before any transport.
+    
+        The in-memory set is an early refusal cache only. A second, already
+        constructed router must observe the original durable command under the
+        same SQL writer. A caller transaction cannot publish an uncommitted
+        command then roll it back after an irreversible native submission.
+        This entry fence is not a financial reservation or parent budget.
+        """
+        require_committed_source_read(self.ledger)
+        if getattr(self.ledger, '_read_snapshot_depth', 0):
+            raise RouterError('entry dispatch requires its own committed writer')
+        started = False
+        try:
+            with self.ledger.atomic():
+                if not self.ledger.verify_incremental()[0]:
+                    raise RouterError('entry command journal invalid; reconciliation required')
+                if any(e.payload.get('idempotency_key') == command.idempotency_key
+                       for e in self.ledger.iter(EventKind.ORDER_COMMAND)):
+                    self._seen.add(command.idempotency_key)
+                    raise RouterError('duplicate idempotency key in committed entry journal')
+                # Writer acquisition may block. Recheck the original grant,
+                # lease, kill state, command controls and deadlines after it.
+                now_ms = recheck(now_ms)
+                event = make_event(EventKind.ORDER_COMMAND, self.producer, payload,
+                    event_time_ms=now_ms, received_time_ms=now_ms,
+                    decision_time_ms=decision_time_ms, correlation_id=command.trade_intent_id)
+                started = True
+                ref = self._log(EventKind.ORDER_COMMAND, payload, now_ms=now_ms,
+                    corr=command.trade_intent_id, decision_time=decision_time_ms)
+                if ref != event.hash:
+                    raise RouterError('entry command publication identity changed')
+            # This is a new, read-only transaction after the writer committed.
+            # A lost commit ACK or failed readback cannot authorize transport.
+            with committed_source_snapshot(self.ledger):
+                rows = [e for e in self.ledger.iter(EventKind.ORDER_COMMAND)
+                        if e.payload.get('idempotency_key') == command.idempotency_key]
+                if (len(rows) != 1 or rows[0].hash != event.hash
+                    or rows[0].hash != canonical_hash(rows[0].body())
+                    or rows[0].body() != event.body()):
+                    raise RouterError('original committed entry command readback differs')
+            self._seen.add(command.idempotency_key)
+            return now_ms
+        except Exception:
+            if started:
+                self._seen.add(command.idempotency_key)
+&gt;               raise EntryDispatchUnknown(command) from None
+E               vati.execution.router.EntryDispatchUnknown: entry command commit/readback unavailable; reconcile original idempotency key before retry
+
+trading/vati/execution/router.py:176: EntryDispatchUnknown</failure></testcase><testcase classname="trading.tests.test_mandate_dispatch_validity" name="test_actual_single_symbol_factory_uses_its_current_clock_after_native_guard_acquisition" time="0.893" /><testcase classname="trading.tests.test_mandate_dispatch_validity" name="test_actual_book_factory_rechecks_its_own_clock_before_the_native_sender" time="0.001"><skipped type="pytest.skip" message="requires isolated PostgreSQL fixture">/workspace/van-review-2026-10-18/publish/trading/tests/test_mandate_dispatch_validity.py:142: requires isolated PostgreSQL fixture</skipped></testcase><testcase classname="trading.tests.test_dispatch_current_controls" name="test_valid_current_controls_reach_actual_sender_at_the_mark_age_boundary" time="0.006"><failure message="vati.execution.router.EntryDispatchUnknown: entry command commit/readback unavailable; reconcile original idempotency key before retry">eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_valid_current_controls_reach_actual_sender_at_the_mark_age_boundary(eurusd):
+        paper,ledger,router,clock,routes,trade,send=prepared(eurusd)
+        @contextmanager
+        def boundary(epoch):clock['ms']+=30;yield True
+        router.lease_submission_guard=boundary
+&gt;       receipt=send()
+                ^^^^^^
+
+trading/tests/test_dispatch_current_controls.py:38: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_dispatch_current_controls.py:27: in send
+    return router.execute(trade,decision,m,now_ms=NOW*1000,execution_policy_decision=policy,
+trading/vati/execution/router.py:656: in execute
+    now_ms = self._commit_entry_command(cmd, {
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;vati.execution.router.ExecutionRouter object at 0x7fdc5db87050&gt;
+command = OrderCommand(trade_intent_id='ti-1', decision_hash='e6216704024197e81bd57fe130ba4161369ea34c4036074eb5f7d4266d7defd0',...egy_version='4.2.1', lease_epoch=None, command_hash='dc378b5666f7b006949fc81e6e46a68e2d24b2b61884078572858cd0f60a1fc0')
+payload = {'trade_intent_id': 'ti-1', 'decision_hash': 'e6216704024197e81bd57fe130ba4161369ea34c4036074eb5f7d4266d7defd0', 'idempotency_key': 'idem-1', 'account_alias': 'fx_primary', ...}
+mandate = TradingMandate(mandate_id='mandate-fx-primary', version='1.0.0', account_alias='fx_primary', venue='paper', mode=&lt;Auth...se)), strategy_risk_budgets={}, trading_temperament=None, strategy_temperaments={}, temperament_owner_signature_ref='')
+now_ms = 1800000000030, decision_time_ms = 1800000000000
+recheck = &lt;function ExecutionRouter.execute.&lt;locals&gt;.recheck_after_writer at 0x7fdc5db953a0&gt;
+
+    def _commit_entry_command(self, command, payload, mandate, *, now_ms, decision_time_ms,
+                              recheck):
+        """Serialize the final duplicate check and commit before any transport.
+    
+        The in-memory set is an early refusal cache only. A second, already
+        constructed router must observe the original durable command under the
+        same SQL writer. A caller transaction cannot publish an uncommitted
+        command then roll it back after an irreversible native submission.
+        This entry fence is not a financial reservation or parent budget.
+        """
+        require_committed_source_read(self.ledger)
+        if getattr(self.ledger, '_read_snapshot_depth', 0):
+            raise RouterError('entry dispatch requires its own committed writer')
+        started = False
+        try:
+            with self.ledger.atomic():
+                if not self.ledger.verify_incremental()[0]:
+                    raise RouterError('entry command journal invalid; reconciliation required')
+                if any(e.payload.get('idempotency_key') == command.idempotency_key
+                       for e in self.ledger.iter(EventKind.ORDER_COMMAND)):
+                    self._seen.add(command.idempotency_key)
+                    raise RouterError('duplicate idempotency key in committed entry journal')
+                # Writer acquisition may block. Recheck the original grant,
+                # lease, kill state, command controls and deadlines after it.
+                now_ms = recheck(now_ms)
+                event = make_event(EventKind.ORDER_COMMAND, self.producer, payload,
+                    event_time_ms=now_ms, received_time_ms=now_ms,
+                    decision_time_ms=decision_time_ms, correlation_id=command.trade_intent_id)
+                started = True
+                ref = self._log(EventKind.ORDER_COMMAND, payload, now_ms=now_ms,
+                    corr=command.trade_intent_id, decision_time=decision_time_ms)
+                if ref != event.hash:
+                    raise RouterError('entry command publication identity changed')
+            # This is a new, read-only transaction after the writer committed.
+            # A lost commit ACK or failed readback cannot authorize transport.
+            with committed_source_snapshot(self.ledger):
+                rows = [e for e in self.ledger.iter(EventKind.ORDER_COMMAND)
+                        if e.payload.get('idempotency_key') == command.idempotency_key]
+                if (len(rows) != 1 or rows[0].hash != event.hash
+                    or rows[0].hash != canonical_hash(rows[0].body())
+                    or rows[0].body() != event.body()):
+                    raise RouterError('original committed entry command readback differs')
+            self._seen.add(command.idempotency_key)
+            return now_ms
+        except Exception:
+            if started:
+                self._seen.add(command.idempotency_key)
+&gt;               raise EntryDispatchUnknown(command) from None
+E               vati.execution.router.EntryDispatchUnknown: entry command commit/readback unavailable; reconcile original idempotency key before retry
+
+trading/vati/execution/router.py:176: EntryDispatchUnknown</failure></testcase><testcase classname="trading.tests.test_dispatch_current_controls" name="test_owner_halt_after_initial_check_stops_new_dispatch_without_consuming_intent[heartbeat]" time="0.005" /><testcase classname="trading.tests.test_dispatch_current_controls" name="test_owner_halt_after_initial_check_stops_new_dispatch_without_consuming_intent[guard]" time="0.006" /><testcase classname="trading.tests.test_dispatch_current_controls" name="test_owner_halt_after_initial_check_stops_new_dispatch_without_consuming_intent[last_fence]" time="0.004" /><testcase classname="trading.tests.test_dispatch_current_controls" name="test_native_read_or_guard_delay_cannot_reuse_a_stale_mark[heartbeat]" time="0.005" /><testcase classname="trading.tests.test_dispatch_current_controls" name="test_native_read_or_guard_delay_cannot_reuse_a_stale_mark[guard]" time="0.006" /><testcase classname="trading.tests.test_dispatch_current_controls" name="test_native_read_or_guard_delay_cannot_reuse_a_stale_mark[last_fence]" time="0.005" /><testcase classname="trading.tests.test_dispatch_current_controls" name="test_route_disabled_while_acquiring_the_guard_cannot_reach_actual_sender" time="0.005" /><testcase classname="trading.tests.test_dispatch_current_controls" name="test_quote_age_includes_waiting_before_native_reads_and_rejects_unknown_or_future_origin[17-6500-10000-3517]" time="0.001" /><testcase classname="trading.tests.test_dispatch_current_controls" name="test_quote_age_includes_waiting_before_native_reads_and_rejects_unknown_or_future_origin[-1-7000-10000--1]" time="0.001" /><testcase classname="trading.tests.test_dispatch_current_controls" name="test_quote_age_includes_waiting_before_native_reads_and_rejects_unknown_or_future_origin[0-10001-10000--1]" time="0.001" /><testcase classname="trading.tests.test_dispatch_current_controls" name="test_quote_age_includes_waiting_before_native_reads_and_rejects_unknown_or_future_origin[17-10001-10000--1]" time="0.001" /><testcase classname="trading.tests.test_dispatch_current_controls" name="test_quote_age_includes_waiting_before_native_reads_and_rejects_unknown_or_future_origin[0-None-10000--1]" time="0.001" /><testcase classname="trading.tests.test_dispatch_current_controls" name="test_quote_age_includes_waiting_before_native_reads_and_rejects_unknown_or_future_origin[True-7000-10000--1]" time="0.001" /><testcase classname="trading.tests.test_dispatch_current_controls" name="test_quote_age_includes_waiting_before_native_reads_and_rejects_unknown_or_future_origin[0-7000-True--1]" time="0.001" /><testcase classname="trading.tests.test_dispatch_current_controls" name="test_changed_lot_contract_after_initial_pretrade_is_refused_without_resizing_command" time="0.006" /><testcase classname="trading.tests.test_dispatch_current_controls" name="test_actual_single_service_preserves_snapshot_quote_age_through_guard_delay" time="0.663" /><testcase classname="trading.tests.test_dispatch_current_controls" name="test_actual_account_delta_sender_ages_original_market_state_before_router[30-True]" time="0.060"><failure message="AttributeError: 'NoneType' object has no attribute 'status'">eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+age = 30, allowed = True
+
+    @pytest.mark.parametrize('age,allowed',[(30,True),(31,False)])
+    def test_actual_account_delta_sender_ages_original_market_state_before_router(eurusd,age,allowed):
+        from types import SimpleNamespace as N
+        from vati.app.account_service import AccountCoordinatorService
+        from vati.accounts import BrokerKind
+        paper,ledger,router,clock,routes,trade,send=prepared(eurusd)
+        m,trade,native=flow(eurusd);decision=RiskAuthority(m).evaluate_safe(trade,native)
+        assert decision.decision in {Decision.APPROVED,Decision.REDUCED}
+        service=AccountCoordinatorService.__new__(AccountCoordinatorService)
+        state=N(as_of_ms=clock['ms']-age,quote_age_ms=0,features=N(close=trade.entry),session=N(value='LONDON'),
+            regime=N(vol=N(value='NORMAL')),event_window=N(value='NONE'))
+        service.evaluators={'EURUSD':N(last_state=state)};service.router=router;service.mandate=m
+        service.account=N(alias=m.account_alias,broker=BrokerKind.PAPER);service.policy=ExecutionPolicyEngine()
+        service.routes=routes;service.contracts={'EURUSD':replace(eurusd,venue='paper')};service.clock=lambda:clock['ms']
+        service.lease=None;service.specs={'EURUSD':N(time_in_force='DAY')};service.cfg=N(max_quote_age_ms=30)
+        service._ledger=ledger
+        result=service._execute_delta(trade,decision)
+        if allowed:
+&gt;           assert result.status=='FILLED' and paper.positions() and ledger.count(EventKind.ORDER_COMMAND)==1
+                   ^^^^^^^^^^^^^
+E           AttributeError: 'NoneType' object has no attribute 'status'
+
+trading/tests/test_dispatch_current_controls.py:178: AttributeError</failure></testcase><testcase classname="trading.tests.test_dispatch_current_controls" name="test_actual_account_delta_sender_ages_original_market_state_before_router[31-False]" time="0.006" /><testcase classname="trading.tests.test_dispatch_current_controls" name="test_actual_account_entry_sender_does_not_reset_age_to_a_fresh_reference" time="0.006" /><testcase classname="trading.tests.test_router_native_entry_deadline" name="test_original_router_mandate_deadline_is_in_the_actual_signed_native_request" time="0.042"><failure message="vati.execution.router.EntryDispatchUnknown: entry command commit/readback unavailable; reconcile original idempotency key before retry">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-250/test_original_router_mandate_d0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_original_router_mandate_deadline_is_in_the_actual_signed_native_request(tmp_path, eurusd):
+        sdk, worker, adapter, clock, mandate, trade, approved, ledger, router = flow(tmp_path, eurusd)
+&gt;       result = router.execute(trade, approved, mandate, now_ms=clock['ms'], entry_type='MARKET')
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_router_native_entry_deadline.py:39: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/execution/router.py:656: in execute
+    now_ms = self._commit_entry_command(cmd, {
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;vati.execution.router.ExecutionRouter object at 0x7fdc5d7f6060&gt;
+command = OrderCommand(trade_intent_id='ti-1', decision_hash='1ee68e332c3f23e07e1d5991dc903381a638ab63a3177d43530b3addce092481',...egy_version='4.2.1', lease_epoch=None, command_hash='8a03f61f37905fecaeecffafe5a2fcdede8a5f8e0bdea25249abb80dcd5c2d18')
+payload = {'trade_intent_id': 'ti-1', 'decision_hash': '1ee68e332c3f23e07e1d5991dc903381a638ab63a3177d43530b3addce092481', 'idempotency_key': 'idem-1', 'account_alias': 'native', ...}
+mandate = TradingMandate(mandate_id='mandate-fx-primary', version='1.0.0', account_alias='native', venue='mt5', mode=&lt;Authorizat...se)), strategy_risk_budgets={}, trading_temperament=None, strategy_temperaments={}, temperament_owner_signature_ref='')
+now_ms = 1800000000000, decision_time_ms = 1800000000000
+recheck = &lt;function ExecutionRouter.execute.&lt;locals&gt;.recheck_after_writer at 0x7fdc5d7877e0&gt;
+
+    def _commit_entry_command(self, command, payload, mandate, *, now_ms, decision_time_ms,
+                              recheck):
+        """Serialize the final duplicate check and commit before any transport.
+    
+        The in-memory set is an early refusal cache only. A second, already
+        constructed router must observe the original durable command under the
+        same SQL writer. A caller transaction cannot publish an uncommitted
+        command then roll it back after an irreversible native submission.
+        This entry fence is not a financial reservation or parent budget.
+        """
+        require_committed_source_read(self.ledger)
+        if getattr(self.ledger, '_read_snapshot_depth', 0):
+            raise RouterError('entry dispatch requires its own committed writer')
+        started = False
+        try:
+            with self.ledger.atomic():
+                if not self.ledger.verify_incremental()[0]:
+                    raise RouterError('entry command journal invalid; reconciliation required')
+                if any(e.payload.get('idempotency_key') == command.idempotency_key
+                       for e in self.ledger.iter(EventKind.ORDER_COMMAND)):
+                    self._seen.add(command.idempotency_key)
+                    raise RouterError('duplicate idempotency key in committed entry journal')
+                # Writer acquisition may block. Recheck the original grant,
+                # lease, kill state, command controls and deadlines after it.
+                now_ms = recheck(now_ms)
+                event = make_event(EventKind.ORDER_COMMAND, self.producer, payload,
+                    event_time_ms=now_ms, received_time_ms=now_ms,
+                    decision_time_ms=decision_time_ms, correlation_id=command.trade_intent_id)
+                started = True
+                ref = self._log(EventKind.ORDER_COMMAND, payload, now_ms=now_ms,
+                    corr=command.trade_intent_id, decision_time=decision_time_ms)
+                if ref != event.hash:
+                    raise RouterError('entry command publication identity changed')
+            # This is a new, read-only transaction after the writer committed.
+            # A lost commit ACK or failed readback cannot authorize transport.
+            with committed_source_snapshot(self.ledger):
+                rows = [e for e in self.ledger.iter(EventKind.ORDER_COMMAND)
+                        if e.payload.get('idempotency_key') == command.idempotency_key]
+                if (len(rows) != 1 or rows[0].hash != event.hash
+                    or rows[0].hash != canonical_hash(rows[0].body())
+                    or rows[0].body() != event.body()):
+                    raise RouterError('original committed entry command readback differs')
+            self._seen.add(command.idempotency_key)
+            return now_ms
+        except Exception:
+            if started:
+                self._seen.add(command.idempotency_key)
+&gt;               raise EntryDispatchUnknown(command) from None
+E               vati.execution.router.EntryDispatchUnknown: entry command commit/readback unavailable; reconcile original idempotency key before retry
+
+trading/vati/execution/router.py:176: EntryDispatchUnknown</failure></testcase><testcase classname="trading.tests.test_router_native_entry_deadline" name="test_native_quote_after_router_preflight_cannot_outlive_the_original_mandate" time="0.036"><failure message="vati.execution.router.EntryDispatchUnknown: entry command commit/readback unavailable; reconcile original idempotency key before retry">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-250/test_native_quote_after_router0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_native_quote_after_router_preflight_cannot_outlive_the_original_mandate(tmp_path, eurusd):
+        sdk, worker, adapter, clock, mandate, trade, approved, ledger, router = flow(tmp_path, eurusd)
+        native_quote = sdk.symbol_info_tick
+        calls=[]
+        def delayed(symbol):
+            value=native_quote(symbol);calls.append(symbol)
+            if len(calls)==2:clock['ms']=mandate.expires_at_unix*1000
+            return value
+        sdk.symbol_info_tick=delayed
+&gt;       result=router.execute(trade,approved,mandate,now_ms=clock['ms'],entry_type='MARKET')
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_router_native_entry_deadline.py:57: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/execution/router.py:656: in execute
+    now_ms = self._commit_entry_command(cmd, {
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;vati.execution.router.ExecutionRouter object at 0x7fdc5d704fe0&gt;
+command = OrderCommand(trade_intent_id='ti-1', decision_hash='c97a1bf8b0d6412ee94132daa28de5653eef4b7f490fef84403890deeb901768',...egy_version='4.2.1', lease_epoch=None, command_hash='301f9095af1fe3e82132d2bcfce3acc03cffdbeb1b379e7f421845ba98d0814d')
+payload = {'trade_intent_id': 'ti-1', 'decision_hash': 'c97a1bf8b0d6412ee94132daa28de5653eef4b7f490fef84403890deeb901768', 'idempotency_key': 'idem-1', 'account_alias': 'native', ...}
+mandate = TradingMandate(mandate_id='mandate-fx-primary', version='1.0.0', account_alias='native', venue='mt5', mode=&lt;Authorizat...se)), strategy_risk_budgets={}, trading_temperament=None, strategy_temperaments={}, temperament_owner_signature_ref='')
+now_ms = 1800000000000, decision_time_ms = 1800000000000
+recheck = &lt;function ExecutionRouter.execute.&lt;locals&gt;.recheck_after_writer at 0x7fdc5d702480&gt;
+
+    def _commit_entry_command(self, command, payload, mandate, *, now_ms, decision_time_ms,
+                              recheck):
+        """Serialize the final duplicate check and commit before any transport.
+    
+        The in-memory set is an early refusal cache only. A second, already
+        constructed router must observe the original durable command under the
+        same SQL writer. A caller transaction cannot publish an uncommitted
+        command then roll it back after an irreversible native submission.
+        This entry fence is not a financial reservation or parent budget.
+        """
+        require_committed_source_read(self.ledger)
+        if getattr(self.ledger, '_read_snapshot_depth', 0):
+            raise RouterError('entry dispatch requires its own committed writer')
+        started = False
+        try:
+            with self.ledger.atomic():
+                if not self.ledger.verify_incremental()[0]:
+                    raise RouterError('entry command journal invalid; reconciliation required')
+                if any(e.payload.get('idempotency_key') == command.idempotency_key
+                       for e in self.ledger.iter(EventKind.ORDER_COMMAND)):
+                    self._seen.add(command.idempotency_key)
+                    raise RouterError('duplicate idempotency key in committed entry journal')
+                # Writer acquisition may block. Recheck the original grant,
+                # lease, kill state, command controls and deadlines after it.
+                now_ms = recheck(now_ms)
+                event = make_event(EventKind.ORDER_COMMAND, self.producer, payload,
+                    event_time_ms=now_ms, received_time_ms=now_ms,
+                    decision_time_ms=decision_time_ms, correlation_id=command.trade_intent_id)
+                started = True
+                ref = self._log(EventKind.ORDER_COMMAND, payload, now_ms=now_ms,
+                    corr=command.trade_intent_id, decision_time=decision_time_ms)
+                if ref != event.hash:
+                    raise RouterError('entry command publication identity changed')
+            # This is a new, read-only transaction after the writer committed.
+            # A lost commit ACK or failed readback cannot authorize transport.
+            with committed_source_snapshot(self.ledger):
+                rows = [e for e in self.ledger.iter(EventKind.ORDER_COMMAND)
+                        if e.payload.get('idempotency_key') == command.idempotency_key]
+                if (len(rows) != 1 or rows[0].hash != event.hash
+                    or rows[0].hash != canonical_hash(rows[0].body())
+                    or rows[0].body() != event.body()):
+                    raise RouterError('original committed entry command readback differs')
+            self._seen.add(command.idempotency_key)
+            return now_ms
+        except Exception:
+            if started:
+                self._seen.add(command.idempotency_key)
+&gt;               raise EntryDispatchUnknown(command) from None
+E               vati.execution.router.EntryDispatchUnknown: entry command commit/readback unavailable; reconcile original idempotency key before retry
+
+trading/vati/execution/router.py:176: EntryDispatchUnknown</failure></testcase><testcase classname="trading.tests.test_router_native_entry_deadline" name="test_original_quote_lifetime_is_not_renewed_inside_native_adapter_io[False]" time="0.039"><failure message="vati.execution.router.EntryDispatchUnknown: entry command commit/readback unavailable; reconcile original idempotency key before retry">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-250/test_original_quote_lifetime_i0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+late = False
+
+    @pytest.mark.parametrize('late', [False, True])
+    def test_original_quote_lifetime_is_not_renewed_inside_native_adapter_io(tmp_path, eurusd, late):
+        from vati.execution.pretrade import MarketReference
+        sdk, worker, adapter, clock, mandate, trade, approved, ledger, router = flow(tmp_path, eurusd)
+        started=clock['ms']; original=sdk.symbol_info_tick; calls=[]
+        def quote(symbol):
+            value=original(symbol);calls.append(symbol)
+            if late and len(calls)==2:clock['ms']=started+101
+            return value
+        sdk.symbol_info_tick=quote
+&gt;       result=router.execute(trade,approved,mandate,now_ms=started,entry_type='MARKET',
+            market_reference=MarketReference(trade.entry,0,100))
+
+trading/tests/test_router_native_entry_deadline.py:73: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/execution/router.py:656: in execute
+    now_ms = self._commit_entry_command(cmd, {
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;vati.execution.router.ExecutionRouter object at 0x7fdc5d778c80&gt;
+command = OrderCommand(trade_intent_id='ti-1', decision_hash='9543150d0081b72f31f4a2a6c33e893d56619c55bb7dd2c719207845ef0b19cc',...egy_version='4.2.1', lease_epoch=None, command_hash='fa0af730da409c33c7198a1baf180f3a3db31c4bd8ae72ffed6417f48f61664c')
+payload = {'trade_intent_id': 'ti-1', 'decision_hash': '9543150d0081b72f31f4a2a6c33e893d56619c55bb7dd2c719207845ef0b19cc', 'idempotency_key': 'idem-1', 'account_alias': 'native', ...}
+mandate = TradingMandate(mandate_id='mandate-fx-primary', version='1.0.0', account_alias='native', venue='mt5', mode=&lt;Authorizat...se)), strategy_risk_budgets={}, trading_temperament=None, strategy_temperaments={}, temperament_owner_signature_ref='')
+now_ms = 1800000000000, decision_time_ms = 1800000000000
+recheck = &lt;function ExecutionRouter.execute.&lt;locals&gt;.recheck_after_writer at 0x7fdc5d787560&gt;
+
+    def _commit_entry_command(self, command, payload, mandate, *, now_ms, decision_time_ms,
+                              recheck):
+        """Serialize the final duplicate check and commit before any transport.
+    
+        The in-memory set is an early refusal cache only. A second, already
+        constructed router must observe the original durable command under the
+        same SQL writer. A caller transaction cannot publish an uncommitted
+        command then roll it back after an irreversible native submission.
+        This entry fence is not a financial reservation or parent budget.
+        """
+        require_committed_source_read(self.ledger)
+        if getattr(self.ledger, '_read_snapshot_depth', 0):
+            raise RouterError('entry dispatch requires its own committed writer')
+        started = False
+        try:
+            with self.ledger.atomic():
+                if not self.ledger.verify_incremental()[0]:
+                    raise RouterError('entry command journal invalid; reconciliation required')
+                if any(e.payload.get('idempotency_key') == command.idempotency_key
+                       for e in self.ledger.iter(EventKind.ORDER_COMMAND)):
+                    self._seen.add(command.idempotency_key)
+                    raise RouterError('duplicate idempotency key in committed entry journal')
+                # Writer acquisition may block. Recheck the original grant,
+                # lease, kill state, command controls and deadlines after it.
+                now_ms = recheck(now_ms)
+                event = make_event(EventKind.ORDER_COMMAND, self.producer, payload,
+                    event_time_ms=now_ms, received_time_ms=now_ms,
+                    decision_time_ms=decision_time_ms, correlation_id=command.trade_intent_id)
+                started = True
+                ref = self._log(EventKind.ORDER_COMMAND, payload, now_ms=now_ms,
+                    corr=command.trade_intent_id, decision_time=decision_time_ms)
+                if ref != event.hash:
+                    raise RouterError('entry command publication identity changed')
+            # This is a new, read-only transaction after the writer committed.
+            # A lost commit ACK or failed readback cannot authorize transport.
+            with committed_source_snapshot(self.ledger):
+                rows = [e for e in self.ledger.iter(EventKind.ORDER_COMMAND)
+                        if e.payload.get('idempotency_key') == command.idempotency_key]
+                if (len(rows) != 1 or rows[0].hash != event.hash
+                    or rows[0].hash != canonical_hash(rows[0].body())
+                    or rows[0].body() != event.body()):
+                    raise RouterError('original committed entry command readback differs')
+            self._seen.add(command.idempotency_key)
+            return now_ms
+        except Exception:
+            if started:
+                self._seen.add(command.idempotency_key)
+&gt;               raise EntryDispatchUnknown(command) from None
+E               vati.execution.router.EntryDispatchUnknown: entry command commit/readback unavailable; reconcile original idempotency key before retry
+
+trading/vati/execution/router.py:176: EntryDispatchUnknown</failure></testcase><testcase classname="trading.tests.test_router_native_entry_deadline" name="test_original_quote_lifetime_is_not_renewed_inside_native_adapter_io[True]" time="0.036"><failure message="vati.execution.router.EntryDispatchUnknown: entry command commit/readback unavailable; reconcile original idempotency key before retry">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-250/test_original_quote_lifetime_i1')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+late = True
+
+    @pytest.mark.parametrize('late', [False, True])
+    def test_original_quote_lifetime_is_not_renewed_inside_native_adapter_io(tmp_path, eurusd, late):
+        from vati.execution.pretrade import MarketReference
+        sdk, worker, adapter, clock, mandate, trade, approved, ledger, router = flow(tmp_path, eurusd)
+        started=clock['ms']; original=sdk.symbol_info_tick; calls=[]
+        def quote(symbol):
+            value=original(symbol);calls.append(symbol)
+            if late and len(calls)==2:clock['ms']=started+101
+            return value
+        sdk.symbol_info_tick=quote
+&gt;       result=router.execute(trade,approved,mandate,now_ms=started,entry_type='MARKET',
+            market_reference=MarketReference(trade.entry,0,100))
+
+trading/tests/test_router_native_entry_deadline.py:73: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/execution/router.py:656: in execute
+    now_ms = self._commit_entry_command(cmd, {
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;vati.execution.router.ExecutionRouter object at 0x7fdc5d779d90&gt;
+command = OrderCommand(trade_intent_id='ti-1', decision_hash='77982f8c59e34a17dad963c7656e0485ba688fe977147cf8aa3aec0d6ec5d758',...egy_version='4.2.1', lease_epoch=None, command_hash='a4771bcb2780cc72e28927fb8771bfc2322f71a0fdcd4ad4de975365f730fa9a')
+payload = {'trade_intent_id': 'ti-1', 'decision_hash': '77982f8c59e34a17dad963c7656e0485ba688fe977147cf8aa3aec0d6ec5d758', 'idempotency_key': 'idem-1', 'account_alias': 'native', ...}
+mandate = TradingMandate(mandate_id='mandate-fx-primary', version='1.0.0', account_alias='native', venue='mt5', mode=&lt;Authorizat...se)), strategy_risk_budgets={}, trading_temperament=None, strategy_temperaments={}, temperament_owner_signature_ref='')
+now_ms = 1800000000000, decision_time_ms = 1800000000000
+recheck = &lt;function ExecutionRouter.execute.&lt;locals&gt;.recheck_after_writer at 0x7fdc5d7847c0&gt;
+
+    def _commit_entry_command(self, command, payload, mandate, *, now_ms, decision_time_ms,
+                              recheck):
+        """Serialize the final duplicate check and commit before any transport.
+    
+        The in-memory set is an early refusal cache only. A second, already
+        constructed router must observe the original durable command under the
+        same SQL writer. A caller transaction cannot publish an uncommitted
+        command then roll it back after an irreversible native submission.
+        This entry fence is not a financial reservation or parent budget.
+        """
+        require_committed_source_read(self.ledger)
+        if getattr(self.ledger, '_read_snapshot_depth', 0):
+            raise RouterError('entry dispatch requires its own committed writer')
+        started = False
+        try:
+            with self.ledger.atomic():
+                if not self.ledger.verify_incremental()[0]:
+                    raise RouterError('entry command journal invalid; reconciliation required')
+                if any(e.payload.get('idempotency_key') == command.idempotency_key
+                       for e in self.ledger.iter(EventKind.ORDER_COMMAND)):
+                    self._seen.add(command.idempotency_key)
+                    raise RouterError('duplicate idempotency key in committed entry journal')
+                # Writer acquisition may block. Recheck the original grant,
+                # lease, kill state, command controls and deadlines after it.
+                now_ms = recheck(now_ms)
+                event = make_event(EventKind.ORDER_COMMAND, self.producer, payload,
+                    event_time_ms=now_ms, received_time_ms=now_ms,
+                    decision_time_ms=decision_time_ms, correlation_id=command.trade_intent_id)
+                started = True
+                ref = self._log(EventKind.ORDER_COMMAND, payload, now_ms=now_ms,
+                    corr=command.trade_intent_id, decision_time=decision_time_ms)
+                if ref != event.hash:
+                    raise RouterError('entry command publication identity changed')
+            # This is a new, read-only transaction after the writer committed.
+            # A lost commit ACK or failed readback cannot authorize transport.
+            with committed_source_snapshot(self.ledger):
+                rows = [e for e in self.ledger.iter(EventKind.ORDER_COMMAND)
+                        if e.payload.get('idempotency_key') == command.idempotency_key]
+                if (len(rows) != 1 or rows[0].hash != event.hash
+                    or rows[0].hash != canonical_hash(rows[0].body())
+                    or rows[0].body() != event.body()):
+                    raise RouterError('original committed entry command readback differs')
+            self._seen.add(command.idempotency_key)
+            return now_ms
+        except Exception:
+            if started:
+                self._seen.add(command.idempotency_key)
+&gt;               raise EntryDispatchUnknown(command) from None
+E               vati.execution.router.EntryDispatchUnknown: entry command commit/readback unavailable; reconcile original idempotency key before retry
+
+trading/vati/execution/router.py:176: EntryDispatchUnknown</failure></testcase></testsuite></testsuites>

@@ -1,0 +1,6 @@
+{
+  "time": "2026-10-30T12:25:25.426775+00:00",
+  "owned_pid": 124318,
+  "command": "/workspace/van-backend-venv-20261025/bin/python tools/rebuild/source_storage_audit.py --report /workspace/van-ctrader-close-cost-full-r1-20261030/storage-audit.json trading/tests backend/tests/test_trading_api.py backend/tests/test_van_private_core_service.py tests/rebuild/test_mt5_cash_unit_source.py --junitxml=/workspace/van-ctrader-close-cost-full-r1-20261030/full-trading.xml -p van_pytest_live_diagnostics -o faulthandler_timeout=0 -q ",
+  "reason": "Stop incomplete source qualification before edits: historical default-zero receipts lack charge provenance. Add exact measured fee-source evidence without changing legacy receipt seals; final inputs must be requalified. No passing full-suite claim."
+}

@@ -1,0 +1,379 @@
+{
+  "schema": "van.rebuild.mt5-durable-replay-source/1",
+  "observed_at_utc": "2026-10-23T15:07:55.615174+00:00",
+  "source_parent": "2e93ab52066565dc81edf9a92ed3423e70c64edc",
+  "source_sha256": {
+    "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py": "16702a2f3d7d6f04490429c4c775098dee06d8cbbbb1761618eeba89624f42db",
+    "trading/vati/execution/mt5_bridge.py": "d2d35c45893f14f8b2f3f1b5cfec98c0dc07ce3f2ead68236802f384e3b23023",
+    "trading/tests/test_mt5_worker.py": "44a5e2018320eb4d2a19413318e657de8ed2bedb12ed92e96d5b23aac68e2fb8",
+    "trading/tests/test_mt5_physical_identity.py": "c4bd001c24b50e098e788772d182899450922a4dc8026618f523b7ab6f53ee03",
+    "trading/tests/test_mt5_nonce_durability.py": "43562383f6fa9cffa77d27b4459a2245c4c0b405d57f7b3b107e6584c951c603",
+    "deploy/van-trading-core/windows/mt5_worker/README.md": "886e5a8023708b03169e6a70bca07b7612617b232dd8aa07cb7cd295d5c275b8"
+  },
+  "executions": {
+    "initial_two_before": {
+      "tests": 2,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.534,
+      "sha256": "249a789ae405b0906438a6fbaaace69c72ffbef9e14071abfd8a210cd50e9912"
+    },
+    "isolated_first": {
+      "tests": 76,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 2.268,
+      "sha256": "299aee21464bb8abc2d3f9c40f60672a01f484d1941aeacb43fead07133e16e4"
+    },
+    "isolated_expanded": {
+      "tests": 89,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 7.373,
+      "sha256": "ca1d3456449ed64da06813071c59846bb04c9e5c5b28cd56f1316a1c26f3d931"
+    },
+    "missing_clock_before": {
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.113,
+      "sha256": "6a7b91b058e56ba972d9ff4752f02b0ff736f523c4d9587dd5f575f9cf6aa12b"
+    },
+    "isolated_final": {
+      "tests": 91,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 7.642,
+      "sha256": "4f372e1452ae84fe0b9eae2da5c05526f3220c0bd2a0b09629b8547325d3c248"
+    },
+    "integrated_before": {
+      "tests": 2,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.541,
+      "sha256": "13e76272fde4eddbd756448cfd65ace6f6a6f834297d4698dfa5c267f2b1eb57"
+    },
+    "integrated_focused": {
+      "tests": 91,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 7.542,
+      "sha256": "962a7744b0809dcffee47a1932ccbaf66af087b2d925671890772395c3b3eabc"
+    },
+    "full_trading_actual_pg": {
+      "tests": 2517,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 535.767,
+      "sha256": "541f5049202fc69ebc2124070e0967a7294fe56711530159cca7649393001bf7"
+    }
+  },
+  "fault_campaign": {
+    "definitions": [
+      [
+        "admit the same nonce twice",
+        "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py",
+        "INSERT OR IGNORE INTO van_native_nonces(nonce,seen_ms) VALUES(?,?)",
+        "INSERT INTO van_native_nonces(nonce,seen_ms) VALUES(?,?) ON CONFLICT(nonce) DO UPDATE SET seen_ms=excluded.seen_ms",
+        "trading/tests/test_mt5_nonce_durability.py::test_independent_native_workers_share_a_durable_single_use_request_identity"
+      ],
+      [
+        "discard durable nonce before SDK effect",
+        "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py",
+        "            db.commit()\n            return inserted",
+        "            db.rollback()\n            return inserted",
+        "trading/tests/test_mt5_nonce_durability.py::test_actual_native_worker_process_restart_cannot_replay_a_signed_sdk_effect"
+      ],
+      [
+        "permit clock rollback after purge",
+        "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py",
+        "if now_ms+SKEW_MS<previous:raise NonceClockRollback()",
+        "if False:raise NonceClockRollback()",
+        "trading/tests/test_mt5_nonce_durability.py::test_purging_expired_nonce_rows_cannot_resurrect_an_old_request_after_clock_rollback"
+      ],
+      [
+        "admit effects when replay storage is locked",
+        "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py",
+        "except sqlite3.Error:\n            raise NonceStoreUnavailable() from None",
+        "except sqlite3.Error:\n            return True",
+        "trading/tests/test_mt5_nonce_durability.py::test_real_native_replay_store_lock_fails_closed_and_recovers_without_dispatch"
+      ],
+      [
+        "coerce nonce boolean into valid request",
+        "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py",
+        "type(req['nonce']) is not int or ",
+        "False or ",
+        "trading/tests/test_mt5_nonce_durability.py::test_malformed_native_headers_are_typed_refusals_before_any_sdk_effect"
+      ],
+      [
+        "use transient default nonce file per worker",
+        "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py",
+        "Path(config['signing_key_file']).name+'.nonces.sqlite3'",
+        "Path(config['signing_key_file']).name+'.'+str(id(self))+'.nonces.sqlite3'",
+        "trading/tests/test_mt5_nonce_durability.py::test_default_replay_path_is_derived_from_the_existing_backend_signing_profile"
+      ],
+      [
+        "overflow client uint128 nonce namespace",
+        "trading/vati/execution/mt5_bridge.py",
+        "if self._nonce & 0xffffffff==0xffffffff:",
+        "if False:",
+        "trading/tests/test_mt5_nonce_durability.py::test_native_nonce_namespace_rollover_stays_inside_the_uint128_wire_contract"
+      ],
+      [
+        "treat missing replay clock as fresh despite history",
+        "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py",
+        "if row is None and db.execute('SELECT 1 FROM van_native_nonces LIMIT 1').fetchone() is not None:",
+        "if False:",
+        "trading/tests/test_mt5_nonce_durability.py::test_a_missing_clock_with_existing_nonce_history_is_not_a_fresh_store"
+      ]
+    ],
+    "records": [
+      {
+        "case": 0,
+        "phase": "control",
+        "reason": "admit the same nonce twice",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "11a7b554290ecfed01486c664c0ef4c1ef03539996ffdf9ee23a48e7b447a051"
+      },
+      {
+        "case": 0,
+        "phase": "fault",
+        "reason": "admit the same nonce twice",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 1,
+        "xml_sha256": "a9424e8703143614a201444771c199fac2e206fd0a063169574460b40f2e2fd6"
+      },
+      {
+        "case": 1,
+        "phase": "control",
+        "reason": "discard durable nonce before SDK effect",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "7c47cc0be49c6098b1c1cba20ee07b2b6ce00f265e7bd7f878d01cba0e6fab3b"
+      },
+      {
+        "case": 1,
+        "phase": "fault",
+        "reason": "discard durable nonce before SDK effect",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 1,
+        "xml_sha256": "b400c28c9d732c1baf56b3d88b5ed7a3b5551efb7ccf5230150aded558ded396"
+      },
+      {
+        "case": 2,
+        "phase": "control",
+        "reason": "permit clock rollback after purge",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "7dddbad36dad6c59874978ac1d5bd417668ce2d1bc3cb6723606f9be8ffa17b3"
+      },
+      {
+        "case": 2,
+        "phase": "fault",
+        "reason": "permit clock rollback after purge",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 1,
+        "xml_sha256": "ecee703c06f9144e8a562773e4d7a3e82bbec518cb55506ac00a311cdcc5c73c"
+      },
+      {
+        "case": 3,
+        "phase": "control",
+        "reason": "admit effects when replay storage is locked",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "8dd8737b006f75dc3264e83cc7e5bc48a1a812db543259c46f289a9d076b8fbc"
+      },
+      {
+        "case": 3,
+        "phase": "fault",
+        "reason": "admit effects when replay storage is locked",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 1,
+        "xml_sha256": "f8aa20d124ded719c6f21c1b3bae279ca0fade49b83b90a356cdb1be5167cd13"
+      },
+      {
+        "case": 4,
+        "phase": "control",
+        "reason": "coerce nonce boolean into valid request",
+        "exit_code": 0,
+        "counts": {
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "6b932d3940e52b88862dd79a4151688c1e0789f579951a3d2ba042d3307dd564"
+      },
+      {
+        "case": 4,
+        "phase": "fault",
+        "reason": "coerce nonce boolean into valid request",
+        "exit_code": 1,
+        "counts": {
+          "tests": 6,
+          "failures": 2,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 1,
+        "xml_sha256": "99007c669ed54a211939dc8656814133c9d8a9900e6a0c8b42b897dce17fa597"
+      },
+      {
+        "case": 5,
+        "phase": "control",
+        "reason": "use transient default nonce file per worker",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "ceb37b0c6c79df90d602da9674afea4723bf8845c51980f90386095f4426bbf3"
+      },
+      {
+        "case": 5,
+        "phase": "fault",
+        "reason": "use transient default nonce file per worker",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 1,
+        "xml_sha256": "6043b3bfbbc94c59e6387fbd7614af2614186660bf11aeff9484a2c58dcdd152"
+      },
+      {
+        "case": 6,
+        "phase": "control",
+        "reason": "overflow client uint128 nonce namespace",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "e18f93643451321b6737f10c534368b7f1489749171d646bc6848235c9cf0d93"
+      },
+      {
+        "case": 6,
+        "phase": "fault",
+        "reason": "overflow client uint128 nonce namespace",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 1,
+        "xml_sha256": "355cccb6f02ba1e9e7a4c30bad3c190134c278cfe47d6b673563e4f2a16219e0"
+      },
+      {
+        "case": 7,
+        "phase": "control",
+        "reason": "treat missing replay clock as fresh despite history",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "d6e1426a1e59fc88e4f9a0b7ebd563978659206a6c14d0a31c51b4caa802ebce"
+      },
+      {
+        "case": 7,
+        "phase": "fault",
+        "reason": "treat missing replay clock as fresh despite history",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 1,
+        "xml_sha256": "2a79da6862ab0882627925bf117b6d3cb9c77e31bd7ed0f63523b37cf6a47938"
+      }
+    ],
+    "before": {
+      "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py": "16702a2f3d7d6f04490429c4c775098dee06d8cbbbb1761618eeba89624f42db",
+      "trading/vati/execution/mt5_bridge.py": "d2d35c45893f14f8b2f3f1b5cfec98c0dc07ce3f2ead68236802f384e3b23023"
+    },
+    "after": {
+      "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py": "16702a2f3d7d6f04490429c4c775098dee06d8cbbbb1761618eeba89624f42db",
+      "trading/vati/execution/mt5_bridge.py": "d2d35c45893f14f8b2f3f1b5cfec98c0dc07ce3f2ead68236802f384e3b23023"
+    },
+    "source_restored": true
+  },
+  "private_pg_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "qualification": "Candidate source only. Persistent single-use authentication cache is not a broker-effect receipt. Shared-file/process-restart and tested clock/corruption guarantees do not certify disk rollback, unshared host replicas, Windows deployment, financial scope/lease/risk/finality or whole-unit/native/production/handset acceptance."
+}

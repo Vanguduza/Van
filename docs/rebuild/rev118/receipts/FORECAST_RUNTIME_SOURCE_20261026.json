@@ -1,0 +1,100 @@
+{
+  "schema": "van.rebuild.forecast-runtime-source/1",
+  "status": "SOURCE_TESTED_COMPONENT_NOT_UNIT_ACCEPTANCE",
+  "base_head": "1f4ecbf748b870b3187ac33ccdac734e375e541c",
+  "updated_at_utc": "2026-10-26T05:03:45.245904+00:00",
+  "unit": "VAN-ML-PKT-004",
+  "unit_status": "IN_PROGRESS",
+  "acceptance": "NOT_ISSUED",
+  "source_sha256": {
+    "trading/vati/__main__.py": "96236bc2d7aa223886aebc8ee8103ad2451bee7d4833be7dc353bc559cb18ff5",
+    "trading/vati/core/model_boundary.py": "9ba4f197858026daaafe553f35fe7e3e982e25524352183fdfe73338343b95bc",
+    "tools/rebuild/run_forecast_runtime_smoke.py": "29814dafdab92a1e05c983d7164ba8b98300198e9173338c9229b1910d1f1f2d",
+    ".github/workflows/van-forecast-runtime-source.yml": "d11b7852a3d4bf29657cfbe2f3c7d9b5c861071ef060c808adfff4f0647115ce",
+    "trading/vati_forecast_worker/README.md": "ecae73ae926be097a35215a01feaa650f018fac2f0f18d7897bcba042a6c68a0",
+    "trading/vati_forecast_worker/__init__.py": "b391b2113172c91b478ab3e84f2705eccafc8bfdd573e151e0c8682c84c4a67e",
+    "trading/vati_forecast_worker/smoke.py": "283d92f9053fd4238ce4861c4e63257ce5ff6468c4cb36326a7fe70ee7b39443",
+    "trading/vati_forecast_worker/inference_smoke.py": "4b96fee5a03cd1ead58b56de7256bb61d1cd00a892364a2be2d5c31ada23c200",
+    "trading/vati_forecast_worker/.dockerignore": "147498c6a65742e4e6f380aabad4a9856ee5074db30a98200f7857de4882996f",
+    "trading/vati_forecast_worker/artifacts.py": "ecae9d896972e99ae94b1ddf901c10588b12cc3d0ff2be9f9ed29c822a69a34f",
+    "trading/vati_forecast_worker/Dockerfile": "5e1ba5a42e20c2e645604b8f4a2a793dfbf5d0c4bc66c9a683024dc4629fa6b1",
+    "trading/vati_forecast_worker/inventory.py": "d1fc5ab35945cfd45579e1191c3d325a66af1ae301047725f754ea924e97fb95",
+    "trading/vati_forecast_worker/policy.py": "1217c358fe804a38fb75ec1cb24b86e9a2721a0e37cb114c69de62ce40897680",
+    "trading/vati_forecast_worker/environment.json": "e0d018057dc17371fafcd97a6a025c1dae0707cb6123e925fe927c9e88f32724",
+    "trading/vati_forecast_worker/verify_wheels.py": "44a23fb7b68161e10fb0f751408c59042af8b5dfa0193d245d96355341de2b20",
+    "trading/vati_forecast_worker/locks/wheel-manifest-cp312-linux-x86_64.json": "bce548621103b5f7239c5de61d44e51b65dbbb7f4e20468f9d0ac2226ee1e04e",
+    "trading/vati_forecast_worker/locks/research-cp312-linux-x86_64.wheel.lock": "cb7658179c9fc4b2f27b48af512f3e74f282b34187a63c095a610cb2fbef1b1e",
+    "trading/vati_forecast_worker/locks/research-cp312-linux-x86_64.source.lock": "16e8f762d29ddac81b4b7024f9e5c675a988815c45b62fbbc97032bccd1db0c5",
+    "trading/vati_forecast_worker/locks/build-cp312-linux-x86_64.lock": "0496f2e6a919f0b7391a91009453b77d9a641b5b8045593d7fa22762e6765a52",
+    "trading/tests/test_forecast_fixture_artifacts.py": "b0da42bffe093b4bdf82ac35137280334ae9194ce637b23ce234ae2e55e9e6a0",
+    "trading/tests/test_forecast_runtime_supervisor.py": "4cbdb5ae85e6df4f2ab4a0fdb543848fc5d9c8a7783d7bc207ed68074542ded9",
+    "trading/tests/test_forecast_worker_policy.py": "b1d1cce001283f1dc662052b3cfcd74c30afd9072255ccc53e46210066399d8c",
+    "trading/tests/test_ml_runtime_boundary.py": "85099ce00edfdfc4d2f254e419f96142a4711994d637a3844c2ac82b944c5a0c"
+  },
+  "evidence": "ci/forecast_runtime_20261026",
+  "actual_research": {
+    "cases": 6,
+    "unexecuted": 0,
+    "data_environment": "FIXTURE",
+    "economic_evidence": false,
+    "execution_authority": false,
+    "locked_distributions": 232,
+    "image_id": "sha256:07722805aed602c59b8250b8b08d6da005211ac72385964b9d78813329cab5da",
+    "controller_sha256": "76a66fe42df34c3c1d68c89e99ee256dacb62cff212324c0381ff1cd264a987d",
+    "model_runtime_sources_match_current": true,
+    "controller_copy_provenance": "Reconstructed by reversing recorded later cleanup/tamper changes;exact original SHA-256 verified"
+  },
+  "cold_inference": {
+    "model_rows": {
+      "qlib_lightgbm": 10,
+      "xgboost": 10,
+      "neuralforecast": 2
+    },
+    "max_abs_error": 0,
+    "training_executed": false,
+    "distinct_containers": true,
+    "independently_absent": true
+  },
+  "tests": {
+    "pre_change_t0": "9 actual serve import-boundary failures;fake model packages reveal import side effects,not upstream model qualification",
+    "postgres": "116 passes/0skips/audit0;pytestexit0;owned pinned isolated PostgreSQL removed;exact then-current source+test digests recorded",
+    "subsequent_test_only_change": {
+      "path": "trading/tests/test_forecast_worker_policy.py",
+      "description": "4 architecture/interpreter refusals now first pin all other platform fields;runtime sources unchanged;latest49control cases pass after restoration"
+    },
+    "latest_controls": {
+      "exit": 0,
+      "cases": 49,
+      "failed_assertions": 0,
+      "errors": 0,
+      "skipped": 0,
+      "storage_audit_violations": 0
+    },
+    "supplemental_faults": {
+      "caught": 8,
+      "setup_errors": 0,
+      "skips": 0,
+      "audit_violations": 0,
+      "exact_source_restoration": true,
+      "not_canonical_374": true
+    },
+    "earlier_selection": "107pass/2PGskip/3PGdeselected retained;subsequent full116PG result executes those cases",
+    "rebuild": "108 passed;document/source checks only",
+    "contracts": "Owner/frontend registries no drift;canonical mutation registry374cases383edits0findings,executionNOT_RUN;consolidation0findings"
+  },
+  "attempts_retained": [
+    "Initial30s container-creation client timeout;original stopped identity reconciled once",
+    "Actual LightGBM missing-libgomp import failure;fixed by pinned Torch bundled OpenMP initialization",
+    "Prototype all6 actual upstream fixture cases pass",
+    "Curated R1 aggregateFAILED_OR_INCOMPLETE on inference creation;later original container inferencePASS separately;original failure preserved",
+    "Curated R2 complete6research+3coldmodel parityPASS;later controller cleanup/tamper guards separately tested"
+  ],
+  "source_build": "Active Docker recipe not locally built;fresh hosted exact-commit build pending,including Gym wheel hash reproducibility;build-only env removed from runtime rather than weakening minimal environment",
+  "remaining": [
+    "Canonical prerequisites BE001/002/003/PRE003 and independent unit acceptance unchanged",
+    "Native authorized host/bootstrap/architecture/capacity/T0 noninterference and complete parser qualification",
+    "Granted real research jobs,dataset entitlements and production artifact lifecycle",
+    "All subsequent forecast/research units,whole backend,Android and native owner/device acceptance"
+  ],
+  "published_previous_head": "receipts/HOSTED_SOURCE_1f4ecbf7.json;17publicjobsPASS/two unwaived mandatoryfailures;does not qualify this later ML source"
+}

@@ -1,0 +1,306 @@
+......FFFFFFFF                                                           [100%]
+=================================== FAILURES ===================================
+_ test_real_sqlite_owner_replay_restores_original_cost_model_without_rewriting_history[.1-False] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-233/test_real_sqlite_owner_replay_2')
+changed_model = '.1', legacy = False
+
+    @pytest.mark.parametrize('legacy', [False, True])
+    @pytest.mark.parametrize('changed_model', [None, '.1', 'NaN'])
+    def test_real_sqlite_owner_replay_restores_original_cost_model_without_rewriting_history(tmp_path, changed_model, legacy):
+        ledger = Ledger(tmp_path/'owner-cost.sqlite3')
+        try:
+>           owner_cost_path(ledger, changed_model, legacy=legacy)
+
+trading/tests/test_mt5_owner_cost_knowledge.py:91: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ledger = <vati.core.ledger.Ledger object at 0x7f65fdd9bdd0>
+changed_model = '.1', legacy = False
+
+    def owner_cost_path(ledger, changed_model=None, *, legacy=False):
+        receipt = replace(_owner_receipt(price='24.90'), fees=D('1.25'), receipt_hash='').sealed()
+        _durable_receipt(ledger, receipt)
+        adapter = OwnerTicketAdapter(equity=D('1000000'), csd_verified=True)
+        life = _lifecycle(ledger, adapter)
+        if legacy:
+            payload = compute_tca(receipt, direction=Direction.LONG, qty=receipt.filled_qty,
+                value_per_unit=D('1'), modelled_cost_pct=D('.0714')).as_dict()
+            del payload['arithmetic']
+            ledger.append(make_event(EventKind.TCA_RECORD, 'vati-account-lifecycle', payload,
+                event_time_ms=2000, received_time_ms=2000, correlation_id=receipt.trade_intent_id))
+        life.adopt_owner_buy_confirmation(receipt, order_payload=ORDER)
+        event = next(ledger.iter(EventKind.TCA_RECORD))
+        expected = D(str(event.payload['cost_ratio']))
+        assert life.entries['intent-1']['cost_ratio'] == expected
+        count = ledger.count()
+        cold = _lifecycle(ledger, adapter)
+        if changed_model is not None:
+            cold.modelled_costs['DELTA'] = D(changed_model)
+        for _ in range(2):
+            cold.adopt_owner_buy_confirmation(receipt, order_payload=ORDER)
+>           assert cold.entries['intent-1']['cost_ratio'] == expected
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: 'cost_ratio'
+
+trading/tests/test_mt5_owner_cost_knowledge.py:78: KeyError
+_ test_real_sqlite_owner_replay_restores_original_cost_model_without_rewriting_history[.1-True] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-233/test_real_sqlite_owner_replay_3')
+changed_model = '.1', legacy = True
+
+    @pytest.mark.parametrize('legacy', [False, True])
+    @pytest.mark.parametrize('changed_model', [None, '.1', 'NaN'])
+    def test_real_sqlite_owner_replay_restores_original_cost_model_without_rewriting_history(tmp_path, changed_model, legacy):
+        ledger = Ledger(tmp_path/'owner-cost.sqlite3')
+        try:
+>           owner_cost_path(ledger, changed_model, legacy=legacy)
+
+trading/tests/test_mt5_owner_cost_knowledge.py:91: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ledger = <vati.core.ledger.Ledger object at 0x7f65fdbc97c0>
+changed_model = '.1', legacy = True
+
+    def owner_cost_path(ledger, changed_model=None, *, legacy=False):
+        receipt = replace(_owner_receipt(price='24.90'), fees=D('1.25'), receipt_hash='').sealed()
+        _durable_receipt(ledger, receipt)
+        adapter = OwnerTicketAdapter(equity=D('1000000'), csd_verified=True)
+        life = _lifecycle(ledger, adapter)
+        if legacy:
+            payload = compute_tca(receipt, direction=Direction.LONG, qty=receipt.filled_qty,
+                value_per_unit=D('1'), modelled_cost_pct=D('.0714')).as_dict()
+            del payload['arithmetic']
+            ledger.append(make_event(EventKind.TCA_RECORD, 'vati-account-lifecycle', payload,
+                event_time_ms=2000, received_time_ms=2000, correlation_id=receipt.trade_intent_id))
+        life.adopt_owner_buy_confirmation(receipt, order_payload=ORDER)
+        event = next(ledger.iter(EventKind.TCA_RECORD))
+        expected = D(str(event.payload['cost_ratio']))
+        assert life.entries['intent-1']['cost_ratio'] == expected
+        count = ledger.count()
+        cold = _lifecycle(ledger, adapter)
+        if changed_model is not None:
+            cold.modelled_costs['DELTA'] = D(changed_model)
+        for _ in range(2):
+            cold.adopt_owner_buy_confirmation(receipt, order_payload=ORDER)
+>           assert cold.entries['intent-1']['cost_ratio'] == expected
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: 'cost_ratio'
+
+trading/tests/test_mt5_owner_cost_knowledge.py:78: KeyError
+_ test_real_sqlite_owner_replay_restores_original_cost_model_without_rewriting_history[NaN-False] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-233/test_real_sqlite_owner_replay_4')
+changed_model = 'NaN', legacy = False
+
+    @pytest.mark.parametrize('legacy', [False, True])
+    @pytest.mark.parametrize('changed_model', [None, '.1', 'NaN'])
+    def test_real_sqlite_owner_replay_restores_original_cost_model_without_rewriting_history(tmp_path, changed_model, legacy):
+        ledger = Ledger(tmp_path/'owner-cost.sqlite3')
+        try:
+>           owner_cost_path(ledger, changed_model, legacy=legacy)
+
+trading/tests/test_mt5_owner_cost_knowledge.py:91: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_mt5_owner_cost_knowledge.py:77: in owner_cost_path
+    cold.adopt_owner_buy_confirmation(receipt, order_payload=ORDER)
+trading/vati/app/trade_lifecycle.py:487: in adopt_owner_buy_confirmation
+    tca = compute_tca(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+r = ExecutionReceipt(trade_intent_id='intent-1', decision_hash='dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd...l('1.25'), protective_stop_price=None, receipt_hash='6a202098787de63fc42348c2ffaf6e3f063d8a4d1da261adeffb159ef88990dd')
+direction = <Direction.LONG: 'LONG'>, qty = Decimal('1200')
+value_per_unit = Decimal('1'), modelled_cost_pct = Decimal('NaN')
+
+    def compute_tca(r: ExecutionReceipt, *, direction: Direction, qty: Decimal, value_per_unit: Decimal, modelled_cost_pct: Decimal) -> TcaRecord:
+        values = (r.filled_qty, r.average_fill, r.decision_price, r.arrival_price,
+                  r.submitted_price, r.spread_at_submit, r.fees, qty, value_per_unit, modelled_cost_pct)
+        if any(not isinstance(v, Decimal) or not v.is_finite() for v in values):
+>           raise ValueError("TCA requires finite Decimal economic inputs")
+E           ValueError: TCA requires finite Decimal economic inputs
+
+trading/vati/execution/tca.py:81: ValueError
+_ test_real_sqlite_owner_replay_restores_original_cost_model_without_rewriting_history[NaN-True] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-233/test_real_sqlite_owner_replay_5')
+changed_model = 'NaN', legacy = True
+
+    @pytest.mark.parametrize('legacy', [False, True])
+    @pytest.mark.parametrize('changed_model', [None, '.1', 'NaN'])
+    def test_real_sqlite_owner_replay_restores_original_cost_model_without_rewriting_history(tmp_path, changed_model, legacy):
+        ledger = Ledger(tmp_path/'owner-cost.sqlite3')
+        try:
+>           owner_cost_path(ledger, changed_model, legacy=legacy)
+
+trading/tests/test_mt5_owner_cost_knowledge.py:91: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_mt5_owner_cost_knowledge.py:77: in owner_cost_path
+    cold.adopt_owner_buy_confirmation(receipt, order_payload=ORDER)
+trading/vati/app/trade_lifecycle.py:487: in adopt_owner_buy_confirmation
+    tca = compute_tca(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+r = ExecutionReceipt(trade_intent_id='intent-1', decision_hash='dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd...l('1.25'), protective_stop_price=None, receipt_hash='6a202098787de63fc42348c2ffaf6e3f063d8a4d1da261adeffb159ef88990dd')
+direction = <Direction.LONG: 'LONG'>, qty = Decimal('1200')
+value_per_unit = Decimal('1'), modelled_cost_pct = Decimal('NaN')
+
+    def compute_tca(r: ExecutionReceipt, *, direction: Direction, qty: Decimal, value_per_unit: Decimal, modelled_cost_pct: Decimal) -> TcaRecord:
+        values = (r.filled_qty, r.average_fill, r.decision_price, r.arrival_price,
+                  r.submitted_price, r.spread_at_submit, r.fees, qty, value_per_unit, modelled_cost_pct)
+        if any(not isinstance(v, Decimal) or not v.is_finite() for v in values):
+>           raise ValueError("TCA requires finite Decimal economic inputs")
+E           ValueError: TCA requires finite Decimal economic inputs
+
+trading/vati/execution/tca.py:81: ValueError
+_ test_conflicting_durable_cost_never_overwrites_original_or_loses_protection[fees] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-233/test_conflicting_durable_cost_0')
+damage = 'fees'
+
+    @pytest.mark.parametrize('damage', ['fees','arithmetic','producer','model'])
+    def test_conflicting_durable_cost_never_overwrites_original_or_loses_protection(tmp_path, damage):
+        ledger = Ledger(tmp_path/'conflict.sqlite3')
+        try:
+            receipt, original = owner_cost_path(ledger)
+            payload = deepcopy(original.payload)
+            producer = original.producer
+            if damage == 'fees':
+                payload['fees'] = '99'
+            elif damage == 'arithmetic':
+                payload['arithmetic']['direct_cost']['numerator'] = '999'
+            elif damage == 'producer':
+                producer = 'untrusted-cost-claim'
+            else:
+                payload = compute_tca(receipt, direction=Direction.LONG, qty=receipt.filled_qty,
+                    value_per_unit=D('1'), modelled_cost_pct=D('.1')).as_dict()
+            bad = ledger.append(make_event(EventKind.TCA_RECORD, producer, payload,
+                event_time_ms=2000, received_time_ms=2000, correlation_id=receipt.trade_intent_id))
+            life = _lifecycle(ledger, OwnerTicketAdapter(equity=D('1000000'), csd_verified=True))
+            life.adopt_owner_buy_confirmation(receipt, order_payload=ORDER)
+            assert 'cost_ratio' not in life.entries['intent-1']
+            assert life.entries['intent-1']['fees'] == D('1.25')
+            assert life.protection.stop_of(receipt.broker_position_id) == D('22.50')
+>           assert [e.hash for e in ledger.iter(EventKind.TCA_RECORD)] == [original.hash, bad.hash]
+                                                                                          ^^^^^^^^
+E           AttributeError: 'str' object has no attribute 'hash'
+
+trading/tests/test_mt5_owner_cost_knowledge.py:119: AttributeError
+_ test_conflicting_durable_cost_never_overwrites_original_or_loses_protection[arithmetic] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-233/test_conflicting_durable_cost_1')
+damage = 'arithmetic'
+
+    @pytest.mark.parametrize('damage', ['fees','arithmetic','producer','model'])
+    def test_conflicting_durable_cost_never_overwrites_original_or_loses_protection(tmp_path, damage):
+        ledger = Ledger(tmp_path/'conflict.sqlite3')
+        try:
+            receipt, original = owner_cost_path(ledger)
+            payload = deepcopy(original.payload)
+            producer = original.producer
+            if damage == 'fees':
+                payload['fees'] = '99'
+            elif damage == 'arithmetic':
+                payload['arithmetic']['direct_cost']['numerator'] = '999'
+            elif damage == 'producer':
+                producer = 'untrusted-cost-claim'
+            else:
+                payload = compute_tca(receipt, direction=Direction.LONG, qty=receipt.filled_qty,
+                    value_per_unit=D('1'), modelled_cost_pct=D('.1')).as_dict()
+            bad = ledger.append(make_event(EventKind.TCA_RECORD, producer, payload,
+                event_time_ms=2000, received_time_ms=2000, correlation_id=receipt.trade_intent_id))
+            life = _lifecycle(ledger, OwnerTicketAdapter(equity=D('1000000'), csd_verified=True))
+            life.adopt_owner_buy_confirmation(receipt, order_payload=ORDER)
+            assert 'cost_ratio' not in life.entries['intent-1']
+            assert life.entries['intent-1']['fees'] == D('1.25')
+            assert life.protection.stop_of(receipt.broker_position_id) == D('22.50')
+>           assert [e.hash for e in ledger.iter(EventKind.TCA_RECORD)] == [original.hash, bad.hash]
+                                                                                          ^^^^^^^^
+E           AttributeError: 'str' object has no attribute 'hash'
+
+trading/tests/test_mt5_owner_cost_knowledge.py:119: AttributeError
+_ test_conflicting_durable_cost_never_overwrites_original_or_loses_protection[producer] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-233/test_conflicting_durable_cost_2')
+damage = 'producer'
+
+    @pytest.mark.parametrize('damage', ['fees','arithmetic','producer','model'])
+    def test_conflicting_durable_cost_never_overwrites_original_or_loses_protection(tmp_path, damage):
+        ledger = Ledger(tmp_path/'conflict.sqlite3')
+        try:
+            receipt, original = owner_cost_path(ledger)
+            payload = deepcopy(original.payload)
+            producer = original.producer
+            if damage == 'fees':
+                payload['fees'] = '99'
+            elif damage == 'arithmetic':
+                payload['arithmetic']['direct_cost']['numerator'] = '999'
+            elif damage == 'producer':
+                producer = 'untrusted-cost-claim'
+            else:
+                payload = compute_tca(receipt, direction=Direction.LONG, qty=receipt.filled_qty,
+                    value_per_unit=D('1'), modelled_cost_pct=D('.1')).as_dict()
+            bad = ledger.append(make_event(EventKind.TCA_RECORD, producer, payload,
+                event_time_ms=2000, received_time_ms=2000, correlation_id=receipt.trade_intent_id))
+            life = _lifecycle(ledger, OwnerTicketAdapter(equity=D('1000000'), csd_verified=True))
+            life.adopt_owner_buy_confirmation(receipt, order_payload=ORDER)
+            assert 'cost_ratio' not in life.entries['intent-1']
+            assert life.entries['intent-1']['fees'] == D('1.25')
+            assert life.protection.stop_of(receipt.broker_position_id) == D('22.50')
+>           assert [e.hash for e in ledger.iter(EventKind.TCA_RECORD)] == [original.hash, bad.hash]
+                                                                                          ^^^^^^^^
+E           AttributeError: 'str' object has no attribute 'hash'
+
+trading/tests/test_mt5_owner_cost_knowledge.py:119: AttributeError
+_ test_conflicting_durable_cost_never_overwrites_original_or_loses_protection[model] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-233/test_conflicting_durable_cost_3')
+damage = 'model'
+
+    @pytest.mark.parametrize('damage', ['fees','arithmetic','producer','model'])
+    def test_conflicting_durable_cost_never_overwrites_original_or_loses_protection(tmp_path, damage):
+        ledger = Ledger(tmp_path/'conflict.sqlite3')
+        try:
+            receipt, original = owner_cost_path(ledger)
+            payload = deepcopy(original.payload)
+            producer = original.producer
+            if damage == 'fees':
+                payload['fees'] = '99'
+            elif damage == 'arithmetic':
+                payload['arithmetic']['direct_cost']['numerator'] = '999'
+            elif damage == 'producer':
+                producer = 'untrusted-cost-claim'
+            else:
+                payload = compute_tca(receipt, direction=Direction.LONG, qty=receipt.filled_qty,
+                    value_per_unit=D('1'), modelled_cost_pct=D('.1')).as_dict()
+            bad = ledger.append(make_event(EventKind.TCA_RECORD, producer, payload,
+                event_time_ms=2000, received_time_ms=2000, correlation_id=receipt.trade_intent_id))
+            life = _lifecycle(ledger, OwnerTicketAdapter(equity=D('1000000'), csd_verified=True))
+            life.adopt_owner_buy_confirmation(receipt, order_payload=ORDER)
+            assert 'cost_ratio' not in life.entries['intent-1']
+            assert life.entries['intent-1']['fees'] == D('1.25')
+            assert life.protection.stop_of(receipt.broker_position_id) == D('22.50')
+>           assert [e.hash for e in ledger.iter(EventKind.TCA_RECORD)] == [original.hash, bad.hash]
+                                                                                          ^^^^^^^^
+E           AttributeError: 'str' object has no attribute 'hash'
+
+trading/tests/test_mt5_owner_cost_knowledge.py:119: AttributeError
+=============================== warnings summary ===============================
+../../van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py:53
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED trading/tests/test_mt5_owner_cost_knowledge.py::test_real_sqlite_owner_replay_restores_original_cost_model_without_rewriting_history[.1-False]
+FAILED trading/tests/test_mt5_owner_cost_knowledge.py::test_real_sqlite_owner_replay_restores_original_cost_model_without_rewriting_history[.1-True]
+FAILED trading/tests/test_mt5_owner_cost_knowledge.py::test_real_sqlite_owner_replay_restores_original_cost_model_without_rewriting_history[NaN-False]
+FAILED trading/tests/test_mt5_owner_cost_knowledge.py::test_real_sqlite_owner_replay_restores_original_cost_model_without_rewriting_history[NaN-True]
+FAILED trading/tests/test_mt5_owner_cost_knowledge.py::test_conflicting_durable_cost_never_overwrites_original_or_loses_protection[fees]
+FAILED trading/tests/test_mt5_owner_cost_knowledge.py::test_conflicting_durable_cost_never_overwrites_original_or_loses_protection[arithmetic]
+FAILED trading/tests/test_mt5_owner_cost_knowledge.py::test_conflicting_durable_cost_never_overwrites_original_or_loses_protection[producer]
+FAILED trading/tests/test_mt5_owner_cost_knowledge.py::test_conflicting_durable_cost_never_overwrites_original_or_loses_protection[model]
+8 failed, 6 passed, 2 warnings in 2.89s

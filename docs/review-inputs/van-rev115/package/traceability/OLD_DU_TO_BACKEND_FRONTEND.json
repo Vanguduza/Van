@@ -1,0 +1,544 @@
+{
+  "mappings": [
+    {
+      "old_id": "DU-00a",
+      "backend": [],
+      "frontend": [],
+      "other": [
+        "PRE-001"
+      ]
+    },
+    {
+      "old_id": "DU-00b",
+      "backend": [
+        "BE-001"
+      ],
+      "frontend": [],
+      "other": []
+    },
+    {
+      "old_id": "DU-01",
+      "backend": [],
+      "frontend": [],
+      "other": [
+        "PRE-002"
+      ]
+    },
+    {
+      "old_id": "DU-31",
+      "backend": [],
+      "frontend": [],
+      "other": [
+        "PRE-003"
+      ]
+    },
+    {
+      "old_id": "DU-02",
+      "backend": [],
+      "frontend": [
+        "FE-002"
+      ],
+      "other": [
+        "UX-001",
+        "UX-002"
+      ]
+    },
+    {
+      "old_id": "DU-03",
+      "backend": [],
+      "frontend": [
+        "FE-002"
+      ],
+      "other": [
+        "UX-002"
+      ]
+    },
+    {
+      "old_id": "DU-04",
+      "backend": [
+        "BE-032"
+      ],
+      "frontend": [
+        "FE-001",
+        "FE-003"
+      ],
+      "other": [
+        "UX-003"
+      ]
+    },
+    {
+      "old_id": "DU-05",
+      "backend": [
+        "BE-030"
+      ],
+      "frontend": [
+        "FE-004"
+      ],
+      "other": []
+    },
+    {
+      "old_id": "DU-06",
+      "backend": [
+        "BE-030",
+        "BE-032"
+      ],
+      "frontend": [
+        "FE-004"
+      ],
+      "other": []
+    },
+    {
+      "old_id": "DU-07",
+      "backend": [
+        "BE-029",
+        "BE-030",
+        "BE-031"
+      ],
+      "frontend": [
+        "FE-005",
+        "FE-021"
+      ],
+      "other": []
+    },
+    {
+      "old_id": "DU-08",
+      "backend": [
+        "BE-002",
+        "BE-030"
+      ],
+      "frontend": [
+        "FE-004"
+      ],
+      "other": []
+    },
+    {
+      "old_id": "DU-09",
+      "backend": [
+        "BE-008",
+        "BE-012",
+        "BE-013",
+        "BE-020",
+        "BE-032"
+      ],
+      "frontend": [
+        "FE-006"
+      ],
+      "other": []
+    },
+    {
+      "old_id": "DU-10",
+      "backend": [
+        "BE-008",
+        "BE-018"
+      ],
+      "frontend": [
+        "FE-007"
+      ],
+      "other": []
+    },
+    {
+      "old_id": "DU-10b",
+      "backend": [
+        "BE-018"
+      ],
+      "frontend": [
+        "FE-008"
+      ],
+      "other": []
+    },
+    {
+      "old_id": "DU-10c",
+      "backend": [
+        "BE-019"
+      ],
+      "frontend": [
+        "FE-008"
+      ],
+      "other": []
+    },
+    {
+      "old_id": "DU-10d",
+      "backend": [
+        "BE-021"
+      ],
+      "frontend": [
+        "FE-014"
+      ],
+      "other": []
+    },
+    {
+      "old_id": "DU-11",
+      "backend": [
+        "BE-010",
+        "BE-011",
+        "BE-012"
+      ],
+      "frontend": [
+        "FE-009",
+        "FE-011"
+      ],
+      "other": []
+    },
+    {
+      "old_id": "DU-12",
+      "backend": [
+        "BE-008",
+        "BE-020"
+      ],
+      "frontend": [
+        "FE-006"
+      ],
+      "other": []
+    },
+    {
+      "old_id": "DU-12a",
+      "backend": [
+        "BE-003",
+        "BE-008",
+        "BE-012"
+      ],
+      "frontend": [
+        "FE-001",
+        "FE-006"
+      ],
+      "other": []
+    },
+    {
+      "old_id": "DU-12b",
+      "backend": [
+        "BE-020"
+      ],
+      "frontend": [
+        "FE-006"
+      ],
+      "other": []
+    },
+    {
+      "old_id": "DU-13",
+      "backend": [
+        "BE-021"
+      ],
+      "frontend": [
+        "FE-014"
+      ],
+      "other": []
+    },
+    {
+      "old_id": "DU-14a",
+      "backend": [
+        "BE-014"
+      ],
+      "frontend": [],
+      "other": []
+    },
+    {
+      "old_id": "DU-14b",
+      "backend": [
+        "BE-015"
+      ],
+      "frontend": [],
+      "other": []
+    },
+    {
+      "old_id": "DU-14c",
+      "backend": [
+        "BE-016"
+      ],
+      "frontend": [
+        "FE-013"
+      ],
+      "other": []
+    },
+    {
+      "old_id": "DU-14d",
+      "backend": [
+        "BE-015",
+        "BE-016",
+        "BE-021"
+      ],
+      "frontend": [
+        "FE-013",
+        "FE-014"
+      ],
+      "other": []
+    },
+    {
+      "old_id": "DU-14e",
+      "backend": [
+        "BE-017"
+      ],
+      "frontend": [
+        "FE-013"
+      ],
+      "other": []
+    },
+    {
+      "old_id": "DU-14f",
+      "backend": [
+        "BE-015"
+      ],
+      "frontend": [],
+      "other": []
+    },
+    {
+      "old_id": "DU-15",
+      "backend": [
+        "BE-023"
+      ],
+      "frontend": [
+        "FE-015"
+      ],
+      "other": []
+    },
+    {
+      "old_id": "DU-16",
+      "backend": [
+        "BE-023"
+      ],
+      "frontend": [
+        "FE-015"
+      ],
+      "other": []
+    },
+    {
+      "old_id": "DU-17",
+      "backend": [
+        "BE-024"
+      ],
+      "frontend": [
+        "FE-016"
+      ],
+      "other": []
+    },
+    {
+      "old_id": "DU-18",
+      "backend": [
+        "BE-024"
+      ],
+      "frontend": [
+        "FE-016"
+      ],
+      "other": []
+    },
+    {
+      "old_id": "DU-19",
+      "backend": [
+        "BE-027",
+        "BE-028"
+      ],
+      "frontend": [
+        "FE-019",
+        "FE-020"
+      ],
+      "other": []
+    },
+    {
+      "old_id": "DU-20",
+      "backend": [
+        "BE-031"
+      ],
+      "frontend": [
+        "FE-022"
+      ],
+      "other": []
+    },
+    {
+      "old_id": "DU-21",
+      "backend": [
+        "BE-025",
+        "BE-026",
+        "BE-029",
+        "BE-034"
+      ],
+      "frontend": [
+        "FE-017",
+        "FE-018",
+        "FE-021"
+      ],
+      "other": []
+    },
+    {
+      "old_id": "DU-22",
+      "backend": [
+        "BE-002",
+        "BE-003",
+        "BE-033"
+      ],
+      "frontend": [],
+      "other": [
+        "BQ-005",
+        "QA-003"
+      ]
+    },
+    {
+      "old_id": "DU-23",
+      "backend": [
+        "BE-033"
+      ],
+      "frontend": [],
+      "other": [
+        "BQ-005",
+        "QA-004"
+      ]
+    },
+    {
+      "old_id": "DU-24",
+      "backend": [
+        "BE-001",
+        "BE-002",
+        "BE-003"
+      ],
+      "frontend": [
+        "FE-001",
+        "FE-002"
+      ],
+      "other": [
+        "QA-001"
+      ]
+    },
+    {
+      "old_id": "DU-25",
+      "backend": [],
+      "frontend": [],
+      "other": [
+        "BQ-006",
+        "QA-001",
+        "QA-002",
+        "QA-003",
+        "QA-004",
+        "QA-005"
+      ]
+    },
+    {
+      "old_id": "DU-26",
+      "backend": [],
+      "frontend": [],
+      "other": [
+        "QA-004",
+        "QA-005"
+      ]
+    },
+    {
+      "old_id": "DU-27",
+      "backend": [],
+      "frontend": [],
+      "other": [
+        "PRE-002"
+      ]
+    },
+    {
+      "old_id": "DU-28",
+      "backend": [
+        "BE-009",
+        "BE-010",
+        "BE-011"
+      ],
+      "frontend": [
+        "FE-009"
+      ],
+      "other": []
+    },
+    {
+      "old_id": "DU-28b",
+      "backend": [
+        "BE-011"
+      ],
+      "frontend": [
+        "FE-009"
+      ],
+      "other": []
+    },
+    {
+      "old_id": "DU-28c",
+      "backend": [
+        "BE-022"
+      ],
+      "frontend": [
+        "FE-014"
+      ],
+      "other": []
+    },
+    {
+      "old_id": "DU-28d",
+      "backend": [
+        "BE-022"
+      ],
+      "frontend": [
+        "FE-014"
+      ],
+      "other": []
+    },
+    {
+      "old_id": "DU-28e",
+      "backend": [
+        "BE-010"
+      ],
+      "frontend": [
+        "FE-009"
+      ],
+      "other": []
+    },
+    {
+      "old_id": "DU-29",
+      "backend": [
+        "BE-004",
+        "BE-005"
+      ],
+      "frontend": [
+        "FE-010"
+      ],
+      "other": []
+    },
+    {
+      "old_id": "DU-29a",
+      "backend": [
+        "BE-006",
+        "BE-009"
+      ],
+      "frontend": [
+        "FE-010",
+        "FE-011"
+      ],
+      "other": []
+    },
+    {
+      "old_id": "DU-29b",
+      "backend": [
+        "BE-012"
+      ],
+      "frontend": [
+        "FE-011"
+      ],
+      "other": []
+    },
+    {
+      "old_id": "DU-29c",
+      "backend": [
+        "BE-007"
+      ],
+      "frontend": [
+        "FE-010"
+      ],
+      "other": []
+    },
+    {
+      "old_id": "DU-30",
+      "backend": [
+        "BE-013"
+      ],
+      "frontend": [
+        "FE-012"
+      ],
+      "other": []
+    },
+    {
+      "old_id": "DU-MR",
+      "backend": [],
+      "frontend": [],
+      "other": [
+        "REL-001",
+        "REL-002"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,156 @@
+{
+  "source_parent": "c0063940a7573597934e62ada558d4dc942cfad0",
+  "identities_before_after": 374,
+  "edits_before_after": 383,
+  "case_order_ids_targets_test_selection_unchanged": true,
+  "exact_five_changes": [
+    {
+      "id": "C39 the outbox says saved before the bytes are down",
+      "original": {
+        "id": "C39 the outbox says saved before the bytes are down",
+        "tests": [
+          "../tests/contracts/test_encrypted_queue_writes_are_off_the_main_thread.py"
+        ],
+        "edits": [
+          [
+            "../android/app/src/main/java/com/dial/van/queue/EncryptedCommandQueue.kt",
+            ".commit()",
+            ".apply()"
+          ]
+        ]
+      },
+      "retargeted": {
+        "id": "C39 the outbox says saved before the bytes are down",
+        "tests": [
+          "../tests/contracts/test_encrypted_queue_writes_are_off_the_main_thread.py"
+        ],
+        "edits": [
+          [
+            "../android/app/src/main/java/com/dial/van/queue/EncryptedCommandQueue.kt",
+            "            if (!editor.commit()) {",
+            "            editor.apply()\n            if (false) {"
+          ]
+        ]
+      }
+    },
+    {
+      "id": "C39 discarding the queue is one synchronous write per command, from a button",
+      "original": {
+        "id": "C39 discarding the queue is one synchronous write per command, from a button",
+        "tests": [
+          "../tests/contracts/test_encrypted_queue_writes_are_off_the_main_thread.py"
+        ],
+        "edits": [
+          [
+            "../android/app/src/main/java/com/dial/van/queue/EncryptedCommandQueue.kt",
+            "        val editor = indexPrefs.edit()\n        for (id in listIds()) editor.remove(blobKey(id))\n        editor.putString(KEY_INDEX, \"\").commit()",
+            "        for (id in listIds()) remove(id)"
+          ]
+        ]
+      },
+      "retargeted": {
+        "id": "C39 discarding the queue is one synchronous write per command, from a button",
+        "tests": [
+          "../tests/contracts/test_encrypted_queue_writes_are_off_the_main_thread.py"
+        ],
+        "edits": [
+          [
+            "../android/app/src/main/java/com/dial/van/queue/EncryptedCommandQueue.kt",
+            "            val editor = indexPrefs.edit()\n            for (id in listIds()) editor.remove(blobKey(id))",
+            "            for (id in listIds()) remove(id)\n            val editor = indexPrefs.edit()"
+          ]
+        ]
+      }
+    },
+    {
+      "id": "C36 a restart finds an empty outbox and the owner's queued work is gone",
+      "original": {
+        "id": "C36 a restart finds an empty outbox and the owner's queued work is gone",
+        "tests": [
+          "KOTLIN_VERIFICATION"
+        ],
+        "edits": [
+          [
+            "android/app/src/main/java/com/dial/van/session/EncryptedSessionOutboxStore.kt",
+            "        records.recordsOfKind(OutboxPersistence.SESSION_KIND)",
+            "        records.recordsOfKind(\"COMMAND\")"
+          ]
+        ]
+      },
+      "retargeted": {
+        "id": "C36 a restart finds an empty outbox and the owner's queued work is gone",
+        "tests": [
+          "KOTLIN_VERIFICATION"
+        ],
+        "edits": [
+          [
+            "android/app/src/main/java/com/dial/van/session/EncryptedSessionOutboxStore.kt",
+            "        records.recoveryRecordsOfKind(OutboxPersistence.SESSION_KIND)",
+            "        records.recoveryRecordsOfKind(\"COMMAND\")"
+          ]
+        ]
+      }
+    },
+    {
+      "id": "C36 a command the Gateway has never heard of is treated as delivered",
+      "original": {
+        "id": "C36 a command the Gateway has never heard of is treated as delivered",
+        "tests": [
+          "KOTLIN_VERIFICATION"
+        ],
+        "edits": [
+          [
+            "android/app/src/main/java/com/dial/van/session/SessionReconciliation.kt",
+            "        if (state == null || state == UNKNOWN || state == RESULT_PENDING) Verdict.RESEND else Verdict.SETTLE",
+            "        if (state == null || state == RESULT_PENDING) Verdict.RESEND else Verdict.SETTLE"
+          ]
+        ]
+      },
+      "retargeted": {
+        "id": "C36 a command the Gateway has never heard of is treated as delivered",
+        "tests": [
+          "KOTLIN_VERIFICATION"
+        ],
+        "edits": [
+          [
+            "android/app/src/main/java/com/dial/van/session/SessionReconciliation.kt",
+            "        else -> Verdict.HOLD",
+            "        else -> Verdict.SETTLE"
+          ]
+        ]
+      }
+    },
+    {
+      "id": "C36 a command the Gateway is already running is sent a second time",
+      "original": {
+        "id": "C36 a command the Gateway is already running is sent a second time",
+        "tests": [
+          "KOTLIN_VERIFICATION"
+        ],
+        "edits": [
+          [
+            "android/app/src/main/java/com/dial/van/session/SessionReconciliation.kt",
+            "        if (state == null || state == UNKNOWN || state == RESULT_PENDING) Verdict.RESEND else Verdict.SETTLE",
+            "        Verdict.RESEND"
+          ]
+        ]
+      },
+      "retargeted": {
+        "id": "C36 a command the Gateway is already running is sent a second time",
+        "tests": [
+          "KOTLIN_VERIFICATION"
+        ],
+        "edits": [
+          [
+            "android/app/src/main/java/com/dial/van/session/SessionReconciliation.kt",
+            "        in ownedResults -> Verdict.SETTLE",
+            "        in ownedResults -> Verdict.RESEND"
+          ]
+        ]
+      }
+    }
+  ],
+  "reason_fifth_case": "Four oldanchors are missing; C39 generic .commit() stillmatches but nowwrongboolean fullclear operation. Fifth edit retargets actualpersist helper/type-valid asyncmutation. Same originalbehavior/ID, no added/droppedcase.",
+  "source_reuse_basis": "MUTATION_REUSE_SOURCE_BASIS.json",
+  "consistency": "mutation-final-check.json PASS; execution NOT_RUN forwholecorpus"
+}

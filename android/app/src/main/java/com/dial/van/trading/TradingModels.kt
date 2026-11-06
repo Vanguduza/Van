@@ -53,15 +53,52 @@ data class Pct(val raw: String?, val fraction: Double?) {
     companion object { fun of(raw: String?) = Pct(raw, raw?.toDoubleOrNull()) }
 }
 
+/** Recorded snapshot provenance, never an approval or permission to execute. */
+data class AccountSnapshotReadback(
+    val state: String, val reason: String, val sourceRevision: String?,
+    val sourceEventTimeMs: Long?, val sourceReceivedTimeMs: Long?,
+    val readAtMs: Long, val ageMs: Long?, val stalenessThresholdMs: Long,
+) {
+    val executionAuthority: Boolean get() = false
+    companion object {
+        fun from(o: JsonObject): AccountSnapshotReadback? {
+            if (o.bool("execution_authority") != false) return null
+            val state = o.str("state")?.takeIf { it in setOf("CURRENT", "LAST_KNOWN", "NEVER_SYNCED", "UNAVAILABLE") } ?: return null
+            val reason = o.str("reason") ?: return null
+            val readAt = o.str("read_at_ms")?.toLongOrNull() ?: return null
+            val threshold = o.str("staleness_threshold_ms")?.toLongOrNull()?.takeIf { it > 0 } ?: return null
+            val revision = o.str("source_revision")
+            if (revision != null && !revision.matches(Regex("[0-9a-f]{64}"))) return null
+            return AccountSnapshotReadback(state, reason, revision,
+                o.str("source_event_time_ms")?.toLongOrNull(), o.str("source_received_time_ms")?.toLongOrNull(),
+                readAt, o.str("age_ms")?.toLongOrNull(), threshold)
+        }
+    }
+}
+
 data class AccountCard(
     val alias: String, val label: String, val broker: String, val mode: String, val currency: String, val safety: SafetyIdentity, val equity: Money, val balance: Money,
     val floatingPnl: Money, val dayPnl: Money, val drawdown: Pct, val connection: DataState, val openPositions: Int, val killSwitch: List<String>, val lastSyncMs: Long?,
+    val performanceState: String = "UNMEASURED", val funding: FundingObservation = FundingObservation.from(null),
+    val margin: AccountMargin = AccountMargin.from(null),
+    val nativeObservation: NativeAccountObservation = NativeAccountObservation.from(null),
+    val snapshotReadback: AccountSnapshotReadback? = null,
 ) {
     companion object {
+        fun parseList(body: String): List<AccountCard>? {
+            val source = parseObject(body) ?: return null
+            check(source.bool("ledger_available") != false) { "Native account ledger unavailable" }
+            return source.arr("accounts").map(::from)
+        }
+
         fun from(o: JsonObject) = AccountCard(
             o.str("alias") ?: "?", o.str("label") ?: o.str("alias") ?: "?", o.str("broker") ?: "?", o.str("mode") ?: "?", o.str("currency") ?: "?", SafetyIdentity.parse(o.str("safety_identity")),
             Money.of(o.str("equity")), Money.of(o.str("balance")), Money.of(o.str("floating_pnl")), Money.of(o.str("day_pnl")), Pct.of(o.str("drawdown_pct")),
             DataState.parse(o.str("connection_state")), o.long("open_positions")?.toInt() ?: 0, o.strList("kill_switch"), o.long("last_sync_ms"),
+            o.str("performance_state") ?: "UNMEASURED", FundingObservation.from(o.obj("funding")),
+            AccountMargin.from(o.obj("margin")),
+            NativeAccountObservation.from(o.obj("native_account_observation")),
+            o.obj("snapshot_readback")?.let { AccountSnapshotReadback.from(it) },
         )
     }
 }
@@ -153,7 +190,7 @@ data class PortfolioSummary(
             watchedInstruments = exposureBySymbol.size,
             pendingSetups = potential.size,
             unrealizedPnl = floatingPnl.value,
-            marginLevelPct = null,
+            marginLevelPct = accounts.mapNotNull { it.margin.riskMarginLevelBoundPct?.toDoubleOrNull() }.minOrNull(),
             riskRefusalsRecent = riskRefusalsRecent,
         )
     companion object {
@@ -299,6 +336,9 @@ data class CognitionSnapshot(
     val proposals: List<ImprovementProposalRow>,
     val rejectionCategories: Map<String, Int>,
     val expansionModes: Map<String, Int>,
+    val cognitiveRecords: Int = 0,
+    val metaT2State: String = "QUALIFICATION_REQUIRED",
+    val paidMetaState: String = "DISABLED",
 ) {
     companion object {
         fun parse(body: String): CognitionSnapshot? {
@@ -345,13 +385,19 @@ data class CognitionSnapshot(
                 cognitionMode = authority.str("cognition_mode") ?: "UNKNOWN",
                 liveAdvisory = authority.str("live_advisory") ?: "UNKNOWN",
                 liveStatus = authority.str("live_status") ?: "UNKNOWN",
-                modelHierarchy = authority.strList("model_hierarchy"),
+                // Canonical supported-model key takes precedence, including an explicit empty list.
+                // Older gateway snapshots use model_hierarchy and remain readable.
+                modelHierarchy = authority.strList(if (authority.containsKey("supported_model_hierarchy"))
+                    "supported_model_hierarchy" else "model_hierarchy"),
                 summary = summary,
                 models = models,
                 missions = missions,
                 proposals = proposals,
                 rejectionCategories = intMap(root.obj("rejections"), "by_category"),
                 expansionModes = intMap(root.obj("expansion"), "mode_counts"),
+                cognitiveRecords = root.obj("cognitive_fabric")?.arr("accounts")?.sumOf { it.arr("records").size } ?: 0,
+                metaT2State = root.obj("cognitive_fabric")?.str("meta_t2") ?: "QUALIFICATION_REQUIRED",
+                paidMetaState = root.obj("cognitive_fabric")?.str("paid_meta") ?: "DISABLED",
             )
         }
     }

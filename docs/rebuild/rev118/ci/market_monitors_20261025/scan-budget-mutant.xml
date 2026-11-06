@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.288" timestamp="2026-10-25T02:24:12.383425+00:00" hostname="56ae90b2c83c"><testcase classname="tests.test_market_monitor_runtime" name="test_scan_quota_is_atomic_and_survives_service_restart_and_clock_rollback" time="0.067"><failure message="Failed: DID NOT RAISE MonitorError">backend/tests/test_market_monitor_runtime.py:158: in test_scan_quota_is_atomic_and_survives_service_restart_and_clock_rollback
+    with pytest.raises(MonitorError, match='MONITOR_SCAN_QUOTA_REACHED'):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE MonitorError</failure></testcase></testsuite></testsuites>

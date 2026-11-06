@@ -24,7 +24,7 @@ from fastapi import HTTPException
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ec
 
-from vati.authority import OwnerAuthority, OwnerAuthorityError
+from vati.authority import OwnerAuthority, OwnerAuthorityError, load_owner_keys
 from vati.core.events import EventKind, make_event
 from vati.core.ledger_pg import open_ledger
 from vati.learning.replay import restore_capsule_state_runtime
@@ -40,6 +40,7 @@ from vati.validation.certificates import (
 PROMOTION_COMMANDS = (
     "capsule_promotion_candidates",
     "owner_authority_enroll",
+    "owner_authority_revoke",
     "capsule_promote",
 )
 PROMOTION_TOOL_SCHEMAS = {
@@ -61,6 +62,12 @@ PROMOTION_TOOL_SCHEMAS = {
             "public_key_pem": {"type": "string"},
         },
         "required": ["device_id", "key_id", "public_key_pem"],
+    },
+    "owner_authority_revoke": {
+        "description": "Revoke the exact paired owner public key durably; hidden from agents/MCP.",
+        "properties": {name:{"type":"string"} for name in
+            ("device_id","key_id","public_key_pem","operation_id")},
+        "required": ["device_id","key_id","public_key_pem","operation_id"],
     },
     "capsule_promote": {
         "description": (
@@ -160,35 +167,9 @@ def owner_authority_key_id(public_key_pem: str) -> str:
 
 
 def _write_owner_authority_registry(path: Path, key_id: str, public_key_pem: str) -> None:
-    """Persist one owner public key. Replacement is a separate recovery ceremony."""
-    existing: dict[str, str] = {}
-    if path.is_file():
-        try:
-            raw = json.loads(path.read_text(encoding="utf-8"))
-            keys = raw.get("keys", raw) if isinstance(raw, dict) else {}
-            existing = {
-                str(k): str(v) for k, v in dict(keys).items() if str(v).strip()
-            }
-        except (OSError, ValueError, TypeError) as exc:
-            raise ValueError("owner authority registry is unreadable") from exc
-    others = {k: v for k, v in existing.items() if k != key_id}
-    if others:
-        raise PermissionError(
-            "a different owner authority key is already enrolled; explicit owner-device rebind is required"
-        )
-    if key_id in existing and existing[key_id].strip() != public_key_pem.strip():
-        raise PermissionError("owner authority key id collides with different key material")
-    payload = {
-        "version": 1,
-        "principle": (
-            "Runtime owner authority public keys only. Enrollment is performed through "
-            "the paired owner-device A4 path; private keys never leave Android Keystore."
-        ),
-        "format": "key_id -> PEM SubjectPublicKeyInfo for an EC P-256 public key",
-        "keys": {key_id: public_key_pem.strip() + "\n"},
-    }
-    _atomic_project(path, payload)
-    os.chmod(path, 0o600)
+    """Persist a public key without resurrecting an acknowledged revocation."""
+    from vati.authority_registry import enroll_owner_key
+    enroll_owner_key(path,key_id,public_key_pem)
 
 
 def build_strategy_handlers(settings: StrategyPromotionSettings):
@@ -292,7 +273,7 @@ def build_strategy_handlers(settings: StrategyPromotionSettings):
         # The commander constructed the verifier before first enrollment. Refresh
         # its public-key view in-process without touching its consumed-token set.
         settings.owner_authority.keys.clear()
-        settings.owner_authority.keys[key_id] = public_key_pem.strip() + "\n"
+        settings.owner_authority.keys.update(load_owner_keys(path))
         return {
             "enrolled": True,
             "device_id": device_id,
@@ -300,6 +281,22 @@ def build_strategy_handlers(settings: StrategyPromotionSettings):
             "registry": str(path),
             "active_owner_keys": 1,
         }
+
+    def revoke_owner_authority(args: dict) -> dict:
+        if set(args)!={"device_id","key_id","public_key_pem","operation_id"}:
+            raise HTTPException(422,"closed native owner revocation target required")
+        if not settings.owner_authority_keys_path.strip():
+            raise HTTPException(503,"runtime owner authority registry path is not configured")
+        from vati.authority_registry import revoke_owner_key
+        try:
+            result=revoke_owner_key(settings.owner_authority_keys_path,**args)
+        except PermissionError as exc:
+            raise HTTPException(409,str(exc)) from exc
+        except (ValueError,TypeError) as exc:
+            raise HTTPException(422,str(exc)) from exc
+        settings.owner_authority.keys.clear()
+        settings.owner_authority.keys.update(load_owner_keys(settings.owner_authority_keys_path))
+        return result
 
     def promote(args: dict) -> dict:
         strategy_id = str(args.get("strategy_id") or "").strip()
@@ -449,6 +446,7 @@ def build_strategy_handlers(settings: StrategyPromotionSettings):
     return {
         "capsule_promotion_candidates": candidates,
         "owner_authority_enroll": enroll_owner_authority,
+        "owner_authority_revoke": revoke_owner_authority,
         "capsule_promote": promote,
     }
 

@@ -6,6 +6,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlin.test.assertFailsWith
 
 /** The read models every development screen renders (VAN-DEV-005…008, 010). */
 class DialDevModelsTest {
@@ -173,6 +174,70 @@ class DialDevModelsTest {
         assertFalse(DialDevSse.affects(change, setOf("reviews")))
         assertTrue(DialDevSse.affects(DialDevChange("r", emptySet()), setOf("reviews")), "an empty change list means refetch everything")
         assertNull(parser.feed(""), "a blank line with no data is not an event")
+    }
+
+    @Test
+    fun `SSE transport refusal is a typed terminal failure rather than a change notification`() {
+        val parser = DialDevSse.Parser()
+        assertNull(parser.feed("event: error"))
+        assertNull(parser.feed("""data: {"error":"dial_dev_unavailable","reason":"unreachable"}"""))
+        val failure = assertFailsWith<DialDevStreamUnavailable> { parser.feed("") }
+        assertEquals("unreachable", failure.reason)
+        assertEquals("dial_dev_unavailable: unreachable", failure.message)
+        assertNull(parser.feed(""), "a terminal frame leaves no buffered change")
+    }
+
+    @Test
+    fun `SSE happy frame partial upstream frame and separated terminal failure remain distinct`() {
+        val parser = DialDevSse.Parser()
+        assertNull(parser.feed("""data: {"projection_revision":"r1","changed":["Tasks"]}"""))
+        assertEquals(DialDevChange("r1", setOf("tasks")), parser.feed(""))
+        assertNull(parser.feed("""data: {"projection_revision":"unfinished","""))
+        assertNull(parser.feed(""), "gateway separates an unfinished upstream event before its refusal")
+        assertNull(parser.feed("event: error"))
+        assertNull(parser.feed("""data: {"error":"dial_dev_unavailable","reason":"timeout"}"""))
+        assertEquals("timeout", assertFailsWith<DialDevStreamUnavailable> { parser.feed("") }.reason)
+        assertNull(parser.feed("""data: {"projection_revision":"r2","changed":["reviews"]}"""))
+        assertEquals(DialDevChange("r2", setOf("reviews")), parser.feed(""), "the buffered refusal is consumed")
+    }
+
+    @Test
+    fun `SSE terminal reason never carries upstream strings or credentials`() {
+        for (reason in listOf("private-token-should-not-escape", "https://private.example/?token=sensitive", "x".repeat(10000))) {
+            val payload = JSONObject().put("error", "dial_dev_unavailable").put("reason", reason).toString()
+            val failure = assertFailsWith<DialDevStreamUnavailable> { DialDevSse.parse(payload) }
+            assertEquals("upstream_error", failure.reason)
+            assertEquals("dial_dev_unavailable: upstream_error", failure.message)
+            assertFalse(failure.toString().contains(reason))
+        }
+    }
+
+    @Test
+    fun `SSE missing or wrongly typed terminal reason uses the safe fallback`() {
+        for (payload in listOf("""{"error":"dial_dev_unavailable"}""",
+            """{"error":"dial_dev_unavailable","reason":{"token":"sensitive"}}""")) {
+            assertEquals("upstream_error", assertFailsWith<DialDevStreamUnavailable> { DialDevSse.parse(payload) }.reason)
+        }
+    }
+
+    @Test
+    fun `SSE every declared safe terminal reason remains available to the read retry policy`() {
+        for (reason in listOf("unconfigured", "credential_invalid", "unreachable", "timeout", "upstream_error",
+            "upstream_auth_refused", "upstream_redirect", "upstream_malformed", "upstream_echoed_credential")) {
+            val payload = JSONObject().put("error", "dial_dev_unavailable").put("reason", reason).toString()
+            assertEquals(reason, assertFailsWith<DialDevStreamUnavailable> { DialDevSse.parse(payload) }.reason)
+        }
+    }
+
+    @Test
+    fun `SSE multiline happy data and malformed framing keep their existing behavior`() {
+        val parser = DialDevSse.Parser()
+        assertNull(parser.feed("""data: {"projection_revision":"r3","""))
+        assertNull(parser.feed("""data: "changed":["WORKSPACES"]}"""))
+        assertEquals(DialDevChange("r3", setOf("workspaces")), parser.feed(""))
+        assertNull(parser.feed("data: not JSON"))
+        assertNull(parser.feed(""))
+        assertEquals(DialDevChange(null, emptySet()), DialDevSse.parse("{}"))
     }
 
     @Test

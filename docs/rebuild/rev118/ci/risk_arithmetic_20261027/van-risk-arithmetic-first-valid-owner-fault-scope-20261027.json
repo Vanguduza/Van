@@ -1,0 +1,9 @@
+{
+  "state": "VALID_CONTROLS_BUT_TWO_RUNTIME_EXCEPTION_DETECTIONS_NOT_SEMANTIC",
+  "passing_controls": 3,
+  "semantic_assertion_detections": 8,
+  "runtime_exception_detections": 2,
+  "strict_no_crash_credit_fixture": "FAILED_AS_REQUIRED",
+  "qualification": "Do not claim all10semantic faults. Existing13probe identities retained; add safe-wrapper reason assertions for mode and stop guards, then rerun unchanged no-crash-credit fixture.",
+  "retained_original_output": "/workspace/van-risk-arithmetic-invariant-faults-valid-owner-r1-20261027.txt"
+}

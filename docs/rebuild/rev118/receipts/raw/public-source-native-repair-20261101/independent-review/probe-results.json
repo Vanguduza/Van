@@ -1,0 +1,55 @@
+{
+  "results": [
+    {
+      "case": "reporter keeps application json patch and records all3 phases",
+      "result": "PASS"
+    },
+    {
+      "case": "true reporter encoding error propagates",
+      "result": "PASS"
+    },
+    {
+      "case": "true reporter write error propagates",
+      "result": "PASS"
+    },
+    {
+      "case": "actual11native modules+frozenset twohashseeds parentproof/archive/reverify",
+      "result": "PASS"
+    },
+    {
+      "case": "checkedhash opt1 parentproof/reverify",
+      "result": "PASS"
+    },
+    {
+      "case": "uncheckedhash opt2 parentproof/reverify",
+      "result": "PASS"
+    },
+    {
+      "case": "strict preexisting cache refused and preserved",
+      "result": "PASS"
+    },
+    {
+      "case": "validheader forgedpayload refused and preserved",
+      "result": "PASS"
+    },
+    {
+      "case": "independent validheader bool-int substitution",
+      "result": "REFUSES_AS_REQUIRED"
+    },
+    {
+      "case": "independent validheader signed-zero substitution",
+      "result": "REFUSES_AS_REQUIRED"
+    }
+  ],
+  "storage_preflight": {
+    "free_bytes_before": 4344459264,
+    "reserve_bytes": 4294967296
+  },
+  "production_import": "/workspace/van-review-2026-10-18/publish/tools/rebuild/public_source_shards.py",
+  "production_import_sha256": "90e9e670940da327baace21335569a447f0d12e1b8aaed3061cd86fe55628837",
+  "all3_archive_patch_before_after_pins_match": true,
+  "owned_tmp_cleanup": true,
+  "fixture_only_git_commits": true,
+  "no_cache_import_or_execution": true,
+  "native_fourworker_qualification": false
+}

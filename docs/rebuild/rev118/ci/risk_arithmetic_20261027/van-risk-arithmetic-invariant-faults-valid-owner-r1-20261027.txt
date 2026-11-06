@@ -1,0 +1,16 @@
+OK   control: unbroken                                          fuzz PASSED
+OK   break: multiplier clamp only (masked by sizing re-check)   fuzz PASSED
+OK   break: multiplier clamp + sizing re-check + final re-check fuzz FAILED (P1 at 175:)
+OK   break: mandate per-trade clamp only (masked by final re-check) fuzz PASSED
+OK   break: mandate per-trade clamp + final re-check            fuzz FAILED (P1 at 70:)
+OK   break: portfolio heat check                                fuzz FAILED (P3 at 1597:)
+OK   break: currency-leg check                                  fuzz FAILED (P4 at 94: {'EUR': Decimal('0.00287128938)
+OK   break: duplicate-intent latch                              fuzz FAILED (P8 at 4
+assert (<Decision.REDUCED: 'REDU)
+OK   break: kill-switch check                                   fuzz FAILED (P6 violated at case 341:)
+OK   break: stale-data check                                    fuzz FAILED (P6 violated at case 381:)
+OK   break: account-verified check                              fuzz FAILED (P6 violated at case 1048:)
+OK   break: order-sending-mode check                            fuzz CRASHED (KeyError: fail-closed by exception)
+OK   break: stop-required check                                 fuzz CRASHED (TypeError: fail-closed by exception)
+
+13/13 probes behaved as expected

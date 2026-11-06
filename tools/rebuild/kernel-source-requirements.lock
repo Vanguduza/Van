@@ -1,0 +1,9 @@
+# Minimal source-kernel suite dependencies, using the canonical backend pins.
+pytest==9.1.1
+iniconfig==2.3.0
+packaging==26.3
+pluggy==1.6.0
+Pygments==2.21.0
+cryptography==50.0.1
+cffi==2.1.1
+pycparser==3.0

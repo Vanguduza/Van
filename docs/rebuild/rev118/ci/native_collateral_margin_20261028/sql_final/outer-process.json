@@ -1,0 +1,15 @@
+{
+  "command": [
+    "python3",
+    "/workspace/van-native-collateral-margin-sql-r2-20261028.py"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 133685,
+  "started_at_utc": "2026-10-28T05:51:01.162461+00:00",
+  "timeout_seconds": 2000,
+  "state": "COMPLETED",
+  "command_pid": 133689,
+  "exit": 0,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-28T05:51:21.807322+00:00"
+}

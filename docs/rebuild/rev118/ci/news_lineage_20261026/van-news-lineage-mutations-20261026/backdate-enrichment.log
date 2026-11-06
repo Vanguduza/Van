@@ -1,0 +1,116 @@
+...........F......................                                       [100%]
+=================================== FAILURES ===================================
+_ test_origin_enrichment_cannot_precede_the_original_observations_availability _
+
+ledger = <vati.core.ledger.Ledger object at 0x7fd420f916a0>
+
+    def test_origin_enrichment_cannot_precede_the_original_observations_availability(ledger):
+        news = NewsIngress(ledger=ledger)
+        value = row(); value.pop('original_publisher')
+        news.ingest_rows([value], now_ms=NOW+20)
+>       news.ingest_rows([row()], now_ms=NOW)
+
+trading/tests/test_news_publisher_lineage.py:104: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/events/news_ingress.py:643: in ingest_rows
+    if self.ingest(headline, now_ms=now_ms,original_publisher=origin) is None:
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/events/news_ingress.py:511: in ingest
+    event,created,available_ms,origin=self._publish_headline(headline,available_ms,now_ms,original_publisher)
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.events.news_ingress.NewsIngress object at 0x7fd420f927b0>
+headline = Headline(source_id='wire-a', trust=<SourceTrust.UNTRUSTED: 'UNTRUSTED'>, published_ms=1800000000000, observed_ms=18000...t_classes=(), symbols=(), event_class='', severity=None, concern=<Concern.UNCLEAR: 'UNCLEAR'>, url='', body_excerpt='')
+available_ms = 1800000000000, ingress_ms = 1800000000000
+origin = PublisherOrigin(publisher_id='central-bank', story_id='release-7')
+
+    def _publish_headline(self,headline: Headline,available_ms: int,ingress_ms,origin=None):
+        hid=headline.headline_id
+        oid=_observation_id(headline)
+        def read():
+            found=None
+            for event in self._ledger.iter(EventKind.NEWS_HEADLINE,correlation_id=hid):
+                if event.producer!=self._producer:continue
+                if event.hash!=canonical_hash(event.body()):
+                    raise NewsIngressError('news original publication is corrupt')
+                stored=_headline_from_original(event.payload)
+                if (stored.dedupe_hash!=headline.dedupe_hash or event.event_time_ms!=stored.published_ms):
+                    raise NewsIngressError('news original publication scope conflicts')
+                _original_available_ms(event,stored)
+                if found is not None:
+                    raise NewsIngressError('news original publication is ambiguous')
+                found=event
+            return found
+        created=False
+        def read_observation(target_id=oid,expected=headline):
+            found=None
+            for event in self._ledger.iter(EventKind.NEWS_OBSERVATION,correlation_id=hid):
+                if event.producer!=self._producer:continue
+                stored,at=_observation_from_event(event)
+                if event.payload['observation_id']!=target_id:continue
+                if stored!=expected:
+                    raise NewsIngressError('news observation original terms conflict')
+                if found is not None:raise NewsIngressError('news observation original is ambiguous')
+                found=(event,at)
+            return found
+        with self._ledger.atomic():
+            original=read()
+            if original is None:
+                orphaned=any(event.producer==self._producer for kind in
+                    (EventKind.NEWS_OBSERVATION,EventKind.NEWS_LINEAGE)
+                    for event in self._ledger.iter(kind,correlation_id=hid))
+                if hid in self._headlines or orphaned:
+                    raise NewsIngressError('news original publication missing; not recreated')
+                self._ledger.append(make_event(EventKind.NEWS_HEADLINE,self._producer,
+                    headline.body()|{'relayed_by':[headline.source_id],
+                    'full_claim':_full_claim(headline),'original_available_ms':available_ms,
+                    'native_clock_qualified':False},event_time_ms=headline.published_ms,
+                    received_time_ms=available_ms,correlation_id=hid))
+                created=True
+            elif 'full_claim' in original.payload:
+                first=_headline_from_original(original.payload)
+                first_observation=read_observation(_observation_id(first),first)
+                if first_observation is None:
+                    raise NewsIngressError('news required original observation missing; not recreated')
+                required=first_observation[0].payload.get('original_publisher')
+                if required is not None:
+                    first_origin=read_lineage(self._ledger,self._producer,_observation_id(first),hid)
+                    if first_origin is None:raise NewsIngressError('news publisher lineage required original missing')
+                    if first_origin['origin']!=required:raise NewsIngressError('news publisher lineage required original conflicts')
+                    if first_origin['available_ms']<first_observation[1]:
+                        raise NewsIngressError('news publisher lineage original availability conflicts')
+            existing_observation=read_observation()
+            if existing_observation is None:
+                if oid in self._published_observations:
+                    raise NewsIngressError('news observation original missing; not recreated')
+                observation_payload={'format':'news-observation/1','observation_id':oid,
+                     'headline_id':hid,'dedupe_hash':headline.dedupe_hash,
+                     'full_claim':_full_claim(headline),'available_ms':available_ms,
+                     'supplied_ingress_ms':ingress_ms,'provider_qualified':False,'authority_effect':'NONE'}
+                if origin is not None:
+                    observation_payload.update(format='news-observation/2',original_publisher=origin.body())
+                self._ledger.append(make_event(EventKind.NEWS_OBSERVATION,self._producer,observation_payload,
+                    event_time_ms=headline.published_ms,received_time_ms=available_ms,correlation_id=hid))
+            lineage=read_lineage(self._ledger,self._producer,oid,hid)
+            if lineage is None:
+                if oid in self._origins or (existing_observation is not None
+                        and existing_observation[0].payload.get('format')=='news-observation/2'):
+                    raise NewsIngressError('news publisher lineage original missing; not recreated')
+                if origin is not None:
+                    at=available_ms
+                    lineage=append_lineage(self._ledger,self._producer,origin,oid,hid,at)
+            elif origin is not None and lineage['origin']!=origin.body():
+                raise NewsIngressError('news original publisher declaration conflicts')
+            if (existing_observation is not None
+                    and existing_observation[0].payload.get('format')=='news-observation/2'
+                    and lineage['origin']!=existing_observation[0].payload['original_publisher']):
+                raise NewsIngressError('news publisher lineage required original conflicts')
+            if existing_observation is not None and lineage is not None and lineage['available_ms']<existing_observation[1]:
+>               raise NewsIngressError('news publisher lineage original availability conflicts')
+E               vati.events.news_ingress.NewsIngressError: news publisher lineage original availability conflicts
+
+trading/vati/events/news_ingress.py:619: NewsIngressError
+=========================== short test summary info ============================
+FAILED trading/tests/test_news_publisher_lineage.py::test_origin_enrichment_cannot_precede_the_original_observations_availability
+1 failed, 33 passed, 2 deselected in 0.91s

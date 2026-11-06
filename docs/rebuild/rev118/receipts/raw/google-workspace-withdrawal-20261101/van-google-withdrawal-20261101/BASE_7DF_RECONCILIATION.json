@@ -1,0 +1,21 @@
+{
+  "old_base": "25a48fd705825f5eec1264696e91536694cfb82f",
+  "new_base": "7df732de4c0a4f84bafadda658654a0ab8788553",
+  "all12reviewedsourcepins_preserved": true,
+  "method": "Guarded normal git switch --detach; full sourceZIP+trackedpatch retained, no reset/overwrite/stash",
+  "before_history_repair": true,
+  "pins": {
+    "android/app/src/main/java/com/dial/van/command/connected/ConnectedReadback.kt": "358bbb7fa78b24ca33805892a0bf4c7d23147c989156cc26267a14445411b0e1",
+    "android/app/src/main/java/com/dial/van/command/connected/ConnectedRoute.kt": "6e89096f6773455dfca27ef29ca2a79b9a23e4c76184d017cc06e53b380c213d",
+    "android/app/src/main/java/com/dial/van/gateway/GoogleWithdrawalOperations.kt": "3718aea7c293fa376100aa712660513bd3f904ab4ccd149d02cbac67c8ffbce6",
+    "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt": "26cdf2e26203594b2113a5b661dda2ea33770cfba1f9aafbc1c22302c048c3ad",
+    "android/verification/build.gradle.kts": "b1342705f7e5fbf4eba602b8efb81fecafb758966b7537a07a9106e6af2dcf0c",
+    "android/verification/src/test/kotlin/com/dial/van/gateway/GoogleWithdrawalOperationsTest.kt": "a8deed3c0eb4f407d3a46ace4298e88644f4dc474d3e7dfcf2a89034e211a006",
+    "backend/tests/test_gateway.py": "02d99600efd79bb926a9e242d8bc688ca4c3141230ecd199194b4d8d113f816b",
+    "backend/tests/test_google_owner_withdrawal_recovery.py": "90f09b6c732406336de69aea379288ee39d7a10814651bc47eea09f4602edfe9",
+    "backend/tests/test_google_readiness_revocation.py": "43ef8e6eefdbcb6a244b295d831591e7a8c0977832837b8a19d91f5e50a8ce42",
+    "backend/van_gateway/app.py": "0cd6c5024d5f73e1049f0bdef10c803c959cde4eeeb5976264ca1122c55c3470",
+    "backend/van_gateway/google/mesh.py": "c71799762b72636c15d0d4667bb08b860c260306994e3b8fba8cbc89dde514be",
+    "backend/van_gateway/google/service.py": "e63d2d1ca14793d7c3542efa15bc8e65190e8e007aff7ee3e5311c2527730912"
+  }
+}

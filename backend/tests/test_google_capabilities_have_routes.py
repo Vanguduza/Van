@@ -31,6 +31,9 @@ INTERNAL = "google-routes-internal"
 NEW_ROUTES = {
     "/v1/google/actions/execute": "POST",
     "/v1/google/gmail/draft": "POST",
+    "/v1/google/calendar/review": "GET",
+    "/v1/google/gmail/attachment/import-pdf": "POST",
+    "/v1/google/gmail/thread": "GET",
     "/v1/google/calendar/agenda": "GET",
     "/v1/google/calendar/reschedule": "POST",
     "/v1/google/drive/search": "GET",
@@ -92,7 +95,9 @@ def test_the_service_methods_these_routes_call_still_exist():
     """A route naming a method that has been renamed is a 500 nobody notices until it is
     called, and these are called rarely."""
     for method in (
-        "gmail_draft", "calendar_agenda", "calendar_reschedule",
+        "gmail_draft", "gmail_thread_get", "gmail_attachment_get",
+        "calendar_agenda", "calendar_event_review", "calendar_reschedule",
+        "calendar_create", "calendar_update", "calendar_delete",
         "drive_search", "contacts_resolve", "tasks_list",
     ):
         assert callable(getattr(GoogleService, method, None)), method
@@ -112,8 +117,11 @@ async def test_none_of_them_is_reachable_without_the_internal_credential(client)
     ac, _ = client
     for path, method in NEW_ROUTES.items():
         call = ac.get if method == "GET" else ac.post
-        response = await call(path, params={"q": "x", "thread_id": "t", "body": "b",
-                                            "event_id": "e", "new_start_unix": 0})
+        response = await call(path, params={
+            "q": "x", "thread_id": "t", "body": "b", "event_id": "e",
+            "new_start_unix": 0, "message_id": "m", "attachment_id": "a",
+            "filename": "form.pdf",
+        })
         assert response.status_code in (401, 403), f"{path} answered {response.status_code}"
         assert response.json()["detail"] != "ok"
 
@@ -174,3 +182,40 @@ async def test_drafting_is_a_typed_a3_mutation_not_a_raw_internal_write(client):
     )
     assert response.status_code == 422
     assert not app.state.google.transport.calls
+
+
+@pytest.mark.asyncio
+async def test_google_rejects_a_real_unapproved_execution_before_provider_or_transition(tmp_path, monkeypatch):
+    """A valid execution ID and matching parameters cannot stand in for owner approval."""
+    from conftest_automation import enroll_device, make_action_runtime, make_store
+    from van_gateway.action.models import ExecutionStatus
+    from van_gateway.action.service import ActionPolicyError
+    from van_gateway.google.transport import FakeGoogleTransport
+    from van_gateway.models import PrincipalType
+
+    store = await make_store(tmp_path)
+    await enroll_device(store)
+    actions = await make_action_runtime(store)
+    parameters = {"event_id": "event-1", "new_start_unix": 1791453600}
+    execution = await actions.begin(
+        execution_id="unapproved-google", command_id="unapproved-command", turn_id="unapproved-turn",
+        action_id="google.calendar.reschedule", principal_type=PrincipalType.OWNER_DEVICE,
+        requested_by="dev-owner-1", idempotency_key="unapproved-key", parameters=parameters,
+        snapshot_id=None, owner_approved=False,
+    )
+    assert execution.status is not ExecutionStatus.AUTHORIZED
+    transition_attempts = []
+    mark_executing = actions.mark_executing
+
+    async def observed_transition(execution_id):
+        transition_attempts.append(execution_id)
+        return await mark_executing(execution_id)
+
+    monkeypatch.setattr(actions, "mark_executing", observed_transition)
+    transport = FakeGoogleTransport()
+    google = GoogleService(store, Fernet.generate_key().decode(), transport)
+    with pytest.raises(ActionPolicyError, match="^execution_not_authorized$"):
+        await google.execute_authorized_action(actions, execution_id=execution.execution_id, parameters=parameters)
+    assert (await actions.get_execution(execution.execution_id)).status is execution.status
+    assert not transition_attempts, "Google must refuse before requesting an execution transition"
+    assert not transport.calls

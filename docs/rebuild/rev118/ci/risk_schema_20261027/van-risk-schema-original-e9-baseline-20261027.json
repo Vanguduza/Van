@@ -1,0 +1,27 @@
+{
+  "source_head": "e9cbdd69c9d98688e14b088c19c65e5df80c6e42",
+  "original_schema_sha256": "8153229ca9f049d08891457ad51db150ac96911fbb4ac37bb7959221e0d318a4",
+  "observed_current_native_rejections": 2,
+  "passing_legacy_controls": 2,
+  "results": {
+    "MT5": {
+      "old_schema_result": "REJECTED_CURRENT_NATIVE_OUTPUT",
+      "errors": [
+        "Additional properties are not allowed ('native_account_context' was unexpected)"
+      ]
+    },
+    "CTRADER": {
+      "old_schema_result": "REJECTED_CURRENT_NATIVE_OUTPUT",
+      "errors": [
+        "Additional properties are not allowed ('native_account_context' was unexpected)"
+      ]
+    },
+    "legacy_risk_snapshot_b58bb578.json": {
+      "old_schema_result": "LEGACY_CONTROL_ACCEPTED"
+    },
+    "legacy_risk_snapshot_no_margin_74b1749a.json": {
+      "old_schema_result": "LEGACY_CONTROL_ACCEPTED"
+    }
+  },
+  "scope": "Actual original JSONSchema validator over actual source-serialized fixture bodies; no native or financial qualification"
+}

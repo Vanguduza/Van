@@ -1,0 +1,32 @@
+{
+  "BG_001": "NOT_ISSUED",
+  "F15": "NOT_ISSUED",
+  "S24_ARTEMIS": "NOT_RUN_LATER_PLAN_GATE",
+  "application_tests": {
+    "planned": 1544,
+    "run": 0
+  },
+  "current_deployment_and_runtime_gate": "NOT_REFRESHED",
+  "economic_experiments": {
+    "reasons": [
+      "Evaluator correctness unresolved before optimization",
+      "Licensed immutable historical market inputs and complete trial census not established",
+      "No admitted DIAL research execution route available"
+    ],
+    "run": 0
+  },
+  "full_feature_semantic_admission": "PRE_001_PRE_002_REMAIN",
+  "global_dial": {
+    "callable_tool_exposed": false,
+    "configured_runtime_connection_established": false,
+    "not_a_request_for_repeat_permission": true,
+    "owner_authorized": true
+  },
+  "native_project_uuid": "NOT_REFRESHED",
+  "open_merged_pr_state": "NOT_OBTAINED_FROM_GIT_REFS",
+  "provider_qualification": {
+    "live_orders_authorized_by_this_review": false,
+    "mandatory_scope": "ACTUAL_CEX_SPOT_ENGINEERING",
+    "state": "UNRESOLVED_TARGET_ELIGIBILITY_AND_ACCESS"
+  }
+}

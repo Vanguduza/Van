@@ -1,0 +1,24 @@
+F...............................                                         [100%]
+=================================== FAILURES ===================================
+__________ test_the_two_vocabularies_are_written_down_and_still_agree __________
+
+    def test_the_two_vocabularies_are_written_down_and_still_agree():
+        """The audit labels that are not routing capabilities, named.
+    
+        Named rather than counted, so that adding one is a deliberate edit to this list and
+        not something that drifts in — and so that the next person to sweep for
+        `capability="..."` finds this file before concluding fourteen things are undeclared.
+        """
+        labels = _audit_labels()
+        declared = _declared()
+>       assert AUDIT_ONLY_LABELS <= labels, sorted(AUDIT_ONLY_LABELS - labels)
+E       AssertionError: ['google.owner_revoke']
+E       assert frozenset({'b...ingest', ...}) <= {'browser.dow....ingest', ...}
+E         
+E         Extra items in the left set:
+E         'google.owner_revoke'
+
+tests/contracts/test_capability_namespaces_are_distinct.py:100: AssertionError
+=========================== short test summary info ============================
+FAILED tests/contracts/test_capability_namespaces_are_distinct.py::test_the_two_vocabularies_are_written_down_and_still_agree
+1 failed, 31 passed in 41.91s

@@ -1,0 +1,28 @@
+{
+  "feature_dim": 80,
+  "files": {
+    "decoder": {
+      "path": "asr/decoder-epoch-30-avg-1.int8.onnx",
+      "sha256": "2b0580feb757696fa929922670b7126aaee609630349a1809fd5a2aee926d56e"
+    },
+    "encoder": {
+      "path": "asr/encoder-epoch-30-avg-1.int8.onnx",
+      "sha256": "d3eff4b1bd747bd781a47966795988539227d05638524b0313f26d3a166962d7"
+    },
+    "joiner": {
+      "path": "asr/joiner-epoch-30-avg-1.int8.onnx",
+      "sha256": "80160e45cca71dd52f6b0a6d3d12be18126f5308b2d4ba03f001300fea377c64"
+    },
+    "tokens": {
+      "path": "asr/tokens.txt",
+      "sha256": "0ef7d736bf4de3ef947292e4b119ef13f6808cd5f3aec225a843a7135ac1c2ce"
+    }
+  },
+  "max_active_paths": 4,
+  "model_type": "transducer",
+  "num_threads": 2,
+  "runtime": "sherpa-onnx",
+  "runtime_version": "1.13.8",
+  "sample_rate_hz": 16000,
+  "schema_version": 1
+}

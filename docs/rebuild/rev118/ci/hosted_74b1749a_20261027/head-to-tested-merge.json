@@ -1,0 +1,265 @@
+{
+  "url": "https://api.github.com/repos/Vanguduza/Van/compare/74b1749a97c9d647776384e9a4da7d4e371f1b4b...0ec2307406300d3bd3fc3edc51e4b46a3a8ae3de",
+  "html_url": "https://github.com/Vanguduza/Van/compare/74b1749a97c9d647776384e9a4da7d4e371f1b4b...0ec2307406300d3bd3fc3edc51e4b46a3a8ae3de",
+  "permalink_url": "https://github.com/Vanguduza/Van/compare/Vanguduza:74b1749...Vanguduza:0ec2307",
+  "diff_url": "https://github.com/Vanguduza/Van/compare/74b1749a97c9d647776384e9a4da7d4e371f1b4b...0ec2307406300d3bd3fc3edc51e4b46a3a8ae3de.diff",
+  "patch_url": "https://github.com/Vanguduza/Van/compare/74b1749a97c9d647776384e9a4da7d4e371f1b4b...0ec2307406300d3bd3fc3edc51e4b46a3a8ae3de.patch",
+  "base_commit": {
+    "sha": "74b1749a97c9d647776384e9a4da7d4e371f1b4b",
+    "node_id": "C_kwDOUZyCqdoAKDc0YjE3NDlhOTdjOWQ2NDc3NzYzODRlOWE0ZGE3ZDRlMzcxZjFiNGI",
+    "commit": {
+      "author": {
+        "name": "Tapiwa Kevin  Guduza",
+        "email": "tapiwaguduza@gmail.com",
+        "date": "2026-10-27T07:51:20Z"
+      },
+      "committer": {
+        "name": "Tapiwa Kevin  Guduza",
+        "email": "tapiwaguduza@gmail.com",
+        "date": "2026-10-27T07:51:20Z"
+      },
+      "message": "Preserve original position loss inputs and native margin report contracts",
+      "tree": {
+        "sha": "1b970f1eda92cce9fee5939e0cba96c94f29224d",
+        "url": "https://api.github.com/repos/Vanguduza/Van/git/trees/1b970f1eda92cce9fee5939e0cba96c94f29224d"
+      },
+      "url": "https://api.github.com/repos/Vanguduza/Van/git/commits/74b1749a97c9d647776384e9a4da7d4e371f1b4b",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null,
+        "verified_at": null
+      }
+    },
+    "url": "https://api.github.com/repos/Vanguduza/Van/commits/74b1749a97c9d647776384e9a4da7d4e371f1b4b",
+    "html_url": "https://github.com/Vanguduza/Van/commit/74b1749a97c9d647776384e9a4da7d4e371f1b4b",
+    "comments_url": "https://api.github.com/repos/Vanguduza/Van/commits/74b1749a97c9d647776384e9a4da7d4e371f1b4b/comments",
+    "author": {
+      "login": "Vanguduza",
+      "id": 215922244,
+      "node_id": "U_kgDODN62RA",
+      "avatar_url": "https://avatars.githubusercontent.com/u/215922244?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/Vanguduza",
+      "html_url": "https://github.com/Vanguduza",
+      "followers_url": "https://api.github.com/users/Vanguduza/followers",
+      "following_url": "https://api.github.com/users/Vanguduza/following{/other_user}",
+      "gists_url": "https://api.github.com/users/Vanguduza/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/Vanguduza/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/Vanguduza/subscriptions",
+      "organizations_url": "https://api.github.com/users/Vanguduza/orgs",
+      "repos_url": "https://api.github.com/users/Vanguduza/repos",
+      "events_url": "https://api.github.com/users/Vanguduza/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/Vanguduza/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "Vanguduza",
+      "id": 215922244,
+      "node_id": "U_kgDODN62RA",
+      "avatar_url": "https://avatars.githubusercontent.com/u/215922244?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/Vanguduza",
+      "html_url": "https://github.com/Vanguduza",
+      "followers_url": "https://api.github.com/users/Vanguduza/followers",
+      "following_url": "https://api.github.com/users/Vanguduza/following{/other_user}",
+      "gists_url": "https://api.github.com/users/Vanguduza/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/Vanguduza/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/Vanguduza/subscriptions",
+      "organizations_url": "https://api.github.com/users/Vanguduza/orgs",
+      "repos_url": "https://api.github.com/users/Vanguduza/repos",
+      "events_url": "https://api.github.com/users/Vanguduza/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/Vanguduza/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "b58bb578418ac1d49dc67078f616ac4c3eb8b3ef",
+        "url": "https://api.github.com/repos/Vanguduza/Van/commits/b58bb578418ac1d49dc67078f616ac4c3eb8b3ef",
+        "html_url": "https://github.com/Vanguduza/Van/commit/b58bb578418ac1d49dc67078f616ac4c3eb8b3ef"
+      }
+    ]
+  },
+  "merge_base_commit": {
+    "sha": "74b1749a97c9d647776384e9a4da7d4e371f1b4b",
+    "node_id": "C_kwDOUZyCqdoAKDc0YjE3NDlhOTdjOWQ2NDc3NzYzODRlOWE0ZGE3ZDRlMzcxZjFiNGI",
+    "commit": {
+      "author": {
+        "name": "Tapiwa Kevin  Guduza",
+        "email": "tapiwaguduza@gmail.com",
+        "date": "2026-10-27T07:51:20Z"
+      },
+      "committer": {
+        "name": "Tapiwa Kevin  Guduza",
+        "email": "tapiwaguduza@gmail.com",
+        "date": "2026-10-27T07:51:20Z"
+      },
+      "message": "Preserve original position loss inputs and native margin report contracts",
+      "tree": {
+        "sha": "1b970f1eda92cce9fee5939e0cba96c94f29224d",
+        "url": "https://api.github.com/repos/Vanguduza/Van/git/trees/1b970f1eda92cce9fee5939e0cba96c94f29224d"
+      },
+      "url": "https://api.github.com/repos/Vanguduza/Van/git/commits/74b1749a97c9d647776384e9a4da7d4e371f1b4b",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null,
+        "verified_at": null
+      }
+    },
+    "url": "https://api.github.com/repos/Vanguduza/Van/commits/74b1749a97c9d647776384e9a4da7d4e371f1b4b",
+    "html_url": "https://github.com/Vanguduza/Van/commit/74b1749a97c9d647776384e9a4da7d4e371f1b4b",
+    "comments_url": "https://api.github.com/repos/Vanguduza/Van/commits/74b1749a97c9d647776384e9a4da7d4e371f1b4b/comments",
+    "author": {
+      "login": "Vanguduza",
+      "id": 215922244,
+      "node_id": "U_kgDODN62RA",
+      "avatar_url": "https://avatars.githubusercontent.com/u/215922244?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/Vanguduza",
+      "html_url": "https://github.com/Vanguduza",
+      "followers_url": "https://api.github.com/users/Vanguduza/followers",
+      "following_url": "https://api.github.com/users/Vanguduza/following{/other_user}",
+      "gists_url": "https://api.github.com/users/Vanguduza/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/Vanguduza/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/Vanguduza/subscriptions",
+      "organizations_url": "https://api.github.com/users/Vanguduza/orgs",
+      "repos_url": "https://api.github.com/users/Vanguduza/repos",
+      "events_url": "https://api.github.com/users/Vanguduza/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/Vanguduza/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "Vanguduza",
+      "id": 215922244,
+      "node_id": "U_kgDODN62RA",
+      "avatar_url": "https://avatars.githubusercontent.com/u/215922244?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/Vanguduza",
+      "html_url": "https://github.com/Vanguduza",
+      "followers_url": "https://api.github.com/users/Vanguduza/followers",
+      "following_url": "https://api.github.com/users/Vanguduza/following{/other_user}",
+      "gists_url": "https://api.github.com/users/Vanguduza/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/Vanguduza/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/Vanguduza/subscriptions",
+      "organizations_url": "https://api.github.com/users/Vanguduza/orgs",
+      "repos_url": "https://api.github.com/users/Vanguduza/repos",
+      "events_url": "https://api.github.com/users/Vanguduza/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/Vanguduza/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "b58bb578418ac1d49dc67078f616ac4c3eb8b3ef",
+        "url": "https://api.github.com/repos/Vanguduza/Van/commits/b58bb578418ac1d49dc67078f616ac4c3eb8b3ef",
+        "html_url": "https://github.com/Vanguduza/Van/commit/b58bb578418ac1d49dc67078f616ac4c3eb8b3ef"
+      }
+    ]
+  },
+  "status": "ahead",
+  "ahead_by": 1,
+  "behind_by": 0,
+  "total_commits": 1,
+  "commits": [
+    {
+      "sha": "0ec2307406300d3bd3fc3edc51e4b46a3a8ae3de",
+      "node_id": "C_kwDOUZyCqdoAKDBlYzIzMDc0MDYzMDBkM2JkM2ZjM2VkYzUxZTRiNDZhM2E4YWUzZGU",
+      "commit": {
+        "author": {
+          "name": "Vanguduza",
+          "email": "tapiwaguduza@gmail.com",
+          "date": "2026-10-27T08:05:50Z"
+        },
+        "committer": {
+          "name": "GitHub",
+          "email": "noreply@github.com",
+          "date": "2026-10-27T08:05:50Z"
+        },
+        "message": "Merge 74b1749a97c9d647776384e9a4da7d4e371f1b4b into 8eb1889822fc8a83f219977c15340172e16acd91",
+        "tree": {
+          "sha": "1b970f1eda92cce9fee5939e0cba96c94f29224d",
+          "url": "https://api.github.com/repos/Vanguduza/Van/git/trees/1b970f1eda92cce9fee5939e0cba96c94f29224d"
+        },
+        "url": "https://api.github.com/repos/Vanguduza/Van/git/commits/0ec2307406300d3bd3fc3edc51e4b46a3a8ae3de",
+        "comment_count": 0,
+        "verification": {
+          "verified": true,
+          "reason": "valid",
+          "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJq4FteCRC1aQ7uu5UhlAAAkqYQAGtTepN04Itzd75ThfqDwfUU\nf74kw6rrTR839VvZjL+GHCkZ4LQSuSVPs6PLyenXpTrxgmx7nUBIa7Fbip8RaRDI\nS5KlIkuYgE7g2q/eVKrRFkDMCpQ1JBQS0R7MkJ/lwhsHUgVbB/ZTAwiVMbUGBxP7\nkT+S+Qf65qjn1Xc6KnjlFAWdqRdZmu4SFKprrQjhFMJVRENqvqeTuJKe3+BFCYxn\nzoZY40mmt587THSLMG6AhRIEgqmN9tGWyhCfXURyiQdDL5RA1Df5VJJfoSleq4he\n8ArCx4l/QZx39GBLZv2b2fCcmVkqwz7/B6/j53Zu9Bq6chJ1ZDN+li/jqsmkL12D\n6Tt7BXNCqOY2jH6tbrbV5QxbCPZCdvD3+WktLzpGH7xIiCkI81m37F7lssKCzsX4\nsvjON426z3wszFdKFW4RaQf8/sYG1PBDYrsaGGjMnq1MNqAUdAwfCHHoguFgziYv\nnLUZi6Yo8Dxe4sRJOpCOoBvl7bxLKlHi19GnVd0eHkemI6zqEyPxffu7V9OTVZWN\nFm1tHywmh7Ei7K9jiZ7DTS7XTnjR0f4wxb361qLL5EOkcE4M6x2g1nabz19zjbzm\naILeQSFxnIJm7l3AiHZjpEmse3cw9jVpDOvlMI6g6277xPQ6OfaIHZpxpUFRMiSL\nPVDJuY8ccn9GoZ+zOFKJ\n=M87c\n-----END PGP SIGNATURE-----\n",
+          "payload": "tree 1b970f1eda92cce9fee5939e0cba96c94f29224d\nparent 8eb1889822fc8a83f219977c15340172e16acd91\nparent 74b1749a97c9d647776384e9a4da7d4e371f1b4b\nauthor Vanguduza <tapiwaguduza@gmail.com> 1793088350 +0000\ncommitter GitHub <noreply@github.com> 1793088350 +0000\n\nMerge 74b1749a97c9d647776384e9a4da7d4e371f1b4b into 8eb1889822fc8a83f219977c15340172e16acd91\n",
+          "verified_at": "2026-10-27T08:05:51Z"
+        }
+      },
+      "url": "https://api.github.com/repos/Vanguduza/Van/commits/0ec2307406300d3bd3fc3edc51e4b46a3a8ae3de",
+      "html_url": "https://github.com/Vanguduza/Van/commit/0ec2307406300d3bd3fc3edc51e4b46a3a8ae3de",
+      "comments_url": "https://api.github.com/repos/Vanguduza/Van/commits/0ec2307406300d3bd3fc3edc51e4b46a3a8ae3de/comments",
+      "author": {
+        "login": "Vanguduza",
+        "id": 215922244,
+        "node_id": "U_kgDODN62RA",
+        "avatar_url": "https://avatars.githubusercontent.com/u/215922244?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Vanguduza",
+        "html_url": "https://github.com/Vanguduza",
+        "followers_url": "https://api.github.com/users/Vanguduza/followers",
+        "following_url": "https://api.github.com/users/Vanguduza/following{/other_user}",
+        "gists_url": "https://api.github.com/users/Vanguduza/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/Vanguduza/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/Vanguduza/subscriptions",
+        "organizations_url": "https://api.github.com/users/Vanguduza/orgs",
+        "repos_url": "https://api.github.com/users/Vanguduza/repos",
+        "events_url": "https://api.github.com/users/Vanguduza/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/Vanguduza/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "committer": {
+        "login": "web-flow",
+        "id": 19864447,
+        "node_id": "MDQ6VXNlcjE5ODY0NDQ3",
+        "avatar_url": "https://avatars.githubusercontent.com/u/19864447?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/web-flow",
+        "html_url": "https://github.com/web-flow",
+        "followers_url": "https://api.github.com/users/web-flow/followers",
+        "following_url": "https://api.github.com/users/web-flow/following{/other_user}",
+        "gists_url": "https://api.github.com/users/web-flow/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/web-flow/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/web-flow/subscriptions",
+        "organizations_url": "https://api.github.com/users/web-flow/orgs",
+        "repos_url": "https://api.github.com/users/web-flow/repos",
+        "events_url": "https://api.github.com/users/web-flow/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/web-flow/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "parents": [
+        {
+          "sha": "8eb1889822fc8a83f219977c15340172e16acd91",
+          "url": "https://api.github.com/repos/Vanguduza/Van/commits/8eb1889822fc8a83f219977c15340172e16acd91",
+          "html_url": "https://github.com/Vanguduza/Van/commit/8eb1889822fc8a83f219977c15340172e16acd91"
+        },
+        {
+          "sha": "74b1749a97c9d647776384e9a4da7d4e371f1b4b",
+          "url": "https://api.github.com/repos/Vanguduza/Van/commits/74b1749a97c9d647776384e9a4da7d4e371f1b4b",
+          "html_url": "https://github.com/Vanguduza/Van/commit/74b1749a97c9d647776384e9a4da7d4e371f1b4b"
+        }
+      ]
+    }
+  ],
+  "files": []
+}

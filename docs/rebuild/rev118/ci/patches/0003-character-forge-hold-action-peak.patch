@@ -1,0 +1,38 @@
+diff --git a/tools/character_forge/build_candidate_b_rive_prototype.py b/tools/character_forge/build_candidate_b_rive_prototype.py
+index ce6694fa..90d9fc2b 100644
+--- a/tools/character_forge/build_candidate_b_rive_prototype.py
++++ b/tools/character_forge/build_candidate_b_rive_prototype.py
+@@ -244,6 +244,9 @@ def _pose_animation(name: str, aid: int, pose, pivots: dict[str, tuple[float, fl
+     items: list[str] = []
+     if action:
+         mid = 22
++        # Hold the key pose from frame 22 to frame 40 (367-667 ms at 60 fps) so a finite action
++        # reads at its peak for a window wider than capture and launch timing jitter.
++        hold = 40
+         end = duration
+ 
+         # The artwork nodes use a two-level transform stack:
+@@ -257,17 +260,17 @@ def _pose_animation(name: str, aid: int, pose, pivots: dict[str, tuple[float, fl
+             "orb": 24,
+         }
+         if pose.forearm_l:
+-            items.append(_keyed(action_ids["forearm_l"], 15, [(0, 0), (mid, math.radians(pose.forearm_l)), (end, 0)]))
++            items.append(_keyed(action_ids["forearm_l"], 15, [(0, 0), (mid, math.radians(pose.forearm_l)), (hold, math.radians(pose.forearm_l)), (end, 0)]))
+         if pose.forearm_r:
+-            items.append(_keyed(action_ids["forearm_r"], 15, [(0, 0), (mid, math.radians(pose.forearm_r)), (end, 0)]))
++            items.append(_keyed(action_ids["forearm_r"], 15, [(0, 0), (mid, math.radians(pose.forearm_r)), (hold, math.radians(pose.forearm_r)), (end, 0)]))
+         if pose.head_tilt:
+-            items.append(_keyed(action_ids["head"], 15, [(0, 0), (mid, math.radians(pose.head_tilt)), (end, 0)]))
++            items.append(_keyed(action_ids["head"], 15, [(0, 0), (mid, math.radians(pose.head_tilt)), (hold, math.radians(pose.head_tilt)), (end, 0)]))
+         if pose.head_drop:
+-            items.append(_keyed(action_ids["head"], 14, [(0, 0), (mid, pose.head_drop), (end, 0)]))
++            items.append(_keyed(action_ids["head"], 14, [(0, 0), (mid, pose.head_drop), (hold, pose.head_drop), (end, 0)]))
+         if pose.orb_dx:
+-            items.append(_keyed(action_ids["orb"], 13, [(0, 0), (mid, pose.orb_dx), (end, 0)]))
++            items.append(_keyed(action_ids["orb"], 13, [(0, 0), (mid, pose.orb_dx), (hold, pose.orb_dx), (end, 0)]))
+         if pose.orb_dy:
+-            items.append(_keyed(action_ids["orb"], 14, [(0, 0), (mid, pose.orb_dy), (end, 0)]))
++            items.append(_keyed(action_ids["orb"], 14, [(0, 0), (mid, pose.orb_dy), (hold, pose.orb_dy), (end, 0)]))
+     else:
+         head_y = pivots["head"][1] + pose.head_drop
+         orb_x = pivots["orb"][0] + pose.orb_dx

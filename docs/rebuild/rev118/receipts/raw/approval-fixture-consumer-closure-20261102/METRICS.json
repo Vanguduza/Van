@@ -1,0 +1,51 @@
+{
+  "schema": "van.delivery.actual-batch-metrics/1",
+  "batch": "APPROVAL_FIXTURE_CONSUMER_CLOSURE_AND_STRATEGY_GAINS",
+  "parent_head": "23a570cf3f4f6e67fee69a2f8d845c7a8f03d244",
+  "closed_original_workflow_ids": null,
+  "canonical_unit_exits_established": false,
+  "scope_note": "This test-fixture/process batch establishes no original domain-workflow/full-unit exit or native acceptance. Seeded BE004/008 matrices remain unverified.",
+  "escaped_source_case_baseline": 53,
+  "escaped_case_source": "CI23a all six failed source-worker decoded identity union; one fixture-owner doubleload cause, not53independent product defects.",
+  "rework_cause": "Bare/qualified fixture owner loaded twice, paired client registered one ECpublickey while action helper signed with the other. Full producer/helper/consumer closure now reconciled.",
+  "new_head_first_pass_functional_CI": null,
+  "new_head_CI_run": null,
+  "new_head_CI_wait_seconds": null,
+  "implementation_seconds": null,
+  "review_total_seconds": null,
+  "integration_total_seconds": null,
+  "blocked_seconds": null,
+  "rework_seconds": null,
+  "model_usage": null,
+  "model_cost": null,
+  "actual_source_verification_child_seconds": 503.584,
+  "actual_source_verification_child_seconds_basis": "Sum of32serialized terminal receipt durations only; excludes resource-lock waits, model work and independent review.",
+  "actual_parent_owned_watch_seconds": 1924.162237,
+  "parent_watch_basis": "Actual41388834052/88283observer start\u2192terminal timestamps, not new-head CI or hardware qualification.",
+  "author_runtime": {
+    "selected_unique": 80,
+    "per_cwd_PASS": 80,
+    "executions": 160,
+    "skip": 0,
+    "failure": 0,
+    "paired_composite_unique": 82,
+    "paired_composite_executions": 168,
+    "overlaps_explicit": true
+  },
+  "independent_runtime": {
+    "executions": 8,
+    "unique": 6,
+    "skip": 0,
+    "failure": 0,
+    "overlaps_author": true,
+    "outer_cleanup_failure_retained": "First reviewer outercontroller exit1after2bodyPASS due zombie classification; supplement retained; tests not repeated or wholecontroller relabeled pass."
+  },
+  "measurement_rule": "First3complete source-bound batches baseline; compare next3same definitions. Unknowns null, no completion percentages or inferred model costs.",
+  "packaging_audit": {
+    "baseline_untracked_manifest_references": 71,
+    "original_result": "REFUSED_BEFORE_COMMIT",
+    "resolution": "independentSAFE71/HOLD0 + rootexactbyte inclusion",
+    "rework_cause": "Preexisting generic*.log ignored by Git while filesystem manifest referenced them; no product change.",
+    "blocked_seconds": null
+  }
+}

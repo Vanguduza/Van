@@ -1,0 +1,13 @@
+trading/tests
+backend/tests/test_trading_api.py
+backend/tests/test_van_private_core_service.py
+tests/rebuild/test_mt5_cash_unit_source.py
+backend/tests/test_lane_auth_commit_expiry.py
+backend/tests/test_lane_auth_commit_expiry_http.py
+backend/tests/test_lane_session_commit_expiry.py
+backend/tests/test_van_hermes_session.py
+backend/tests/test_session_socket_binding.py
+backend/tests/test_session_operation_recovery.py
+backend/tests/test_session_transport_api.py
+backend/tests/test_session_open_recovery.py
+backend/tests/test_ops_retention.py

@@ -1,0 +1,21 @@
+{
+  "source_head": "3205594c907665732e69dcac26852ff28078c48a",
+  "tested_merge": "8d50404f49304c80e59dd93bcf95a33ad8cb8c3e",
+  "tree_comparison": "GitHub ahead1/behind0/files[]",
+  "run": 40367094028,
+  "workflow_status": "SUCCESS",
+  "native_parquet_passed": 114,
+  "native_parquet_skips": 0,
+  "native_parquet_audit": 0,
+  "six_actual_upstream_cases": true,
+  "three_separate_cold_models_zero_difference": true,
+  "232_versions_checked_each_process": true,
+  "actual_kernel_limits_checked": true,
+  "both_distinct_workers_removed": true,
+  "source_controller_report_hashes_match": true,
+  "image_id": "sha256:5802a92ac475b9a2af74b20290c80084f329e0d487099dc7b3aa6c3198b98d1f",
+  "not_unit_acceptance": true,
+  "qualification": "Published3205 source fixtures only;later financial movement candidate not qualified",
+  "schema": "van.rebuild.forecast-hosted-source/1",
+  "evidence": "ci/forecast_hosted_3205594c_20261026"
+}

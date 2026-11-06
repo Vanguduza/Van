@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "authorization_id": "auth-20261006-owner-cognitive-fabric-native-qualification",
+  "project": "van",
+  "authority": "OWNER_DERIVED",
+  "owner_instruction_sha256": "917b3c26c2bc1617739c621f8d637756ee6a9d004ed46e4e092d5529ac71afd1",
+  "owner_instruction_excerpt": "Implement. This is not ordinary development. This is work that builds the development system and should be done directly without going through hermes",
+  "source": {
+    "kind": "owner_session_instruction",
+    "channel": "chatgpt",
+    "request_id": "chatgpt-20261006-cognitive-fabric-implementation",
+    "owner_attested": true,
+    "attachment_name": "Codex_GPT_6_1_Cognitive_Fabric_Completion_Prompt_20261006.txt",
+    "direct_execution_correction_sha256": "58909ed642437cf086ee329d97de74b6349d5ffcd4a3285fa3154bfdb0de9edf"
+  },
+  "issued_at_utc": "2026-10-06T11:13:10.983649+00:00",
+  "base_sha": "12feb9033dfc1dd68d7b4d41ac477f0d9dbbc4af",
+  "branch_scope": "codex/cognitive-fabric-r161-20261006",
+  "authorized_paths": [
+    "deploy/van-trading-core/supabase/reconcile_vati_ledger.py",
+    "tools/cognitive/**"
+  ],
+  "change_classes": [
+    "technical_implementation",
+    "candidate_integration",
+    "verification",
+    "source_provenance",
+    "necessary_generated_truth_reconciliation"
+  ],
+  "material_scope_expansion": false,
+  "feature_removal": false,
+  "business_model_change": false,
+  "security_authority_change": false,
+  "owner_control_boundary_change": false,
+  "legal_position_change": false,
+  "money_or_custody_model_change": false,
+  "locked_provider_change": false,
+  "revoked": false,
+  "limitations": [
+    "No self approval or owner adoption record",
+    "No protected merge, deployment or live trading activation",
+    "This owner session explicitly authorizes direct Codex implementation without Hermes"
+  ],
+  "parent_authorization_id": "auth-20261006-owner-cognitive-fabric-r161-direct",
+  "derivation": "Necessary native qualification and exact candidate tenant materialization within the explicitly authorized direct implementation."
+}

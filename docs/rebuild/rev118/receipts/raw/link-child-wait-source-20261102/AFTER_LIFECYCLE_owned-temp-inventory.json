@@ -1,0 +1,76 @@
+{
+  "directory": "/tmp/van-recovery-pytest-link-child-lifecycle-20261102",
+  "at_utc": "2026-11-02T00:40:07.737843+00:00",
+  "files": [
+    {
+      "path": "test_actual_owner_child_is_rea1/lifecycle-diagnostic.json",
+      "bytes": 442,
+      "sha256": "097ed660e491f781990646b4c4b21586c8b57f186ed6b25566d0e14972003e0e"
+    },
+    {
+      "path": "test_actual_owner_child_is_rea1/accounts.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_actual_owner_child_is_rea1/accounts.json.operation.process_link.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_actual_owner_child_is_rea1/native.sqlite",
+      "bytes": 24576,
+      "sha256": "1a2dd2859a8b29c874e4a91d2c34a85f4f6f4182ccd9d3e701658cd8f6607d31"
+    },
+    {
+      "path": "test_actual_owner_child_is_rea1/gw.sqlite3",
+      "bytes": 2052096,
+      "sha256": "0c20146bd746341adf2b1ee7fa2bacd9da0aa2cb1632ee85fd402d1d365e059d"
+    },
+    {
+      "path": "test_actual_owner_child_is_rea0/lifecycle-diagnostic.json",
+      "bytes": 440,
+      "sha256": "c83f84147ec908a688096f74d69d7372ed6f25d5097c4b58714682f07a66e689"
+    },
+    {
+      "path": "test_actual_owner_child_is_rea0/accounts.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_actual_owner_child_is_rea0/accounts.json.operation.process_link.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_actual_owner_child_is_rea0/native.sqlite",
+      "bytes": 24576,
+      "sha256": "ebe2559cc75b79b3c0805cee709c431f0642132871aa49847d2803190c5bb529"
+    },
+    {
+      "path": "test_actual_owner_child_is_rea0/gw.sqlite3",
+      "bytes": 2052096,
+      "sha256": "56463c1c8274c75a558ed6c10e8467f38aa7c01b64a1443e5474cbe4ea73ff1a"
+    },
+    {
+      "path": "test_actual_owner_child_is_rea1/secrets/.account-control-domain.env",
+      "bytes": 88,
+      "sha256": "1e3cf81d42995607adb1eca278e138e81946b43e25625107e22b1fa1257cf794"
+    },
+    {
+      "path": "test_actual_owner_child_is_rea1/secrets/.account-control-domain.env.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_actual_owner_child_is_rea0/secrets/.account-control-domain.env",
+      "bytes": 88,
+      "sha256": "315b9c6257d153a5fa001dbd5e72854bd0c481ee60c7b06931d40fd29e863a32"
+    },
+    {
+      "path": "test_actual_owner_child_is_rea0/secrets/.account-control-domain.env.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

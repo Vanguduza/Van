@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.trading.NativeAccountObservationTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-27T06:50:52" hostname="runnervmtai0g" time="0.005">
+  <properties/>
+  <testcase name="existingAccountModelRetainsExactOriginalIdentityMoneyAndClocks()" classname="com.dial.van.trading.NativeAccountObservationTest" time="0.001"/>
+  <testcase name="badAuthorityAmountsSourcesAndClocksCannotBecomeQualifiedFacts()" classname="com.dial.van.trading.NativeAccountObservationTest" time="0.001"/>
+  <testcase name="legacyAndExplicitUnavailableStatesRemainDistinct()" classname="com.dial.van.trading.NativeAccountObservationTest" time="0.0"/>
+  <testcase name="negativeCreditRemainsAnUnqualifiedLiability()" classname="com.dial.van.trading.NativeAccountObservationTest" time="0.001"/>
+  <testcase name="unavailableCreditKeepsOriginalMoneyWithoutInventingRiskEquity()" classname="com.dial.van.trading.NativeAccountObservationTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

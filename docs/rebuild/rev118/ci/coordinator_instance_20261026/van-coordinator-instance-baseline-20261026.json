@@ -1,0 +1,14 @@
+{
+  "base_head": "a7485a9a1ca6b3b11c96436b04fa2e1c05397029",
+  "source_matches_committed": true,
+  "source_file": "trading/vati/app/account_service.py",
+  "source_sha256": "f726e9a161affcde31cc457bd5a0827969308c948aa30e83b61d301c9a382235",
+  "actual_before": {
+    "failed": 2,
+    "passed": 1,
+    "skips": 0,
+    "audit_violations": 0,
+    "owned_fixture_independently_absent": true
+  },
+  "qualification": "Actual coordinator builders/sharedPostgres and Paper source fixture;not native provider/owner/financial acceptance"
+}

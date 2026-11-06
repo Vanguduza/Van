@@ -1,0 +1,560 @@
+﻿2026-11-01T07:35:48.7529011Z Current runner version: '2.338.2'
+2026-11-01T07:35:48.7561713Z ##[group]Runner Image Provisioner
+2026-11-01T07:35:48.7562588Z Hosted Compute Agent
+2026-11-01T07:35:48.7563268Z Version: 20261021.618
+2026-11-01T07:35:48.7563926Z Commit: 21505ad2541d5be6135ed84fc33697146cf75b8e
+2026-11-01T07:35:48.7564682Z Build Date: 2026-10-21T00:45:21Z
+2026-11-01T07:35:48.7565464Z Worker ID: {9e435c37-fcaa-48db-aab9-05057bf9bd9b}
+2026-11-01T07:35:48.7566550Z Region: northcentralus
+2026-11-01T07:35:48.7567224Z Cloud: Azure
+2026-11-01T07:35:48.7567809Z ##[endgroup]
+2026-11-01T07:35:48.7569779Z ##[group]Operating System
+2026-11-01T07:35:48.7570561Z Ubuntu
+2026-11-01T07:35:48.7571101Z 26.04.1
+2026-11-01T07:35:48.7571659Z LTS
+2026-11-01T07:35:48.7572201Z ##[endgroup]
+2026-11-01T07:35:48.7572805Z ##[group]Runner Image
+2026-11-01T07:35:48.7573453Z Image: ubuntu-26.04
+2026-11-01T07:35:48.7574039Z Version: 20261025.179.1
+2026-11-01T07:35:48.7575376Z Included Software: https://github.com/actions/runner-images/blob/ubuntu26/20261025.179/images/ubuntu/Ubuntu2604-Readme.md
+2026-11-01T07:35:48.7577233Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu26%2F20261025.179
+2026-11-01T07:35:48.7578287Z ##[endgroup]
+2026-11-01T07:35:48.7579510Z ##[group]GITHUB_TOKEN Permissions
+2026-11-01T07:35:48.7581742Z Contents: read
+2026-11-01T07:35:48.7582428Z Metadata: read
+2026-11-01T07:35:48.7583112Z Packages: read
+2026-11-01T07:35:48.7583713Z ##[endgroup]
+2026-11-01T07:35:48.7585883Z Secret source: Actions
+2026-11-01T07:35:48.7587548Z Cache mode: write
+2026-11-01T07:35:48.7589264Z Prepare workflow directory
+2026-11-01T07:35:48.8450486Z Prepare all required actions
+2026-11-01T07:35:48.8532517Z Getting action download info
+2026-11-01T07:35:49.0550448Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-11-01T07:35:49.1387184Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+2026-11-01T07:35:49.2079966Z Download action repository 'actions/setup-java@v4' (SHA:cf277c60eb25467037889841efdb72551f06f6c3)
+2026-11-01T07:35:49.6169480Z Download action repository 'gradle/actions@v4' (SHA:ed408507eac070d1f99cc633dbcf757c94c7933a)
+2026-11-01T07:35:50.2147542Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-11-01T07:35:50.4495561Z Complete job name: mutation (python-0, python, 0/4)
+2026-11-01T07:35:50.5618589Z ##[group]Run actions/checkout@v4
+2026-11-01T07:35:50.5620043Z with:
+2026-11-01T07:35:50.5620892Z   repository: Vanguduza/Van
+2026-11-01T07:35:50.5629708Z   token: ***
+2026-11-01T07:35:50.5630592Z   ssh-strict: true
+2026-11-01T07:35:50.5631481Z   ssh-user: git
+2026-11-01T07:35:50.5632331Z   persist-credentials: true
+2026-11-01T07:35:50.5633263Z   clean: true
+2026-11-01T07:35:50.5634112Z   sparse-checkout-cone-mode: true
+2026-11-01T07:35:50.5635117Z   fetch-depth: 1
+2026-11-01T07:35:50.5635946Z   fetch-tags: false
+2026-11-01T07:35:50.5637022Z   show-progress: true
+2026-11-01T07:35:50.5637923Z   lfs: false
+2026-11-01T07:35:50.5638727Z   submodules: false
+2026-11-01T07:35:50.5639619Z   set-safe-directory: true
+2026-11-01T07:35:50.5640600Z   allow-unsafe-pr-checkout: false
+2026-11-01T07:35:50.5642183Z env:
+2026-11-01T07:35:50.5643005Z   MUTATION_FAMILY: python
+2026-11-01T07:35:50.5643922Z   MUTATION_SHARD: 0/4
+2026-11-01T07:35:50.5645607Z   PYTHONPATH: /home/runner/work/Van/Van:/home/runner/work/Van/Van/backend:/home/runner/work/Van/Van/trading
+2026-11-01T07:35:50.5648009Z ##[endgroup]
+2026-11-01T07:35:50.7979062Z Syncing repository: Vanguduza/Van
+2026-11-01T07:35:50.7983784Z ##[group]Getting Git version info
+2026-11-01T07:35:50.7985928Z Working directory is '/home/runner/work/Van/Van'
+2026-11-01T07:35:50.7989395Z [command]/usr/bin/git version
+2026-11-01T07:35:50.8006500Z git version 2.56.0
+2026-11-01T07:35:50.8047418Z ##[endgroup]
+2026-11-01T07:35:50.8082467Z Temporarily overriding HOME='/home/runner/work/_temp/49476e56-a9ed-4f2e-932c-356f92aeb6a0' before making global git config changes
+2026-11-01T07:35:50.8101897Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-01T07:35:50.8114962Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Van/Van
+2026-11-01T07:35:50.8219215Z Deleting the contents of '/home/runner/work/Van/Van'
+2026-11-01T07:35:50.8223071Z ##[group]Initializing the repository
+2026-11-01T07:35:50.8225489Z [command]/usr/bin/git init /home/runner/work/Van/Van
+2026-11-01T07:35:50.8350863Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-11-01T07:35:50.8354643Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-11-01T07:35:50.8358432Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-11-01T07:35:50.8361286Z hint: call:
+2026-11-01T07:35:50.8362834Z hint:
+2026-11-01T07:35:50.8364590Z hint: 	git config --global init.defaultBranch <name>
+2026-11-01T07:35:50.8367509Z hint:
+2026-11-01T07:35:50.8369711Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-11-01T07:35:50.8373063Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-11-01T07:35:50.8376490Z hint:
+2026-11-01T07:35:50.8378230Z hint: 	git branch -m <name>
+2026-11-01T07:35:50.8380042Z hint:
+2026-11-01T07:35:50.8381687Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-11-01T07:35:50.8383931Z Initialized empty Git repository in /home/runner/work/Van/Van/.git/
+2026-11-01T07:35:50.8390144Z [command]/usr/bin/git remote add origin https://github.com/Vanguduza/Van
+2026-11-01T07:35:50.8432212Z ##[endgroup]
+2026-11-01T07:35:50.8434867Z ##[group]Disabling automatic garbage collection
+2026-11-01T07:35:50.8437447Z [command]/usr/bin/git config --local gc.auto 0
+2026-11-01T07:35:50.8483665Z ##[endgroup]
+2026-11-01T07:35:50.8485059Z ##[group]Setting up auth
+2026-11-01T07:35:50.8487236Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-01T07:35:50.8531903Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-01T07:35:50.8992346Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-01T07:35:50.9042847Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-01T07:35:50.9335810Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-01T07:35:50.9385083Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-01T07:35:50.9675924Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-11-01T07:35:50.9720183Z ##[endgroup]
+2026-11-01T07:35:50.9722354Z ##[group]Fetching the repository
+2026-11-01T07:35:50.9730076Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +721e4179b52312c21c7b5a50a6dfa0759dd30ce7:refs/remotes/pull/105/merge
+2026-11-01T07:35:54.8499494Z From https://github.com/Vanguduza/Van
+2026-11-01T07:35:54.8501035Z  * [new ref]         721e4179b52312c21c7b5a50a6dfa0759dd30ce7 -> pull/105/merge
+2026-11-01T07:35:54.8504065Z ##[endgroup]
+2026-11-01T07:35:54.8507519Z ##[group]Determining the checkout info
+2026-11-01T07:35:54.8508151Z ##[endgroup]
+2026-11-01T07:35:54.8513486Z [command]/usr/bin/git sparse-checkout disable
+2026-11-01T07:35:54.8565556Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-11-01T07:35:54.8597084Z ##[group]Checking out the ref
+2026-11-01T07:35:54.8600684Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/105/merge
+2026-11-01T07:35:55.8883620Z Updating files:  50% (9098/18055)
+2026-11-01T07:35:55.9081270Z Updating files:  51% (9209/18055)
+2026-11-01T07:35:55.9244325Z Updating files:  52% (9389/18055)
+2026-11-01T07:35:55.9322077Z Updating files:  53% (9570/18055)
+2026-11-01T07:35:55.9393550Z Updating files:  54% (9750/18055)
+2026-11-01T07:35:55.9542925Z Updating files:  55% (9931/18055)
+2026-11-01T07:35:55.9703403Z Updating files:  56% (10111/18055)
+2026-11-01T07:35:55.9835889Z Updating files:  57% (10292/18055)
+2026-11-01T07:35:55.9942470Z Updating files:  58% (10472/18055)
+2026-11-01T07:35:56.0013655Z Updating files:  59% (10653/18055)
+2026-11-01T07:35:56.0145938Z Updating files:  60% (10833/18055)
+2026-11-01T07:35:56.0316406Z Updating files:  61% (11014/18055)
+2026-11-01T07:35:56.0452741Z Updating files:  62% (11195/18055)
+2026-11-01T07:35:56.0753317Z Updating files:  63% (11375/18055)
+2026-11-01T07:35:56.0899940Z Updating files:  64% (11556/18055)
+2026-11-01T07:35:56.1240216Z Updating files:  65% (11736/18055)
+2026-11-01T07:35:56.1677689Z Updating files:  66% (11917/18055)
+2026-11-01T07:35:56.1982917Z Updating files:  67% (12097/18055)
+2026-11-01T07:35:56.2220155Z Updating files:  68% (12278/18055)
+2026-11-01T07:35:56.2414579Z Updating files:  69% (12458/18055)
+2026-11-01T07:35:56.2639046Z Updating files:  70% (12639/18055)
+2026-11-01T07:35:56.2814926Z Updating files:  71% (12820/18055)
+2026-11-01T07:35:56.3100209Z Updating files:  72% (13000/18055)
+2026-11-01T07:35:56.3229505Z Updating files:  73% (13181/18055)
+2026-11-01T07:35:56.3415746Z Updating files:  74% (13361/18055)
+2026-11-01T07:35:56.3523131Z Updating files:  75% (13542/18055)
+2026-11-01T07:35:56.3626936Z Updating files:  76% (13722/18055)
+2026-11-01T07:35:56.3752514Z Updating files:  77% (13903/18055)
+2026-11-01T07:35:56.4092210Z Updating files:  78% (14083/18055)
+2026-11-01T07:35:56.4346758Z Updating files:  79% (14264/18055)
+2026-11-01T07:35:56.4576817Z Updating files:  80% (14444/18055)
+2026-11-01T07:35:56.4726532Z Updating files:  81% (14625/18055)
+2026-11-01T07:35:56.4986547Z Updating files:  82% (14806/18055)
+2026-11-01T07:35:56.5251236Z Updating files:  83% (14986/18055)
+2026-11-01T07:35:56.5398221Z Updating files:  84% (15167/18055)
+2026-11-01T07:35:56.5591982Z Updating files:  85% (15347/18055)
+2026-11-01T07:35:56.5706432Z Updating files:  86% (15528/18055)
+2026-11-01T07:35:56.5823203Z Updating files:  87% (15708/18055)
+2026-11-01T07:35:56.6747798Z Updating files:  88% (15889/18055)
+2026-11-01T07:35:56.6864581Z Updating files:  89% (16069/18055)
+2026-11-01T07:35:56.7012537Z Updating files:  90% (16250/18055)
+2026-11-01T07:35:56.7469465Z Updating files:  91% (16431/18055)
+2026-11-01T07:35:56.7955045Z Updating files:  92% (16611/18055)
+2026-11-01T07:35:56.8251030Z Updating files:  93% (16792/18055)
+2026-11-01T07:35:56.8392800Z Updating files:  94% (16972/18055)
+2026-11-01T07:35:56.8544761Z Updating files:  95% (17153/18055)
+2026-11-01T07:35:56.8672860Z Updating files:  96% (17333/18055)
+2026-11-01T07:35:56.8789501Z Updating files:  97% (17514/18055)
+2026-11-01T07:35:56.8805586Z Updating files:  97% (17671/18055)
+2026-11-01T07:35:56.8924781Z Updating files:  98% (17694/18055)
+2026-11-01T07:35:57.0891625Z Updating files:  99% (17875/18055)
+2026-11-01T07:35:57.0892545Z Updating files: 100% (18055/18055)
+2026-11-01T07:35:57.0893004Z Updating files: 100% (18055/18055), done.
+2026-11-01T07:35:57.1099526Z Note: switching to 'refs/remotes/pull/105/merge'.
+2026-11-01T07:35:57.1100016Z 
+2026-11-01T07:35:57.1100384Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-11-01T07:35:57.1100880Z changes and commit them, and you can discard any commits you make in this
+2026-11-01T07:35:57.1101356Z state without impacting any branches by switching back to a branch.
+2026-11-01T07:35:57.1101638Z 
+2026-11-01T07:35:57.1101825Z If you want to create a new branch to retain commits you create, you may
+2026-11-01T07:35:57.1102269Z do so (now or later) by using -c with the switch command. Example:
+2026-11-01T07:35:57.1102529Z 
+2026-11-01T07:35:57.1102642Z   git switch -c <new-branch-name>
+2026-11-01T07:35:57.1102821Z 
+2026-11-01T07:35:57.1102923Z Or undo this operation with:
+2026-11-01T07:35:57.1103393Z 
+2026-11-01T07:35:57.1103480Z   git switch -
+2026-11-01T07:35:57.1103608Z 
+2026-11-01T07:35:57.1103818Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-11-01T07:35:57.1104134Z 
+2026-11-01T07:35:57.1104466Z HEAD is now at 721e417 Merge 25a48fd705825f5eec1264696e91536694cfb82f into 8eb1889822fc8a83f219977c15340172e16acd91
+2026-11-01T07:35:57.1238181Z ##[endgroup]
+2026-11-01T07:35:57.1286192Z [command]/usr/bin/git log -1 --format=%H
+2026-11-01T07:35:57.1311153Z 721e4179b52312c21c7b5a50a6dfa0759dd30ce7
+2026-11-01T07:35:57.1594481Z ##[group]Run actions/setup-python@v5
+2026-11-01T07:35:57.1594796Z with:
+2026-11-01T07:35:57.1595002Z   python-version: 3.12
+2026-11-01T07:35:57.1595233Z   check-latest: false
+2026-11-01T07:35:57.1597917Z   token: ***
+2026-11-01T07:35:57.1598149Z   update-environment: true
+2026-11-01T07:35:57.1598397Z   allow-prereleases: false
+2026-11-01T07:35:57.1598636Z   freethreaded: false
+2026-11-01T07:35:57.1598847Z env:
+2026-11-01T07:35:57.1599060Z   MUTATION_FAMILY: python
+2026-11-01T07:35:57.1599307Z   MUTATION_SHARD: 0/4
+2026-11-01T07:35:57.1599771Z   PYTHONPATH: /home/runner/work/Van/Van:/home/runner/work/Van/Van/backend:/home/runner/work/Van/Van/trading
+2026-11-01T07:35:57.1600262Z ##[endgroup]
+2026-11-01T07:35:57.2984202Z ##[group]Installed versions
+2026-11-01T07:35:57.3111047Z (node:2374) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-01T07:35:57.3112444Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-01T07:35:57.3127749Z Successfully set up CPython (3.12.15)
+2026-11-01T07:35:57.3128750Z ##[endgroup]
+2026-11-01T07:35:57.3373181Z ##[group]Run actions/setup-java@v4
+2026-11-01T07:35:57.3373630Z with:
+2026-11-01T07:35:57.3373940Z   distribution: temurin
+2026-11-01T07:35:57.3374298Z   java-version: 17
+2026-11-01T07:35:57.3374633Z   java-package: jdk
+2026-11-01T07:35:57.3374972Z   check-latest: false
+2026-11-01T07:35:57.3375379Z   server-id: github
+2026-11-01T07:35:57.3375708Z   server-username: GITHUB_ACTOR
+2026-11-01T07:35:57.3376328Z   server-password: GITHUB_TOKEN
+2026-11-01T07:35:57.3376845Z   overwrite-settings: true
+2026-11-01T07:35:57.3377321Z   job-status: success
+2026-11-01T07:35:57.3381403Z   token: ***
+2026-11-01T07:35:57.3381725Z env:
+2026-11-01T07:35:57.3382022Z   MUTATION_FAMILY: python
+2026-11-01T07:35:57.3382408Z   MUTATION_SHARD: 0/4
+2026-11-01T07:35:57.3382870Z   PYTHONPATH: /home/runner/work/Van/Van:/home/runner/work/Van/Van/backend:/home/runner/work/Van/Van/trading
+2026-11-01T07:35:57.3383419Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:35:57.3383908Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-11-01T07:35:57.3384336Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:35:57.3384714Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:35:57.3385093Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:35:57.3385482Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-11-01T07:35:57.3385803Z ##[endgroup]
+2026-11-01T07:35:57.5264383Z ##[warning]setup-java v4 is deprecated and will no longer receive updates. Please migrate to actions/setup-java@v5.
+2026-11-01T07:35:57.5271615Z ##[group]Installed distributions
+2026-11-01T07:35:57.5313562Z Resolved Java 17.0.21+9 from tool-cache
+2026-11-01T07:35:57.5314142Z Setting Java 17.0.21+9 as the default
+2026-11-01T07:35:57.5324355Z (node:2382) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-01T07:35:57.5325083Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-01T07:35:57.5329103Z Creating toolchains.xml for JDK version 17 from temurin
+2026-11-01T07:35:57.5404320Z Writing to /home/runner/.m2/toolchains.xml
+2026-11-01T07:35:57.5404896Z 
+2026-11-01T07:35:57.5405142Z Java configuration:
+2026-11-01T07:35:57.5406652Z   Distribution: temurin
+2026-11-01T07:35:57.5427079Z   Version: 17.0.21+9
+2026-11-01T07:35:57.5427607Z   Path: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-11-01T07:35:57.5427910Z 
+2026-11-01T07:35:57.5428271Z ##[endgroup]
+2026-11-01T07:35:57.5443425Z Creating settings.xml with server-id: github
+2026-11-01T07:35:57.5451379Z Writing to /home/runner/.m2/settings.xml
+2026-11-01T07:35:57.5668838Z ##[group]Run pip install -r requirements.lock
+2026-11-01T07:35:57.5669503Z [36;1mpip install -r requirements.lock[0m
+2026-11-01T07:35:57.5730433Z shell: /usr/bin/bash -e {0}
+2026-11-01T07:35:57.5730726Z env:
+2026-11-01T07:35:57.5730936Z   MUTATION_FAMILY: python
+2026-11-01T07:35:57.5731188Z   MUTATION_SHARD: 0/4
+2026-11-01T07:35:57.5731642Z   PYTHONPATH: /home/runner/work/Van/Van:/home/runner/work/Van/Van/backend:/home/runner/work/Van/Van/trading
+2026-11-01T07:35:57.5732210Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:35:57.5732646Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-11-01T07:35:57.5733092Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:35:57.5733473Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:35:57.5733855Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:35:57.5734281Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-11-01T07:35:57.5734706Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-11-01T07:35:57.5735665Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-11-01T07:35:57.5736777Z ##[endgroup]
+2026-11-01T07:35:58.2844992Z Collecting aiosqlite==0.22.1 (from -r requirements.lock (line 16))
+2026-11-01T07:35:58.3082324Z   Downloading aiosqlite-0.22.1-py3-none-any.whl.metadata (4.3 kB)
+2026-11-01T07:35:58.3200343Z Collecting annotated-doc==0.0.5 (from -r requirements.lock (line 17))
+2026-11-01T07:35:58.3234191Z   Downloading annotated_doc-0.0.5-py3-none-any.whl.metadata (6.5 kB)
+2026-11-01T07:35:58.3344496Z Collecting annotated-types==0.8.0 (from -r requirements.lock (line 18))
+2026-11-01T07:35:58.3378086Z   Downloading annotated_types-0.8.0-py3-none-any.whl.metadata (15 kB)
+2026-11-01T07:35:58.3539552Z Collecting anyio==4.15.1 (from -r requirements.lock (line 19))
+2026-11-01T07:35:58.3573811Z   Downloading anyio-4.15.1-py3-none-any.whl.metadata (4.7 kB)
+2026-11-01T07:35:58.3731591Z Collecting certifi==2026.7.22 (from -r requirements.lock (line 20))
+2026-11-01T07:35:58.3764878Z   Downloading certifi-2026.7.22-py3-none-any.whl.metadata (2.5 kB)
+2026-11-01T07:35:58.4958547Z Collecting cffi==2.1.1 (from -r requirements.lock (line 21))
+2026-11-01T07:35:58.4996803Z   Downloading cffi-2.1.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (2.5 kB)
+2026-11-01T07:35:58.5147445Z Collecting click==8.5.0 (from -r requirements.lock (line 22))
+2026-11-01T07:35:58.5182666Z   Downloading click-8.5.0-py3-none-any.whl.metadata (2.6 kB)
+2026-11-01T07:35:58.6924561Z Collecting cryptography==50.0.1 (from -r requirements.lock (line 23))
+2026-11-01T07:35:58.6961722Z   Downloading cryptography-50.0.1-cp311-abi3-manylinux_2_34_x86_64.whl.metadata (4.3 kB)
+2026-11-01T07:35:58.7339523Z Collecting fastapi==0.141.1 (from -r requirements.lock (line 24))
+2026-11-01T07:35:58.7377185Z   Downloading fastapi-0.141.1-py3-none-any.whl.metadata (27 kB)
+2026-11-01T07:35:58.8817585Z Collecting greenlet==3.5.6 (from -r requirements.lock (line 25))
+2026-11-01T07:35:58.8855904Z   Downloading greenlet-3.5.6-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (3.8 kB)
+2026-11-01T07:35:58.8967302Z Collecting h11==0.16.0 (from -r requirements.lock (line 26))
+2026-11-01T07:35:58.9003557Z   Downloading h11-0.16.0-py3-none-any.whl.metadata (8.3 kB)
+2026-11-01T07:35:58.9151059Z Collecting httpcore==1.0.9 (from -r requirements.lock (line 27))
+2026-11-01T07:35:58.9186936Z   Downloading httpcore-1.0.9-py3-none-any.whl.metadata (21 kB)
+2026-11-01T07:35:58.9540551Z Collecting httptools==0.8.0 (from -r requirements.lock (line 28))
+2026-11-01T07:35:58.9577439Z   Downloading httptools-0.8.0-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (3.5 kB)
+2026-11-01T07:35:58.9726636Z Collecting httpx==0.28.1 (from -r requirements.lock (line 29))
+2026-11-01T07:35:58.9761569Z   Downloading httpx-0.28.1-py3-none-any.whl.metadata (7.1 kB)
+2026-11-01T07:35:58.9897423Z Collecting idna==3.20 (from -r requirements.lock (line 30))
+2026-11-01T07:35:58.9932045Z   Downloading idna-3.20-py3-none-any.whl.metadata (7.2 kB)
+2026-11-01T07:35:59.0033534Z Collecting iniconfig==2.3.0 (from -r requirements.lock (line 31))
+2026-11-01T07:35:59.0070578Z   Downloading iniconfig-2.3.0-py3-none-any.whl.metadata (2.5 kB)
+2026-11-01T07:35:59.0203309Z Collecting packaging==26.3 (from -r requirements.lock (line 32))
+2026-11-01T07:35:59.0237892Z   Downloading packaging-26.3-py3-none-any.whl.metadata (3.5 kB)
+2026-11-01T07:35:59.0574349Z Collecting playwright==1.63.0 (from -r requirements.lock (line 33))
+2026-11-01T07:35:59.0612625Z   Downloading playwright-1.63.0-py3-none-manylinux1_x86_64.whl.metadata (3.3 kB)
+2026-11-01T07:35:59.0732589Z Collecting pluggy==1.6.0 (from -r requirements.lock (line 34))
+2026-11-01T07:35:59.0769639Z   Downloading pluggy-1.6.0-py3-none-any.whl.metadata (4.8 kB)
+2026-11-01T07:35:59.0882671Z Collecting pycparser==3.0 (from -r requirements.lock (line 35))
+2026-11-01T07:35:59.0917975Z   Downloading pycparser-3.0-py3-none-any.whl.metadata (8.2 kB)
+2026-11-01T07:35:59.1908074Z Collecting pydantic==2.13.5 (from -r requirements.lock (line 36))
+2026-11-01T07:35:59.1946074Z   Downloading pydantic-2.13.5-py3-none-any.whl.metadata (110 kB)
+2026-11-01T07:35:59.2133427Z Collecting pydantic-settings==2.15.0 (from -r requirements.lock (line 37))
+2026-11-01T07:35:59.2168466Z   Downloading pydantic_settings-2.15.0-py3-none-any.whl.metadata (3.9 kB)
+2026-11-01T07:35:59.8827198Z Collecting pydantic_core==2.46.5 (from -r requirements.lock (line 38))
+2026-11-01T07:35:59.8864467Z   Downloading pydantic_core-2.46.5-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (6.6 kB)
+2026-11-01T07:35:59.9047706Z Collecting pypdf==6.19.0 (from -r requirements.lock (line 39))
+2026-11-01T07:35:59.9083077Z   Downloading pypdf-6.19.0-py3-none-any.whl.metadata (7.5 kB)
+2026-11-01T07:35:59.9235686Z Collecting pyee==13.0.1 (from -r requirements.lock (line 40))
+2026-11-01T07:35:59.9269891Z   Downloading pyee-13.0.1-py3-none-any.whl.metadata (3.0 kB)
+2026-11-01T07:35:59.9651339Z Collecting Pygments==2.21.0 (from -r requirements.lock (line 41))
+2026-11-01T07:35:59.9688622Z   Downloading pygments-2.21.0-py3-none-any.whl.metadata (2.5 kB)
+2026-11-01T07:35:59.9932777Z Collecting pytest==9.1.1 (from -r requirements.lock (line 42))
+2026-11-01T07:35:59.9970129Z   Downloading pytest-9.1.1-py3-none-any.whl.metadata (7.6 kB)
+2026-11-01T07:36:00.0143243Z Collecting pytest-asyncio==1.4.0 (from -r requirements.lock (line 43))
+2026-11-01T07:36:00.0178312Z   Downloading pytest_asyncio-1.4.0-py3-none-any.whl.metadata (4.1 kB)
+2026-11-01T07:36:00.0317587Z Collecting python-dotenv==1.2.3 (from -r requirements.lock (line 44))
+2026-11-01T07:36:00.0354463Z   Downloading python_dotenv-1.2.3-py3-none-any.whl.metadata (29 kB)
+2026-11-01T07:36:00.0491112Z Collecting python-multipart==0.0.32 (from -r requirements.lock (line 45))
+2026-11-01T07:36:00.0524960Z   Downloading python_multipart-0.0.32-py3-none-any.whl.metadata (2.1 kB)
+2026-11-01T07:36:00.0891719Z Collecting PyYAML==6.0.3 (from -r requirements.lock (line 46))
+2026-11-01T07:36:00.0930660Z   Downloading pyyaml-6.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.4 kB)
+2026-11-01T07:36:00.1152082Z Collecting starlette==1.6.0 (from -r requirements.lock (line 47))
+2026-11-01T07:36:00.1188686Z   Downloading starlette-1.6.0-py3-none-any.whl.metadata (6.4 kB)
+2026-11-01T07:36:00.1301173Z Collecting typing-inspection==0.4.4 (from -r requirements.lock (line 48))
+2026-11-01T07:36:00.1341578Z   Downloading typing_inspection-0.4.4-py3-none-any.whl.metadata (2.6 kB)
+2026-11-01T07:36:00.1491391Z Collecting typing_extensions==4.16.0 (from -r requirements.lock (line 49))
+2026-11-01T07:36:00.1526506Z   Downloading typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)
+2026-11-01T07:36:00.1731710Z Collecting uvicorn==0.53.0 (from -r requirements.lock (line 50))
+2026-11-01T07:36:00.1768517Z   Downloading uvicorn-0.53.0-py3-none-any.whl.metadata (6.6 kB)
+2026-11-01T07:36:00.2159713Z Collecting uvloop==0.22.1 (from -r requirements.lock (line 51))
+2026-11-01T07:36:00.2197967Z   Downloading uvloop-0.22.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (4.9 kB)
+2026-11-01T07:36:00.2952202Z Collecting watchfiles==1.3.0 (from -r requirements.lock (line 52))
+2026-11-01T07:36:00.2991163Z   Downloading watchfiles-1.3.0-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (4.9 kB)
+2026-11-01T07:36:00.4243360Z Collecting websockets==17.1 (from -r requirements.lock (line 53))
+2026-11-01T07:36:00.4280918Z   Downloading websockets-17.1-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (6.3 kB)
+2026-11-01T07:36:00.4730847Z Downloading aiosqlite-0.22.1-py3-none-any.whl (17 kB)
+2026-11-01T07:36:00.4784514Z Downloading annotated_doc-0.0.5-py3-none-any.whl (5.3 kB)
+2026-11-01T07:36:00.4836484Z Downloading annotated_types-0.8.0-py3-none-any.whl (13 kB)
+2026-11-01T07:36:00.4889974Z Downloading anyio-4.15.1-py3-none-any.whl (132 kB)
+2026-11-01T07:36:00.4946803Z Downloading certifi-2026.7.22-py3-none-any.whl (136 kB)
+2026-11-01T07:36:00.5003916Z Downloading cffi-2.1.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (221 kB)
+2026-11-01T07:36:00.5068059Z Downloading click-8.5.0-py3-none-any.whl (125 kB)
+2026-11-01T07:36:00.5134919Z Downloading cryptography-50.0.1-cp311-abi3-manylinux_2_34_x86_64.whl (4.7 MB)
+2026-11-01T07:36:00.5335008Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.7/4.7 MB 263.4 MB/s  0:00:00
+2026-11-01T07:36:00.5372893Z Downloading fastapi-0.141.1-py3-none-any.whl (131 kB)
+2026-11-01T07:36:00.5434606Z Downloading greenlet-3.5.6-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (621 kB)
+2026-11-01T07:36:00.5484705Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 621.4/621.4 kB 130.4 MB/s  0:00:00
+2026-11-01T07:36:00.5520955Z Downloading h11-0.16.0-py3-none-any.whl (37 kB)
+2026-11-01T07:36:00.5575527Z Downloading httpcore-1.0.9-py3-none-any.whl (78 kB)
+2026-11-01T07:36:00.5633731Z Downloading httptools-0.8.0-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (523 kB)
+2026-11-01T07:36:00.5696967Z Downloading httpx-0.28.1-py3-none-any.whl (73 kB)
+2026-11-01T07:36:00.5753907Z Downloading idna-3.20-py3-none-any.whl (69 kB)
+2026-11-01T07:36:00.5808603Z Downloading iniconfig-2.3.0-py3-none-any.whl (7.5 kB)
+2026-11-01T07:36:00.5860420Z Downloading packaging-26.3-py3-none-any.whl (129 kB)
+2026-11-01T07:36:00.5918138Z Downloading playwright-1.63.0-py3-none-manylinux1_x86_64.whl (48.2 MB)
+2026-11-01T07:36:00.7476512Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 48.2/48.2 MB 314.2 MB/s  0:00:00
+2026-11-01T07:36:00.7513846Z Downloading pyee-13.0.1-py3-none-any.whl (15 kB)
+2026-11-01T07:36:00.7569550Z Downloading pluggy-1.6.0-py3-none-any.whl (20 kB)
+2026-11-01T07:36:00.7622899Z Downloading pycparser-3.0-py3-none-any.whl (48 kB)
+2026-11-01T07:36:00.7679451Z Downloading pydantic-2.13.5-py3-none-any.whl (472 kB)
+2026-11-01T07:36:00.7743564Z Downloading pydantic_settings-2.15.0-py3-none-any.whl (69 kB)
+2026-11-01T07:36:00.7802837Z Downloading pydantic_core-2.46.5-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.1 MB)
+2026-11-01T07:36:00.7895612Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.1/2.1 MB 281.2 MB/s  0:00:00
+2026-11-01T07:36:00.7932522Z Downloading pypdf-6.19.0-py3-none-any.whl (395 kB)
+2026-11-01T07:36:00.7995333Z Downloading pygments-2.21.0-py3-none-any.whl (1.3 MB)
+2026-11-01T07:36:00.8059655Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.3/1.3 MB 229.3 MB/s  0:00:00
+2026-11-01T07:36:00.8095059Z Downloading pytest-9.1.1-py3-none-any.whl (386 kB)
+2026-11-01T07:36:00.8155935Z Downloading pytest_asyncio-1.4.0-py3-none-any.whl (16 kB)
+2026-11-01T07:36:00.8232448Z Downloading python_dotenv-1.2.3-py3-none-any.whl (22 kB)
+2026-11-01T07:36:00.8298533Z Downloading python_multipart-0.0.32-py3-none-any.whl (30 kB)
+2026-11-01T07:36:00.8353398Z Downloading pyyaml-6.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (807 kB)
+2026-11-01T07:36:00.8412014Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 807.9/807.9 kB 153.5 MB/s  0:00:00
+2026-11-01T07:36:00.8446829Z Downloading starlette-1.6.0-py3-none-any.whl (75 kB)
+2026-11-01T07:36:00.8501654Z Downloading typing_inspection-0.4.4-py3-none-any.whl (14 kB)
+2026-11-01T07:36:00.8566557Z Downloading typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+2026-11-01T07:36:00.8620400Z Downloading uvicorn-0.53.0-py3-none-any.whl (87 kB)
+2026-11-01T07:36:00.8675772Z Downloading uvloop-0.22.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (4.4 MB)
+2026-11-01T07:36:00.8820614Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.4/4.4 MB 345.9 MB/s  0:00:00
+2026-11-01T07:36:00.8858716Z Downloading watchfiles-1.3.0-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (458 kB)
+2026-11-01T07:36:00.8923289Z Downloading websockets-17.1-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (224 kB)
+2026-11-01T07:36:01.1125412Z Installing collected packages: websockets, uvloop, typing_extensions, PyYAML, python-multipart, python-dotenv, pypdf, Pygments, pycparser, pluggy, packaging, iniconfig, idna, httptools, h11, greenlet, click, certifi, annotated-types, annotated-doc, aiosqlite, uvicorn, typing-inspection, pytest, pyee, pydantic_core, httpcore, cffi, anyio, watchfiles, starlette, pytest-asyncio, pydantic, playwright, httpx, cryptography, pydantic-settings, fastapi
+2026-11-01T07:36:05.0992432Z 
+2026-11-01T07:36:05.1028547Z Successfully installed PyYAML-6.0.3 Pygments-2.21.0 aiosqlite-0.22.1 annotated-doc-0.0.5 annotated-types-0.8.0 anyio-4.15.1 certifi-2026.7.22 cffi-2.1.1 click-8.5.0 cryptography-50.0.1 fastapi-0.141.1 greenlet-3.5.6 h11-0.16.0 httpcore-1.0.9 httptools-0.8.0 httpx-0.28.1 idna-3.20 iniconfig-2.3.0 packaging-26.3 playwright-1.63.0 pluggy-1.6.0 pycparser-3.0 pydantic-2.13.5 pydantic-settings-2.15.0 pydantic_core-2.46.5 pyee-13.0.1 pypdf-6.19.0 pytest-9.1.1 pytest-asyncio-1.4.0 python-dotenv-1.2.3 python-multipart-0.0.32 starlette-1.6.0 typing-inspection-0.4.4 typing_extensions-4.16.0 uvicorn-0.53.0 uvloop-0.22.1 watchfiles-1.3.0 websockets-17.1
+2026-11-01T07:36:05.2427573Z ##[group]Run set -euo pipefail
+2026-11-01T07:36:05.2427938Z [36;1mset -euo pipefail[0m
+2026-11-01T07:36:05.2428212Z [36;1mmkdir -p ../artifacts/mutation[0m
+2026-11-01T07:36:05.2428754Z [36;1mpython ../tools/rebuild/mutation_registry.py --check | tee ../artifacts/mutation/mutation-registry.json[0m
+2026-11-01T07:36:05.2429650Z [36;1mpython ../tools/audit/mutation_suite.py --family "$MUTATION_FAMILY" --shard "$MUTATION_SHARD" 2>&1 | tee ../artifacts/mutation/mutation-report.txt[0m
+2026-11-01T07:36:05.2460415Z shell: /usr/bin/bash -e {0}
+2026-11-01T07:36:05.2460678Z env:
+2026-11-01T07:36:05.2460884Z   MUTATION_FAMILY: python
+2026-11-01T07:36:05.2461129Z   MUTATION_SHARD: 0/4
+2026-11-01T07:36:05.2461579Z   PYTHONPATH: /home/runner/work/Van/Van:/home/runner/work/Van/Van/backend:/home/runner/work/Van/Van/trading
+2026-11-01T07:36:05.2462176Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:36:05.2462658Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-11-01T07:36:05.2463093Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:36:05.2463472Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:36:05.2463850Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:36:05.2464227Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-11-01T07:36:05.2464652Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-11-01T07:36:05.2465138Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-11-01T07:36:05.2465703Z ##[endgroup]
+2026-11-01T07:36:05.3348825Z {
+2026-11-01T07:36:05.3349291Z   "schema": "van.rebuild.mutation-registry-preflight/1",
+2026-11-01T07:36:05.3349959Z   "registry_sha256": "cbf114a3374538eeb1403d3f066ee4f22d2405b32e6a7f6b752fa9fe0d9a99df",
+2026-11-01T07:36:05.3350544Z   "mutation_count": 374,
+2026-11-01T07:36:05.3350852Z   "edit_count": 383,
+2026-11-01T07:36:05.3351069Z   "findings": [],
+2026-11-01T07:36:05.3351315Z   "execution_state": "NOT_RUN",
+2026-11-01T07:36:05.3351648Z   "status": "ANCHORS_VALID_BASELINES_AND_MUTATIONS_NOT_EXECUTED"
+2026-11-01T07:36:05.3351995Z }
+2026-11-01T07:36:05.3842776Z 
+2026-11-01T07:36:05.3843599Z ### ['tests/test_command_success_contract.py', 'tests/test_verification_is_performed.py']
+2026-11-01T07:37:06.1129702Z CAUGHT             C5 drop the owner-halt claim
+2026-11-01T07:37:06.1130166Z CAUGHT             C5 revert the joint
+2026-11-01T07:37:06.1130530Z CAUGHT             C5 accept a stale ledger
+2026-11-01T07:37:06.1130996Z CAUGHT             C5 unreachable provider reads as a deletion
+2026-11-01T07:37:06.1131452Z CAUGHT             C5 cite evidence on a failed halt
+2026-11-01T07:37:06.1131722Z 
+2026-11-01T07:37:06.1131828Z 5/5 caught
+2026-11-01T07:37:06.1131958Z 
+2026-11-01T07:37:06.1132118Z ### ['tests/test_interactive_browser_session.py']
+2026-11-01T07:38:45.8947495Z CAUGHT             C23 a stale control generation actuates
+2026-11-01T07:38:45.8948155Z CAUGHT             C23 a fabricated control lease id actuates
+2026-11-01T07:38:45.8948726Z CAUGHT             C23 the control fence never moves
+2026-11-01T07:38:45.8949416Z CAUGHT             C23 input lands before the device acknowledges the layout
+2026-11-01T07:38:45.8950217Z CAUGHT             C23 a stale viewport revision actuates
+2026-11-01T07:38:45.8950876Z CAUGHT             C23 the cleanup grace extends actuation authority
+2026-11-01T07:38:45.8951411Z CAUGHT             C23 the grant verifier accepts the algorithm the token names
+2026-11-01T07:38:45.8951891Z CAUGHT             C23 a stream grant is redeemable twice
+2026-11-01T07:38:45.8952297Z CAUGHT             C23 one device's events reach another device
+2026-11-01T07:38:45.8952732Z CAUGHT             C23 the cursor sticks behind another device's rows
+2026-11-01T07:38:45.8953017Z 
+2026-11-01T07:38:45.8953102Z 10/10 caught
+2026-11-01T07:38:45.8953229Z 
+2026-11-01T07:38:45.8953350Z ### ['tests/test_voice_speech_stream.py']
+2026-11-01T07:39:09.6806302Z CAUGHT             C30 resume from what arrived, putting a hole in the middle of the answer
+2026-11-01T07:39:09.6807105Z CAUGHT             C30 a device that restarted its queue makes VAN repeat a sentence
+2026-11-01T07:39:09.6807827Z CAUGHT             C30 two streams for one answer, so de-duplication by segment id stops working
+2026-11-01T07:39:09.6808570Z CAUGHT             C30 a barged-in answer is resumed, finishing a sentence the owner cut off
+2026-11-01T07:39:09.6809141Z CAUGHT             C30 delivered counts as heard
+2026-11-01T07:39:09.6809655Z CAUGHT             C30 a pause lands in the middle of 'approx. 40 percent'
+2026-11-01T07:39:09.6810196Z CAUGHT             C30 a long sentence is never actually split
+2026-11-01T07:39:09.6810707Z CAUGHT             C30 every segment claims to be the end of the answer
+2026-11-01T07:39:09.6811044Z 
+2026-11-01T07:39:09.6811148Z 8/8 caught
+2026-11-01T07:39:09.6811290Z 
+2026-11-01T07:39:09.6811440Z ### ['tests/test_device_proof_enforcement.py']
+2026-11-01T07:41:05.3390462Z CAUGHT             C28 the proof is verified by nobody, as before
+2026-11-01T07:41:05.3391133Z CAUGHT             C28 a missing proof header is treated as a valid proof
+2026-11-01T07:41:05.3391786Z CAUGHT             C28 a second paired device skips the gate by never enrolling
+2026-11-01T07:41:05.3392536Z CAUGHT             C28 any device may present the owner's proof
+2026-11-01T07:41:05.3393148Z CAUGHT             C28 the proof covers an empty body rather than this request's
+2026-11-01T07:41:05.3393780Z CAUGHT             C28 a Keystore signature is demanded on every poll
+2026-11-01T07:41:05.3394443Z 
+2026-11-01T07:41:05.3394558Z 6/6 caught
+2026-11-01T07:41:05.3394709Z 
+2026-11-01T07:41:05.3395148Z ### ['tests/test_browser_takeover_and_downloads.py', 'tests/test_browser_mission_binding_regression.py']
+2026-11-01T07:49:04.6595075Z CAUGHT             C31 quarantine becomes a step on the way to completed
+2026-11-01T07:49:04.6595907Z CAUGHT             C31 a dangerous file completes like any other
+2026-11-01T07:49:04.6596972Z CAUGHT             C31 a server that lied at creation is believed at completion
+2026-11-01T07:49:04.6597538Z CAUGHT             C31 setup.exe served as text/plain is safe
+2026-11-01T07:49:04.6598055Z CAUGHT             C31 invoice.pdf served as an executable is safe
+2026-11-01T07:49:04.6598522Z CAUGHT             C31 ../../.bashrc is a filename
+2026-11-01T07:49:04.6599076Z CAUGHT             C31 a quarantined file whose reason was lost is one tap from opening
+2026-11-01T07:49:04.6599680Z CAUGHT             C31 a caller's own dangerous verdict is ignored
+2026-11-01T07:49:04.6600307Z CAUGHT             C31 a grant already preempted is preempted again, losing when it happened
+2026-11-01T07:49:04.6600946Z CAUGHT             C31 taking control preempts grants issued after it
+2026-11-01T07:49:04.6612514Z CAUGHT             C31 the queue survives preemption, so the agent acts after the owner took over
+2026-11-01T07:49:04.6613369Z CAUGHT             C31 a refused mission binding strands the owner's profile
+2026-11-01T07:49:04.6613895Z CAUGHT             C31 a file appears in a browser the owner already closed
+2026-11-01T07:49:04.6614657Z CAUGHT             C31 a download is reported started and never leaves CREATED
+2026-11-01T07:49:04.6615389Z CAUGHT             C31 one session's device deletes another session's download
+2026-11-01T07:49:04.6615885Z 
+2026-11-01T07:49:04.6616277Z 15/15 caught
+2026-11-01T07:49:04.6616488Z 
+2026-11-01T07:49:04.6617064Z ### ['tests/test_browser_quality_api.py', 'tests/test_session_transport_api.py', 'tests/test_observability_metrics.py']
+2026-11-01T07:54:52.0879824Z CAUGHT             C33 a phone certifies its own session and the field is quietly ignored
+2026-11-01T07:54:52.0880659Z CAUGHT             C33 the hysteresis streak restarts on every report
+2026-11-01T07:54:52.0881312Z CAUGHT             C33 a closed session's data usage is billed to the next one
+2026-11-01T07:54:52.0881962Z CAUGHT             C33 a tunnel is reported as a carrier route failure
+2026-11-01T07:54:52.0882800Z CAUGHT             C33 a failover that never came back is not counted
+2026-11-01T07:54:52.0883474Z CAUGHT             C33 a second carrier on the same road is reported as a recovered route
+2026-11-01T07:54:52.0884251Z CAUGHT             C33 an outbox depth with no storability is bucketed with the retry queue
+2026-11-01T07:54:52.0884726Z 
+2026-11-01T07:54:52.0884836Z 7/7 caught
+2026-11-01T07:54:52.0884991Z 
+2026-11-01T07:54:52.0885211Z ### ['tests/contracts/test_owner_surfaces_are_reachable.py']
+2026-11-01T07:54:55.2285768Z CAUGHT             C20 the work screen has no render branch
+2026-11-01T07:54:55.2286752Z CAUGHT             C20 the work screen is not navigable
+2026-11-01T07:54:55.2287454Z CAUGHT             C20 the work screen never binds the repository result
+2026-11-01T07:54:55.2288171Z CAUGHT             C20 setting an app policy does nothing
+2026-11-01T07:54:55.2288816Z CAUGHT             C20 the open mission is lost on rotation
+2026-11-01T07:54:55.2289225Z 
+2026-11-01T07:54:55.2289407Z 5/5 caught
+2026-11-01T07:54:55.2289614Z 
+2026-11-01T07:54:55.2290128Z ### ['backend/tests/test_google_capabilities_have_routes.py', 'backend/tests/test_control_scopes.py']
+2026-11-01T07:56:03.7274026Z CAUGHT             C19 two new routes fall outside the scope set
+2026-11-01T07:56:03.7275170Z CAUGHT             C19 Google provider executes an A4 record that never received owner approval
+2026-11-01T07:56:03.7276615Z CAUGHT             C19 the owner's tasks reachable with a device token (both guards removed)
+2026-11-01T07:56:03.7277577Z 
+2026-11-01T07:56:03.7277724Z 3/3 caught
+2026-11-01T07:56:03.7277911Z 
+2026-11-01T07:56:03.7278093Z ================ SURVIVORS ================
+2026-11-01T07:56:03.7278552Z none
+2026-11-01T07:56:03.7413599Z ##[group]Run actions/upload-artifact@v4
+2026-11-01T07:56:03.7413907Z with:
+2026-11-01T07:56:03.7414144Z   name: van-mutation-report-python-0
+2026-11-01T07:56:03.7414430Z   path: artifacts/mutation/
+2026-11-01T07:56:03.7414674Z   if-no-files-found: warn
+2026-11-01T07:56:03.7414907Z   compression-level: 6
+2026-11-01T07:56:03.7415120Z   overwrite: false
+2026-11-01T07:56:03.7415338Z   include-hidden-files: false
+2026-11-01T07:56:03.7415568Z env:
+2026-11-01T07:56:03.7415754Z   MUTATION_FAMILY: python
+2026-11-01T07:56:03.7415974Z   MUTATION_SHARD: 0/4
+2026-11-01T07:56:03.7416722Z   PYTHONPATH: /home/runner/work/Van/Van:/home/runner/work/Van/Van/backend:/home/runner/work/Van/Van/trading
+2026-11-01T07:56:03.7417281Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:56:03.7417729Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-11-01T07:56:03.7418151Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:56:03.7418567Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:56:03.7418942Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:56:03.7419323Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-11-01T07:56:03.7419752Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-11-01T07:56:03.7420231Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-11-01T07:56:03.7420606Z ##[endgroup]
+2026-11-01T07:56:03.9209881Z (node:84022) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-01T07:56:03.9210617Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-01T07:56:03.9301312Z With the provided path, there will be 2 files uploaded
+2026-11-01T07:56:03.9308140Z Artifact name is valid!
+2026-11-01T07:56:03.9309058Z Root directory input is valid!
+2026-11-01T07:56:04.1836973Z Beginning upload of artifact content to blob storage
+2026-11-01T07:56:04.2082317Z (node:84022) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-11-01T07:56:04.3088542Z Uploaded bytes 2295
+2026-11-01T07:56:04.3406883Z Finished uploading artifact content to blob storage!
+2026-11-01T07:56:04.3408531Z SHA256 digest of uploaded artifact zip is a1c86d5ac04f732d7c0f71c21f35e93fbba190693706049cc9657cf1a8abcfa2
+2026-11-01T07:56:04.3409877Z Finalizing artifact upload
+2026-11-01T07:56:04.7746921Z Artifact van-mutation-report-python-0.zip successfully finalized. Artifact ID 13075622684
+2026-11-01T07:56:04.7748879Z Artifact van-mutation-report-python-0 has been successfully uploaded! Final size is 2295 bytes. Artifact ID is 13075622684
+2026-11-01T07:56:04.7756585Z Artifact download URL: https://github.com/Vanguduza/Van/actions/runs/41285417143/artifacts/13075622684
+2026-11-01T07:56:04.7971927Z Post job cleanup.
+2026-11-01T07:56:04.9405575Z (node:84034) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-01T07:56:04.9406851Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-01T07:56:04.9593594Z Post job cleanup.
+2026-11-01T07:56:05.1003778Z (node:84042) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-01T07:56:05.1004797Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-01T07:56:05.1173006Z Post job cleanup.
+2026-11-01T07:56:05.2111965Z [command]/usr/bin/git version
+2026-11-01T07:56:05.2161075Z git version 2.56.0
+2026-11-01T07:56:05.2207761Z Temporarily overriding HOME='/home/runner/work/_temp/ebf05cc2-89b0-426a-879d-3b97c8c51201' before making global git config changes
+2026-11-01T07:56:05.2210090Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-01T07:56:05.2212754Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Van/Van
+2026-11-01T07:56:05.2256789Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-01T07:56:05.2296716Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-01T07:56:05.2670355Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-01T07:56:05.2700841Z http.https://github.com/.extraheader
+2026-11-01T07:56:05.2714056Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-11-01T07:56:05.2759622Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-01T07:56:05.3166741Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-01T07:56:05.3209614Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-01T07:56:05.3712434Z Cleaning up orphan processes
+2026-11-01T07:56:05.4108906Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-java@v4, actions/setup-python@v5, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

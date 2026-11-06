@@ -24,11 +24,13 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.fragment.app.FragmentActivity
@@ -49,6 +51,7 @@ import com.dial.van.design.components.StatusChip
 import com.dial.van.design.components.VanPanel
 import com.dial.van.security.BiometricGate
 import com.dial.van.trading.TradingHaltAuthority
+import com.dial.van.trading.TradingNavigation
 import com.dial.van.trading.TradingRepository
 import com.dial.van.trading.VanTradeAuraPublisher
 
@@ -62,10 +65,11 @@ class TradingNav(
     val openAccountAdd: () -> Unit,
     val openStrategies: () -> Unit,
     val openCognition: () -> Unit,
+    val openTickets: () -> Unit,
     val back: () -> Unit,
 )
 
-private const val ROUTE_OVERVIEW = "overview"
+private const val ROUTE_OVERVIEW = TradingNavigation.ROOT
 private const val ROUTE_POSITIONS = "positions"
 private const val ROUTE_POSITION_DETAIL = "positions/{id}"
 private const val ROUTE_POTENTIAL = "potential"
@@ -74,6 +78,7 @@ private const val ROUTE_ACCOUNTS = "accounts"
 private const val ROUTE_ACCOUNTS_ADD = "accounts/add"
 private const val ROUTE_STRATEGIES = "strategies"
 private const val ROUTE_COGNITION = "cognition"
+private const val ROUTE_TICKETS = "tickets"
 
 /**
  * DNA §4 destination 4, "Trading": `overview → positions → position detail → potential →
@@ -86,11 +91,12 @@ private const val ROUTE_COGNITION = "cognition"
  * composable directly rather than owning its own `NavHost`.
  */
 @Composable
-fun TradingRoute(app: VanApplication, onBack: () -> Unit) {
+fun TradingRoute(app: VanApplication, onBack: () -> Unit, initialRoute: String? = null) {
     val tokens = LocalVanTokens.current
     val repo = remember(app) { TradingRepository(app.gatewayClient) }
     PublishTradeSemantic(repo)
     val nav = rememberNavController()
+    var initialRouteHandled by rememberSaveable(initialRoute) { mutableStateOf(false) }
     val tnav = remember(nav) {
         TradingNav(
             openPositions = { nav.navigate(ROUTE_POSITIONS) { launchSingleTop = true } },
@@ -101,6 +107,7 @@ fun TradingRoute(app: VanApplication, onBack: () -> Unit) {
             openAccountAdd = { nav.navigate(ROUTE_ACCOUNTS_ADD) },
             openStrategies = { nav.navigate(ROUTE_STRATEGIES) },
             openCognition = { nav.navigate(ROUTE_COGNITION) },
+            openTickets = { nav.navigate(ROUTE_TICKETS) },
             back = onBack,
         )
     }
@@ -125,8 +132,17 @@ fun TradingRoute(app: VanApplication, onBack: () -> Unit) {
                 composable(ROUTE_ACCOUNTS_ADD) { AccountOnboardingScreen(app) { nav.popBackStack() } }
                 composable(ROUTE_STRATEGIES) { StrategiesScreen(app, repo) }
                 composable(ROUTE_COGNITION) { CognitionScreen(repo) }
+                composable(ROUTE_TICKETS) { TicketsScreen(app, repo) }
             }
         }
+    }
+    // NavHost installs its graph before launched effects run. Keep Overview on the
+    // stack so Back and the bottom bar's popUpTo retain the same root for every link.
+    // The saveable flag prevents a restored back stack from receiving the link again.
+    LaunchedEffect(nav, initialRoute) {
+        val destination = TradingNavigation.launchDestination(initialRoute, initialRouteHandled)
+        initialRouteHandled = true
+        destination?.let { nav.navigate(it) { launchSingleTop = true } }
     }
 }
 
@@ -139,7 +155,7 @@ private fun TradingTopBar(nav: NavHostController, onBack: () -> Unit, app: VanAp
     TopAppBar(
         title = { Text("Trading", style = tokens.type.title, color = tokens.color.textPrimary) },
         navigationIcon = {
-            IconButton(onClick = { if (atRoot) onBack() else nav.popBackStack() }) {
+            IconButton(onClick = { if (atRoot || !nav.popBackStack()) onBack() }) {
                 Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = tokens.color.textPrimary)
             }
         },
@@ -216,7 +232,7 @@ private fun TradingHaltButton(app: VanApplication) {
         ApprovalSheet(
             title = "Halt trading",
             actionDigest = "Stops VAN placing, sizing, modifying or exiting trades across every " +
-                "connected account until you resume trading. Existing positions are not closed. " +
+                "connected account. Removing a halt requires the supported owner recovery process. Existing positions are not closed. " +
                 "This sends the request; owner biometric approval is required next and is " +
                 "enforced by the trading authority itself, not by this screen.",
             onApprove = {

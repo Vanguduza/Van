@@ -1,0 +1,19 @@
+........................F............                                    [100%]
+=================================== FAILURES ===================================
+____ test_same_quote_request_cannot_change_its_original_policy_or_metadata _____
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-123/test_same_quote_request_cannot0')
+
+    def test_same_quote_request_cannot_change_its_original_policy_or_metadata(tmp_path):
+        book=archive(tmp_path);c=contract();first=book.record('original',c,sample(c))
+        def forbidden():raise AssertionError('replay attempted another native source read')
+        collector=NativeQuoteCollector(book,forbidden)
+        assert collector.collect('original',c)==first
+>       with pytest.raises(NativeArchiveError,match='conflicts'):collector.collect('original',c,max_age_ms=4999)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE NativeArchiveError
+
+trading/tests/test_native_quote_archive.py:105: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_native_quote_archive.py::test_same_quote_request_cannot_change_its_original_policy_or_metadata
+1 failed, 36 passed in 1.70s

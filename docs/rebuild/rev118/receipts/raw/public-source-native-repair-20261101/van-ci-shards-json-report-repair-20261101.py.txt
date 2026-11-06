@@ -1,0 +1,65 @@
+from pathlib import Path
+import json,os,sys,subprocess,hashlib,datetime,tarfile,shutil
+sys.path.insert(0,'/workspace')
+from van_owned_basetemp_20261101 import preflight,cleanup
+root=Path('/workspace/van-review-2026-10-18/publish');out=Path('/workspace/van-ci-shards-json-report-repair-20261101');mode=sys.argv[1]
+assert mode in ('before','after')
+if mode=='before':out.mkdir(exist_ok=True)
+temp='/tmp/van-recovery-ci-shards-json-report-'+mode+'-20261101'
+receipt={'started_at_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'mode':mode,'preflight':preflight(temp)}
+base='a5d63df4310ecda331aa5f6c6995ed46a42739f8';test='backend/tests/test_owner_permission_integrity.py'
+assert hashlib.sha256((root/test).read_bytes()).hexdigest()==hashlib.sha256(subprocess.check_output(['git','show',base+':'+test],cwd=root)).hexdigest()
+fixture=Path(temp)/'focused-source';fixture.mkdir(parents=True)
+paths=['backend/van_gateway','trading','registries','pytest.ini',test,'tools/rebuild/backend_public_source.py',
+ 'tools/rebuild/public_source_shards.py','tools/rebuild/source_storage_audit.py','tools/rebuild/backend_public_source_costs.json']
+archive=Path(temp)/'source.tar'
+with archive.open('wb') as stream:subprocess.run(['git','archive',base,'--',*paths],cwd=root,stdout=stream,check=True)
+with tarfile.open(archive) as stream:stream.extractall(fixture,filter='data')
+if mode=='after':shutil.copyfile(root/'tools/rebuild/public_source_shards.py',fixture/'tools/rebuild/public_source_shards.py')
+for rel in ('tests/contracts/test_artemis_acceptance_plan.py','tests/contracts/test_artemis_usb_acceptance.py','tests/contracts/test_van_browser_core_firewall.py'):
+ p=fixture/rel;p.parent.mkdir(parents=True,exist_ok=True);p.write_text('# Excluded synthetic fixture sentinel, not application evidence\n')
+for index in range(3):
+ p=fixture/f'backend/tests/test_instrument_sentinel_{index}.py'
+ p.write_text('def test_synthetic_instrument_sentinel():\n    assert True\n')
+subprocess.run(['git','init','-q'],cwd=fixture,check=True);subprocess.run(['git','add','-f','.'],cwd=fixture,check=True)
+subprocess.run(['git','-c','user.name=Focused source instrument fixture','-c','user.email=source@example.test',
+ 'commit','-qm','Synthetic focused fixture; exact published application and original test bytes'],cwd=fixture,check=True)
+commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=fixture,text=True).strip()
+receipt.update(published_application_source=base,focused_fixture_commit=commit,
+ real_test_sha256=hashlib.sha256((fixture/test).read_bytes()).hexdigest(),
+ helper_sha256=hashlib.sha256((fixture/'tools/rebuild/public_source_shards.py').read_bytes()).hexdigest(),
+ application_assertions='Byte-exact unchanged whole original test module; only local focused selection, not native full-source qualification')
+env={**os.environ,'PYTHONPATH':'backend:backend/tests:trading:trading/tests:.','PYTHONDONTWRITEBYTECODE':'1',
+ 'GITHUB_RUN_ID':'synthetic-real-permission-reporter-probe','GITHUB_RUN_ATTEMPT':'1'}
+env.pop('VATI_TEST_PG_DSN',None);env.pop('VATI_TEST_PG_ISOLATED_FIXTURE',None)
+target=out/mode;target.mkdir()
+try:
+ if mode=='before':
+  cmd=['/workspace/van-backend-venv-20261025/bin/python','tools/rebuild/source_storage_audit.py','--report',str(target/'without-plugin-audit.json'),
+   test+'::test_serializer_recursion_failure_is_an_explicit_refusal','--basetemp='+temp+'/without-plugin','--junitxml='+str(target/'without-plugin.xml'),'-q']
+  with (target/'without-plugin.log').open('w') as log:receipt['without_plugin_exit']=subprocess.run(cmd,cwd=root,env=env,stdout=log,stderr=subprocess.STDOUT,timeout=90).returncode
+  assert receipt['without_plugin_exit']==0
+ cmd=['/workspace/van-backend-venv-20261025/bin/python','-B','tools/rebuild/backend_public_source.py','run-shard',
+  '--output',str(target/'production-plugin'),'--runtime','gateway','--shards','4','--shard-index','0',
+  '--expected-commit',commit,'--basetemp='+temp+'/with-plugin']
+ receipt['command']=cmd
+ with (target/'with-plugin.log').open('w') as log:receipt['with_plugin_exit']=subprocess.run(cmd,cwd=fixture,env=env,stdout=log,stderr=subprocess.STDOUT,timeout=180).returncode
+ log=(target/'with-plugin.log').read_text()
+ if mode=='before':
+  assert receipt['with_plugin_exit']!=0 and 'RecursionError: nested JSON' in log
+  assert 'pytest_runtest_logreport' in log and 'public_source_shards.py' in log
+ else:
+  assert receipt['with_plugin_exit']==0,log
+  state=json.loads((target/'production-plugin/terminal.json').read_text())
+  events=[json.loads(s) for s in (target/'production-plugin/phases.jsonl').read_text().splitlines()]
+  exact=test+'::test_serializer_recursion_failure_is_an_explicit_refusal'
+  selected=[e for e in events if e['nodeid']==exact]
+  assert [(e['when'],e['outcome']) for e in selected]==[('setup','passed'),('call','passed'),('teardown','passed')]
+  assert all(e['outcome']=='passed' for e in events) and state['pytest_exit']==0 and not state['internal_errors']
+  receipt.update(actual_assigned_ids=state['assigned'],actual_full_collection=state['full_collection'],
+   exact_real_test_phases=selected,actual_phase_events=len(events),all_assigned_passed=True)
+finally:
+ receipt['cleanup']=cleanup(temp,target)
+ receipt['completed_at_utc']=datetime.datetime.now(datetime.timezone.utc).isoformat()
+ (target/'receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
+print(json.dumps({k:v for k,v in receipt.items() if k not in ('cleanup','actual_assigned_ids','actual_full_collection','command')}))

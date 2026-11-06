@@ -1,0 +1,240 @@
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt:669:        supervisor.observe(
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_automation_api.py:91:    app.include_router(api.router)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_automation_api.py:275:    app.include_router(api.router)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_automation_api.py:627:    app.include_router(api.router)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_automation_provisioning.py:188:    app.include_router(api.router)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_automation_typed_runtime.py:89:    assert (await WorkerWorkflowObserver(worker).observe(None,{"run_id":"run","inputs":{"document":{"ready":ready}}}))["exists"] is True
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_automation_typed_runtime.py:117:    observed = await observer.observe(None, {"run_id": "run", "inputs": {"document": {"ready": ready}}})
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_automation_typed_runtime.py:123:    assert (await observer.observe(None, {"run_id": "run", "inputs": {"document": {"ready": ready}}}))["exists"] is False
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_automation_typed_runtime.py:152:    assert (await observer.observe(None, {"run_id": "run", "inputs": {}}))["exists"] is True
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_automation_typed_runtime.py:154:    assert (await observer.observe(None, {"run_id": "run", "inputs": {}}))["exists"] is False
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_automation_typed_runtime.py:208:    assert (await observer.observe(None, {"run_id": "run", "inputs": body.input}))["exists"] is True
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_automation_typed_runtime.py:211:    assert (await observer.observe(None, {"run_id": "run", "inputs": body.input}))["exists"] is False
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_automation_typed_runtime.py:227:    assert (await WorkerWorkflowObserver(worker).observe(None, {"run_id": "run", "inputs": body.input}))["exists"] is False
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_automation_typed_runtime.py:295:    assert (await WorkerWorkflowObserver(worker).observe(None,{"run_id":"run","inputs":inputs}))["exists"] is True
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_automation_worker_runtime.py:541:    app.include_router(worker.router)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_action_plans.py:196:    app.include_router(build_action_plan_router(plans))
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_api.py:94:    app.include_router(api.router)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_artifact_admission.py:34:    await f.producers.observe(producer_session_id=PID,principal=PRINCIPAL,event="target",target_id="tab",url="https://example.org",now_ms=NOW)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_artifact_admission.py:365:    result=await service.observe(session_id=draft["session_id"],owner_device_id="phone",request_id=draft["request_id"])
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_artifact_admission.py:376:    expired=await service.observe(session_id=draft["session_id"],owner_device_id="phone",request_id=draft["request_id"])
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_artifact_admission.py:388:    result=await service.observe(session_id=draft["session_id"],owner_device_id="phone",request_id=draft["request_id"])
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_artifact_admission.py:399:        await service.observe(session_id="other-session",owner_device_id="phone",request_id=draft["request_id"])
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_artifact_admission.py:401:    result=await service.observe(session_id=draft["session_id"],owner_device_id="phone",request_id=draft["request_id"])
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_artifact_admission.py:411:    result=await service.observe(session_id=draft["session_id"],owner_device_id="phone",request_id=draft["request_id"])
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_artifact_provider.py:103:    app.include_router(build_artifact_provider_router(sessions=Sessions(),providers={}))
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_fabric.py:392:    await adapter.observe(task, "find the download link")
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_input_protocol.py:263:            verdict = c.observe(_sample(available_bitrate_kbps=12_000))
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_input_protocol.py:272:            verdict = capped.observe(_sample(metered=True))
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_input_protocol.py:279:            allowed = lifted.observe(
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_input_protocol.py:288:        verdict = c.observe(_sample(metered=True, rendered_fps=35.0, available_bitrate_kbps=2_500))
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_input_protocol.py:293:        same_link = unmetered.observe(_sample(rendered_fps=35.0))
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_input_protocol.py:300:        verdict = c.observe(_sample(metered=True, rendered_fps=60.0, packet_loss=0.0))
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_input_protocol.py:307:        verdict = c.observe(_sample(rtt_ms=400.0))
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_input_protocol.py:314:        dropped = c.observe(_sample(available_bitrate_kbps=1_600))
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_input_protocol.py:318:        first = c.observe(_sample(available_bitrate_kbps=9_000))
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_input_protocol.py:320:        c.observe(_sample(available_bitrate_kbps=9_000))
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_input_protocol.py:321:        third = c.observe(_sample(available_bitrate_kbps=9_000))
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_input_protocol.py:327:            verdict = c.observe(_sample(available_bitrate_kbps=20_000))
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_input_protocol.py:334:        verdict = c.observe(_sample(metered=True))
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_interaction_router.py:949:    app.include_router(api.router)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_interaction_router.py:950:    app.include_router(build_interaction_routes(api, router))
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_late_block_callers.py:88:    app = FastAPI(); app.include_router(api.router)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_late_block_callers.py:111:    app = FastAPI(); app.include_router(api.router)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_late_block_callers.py:131:    app = FastAPI(); app.include_router(api.router)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_late_block_callers.py:144:    app = FastAPI(); app.include_router(api.router)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_late_block_callers.py:165:    app = FastAPI(); app.include_router(api.router)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_late_block_callers.py:184:    app = FastAPI(); app.include_router(api.router)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_late_block_callers.py:385:        app = FastAPI(); app.include_router(api.router)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_late_block_callers.py:425:    app = FastAPI(); app.include_router(api.router)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_network_effect_guard.py:509:    app.include_router(api.router)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_network_effect_guard.py:510:    app.include_router(build_interaction_routes(api, router))
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_network_guard_lease.py:348:    app.include_router(api.router)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_network_guard_lease.py:349:    app.include_router(build_interaction_routes(api, router))
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_network_guard_lease.py:389:    app.include_router(api.router)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_network_guard_lease.py:390:    app.include_router(build_interaction_routes(api, router))
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_owner_command_e2e.py:59:        await producers.observe(producer_session_id=PID,principal=PRINCIPAL,event=event)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_owner_command_e2e.py:60:    await producers.observe(producer_session_id=PID,principal=PRINCIPAL,event="first_frame",
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_owner_command_e2e.py:65:    await producers.observe(producer_session_id=PID,principal=PRINCIPAL,event="target",target_id="tab",
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_owner_file_grants.py:10:    await f.producers.observe(producer_session_id=PID, principal=PRINCIPAL, event="target", target_id="tab", url="https://example.org", now_ms=NOW)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_producer_api.py:64:        await f.producers.observe(producer_session_id=PID, principal=PRINCIPAL, event=event, now_ms=NOW)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_producer_api.py:75:    return await f.producers.observe(producer_session_id=PID, principal=PRINCIPAL,
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_producer_api.py:160:        await fabric.producers.observe(producer_session_id=PID, principal=PRINCIPAL, event=event, now_ms=NOW)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_producer_api.py:170:        await fabric.producers.observe(producer_session_id=PID, principal=PRINCIPAL, event=event, now_ms=NOW)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_producer_api.py:210:    await fabric.producers.observe(producer_session_id=PID, principal=PRINCIPAL, event="target", target_id="real-tab", url="https://example.org/private?q=owner", title="Owner page", now_ms=NOW)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_producer_api.py:214:    await fabric.producers.observe(producer_session_id=PID, principal=PRINCIPAL, event="target_closed", target_id="real-tab", now_ms=NOW)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_producer_api.py:221:    app.include_router(build_browser_producer_router(service=fabric.producers, settings=settings))
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_producer_api.py:248:    await f.producers.observe(producer_session_id=PID, principal=PRINCIPAL, event="target", target_id="tab", url="https://example.org", now_ms=NOW)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_producer_api.py:508:    await f.producers.observe(producer_session_id=PID, principal=PRINCIPAL, event="target", target_id="tab", url="https://example.org", now_ms=NOW)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_producer_api.py:516:    await fabric.producers.observe(producer_session_id=PID, principal=PRINCIPAL, event="target",
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_producer_api.py:521:    await fabric.producers.observe(producer_session_id=PID, principal=PRINCIPAL, event="target",
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_producer_api.py:623:    await fabric.producers.observe(producer_session_id=PID, principal=PRINCIPAL, event="target", target_id="tab", url="https://example.org", now_ms=NOW)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_producer_api.py:656:    await fabric.producers.observe(producer_session_id=PID, principal=PRINCIPAL, event="target", target_id="new-tab", url="https://example.org/new", now_ms=NOW)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_producer_api.py:743:    await fabric.producers.observe(producer_session_id=PID, principal=PRINCIPAL, event="target", target_id="tab", url="https://example.org", now_ms=NOW)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_producer_api.py:853:    app.include_router(build_interactive_router(sessions=fabric.sessions, control=fabric.control, grants=fabric.grants,
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_review_i2_lifecycle.py:79:    app.include_router(api.router)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_review_i2_lifecycle.py:80:    app.include_router(build_interaction_routes(api, router))
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_review_i2_router.py:317:    await sh.observe(task, "a")
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_review_i2_router.py:318:    await sh.observe(task, "b")
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_review_i3.py:140:    app.include_router(api.router)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_review_i3.py:141:    app.include_router(build_interaction_routes(api, router))
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_review_i3.py:335:    app.include_router(api.router)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_review_i3.py:336:    app.include_router(build_interaction_routes(api, router))
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_browser_task_preparation.py:19:    await f.producers.observe(producer_session_id=PID,principal=PRINCIPAL,event="target",target_id="tab",
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_cognition_is_real.py:221:        assertion = await model.observe(
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_cognition_is_real.py:329:        await model.observe(
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_cognitive_fabric.py:105:    app.include_router(build_cognitive_router(store=svc.store, context=svc.context, trading=Trading(), require_internal=authorize))
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_correlation_predicate_declared.py:62:    observed = await HarnessReadBackObserver(FakeHarness()).observe(
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_credential_expiry_and_rotation.py:119:        age = await rot.observe("ingress_token", "t" * 40)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_credential_expiry_and_rotation.py:125:        await rot.observe("ingress_token", "t" * 40, now=now)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_credential_expiry_and_rotation.py:127:        assert (await rot.observe("ingress_token", "t" * 40, now=now + policy + 1)).state == "OVERDUE"
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_credential_expiry_and_rotation.py:128:        warned = await rot.observe(
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_credential_expiry_and_rotation.py:137:        await rot.observe("ingress_token", "old-token-value-0123456789", now=now)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_credential_expiry_and_rotation.py:139:        rotated = await rot.observe(
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_credential_expiry_and_rotation.py:147:        await rot.observe("ingress_token", secret)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_credential_expiry_and_rotation.py:155:        assert (await rot.observe("ingress_token", "")).state == "UNCONFIGURED"
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_dial_dev_stream_lifecycle.py:65:    app.include_router(build_dial_dev_router(client=client, config=config,
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_epistemics_context_understanding.py:201:        assertion = await model.observe(
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_epistemics_context_understanding.py:218:        assertion = await model.observe(
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_epistemics_context_understanding.py:239:            await model.observe(
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_epistemics_context_understanding.py:253:        assertion = await model.observe(
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_epistemics_context_understanding.py:270:    a = await model.observe(
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_epistemics_context_understanding.py:277:        again = await model.observe(
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_epistemics_context_understanding.py:290:    original = await model.observe(
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_epistemics_context_understanding.py:355:    old = await graph.observe(owner_goal="keep the fabric minimal", project_id="van")
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_epistemics_context_understanding.py:356:    new = await graph.observe(owner_goal="add every integration we can", project_id="van")
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_epistemics_context_understanding.py:367:    node = await graph.observe(owner_goal="ship the trading core", now_ms=0)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_epistemics_context_understanding.py:371:    await graph.observe(owner_goal="ship the trading core", now_ms=NOW)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_external_reality_and_benchmarks.py:75:            await ExternalRealityModel(store).observe(
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_jev_no_generic_executor.py:24:from van_gateway.jev.advisor import JevVanAdvisor
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_jev_no_generic_executor.py:46:@pytest.mark.parametrize("cls", [JevVanAdvisor, JevProjectionClient])
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_mission_binding_api.py:107:    app.include_router(api.router)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_mission_binding_api.py:464:    app.include_router(browser.router)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_mission_binding_api.py:499:    app.include_router(browser.router)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_mission_binding_api.py:525:    app.include_router(browser.router)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_observability_alerts.py:105:        registry.observe(name, 1.0, labels={
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_observability_metrics.py:55:        registry.observe("van_error_total", 1.0)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_observability_metrics.py:227:        registry.observe(
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_owner_memory_has_a_producer.py:103:        node = await graph.observe(owner_goal="an old plan", now_ms=0)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_owner_memory_has_a_producer.py:107:        await graph.observe(owner_goal="an old plan", now_ms=graph.STALE_AFTER_MS + DAY_MS)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_owner_memory_has_a_producer.py:112:        node = await graph.observe(owner_goal="a current plan", now_ms=0)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_owner_memory_has_a_producer.py:172:        node = await graph.observe(
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_owner_memory_has_a_producer.py:181:        await graph.observe(owner_goal="finish the migration", project_id="van")
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_owner_memory_has_a_producer.py:182:        node = await graph.observe(owner_goal="finish the migration", project_id="van")
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_owner_memory_has_a_producer.py:189:        await graph.observe(owner_goal="a goal", owner_declared_standing=True)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_owner_memory_has_a_producer.py:190:        node = await graph.observe(owner_goal="a goal")
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_owner_memory_has_a_producer.py:268:        old = await graph.observe(owner_goal="never trade on margin")
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_owner_memory_has_a_producer.py:269:        new = await graph.observe(owner_goal="use leverage to hit the quarterly target")
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_owner_model_episode_identity.py:58:    return await model.observe(owner_principal_id=owner, field=FIELD, value="terse",
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_owner_model_migration.py:159:    held = await model.observe(**kwargs, episode_ref=refs[0],
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_owner_model_migration.py:163:    promoted = await model.observe(**kwargs, episode_ref=refs[1],
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_owner_model_migration.py:218:    after = await model.observe(owner_principal_id="owner",
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_owner_model_origin_provenance.py:51:    return await model.observe(
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_owner_model_origin_provenance.py:166:        await model.observe(  # type: ignore[call-arg]
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_owner_model_origin_provenance.py:171:            await model.observe(
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_owner_model_origin_provenance.py:194:    await model.observe(owner_principal_id="owner", field=FIELD, value="terse",
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_owner_model_origin_provenance.py:196:    a = await model.observe(owner_principal_id="owner", field=FIELD, value="terse",
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_owner_model_origin_provenance.py:263:    app.include_router(api.router)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_owner_model_revision_outbox.py:49:    return await model.observe(owner_principal_id=owner, field=field, value=value,
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_owner_model_revision_outbox.py:310:    p = await model.observe(owner_principal_id="owner", field=FIELD, value="proj",
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_owner_service_projections.py:91:    app.include_router(api.router)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_personal_context_resolver.py:54:        a = await model.observe(owner_principal_id="owner", field=FIELD, value="terse",
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_personal_context_resolver.py:250:        a = await api.owner_model.observe(owner_principal_id="owner", field=FIELD,
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_personal_context_resolver.py:254:    app.include_router(api.router)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_proactive_evolution_eval.py:219:        await reality.observe(subject="model-x", claim="deprecated",
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_proactive_evolution_eval.py:226:    await reality.observe(
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_proactive_followups.py:220:        node = await intents.observe(owner_goal="Ship the Q3 report", now_ms=NOW - NINETY_ONE_DAYS_MS)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_proactive_followups.py:237:        await intents.observe(owner_goal="Ship the Q3 report", now_ms=NOW)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_proactive_followups.py:246:        await intents.observe(owner_goal="Ship the Q3 report", now_ms=NOW - NINETY_ONE_DAYS_MS)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_relationship_calibration.py:57:        assertion = await model.observe(
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_relationship_calibration.py:121:        await model.observe(
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_relationship_calibration.py:132:    await model.observe(
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_relationship_calibration.py:207:    app.include_router(api.router)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_relationship_calibration.py:232:    first = await api.owner_model.observe(
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_relationship_calibration.py:237:    second = await api.owner_model.observe(
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_relationship_calibration.py:271:    confirmable = await api.owner_model.observe(
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_relationship_calibration.py:276:    rejectable = await api.owner_model.observe(
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_stagehand_adapter_gate.py:105:        await stagehand.observe(task, "look")
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_stagehand_adapter_gate.py:120:        await stagehand.observe(task, "look")
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_stagehand_adapter_gate.py:141:        await stagehand.observe(task, "look")
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_stagehand_adapter_gate.py:165:        await stagehand.observe(task, "look")
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_stagehand_adapter_gate.py:175:    await stagehand.observe(task, "look")
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_stagehand_adapter_gate.py:188:        await stagehand.observe(task, "look")
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_van_private_core_service.py:40:        a = await model.observe(owner_principal_id="owner",
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_web_acquisition_api.py:36:    app.include_router(api.router)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_web_acquisition_api.py:219:    app.include_router(api.router)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/tests/test_web_acquisition_api.py:338:    app.include_router(api.router)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/app.py:70:from van_gateway.jev.advisor import JevVanAdvisor
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/app.py:503:    jev_advisor = JevVanAdvisor(
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/app.py:1183:    app.include_router(owner_runtime.router)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/app.py:1185:        app.include_router(build_action_plan_router(browser_action_plans))
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/app.py:1187:    app.include_router(build_artifact_provider_router(sessions=interactive_sessions,
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/app.py:1189:    app.include_router(build_artifact_admission_router(browser_artifacts))
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/app.py:1190:    app.include_router(build_artifact_provider_claim_router(browser_artifacts, artifact_provider_auth.authenticate))
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/app.py:1195:    app.include_router(OwnerAutomationApi(automation).router)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/app.py:1197:    app.include_router(build_artifact_router(artifacts))
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/app.py:1198:    app.include_router(build_document_router(documents))
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/app.py:1199:    app.include_router(build_goal_router(goals))
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/app.py:1200:    app.include_router(build_suggestion_router(suggestions))
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/app.py:1201:    app.include_router(build_conversation_router(conversations))
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/app.py:1202:    app.include_router(build_computer_use_router(computer_use))
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/app.py:1209:    app.include_router(build_cognitive_router(store=store, context=owner_runtime.context,
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/app.py:1212:    app.include_router(build_dial_dev_router(
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/app.py:1219:    app.include_router(jev_projection.router)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/app.py:1240:    app.include_router(automation_health.router)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/app.py:1241:    app.include_router(automation.router)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/app.py:1242:    app.include_router(automation_worker.router)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/app.py:1243:    app.include_router(temporal_automation.router)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/app.py:1244:    app.include_router(browser.router)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/app.py:1245:    app.include_router(build_interaction_routes(browser, browser_interaction))
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/app.py:1263:        app.include_router(build_interactive_router(
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/app.py:1279:        app.include_router(build_browser_producer_router(
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/app.py:1287:        app.include_router(build_download_report_router(
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/app.py:1292:        app.include_router(build_quality_router(
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/app.py:1470:    app.include_router(build_session_router(
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/app.py:1516:    app.include_router(mission_api.router)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/app.py:1517:    app.include_router(understanding_api.router)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/app.py:1519:    app.include_router(build_decision_router(decisions))
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/app.py:1521:    app.include_router(build_owner_permission_router(store))
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/app.py:3258:    app.include_router(owner_services.router)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/attention/engine.py:9:from van_gateway.jev.advisor import JevVanAdvisor, score01
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/attention/engine.py:44:        jev_advisor: JevVanAdvisor | None = None,
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/auth/rotation.py:118:        ages = [await self.observe(name, value, now=now) for name, value in credentials.items()]
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/automation/commands.py:242:        result = await WorkerWorkflowObserver(worker).observe(None, {"run_id": rows[0]["run_id"], "inputs": parameters})
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/automation/verifier.py:190:            observed = await observer.observe(spec, context)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/browser/artifact_admission.py:789:        return await guarded(service.observe(session_id=session_id,owner_device_id=owner(request),request_id=request_id))
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/browser/interaction_router.py:2010:        observation = await self.stagehand.observe(task, instruction)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/browser/producer_api.py:170:        return await guarded(service.observe(producer_session_id=producer_session_id, principal=p, **body.model_dump(exclude_none=True)))
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/browser/quality.py:262:        verdict = self.observe(replace(sample))
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/browser/quality_api.py:153:        verdict = controller.observe(sample)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/browser/worker.py:442:        observation = await self.stagehand.observe(task, instruction)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/jev/advisor.py:28:class JevVanAdvisor:
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/jev/advisor.py:171:    "JevVanAdvisor",
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/learning/feed.py:117:        intent = await self.intents.observe(
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/observability/instruments.py:45:    registry.observe(
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/observability/instruments.py:53:    registry.observe(
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/observability/instruments.py:61:    registry.observe(
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/observability/instruments.py:69:    registry.observe(
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/observability/instruments.py:92:    registry.observe("van_trade_halt_latency_ms", max(duration_ms, 0.0))
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/observability/instruments.py:96:    registry.observe("van_event_bus_lag_ms", max(lag_ms, 0.0), labels={"topic": _clean(topic)})
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/observability/instruments.py:124:    registry.observe("van_browser_session_connect_ms", max(duration_ms, 0.0))
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/observability/instruments.py:133:    registry.observe("van_browser_control_preempt_ms", max(duration_ms, 0.0))
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/observability/instruments.py:256:        lambda m, v, l: registry.observe(m, max(v, 0.0), labels=l),
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/observability/metrics.py:377:            histogram.observe(float(value))
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/reasoning/kernel.py:38:from van_gateway.jev.advisor import JevVanAdvisor, noul_probability
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/reasoning/kernel.py:202:    def __init__(self, store: Store, *, jev_advisor: JevVanAdvisor | None = None) -> None:
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/research/exa.py:148:                await self.reality.observe(
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/runtime_api.py:46:from van_gateway.jev.advisor import JevVanAdvisor
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/runtime_api.py:237:        jev_advisor: JevVanAdvisor | None = None,
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/understanding/api.py:43:from van_gateway.jev.advisor import JevVanAdvisor
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/understanding/api.py:107:        self, store: Store, settings: Settings, *, jev_advisor: JevVanAdvisor | None = None
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:backend/van_gateway/understanding/api.py:481:                assertion = await self.owner_model.observe(
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:trading/vati/calendar/recorder.py:303:                self.observe(obs)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:trading/vati/events/runtime.py:88:            recorder.observe(ReleaseObservation(
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:trading/vati/execution/policy.py:191:        self.evidence(bucket, template_id).observe(**outcome)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:trading/vati/learning/health.py:163:        return self.observe(HealthObservation(strategy_id, rec.environment, r, proc, cost, regime_fit, evidence_ref),
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:trading/vati/learning/hooks.py:87:            self.brokers.observe(broker=self.broker, symbol=symbol, session=session, environment=self.environment, cost_ratio=cost_ratio, slippage_pips=slippage,
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:trading/vati/learning/hooks.py:106:            self.health.observe(HealthObservation(strategy_id, self.environment, r_multiple, process_ok, min(cost_ratio, Decimal("10")), regime_fit,
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:trading/vati/learning/replay.py:193:            learning.brokers.observe(
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:trading/vati/research/workflow.py:112:        observation = self.feature_drift.observe(segment, **kwargs)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:trading/vati/research/workflow.py:120:        observation = self.edge_drift.observe(**kwargs)

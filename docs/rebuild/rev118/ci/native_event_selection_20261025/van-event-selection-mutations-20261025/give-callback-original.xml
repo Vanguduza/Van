@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="15" time="0.729" timestamp="2026-10-25T20:53:29.531320+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_ctrader_event_selection" name="test_selective_wait_preserves_original_relative_order_and_complete_payloads" time="0.023" /><testcase classname="trading.tests.test_ctrader_event_selection" name="test_predicate_exception_does_not_consume_the_original_financial_delivery" time="0.006" /><testcase classname="trading.tests.test_ctrader_event_selection" name="test_slow_selector_does_not_hide_an_unmatched_event_from_another_consumer" time="0.012" /><testcase classname="trading.tests.test_ctrader_event_selection" name="test_predicate_cannot_mutate_the_original_native_payload[False]" time="0.036"><failure message="AssertionError: assert (None is None and [{'payloadTyp...ILLED', ...}}] == [{'payloadTyp...ILLED', ...}}]&#10;  &#10;  At index 0 diff: {'payloadType': 'PROTO_OA_EXECUTION_EVENT', 'ctidTraderAccountId': 12345, 'executionType': 'ORDER_FILLED', 'order': {'orderId': 1, 'tradeData': {'symbolId': 1, 'volume': 999999, 'tradeSide': 'BUY'}, 'orderType': 'MARKET', 'orderStatus': 'ORDER_STATUS_FILLED', 'clientOrderId': 'different', 'timeInForce': 'IMMEDIATE_OR_CANCEL', 'stopTriggerMethod': 'TRADE'}} != {'payloadType': 'PROTO_OA_EXECUTION_EVENT', 'ctidTraderAccountId': 12345, 'executionType': 'ORDER_FILLED', 'order': {'orderId': 1, 'tradeData': {'symbolId': 1, 'volume': 100000, 'tradeSide': 'BUY'}...&#10;  &#10;  ...Full output truncated (2 lines hidden), use '-vv' to show)">harness = &lt;test_ctrader_transport_lifecycle.Harness object at 0x7feae5c2ad50&gt;
+matched = False
+
+    @pytest.mark.parametrize('matched',[False,True])
+    def test_predicate_cannot_mutate_the_original_native_payload(harness,matched):
+        transport=seeded(harness,count=1);before=originals(transport)
+        def mutating(name,body):
+            body['order']['tradeData']['volume']=999999
+            body['order']['clientOrderId']='different'
+            return matched
+        selected=transport.wait_event(mutating,timeout_s=.03)
+        if matched:
+            assert selected[1]==before[0] and originals(transport)==[]
+        else:
+&gt;           assert selected is None and originals(transport)==before
+E           AssertionError: assert (None is None and [{'payloadTyp...ILLED', ...}}] == [{'payloadTyp...ILLED', ...}}]
+E             
+E             At index 0 diff: {'payloadType': 'PROTO_OA_EXECUTION_EVENT', 'ctidTraderAccountId': 12345, 'executionType': 'ORDER_FILLED', 'order': {'orderId': 1, 'tradeData': {'symbolId': 1, 'volume': 999999, 'tradeSide': 'BUY'}, 'orderType': 'MARKET', 'orderStatus': 'ORDER_STATUS_FILLED', 'clientOrderId': 'different', 'timeInForce': 'IMMEDIATE_OR_CANCEL', 'stopTriggerMethod': 'TRADE'}} != {'payloadType': 'PROTO_OA_EXECUTION_EVENT', 'ctidTraderAccountId': 12345, 'executionType': 'ORDER_FILLED', 'order': {'orderId': 1, 'tradeData': {'symbolId': 1, 'volume': 100000, 'tradeSide': 'BUY'}...
+E             
+E             ...Full output truncated (2 lines hidden), use '-vv' to show)
+
+trading/tests/test_ctrader_event_selection.py:82: AssertionError</failure></testcase><testcase classname="trading.tests.test_ctrader_event_selection" name="test_predicate_cannot_mutate_the_original_native_payload[True]" time="0.005"><failure message="AssertionError: assert ({'payloadType...FILLED', ...}} == {'payloadType...FILLED', ...}}&#10;  &#10;  Omitting 3 identical items, use -vv to show&#10;  Differing items:&#10;  {'order': {'orderId': 1, 'tradeData': {'symbolId': 1, 'volume': 999999, 'tradeSide': 'BUY'}, 'orderType': 'MARKET', 'orderStatus': 'ORDER_STATUS_FILLED', ...}} != {'order': {'orderId': 1, 'tradeData': {'symbolId': 1, 'volume': 100000, 'tradeSide': 'BUY'}, 'orderType': 'MARKET', 'orderStatus': 'ORDER_STATUS_FILLED', ...}}&#10;  Use -v to get more diff)">harness = &lt;test_ctrader_transport_lifecycle.Harness object at 0x7feae5a71220&gt;
+matched = True
+
+    @pytest.mark.parametrize('matched',[False,True])
+    def test_predicate_cannot_mutate_the_original_native_payload(harness,matched):
+        transport=seeded(harness,count=1);before=originals(transport)
+        def mutating(name,body):
+            body['order']['tradeData']['volume']=999999
+            body['order']['clientOrderId']='different'
+            return matched
+        selected=transport.wait_event(mutating,timeout_s=.03)
+        if matched:
+&gt;           assert selected[1]==before[0] and originals(transport)==[]
+E           AssertionError: assert ({'payloadType...FILLED', ...}} == {'payloadType...FILLED', ...}}
+E             
+E             Omitting 3 identical items, use -vv to show
+E             Differing items:
+E             {'order': {'orderId': 1, 'tradeData': {'symbolId': 1, 'volume': 999999, 'tradeSide': 'BUY'}, 'orderType': 'MARKET', 'orderStatus': 'ORDER_STATUS_FILLED', ...}} != {'order': {'orderId': 1, 'tradeData': {'symbolId': 1, 'volume': 100000, 'tradeSide': 'BUY'}, 'orderType': 'MARKET', 'orderStatus': 'ORDER_STATUS_FILLED', ...}}
+E             Use -v to get more diff)
+
+trading/tests/test_ctrader_event_selection.py:80: AssertionError</failure></testcase><testcase classname="trading.tests.test_ctrader_event_selection" name="test_two_selectors_cannot_both_claim_one_original_delivery" time="0.156" /><testcase classname="trading.tests.test_ctrader_event_selection" name="test_selector_that_returns_after_timeout_leaves_the_original_for_reconciliation" time="0.033" /><testcase classname="trading.tests.test_ctrader_event_selection" name="test_unmatched_originals_are_evaluated_once_and_remain_ordered_on_timeout" time="0.025" /><testcase classname="trading.tests.test_ctrader_event_selection" name="test_invalid_wait_timeout_does_not_remove_original_evidence[True]" time="0.004" /><testcase classname="trading.tests.test_ctrader_event_selection" name="test_invalid_wait_timeout_does_not_remove_original_evidence[-1]" time="0.005" /><testcase classname="trading.tests.test_ctrader_event_selection" name="test_invalid_wait_timeout_does_not_remove_original_evidence[nan]" time="0.004" /><testcase classname="trading.tests.test_ctrader_event_selection" name="test_invalid_wait_timeout_does_not_remove_original_evidence[inf]" time="0.004" /><testcase classname="trading.tests.test_ctrader_event_selection" name="test_invalid_wait_timeout_does_not_remove_original_evidence[1]" time="0.004" /><testcase classname="trading.tests.test_ctrader_event_selection" name="test_arrival_after_snapshot_wakes_the_original_wait_without_reordering" time="0.004" /><testcase classname="trading.tests.test_ctrader_event_selection" name="test_retired_quote_cannot_be_returned_after_a_predicate_closes_its_connection" time="0.055" /></testsuite></testsuites>

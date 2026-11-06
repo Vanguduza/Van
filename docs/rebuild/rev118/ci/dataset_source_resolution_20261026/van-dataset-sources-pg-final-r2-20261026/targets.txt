@@ -1,0 +1,13 @@
+trading/tests/test_dataset_manifest_candidates.py
+trading/tests/test_contract_schemas.py
+trading/worker_tests
+trading/tests/test_forecast_source_partitions.py
+trading/tests/test_ml_runtime_boundary.py
+trading/tests/test_research_and_drift.py
+trading/tests/test_native_catalog_store.py
+trading/tests/test_native_symbol_catalog.py
+trading/tests/test_native_bar_windows.py
+trading/tests/test_native_market_archive.py
+trading/tests/test_ctrader.py
+trading/tests/test_ctrader_read_budget.py
+trading/tests/test_ctrader_read_capacity.py

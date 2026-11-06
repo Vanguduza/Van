@@ -1,0 +1,9 @@
+{
+  "run": "van-lease-guard-baseline-20261027",
+  "status": "FAILED_FIXTURE_BEFORE_FUNCTIONAL_BOUNDARY",
+  "failed": 4,
+  "passed": 0,
+  "cause": "Dedicated database fixture created only schema vati, not account_runtime_leases. PostgresLeaseStore correctly returned STORE_UNREACHABLE; no lock-retention regression established.",
+  "correction": "Initialize the actual PostgresLedger schema and close its handle before the existing lease acquisition. Move acquisition assertion inside store cleanup. All original functional assertions retained.",
+  "application_source_changed": false
+}

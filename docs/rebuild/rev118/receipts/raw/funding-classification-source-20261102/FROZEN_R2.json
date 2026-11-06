@@ -1,0 +1,120 @@
+{
+  "status": "R2_FROZEN_SOURCE_FOR_INDEPENDENT_RECHECK",
+  "base": "5c80526ddb6effe9f61c4761645f7377314260f5",
+  "local_peer_commit_source_equivalence_only": "c792a1e6e7e1e942b56d00a3929d7b54f6eac13f",
+  "per_path_preimages_equal": {
+    "trading/vati/funding/classification_journal.py": true,
+    "backend/van_gateway/trading/funding_classification_api.py": true,
+    "trading/tests/test_funding_classification_journal.py": true,
+    "backend/tests/test_funding_classification_api.py": true,
+    "backend/tests/test_funding_classification_authority.py": true,
+    "trading/vati/funding/runtime.py": true,
+    "trading/vati/core/events.py": true,
+    "backend/van_gateway/app.py": true,
+    "backend/van_gateway/context/forget.py": true
+  },
+  "source_allowlist": [
+    "trading/vati/funding/classification_journal.py",
+    "backend/van_gateway/trading/funding_classification_api.py",
+    "trading/tests/test_funding_classification_journal.py",
+    "backend/tests/test_funding_classification_api.py",
+    "backend/tests/test_funding_classification_authority.py",
+    "trading/vati/funding/runtime.py",
+    "trading/vati/core/events.py",
+    "backend/van_gateway/app.py",
+    "backend/van_gateway/context/forget.py"
+  ],
+  "source_sha256": {
+    "trading/vati/funding/classification_journal.py": "59c7f1b9b8a1b1dd4fb416319655d43fcc938fdcb7df006aad9ffa4258d75beb",
+    "backend/van_gateway/trading/funding_classification_api.py": "b306abaacc9bf625333e50bc80487bd9d02e4801b8e3bab976e28b8908b62f7f",
+    "trading/tests/test_funding_classification_journal.py": "3b25920ce903b021923f7030995d649b258f6d5a71d00784aaff7e58a170943d",
+    "backend/tests/test_funding_classification_api.py": "70daa49eaee117c8342d546bef0e531ae612f6e00f490519b461530ef1c87f38",
+    "backend/tests/test_funding_classification_authority.py": "b4787821b263b04feabaf44cc50553dfda714ee4d056578c8b5d1b8185b55d77",
+    "trading/vati/funding/runtime.py": "f12a4ba303b40cc77415ce5a3d760690a3bef737f665ff6ef4cc6ce14aec5efc",
+    "trading/vati/core/events.py": "31480e73e4f067b0e980e592e5527a6a943aea6f634775914fe880c485bafd3a",
+    "backend/van_gateway/app.py": "53ddf7e582e30feff0dd823ec57a7d725d686deeb2a0626759a64abf9db08328",
+    "backend/van_gateway/context/forget.py": "73ab8c429419ce1c5aae4911a602586d0cdc3427b1a2b6fa17d4b81d9cae2784"
+  },
+  "preimage_sha256": {
+    "trading/vati/funding/classification_journal.py": null,
+    "backend/van_gateway/trading/funding_classification_api.py": null,
+    "trading/tests/test_funding_classification_journal.py": null,
+    "backend/tests/test_funding_classification_api.py": null,
+    "backend/tests/test_funding_classification_authority.py": null,
+    "trading/vati/funding/runtime.py": "e02cddf4b95d7ffc2dc6e76671c0b289e60ff7c509b4a1b65c5d4eaa60cd0460",
+    "trading/vati/core/events.py": "5f46f070021eadc478784c816b8e3eb81479659c04f160be2a221487a0f6ff76",
+    "backend/van_gateway/app.py": "5dd80495c8a2627bfa2ddc7cf3477b3f5e129a0113e18b2370a23e99e0438140",
+    "backend/van_gateway/context/forget.py": "6fed25f2f105938d6e5be3ebbd98f3ac1bb8b36aee3fbf1b1dc19cbeb87a2625"
+  },
+  "r1_frozen_sha256": "40b70752ca0b59fce73da0c11c61ec5dd76ed657d8be769cc87468d6b0514e28",
+  "r1_source_sha256": {
+    "trading/vati/funding/classification_journal.py": "59c7f1b9b8a1b1dd4fb416319655d43fcc938fdcb7df006aad9ffa4258d75beb",
+    "backend/van_gateway/trading/funding_classification_api.py": "c5515ff751d7088b4f2fa765a35abfefa34d81ca35c8bb7e13742c596decc45e",
+    "trading/tests/test_funding_classification_journal.py": "3b25920ce903b021923f7030995d649b258f6d5a71d00784aaff7e58a170943d",
+    "backend/tests/test_funding_classification_api.py": "70daa49eaee117c8342d546bef0e531ae612f6e00f490519b461530ef1c87f38",
+    "backend/tests/test_funding_classification_authority.py": "f09d872b9ab5e02c45e33ca13f70061b6af2376206f494c55b0f101f8adf51c5",
+    "trading/vati/funding/runtime.py": "f12a4ba303b40cc77415ce5a3d760690a3bef737f665ff6ef4cc6ce14aec5efc",
+    "trading/vati/core/events.py": "31480e73e4f067b0e980e592e5527a6a943aea6f634775914fe880c485bafd3a",
+    "backend/van_gateway/app.py": "14f16cc76bab7f6491dfa2f65cb6a9ab9ba0feaf0bfd4e984d56e6d871e7c7cb",
+    "backend/van_gateway/context/forget.py": "73ab8c429419ce1c5aae4911a602586d0cdc3427b1a2b6fa17d4b81d9cae2784"
+  },
+  "changed_from_r1": [
+    "backend/van_gateway/trading/funding_classification_api.py",
+    "backend/tests/test_funding_classification_authority.py",
+    "backend/van_gateway/app.py"
+  ],
+  "full_patch_sha256": "1bc9d58df2b74e4f4cadf4c05bdf5bf1cdcfd89437d48873063b594d1479644d",
+  "r1_r2_delta_sha256": "fa84d224bdfb11ae37eeb815b7ca1d6ef94b9bcf77062c74d7aa4287d4c4da70",
+  "zip_sha256": "24aee9268469768c07e717e260be1f1662917e2e63b7409868ae02371cbb4e4f",
+  "review_probe_sha256": "421f25c75d8d369ce64000be8c75dbe544ee4e03f68472b9f5f61034c74c8f82",
+  "terminal": {
+    "exit": 0,
+    "passed": 78,
+    "skipped": 1,
+    "distinct_cases": 79,
+    "elapsed_s": 72.681,
+    "all9_pins_unchanged": true,
+    "child_reaped": true
+  },
+  "final_receipt": "/tmp/van-be006-classification-evidence-20261102/R2_FINAL08/receipt.json",
+  "junit_sha256": "522b048713659af6d581822b45a7ea95b1969a20730e3ed2ff8861c8134597b5",
+  "original_counterexample": "R2_BEFORE06 exact unchanged probe +10 positive controls:1failed10passed exit1; archived exact member bytes, original reviewer13.749MB tree untouched",
+  "collection_history": "R2_FINAL07 exit4/no cases executed, mistyped existing selector; corrected selector only in R2_FINAL08, same source pins",
+  "repair": "Existing immutable OwnerDeviceBindingService.require_proof result captured only at actual verification; middleware stores binding identity after original nonce succeeds. Funding caller forwards trusted state. Auth writer compares exact current binding ID/owner/device/bound_at/key fingerprint/public-key SHA256; ignores mutable proof-use timestamp. No second verification or nonce, no Auth API/source edits.",
+  "actual_consumers": {
+    "unchanged_source_sha256": {
+      "backend/van_gateway/auth/service.py": "74a377859cf661f063b51f79f3503faa7946134f4272169bbd34f757fc523e86",
+      "backend/van_gateway/auth/device_binding.py": "5be4571f3af4206eb2a9345c6b3aa8bc4afcdfa86cb0ff5915bc9960ebe12125",
+      "backend/van_gateway/auth/device_proof.py": "d323bba11477ffa2ac9b45595f8bd9b0d92916bab25fe2fb9abc3d23f30275a9",
+      "backend/van_gateway/session/api.py": "d7412729bde3ccaed9ed7512f2ec5f3bcf90825bfb65322c6f3d9861fc0b6d61",
+      "backend/van_gateway/command/nonce.py": "3beb55a7a7f03a267731230f7ee943558c6fd1dc80717ce11832c8b01f772d4a"
+    },
+    "tested": [
+      "HTTP mutation proof/legacy/read polling",
+      "binding service direct proof+revoked binding",
+      "pairing original recovery+nonce replay",
+      "bootstrap original recovery+nonce replay",
+      "session socket valid proof+replay refusal"
+    ]
+  },
+  "limits": [
+    "AuthStore BEGIN IMMEDIATE -> joined Ledger worker is ordered locking, not 2PC. Auth transaction has no annotation state; only Ledger appends.",
+    "No provider sender, reservation, approval, registry or native financial/risk source write. Current descriptive overlay never changes native period/posting/risk calculations.",
+    "Real SQLite + ASGI/paired cryptographic SOURCE fixtures, not hardware/provider/native/PG admission. Fresh interpreter readback is not killed-process/host crash proof.",
+    "Immutable structured financial-audit metadata; correction/withdrawal append, not privacy erase. Memory inventory explicitly discloses retention.",
+    "No Android owner producer/UI delivered in this backend packet; no BG001 or whole-unit acceptance.",
+    "Label-specific action catalog amendment gap recorded separately; LAC132/133 unchanged.",
+    "Owner/frontend registry and mutation citations not regenerated or claimed current in isolated sparse lane; integrator owns derived files/final affected checks.",
+    "Trusted current-binding replacement SOURCE fixture, not a production key-rotation/reenrollment exploit.",
+    "Existing other owner-state callers may later reuse the new fact; no unrelated semantics changed or widened audit claimed."
+  ],
+  "remaining": [
+    "Independent review",
+    "Actual supported PG fixture execution",
+    "Derived registry/citation integration against genuine next base",
+    "Canonical catalog mapping procedure remains separate; no frozen amendment",
+    "Native/provider/formal PRE003/BE003/BE004 and BE006 acceptance unissued"
+  ],
+  "tmp_free": 2296680448,
+  "workspace_free": 89268224
+}

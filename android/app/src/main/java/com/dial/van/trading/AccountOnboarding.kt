@@ -21,7 +21,8 @@ import javax.crypto.spec.SecretKeySpec
  * "trading-account|device|issued|action|sha256hex(args)" under HMAC-SHA256 with the device secret.
  */
 object AccountOnboarding {
-    val ACTIONS = listOf("account_upsert", "account_credentials", "account_remove", "account_verify", "deriv_verify_email", "deriv_create_demo", "deriv_oauth_link", "ctrader_discover", "ctrader_link", "mt5_ea_issue_key", "oauth_start", "oauth_pending")
+    // Wire actions, not form capabilities. Restriction uses its dedicated purpose routes.
+    val ACTIONS = listOf("account_restrict", "account_upsert", "account_credentials", "account_remove", "account_verify", "deriv_verify_email", "deriv_create_demo", "deriv_oauth_link", "ctrader_discover", "ctrader_link", "mt5_ea_issue_key", "oauth_start", "oauth_pending")
 
     fun canonicalJson(el: JsonElement): String = when (el) {
         is JsonNull -> "null"
@@ -40,6 +41,8 @@ object AccountOnboarding {
                 ch == '\n' -> sb.append("\\n")
                 ch == '\r' -> sb.append("\\r")
                 ch == '\t' -> sb.append("\\t")
+                ch == '\b' -> sb.append("\\b")
+                ch == '\u000C' -> sb.append("\\f")
                 ch.code < 0x20 -> sb.append("\\u").append(String.format("%04x", ch.code))
                 else -> sb.append(ch)
             }
@@ -77,7 +80,7 @@ object AccountOnboarding {
     fun approvalSubtitle(action: String): String = when (action) {
         "account_upsert" -> "Add or change a trading account"
         "account_credentials" -> "Store broker credentials for this account"
-        "account_remove" -> "Remove a trading account"
+        "account_remove" -> "Unlink an account from VAN"
         "deriv_verify_email" -> "Send a Deriv verification email"
         "deriv_create_demo" -> "Create a Deriv demo account"
         "deriv_oauth_link" -> "Link a Deriv account"
@@ -85,6 +88,85 @@ object AccountOnboarding {
         "mt5_ea_issue_key" -> "Issue a new MT5 bridge signing key"
         "oauth_start" -> "Begin linking a broker account"
         else -> "Confirm trading account change"
+    }
+
+    /** Display the native effective settings; never native locators or credential values. */
+    fun resolvedReviewText(review: JsonObject?): String? {
+        if (review?.str("schema") != "vati.account-review/1") return null
+        if (review.str("action") == "account_remove") return resolvedUnlinkReviewText(review)
+        if (review.str("action") != "account_upsert") return null
+        val after = review.obj("after") ?: return null
+        val before = review.obj("before")
+        val labels = linkedMapOf("alias" to "Account", "broker" to "Broker", "label" to "Name",
+            "mode" to "Trading mode", "currency" to "Currency", "demo" to "Configured account type",
+            "enabled" to "Enabled", "login" to "Broker login", "server" to "Broker server / app ID",
+            "bridge_url" to "Provider connection", "venue" to "Venue", "mandate_ref" to "Policy reference",
+            "notes" to "Notes", "credential_ref" to "Credentials", "safety_identity" to "Safety identity")
+        if (after.keys != labels.keys || (before != null && before.keys != labels.keys)) return null
+        if (after.obj("credential_ref")?.keys != setOf("kind") ||
+            (before != null && before.obj("credential_ref")?.keys != setOf("kind"))) return null
+        val changed = labels.keys.filter { before == null || before[it] != after[it] }
+        val contextFields = setOf("broker", "login", "mode", "currency", "demo", "enabled", "mandate_ref")
+        fun display(record: JsonObject, key: String): String {
+            val value = record.str(key).orEmpty()
+            return when {
+                key == "demo" -> if (value == "true") "Demo" else "Live"
+                key == "enabled" -> if (value == "true") "Yes" else "No"
+                key == "mode" -> value.lowercase().replace('_', ' ')
+                else -> value.ifBlank { "not set" }
+            }
+        }
+        return buildString {
+            append(if (before == null) "Register account" else "Update account").append(" ").append(after.str("alias") ?: return null)
+            for (key in labels.keys.filter { it != "alias" && (it in changed || it in contextFields) }) {
+                if (key == "credential_ref") {
+                    append("\nCredentials: ").append(if (after.obj(key)?.str("kind") == "none") "not required" else if (before == null) "storage on trading host; no credential values supplied" else "existing values retained")
+                } else {
+                    val value = after.str(key).orEmpty()
+                    if (value.isNotBlank() || before != null) {
+                        append("\n").append(labels.getValue(key)).append(": ")
+                        if (before != null && key in changed) append(display(before, key)).append(" → ")
+                        append(display(after, key))
+                    }
+                }
+            }
+            if (changed.isEmpty()) append("\nNo setting values changed.")
+            append("\n\nBroker connectivity and trading policy are checked separately.")
+        }
+    }
+
+    private fun resolvedUnlinkReviewText(review: JsonObject): String? {
+        val before = review.obj("before") ?: return null
+        if (review["after"] != JsonNull) return null
+        val facts = review.obj("retirement") ?: return null
+        if (facts.str("schema") != "vati.local-unlink-review/1" ||
+            facts["remote_account_closed"] != JsonPrimitive(false) ||
+            facts["historical_data_retained"] != JsonPrimitive(true)) return null
+        val alias = before.str("alias")?.takeIf { validateAlias(it) == null } ?: return null
+        val broker = before.str("broker")?.takeIf { it.isNotBlank() } ?: return null
+        val currency = before.str("currency")?.takeIf { it.isNotBlank() } ?: return null
+        val credential = before.obj("credential_ref") ?: return null
+        if (credential.keys != setOf("kind")) return null
+        val fundsText = if (broker == "PAPER") {
+            if (facts["retained_remote_funds"] != JsonNull) return null
+            "Simulation only; no broker funds."
+        } else {
+            val funds = facts.obj("retained_remote_funds") ?: return null
+            if (funds.keys != setOf("balance", "equity", "currency") || funds.str("currency") != currency) return null
+            val balance = funds.str("balance")?.takeIf { it.toBigDecimalOrNull() != null } ?: return null
+            val equity = funds.str("equity")?.takeIf { it.toBigDecimalOrNull() != null } ?: return null
+            "Funds remain at the broker: balance $balance $currency; equity $equity $currency."
+        }
+        val credentialText = when (facts.str("credential_cleanup")) {
+            "DELETE_MANAGED" -> "Its managed local credentials will be removed."
+            "KEEP_SHARED" -> "Shared credentials are kept for the other accounts."
+            "KEEP_EXTERNAL" -> "Externally managed credentials are retained."
+            "NONE" -> "No managed local credentials need removal."
+            else -> return null
+        }
+        return "Unlink $alias from VAN\nBroker: $broker\n$fundsText\n$credentialText\n\n" +
+            "This removes the local connection. " +
+            "It does not close the broker account or move funds. VAN trading history is retained."
     }
 
     fun requestBody(
@@ -141,9 +223,39 @@ object AccountOnboarding {
     // ------------------------------------------------------------ responses
     data class ActionOutcome(val ok: Boolean, val message: String, val account: AccountCard? = null, val signingKey: String? = null, val eaInputs: Map<String, String> = emptyMap(), val state: String? = null, val url: String? = null, val raw: JsonObject? = null)
 
-    fun parseOutcome(action: String, body: String, httpCode: Int): ActionOutcome {
+    fun parseOutcome(action: String, body: String, httpCode: Int, requireOriginalReceipt: Boolean = false): ActionOutcome {
         val o = parseObject(body) ?: return ActionOutcome(false, if (httpCode in 200..299) "Unreadable gateway reply" else "Gateway error $httpCode")
+        if (o.str("effect_state") == "UNKNOWN" || o.bool("reconciliation_required") == true ||
+            o.bool("native_reconciliation_required") == true || o.str("scope_status") == "UNBOUND")
+            return ActionOutcome(false, if (action == "deriv_create_demo")
+                "Original demo creation is unconfirmed. Hold creation and check its original result; do not create another account."
+                else "Original account change is unconfirmed. Check its original result before trying again.", raw = o)
         if (httpCode !in 200..299) return ActionOutcome(false, o.str("detail") ?: "Gateway error $httpCode", raw = o)
+        if (action in setOf("deriv_oauth_link", "ctrader_link")) {
+            if (o.str("effect_state") == "NOT_DISPATCHED") return ActionOutcome(false,
+                "Original link was not dispatched. Review and approve resume of the same link.", raw = o)
+            val bound = o.str("effect_state") in setOf("APPLIED", "REFUSED") &&
+                o.str("operation_id")?.matches(Regex("[A-Za-z0-9_-]{20,128}")) == true &&
+                o.str("oauth_state")?.matches(Regex("[A-Za-z0-9_-]{20,128}")) == true &&
+                !o.str("device_id").isNullOrBlank() &&
+                o.str("account_control_domain")?.matches(Regex("[0-9a-f]{64}")) == true &&
+                o.str("native_resource_version")?.matches(Regex("[0-9a-f]{64}")) == true &&
+                o.bool("reconciliation_required") == false
+            if ((requireOriginalReceipt && !bound) ||
+                (o.obj("account") == null && o.obj("result")?.obj("account") == null && o.str("effect_state") != "REFUSED"))
+                return ActionOutcome(false, "Broker authorization readiness is not original link completion. Check the original result; no link was repeated.", raw = o)
+        }
+        if (o.str("effect_state") == "APPLIED" && o.obj("result") != null) {
+            val original = o.obj("result")!!
+            return ActionOutcome(true, if (original.bool("credential_export_available") == false)
+                "Original account change confirmed. Its signing key is not retained in recovery history."
+                else "Original account change confirmed.", original.obj("account")?.let(AccountCard::from), raw = o)
+        }
+        if (o.str("effect_state") == "REFUSED")
+            return ActionOutcome(false, "Original account change was refused before any effect.", raw = o)
+        if (o.bool("credential_export_available") == false)
+            return ActionOutcome(true, "Original key issue confirmed. Its signing key is not retained in recovery history.",
+                o.obj("account")?.let(AccountCard::from), raw = o)
         val acct = o.obj("account")?.let(AccountCard::from)
         return when (action) {
             "account_verify" -> ActionOutcome(o.bool("ok") == true, if (o.bool("ok") == true) "Connected. Equity ${o.str("equity") ?: "?"} ${o.str("currency") ?: ""}" else (o.str("detail") ?: "Verification failed"), raw = o)
@@ -151,7 +263,10 @@ object AccountOnboarding {
             "oauth_start" -> ActionOutcome(true, o.str("note") ?: "Continue in the browser", state = o.str("state"), url = o.str("url"), raw = o)
             "oauth_pending" -> ActionOutcome(o.bool("ready") == true, if (o.bool("expired") == true) "Link expired; start again" else if (o.bool("ready") == true) "Accounts found" else "Waiting for the browser sign-in", raw = o)
             "deriv_verify_email" -> ActionOutcome(o.bool("sent") == true, if (o.bool("sent") == true) "Verification code sent to ${o.str("email")}" else "Could not send the code", raw = o)
-            "account_remove" -> ActionOutcome(o.bool("removed") == true, "Account removed", raw = o)
+            "account_remove" -> ActionOutcome(o.bool("removed") == true && o.bool("remote_account_closed") != true,
+                if (o.bool("remote_account_closed") == false && o.bool("historical_data_retained") == true)
+                    "Account unlinked locally. Broker account and funds remain; VAN trading history is retained."
+                else "Local removal reported; verify broker account and history status.", raw = o)
             "account_credentials" -> ActionOutcome(true, "Stored: ${o.strList("stored_keys").joinToString()}", raw = o)
             else -> ActionOutcome(true, if (acct != null) "${acct.label} ${acct.safety.label}" else "Done", acct, raw = o)
         }

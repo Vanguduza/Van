@@ -1,0 +1,39 @@
+{
+  "kind": "LOCAL_DEPLOYMENT_POLICY_FIXTURES_ONLY",
+  "exit_code": 0,
+  "tests": 136,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "source_inputs": 268,
+  "all_inputs_stable": true,
+  "owned_sources_stable": true,
+  "changed_inputs": [],
+  "owned_files": {
+    "tools/runtime/check_ufw_commander_scope.py": "60d98199aab0cb33b2f4324d2396c675b7370664ba7f3c6449fd133cc5e1801a",
+    "tools/runtime/owner_core_firewall_policy.py": "daa3023b82ddf21f9d0b2b98029c55c8ca1861f86b5b78d730232473a7d37a2e",
+    "tools/runtime/owner_core_network_observations.py": "582aa7f5c03d3a6837eb5a2228f48e342346ca38d1a7f9a39fdef0e0f1dea936",
+    "tools/runtime/prepare_owner_core_deployment.py": "f763716a3ce892662e0e8ddab26193d7ba7621ee04556d394d163d4805c0f8fc",
+    "tools/runtime/preflight_owner_core.py": "01ed92a530b15313d0ced31d5405ef1019fdd864beff2a4daabed6bc26d0c324",
+    "deploy/van-trading-core/qualify.sh": "664b99fbce11e9c8a968156b1ac8795f0c61728da25bdae9cbb41f472402dc72",
+    "deploy/van-owner-core/profile.example.json": "dc5f73d1e6c3eb62d38c7f45126dd8eb00ca72e87e67ad32cc4019a63abfe676",
+    "deploy/van-owner-core/README.md": "cd63a9e9d7837f351a2e36f5b0d3438eea79f161890f7564f680b67d6a07a5e5",
+    "tests/contracts/test_owner_core_network_policy.py": "a93af88a64d5d3951033442fcefa6f20a46eafa52c9ea0a5476cd3704d67e70c",
+    "tests/contracts/test_owner_core_deployment_profile.py": "79b1f1098387cf9551491baa9b5d19c830150872ba5755da008b7a8a33e07497"
+  },
+  "log_sha256": "e2198736c1169e0e829c15833ab331510637b3e6e8d852a27ff5594e18801c92",
+  "junit_sha256": "8c4b56d2a611eeee53ad9b427231f1545764db24b15b56978bb9de52fa5b0129",
+  "remote_qualifier_baseline": {
+    "repository": "Vanguduza/Van",
+    "source_commit": "12feb9033dfc1dd68d7b4d41ac477f0d9dbbc4af",
+    "path": "deploy/van-trading-core/qualify.sh",
+    "sha256": "15fb88c5c27ae9808310151c3326927859fa7023c91d11e6f6f9e6d768cb26fb"
+  },
+  "DDS_mutations": 0,
+  "live_host_commands": 0,
+  "host_firewall_verified": false,
+  "OCI_policy_verified": false,
+  "provider_callback_routes_verified": false,
+  "owner_release_verified": false,
+  "S24_tested": false
+}

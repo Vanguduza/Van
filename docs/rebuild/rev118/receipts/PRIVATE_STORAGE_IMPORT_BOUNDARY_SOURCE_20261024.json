@@ -1,0 +1,140 @@
+{
+  "schema": "van.rebuild.private-storage-import-boundary-source/1",
+  "observed_at_utc": "2026-10-24T07:41:45.512000+00:00",
+  "source_parent": "e22a4e7cccca690df5b9cb197f440eb06fb03f06",
+  "source_sha256": {
+    "backend/van_gateway/storage/db.py": "3e99ea43fe2bfed43dbfb074764b077f6e605f15406172d4768f3d7846a9bf31",
+    "backend/van_gateway/storage/chart_migration.py": "70d04e1fb2d20ce984bd154ca0c0fff43ac3fb8127b6fa355839a6acdc31c16b",
+    "backend/van_gateway/trading/chart_schema.py": "acb96da839d63f8dd4c6d271de9fab501c80a029e6afed177ba28ed32bd5252a",
+    "backend/tests/legacy_mission_fixtures.py": "ec2fe62380e9442a7702e470f17248698311b830711d6c2423e9b5f5302d3677",
+    "backend/tests/test_owner_model_migration.py": "70e88e3703689370ebea8e7c0e4415f92e4525c64601eef7d37d1e003705ca32",
+    "backend/tests/test_owner_model_migration_32.py": "d7732d53585493dff9a25509697a3af72be9407d11c87c36295a29330028f2d1"
+  },
+  "migration_sql": {
+    "identical": true,
+    "sha256": "cd5b2b508baf7a532ed3f20d5331fa5bb39da193a373c8160b41f0d651ec52bf",
+    "old_module_sha256": "70d04e1fb2d20ce984bd154ca0c0fff43ac3fb8127b6fa355839a6acdc31c16b",
+    "new_module_sha256": "70d04e1fb2d20ce984bd154ca0c0fff43ac3fb8127b6fa355839a6acdc31c16b"
+  },
+  "executions": {
+    "original_before": {
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.379,
+      "xml_sha256": "0dab7143bcb11d4cba49fadc5511369442136d62d1f9c0620e0dceeb3e1279f6"
+    },
+    "first_migration_fixtures": {
+      "tests": 172,
+      "failures": 6,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 26.711,
+      "xml_sha256": "b939a1f3ed0f6a4d1ec68c001b25e09e49ed3f842b234fb6650cfdb4753d7687"
+    },
+    "guarded_fixture_edit_repeat": {
+      "tests": 172,
+      "failures": 6,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 25.765,
+      "xml_sha256": "8bff29344055cc61c97940b99d3c45bd8d9d57bfbe945243a60ff1dd62831e65"
+    },
+    "final_focused": {
+      "tests": 172,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 26.303,
+      "xml_sha256": "0c46da1bd49a554bcbf83232da9e4de5dfef9bde60af544c810a11a7df636614"
+    },
+    "registry": {
+      "tests": 26,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 3.518,
+      "xml_sha256": "2384a2c90a49e8bc71ccb27ba77449da2ba960085fa890d39d3dc8b32ca3497a"
+    },
+    "rebuild": {
+      "tests": 80,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 29.643,
+      "xml_sha256": "01655256bd01de6b469c9da9aadcd9ae1661ead69f5b999b8b43b79c158b11e6"
+    }
+  },
+  "fault_campaign": {
+    "definitions": [
+      [
+        "restore the trading runtime import into the private storage dependency",
+        [
+          [
+            "backend/van_gateway/storage/db.py",
+            "from van_gateway.storage.chart_migration import MIGRATION_56",
+            "from van_gateway.trading.chart_schema import MIGRATION_56",
+            1
+          ]
+        ],
+        "tests/contracts/test_van_private_core_topology.py::test_private_core_app_import_closure_excludes_forbidden_code"
+      ]
+    ],
+    "records": [
+      {
+        "case": 0,
+        "phase": "control",
+        "reason": "restore the trading runtime import into the private storage dependency",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "7380ec8c624d2bc3a4896084136046e11f9a2c319ecc3e8ff3e510cd76de4cf2"
+      },
+      {
+        "case": 0,
+        "phase": "fault",
+        "reason": "restore the trading runtime import into the private storage dependency",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "8ab12110a3d8f9cac9f6946365744c7ef6dac6f84a5fa0e48d5eec86138cf7a0"
+      }
+    ],
+    "before": {
+      "backend/van_gateway/storage/db.py": "3e99ea43fe2bfed43dbfb074764b077f6e605f15406172d4768f3d7846a9bf31"
+    },
+    "after": {
+      "backend/van_gateway/storage/db.py": "3e99ea43fe2bfed43dbfb074764b077f6e605f15406172d4768f3d7846a9bf31"
+    },
+    "source_restored": true
+  },
+  "storage_audit": {
+    "schema": "van.source-storage-audit/1",
+    "forbidden_events": [],
+    "source_sha256": "d4e270150fb0da6e8d79b449dd0de68fd1f97b3ccea3d282f31d91297edbd495",
+    "root": "/workspace/van-review-2026-10-18/publish",
+    "scope": "SQLite opens, path-based writable opens and directory/link/rename/delete events under data and backend/data",
+    "limits": "Python audit events only; existing fd writes, native-library raw I/O and external processes are not an OS sandbox. Git state is checked separately."
+  },
+  "legacy_registry_preflight": {
+    "schema": "van.rebuild.mutation-registry-preflight/1",
+    "registry_sha256": "35d10c7b0f2b8319b7f7305828262c972b2a6451139d75b9e83c7d0062282955",
+    "mutation_count": 374,
+    "edit_count": 383,
+    "findings": [],
+    "execution_state": "NOT_RUN",
+    "status": "ANCHORS_VALID_BASELINES_AND_MUTATIONS_NOT_EXECUTED"
+  },
+  "qualification": "Source import boundary and historical fixture compatibility only. Original forbidden prefix test unchanged. No native host/custody/firewall, complete unit, production, F15/BG or device acceptance. Earlier full815 failed receipt retained; fresh exact-source broad regression pending."
+}

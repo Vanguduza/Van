@@ -1,0 +1,21 @@
+{
+  "schema": "van.auth-final-source-integration/1",
+  "at_utc": "2026-11-01T01:26:39.938439+00:00",
+  "original_terminal_exit": -15,
+  "before": {
+    "backend/van_gateway/auth/service.py": "a495f075cdc70c93fce664942a3832bb24327da56118ac5aff2a2b439db2cf66",
+    "backend/tests/test_lane_auth_commit_expiry.py": "bc4d79ed6ec7085af59465d4c45286e04bff51868a6e5a1b77104882e6cb476e",
+    "backend/tests/test_lane_auth_commit_expiry_http.py": "b245d280b9bc62b310629b4086df1bb9f6490dd8f667d4e079c4e63f0c54bada"
+  },
+  "after": {
+    "backend/van_gateway/auth/service.py": "7e9e8909fe08bc28b09c3f37a3b39d26fbe30f53e6f2bcfbeaaf348d391971d5",
+    "backend/tests/test_lane_auth_commit_expiry.py": "562449e4bad53627645e41b9f7ce48d18f5556ed8b0a9e8e2534b36cb822f6c3",
+    "backend/tests/test_lane_auth_commit_expiry_http.py": "b245d280b9bc62b310629b4086df1bb9f6490dd8f667d4e079c4e63f0c54bada"
+  },
+  "paths": [
+    "backend/van_gateway/auth/service.py",
+    "backend/tests/test_lane_auth_commit_expiry.py",
+    "backend/tests/test_lane_auth_commit_expiry_http.py"
+  ],
+  "unrelated_edits_preserved": true
+}

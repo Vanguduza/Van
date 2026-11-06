@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:van:forecast:prediction-market:PredictionMarketSourceProfile:1.0",
+  "title": "PredictionMarketSourceProfile",
+  "description": "Proposed VAN contract. JSON shape/local arithmetic is not evidence admission, source permission or financial authority.",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "record_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "environment": {
+      "enum": [
+        "FIXTURE",
+        "RESEARCH",
+        "SHADOW"
+      ]
+    },
+    "authority_effect": {
+      "const": "NONE"
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0
+    },
+    "source_digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "source_name": {
+      "enum": [
+        "KALSHI",
+        "POLYMARKET",
+        "FIXTURE_PROVIDER"
+      ]
+    },
+    "execution_provider": {
+      "enum": [
+        "NETCUP",
+        "ORACLE"
+      ]
+    },
+    "runtime_region": {
+      "type": "string",
+      "minLength": 1
+    },
+    "licence_procurement_required": {
+      "const": false
+    },
+    "procurement_in_this_phase": {
+      "const": false
+    },
+    "new_purchase_budget_usd": {
+      "const": "0.00"
+    },
+    "operator_eligibility": {
+      "enum": [
+        "NOT_ASSERTED",
+        "EXTERNALLY_VERIFIED",
+        "UNAVAILABLE"
+      ]
+    },
+    "eligibility_inferred_from_host": {
+      "const": false
+    },
+    "acquisition_mode": {
+      "enum": [
+        "FIXTURE_REPLAY",
+        "AUTHORIZED_HISTORICAL_IMPORT",
+        "AUTHORIZED_READ_ONLY_CAPTURE"
+      ]
+    },
+    "allowed_uses": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "permission_state": {
+      "enum": [
+        "FIXTURE_ONLY",
+        "ESTABLISHED_FOR_EXACT_USE",
+        "NOT_ESTABLISHED",
+        "REVOKED"
+      ]
+    },
+    "permission_ref": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "terms_revision_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "live_order_submission": {
+      "const": false
+    }
+  },
+  "required": [
+    "schema_version",
+    "record_id",
+    "environment",
+    "authority_effect",
+    "evidence_refs",
+    "source_digest",
+    "source_name",
+    "execution_provider",
+    "runtime_region",
+    "licence_procurement_required",
+    "procurement_in_this_phase",
+    "new_purchase_budget_usd",
+    "operator_eligibility",
+    "eligibility_inferred_from_host",
+    "acquisition_mode",
+    "allowed_uses",
+    "permission_state",
+    "permission_ref",
+    "terms_revision_ref",
+    "live_order_submission"
+  ],
+  "additionalProperties": false
+}

@@ -4,26 +4,19 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.res.Configuration
 import android.graphics.PixelFormat
-import android.os.Build
 import android.os.IBinder
-import android.os.PowerManager
 import android.provider.Settings
 import android.view.Gravity
-import android.view.HapticFeedbackConstants
 import android.view.WindowManager
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -35,7 +28,6 @@ import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.dial.van.VanApplication
 import com.dial.van.command.CommandCentreActivity
-import com.dial.van.trading.TradeView
 import com.dial.van.trading.TradingCommandCentreActivity
 
 class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
@@ -45,142 +37,233 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
     private lateinit var stateStore: OverlayStateStore
     private lateinit var dismissWindow: OverlayDismissWindow<FloatingOverlayService>
 
-
     private val lifecycleRegistry = LifecycleRegistry(this)
     private val savedStateController = SavedStateRegistryController.create(this)
-
     private var uiState by mutableStateOf(VanOverlayUiState())
     private var dockEdge by mutableStateOf(DockEdge.NONE)
     private var blurBehindActive by mutableStateOf(false)
-    private var workboardMode by mutableStateOf(VanWorkboardMode.CONTEXT)
-    private var chatDraft by mutableStateOf("")
-    private var tradeView by mutableStateOf(TradeView.CURRENT)
-    private var tradeRefreshTick by mutableStateOf(0)
+    private var boardSize by mutableStateOf<OverlaySize?>(null)
+    private var visibility by mutableStateOf(OverlayVisibility(attached = false))
 
-    private var visibility by mutableStateOf(OverlayVisibility())
+    private var windowAttached = false
+    private var windowFailed = false
+    private var screenReceiverRegistered = false
+    private var obstructionReceiverRegistered = false
+    private var keyboardTopPx = Int.MAX_VALUE
+    private var lastAppliedPlacement = OverlayPlacement(0, 0)
 
-    /** Broadcast parsing is isolated; the service owns lifecycle state and policy. */
     private val screenReceiver = OverlayScreenStateReceiver(::setScreenOn)
-
     private val obstructionReceiver = OverlayObstructionReceiver { state ->
-        visibility = visibility.copy(
-            keyboardVisible = state.keyboardVisible,
-            fullscreenAppActive = state.fullscreenAppActive,
+        if (OverlayVisibilityPolicy.obstructionChanged(
+                visibility, keyboardTopPx, state.keyboardVisible,
+                state.keyboardTopPx, state.fullscreenAppActive,
+            )) {
+            keyboardTopPx = OverlayVisibilityPolicy.keyboardTop(state.keyboardVisible, state.keyboardTopPx)
+            visibility = visibility.copy(
+                keyboardVisible = state.keyboardVisible,
+                fullscreenAppActive = state.fullscreenAppActive,
+            )
+            interaction.cancelSettle()
+            reconcileWindow()
+            refreshKeyboardOverlap()
+            applyVisibilityLifecycle()
+        }
+    }
+
+    private val interaction = OverlayWindowInteraction(object : OverlayInteractionHost {
+        override val context get() = this@FloatingOverlayService
+        override val manager get() = if (::windowManager.isInitialized) windowManager else null
+        override val view get() = if (::overlayView.isInitialized) overlayView else null
+        override val params get() = if (::layoutParams.isInitialized) layoutParams else null
+        override val keyboardTopPx get() = this@FloatingOverlayService.keyboardTopPx
+        override var uiState: VanOverlayUiState
+            get() = this@FloatingOverlayService.uiState
+            set(value) { this@FloatingOverlayService.uiState = value }
+        override var visibility: OverlayVisibility
+            get() = this@FloatingOverlayService.visibility
+            set(value) { this@FloatingOverlayService.visibility = value }
+        override var dockEdge: DockEdge
+            get() = this@FloatingOverlayService.dockEdge
+            set(value) { this@FloatingOverlayService.dockEdge = value }
+        override fun canUseWindow() = this@FloatingOverlayService.canUseWindow()
+        override fun updateWindow() = this@FloatingOverlayService.updateWindow()
+        override fun moveWindow(placement: OverlayPlacement) = this@FloatingOverlayService.moveWindow(placement)
+        override fun persistState() = this@FloatingOverlayService.persistState()
+        override fun applyVisibilityLifecycle() = this@FloatingOverlayService.applyVisibilityLifecycle()
+        override fun showDismissTarget() = this@FloatingOverlayService.showDismissTarget()
+        override fun refreshDismissTarget() = this@FloatingOverlayService.refreshDismissTarget()
+        override fun hideDismissTarget() = this@FloatingOverlayService.hideDismissTarget()
+        override fun dismissBounds() = if (::dismissWindow.isInitialized) dismissWindow.boundsOnScreen() else null
+        override fun dismissOverlay() {
+            running = false
+            this@FloatingOverlayService.persistState(running = false)
+            stopSelf()
+        }
+        override fun failWindow() = this@FloatingOverlayService.failWindow()
+        override fun environmentChanged() = this@FloatingOverlayService.environmentChanged()
+        override fun boardSizeChanged(size: OverlaySize?) { boardSize = size }
+        override fun imeObserved(visible: Boolean, topPx: Int) {
+            if (visibility.keyboardVisible == visible && keyboardTopPx == topPx) return
+            this@FloatingOverlayService.keyboardTopPx = topPx
+            visibility = visibility.copy(keyboardVisible = visible)
+            if (::overlayView.isInitialized) overlayView.post { reconcileWindow() }
+        }
+    })
+    private val surfaceController = OverlaySurfaceController()
+    private fun screenBounds() = interaction.screenBounds()
+    private fun refreshKeyboardOverlap() = interaction.refreshKeyboardOverlap()
+    private fun reconcileWindow(): Unit = interaction.reconcileWindow()
+    private fun stopInteraction() = interaction.stopInteraction()
+
+    @Composable
+    private fun OverlayContent() {
+        val metrics = resources.displayMetrics
+        val gestures = remember {
+            Modifier.vanGestures(interaction, ::onVanTap, { surfaceController.onDoubleTap(uiState, ::updateUiState) { openCommandCentre() } }, ::showQuickControls)
+        }
+        val dragHandle = remember { Modifier.vanGestures(interaction, {}, {}, {}, clicks = false) }
+        surfaceController.Content(
+            dragHandle = dragHandle,
+            onMove = interaction::moveAccessibly,
+            app = application as VanApplication, uiState = uiState, visibility = visibility,
+            blurBehindActive = blurBehindActive, widthDp = metrics.widthPixels / metrics.density,
+            heightDp = metrics.heightPixels / metrics.density, gestures = gestures,
+            boardWidthDp = boardSize?.widthPx?.div(metrics.density),
+            boardHeightDp = boardSize?.heightPx?.div(metrics.density),
+            onUiChange = ::updateUiState, onCommandCentre = ::openCommandCentre,
+            onTradingRoute = ::openTradingRoute, onClose = ::stopSelf,
+            onBlurAllowed = ::setBlurAllowed,
         )
-        if (state.keyboardVisible) moveAboveKeyboard(state.keyboardTopPx)
-        applyVisibilityLifecycle()
     }
 
-    private fun moveAboveKeyboard(keyboardTopPx: Int) {
-        if (
-            keyboardTopPx == Int.MAX_VALUE ||
-            !::overlayView.isInitialized ||
-            !::layoutParams.isInitialized ||
-            !::windowManager.isInitialized
-        ) return
-        val measuredHeight = overlayView.height.takeIf { it > 0 } ?: dp(180)
-        val safeY = (keyboardTopPx - measuredHeight - dp(12)).coerceAtLeast(0)
-        if (layoutParams.y <= safeY) return
-        layoutParams.y = safeY
-        uiState = uiState.copy(yPx = safeY)
-        runCatching { windowManager.updateViewLayout(overlayView, layoutParams) }
-        persistState()
+    private fun setBlurAllowed(allowed: Boolean) {
+        if (!canUseWindow()) return
+        val next = allowed && OverlayWindowFlags.blurSupported(windowManager)
+        if (next == blurBehindActive) return
+        blurBehindActive = next
+        applyWindowFlags()
+        updateWindow()
     }
 
+    private fun environmentChanged() {
+        if (!canUseWindow()) return
+        stopInteraction()
+        layoutParams.width = WindowManager.LayoutParams.WRAP_CONTENT
+        layoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT
+        if (updateWindow()) reconcileWindow()
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        environmentChanged()
+    }
     private fun setScreenOn(on: Boolean) {
-        if (visibility.screenOn == on) return
-        visibility = visibility.copy(screenOn = on)
+        val visible = on && OverlayPrivacyVisibility.interactiveAndUnlocked(this)
+        visibility = visibility.copy(screenOn = visible)
+        if (::overlayView.isInitialized) overlayView.visibility = if (visible) android.view.View.VISIBLE else android.view.View.GONE
+        if (!visible) {
+            surfaceController.pauseOwnerCapture()
+            if (uiState.presentation in OverlayWindowFlags.WORKBOARDS) updateUiState(uiState.copy(presentation = VanOverlayPresentation.FULL_FLOATING, quickControls = VanQuickControlsState.HIDDEN))
+        }
+        if (visible && canUseWindow()) reconcileWindow()
         applyVisibilityLifecycle()
     }
 
-    /**
-     * CREATED rather than STOPPED when paused: the composition is retained, so waking the
-     * phone does not rebuild the whole overlay, but no frame callback runs. The view stays
-     * attached, so the overlay does not visibly disappear and reappear.
-     */
     private fun applyVisibilityLifecycle() {
         if (lifecycleRegistry.currentState == Lifecycle.State.DESTROYED) return
-        lifecycleRegistry.currentState = when (OverlayVisibilityPolicy.target(visibility)) {
+        val target = OverlayVisibilityPolicy.target(visibility)
+        if (target != OverlayLifecycleTarget.ANIMATING) stopInteraction()
+        lifecycleRegistry.currentState = when (target) {
             OverlayLifecycleTarget.ANIMATING -> Lifecycle.State.STARTED
             OverlayLifecycleTarget.PAUSED -> Lifecycle.State.CREATED
             OverlayLifecycleTarget.DESTROYED -> Lifecycle.State.DESTROYED
         }
-        OverlayTradeAura.hold(application, OverlayVisibilityPolicy.target(visibility) == OverlayLifecycleTarget.ANIMATING)
+        OverlayTradeAura.hold(application, target == OverlayLifecycleTarget.ANIMATING)
     }
 
     override fun onCreate() {
         super.onCreate()
-        // Foreground first: a slow or failing addView below must not spend the seconds
-        // startForegroundService allows, and an ungranted overlay stops honestly (running=false).
-        startForeground(NOTIFICATION_ID, OverlayNotification.build(this))
-        if (!Settings.canDrawOverlays(this)) {
-            stopSelf()
-            return
-        }
-        running = true
-        savedStateController.performRestore(null)
-        lifecycleRegistry.currentState = Lifecycle.State.CREATED
-        stateStore = OverlayStateStore(this)
-        windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
-        dismissWindow = OverlayDismissWindow(this, windowManager, ::dp)
-
-        val metrics = resources.displayMetrics
-        val restored = stateStore.load(metrics.widthPixels / 2, metrics.heightPixels / 3)
-        uiState = VanOverlayUiState(
-            presentation = restored.presentation,
-            xPx = restored.x,
-            yPx = restored.y,
-        )
-        dockEdge = restored.dock
-
-        layoutParams = WindowManager.LayoutParams(
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-            OverlayWindowFlags.base(uiState.presentation),
-            PixelFormat.TRANSLUCENT,
-        ).apply {
-            gravity = Gravity.TOP or Gravity.START
-            x = uiState.xPx
-            y = uiState.yPx
-        }
-        applyBackdropBlur()
-
-        overlayView = ComposeView(this).apply {
-            setViewTreeLifecycleOwner(this@FloatingOverlayService)
-            setViewTreeSavedStateRegistryOwner(this@FloatingOverlayService)
-            setContent { OverlayContent() }
-        }
-        windowManager.addView(overlayView, layoutParams)
-        // Seed from the real screen state rather than assuming on: a service started while
-        // the phone is locked would otherwise animate immediately.
-        val power = getSystemService(PowerManager::class.java)
-        visibility = visibility.copy(
-            attached = true,
-            screenOn = power?.isInteractive != false,
-        )
-        registerReceiver(
-            screenReceiver,
-            IntentFilter().apply {
-                addAction(Intent.ACTION_SCREEN_ON)
-                addAction(Intent.ACTION_SCREEN_OFF)
-                addAction(Intent.ACTION_USER_PRESENT)
-            },
-        )
-        val obstructionFilter = IntentFilter(
-            VanObstructionAccessibilityService.ACTION_OBSTRUCTION_STATE,
-        )
-        ContextCompat.registerReceiver(
-            this,
-            obstructionReceiver,
-            obstructionFilter,
-            ContextCompat.RECEIVER_NOT_EXPORTED,
-        )
-        applyVisibilityLifecycle()
-        stateStore.markRunning(true)
+        running = false
+        runCatching {
+            startForeground(NOTIFICATION_ID, OverlayNotification.build(this))
+            savedStateController.performRestore(null)
+            lifecycleRegistry.currentState = Lifecycle.State.CREATED
+            stateStore = OverlayStateStore(this)
+            surfaceController.attach(application as VanApplication, stateStore)
+            stateStore.markRunning(false)
+            if (!Settings.canDrawOverlays(this)) {
+                stopSelf()
+                return
+            }
+            windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
+            dismissWindow = OverlayDismissWindow(this, windowManager, ::dp)
+            val screen = screenBounds()
+            val saved = stateStore.load(screen.widthPx / 2, screen.heightPx / 3)
+            val restored = saved.copy(presentation = OverlayRestartPresentation.safe(saved.presentation))
+            val fallback = VanOverlayController.fallbackSizeFor(restored.presentation, ::dp, screen)
+            val placement = VanOverlayController.clamp(
+                restored.x, restored.y, fallback.widthPx, fallback.heightPx, screen,
+            )
+            uiState = VanOverlayUiState(
+                presentation = restored.presentation, xPx = placement.x, yPx = placement.y,
+            )
+            dockEdge = restored.dock
+            lastAppliedPlacement = placement
+            layoutParams = WindowManager.LayoutParams(
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                OverlayWindowFlags.base(uiState.presentation),
+                PixelFormat.TRANSLUCENT,
+            ).apply {
+                // Absolute screen coordinates, including on RTL devices.
+                gravity = Gravity.TOP or Gravity.LEFT
+                x = placement.x
+                y = placement.y
+            }
+            blurBehindActive = OverlayWindowFlags.blurSupported(windowManager)
+            applyWindowFlags()
+            overlayView = ComposeView(this).apply {
+                setViewTreeLifecycleOwner(this@FloatingOverlayService)
+                setViewTreeSavedStateRegistryOwner(this@FloatingOverlayService)
+                addOnLayoutChangeListener(interaction.layoutListener)
+                addOnAttachStateChangeListener(interaction.attachListener)
+                setOnApplyWindowInsetsListener { view, insets -> interaction.onWindowInsets(view, insets) }
+                setContent { OverlayContent() }
+            }
+            windowManager.addView(overlayView, layoutParams)
+            windowAttached = true
+            visibility = visibility.copy(attached = true)
+            setScreenOn(OverlayPrivacyVisibility.interactiveAndUnlocked(this))
+            registerReceiver(
+                screenReceiver,
+                IntentFilter().apply {
+                    addAction(Intent.ACTION_SCREEN_ON)
+                    addAction(Intent.ACTION_SCREEN_OFF)
+                    addAction(Intent.ACTION_USER_PRESENT)
+                },
+            )
+            screenReceiverRegistered = true
+            ContextCompat.registerReceiver(
+                this, obstructionReceiver,
+                IntentFilter(VanObstructionAccessibilityService.ACTION_OBSTRUCTION_STATE),
+                ContextCompat.RECEIVER_NOT_EXPORTED,
+            )
+            obstructionReceiverRegistered = true
+            reconcileWindow()
+            if (canUseWindow()) {
+                running = true
+                persistState()
+                overlayView.requestApplyInsets()
+            }
+        }.onFailure { failWindow() }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if (!canUseWindow() || !Settings.canDrawOverlays(this)) {
+            failWindow()
+            return START_NOT_STICKY
+        }
         when (intent?.action) {
             ACTION_TOGGLE_MODE -> onVanTap()
             ACTION_OPEN_COMMAND -> openCommandCentre()
@@ -190,15 +273,35 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
 
     override fun onDestroy() {
         visibility = visibility.copy(destroying = true, attached = false)
-        runCatching { unregisterReceiver(screenReceiver) }
-        runCatching { unregisterReceiver(obstructionReceiver) }
-        stateStore.markRunning(false)
+        running = false
+        surfaceController.close()
+        stopInteraction()
+        if (screenReceiverRegistered) {
+            runCatching { unregisterReceiver(screenReceiver) }
+            screenReceiverRegistered = false
+        }
+        if (obstructionReceiverRegistered) {
+            runCatching { unregisterReceiver(obstructionReceiver) }
+            obstructionReceiverRegistered = false
+        }
         persistState(running = false)
         hideDismissTarget()
         OverlayTradeAura.hold(application, visible = false)
-        if (::overlayView.isInitialized) runCatching { windowManager.removeView(overlayView) }
+        if (::overlayView.isInitialized) {
+            overlayView.removeOnLayoutChangeListener(interaction.layoutListener)
+            overlayView.removeOnAttachStateChangeListener(interaction.attachListener)
+            overlayView.setOnApplyWindowInsetsListener(null)
+            if (::windowManager.isInitialized && (windowAttached || overlayView.isAttachedToWindow)) {
+                runCatching { windowManager.removeView(overlayView) }
+            }
+            overlayView.disposeComposition()
+        }
+        windowAttached = false
+        OverlayOwnWindowIdentity.detached()
+        if (lifecycleRegistry.currentState == Lifecycle.State.INITIALIZED) {
+            lifecycleRegistry.currentState = Lifecycle.State.CREATED
+        }
         lifecycleRegistry.currentState = Lifecycle.State.DESTROYED
-        running = false
         super.onDestroy()
     }
 
@@ -206,190 +309,94 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
     override val lifecycle: Lifecycle get() = lifecycleRegistry
     override val savedStateRegistry: SavedStateRegistry get() = savedStateController.savedStateRegistry
 
-    /**
-     * The overlay's presentation, handed everything it needs and nothing it does not.
-     *
-     * P3-AND-009 / Rev 3.0 s41. This used to be the whole Compose tree, inline, reading
-     * these fields and calling these methods directly. What is left is the adapter: the
-     * service measures the window and owns the state, `VanOverlaySurface` draws.
-     */
-    @Composable
-    private fun OverlayContent() {
-        val metrics = resources.displayMetrics
-        val density = metrics.density
-        // One gesture chain for every presentation, so dragging VAN feels the same whatever
-        // it happens to be showing.
-        val gestures = remember { Modifier.vanGestures() }
-        val actions = remember(gestures) {
-            VanOverlayActions(
-                gestures = gestures,
-                onQuickControl = ::handleQuickControl,
-                onChat = ::openChat,
-                onVoice = { beginVoice(application as VanApplication) },
-                onPresentation = ::setPresentation,
-                onCommandCentre = ::openCommandCentre,
-                onTradingRoute = ::openTradingRoute,
-                onWorkboardMode = { workboardMode = it },
-                onTradeView = { tradeView = it },
-                onTradeRefresh = { tradeRefreshTick += 1 },
-                onDraft = { chatDraft = it },
-            )
-        }
-        VanOverlaySurface(
-            app = application as VanApplication,
-            state = VanOverlaySurfaceState(
-                presentation = uiState.presentation,
-                quickControlsVisible = uiState.quickControls == VanQuickControlsState.VISIBLE,
-                workboardMode = workboardMode,
-                chatDraft = chatDraft,
-                tradeView = tradeView,
-                tradeRefreshTick = tradeRefreshTick,
-                animate = OverlayVisibilityPolicy.shouldAnimate(visibility),
-                blurBehindActive = blurBehindActive,
-                maximizedWidthDp = metrics.widthPixels / density -
-                    OverlayTheme.MAXIMIZED_HORIZONTAL_MARGIN_DP * 2,
-                maximizedHeightDp = metrics.heightPixels / density *
-                    OverlayTheme.MAXIMIZED_HEIGHT_FRACTION,
-            ),
-            actions = actions,
-        )
-    }
-
-    @OptIn(ExperimentalFoundationApi::class)
-    private fun Modifier.vanGestures(): Modifier = this
-        .pointerInput(Unit) {
-            detectDragGestures(
-                onDragStart = { beginDrag() },
-                onDrag = { change, amount ->
-                    change.consume()
-                    dragBy(amount.x.toInt(), amount.y.toInt())
-                },
-                onDragEnd = { finishDrag() },
-                onDragCancel = { cancelDrag() },
-            )
-        }
-        .combinedClickable(
-            onClick = { onVanTap() },
-            onDoubleClick = { openCommandCentre() },
-            onLongClick = { showQuickControls() },
-        )
-
-    private fun onVanTap() {
-        updateUiState(VanOverlayReducer.onVanTapped(uiState))
-    }
-
-    private fun showQuickControls() {
-        updateUiState(VanOverlayReducer.showQuickControls(uiState))
-    }
-
-    private fun openChat(expanded: Boolean) {
-        workboardMode = VanWorkboardMode.CHAT
-        setPresentation(
-            if (expanded) VanOverlayPresentation.WORKBOARD_EXPANDED
-            else VanOverlayPresentation.WORKBOARD_COMPACT,
-        )
-    }
-
-    private fun beginVoice(app: VanApplication) {
-        workboardMode = VanWorkboardMode.VOICE
-        setPresentation(VanOverlayPresentation.WORKBOARD_EXPANDED)
-        app.voiceSession.beginOwnerTurn()
-    }
-
-    private fun handleQuickControl(label: String) {
-        val app = application as VanApplication
-        when (label) {
-            "Chat" -> openChat(expanded = true)
-            "Voice" -> beginVoice(app)
-            "Minimize" -> updateUiState(VanOverlayReducer.minimize(uiState))
-            "Command Centre" -> openCommandCentre()
-            "Dock" -> updateUiState(VanOverlayReducer.dock(uiState))
-            "Close" -> stopSelf()
-        }
-    }
-
-    private fun setPresentation(presentation: VanOverlayPresentation) {
-        updateUiState(uiState.copy(presentation = presentation, quickControls = VanQuickControlsState.HIDDEN))
-    }
+    private fun onVanTap() = updateUiState(VanOverlayReducer.onVanTapped(uiState))
+    private fun showQuickControls() = updateUiState(VanOverlayReducer.showQuickControls(uiState))
 
     private fun updateUiState(next: VanOverlayUiState) {
-        uiState = next
-        if (::layoutParams.isInitialized && ::overlayView.isInitialized) {
-            updateWindowFlags()
-            persistState()
+        stopInteraction()
+        val presentationChanged = next.presentation != uiState.presentation
+        if (presentationChanged && canUseWindow()) interaction.preparePresentation(uiState.presentation, next.presentation)
+        OverlayVisualCueBridge.publishPresentationChange(
+            previous = uiState.presentation,
+            next = next.presentation,
+        )
+        uiState = next.copy(
+            xPx = uiState.xPx, yPx = uiState.yPx,
+            dragging = false, dismissTargetVisible = false, dismissTargetArmed = false,
+        )
+        if (canUseWindow()) {
+            applyWindowFlags()
+            if (updateWindow()) {
+                reconcileWindow()
+                overlayView.post { reconcileWindow() }
+                persistState()
+            }
         }
     }
 
-    private fun beginDrag() = updateUiState(dragController.begin(uiState))
+    private fun canUseWindow(): Boolean = windowAttached && !windowFailed && !visibility.destroying
 
-    private fun dragBy(dx: Int, dy: Int) {
-        // Assigned directly rather than through updateUiState: that also writes the window
-        // position, and the drag has just written it.
-        uiState = dragController.drag(uiState, dx, dy)
+    private fun moveWindow(placement: OverlayPlacement): Boolean {
+        if (!canUseWindow()) return false
+        layoutParams.x = placement.x
+        layoutParams.y = placement.y
+        if (!updateWindow()) return false
+        refreshKeyboardOverlap()
+        applyVisibilityLifecycle()
+        return canUseWindow()
     }
 
-    private fun finishDrag() {
-        dragController.finish(uiState, reducedMotion = isReducedMotion())?.let(::updateUiState)
+    private fun syncPosition() {
+        uiState = uiState.copy(xPx = layoutParams.x, yPx = layoutParams.y)
     }
 
-    private fun isReducedMotion(): Boolean = systemReducedMotionEnabled()
-
-    private fun cancelDrag() = updateUiState(dragController.cancel(uiState))
-
-    /**
-     * The service's side of [OverlayWindowPort] (Rev 3.0 s41): everything the drag needs
-     * that genuinely requires a window, and nothing else.
-     */
-    private val dragWindow = object : OverlayWindowPort {
-        override fun screen(): OverlayScreen = resources.displayMetrics.let {
-            OverlayScreen(widthPx = it.widthPixels, heightPx = it.heightPixels)
-        }
-
-        override fun dp(value: Int): Int = this@FloatingOverlayService.dp(value)
-
-        override fun position(): OverlayPlacement = OverlayPlacement(layoutParams.x, layoutParams.y)
-
-        override fun moveTo(x: Int, y: Int) {
-            layoutParams.x = x
-            layoutParams.y = y
+    /** Failed updates retain the last successfully applied coordinates and stop once. */
+    private fun updateWindow(): Boolean {
+        if (!canUseWindow()) return false
+        val success = runCatching {
+            check(Settings.canDrawOverlays(this))
             windowManager.updateViewLayout(overlayView, layoutParams)
+        }.isSuccess
+        if (success) {
+            lastAppliedPlacement = OverlayPlacement(layoutParams.x, layoutParams.y)
+            syncPosition()
+        } else {
+            layoutParams.x = lastAppliedPlacement.x
+            layoutParams.y = lastAppliedPlacement.y
+            syncPosition()
+            failWindow()
         }
+        return success
+    }
 
-        override fun armedFeedback() {
-            overlayView.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-        }
-
-        override fun showDismissTarget() = this@FloatingOverlayService.showDismissTarget()
-
-        override fun refreshDismissTarget() = this@FloatingOverlayService.refreshDismissTarget()
-
-        override fun hideDismissTarget() = this@FloatingOverlayService.hideDismissTarget()
-
-        override fun dismissOverlay() {
-            stateStore.markRunning(false)
-            stopSelf()
-        }
-
-        override fun dockedTo(edge: DockEdge, durationMs: Int) {
-            dockEdge = edge
-            // Placement is already snapped; this callback records the owning edge.
-        }
-
-        override fun dockFeedback() {
-            overlayView.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+    private fun failWindow() {
+        if (windowFailed) return
+        windowFailed = true
+        running = false
+        visibility = visibility.copy(attached = false)
+        stopInteraction()
+        if (::stateStore.isInitialized) runCatching { stateStore.markRunning(false) }
+        persistState(running = false)
+        if (lifecycleRegistry.currentState != Lifecycle.State.INITIALIZED) applyVisibilityLifecycle()
+        stopSelf()
+    }
+    private fun showDismissTarget() {
+        if (canUseWindow() && ::dismissWindow.isInitialized) {
+            runCatching { dismissWindow.show { DismissTarget(uiState.dismissTargetArmed) } }
+                .onFailure { failWindow() }
         }
     }
 
-    private val dragController = OverlayDragController(dragWindow)
+    private fun refreshDismissTarget() {
+        if (::dismissWindow.isInitialized) {
+            runCatching { dismissWindow.refresh() }.onFailure { failWindow() }
+        }
+    }
 
-    private fun showDismissTarget() =
-        dismissWindow.show { DismissTarget(uiState.dismissTargetArmed) }
+    private fun hideDismissTarget() {
+        if (::dismissWindow.isInitialized) runCatching { dismissWindow.hide() }
+    }
 
-    private fun refreshDismissTarget() = dismissWindow.refresh()
-
-    private fun hideDismissTarget() = dismissWindow.hide()
-
-    /** The one place the overlay leaves for the trading surface (Rev 3.0 §41). */
     private fun openTradingRoute(route: String) {
         startActivity(TradingCommandCentreActivity.intent(this, route))
     }
@@ -403,26 +410,23 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
         )
     }
 
-    private fun updateWindowFlags() {
+    private fun applyWindowFlags() {
         OverlayWindowFlags.apply(layoutParams, uiState.presentation, blurBehindActive, ::dp)
-        runCatching { windowManager.updateViewLayout(overlayView, layoutParams) }
+        layoutParams.flags = (layoutParams.flags and WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS.inv()) or
+            WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
     }
 
-    private fun applyBackdropBlur() {
-        blurBehindActive = OverlayWindowFlags.blurSupported(windowManager)
-        OverlayWindowFlags.apply(layoutParams, uiState.presentation, blurBehindActive, ::dp)
-    }
-
-    private fun persistState(running: Boolean = true) {
-        stateStore.save(
-            OverlayPersistedState(
-                x = uiState.xPx,
-                y = uiState.yPx,
-                presentation = uiState.presentation,
-                dock = dockEdge,
-                serviceRunning = running,
-            ),
-        )
+    private fun persistState(running: Boolean = isRunning()) {
+        if (!::stateStore.isInitialized) return
+        if (::layoutParams.isInitialized) syncPosition()
+        runCatching {
+            stateStore.save(
+                OverlayPersistedState(
+                    x = uiState.xPx, y = uiState.yPx, presentation = uiState.presentation,
+                    dock = dockEdge, serviceRunning = running,
+                ),
+            )
+        }
     }
 
     private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()
@@ -431,17 +435,11 @@ class FloatingOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwne
         const val ACTION_TOGGLE_MODE = "com.dial.van.overlay.TOGGLE"
         const val ACTION_OPEN_COMMAND = "com.dial.van.overlay.OPEN_COMMAND"
         private const val NOTIFICATION_ID = 1001
-
-        /** Explicit service health; never inferred from deprecated ActivityManager state. */
-        @Volatile
-        private var running: Boolean = false
-
+        @Volatile private var running: Boolean = false
         fun isRunning(): Boolean = running
-
         fun start(context: Context) {
             context.startForegroundService(Intent(context, FloatingOverlayService::class.java))
         }
-
         fun stop(context: Context) {
             context.stopService(Intent(context, FloatingOverlayService::class.java))
         }

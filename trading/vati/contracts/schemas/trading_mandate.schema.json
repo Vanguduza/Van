@@ -148,7 +148,7 @@
     "owner_signature_ref": {
       "type": "string",
       "minLength": 1,
-      "description": "Reference to the device-signed owner approval (A4) that created this mandate version."
+      "description": "Owner van-oa1 token for act mandate-admit and the mandate-v2 content subject produced by vati.risk.mandate.mandate_subject. It covers all effective defaults, scope, bounds and expiry. Identity-only historical tokens do not admit a current policy."
     },
     "signed_at_unix": {
       "type": "integer"

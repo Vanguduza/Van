@@ -4,6 +4,7 @@ import android.view.MotionEvent
 import com.dial.van.gateway.VanGatewayClient
 import com.dial.van.visual.VanDurableState
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -61,6 +62,12 @@ class BrowserSessionController(
         val snapshot: BrowserSessionSnapshot? = null,
         val link: BrowserStreamClient.Link = BrowserStreamClient.Link.CLOSED,
         val lastError: String? = null,
+        val controlUncertain: Boolean = false,
+        val controlMutationPending: Boolean = false,
+        val frameConfirmed: Boolean = false,
+        val pendingChooser: FileChooserRequest? = null,
+        val transferNotice: String? = null,
+        val tabState: TabState = TabState(),
     ) {
         /**
          * One sentence for the owner, and never an enum name or an internal state.
@@ -70,12 +77,14 @@ class BrowserSessionController(
          */
         val ownerReadableState: String
             get() = when {
+                controlMutationPending -> "Confirming the browser control change…"
                 lastError != null -> lastError
                 snapshot == null -> "Opening the browser…"
                 link == BrowserStreamClient.Link.FAILED -> "The picture stopped. Reconnecting."
                 link == BrowserStreamClient.Link.RECOVERING -> "Connection wobbled — holding on"
                 link != BrowserStreamClient.Link.LIVE -> "Connecting to the browser…"
                 snapshot.controlHolder.isAgent -> "VAN is driving — tap Take Control to steer"
+                !frameConfirmed -> "Waiting for a verified browser frame…"
                 snapshot.viewportUnacknowledged -> "Resizing…"
                 else -> snapshot.ownerReadableState
             }
@@ -86,7 +95,46 @@ class BrowserSessionController(
     val state: StateFlow<State> = _state.asStateFlow()
 
     private var heartbeat: Job? = null
+    private var streamConnection: Job? = null
+    private var frameAcknowledgement: Job? = null
+    private var mediaBinding: BrowserStreamMetadata.Binding? = null
+    private var pendingExternalUrl: String? = null
     private var renderer: SurfaceViewRenderer? = null
+    private val pendingControl = BrowserControlMutation.PendingGate()
+
+    private fun controlMutation(action: String, snapshot: BrowserSessionSnapshot,
+        request: suspend () -> BrowserControlMutation.Outcome) {
+        val lease = pendingControl.acquire() ?: return
+        _state.value = _state.value.copy(controlMutationPending = true, controlUncertain = true, lastError = null)
+        val job = scope.launch {
+            val outcome = request()
+            if (applyControlOutcome(snapshot.sessionId, outcome)) sequencer.reset()
+        }
+        // Completion also runs when lifecycleScope was already cancelled before launch.
+        job.invokeOnCompletion { failure ->
+            if (failure is CancellationException) applyControlOutcome(snapshot.sessionId, BrowserControlMutation.cancelled(action))
+            pendingControl.release(lease)
+            _state.value = _state.value.copy(controlMutationPending = pendingControl.isPending)
+        }
+    }
+
+    private fun applyControlOutcome(sessionId: String, outcome: BrowserControlMutation.Outcome): Boolean {
+        val current = _state.value
+        val snapshot = current.snapshot ?: return false
+        if (snapshot.sessionId != sessionId) return false
+        val fresh = outcome.confirmedSnapshot
+        if (fresh != null && !BrowserControlMutation.mayReplaceSnapshot(snapshot, fresh)) {
+            _state.value = current.copy(lastError = "The browser changed while the request was being confirmed. Check its current state.",
+                controlUncertain = true)
+            return false
+        }
+        val changedBinding = fresh != null && (fresh.controlGeneration != snapshot.controlGeneration || fresh.viewport.revision != snapshot.viewport.revision)
+        _state.value = current.copy(snapshot = outcome.snapshotOr(snapshot), lastError = outcome.error,
+            controlUncertain = outcome.inputHeld, frameConfirmed = current.frameConfirmed && !changedBinding)
+        if (changedBinding && fresh != null && !fresh.state.isTerminal && fresh.state != BrowserSessionState.SUSPENDED) requestStreamConnection()
+        publishVisualState()
+        return fresh != null
+    }
 
     /** §17.1 — the projection of Chromium's targets. Never a tab this side invented. */
     private var tabs = TabState()
@@ -107,6 +155,7 @@ class BrowserSessionController(
      */
     fun onTabEvent(event: TabEvent) {
         tabs = BrowserTabs.reduce(tabs, event)
+        _state.value = _state.value.copy(tabState = tabs)
         publishVisualState()
     }
 
@@ -148,22 +197,23 @@ class BrowserSessionController(
      * because §19's prohibition — the content is not logged or sent to Hermes — is easier
      * to keep when there is nowhere here to put it.
      */
-    fun beginUpload(request: FileChooserRequest, displayName: String, byteSize: Long) {
-        val sessionId = _state.value.snapshot?.sessionId ?: return
-        uploads += UploadTicket(
-            uploadId = "up_${'$'}{System.nanoTime()}",
-            sessionId = sessionId,
-            targetId = request.targetId,
-            displayName = displayName,
-            byteSize = byteSize,
-            declaredMime = "application/octet-stream",
-            createdAtMs = System.currentTimeMillis(),
-            state = UploadState.TRANSFERRING,
-        )
+    fun transferContext(): BrowserTransfers.Context? {
+        if (!mayActuate()) return null
+        val snapshot = _state.value.snapshot ?: return null
+        val binding = mediaBinding ?: return null
+        val target = tabs.activeTargetId ?: return null
+        if (binding.sessionId != snapshot.sessionId || binding.controlGeneration != snapshot.controlGeneration ||
+            binding.viewportRevision != snapshot.viewport.revision) return null
+        return BrowserTransfers.Context(snapshot.sessionId, target, binding.mediaEpoch)
+    }
+
+    fun reportTransfer(message: String, clearChooser: Boolean = false) {
+        _state.value = _state.value.copy(transferNotice = message,
+            pendingChooser = if (clearChooser) null else _state.value.pendingChooser)
     }
 
     fun reportUploadRefused(refusal: UploadRefusal) {
-        _state.value = _state.value.copy(lastError = uploadRefusalText(refusal))
+        reportTransfer(uploadRefusalText(refusal), clearChooser = true)
     }
 
     /** §19 step 8 — drop the tickets whose ephemeral copies have expired. */
@@ -181,6 +231,7 @@ class BrowserSessionController(
         UploadRefusal.NAME_UNSAFE -> "VAN could not read that file's name."
         UploadRefusal.SESSION_STALE -> "That browser session has moved on. Try again."
         UploadRefusal.OWNER_CANCELLED -> "Upload cancelled."
+        UploadRefusal.TRANSPORT_UNAVAILABLE -> BrowserDownloadReview.UPLOAD_UNAVAILABLE
     }
 
     /**
@@ -193,11 +244,23 @@ class BrowserSessionController(
     fun navigateTo(url: String): Boolean =
         sendNavigation(BrowserInputProtocol.Kind.NAVIGATE, url)
 
+    private fun runPendingNavigation() {
+        val url = pendingExternalUrl ?: return
+        if (navigateTo(url)) pendingExternalUrl = null
+    }
+    fun historyBack() = if (tabs.active?.canGoBack == true) sendNavigation(BrowserInputProtocol.Kind.HISTORY_BACK) else false
+
+    fun openExternalUrl(url: String) {
+        val resolved = BrowserOmnibox.resolve(url)
+        if (resolved.intent != OmniboxIntent.NAVIGATE || resolved.value.isBlank()) return
+        if (!navigateTo(resolved.value)) pendingExternalUrl = resolved.value
+    }
+
     fun reload() = sendNavigation(BrowserInputProtocol.Kind.RELOAD)
 
     fun stopLoading() = sendNavigation(BrowserInputProtocol.Kind.STOP_LOADING)
 
-    fun goForward() = sendNavigation(BrowserInputProtocol.Kind.HISTORY_FORWARD)
+    fun goForward() = if (tabs.active?.canGoForward == true) sendNavigation(BrowserInputProtocol.Kind.HISTORY_FORWARD) else false
 
     /**
      * §17.2 — navigation on the reliable channel, under the same authority as a tap.
@@ -250,7 +313,7 @@ class BrowserSessionController(
     private fun sendViewport(candidate: ViewportCandidate) {
         val sessionId = _state.value.snapshot?.sessionId ?: return
         scope.launch {
-            runCatching {
+            BrowserControlMutation.capture {
                 gateway.interactiveBrowserProposeViewport(
                     sessionId = sessionId,
                     widthPx = candidate.contentWidthPx,
@@ -266,18 +329,15 @@ class BrowserSessionController(
                 if (issued.revision > current.live.revision) current.onSent(issued)
                 // §8.6 — acknowledge the size we are drawing, which is what re-opens the
                 // input gate. The frame carrying that revision completes the swap.
-                runCatching {
-                    gateway.interactiveBrowserAckViewport(sessionId, revision)
-                }.onSuccess {
-                    current.onAcked(revision)
-                    _state.value.snapshot?.let { snapshot ->
-                        _state.value = _state.value.copy(
-                            snapshot = snapshot.copy(ackedViewportRevision = revision),
-                        )
-                    }
+                _state.value.snapshot?.takeIf { it.sessionId == sessionId }?.let { snapshot ->
+                    if (revision < snapshot.viewport.revision) return@let
+                    val proposed = snapshot.copy(viewport = BrowserViewport(issued.contentWidthPx, issued.contentHeightPx,
+                        issued.density, revision))
+                    _state.value = _state.value.copy(snapshot = proposed, frameConfirmed = false)
+                    requestStreamConnection()
                 }
             }.onFailure { failure ->
-                _state.value = _state.value.copy(lastError = readable(failure))
+                _state.value = _state.value.copy(lastError = readable(failure), controlUncertain = true)
             }
         }
     }
@@ -351,7 +411,7 @@ class BrowserSessionController(
     ): RestoredBrowserSession {
         val restored = BrowserProcessRecovery.restore(persisted, nowMs)
         val sessionId = restored.sessionId ?: return restored
-        val fresh = runCatching { gateway.interactiveBrowserRead(sessionId) }.getOrNull()
+        val fresh = BrowserControlMutation.capture { gateway.interactiveBrowserRead(sessionId) }.getOrNull()
         val reconciled = BrowserProcessRecovery.reconcile(
             restored = restored,
             gatewaySaysResumable = fresh != null && !fresh.state.isTerminal,
@@ -365,7 +425,10 @@ class BrowserSessionController(
             // §29.8 — the media plane reconnects separately, and only now: negotiating
             // against a grant for a session the Gateway has ended fails in a way that
             // looks like a network problem and is not.
-            connectStream()
+            if (fresh.state == BrowserSessionState.SUSPENDED) reconnect() else {
+                startHeartbeat()
+                requestStreamConnection()
+            }
         }
         return reconciled
     }
@@ -378,7 +441,7 @@ class BrowserSessionController(
         heightPx: Int,
         deviceScaleFactor: Float,
     ) {
-        val snapshot = runCatching {
+        val snapshot = BrowserControlMutation.capture {
             if (existingSessionId != null) {
                 gateway.interactiveBrowserRead(existingSessionId)
             } else {
@@ -396,44 +459,125 @@ class BrowserSessionController(
         _state.value = State(snapshot = snapshot)
         publishVisualState()
 
-        // §8.6 — acknowledge the viewport we are actually drawing before any input is
-        // allowed through. The gate below reads this, so forgetting it fails closed.
-        acknowledgeViewport(snapshot)
-        startHeartbeat()
-        connectStream()
+        // Owner input is held until current peer metadata and a decoded frame are bound
+        // to the broker's exact viewport, then acknowledged and read back.
+        if (snapshot.state == BrowserSessionState.SUSPENDED) reconnect() else {
+            startHeartbeat()
+            requestStreamConnection()
+        }
     }
 
-    private suspend fun acknowledgeViewport(snapshot: BrowserSessionSnapshot) {
-        if (snapshot.ackedViewportRevision == snapshot.viewport.revision) return
-        runCatching {
-            gateway.interactiveBrowserAckViewport(snapshot.sessionId, snapshot.viewport.revision)
-        }.onSuccess {
-            _state.value = _state.value.copy(
-                snapshot = snapshot.copy(ackedViewportRevision = snapshot.viewport.revision),
-            )
-        }
+    fun reconnect() {
+        val snapshot = _state.value.snapshot ?: return
+        if (snapshot.state.isTerminal || _state.value.controlMutationPending) return
+        if (snapshot.state == BrowserSessionState.SUSPENDED) {
+            controlMutation("resume the browser", snapshot) {
+                BrowserControlMutation.resume(snapshot, request = { gateway.interactiveBrowserResume(snapshot.sessionId) },
+                    read = { gateway.interactiveBrowserRead(snapshot.sessionId) }).also { outcome ->
+                    if (outcome.confirmedSnapshot != null) startHeartbeat()
+                }
+            }
+        } else requestStreamConnection()
+    }
+
+    private fun requestStreamConnection() {
+        streamConnection?.cancel()
+        frameAcknowledgement?.cancel()
+        mediaBinding = null
+        _state.value = _state.value.copy(frameConfirmed = false, pendingChooser = null, link = BrowserStreamClient.Link.CONNECTING)
+        streamConnection = scope.launch { connectStream() }
     }
 
     private suspend fun connectStream() {
         val sessionId = _state.value.snapshot?.sessionId ?: return
-        val grant = runCatching { gateway.interactiveBrowserStreamGrant(sessionId) }
-            .getOrElse { failure ->
-                _state.value = _state.value.copy(lastError = readable(failure))
-                return
-            }
-        runCatching {
-            stream.connect(
-                grant = grant,
+        val fresh = BrowserControlMutation.capture { gateway.interactiveBrowserRead(sessionId) }.getOrElse { failure ->
+            _state.value = _state.value.copy(lastError = readable(failure), frameConfirmed = false)
+            return
+        }
+        if (fresh.sessionId != sessionId || fresh.state.isTerminal) return
+        val previous = _state.value.snapshot ?: return
+        if (!BrowserControlMutation.mayReplaceSnapshot(previous, fresh)) return
+        _state.value = _state.value.copy(snapshot = fresh, frameConfirmed = false, lastError = null)
+        val grant = BrowserControlMutation.capture { gateway.interactiveBrowserStreamGrant(sessionId) }.getOrElse { failure ->
+            _state.value = _state.value.copy(lastError = readable(failure), frameConfirmed = false)
+            return
+        }
+        BrowserControlMutation.capture {
+            stream.connect(grant = grant, expected = fresh,
                 onVideo = { track: VideoTrack -> renderer?.let(track::addSink) },
-                onLink = { link ->
-                    _state.value = _state.value.copy(link = link)
-                    // §24 — CONNECTING and DEGRADED are the two the owner most needs to
-                    // see, and they only ever come from here.
+                onLink = { link -> scope.launch {
+                    _state.value = _state.value.copy(link = link, frameConfirmed = _state.value.frameConfirmed && link == BrowserStreamClient.Link.LIVE)
+                    if (link == BrowserStreamClient.Link.LIVE) runPendingNavigation()
                     publishVisualState()
-                },
+                } },
+                onBinding = { binding -> scope.launch { mediaBinding = binding } },
+                onMetadata = { event -> scope.launch {
+                    if (event.binding != mediaBinding) return@launch
+                    val snapshot = _state.value.snapshot ?: return@launch
+                    if (snapshot.sessionId != event.binding.sessionId || snapshot.controlGeneration != event.binding.controlGeneration ||
+                        snapshot.viewport.revision != event.binding.viewportRevision) return@launch
+                    when (event) {
+                        is BrowserStreamMetadata.Event.Tabs -> {
+                            val known = event.tabs.map { it.targetId }.toSet()
+                            tabs.tabs.filter { it.targetId !in known }.forEach { onTabEvent(TabEvent.Closed(it.targetId)) }
+                            event.tabs.forEach { tab -> onTabEvent(TabEvent.Updated(tab.targetId, tab.title, tab.url, tab.urlDigest,
+                                tab.faviconRef, tab.loading, tab.canGoBack, tab.canGoForward, tab.securityState)) }
+                            event.activeTargetId?.let { onTabEvent(TabEvent.Activated(it)) }
+                            if (event.activeTargetId == null) {
+                                tabs = tabs.copy(activeTargetId = null)
+                                _state.value = _state.value.copy(tabState = tabs)
+                            }
+                        }
+                        is BrowserStreamMetadata.Event.Session -> {
+                            // A stream observation is not a gateway authority snapshot.
+                            if (!event.state.acceptsInput) _state.value = _state.value.copy(frameConfirmed = false)
+                        }
+                        is BrowserStreamMetadata.Event.Frame -> Unit
+                        is BrowserStreamMetadata.Event.Chooser -> {
+                            if (tabs.tabs.any { it.targetId == event.targetId }) _state.value = _state.value.copy(
+                                pendingChooser = FileChooserRequest(event.binding.sessionId, event.targetId, event.acceptTypes,
+                                    false, event.chooserId, event.binding.mediaEpoch, System.currentTimeMillis() + event.expiresInMs),
+                                transferNotice = "This page requested a file. Choose a phone file to send only to this page.")
+                        }
+                        is BrowserStreamMetadata.Event.Download -> _state.value = _state.value.copy(
+                            transferNotice = if (event.state == "COMPLETED") "A completed download is ready to review in Downloads & phone files."
+                                else "The browser host recorded download progress. Review its current state in Downloads & phone files.")
+                        is BrowserStreamMetadata.Event.Refused -> {
+                            if (event.input) _state.value = _state.value.copy(frameConfirmed = false, controlUncertain = true,
+                                lastError = "The browser host refused an input. Input is held; reconnect to confirm the current browser state.")
+                            else reportTransfer("The browser host refused a file action. No completed transfer was confirmed.", clearChooser = true)
+                        }
+                    }
+                } },
+                onRenderedFrame = { frame -> scope.launch { confirmRenderedFrame(frame) } },
+                onMetadataError = { error -> scope.launch {
+                    mediaBinding = null
+                    frameAcknowledgement?.cancel()
+                    _state.value = _state.value.copy(lastError = error, frameConfirmed = false, controlUncertain = true)
+                } },
             )
         }.onFailure { failure ->
-            _state.value = _state.value.copy(lastError = readable(failure))
+            _state.value = _state.value.copy(lastError = readable(failure), frameConfirmed = false)
+        }
+    }
+
+    private fun confirmRenderedFrame(frame: BrowserStreamMetadata.RenderedFrame) {
+        if (frame.binding != mediaBinding || frameAcknowledgement?.isActive == true) return
+        val snapshot = _state.value.snapshot ?: return
+        if (snapshot.sessionId != frame.binding.sessionId || snapshot.controlGeneration != frame.binding.controlGeneration ||
+            snapshot.viewport.revision != frame.binding.viewportRevision) return
+        frameAcknowledgement = scope.launch {
+            val outcome = BrowserControlMutation.acknowledgeRenderedViewport(snapshot, frame,
+                request = { gateway.interactiveBrowserAckViewport(snapshot.sessionId, snapshot.viewport.revision,
+                    frameSequence = frame.frameSequence, mediaEpoch = frame.binding.mediaEpoch) },
+                read = { gateway.interactiveBrowserRead(snapshot.sessionId) })
+            if (frame.binding != mediaBinding) return@launch
+            if (applyControlOutcome(snapshot.sessionId, outcome) && outcome.error == null) {
+                _state.value = _state.value.copy(frameConfirmed = true)
+                runPendingNavigation()
+                swap?.onAcked(frame.binding.viewportRevision)
+                onFrameForRevision(frame.binding.viewportRevision)
+            }
         }
     }
 
@@ -456,8 +600,8 @@ class BrowserSessionController(
                 // a JNI round trip into the native stack; doing it per frame to measure
                 // dropped frames would be the thing dropping them.
                 stream.pollDecoderStats()
-                runCatching { gateway.interactiveBrowserHeartbeat(sessionId) }
-                    .onSuccess { fresh -> _state.value = _state.value.copy(snapshot = fresh) }
+                BrowserControlMutation.capture { gateway.interactiveBrowserHeartbeat(sessionId) }
+                    .onSuccess { fresh -> applyControlOutcome(sessionId, BrowserControlMutation.Outcome(confirmedSnapshot = fresh)) }
                     .onFailure { failure ->
                         _state.value = _state.value.copy(lastError = readable(failure))
                     }
@@ -465,36 +609,62 @@ class BrowserSessionController(
         }
     }
 
-    /** ADR-RB-007 — the owner takes control back. Not a request; a fact. */
+    /** ADR-RB-007 — taking control becomes a fact only after the matching receipt and readback. */
     fun takeControl() {
-        val sessionId = _state.value.snapshot?.sessionId ?: return
-        scope.launch {
-            runCatching { gateway.interactiveBrowserTakeControl(sessionId) }
-            runCatching { gateway.interactiveBrowserRead(sessionId) }
-                .onSuccess { fresh ->
-                    // The gesture space is reset: a gesture begun while an agent held the
-                    // lease must not continue into the owner's, or the host would apply
-                    // half a drag under the new generation.
-                    sequencer.reset()
-                    _state.value = _state.value.copy(snapshot = fresh)
-                    publishVisualState()
-                }
+        val snapshot = _state.value.snapshot ?: return
+        if (!BrowserControlMutation.mayRequestControl(snapshot, _state.value.controlUncertain, _state.value.controlMutationPending)) return
+        val sessionId = snapshot.sessionId
+        controlMutation("take control", snapshot) {
+            BrowserControlMutation.takeControl(snapshot,
+                request = { gateway.interactiveBrowserTakeControl(sessionId) },
+                read = { gateway.interactiveBrowserRead(sessionId) })
+        }
+    }
+
+    /** The owner delegates only the existing linked mission; this does not launch new work. */
+    fun delegateControl(holder: BrowserControlHolder) {
+        val current = _state.value
+        val snapshot = current.snapshot ?: return
+        if (!holder.isAgent || !BrowserControlMutation.mayDelegate(snapshot, current.controlUncertain, current.controlMutationPending)) return
+        val sessionId = snapshot.sessionId
+        val issuedFor = snapshot.controlDelegateIssuedFor ?: return
+        controlMutation("hand browser control to VAN", snapshot) {
+            BrowserControlMutation.delegate(snapshot, holder,
+                request = { gateway.interactiveBrowserDelegateControl(sessionId, holder.name, issuedFor) },
+                read = { gateway.interactiveBrowserRead(sessionId) })
         }
     }
 
     fun suspendSession() {
-        val sessionId = _state.value.snapshot?.sessionId ?: return
+        val snapshot = _state.value.snapshot ?: return
+        if (snapshot.state.isTerminal || snapshot.state == BrowserSessionState.SUSPENDED) return
+        val sessionId = snapshot.sessionId
         heartbeat?.cancel()
-        scope.launch { runCatching { gateway.interactiveBrowserSuspend(sessionId) } }
+        _state.value = _state.value.copy(frameConfirmed = false)
+        controlMutation("pause the browser", snapshot) {
+            BrowserControlMutation.suspendSession(snapshot) {
+                gateway.interactiveBrowserSuspend(sessionId)
+            }
+        }
     }
 
     fun close() {
         heartbeat?.cancel()
-        val sessionId = _state.value.snapshot?.sessionId
+        streamConnection?.cancel()
+        frameAcknowledgement?.cancel()
+        mediaBinding = null
+        val snapshot = _state.value.snapshot
         stream.close()
         renderer = null
-        if (sessionId != null) {
-            scope.launch { runCatching { gateway.interactiveBrowserEnd(sessionId) } }
+        _state.value = _state.value.copy(link = BrowserStreamClient.Link.CLOSED,
+            lastError = if (snapshot != null && !snapshot.state.isTerminal) "The remote browser has not been confirmed closed." else null,
+            controlUncertain = snapshot != null && !snapshot.state.isTerminal)
+        if (snapshot != null && !snapshot.state.isTerminal) {
+            controlMutation("close the remote browser", snapshot) {
+                BrowserControlMutation.close(snapshot) {
+                    gateway.interactiveBrowserEnd(snapshot.sessionId)
+                }
+            }
         }
     }
 
@@ -502,9 +672,9 @@ class BrowserSessionController(
     fun mayActuate(): Boolean {
         val current = _state.value
         val snapshot = current.snapshot ?: return false
-        return snapshot.mayActuate &&
-            current.link == BrowserStreamClient.Link.LIVE &&
-            !snapshot.viewportUnacknowledged
+        return BrowserControlMutation.mayActuate(snapshot,
+            mediaLive = current.link == BrowserStreamClient.Link.LIVE,
+            controlUnconfirmed = current.controlUncertain || current.controlMutationPending || !current.frameConfirmed)
     }
 
     /**
@@ -518,8 +688,11 @@ class BrowserSessionController(
     fun onTouch(event: MotionEvent, viewWidth: Int, viewHeight: Int): Boolean {
         val authority = authority() ?: return false
         val pointerId = event.getPointerId(event.actionIndex)
-        val x = BrowserInputProtocol.normalize(event.getX(event.actionIndex), viewWidth)
-        val y = BrowserInputProtocol.normalize(event.getY(event.actionIndex), viewHeight)
+        val viewport = _state.value.snapshot?.viewport ?: return false
+        val down = event.actionMasked == MotionEvent.ACTION_DOWN || event.actionMasked == MotionEvent.ACTION_POINTER_DOWN
+        val position = BrowserSurfaceCoordinates.map(event.getX(event.actionIndex), event.getY(event.actionIndex),
+            viewWidth, viewHeight, viewport.width, viewport.height, clamp = !down) ?: return false
+        val (x, y) = position
 
         return when (event.actionMasked) {
             MotionEvent.ACTION_DOWN, MotionEvent.ACTION_POINTER_DOWN -> {
@@ -544,6 +717,8 @@ class BrowserSessionController(
                     // waiting for a DOWN that is not coming and drop it eight milliseconds
                     // later; not sending it says the same thing without the round trip.
                     if (sequencer.gestureFor(id) == 0) continue
+                    val move = BrowserSurfaceCoordinates.map(event.getX(index), event.getY(index), viewWidth, viewHeight,
+                        viewport.width, viewport.height, clamp = true) ?: continue
                     delivered = stream.send(
                         BrowserInputProtocol.Packet(
                             authority = authority,
@@ -554,8 +729,8 @@ class BrowserSessionController(
                             gestureEpoch = sequencer.epochFor(id),
                             fastSeq = sequencer.nextFast(),
                             motionSeq = sequencer.nextMotion(id),
-                            x = BrowserInputProtocol.normalize(event.getX(index), viewWidth),
-                            y = BrowserInputProtocol.normalize(event.getY(index), viewHeight),
+                            x = move.first,
+                            y = move.second,
                             sentAtMs = System.currentTimeMillis(),
                         ),
                     ) || delivered
@@ -574,14 +749,17 @@ class BrowserSessionController(
      */
     fun onScroll(event: MotionEvent, viewWidth: Int, viewHeight: Int): Boolean {
         val authority = authority() ?: return false
+        val viewport = _state.value.snapshot?.viewport ?: return false
+        val position = BrowserSurfaceCoordinates.map(event.x, event.y, viewWidth, viewHeight,
+            viewport.width, viewport.height) ?: return false
         return stream.send(
             BrowserInputProtocol.Packet(
                 authority = authority,
                 kind = BrowserInputProtocol.Kind.SCROLL,
                 channel = BrowserInputProtocol.Channel.RELIABLE,
                 reliableSeq = sequencer.nextReliable(),
-                x = BrowserInputProtocol.normalize(event.x, viewWidth),
-                y = BrowserInputProtocol.normalize(event.y, viewHeight),
+                x = position.first,
+                y = position.second,
                 // Whole wheel clicks, scaled on the host against its own viewport. Sending
                 // pixels would mean this phone's density decided how far a page scrolls on
                 // a desktop-sized remote viewport.
@@ -593,8 +771,9 @@ class BrowserSessionController(
     }
 
     /** §8.4 — a key, both edges, on the reliable channel. A lost key-up is a stuck modifier. */
-    fun onKey(keyCode: Int, unicodeChar: Int, down: Boolean): Boolean {
+    fun onKey(keyCode: Int, unicodeChar: Int, down: Boolean, metaState: Int = 0): Boolean {
         val authority = authority() ?: return false
+        val key = BrowserKeyMapping.key(keyCode, unicodeChar, metaState, down) ?: return false
         return stream.send(
             BrowserInputProtocol.Packet(
                 authority = authority,
@@ -605,8 +784,9 @@ class BrowserSessionController(
                 },
                 channel = BrowserInputProtocol.Channel.RELIABLE,
                 reliableSeq = sequencer.nextReliable(),
-                valueA = keyCode,
-                valueB = unicodeChar,
+                valueA = key.virtualKey,
+                valueB = key.modifiers,
+                text = key.text,
                 sentAtMs = System.currentTimeMillis(),
             ),
         )

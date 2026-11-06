@@ -1,0 +1,127 @@
+{
+  "schema": "van.source-workflow-evidence/1",
+  "unit": "BE-004",
+  "packet": "ACCOUNT_RESTRICTION_EXISTING_OWNER_SOURCE",
+  "last_verified_published_base": "6aa631c582979c94c74e7b078cee18be3dbbc301",
+  "created_utc": "2026-11-03T16:47:42.320592+00:00",
+  "status": "SOURCE_CANDIDATE_BOUNDED_QUALIFICATION_FINAL_MAIN_GUARDS_PENDING",
+  "implementation": [
+    "Strict schema4 restriction current/history DATA; legacy1/2/3 compatibility; sticky floor and old-reader refusal; Account/asdict unchanged",
+    "Existing enrolled-device reauth and distinct substantive A4 Store writer; native exact R/P/read-only control with final actual-source/expiry checks",
+    "Factory-owned PAPER/MT5/EA/Deriv/cTrader read-only identity; no mode/mandate grant",
+    "Exact selected child and unique ancestor with complete reviewed causal references, strict cold metadata proof, immutable UNKNOWN/null and read-only replay",
+    "Entry-only fence preserves protective/manual exits, original alias history and stale-control refusal; enabled flip cannot activate"
+  ],
+  "source_runs": [
+    {
+      "label": "restriction-final-affected-r5",
+      "result": "21PASS0SKIP",
+      "test_seconds": 58.93,
+      "started_utc": "2026-11-03T16:37:36Z",
+      "finished_utc": "2026-11-03T16:38:45Z",
+      "cleanup": "waited/ECHILD/drains clean",
+      "scope": "11 actual enrolled Gateway PAPER cases,Directory7,catalog1,legacycounter/retention2; same original6 timeout cases included under unchanged180s and faulthandler25"
+    },
+    {
+      "label": "restriction-caller-foundation-r3",
+      "result": "25PASS0SKIP",
+      "reuse": "20DATA foundation on unchanged actual dependencies; five older caller cases superseded by finalr5"
+    },
+    {
+      "label": "restriction-journal-r10",
+      "result": "22PASS0SKIP",
+      "archive_sha256": "e4be908b20b8510e9daa5c3d1e1685b4ad9435750963518586e647be56359fcf",
+      "scope": "Controlled PAPER/SQLite component; lower DATA is not Owner proof"
+    },
+    {
+      "label": "restriction-identity-r4",
+      "result": "8PASS0SKIP",
+      "archive_sha256": "ca3674faead66b887cc725ce42d733a9e6d44a7e561b72081cf6e2316cf69d1a",
+      "scope": "Controlled actual owner transports/PAPER, no provider/hardware acceptance"
+    }
+  ],
+  "retained_failure": {
+    "run": "restriction-gateway-paper-r4",
+    "state": "FAILED_INCOMPLETE",
+    "timeout_seconds": 180,
+    "exit": -15,
+    "junit": "ABSENT",
+    "stdout_dots": "NOT_PASS_EVIDENCE",
+    "cause": "UNRESOLVED_UNREPRODUCED; later isolated unchanged1PASS and final same6PASS do not establish cause"
+  },
+  "independent_reviews": {
+    "identity_r4": "abbc3fae91e472109b76c0417626a08c8ed90bf0143bd0f27a2b895fbcb2a32a",
+    "journal_r10": "5b9b9a2c0bf56234ad87e7b9d76df8a6d7100b3499b6d5b72285076f5fb87fe9",
+    "caller": "EARLY_FINDINGS_FIXED_FINAL_EXACT_REVIEW_PENDING"
+  },
+  "last_published_ci": {
+    "head": "6aa631c582979c94c74e7b078cee18be3dbbc301",
+    "run_id": 41648747325,
+    "attempt": 1,
+    "state": "COMPLETED_FAILURE",
+    "jobs": 41,
+    "success": 32,
+    "failure": 9,
+    "matrix_verified_profiles": 16,
+    "blocked_cells": 6,
+    "certificates": [],
+    "directory_original_cases": "7HOSTED_PASS0ERROR0SKIP",
+    "evidence": "/workspace/van-delivery-continuation-20261103/CI_6AA_TERMINAL_20261103/"
+  },
+  "explicit_open_source_obligations": [
+    "ZSE/manual-ticket/VFEX/CEX spot fresh native identity positive owners NOTIMPLEMENTED; permanent HOLD is not completion",
+    "BE009 governed mode/mandate promotion and entry activation remain separate; generic enabledTrue refuses",
+    "Android persisted restriction/two-proof/recovery producer remains unimplemented",
+    "Original OBL004 auditor detached-descendant cleanup queued in its actual owner",
+    "BE006 retained-incarnation/native-scope transaction pagination deferred original obligation"
+  ],
+  "scope_preservation": {
+    "BE004_verbs": 8,
+    "requirements": 11,
+    "acceptances": 21,
+    "contexts": 20,
+    "owner_actions": 6,
+    "whole_unit": "OPEN",
+    "formal_acceptance_issued": false,
+    "frozen_canonical_bytes_changed": false,
+    "frontend_source_IDs": [
+      42,
+      105,
+      78
+    ]
+  },
+  "prohibited_validation": "No blocked private-key-lock/credential-destruction probe rerun/rephrase/relocation/CI insertion; no local credential files/destruction, provider/financial effects, new issuer/key/certificate.",
+  "resources": {
+    "aggregate_cap_mib": 384,
+    "per_file_cap_mib": 8,
+    "tmp_shm_reserve": "2GiB+cap",
+    "memory_headroom_gib": 4,
+    "r5_allocation_bytes": 198457948,
+    "main_entry_mib": 64,
+    "main_hard_floor_mib": 32,
+    "main_batch_cap_mib": 16
+  },
+  "source_pins": {
+    "trading/vati/accounts/restrictions.py": "ef52a503aef5531b81f83950af60b29d72e6dd694a1bfa64cf2ed098f05992ea",
+    "trading/vati/accounts/registry.py": "9577f5ce652424a4b9a1284025367f1bcbe8ab402894739bc1e28b406a98a4d5",
+    "trading/vati/accounts/access.py": "941e9b5af3a91a93b15644ed5190564c5f2fb6d5c4be8a51bae2c42b9f0eecdb",
+    "trading/vati/accounts/resource_version.py": "dcb46006b6c0d5aa922a1d196906b2b71e8107432272a9e812228debb8dbb7ef",
+    "trading/commander/account_restrictions.py": "92bae47435d2bff46a177b22b269710cf9af28898e8a43c4e6e1ed973785ec84",
+    "trading/commander/accounts.py": "a4bff90138bbd31ec07293fb41f231eb110a062307a904f7da25fc79c44f5593",
+    "trading/commander/account_effects.py": "4248607d8f0c3d0d142351e75fd02707650f0d74ebc5fd84eb7bd25125ac4492",
+    "trading/commander/app.py": "395d2e9a115dfdbb041993fb0c1d9d9820c4b2b532bf2d21173a8e19c946d7e5",
+    "backend/van_gateway/trading/account_restrictions.py": "eaacb486d33523def5d9d28d07094a2fed1e0e1adff050484ff16defd0114530",
+    "backend/van_gateway/trading/accounts.py": "e600fb68245a237e31ee3124df73e084fdd39e1f47a6c2e5810b880763bf9a66",
+    "backend/van_gateway/trading/account_operations.py": "c944f1a0f4a8d311fe46d03952bfe48c790f8a98ec4cee0c761889981d41f11f",
+    "backend/van_gateway/approval/account_lifecycle_reauth.py": "e35d1002a06b4b26b24749268c88245e7a30644abd7a0e30e3302222966fbbae",
+    "backend/van_gateway/app.py": "ce5f40fca5649b2d8600fc47247b88307e5b42b93bf223f7ce6a69047c851a6f",
+    "trading/tests/test_account_restrictions.py": "d2a8944e1533a12f8ae1e3dcf886022eb43a075a12396eb4e9caeb4b0140804a",
+    "backend/tests/test_account_restriction_gateway.py": "99c48d27db7b70c8b405d70fd82d7244e49d48e629aa933072f5b824dacb335d",
+    "backend/tests/test_account_update_review.py": "874e93fc2f14b76375dd06026c2e0e29a4bc2d7fc2b0cd079d1d1ba19d75fa4a",
+    "trading/commander/account_restriction_identity.py": "f323f5dc5434337b8d9f41d60ddd53de1b8269ea91307e2741d806cd202e95d2",
+    "trading/tests/test_account_restriction_identity.py": "57fa5553926259ad63d949bec941e8efcff543d4b28c9da4b32b85da00883d40",
+    "trading/tests/test_account_restriction_journal.py": "dce065d7e4fe5ab6e4996e7a217ac7cf6e83ddb4034810b5aa1b316dbdd45c31"
+  },
+  "model_usage_cost": null,
+  "remaining_finalization": "Actual-main topology and normal owner/frontend/workmap/mutation-consistency/consolidation/PRE003 build-check LAST, genuine hooks/fullcommitted4fd/normalpush/exactremote/exactCI pending, not preclaimed."
+}

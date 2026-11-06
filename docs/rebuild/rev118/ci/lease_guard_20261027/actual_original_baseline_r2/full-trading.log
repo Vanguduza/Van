@@ -1,0 +1,178 @@
+.FFF                                                                     [100%]
+=================================== FAILURES ===================================
+____ test_outer_guard_keeps_actual_row_lock_across_nested_operations[read] _____
+
+pg_dsn = 'user=van_fixture password=van_ephemeral_test_only dbname=van_ledger_fixture_f70462cc70da463b96174128c1b0d209 host=127.0.0.1 port=32855'
+nested_operation = 'read'
+
+    @pytest.mark.parametrize('nested_operation', ['none', 'read', 'fence', 'guard'])
+    def test_outer_guard_keeps_actual_row_lock_across_nested_operations(pg_dsn, nested_operation):
+        with closing(PostgresLedger(pg_dsn)):
+            pass
+        original = PostgresLeaseStore(pg_dsn)
+        owner = AccountRuntimeLease(original, account_alias='guard_owner', instance_id='original', ttl_ms=1000)
+        requested = threading.Event()
+        peer_pid = []
+    
+        def peer_takeover():
+            class ObservedStore(PostgresLeaseStore):
+                def write_if(self, expected, new):
+                    requested.set()
+                    return super().write_if(expected, new)
+            store = ObservedStore(pg_dsn)
+            try:
+                peer_pid.append(store._conn.info.backend_pid)
+                peer = AccountRuntimeLease(store, account_alias='guard_owner', instance_id='peer', ttl_ms=1000)
+                return peer.acquire(now_ms=1001)
+            finally:
+                store.close()
+    
+        try:
+            assert owner.acquire(now_ms=0).outcome is LeaseOutcome.GRANTED
+            epoch = owner.epoch
+            with psycopg.connect(pg_dsn, autocommit=True) as observer, ThreadPoolExecutor(max_workers=1) as executor:
+                with owner.submission_guard(epoch, now_ms=1) as allowed:
+                    assert allowed is True
+                    if nested_operation == 'read':
+                        assert original.read('guard_owner').lease_epoch == epoch
+                    elif nested_operation == 'fence':
+                        assert owner.fence(epoch, now_ms=2, min_validity_ms=0) is True
+                    elif nested_operation == 'guard':
+                        with owner.submission_guard(epoch, now_ms=2) as inner:
+                            assert inner is True
+                    future = executor.submit(peer_takeover)
+                    assert requested.wait(timeout=5)
+                    waiting_on_actual_lock = False
+                    for _ in range(100):
+                        if future.done():
+                            break
+                        row = observer.execute('SELECT wait_event_type FROM pg_stat_activity WHERE pid=%s',
+                                               (peer_pid[0],)).fetchone()
+                        if row is not None and row[0] == 'Lock':
+                            waiting_on_actual_lock = True
+                            break
+                        time.sleep(.01)
+>                   assert waiting_on_actual_lock, 'peer did not remain blocked by the original submission row lock'
+E                   AssertionError: peer did not remain blocked by the original submission row lock
+E                   assert False
+
+trading/tests/test_postgres_lease_guard_ownership.py:65: AssertionError
+____ test_outer_guard_keeps_actual_row_lock_across_nested_operations[fence] ____
+
+pg_dsn = 'user=van_fixture password=van_ephemeral_test_only dbname=van_ledger_fixture_23b5ba9b322a48c5a0c8e3f931f23b19 host=127.0.0.1 port=32855'
+nested_operation = 'fence'
+
+    @pytest.mark.parametrize('nested_operation', ['none', 'read', 'fence', 'guard'])
+    def test_outer_guard_keeps_actual_row_lock_across_nested_operations(pg_dsn, nested_operation):
+        with closing(PostgresLedger(pg_dsn)):
+            pass
+        original = PostgresLeaseStore(pg_dsn)
+        owner = AccountRuntimeLease(original, account_alias='guard_owner', instance_id='original', ttl_ms=1000)
+        requested = threading.Event()
+        peer_pid = []
+    
+        def peer_takeover():
+            class ObservedStore(PostgresLeaseStore):
+                def write_if(self, expected, new):
+                    requested.set()
+                    return super().write_if(expected, new)
+            store = ObservedStore(pg_dsn)
+            try:
+                peer_pid.append(store._conn.info.backend_pid)
+                peer = AccountRuntimeLease(store, account_alias='guard_owner', instance_id='peer', ttl_ms=1000)
+                return peer.acquire(now_ms=1001)
+            finally:
+                store.close()
+    
+        try:
+            assert owner.acquire(now_ms=0).outcome is LeaseOutcome.GRANTED
+            epoch = owner.epoch
+            with psycopg.connect(pg_dsn, autocommit=True) as observer, ThreadPoolExecutor(max_workers=1) as executor:
+                with owner.submission_guard(epoch, now_ms=1) as allowed:
+                    assert allowed is True
+                    if nested_operation == 'read':
+                        assert original.read('guard_owner').lease_epoch == epoch
+                    elif nested_operation == 'fence':
+                        assert owner.fence(epoch, now_ms=2, min_validity_ms=0) is True
+                    elif nested_operation == 'guard':
+                        with owner.submission_guard(epoch, now_ms=2) as inner:
+                            assert inner is True
+                    future = executor.submit(peer_takeover)
+                    assert requested.wait(timeout=5)
+                    waiting_on_actual_lock = False
+                    for _ in range(100):
+                        if future.done():
+                            break
+                        row = observer.execute('SELECT wait_event_type FROM pg_stat_activity WHERE pid=%s',
+                                               (peer_pid[0],)).fetchone()
+                        if row is not None and row[0] == 'Lock':
+                            waiting_on_actual_lock = True
+                            break
+                        time.sleep(.01)
+>                   assert waiting_on_actual_lock, 'peer did not remain blocked by the original submission row lock'
+E                   AssertionError: peer did not remain blocked by the original submission row lock
+E                   assert False
+
+trading/tests/test_postgres_lease_guard_ownership.py:65: AssertionError
+____ test_outer_guard_keeps_actual_row_lock_across_nested_operations[guard] ____
+
+pg_dsn = 'user=van_fixture password=van_ephemeral_test_only dbname=van_ledger_fixture_2cb54f32fc2d4915a5ee0940297bc0ee host=127.0.0.1 port=32855'
+nested_operation = 'guard'
+
+    @pytest.mark.parametrize('nested_operation', ['none', 'read', 'fence', 'guard'])
+    def test_outer_guard_keeps_actual_row_lock_across_nested_operations(pg_dsn, nested_operation):
+        with closing(PostgresLedger(pg_dsn)):
+            pass
+        original = PostgresLeaseStore(pg_dsn)
+        owner = AccountRuntimeLease(original, account_alias='guard_owner', instance_id='original', ttl_ms=1000)
+        requested = threading.Event()
+        peer_pid = []
+    
+        def peer_takeover():
+            class ObservedStore(PostgresLeaseStore):
+                def write_if(self, expected, new):
+                    requested.set()
+                    return super().write_if(expected, new)
+            store = ObservedStore(pg_dsn)
+            try:
+                peer_pid.append(store._conn.info.backend_pid)
+                peer = AccountRuntimeLease(store, account_alias='guard_owner', instance_id='peer', ttl_ms=1000)
+                return peer.acquire(now_ms=1001)
+            finally:
+                store.close()
+    
+        try:
+            assert owner.acquire(now_ms=0).outcome is LeaseOutcome.GRANTED
+            epoch = owner.epoch
+            with psycopg.connect(pg_dsn, autocommit=True) as observer, ThreadPoolExecutor(max_workers=1) as executor:
+                with owner.submission_guard(epoch, now_ms=1) as allowed:
+                    assert allowed is True
+                    if nested_operation == 'read':
+                        assert original.read('guard_owner').lease_epoch == epoch
+                    elif nested_operation == 'fence':
+                        assert owner.fence(epoch, now_ms=2, min_validity_ms=0) is True
+                    elif nested_operation == 'guard':
+                        with owner.submission_guard(epoch, now_ms=2) as inner:
+                            assert inner is True
+                    future = executor.submit(peer_takeover)
+                    assert requested.wait(timeout=5)
+                    waiting_on_actual_lock = False
+                    for _ in range(100):
+                        if future.done():
+                            break
+                        row = observer.execute('SELECT wait_event_type FROM pg_stat_activity WHERE pid=%s',
+                                               (peer_pid[0],)).fetchone()
+                        if row is not None and row[0] == 'Lock':
+                            waiting_on_actual_lock = True
+                            break
+                        time.sleep(.01)
+>                   assert waiting_on_actual_lock, 'peer did not remain blocked by the original submission row lock'
+E                   AssertionError: peer did not remain blocked by the original submission row lock
+E                   assert False
+
+trading/tests/test_postgres_lease_guard_ownership.py:65: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_postgres_lease_guard_ownership.py::test_outer_guard_keeps_actual_row_lock_across_nested_operations[read]
+FAILED trading/tests/test_postgres_lease_guard_ownership.py::test_outer_guard_keeps_actual_row_lock_across_nested_operations[fence]
+FAILED trading/tests/test_postgres_lease_guard_ownership.py::test_outer_guard_keeps_actual_row_lock_across_nested_operations[guard]
+3 failed, 1 passed in 2.56s

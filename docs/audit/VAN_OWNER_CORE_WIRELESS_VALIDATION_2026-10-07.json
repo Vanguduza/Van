@@ -1,0 +1,406 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-10-07T11:33:38.970390+00:00",
+  "outcome": "LOCAL_IMPLEMENTATION_VALIDATED_LIVE_ACCEPTANCE_BLOCKED",
+  "worktree": "Uncommitted local changes; no production deploy, commit, push, pairing, handset install or live qualification.",
+  "aggregate_counts": {
+    "passed": 5714,
+    "skipped": 10,
+    "failed": 0
+  },
+  "counting_rule": "Four disjoint full Python invocations plus JVM/app-unit results with disjoint case identities. Focused repetitions, earlier snapshots, four AGP guard checks and DDS projection tests are supplementary and excluded. Counts are executed test cases, not unique requirements.",
+  "python_suites": [
+    {
+      "suite": "backend",
+      "command": [
+        "/workspace/.onboarding/van-venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "tests"
+      ],
+      "cwd": "/workspace/Van/backend",
+      "started_at_utc": "2026-10-07T11:05:51.494221+00:00",
+      "finished_at_utc": "2026-10-07T11:11:08.677432+00:00",
+      "exit_code": 0,
+      "input_files": 360,
+      "source_unchanged": true,
+      "changed_inputs": [],
+      "live_device_executed": false,
+      "status": "PASSED",
+      "counts": {
+        "passed": 2183,
+        "skipped": 0,
+        "failed": 0,
+        "warnings": 7
+      },
+      "summary": "2183 passed, 7 warnings in 313.30s (0:05:13)",
+      "evidence": {
+        ".log": {
+          "path": "docs/audit/validation/owner-core-wireless/owner-core-backend-full.log",
+          "sha256": "cb35d9ebcd2e16d8abe21475be8c13f9a971d1ee5f9e208a2c5624aa003dced5"
+        },
+        "-result.json": {
+          "path": "docs/audit/validation/owner-core-wireless/owner-core-backend-full-result.json",
+          "sha256": "f34b7c878d5d0ffa05f183b550f23f870d0cdd8afb1300b65b5c6a5ce850e6f7"
+        },
+        "-inputs.json": {
+          "path": "docs/audit/validation/owner-core-wireless/owner-core-backend-full-inputs.json",
+          "sha256": "4d6252f4a4aa2b06adf92e2cb94f35fd3865ce659c6da9256bd52935938c7dd0"
+        }
+      }
+    },
+    {
+      "suite": "contracts",
+      "command": [
+        "/workspace/.onboarding/van-venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "tests/contracts"
+      ],
+      "cwd": "/workspace/Van",
+      "started_at_utc": "2026-10-07T11:31:20.420954+00:00",
+      "finished_at_utc": "2026-10-07T11:32:31.676678+00:00",
+      "exit_code": 0,
+      "input_files": 833,
+      "source_unchanged": true,
+      "changed_inputs": [],
+      "live_device_executed": false,
+      "status": "PASSED",
+      "counts": {
+        "passed": 766,
+        "skipped": 4,
+        "failed": 0,
+        "warnings": 0
+      },
+      "summary": "766 passed, 4 skipped in 70.36s (0:01:10)",
+      "evidence": {
+        ".log": {
+          "path": "docs/audit/validation/owner-core-wireless/owner-core-contracts-full.log",
+          "sha256": "5049db2a53497aed5a5d58213edc764ce162aaf9db99b105e6764a8aa5c7cc6a"
+        },
+        "-result.json": {
+          "path": "docs/audit/validation/owner-core-wireless/owner-core-contracts-full-result.json",
+          "sha256": "eea995442104828eea737c0ea7c9ff357dca359b660762729b91521e0e501e93"
+        },
+        "-inputs.json": {
+          "path": "docs/audit/validation/owner-core-wireless/owner-core-contracts-full-inputs.json",
+          "sha256": "c2a4c8eb32aad8fcc21958826866d8d82d27201814d71140ff9442b5e8cd2096"
+        }
+      }
+    },
+    {
+      "suite": "services",
+      "command": [
+        "/workspace/.onboarding/van-venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "services",
+        "tests/hermes",
+        "hermes/policy/tests",
+        "tests/scenarios"
+      ],
+      "cwd": "/workspace/Van",
+      "started_at_utc": "2026-10-07T11:05:58.110741+00:00",
+      "finished_at_utc": "2026-10-07T11:06:04.058723+00:00",
+      "exit_code": 0,
+      "input_files": 27,
+      "source_unchanged": true,
+      "changed_inputs": [],
+      "live_device_executed": false,
+      "status": "PASSED",
+      "counts": {
+        "passed": 204,
+        "skipped": 1,
+        "failed": 0,
+        "warnings": 0
+      },
+      "summary": "204 passed, 1 skipped in 4.31s",
+      "evidence": {
+        ".log": {
+          "path": "docs/audit/validation/owner-core-wireless/owner-core-services-full.log",
+          "sha256": "876410ec8678b8306f291764e99d3412ace0c7c3a4a1ad7591d22ec216fa10ca"
+        },
+        "-result.json": {
+          "path": "docs/audit/validation/owner-core-wireless/owner-core-services-full-result.json",
+          "sha256": "7501fac89877ded96b102671f41704a4d7b5eadd08f1f3f0017af21ae8bab7b2"
+        },
+        "-inputs.json": {
+          "path": "docs/audit/validation/owner-core-wireless/owner-core-services-full-inputs.json",
+          "sha256": "392cec1e9ee81ad4588aa4703ce72a45ee1200358d2b2fd241a62361debf1af3"
+        }
+      }
+    },
+    {
+      "suite": "trading",
+      "command": [
+        "/workspace/.onboarding/van-venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "trading/tests"
+      ],
+      "cwd": "/workspace/Van",
+      "started_at_utc": "2026-10-07T11:05:58.140145+00:00",
+      "finished_at_utc": "2026-10-07T11:06:43.125725+00:00",
+      "exit_code": 0,
+      "input_files": 310,
+      "source_unchanged": true,
+      "changed_inputs": [],
+      "live_device_executed": false,
+      "status": "PASSED",
+      "counts": {
+        "passed": 1276,
+        "skipped": 5,
+        "failed": 0,
+        "warnings": 3
+      },
+      "summary": "1276 passed, 5 skipped, 3 warnings in 44.12s",
+      "evidence": {
+        ".log": {
+          "path": "docs/audit/validation/owner-core-wireless/owner-core-trading-full.log",
+          "sha256": "d70ec6c3bcc43e8677f51595091d63de3148594c3ca4c18553390947aac43af3"
+        },
+        "-result.json": {
+          "path": "docs/audit/validation/owner-core-wireless/owner-core-trading-full-result.json",
+          "sha256": "aa53db6e5f3cddb609fcaece9e966f9736b441946cf1f03b00dfb2fb20366a4d"
+        },
+        "-inputs.json": {
+          "path": "docs/audit/validation/owner-core-wireless/owner-core-trading-full-inputs.json",
+          "sha256": "b6b77b27194412daccd579a95177d602092401cf907036109b39a1917b194be7"
+        }
+      }
+    }
+  ],
+  "android_app": {
+    "counts": {
+      "tests": 203,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "suites": 36,
+    "xml_archive": {
+      "path": "docs/audit/validation/owner-core-wireless/android-app-unit-results.zip",
+      "sha256": "dd7ecccdd23cb2b9ca05e07846e857efa0a8639d0db0b5e5523ce7cc997a58b4"
+    },
+    "build": {
+      "android_test_apk": null,
+      "app_unit_test_results": {
+        "errors": 0,
+        "failures": 0,
+        "skipped": 0,
+        "suites": 36,
+        "tests": 203
+      },
+      "changed_inputs": [],
+      "debug_apk": {
+        "bytes": 122241552,
+        "native_abis": [
+          "arm64-v8a"
+        ],
+        "path": "/workspace/Van/android/app/build/outputs/apk/debug/app-debug.apk",
+        "sha256": "74ce85fa2767d80ee46da7f72d8c9e88fe4971ff392b052c682d9a20d0dbd21f"
+      },
+      "emulator_executed": false,
+      "gradle_build_successful": true,
+      "live_device_executed": false,
+      "observed_at": "2026-10-07T11:06:55.603605+00:00",
+      "production_signed": false,
+      "source_inputs_unchanged": true
+    },
+    "input_files": 337,
+    "evidence": {
+      ".log": {
+        "path": "docs/audit/validation/owner-core-wireless/owner-core-wireless-app-build.log",
+        "sha256": "9257ee015bc66d79ab06f3c2a354f433f423da6b530edbd0f6bd75f76f0f71f2"
+      },
+      "-receipt.json": {
+        "path": "docs/audit/validation/owner-core-wireless/owner-core-wireless-app-build-receipt.json",
+        "sha256": "bd8a755421a9b4add510087b40105fe2ab3d387630740ea4fdaae71ec53c121b"
+      },
+      "-inputs-before.json": {
+        "path": "docs/audit/validation/owner-core-wireless/owner-core-wireless-app-build-inputs-before.json",
+        "sha256": "2f14b8b416f6013a0492bbf1b92dd36848fe62f6fb95ffd8b9b72fcef649e10f"
+      },
+      "-inputs-after.json": {
+        "path": "docs/audit/validation/owner-core-wireless/owner-core-wireless-app-build-inputs-after.json",
+        "sha256": "2f14b8b416f6013a0492bbf1b92dd36848fe62f6fb95ffd8b9b72fcef649e10f"
+      }
+    },
+    "retained_apk": {
+      "path": "/workspace/van-audit/apks/van-debug-arm64-v8a-owner-core.apk",
+      "bytes": 122241552,
+      "sha256": "74ce85fa2767d80ee46da7f72d8c9e88fe4971ff392b052c682d9a20d0dbd21f"
+    },
+    "scope": "Actual arm64 debug compile/package/app unit tests/lint. Legacy debug route, debug signing; no owner-core release or physical device acceptance."
+  },
+  "android_jvm": {
+    "counts": {
+      "tests": 1082,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "suites": 123,
+    "xml_archive": {
+      "path": "docs/audit/validation/owner-core-wireless/android-jvm-results.zip",
+      "sha256": "086e721cd241c79efa219bfccf3de3ce9df6bcefb8bbe94130abdec5f51a0b54"
+    },
+    "run": {
+      "suite": "jvm",
+      "command": [
+        "/workspace/.onboarding/gradle-8.11.1/bin/gradle",
+        "-p",
+        "/workspace/Van/android/verification",
+        "test",
+        "--no-daemon",
+        "--console=plain",
+        "--max-workers=2"
+      ],
+      "cwd": "/workspace/Van",
+      "started_at_utc": "2026-10-07T11:07:56.813928+00:00",
+      "finished_at_utc": "2026-10-07T11:08:06.536418+00:00",
+      "exit_code": 0,
+      "input_files": 429,
+      "source_unchanged": true,
+      "changed_inputs": [],
+      "live_device_executed": false
+    },
+    "evidence": {
+      ".log": {
+        "path": "docs/audit/validation/owner-core-wireless/owner-core-jvm-full.log",
+        "sha256": "70d0159d84b14b544fc063cdcdb9ffab90ca86844c6c2f9be89e0f99f24df49f"
+      },
+      "-result.json": {
+        "path": "docs/audit/validation/owner-core-wireless/owner-core-jvm-full-result.json",
+        "sha256": "4d7e0e94363ade3f6b6beb29e041d556e77f03db05832b2605ab7204aa213ce4"
+      },
+      "-inputs.json": {
+        "path": "docs/audit/validation/owner-core-wireless/owner-core-jvm-full-inputs.json",
+        "sha256": "7379a60a5e14c9fd8a5598739200bdb3c215c249a8e1dd7a127d32f4bd85e4d3"
+      }
+    },
+    "scope": "Selected actual production Kotlin logic with controlled socket/gateway dependencies; no Android physical execution."
+  },
+  "registry": {
+    "counts": {
+      "features": 42,
+      "functions": 58,
+      "screens": 68,
+      "endpoints": 285,
+      "schemas": 149
+    },
+    "artifacts": {
+      "owner_features.json": {
+        "path": "registries/owner_features.json",
+        "sha256": "2ecc45df95683c23366710b2ac4d80d3842b616720604b2eeb6c98a36d642d70"
+      },
+      "owner_screens.json": {
+        "path": "registries/owner_screens.json",
+        "sha256": "6d96433451a08ad8ff6d322e5f957a7c805fe1b4d3e0a1edca459852ff421941"
+      },
+      "owner_endpoints.json": {
+        "path": "registries/owner_endpoints.json",
+        "sha256": "dc2fb55aaf6afda7914c8d69dafac032c495225da20336b49383fe7c100de1ed"
+      },
+      "owner_endpoint_schemas.json": {
+        "path": "registries/owner_endpoint_schemas.json",
+        "sha256": "2ac141984ad1841653eda7fdc9773f062cf271ed8edd64c64c13dfdb570b5381"
+      }
+    }
+  },
+  "frontend_registry_browser_check": {
+    "evidence": {
+      "path": "docs/audit/validation/owner-core-wireless/owner-contract-browser-check.json",
+      "sha256": "b131e9aa2eadee026684937c391e8cc277a1c7a7f42016fe0b76cb98d281407f"
+    },
+    "status": "PASSED",
+    "handset_acceptance": false
+  },
+  "artemis": {
+    "plan": {
+      "path": "docs/audit/VAN_ARTEMIS_ACCEPTANCE_PLAN_2026-10-07.json",
+      "sha256": "545333d2d0b1959261d515cecfff63b414a749359161c272b4d75ca4b3b8dac4",
+      "canonical_payload_sha256": "63fb15f4c112a143fa1c8a3538c78d221590a9a8aad8fb1ef4d52e5393ff7ff8",
+      "input_files": 784
+    },
+    "readiness": {
+      "path": "docs/audit/VAN_ARTEMIS_LIVE_READINESS_2026-10-07.json",
+      "sha256": "3cd6cec1a9997bc1dff7f52a198f26e3cd965abc2367667e48699428ba93d562"
+    },
+    "planned_cases": 684,
+    "executed_device_cases": 0,
+    "live_qualified": false,
+    "cloud_readiness": {
+      "path": "docs/audit/validation/owner-core-wireless/owner-core-cloud-readiness.json",
+      "sha256": "f2f176630e64010ff099c7d8190055d8ade6ec2868a5f56ac80f2425292ece7f"
+    }
+  },
+  "supplementary_evidence": {
+    "owner-core-final-focused-tests.log": {
+      "path": "docs/audit/validation/owner-core-wireless/owner-core-final-focused-tests.log",
+      "sha256": "191bea6e92d0e663eba1168d8f589b9826578a7b84cc79911e66d05c9605f72a"
+    },
+    "android-owner-core-target-tests-final.log": {
+      "path": "docs/audit/validation/owner-core-wireless/android-owner-core-target-tests-final.log",
+      "sha256": "c55f7ec774818e418d7dfa81788b69f97644a5d72aecbe8cbc843d36c0c5dc7a"
+    },
+    "android-owner-core-agp-guards-final.log": {
+      "path": "docs/audit/validation/owner-core-wireless/android-owner-core-agp-guards-final.log",
+      "sha256": "89293e2f4ccbe378e357a127ae1b06b3f1649a1528c9eaba69fbf4dbd57560b7"
+    },
+    "owner-core-endpoint-export.log": {
+      "path": "docs/audit/validation/owner-core-wireless/owner-core-endpoint-export.log",
+      "sha256": "ba5f964f9f01231dfb940c7e63014cc9b07e984fe35143329fb4690541653037"
+    },
+    "owner-core-storage-cleanup.log": {
+      "path": "docs/audit/validation/owner-core-wireless/owner-core-storage-cleanup.log",
+      "sha256": "80a3e5c33d2d19cd4ce4551eabbaaed379731560021a41a3fde033d466570e4a"
+    },
+    "owner-core-browser-executable-actions.log": {
+      "path": "docs/audit/validation/owner-core-wireless/owner-core-browser-executable-actions.log",
+      "sha256": "b9252b5932c60277dbba424d586591957d470a6f0b450ede7568833814c8684a"
+    },
+    "owner-core-unbound-profile-readiness.log": {
+      "path": "docs/audit/validation/owner-core-wireless/owner-core-unbound-profile-readiness.log",
+      "sha256": "50f3f94a772407ad38d8efef7edc7b792da7f869353a2f0d2ccc4a39d05a61bd"
+    },
+    "owner-core-browser-registry-check.log": {
+      "path": "docs/audit/validation/owner-core-wireless/owner-core-browser-registry-check.log",
+      "sha256": "17232838d83afee842651680d0218684fdbd5ba7f80a0b11bc4a72f8a11e113c"
+    },
+    "owner-core-android-boundary-final.log": {
+      "path": "docs/audit/validation/owner-core-wireless/owner-core-android-boundary-final.log",
+      "sha256": "bde1610286b5d5f699141cdf5f5e43128956ac01eac06d9e7755442ab607aace"
+    },
+    "owner-core-contracts-initial.log": {
+      "path": "docs/audit/validation/owner-core-wireless/owner-core-contracts-initial.log",
+      "sha256": "eb4e6e85fbe2f55c8dba0e3e7f0bab520ffacd49526dc4e94301b19d1454aaba"
+    },
+    "owner-core-contracts-initial-result.json": {
+      "path": "docs/audit/validation/owner-core-wireless/owner-core-contracts-initial-result.json",
+      "sha256": "2b25c2fed80c8d80e203c18f55fb35962a75cdcb888a51300f938bf5b31d5e79"
+    },
+    "owner-core-contracts-initial-inputs.json": {
+      "path": "docs/audit/validation/owner-core-wireless/owner-core-contracts-initial-inputs.json",
+      "sha256": "1fe4a5d76414a32c1d1d92e11a111737ed43187168d01087b606085c34eadc3b"
+    }
+  },
+  "remaining_gates": [
+    "Callable Global DIAL/Artemis and Oracle controls; no account-connector enable tool is exposed.",
+    "Existing owner-originated Oracle job/append-only authorization for DDS reconciliation and exact narrow deployment capability.",
+    "Fresh retained-core identity, resource admission, overlay/private route/firewall and observed VAN-only public ingress.",
+    "Bound per-service secrets, production owner signing/trust identities and exact immutable deployed source.",
+    "Admitted secure wireless pairing recipe and connected/allowlisted S24 Ultra with matching hardware/APK identity.",
+    "Isolated provider/demo-trading fixtures, step/artifact exports, independent effects and required physical owner consent.",
+    "Missing stream-host binary transfer and unexposed Hermes recovery semantics remain partial, unavailable or unknown."
+  ],
+  "source_manifest": {
+    "path": "docs/audit/VAN_OWNER_CORE_WIRELESS_SOURCE_MANIFEST_2026-10-07.json",
+    "sha256": "5ad4ace24fb147679260d8b0d18fb317d487a67388a8322cf42015959c0b2297"
+  },
+  "baseline_head": "12feb9033dfc1dd68d7b4d41ac477f0d9dbbc4af"
+}

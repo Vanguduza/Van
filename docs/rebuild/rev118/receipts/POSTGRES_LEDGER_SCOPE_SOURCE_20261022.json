@@ -1,0 +1,72 @@
+{
+  "schema": "van.rebuild.candidate-source-receipt/1",
+  "source_parent": "eb94d0f8",
+  "scope": "PARTIAL_BE003_NAMED_LEDGER_ISOLATION_NOT_UNIT_ACCEPTANCE",
+  "source_sha256": {
+    "trading/vati/core/ledger_pg.py": "e24b0a7024e84448bc9c1fdcde58327b0010c26f4337fcd8ed3fecb71c7be735",
+    "trading/vati/core/ledger_pg_migration.py": "16ab238a14a0a449917cebe43fa67e22833375a88251f20a5f0ad551bc2e8f2d",
+    "trading/tests/test_postgres_ledger_isolation.py": "d362cbdb0155acc19bdca5dc8e89091a03e565e189f95f950fed7e7be597255e",
+    "tools/rebuild/pg_ledger_migration.py": "1fe4f99237aeed11d517ecc35e9eb9dcbba81087169536da915aa16aa5eebcea",
+    "deploy/van-trading-core/supabase/init/01_vati_ledger.sql.tpl": "688d91ba53be82032a880c0c23caf3d0fd34aad5575ece7d4d509d6d4d67552a",
+    ".github/workflows/van-ci.yml": "f5b40c1afd02196d4629a287720a787c38790755336daf0f614535c1ddf27203",
+    "tools/ci/github-actions-ci.yml": "f5b40c1afd02196d4629a287720a787c38790755336daf0f614535c1ddf27203"
+  },
+  "before": {
+    "failed": 5,
+    "environment": "real PostgreSQL disposable databases"
+  },
+  "validation": {
+    "full_trading_before_two_final_test_only_controls": {
+      "passed": 1680,
+      "skipped": 1,
+      "warnings": 3,
+      "seconds": 46.8
+    },
+    "latest_exact_CI_selection": {
+      "tests": 26,
+      "passed": 26,
+      "skipped": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "CI_template_and_deployer_contracts": {
+      "passed": 18
+    }
+  },
+  "runtime": {
+    "driver": "3.2.9",
+    "server": "PostgreSQL 17.11 (Debian 17.11-0+deb13u1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit"
+  },
+  "test_container": {
+    "image": "postgres:17.11-bookworm",
+    "digest": "sha256:858bb5e98eed02eb8cafbcdc007f9a65d1b613972028944a8ec2133ccaf80d27",
+    "manifest_sha256": "858bb5e98eed02eb8cafbcdc007f9a65d1b613972028944a8ec2133ccaf80d27"
+  },
+  "fixture": {
+    "private_unix_socket_only": true,
+    "production_database_used": false,
+    "fixture_stopped": true,
+    "post_stop_status": 3,
+    "fixture_data_removed": true,
+    "binary_sha256": {
+      "postgres": "6468a969338215cb3912cf9c0b894bdbbd37b9a709926db078e9a5bf8bdc3e16",
+      "pg_ctl": "c8a0fa6df90600186575e3f3c47a352bafac73547416cf67675b41991b5b5d74",
+      "initdb": "a0363354125bc00f25075bb47fc32a2838fa7668c008326227f5bc04d628ca1d"
+    }
+  },
+  "logs_sha256": {
+    "/tmp/van-pg-isolation-before.txt": "71333f1d35e32f95fae720fce00a3493ad70b9ca00d23cd3def1f372839b1d80",
+    "/tmp/van-pg-isolation-final-controls.txt": "cbea92879358f1cce702f719ddea40feb1a14269bdc513fea93f90b77c62d2fd",
+    "/tmp/van-pg-job-equivalent.txt": "38788d5b96ca9679aad5c964d12a71a8b88b1a55210d75f3dac39ee5e64910d4",
+    "/tmp/van-pg-job-equivalent.xml": "ef0f359ce8d6fc2c44b0eb21194d36d000f47b419fcc286ee54af189b322d282",
+    "/tmp/van-pg-full-trading.txt": "23b52770e7843b059563358cc3ddf093a6ae254a026dc4446b85c91e2052c5e1",
+    "/tmp/van-pg-ci-template-validation.txt": "f05c57d1ada6bacb60013513040188f81172a9178b11ab9a80f44a6d89bcadde"
+  },
+  "limits": [
+    "Private local controlled database, no production or native service deployment",
+    "Existing default vati scope retained; no implicit assignment of existing account histories to newly named scopes. Account/runtime/readmodel scope admission remains further source/integration work.",
+    "Runtime refuses legacy/incomplete schema; operator CLI migration is explicit and privileged, not automatic",
+    "Source backend/private DDS read credential and trusted-main/bootstrap checks remain mandatory and unchanged",
+    "Hosted PostgreSQL job added; no hosted result at this new source yet"
+  ]
+}

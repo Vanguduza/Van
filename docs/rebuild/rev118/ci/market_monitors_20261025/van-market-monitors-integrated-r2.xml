@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="3" skipped="0" tests="72" time="7.346" timestamp="2026-10-25T02:07:32.524330+00:00" hostname="56ae90b2c83c"><testcase classname="tests.test_market_monitor_persistence" name="test_exact_native_identity_preferences_and_favourites_survive_restart" time="0.077" /><testcase classname="tests.test_market_monitor_persistence" name="test_original_receipt_survives_edit_delete_and_lost_response_retry_without_resurrection" time="0.077" /><testcase classname="tests.test_market_monitor_persistence" name="test_request_identity_is_bound_to_payload_kind_target_and_operation" time="0.089" /><testcase classname="tests.test_market_monitor_persistence" name="test_stale_cas_and_foreign_owner_cannot_change_or_read_rule_or_receipt" time="0.075" /><testcase classname="tests.test_market_monitor_persistence" name="test_pause_and_explicit_restart_are_revision_checked_and_rearm_once" time="0.077" /><testcase classname="tests.test_market_monitor_persistence" name="test_pagination_is_stable_owner_scoped_and_checks_cursor_scope" time="0.076" /><testcase classname="tests.test_market_monitor_persistence" name="test_corrupt_saved_state_is_explicit_unavailable_not_a_healthy_empty_list" time="0.073" /><testcase classname="tests.test_market_monitor_persistence" name="test_capacity_and_invalid_clock_do_not_create_partial_objects_or_receipts" time="0.074" /><testcase classname="tests.test_market_monitor_persistence" name="test_schema57_upgrade_keeps_existing_chart_and_adds_monitor_tables" time="0.077" /><testcase classname="tests.test_market_monitor_persistence" name="test_real_backup_and_restore_preserve_lists_alert_arms_and_original_results" time="0.094" /><testcase classname="tests.test_market_monitor_measurements" name="test_first_sample_establishes_crossing_then_only_new_contiguous_sample_can_fire" time="0.001" /><testcase classname="tests.test_market_monitor_measurements" name="test_full_scope_and_actual_availability_refusals[change0-SOURCE_SCOPE_MISMATCH]" time="0.001" /><testcase classname="tests.test_market_monitor_measurements" name="test_full_scope_and_actual_availability_refusals[change1-SOURCE_SCOPE_MISMATCH]" time="0.001" /><testcase classname="tests.test_market_monitor_measurements" name="test_full_scope_and_actual_availability_refusals[change2-SOURCE_SCOPE_MISMATCH]" time="0.001" /><testcase classname="tests.test_market_monitor_measurements" name="test_full_scope_and_actual_availability_refusals[change3-SOURCE_FROM_FUTURE]" time="0.001" /><testcase classname="tests.test_market_monitor_measurements" name="test_stale_data_missing_binding_and_short_indicator_history_are_not_zeroes" time="0.001" /><testcase classname="tests.test_market_monitor_measurements" name="test_correction_gap_source_revision_and_out_of_order_data_cannot_manufacture_crossing" time="0.001" /><testcase classname="tests.test_market_monitor_measurements" name="test_measurements_match_independent_hand_calculated_series[SMA-VALUE-spec0-closes0-3]" time="0.000" /><testcase classname="tests.test_market_monitor_measurements" name="test_measurements_match_independent_hand_calculated_series[EMA-VALUE-spec1-closes1-3]" time="0.001" /><testcase classname="tests.test_market_monitor_measurements" name="test_measurements_match_independent_hand_calculated_series[RSI-VALUE-spec2-closes2-100]" time="0.000" /><testcase classname="tests.test_market_monitor_measurements" name="test_measurements_match_independent_hand_calculated_series[ATR-VALUE-spec3-closes3-2]" time="0.000" /><testcase classname="tests.test_market_monitor_measurements" name="test_measurements_match_independent_hand_calculated_series[MACD-MACD-spec4-closes4-0.5]" time="0.000" /><testcase classname="tests.test_market_monitor_measurements" name="test_measurements_match_independent_hand_calculated_series[MACD-SIGNAL-spec5-closes5-0.5]" time="0.000" /><testcase classname="tests.test_market_monitor_measurements" name="test_measurements_match_independent_hand_calculated_series[MACD-HISTOGRAM-spec6-closes6-0]" time="0.000" /><testcase classname="tests.test_market_monitor_measurements" name="test_measurements_match_independent_hand_calculated_series[BOLLINGER-UPPER-spec7-closes7-1]" time="0.000" /><testcase classname="tests.test_market_monitor_measurements" name="test_measurements_match_independent_hand_calculated_series[BOLLINGER-LOWER-spec8-closes8-1]" time="0.000" /><testcase classname="tests.test_market_monitor_measurements" name="test_measurements_match_independent_hand_calculated_series[VWAP-VALUE-spec9-closes9-4]" time="0.000" /><testcase classname="tests.test_market_monitor_measurements" name="test_vwap_does_not_silently_move_an_uncaptured_or_partial_bar_anchor" time="0.000" /><testcase classname="tests.test_market_monitor_measurements" name="test_moving_pinned_trend_uses_price_minus_line_at_each_observation_time" time="0.001" /><testcase classname="tests.test_market_monitor_measurements" name="test_literal_news_keyword_matching_preserves_trust_freshness_time_and_declared_relevance" time="0.001" /><testcase classname="tests.test_market_monitor_measurements" name="test_invalid_or_authority_bearing_alerts_cannot_be_saved[data0]" time="0.000" /><testcase classname="tests.test_market_monitor_measurements" name="test_invalid_or_authority_bearing_alerts_cannot_be_saved[data1]" time="0.000" /><testcase classname="tests.test_market_monitor_measurements" name="test_invalid_or_authority_bearing_alerts_cannot_be_saved[data2]" time="0.000" /><testcase classname="tests.test_market_monitor_measurements" name="test_invalid_or_authority_bearing_alerts_cannot_be_saved[data3]" time="0.000" /><testcase classname="tests.test_market_monitor_measurements" name="test_invalid_or_authority_bearing_alerts_cannot_be_saved[data4]" time="0.000" /><testcase classname="tests.test_market_monitor_measurements" name="test_invalid_or_authority_bearing_alerts_cannot_be_saved[data5]" time="0.000" /><testcase classname="tests.test_market_monitor_measurements" name="test_invalid_or_authority_bearing_alerts_cannot_be_saved[data6]" time="0.000" /><testcase classname="tests.test_market_monitor_measurements" name="test_duplicate_native_identity_is_refused_but_same_symbol_on_distinct_venues_is_preserved" time="0.000" /><testcase classname="tests.test_market_monitor_measurements" name="test_scan_has_closed_level_predicates_and_bounded_distinct_universe" time="0.001" /><testcase classname="tests.test_market_monitor_runtime" name="test_one_canonical_trigger_survives_service_restart_and_explicit_rearm_is_distinct" time="0.087" /><testcase classname="tests.test_market_monitor_runtime" name="test_event_alert_state_and_projection_witness_have_one_sqlite_rollback_boundary" time="0.081" /><testcase classname="tests.test_market_monitor_runtime" name="test_delayed_evaluation_is_rechecked_after_write_lock_before_publication" time="0.076" /><testcase classname="tests.test_market_monitor_runtime" name="test_competing_evaluators_cannot_overwrite_a_newer_baseline_or_emit_from_a_stale_view" time="0.080" /><testcase classname="tests.test_market_monitor_runtime" name="test_committed_original_write_is_recovered_after_its_commit_acknowledgement_is_lost" time="0.076" /><testcase classname="tests.test_market_monitor_runtime" name="test_attention_projection_recovers_after_lost_ack_and_rule_deletion_without_reopening_acknowledged_item" time="0.122" /><testcase classname="tests.test_market_monitor_runtime" name="test_scan_quota_is_atomic_and_survives_service_restart_and_clock_rollback" time="0.066" /><testcase classname="tests.test_market_monitor_runtime" name="test_news_uses_existing_native_ledger_records_with_source_and_availability" time="0.077" /><testcase classname="tests.test_market_monitor_gateway" name="test_paired_owner_can_recover_list_mutations_and_privacy_inventory_without_dispatch" time="0.670"><failure message="RuntimeError: can't start new thread">backend/tests/test_market_monitor_gateway.py:16: in test_paired_owner_can_recover_list_mutations_and_privacy_inventory_without_dispatch
+    await _pair_for_test(ac, app, 'dev-monitor-owner', 'fixture-monitor-secret')
+backend/tests/test_local_typed_actions.py:95: in _pair_for_test
+    ticket = await app.state.auth.create_pairing_ticket(device_id)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/van_gateway/auth/service.py:111: in create_pairing_ticket
+    async with self.store.connection() as db:
+               ^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:210: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend/van_gateway/storage/db.py:2566: in connection
+    db = await asyncio.shield(opening)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/tasks.py:684: in _wrap_awaitable
+    return await awaitable
+           ^^^^^^^^^^^^^^^
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/aiosqlite/core.py:177: in __await__
+    self._thread.start()
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/threading.py:994: in start
+    _start_new_thread(self._bootstrap, ())
+E   RuntimeError: can't start new thread</failure></testcase><testcase classname="tests.test_market_monitor_gateway" name="test_monitor_event_has_one_identity_on_both_paired_devices_and_survives_replay" time="0.406"><failure message="RuntimeError: can't start new thread">backend/tests/test_market_monitor_gateway.py:46: in test_monitor_event_has_one_identity_on_both_paired_devices_and_survives_replay
+    await _pair_for_test(ac,app,'dev-monitor-one','fixture-monitor-one')
+backend/tests/test_local_typed_actions.py:95: in _pair_for_test
+    ticket = await app.state.auth.create_pairing_ticket(device_id)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/van_gateway/auth/service.py:111: in create_pairing_ticket
+    async with self.store.connection() as db:
+               ^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:210: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend/van_gateway/storage/db.py:2566: in connection
+    db = await asyncio.shield(opening)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/tasks.py:684: in _wrap_awaitable
+    return await awaitable
+           ^^^^^^^^^^^^^^^
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/aiosqlite/core.py:177: in __await__
+    self._thread.start()
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/threading.py:994: in start
+    _start_new_thread(self._bootstrap, ())
+E   RuntimeError: can't start new thread</failure></testcase><testcase classname="tests.test_market_monitor_gateway" name="test_unqualified_technical_alert_and_scan_are_explicitly_unavailable_and_never_dispatch" time="0.538"><failure message="RuntimeError: can't start new thread">backend/tests/test_market_monitor_gateway.py:77: in test_unqualified_technical_alert_and_scan_are_explicitly_unavailable_and_never_dispatch
+    await _pair_for_test(ac,app,'dev-monitor-hold','fixture-monitor-hold')
+backend/tests/test_local_typed_actions.py:95: in _pair_for_test
+    ticket = await app.state.auth.create_pairing_ticket(device_id)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/van_gateway/auth/service.py:111: in create_pairing_ticket
+    async with self.store.connection() as db:
+               ^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:210: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend/van_gateway/storage/db.py:2566: in connection
+    db = await asyncio.shield(opening)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/tasks.py:684: in _wrap_awaitable
+    return await awaitable
+           ^^^^^^^^^^^^^^^
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/aiosqlite/core.py:177: in __await__
+    self._thread.start()
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/threading.py:994: in start
+    _start_new_thread(self._bootstrap, ())
+E   RuntimeError: can't start new thread</failure></testcase><testcase classname="tests.test_market_monitor_bound_device" name="test_bound_monitor_mutation_needs_real_device_signature_and_reads_need_only_current_token" time="0.358"><error message="failed on setup with &quot;RuntimeError: can't start new thread&quot;">../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/pytest_asyncio/plugin.py:558: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/pytest_asyncio/plugin.py:944: in pytest_fixture_setup
+    hook_result = yield
+                  ^^^^^
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/pytest_asyncio/plugin.py:407: in _asyncgen_fixture_wrapper
+    result = runner.run(setup(), context=context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/base_events.py:691: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/pytest_asyncio/plugin.py:403: in setup
+    res = await gen_obj.__anext__()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/tests/test_device_proof_enforcement.py:73: in client
+    async with app.router.lifespan_context(app):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:210: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/fastapi/routing.py:240: in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:210: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/fastapi/routing.py:240: in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:210: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/fastapi/routing.py:240: in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:210: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/fastapi/routing.py:240: in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:210: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/fastapi/routing.py:240: in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:210: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/fastapi/routing.py:240: in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:210: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/fastapi/routing.py:240: in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:210: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/fastapi/routing.py:240: in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:210: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/fastapi/routing.py:240: in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:210: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/fastapi/routing.py:240: in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:210: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/fastapi/routing.py:240: in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:210: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/fastapi/routing.py:240: in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:210: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/fastapi/routing.py:240: in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:210: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/fastapi/routing.py:240: in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:210: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/fastapi/routing.py:240: in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:210: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/fastapi/routing.py:240: in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:210: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/fastapi/routing.py:240: in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:210: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/fastapi/routing.py:240: in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:210: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/fastapi/routing.py:240: in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:210: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/fastapi/routing.py:240: in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:210: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/fastapi/routing.py:240: in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:210: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/fastapi/routing.py:240: in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:210: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/fastapi/routing.py:240: in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:210: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/fastapi/routing.py:240: in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:210: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/fastapi/routing.py:240: in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:210: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/fastapi/routing.py:240: in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:210: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/fastapi/routing.py:240: in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:210: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/fastapi/routing.py:240: in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:210: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/fastapi/routing.py:240: in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:210: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/fastapi/routing.py:240: in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:210: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/fastapi/routing.py:240: in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:210: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/fastapi/routing.py:240: in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:210: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/fastapi/routing.py:240: in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:210: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/fastapi/routing.py:240: in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:210: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend/van_gateway/app.py:1135: in lifespan
+    await owner_runtime.startup()
+backend/van_gateway/runtime_api.py:359: in startup
+    await install_builtin_actions(self.actions)
+backend/van_gateway/action/registry.py:334: in install_builtin_actions
+    await runtime.register(definition)
+backend/van_gateway/action/service.py:59: in register
+    await self.store.execute(
+backend/van_gateway/storage/db.py:2691: in execute
+    async with self.connection() as db:
+               ^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:210: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend/van_gateway/storage/db.py:2566: in connection
+    db = await asyncio.shield(opening)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/tasks.py:684: in _wrap_awaitable
+    return await awaitable
+           ^^^^^^^^^^^^^^^
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/aiosqlite/core.py:177: in __await__
+    self._thread.start()
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/threading.py:994: in start
+    _start_new_thread(self._bootstrap, ())
+E   RuntimeError: can't start new thread</error></testcase><testcase classname="tests.test_ops_retention" name="test_every_table_in_the_live_schema_has_a_retention_class" time="0.064" /><testcase classname="tests.test_ops_retention" name="test_a_pruned_class_must_name_the_column_that_says_how_old_a_row_is" time="0.000" /><testcase classname="tests.test_ops_retention" name="test_the_classes_that_never_delete_say_why" time="0.000" /><testcase classname="tests.test_ops_retention" name="test_a_row_past_its_horizon_goes_and_one_inside_it_stays" time="0.109" /><testcase classname="tests.test_ops_retention" name="test_owner_state_is_never_pruned_however_old_it_is" time="0.082" /><testcase classname="tests.test_ops_retention" name="test_recovery_authority_survives_age_pruning_and_tracks_its_parent" time="0.127" /><testcase classname="tests.test_ops_retention" name="test_session_retirement_preserves_live_admission_then_removes_grant_producer_and_transfer" time="0.189" /><testcase classname="tests.test_ops_retention" name="test_an_orphaned_child_row_is_swept" time="0.094" /><testcase classname="tests.test_ops_retention" name="test_the_audit_log_is_not_touched_by_the_ordinary_sweep" time="0.086" /><testcase classname="tests.test_ops_retention" name="test_pruning_the_audit_prefix_leaves_a_chain_that_still_verifies" time="0.103" /><testcase classname="tests.test_ops_retention" name="test_a_tampered_row_after_an_anchor_is_still_caught" time="0.072" /><testcase classname="tests.test_ops_retention" name="test_a_prune_is_visible_afterwards" time="0.076" /><testcase classname="tests.test_ops_retention" name="test_seconds_and_millisecond_columns_are_not_confused" time="0.000" /><testcase classname="tests.test_trading_event_bridge" name="test_publishes_each_closed_trade_once" time="0.077" /><testcase classname="tests.test_trading_event_bridge" name="test_unavailable_ledger_publishes_nothing" time="0.068" /><testcase classname="tests.test_trading_event_bridge" name="test_gateway_registered_scheduler_publishes_closed_trade_once" time="0.458" /><testcase classname="tests.test_harness_page_startup" name="test_debug_socket_before_page_waits_for_original_target_without_creating_a_replacement" time="0.004" /><testcase classname="tests.test_harness_page_startup" name="test_ready_page_does_not_wait_or_replace_it" time="0.000" /><testcase classname="tests.test_harness_page_startup" name="test_missing_page_has_bounded_deadline_and_closes_failed_connection" time="0.001" /><testcase classname="tests.test_harness_page_startup" name="test_page_arriving_after_original_deadline_is_not_accepted" time="0.000" /><testcase classname="tests.test_harness_page_startup" name="test_cdp_failure_is_reported_without_restarting_or_hiding_it" time="0.001" /></testsuite></testsuites>

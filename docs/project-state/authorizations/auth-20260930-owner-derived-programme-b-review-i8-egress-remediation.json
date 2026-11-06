@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "authorization_id": "auth-20260930-owner-derived-programme-b-review-i8-egress-remediation",
+  "project": "van",
+  "authority": "OWNER_DERIVED",
+  "owner_instruction_sha256": "bb585837793f4ad187205e1c663848d4a53315fa6ee319db3d02536035026c49",
+  "owner_instruction_digest_input": "UTF-8 bytes of the verbatim selected answer label \"Egress proxy (Recommended)\", no quotes, no trailing newline",
+  "owner_instruction_record": "docs/decisions/OWNER-DECISION-20260930-BROWSER-TASK-SCOPE.md",
+  "owner_instruction_excerpt": "Egress proxy (Recommended)",
+  "additional_owner_answers": {
+    "udp": {
+      "label": "Firewall UDP in zone (Recommended)",
+      "sha256": "3f82614aae8f431c5485fddc37d93855bb919f330ad311eba89c254601bd16a3"
+    },
+    "canary": {
+      "label": "In-zone canary origin (Recommended)",
+      "sha256": "76df8fb31e23f8ae44e8d05d2ca94ece66ee8c8868e5d5f5ba9258c01c15ff37"
+    },
+    "ledger": {
+      "label": "Yes to owner derived treatment and  enforce van's ledger",
+      "sha256": "1fb51f92482bc51e4c6d7fc1ef508b3070a56c0d024dd773927367162ce72dfb"
+    }
+  },
+  "source": {
+    "kind": "owner_session_instruction",
+    "channel": "claude_code",
+    "request_id": "claude-code-session_01ELKqm4GCPmPvF3ggKkgB1J-20260930",
+    "owner_attested": true,
+    "device_signature_claimed": false,
+    "cryptographic_signature_claimed": false,
+    "signed_ingress_claimed": false
+  },
+  "signature_note": "Derived authority; no signature claimed. Review I8 reproduced that the egress proxy the owner chose could be bypassed by bare-LF request smuggling, accepted clients of any uid, forgot revoked leases across a restart and refused OPTIONS; that the zone firewall chosen by the owner dropped socketless root traffic; that the egress production gate ignored failed checks and the canary; and that Stagehand shared the Harness uid. Fixing these is a necessary consequence of the owner's 'Egress proxy', 'Firewall UDP in zone' and 'In-zone canary origin' answers and the 2026-09-29 van-browser-core isolation decision (section 1). Adding the canary and three egress checks to the required production-gate list only tightens gates. The owner did not review these diffs.",
+  "purpose": "Authorize unit G14's review-I8 egress remediation (MAJOR-3, MAJOR-4, MINOR-1, MINOR-2, MINOR-4, MINOR-5, MINOR-7), its documentation and decision-yaml append, and its qualify.sh correction.",
+  "authorized_paths": [
+    "backend/tests/test_browser_egress_proxy_i8.py",
+    "backend/tests/test_production_activation_gates.py",
+    "backend/van_gateway/automation/production_gates.py",
+    "deploy/van-browser-core/README.md",
+    "deploy/van-browser-core/bootstrap.sh",
+    "deploy/van-browser-core/browser/egress_proxy.py",
+    "deploy/van-browser-core/browser/harness_service.py",
+    "deploy/van-browser-core/firewall/van-browser-core.nft",
+    "deploy/van-browser-core/qualify.sh",
+    "deploy/van-browser-core/runtime.env.example",
+    "deploy/van-browser-core/systemd/van-browser-egress.service",
+    "deploy/van-browser-core/systemd/van-browser-harness.service",
+    "deploy/van-browser-core/systemd/van-stagehand.service",
+    "deploy/van-browser-core/zone.json",
+    "docs/decisions/VAN-BROWSER-CORE-EGRESS-001.yaml",
+    "docs/project-state/VAN_BROWSER_CORE_MIGRATION_20260929.md",
+    "registries/production_activation_gates.json",
+    "tests/contracts/test_automation_browser_governance.py",
+    "tests/contracts/test_van_browser_core_egress_proxy.py",
+    "tests/contracts/test_van_browser_core_firewall.py"
+  ],
+  "commit_scope": {
+    "commits": [
+      "e2fc2526aa601066fbd73cf843cd77e7c507113f",
+      "9f1c4af652eafd87be27761a0e916884a8da58fe",
+      "fae3bb93905310220ba00e01deb03848d092415a",
+      "c2d6390e473538c0487139e367d9a8e1496f8f19",
+      "8e26159864b535cdd21484dbd4b87d69ea9aa2da",
+      "5bc5b1a7389d46d80d2da4230bf4f68ae402cbdd"
+    ]
+  },
+  "limits": [
+    "Covers only the listed paths in the listed commits.",
+    "May not redefine product, money, security or owner-control intent.",
+    "Opens no production gate; not reusable."
+  ],
+  "issued_at_utc": "2026-09-30T00:00:00Z",
+  "recorded_by": "integrator (session_01ELKqm4GCPmPvF3ggKkgB1J)",
+  "material_scope_expansion": false,
+  "feature_removal": false,
+  "business_model_change": false,
+  "security_authority_change": false,
+  "owner_control_boundary_change": false,
+  "legal_position_change": false,
+  "money_or_custody_model_change": false,
+  "locked_provider_change": false,
+  "reusable": false,
+  "revoked": false
+}

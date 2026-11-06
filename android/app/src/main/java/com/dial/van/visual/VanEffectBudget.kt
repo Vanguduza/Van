@@ -58,7 +58,25 @@ data class VanEffectConditions(
     val frameBudgetMissed: Boolean = false,
 )
 
+/** Gates animation only; callers retain the complete visual and semantic state. */
+fun vanMotionEnabled(
+    budget: VanEffectBudget,
+    visible: Boolean = true,
+    animate: Boolean = true,
+    reducedMotion: Boolean = false,
+): Boolean = visible && animate && budget.allowMotion && !reducedMotion
+
 object VanEffectPolicy {
+
+    /** Cadence can only lower the current resource ceiling; it cannot restore motion or blur. */
+    fun withCadencePressure(budget: VanEffectBudget, missed: Boolean): VanEffectBudget {
+        val cadence = resolve(VanEffectConditions(frameBudgetMissed = missed))
+        return when (budget) {
+            VanEffectBudget.FULL -> cadence
+            VanEffectBudget.REDUCED -> if (missed) cadence else budget
+            else -> budget
+        }
+    }
 
     /** `PowerManager.THERMAL_STATUS_SEVERE`. */
     const val THERMAL_SEVERE = 3

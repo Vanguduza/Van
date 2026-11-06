@@ -32,7 +32,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from van_gateway.google.mesh import GoogleCredentialPlane
+from van_gateway.google.mesh import GoogleCapabilityState, GoogleCredentialPlane
 
 REGISTRY = Path(__file__).resolve().parents[3] / "registries" / "google_capabilities.json"
 
@@ -143,19 +143,31 @@ async def plane_health(
     # --- gemini_runtime: the model runtime's own entitlement ----------------------
     if broker is not None:
         principal = await broker.principal_status()
+        runtime = await broker.capability_status("gemini")
+        # Registration proves ownership, not runtime authentication. A successful
+        # canary or an authenticated quota refusal proves the credential plane; a
+        # capacity refusal still cannot make the capability itself executable.
+        authenticated = (
+            principal.registered
+            and principal.status == "VERIFIED_OWNER_ACCOUNT"
+            and runtime.state in {
+                GoogleCapabilityState.READY,
+                GoogleCapabilityState.CAPACITY_LIMITED,
+                GoogleCapabilityState.RATE_LIMITED,
+            }
+        )
         out.append(PlaneHealth(
             plane=GoogleCredentialPlane.GEMINI_RUNTIME,
             state=(
-                PlaneState.READY if principal.registered and principal.status == "active"
-                else PlaneState.UNCONFIGURED if not principal.registered
+                PlaneState.READY if authenticated
+                else PlaneState.UNCONFIGURED if not principal.registered or runtime.state == GoogleCapabilityState.UNAVAILABLE
                 else PlaneState.AUTH_REQUIRED
             ),
-            credential_locus="google principal registration",
+            credential_locus="Hermes Gemini runtime credential",
             serves=serves[GoogleCredentialPlane.GEMINI_RUNTIME.value],
             detail=(
-                None if principal.registered and principal.status == "active"
-                else "no Google principal is registered, so the runtime's entitlement is "
-                     "unverified"
+                None if authenticated
+                else f"Gemini runtime authentication is unverified ({runtime.state.value})"
             ),
         ))
 
@@ -177,7 +189,7 @@ def _from_provider_state(state: Any) -> str:
     return PlaneState.AUTH_REQUIRED
 
 
-def summarise(planes: list[PlaneHealth]) -> dict[str, Any]:
+def summarise(planes: list[PlaneHealth], *, mesh: dict[str, Any] | None = None) -> dict[str, Any]:
     """What still works, said plainly.
 
     The two wrong answers are symmetrical: everything broken because one credential
@@ -187,9 +199,20 @@ def summarise(planes: list[PlaneHealth]) -> dict[str, Any]:
     """
     working: list[str] = []
     blocked: list[str] = []
-    for plane in planes:
-        (working if plane.usable else blocked).extend(plane.serves)
-    return {
+    if mesh is None:
+        for plane in planes:
+            (working if plane.usable else blocked).extend(plane.serves)
+    else:
+        # Cloud services and consumer sessions can have different credentials even
+        # within the same logical plane (notably Stitch and delegated Antigravity).
+        # A Notebook provider's status cannot certify or disconnect its neighbours.
+        for capability in mesh["capabilities"]:
+            authenticated = (
+                capability["configured_by_account"]
+                and capability["state"] in {"READY", "CAPACITY_LIMITED", "RATE_LIMITED"}
+            )
+            (working if authenticated else blocked).append(capability["capability_id"])
+    result = {
         "planes": [plane.as_dict() for plane in planes],
         # Named for exactly what they are. `capabilities_available` would be read as "VAN
         # can do these", and a working credential is not a working capability: the runtime
@@ -207,6 +230,19 @@ def summarise(planes: list[PlaneHealth]) -> dict[str, Any]:
         # the property the single-boolean surface made impossible to see.
         "planes_fail_independently": True,
     }
+    if mesh is not None:
+        result.update(
+            principal=mesh["principal"],
+            capabilities=mesh["capabilities"],
+            registry_version=mesh["registry_version"],
+            plane_state_scope={
+                "workspace_oauth": "gateway Workspace refresh credential",
+                "gemini_runtime": "Hermes Gemini runtime authentication; quotas remain capability-specific",
+                "cloud_service": "Notebook Enterprise credential; other Cloud capabilities report independently",
+                "consumer_session": "Notebook consumer owner profile; delegated workers report independently",
+            },
+        )
+    return result
 
 
 __all__ = [

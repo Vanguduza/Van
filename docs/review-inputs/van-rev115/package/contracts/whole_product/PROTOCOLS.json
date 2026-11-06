@@ -1,0 +1,201 @@
+{
+  "command_transitions": [
+    {
+      "from": "DRAFT",
+      "guard": "Exact typed draft/preview",
+      "to": "AWAITING_CONFIRMATION"
+    },
+    {
+      "from": "DRAFT",
+      "guard": "Read or standing policy permits; durable intent",
+      "to": "ACCEPTED"
+    },
+    {
+      "from": "AWAITING_CONFIRMATION",
+      "guard": "Current bound native proof and durable intent",
+      "to": "ACCEPTED"
+    },
+    {
+      "from": "AWAITING_CONFIRMATION",
+      "guard": "Owner decline, expiry or policy refusal",
+      "to": "REFUSED"
+    },
+    {
+      "from": "ACCEPTED",
+      "guard": "Current authority/revision, outbox and native operation binding",
+      "to": "DISPATCHING"
+    },
+    {
+      "from": "DISPATCHING",
+      "guard": "Native accepted/running readback",
+      "to": "RUNNING"
+    },
+    {
+      "from": "DISPATCHING",
+      "guard": "Transport ambiguous after possible effect",
+      "to": "OUTCOME_UNKNOWN"
+    },
+    {
+      "from": "RUNNING",
+      "guard": "Independent exact postcondition receipt",
+      "to": "SUCCEEDED"
+    },
+    {
+      "from": "RUNNING",
+      "guard": "Native confirmed failure; partial effects disclosed",
+      "to": "FAILED"
+    },
+    {
+      "from": "RUNNING",
+      "guard": "Authorized distinct cancel intent",
+      "to": "CANCEL_REQUESTED"
+    },
+    {
+      "from": "CANCEL_REQUESTED",
+      "guard": "Native cancellation and reconciled partial effects",
+      "to": "CANCELLED"
+    },
+    {
+      "from": "CANCEL_REQUESTED",
+      "guard": "Effect finished before cancellation",
+      "to": "SUCCEEDED"
+    },
+    {
+      "from": "CANCEL_REQUESTED",
+      "guard": "Cancellation outcome not confirmed",
+      "to": "OUTCOME_UNKNOWN"
+    },
+    {
+      "from": "OUTCOME_UNKNOWN",
+      "guard": "Original native query proves running; no redispatch",
+      "to": "RUNNING"
+    },
+    {
+      "from": "OUTCOME_UNKNOWN",
+      "guard": "Original independent postcondition proves completion",
+      "to": "SUCCEEDED"
+    },
+    {
+      "from": "OUTCOME_UNKNOWN",
+      "guard": "Original native query confirms failure",
+      "to": "FAILED"
+    },
+    {
+      "from": "OUTCOME_UNKNOWN",
+      "guard": "Original native query confirms cancellation",
+      "to": "CANCELLED"
+    },
+    {
+      "from": "ACCEPTED",
+      "guard": "Revoked/expired policy before dispatch",
+      "to": "REFUSED"
+    },
+    {
+      "from": "DISPATCHING",
+      "guard": "Native proves no effect and failure",
+      "to": "FAILED"
+    },
+    {
+      "from": "DRAFT",
+      "guard": "Local unsubmitted draft cancelled; no native outcome required",
+      "to": "CANCELLED"
+    },
+    {
+      "from": "DRAFT",
+      "guard": "Invalid typed input/scope before effect",
+      "to": "REFUSED"
+    },
+    {
+      "from": "ACCEPTED",
+      "guard": "Authorized cancel before dispatch; atomically fence outbox",
+      "to": "CANCEL_REQUESTED"
+    },
+    {
+      "from": "DISPATCHING",
+      "guard": "Cancellation requested while external result uncertain; query original",
+      "to": "CANCEL_REQUESTED"
+    },
+    {
+      "from": "DISPATCHING",
+      "guard": "Native independent postcondition already final",
+      "to": "SUCCEEDED"
+    },
+    {
+      "from": "DISPATCHING",
+      "guard": "Native confirmed refusal before any effect",
+      "to": "REFUSED"
+    },
+    {
+      "from": "RUNNING",
+      "guard": "Lost authoritative progress/outcome; query original",
+      "to": "OUTCOME_UNKNOWN"
+    }
+  ],
+  "operational_targets": [
+    {
+      "id": "voice-feedback",
+      "metric": "capture feedback p95",
+      "state": "TARGET_NOT_MEASURED",
+      "unit": "ms",
+      "value": 150
+    },
+    {
+      "id": "voice-interrupt",
+      "metric": "accepted interruption to playback stop p95",
+      "state": "TARGET_NOT_MEASURED",
+      "unit": "ms",
+      "value": 200
+    },
+    {
+      "id": "turn-ack",
+      "metric": "gateway receipt to turn acknowledgement p95",
+      "state": "TARGET_NOT_MEASURED",
+      "unit": "ms",
+      "value": 500
+    },
+    {
+      "id": "bounded-response",
+      "metric": "first meaningful text/audio bounded non-tool prompt p95 on qualified profile",
+      "state": "TARGET_NOT_MEASURED",
+      "unit": "ms",
+      "value": 3000
+    },
+    {
+      "id": "intent-rpo",
+      "metric": "acknowledged intent loss within supported failover model",
+      "state": "TARGET_NOT_MEASURED",
+      "unit": "events",
+      "value": 0
+    },
+    {
+      "id": "control-rto",
+      "metric": "control-plane recovery supported single-host failure",
+      "state": "TARGET_NOT_MEASURED",
+      "unit": "minutes",
+      "value": 15
+    }
+  ],
+  "outcome_scope": "Outcome schema models accepted native command outcomes. Local unsubmitted draft cancellation is a UI/intent state and is not a falsely certified native CANCELLED outcome.",
+  "provisioning_checks": [
+    "signature issuer and pinned trust",
+    "application and signing audience",
+    "issued_at <= trusted_now < expires_at with declared skew bound",
+    "monotonic configuration epoch",
+    "single enrollment nonce; replay lookup atomic",
+    "current device revocation epoch",
+    "actual service-capability readback"
+  ],
+  "reconciliation_rule": "OUTCOME_UNKNOWN may query original identity but has no automatic DISPATCHING edge. Receipt validity/current authority enforced by native owner beyond schema validation.",
+  "records_schema": "contracts/whole_product/RECORDS.schema.json",
+  "revision": "1.18",
+  "schema_limits": "Structural checks do not verify signatures, authorization, clock truth, receipt authenticity, native effect or profitability; producer/consumer qualification is mandatory.",
+  "voice_ordering": {
+    "barge_in_cancels_domain_task": false,
+    "default_activation": "EXPLICIT_OWNER_INVOCATION",
+    "effect_completion_requires_readback": true,
+    "late_cancelled_generation_can_play": false,
+    "local_sherpa_and_energy_vad_preserved": true,
+    "partial_transcripts_can_dispatch": false,
+    "speaker_similarity_is_authorization": false
+  }
+}

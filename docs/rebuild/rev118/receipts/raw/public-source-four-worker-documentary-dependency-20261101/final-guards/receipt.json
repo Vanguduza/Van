@@ -1,0 +1,30 @@
+{
+  "started_at_utc": "2026-11-01T11:26:12.659010+00:00",
+  "preflight": {
+    "path": "/tmp/van-recovery-ci-shards-dependency-final-guards-20261101",
+    "free_bytes_before": 4683632640,
+    "free_inodes_before": 2238829,
+    "minimum_free_bytes": 4294967296,
+    "no_preexisting_directory": true
+  },
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "tools/rebuild/source_storage_audit.py",
+    "--report",
+    "/workspace/van-ci-shards-dependency-final-guards-20261101/storage-audit.json",
+    "tests/contracts/test_van_private_core_topology.py::test_only_private_core_modules_touch_the_protected_tables",
+    "tests/contracts/test_ci_public_source_shards.py",
+    "tests/contracts/test_ci_workflow_is_what_it_claims.py",
+    "tests/contracts/test_ci_dds_contract_pin.py",
+    "--basetemp=/tmp/van-recovery-ci-shards-dependency-final-guards-20261101",
+    "--junitxml=/workspace/van-ci-shards-dependency-final-guards-20261101/tests.xml",
+    "-q"
+  ],
+  "exit": 0,
+  "cleanup": {
+    "path": "/tmp/van-recovery-ci-shards-dependency-final-guards-20261101",
+    "created": false,
+    "independently_absent": true
+  },
+  "completed_at_utc": "2026-11-01T11:26:17.801992+00:00"
+}

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.memory.LearningProducerTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-08T04:57:38" hostname="052fefa249ff" time="0.001">
+  <properties/>
+  <testcase name="snapshot ready does not claim a live learning daemon()" classname="com.dial.van.memory.LearningProducerTest" time="0.0"/>
+  <testcase name="evidence never mints action authority()" classname="com.dial.van.memory.LearningProducerTest" time="0.0"/>
+  <testcase name="no data partial and unknown preserve uncertainty()" classname="com.dial.van.memory.LearningProducerTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

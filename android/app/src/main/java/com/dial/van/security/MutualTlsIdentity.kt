@@ -89,6 +89,15 @@ class MutualTlsIdentity(context: Context) {
     /** Socket factory for the pre-enrolment routes: pinned trust, no certificate. */
     fun enrolmentSocketFactory(): SSLSocketFactory? = enrolmentContext?.socketFactory
 
+    fun pinnedTrustManager(): X509TrustManager? = trustManager
+
+    /** A verified signed route may move while retaining this phone's existing TLS identity. */
+    fun socketFactoryWithTrust(trust: X509TrustManager, presentCertificate: Boolean): SSLSocketFactory =
+        SSLContext.getInstance("TLS").apply {
+            init(if (presentCertificate) arrayOf<KeyManager>(KeystoreKeyManager()) else null,
+                arrayOf(trust), null)
+        }.socketFactory
+
     /** True when a certificate for the current key is held and is not within [renewWithinMs] of expiry. */
     fun hasUsableCertificate(renewWithinMs: Long = RENEW_WITHIN_MS): Boolean {
         val cert = currentCertificate() ?: return false

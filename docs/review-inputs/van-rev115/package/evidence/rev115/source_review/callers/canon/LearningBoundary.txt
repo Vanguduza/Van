@@ -1,0 +1,28 @@
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:trading/vati/app/cycle.py:590:        """Observe the closed trade; apply only LearningBoundary-checked, reduce-only effects.
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:trading/vati/app/service.py:200:        # LearningBoundary permits reduce-only adjustments, and a demotion moves a capsule
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:trading/vati/learning/__init__.py:6:from vati.learning.boundary import LearningBoundary, LearningBoundaryError, LiveAdjustment, LiveAdjustmentProposal
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:trading/vati/learning/boundary.py:28:class LearningBoundaryError(RuntimeError):
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:trading/vati/learning/boundary.py:70:    for compatibility with direct constructors, but `LearningBoundary.check`
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:trading/vati/learning/boundary.py:72:    adjustments with `LearningBoundary.admit(LiveAdjustmentProposal, resolver)`."""
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:trading/vati/learning/boundary.py:81:class LearningBoundary:
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:trading/vati/learning/boundary.py:87:            raise LearningBoundaryError(f"learning may not touch {target}")
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:trading/vati/learning/boundary.py:89:            raise LearningBoundaryError("learning multipliers are reduce-only within [0, 1]")
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:trading/vati/learning/boundary.py:91:            raise LearningBoundaryError("only capsule health may demote")
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:trading/vati/learning/boundary.py:93:            raise LearningBoundaryError("demotion targets are DEGRADED|SHADOW|SUSPENDED; promotion is never a learning output")
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:trading/vati/learning/boundary.py:98:            raise LearningBoundaryError("a live adjustment must cite evidence artifact hashes")
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:trading/vati/learning/boundary.py:102:            raise LearningBoundaryError(f"live evidence rejected: {e}") from None
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:trading/vati/learning/boundary.py:106:            raise LearningBoundaryError(f"live evidence rejected: {target.value} does not learn from {wrong} "
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:trading/vati/learning/boundary.py:114:            raise LearningBoundaryError(f"insufficient environment-weighted samples ({samples} < {cls.MIN_WEIGHTED_SAMPLES}) for a live adjustment")
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:trading/vati/learning/boundary.py:131:            raise LearningBoundaryError(f"caller-supplied environment_weighted_samples {adj.environment_weighted_samples} != {samples} recomputed from resolved evidence")
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:trading/vati/learning/boundary.py:138:        raise LearningBoundaryError(f"learning may not touch {target}; use the owner-signed promotion path")
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:trading/vati/learning/broker.py:13:from vati.learning.boundary import LearningBoundary, LiveAdjustment, LiveAdjustmentProposal, LiveTarget
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:trading/vati/learning/broker.py:143:        if p is None or p._w() < LearningBoundary.MIN_WEIGHTED_SAMPLES:
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:trading/vati/learning/broker.py:145:        return LearningBoundary.admit(LiveAdjustmentProposal(LiveTarget.BROKER_PROFILE, f"{broker}:{symbol}:{session}", p.liquidity_multiplier(), None, tuple(p.evidence_refs)), self.evidence)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:trading/vati/learning/episodes.py:220:    LearningBoundary targets, and this is not one of them.
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:trading/vati/learning/evidence.py:1:"""Typed, hashed live-evidence references for the LearningBoundary (C5).
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:trading/vati/learning/health.py:10:from vati.learning.boundary import LearningBoundary, LiveAdjustment, LiveAdjustmentProposal, LiveTarget
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:trading/vati/learning/health.py:194:        if v.weighted_samples < LearningBoundary.MIN_WEIGHTED_SAMPLES:
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:trading/vati/learning/health.py:197:        return LearningBoundary.admit(proposal, self.evidence)
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:trading/vati/learning/hooks.py:5:the live path are the three LearningBoundary targets: a capsule-health
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:trading/vati/learning/hooks.py:24:from vati.learning.boundary import LearningBoundary, LiveAdjustment, LiveTarget
+dfc1557ab99ad8d41cf84714e1bb671e89b045e6:trading/vati/learning/hooks.py:120:        ms = [p.liquidity_multiplier() for (b, s, _), p in self.brokers.profiles.items() if b == self.broker and s == symbol and p._w() >= LearningBoundary.MIN_WEIGHTED_SAMPLES]

@@ -1,0 +1,15 @@
+{
+  "runtime": "sherpa-onnx",
+  "runtime_version": "1.13.8",
+  "framework": "wespeaker",
+  "model_architecture": "ResNet34",
+  "model_type_metadata_present": false,
+  "sample_rate_hz": 16000,
+  "embedding_dimension": 256,
+  "normalize_samples_metadata": 0,
+  "source_url": "https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-recongition-models/wespeaker_en_voxceleb_resnet34.onnx",
+  "sha256": "5ef208a9da1453335308a6b6f4e6dfbd7e183a38b604de0a57664f45d257fe94",
+  "size": 26534365,
+  "owner_embedding_or_profile": false,
+  "license_attribution": "licenses/WESPEAKER-ATTRIBUTION.txt"
+}

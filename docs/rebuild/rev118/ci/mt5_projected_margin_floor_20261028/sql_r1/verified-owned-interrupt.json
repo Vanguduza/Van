@@ -1,0 +1,10 @@
+{
+  "at": "2026-10-28T14:20:18.173264+00:00",
+  "controller_pid": 534831,
+  "test_pid": 535120,
+  "parentage_and_exact_audit_command_verified": true,
+  "command_sha256": "3eaddfa42e1ea1be57f5e7310e298c6f3431e071681f0b360a1288c205a6d6ae",
+  "signal": "SIGINT",
+  "reason": "Confirmed new healthy positive boundary failure: SDK rounded percentage-implied capital to whole money units while EA retained exact product. Stop owned partial run before correcting source; this run is not full qualification.",
+  "unrelated_processes_signalled": false
+}

@@ -1,0 +1,15 @@
+{
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "/workspace/van-entry-margin-binding-collect-20261028.py"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 601566,
+  "started_at_utc": "2026-10-28T16:31:05.697726+00:00",
+  "timeout_seconds": 180,
+  "state": "COMPLETED",
+  "command_pid": 601569,
+  "exit": 0,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-28T16:31:13.361491+00:00"
+}

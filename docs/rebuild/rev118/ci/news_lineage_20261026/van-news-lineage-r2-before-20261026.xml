@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="19" time="0.586" timestamp="2026-10-26T01:49:04.820194+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_news_publisher_lineage" name="test_rewritten_syndicated_stories_form_one_declared_cluster" time="0.150" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_invalid_explicit_origin_is_skipped_without_publishing_a_headline[None]" time="0.004" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_invalid_explicit_origin_is_skipped_without_publishing_a_headline[origin1]" time="0.004" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_invalid_explicit_origin_is_skipped_without_publishing_a_headline[origin2]" time="0.005" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_invalid_explicit_origin_is_skipped_without_publishing_a_headline[origin3]" time="0.004" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_invalid_explicit_origin_is_skipped_without_publishing_a_headline[origin4]" time="0.004" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_invalid_explicit_origin_is_skipped_without_publishing_a_headline[origin5]" time="0.004" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_originless_legacy_rows_stay_unknown_and_do_not_infer_publisher_from_transport" time="0.009" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_cold_recovery_restores_lineage_without_republishing_originals" time="0.014" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_declared_origin_does_not_backdate_earlier_unknown_observation" time="0.007" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_lineage_result_cannot_mutate_original_evidence" time="0.007" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_origin_enrichment_cannot_precede_the_original_observations_availability" time="0.006"><failure message="assert 1800000000000 == (1800000000000 + 20)">ledger = &lt;vati.core.ledger.Ledger object at 0x7f3205c4f6e0&gt;
+
+    def test_origin_enrichment_cannot_precede_the_original_observations_availability(ledger):
+        news = NewsIngress(ledger=ledger)
+        value = row(); value.pop('original_publisher')
+        news.ingest_rows([value], now_ms=NOW+20)
+        news.ingest_rows([row()], now_ms=NOW)
+&gt;       assert records(ledger)[0].payload['available_ms'] == NOW+20
+E       assert 1800000000000 == (1800000000000 + 20)
+
+trading/tests/test_news_publisher_lineage.py:105: AssertionError</failure></testcase><testcase classname="trading.tests.test_news_publisher_lineage" name="test_lineage_append_failure_rolls_back_headline_and_observation_before_memory" time="0.008" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_lost_sql_commit_reply_keeps_memory_unknown_and_cold_replay_reads_original" time="0.006" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_lineage_requires_independent_readback_before_memory_success" time="0.006" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_conflicting_origin_cannot_rewrite_an_original_observation" time="0.006" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_exact_title_with_contradictory_origins_is_one_conflicted_cluster" time="0.007" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_future_origin_does_not_reveal_future_publisher_or_transport" time="0.009" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_atomic_origin_marker_refuses_deleted_lineage_after_cold_start" time="0.007"><failure message="Failed: DID NOT RAISE ValueError">ledger = &lt;vati.core.ledger.Ledger object at 0x7f3205f02d50&gt;
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7f3205f01970&gt;
+
+    def test_atomic_origin_marker_refuses_deleted_lineage_after_cold_start(ledger, monkeypatch):
+        news = NewsIngress(ledger=ledger); news.ingest_rows([row()], now_ms=NOW)
+        iterate = ledger.iter
+        def hide(kind=None, **kwargs):
+            if kind is not None and kind.value == 'NEWS_LINEAGE':
+                return iter(())
+            return iterate(kind, **kwargs)
+        with monkeypatch.context() as patch:
+            patch.setattr(ledger, 'iter', hide)
+&gt;           with pytest.raises(ValueError, match='lineage.*missing'):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE ValueError
+
+trading/tests/test_news_publisher_lineage.py:197: Failed</failure></testcase></testsuite></testsuites>

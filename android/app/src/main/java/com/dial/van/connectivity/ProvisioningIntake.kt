@@ -39,6 +39,31 @@ class ProvisioningIntake(context: Context) {
 
     fun accepted(): Set<String> = prefs.getStringSet(KEY_ACCEPTED, emptySet()) ?: emptySet()
 
+    /** Installer handoff survives Activity/process death, encrypted with the other intake state. */
+    @Synchronized
+    fun stage(envelope: JSONObject): ProvisioningVerdict {
+        val verdict = verify(envelope)
+        if (verdict is ProvisioningVerdict.Accepted) {
+            val previous = pending()
+            if (previous != null && ProvisioningRecovery.fingerprint(previous) !=
+                ProvisioningRecovery.fingerprint(verdict.payload)) {
+                return ProvisioningVerdict.Refused("provisioning_pending_identity_mismatch")
+            }
+            check(prefs.edit().putString(KEY_PENDING, envelope.toString()).commit()) { "provisioning_pending_store_failed" }
+        }
+        return verdict
+    }
+
+    @Synchronized
+    fun pending(nowMs: Long = System.currentTimeMillis()): ProvisioningPayload? {
+        val raw = prefs.getString(KEY_PENDING, null) ?: return null
+        val envelope = runCatching { JSONObject(raw) }.getOrNull()
+        val verdict = envelope?.let { verify(it, nowMs) }
+        if (verdict is ProvisioningVerdict.Accepted) return verdict.payload
+        check(prefs.edit().remove(KEY_PENDING).commit()) { "provisioning_pending_clear_failed" }
+        return null
+    }
+
     /**
      * Verify one payload without consuming it.
      *
@@ -65,7 +90,8 @@ class ProvisioningIntake(context: Context) {
 
     /** Record that this payload was used. Called only after enrolment actually succeeded. */
     fun consume(provisioningId: String) {
-        prefs.edit().putStringSet(KEY_ACCEPTED, accepted() + provisioningId).apply()
+        check(prefs.edit().putStringSet(KEY_ACCEPTED, accepted() + provisioningId)
+            .remove(KEY_PENDING).commit()) { "provisioning_consumption_store_failed" }
     }
 
     /**
@@ -81,5 +107,6 @@ class ProvisioningIntake(context: Context) {
 
     private companion object {
         const val KEY_ACCEPTED = "accepted_provisioning_ids"
+        const val KEY_PENDING = "pending_signed_envelope"
     }
 }

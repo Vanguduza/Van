@@ -1,0 +1,51 @@
+import asyncio,hashlib,json,secrets,tempfile,zipfile
+from pathlib import Path
+import pytest
+from test_google_owner_revoke_and_scrub import client,_settings
+from test_google_owner_withdrawal_recovery import test_explicit_connect_is_new_generation_even_with_same_token_bytes,test_workspace_canary_binds_original_probe_and_live_generation_without_status_argument,test_actual_http_withdrawal_wins_delayed_oauth_and_blocks_provider_boundary,test_expired_pending_refuses_but_completed_original_recovers_after_deadline,test_tampered_original_receipt_retains_forensic_state_and_replacement,SCOPE
+import van_gateway.google.service as source
+import van_gateway.google.mesh as mesh
+OUT=Path('/workspace/van-lac230-independent-review-20261101');ROOT=Path('/workspace/van-lanes-20261101/google-withdrawal');E=Path('/workspace/van-google-withdrawal-20261101');h=json.loads((E/'HANDOFF.json').read_text())
+def pins():return {p:hashlib.sha256((ROOT/p).read_bytes()).hexdigest() for p in h['source_files']}
+before=pins();assert before==h['source_files'];(OUT/'before.json').write_text(json.dumps(before,indent=2))
+assert hashlib.sha256((E/h['patch']).read_bytes()).hexdigest()==h['patch_sha256'];assert hashlib.sha256((E/h['archive']).read_bytes()).hexdigest()==h['archive_sha256']
+with zipfile.ZipFile(E/h['archive']) as z:
+ for p,want in before.items():
+  ns=[n for n in z.namelist() if n==p or n.endswith('/'+p)];assert len(ns)==1;assert hashlib.sha256(z.read(ns[0])).hexdigest()==want
+async def identity_history(world):
+ ac,app=world;g=app.state.google
+ await g.store_refresh_token('owner','SOURCE-credential',[SCOPE])
+ request=(await ac.get('/v1/google/status')).json()['withdrawal_request']
+ applied=await ac.post('/v1/google/owner-revoke',json=request);assert applied.status_code==200,applied.text
+ receipt=applied.json()['withdrawal_receipt'];key=g._withdrawal_key(request['operation_id'])
+ original_cipher=(await app.state.store.fetchone('SELECT value FROM runtime_meta WHERE key=?',(key,)))['value'];original_hash=hashlib.sha256(original_cipher.encode()).hexdigest()
+ # Actual existing normal grant renewal retains its token; history must remain available.
+ renewed_grant=await app.state.auth.renew_grant('phone');assert renewed_grant['state']=='VALID'
+ normal=await ac.get('/v1/google/owner-revocations/'+request['operation_id']);assert normal.status_code==200 and normal.json()==receipt
+ # Model trusted same-principal token replacement (no ordinary rotation producer exists).
+ old_device=dict(await app.state.store.fetchone('SELECT * FROM devices WHERE device_id=?',('phone',)))
+ new_token=secrets.token_urlsafe(32)
+ await app.state.store.execute('UPDATE devices SET access_token_hash=? WHERE device_id=?',(hashlib.sha256(new_token.encode()).hexdigest(),'phone'))
+ ac.headers['X-Van-Device-Token']=new_token
+ authenticated=await app.state.auth.require_access_token(new_token);assert authenticated.device_id=='phone'
+ status=await ac.get('/v1/google/status');assert status.status_code==200,status.text
+ original=await ac.get('/v1/google/owner-revocations/'+request['operation_id'])
+ assert hashlib.sha256((await app.state.store.fetchone('SELECT value FROM runtime_meta WHERE key=?',(key,)))['value'].encode()).hexdigest()==original_hash
+ after=dict(await app.state.store.fetchone('SELECT * FROM devices WHERE device_id=?',('phone',)))
+ assert {k:v for k,v in after.items() if k!='access_token_hash'}=={k:v for k,v in old_device.items() if k!='access_token_hash'}
+ return {'normal_existing_enrollment_renewal_receipt_status':normal.status_code,'trusted_token_replacement_modeled_not_existing_rotation_producer':True,'actual_http_status_with_newtoken':status.status_code,'original_receipt_status_after_token_replacement':original.status_code,'original_receipt_error':original.json(),'original_sealed_record_sha256':original_hash,'original_unchanged':True}
+async def main():
+ results=[]
+ for name,fn,mp_needed in [('explicit reconnect identical token bytes creates newgeneration',test_explicit_connect_is_new_generation_even_with_same_token_bytes,False),('canary originalprobe lineage/currentgen without statusargument',test_workspace_canary_binds_original_probe_and_live_generation_without_status_argument,False),('actualHTTP withdrawal wins delayedOAuth noprovidercall',test_actual_http_withdrawal_wins_delayed_oauth_and_blocks_provider_boundary,False),('pending expiry versus completed historical recovery',test_expired_pending_refuses_but_completed_original_recovers_after_deadline,True),('tampered original sealedreceipt preserves replacement',test_tampered_original_receipt_retains_forensic_state_and_replacement,False),('sameprincipal normalgrant renewal and modeledtokenreplacement history',identity_history,False)]:
+  with tempfile.TemporaryDirectory(prefix='van-lac230-http-review-',dir='/tmp') as temp:
+   with pytest.MonkeyPatch.context() as mp:
+    settings=_settings.__wrapped__(Path(temp),mp);next(settings);fixture=client.__wrapped__();world=await anext(fixture)
+    try:
+     extra=await fn(world,mp) if mp_needed else await fn(world);results.append({'case':name,'result':'OBSERVED' if extra else 'PASS','extra':extra})
+    finally:
+     try:await anext(fixture)
+     except StopAsyncIteration:pass
+     try:next(settings)
+     except StopIteration:pass
+ return results
+results=asyncio.run(main());after=pins();assert after==before;(OUT/'after.json').write_text(json.dumps(after,indent=2));record={'imports':{'service':source.__file__,'mesh':mesh.__file__},'results':results,'all12source_archive_patchpins_verified_unchanged':True,'owned_tmp_cleanup':True};(OUT/'probe-results.json').write_text(json.dumps(record,indent=2));print(json.dumps(record))

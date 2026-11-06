@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="6" time="1.422" timestamp="2026-10-26T11:15:39.378849+00:00" hostname="2c5a245e39f1"><testcase classname="trading.worker_tests.test_dataset_candidate_archive" name="test_even_sealed_incompatible_original_records_refuse_recovery[sqlite-decision]" time="0.154"><failure message="Failed: DID NOT RAISE DatasetContractError">publication = (&lt;vati.core.ledger.Ledger object at 0x7fccf332faa0&gt;, &lt;vati.research.dataset_archive.DatasetCandidateArchive object at ...tive_account_id":123,"schema":"vati.ctrader-symbol/1","transport_host":"demo.ctraderapi.com"}', received_at_ms=100000))
+damage = 'decision'
+
+    @pytest.mark.parametrize('damage',['decision','schema','producer','request_digest','created_at','witness'])
+    def test_even_sealed_incompatible_original_records_refuse_recovery(publication,damage):
+        ledger,archive,record,c=publication
+        archive.publish('original',parse(record),expected_scope=c.native_scope)
+        with ledger.read_snapshot():original=next(ledger.iter(EventKind.DATASET_MANIFEST_CANDIDATE))
+        payload=deepcopy(original.payload);payload['request_id']='malformed'
+        payload['manifest']['record_id']=payload['requested_manifest']['record_id']='another-record'
+        payload['request_sha256']=canonical_hash({'manifest':payload['requested_manifest'],'native_scope':payload['native_scope']})
+        if damage=='request_digest':payload['request_sha256']='f'*64
+        elif damage=='created_at':payload['manifest']['created_at']='1970-01-01T00:08:21Z'
+        elif damage=='witness':payload['source_witness_digest']='invalid'
+        altered=replace(original,payload=payload,correlation_id='another-record',hash='',
+            decision_time_ms=1 if damage=='decision' else None,
+            schema_version=2 if damage=='schema' else 1,
+            producer='another-owner' if damage=='producer' else original.producer)
+        altered=replace(altered,hash=canonical_hash(altered.body()));ledger.append(altered)
+        head=state(ledger)
+&gt;       with pytest.raises(DatasetContractError,match='ORIGINAL_'):archive.lookup('original')
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE DatasetContractError
+
+trading/worker_tests/test_dataset_candidate_archive.py:225: Failed</failure></testcase><testcase classname="trading.worker_tests.test_dataset_candidate_archive" name="test_even_sealed_incompatible_original_records_refuse_recovery[sqlite-schema]" time="0.060" /><testcase classname="trading.worker_tests.test_dataset_candidate_archive" name="test_even_sealed_incompatible_original_records_refuse_recovery[sqlite-producer]" time="0.126" /><testcase classname="trading.worker_tests.test_dataset_candidate_archive" name="test_even_sealed_incompatible_original_records_refuse_recovery[sqlite-request_digest]" time="0.077" /><testcase classname="trading.worker_tests.test_dataset_candidate_archive" name="test_even_sealed_incompatible_original_records_refuse_recovery[sqlite-created_at]" time="0.054" /><testcase classname="trading.worker_tests.test_dataset_candidate_archive" name="test_even_sealed_incompatible_original_records_refuse_recovery[sqlite-witness]" time="0.059" /></testsuite></testsuites>

@@ -1,0 +1,884 @@
+{
+  "schema": "van.rebuild.native-owner-key-revocation-source/1",
+  "observed_at_utc": "2026-10-23T07:02:59.803941+00:00",
+  "source_parent": "f3c2e13886e5bbab0904329d25f7c0491bb796e5",
+  "source_provenance": "Current uncommitted candidate patch bound below. Full2511 run precedes final same-key alias/PEM compatibility and readonly status-route hardening; final155 affected cases pass afterward. No unmodified exact-current full run claimed.",
+  "source_sha256": {
+    "backend/van_gateway/app.py": "729614aaa3aca62966f0c82bf9785ec7c444a9e461ce3420730235e3cbfb104e",
+    "backend/van_gateway/auth/service.py": "d38b03902d330c1daa74382388d04d35b53281429ee62349c1b0644ac1b55191",
+    "backend/van_gateway/auth/native_revocation.py": "e204022972c76843707c6def8355fc1d9caf691f1fb017c39c642f1d3f409356",
+    "trading/commander/app.py": "d78bc81babd7750caa9a46075182202dba74c22612a3ab69c967e818713c429e",
+    "trading/commander/strategies.py": "8e2da48efd6de4f4be63c3678e29a1759f019b297a2a025116b758788ee4a68a",
+    "trading/commander/runtime_controls.py": "6f9d6b365c99e0d55e75c7df440104c135064d71aef2fc22ae8bf401e4c55f09",
+    "trading/vati/authority.py": "2eaf5a478bcf31e934a127614d3b0b806df118ba2f552334682956ce5effb9f5",
+    "trading/vati/authority_registry.py": "98f52094287444503a07085d29b34044c250f0b4372c92393a31fc4993a885d0",
+    "trading/vati/app/runtime_control_actor.py": "05697286eb0e1a743850849c2facef3f140d9a4d15a21a4d38c321f912de0d9b",
+    "trading/vati/app/runtime_control_protocol.py": "1540afac2706d407e9ccb86c3ac940f2a7c6ee493481754fe69a976a32a61ea2",
+    "backend/tests/test_native_owner_key_revocation.py": "eb4cc6abed6b05b1350ef742515c8ef7e59bbe9a8e366dc6650bfdea4ee36753",
+    "trading/tests/test_owner_key_registry.py": "76db755d60261413a5965ade53e3b11814fc5b631925c259659f658c37b2c07a"
+  },
+  "full_private_postgresql_before_last_hardening": {
+    "tests": 2511,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 616.581,
+    "sha256": "e8c93e455ceec3ba93925354d58b2c308097ae052cfaf21b124c184fbefb9fac"
+  },
+  "full_input_sha256": {
+    "backend/van_gateway/app.py": "c66e85491ca764f5ab118d6771d27ce2183a7d0adb30e4f932254cb0d1be224b",
+    "backend/van_gateway/auth/service.py": "d38b03902d330c1daa74382388d04d35b53281429ee62349c1b0644ac1b55191",
+    "backend/van_gateway/auth/native_revocation.py": "3af29c82e0a18caf882f8332172b558d122fe35b00bd025d3d5b019906cd1df6",
+    "trading/commander/app.py": "d78bc81babd7750caa9a46075182202dba74c22612a3ab69c967e818713c429e",
+    "trading/commander/strategies.py": "47417ccb11a8a716a31d737cea75b04f8cd6d519576193c93be16176336fe055",
+    "trading/commander/runtime_controls.py": "6f9d6b365c99e0d55e75c7df440104c135064d71aef2fc22ae8bf401e4c55f09",
+    "trading/vati/authority.py": "2eaf5a478bcf31e934a127614d3b0b806df118ba2f552334682956ce5effb9f5",
+    "trading/vati/authority_registry.py": "9b15c2178adef9ff993d289fad3450c86848966a2b467ffd3e1b3a5e45bbf2b3",
+    "trading/vati/app/runtime_control_actor.py": "05697286eb0e1a743850849c2facef3f140d9a4d15a21a4d38c321f912de0d9b",
+    "trading/vati/app/runtime_control_protocol.py": "1540afac2706d407e9ccb86c3ac940f2a7c6ee493481754fe69a976a32a61ea2"
+  },
+  "private_fixture_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "full_driver": {
+    "path": "/tmp/van-native-owner-revocation-final-pg-runner.txt",
+    "sha256": "b92ee97af9a786baae2bdf7e23f1ea4c38e5f3b66bce02edb0bf875c736f5c2f",
+    "tail": "trading_exit_code 0\nprivate_fixture_stopped_and_removed True\n"
+  },
+  "final_affected_source": {
+    "tests": 155,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 64.884,
+    "sha256": "d12d96196afb53cf00be5c09156bd762bb2b1b189a36e89e832c951c85102d3e"
+  },
+  "executions": {
+    "before": {
+      "tests": 4,
+      "failures": 4,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 4.473,
+      "sha256": "b971b3c4a92e89b755ea5b16122b294893bbea9a27ae6b719d7d92d9b07302d7"
+    },
+    "first": {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 4.344,
+      "sha256": "2bd48b3851855f60d43bf7de55d5a26921e52390aa19032da73968dddbdda815"
+    },
+    "expanded": {
+      "tests": 92,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 33.19,
+      "sha256": "58761c03854f39672c90da4c059a1049b5e0efad91c920aae1d89ef9f7ab175e"
+    },
+    "registry": {
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 4.556,
+      "sha256": "6cf52561c476dd6221f8f1eef9079d8317b0abb72734612d7da8f38a50f77305"
+    },
+    "fault-controls": {
+      "tests": 22,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 12.832,
+      "sha256": "b1258767b5626cf5226ef50b9b3b52b38ad165155b5b14d9cfed5fbfff35643d"
+    },
+    "order-before": {
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 1.911,
+      "sha256": "ea80308da2f07bb5dd8039c1c8448bf6bc16ab4c65b1c3bf20149643c9878fdc"
+    },
+    "order-restored": {
+      "tests": 39,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 13.295,
+      "sha256": "12d1b067be45f6a44598ade4edb37928263e9dc4031f145977d1a6d4aad988c3"
+    },
+    "path-before": {
+      "tests": 2,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 2.675,
+      "sha256": "ae4e0904cae7bffddd4e8cf49c15f3da1e8a4a4f90edd83e93ffe7b0f9a8c85d"
+    },
+    "path-restored": {
+      "tests": 45,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 32.529,
+      "sha256": "cb78f2a1b74bbaa1becb9b40e25628299aa0e7d14b264b2f5fc61e4596740939"
+    },
+    "final-controls": {
+      "tests": 35,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 21.464,
+      "sha256": "6512c75fdcd89401e06b157959678e33ca319aca1905f456b710c2bcfea0205c"
+    },
+    "process": {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.124,
+      "sha256": "a0ccca340ba301a87401613504097e9fbff8394dc7e667a01f356477cb7941e5"
+    },
+    "marker": {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 2.659,
+      "sha256": "3060c1572358abf84db3a14e7291f8ef7ac8b3be820872a0d2b3f1e617effb5e"
+    },
+    "alias-before": {
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.072,
+      "sha256": "b6d928b56448fb557d4af317506b162d0278e8611963c386c63abe1593cb7e96"
+    },
+    "alias-restored": {
+      "tests": 126,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 59.02,
+      "sha256": "74b6bf87595ae74750e7e703ad552b402bd82656c0a80ca7871d3270e238beda"
+    },
+    "enroll-alias-before": {
+      "tests": 2,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.07,
+      "sha256": "25aebe0158fdf47afa405d8f7e556292b7cd97b2fb3e972d90d5c7a9a0bb89bb"
+    },
+    "final-restored": {
+      "tests": 128,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 59.903,
+      "sha256": "84f1a26eb23b7e52286d40125b2046bca8ad8610889ef4799b386cd0043f29e8"
+    },
+    "read-status": {
+      "tests": 3,
+      "failures": 3,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 3.786,
+      "sha256": "61931bddd5a6538f4e0aac64b926c656578f48a9c3729775c3a827ead8f75b7d"
+    },
+    "read-status-restored": {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 3.851,
+      "sha256": "d36fc38fc7225f0a735378b660438d72b170e881269283569576ff26a1de8ef4"
+    }
+  },
+  "induced_regressions": {
+    "caught": 17,
+    "baseline_passes": 17,
+    "invalid_runs": 0,
+    "evidence": {
+      "definitions": [
+        [
+          [
+            "backend/van_gateway/app.py",
+            "asyncio.create_task(native_owner_revocations.run())",
+            "asyncio.create_task(asyncio.sleep(3600))",
+            "omit native-key revocation from gateway startup"
+          ],
+          "backend/tests/test_native_owner_key_revocation.py::test_native_revocation_background_worker_is_started_and_awaited"
+        ],
+        [
+          [
+            "backend/van_gateway/app.py",
+            "        revoked_executions = await owner_runtime.actions.revoke_privileged_for_device(f\"device:{device_id}\")\n        device_ca = getattr(app.state, \"device_ca\", None)\n        revoked_certificates = device_ca.revoke_device(device_id) if device_ca is not None else 0\n        try:\n            native_revocation = await native_owner_revocations.reconcile_operation(native_revocation['operation_id'])\n        except (OSError, ValueError, TypeError):\n            native_revocation['phase'] = 'UNKNOWN'\n",
+            "        try:\n            native_revocation = await native_owner_revocations.reconcile_operation(native_revocation['operation_id'])\n        except (OSError, ValueError, TypeError):\n            native_revocation['phase'] = 'UNKNOWN'\n        revoked_executions = await owner_runtime.actions.revoke_privileged_for_device(f\"device:{device_id}\")\n        device_ca = getattr(app.state, \"device_ca\", None)\n        revoked_certificates = device_ca.revoke_device(device_id) if device_ca is not None else 0\n",
+            "delay local privileged-action revocation behind native network IO"
+          ],
+          "backend/tests/test_native_owner_key_revocation.py::test_local_action_revocation_precedes_any_potentially_slow_native_delivery"
+        ],
+        [
+          [
+            "backend/van_gateway/auth/native_revocation.py",
+            "result.get('key_active') is False",
+            "True",
+            "accept an acknowledgement that leaves the phone key active"
+          ],
+          "backend/tests/test_native_owner_key_revocation.py::test_native_acknowledgement_must_prove_the_exact_inactive_key[active]"
+        ],
+        [
+          [
+            "backend/van_gateway/auth/native_revocation.py",
+            "            if not self._matches_native(record,record['native_result']):raise ValueError('native revocation receipt is unreadable')",
+            "            pass",
+            "trust a weakened cached native revocation result"
+          ],
+          "backend/tests/test_native_owner_key_revocation.py::test_cached_native_revocation_receipt_is_revalidated"
+        ],
+        [
+          [
+            "backend/van_gateway/auth/native_revocation.py",
+            "after=cursor['value'] if cursor else ''",
+            "after=''",
+            "starve actual revocations behind an invalid old work row"
+          ],
+          "backend/tests/test_native_owner_key_revocation.py::test_one_bad_pending_record_cannot_starve_native_revocation"
+        ],
+        [
+          [
+            "backend/van_gateway/auth/service.py",
+            "            await db.execute('INSERT OR IGNORE INTO runtime_meta(key,value,updated_at_unix_ms) VALUES(?,?,?)',\n                (PREFIX+record['operation_id'],json.dumps(record,sort_keys=True,separators=(',',':')),now*1000))",
+            "            pass",
+            "commit local revocation without its durable native propagation identity"
+          ],
+          "backend/tests/test_native_owner_key_revocation.py::test_device_revocation_and_native_pending_receipt_roll_back_together"
+        ],
+        [
+          [
+            "trading/vati/authority.py",
+            "if self.registry_path is not None:",
+            "if False:",
+            "continue trusting a key cached before another process revoked it"
+          ],
+          "backend/tests/test_native_owner_key_revocation.py::test_native_key_cache_cannot_outlive_a_revocation_from_another_process"
+        ],
+        [
+          [
+            "trading/vati/authority_registry.py",
+            "if any(row['key_id']==key_id for row in record['revocations'].values()):",
+            "if False:",
+            "acknowledge stale enrollment of an already revoked phone key"
+          ],
+          "backend/tests/test_native_owner_key_revocation.py::test_revoked_native_key_cannot_be_reenrolled_by_a_stale_gateway_request"
+        ],
+        [
+          [
+            [
+              [
+                "trading/vati/authority_registry.py",
+                "        record['keys']={k:v for k,v in record['keys'].items()\n            if k!=key_id and _key_fingerprint(v)!=key_id}",
+                "        pass"
+              ],
+              [
+                "trading/vati/authority_registry.py",
+                "return {k:v for k,v in record['keys'].items()\n        if k not in revoked and (not revoked or _key_fingerprint(v) not in revoked)}",
+                "return dict(record['keys'])"
+              ]
+            ],
+            "leave a revoked key usable through both physical removal and tombstone exclusion"
+          ],
+          "backend/tests/test_native_owner_key_revocation.py::test_revoking_phone_key_prevents_a_queued_native_recovery_effect"
+        ],
+        [
+          [
+            [
+              [
+                "trading/vati/authority_registry.py",
+                "with exclusive_state_lock(path):",
+                "with __import__('contextlib').nullcontext():"
+              ],
+              [
+                "trading/vati/authority_registry.py",
+                "with exclusive_state_lock(path):",
+                "with __import__('contextlib').nullcontext():"
+              ]
+            ],
+            "let a concurrent enrollment overwrite a native revocation tombstone"
+          ],
+          "trading/tests/test_owner_key_registry.py::test_an_enrollment_read_cannot_overwrite_a_concurrent_native_tombstone"
+        ],
+        [
+          [
+            "trading/vati/authority_registry.py",
+            "        if not isinstance(row,dict) or row!=revocation_record(row.get('device_id'),row.get('key_id')) or identity!=row['operation_id']:",
+            "        if False:",
+            "silently accept altered native revocation history"
+          ],
+          "trading/tests/test_owner_key_registry.py::test_unreadable_revocation_history_never_silently_becomes_a_fresh_registry[identity]"
+        ],
+        [
+          [
+            "trading/vati/authority_registry.py",
+            "if os.name!='nt' and path.stat().st_mode & 0o022:",
+            "if False:",
+            "trust a key registry writable by other users"
+          ],
+          "trading/tests/test_owner_key_registry.py::test_group_writable_key_registry_is_not_authority"
+        ],
+        [
+          [
+            "trading/vati/app/runtime_control_protocol.py",
+            ",\n        'owner-key-registry:'+canonical_hash(str(owner_registry_path(owner_keys_path or None)))",
+            "",
+            "leave native authority key-file identity outside the signed recovery review"
+          ],
+          "backend/tests/test_native_owner_key_revocation.py::test_switching_actor_to_a_different_owner_key_registry_cannot_keep_old_recovery_authority"
+        ],
+        [
+          [
+            "trading/commander/runtime_controls.py",
+            "if state.get('profile_ref')!=recovery_profile_ref(account,settings.owner_authority_keys):",
+            "if False:",
+            "offer a recovery review from an actor with a different authority source"
+          ],
+          "backend/tests/test_native_owner_key_revocation.py::test_mismatched_commander_and_actor_key_registry_refuses_new_owner_review"
+        ],
+        [
+          [
+            "trading/vati/authority_registry.py",
+            "_key_fingerprint(v) not in revoked",
+            "True",
+            "reactivate a revoked public key by restoring it under a different label"
+          ],
+          "trading/tests/test_owner_key_registry.py::test_revoke_the_public_key_under_every_registered_alias_without_touching_another_key"
+        ],
+        [
+          [
+            "trading/vati/authority_registry.py",
+            "record['keys']={**existing,key_id:pem.strip()+'\\n'}",
+            "record['keys']={key_id:pem.strip()+'\\n'}",
+            "drop an existing policy alias while enrolling the same public key"
+          ],
+          "trading/tests/test_owner_key_registry.py::test_enrolling_the_same_public_key_preserves_existing_policy_aliases"
+        ],
+        [
+          [
+            "trading/vati/authority_registry.py",
+            "_public_der(existing[key_id])!=_public_der(pem)",
+            "existing[key_id].strip()!=pem.strip()",
+            "mistake a PEM line-ending difference for new key material"
+          ],
+          "trading/tests/test_owner_key_registry.py::test_the_same_key_with_different_pem_line_endings_is_not_a_replacement"
+        ]
+      ],
+      "records": [
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "13ad3e2c9f95386ca9d2130651f5ff1135ae479096e4be5ff500006fb995efca",
+          "xml_sha256": "a353f8ceff18707fa3a7296f00237a9ac47a3d5149b7248cc5623629c54871d2"
+        },
+        {
+          "phase": "mutation",
+          "why": "omit native-key revocation from gateway startup",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "60ebc51a6cead8cd30e6be10e47c23bbc7757663f695856dbcec50e2618140ce",
+          "xml_sha256": "53864077f13a4772768fb2c7fc5617e112d0eb09bff368414ba9fda1f68b1b18"
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "8615b7efda16c0debc1c856289af0f8678c07eb5933f26899c8650bc8d52b663",
+          "xml_sha256": "1b19cc0991c222be245e5e8f224ca760cf512bd9442bfdc2ba151c8e7df04450"
+        },
+        {
+          "phase": "mutation",
+          "why": "delay local privileged-action revocation behind native network IO",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "d640424cb754d85350f9a17e63ae8e3dd128061382740aeacc92aec446ca162a",
+          "xml_sha256": "ffd004b351d8327fc6041eca0c1c11796f330c9f81f374efa57f88b3aeddbb4d"
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "049bc25fd9609f7200af5e25ed1a1da1cb610331be91829b224c891be0caf9cb",
+          "xml_sha256": "e9eac1fb40774100403bc6b3358902b8b18e480899b59dff3309df0da7aa08e9"
+        },
+        {
+          "phase": "mutation",
+          "why": "accept an acknowledgement that leaves the phone key active",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "8d46d7954c98a5ae2f4607f26abc210be5413c73e6098fb97550c9b7cc28eeb9",
+          "xml_sha256": "a4a9a1c5dfabae0fe389330f6e6714230aeebd2c7bfaf88758de7b4bd7a54d27"
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "e66ff84ac1079504c7e2848b3c04aeeb3d88972f49444107cf855cbf670544ed",
+          "xml_sha256": "b3e5a76af01c1f6ab8fd2cd2cd64d58dd61d9030368263328dc37e3c977532c3"
+        },
+        {
+          "phase": "mutation",
+          "why": "trust a weakened cached native revocation result",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "1b3ca65a23caa065b2f6d6e8c148dc43df45b7ee191407d836e62aaeb641c5bc",
+          "xml_sha256": "06bc1bea0f1aa0ab1f00f80258c8a966eeafb1e2cf07197dcc8f2a7edcc4b3d2"
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "ef6e6cf01331e683475830ea174aa75888d2534855a8ea28d9696422a1bbc4fd",
+          "xml_sha256": "965f3a7978966a9aea92a274a9cb8b83150958fabac211e58a4242f8299b98ea"
+        },
+        {
+          "phase": "mutation",
+          "why": "starve actual revocations behind an invalid old work row",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "98f1a28c1d43fb4a85b4f2ad41c1658a4de7168ef91f536f85eaf5e56b0a8c81",
+          "xml_sha256": "343621be10a8c1be713bd98424677cae35d09b594dd198d1f0e7195857ab4323"
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "13ad3e2c9f95386ca9d2130651f5ff1135ae479096e4be5ff500006fb995efca",
+          "xml_sha256": "10d6cd5ff9fe3a6046b5012475447076011a18d04bc10a08a74004b97569c7e0"
+        },
+        {
+          "phase": "mutation",
+          "why": "commit local revocation without its durable native propagation identity",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "2023f2093b4ba1d57fbcb8b15c020bc88299f11cba96ef3c1e3237aedbe45605",
+          "xml_sha256": "2c84d1d0cbc2e23702739c61a158a17dcf85a80ee785fea82055e94446119b4c"
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "7eadb94b4e889fdee7dce28c72d9d2873fd6be9cb43df3e8cfe4d79e53cb3bf1",
+          "xml_sha256": "7f8da5492a0880051e79794f2da9394465c1af33e8291a500d9ddcff79af2008"
+        },
+        {
+          "phase": "mutation",
+          "why": "continue trusting a key cached before another process revoked it",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "46624cd2f219d8afd3ab903f9deb87c3cb88062254defe3c1b3f663530bdfd2e",
+          "xml_sha256": "bbfa96d5bc23cb4238984cc24786e06067f5a261472580125cf296c16037dc2d"
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "5f1119f6399f36283db0eedfbbb413ecc6035a278c6d0f56851c12f43e436c63",
+          "xml_sha256": "cbd7080242cc094fb48194cf057f5dade70f1b209337cb979b1dfd08436ccd90"
+        },
+        {
+          "phase": "mutation",
+          "why": "acknowledge stale enrollment of an already revoked phone key",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "52010ea26f541888299b925c5bef8808c62bbfda773f75e15ac27b59e12f3d8e",
+          "xml_sha256": "f69c9390760d6bed9c8634be78e6b563a45ce2e11fab8100c1eeb86b24eaafa0"
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "cedbea6ac8dafd4901c3061567c7f6a90a953633e80d003e347339fff87c6fc3",
+          "xml_sha256": "524e39fff91cd8714db196529749237a6c2467c2fda8c51742acfad5ef9b25b2"
+        },
+        {
+          "phase": "mutation",
+          "why": "leave a revoked key usable through both physical removal and tombstone exclusion",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "bfbb08e669d8180e014eb8d393383389e4fa0488f4dfde43aeebb845faca0e8d",
+          "xml_sha256": "a8f50173821a4bddb071fbfc55ba582d512f5714a110bd13817edade86667cd7"
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "3be62f393f5921607a873beb897436b1f6af7bf8e959115d728ee0ecc5bd3a34",
+          "xml_sha256": "d92dc2a9f937e9a5eb6129892b0f0ffe29a0a6f9aacf310420e96506446b0499"
+        },
+        {
+          "phase": "mutation",
+          "why": "let a concurrent enrollment overwrite a native revocation tombstone",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "0c317bd4f90857dba6e3690f7da6d20b3a40be4b69673eb751c539d16a8620fd",
+          "xml_sha256": "e8eec56c811588e845d87541f57f68f2d23358ec1892d50f8888b3b2a10121c7"
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "5b19689a97d618d5cdfce632de67285a8efa3c57100a80350a5bb7ca9e05ae34",
+          "xml_sha256": "0604b7e2f849ad6963b4bc1f6ae7519ab4b556aa1d66ae21deda38f05702e44c"
+        },
+        {
+          "phase": "mutation",
+          "why": "silently accept altered native revocation history",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "fd6139292eb595704478e88460551c41fc8ec6a7685afc55cc9702a1cfede58e",
+          "xml_sha256": "a7fd9b28c0d2423ff4beb2d300b07bda3c38a4d262c36e35b7e708cce83c8b65"
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "5b19689a97d618d5cdfce632de67285a8efa3c57100a80350a5bb7ca9e05ae34",
+          "xml_sha256": "acd531cdfa7c24db6e43686dc451f0487a4af3af8b85ad1330de3bc983678379"
+        },
+        {
+          "phase": "mutation",
+          "why": "trust a key registry writable by other users",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "18b3c34b3ef4004ad0186b0c2e41dca1d0732b97a96bd7f693039e0458899473",
+          "xml_sha256": "3c533e4945829b7102dfbec42f14b0bca20337d6aa9f368bc963ca2fd10266c4"
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "049bc25fd9609f7200af5e25ed1a1da1cb610331be91829b224c891be0caf9cb",
+          "xml_sha256": "60447d66c765175bbd7964685497d6467e339fb4b8f4f72e42d4be542a87302c"
+        },
+        {
+          "phase": "mutation",
+          "why": "leave native authority key-file identity outside the signed recovery review",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "e970651163e545db8790ca1b556beb5e7d2257239a402196da229952dcb9ff0e",
+          "xml_sha256": "ba3a7fff35df442d4b5784669cd0153796f0fef6ea29141fc830ff81224bdf2a"
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "6f70c1e001a0c5bc86030e8e530e2e43b4ce3ab06ba4b43c460f708b9858e00b",
+          "xml_sha256": "d1eaea4c9d8aca59d7afa4fb0c89203fa9b6a35ae0ee0437bf64233805ad5cb5"
+        },
+        {
+          "phase": "mutation",
+          "why": "offer a recovery review from an actor with a different authority source",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "e716cda84df91e8320b2546a84d51b7cfd07dfc0a72c7a9250bec5c36e3fc46b",
+          "xml_sha256": "606880aa69f04d2fea4c158db9cd64670b20b89aae78f90d10b8a9e154c30435"
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "3605abb09038ce24e90d81df8f7c0d87bb6f647a5e016bf461d8a8fcb408f6e9",
+          "xml_sha256": "b6e36ef1ad96d535eb92183e564613fac0a6d93d631f357017d43a9e59f54dc3"
+        },
+        {
+          "phase": "mutation",
+          "why": "reactivate a revoked public key by restoring it under a different label",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "b9c388771b4222d86c7e02a77790aeccdd3904dd03ad7a532ff2013ca7a0d1cb",
+          "xml_sha256": "2db7e2f28d5a3b50807cad1a3f628ad22a707bca246443d76d57bc2dae174edf"
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "3605abb09038ce24e90d81df8f7c0d87bb6f647a5e016bf461d8a8fcb408f6e9",
+          "xml_sha256": "d72a4dfdd44d8ebf6cd7fd69426d99b04e853a6d3540c9d2a8a12ea6de6055d0"
+        },
+        {
+          "phase": "mutation",
+          "why": "drop an existing policy alias while enrolling the same public key",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "757309520c5c018f9467c5fedbf8763b01d6cc2643bfc21623029ed3cdd13a46",
+          "xml_sha256": "9501cbaa89facbdaf426490ea8b10a47d87818a1c51515383a0bc2ddc8c19ad9"
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "5b19689a97d618d5cdfce632de67285a8efa3c57100a80350a5bb7ca9e05ae34",
+          "xml_sha256": "73d109f942538a9f226d8eeaf7da99b79c51defe27116aa2afdcb6c6347acafa"
+        },
+        {
+          "phase": "mutation",
+          "why": "mistake a PEM line-ending difference for new key material",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "6c3b16c7e224a5d98a2a6eb23d0909055e9a34d201da45e3a6dc21ca813b63b6",
+          "xml_sha256": "f7e1ffaa60e5757ef714eb50119dbb4e017687262869c6c5f9a7a7dbc28c2452"
+        }
+      ],
+      "source_before_sha256": {
+        "backend/van_gateway/app.py": "c66e85491ca764f5ab118d6771d27ce2183a7d0adb30e4f932254cb0d1be224b",
+        "backend/van_gateway/auth/native_revocation.py": "3af29c82e0a18caf882f8332172b558d122fe35b00bd025d3d5b019906cd1df6",
+        "backend/van_gateway/auth/service.py": "d38b03902d330c1daa74382388d04d35b53281429ee62349c1b0644ac1b55191",
+        "trading/vati/authority_registry.py": "98f52094287444503a07085d29b34044c250f0b4372c92393a31fc4993a885d0",
+        "trading/vati/authority.py": "2eaf5a478bcf31e934a127614d3b0b806df118ba2f552334682956ce5effb9f5",
+        "trading/vati/app/runtime_control_protocol.py": "1540afac2706d407e9ccb86c3ac940f2a7c6ee493481754fe69a976a32a61ea2",
+        "trading/commander/runtime_controls.py": "6f9d6b365c99e0d55e75c7df440104c135064d71aef2fc22ae8bf401e4c55f09"
+      },
+      "source_after_sha256": {
+        "backend/van_gateway/app.py": "c66e85491ca764f5ab118d6771d27ce2183a7d0adb30e4f932254cb0d1be224b",
+        "backend/van_gateway/auth/native_revocation.py": "3af29c82e0a18caf882f8332172b558d122fe35b00bd025d3d5b019906cd1df6",
+        "backend/van_gateway/auth/service.py": "d38b03902d330c1daa74382388d04d35b53281429ee62349c1b0644ac1b55191",
+        "trading/vati/authority_registry.py": "98f52094287444503a07085d29b34044c250f0b4372c92393a31fc4993a885d0",
+        "trading/vati/authority.py": "2eaf5a478bcf31e934a127614d3b0b806df118ba2f552334682956ce5effb9f5",
+        "trading/vati/app/runtime_control_protocol.py": "1540afac2706d407e9ccb86c3ac940f2a7c6ee493481754fe69a976a32a61ea2",
+        "trading/commander/runtime_controls.py": "6f9d6b365c99e0d55e75c7df440104c135064d71aef2fc22ae8bf401e4c55f09"
+      },
+      "source_restored": true,
+      "journal_present": false
+    },
+    "follow_up_source_change": "Readonly original-outcome method/route and its exact enrolment-scope middleware binding added after this matrix. Three status/error tests plus dedicated-scope and hidden-agent controls are included in final155."
+  },
+  "retained_failures": [
+    "4 original gateway/native revocation counterexamples",
+    "1 introduced local-action-vs-native ordering failure, corrected before publishing",
+    "2 authority-file mismatch counterexamples",
+    "1 public key under multiple aliases",
+    "2 same-key enrollment aliases/PEM formatting counterexamples",
+    "3 new readonly status routes initially refused by device middleware until the dedicated control scope was explicitly wired"
+  ],
+  "other_checks": {
+    "rebuild": {
+      "path": "/tmp/van-native-owner-revocation-rebuild-final.txt",
+      "sha256": "c903779018b394020e59e207586d0a70da94ae86b3cf52a084ed17a3f84f076e",
+      "tail": "........................................................................ [ 92%]\n......                                                                   [100%]\n78 passed in 30.40s\n"
+    },
+    "owner-contracts": {
+      "path": "/tmp/van-native-owner-revocation-owner-contracts-final.txt",
+      "sha256": "9f62eb9a78d0bfe9e0618cab50609c459867338134f48430b253d60776c8eb9d",
+      "tail": "...................                                                      [100%]\n19 passed in 3.55s\n"
+    },
+    "consolidation": {
+      "path": "/tmp/van-native-owner-revocation-consolidation.txt",
+      "sha256": "d87b8fe5f7b2b4ca7312b9ba93c4e1aa24ae2301f775aa6f915d81572aec7870",
+      "tail": "{\n  \"scope\": \"SOURCE_CONSOLIDATION_ONLY\",\n  \"branches_evaluated\": 70,\n  \"blueprint_archive_sha256\": \"6c7c7c1cb4fbd4748c0d63ceb2add9bd460778b66fb3b2302e16de09ac3a57a8\",\n  \"findings\": [],\n  \"runtime_qualification_issued\": false\n}\n"
+    }
+  },
+  "api_scope": "Existing internal DEVICE_ENROLMENT administration purpose only. Owner/agent/shared runtime tokens gain no new native mutation authority. Readonly original status route never dispatches.",
+  "qualification": "Source-only gateway/native protocol, actual P256 and SQLite/PostgreSQL/filesystem/independent-process tests. No newfrontend/BG001, native host/provider/production/biometric/S24, independent or whole-unit acceptance. Original programme/frozen package preserved.",
+  "registry": {
+    "endpoints": 445,
+    "schemas": 279,
+    "current_features": 42,
+    "current_surfaces": 78,
+    "planned_features_preserved": 93,
+    "status_reader": "GET /v1/devices/{device_id}/revocations/{operation_id}",
+    "new_ui_implemented": false
+  }
+}

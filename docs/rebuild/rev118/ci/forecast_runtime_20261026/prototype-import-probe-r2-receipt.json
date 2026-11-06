@@ -1,0 +1,36 @@
+{
+  "status": "FAILED_IMPORT_PROBE",
+  "container": "van-ml004-import-probe-20261026",
+  "image_id": "sha256:d329d19854d7c1f414def27e5d681f050562cd32a506e56e274171b65d9124e1",
+  "created": true,
+  "removed": true,
+  "reused_reconciled_container": "2268273d00889c267c493fe0e637b43c58db50359830b2f4e3706d2e3b71bc71",
+  "exit": 1,
+  "state": {
+    "Status": "exited",
+    "Running": false,
+    "Paused": false,
+    "Restarting": false,
+    "OOMKilled": false,
+    "Dead": false,
+    "Pid": 0,
+    "ExitCode": 1,
+    "Error": "",
+    "StartedAt": "2026-10-26T03:15:14.825051796Z",
+    "FinishedAt": "2026-10-26T03:15:24.640925201Z"
+  },
+  "enforced_configuration": {
+    "Memory": 6442450944,
+    "NanoCpus": 2000000000,
+    "PidsLimit": 256,
+    "ReadonlyRootfs": true,
+    "NetworkMode": "none",
+    "CapDrop": [
+      "ALL"
+    ],
+    "SecurityOpt": [
+      "no-new-privileges"
+    ]
+  },
+  "owned_adopted_children_reaped": []
+}

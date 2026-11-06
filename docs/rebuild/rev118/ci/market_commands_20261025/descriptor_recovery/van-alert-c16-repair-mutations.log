@@ -1,0 +1,19 @@
+
+### ['tests/test_irreversible_work_waits_on_assumptions.py', 'tests/test_authority_descriptor.py']
+CAUGHT             C16 drop the gate from the execution ingress
+CAUGHT             C16 an undeclared reversibility is assumed reversible
+CAUGHT             C16 an action with no mission is waved through
+CAUGHT             C16 falsifying needs no evidence again
+CAUGHT             C16 a caller may assert expiry
+CAUGHT             C16 supersession need not name a replacement
+CAUGHT             C16 cite another mission's assumption as the replacement
+CAUGHT             C16 an assumption supersedes itself
+CAUGHT             C16 expiry reports a count that is always zero
+CAUGHT             C16 the orchestrator stops asking the descriptor
+CAUGHT             C16 A4 no longer needs owner approval
+CAUGHT             C16 A5 is no longer refused
+
+12/12 caught
+
+================ SURVIVORS ================
+none

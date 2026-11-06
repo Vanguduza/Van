@@ -1,0 +1,94 @@
+{
+  "checks": [
+    {
+      "label": "guard-owner",
+      "command": [
+        "/workspace/van-backend-venv-20261025/bin/python",
+        "-B",
+        "tools/rebuild/refresh_owner_source_contracts.py",
+        "--check"
+      ],
+      "exit": 0,
+      "seconds": 32.613,
+      "reason": null,
+      "group_absent": true,
+      "output": "/dev/shm/van-depth-main-integration-20261102/guard-owner.txt",
+      "sha256": "35a9b4641c85055b16c3a6458a7b1f99fb5df7ec0f5a6280ca45c3ab14cd7103"
+    },
+    {
+      "label": "guard-frontend",
+      "command": [
+        "/workspace/van-backend-venv-20261025/bin/python",
+        "-B",
+        "tools/rebuild/render_frontend_registry.py",
+        "--check"
+      ],
+      "exit": 0,
+      "seconds": 0.206,
+      "reason": null,
+      "group_absent": true,
+      "output": "/dev/shm/van-depth-main-integration-20261102/guard-frontend.txt",
+      "sha256": "69dcc86a9d7aaffcadf4a70e58b379d8452c124dadc4347afbc9e57fbab7ae85"
+    },
+    {
+      "label": "guard-workmap",
+      "command": [
+        "/workspace/van-backend-venv-20261025/bin/python",
+        "-B",
+        "tools/rebuild/workmap.py",
+        "--check"
+      ],
+      "exit": 0,
+      "seconds": 0.41,
+      "reason": null,
+      "group_absent": true,
+      "output": "/dev/shm/van-depth-main-integration-20261102/guard-workmap.txt",
+      "sha256": "6e20f8f2172ee5c1d1fce0a0c754de3b77fe5a107aa568cdf51b6c0797a54037"
+    },
+    {
+      "label": "guard-consolidation",
+      "command": [
+        "/workspace/van-backend-venv-20261025/bin/python",
+        "-B",
+        "tools/consolidation/verify.py"
+      ],
+      "exit": 0,
+      "seconds": 0.613,
+      "reason": null,
+      "group_absent": true,
+      "output": "/dev/shm/van-depth-main-integration-20261102/guard-consolidation.txt",
+      "sha256": "d87b8fe5f7b2b4ca7312b9ba93c4e1aa24ae2301f775aa6f915d81572aec7870"
+    },
+    {
+      "label": "guard-mutation-consistency",
+      "command": [
+        "/workspace/van-backend-venv-20261025/bin/python",
+        "-B",
+        "tools/rebuild/mutation_registry.py",
+        "--check"
+      ],
+      "exit": 0,
+      "seconds": 0.204,
+      "reason": null,
+      "group_absent": true,
+      "output": "/dev/shm/van-depth-main-integration-20261102/guard-mutation-consistency.txt",
+      "sha256": "65eff7a24f4dbb5a29bcb0010ea20f185bc2d64e425a2ec484aeddb1e874f2b1"
+    },
+    {
+      "label": "guard-whole-product-documentary",
+      "command": [
+        "/workspace/van-backend-venv-20261025/bin/python",
+        "-B",
+        "docs/review-inputs/van-rev115/package/verification/verify_whole_product.py"
+      ],
+      "exit": 0,
+      "seconds": 1.007,
+      "reason": null,
+      "group_absent": true,
+      "output": "/dev/shm/van-depth-main-integration-20261102/guard-whole-product-documentary.txt",
+      "sha256": "0f30986212e6bf92a6b1750e69257d50a2524b7bf0126c9391b66b0d6955e37c"
+    }
+  ],
+  "mutation_consistency_only_not_execution": true,
+  "source198_not_rerun_inputs_exact": true
+}

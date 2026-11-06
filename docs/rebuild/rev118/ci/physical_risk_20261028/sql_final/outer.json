@@ -1,0 +1,15 @@
+{
+  "command": [
+    "python3",
+    "/workspace/van-physical-risk-integrated-sql-r3-20261028.py"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 45333,
+  "started_at_utc": "2026-10-28T04:19:54.308553+00:00",
+  "timeout_seconds": 1950,
+  "state": "COMPLETED",
+  "command_pid": 45335,
+  "exit": 0,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-28T04:21:04.566095+00:00"
+}

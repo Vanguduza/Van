@@ -1,0 +1,27 @@
+{
+  "schema": "van.source-packet-metrics/1",
+  "base": "9cfde69c38bc39a54875c2a9bf60c6269f363d64",
+  "author_executions": 117,
+  "author_unique_including_skips": 115,
+  "author_distinct_PASS": 113,
+  "author_distinct_PG_skips": 2,
+  "cross_CWD_repeats": 2,
+  "independent_executions": 3,
+  "independent_distinct_PASS": 3,
+  "independent_not_added_to_author_union": true,
+  "related_semantic_PASS": 40,
+  "source_workflow_ids_closed": null,
+  "unit_exit_established": false,
+  "measured_author_elapsed_s": [
+    139.475,
+    79.153,
+    46.08
+  ],
+  "measured_author_elapsed_sum_s": 264.708,
+  "newhead_CI": null,
+  "implementation_elapsed_s": null,
+  "blocked_s": null,
+  "model_usage": null,
+  "model_cost": null,
+  "old44": "FAILEDcontroller146298491B/over128MiB/CHILD_EXIT_UNKNOWN/no reapclaim; correctedhelper twoactualpreflights+genuine45A45B46terminal0 retained"
+}

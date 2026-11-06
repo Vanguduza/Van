@@ -1,0 +1,12 @@
+{
+  "result": "PASS",
+  "all_three_prefix_values_unchanged": true,
+  "row_count": 3,
+  "aged_updated_at_ms": 1,
+  "prune_horizon_years": 5,
+  "legacy_retry_after_reconnect_status": 409,
+  "completed_original_status": 200,
+  "credential_replacement_preserved": true,
+  "retention_owner_policy": "runtime_meta/google_connections/google_capability_connections remain OWNER_STATE no ordinary age-prune; explicit owner privacy erase policy not changed/tested",
+  "owned_tmp_cleanup": true
+}

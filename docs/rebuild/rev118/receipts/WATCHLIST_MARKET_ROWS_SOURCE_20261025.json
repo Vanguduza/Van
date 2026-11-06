@@ -1,0 +1,90 @@
+{
+  "schema": "van.rebuild.watchlist-market-rows-source/1",
+  "parent_source_head": "689dfd4a9b83d7597092fb14c0f77a823281ad95",
+  "status": "CANDIDATE_SOURCE_EVIDENCE",
+  "canonical_units": [
+    "BE-020"
+  ],
+  "unit_acceptance": "NOT_ISSUED",
+  "source_sha256": {
+    "backend/van_gateway/trading/watchlist_projection.py": "0dca766c39072cc4c7a87e0e18a1a9f98ebb078540593e6359c615ef7a8d5056",
+    "backend/van_gateway/trading/monitor_models.py": "59a3c3e5caeb0624987e08f209936bb7621445454f4ae4bc67898733ce412715",
+    "backend/van_gateway/trading/monitor_service.py": "3345f4ae60cd8ab71a63a36eabd7a01315541d71d1c3c512c968f4617683fc14",
+    "backend/van_gateway/trading/monitor_api.py": "c92e8972c08410135a54609fe960ee1640f23f25cede673d154e86fefec814af",
+    "backend/tests/test_watchlist_market_projection.py": "205c6aeab452d6ea2673f34b5dbf01a556f0f9707f83a8fb8f707284689a6c5b",
+    "backend/tests/test_market_monitor_gateway.py": "37597c17f0f832ea01c4528d6cbb7e07bbf5b51bf5f11ccd7ed5e9f62eb83f84",
+    "tools/rebuild/refresh_owner_source_contracts.py": "f737391be4e3a484428256a0b0ec1b574fef0a8eb93b7018be7eb07965ba9400"
+  },
+  "reports": {
+    "van-watchlist-projection-final-r3.xml": {
+      "file": "docs/rebuild/rev118/ci/watchlist_rows_20261025/van-watchlist-projection-final-r3.xml",
+      "sha256": "3cc8631129e1b146f7bd689eedfdd03c7b85b592763a91e836a3661bc6b0d136",
+      "tests": 22,
+      "passed": 19,
+      "failures": 2,
+      "errors": 1,
+      "skipped": 0
+    },
+    "van-watchlist-projection-integration-r2.xml": {
+      "file": "docs/rebuild/rev118/ci/watchlist_rows_20261025/van-watchlist-projection-integration-r2.xml",
+      "sha256": "461ede0c83a8fc5592d9a89148dc85dd583e472b31263ffb7f7922ab8e04d43a",
+      "tests": 3,
+      "passed": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "van-watchlist-projection-pure-r2.xml": {
+      "file": "docs/rebuild/rev118/ci/watchlist_rows_20261025/van-watchlist-projection-pure-r2.xml",
+      "sha256": "2c4e00851a648b6ac7770f2d21f4ee376ddc0c4de438a89d887b2ca805618147",
+      "tests": 19,
+      "passed": 19,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "van-watchlist-projection-r1.xml": {
+      "file": "docs/rebuild/rev118/ci/watchlist_rows_20261025/van-watchlist-projection-r1.xml",
+      "sha256": "bd1df11a1264a51fa7cfe5e18138c62c611330e5615e25601c510a176a798708",
+      "tests": 26,
+      "passed": 17,
+      "failures": 4,
+      "errors": 5,
+      "skipped": 0
+    }
+  },
+  "test_interpretation": {
+    "r1": "17passed; two new pure-test fixture/oracle defects (permitted decimal spelling and a tiny-value bar fixture using an exponent price) corrected without changing numerical postconditions. Two actual SQL tests and five HTTP setups failed at native worker thread creation; no product result obtained for those cases.",
+    "pure_r2": "19pure calculation/sort/filter/scope/freshness cases pass.",
+    "integration_r2": "Both actual SQL/CAS/concurrent edit/clock rollback cases and the new actual paired HTTP case pass (3/3, zero skips).",
+    "final_r3": "After distinguishing source exceptions as SOURCE_READ_FAILED, all19pure cases pass; the unchanged two SQL and one HTTP cases fail at native worker creation. Failed latest run retained; no single current green22-case run claimed."
+  },
+  "registry": {
+    "feature_groups": 42,
+    "original_function_ids_preserved": 105,
+    "surfaces": 78,
+    "endpoints": 479,
+    "previous_endpoints_preserved": 478,
+    "new_market_row_endpoints": 1,
+    "api_schemas": 369,
+    "original_schema_names_preserved": 333,
+    "source_contract_check": "PASS_ZERO_CHANGES",
+    "markdown": "backend/OWNER_FRONTEND_SCREEN_REGISTRY.md"
+  },
+  "source_scope": [
+    "Captured watchlist revision/hash; saved order/direction/favourites and bounded literal search/native venue/environment/API family filters.",
+    "Exact closed-bar close, previous-contiguous-bar percentage with reference/interval, source hash/revision/availability and per-row age.",
+    "Stable equal-value owner order; absent numeric metrics last for either direction; missing spread never zero.",
+    "Read-only actual owner/device API; no events, requests, mutations, subscriptions or trading authority created.",
+    "Foreign/stale/future/corrupt/missing/source-failure facts unavailable; no private source errors exposed; clock rollback refuses whole response."
+  ],
+  "remaining": [
+    "Full qualified native feed/quote/spread and session-change producers.",
+    "Dynamic candidate/exposure/news/near-alert lists.",
+    "Voice typed-action catalog and Android consumers; independent/provider/native acceptance."
+  ],
+  "formal_acceptances_issued": [],
+  "native_or_live_feed_qualified": false,
+  "financial_effects_authorized_or_performed": false,
+  "frozen_package_changed": false
+}

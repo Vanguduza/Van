@@ -1,0 +1,62 @@
+{
+  "schema_version": "1.0",
+  "record_id": "fixture:EventProbabilitySnapshot",
+  "environment": "FIXTURE",
+  "authority_effect": "NONE",
+  "evidence_refs": [
+    "fixture:synthetic-only-not-real-evidence"
+  ],
+  "source_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "canonical_event_id": "fixture:CPI-2026-10",
+  "proposition_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "as_of": "2026-10-17T11:00:00Z",
+  "max_input_available_at": "2026-10-17T11:00:00Z",
+  "scheduled_release_at": "2026-10-17T14:30:00Z",
+  "estimate_kind": "MARKET_IMPLIED",
+  "distribution_representation": "EXCLUSIVE_EXHAUSTIVE_BINS",
+  "raw_probabilities": [
+    {
+      "outcome": "BELOW3",
+      "probability": 0.2
+    },
+    {
+      "outcome": "3TO4",
+      "probability": 0.6
+    },
+    {
+      "outcome": "ATLEAST4",
+      "probability": 0.2
+    }
+  ],
+  "calibrated_probabilities": null,
+  "thresholds": [
+    {
+      "threshold": 3,
+      "survival_probability": 0.8
+    },
+    {
+      "threshold": 4,
+      "survival_probability": 0.2
+    }
+  ],
+  "tail_policy": "OPEN_TAILS_NO_MEAN_WITHOUT_ASSUMPTIONS",
+  "estimator_policy_ref": "fixture:midpoint-with-quality",
+  "adjustment_policy_ref": null,
+  "calibrator_ref": null,
+  "event_count": 0,
+  "source_count": 2,
+  "source_names": [
+    "KALSHI",
+    "POLYMARKET"
+  ],
+  "source_event_ids": [
+    "fixture:CPI-2026-10",
+    "fixture:CPI-2026-10"
+  ],
+  "agreement_state": "MATCHED_TWO_SOURCES",
+  "agreement_proves_independence": false,
+  "status": "READY_FOR_RESEARCH",
+  "armed_eligible": false,
+  "origin_event_id_for_change": "fixture:CPI-2026-10",
+  "armed_eligibility_evidence_ref": null
+}

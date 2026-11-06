@@ -1,0 +1,17 @@
+............F............                                                [100%]
+=================================== FAILURES ===================================
+_ test_same_subject_identifier_in_different_subject_kinds_keeps_distinct_impacts _
+
+    def test_same_subject_identifier_in_different_subject_kinds_keeps_distinct_impacts():
+        news=NewsIngress();h=story();news.ingest(h)
+        a=news.assess(h,subject_kind='POSITION',subject_id='same',symbol='EURUSD',now_ms=NOW)
+        b=news.assess(h,subject_kind='CANDIDATE',subject_id='same',symbol='EURUSD',now_ms=NOW)
+>       assert a.impact_id!=b.impact_id
+E       AssertionError: assert '45db7ca3174faee0b13c3263' != '45db7ca3174faee0b13c3263'
+E        +  where '45db7ca3174faee0b13c3263' = EventImpactAssessment(impact_id='45db7ca3174faee0b13c3263', headline_id='138bd873f2a6c652858d8f2f466ac369', subject_ki...66ac369cd194fb68ff43f2a00a3d50a892ec36f', 'publisher'), assessed_ms=1800000000000, impact_version='event-impact/5.1.1').impact_id
+E        +  and   '45db7ca3174faee0b13c3263' = EventImpactAssessment(impact_id='45db7ca3174faee0b13c3263', headline_id='138bd873f2a6c652858d8f2f466ac369', subject_ki...66ac369cd194fb68ff43f2a00a3d50a892ec36f', 'publisher'), assessed_ms=1800000000000, impact_version='event-impact/5.1.1').impact_id
+
+trading/tests/test_news_causal_boundaries.py:72: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_news_causal_boundaries.py::test_same_subject_identifier_in_different_subject_kinds_keeps_distinct_impacts
+1 failed, 24 passed in 0.40s

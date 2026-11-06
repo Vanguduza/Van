@@ -1,0 +1,36 @@
+F
+=================================== FAILURES ===================================
+_ test_growing_native_record_is_read_with_a_real_bound_even_after_a_small_stat _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-562/test_growing_native_record_is_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f8f657e5640>
+
+    def test_growing_native_record_is_read_with_a_real_bound_even_after_a_small_stat(tmp_path,monkeypatch):
+        target=tmp_path/'growing.json';target.write_bytes(b'x'*5000)
+        stat=Path.stat;opened=Path.open;requests=[]
+        class Tracked:
+            def __init__(self,raw):self.raw=raw
+            def __enter__(self):return self
+            def __exit__(self,*exc):self.raw.close()
+            def read(self,size=-1):requests.append(size);return self.raw.read(size)
+        def small(path,*args,**kwargs):
+            value=stat(path,*args,**kwargs)
+            return SimpleNamespace(st_size=1) if path==target and kwargs.get('follow_symlinks',True) else value
+        def track(path,*args,**kwargs):
+            value=opened(path,*args,**kwargs)
+            return Tracked(value) if path==target else value
+        monkeypatch.setattr(native_archive,'MAX_RECORD_BYTES',64)
+        monkeypatch.setattr(Path,'stat',small);monkeypatch.setattr(Path,'open',track)
+        with pytest.raises(ValueError,match='resource bound'):NativeMarketArchive._read(target)
+>       assert requests==[65],'native source consumed an unbounded record after its pre-read stat'
+E       AssertionError: native source consumed an unbounded record after its pre-read stat
+E       assert [-1] == [65]
+E         
+E         At index 0 diff: -1 != 65
+E         Use -v to get more diff
+
+trading/tests/test_native_archive_read_budget.py:31: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_native_archive_read_budget.py::test_growing_native_record_is_read_with_a_real_bound_even_after_a_small_stat
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed in 0.84s

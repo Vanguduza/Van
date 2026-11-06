@@ -1,0 +1,27 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_________ test_queue_wait_rechecks_expiry_under_actual_sql_writer_lock _________
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-14/test_queue_wait_rechecks_expir0')
+
+    @pytest.mark.asyncio
+    async def test_queue_wait_rechecks_expiry_under_actual_sql_writer_lock(tmp_path):
+        clock=[1000000]
+        s=await service(tmp_path,clock=lambda:clock[0]); alert=await create_alert(s)
+        ctx=await command(s,alert.object_id)
+        async with s.store.connection() as db:
+            await db.execute('BEGIN IMMEDIATE')
+            task=asyncio.create_task(AlertControlExecutor().execute(ctx))
+            try:
+                await asyncio.sleep(.05)
+                assert not task.done()
+                clock[0]=1020000
+                await db.rollback()
+>               with pytest.raises(LocalExecutionError,match='MONITOR_COMMAND_EXPIRED'):
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               Failed: DID NOT RAISE LocalExecutionError
+
+backend/tests/test_market_monitor_commands.py:194: Failed
+=========================== short test summary info ============================
+FAILED backend/tests/test_market_monitor_commands.py::test_queue_wait_rechecks_expiry_under_actual_sql_writer_lock
+1 failed in 2.37s

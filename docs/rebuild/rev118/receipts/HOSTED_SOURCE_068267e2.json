@@ -1,0 +1,1988 @@
+{
+  "source_head": "068267e2901d0e1d62c29d101e83860916461bec",
+  "tested_merge": "8b3dbbde0f1f1c19dfef2525e284c0eb4afa73e4",
+  "run_id": 40454839376,
+  "status": "TERMINAL_FAILURE_MANDATORY_PREREQUISITES_UNWAIVED",
+  "public_jobs_success": 17,
+  "public_backend_job": "SUCCESS; actual gateway5854/7 and media198, coverage verify and artifact upload succeeded",
+  "public_source_selection_hashes_and_canonical_verify_match_exact_committed_head": true,
+  "mandatory_unwaived_failures": [
+    "missing private DDS deploy key",
+    "absent trusted-main checker"
+  ],
+  "junit": {
+    "van-market-monitor-source/report.xml": {
+      "passed": 258,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-browser-guard-source/uid-report.xml": {
+      "passed": 1,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-browser-guard-source/full-report.xml": {
+      "passed": 1547,
+      "skips": 1,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-browser-guard-source/report.xml": {
+      "passed": 11,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-browser-guard-source/firewall-report.xml": {
+      "passed": 10,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-postgres-ledger-report/trading-source-report.xml": {
+      "passed": 4351,
+      "skips": 1,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-postgres-ledger-report/voice-source-report.xml": {
+      "passed": 117,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-postgres-ledger-report/postgres-ledger-report.xml": {
+      "passed": 26,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-python-results/cognitive-broad.xml": {
+      "passed": 4143,
+      "skips": 245,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-python-results/cognitive-focused.xml": {
+      "passed": 79,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-actual-release-guards/report.xml": {
+      "passed": 2,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-backend-public-source/media-report.xml": {
+      "passed": 198,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-backend-public-source/gateway-report.xml": {
+      "passed": 5854,
+      "skips": 7,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-native-source-parquet-report/report.xml": {
+      "passed": 114,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.session.DurableOutboxTest.xml": {
+      "passed": 14,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.VitsSpeakerIdentityTest.xml": {
+      "passed": 4,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.BrowserVisualStateTest.xml": {
+      "passed": 10,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.telemetry.DeviceTelemetryTest.xml": {
+      "passed": 13,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.mission.MissionExecutionControlTest.xml": {
+      "passed": 3,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.visual.VanFlameAuraTest.xml": {
+      "passed": 16,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.overlay.OverlayVisibilityPolicyTest.xml": {
+      "passed": 11,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.session.SessionDownstreamTest.xml": {
+      "passed": 9,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.security.DeviceProofQueryTargetTest.xml": {
+      "passed": 1,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.dialdev.DialDevActionsTest.xml": {
+      "passed": 13,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.trading.TradingFormatTest.xml": {
+      "passed": 11,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.onboarding.OnboardingPlanTest.xml": {
+      "passed": 9,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.overlay.VanOverlayControllerTest.xml": {
+      "passed": 8,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.gateway.ReplayTriggerTest.xml": {
+      "passed": 8,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.visual.VanAuraPlanTest.xml": {
+      "passed": 9,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.SpeechFusionEngineTest.xml": {
+      "passed": 10,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.session.SessionOutboxDurabilityTest.xml": {
+      "passed": 11,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.BrowserDownloadReviewTest.xml": {
+      "passed": 6,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.BrowserExternalLinkTest.xml": {
+      "passed": 4,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.DelayedAnswerPolicyTest.xml": {
+      "passed": 4,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.command.jev.JevRouteTest.xml": {
+      "passed": 1,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.trading.TradingReadModelsTest.xml": {
+      "passed": 12,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.SpeakerCaptureJobTest.xml": {
+      "passed": 5,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.SpeechQueueContinuityTest.xml": {
+      "passed": 8,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.session.VanHermesSessionManagerTest.xml": {
+      "passed": 21,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.dialdev.DialDevOutcomeRecoveryTest.xml": {
+      "passed": 6,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.BrowserControlMutationTest.xml": {
+      "passed": 16,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.gateway.GatewayRetryTest.xml": {
+      "passed": 11,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.GatewaySpeechDeliveryTest.xml": {
+      "passed": 9,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.ActivityLifetimeContractTest.xml": {
+      "passed": 3,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.SuggestionPolicyTest.xml": {
+      "passed": 6,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.connectivity.ConnectivityTrustedKeysTest.xml": {
+      "passed": 5,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.visual.VanMotionMapTest.xml": {
+      "passed": 4,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.dialdev.DialDevOriginalOperationsTest.xml": {
+      "passed": 14,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.trading.ChartGeometryTest.xml": {
+      "passed": 6,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.BrowserOmniboxTest.xml": {
+      "passed": 11,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.design.MotionSpecTest.xml": {
+      "passed": 6,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.visual.VanEmbodimentReducerTest.xml": {
+      "passed": 30,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.AcousticDeliveryTest.xml": {
+      "passed": 6,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.BrowserFileProviderTest.xml": {
+      "passed": 16,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.command.connected.ConnectedReadbackTest.xml": {
+      "passed": 4,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.dialdev.DialDevModelsTest.xml": {
+      "passed": 21,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.overlay.OverlayDragControllerTest.xml": {
+      "passed": 14,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.events.EventStreamTest.xml": {
+      "passed": 16,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.cognitive.CognitiveTwinTest.xml": {
+      "passed": 2,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.VoiceRecognitionPolicyTest.xml": {
+      "passed": 11,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.visual.VanDesignRolesTest.xml": {
+      "passed": 4,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.projects.ProjectModelsTest.xml": {
+      "passed": 18,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.VoiceAssetManifestTest.xml": {
+      "passed": 10,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.memory.LearningProducerTest.xml": {
+      "passed": 3,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.security.Pkcs10Test.xml": {
+      "passed": 3,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.events.VanEventStreamStoreTest.xml": {
+      "passed": 8,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.BrowserUploadPolicyTest.xml": {
+      "passed": 11,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.visual.VanStatePriorityTest.xml": {
+      "passed": 3,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.telemetry.BrowserStreamTelemetryTest.xml": {
+      "passed": 15,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.mission.MissionSelectionTest.xml": {
+      "passed": 5,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.security.MutualTlsScopeTest.xml": {
+      "passed": 7,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.status.VanCommandStatusTest.xml": {
+      "passed": 6,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.visual.VanFrameBudgetTest.xml": {
+      "passed": 9,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.session.RestartSeamTest.xml": {
+      "passed": 8,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.connectivity.ProvisioningRecoveryTest.xml": {
+      "passed": 10,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.design.DensityTierTest.xml": {
+      "passed": 4,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.ViewportSwapTest.xml": {
+      "passed": 9,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.design.LiveBadgeFormatTest.xml": {
+      "passed": 7,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.ResizeCoalescerTest.xml": {
+      "passed": 10,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.command.owner.OwnerServicePresentationTest.xml": {
+      "passed": 10,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.trading.TradingTicketsTest.xml": {
+      "passed": 5,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.projects.ProjectSourceReadTest.xml": {
+      "passed": 5,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.command.nav.VanNavModelTest.xml": {
+      "passed": 27,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.dialdev.DialDevSemanticsTest.xml": {
+      "passed": 11,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.status.OwnerSourceReadTest.xml": {
+      "passed": 5,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.connectivity.SignedConnectivityRoutingTest.xml": {
+      "passed": 4,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.connectivity.ProvisioningPayloadTest.xml": {
+      "passed": 21,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.command.owner.OwnerAutomationDraftTest.xml": {
+      "passed": 4,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.telemetry.SessionTelemetryTest.xml": {
+      "passed": 8,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.security.AttestationChallengeTest.xml": {
+      "passed": 3,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.session.WarmStandbyIsPolicyNotTransportTest.xml": {
+      "passed": 3,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.share.ShareIntakeTest.xml": {
+      "passed": 7,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.command.settings.DomainAutonomyCommandTest.xml": {
+      "passed": 3,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.VoiceTurnLifecycleTest.xml": {
+      "passed": 3,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.OfflineVoiceEndpointTest.xml": {
+      "passed": 4,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.session.TransportSupervisorTest.xml": {
+      "passed": 10,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.PreRollPolicyTest.xml": {
+      "passed": 4,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.trading.NativeBalanceSourceContractTest.xml": {
+      "passed": 2,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.visual.VanPaletteTest.xml": {
+      "passed": 8,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.SpeechPlaybackStateTest.xml": {
+      "passed": 9,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.AndroidOfflineTtsReadinessTest.xml": {
+      "passed": 12,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.LocalTtsRouterTest.xml": {
+      "passed": 11,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.degraded.SubsystemHealthTest.xml": {
+      "passed": 9,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.BrowserInputProtocolTest.xml": {
+      "passed": 6,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.control.VanCommandControllerTest.xml": {
+      "passed": 9,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.session.OutboxPolicyTest.xml": {
+      "passed": 4,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.trading.CurrentAccountRiskTest.xml": {
+      "passed": 2,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.memory.OwnerMemoryDeclarationsTest.xml": {
+      "passed": 4,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.session.SessionReconciliationTest.xml": {
+      "passed": 10,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.gateway.GatewayMutationRetryTest.xml": {
+      "passed": 4,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.BrowserActionPlanTest.xml": {
+      "passed": 7,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.session.WarmStandbyPolicyTest.xml": {
+      "passed": 10,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.BrowserShortcutStoreTest.xml": {
+      "passed": 11,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.command.settings.OwnerPermissionDraftTest.xml": {
+      "passed": 4,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.SpeechCueTimingTest.xml": {
+      "passed": 8,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.ViewportChromeClassTest.xml": {
+      "passed": 2,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.trading.TradingNavigationTest.xml": {
+      "passed": 4,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.memory.MemoryModelsTest.xml": {
+      "passed": 12,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.VoiceSecondPassPolicyTest.xml": {
+      "passed": 5,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.command.jev.JevBrowserLaneTest.xml": {
+      "passed": 2,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.BrowserSessionRecordsTest.xml": {
+      "passed": 4,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.SpeakerEvidenceRemovalTest.xml": {
+      "passed": 1,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.OfflineSpeechCoverageTest.xml": {
+      "passed": 3,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.command.attention.OwnerDecisionTest.xml": {
+      "passed": 5,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.mission.MissionInterventionTest.xml": {
+      "passed": 3,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.session.ResumePolicyTest.xml": {
+      "passed": 7,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.command.work.ConversationReducerTest.xml": {
+      "passed": 9,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.memory.MemoryEffectReceiptTest.xml": {
+      "passed": 2,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.design.ScreenStateTest.xml": {
+      "passed": 17,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.BrowserBackPolicyTest.xml": {
+      "passed": 4,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.trading.ChartViewportTest.xml": {
+      "passed": 16,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.AudioFocusPolicyTest.xml": {
+      "passed": 5,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.visual.VanAnimationClockTest.xml": {
+      "passed": 13,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.SpeakerEnrollmentPolicyTest.xml": {
+      "passed": 22,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.BargeInPolicyTest.xml": {
+      "passed": 6,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.session.SessionEnvelopeTest.xml": {
+      "passed": 6,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.design.charts.ChartAxesTest.xml": {
+      "passed": 12,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.visual.VanAuraVoiceReactivityTest.xml": {
+      "passed": 6,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.design.StatusSemanticsTest.xml": {
+      "passed": 5,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.BrowserStreamMetadataTest.xml": {
+      "passed": 7,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.dialdev.DialDevEnvelopeTest.xml": {
+      "passed": 16,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.BrowserSurfaceCoordinatesTest.xml": {
+      "passed": 3,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.session.HttpSessionCarrierTest.xml": {
+      "passed": 3,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.ContentViewportTest.xml": {
+      "passed": 3,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.VoiceTurnTest.xml": {
+      "passed": 3,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.UploadAcceptMatchingTest.xml": {
+      "passed": 7,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.BrowserTransfersTest.xml": {
+      "passed": 5,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.session.OutboxPersistenceTest.xml": {
+      "passed": 10,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.OfflineCommandClassifierTest.xml": {
+      "passed": 7,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.session.CommandLifecycleKillSweepTest.xml": {
+      "passed": 5,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.BrowserGestureSequencerTest.xml": {
+      "passed": 10,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.BrowserFileInspectionTest.xml": {
+      "passed": 4,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.session.FailoverTransactionTest.xml": {
+      "passed": 9,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.status.OwnerStatusProjectionTest.xml": {
+      "passed": 10,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.session.OfflineSubmissionTest.xml": {
+      "passed": 12,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.status.OwnerLanguageTest.xml": {
+      "passed": 17,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.command.nav.ConcreteRouteRestorationTest.xml": {
+      "passed": 3,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.session.OwnerReconfirmationSurfaceTest.xml": {
+      "passed": 6,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.command.work.GmailApprovalPreviewTest.xml": {
+      "passed": 3,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.trading.AccountMarginTest.xml": {
+      "passed": 3,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.telemetry.DecoderStatsTest.xml": {
+      "passed": 5,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.BrowserProcessRecoveryTest.xml": {
+      "passed": 10,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.WakeModelAssetTest.xml": {
+      "passed": 7,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.notification.NotificationAppCatalogueTest.xml": {
+      "passed": 2,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.session.UnboundEnvelopeTest.xml": {
+      "passed": 5,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.trading.NativeAccountObservationTest.xml": {
+      "passed": 5,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.status.OwnerOverviewTest.xml": {
+      "passed": 10,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.mission.MissionSummaryTest.xml": {
+      "passed": 10,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.SpeechQueueTest.xml": {
+      "passed": 10,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.trading.TradingRuntimeReadModelTest.xml": {
+      "passed": 5,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.degraded.GatewayDegradedMappingTest.xml": {
+      "passed": 7,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.connectivity.ConnectivityManifestTest.xml": {
+      "passed": 10,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.trading.FundingSourceContractTest.xml": {
+      "passed": 3,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.trading.CognitionHierarchyContractTest.xml": {
+      "passed": 2,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.visual.VanTradeSemanticTest.xml": {
+      "passed": 22,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.memory.DerivedMemoryRecordTest.xml": {
+      "passed": 4,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.command.jev.JevModelsTest.xml": {
+      "passed": 5,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.security.CrossLanguageVectorsTest.xml": {
+      "passed": 5,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.runtime.VanResourceEnvelopeTest.xml": {
+      "passed": 20,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.degraded.DegradedModeStoreGatewayHealthTest.xml": {
+      "passed": 5,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.BrowserTabsTest.xml": {
+      "passed": 13,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.BrowserKeyMappingTest.xml": {
+      "passed": 4,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/app/build/reports/lint-results-debug.xml": {
+      "passed": 0,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.trading.StrategyPromotionVerificationTest.xml": {
+      "passed": 3,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.mission.MissionSurfaceTest.xml": {
+      "passed": 11,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.trading.AccountUnlinkReviewTest.xml": {
+      "passed": 6,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.queue.EncryptedCommandQueueLogicTest.xml": {
+      "passed": 5,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.trading.NativeBalancePeriodTest.xml": {
+      "passed": 2,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.trading.ChartGeometryTest.xml": {
+      "passed": 4,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.design.MotionSpecTest.xml": {
+      "passed": 3,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.voice.VoiceSecondPassTest.xml": {
+      "passed": 6,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.visual.VanCharacterMotionTest.xml": {
+      "passed": 4,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.trading.TradingModelsTest.xml": {
+      "passed": 3,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.trading.AccountOperationRecoveryTest.xml": {
+      "passed": 7,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.security.OwnerAuthorityTokenTest.xml": {
+      "passed": 3,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.voice.VoiceRecognitionPolicyTest.xml": {
+      "passed": 7,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.overlay.VanOverlayInteractionTest.xml": {
+      "passed": 5,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.trading.RuntimeRecoveryProtocolTest.xml": {
+      "passed": 5,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.projects.ProjectModelsTest.xml": {
+      "passed": 18,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.gateway.ReplayDispatchPolicyTest.xml": {
+      "passed": 7,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.trading.RuntimeRecoveryOperationsTest.xml": {
+      "passed": 8,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.degraded.DegradedModeStoreTest.xml": {
+      "passed": 3,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.visual.VanSceneIdentityTest.xml": {
+      "passed": 13,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.visual.VanPresenceFrameTest.xml": {
+      "passed": 9,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.design.DensityTierTest.xml": {
+      "passed": 2,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.design.LiveBadgeFormatTest.xml": {
+      "passed": 3,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.overlay.VanOverlayChromeTest.xml": {
+      "passed": 4,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.trading.FundingObservationTest.xml": {
+      "passed": 3,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.trading.CognitionSurfacesTest.xml": {
+      "passed": 2,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.visual.VanEffectPolicyTest.xml": {
+      "passed": 3,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.visual.RiveContractTest.xml": {
+      "passed": 6,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.memory.MemoryModelsTest.xml": {
+      "passed": 12,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.trading.AccountOnboardingTest.xml": {
+      "passed": 4,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.design.ScreenStateTest.xml": {
+      "passed": 7,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.design.charts.ChartAxesTest.xml": {
+      "passed": 4,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.design.StatusSemanticsTest.xml": {
+      "passed": 4,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.visual.VanCharacterOpacityTest.xml": {
+      "passed": 1,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.visual.VanWindFieldMotionTest.xml": {
+      "passed": 4,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.visual.VanAuraEnvelopeTest.xml": {
+      "passed": 5,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.voice.WakeRuntimeTest.xml": {
+      "passed": 7,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.visual.VanVisualRuntimeTest.xml": {
+      "passed": 8,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.visual.VanPresenceTest.xml": {
+      "passed": 10,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.trading.TradeBookTest.xml": {
+      "passed": 6,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-character-forge-validation-binding/junit/TEST-emulator-5554 - 12-_app-.xml": {
+      "passed": 18,
+      "skips": 4,
+      "failures": 0,
+      "errors": 0
+    }
+  },
+  "canonical_mutations": {
+    "reports": 9,
+    "caught_exactly_once": 374,
+    "edits": 383,
+    "survivors": 0,
+    "unexecuted": 0
+  },
+  "actual_verified_main_archives": 17,
+  "actual_verified_archives_total": 21,
+  "native_or_unit_acceptance": false,
+  "qualification": "Published0682 physical-account scope and optional-driver source only; later uncommitted risk arithmetic repair not qualified",
+  "file_sha256": {
+    "van-instrumentation-report.zip": "030f4b6247e6d10ca1afbd5c8d2bf0541073ed52c3a78f0a7b3705cbac12724d",
+    "run-and-jobs-metadata.json": "5da09025eb6e91438129b440f523365bcf521299de8e0f6c63ef4f9d899eb027",
+    "van-market-monitor-source.zip": "874f1e355aa6a5e72cfee70f7c8b446b0dad20454ec144ab67ca60d75bbf35ae",
+    "van-actual-release-guards.zip": "02a68f16567edfbc20f015ad72f8d70caed8fb74bab8b50fb20fbd1b73363e63",
+    "van-voice-runtime.zip": "65fc717b7894084e62ee90fcd211531f9b26e9a65cd50547366a74e80e843f73",
+    "cognitive-android-results.zip": "837df0140446f15b46f4499edc6d360e6e8a6d139f9c2e6adf14798c9e44184c",
+    "public-job.log": "74488198558bfa43f79c6aba02d05d7f666896508663f8f52ad42db4f349cf83",
+    "van-mutation-report-python-0.zip": "558fe48c707abea6077abc8ec650bed14e7fdbe3cc9df26825dc4d4054228467",
+    "van-postgres-ledger-report.zip": "800e2a2356150120be6060d4a2d9a97ec7721258796ef6de28405093751a0e95",
+    "van-native-source-parquet-report.zip": "469a1c79583cb7fe4b6710986b004d3befa342d436bf9aaa793abfc876758c41",
+    "van-mutation-report-kotlin-2.zip": "147ec892d354f34b4ce7168e959fed5c501da46fa19bfc5ea2b5da369e878450",
+    "cognitive-python-results.zip": "d56f0a94cccb623386cc7289bb6cfa626e7b100ba5e82c127998470223fc95ef",
+    "van-character-forge-validation-binding.zip": "b0039c5fedbc16f5daa71372d3b9f256c4f454763f4f44ec09da4f5a5008cbfe",
+    "van-browser-guard-source.zip": "f5f601e13371676954b0e22dc07b8697b4f5bea0c234e9ca063677c46faab1a7",
+    "van-mutation-report-kotlin-0.zip": "91bdd7c2d698e0f90128d68d010f3b793ae0c1d4d94005e86ff8a10b76e5ecd6",
+    "van-mutation-report-kotlin-1.zip": "2d5a416925bab9fe85bddc51e933120e36a144ed7facabb2af63182c70ce3302",
+    "van-forecast-runtime-source-report.zip": "203a347e75e62bd485cc1304352152e440be2dc016496decc8de3c6f66c7c9cb",
+    "van-backend-public-source.zip": "36388d6685daaa171630b8e00db7403efa905e50da591eaeb91e8c95a050a99d",
+    "private-job.log": "28ccc15781b9f6eabbee5e4e8a770eb9bea7e9006eb16d861d48951b7636a195",
+    "van-mutation-report-python-3.zip": "4d40ba467605610b747533da3e2a2bd4d9137de5bbb2f56aa5b6bfbc764b60df",
+    "van-mutation-report-kotlin-3.zip": "e96c053e5dce86c0d8eced059371d4da39db6aab8e72fb4b8dc634e7a1c6b318",
+    "van-mutation-report-python-2.zip": "d9919eb87380af47aa799b706a8354a9eb16f2525db92677b6b83717374717a4",
+    "truth-job.log": "f5923f1075e0883d5329dfba2996f61703b758e5678fb5e867c92e5c703618ee",
+    "van-mutation-report-python-1.zip": "3d804dd51fe067db5d99dbb8ed9b5fe22765c78b0c26e00c15dd5e5937a91dd0",
+    "download-receipts.json": "c2286c37aee49a638ad669478a1590233cfe467a4a46da19fbc38832e207b224",
+    "exact-run-bindings.json": "5db47a53246963b6d1b43347f1092fe81170a7d98af9fbf157c6afa550470910",
+    "van-mutation-report-browser-agent.zip": "ed5cba4c6203db8c194e84e1f39af1316279e48c79bb50f6a4662da537d50277",
+    "van-mutation-report-kotlin-1/mutation-registry.json": "37964fd82d7516acf4af9dc3165d4754ce85f4d7e8c51bdcfd7a72bca9e0611e",
+    "van-mutation-report-kotlin-1/mutation-report.txt": "1366f2d48fcca6799618ece96fe3916764244cb769f6ff4fbc9cc89b995be4d1",
+    "van-voice-runtime/logcat.txt": "939746b72f16c09ebd582a5e4af7b1007fa455f4c462746833c40140cef04d45",
+    "van-mutation-report-python-0/mutation-registry.json": "37964fd82d7516acf4af9dc3165d4754ce85f4d7e8c51bdcfd7a72bca9e0611e",
+    "van-mutation-report-python-0/mutation-report.txt": "dd104db97d3badc8b1438b6177cea5f388f27f055fc9ccb7161d293c63c6327b",
+    "van-mutation-report-kotlin-2/mutation-registry.json": "37964fd82d7516acf4af9dc3165d4754ce85f4d7e8c51bdcfd7a72bca9e0611e",
+    "van-mutation-report-kotlin-2/mutation-report.txt": "890b7a4461725cb8a390ada3c5d45aff8727b8a25d9e057fc4564ddd8cb3a3a7",
+    "van-market-monitor-source/storage-audit.json": "128b04a8c8f58c8d4d335db930e1fabd533499ca88e5c1c3afb2e49eb25caea1",
+    "van-market-monitor-source/tested-commit.txt": "f51351de71037e43bd5533f8ebb09d86b2866bedb6fa2f2ae29727b177ebc831",
+    "van-market-monitor-source/report.xml": "5ad1309d5f1dccec5c6745164c6a0de86b2c38604b611f40151a75f7bd18d329",
+    "van-mutation-report-python-1/mutation-registry.json": "37964fd82d7516acf4af9dc3165d4754ce85f4d7e8c51bdcfd7a72bca9e0611e",
+    "van-mutation-report-python-1/mutation-report.txt": "8bdb7bd24258c234e32b634be95c4bc20cc7eea3819839251367d7dfad3577e7",
+    "van-mutation-report-kotlin-3/mutation-registry.json": "37964fd82d7516acf4af9dc3165d4754ce85f4d7e8c51bdcfd7a72bca9e0611e",
+    "van-mutation-report-kotlin-3/mutation-report.txt": "5c356d0c2e148dd801553a3f7e5b68a7e343d27d6638c6b0068636e9152da1b5",
+    "van-mutation-report-browser-agent/mutation-registry.json": "37964fd82d7516acf4af9dc3165d4754ce85f4d7e8c51bdcfd7a72bca9e0611e",
+    "van-mutation-report-browser-agent/mutation-report.txt": "1de5887f4df8d80fafb959d96e289e881ba46ac6bfb420dc6c51f45e0aeaf5d9",
+    "van-mutation-report-python-3/mutation-registry.json": "37964fd82d7516acf4af9dc3165d4754ce85f4d7e8c51bdcfd7a72bca9e0611e",
+    "van-mutation-report-python-3/mutation-report.txt": "14c8fc346a53bff4388bc940ec90ec47892082a87f11188dfcdae8dffc254834",
+    "van-browser-guard-source/firewall-storage-audit.json": "128b04a8c8f58c8d4d335db930e1fabd533499ca88e5c1c3afb2e49eb25caea1",
+    "van-browser-guard-source/uid-storage-audit.json": "128b04a8c8f58c8d4d335db930e1fabd533499ca88e5c1c3afb2e49eb25caea1",
+    "van-browser-guard-source/uid-report.xml": "dd3fd78ea7d4dde9941ab63ceeda0c57ed9acbbfac38c0b3a4f51d83ad8b4b6d",
+    "van-browser-guard-source/nft-version.txt": "89995fd0c92187974133511999d65ba41513837cf75e37d0713b14fd3ada7e9d",
+    "van-browser-guard-source/full-report.xml": "ce6ca77fa2c9573ace8d7132028f96381e7e88cb565c7dc582f049f9e9df3f81",
+    "van-browser-guard-source/storage-audit.json": "128b04a8c8f58c8d4d335db930e1fabd533499ca88e5c1c3afb2e49eb25caea1",
+    "van-browser-guard-source/kernel-version.txt": "968b9059a40ef049e1e0e9b68b5c1104d6687376f38c1566ec6a0e88991517d4",
+    "van-browser-guard-source/tested-commit.txt": "c8dfe896b1d38c2f8808d2704435adae64faaecb8aa86a8eb5084bd0b36e08c8",
+    "van-browser-guard-source/full-storage-audit.json": "128b04a8c8f58c8d4d335db930e1fabd533499ca88e5c1c3afb2e49eb25caea1",
+    "van-browser-guard-source/full-suite-files.json": "d2c98ddac2a9f05a755088c69caa1193d2c7202a5882d6dafef125c4801fa83d",
+    "van-browser-guard-source/report.xml": "eb00b586115d64be8ad92e3dbfa59b641248bc0be88870517ccab47fac4d7d69",
+    "van-browser-guard-source/firewall-report.xml": "b0d474b5a7f3d14287cefdaf368afb6bc32eb55bb7b56d034ccea21af8debd2d",
+    "van-browser-guard-source/chromium-version.txt": "2ad066640772a38a7acd9f2b40ddda00d0ca6f78ccba87be5c3126793b6517b0",
+    "van-postgres-ledger-report/trading-source-report.xml": "66f6f5025f80c3efaa9dc742d6df5400b6ad687e62f65cabd7c5fa053e9713c3",
+    "van-postgres-ledger-report/voice-source-report.xml": "b5794ce7081553f67c0e38c7edea2e64e4072c0ba0818a03ea8fa95457ef1733",
+    "van-postgres-ledger-report/trading-source.log": "87018ad4c5e142eb0b1010cbcd50b6c7a2b153d7f2f726bc98200b632d9d7f71",
+    "van-postgres-ledger-report/postgres-ledger-report.xml": "349349137f07aed444e06ce9b30dfdb0b699be6ddfd9f9e661d5a73a6c393136",
+    "cognitive-python-results/cognitive-broad.xml": "571ef9c17c778679f39a439bcabda8ac26482a2d65b94f15f06831cd28063fd7",
+    "cognitive-python-results/cognitive-focused.xml": "45c847be95cafd924a7d93c71864400e83fa1d9a357b13d8dcf8dc08fbdfb5fd",
+    "van-character-forge-validation-binding/van_candidate.sha256": "fb7b03ce82db1b1adc3044ef67e2af97a670eabe43dd6cd08a3b1fe4e574bef2",
+    "van-character-forge-validation-binding/van_production.sha256": "19254b59d1f5b1c4b91fc854285fed67fca6723015db612c6fa55e0c87919376",
+    "van-character-forge-validation-binding/van_validation.json": "bb41f01d5442b492db66dae5f04c7bf7d4d31890415775441e8d8a356aba39d2",
+    "van-mutation-report-python-2/mutation-registry.json": "37964fd82d7516acf4af9dc3165d4754ce85f4d7e8c51bdcfd7a72bca9e0611e",
+    "van-mutation-report-python-2/mutation-report.txt": "7fff702edf4532a5ce97f921f41465ad4af3a5ab7ac7bb3b8ad39ed4ae4b993f",
+    "van-actual-release-guards/report.xml": "ba39d436c14a7186040d82d551736ad48a153db1dfa473a3f4403f7a080b57bb",
+    "van-forecast-runtime-source-report/source-wheel-sbom.json": "64f4a858d38c9b5720279eaaca3aedb45f3823bc0d619ea7be5c887b6fec6a31",
+    "van-forecast-runtime-source-report/lock-digests.txt": "757858eb148b4208c01cd61f687686ffc55631ffa2b6c5f8e05444d81d8d2fa6",
+    "van-forecast-runtime-source-report/image-id.txt": "b4809323167d2b37aadd723aa6794544bcb3aa48363e9827020dbb1c5c296846",
+    "van-forecast-runtime-source-report/tested-head.txt": "c8dfe896b1d38c2f8808d2704435adae64faaecb8aa86a8eb5084bd0b36e08c8",
+    "van-backend-public-source/summary.json": "63c2abca13c8cdc50e946ed5f2417229b56e0a696260830f89c842b664b33c37",
+    "van-backend-public-source/gateway-storage-audit.json": "128b04a8c8f58c8d4d335db930e1fabd533499ca88e5c1c3afb2e49eb25caea1",
+    "van-backend-public-source/media-report.xml": "813816206d6f38760dd7e00e2771eb0b68e792ffa8e8a2bddbe36cf3045d387a",
+    "van-backend-public-source/tested-commit.txt": "f51351de71037e43bd5533f8ebb09d86b2866bedb6fa2f2ae29727b177ebc831",
+    "van-backend-public-source/selection.json": "c31b4fbe40e8573f7e204fdd805b1ff8642b023113c932af9cf3916cf777fd8f",
+    "van-backend-public-source/gateway-report.xml": "193561fcf7efabc5fcfd691767a126a6801887c148f8e570249b7fa8eabf3b72",
+    "van-backend-public-source/media-storage-audit.json": "128b04a8c8f58c8d4d335db930e1fabd533499ca88e5c1c3afb2e49eb25caea1",
+    "van-mutation-report-kotlin-0/mutation-registry.json": "37964fd82d7516acf4af9dc3165d4754ce85f4d7e8c51bdcfd7a72bca9e0611e",
+    "van-mutation-report-kotlin-0/mutation-report.txt": "f08f9619f8a0fefb0faf3ec13beb6700f6342a514a185fff89c3b4cb8dcd9da9",
+    "van-native-source-parquet-report/storage-audit.json": "128b04a8c8f58c8d4d335db930e1fabd533499ca88e5c1c3afb2e49eb25caea1",
+    "van-native-source-parquet-report/tested-head.txt": "c8dfe896b1d38c2f8808d2704435adae64faaecb8aa86a8eb5084bd0b36e08c8",
+    "van-native-source-parquet-report/report.xml": "e743ea47255306baecd3fb04da4f9c100dfce98355089d4edfed91d5b415e7b6",
+    "cognitive-android-results/verification/build/reports/tests/test/index.html": "3551c6bcdd5d8a95846162ee625b8c8e8dc9a2da7f1d5435946f5197fd127d0d",
+    "cognitive-android-results/verification/build/reports/tests/test/css/style.css": "61866908fd7eb09c79e96239f69db2e8cc5c6526cdb308eba0535ed2a0f6a263",
+    "cognitive-android-results/verification/build/reports/tests/test/css/base-style.css": "a10a4ef75ca2601b44bfdaf3112a5854f6376f68d7cbaf6958286f04488d293b",
+    "cognitive-android-results/verification/build/reports/tests/test/js/report.js": "fc89c6d002d18f4662065c9887b2cda8f8486f2737d4ad0f2fdeac0ad58a44dc",
+    "cognitive-android-results/verification/build/reports/tests/test/packages/com.dial.van.runtime.html": "0606a0cc79284d699d2a7ab9c90874675dd0a30e7fc892d05723e5e8f79f0a69",
+    "cognitive-android-results/verification/build/reports/tests/test/packages/com.dial.van.notification.html": "b967ac7c436d9cdfc49e53eb8b1f03ee52aa36c298bf147ff7b371acc7606e75",
+    "cognitive-android-results/verification/build/reports/tests/test/packages/com.dial.van.degraded.html": "913e2fbdb532f8259705ca938bc76f32b45db30bd533f0b0c7caffe0594e0e8d",
+    "cognitive-android-results/verification/build/reports/tests/test/packages/com.dial.van.command.owner.html": "813d44b3743fc0b53e106e4dd9a87274caad10e69868e2c2a0f36144ecadbfe9",
+    "cognitive-android-results/verification/build/reports/tests/test/packages/com.dial.van.gateway.html": "7392ba971c4432d389658f7aa879c32fa9ec59111f93def12db24ed99d21b64b",
+    "cognitive-android-results/verification/build/reports/tests/test/packages/com.dial.van.visual.html": "ca88a8767fb0f8fec96789e82667a9b69e8e00976f016d68d50abcd3c6af82cf",
+    "cognitive-android-results/verification/build/reports/tests/test/packages/com.dial.van.share.html": "38575f523777757952fb3ef07fa86d5df454335fce736850598de889ebd4c544",
+    "cognitive-android-results/verification/build/reports/tests/test/packages/com.dial.van.design.charts.html": "3d6282638c227f0f88ccc9f5fa27b41e607debae98d68ff0b65f6f4b20d6972a",
+    "cognitive-android-results/verification/build/reports/tests/test/packages/com.dial.van.browser.html": "bd9af619899bf918abf2707c64320a49c4fadad22b951a683cac007d20816a68",
+    "cognitive-android-results/verification/build/reports/tests/test/packages/com.dial.van.command.nav.html": "10a31e917fb2b9a69cfd3ceb412fe072c888581eaed26ad3f0db0ffc29a6eac0",
+    "cognitive-android-results/verification/build/reports/tests/test/packages/com.dial.van.events.html": "84d60419d9eef5c98b4f4b0abbe78e37baadd1036155abdb88c1791bba0abb4f",
+    "cognitive-android-results/verification/build/reports/tests/test/packages/com.dial.van.command.attention.html": "de9849df3ad18a6dd701710b1682e3e0363f0c1a06807b26e55909fb0b6aa00b",
+    "cognitive-android-results/verification/build/reports/tests/test/packages/com.dial.van.onboarding.html": "a7d86382c4f47f8f390b8e63750e7bdcbb390a30331a716bf881f8257b7408e1",
+    "cognitive-android-results/verification/build/reports/tests/test/packages/com.dial.van.command.settings.html": "085dad9e8654cb6e28d64ecd97bee94489cf91a573f5f140b71e373545587877",
+    "cognitive-android-results/verification/build/reports/tests/test/packages/com.dial.van.dialdev.html": "b2ca859a8f633a5bd9fdf0d66f67a9d3bba0b6902cf1a6d4ebaec1fc0db1b640",
+    "cognitive-android-results/verification/build/reports/tests/test/packages/com.dial.van.command.work.html": "6a0eed14df529fb3362f3131d7471d044d3b63a3aa98f2c435aad666d90f4aa8",
+    "cognitive-android-results/verification/build/reports/tests/test/packages/com.dial.van.security.html": "f5c1ab17f21e5b65dbb2d9633dbd009785e2b7a9e16481ee9d3101f21e3bbc57",
+    "cognitive-android-results/verification/build/reports/tests/test/packages/com.dial.van.projects.html": "91f9cf41b4283b41669c14f7ba33db3fc25396ffaaa344ed99547f1382be666e",
+    "cognitive-android-results/verification/build/reports/tests/test/packages/com.dial.van.mission.html": "50d0a3dcc8203d6b9a0460cd99df3c4a2971263991aec0e9515ae5a2664116a1",
+    "cognitive-android-results/verification/build/reports/tests/test/packages/com.dial.van.command.connected.html": "fcdcd30c952c915f2fd09bee1178005c697666f8163dd2ac690d85c0a041538c",
+    "cognitive-android-results/verification/build/reports/tests/test/packages/com.dial.van.control.html": "902c8bb1f1db8fb910f615431e4e58ac7464671b46ca193c0700eedd04a796e1",
+    "cognitive-android-results/verification/build/reports/tests/test/packages/com.dial.van.session.html": "ed9b98b93748629de4605f56c895d7865a08be902092ec11be409f3932bedfa6",
+    "cognitive-android-results/verification/build/reports/tests/test/packages/com.dial.van.telemetry.html": "fab200eb29ab005d3aa36b45a25619b066bab63b19bbb80dfd78ab1653c9525e",
+    "cognitive-android-results/verification/build/reports/tests/test/packages/com.dial.van.overlay.html": "496a5106950d7c9c63353792a644daea9128c1b359a636e3f90cf92a0baf0b81",
+    "cognitive-android-results/verification/build/reports/tests/test/packages/com.dial.van.design.html": "4e62887a315976c2bf143d95689c4cc293788748d4043dc73196895c6130268e",
+    "cognitive-android-results/verification/build/reports/tests/test/packages/com.dial.van.trading.html": "dd523c3806dc8623f4d7924fba53d6a1abfbd78b946348984556cc8bba5214ba",
+    "cognitive-android-results/verification/build/reports/tests/test/packages/com.dial.van.cognitive.html": "05a2b1ed62c69b09fdc17b0fd3c1447a71623032cc552567ba87c60f8aa7d8fa",
+    "cognitive-android-results/verification/build/reports/tests/test/packages/com.dial.van.voice.html": "80c12e60279dabdadd93781bbca4e59e6988d8bcd0d146d411fef1490001ed00",
+    "cognitive-android-results/verification/build/reports/tests/test/packages/com.dial.van.connectivity.html": "dd0e69d09a8b793a2ff4cf5e4fbbce097adbd380f6745ad222f44186af33fb91",
+    "cognitive-android-results/verification/build/reports/tests/test/packages/com.dial.van.status.html": "993e3f7dab54468761c2c860047b1e3104a1cfd03670566c0576ba175052be85",
+    "cognitive-android-results/verification/build/reports/tests/test/packages/com.dial.van.command.jev.html": "3ab6461ca28da9abc74b1c0cac4e7d15da0d2ba74e5c4f92cbb1ec3c25c09df9",
+    "cognitive-android-results/verification/build/reports/tests/test/packages/com.dial.van.memory.html": "73aeba214e0e9cdef565e9164ee7e7db69fb0ee23ded167520afe0a27887b815",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.command.owner.OwnerAutomationDraftTest.html": "917aa612bd7f8db14d9471ef686dd1ff1dfb6f63733f619b69c2363d911dba3d",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.browser.BrowserDownloadReviewTest.html": "f093bf8dffbbd1f6e61d7cec5c5ce298cda33f2d173a2cf7392f0891a21c4af4",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.voice.VoiceTurnLifecycleTest.html": "07c1aa5909d895597c3bda9b3609da260d10091f757354b3ac62760b9d10d145",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.mission.MissionInterventionTest.html": "47af4ddfff0692769044d8ec31cde77ca913e21ea9d46da690f1470c69d291b9",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.visual.VanFlameAuraTest.html": "347491db8d5777182948c5dee999cce64e16719c0b645d4dbac5cce4db80fcce",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.session.OutboxPersistenceTest.html": "8c4f5b93ebe00f2856ac7079379a3b0b6f9b40099ab718bf2f3140d7737d2074",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.visual.VanAuraPlanTest.html": "fda341ad08fcefeb37377df9eba4266c4cfd1ab18b6695b8bd5a46c7a04e5e4e",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.voice.SpeakerEnrollmentPolicyTest.html": "6059d140734e15dfff5356b30dccafb504b4d7ed23ae5a7a83239612cc6c75a9",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.session.FailoverTransactionTest.html": "51367ec7e42d19f08bf1b335cc0b27cd0ed5db3d10eff3b5023796c48a9339b4",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.browser.ViewportChromeClassTest.html": "56da98c1211466e78fb9fea7911eb36b18efd1509941b8fa121c481a6b3c47e4",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.voice.SpeakerEvidenceRemovalTest.html": "853851b3f3152e399f5571acbc362c6e4717ff152d85b01140ac865ee8aac4a8",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.degraded.SubsystemHealthTest.html": "7cf9309108f2da832c0394b7682831b80180938a05ecfd24758e467196029798",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.command.nav.ConcreteRouteRestorationTest.html": "07a7f935a076932cbab2c4c7b70e88bfeaf61420c04639fbe186a33ccd3e6424",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.dialdev.DialDevOutcomeRecoveryTest.html": "ccb18ad9cd5e96843c4100eefa76e49a0926cfe48697a9934bf12cc6c53a32ba",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.command.settings.OwnerPermissionDraftTest.html": "dafcd2713c91aa715fa31f36e1450fec5062c9650e936ebe7d7c849df4486710",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.command.settings.DomainAutonomyCommandTest.html": "cbec600801e44ec9f71cf099648b99d976e1241a6611af7516e8add9c4315330",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.security.DeviceProofQueryTargetTest.html": "8180b2c8f05887cf8ca2dd4b8d9cefd69e1370c476219fffe9749d1cdf512b66",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.gateway.GatewayRetryTest.html": "1ebc5341d70dec75608ae0e45bd0f282350bdb948e80b29045f0c148222bae9f",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.session.SessionReconciliationTest.html": "fd020075f86479ab81b1c03e3a1b8ab5b23ed6949c9102919ce680bcf8d728c4",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.session.WarmStandbyPolicyTest.html": "983f58bc70ef1ab276bbb4c4bd2dcb0b1e278c52f89c7483ed4dedc485a6a976",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.overlay.OverlayVisibilityPolicyTest.html": "832cc3a206982c566f4334946964d246c1a5d71da5bd5741244367ecc329e497",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.voice.AcousticDeliveryTest.html": "7e16d5eedfdae35a3538c00e149739544f0d34f9220970cb31816d9924ed6cbe",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.session.DurableOutboxTest.html": "613763843bdcfb70b3a99e4c90a87e087eacc4b9e499919ea090fc54f95964e2",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.voice.AndroidOfflineTtsReadinessTest.html": "3ef96e5d868eaafd80bc73f4a9949e3b49d20ddb55efe259520f146e838117a1",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.overlay.OverlayDragControllerTest.html": "37e47cb7588ece0c78bf7689a5a39b05b56102bc9be1fff704e76c11831aaff5",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.command.connected.ConnectedReadbackTest.html": "0eeeb442423710d1f057722b87ad045e1e3fb841e7d47d150932de9ce7ffb203",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.voice.OfflineSpeechCoverageTest.html": "23fcde34cf7154ed9c0cf1aa206053c41c643fb5cb21aa55744c65b213e1d527",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.session.WarmStandbyIsPolicyNotTransportTest.html": "92afbd818adfb413eb359ca03b5569b8262dd73bce5891865074bfbd30989091",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.overlay.VanOverlayControllerTest.html": "0b359c2fd800c668e6cfc647ec838cc94dd4fe3b492ab19209d2aaf8b3ea6642",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.trading.ChartViewportTest.html": "f03db2335fdad50da70bc677fce58d98e16881bcc7ef3b16d5d6bfcedd55f987",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.trading.CognitionHierarchyContractTest.html": "17973a9f23f90b7caf7142f160e47f3daa4f9d6cbfffe68b8fab83e5803bdb95",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.events.VanEventStreamStoreTest.html": "18e71a9a4ae40c26310086cfe810dec71d7d7156554d53babf8653e7579b8d16",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.dialdev.DialDevActionsTest.html": "d5b371e41c8e41ddf5f35672669ceb99bce0c71e6f21404c86fe539e4c829e9a",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.command.work.GmailApprovalPreviewTest.html": "f273901e1f4429a227fce770003097d05d2df72fcbf8576a097b70205064d0ab",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.dialdev.DialDevOriginalOperationsTest.html": "e73197895dd77237401668df00809432ebac3cb7a732a41b44ce715453e43b74",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.voice.SpeechQueueContinuityTest.html": "229c92d92469ade4f1eaba78b0ceaefa070c39db7c61f6c813f7c177ea1aff50",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.command.attention.OwnerDecisionTest.html": "488dc34ff3154682470406e2f3fd609e17688a604b49bb097cca177ac66aa891",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.status.OwnerLanguageTest.html": "4cc8e3c2180be20e46026a8f6c0fb1e62de5294bc848c13af768ab6cc1449708",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.memory.MemoryEffectReceiptTest.html": "93c5fbf1d0941c44bf2fa4376641e834f7cd04512cdfd4745562900e19eb6d10",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.voice.BargeInPolicyTest.html": "a795f52fe8324fc1505c817515498631a626e4a19f6f6f15ec8ddae0874c6cde",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.trading.TradingRuntimeReadModelTest.html": "81ca072ad02e07cd3f36a9bc1a4d367cdd9a237fb5d0307bb9b1d1244ff5c57b",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.browser.BrowserOmniboxTest.html": "3c627aaca4a7fea60ceccf76e93f598a29a9794e324b92fae7a0ab060d434141",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.status.OwnerStatusProjectionTest.html": "5aaaf22c726ff2431a99afe38f4e18d4ea4c124a8c5ac155001b07030f82eb6a",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.visual.VanAnimationClockTest.html": "922e883f0b0e61f650c4f36079b8954639bba7292dafcf5ef2c74ab03c80fe13",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.voice.VoiceRecognitionPolicyTest.html": "55750b29bfebba9632472a931571a8c5f7c8871a0ff84a150eae1eb8ac09dddc",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.browser.BrowserUploadPolicyTest.html": "723285975656ba4bc0dfd49ce6b3b077b63e20f97c3134ec967788ed06c9d76b",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.notification.NotificationAppCatalogueTest.html": "dada6f4dac4fdf40ba98670561ef4d2e210a86b41440ee16fbb005e8b2490f39",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.trading.AccountMarginTest.html": "69de83464825ce3759415d9fe939a281613907ba9c013899f148e095d74acd50",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.security.CrossLanguageVectorsTest.html": "6e3302a843029023e8a600e57357267aba2fd34a2a2e7bbec3fdc5d5f036e4ae",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.memory.OwnerMemoryDeclarationsTest.html": "fcb0d890b2cb479c84bc76c1fe529823d078062e310f128f09367166db8265e1",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.browser.BrowserKeyMappingTest.html": "bb94fde9b3154b44d74beb455992c6996cfda75dbbc5f27e5a51995d64b6ea43",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.share.ShareIntakeTest.html": "9c8102037ec40e66ae2bab0ec6586612c68952ad2664f65b9f6aee55c66a5c8e",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.session.TransportSupervisorTest.html": "2330c7509894134c93b2f95e51c761e63d06cefc1a17cf176528a68428f2e6d1",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.visual.VanMotionMapTest.html": "4571301197591f2369dc7411bec2f06fd301ffeb563594f058cbcb83f184da8f",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.voice.WakeModelAssetTest.html": "8f7f5c8a278a52ac5837d37778303854b2de1639d5daf716e3edc570b84c83a4",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.browser.BrowserTabsTest.html": "b60032da520ff7c99aad0f5d5f2df330b04057b67191e4d0d57023f39df55d6c",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.dialdev.DialDevModelsTest.html": "63942c6b9f27714782ebb33c84dd987f485ddc2584468a93e99fa02b8da7f9f9",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.browser.BrowserInputProtocolTest.html": "a1632718ca7f5bf84311614dcdf71d9467d72ccfd63ba83eb9e2e3982c42f3b8",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.session.SessionEnvelopeTest.html": "5cb2a2a0ca068e697c0b6cffefe5e1824f9b69ef4d8386328170574233878e60",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.command.jev.JevRouteTest.html": "4443ad7c721f51e745915d97c9cefb272f64409be4a6d1ec0d9473ccbd34e585",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.connectivity.ConnectivityManifestTest.html": "268349aae027a935d5051bbff9616f69235745c805bbc1530a2108329aa00a0d",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.trading.FundingSourceContractTest.html": "416facbc21998b7fe7ad2d1eb6c113bf213cdf04a792703ec35fa9f301ff39c2",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.browser.BrowserSurfaceCoordinatesTest.html": "3be8fb8962e2c601e27a3e7a41d238d15216194e0988169525d5b717c36e9be7",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.browser.BrowserStreamMetadataTest.html": "97af37e824617178444ae140a7a52679662eb1bfb6964bd36176b35990ad2e95",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.voice.OfflineCommandClassifierTest.html": "c4d65d90919af4314c7af732ddd144b55ccb1ac0fcde68e92436b6f834a86efd",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.degraded.DegradedModeStoreGatewayHealthTest.html": "b995cfbb812c313580bf4249397abc08fe3af3c88a26a0b3bad7a011d5244334",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.control.VanCommandControllerTest.html": "dfdc922bfa0cadd96fe54c8cd62f3e01145594516fbf4674b86b41118c7ba6e5",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.degraded.GatewayDegradedMappingTest.html": "bcaeba3710c9e49ee0bbcb4a5eda0240951d8968384dc1423a9b7840b3291870",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.session.ResumePolicyTest.html": "3311dc8e43de4421bd923846fc50b394c88c859abbb4100353c75d703e81adde",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.browser.ResizeCoalescerTest.html": "265b2958a8c09e7d616b29b90051e754b62233c7ea0ff261b93fe937d3622e48",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.browser.ContentViewportTest.html": "ecaff509622b8cf82ef7cf6e5389ae42f340f7268aae4c959a9ff00be42fd926",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.session.UnboundEnvelopeTest.html": "914cf4c838afbe8c1a7f77f0b17fef2edb4d0e5df52debb556699034c886b2ab",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.security.Pkcs10Test.html": "ab367d07a853c76096788d52f79caf0e93f200cd17c60c1198208d1569891ec0",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.design.charts.ChartAxesTest.html": "044cbe65e97d3f0c5a6a87168fc7d7ae55f2d45180b588eb5f545fe59d0e6829",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.browser.BrowserControlMutationTest.html": "42efe8b239bfc774bfaa1225bd852fa68efebd179301ee231e9ecc5442cf8959",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.voice.SpeechFusionEngineTest.html": "67084a018efe8bdba6a36725540412be7964b4677fefc5a9c1026403324471a1",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.telemetry.DecoderStatsTest.html": "d2ca06148dab4d1818795e41bc91d94905adb2af0cb0df93e1a79650ea188cb9",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.voice.GatewaySpeechDeliveryTest.html": "0a233f8fef0a22c9e43e9c7c98ad051d03c1bc8c360363bf581a52ed7b3116d0",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.session.CommandLifecycleKillSweepTest.html": "e7561e6c3a79a7a61988fc819240fa9938fadf2593ead30a098bc63f799d509d",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.memory.DerivedMemoryRecordTest.html": "8c867a3c87eafa597837cdece0e27244fdef419de1cf3109353dd923cba09527",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.voice.DelayedAnswerPolicyTest.html": "a692171946875c3d6d8d329e1b29e9d8250fcdb9aee5fcbdf6f7e792d4122ac5",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.status.OwnerSourceReadTest.html": "faa6d818c73005a1e96583f9c64e6043d2ea8f96a08ac035145e38abfec29860",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.connectivity.ProvisioningRecoveryTest.html": "908b7b78816aca317b530fd1e1797b0384df991fbc9c14408e20d17a58fc74f6",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.session.VanHermesSessionManagerTest.html": "e8d78c34f8ba979cecd5c5ed0ddbbdffdfed54c05d7bfa30333a79a25bd52afa",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.status.VanCommandStatusTest.html": "ad17b483c830d3f052599ce0d0abfb8a0a70ad4822d889f58904a9d490c42063",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.connectivity.ConnectivityTrustedKeysTest.html": "f36d4bdb0886725074112cfabd0192aa2ed52737d79a658e315ac3f13b42b1b3",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.browser.BrowserTransfersTest.html": "1cc25fbba221bc1a4beb4b1459f23dafa7d40504b76444f4c50f79a893a6e788",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.visual.VanTradeSemanticTest.html": "9c4625435264f30f245de035f7cbd1204d1fda442f86ce51bc9bacf717ceb253",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.telemetry.DeviceTelemetryTest.html": "be9fda4c0ad28d697c8c8834bfe974740c8071d7d3c2845fdcc23f430e1176e2",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.telemetry.BrowserStreamTelemetryTest.html": "1ee0da243ed7adff93f6c205e2dccb4897a5cb71d9971223a1aa0ad0bd2ce2a1",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.connectivity.SignedConnectivityRoutingTest.html": "5b3eb7e632beda3608d19baf36f3a3cb03a4ea0680c96cfa37cc3e4ea2a55dd6",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.voice.SpeechQueueTest.html": "c438c7585cb529f5701414654bbc23f5356111fe04620344bda12fba84dfb27e",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.session.OwnerReconfirmationSurfaceTest.html": "38b2880fcbeebbe7f59fc54349ed70144c9159b97008b1b17435c041f86624a1",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.voice.SpeakerCaptureJobTest.html": "37486be54989c307618770627a284dc160f4d3ea17e26ae4d6bfa2eb5cacb238",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.visual.VanEmbodimentReducerTest.html": "b6c31d71f4f053d63715554e544d592166f7d2cffe77ef1ba0beece6996deb1c",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.browser.BrowserGestureSequencerTest.html": "847eca3dcb192ee5300e921f127ef5acfac45c3b9870fcfe945e15c61d3afe03",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.browser.ViewportSwapTest.html": "51a2c77c65ea2c676c19d983e59b916c1a1558295741e5a95fdb698811d4b7e8",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.session.OutboxPolicyTest.html": "90c082223a3979cb5c425747f456d8638385872eb5d62732fa599f0211cad6d0",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.trading.TradingReadModelsTest.html": "96bdf52ea8579a38dd3102344d5384e9dc3e4b4d2ecafcbdd895d4a705c8aa1c",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.trading.CurrentAccountRiskTest.html": "6be3ec914f92775fc3c9cb24edfb2b931e9b4de9d37a17bf4e8931d5cca8c3b7",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.voice.VitsSpeakerIdentityTest.html": "b147a1ca5ad465091e9165169c5225a0d9e80aac62ba922579bea3c7ae47f9c5",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.visual.VanStatePriorityTest.html": "557981d4945cda7d390c989adf678bcbe058cab100a816475cb1a2d4cd5e468c",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.dialdev.DialDevEnvelopeTest.html": "88313acf80b2cb50e0b795ad79e9574781951750639e95a97aa594e9e75fbb0f",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.command.jev.JevModelsTest.html": "8d7aaef70d563d99dcd077d39b29711490ee315aa6d995b1ebc0030bffab04fe",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.trading.TradingNavigationTest.html": "e4b9005568ff7ec3d9177e808c3e9e4c7f32a6e85ad618f641f796f85a6a7ca5",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.browser.BrowserSessionRecordsTest.html": "32954b2f40ad4b0182387a50618875e8e0055ca116ceddbf104e281776d5b0e8",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.trading.NativeBalanceSourceContractTest.html": "1398a2b55936a25dfffdda50bbe3391897e2e5ac2be84b2437683d5d08fd723c",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.session.OfflineSubmissionTest.html": "85ae9d6b5da1417320ed4ae4490557b3eed08bb37564e04e361c3ad7794e3dcd",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.voice.VoiceSecondPassPolicyTest.html": "40311d98c5808843d9ae33a0c09c6b2a93064571ff05d4e9f91e3d4152b05f92",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.voice.SpeechCueTimingTest.html": "39cd4eb3bd1968ecf76f57ca54775f07864771880c84d1377a05329e2be293a7",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.gateway.GatewayMutationRetryTest.html": "0c7141959171b7847d47a44e0d97fa52f8dc625d656cab004fb52efd7f9fb50a",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.security.AttestationChallengeTest.html": "586b8cc9e0ddaefdd96c5a4474711ad2b0fd2d6bf3eb594fa1776a5055773d62",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.mission.MissionSelectionTest.html": "f0cab642bc51c326ed179185d45e187b2f5b9b3706797b0f1675c96207457a93",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.browser.BrowserProcessRecoveryTest.html": "7ead71c9cc57ce54edf62ad77af2fdb236f6e2957706031573653770ec417ae5",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.design.StatusSemanticsTest.html": "473a0ef2460f0952ea84a3d07f61d00bf5bdeffb671ca65777fc4f51b5035798",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.browser.UploadAcceptMatchingTest.html": "ea7f575072393baa57ff2788387b681fc3a3e17336c5a1c7cd84ec026fa944f8",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.gateway.ReplayTriggerTest.html": "0479a2c4810644333b85b28812329a34780656c9e1dbd31bb3aede1f2f43f521",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.design.ScreenStateTest.html": "9279574b8e5d87347dc332641e26a3f0a61994018ac336914ad3ac147d1432d8",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.browser.ActivityLifetimeContractTest.html": "92a93ae3c6e86327c96e879fcfdac950d5941c3c0101c4e8d7075c597671e07f",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.trading.NativeAccountObservationTest.html": "1c347946616cf314c4082e8933099764116653e39605f2bc25dba6941e25b0b0",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.projects.ProjectSourceReadTest.html": "33ac77d9b1dcf701ed0b26649150e92802991f54e3cae3fe9b1ee70a1cdc101b",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.voice.SpeechPlaybackStateTest.html": "86ad84c879a1b9d19efc7ebd3ec8e1dd1d1665cae5a9202ec26095d640aaef5e",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.browser.SuggestionPolicyTest.html": "b008989968bdc81ac26846346a23aaab216495561d9c3fa1a69fba17d3133b45",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.visual.VanDesignRolesTest.html": "5c8d59f3e5d8db65c75da124df55b1bebd7d7119e5049afea3b6779c37a0b495",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.browser.BrowserFileInspectionTest.html": "a22d29006041b8d023bc906db846c43a036e59375ad21b3a87ebde284f014eef",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.events.EventStreamTest.html": "319a89f05e37844bdac3d83e4441997d68ed87e98fb4c1486c43316726340459",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.browser.BrowserShortcutStoreTest.html": "b2c246d129880b98f8efdf40c62c8f31a848c589df910e9cfaa3150f98af972f",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.status.OwnerOverviewTest.html": "5f979dbf951a9b26af979a123fbeb9491582bc0cfcc5340514357c2d218946ec",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.session.HttpSessionCarrierTest.html": "a079230b502d878e395a9f20414c075b7c34a1b75bd1e81195041652469c83ea",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.trading.TradingTicketsTest.html": "568ca1d1131e9b38badf445dd8676d0ea0e7f8ecf758cb54564f31ddb488eae0",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.voice.AudioFocusPolicyTest.html": "897a13c20af065341884a59204a9d1d16257eac552bacf3751cb7cc2f2ae2238",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.security.MutualTlsScopeTest.html": "81c8fca5d832405ca50299d4a0da14748d19ecc44bb3aa8c0976cb21b371116d",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.runtime.VanResourceEnvelopeTest.html": "3849ff3ac46d67ffbccf0f2708908bcaf606f1577b265986cb91098bb1198793",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.session.RestartSeamTest.html": "1ba188d5a21a695274fd75fe9b9763f00f52c4e30523f1b3c9ce26aa6eb3e1af",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.design.LiveBadgeFormatTest.html": "8f52e6959e5220d5d8e5522e947ff0c48008fd66c8b510ae872b1e997ca843dc",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.dialdev.DialDevSemanticsTest.html": "3e590888828d1f241ada03e34a7d2146403d88bc03cfb0b32a1c2c95f04d95fb",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.telemetry.SessionTelemetryTest.html": "e599e8554ab863b2153699284482f716fe2908b60852f2bf00b133417f2334e0",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.voice.VoiceAssetManifestTest.html": "4fae7442b305eb99d0384f0f8b08c14dda17274948226fce35955cd2274bfcfa",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.command.work.ConversationReducerTest.html": "9bccca69ff91aad6a0a8a487d33a1c47d6b7667afc4b7fc12cd940b2c2dc2b25",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.cognitive.CognitiveTwinTest.html": "3466cc4fc5c554defc658ad73fb18ce46302f93256af1a09ac7dd7bfa1b03e70",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.browser.BrowserBackPolicyTest.html": "9fea207d8d6848f2f087faccc62cbd88aae874f45cae90f08ace499fcc86b46a",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.voice.LocalTtsRouterTest.html": "2bb04d401d6b1e9e5921b72d9adcf086a55884973dcd5b334a6ba6c2c2c9ae55",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.design.DensityTierTest.html": "c042c9f7f818d6369cc6d49d43a6aa07379b917fd3aef9cd7924550f1cf19365",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.browser.BrowserActionPlanTest.html": "c4bb77af905a1b87c401b0953bc962f054f72239d70df2575c76fad1a1dafc0a",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.visual.VanPaletteTest.html": "24878840b34da2854b0f865e19e2d35e74a691d6486ef2ff1f4fcdbc9717319d",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.voice.VoiceTurnTest.html": "58e3109a5537a8c90e59c9be531e8c611998edb8b8a74b1e352d0be42b0104b3",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.onboarding.OnboardingPlanTest.html": "523ec6259759e33741e787e501708909aad2aac517f3c5ba7006458b9fc79351",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.command.jev.JevBrowserLaneTest.html": "4449f956180dd885641387910a7dffb0bd417583ba55edc76273e5253076b87a",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.visual.VanAuraVoiceReactivityTest.html": "d97ead1213101526a13beeb150949290b80415e2748d3dd9478cceeb5904af66",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.mission.MissionExecutionControlTest.html": "f27eaf9ab85ceff14691bb669d8f3766398874118609b6cebed89567bdbe513e",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.connectivity.ProvisioningPayloadTest.html": "67bf26e5c0bc465ec1c50e7babe146ba997294d0fec95e2780e773cd470a110e",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.mission.MissionSummaryTest.html": "1e769a585d7d2d33d29d6f8d2dc3ebc1d35a32bbd0b0164d730b7f7a78e4ef45",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.memory.MemoryModelsTest.html": "6140853de659467672ae5e09b05ee445186945f97bd967ed5c8737f8f0e37989",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.trading.ChartGeometryTest.html": "5c362fb0a604e966537657e673f66814d976a0b6934e27ee1915e92ff8249959",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.design.MotionSpecTest.html": "a652d2f1ac0196e180e31ad8ec54ec695a40f47c2f30263136679fefd1e176d9",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.command.owner.OwnerServicePresentationTest.html": "1aa980a41b67066c4b0e41382fc2b17af3038072350c1d47fa5f92fe53ca0076",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.browser.BrowserFileProviderTest.html": "d2fc2b3d78c950f4e3d08d10d5046daa689fa412f6facad09b07f931f8179b72",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.trading.TradingFormatTest.html": "3b2b8cd47356bd4aebd39be04453bb0fd1cbd0777eb4dbc95c1a37750cb9fc39",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.voice.PreRollPolicyTest.html": "d31180caf5707f12f3a6e2459d231d1d9bde76db9ed8026d8f9d262faf268a62",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.projects.ProjectModelsTest.html": "35f7e884f823976ef1a8c9e9362dd1ec8d770b43fa1bc9a008dc414441e3be63",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.memory.LearningProducerTest.html": "fb1f68ee248b8417cb9725d9b2ceec18ac981f3aa967745687b6336bbae65a18",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.browser.BrowserVisualStateTest.html": "87c75abe1693778632d26c26796b9ad954b383627defb817fb0bd3c4893ed82d",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.command.nav.VanNavModelTest.html": "575496c7b49212db431b79353afefecdfc1cd6451dad6bb39d95f3324a3c3c7e",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.session.SessionOutboxDurabilityTest.html": "539a8661e25d94b3aff83d2fb19a50c1edd647c2e1aca6e34106e214700e9cfe",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.session.SessionDownstreamTest.html": "29ebaf8511270f9dc1555feb640bff669d3ce4f9d8c08fb2cbd93393b3f6cc2d",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.voice.OfflineVoiceEndpointTest.html": "d85a77fc3f8f8d0ff01f20ce24e8bac18d862a1395e920b34097e448407bca79",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.browser.BrowserExternalLinkTest.html": "88fe98d32f4ca1cb94c88cf811dfb3ae325b6602257eb80111d12ea461b4f0da",
+    "cognitive-android-results/verification/build/reports/tests/test/classes/com.dial.van.visual.VanFrameBudgetTest.html": "2ad5e96a401cd11d98b2684231d052439e08f4833ea319c099836ec025a42527",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.session.DurableOutboxTest.xml": "d589221ba60d4e29fd4b010020c6570f661e4a33fe029f230ed87608605f4432",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.VitsSpeakerIdentityTest.xml": "5e1d3746fca33b84eaa2f0cc2b33b5fbfb2cc7ffe53fa1f61c0e1d33fea7e753",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.BrowserVisualStateTest.xml": "553a750c50e9b0f7a7e4f6a985811774879bf7878f2e3b62b907aeee9e87758a",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.telemetry.DeviceTelemetryTest.xml": "156092bd271c6b3cc10cc09aa49a976820085cdacd40a0ddf47b8e055b877239",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.mission.MissionExecutionControlTest.xml": "5c445bd96c2389c3281b8ea2e3d57611f544ead9c449b15f9ec27f43b8604b96",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.visual.VanFlameAuraTest.xml": "40001ce08e609d5a816f62f2be2264a189a52f6add806e7e22fe1a23040ab2a7",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.overlay.OverlayVisibilityPolicyTest.xml": "8ebb98d7fa4838e4fdc1650f80167fe8a503a32e28b71426710fc3b52bda2f19",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.session.SessionDownstreamTest.xml": "fe85e56ed7dd19777e6894b4b507b8ff694ecdf40e78c5c12c871e5682d017a6",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.security.DeviceProofQueryTargetTest.xml": "fd2dc1d54d0dbb949fc419168a9ec87f5d07e181792d3a80c67c75e707e17492",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.dialdev.DialDevActionsTest.xml": "e819eba0b9e6cc9b38f815ffb404f964cb824338c2db0a31d6014c1c551cee2d",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.trading.TradingFormatTest.xml": "d8abda786a2b15c2bc15316381f64e4248c5d4b323227366b4e4cbebaff7dc0c",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.onboarding.OnboardingPlanTest.xml": "5d41edd38884635fca0a2a63a89ea7ef137f88daf38c5fd7fd441a1bae41b205",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.overlay.VanOverlayControllerTest.xml": "cfbf8c4b227610b70403902ef491217b68edf0c2d0c7aa66f1f6a8c326b772ee",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.gateway.ReplayTriggerTest.xml": "be8f5c336f45c573f60fc4ef8ea3d79dcf9316eeb09470b12e6f14d59c94653e",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.visual.VanAuraPlanTest.xml": "73841f2ef89ad3673ed502f3081a0d7a4e80138db74a78eb075b29f34a0e75d0",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.SpeechFusionEngineTest.xml": "5cd60c8c7f267747321bf0d04f6935fae7d544bb08d8b69d8a3e99b71121a69b",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.session.SessionOutboxDurabilityTest.xml": "6c6bd5a6a61f5146ace9e4e29bed58eda4536042728732c4f7c5eb3c5f9b14ae",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.BrowserDownloadReviewTest.xml": "b626247f33fc414a6adaefff5fc3acdad32edd9fa286b456a1416b99a9094a46",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.BrowserExternalLinkTest.xml": "86b09834d2b519de3b070a1e0353d4363a9a38b834520fa5e50afc29b3078d33",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.DelayedAnswerPolicyTest.xml": "5fd539f5f09e5b4bda1af1f0e8dfea4706973e1a4e80282c49dba97be0cd814f",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.command.jev.JevRouteTest.xml": "ab72f744a983564ca6a6efc0d00b6cbb60b469107b720040f5d845482f2f034b",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.trading.TradingReadModelsTest.xml": "ebfbc333bdad170597491aaf241f8beb6db845e70414112c63152f73d161b351",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.SpeakerCaptureJobTest.xml": "f12d8c9a4b779dd865261cd44a39fc242905c28aa724b1f8dcc01521125e6883",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.SpeechQueueContinuityTest.xml": "e03895d3987b99955e47a1f9c4783384700749156eeca0b8e2e3d15f805e65ba",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.session.VanHermesSessionManagerTest.xml": "82b785491b7e114263881eda2809b606fc2cf03512875c2866027607a3d3664a",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.dialdev.DialDevOutcomeRecoveryTest.xml": "ba914ee389ad24592a8e97bc91daa52ea63c03c38e85553fa10368d7a9f1c108",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.BrowserControlMutationTest.xml": "622f687f83aadcd2a3b1afb29d29df29c52f03440defb3f936e0073c08263d0b",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.gateway.GatewayRetryTest.xml": "245af2527462550bb69927da39d5d76ee28b41edc97c151187e312a5191510ab",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.GatewaySpeechDeliveryTest.xml": "23d19191db7e3db53da2884fa6083380f69eb8716a4476fb6a08beeaa331a834",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.ActivityLifetimeContractTest.xml": "6dcfcef291069d6e250dcba657f405043ff3a86f9d4c0476214b02398fe2a65d",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.SuggestionPolicyTest.xml": "1e9a5d29176da95bd5769945b3bbf1611fd92b8914e50b08b93f2b124b216b3e",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.connectivity.ConnectivityTrustedKeysTest.xml": "6694a5252f80df1db9d17ff150310c999527eed9e21a059089deaeae257da34e",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.visual.VanMotionMapTest.xml": "3877fe40cf6c1f9f18e095de488118016aab70430760d1355451049e757cdc07",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.dialdev.DialDevOriginalOperationsTest.xml": "2273a13ba71c216942dc7f5592ae6484f846e8f3d34cecd6197b528dbb63dc7d",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.trading.ChartGeometryTest.xml": "9d9000057d30c892d6fd9778c5037c9ee28a6ac0733dd306ab67cad0bc8d08c1",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.BrowserOmniboxTest.xml": "ad4de52b6e2797a0c52fbc1cda8697d6b00209757a42a95beb01270b751b7e3f",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.design.MotionSpecTest.xml": "87bf89c03dcbe4b21f494a2d34eb0072659943908be352903e8f8e268b608c45",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.visual.VanEmbodimentReducerTest.xml": "39aa52ad016666c83d634f9cdb038ea9b578cf82b584bfb7aa958c9b876b977e",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.AcousticDeliveryTest.xml": "8aebec61add75e5d8e04d8e3ff626adbcd053fb33f5fe86ddaad0adf9dca93b4",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.BrowserFileProviderTest.xml": "7d03eb69ae7cc8e32517e6f58a87a0cb66b16e7c97f3f7173782130516383e9a",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.command.connected.ConnectedReadbackTest.xml": "0bf01521803435b105689923eb95acca878105dbaea02dfddf10ed16d985075d",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.dialdev.DialDevModelsTest.xml": "2e029be5c4c95b5c0c3edb29e8c0dfe0db28736bd185a5e983eb477c243d7f40",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.overlay.OverlayDragControllerTest.xml": "a0951e27ed4d255a7784520980b4569e6c59011ea604ba8c4076caa29c66bddb",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.events.EventStreamTest.xml": "abfbe4628a5acd8d08d2047064321d756a6c3eb6fd8721cc384745610295449c",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.cognitive.CognitiveTwinTest.xml": "0c02b94e9adba3c1ba05cf1fee4338ca358db2035d3be1a19c6f70e99a95ae37",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.VoiceRecognitionPolicyTest.xml": "21a642e4643305f5aff62cd0a8e8c24394ee93d0e63cf00d28b27d6bfac58bb1",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.visual.VanDesignRolesTest.xml": "ece6bbb1c36af6a7af9924725817ef3d4d825cd66ecde2061c1fffdede256269",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.projects.ProjectModelsTest.xml": "b885f77d3983837197ddcdb3816b3bffeb29ebe6a16f1fa2e9d47ac54ed83a24",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.VoiceAssetManifestTest.xml": "ec28f5f49869f4b15fc10f2cee94852791cc975a5f34ebacf2485f76d037a45c",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.memory.LearningProducerTest.xml": "82770ef9c1bca9fc4ebe33675105192ee105792ee36e8ec63d4e9e6cff721ddd",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.security.Pkcs10Test.xml": "c27c61b2b79cb02ab5ce6b01438280e28b9824f240f9d744316433baccbb9afb",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.events.VanEventStreamStoreTest.xml": "6ed07fc2c8760cf8373acf2d9fdb830494fe8cb188248fde5c374fb7076dec4e",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.BrowserUploadPolicyTest.xml": "23b9495fd4af8c5818836e2d37a5c3ddf1105dc65c3cf93414eedbf7b97abd8c",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.visual.VanStatePriorityTest.xml": "dd65ab270750c93f6969260807a336efe296eab179cb7415f2f23b116fff9051",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.telemetry.BrowserStreamTelemetryTest.xml": "22e96c5e5d52c05f81addfa58bdd507ee1641f2615ec56096d1a8ba761508755",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.mission.MissionSelectionTest.xml": "86a27ad5efb950ed5f8a996cb2b04c3fea875cd06b1c43491a49536db0ab0385",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.security.MutualTlsScopeTest.xml": "47b6dc7ac71572ac210e0f5a6a39cf5e1d8b3a79ebcf1491b7fce56314d69520",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.status.VanCommandStatusTest.xml": "1ba0f965912319d96b15898ea79d4fe568bcf6faf4051dd434ccca66451421a1",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.visual.VanFrameBudgetTest.xml": "f33cb04efafe246b493d34717e6246bceee157bd421c7eb33e38004314e6d557",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.session.RestartSeamTest.xml": "e8ddda5156d70bd7511ed3f9b46b88f91f0e900a39d5021ece4b005eafa7d7e2",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.connectivity.ProvisioningRecoveryTest.xml": "c56664251f7e1e0302362b8ad5c18dfe04c3f423422f7acb7ad03020d5d02466",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.design.DensityTierTest.xml": "f2ffee2bf5e82ddf391f35be5988e59839895fa87ec388baf1ba635b915b8f77",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.ViewportSwapTest.xml": "00e07e60070fce1673b9854508a4ef2c70d41ca0e01a6e2dffe827b173b943f0",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.design.LiveBadgeFormatTest.xml": "393f2423d3e80e4be752e7f8271ccd63bed8339dcb7a4243ed5c613bcdabf329",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.ResizeCoalescerTest.xml": "dade0bfb4aae85438b5eef9fa996e33136b9dec12f5b3ff2f01e4c974816da6b",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.command.owner.OwnerServicePresentationTest.xml": "4f503e0f14900f01e67c1f7d1d7af1f3e2ddfb5e41a914aaffd202bb145500e0",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.trading.TradingTicketsTest.xml": "d4bf1cb7a168943b83fd90562c6d5814e25814297309e071467f4e12a50f6f2f",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.projects.ProjectSourceReadTest.xml": "7b5823fd2d9ee86539b5cd5d85efcdfcba42d9500f0b3f18650db20791fcd77b",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.command.nav.VanNavModelTest.xml": "36442fad8c41a856ed52609c4d35534831955a11ae3bac3ff34f150670712d19",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.dialdev.DialDevSemanticsTest.xml": "b0020250ca1f9c5d3d8ea58cf31035851adc6a2cca3113b556a51892467a644d",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.status.OwnerSourceReadTest.xml": "e8de0f9fc57e1a6dcd10913c245d52a17e024a328171ce6a600dd3f44c6bcc90",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.connectivity.SignedConnectivityRoutingTest.xml": "0f8bfa88dbd31f6253cd7cc2ee5ff37b4939df684d0c17436b05509475755a69",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.connectivity.ProvisioningPayloadTest.xml": "74314c93a92cd4fe201209c8dfdb429918b50aa5ceb3fce17da41de5c5ca7108",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.command.owner.OwnerAutomationDraftTest.xml": "be130cee19813ec491f6b82395016f90759a8badb0866ae180b920101c862bba",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.telemetry.SessionTelemetryTest.xml": "d701f0547fffe4174857c6a17874c4846d695285cb5af301d76b4914bccef209",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.security.AttestationChallengeTest.xml": "397f5935637ae6fd2be2ce96c16c901495235b04f32e47374a93601b29c3c29f",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.session.WarmStandbyIsPolicyNotTransportTest.xml": "acedf4cd53af462c5efc2e53f15a8d20ea7fd25c3a9eed351950f95c393e68ab",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.share.ShareIntakeTest.xml": "4a98f9f060e18d6e00c8fa0ab9a08bd6742038e1ba3b7fcfbb6292baa802d227",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.command.settings.DomainAutonomyCommandTest.xml": "06e06350198668794b48c1145823cb19e011f8446c9cd79fed29cfe668475a03",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.VoiceTurnLifecycleTest.xml": "be5d415efab2cdbebf59540d9d85f8f3b40dc1f7ec0ce377bf31addf3fa3aa86",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.OfflineVoiceEndpointTest.xml": "d72f8b759e998cba5865311a92d6b5e88886467509edb62aaa2eb795c9c27b83",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.session.TransportSupervisorTest.xml": "b7567caaeacef9ac8e280286f3ea2f9b7c361478bd09f7dba11045b1f56d3ac5",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.PreRollPolicyTest.xml": "94182d058fd646ad51ceea6ef2a15b85128bc3628bde12de21532f6495c2005b",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.trading.NativeBalanceSourceContractTest.xml": "132e972b3594186a2db666422c5ce5688d859de5d7f41fece7d1636987304157",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.visual.VanPaletteTest.xml": "b651621520c7fea4deb11c147c3711349a8a9fbab19da36553d871fefdcecf04",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.SpeechPlaybackStateTest.xml": "a6439b44d4a452f32449117ef073ff09fd8e222677a98cc0e8b301c1ed54f7a1",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.AndroidOfflineTtsReadinessTest.xml": "5ba4b5ac15f465087b0a33fe3cf585e086a7bed752fa6a134c813b1eed694e02",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.LocalTtsRouterTest.xml": "3aec288baf0d6ccfff91497ebcef2d85a72981e7b748e828ac54aa1fcb8135b8",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.degraded.SubsystemHealthTest.xml": "512e153f88e872d9ec7981652b8b9476be17cdbc72b9e3d04dc45b06523096d0",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.BrowserInputProtocolTest.xml": "b5f83182030e551de2517b8f02c3434df328b5fc81418f6f5bb39cb65283b6da",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.control.VanCommandControllerTest.xml": "b5ec9becc7d03c295d88230289079ba53f708dc1717658b1811dd738a3386b6b",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.session.OutboxPolicyTest.xml": "9325709781e144530099806d792cf7659ebadeb0e212708ee8eab4da74c7003c",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.trading.CurrentAccountRiskTest.xml": "76ebae69dcda2de5803a0e628050b35e83fda5c45548b44b7cd1f727cebcc4f7",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.memory.OwnerMemoryDeclarationsTest.xml": "b25617229553f45f23f0d6bc80e3a9ae53f4e519f0280823812bd74ddcdad4a7",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.session.SessionReconciliationTest.xml": "cef53d2f3ce1e592cc667a37a29c65b6aad91e604ff728ba8dc7d206f4e2e9e0",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.gateway.GatewayMutationRetryTest.xml": "37b0934d22996a90117be85e5873923d228738513fd1587f6092a24ad1ac6e7b",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.BrowserActionPlanTest.xml": "e14614ec3f3e94134ea365983c221c866b4cf0a2956d8ee5098b1beb54e1899e",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.session.WarmStandbyPolicyTest.xml": "725f4d7fb1cd2e923cc0bd6a39873274b8ccdef0b997790ac539ea86e8bdb479",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.BrowserShortcutStoreTest.xml": "6d532bfc4729a3d4869808a8146d7a8c13a7f01b73ab4f708ee399e821d2492f",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.command.settings.OwnerPermissionDraftTest.xml": "250cea7dface8a1f87bde62063f44266cc089540399cde954f27b69aca411f6b",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.SpeechCueTimingTest.xml": "b9931f72d0272de0703406f43ce960f53b0fa079cf7cf88d2df502cc0450f76b",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.ViewportChromeClassTest.xml": "7c1cbb942fbdd27b18469e580bd9d3af2841ae28b6e4fde2e71a93be3657e576",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.trading.TradingNavigationTest.xml": "93e98bbe256422f1c9a878777acb8709ec3126809c4753ef4452bbe8d904ab0c",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.memory.MemoryModelsTest.xml": "5d6159ee3ae2089ca17a094c0d2f8fc0fedea2d744cbb31bbe93adaf086a815d",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.VoiceSecondPassPolicyTest.xml": "36e666c0610d92809d18a137d6d6562f588aa1fdbc1b027d3c8d61b0a0e7b45d",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.command.jev.JevBrowserLaneTest.xml": "bef65694ca7e8b0302980a59fbf585e0ffdb5e592c310e9d75320f202d885c4b",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.BrowserSessionRecordsTest.xml": "3489b4e747287a382d2a98a86828a86499f3f055ee7dec4e9d26d16bbb2c3a88",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.SpeakerEvidenceRemovalTest.xml": "cc0a12b146beb8663fb3f253e2c821dd8724afad9959aaf586b10aa7a088591d",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.OfflineSpeechCoverageTest.xml": "7c2c66ac3de84cf2760b06dad463841d6fadf7b20c0c713c3ab66e5d41f6f29b",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.command.attention.OwnerDecisionTest.xml": "4506f7fa13a6a8e36572350d302f1ade21b4987c42d8f6b8305e3a6ca076563f",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.mission.MissionInterventionTest.xml": "e49224de70c4cad1bbeb511f169d2a02fe4bf14c02b2e07ee7e04b4eff7508ac",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.session.ResumePolicyTest.xml": "5f1687f761427ca2003d116e307bbcd0519f51f19f62ffd920eeae938fe6077c",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.command.work.ConversationReducerTest.xml": "911970729706913768bc7c30f82b5ab2b6aa91fbbb203ee9f29d7431d7d0053f",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.memory.MemoryEffectReceiptTest.xml": "6ee27d00b6113bb7f1b1f3f2411e396edded788b5f06d82afda34ffcd8e11e6c",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.design.ScreenStateTest.xml": "ec122d72f40c36405beabb98c925174881f232fb14c1f8448e9e118a70372a55",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.BrowserBackPolicyTest.xml": "c5ce55bbd096a16fc4b7a9914e7bc69242ed0bb457ff195f6df53db3c9691dfb",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.trading.ChartViewportTest.xml": "173a5a5bfeb4502c0f7facdd9de7f740bb122a4f20f4cd10f631dd44399ab50d",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.AudioFocusPolicyTest.xml": "a47f5f63a02a330dc7edc51c2c0f500902b8bc13c3703ab318f68c7293e90c2e",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.visual.VanAnimationClockTest.xml": "009d3a5ff70de00152a7e576496959349649f0c3e817891b9f90afe6dcfb0941",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.SpeakerEnrollmentPolicyTest.xml": "bccc43337d8262e81706a0f4ae4fd63f9f6882be8a76a2116d3af0ea62696a20",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.BargeInPolicyTest.xml": "668c5b133843c2fe5a2a77586bd5e7dc485ebb453e20cae4548a422f6caaf2bb",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.session.SessionEnvelopeTest.xml": "e62dff01994cc0d7b48fc58dbc480c87028c8ff48f917333ded31fb55a5027b9",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.design.charts.ChartAxesTest.xml": "73ae40ca2c53a69df97009cf152265886e888ee8cd784789d7dca0863de98545",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.visual.VanAuraVoiceReactivityTest.xml": "41a9c8eb8f8da30cc61bba37480f95760aff06da01f7afc185fe9692f2bba5c8",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.design.StatusSemanticsTest.xml": "92db033fc02dcdd3e2f3530a9b20723238a2c92a9956b8514bf3fc6f68d9ee67",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.BrowserStreamMetadataTest.xml": "562ee7dec4fd8ae25e706f8f1b1fe67e0972e2a7b86873b62fb4580a076672a1",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.dialdev.DialDevEnvelopeTest.xml": "8907a947539decd7031d382b5e33d89492e9209ff65d395cd4a3f14026160f7f",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.BrowserSurfaceCoordinatesTest.xml": "6ff7074bfad42263e162e4f266a2f9012c74cbff855dfae391646e85db2b9b57",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.session.HttpSessionCarrierTest.xml": "07cbce5b43fb8e53e92980f0ed7fb290d2d8c96e8b20b39e24718242bab025ad",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.ContentViewportTest.xml": "60ac70617a1c90a3a5dc1f787357cf4ed251a628d096fec9156b050251326930",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.VoiceTurnTest.xml": "2ef26534280b8885aa68ae1bb6fbe1c307d6c33b431eaa0802f079d77045115a",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.UploadAcceptMatchingTest.xml": "a37e90d14ea79b17bea2255cde3f3cae65f2007e7ea7904adaf7474b9b71b627",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.BrowserTransfersTest.xml": "2e60781012210a3219af9239ff210083adbc13a3fc9976ad57198683cf889c32",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.session.OutboxPersistenceTest.xml": "6513bfe45334d2677ca323b4c3cd643c6922951395ddb33619f45d77b5a6317e",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.OfflineCommandClassifierTest.xml": "c3f588f790bf0fd1749b8787d80e122221fb2d6db2fc2ce52ee5ed2d4ef491e9",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.session.CommandLifecycleKillSweepTest.xml": "12d8cc573b7628b15d643d6c6c5ca1d8343242d97d4dbce33571efadc29fd39c",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.BrowserGestureSequencerTest.xml": "3e9b36172038ef411b7c4fc5a8ea09336f260a962ba7b0e66ecb3b0ae56a7a14",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.BrowserFileInspectionTest.xml": "ca103c6fe53fa8f0ffb01c76ccbe043e692cb5af144a41fabe4563d86e706009",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.session.FailoverTransactionTest.xml": "9074fd4a5d9e69b7bc87ab4cdb60c0ec22de98253ea1ea7936330ae821a38395",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.status.OwnerStatusProjectionTest.xml": "7cc89824cc0a58201b9734c15a73fd9491c2d7dc5934bd2a4d6a08c534ab8521",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.session.OfflineSubmissionTest.xml": "6be2808d074dc4bd022bae86f4168493e065aa184424505cd3e68a6b86adcdda",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.status.OwnerLanguageTest.xml": "e393b6c9e3c871f95f9ce0b4a9b5459a41a3be1f53d6add245c551b9af2dfbd7",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.command.nav.ConcreteRouteRestorationTest.xml": "8ee1d72af0131b8a01062fd2156d0db9e216fe28b56f6e9771127f9fddf74d3d",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.session.OwnerReconfirmationSurfaceTest.xml": "cfe2533a92f5cb8ab215165b7975a9ed4397ee95deeb7d55aee45ceea777675e",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.command.work.GmailApprovalPreviewTest.xml": "69bbf0c9d339be08d575935f4c63440eb172cadaad5391f4e19fc3729e5ad09b",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.trading.AccountMarginTest.xml": "d2618e67480f82b67d4a32b4123ace4683e194d95f8eb870d7699f2f4d7ea94b",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.telemetry.DecoderStatsTest.xml": "c0b190174dd884e7aa46a204ac31127998eb16706686bd3781805339ff16c168",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.BrowserProcessRecoveryTest.xml": "fe7301c2f6b0b8370631065f5437c595d63598aa5d78ab846fc4e80ba06eb7b9",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.WakeModelAssetTest.xml": "f69b9ef7b3543067561416a0e90f2b9df81f3edb945a9aa1db2da97892c6fcf4",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.notification.NotificationAppCatalogueTest.xml": "11f2df7cea2697eccaa7c2d88c7a4d62b2d5e18540709eaba4d59774a36f96fd",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.session.UnboundEnvelopeTest.xml": "1ffd45e40ffffa5c6704d4795572ccb4e53724d0bf8bd0c0e2b27e6ad58c61cd",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.trading.NativeAccountObservationTest.xml": "3de69b68dae1ee8b3b9936f85031d2948c47de3cf2e75d9882df78d57df1c95f",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.status.OwnerOverviewTest.xml": "37c5db28f58e8a9daf2f71124a1d8206d3596bae5554224968b62387e1f6f4a1",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.mission.MissionSummaryTest.xml": "331500977c15e9920fb42e91dfa00677336a2c58dc03d57d35ecb30e2b8df3b9",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.voice.SpeechQueueTest.xml": "a217aa4eb12409f9e75f3cc356600014000881016bc7c4a5ede547915d391c2b",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.trading.TradingRuntimeReadModelTest.xml": "c326cd12101c213f72150ff2ba176ad825a624d092b4fa9f4ace2c8da900e9b2",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.degraded.GatewayDegradedMappingTest.xml": "5355a387c84a231f9b9d6c645750756837eae7f104b9357c98c5be58b3aebad7",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.connectivity.ConnectivityManifestTest.xml": "27552d0a92d6a111aa50fc77c3d596c89a7c88cafdb5dc094280f4ece3e63159",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.trading.FundingSourceContractTest.xml": "cf0c6238f16b0a7030fa3c3bcf01acf8577e019edebbcf8833d38cc67a15b108",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.trading.CognitionHierarchyContractTest.xml": "d9d78319ec8ff67c80aaf6ae3de037b5466c7d1b20e1199fa96baaccdb5819f0",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.visual.VanTradeSemanticTest.xml": "51db4777cd40607b34ff8f953a33a1b9946a2aff03b85b118a5b442f416c8d6a",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.memory.DerivedMemoryRecordTest.xml": "84c664e0b124597364df5900d84c8841d99bd11590dad2efa022b1de0211af9b",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.command.jev.JevModelsTest.xml": "30867346f1e934fd3da9e6cabd92d5ec02c93f5e43b508cb9f31d35fd7afc7fa",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.security.CrossLanguageVectorsTest.xml": "d10111b7bcad1ff1e7f6354fd26147bdd1a64399aea3dc0b7fe5216b847a3688",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.runtime.VanResourceEnvelopeTest.xml": "7c2863275a7d52fb5f9c698938b794b038e727926d7460468fb2a432199d6914",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.degraded.DegradedModeStoreGatewayHealthTest.xml": "c4ebf7442cefd0fc790721d71da49c335242acb9ec0df164ee91ab00a73ae2d1",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.BrowserTabsTest.xml": "9f47b3238d4115741416913adff3d3b4c5bf90c502af2800e1192645b4d77eda",
+    "cognitive-android-results/verification/build/test-results/test/TEST-com.dial.van.browser.BrowserKeyMappingTest.xml": "0e6b90e0d0d7141545ca322e1038c30a8e3ad2f3ba0e8ec1558f86496d68d146",
+    "cognitive-android-results/verification/build/test-results/test/binary/results.bin": "ae7639434c32ddf5b58b5a9a1abf2338e4ef05ef0087959aaee7be564bfcb58e",
+    "cognitive-android-results/verification/build/test-results/test/binary/output.bin.idx": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+    "cognitive-android-results/verification/build/test-results/test/binary/output.bin": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cognitive-android-results/app/build/reports/lint-results-debug.html": "86157d2e33ea8a3d2069e849a99c1118f1c2e39d6d122256f9427edb220bc311",
+    "cognitive-android-results/app/build/reports/lint-results-debug.xml": "1c343c4e93db6e26c4a40e757ca515d19adfb3bee52c2c80037aa33ddcfec505",
+    "cognitive-android-results/app/build/reports/lint-results-debug.txt": "5bc180b2c50dfbb58ab207dc7bb35ba6db178e1193d8222ee64ba1c9d2e3bee7",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/index.html": "fd78a7646743fbb4127e6e4dc0444e1a1655524eead960d14282472f61837e23",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/css/style.css": "61866908fd7eb09c79e96239f69db2e8cc5c6526cdb308eba0535ed2a0f6a263",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/css/base-style.css": "a10a4ef75ca2601b44bfdaf3112a5854f6376f68d7cbaf6958286f04488d293b",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/js/report.js": "fc89c6d002d18f4662065c9887b2cda8f8486f2737d4ad0f2fdeac0ad58a44dc",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/packages/com.dial.van.degraded.html": "b05c288393515f7ecf31e68dc5200698b6f6fa5b1b45157f3b96a9900b664c03",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/packages/com.dial.van.gateway.html": "1f051b5e511dea55b597d2bb6c77c9745180e088d3c877deb764cf3386bf721b",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/packages/com.dial.van.visual.html": "424efa65de4324143be5e75ffe05e142ab9ef92bb6cb68a597a534ea17a44b11",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/packages/com.dial.van.design.charts.html": "cb3c0f75c9c33c20af5dc13a898e5324e1b4a1dca6607522c82be07327fe28b6",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/packages/com.dial.van.queue.html": "a984567e03fa668e4c7c3e12e8fb1f0dd752996e42f76c7bb4f6279b74dc90c3",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/packages/com.dial.van.security.html": "47cb09a765f0cbfc2c689465c3e672f14ccde08daccd55dd571b5caaed0673d5",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/packages/com.dial.van.projects.html": "48ecebef1cb62367f040150feeffd1094c0067ddd59c1614a074a79ebbfb2344",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/packages/com.dial.van.mission.html": "f3c71abc0ecde9a40b21b5cd50e1cd9343b6e1f9d8c62bcb0e5fa77ea3387273",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/packages/com.dial.van.overlay.html": "d1dcdc4f75a756fe1ec5acd7a038ce31e4b792e92f11fc1bc515082bb9ebe46c",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/packages/com.dial.van.design.html": "051a28a5c1df9794987fb30e820f3a99e5c41d1e5ce883da67ef006acd170ddd",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/packages/com.dial.van.trading.html": "392520d1d3b491e2396a4619443b1080b97eb996a0b609410ee0461babd15be8",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/packages/com.dial.van.voice.html": "ff151fac555bd05d56232aa2df2dc64a16a860ac4f5550824e34592830a7968a",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/packages/com.dial.van.memory.html": "914e1853d304982413c874fbf63158f0ee814ca40a189e8ae0dd687725b053c0",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/classes/com.dial.van.degraded.DegradedModeStoreTest.html": "38e9af8c34e0008f5eaa4b9d75c0fb343f1b90e08ae9b004514472985fe7c5d6",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/classes/com.dial.van.trading.TradeBookTest.html": "9f6ba2b0fe5232d78159c350926ba849517d86ffc37e57ff65522dacf32a184e",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/classes/com.dial.van.visual.VanWindFieldMotionTest.html": "f848f7b7577d5c9dac4c24f79169fab7b8f71f8a26c0ad4c1495f7a31f9f222f",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/classes/com.dial.van.trading.FundingObservationTest.html": "45227b1ee8a06e1442324eb5a35767fa4fd436dcc30e129b81cca5ed1cbf090c",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/classes/com.dial.van.visual.VanPresenceFrameTest.html": "a7624c820d069c582b5f1bb9da84c17f5d54f50780fc5c05c8485c0a352ab2f8",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/classes/com.dial.van.visual.VanCharacterOpacityTest.html": "fb0bedf9334c6e2a641b54a9d80577aec894b6032467db3b1efd5363b634fb47",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/classes/com.dial.van.visual.VanAuraEnvelopeTest.html": "cdaba554b7a58e04a1d62b52098fe0817419673517b13665f2057fb2628c38ae",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/classes/com.dial.van.visual.VanVisualRuntimeTest.html": "525578360b21cdc9ec07f496ee238ac465c4c6409cd3b5a36fe8ab98a1a380aa",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/classes/com.dial.van.visual.VanPresenceTest.html": "fb75bdf6f0c1a8035d06635eeb435f7aa82994fcb5f60715c32fd02c605ac3d2",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/classes/com.dial.van.voice.VoiceRecognitionPolicyTest.html": "d85bcc4535ce6f1a5be600ba53c98e4310414e0513fed2611a0a512eb694b614",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/classes/com.dial.van.visual.RiveContractTest.html": "ec8bef9fa1942d96145fabb70466edba4446c643bce2363af5f07ab412d35dca",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/classes/com.dial.van.trading.NativeBalancePeriodTest.html": "394f633842000d14a5e98eb255964f316542f10309cf04af5b9acfe9b3029438",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/classes/com.dial.van.trading.TradingModelsTest.html": "941ec2e46383ab0e59de4efd5f661dc4e0330a54cb57df0753e90aa76b62903d",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/classes/com.dial.van.overlay.VanOverlayInteractionTest.html": "fef60dad853839e5cfc85df356cbc6dc96196c1874caca48192e4855708afb03",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/classes/com.dial.van.queue.EncryptedCommandQueueLogicTest.html": "c0efb659f6498b654a700d8defbbc79ccea4fcaef3c4afee52c9dab67c770fb3",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/classes/com.dial.van.visual.VanCharacterMotionTest.html": "32aea549c4d90ae47a145719342bbad88ec8419a8ecc11e1e8df6bd41ecba1b9",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/classes/com.dial.van.visual.VanSceneIdentityTest.html": "4f2b48d0eff47118e948f7d95619b460530e05b38f7a69e5c90af04b49cdcf55",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/classes/com.dial.van.design.charts.ChartAxesTest.html": "80fad5286c43258d54fa7a36e83212503d0d2b26afd6b7105f57fe3ce07cdb4f",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/classes/com.dial.van.trading.RuntimeRecoveryOperationsTest.html": "4e7277c22bfb94b648e5f877d1ce53efb5051f2bbeb88deb303bcd2563ad5a0a",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/classes/com.dial.van.trading.RuntimeRecoveryProtocolTest.html": "229722a8fa5981b33cddc37b528c65feb4fba031c1733efb9c056be6060714d0",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/classes/com.dial.van.mission.MissionSurfaceTest.html": "3cd838f3755a61ff894a3b3ab7bef67754fcfdea83a0379e049e869e4d696656",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/classes/com.dial.van.trading.AccountOperationRecoveryTest.html": "e0e11c0f20b80ba94a27932cb3ce147a042e529ba2cf4c32e4686d9198448752",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/classes/com.dial.van.security.OwnerAuthorityTokenTest.html": "014b8ba24b6b7a06a0c3a850c9fd29517b217eb2c27734b009ec13aaceb46aed",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/classes/com.dial.van.gateway.ReplayDispatchPolicyTest.html": "8f07019b027867ed732b37c0baf0a6c5f4dbf2c7752ddc767e0dc26f07636dd6",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/classes/com.dial.van.voice.VoiceSecondPassTest.html": "09946f6bc82a4c477ce65519926250a8bf673aba89f9516190ec8714f9e96990",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/classes/com.dial.van.trading.StrategyPromotionVerificationTest.html": "1165b8ebfa349db982ad42f007daf1395077183951d4f263d6b6d6149d55bf4d",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/classes/com.dial.van.design.StatusSemanticsTest.html": "d92c6f20b4d9d2ce5334ed4db94e0958b24c2af29f18e2664f1d27414be16d57",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/classes/com.dial.van.trading.CognitionSurfacesTest.html": "1b88b7c9b936bc21c2c3eaac6f25d542b1c52f02ab2a37fbf1b0356b53f1bbcf",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/classes/com.dial.van.voice.WakeRuntimeTest.html": "f32efe86d20fbd01048f74455e8c7333581a36ce3f27dc0d3981d92263bcbc9d",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/classes/com.dial.van.design.ScreenStateTest.html": "4c38fc0a3f42fe8a11fbb61296947b0a4857a71e8cedb73da069ce81de2d3741",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/classes/com.dial.van.trading.AccountOnboardingTest.html": "04c774bb1acf9c34ebf14789c3583928324efc7d1e7f5891f7ee3670f763089d",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/classes/com.dial.van.visual.VanEffectPolicyTest.html": "80c14d5ca1270817db37fef62f2a706e294f23f6f41bdff976556bd6d5227576",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/classes/com.dial.van.design.LiveBadgeFormatTest.html": "b4c5207e81da2a1a7bf4a0b825ddcaf92a097eb3f2ed1575366009b38a0f7f26",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/classes/com.dial.van.design.DensityTierTest.html": "c9a5b5e1ee19976193b0ce2fa384187ab2cdd4f1f56c7f1bc476829d9c01e1a5",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/classes/com.dial.van.trading.AccountUnlinkReviewTest.html": "8fe584f40478944f4ab78a9b2b16323969eee96f775b8200c5c6b102ffbf83f0",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/classes/com.dial.van.memory.MemoryModelsTest.html": "cc6067ff0cde0385ba521c0383940033c68678d8f565a0926a82d2e6e6888812",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/classes/com.dial.van.trading.ChartGeometryTest.html": "4e699195c7c8709c0d8a4ad9d9e5afb4ce4eace69a520c5c92959347aea8d268",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/classes/com.dial.van.design.MotionSpecTest.html": "651912d067c151996523d7d1751c3744d32f0746fb8d26fef4d3c2afe24c590f",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/classes/com.dial.van.projects.ProjectModelsTest.html": "c8995a1f27cd91059ee802595e872394f3c80706bff5911eec9b9003b00731fb",
+    "cognitive-android-results/app/build/reports/tests/testDebugUnitTest/classes/com.dial.van.overlay.VanOverlayChromeTest.html": "87d7817dff2b1dfdac1742ae466dd67d0cb161b97293bee1d3c03f63a1f975a5",
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.trading.StrategyPromotionVerificationTest.xml": "5605f8ec0e9496ba60d2e6d7f87383d60fcfa78b2aa0dc0f56b643c0ff9968f0",
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.mission.MissionSurfaceTest.xml": "661a6b364ca5896ccae51865fed976849fd5c6d0919045fc7bdfc85f9fdaed8d",
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.trading.AccountUnlinkReviewTest.xml": "661ec354c6eecf8c2f8ee00050dab7b960cb8df0d42163c5f4ba2249852e8af0",
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.queue.EncryptedCommandQueueLogicTest.xml": "8473a4a780ef3d3d207d294fd5f1733aa06c62adac295a863f760102e383af25",
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.trading.NativeBalancePeriodTest.xml": "46c80a44614af5cab4874c53344191b037ab286dab31d08c66c5fee16c0ae1b8",
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.trading.ChartGeometryTest.xml": "391b5f518fbc2e73fe42a707ec2fde9bd3a048d832b3d86c8ab23d8cf3d09b4d",
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.design.MotionSpecTest.xml": "0b0f31b29bf37bdb2f543467d237772dba0cd3854f79a9cd72a77406a8217c79",
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.voice.VoiceSecondPassTest.xml": "1b55ec52eb05325fb6e6cdc5f4f6123dc1377c5b093730857a8f905530463596",
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.visual.VanCharacterMotionTest.xml": "8af56e341975bcc0e0643f54906a692d38488bcfbe9e6982147f0f23a66d6384",
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.trading.TradingModelsTest.xml": "208c9fda10264eccf2398702e4ceed9e61302efec4c864fb2b437f9dda4d1083",
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.trading.AccountOperationRecoveryTest.xml": "5942bcf29531e8ae1bf72dd19b4f18638f996739f19f93d7778459b101027229",
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.security.OwnerAuthorityTokenTest.xml": "16751c62716b1ebc002052816ca4b71a1345d5b2054a15a7831d7e9b59ca2996",
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.voice.VoiceRecognitionPolicyTest.xml": "5c0cfd8345524d7cba65fe6e0f284a509fd725bd5b56c251951d688412116151",
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.overlay.VanOverlayInteractionTest.xml": "012049284057f54a04aa4f6d024795aceb14b1250f4eecb8eea42e2968c5c647",
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.trading.RuntimeRecoveryProtocolTest.xml": "a14bf829cabd60f9cd345134a265e4f78b68574e695a6534edbf2559607d4b94",
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.projects.ProjectModelsTest.xml": "33a6ca9e966e30e570efd389b367abe70be662e84992e1a419c944f5fc8de645",
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.gateway.ReplayDispatchPolicyTest.xml": "b5656a0b71787809e34ef6e47d40659991765f247b9d661c966571ca2ef0e371",
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.trading.RuntimeRecoveryOperationsTest.xml": "7e59e7ae72d0f318386c6b6ff90aa25bcc13580b8e617bbe105ac0d3303c7352",
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.degraded.DegradedModeStoreTest.xml": "9a1c141475f66b4aee0bc5efc5e75ff474c903a452721dd26673a158cb9c19a3",
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.visual.VanSceneIdentityTest.xml": "e3ed8f2b9c25781d1d358e9931bac4e6c3cb62066912a765bee1474ffc6e4ed2",
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.visual.VanPresenceFrameTest.xml": "7aa12a4e534715000729bc218c49a00d4a7d82a6d5090d055e2cb6c1e35422c5",
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.design.DensityTierTest.xml": "429eadf31492a4d36825d06b74d180bbd7a7c963488d3b99a080d96cc47e0a68",
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.design.LiveBadgeFormatTest.xml": "c9cc012925fecae19bd795f8f190c5f79c02e667d9fbf38c0ebd1ea026011d37",
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.overlay.VanOverlayChromeTest.xml": "f56402a7886a72161d384ba0e32e181a8d26a57d565a92f6a698e62d136513a7",
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.trading.FundingObservationTest.xml": "6ccf8091fb32215bdb0b9392a8d87cfad79296ccec7eb6e778972b2aef8ce52b",
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.trading.CognitionSurfacesTest.xml": "2793f131439b8bf146abe7a38e9c713134aef58f5341fee00a18e052d19306ff",
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.visual.VanEffectPolicyTest.xml": "39c848d6cf83ffe4a8bdb6f42468fd6864254f91f3f2eac7dd9823271b6ef967",
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.visual.RiveContractTest.xml": "836cff35909e19738ef04170db4be77378c46692be34276f5aa44860c2cc31e8",
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.memory.MemoryModelsTest.xml": "917d6bca86c6926e8bc3e478c0d2bf45ca89603465615fa7f5f89edbe5469d1a",
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.trading.AccountOnboardingTest.xml": "aa4a71e3d8fdb6cc9a938d9fec3cedbc1e0990477fefb5e41b6151f1d445b843",
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.design.ScreenStateTest.xml": "fcbbdcb03599e102ddb00eb6b7e05dbbf26dbd0fb9038a23035c17a088037ebb",
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.design.charts.ChartAxesTest.xml": "e2b9bc8c55c33a49a5c983c21cf51816707c56601a2c85fa38417c80bf0e1288",
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.design.StatusSemanticsTest.xml": "71b3d9c4c20a7bcdcc3ccaf11b08d023693243dd1c930903c3f067392b3880f2",
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.visual.VanCharacterOpacityTest.xml": "0d554c36674397f2e4462b0212a475bfc3f82c36853d7c2172722331044d4d6c",
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.visual.VanWindFieldMotionTest.xml": "e37760a92c63f510a960234c8ba54f63acaf073ee73cc36e79f8fde510055b91",
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.visual.VanAuraEnvelopeTest.xml": "c7766fe39678c7a45861df5cabc762d36b0d9a3f89d5334bee867316c29aef08",
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.voice.WakeRuntimeTest.xml": "bea9632a58b643ccb1dacb72042ea61caa8af4a3e3fab4d7f8f8c7d8d9a2d18f",
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.visual.VanVisualRuntimeTest.xml": "5a4db3b0a1bb66baf82e72083b1f241d0bac6e4cedd3de865d7701b95d400734",
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.visual.VanPresenceTest.xml": "8d84786d71b0e829050fb288b7ba877ee0993fbd90d1705cbd78685baf765677",
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/TEST-com.dial.van.trading.TradeBookTest.xml": "551a811e721eb7d99db41a763596615e8794939e62d362237e80e1535916929c",
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/binary/results.bin": "59c4bd2258e7a93eda36a2648972d2351fb11bdc0f881ed2ddcf3c0b15a7af04",
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/binary/output.bin.idx": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+    "cognitive-android-results/app/build/test-results/testDebugUnitTest/binary/output.bin": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "van-instrumentation-report/debug/com.dial.van.instrumentation.VoicePlaybackRuntimeTest.html": "5e9dab766a5b2b6f1d05f26f59d21e4a02c66fb698a9a8c697d06605b25221d5",
+    "van-instrumentation-report/debug/com.dial.van.instrumentation.FloatingOverlayServiceTest.html": "0fae3a50365339615cdf13e91bfdfc720fc523b2a3913654158ff0a9d12c2a75",
+    "van-instrumentation-report/debug/index.html": "1f74ca9e3e7e0b661c2dadd9f3ba2a3932e70fdf7bf9fc14af4db17d8a0f3634",
+    "van-instrumentation-report/debug/com.dial.van.instrumentation.html": "50db44d95187b13b0b4dbd8bbf60d9961e06658583ccd88023b0126b7d550b74",
+    "van-instrumentation-report/debug/com.dial.van.instrumentation.NetworkSecurityRuntimeTest.html": "4feb4cca0a4741a89187275dbaf5c0bce9939a5d213ae942614fee21e29a41bc",
+    "van-instrumentation-report/debug/com.dial.van.instrumentation.RiveContractTest.html": "dd28669bf9d23f63b98a6fc567b63f97221ea7014ab32ebcc10ae6927a570e0e",
+    "van-instrumentation-report/debug/com.dial.van.instrumentation.CommandCentreLaunchTest.html": "91c0a5811563b0709c5c83852a20e79dff1a9a7b2475e5223b8e9d0187eed26d",
+    "van-instrumentation-report/debug/com.dial.van.instrumentation.TemplateRuntimeTest.html": "28069b7a7a159e7bac875e4ad177ba027e6ffba59ad2a8935796d1c87085e121",
+    "van-instrumentation-report/debug/css/style.css": "f1b366319836f8726d0939654d0eeddfc5b20f67d9e5954b9a1632c60f2f31bf",
+    "van-instrumentation-report/debug/css/base-style.css": "2851d0b2f14f4ff1b75f0d01438887911eb474e235be93e561709227cefb18db",
+    "van-instrumentation-report/debug/js/report.js": "0aa306f94805890682c639b2d5c06108801d64b859a171a3c6eea66c8bab4c6a",
+    "van-character-forge-validation-binding/junit/TEST-emulator-5554 - 12-_app-.xml": "8698eea2c4fd5fe870fb6ab6227ae7bb9290e22a363cf78915d0f4a5a3e5bd89",
+    "van-forecast-runtime-source-report/runtime/research_fixture_smoke-intent.json": "26f8141b20e1f4a5936bc816f7efcbadf19f0b8535ec9988f408e04f81dc14c9",
+    "van-forecast-runtime-source-report/runtime/inference_fixture_smoke-supervisor.json": "f2f05e9423f5955e26e11f74ab71b5b7cf8f14d506c7837a1b493afbbdb6d168",
+    "van-forecast-runtime-source-report/runtime/research_fixture_smoke.log": "d98f1b1eb3d05fdc1f53233d59052067717d5a7363fd1ca541a3368b57db742d",
+    "van-forecast-runtime-source-report/runtime/receipt.json": "88970b47589d02ed3d7ee2bce273c2f1e6db4d8948350ba05525d9aabb2b71c1",
+    "van-forecast-runtime-source-report/runtime/inference_fixture_smoke-intent.json": "2ca0f6a0fba4a789bf4c1d3632fb75d1dda2fee878b057b15385727b902ae9e1",
+    "van-forecast-runtime-source-report/runtime/inference_fixture_smoke.log": "a904f28d51024fa5a0ca5c0f2ccd8efbe6e214e5540afd388c5ae624a60c6552",
+    "van-forecast-runtime-source-report/runtime/research_fixture_smoke-supervisor.json": "cb687c3e88a64fbb658848472fd873641d06c0b660cfe9307d45dadfb2393a90",
+    "van-forecast-runtime-source-report/runtime/research/optuna.sqlite": "0895e76dca5abec46ab23026f465d45a4369d812c976a43a4a24de75e6911143",
+    "van-forecast-runtime-source-report/runtime/research/qlib.sqlite": "c620b2bff941c45076a069423522d3290300938f1fd281cb7743e462f75872ab",
+    "van-forecast-runtime-source-report/runtime/research/qlib-lightgbm.txt": "58ab9809acac5cd3e345b7a46c86f42bab563323023ea44eb25a86a0c0558e24",
+    "van-forecast-runtime-source-report/runtime/research/fixture-artifact.json": "b5f2ef99bf3fbed751213e0e5d04cae3f7202c9a28aec496c31375380c0da39c",
+    "van-forecast-runtime-source-report/runtime/research/xgboost.json": "e63bf713e2fd45ae9d0a24790fef9dee6b872a4fe49ca543097cc402dd1e0bec",
+    "van-forecast-runtime-source-report/runtime/research/mlflow.sqlite": "890990c520793f899b5b39f6651355a767e1ed11aab154948013a5190818479a",
+    "van-forecast-runtime-source-report/runtime/research/train-probe-receipt.json": "5a039bca7c9d86fd3ed744ca51e802107392d29b43fe26c4a28fb7bfe35d381e",
+    "van-forecast-runtime-source-report/runtime/inference/inference-receipt.json": "8bd8493eb728b808c14d8bc17fe3f61928566e7115b46a1023bb6e2c39dcb436",
+    "van-forecast-runtime-source-report/runtime/source/vati_forecast_worker/__init__.py": "b391b2113172c91b478ab3e84f2705eccafc8bfdd573e151e0c8682c84c4a67e",
+    "van-forecast-runtime-source-report/runtime/source/vati_forecast_worker/smoke.py": "283d92f9053fd4238ce4861c4e63257ce5ff6468c4cb36326a7fe70ee7b39443",
+    "van-forecast-runtime-source-report/runtime/source/vati_forecast_worker/source_partitions.py": "6afc0f9c010e0e6e8cdeaae0c8ea974027a74a5d01a9e9a4d4b333639cda2870",
+    "van-forecast-runtime-source-report/runtime/source/vati_forecast_worker/inference_smoke.py": "4b96fee5a03cd1ead58b56de7256bb61d1cd00a892364a2be2d5c31ada23c200",
+    "van-forecast-runtime-source-report/runtime/source/vati_forecast_worker/artifacts.py": "ecae9d896972e99ae94b1ddf901c10588b12cc3d0ff2be9f9ed29c822a69a34f",
+    "van-forecast-runtime-source-report/runtime/source/vati_forecast_worker/inventory.py": "d1fc5ab35945cfd45579e1191c3d325a66af1ae301047725f754ea924e97fb95",
+    "van-forecast-runtime-source-report/runtime/source/vati_forecast_worker/policy.py": "1217c358fe804a38fb75ec1cb24b86e9a2721a0e37cb114c69de62ce40897680",
+    "van-forecast-runtime-source-report/runtime/source/vati_forecast_worker/environment.json": "ee7b77b9b162e858bc477b0b5101004415910db283b1659ba481f161ce0bcae9",
+    "van-forecast-runtime-source-report/runtime/source/vati_forecast_worker/verify_wheels.py": "44a23fb7b68161e10fb0f751408c59042af8b5dfa0193d245d96355341de2b20",
+    "van-forecast-runtime-source-report/runtime/source/vati_forecast_worker/locks/wheel-manifest-cp312-linux-x86_64.json": "b4aba86b9b84970e64c7d0072da6c065d0374f16ef32ceb6153c1504450352ef",
+    "van-forecast-runtime-source-report/runtime/source/vati_forecast_worker/locks/research-cp312-linux-x86_64.wheel.lock": "1c607285f9cad2f82dafce1494b8056e1c4ceb23956166bf351d602111b80283",
+    "van-forecast-runtime-source-report/runtime/source/vati_forecast_worker/locks/research-cp312-linux-x86_64.source.lock": "16e8f762d29ddac81b4b7024f9e5c675a988815c45b62fbbc97032bccd1db0c5",
+    "van-forecast-runtime-source-report/runtime/source/vati_forecast_worker/locks/build-cp312-linux-x86_64.lock": "0496f2e6a919f0b7391a91009453b77d9a641b5b8045593d7fa22762e6765a52",
+    "van-forecast-runtime-source-report/runtime/research/feast/feature_store.yaml": "14ca89f3b6422ec7fd38c2ff1742064b58a7df692fe90cef123a429ad57497cd",
+    "van-forecast-runtime-source-report/runtime/research/feast/registry.db": "118f63cb234f95c08b586565cd1a34d0b659da113c44d93e8ef2b82a3acb7015",
+    "van-forecast-runtime-source-report/runtime/research/feast/online.db": "a53072628a5eda8ed7139d68743649c62e4a007f7e692a4f88cb98893e1f7b9d",
+    "van-forecast-runtime-source-report/runtime/research/feast/input.parquet": "dc250b1291f95d0e33e0f5e83d1248029ce137ba06b625235aff786a3ac1dab9",
+    "van-forecast-runtime-source-report/runtime/research/neuralforecast/NHITS_0.safetensors": "fb8b6e47ea8a3a8d5d41d9b7321d109d578e53ee29368d06a2a55b02189fe58a",
+    "van-forecast-runtime-source-report/runtime/research/neuralforecast/configuration.json": "7bab4328fe11f4f261fd45e68db45954788dcea15d01eda160843ab19c5cab25",
+    "van-forecast-runtime-source-report/runtime/research/model-bundle/qlib-lightgbm.txt": "58ab9809acac5cd3e345b7a46c86f42bab563323023ea44eb25a86a0c0558e24",
+    "van-forecast-runtime-source-report/runtime/research/model-bundle/xgboost.json": "e63bf713e2fd45ae9d0a24790fef9dee6b872a4fe49ca543097cc402dd1e0bec",
+    "van-forecast-runtime-source-report/runtime/research/model-bundle/fixture-models.json": "3449a9f74aa0e1291dceaf762a4b8ae432184ac51f89ea0d5f9fa08cd25cd1de",
+    "van-forecast-runtime-source-report/runtime/research/mlruns/1/46c4228ea6c04ae68be8f06edebaab99/artifacts/fixture-artifact.json": "b5f2ef99bf3fbed751213e0e5d04cae3f7202c9a28aec496c31375380c0da39c",
+    "van-forecast-runtime-source-report/runtime/research/model-bundle/neuralforecast/NHITS_0.safetensors": "fb8b6e47ea8a3a8d5d41d9b7321d109d578e53ee29368d06a2a55b02189fe58a",
+    "van-forecast-runtime-source-report/runtime/research/model-bundle/neuralforecast/configuration.json": "7bab4328fe11f4f261fd45e68db45954788dcea15d01eda160843ab19c5cab25"
+  }
+}

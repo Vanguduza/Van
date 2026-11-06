@@ -3,6 +3,8 @@ package com.dial.van.overlay
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,10 +21,17 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,8 +44,11 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import com.dial.van.VanApplication
 import com.dial.van.control.VanCommandSource
 import com.dial.van.control.VanMessageRole
@@ -73,17 +85,26 @@ internal fun ColumnScope.TradesWorkboardPanel(
     onRefresh: () -> Unit,
     onOpenRoute: (String) -> Unit,
 ) {
-    var state: TradeBookState by remember { mutableStateOf(TradeBookState.Loading) }
+    var state: TradeBookState by remember(view, refresh) { mutableStateOf(TradeBookState.Loading) }
     LaunchedEffect(view, refresh) {
-        state = runCatching { app.gatewayClient.tradingTrades(view.query) }.fold(
+        // Never leave a previous account/view's rows under the newly selected tab.
+        state = TradeBookState.Loading
+        state = runCatching {
+            val response = app.gatewayClient.tradingTrades(view.query)
+            currentCoroutineContext().ensureActive()
+            response
+        }.fold(
             onSuccess = { TradeBookParser.parse(view, it) },
-            onFailure = { TradeBookState.Unavailable(view, TradingFormat.unavailableState(null)) },
+            onFailure = { failure ->
+                if (failure is kotlinx.coroutines.CancellationException) throw failure
+                TradeBookState.Unavailable(view, TradingFormat.unavailableState(null))
+            },
         )
     }
     Column(modifier = Modifier.fillMaxWidth().weight(1f)) {
-        Row(horizontalArrangement = Arrangement.spacedBy(5.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(5.dp), verticalAlignment = Alignment.CenterVertically) {
             TradeView.entries.forEach { candidate ->
-                WorkChip(candidate.label, accent) { onView(candidate) }
+                WorkChip(candidate.label, accent, selected = candidate == view) { onView(candidate) }
             }
             WorkChip("Refresh", accent) { onRefresh() }
             WorkChip("Open", accent) {
@@ -94,10 +115,10 @@ internal fun ColumnScope.TradesWorkboardPanel(
         when (val current = state) {
             TradeBookState.Loading -> Text("Reading the trading ledger…", color = Color(0xFFB6C2D0), fontSize = 10.sp)
             is TradeBookState.Unavailable ->
-                Text(current.reason, color = Color(0xFFFFB300), fontSize = 10.sp, maxLines = 3)
+                Text(current.reason, color = Color(0xFFFFB300), fontSize = 12.sp, maxLines = 3)
             is TradeBookState.Ready -> {
                 if (!current.ledgerAvailable) {
-                    Text(TradingFormat.unavailableState(null), color = Color(0xFFFFB300), fontSize = 10.sp, maxLines = 3)
+                    Text(TradingFormat.unavailableState(null), color = Color(0xFFFFB300), fontSize = 12.sp, maxLines = 3)
                 } else if (current.rows.isEmpty()) {
                     Text(view.emptyCopy, color = Color(0xFFB6C2D0), fontSize = 10.sp)
                 } else {
@@ -112,7 +133,7 @@ internal fun ColumnScope.TradesWorkboardPanel(
         Text(
             "Shown here only. Van does not place or change trades.",
             color = Color(0xFF7F9099),
-            fontSize = 8.sp,
+            fontSize = 12.sp,
             maxLines = 2,
         )
     }
@@ -137,7 +158,38 @@ internal fun ChatComposer(
     compact: Boolean,
     draft: String,
     onDraft: (String) -> Unit,
+    localReady: Boolean = true,
 ) {
+    val conversation by app.commandController.state.collectAsState()
+    var sendError by remember { mutableStateOf<String?>(null) }
+    val draftGate = remember { OverlaySubmissionGuard() }
+    val draftLease = draftGate.observe(draft)
+    fun send() {
+        if (!localReady) return
+        // Read the controller now, not a stale composition. The controller marks
+        // submitting synchronously, so a double-click/IME replay cannot resend.
+        runCatching {
+            draftGate.submit(draft, draftLease, app.commandController.state.value.submitting) { text ->
+                val previous = app.commandController.state.value.messages.map { it.id }.toSet()
+                app.commandController.submitText(text, VanCommandSource.CHAT)
+                app.commandController.state.value.messages.any {
+                    it.id !in previous && it.role == VanMessageRole.OWNER && it.text == text
+                }
+            }
+        }.onSuccess { result ->
+            if (result == OverlaySubmissionGuard.Result.LOCALLY_RECORDED) { draftGate.observe(""); sendError = null; onDraft("") }
+            if (result == OverlaySubmissionGuard.Result.NOT_RECORDED) sendError = "Message not submitted. Your draft is still here."
+        }.onFailure { sendError = "Message not submitted. Your draft is still here." }
+    }
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+    val feedback = sendError ?: when {
+        conversation.submitting -> "Sending your message…"
+        conversation.pendingA4Approval != null -> "Approval is required. Review the exact action in Command Centre."
+        conversation.lastError != null -> "Request needs attention. Check its status in the conversation before sending again."
+        else -> null
+    }
+    if (feedback != null) Text(feedback, color = Color(0xFFB8CBD2), fontSize = 12.sp,
+        modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(5.dp),
@@ -145,19 +197,17 @@ internal fun ChatComposer(
     ) {
         OutlinedTextField(
             value = draft,
-            onValueChange = onDraft,
+            enabled = localReady,
+            onValueChange = { draftGate.observe(it); sendError = null; onDraft(it) },
             modifier = Modifier.weight(1f),
             singleLine = compact,
             maxLines = if (compact) 1 else 3,
-            label = { Text("Command", fontSize = 10.sp) },
+            label = { Text("Message VAN", fontSize = 12.sp) },
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
+            keyboardActions = KeyboardActions(onSend = { send() }),
         )
-        WorkChip("Send", accent) {
-            val text = draft.trim()
-            if (text.isNotEmpty()) {
-                app.commandController.submitText(text, VanCommandSource.CHAT)
-                onDraft("")
-            }
-        }
+        WorkChip("Send", accent, enabled = localReady && OverlayUsabilityPolicy.canSubmit(draft, conversation.submitting)) { send() }
+    }
     }
 }
 
@@ -176,45 +226,16 @@ internal fun ConversationBubble(role: VanMessageRole, text: String, accent: Int)
             .background(background)
             .padding(8.dp),
     ) {
-        Text(text, color = Color(0xFFF4FCFF), fontSize = 11.sp)
-    }
-}
-
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-internal fun ContextAction(title: String, detail: String, onClick: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(10.dp))
-            .background(Color(VanGlassTokens.BABY_CYAN).copy(alpha = 0.08f))
-            .combinedClickable(onClick = onClick)
-            .padding(9.dp),
-    ) {
-        Column {
-            Text(title, color = Color.White, fontWeight = FontWeight.SemiBold, fontSize = 12.sp)
-            Text(detail, color = Color(0xFFB8CBD2), fontSize = 10.sp)
+        Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
+            Text(when (role) { VanMessageRole.OWNER -> "You"; VanMessageRole.VAN -> "VAN"; VanMessageRole.SYSTEM -> "Status" },
+                color = Color(0xFFB8CBD2), fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
+            SelectionContainer { Text(text, color = Color(0xFFF4FCFF), fontSize = 13.sp) }
         }
     }
 }
 
 
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-internal fun WorkChip(label: String, accent: Int, onClick: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .height(30.dp)
-            .clip(RoundedCornerShape(9.dp))
-            .background(Color(accent).copy(alpha = 0.16f))
-            .combinedClickable(onClick = onClick)
-            .padding(horizontal = 7.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(label, color = Color(0xFFF4FCFF), fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
-    }
-}
+
 
 
 @Composable

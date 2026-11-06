@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.586" timestamp="2026-10-30T12:26:58.426143+00:00" hostname="c80195087e61"><testcase classname="trading.tests.test_native_fee_provenance" name="test_historical_default_zero_close_without_native_charge_source_stays_unknown" time="0.063"><failure message="AssertionError: assert 'PRICE_DERIVE...ORDED_CHARGES' == 'UNKNOWN_CHARGES'&#10;  &#10;  - UNKNOWN_CHARGES&#10;  + PRICE_DERIVED_NET_RECORDED_CHARGES">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-38/test_historical_default_zero_c0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7f09887a88c0&gt;
+
+    def test_historical_default_zero_close_without_native_charge_source_stays_unknown(tmp_path,monkeypatch):
+        original=ExecutionRouter._log
+        def legacy_log(self,kind,payload,**kwargs):
+            payload=dict(payload)
+            if kind is EventKind.EXECUTION_RECEIPT:
+                payload.pop('recorded_native_charge',None)
+            return original(self,kind,payload,**kwargs)
+        monkeypatch.setattr(ExecutionRouter,'_log',legacy_log)
+        ledger=Ledger(tmp_path/'historical-default-zero.sqlite')
+        try:
+            out=account_close_review(ledger,commission=0)
+            assert out['receipt'].fees==D(0) and out['receipt'].status=='FILLED'
+&gt;           assert out['review'].pnl_basis=='UNKNOWN_CHARGES'
+E           AssertionError: assert 'PRICE_DERIVE...ORDED_CHARGES' == 'UNKNOWN_CHARGES'
+E             
+E             - UNKNOWN_CHARGES
+E             + PRICE_DERIVED_NET_RECORDED_CHARGES
+
+trading/tests/test_native_fee_provenance.py:21: AssertionError</failure></testcase></testsuite></testsuites>

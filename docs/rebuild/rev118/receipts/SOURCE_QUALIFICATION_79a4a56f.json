@@ -1,0 +1,43 @@
+{
+  "schema": "van.rebuild.source-qualification/1",
+  "source_head": "79a4a56f05831e6f5a8e3a4bcd1d950d70b39388",
+  "scope": "backend/tests and tests/contracts; actual pinned DDS source; isolated frozen worktree",
+  "result": "FAILED_ONE_HTML_ESCAPING_GUARD",
+  "counts": {
+    "tests": 6776,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 166
+  },
+  "passed": 6609,
+  "duration_seconds": 1584.962,
+  "failures": [
+    {
+      "class": "backend.tests.test_oauth_callback_escaping",
+      "name": "test_the_gateway_has_no_other_unescaped_html_interpolation",
+      "message": "AssertionError: unescaped interpolation in an HTML response: {title}\nassert 'html.escape' in 'title'"
+    }
+  ],
+  "skips_by_reason": {
+    "needs the pinned Chromium, openssl and a local non-loopback address": 6,
+    "needs the pinned Chromium and openssl": 31,
+    "needs root and setpriv": 1,
+    "no Chromium/Playwright available": 49,
+    "no Chromium for the network-effect guard": 62,
+    "no Chromium/Playwright available for the real-browser element test": 6,
+    "DDS checkout not present; blob hashes pinned above": 1,
+    "member of the B1 closed set by definition": 3,
+    "opt-in actual AGP release guard check": 1,
+    "opt-in actual AGP signing guard check": 1,
+    "needs root, unshare -n, nft and setpriv": 5
+  },
+  "xml_sha256": "51cb23ef83a6ddae4b9ed7996d53d1c712c423ebbe1542412e4e102686f819aa",
+  "log_sha256": "55bfb79bd875af6f410b35ab472856a63d9dc12c3f1471f5e6953c826e3acf70",
+  "storage_audit": {
+    "forbidden_events": [],
+    "scope": "backend/tests plus tests/contracts; repo-root invocation; writes and SQLite opens under root/data or backend/data refused"
+  },
+  "worktree_clean": true,
+  "source_fix": "Escape the static callback title using the unchanged existing html.escape guard; current source test execution is recorded separately after restoration of active mutation work.",
+  "qualification": "Source evidence only; not all tests passed at this source. No unit or production/handset acceptance."
+}

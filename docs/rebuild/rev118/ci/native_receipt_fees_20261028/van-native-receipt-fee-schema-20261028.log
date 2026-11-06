@@ -1,0 +1,30 @@
+{
+  "schema_sha256": "0a102a83397f1ad3f4a5777cd51278888b1e54e3fc3c89a4d882f38e290ca7bf",
+  "cases": [
+    {
+      "fees": null,
+      "receipt_hash": "2c76d2022dd597b5fa21136fcc236dd3252a6f60be4d1805fcfbd4a9fed36f02",
+      "schema_valid": true,
+      "actual_fill_retained": true,
+      "protection_retained": true,
+      "same_original_hash": true
+    },
+    {
+      "fees": "0.00",
+      "receipt_hash": "beddfbf6c985c645980ebcfd858e44485a32cea4b2138642c4353dbe7f254970",
+      "schema_valid": true,
+      "actual_fill_retained": true,
+      "protection_retained": true,
+      "same_original_hash": true
+    },
+    {
+      "fees": "3.50",
+      "receipt_hash": "35a7018497edcd34e1559f47cc0eb20a1f12b61b8d90148617f8df8f4756bf50",
+      "schema_valid": true,
+      "actual_fill_retained": true,
+      "protection_retained": true,
+      "same_original_hash": true
+    }
+  ],
+  "source_fixtures_not_provider_or_device_qualification": true
+}

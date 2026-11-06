@@ -1,0 +1,226 @@
+{
+  "schema": "van.rebuild.hosted-source/1",
+  "source_head": "be61c629ffdfaf3db71b084e9cae1acb9d6ea31c",
+  "tested_merge": "81bbb4978c6ea8dfedd2e10c6a6b63e282bb7835",
+  "run_id": 40115383483,
+  "conclusion": "failure",
+  "jobs": [
+    {
+      "id": 120935476638,
+      "name": "backend",
+      "conclusion": "failure"
+    },
+    {
+      "id": 120935476758,
+      "name": "mutation (kotlin-0, kotlin, 0/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120935476761,
+      "name": "postgres-ledger",
+      "conclusion": "success"
+    },
+    {
+      "id": 120935476767,
+      "name": "rebuild-documentary",
+      "conclusion": "success"
+    },
+    {
+      "id": 120935476795,
+      "name": "project-truth-ledger",
+      "conclusion": "failure"
+    },
+    {
+      "id": 120935476819,
+      "name": "android-instrumentation",
+      "conclusion": "success"
+    },
+    {
+      "id": 120935476825,
+      "name": "mutation (python-3, python, 3/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120935476837,
+      "name": "mutation (kotlin-2, kotlin, 2/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120935476849,
+      "name": "backend-public-source",
+      "conclusion": "failure"
+    },
+    {
+      "id": 120935476862,
+      "name": "browser-guard-source",
+      "conclusion": "success"
+    },
+    {
+      "id": 120935476865,
+      "name": "android-and-visual-evidence",
+      "conclusion": "success"
+    },
+    {
+      "id": 120935476905,
+      "name": "mutation (python-1, python, 1/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120935476950,
+      "name": "mutation (kotlin-3, kotlin, 3/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120935476968,
+      "name": "mutation (browser-agent, browser-agent, 0/1)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120935476984,
+      "name": "mutation (kotlin-1, kotlin, 1/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120935476999,
+      "name": "mutation (python-0, python, 0/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120935477002,
+      "name": "mutation (python-2, python, 2/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120938363707,
+      "name": "character-forge-gate",
+      "conclusion": "success"
+    }
+  ],
+  "postgres": {
+    "tests": 26,
+    "passed": 26,
+    "failed": [],
+    "errors": 0,
+    "skipped": [],
+    "sha256": "a60968e8bbf5eb0286bbb7b0faccc7ed95c8a289ddf94ccfde7416ff884f987f"
+  },
+  "trading": {
+    "tests": 2912,
+    "passed": 2911,
+    "failed": [],
+    "errors": 0,
+    "skipped": [
+      {
+        "id": "trading.tests.test_vtil_borrow::test_dial_resolver_selects_trading_knowledge_from_van_registry",
+        "reason": "dial-new checkout not available (set DIAL_REPO)"
+      }
+    ],
+    "sha256": "0bc1870a6fe736b495e7feb191aa5396583f9a5f90fd63e3113ecebcd40046a1"
+  },
+  "voice_source": {
+    "tests": 117,
+    "passed": 117,
+    "failed": [],
+    "errors": 0,
+    "skipped": [],
+    "sha256": "5b89cebf2a53a25d04230dce9505150e3e365360bf89229782db6fee4fc708e5"
+  },
+  "public_gateway": {
+    "tests": 5647,
+    "passed": 5636,
+    "failed": [
+      {
+        "id": "backend.tests.test_one_jev_system::test_no_second_jev_service_name_anywhere_in_van",
+        "message": "AssertionError: assert ['tools/rebui...source.py:19'] == []\n  \n  Left contains one more item: 'tools/rebuild/backend_public_source.py:19'\n  \n  Full diff:\n  - []\n  + [\n  +     'tools/rebuild/backend_public_source.py:19',\n  + ]"
+      }
+    ],
+    "errors": 0,
+    "skipped": [
+      {
+        "id": "backend.tests.test_jev_browser_eligibility::test_vendored_dds_files_are_the_audited_blobs",
+        "reason": "DDS checkout not present; blob hashes pinned above"
+      },
+      {
+        "id": "backend.tests.test_jev_no_generic_executor::test_no_fabric_or_generic_operation_survives_the_b1_validator[click]",
+        "reason": "member of the B1 closed set by definition"
+      },
+      {
+        "id": "backend.tests.test_jev_no_generic_executor::test_no_fabric_or_generic_operation_survives_the_b1_validator[scroll]",
+        "reason": "member of the B1 closed set by definition"
+      },
+      {
+        "id": "backend.tests.test_jev_no_generic_executor::test_no_fabric_or_generic_operation_survives_the_b1_validator[select]",
+        "reason": "member of the B1 closed set by definition"
+      },
+      {
+        "id": "tests.contracts.test_android_instrumentation_abi::test_actual_agp_direct_package_release_refuses_missing_core_deployment_profile",
+        "reason": "opt-in actual AGP release guard check"
+      },
+      {
+        "id": "tests.contracts.test_android_production_target::test_actual_agp_valid_target_still_refuses_missing_production_signing",
+        "reason": "opt-in actual AGP signing guard check"
+      },
+      {
+        "id": "tests.contracts.test_character_forge_reference_pack::test_crops_regenerate_byte_identically_from_the_board",
+        "reason": "could not import 'PIL.Image': No module named 'PIL'"
+      },
+      {
+        "id": "tests.contracts.test_character_forge_reference_pack::test_interim_art_is_the_bundled_asset_and_regenerates_from_candidate_b",
+        "reason": "could not import 'PIL.Image': No module named 'PIL'"
+      },
+      {
+        "id": "tests.contracts.test_ci_dds_contract_pin::test_recorded_blobs_are_the_pinned_dds_blobs_when_dds_is_present",
+        "reason": "no DDS git clone beside this checkout; the CI step verifies the same table itself"
+      },
+      {
+        "id": "tests.contracts.test_project_truth_ledger::test_the_real_branch_verifies_at_head",
+        "reason": "shallow checkout: the project-truth-ledger CI job runs this with full history"
+      }
+    ],
+    "sha256": "9a24913175dd0a7b5bf4a8cd43ddcf75b86bcb7669d5423c9fdbbdb70a75cf57"
+  },
+  "public_gateway_storage_audit": {
+    "schema": "van.source-storage-audit/1",
+    "forbidden_events": [],
+    "source_sha256": "d4e270150fb0da6e8d79b449dd0de68fd1f97b3ccea3d282f31d91297edbd495",
+    "root": "/home/runner/work/Van/Van",
+    "scope": "SQLite opens, path-based writable opens and directory/link/rename/delete events under data and backend/data",
+    "limits": "Python audit events only; existing fd writes, native-library raw I/O and external processes are not an OS sandbox. Git state is checked separately."
+  },
+  "public_media": {
+    "executed": false,
+    "reason": "Gateway failure prevented this independent step. Next workflow runs media with always(), retaining all failure gates."
+  },
+  "emulator": {
+    "tests": 22,
+    "passed": 18,
+    "failures": 0,
+    "skipped": 4,
+    "html_sha256": "d5c68cc6b4fd4e8109ff1fc65fefbe28ffe423ed946f679a619fff9041f7ac13",
+    "voice_methods": [
+      {
+        "name": "cancellationBeforeNativeStartCannotCompleteOrDamageTheReplacementAnswer",
+        "elapsed": "3.211s"
+      },
+      {
+        "name": "realOfflineAnswerReachesTheApplicationQueueAsSpoken",
+        "elapsed": "2.436s"
+      }
+    ],
+    "voice_html_sha256": "ab697a1bc5e47956d5b93594e73d910e9db44ca1859311786cadb078805fe792"
+  },
+  "next_source_corrections": [
+    "Use canonical existing test-file paths for declared skip metadata; original single-JEV policy unchanged.",
+    "Pin Pillow12.3.0 to execute two image source cases.",
+    "Full-history source-head checkout executes actual branch-ledger regression; original trusted-main required job stays unchanged.",
+    "Run the two exact original AGP refusal cases in the Android SDK/JDK job and require2executed/no-skips. Public source report explicitly discloses their separate-runtime prerequisite.",
+    "Run isolated media coverage independently even when gateway fails; all failure verdicts remain enforced."
+  ],
+  "related": [
+    "HOSTED_FULL_BROWSER_SOURCE_be61c629.json",
+    "NATIVE_METAEDITOR_be61c629.json",
+    "../ci/MUTATION_CORPUS_be61c629.json"
+  ],
+  "remaining_required_jobs": "Private-DDS read credential and trusted-main bootstrap still required; neither bypassed.",
+  "limits": "Source and emulator evidence only; no whole-backend pass, admission, live host/provider, handset or production signing/profit claim."
+}

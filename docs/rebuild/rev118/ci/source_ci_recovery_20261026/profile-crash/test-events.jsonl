@@ -1,0 +1,1 @@
+{"duration": 0.11481981399992947, "nodeid": "trading/tests/test_single_session_unknown_entry.py::test_current_empty_positions_do_not_release_original_unresolved_entry_risk", "outcome": "passed", "phase": "setup"}

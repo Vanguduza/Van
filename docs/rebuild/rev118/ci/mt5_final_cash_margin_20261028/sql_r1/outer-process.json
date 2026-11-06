@@ -1,0 +1,15 @@
+{
+  "command": [
+    "python3",
+    "/workspace/van-mt5-final-cash-margin-sql-r1-20261028.py"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 438883,
+  "started_at_utc": "2026-10-28T12:21:02.746048+00:00",
+  "timeout_seconds": 2100,
+  "state": "COMPLETED",
+  "command_pid": 438887,
+  "exit": 1,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-28T12:32:37.048754+00:00"
+}

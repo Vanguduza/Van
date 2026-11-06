@@ -1,0 +1,1789 @@
+{
+  "count": 64,
+  "requirements": [
+    {
+      "acceptance": "Actual outcome producer, durable evidence, selector and evolution consumers form one integrated VATI loop.",
+      "backend_units": [
+        "BE-036"
+      ],
+      "frontend_units": [],
+      "id": "VAN-SO-001",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [
+        "BQ-007",
+        "BG-001"
+      ],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "source_refs": [
+        "CONS §§14,16,20"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §1,8,9",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-SO-001-POS",
+      "test_ids": [
+        "T-VAN-SO-001-POS",
+        "T-VAN-SO-001-NEG",
+        "T-VAN-SO-001-REC"
+      ],
+      "text": "Self-optimization is an end-to-end required backend outcome"
+    },
+    {
+      "acceptance": "Operational choices are automatic under qualified grants; novel policies require independent qualification and authorized promotion.",
+      "backend_units": [
+        "BE-002",
+        "BE-010",
+        "BE-036"
+      ],
+      "frontend_units": [],
+      "id": "VAN-SO-002",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [
+        "BQ-007"
+      ],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "source_refs": [
+        "OWNER+CONS §§16,18"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §2",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-SO-002-POS",
+      "test_ids": [
+        "T-VAN-SO-002-POS",
+        "T-VAN-SO-002-NEG",
+        "T-VAN-SO-002-REC"
+      ],
+      "text": "Two autonomy levels with separate financial activation"
+    },
+    {
+      "acceptance": "Evidence update, operational selection and policy mutation are three different typed effects.",
+      "backend_units": [
+        "BE-002",
+        "BE-036"
+      ],
+      "frontend_units": [],
+      "id": "VAN-SO-003",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [
+        "BQ-007"
+      ],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "source_refs": [
+        "CODE learning/boundary.py"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §2.4",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-SO-003-POS",
+      "test_ids": [
+        "T-VAN-SO-003-POS",
+        "T-VAN-SO-003-NEG",
+        "T-VAN-SO-003-REC"
+      ],
+      "text": "Narrow extension of LearningBoundary without removing forbidden policy targets"
+    },
+    {
+      "acceptance": "Bind policy/artifact/qualification/venue/account/product/expiry and tested joint parameters to existing mandate.",
+      "backend_units": [
+        "BE-002",
+        "BE-009",
+        "BE-010"
+      ],
+      "frontend_units": [],
+      "id": "VAN-SO-004",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "source_refs": [
+        "OWNER+CONS §14"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §2,6",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-SO-004-POS",
+      "test_ids": [
+        "T-VAN-SO-004-POS",
+        "T-VAN-SO-004-NEG",
+        "T-VAN-SO-004-REC"
+      ],
+      "text": "Exact operational grant and joint parameter domain"
+    },
+    {
+      "acceptance": "Filter authorization, venue capability, order semantics, data, urgency, deadline and protection before scoring.",
+      "backend_units": [
+        "BE-009",
+        "BE-010"
+      ],
+      "frontend_units": [],
+      "id": "VAN-SO-005",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "source_refs": [
+        "CONS §§3,14"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §6.2",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-SO-005-POS",
+      "test_ids": [
+        "T-VAN-SO-005-POS",
+        "T-VAN-SO-005-NEG",
+        "T-VAN-SO-005-REC"
+      ],
+      "text": "Feasibility filtering is irrevocable within a selection"
+    },
+    {
+      "acceptance": "Empty urgent-compatible candidates choose explicit emergency route or refusal appropriate to objective purpose.",
+      "backend_units": [
+        "BE-010"
+      ],
+      "frontend_units": [],
+      "id": "VAN-SO-006",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [
+        "BQ-007"
+      ],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "source_refs": [
+        "CODE policy.py select"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §5.4,6",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-SO-006-POS",
+      "test_ids": [
+        "T-VAN-SO-006-POS",
+        "T-VAN-SO-006-NEG",
+        "T-VAN-SO-006-REC"
+      ],
+      "text": "Urgency cannot fall back to the original ineligible score set"
+    },
+    {
+      "acceptance": "Registry insertion order never decides fallback; decision binds immutable chosen semantics.",
+      "backend_units": [
+        "BE-010"
+      ],
+      "frontend_units": [],
+      "id": "VAN-SO-007",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "source_refs": [
+        "CODE policy.py"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §4,6.2",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-SO-007-POS",
+      "test_ids": [
+        "T-VAN-SO-007-POS",
+        "T-VAN-SO-007-NEG",
+        "T-VAN-SO-007-REC"
+      ],
+      "text": "Stable fallback and template-epoch binding"
+    },
+    {
+      "acceptance": "Do not call a mixture of medians an expectation or missing cost zero; record units, estimator and uncertainty.",
+      "backend_units": [
+        "BE-012",
+        "BE-035",
+        "BE-036"
+      ],
+      "frontend_units": [],
+      "id": "VAN-SO-008",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "source_refs": [
+        "CODE policy.py + CONS §15"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §7",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-SO-008-POS",
+      "test_ids": [
+        "T-VAN-SO-008-POS",
+        "T-VAN-SO-008-NEG",
+        "T-VAN-SO-008-REC"
+      ],
+      "text": "Execution estimator matches its mathematical target"
+    },
+    {
+      "acceptance": "Version canonical bucket key, product, side, amount/participation, fees, volatility, event and regime.",
+      "backend_units": [
+        "BE-008",
+        "BE-012",
+        "BE-036"
+      ],
+      "frontend_units": [],
+      "id": "VAN-SO-009",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "source_refs": [
+        "CONS §§5,15"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §6.3,8",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-SO-009-POS",
+      "test_ids": [
+        "T-VAN-SO-009-POS",
+        "T-VAN-SO-009-NEG",
+        "T-VAN-SO-009-REC"
+      ],
+      "text": "Context includes economically meaningful size and liquidity"
+    },
+    {
+      "acceptance": "Order finality, cash/fee finality and markout maturity are separate; child messages are not independent trades.",
+      "backend_units": [
+        "BE-012",
+        "BE-036"
+      ],
+      "frontend_units": [],
+      "id": "VAN-SO-010",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "source_refs": [
+        "CONS §16.5"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §8.2",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-SO-010-POS",
+      "test_ids": [
+        "T-VAN-SO-010-POS",
+        "T-VAN-SO-010-NEG",
+        "T-VAN-SO-010-REC"
+      ],
+      "text": "Maturity, censoring and parent-level sample meaning"
+    },
+    {
+      "acceptance": "Live/demo/paper/shadow/backtest/counterfactual provenance stays separate and source-authorized.",
+      "backend_units": [
+        "BE-003",
+        "BE-012",
+        "BE-036"
+      ],
+      "frontend_units": [],
+      "id": "VAN-SO-011",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "source_refs": [
+        "CONS §§2,16"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §8.1",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-SO-011-POS",
+      "test_ids": [
+        "T-VAN-SO-011-POS",
+        "T-VAN-SO-011-NEG",
+        "T-VAN-SO-011-REC"
+      ],
+      "text": "Environment and source evidence cannot be promoted by relabeling"
+    },
+    {
+      "acceptance": "Account coordinator owns total worst-case exposure, including uncertain and cancel-pending children.",
+      "backend_units": [
+        "BE-009",
+        "BE-010"
+      ],
+      "frontend_units": [],
+      "id": "VAN-SO-012",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [
+        "BQ-002"
+      ],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "source_refs": [
+        "CONS §14.3"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §5.1,5.2",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-SO-012-POS",
+      "test_ids": [
+        "T-VAN-SO-012-POS",
+        "T-VAN-SO-012-NEG",
+        "T-VAN-SO-012-REC"
+      ],
+      "text": "Parent and all potential child exposure share one reservation"
+    },
+    {
+      "acceptance": "Exact command and causal/fence identity committed before side effect; no exactly-once network assumption.",
+      "backend_units": [
+        "BE-003",
+        "BE-010"
+      ],
+      "frontend_units": [],
+      "id": "VAN-SO-013",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "source_refs": [
+        "CONS §14.3"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §5.3",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-SO-013-POS",
+      "test_ids": [
+        "T-VAN-SO-013-POS",
+        "T-VAN-SO-013-NEG",
+        "T-VAN-SO-013-REC"
+      ],
+      "text": "Durable command before transport and broker-aware idempotency"
+    },
+    {
+      "acceptance": "Cancel request does not release exposure; all feasible interleavings join authoritative facts.",
+      "backend_units": [
+        "BE-010",
+        "BE-012"
+      ],
+      "frontend_units": [],
+      "id": "VAN-SO-014",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "source_refs": [
+        "CONS §§14,20"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §5.5",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-SO-014-POS",
+      "test_ids": [
+        "T-VAN-SO-014-POS",
+        "T-VAN-SO-014-NEG",
+        "T-VAN-SO-014-REC"
+      ],
+      "text": "Cancellation/fill and expiry races remain economically truthful"
+    },
+    {
+      "acceptance": "Distinguish atomic amend, cancel-replace, identity/priority change and unsupported operations.",
+      "backend_units": [
+        "BE-010"
+      ],
+      "frontend_units": [],
+      "id": "VAN-SO-015",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "source_refs": [
+        "CONS §14.4"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §5.2,11.7",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-SO-015-POS",
+      "test_ids": [
+        "T-VAN-SO-015-POS",
+        "T-VAN-SO-015-NEG",
+        "T-VAN-SO-015-REC"
+      ],
+      "text": "Amend/replace capabilities and queue priority are explicit"
+    },
+    {
+      "acceptance": "Immediate and pending fills share confirmed-protection/recovery behavior; flatten request is not flatness.",
+      "backend_units": [
+        "BE-010",
+        "BE-012"
+      ],
+      "frontend_units": [],
+      "id": "VAN-SO-016",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [
+        "BQ-001"
+      ],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "source_refs": [
+        "CONS GAP12/15"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §5.4",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-SO-016-POS",
+      "test_ids": [
+        "T-VAN-SO-016-POS",
+        "T-VAN-SO-016-NEG",
+        "T-VAN-SO-016-REC"
+      ],
+      "text": "Per-fill protection and uncertain emergency close"
+    },
+    {
+      "acceptance": "Use approved deadline/TIF; adapter defaults and restarts cannot extend it.",
+      "backend_units": [
+        "BE-010"
+      ],
+      "frontend_units": [],
+      "id": "VAN-SO-017",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "source_refs": [
+        "CONS GAP11"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §5.5",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-SO-017-POS",
+      "test_ids": [
+        "T-VAN-SO-017-POS",
+        "T-VAN-SO-017-NEG",
+        "T-VAN-SO-017-REC"
+      ],
+      "text": "Approved lifetime reaches every child and recovery layer"
+    },
+    {
+      "acceptance": "Preserve requested order type and side-correct limit; touching does not imply unlimited fills.",
+      "backend_units": [
+        "BE-010",
+        "BE-035"
+      ],
+      "frontend_units": [],
+      "id": "VAN-SO-018",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "source_refs": [
+        "CONS GAP10/12"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §5,6",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-SO-018-POS",
+      "test_ids": [
+        "T-VAN-SO-018-POS",
+        "T-VAN-SO-018-NEG",
+        "T-VAN-SO-018-REC"
+      ],
+      "text": "Correct limit, stop and conditional economic semantics"
+    },
+    {
+      "acceptance": "Authoritative fill identity, correction/bust and fee currency feed one cash/position state.",
+      "backend_units": [
+        "BE-003",
+        "BE-012"
+      ],
+      "frontend_units": [],
+      "id": "VAN-SO-019",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "source_refs": [
+        "CONS §§14,15"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §5.3,8.3",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-SO-019-POS",
+      "test_ids": [
+        "T-VAN-SO-019-POS",
+        "T-VAN-SO-019-NEG",
+        "T-VAN-SO-019-REC"
+      ],
+      "text": "Fill revisions, partial fees and cumulative quantity accounting"
+    },
+    {
+      "acceptance": "Verified anchor plus tail reduces repeated work without accepting tampered history.",
+      "backend_units": [
+        "BE-003",
+        "BE-033"
+      ],
+      "frontend_units": [],
+      "id": "VAN-SO-020",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "source_refs": [
+        "CONS §4"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §4,8.3",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-SO-020-POS",
+      "test_ids": [
+        "T-VAN-SO-020-POS",
+        "T-VAN-SO-020-NEG",
+        "T-VAN-SO-020-REC"
+      ],
+      "text": "Integrity-preserving ledger checkpoints and bounded hot path"
+    },
+    {
+      "acceptance": "Register actual outcome consumer, persist update and prove later decision effect.",
+      "backend_units": [
+        "BE-012",
+        "BE-036"
+      ],
+      "frontend_units": [],
+      "id": "VAN-SO-021",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [
+        "BQ-007"
+      ],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "source_refs": [
+        "CONS §16.4"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §8.5",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-SO-021-POS",
+      "test_ids": [
+        "T-VAN-SO-021-POS",
+        "T-VAN-SO-021-NEG",
+        "T-VAN-SO-021-REC"
+      ],
+      "text": "Real observe-to-select production binding"
+    },
+    {
+      "acceptance": "Observation contribution, consumed revision and cursor/snapshot publish atomically.",
+      "backend_units": [
+        "BE-003",
+        "BE-036"
+      ],
+      "frontend_units": [],
+      "id": "VAN-SO-022",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "source_refs": [
+        "CONS §16.4"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §4,8.3",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-SO-022-POS",
+      "test_ids": [
+        "T-VAN-SO-022-POS",
+        "T-VAN-SO-022-NEG",
+        "T-VAN-SO-022-REC"
+      ],
+      "text": "Immutable evidence snapshots and atomic cursor advancement"
+    },
+    {
+      "acceptance": "No retroactive editing of issued decision; affected future statistics/models are invalidated or restated.",
+      "backend_units": [
+        "BE-003",
+        "BE-036"
+      ],
+      "frontend_units": [],
+      "id": "VAN-SO-023",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "source_refs": [
+        "CONS §§5,12,16"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §4,8",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-SO-023-POS",
+      "test_ids": [
+        "T-VAN-SO-023-POS",
+        "T-VAN-SO-023-NEG",
+        "T-VAN-SO-023-REC"
+      ],
+      "text": "Evidence corrections preserve as-decided and restated views"
+    },
+    {
+      "acceptance": "Use only fresh mature compatible evidence; pooling/fallback is versioned and justified.",
+      "backend_units": [
+        "BE-036"
+      ],
+      "frontend_units": [],
+      "id": "VAN-SO-024",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "source_refs": [
+        "CONS §§10,16"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §6.3",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-SO-024-POS",
+      "test_ids": [
+        "T-VAN-SO-024-POS",
+        "T-VAN-SO-024-NEG",
+        "T-VAN-SO-024-REC"
+      ],
+      "text": "Freshness/OOD and hierarchical fallback have qualified semantics"
+    },
+    {
+      "acceptance": "Qualified hysteresis, tie tolerance, persistence and joint action envelope constrain parameter changes.",
+      "backend_units": [
+        "BE-010",
+        "BE-036"
+      ],
+      "frontend_units": [],
+      "id": "VAN-SO-025",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "source_refs": [
+        "OWNER+CONS §16"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §6.4",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-SO-025-POS",
+      "test_ids": [
+        "T-VAN-SO-025-POS",
+        "T-VAN-SO-025-NEG",
+        "T-VAN-SO-025-REC"
+      ],
+      "text": "Bounded operational switching and stability"
+    },
+    {
+      "acceptance": "Remote interpretation/training stays off decision/protection path; bounded queues and credentials.",
+      "backend_units": [
+        "BE-021",
+        "BE-024",
+        "BE-028",
+        "BE-033"
+      ],
+      "frontend_units": [],
+      "id": "VAN-SO-026",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "source_refs": [
+        "CONS §17"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §3,8.4",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-SO-026-POS",
+      "test_ids": [
+        "T-VAN-SO-026-POS",
+        "T-VAN-SO-026-NEG",
+        "T-VAN-SO-026-REC"
+      ],
+      "text": "Research/LLM noninterference and resource isolation"
+    },
+    {
+      "acceptance": "Weekly/drift jobs register target/comparator/budget and every attempted or cancelled candidate.",
+      "backend_units": [
+        "BE-022",
+        "BE-028",
+        "BE-036"
+      ],
+      "frontend_units": [],
+      "id": "VAN-SO-027",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "source_refs": [
+        "CONS §§16,19"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §9",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-SO-027-POS",
+      "test_ids": [
+        "T-VAN-SO-027-POS",
+        "T-VAN-SO-027-NEG",
+        "T-VAN-SO-027-REC"
+      ],
+      "text": "Complete triggers, hypotheses and all-trial census"
+    },
+    {
+      "acceptance": "Price/time/cost/account oracle and causal tests are prerequisites to candidate efficacy.",
+      "backend_units": [
+        "BE-035",
+        "BE-036"
+      ],
+      "frontend_units": [],
+      "id": "VAN-SO-028",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [
+        "BQ-007"
+      ],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "source_refs": [
+        "CONS GAP05–09"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §10",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-SO-028-POS",
+      "test_ids": [
+        "T-VAN-SO-028-POS",
+        "T-VAN-SO-028-NEG",
+        "T-VAN-SO-028-REC"
+      ],
+      "text": "Evaluator qualification before policy optimization"
+    },
+    {
+      "acceptance": "Fit/selection/calibration/test records reflect actual chronology, with overlap controls.",
+      "backend_units": [
+        "BE-035",
+        "BE-036",
+        "VAN-ML-PKT-008"
+      ],
+      "frontend_units": [],
+      "id": "VAN-SO-029",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "source_refs": [
+        "CONS §19"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §10.2,10.3",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-SO-029-POS",
+      "test_ids": [
+        "T-VAN-SO-029-POS",
+        "T-VAN-SO-029-NEG",
+        "T-VAN-SO-029-REC"
+      ],
+      "text": "Real walk-forward folds and protected holdout"
+    },
+    {
+      "acceptance": "Mutating later information cannot affect earlier features, decisions or commands.",
+      "backend_units": [
+        "BE-035",
+        "VAN-ML-PKT-008"
+      ],
+      "frontend_units": [],
+      "id": "VAN-SO-030",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "source_refs": [
+        "CONS §7.2"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §10.2",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-SO-030-POS",
+      "test_ids": [
+        "T-VAN-SO-030-POS",
+        "T-VAN-SO-030-NEG",
+        "T-VAN-SO-030-REC"
+      ],
+      "text": "Prefix causality and future-data poison diagnostics"
+    },
+    {
+      "acceptance": "Each arm has its own cash/reservations/holdings while receiving same permissible information and resource limits.",
+      "backend_units": [
+        "BE-035",
+        "BE-036",
+        "VAN-ML-PKT-010"
+      ],
+      "frontend_units": [],
+      "id": "VAN-SO-031",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "source_refs": [
+        "CONS §§15,19"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §7,10",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-SO-031-POS",
+      "test_ids": [
+        "T-VAN-SO-031-POS",
+        "T-VAN-SO-031-NEG",
+        "T-VAN-SO-031-REC"
+      ],
+      "text": "Matched policy and full-account feasibility comparison"
+    },
+    {
+      "acceptance": "No live randomized exploration by default; off-policy claims require propensity/overlap assumptions.",
+      "backend_units": [
+        "BE-036"
+      ],
+      "frontend_units": [],
+      "id": "VAN-SO-032",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [
+        "BQ-009"
+      ],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "source_refs": [
+        "CONS §19 + EXT-DR"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §6.5,9",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-SO-032-POS",
+      "test_ids": [
+        "T-VAN-SO-032-POS",
+        "T-VAN-SO-032-NEG",
+        "T-VAN-SO-032-REC"
+      ],
+      "text": "Causal support and separately authorized exploration"
+    },
+    {
+      "acceptance": "Qualification binds exact cohort/evaluator/artifact, uncertainty and operational limits; author cannot self-certify.",
+      "backend_units": [
+        "BE-036"
+      ],
+      "frontend_units": [],
+      "id": "VAN-SO-033",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [
+        "BQ-007",
+        "BQ-009"
+      ],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "source_refs": [
+        "CONS §§16,19"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §9",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-SO-033-POS",
+      "test_ids": [
+        "T-VAN-SO-033-POS",
+        "T-VAN-SO-033-NEG",
+        "T-VAN-SO-033-REC"
+      ],
+      "text": "Independent economic qualification and prospective evidence"
+    },
+    {
+      "acceptance": "New bindings require qualified and authenticated promotion; open parents retain policy unless explicit compatible migration.",
+      "backend_units": [
+        "BE-002",
+        "BE-010",
+        "BE-036"
+      ],
+      "frontend_units": [],
+      "id": "VAN-SO-034",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "source_refs": [
+        "CONS §16.7"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §2,9.1",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-SO-034-POS",
+      "test_ids": [
+        "T-VAN-SO-034-POS",
+        "T-VAN-SO-034-NEG",
+        "T-VAN-SO-034-REC"
+      ],
+      "text": "Atomic authorized activation and active-parent version pinning"
+    },
+    {
+      "acceptance": "Safety response immediate; economic monitoring uses qualified windows/sequential method; rollback never restores account history.",
+      "backend_units": [
+        "BE-012",
+        "BE-033",
+        "BE-036"
+      ],
+      "frontend_units": [],
+      "id": "VAN-SO-035",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "source_refs": [
+        "CONS §§16,21"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §9.4",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-SO-035-POS",
+      "test_ids": [
+        "T-VAN-SO-035-POS",
+        "T-VAN-SO-035-NEG",
+        "T-VAN-SO-035-REC"
+      ],
+      "text": "Monitoring, suspension and compatible rollback"
+    },
+    {
+      "acceptance": "Frozen benchmark/horizon includes partial/non-fill costs and explicit fees without double counting.",
+      "backend_units": [
+        "BE-012",
+        "BE-035",
+        "BE-036"
+      ],
+      "frontend_units": [],
+      "id": "VAN-SO-036",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "source_refs": [
+        "CONS §15"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §7",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-SO-036-POS",
+      "test_ids": [
+        "T-VAN-SO-036-POS",
+        "T-VAN-SO-036-NEG",
+        "T-VAN-SO-036-REC"
+      ],
+      "text": "Objective-level cost and anti-reward-hacking"
+    },
+    {
+      "acceptance": "Full positive loop is mandatory; real candidate may correctly fail economic tests.",
+      "backend_units": [
+        "BE-036"
+      ],
+      "frontend_units": [],
+      "id": "VAN-SO-037",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [
+        "BQ-007"
+      ],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "source_refs": [
+        "CONS §20.1"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §8.5,9.5",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-SO-037-POS",
+      "test_ids": [
+        "T-VAN-SO-037-POS",
+        "T-VAN-SO-037-NEG",
+        "T-VAN-SO-037-REC"
+      ],
+      "text": "Positive mechanism demonstration distinct from economic promise"
+    },
+    {
+      "acceptance": "Expose active binding, changed decision, evidence/maturity, authority and fallback without ungrounded profit claims.",
+      "backend_units": [
+        "BE-030",
+        "BE-032"
+      ],
+      "frontend_units": [
+        "FE-009",
+        "FE-013"
+      ],
+      "id": "VAN-SO-038",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "source_refs": [
+        "CONS §22"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §12",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-SO-038-POS",
+      "test_ids": [
+        "T-VAN-SO-038-POS",
+        "T-VAN-SO-038-NEG",
+        "T-VAN-SO-038-REC"
+      ],
+      "text": "Owner-visible adaptive state with exact causal trace"
+    },
+    {
+      "acceptance": "Learned state can evolve under qualified rule; rule/action/reward/scope changes use policy evolution; risk changes keep own authority.",
+      "backend_units": [
+        "BE-002",
+        "BE-009",
+        "BE-036"
+      ],
+      "frontend_units": [],
+      "id": "VAN-SO-039",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "source_refs": [
+        "CONS §§16,18"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §2",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-SO-039-POS",
+      "test_ids": [
+        "T-VAN-SO-039-POS",
+        "T-VAN-SO-039-NEG",
+        "T-VAN-SO-039-REC"
+      ],
+      "text": "Operational vs learned policy versus strategy/risk change"
+    },
+    {
+      "acceptance": "Target delta accounts for actual holdings/working orders, netting mode and manual/strategy ownership.",
+      "backend_units": [
+        "BE-009",
+        "BE-010",
+        "BE-012"
+      ],
+      "frontend_units": [],
+      "id": "VAN-SO-040",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "source_refs": [
+        "CONS §14.6"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §5,6.1",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-SO-040-POS",
+      "test_ids": [
+        "T-VAN-SO-040-POS",
+        "T-VAN-SO-040-NEG",
+        "T-VAN-SO-040-REC"
+      ],
+      "text": "Portfolio targets respect ownership and pending exposure"
+    },
+    {
+      "acceptance": "Immediate/passive/chase/TWAP/participation/target methods have positive supported paths and constrained unsupported refusal.",
+      "backend_units": [
+        "BE-010",
+        "BE-035"
+      ],
+      "frontend_units": [],
+      "id": "VAN-SO-041",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "source_refs": [
+        "CONS §14.5"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §6.1",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-SO-041-POS",
+      "test_ids": [
+        "T-VAN-SO-041-POS",
+        "T-VAN-SO-041-NEG",
+        "T-VAN-SO-041-REC"
+      ],
+      "text": "Algorithm family complete with capability refusal not coercion"
+    },
+    {
+      "acceptance": "Required forecasting plugins are complete integrations, while active selection uses qualified minimal stack.",
+      "backend_units": [
+        "BE-013",
+        "BE-036",
+        "VAN-ML-PKT-025"
+      ],
+      "frontend_units": [],
+      "id": "VAN-SO-042",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "source_refs": [
+        "CONS §§2,6–10"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §13",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-SO-042-POS",
+      "test_ids": [
+        "T-VAN-SO-042-POS",
+        "T-VAN-SO-042-NEG",
+        "T-VAN-SO-042-REC"
+      ],
+      "text": "Model breadth preserved with evidence-gated economic use"
+    },
+    {
+      "acceptance": "DesignChangeProposal binds source/data/evaluator/alternatives/uncertainty, complexity effects and affected contracts.",
+      "backend_units": [
+        "BE-035",
+        "BE-036"
+      ],
+      "frontend_units": [],
+      "id": "VAN-SO-043",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [
+        "PRE-002"
+      ],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "source_refs": [
+        "OWNER+CONS §19"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §10.4",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-SO-043-POS",
+      "test_ids": [
+        "T-VAN-SO-043-POS",
+        "T-VAN-SO-043-NEG",
+        "T-VAN-SO-043-REC"
+      ],
+      "text": "Astra design changes grounded in valid backtests and ablation"
+    },
+    {
+      "acceptance": "Every new lifecycle/crypto operation has producer, caller, tests and scoped evidence before frontend.",
+      "backend_units": [
+        "BE-032"
+      ],
+      "frontend_units": [],
+      "id": "VAN-SO-044",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [
+        "BQ-006",
+        "BG-001"
+      ],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "source_refs": [
+        "OWNER+CONS §23"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §14",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-SO-044-POS",
+      "test_ids": [
+        "T-VAN-SO-044-POS",
+        "T-VAN-SO-044-NEG",
+        "T-VAN-SO-044-REC"
+      ],
+      "text": "Whole-backend gate includes both autonomy levels"
+    },
+    {
+      "acceptance": "At least one eligible supported CEX spot integration; same risk/router/lifecycle owners and current markets preserved.",
+      "backend_units": [
+        "BE-004",
+        "BE-010",
+        "BE-011"
+      ],
+      "frontend_units": [],
+      "id": "VAN-CRYPTO-001",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [
+        "BQ-001"
+      ],
+      "product_truth_refs": [
+        "VAN-PT-CRYPTO-01"
+      ],
+      "source_refs": [
+        "OWNER"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §11.1,11.8",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-CRYPTO-001-POS",
+      "test_ids": [
+        "T-VAN-CRYPTO-001-POS",
+        "T-VAN-CRYPTO-001-NEG",
+        "T-VAN-CRYPTO-001-REC"
+      ],
+      "text": "Actual spot crypto trading through VATI across manual and automatic objectives"
+    },
+    {
+      "acceptance": "API family, account/subaccount, native product, spot type, base/quote/network identities are versioned.",
+      "backend_units": [
+        "BE-004",
+        "BE-008"
+      ],
+      "frontend_units": [],
+      "id": "VAN-CRYPTO-002",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [],
+      "product_truth_refs": [
+        "VAN-PT-CRYPTO-01"
+      ],
+      "source_refs": [
+        "CONS §5 + OWNER"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §11.3",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-CRYPTO-002-POS",
+      "test_ids": [
+        "T-VAN-CRYPTO-002-POS",
+        "T-VAN-CRYPTO-002-NEG",
+        "T-VAN-CRYPTO-002-REC"
+      ],
+      "text": "Exact exchange/product and asset identity"
+    },
+    {
+      "acceptance": "Tick/step/min-notional/max limits and fee reserves apply before exact risk approval.",
+      "backend_units": [
+        "BE-008",
+        "BE-009",
+        "BE-010"
+      ],
+      "frontend_units": [],
+      "id": "VAN-CRYPTO-003",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [],
+      "product_truth_refs": [
+        "VAN-PT-CRYPTO-01"
+      ],
+      "source_refs": [
+        "OWNER+CONS §15"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §11.3",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-CRYPTO-003-POS",
+      "test_ids": [
+        "T-VAN-CRYPTO-003-POS",
+        "T-VAN-CRYPTO-003-NEG",
+        "T-VAN-CRYPTO-003-REC"
+      ],
+      "text": "Venue filters, precision and executable quantity"
+    },
+    {
+      "acceptance": "Trading workers lack withdrawal scope; secret references and account grants remain per environment.",
+      "backend_units": [
+        "BE-002",
+        "BE-005",
+        "BE-007"
+      ],
+      "frontend_units": [],
+      "id": "VAN-CRYPTO-004",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [],
+      "product_truth_refs": [
+        "VAN-PT-CRYPTO-01"
+      ],
+      "source_refs": [
+        "OWNER"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §11.2,11.4",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-CRYPTO-004-POS",
+      "test_ids": [
+        "T-VAN-CRYPTO-004-POS",
+        "T-VAN-CRYPTO-004-NEG",
+        "T-VAN-CRYPTO-004-REC"
+      ],
+      "text": "Trade credentials separated from funding and withdrawals"
+    },
+    {
+      "acceptance": "Buy reserves quote, sell owned base; fees/base/quote/third assets and cash conversion explicit; no leverage.",
+      "backend_units": [
+        "BE-006",
+        "BE-009",
+        "BE-012"
+      ],
+      "frontend_units": [],
+      "id": "VAN-CRYPTO-005",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [],
+      "product_truth_refs": [
+        "VAN-PT-CRYPTO-01"
+      ],
+      "source_refs": [
+        "OWNER+CONS §15"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §11.4",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-CRYPTO-005-POS",
+      "test_ids": [
+        "T-VAN-CRYPTO-005-POS",
+        "T-VAN-CRYPTO-005-NEG",
+        "T-VAN-CRYPTO-005-REC"
+      ],
+      "text": "Spot inventory, stablecoin valuation and actual fee currencies"
+    },
+    {
+      "acceptance": "Sequence/checksum, timestamps, snapshot boundaries, fill IDs and resync per selected provider.",
+      "backend_units": [
+        "BE-008",
+        "BE-010"
+      ],
+      "frontend_units": [],
+      "id": "VAN-CRYPTO-006",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [],
+      "product_truth_refs": [
+        "VAN-PT-CRYPTO-01"
+      ],
+      "source_refs": [
+        "OWNER+EXT-KRAKEN-ORDER"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §11.5",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-CRYPTO-006-POS",
+      "test_ids": [
+        "T-VAN-CRYPTO-006-POS",
+        "T-VAN-CRYPTO-006-NEG",
+        "T-VAN-CRYPTO-006-REC"
+      ],
+      "text": "Snapshot/delta books and private-stream recovery"
+    },
+    {
+      "acceptance": "No silent coercion, native/synthetic stop distinction, amend priority and trigger sources explicit.",
+      "backend_units": [
+        "BE-010",
+        "BE-012",
+        "BE-035"
+      ],
+      "frontend_units": [],
+      "id": "VAN-CRYPTO-007",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [],
+      "product_truth_refs": [
+        "VAN-PT-CRYPTO-01"
+      ],
+      "source_refs": [
+        "EXT-KRAKEN-ORDER"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §11.7",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-CRYPTO-007-POS",
+      "test_ids": [
+        "T-VAN-CRYPTO-007-POS",
+        "T-VAN-CRYPTO-007-NEG",
+        "T-VAN-CRYPTO-007-REC"
+      ],
+      "text": "Crypto limit/post-only/stop/amend behavior is capability qualified"
+    },
+    {
+      "acceptance": "24/7 operation still handles maintenance; nonce/clock constraints; cancel/query headroom protected.",
+      "backend_units": [
+        "BE-008",
+        "BE-010",
+        "BE-033"
+      ],
+      "frontend_units": [],
+      "id": "VAN-CRYPTO-008",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [],
+      "product_truth_refs": [
+        "VAN-PT-CRYPTO-01"
+      ],
+      "source_refs": [
+        "OWNER+EXT-NAUTILUS"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §11.5",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-CRYPTO-008-POS",
+      "test_ids": [
+        "T-VAN-CRYPTO-008-POS",
+        "T-VAN-CRYPTO-008-NEG",
+        "T-VAN-CRYPTO-008-REC"
+      ],
+      "text": "Rate-limit, clock and outage budget preserves recovery priority"
+    },
+    {
+      "acceptance": "Account-wide cancellation must be assessed against protective/manual orders; no automatic blanket enabling.",
+      "backend_units": [
+        "BE-010",
+        "BE-012"
+      ],
+      "frontend_units": [],
+      "id": "VAN-CRYPTO-009",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [
+        "BQ-002"
+      ],
+      "product_truth_refs": [
+        "VAN-PT-CRYPTO-01"
+      ],
+      "source_refs": [
+        "EXT-KRAKEN-DMS"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §11.6",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-CRYPTO-009-POS",
+      "test_ids": [
+        "T-VAN-CRYPTO-009-POS",
+        "T-VAN-CRYPTO-009-NEG",
+        "T-VAN-CRYPTO-009-REC"
+      ],
+      "text": "Dead-man switch scope cannot silently remove protection"
+    },
+    {
+      "acceptance": "Provider chosen by eligible current access; mocked Coinbase Advanced output cannot qualify matching or latency.",
+      "backend_units": [
+        "BE-005",
+        "BE-010"
+      ],
+      "frontend_units": [],
+      "id": "VAN-CRYPTO-010",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [
+        "BQ-001",
+        "BQ-002"
+      ],
+      "product_truth_refs": [
+        "VAN-PT-CRYPTO-01"
+      ],
+      "source_refs": [
+        "EXT-COINBASE"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §11.2,11.8",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-CRYPTO-010-POS",
+      "test_ids": [
+        "T-VAN-CRYPTO-010-POS",
+        "T-VAN-CRYPTO-010-NEG",
+        "T-VAN-CRYPTO-010-REC"
+      ],
+      "text": "Real integration evidence distinct from static API sandbox"
+    },
+    {
+      "acceptance": "Crypto full-account arms include correct data conventions, fees, liquidity drought, maintenance, delisting and stablecoin stress.",
+      "backend_units": [
+        "BE-035",
+        "VAN-ML-PKT-010"
+      ],
+      "frontend_units": [],
+      "id": "VAN-CRYPTO-011",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [],
+      "product_truth_refs": [
+        "VAN-PT-CRYPTO-01"
+      ],
+      "source_refs": [
+        "OWNER+CONS §19"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §10.3,11",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-CRYPTO-011-POS",
+      "test_ids": [
+        "T-VAN-CRYPTO-011-POS",
+        "T-VAN-CRYPTO-011-NEG",
+        "T-VAN-CRYPTO-011-REC"
+      ],
+      "text": "Crypto evaluator has event-time, depth, costs and stress realism"
+    },
+    {
+      "acceptance": "Chain discovery remains read-only; only independently admitted exchange products may enter actual order universe.",
+      "backend_units": [
+        "BE-037",
+        "BE-041",
+        "BE-043",
+        "BE-044",
+        "BE-010"
+      ],
+      "frontend_units": [],
+      "id": "VAN-CRYPTO-012",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [],
+      "product_truth_refs": [
+        "VAN-PT-CRYPTO-01"
+      ],
+      "source_refs": [
+        "CONS §12 + OWNER"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §11.1",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-CRYPTO-012-POS",
+      "test_ids": [
+        "T-VAN-CRYPTO-012-POS",
+        "T-VAN-CRYPTO-012-NEG",
+        "T-VAN-CRYPTO-012-REC"
+      ],
+      "text": "Research-only chain data never becomes an order or wallet signer"
+    },
+    {
+      "acceptance": "Spot support does not imply margin/perps/options/DEX/withdraw authority; any extension needs product-specific qualification.",
+      "backend_units": [
+        "BE-002",
+        "BE-004",
+        "BE-009",
+        "BE-010"
+      ],
+      "frontend_units": [],
+      "id": "VAN-CRYPTO-013",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [],
+      "product_truth_refs": [
+        "VAN-PT-CRYPTO-01"
+      ],
+      "source_refs": [
+        "OWNER"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §11.1",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-CRYPTO-013-POS",
+      "test_ids": [
+        "T-VAN-CRYPTO-013-POS",
+        "T-VAN-CRYPTO-013-NEG",
+        "T-VAN-CRYPTO-013-REC"
+      ],
+      "text": "Derivatives and live activation are explicit separate boundaries"
+    },
+    {
+      "acceptance": "Markets/accounts/order/positions/news/learning show genuine venue and assets, permissions, fee/protection/recovery states.",
+      "backend_units": [
+        "BE-032"
+      ],
+      "frontend_units": [
+        "FE-006",
+        "FE-007",
+        "FE-008",
+        "FE-009",
+        "FE-011"
+      ],
+      "id": "VAN-CRYPTO-014",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [],
+      "product_truth_refs": [
+        "VAN-PT-CRYPTO-01"
+      ],
+      "source_refs": [
+        "OWNER+CONS §22"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §12",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-CRYPTO-014-POS",
+      "test_ids": [
+        "T-VAN-CRYPTO-014-POS",
+        "T-VAN-CRYPTO-014-NEG",
+        "T-VAN-CRYPTO-014-REC"
+      ],
+      "text": "Crypto frontend is full existing-context integration after BG"
+    },
+    {
+      "acceptance": "Extend existing boundaries; justify any new process/store with measured isolation/correctness benefit.",
+      "backend_units": [
+        "BE-001",
+        "BE-033"
+      ],
+      "frontend_units": [],
+      "id": "VAN-LEAN-001",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [
+        "PRE-002"
+      ],
+      "product_truth_refs": [
+        "VAN-PT-LEAN-01"
+      ],
+      "source_refs": [
+        "CONS §3 + OWNER"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §3,13",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-LEAN-001-POS",
+      "test_ids": [
+        "T-VAN-LEAN-001-POS",
+        "T-VAN-LEAN-001-NEG",
+        "T-VAN-LEAN-001-REC"
+      ],
+      "text": "No mandatory new deployable services or competing truth stores"
+    },
+    {
+      "acceptance": "Each candidate lists operational cost, maintenance/state burden, alternatives and incremental evidence; safety complexity is mandatory.",
+      "backend_units": [
+        "BE-036"
+      ],
+      "frontend_units": [],
+      "id": "VAN-LEAN-002",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [
+        "BQ-009",
+        "PRE-002"
+      ],
+      "product_truth_refs": [
+        "VAN-PT-LEAN-01"
+      ],
+      "source_refs": [
+        "OWNER+CONS §10"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §13",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-LEAN-002-POS",
+      "test_ids": [
+        "T-VAN-LEAN-002-POS",
+        "T-VAN-LEAN-002-NEG",
+        "T-VAN-LEAN-002-REC"
+      ],
+      "text": "Complexity ledger and ablation of speculative additions"
+    },
+    {
+      "acceptance": "All inherited requirement/action/context objects remain, with explicit semantic additions not automatic deletion.",
+      "backend_units": [
+        "BE-001"
+      ],
+      "frontend_units": [],
+      "id": "VAN-LEAN-003",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [
+        "PRE-002",
+        "BQ-006"
+      ],
+      "product_truth_refs": [
+        "VAN-PT-LEAN-01"
+      ],
+      "source_refs": [
+        "OWNER+CONS §2"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §1,13,14",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-LEAN-003-POS",
+      "test_ids": [
+        "T-VAN-LEAN-003-POS",
+        "T-VAN-LEAN-003-NEG",
+        "T-VAN-LEAN-003-REC"
+      ],
+      "text": "No requirement loss disguised as simplicity"
+    },
+    {
+      "acceptance": "Internal optimizer states become contextual typed views; no new default global tab or dense Home.",
+      "backend_units": [
+        "BE-032"
+      ],
+      "frontend_units": [],
+      "id": "VAN-LEAN-004",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [
+        "UX-001",
+        "UX-003"
+      ],
+      "product_truth_refs": [
+        "VAN-PT-LEAN-01"
+      ],
+      "source_refs": [
+        "OWNER+CONS §22"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §12",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-LEAN-004-POS",
+      "test_ids": [
+        "T-VAN-LEAN-004-POS",
+        "T-VAN-LEAN-004-NEG",
+        "T-VAN-LEAN-004-REC"
+      ],
+      "text": "Complete API contract and life-cycle read models, not dashboard sprawl"
+    },
+    {
+      "acceptance": "Astra proposals bind experimental evidence and causal claims; result classes and amendment path explicit.",
+      "backend_units": [
+        "BE-035",
+        "BE-036"
+      ],
+      "frontend_units": [],
+      "id": "VAN-LEAN-005",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [
+        "PRE-002"
+      ],
+      "product_truth_refs": [
+        "VAN-PT-LEAN-01"
+      ],
+      "source_refs": [
+        "OWNER"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §10.4",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-LEAN-005-POS",
+      "test_ids": [
+        "T-VAN-LEAN-005-POS",
+        "T-VAN-LEAN-005-NEG",
+        "T-VAN-LEAN-005-REC"
+      ],
+      "text": "Backtest can improve design but cannot issue authority"
+    },
+    {
+      "acceptance": "All new capabilities feed sole BG and existing context/material contracts; no early native renderer.",
+      "backend_units": [],
+      "frontend_units": [
+        "FE-002"
+      ],
+      "id": "VAN-LEAN-006",
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "other_units": [
+        "BG-001",
+        "UX-002",
+        "BQ-006"
+      ],
+      "product_truth_refs": [
+        "VAN-PT-LEAN-01"
+      ],
+      "source_refs": [
+        "OWNER+PARENT"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV2_20261018.md §12,14",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-LEAN-006-POS",
+      "test_ids": [
+        "T-VAN-LEAN-006-POS",
+        "T-VAN-LEAN-006-NEG",
+        "T-VAN-LEAN-006-REC"
+      ],
+      "text": "Preserve both locked themes and backend-first whole-product completion"
+    }
+  ],
+  "schema": "van.self-optimization.requirements/1.0",
+  "status": "SPECIFIED_NOT_IMPLEMENTED"
+}

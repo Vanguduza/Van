@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from conftest import mandate_dict, passing_certificate
+from conftest import historical_mandate_dict, mandate_dict, passing_certificate
 from test_intelligence import mk_bars, noisy_trend
 from vati.__main__ import main as cli_main
 from vati.app import DecisionCycle, SessionConfig, SessionRunner
@@ -38,7 +38,7 @@ def synthetic_bars(n_cycles=4):
 
 
 def fx_cfg(eurusd, **mandate_over):
-    m = mandate_dict(venue="paper", mode="DEMO_TRADER", allowed_strategies=["FX-TREND-PULLBACK-01", "FX-LONDON-BREAKOUT-01"], **mandate_over)
+    m = historical_mandate_dict(venue="paper", mode="DEMO_TRADER", allowed_strategies=["FX-TREND-PULLBACK-01", "FX-LONDON-BREAKOUT-01"], **mandate_over)
     return SessionConfig(symbol="EURUSD", base="EUR", quote="USD", venue="paper", account_alias="fx_primary", contract=SymbolContract(**{**eurusd.__dict__, "venue": "paper"}), mandate_dict=m, session_id="bt-1")
 
 
@@ -124,7 +124,7 @@ def test_zse_session_produces_owner_ticket():
     contract = SymbolContract(symbol="DELTA", venue="zse", base_currency="DELTA", quote_currency="ZiG", account_currency="ZiG", contract_size=Decimal("1"), tick_size=Decimal("0.01"), tick_value=Decimal("0.01"),
                               volume_min=Decimal("100"), volume_step=Decimal("100"), volume_max=Decimal("10000000"), min_stop_distance=Decimal("0"), trade_mode="LONG_ONLY", loss_model=LossModel.ILLIQUID_EQUITY,
                               board_lot=Decimal("100"), adv_20d=Decimal("120000"), liquidity_haircut=Decimal("0.03"), round_trip_cost_pct=Decimal("0.044"))
-    m = mandate_dict(venue="zse", instruments=["DELTA"], allowed_strategies=["ZSE-VALUE-ROTATION-01"], mode="LIMITED_LIVE", weekend_hold_allowed=True, max_open_stop_risk="0.02", max_risk_per_trade="0.01", account_alias="zse_primary")
+    m = historical_mandate_dict(venue="zse", instruments=["DELTA"], allowed_strategies=["ZSE-VALUE-ROTATION-01"], mode="LIMITED_LIVE", weekend_hold_allowed=True, max_open_stop_risk="0.02", max_risk_per_trade="0.01", account_alias="zse_primary")
     cfg = SessionConfig(symbol="DELTA", base="DELTA", quote="ZiG", venue="zse", account_alias="zse_primary", contract=contract, mandate_dict=m, session_id="zse-1", software_stops=True, time_in_force="GTC30")
     from conftest_owner_authority import OwnerAuthorityHarness
 

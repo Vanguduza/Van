@@ -1,0 +1,17 @@
+# MT5 connection identity, original claims and reconnect behavior
+
+Candidate source only; the original programme and acceptance gates remain unchanged.
+
+Two valid counterexamples showed that fresh MT5 clients reused nonce 1 and collided at the worker, including concurrent connections. Eight actual-factory counterexamples showed that both push and pull routes could verify a different login, server, currency or demo/live account from the registered profile.
+
+Fresh clients now use independent random nonce namespaces with a locked local sequence. Original signed requests remain replay-protected. The immutable physical identity requires a positive native-range login, exact server and currency, and a strict boolean demo label. Both factories bind that identity. Push requests carry it inside the HMAC-signed body; the worker validates it within its terminal lock and acknowledges actual readback. Clients check that acknowledgement through a non-effectful preflight before other operations. Older workers are refused before an entry.
+
+The production registered pull provider reads key, identity and entry permission from one account record, then rechecks them under the account-operation and registry locks after receiving/authenticating the body. Invalid or foreign snapshots do not overwrite state or receive commands. Key rotation cannot extend an old authenticated poll. The queue refuses an undelivered original whose physical identity changed or whose entry profile was disabled. It does not turn already-taken work into a zero-effect refusal. Protective operations carry the same physical binding.
+
+The bound wire has 17 fields, including explicit order type and identity. Server/currency strings use UTF-8 hex so pipe characters and Unicode remain unambiguous. The EA source reports login as a native 64-bit value and reports server/demo identity; it checks that binding before each operation. Execution type comes from its explicit field, independently of the intent label. Legacy 12-column fixtures remain component compatibility controls; production requires the bound protocol.
+
+Historical original-result readback is separate from current native state. A retained failed control exposed an unnecessary freshness dependency; readback now returns the same original durable result while stale positions and account reads still fail. Its consumer independently requires current positions before settling a risk hold. No entry is resent or inferred from an empty account.
+
+Final evidence: 2,281 trading tests pass with real isolated PostgreSQL and both DDS inputs, with zero skips. Fifteen deliberate source regressions fail after passing controls and source restoration. The focused checks include actual factory-to-worker HMAC traffic, original queue/result roundtrips, account migration before/after delivery, current disable, key rotation, safe frame encoding and explicit order type. Rebuild checks pass; owner export remains 444 endpoints/276 schemas and all 374 legacy identities/383 edits retain valid anchors. Earlier failures and unconfigured-PG skips are retained in the receipt and activated in the full run.
+
+MQL changes have not been compiled in MetaEditor or exercised on a native terminal. No physical provider, financial effect, entire unit, release or S24 is qualified. Precision, full worker deadline/epoch/risk envelopes, provider finality/corrections, migration/retirement and the rest of the original programme remain required.

@@ -392,11 +392,21 @@ async def test_hermes_failure_degraded(client, monkeypatch):
 async def test_health_exposes_workspace_ready_truth(client):
     ac, app = client
     await app.state.google_broker.register_principal(subject="owner-google-subject", ai_plan="PRO")
+    await app.state.google.store_refresh_token(
+        "owner", "synthetic-current-refresh-token",
+        ["https://www.googleapis.com/auth/gmail.readonly"],
+    )
     from van_gateway.google.mesh import GoogleCapabilityState
+    from van_gateway.google.transport import FakeGoogleTransport
+    # SOURCE canary: capture the original connection before its fixture observation.
+    app.state.google.transport = FakeGoogleTransport()
+    probe = await app.state.google_broker.begin_workspace_probe('workspace_api')
+    await app.state.google.gmail_search('SOURCE-canary')
     await app.state.google_broker.record_capability_evidence(
         "workspace_api",
         state=GoogleCapabilityState.READY,
         evidence_pointer="live://test/workspace-canary",
+        metadata={'workspace_probe':probe},
     )
 
     response = await ac.get("/health")

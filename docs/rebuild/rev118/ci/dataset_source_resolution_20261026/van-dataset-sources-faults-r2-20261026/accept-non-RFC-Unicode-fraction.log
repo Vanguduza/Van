@@ -1,0 +1,34 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+_ test_rfc3339_fraction_is_ascii_even_when_python_integer_parser_accepts_unicode_digits[\u0660\u0660\u0661] _
+
+digits = '٠٠١'
+
+    @pytest.mark.parametrize('digits',['٠٠١','００１'])
+    def test_rfc3339_fraction_is_ascii_even_when_python_integer_parser_accepts_unicode_digits(digits):
+        record=fixture()
+        for field in ('max_input_available_at','data_cutoff','created_at'):
+            record[field]='2020-01-01T00:00:00.'+digits+'Z'
+>       with pytest.raises(DatasetContractError): parse(record)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE DatasetContractError
+
+trading/tests/test_dataset_manifest_candidates.py:102: Failed
+_ test_rfc3339_fraction_is_ascii_even_when_python_integer_parser_accepts_unicode_digits[\uff10\uff10\uff11] _
+
+digits = '００１'
+
+    @pytest.mark.parametrize('digits',['٠٠١','００１'])
+    def test_rfc3339_fraction_is_ascii_even_when_python_integer_parser_accepts_unicode_digits(digits):
+        record=fixture()
+        for field in ('max_input_available_at','data_cutoff','created_at'):
+            record[field]='2020-01-01T00:00:00.'+digits+'Z'
+>       with pytest.raises(DatasetContractError): parse(record)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE DatasetContractError
+
+trading/tests/test_dataset_manifest_candidates.py:102: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_dataset_manifest_candidates.py::test_rfc3339_fraction_is_ascii_even_when_python_integer_parser_accepts_unicode_digits[\u0660\u0660\u0661]
+FAILED trading/tests/test_dataset_manifest_candidates.py::test_rfc3339_fraction_is_ascii_even_when_python_integer_parser_accepts_unicode_digits[\uff10\uff10\uff11]
+2 failed in 2.16s

@@ -1,0 +1,57 @@
+{
+  "schema": "van.rebuild.native-delivery-claim-source/1",
+  "observed_at_utc": "2026-10-23T00:18:58.298732+00:00",
+  "source_parent": "32118b50e876bacbf1e91b1bf264b0bbe0e8dc50",
+  "source_sha256": {
+    "trading/vati/execution/mt5_pull.py": "1d0d4bec90e9721d2f27909cbb19584a89d8dfdb496b19f10868afa9d1c763ae",
+    "trading/tests/test_mt5_delivery_claim.py": "894c7952554313d6f9008fe084a81a909899422d795100929e55f175f4f015a4"
+  },
+  "initial_queue_counterexample": {
+    "tests": 1,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "d194746d7d131a0eec49179dc914dacc3ee001d2e1deaa4072f32398b557fc18"
+  },
+  "independent_queue_and_signed_http_counterexamples": {
+    "tests": 2,
+    "failures": 2,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "ea8138f0423cf6cb1da3f477ef5bf7c984a6895fd01fd0bfd6227fb9c23de9dd"
+  },
+  "focused_native_bridge_and_stop_protocols": {
+    "tests": 23,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "881b3d951780e489604e7765abc21ea83b926f684bf51a419e30a289684c4074"
+  },
+  "source_fault": {
+    "records": [
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "1fa46ea395c42409199fa0d98fd4e85a2d2ed19ebfa6601cecfb23432c4ce7a1"
+      },
+      {
+        "phase": "mutation",
+        "why": "remove the database-wide native delivery claim",
+        "returncode": 1,
+        "log_sha256": "bbaee560af4f17fbdfb90f6061cbd492e9b9a62d4574bf4af7fdf7fad076bb96"
+      }
+    ],
+    "definition": [
+      "trading/vati/execution/mt5_pull.py",
+      "    def take_pending(self, alias: str, *, now_ms: int, limit: int = 10) -> list[dict]:\n        with self._lock:\n            # Independent poll servers share the database, not this lock.\n            # Claim the complete batch before any consumer can receive it.\n            self._conn.execute('BEGIN IMMEDIATE')\n            try:\n                rows = self._conn.execute(\"SELECT id, op, body_json FROM commands WHERE alias = ? AND status = 'QUEUED' ORDER BY id LIMIT ?\", (alias, limit)).fetchall()\n                out = []\n                for cid, op, body in rows:\n                    self._conn.execute(\"UPDATE commands SET status = 'TAKEN', taken_ms = ? WHERE id = ?\", (now_ms, cid))\n                    out.append({\"id\": cid, \"op\": op, **json.loads(body)})\n                self._conn.commit()\n                return out\n            except BaseException:\n                self._conn.rollback()\n                raise\n\n",
+      "    def take_pending(self, alias: str, *, now_ms: int, limit: int = 10) -> list[dict]:\n        with self._lock:\n            rows = self._conn.execute(\"SELECT id, op, body_json FROM commands WHERE alias = ? AND status = 'QUEUED' ORDER BY id LIMIT ?\", (alias, limit)).fetchall()\n            out = []\n            for cid, op, body in rows:\n                self._conn.execute(\"UPDATE commands SET status = 'TAKEN', taken_ms = ? WHERE id = ?\", (now_ms, cid))\n                out.append({\"id\": cid, \"op\": op, **json.loads(body)})\n            return out\n\n",
+      "remove the database-wide native delivery claim"
+    ],
+    "source_before_sha256": "1d0d4bec90e9721d2f27909cbb19584a89d8dfdb496b19f10868afa9d1c763ae",
+    "source_after_sha256": "1d0d4bec90e9721d2f27909cbb19584a89d8dfdb496b19f10868afa9d1c763ae",
+    "source_restored": true,
+    "journal_present": false
+  },
+  "qualification": "Source only. Two actual SQLite connections and HMAC-authenticated local HTTP consumers; no native terminal/broker/S24 or unit acceptance. A committed claim whose response is lost stays TAKEN, not guessed NoEffect or redelivered. Deferred native consumer identity/epoch/deadline, delivery lookup, worker precision/order-type protocol and economic finality remain required."
+}

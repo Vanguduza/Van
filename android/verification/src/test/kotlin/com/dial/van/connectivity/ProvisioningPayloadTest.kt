@@ -233,6 +233,45 @@ class ProvisioningPayloadTest {
     }
 
     @Test
+    fun `gateway base rejects credentials query fragments resource paths and invalid authorities`() {
+        for (url in listOf(
+            "https://owner:secret@van.example", "https://van.example?token=secret", "https://van.example#fragment",
+            "https://van.example/api", "https://van.example////", "https://", "https://bad_host.example",
+            "https://-bad.example", "https://van.example:0", "https://van.example:65536", "https://van.example:",
+            "https://999.2.3.4", "https://van.example?", "https://van.example#",
+        )) {
+            assertEquals("provisioning_url_must_use_https", reasonOf(verify(
+                json = payload(extra = mapOf("gateway_url" to url)),
+            )), url)
+        }
+    }
+
+    @Test
+    fun `debug HTTP permits exact IPv4 IPv6 and localhost but rejects lookalikes`() {
+        for (url in listOf("http://localhost:8787/", "http://127.0.0.1:8787", "http://[::1]:8787")) {
+            assertTrue(verify(json = payload(extra = mapOf("gateway_url" to url)),
+                allowInsecureLoopback = true) is ProvisioningVerdict.Accepted, url)
+            assertEquals("provisioning_url_must_use_https", reasonOf(verify(
+                json = payload(extra = mapOf("gateway_url" to url)),
+            )), url)
+        }
+        for (url in listOf("http://localhost.evil.example", "http://127.0.0.1.evil.example",
+            "http://127.0.0.2", "http://[::2]", "http://localhost.", "http://127.0.0.1:0")) {
+            assertEquals("provisioning_url_must_use_https", reasonOf(verify(
+                json = payload(extra = mapOf("gateway_url" to url)), allowInsecureLoopback = true,
+            )), url)
+        }
+    }
+
+    @Test
+    fun `valid HTTPS DNS IPv4 and IPv6 base roots remain accepted`() {
+        for (url in listOf("https://van.example/", "https://62.83.35.103:8443", "https://[2001:db8::1]:8443/")) {
+            val accepted = verify(json = payload(extra = mapOf("gateway_url" to url))) as ProvisioningVerdict.Accepted
+            assertEquals(url.trimEnd('/'), accepted.payload.gatewayUrl)
+        }
+    }
+
+    @Test
     fun `an unsupported payload version is refused rather than parsed as this one`() {
         val (privateKey, pem) = keys()
         assertEquals(

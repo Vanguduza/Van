@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="32" time="5.484" timestamp="2026-10-27T07:06:03.596257+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_native_account_observation" name="test_actual_signed_worker_keeps_physical_observation_without_cash_history" time="0.124" /><testcase classname="trading.tests.test_native_account_observation" name="test_unknown_or_liability_credit_is_not_a_measured_risk_valuation[None]" time="0.014" /><testcase classname="trading.tests.test_native_account_observation" name="test_unknown_or_liability_credit_is_not_a_measured_risk_valuation[missing]" time="0.010" /><testcase classname="trading.tests.test_native_account_observation" name="test_unknown_or_liability_credit_is_not_a_measured_risk_valuation[nan]" time="0.009" /><testcase classname="trading.tests.test_native_account_observation" name="test_unknown_or_liability_credit_is_not_a_measured_risk_valuation[-10.0]" time="0.014" /><testcase classname="trading.tests.test_native_account_observation" name="test_actual_snapshot_producers_supply_bound_account_and_margin_during_cash_outage[single]" time="2.312"><failure message="AssertionError: assert ('9000' == '9000.0'&#10;  &#10;  - 9000.0&#10;  ?     --&#10;  + 9000)">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-675/test_actual_snapshot_producers0')
+producer = 'single'
+
+    @pytest.mark.parametrize('producer', ['single', 'account'])
+    def test_actual_snapshot_producers_supply_bound_account_and_margin_during_cash_outage(tmp_path, producer):
+        from test_mt5_funding_runtime import profile
+        from vati.app.portfolio import account_states
+        from vati.funding.risk_fence import funding_risk_fence
+        sdk, adapter, ledger, event = observed_owner(tmp_path, producer)
+        before = ledger.count(); row = account_states(ledger, [profile()])[0]
+        value = row['native_account_observation']
+        assert value['state']=='OBSERVED' and value['snapshot_ref']==event.hash
+        assert value['reported_equity']=='10250.5' and value['risk_equity']=='10000.0'
+        assert value['valuation_state']=='CREDIT_EXCLUDED' and value['execution_authority'] is False
+        assert row['equity']=='10000.0' and row['floating_pnl']=='0.0' and row['margin']['state']=='OBSERVED'
+&gt;       assert row['margin']['risk_free_margin_bound']=='9000.0' and row['day_pnl'] is None
+E       AssertionError: assert ('9000' == '9000.0'
+E         
+E         - 9000.0
+E         ?     --
+E         + 9000)
+
+trading/tests/test_native_account_observation.py:83: AssertionError</failure></testcase><testcase classname="trading.tests.test_native_account_observation" name="test_actual_snapshot_producers_supply_bound_account_and_margin_during_cash_outage[account]" time="0.562"><failure message="AssertionError: assert ('9000' == '9000.0'&#10;  &#10;  - 9000.0&#10;  ?     --&#10;  + 9000)">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-675/test_actual_snapshot_producers1')
+producer = 'account'
+
+    @pytest.mark.parametrize('producer', ['single', 'account'])
+    def test_actual_snapshot_producers_supply_bound_account_and_margin_during_cash_outage(tmp_path, producer):
+        from test_mt5_funding_runtime import profile
+        from vati.app.portfolio import account_states
+        from vati.funding.risk_fence import funding_risk_fence
+        sdk, adapter, ledger, event = observed_owner(tmp_path, producer)
+        before = ledger.count(); row = account_states(ledger, [profile()])[0]
+        value = row['native_account_observation']
+        assert value['state']=='OBSERVED' and value['snapshot_ref']==event.hash
+        assert value['reported_equity']=='10250.5' and value['risk_equity']=='10000.0'
+        assert value['valuation_state']=='CREDIT_EXCLUDED' and value['execution_authority'] is False
+        assert row['equity']=='10000.0' and row['floating_pnl']=='0.0' and row['margin']['state']=='OBSERVED'
+&gt;       assert row['margin']['risk_free_margin_bound']=='9000.0' and row['day_pnl'] is None
+E       AssertionError: assert ('9000' == '9000.0'
+E         
+E         - 9000.0
+E         ?     --
+E         + 9000)
+
+trading/tests/test_native_account_observation.py:83: AssertionError</failure></testcase><testcase classname="trading.tests.test_native_account_observation" name="test_owner_receives_original_amounts_with_explicit_unknown_risk_valuation[None]" time="0.051" /><testcase classname="trading.tests.test_native_account_observation" name="test_owner_receives_original_amounts_with_explicit_unknown_risk_valuation[-10.0]" time="0.032" /><testcase classname="trading.tests.test_native_account_observation" name="test_cash_outage_does_not_let_old_native_values_attach_to_changed_physical_profile[login-12345679]" time="0.018" /><testcase classname="trading.tests.test_native_account_observation" name="test_cash_outage_does_not_let_old_native_values_attach_to_changed_physical_profile[server-Different-Demo]" time="0.017" /><testcase classname="trading.tests.test_native_account_observation" name="test_cash_outage_does_not_let_old_native_values_attach_to_changed_physical_profile[currency-EUR]" time="0.018" /><testcase classname="trading.tests.test_native_account_observation" name="test_cash_outage_does_not_let_old_native_values_attach_to_changed_physical_profile[demo-False]" time="0.018" /><testcase classname="trading.tests.test_native_account_observation" name="test_cash_outage_does_not_let_old_native_values_attach_to_changed_physical_profile[broker-CTRADER]" time="0.019" /><testcase classname="trading.tests.test_native_account_observation" name="test_cash_outage_does_not_let_old_native_values_attach_to_changed_physical_profile[login-None]" time="0.025" /><testcase classname="trading.tests.test_native_account_observation" name="test_original_account_readback_rejects_forged_or_unjoined_observations[authority]" time="0.019" /><testcase classname="trading.tests.test_native_account_observation" name="test_original_account_readback_rejects_forged_or_unjoined_observations[numeric-authority]" time="0.016" /><testcase classname="trading.tests.test_native_account_observation" name="test_original_account_readback_rejects_forged_or_unjoined_observations[source-seal]" time="0.016" /><testcase classname="trading.tests.test_native_account_observation" name="test_original_account_readback_rejects_forged_or_unjoined_observations[scope]" time="0.017" /><testcase classname="trading.tests.test_native_account_observation" name="test_original_account_readback_rejects_forged_or_unjoined_observations[future]" time="0.022" /><testcase classname="trading.tests.test_native_account_observation" name="test_original_account_readback_rejects_forged_or_unjoined_observations[bad-clock]" time="0.020" /><testcase classname="trading.tests.test_native_account_observation" name="test_original_account_readback_rejects_forged_or_unjoined_observations[money]" time="0.019" /><testcase classname="trading.tests.test_native_account_observation" name="test_original_account_readback_rejects_forged_or_unjoined_observations[source-kind]" time="0.019" /><testcase classname="trading.tests.test_native_account_observation" name="test_original_account_readback_rejects_forged_or_unjoined_observations[alias]" time="0.019" /><testcase classname="trading.tests.test_native_account_observation" name="test_original_account_readback_rejects_forged_or_unjoined_observations[unknown-field]" time="0.020" /><testcase classname="trading.tests.test_native_account_observation" name="test_original_account_readback_rejects_forged_or_unjoined_observations[producer]" time="0.037" /><testcase classname="trading.tests.test_native_account_observation" name="test_original_account_readback_rejects_forged_or_unjoined_observations[snapshot-seal]" time="0.017" /><testcase classname="trading.tests.test_native_account_observation" name="test_original_account_readback_rejects_forged_or_unjoined_observations[snapshot-valuation]" time="0.042" /><testcase classname="trading.tests.test_native_account_observation" name="test_actual_pull_adapter_keeps_poll_and_read_clocks_without_cash_history[200]" time="0.015" /><testcase classname="trading.tests.test_native_account_observation" name="test_actual_pull_adapter_keeps_poll_and_read_clocks_without_cash_history[None]" time="0.016" /><testcase classname="trading.tests.test_native_account_observation" name="test_legacy_missing_observation_nonce_withholds_proof_without_disabling_protective_reads" time="0.018" /><testcase classname="trading.tests.test_native_account_observation" name="test_legacy_alias_only_native_snapshot_cannot_supply_current_profile_money" time="0.003" /></testsuite></testsuites>

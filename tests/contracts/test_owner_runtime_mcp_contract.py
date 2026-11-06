@@ -13,9 +13,16 @@ SHIM = ROOT / "hermes" / "mcp" / "owner_runtime_stdio.mjs"
 REGISTER = ROOT / "tools" / "hermes" / "register_owner_runtime_mcp.sh"
 
 REQUIRED_TOOLS = {
+    "mission_control_poll",
+    "mission_control_ack",
+    "decision_escalate",
+    "decision_read",
     "runtime_status",
     "mission_result",
     "resolve_command",
+    "assumption_record",
+    "assumption_blocking",
+    "premise_record",
     "context_graph_query",
     "context_lexical_query",
     "context_hot_capsule",
@@ -31,11 +38,17 @@ REQUIRED_TOOLS = {
     "google_status",
     "google_capabilities",
     "google_gmail_search",
+    "google_gmail_draft_preview",
+    "google_gmail_thread",
+    "google_gmail_attachment_import",
     "google_calendar_agenda",
+    "google_calendar_review",
     "google_drive_search",
     "google_contacts_resolve",
     "google_tasks_list",
     "google_job_plan",
+    "google_job_get",
+    "google_artifact_record",
     "google_action_execute",
     "research_status",
     "research_search",
@@ -56,11 +69,13 @@ REQUIRED_TOOLS = {
     "trading_trade_detail",
     "trading_status",
     "reminder_create",
+    "suggestion_create",
     "attention_list",
     "briefing_read",
     "browser_task_create",
     "browser_assignment_run",
     "browser_task_status",
+    "browser_control_grant_issue",
     "browser_task_evidence",
     "automation_route",
     "automation_execute",
@@ -181,6 +196,89 @@ def test_retrieval_tools_remain_read_only_and_bounded():
     assert "context_hot_capsule: { method: 'POST'" in text
 
 
+def test_reasoning_tools_use_scoped_routes_and_resolution_is_not_a_worker_tool():
+    node = shutil.which("node")
+    if node is None:
+        return
+    env = os.environ.copy()
+    env["VAN_INTERNAL_CONTROL_TOKEN"] = "reasoning-contract-test-only"
+    env["VAN_OWNER_RUNTIME_URL"] = "http://runtime.test.invalid"
+    script = """
+      const calls = [];
+      globalThis.fetch = async (url, options) => {
+        calls.push({url, method: options.method, headers: options.headers,
+                    body: options.body ? JSON.parse(options.body) : null});
+        return {ok: true, text: async () => JSON.stringify({recorded: true})};
+      };
+      const {handle} = await import(process.argv[1]);
+      const operations = [
+        ['assumption_record', {mission_id:'mission/with space',claim:'this is uncertain',source:'hermes',importance:'HIGH'}],
+        ['assumption_blocking', {mission_id:'mission/with space'}],
+        ['premise_record', {mission_id:'mission/with space',owner_premise:'the deployment succeeded',van_position:'uncertain',semantic_class:'FACT_UNVERIFIED'}],
+        ['assumption_resolve', {assumption_id:'a',status:'VERIFIED',evidence_refs:['invented://proof'],independent_observer:true}],
+      ];
+      for (let i=0; i<operations.length; i++)
+        await handle({jsonrpc:'2.0',id:i+1,method:'tools/call',params:{name:operations[i][0],arguments:operations[i][1]}});
+      console.log(JSON.stringify({calls}));
+    """
+    completed = subprocess.run([node, '--input-type=module', '-e', script, SHIM.as_uri()],
+                               env=env, text=True, capture_output=True, timeout=5, check=False)
+    assert completed.returncode == 0, completed.stderr
+    rows = [json.loads(line) for line in completed.stdout.splitlines()]
+    calls = rows[-1]['calls']
+    assert [(c['method'], c['url']) for c in calls] == [
+        ('POST', 'http://runtime.test.invalid/v1/runtime/reasoning/assumptions'),
+        ('GET', 'http://runtime.test.invalid/v1/runtime/reasoning/assumptions/mission%2Fwith%20space'),
+        ('POST', 'http://runtime.test.invalid/v1/runtime/reasoning/premises'),
+    ]
+    assert all(c['headers']['x-van-internal-token'] == env['VAN_INTERNAL_CONTROL_TOKEN'] for c in calls)
+    assert all(rows[i]['result']['isError'] is False for i in range(3))
+    assert rows[3]['error']['code'] == -32602
+    assert env['VAN_INTERNAL_CONTROL_TOKEN'] not in json.dumps(rows[:-1])
+
+
+def test_decisions_and_checkpoints_route_to_fixed_runtime_contract_without_owner_answer_tool():
+    node = shutil.which("node")
+    if node is None:
+        return
+    env = os.environ.copy()
+    env["VAN_INTERNAL_CONTROL_TOKEN"] = "checkpoint-contract-test-only"
+    env["VAN_OWNER_RUNTIME_URL"] = "http://runtime.test.invalid"
+    script = """
+      const calls = [];
+      globalThis.fetch = async (url, options) => {
+        calls.push({url, method: options.method, body: options.body ? JSON.parse(options.body) : null});
+        return {ok:true,text:async()=>JSON.stringify({recorded:true})};
+      };
+      const {handle} = await import(process.argv[1]);
+      const operations = [
+        ['mission_control_poll',{mission_id:'mission/1',hermes_run_id:'run 1'}],
+        ['mission_control_ack',{mission_id:'mission/1',hermes_run_id:'run 1',control_id:'control-1',generation:2,payload_digest:'sha256:'+'a'.repeat(64),checkpoint_ref:'checkpoint://actual'}],
+        ['decision_escalate',{mission_id:'mission/1',hermes_run_id:'run 1',request_id:'proposal-1',title:'Choose',body:'Select one'}],
+        ['decision_read',{decision_id:'decision/1',mission_id:'mission/1',hermes_run_id:'run 1'}],
+        ['decision_answer',{approved:true}], ['mission_pause',{}],
+      ];
+      for (let i=0;i<operations.length;i++)
+        await handle({jsonrpc:'2.0',id:i+1,method:'tools/call',params:{name:operations[i][0],arguments:operations[i][1]}});
+      console.log(JSON.stringify({calls}));
+    """
+    completed = subprocess.run([node,'--input-type=module','-e',script,SHIM.as_uri()],
+                               env=env,text=True,capture_output=True,timeout=5,check=False)
+    assert completed.returncode == 0, completed.stderr
+    rows = [json.loads(line) for line in completed.stdout.splitlines()]
+    calls = rows[-1]["calls"]
+    assert [(c["method"],c["url"]) for c in calls] == [
+        ("POST","http://runtime.test.invalid/v1/runtime/missions/control/poll"),
+        ("POST","http://runtime.test.invalid/v1/runtime/missions/control/ack"),
+        ("POST","http://runtime.test.invalid/v1/runtime/decisions/escalate"),
+        ("GET","http://runtime.test.invalid/v1/runtime/decisions/decision%2F1?mission_id=mission%2F1&hermes_run_id=run%201"),
+    ]
+    assert calls[1]["body"]["generation"] == 2 and calls[1]["body"]["checkpoint_ref"] == "checkpoint://actual"
+    assert all(rows[i]["result"]["isError"] is False for i in range(4))
+    assert all(rows[i]["error"]["code"] == -32602 for i in (4,5))
+    assert env["VAN_INTERNAL_CONTROL_TOKEN"] not in json.dumps(rows)
+
+
 def test_knowledge_mutation_tool_is_authorized_execution_only():
     text = SHIM.read_text(encoding="utf-8")
     assert "Execute a Notebook mutation only after action_begin has produced an AUTHORIZED execution" in text
@@ -195,7 +293,10 @@ def test_google_mcp_surface_is_read_or_plan_only():
         "/v1/google/status",
         "/v1/google/capabilities",
         "/v1/google/gmail/search",
+        "/v1/google/gmail/thread",
+        "/v1/google/gmail/attachment/import-pdf",
         "/v1/google/calendar/agenda",
+        "/v1/google/calendar/review",
         "/v1/google/drive/search",
         "/v1/google/contacts/resolve",
         "/v1/google/tasks",
@@ -205,9 +306,14 @@ def test_google_mcp_surface_is_read_or_plan_only():
     # Mutating Workspace routes must not be raw MCP tools. They have caller-supplied
     # approval parameters today and therefore need the Action Runtime boundary first.
     assert "/v1/google/gmail/send" not in text
-    assert "/v1/google/gmail/draft" not in text
+    assert re.search(r"['\"](/v1/google/gmail/draft)['\"]", text) is None
+    assert "google_gmail_draft_preview: { method: 'GET'" in text
+    assert "trust: 'UNTRUSTED', validation_state: 'PENDING'" in text
     assert "/v1/google/calendar/reschedule" not in text
     assert "/v1/google/actions/execute" in text
+    assert "name: 'google_gmail_thread'" in text
+    assert "name: 'google_gmail_attachment_import'" in text
+    assert "name: 'google_calendar_review'" in text
     action_tool = re.search(
         r"name: 'google_action_execute'.*?additionalProperties: false", text, re.S
     )
@@ -246,6 +352,19 @@ def test_reminder_create_is_owner_behalf_and_not_a_memory_admission():
     assert tool is not None
     assert "own words" in tool.group(0)
     assert "creates no canonical owner fact" in tool.group(0)
+
+
+def test_suggestion_create_is_evidence_backed_and_non_executing():
+    text = SHIM.read_text(encoding="utf-8")
+    assert "suggestion_create: { method: 'POST', path: () => '/v1/runtime/suggestions'" in text
+    tool = re.search(r"name: 'suggestion_create'.*?additionalProperties: false", text, re.S)
+    assert tool is not None
+    block = tool.group(0)
+    assert "source_refs" in block
+    assert "minItems: 1" in block
+    assert "cannot execute the proposed prompt" in block
+    assert "approved" not in block.lower()
+    assert "execution_id" not in block
 
 
 def test_attention_and_briefing_reads_are_read_only():
@@ -303,4 +422,3 @@ def test_automation_tools_carry_no_approval_field():
     assert "approved" not in execute_tool.group(0).lower()
     for field in ("capability_id", "action_id", "command_id", "snapshot_id", "requested_by", "principal_type"):
         assert field in execute_tool.group(0)
-

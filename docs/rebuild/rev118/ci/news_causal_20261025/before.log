@@ -1,0 +1,227 @@
+FFFFF.FFFFFFF.                                                           [100%]
+=================================== FAILURES ===================================
+_ test_future_publication_or_observation_cannot_affect_an_earlier_subject[changes0] _
+
+changes = {'observed_ms': 1800000001000}
+
+    @pytest.mark.parametrize('changes',[
+        {'observed_ms':NOW+1000}, {'published_ms':NOW+1000},
+    ])
+    def test_future_publication_or_observation_cannot_affect_an_earlier_subject(changes):
+        news=NewsIngress();h=story(**changes);news.ingest(h)
+>       assert news.assess(h,subject_kind='POSITION',subject_id='p',symbol='EURUSD',now_ms=NOW) is None
+E       AssertionError: assert EventImpactAssessment(impact_id='99f1503b1fd6622eaeeda73a', headline_id='138bd873f2a6c652858d8f2f466ac369', subject_ki...66ac369cd194fb68ff43f2a00a3d50a892ec36f', 'publisher'), assessed_ms=1800000000000, impact_version='event-impact/5.1.0') is None
+E        +  where EventImpactAssessment(impact_id='99f1503b1fd6622eaeeda73a', headline_id='138bd873f2a6c652858d8f2f466ac369', subject_ki...66ac369cd194fb68ff43f2a00a3d50a892ec36f', 'publisher'), assessed_ms=1800000000000, impact_version='event-impact/5.1.0') = assess(Headline(source_id='publisher', trust=<SourceTrust.T1_PRIMARY: 'T1_PRIMARY'>, published_ms=1800000000000, observed_ms=...bols=('EURUSD',), event_class='', severity=Decimal('1'), concern=<Concern.UNCLEAR: 'UNCLEAR'>, url='', body_excerpt=''), subject_kind='POSITION', subject_id='p', symbol='EURUSD', now_ms=1800000000000)
+E        +    where assess = <vati.events.news_ingress.NewsIngress object at 0x7f408b31f5f0>.assess
+
+trading/tests/test_news_causal_boundaries.py:25: AssertionError
+_ test_future_publication_or_observation_cannot_affect_an_earlier_subject[changes1] _
+
+changes = {'published_ms': 1800000001000}
+
+    @pytest.mark.parametrize('changes',[
+        {'observed_ms':NOW+1000}, {'published_ms':NOW+1000},
+    ])
+    def test_future_publication_or_observation_cannot_affect_an_earlier_subject(changes):
+        news=NewsIngress();h=story(**changes);news.ingest(h)
+>       assert news.assess(h,subject_kind='POSITION',subject_id='p',symbol='EURUSD',now_ms=NOW) is None
+E       AssertionError: assert EventImpactAssessment(impact_id='61ed7e3228532e11e83eb556', headline_id='4a2346a632316dbc6532f0fb0c88e8e2', subject_ki...c88e8e2887f92bb4c4e9e3d731be31bbead8341', 'publisher'), assessed_ms=1800000000000, impact_version='event-impact/5.1.0') is None
+E        +  where EventImpactAssessment(impact_id='61ed7e3228532e11e83eb556', headline_id='4a2346a632316dbc6532f0fb0c88e8e2', subject_ki...c88e8e2887f92bb4c4e9e3d731be31bbead8341', 'publisher'), assessed_ms=1800000000000, impact_version='event-impact/5.1.0') = assess(Headline(source_id='publisher', trust=<SourceTrust.T1_PRIMARY: 'T1_PRIMARY'>, published_ms=1800000001000, observed_ms=...bols=('EURUSD',), event_class='', severity=Decimal('1'), concern=<Concern.UNCLEAR: 'UNCLEAR'>, url='', body_excerpt=''), subject_kind='POSITION', subject_id='p', symbol='EURUSD', now_ms=1800000000000)
+E        +    where assess = <vati.events.news_ingress.NewsIngress object at 0x7f408adf3f50>.assess
+
+trading/tests/test_news_causal_boundaries.py:25: AssertionError
+_______ test_a_future_relay_cannot_enter_an_earlier_impact_evidence_set ________
+
+    def test_a_future_relay_cannot_enter_an_earlier_impact_evidence_set():
+        news=NewsIngress();h=story();news.ingest(h)
+        news.ingest(story(source_id='future-relay',observed_ms=NOW+1000))
+        before=news.assess(h,subject_kind='POSITION',subject_id='p',symbol='EURUSD',now_ms=NOW)
+        after=news.assess(h,subject_kind='POSITION',subject_id='p',symbol='EURUSD',now_ms=NOW+1000)
+>       assert 'publisher' in before.evidence_refs and 'future-relay' not in before.evidence_refs
+E       AssertionError: assert ('publisher' in ('138bd873f2a6c652858d8f2f466ac369cd194fb68ff43f2a00a3d50a892ec36f', 'publisher', 'future-relay') and 'future-relay' not in ('138bd873f2a6c652858d8f2f466ac369cd194fb68ff43f2a00a3d50a892ec36f', 'publisher', 'future-relay'))
+E        +  where ('138bd873f2a6c652858d8f2f466ac369cd194fb68ff43f2a00a3d50a892ec36f', 'publisher', 'future-relay') = EventImpactAssessment(impact_id='99f1503b1fd6622eaeeda73a', headline_id='138bd873f2a6c652858d8f2f466ac369', subject_ki...ff43f2a00a3d50a892ec36f', 'publisher', 'future-relay'), assessed_ms=1800000000000, impact_version='event-impact/5.1.0').evidence_refs
+E        +  and   ('138bd873f2a6c652858d8f2f466ac369cd194fb68ff43f2a00a3d50a892ec36f', 'publisher', 'future-relay') = EventImpactAssessment(impact_id='99f1503b1fd6622eaeeda73a', headline_id='138bd873f2a6c652858d8f2f466ac369', subject_ki...ff43f2a00a3d50a892ec36f', 'publisher', 'future-relay'), assessed_ms=1800000000000, impact_version='event-impact/5.1.0').evidence_refs
+
+trading/tests/test_news_causal_boundaries.py:35: AssertionError
+_ test_a_feed_row_cannot_promote_its_own_source_trust[None-T1_PRIMARY-UNTRUSTED] _
+
+registered = None, requested = 'T1_PRIMARY'
+expected = <SourceTrust.UNTRUSTED: 'UNTRUSTED'>
+
+    @pytest.mark.parametrize('registered,requested,expected',[
+        (None,'T1_PRIMARY',SourceTrust.UNTRUSTED),
+        (SourceTrust.T2_SECONDARY,'T1_PRIMARY',SourceTrust.T2_SECONDARY),
+        (SourceTrust.T1_PRIMARY,'UNTRUSTED',SourceTrust.UNTRUSTED),
+    ])
+    def test_a_feed_row_cannot_promote_its_own_source_trust(registered,requested,expected):
+        news=NewsIngress(sources=[] if registered is None else [NewsSource('publisher',registered)])
+        parsed=news.headline_from_row(dict(source='publisher',trust=requested,title='Policy decision',
+            published_ms=NOW,observed_ms=NOW))
+>       assert parsed.trust is expected
+E       AssertionError: assert <SourceTrust.T1_PRIMARY: 'T1_PRIMARY'> is <SourceTrust.UNTRUSTED: 'UNTRUSTED'>
+E        +  where <SourceTrust.T1_PRIMARY: 'T1_PRIMARY'> = Headline(source_id='publisher', trust=<SourceTrust.T1_PRIMARY: 'T1_PRIMARY'>, published_ms=1800000000000, observed_ms=...t_classes=(), symbols=(), event_class='', severity=None, concern=<Concern.UNCLEAR: 'UNCLEAR'>, url='', body_excerpt='').trust
+
+trading/tests/test_news_causal_boundaries.py:49: AssertionError
+_ test_a_feed_row_cannot_promote_its_own_source_trust[T2_SECONDARY-T1_PRIMARY-T2_SECONDARY] _
+
+registered = <SourceTrust.T2_SECONDARY: 'T2_SECONDARY'>
+requested = 'T1_PRIMARY', expected = <SourceTrust.T2_SECONDARY: 'T2_SECONDARY'>
+
+    @pytest.mark.parametrize('registered,requested,expected',[
+        (None,'T1_PRIMARY',SourceTrust.UNTRUSTED),
+        (SourceTrust.T2_SECONDARY,'T1_PRIMARY',SourceTrust.T2_SECONDARY),
+        (SourceTrust.T1_PRIMARY,'UNTRUSTED',SourceTrust.UNTRUSTED),
+    ])
+    def test_a_feed_row_cannot_promote_its_own_source_trust(registered,requested,expected):
+        news=NewsIngress(sources=[] if registered is None else [NewsSource('publisher',registered)])
+        parsed=news.headline_from_row(dict(source='publisher',trust=requested,title='Policy decision',
+            published_ms=NOW,observed_ms=NOW))
+>       assert parsed.trust is expected
+E       AssertionError: assert <SourceTrust.T1_PRIMARY: 'T1_PRIMARY'> is <SourceTrust.T2_SECONDARY: 'T2_SECONDARY'>
+E        +  where <SourceTrust.T1_PRIMARY: 'T1_PRIMARY'> = Headline(source_id='publisher', trust=<SourceTrust.T1_PRIMARY: 'T1_PRIMARY'>, published_ms=1800000000000, observed_ms=...t_classes=(), symbols=(), event_class='', severity=None, concern=<Concern.UNCLEAR: 'UNCLEAR'>, url='', body_excerpt='').trust
+
+trading/tests/test_news_causal_boundaries.py:49: AssertionError
+_______ test_explicit_zero_milliseconds_is_not_replaced_by_another_time ________
+
+    def test_explicit_zero_milliseconds_is_not_replaced_by_another_time():
+        news=NewsIngress()
+>       h=news.headline_from_row(dict(source='publisher',title='Historical event',published_ms=0,observed_ms=1000))
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_news_causal_boundaries.py:54: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.events.news_ingress.NewsIngress object at 0x7f408ae40c50>
+row = {'source': 'publisher', 'title': 'Historical event', 'published_ms': 0, 'observed_ms': 1000}
+
+    def headline_from_row(self, row: Mapping[str, Any]) -> Headline:
+        source_id = str(row.get("source") or row.get("source_id") or "").strip()
+        if not source_id:
+            raise NewsIngressError("headline row has no source")
+        declared = row.get("trust")
+        trust = (SourceTrust(str(declared).upper()) if declared
+                 else self.trust_for(source_id))
+>       published = _parse_ms(row.get("published") or row.get("published_ms") or row["observed"])
+                                                                                 ^^^^^^^^^^^^^^^
+E       KeyError: 'observed'
+
+trading/vati/events/news_ingress.py:409: KeyError
+_ test_an_invalid_floor_cannot_make_the_reduce_only_multiplier_exceed_its_contract[floor0] _
+
+floor = Decimal('-0.1')
+
+    @pytest.mark.parametrize('floor',[Decimal('-0.1'),Decimal('2'),Decimal('NaN')])
+    def test_an_invalid_floor_cannot_make_the_reduce_only_multiplier_exceed_its_contract(floor):
+>       with pytest.raises(NewsIngressError):event_risk_multiplier_for(Decimal('1'),floor=floor)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE NewsIngressError
+
+trading/tests/test_news_causal_boundaries.py:60: Failed
+_ test_an_invalid_floor_cannot_make_the_reduce_only_multiplier_exceed_its_contract[floor1] _
+
+floor = Decimal('2')
+
+    @pytest.mark.parametrize('floor',[Decimal('-0.1'),Decimal('2'),Decimal('NaN')])
+    def test_an_invalid_floor_cannot_make_the_reduce_only_multiplier_exceed_its_contract(floor):
+>       with pytest.raises(NewsIngressError):event_risk_multiplier_for(Decimal('1'),floor=floor)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE NewsIngressError
+
+trading/tests/test_news_causal_boundaries.py:60: Failed
+_ test_an_invalid_floor_cannot_make_the_reduce_only_multiplier_exceed_its_contract[floor2] _
+
+floor = Decimal('NaN')
+
+    @pytest.mark.parametrize('floor',[Decimal('-0.1'),Decimal('2'),Decimal('NaN')])
+    def test_an_invalid_floor_cannot_make_the_reduce_only_multiplier_exceed_its_contract(floor):
+>       with pytest.raises(NewsIngressError):event_risk_multiplier_for(Decimal('1'),floor=floor)
+                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_news_causal_boundaries.py:60: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+materiality = Decimal('1'), floor = Decimal('NaN')
+
+    def event_risk_multiplier_for(materiality: Decimal, *,
+                                  floor: Decimal = EVENT_MULTIPLIER_FLOOR) -> Decimal:
+        """Materiality -> a multiplier in [floor, 1]. Never above 1, by construction.
+    
+        This is the single function through which news reaches sizing, and it is
+        written as `1 - reduction` rather than as a lookup so that "news cannot
+        raise risk" is a property of the arithmetic rather than of a table somebody
+        might extend.
+        """
+        m = max(ZERO, min(ONE, materiality))
+        if m < MATERIALITY_ACTIONABLE:
+            return ONE
+        reduction = (ONE - floor) * m
+>       return max(floor, min(ONE, ONE - reduction))
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       decimal.InvalidOperation: [<class 'decimal.InvalidOperation'>]
+
+trading/vati/events/news_ingress.py:281: InvalidOperation
+____ test_nonfinite_news_materiality_has_a_controlled_domain_error[value0] _____
+
+value = Decimal('NaN')
+
+    @pytest.mark.parametrize('value',[Decimal('NaN'),Decimal('Infinity')])
+    def test_nonfinite_news_materiality_has_a_controlled_domain_error(value):
+>       with pytest.raises(NewsIngressError):event_risk_multiplier_for(value)
+                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_news_causal_boundaries.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+materiality = Decimal('NaN'), floor = Decimal('0.25')
+
+    def event_risk_multiplier_for(materiality: Decimal, *,
+                                  floor: Decimal = EVENT_MULTIPLIER_FLOOR) -> Decimal:
+        """Materiality -> a multiplier in [floor, 1]. Never above 1, by construction.
+    
+        This is the single function through which news reaches sizing, and it is
+        written as `1 - reduction` rather than as a lookup so that "news cannot
+        raise risk" is a property of the arithmetic rather than of a table somebody
+        might extend.
+        """
+>       m = max(ZERO, min(ONE, materiality))
+                      ^^^^^^^^^^^^^^^^^^^^^
+E       decimal.InvalidOperation: [<class 'decimal.InvalidOperation'>]
+
+trading/vati/events/news_ingress.py:277: InvalidOperation
+____ test_nonfinite_news_materiality_has_a_controlled_domain_error[value1] _____
+
+value = Decimal('Infinity')
+
+    @pytest.mark.parametrize('value',[Decimal('NaN'),Decimal('Infinity')])
+    def test_nonfinite_news_materiality_has_a_controlled_domain_error(value):
+>       with pytest.raises(NewsIngressError):event_risk_multiplier_for(value)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE NewsIngressError
+
+trading/tests/test_news_causal_boundaries.py:65: Failed
+_ test_same_subject_identifier_in_different_subject_kinds_keeps_distinct_impacts _
+
+    def test_same_subject_identifier_in_different_subject_kinds_keeps_distinct_impacts():
+        news=NewsIngress();h=story();news.ingest(h)
+        a=news.assess(h,subject_kind='POSITION',subject_id='same',symbol='EURUSD',now_ms=NOW)
+        b=news.assess(h,subject_kind='CANDIDATE',subject_id='same',symbol='EURUSD',now_ms=NOW)
+>       assert a.impact_id!=b.impact_id
+E       AssertionError: assert '45db7ca3174faee0b13c3263' != '45db7ca3174faee0b13c3263'
+E        +  where '45db7ca3174faee0b13c3263' = EventImpactAssessment(impact_id='45db7ca3174faee0b13c3263', headline_id='138bd873f2a6c652858d8f2f466ac369', subject_ki...66ac369cd194fb68ff43f2a00a3d50a892ec36f', 'publisher'), assessed_ms=1800000000000, impact_version='event-impact/5.1.0').impact_id
+E        +  and   '45db7ca3174faee0b13c3263' = EventImpactAssessment(impact_id='45db7ca3174faee0b13c3263', headline_id='138bd873f2a6c652858d8f2f466ac369', subject_ki...66ac369cd194fb68ff43f2a00a3d50a892ec36f', 'publisher'), assessed_ms=1800000000000, impact_version='event-impact/5.1.0').impact_id
+
+trading/tests/test_news_causal_boundaries.py:72: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_news_causal_boundaries.py::test_future_publication_or_observation_cannot_affect_an_earlier_subject[changes0]
+FAILED trading/tests/test_news_causal_boundaries.py::test_future_publication_or_observation_cannot_affect_an_earlier_subject[changes1]
+FAILED trading/tests/test_news_causal_boundaries.py::test_a_future_relay_cannot_enter_an_earlier_impact_evidence_set
+FAILED trading/tests/test_news_causal_boundaries.py::test_a_feed_row_cannot_promote_its_own_source_trust[None-T1_PRIMARY-UNTRUSTED]
+FAILED trading/tests/test_news_causal_boundaries.py::test_a_feed_row_cannot_promote_its_own_source_trust[T2_SECONDARY-T1_PRIMARY-T2_SECONDARY]
+FAILED trading/tests/test_news_causal_boundaries.py::test_explicit_zero_milliseconds_is_not_replaced_by_another_time
+FAILED trading/tests/test_news_causal_boundaries.py::test_an_invalid_floor_cannot_make_the_reduce_only_multiplier_exceed_its_contract[floor0]
+FAILED trading/tests/test_news_causal_boundaries.py::test_an_invalid_floor_cannot_make_the_reduce_only_multiplier_exceed_its_contract[floor1]
+FAILED trading/tests/test_news_causal_boundaries.py::test_an_invalid_floor_cannot_make_the_reduce_only_multiplier_exceed_its_contract[floor2]
+FAILED trading/tests/test_news_causal_boundaries.py::test_nonfinite_news_materiality_has_a_controlled_domain_error[value0]
+FAILED trading/tests/test_news_causal_boundaries.py::test_nonfinite_news_materiality_has_a_controlled_domain_error[value1]
+FAILED trading/tests/test_news_causal_boundaries.py::test_same_subject_identifier_in_different_subject_kinds_keeps_distinct_impacts
+12 failed, 2 passed in 0.49s

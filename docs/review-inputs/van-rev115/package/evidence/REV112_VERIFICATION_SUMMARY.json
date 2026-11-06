@@ -1,0 +1,95 @@
+{
+  "application_acceptance_tests": {
+    "executed": 0,
+    "planned": 1287,
+    "state": "NOT_RUN"
+  },
+  "checks": {
+    "F15_and_BG_readiness": "REFUSED_AS_EXPECTED_NOT_ISSUED",
+    "canonical_structure": {
+      "environment": "LOCAL_DOCUMENT_CONTAINER",
+      "findings": 0,
+      "negative_cases_caught": 52,
+      "negative_cases_total": 52
+    },
+    "exact_exported_graph": {
+      "environment": "ACTUAL_VAN_TRADING_CORE_VM",
+      "findings": 0,
+      "graph_sha256": "8cf20c07b1b248ea92ff97d934ea818a6aca40152d129426d76ca419021ff644",
+      "negative_cases_caught": 18,
+      "negative_cases_total": 18,
+      "nodes": 131
+    },
+    "new_schema_fixture_semantics": {
+      "environment": "LOCAL_DOCUMENT_CONTAINER",
+      "findings": 0,
+      "fixtures": 12,
+      "negative_cases_caught": 67,
+      "negative_cases_total": 67,
+      "schemas": 12
+    },
+    "original_preservation": {
+      "check_groups": 13,
+      "environment": "LOCAL_DOCUMENT_CONTAINER",
+      "findings": 0,
+      "negative_cases_caught": 17,
+      "negative_cases_total": 17
+    },
+    "retained_forecast_contracts": {
+      "environment": "LOCAL_DOCUMENT_CONTAINER",
+      "findings": 0,
+      "fixtures": 12,
+      "negative_cases_caught": 38,
+      "negative_cases_total": 38,
+      "schemas": 18
+    },
+    "retained_news_readiness": {
+      "environment": "LOCAL_DOCUMENT_CONTAINER",
+      "findings": 0,
+      "negative_cases_caught": 12,
+      "negative_cases_total": 12
+    }
+  },
+  "generated_counts": {
+    "BG_packet": "VAN-PKT-098",
+    "application_tests_executed": 0,
+    "counts": {
+      "actions": 349,
+      "atoms": 171,
+      "backend": 82,
+      "backend_verification": 12,
+      "features": 93,
+      "forecast_aliases": 48,
+      "nodes": 131,
+      "requirements": 237,
+      "surfaces": 234,
+      "tests": 1287,
+      "truth": 18
+    },
+    "first_UX_packet": "VAN-PKT-099",
+    "new_application_contracts": 102,
+    "new_principal_schemas": 12,
+    "new_requirements": 32,
+    "new_synthetic_examples": 12,
+    "original_requirement_objects_preserved": 205,
+    "original_test_objects_preserved": 1185,
+    "original_unit_ids_preserved": 121,
+    "revision": "1.12"
+  },
+  "live_financial_operations": false,
+  "new_procurement": false,
+  "not_claimed": [
+    "full semantic admission",
+    "owner cryptographic signature",
+    "source fixes",
+    "provider integration",
+    "model training",
+    "economic edge",
+    "application or handset qualification",
+    "deployment",
+    "financial authority"
+  ],
+  "repository_writes": false,
+  "revision": "1.12",
+  "specification_state": "OWNER_DIRECTED_INTEGRATION_CANDIDATE_INDEPENDENT_SEMANTIC_ADMISSION_PENDING"
+}

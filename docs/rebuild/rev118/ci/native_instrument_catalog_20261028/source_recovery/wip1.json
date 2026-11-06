@@ -1,0 +1,9 @@
+{
+  "archive": "/workspace/van-native-instrument-catalog-wip1-20261028.zip",
+  "files": 14,
+  "base": "291de61baf55255d8ccd51ae7783df0bec4b8692",
+  "bytes": 753743,
+  "sha256": "e0ff8b3e17bada8178197ced85c4a8a38473da676d54e7c7c3f147d984c82aec",
+  "CRC_and_hashes_verified": true,
+  "qualification": "focused_r3_running; PostgreSQL full pending"
+}

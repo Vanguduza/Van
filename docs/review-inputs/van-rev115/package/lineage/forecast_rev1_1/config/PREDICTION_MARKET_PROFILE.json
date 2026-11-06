@@ -1,0 +1,100 @@
+{
+  "schema_version": "1.0",
+  "profile_id": "VAN-PM-RESEARCH-REV1.1",
+  "status": "SPECIFIED_NOT_DEPLOYED",
+  "development_enabled": true,
+  "default_input_mode": "FIXTURE_REPLAY",
+  "source_adapter_modes": [
+    "FIXTURE_REPLAY",
+    "AUTHORIZED_HISTORICAL_IMPORT",
+    "AUTHORIZED_READ_ONLY_CAPTURE"
+  ],
+  "source_scope": [
+    "KALSHI",
+    "POLYMARKET"
+  ],
+  "licence_procurement_required": false,
+  "procurement_in_this_phase": false,
+  "new_external_purchase_budget_usd": "0.00",
+  "live_event_contract_execution_enabled": false,
+  "automatic_live_promotion": false,
+  "deployment": {
+    "providers": [
+      "NETCUP",
+      "ORACLE"
+    ],
+    "preferred_existing_hosts": [
+      "dial-control",
+      "van-trading-core"
+    ],
+    "region": "RESOLVE_ACTUAL_HOST_AT_PLACEMENT",
+    "runtime_change_authorized_by_document": false,
+    "operator_eligibility_inferred_from_host": false
+  },
+  "real_source_use": {
+    "status": "NOT_ESTABLISHED_BY_THIS_PACK",
+    "required_binding": "Existing permission/public terms/source-specific admission for actual intended use; not a required licence purchase",
+    "unavailable_behavior": "SOURCE_UNAVAILABLE_AND_CONTINUE_UNRELATED_OR_FIXTURE_WORK",
+    "no_evasion": true
+  },
+  "read_only_endpoints": {
+    "kalshi_base_url_candidate": "https://external-api.kalshi.com/trade-api/v2",
+    "revalidate_schema_and_endpoint_before_use": true,
+    "allowed_families": [
+      "series",
+      "events",
+      "markets",
+      "historical public markets and trades",
+      "read-only websocket orderbook"
+    ],
+    "trade_and_account_mutations_allowed": false
+  },
+  "expectations": {
+    "armed_source_minimum": 2,
+    "required_armed_sources": [
+      "KALSHI",
+      "POLYMARKET"
+    ],
+    "semantic_and_horizon_match_required": true,
+    "agreement_is_statistical_independence": false,
+    "liquidity_floors": "Inherited parent policy; refine empirically before economic use",
+    "single_source_mode": "LABELLED_RESEARCH_ONLY_NOT_ARMED_EXPECTATION"
+  },
+  "calibration": {
+    "owner": "Existing VAN calibration/conformal service",
+    "grouping": [
+      "event_family",
+      "underlying_event",
+      "forecast_horizon",
+      "liquidity_cohort"
+    ],
+    "matured_labels_only": true,
+    "minimum_events": "Power/effect-size justified; no default claim of adequacy",
+    "raw_values_are_physical_probabilities": false
+  },
+  "studies": [
+    "PM-STUDY-01-RISK",
+    "PM-STUDY-02-SURPRISE",
+    "PM-STUDY-03-VOLATILITY",
+    "PM-STUDY-04-RANKING"
+  ],
+  "labs": {
+    "binary_value": "MANDATORY_SANDBOX_IMPLEMENTATION",
+    "arbitrage": "MANDATORY_RESEARCH_IMPLEMENTATION_NO_LIVE_EXECUTOR",
+    "market_making": "MANDATORY_RESEARCH_IMPLEMENTATION_NO_LIVE_EXECUTOR"
+  },
+  "risk": {
+    "single_authority": "VATI.RiskAuthority",
+    "single_order_sender": "VATI.ExecutionRouter",
+    "forecast_authority_effect": "NONE",
+    "event_generated_size_is_proposal_only": true,
+    "news_multiplier_upper_bound": "1.00",
+    "preserve_D1_D7": true
+  },
+  "resources": {
+    "initial_lightgbm_threads": 2,
+    "max_parallel_studies": 1,
+    "memory_mb": "MEASURE_AND_ADMIT_PER_VM",
+    "retention_and_fetch_rates": "Versioned no-charge per-source budget; no provider defaults invented"
+  }
+}

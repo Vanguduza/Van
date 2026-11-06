@@ -1,0 +1,35 @@
+{
+  "allowed_method_refs": [
+    "FIXTURE_METHOD"
+  ],
+  "deadline_ms": 2000,
+  "environment": "FIXTURE",
+  "fence_epoch": 0,
+  "mandate_ref": "FIXTURE_MANDATE_REF",
+  "max_notional_quote": "100.0",
+  "operational_grant_ref": "FIXTURE_OPERATIONAL_GRANT_REF",
+  "payload_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+  "policy_binding_ref": "FIXTURE_POLICY_BINDING_REF",
+  "price_limit": null,
+  "protection_requirement_ref": "FIXTURE_PROTECTION_REQUIREMENT_REF",
+  "purpose": "ENTRY",
+  "quantity_base": "1.0",
+  "record_id": "FIXTURE_ExecutionObjective",
+  "record_type": "ExecutionObjective",
+  "reference_price": "90.0",
+  "reference_time_ms": 1000,
+  "reservation_ref": "FIXTURE_RESERVATION_REF",
+  "reservation_version": 0,
+  "risk_approval_ref": "FIXTURE_RISK_APPROVAL_REF",
+  "schema_version": 2,
+  "scope": {
+    "account_id": "FIXTURE_ACCOUNT",
+    "market_type": "CRYPTO_SPOT",
+    "ownership": "OWNER_MANUAL",
+    "product_id": "FIXTURE_PRODUCT_ID",
+    "scope_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+    "strategy_id": "FIXTURE_STRATEGY_ID",
+    "venue_id": "FIXTURE_VENUE"
+  },
+  "side": "BUY"
+}

@@ -1,0 +1,25 @@
+{
+  "archive": "/workspace/van-native-cancel-final-wip4-20261030.zip",
+  "bytes": 62159,
+  "sha256": "1c5250184641fff7ccff45c87dd928620615f6cefae29ebb9251a87dca07a5ef",
+  "verified": true,
+  "manifest": {
+    "base_commit": "02e8e712da17a0c70b19e3e1a9dfbed394e58061",
+    "created_at_utc": "2026-10-30T11:10:17.279971+00:00",
+    "files": {
+      "trading/tests/test_ctrader_cancel_adapter.py": "e4560ec73a647d2f28d8f1ad7cd037cc0de1c7c5802d659cffa2b9feba0a96a0",
+      "trading/tests/test_ctrader_cancel_transport.py": "0c676677a6652c3f0510ad87e1027c96a2b4bb0da6e44c2a37551af042f3a320",
+      "trading/tests/test_native_cancel_framed.py": "ace744c9cab152e75c035aec1fc535211e2b6d0e81652fd1d122cbf1a0d6d8df",
+      "trading/tests/test_native_cancel_owner.py": "51e8e5c92e759715d1c74db4f6a697512a812ddd6d028bd60bc0a012ef4625dd",
+      "trading/tests/test_native_cancel_owner_postgres.py": "4e380932b0cb429f649e3808338992cd869749bb1a87f462fe798a0430cfccb9",
+      "trading/tests/test_native_cancel_pending_contradictions.py": "5a6d459b6cf3b737059a634f2dcee2e876cd538d8368010e29b8048f656a2cf9",
+      "trading/vati/execution/ctrader/adapter.py": "5bc64ac20bf844c1bccfb95095bcd357a59ba0e0eb176270172c19c50f50c5cf",
+      "trading/vati/execution/ctrader/cancel.py": "54f4cafe43825a553da84301af72fa5e7cfad3daf711476f321c2877688073d4",
+      "trading/vati/execution/ctrader/transport.py": "a0bedce5225543e5b7f0ef65760ec5d7171a8700d8a5274bccec886bfed6fc60",
+      "trading/vati/execution/native_cancel.py": "2b039183116f6eb17d3644ace0f331e8811ab2d90ee91d8c7f5442647c15061c",
+      "trading/vati/execution/native_order_book.py": "72d14465d9748752b5c585206771f8047248240d3e25d8283d3e971546793003",
+      "trading/vati/execution/router.py": "60e708ba3032fe3b779d7ff100e0fcb0d49a7392f8c86bbf256f80b90a806b95",
+      "trading/vati/risk/physical_pending.py": "f488f24c13411ff70eae7b1a7be163072fb535c3a25bb22d855b8fb0e21b9a71"
+    }
+  }
+}

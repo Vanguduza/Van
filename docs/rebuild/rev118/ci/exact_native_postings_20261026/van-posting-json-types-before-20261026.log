@@ -1,0 +1,144 @@
+FFFFF                                                                    [100%]
+=================================== FAILURES ===================================
+_ test_resealed_numeric_values_cannot_impersonate_exact_json_boolean_or_integer_types[sqlite-risk_capital_qualified] _
+
+book = (<vati.core.ledger.Ledger object at 0x7f221c700a70>, <vati.funding.movement_journal.FinancialMovementBook object at 0x...version=9, occurred_at_ms=1500, money_digits=8),)), 'becc530bc24b7acd785ad72793add5a1d0c2418a4b5148c93c3e97d5ab89c68b')
+field = 'risk_capital_qualified'
+
+    @pytest.mark.parametrize('field',['risk_capital_qualified','execution_authority','trade_alpha_claimed','scale','recorded_at_ms'])
+    def test_resealed_numeric_values_cannot_impersonate_exact_json_boolean_or_integer_types(book,field):
+        ledger,journal,native,ref=book
+        with ledger.read_snapshot():source=next(ledger.iter(EventKind.FUNDING_STATEMENT))
+        requested={'scope_hash':native.scope_hash,'native_id':str(native.movements[0].native_id),'statement_ref':ref}
+        payload={'format':'native-financial-movement-record/1','request_id':'original',
+            'request_sha256':canonical_hash(requested),'source':requested,
+            'movement':FinancialMovement(source,native.movements[0].native_id,recorded_at_ms=6000).body()}
+        if field=='scale':payload['movement']['amount']['scale']=float(payload['movement']['amount']['scale'])
+        elif field=='recorded_at_ms':payload['movement'][field]=float(payload['movement'][field])
+        else:payload['movement'][field]=0
+        forged=make_event(EventKind.FINANCIAL_MOVEMENT,PRODUCER,payload,
+            event_time_ms=payload['movement']['occurred_at_ms'],received_time_ms=6000,
+            correlation_id=payload['movement']['movement_id'])
+        ledger.append(forged)
+        assert ledger.verify_chain()[0]
+        before=state(ledger)
+>       with pytest.raises(UnitError,match='ORIGINAL_POSTINGS'):journal.lookup('original')
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE UnitError
+
+trading/tests/test_financial_movement_journal.py:146: Failed
+_ test_resealed_numeric_values_cannot_impersonate_exact_json_boolean_or_integer_types[sqlite-execution_authority] _
+
+book = (<vati.core.ledger.Ledger object at 0x7f221e9cfce0>, <vati.funding.movement_journal.FinancialMovementBook object at 0x...version=9, occurred_at_ms=1500, money_digits=8),)), 'becc530bc24b7acd785ad72793add5a1d0c2418a4b5148c93c3e97d5ab89c68b')
+field = 'execution_authority'
+
+    @pytest.mark.parametrize('field',['risk_capital_qualified','execution_authority','trade_alpha_claimed','scale','recorded_at_ms'])
+    def test_resealed_numeric_values_cannot_impersonate_exact_json_boolean_or_integer_types(book,field):
+        ledger,journal,native,ref=book
+        with ledger.read_snapshot():source=next(ledger.iter(EventKind.FUNDING_STATEMENT))
+        requested={'scope_hash':native.scope_hash,'native_id':str(native.movements[0].native_id),'statement_ref':ref}
+        payload={'format':'native-financial-movement-record/1','request_id':'original',
+            'request_sha256':canonical_hash(requested),'source':requested,
+            'movement':FinancialMovement(source,native.movements[0].native_id,recorded_at_ms=6000).body()}
+        if field=='scale':payload['movement']['amount']['scale']=float(payload['movement']['amount']['scale'])
+        elif field=='recorded_at_ms':payload['movement'][field]=float(payload['movement'][field])
+        else:payload['movement'][field]=0
+        forged=make_event(EventKind.FINANCIAL_MOVEMENT,PRODUCER,payload,
+            event_time_ms=payload['movement']['occurred_at_ms'],received_time_ms=6000,
+            correlation_id=payload['movement']['movement_id'])
+        ledger.append(forged)
+        assert ledger.verify_chain()[0]
+        before=state(ledger)
+>       with pytest.raises(UnitError,match='ORIGINAL_POSTINGS'):journal.lookup('original')
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE UnitError
+
+trading/tests/test_financial_movement_journal.py:146: Failed
+_ test_resealed_numeric_values_cannot_impersonate_exact_json_boolean_or_integer_types[sqlite-trade_alpha_claimed] _
+
+book = (<vati.core.ledger.Ledger object at 0x7f221cbbb050>, <vati.funding.movement_journal.FinancialMovementBook object at 0x...version=9, occurred_at_ms=1500, money_digits=8),)), 'becc530bc24b7acd785ad72793add5a1d0c2418a4b5148c93c3e97d5ab89c68b')
+field = 'trade_alpha_claimed'
+
+    @pytest.mark.parametrize('field',['risk_capital_qualified','execution_authority','trade_alpha_claimed','scale','recorded_at_ms'])
+    def test_resealed_numeric_values_cannot_impersonate_exact_json_boolean_or_integer_types(book,field):
+        ledger,journal,native,ref=book
+        with ledger.read_snapshot():source=next(ledger.iter(EventKind.FUNDING_STATEMENT))
+        requested={'scope_hash':native.scope_hash,'native_id':str(native.movements[0].native_id),'statement_ref':ref}
+        payload={'format':'native-financial-movement-record/1','request_id':'original',
+            'request_sha256':canonical_hash(requested),'source':requested,
+            'movement':FinancialMovement(source,native.movements[0].native_id,recorded_at_ms=6000).body()}
+        if field=='scale':payload['movement']['amount']['scale']=float(payload['movement']['amount']['scale'])
+        elif field=='recorded_at_ms':payload['movement'][field]=float(payload['movement'][field])
+        else:payload['movement'][field]=0
+        forged=make_event(EventKind.FINANCIAL_MOVEMENT,PRODUCER,payload,
+            event_time_ms=payload['movement']['occurred_at_ms'],received_time_ms=6000,
+            correlation_id=payload['movement']['movement_id'])
+        ledger.append(forged)
+        assert ledger.verify_chain()[0]
+        before=state(ledger)
+>       with pytest.raises(UnitError,match='ORIGINAL_POSTINGS'):journal.lookup('original')
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE UnitError
+
+trading/tests/test_financial_movement_journal.py:146: Failed
+_ test_resealed_numeric_values_cannot_impersonate_exact_json_boolean_or_integer_types[sqlite-scale] _
+
+book = (<vati.core.ledger.Ledger object at 0x7f221c703320>, <vati.funding.movement_journal.FinancialMovementBook object at 0x...version=9, occurred_at_ms=1500, money_digits=8),)), 'becc530bc24b7acd785ad72793add5a1d0c2418a4b5148c93c3e97d5ab89c68b')
+field = 'scale'
+
+    @pytest.mark.parametrize('field',['risk_capital_qualified','execution_authority','trade_alpha_claimed','scale','recorded_at_ms'])
+    def test_resealed_numeric_values_cannot_impersonate_exact_json_boolean_or_integer_types(book,field):
+        ledger,journal,native,ref=book
+        with ledger.read_snapshot():source=next(ledger.iter(EventKind.FUNDING_STATEMENT))
+        requested={'scope_hash':native.scope_hash,'native_id':str(native.movements[0].native_id),'statement_ref':ref}
+        payload={'format':'native-financial-movement-record/1','request_id':'original',
+            'request_sha256':canonical_hash(requested),'source':requested,
+            'movement':FinancialMovement(source,native.movements[0].native_id,recorded_at_ms=6000).body()}
+        if field=='scale':payload['movement']['amount']['scale']=float(payload['movement']['amount']['scale'])
+        elif field=='recorded_at_ms':payload['movement'][field]=float(payload['movement'][field])
+        else:payload['movement'][field]=0
+        forged=make_event(EventKind.FINANCIAL_MOVEMENT,PRODUCER,payload,
+            event_time_ms=payload['movement']['occurred_at_ms'],received_time_ms=6000,
+            correlation_id=payload['movement']['movement_id'])
+        ledger.append(forged)
+        assert ledger.verify_chain()[0]
+        before=state(ledger)
+>       with pytest.raises(UnitError,match='ORIGINAL_POSTINGS'):journal.lookup('original')
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE UnitError
+
+trading/tests/test_financial_movement_journal.py:146: Failed
+_ test_resealed_numeric_values_cannot_impersonate_exact_json_boolean_or_integer_types[sqlite-recorded_at_ms] _
+
+book = (<vati.core.ledger.Ledger object at 0x7f221c702750>, <vati.funding.movement_journal.FinancialMovementBook object at 0x...version=9, occurred_at_ms=1500, money_digits=8),)), 'becc530bc24b7acd785ad72793add5a1d0c2418a4b5148c93c3e97d5ab89c68b')
+field = 'recorded_at_ms'
+
+    @pytest.mark.parametrize('field',['risk_capital_qualified','execution_authority','trade_alpha_claimed','scale','recorded_at_ms'])
+    def test_resealed_numeric_values_cannot_impersonate_exact_json_boolean_or_integer_types(book,field):
+        ledger,journal,native,ref=book
+        with ledger.read_snapshot():source=next(ledger.iter(EventKind.FUNDING_STATEMENT))
+        requested={'scope_hash':native.scope_hash,'native_id':str(native.movements[0].native_id),'statement_ref':ref}
+        payload={'format':'native-financial-movement-record/1','request_id':'original',
+            'request_sha256':canonical_hash(requested),'source':requested,
+            'movement':FinancialMovement(source,native.movements[0].native_id,recorded_at_ms=6000).body()}
+        if field=='scale':payload['movement']['amount']['scale']=float(payload['movement']['amount']['scale'])
+        elif field=='recorded_at_ms':payload['movement'][field]=float(payload['movement'][field])
+        else:payload['movement'][field]=0
+        forged=make_event(EventKind.FINANCIAL_MOVEMENT,PRODUCER,payload,
+            event_time_ms=payload['movement']['occurred_at_ms'],received_time_ms=6000,
+            correlation_id=payload['movement']['movement_id'])
+        ledger.append(forged)
+        assert ledger.verify_chain()[0]
+        before=state(ledger)
+>       with pytest.raises(UnitError,match='ORIGINAL_POSTINGS'):journal.lookup('original')
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE UnitError
+
+trading/tests/test_financial_movement_journal.py:146: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_financial_movement_journal.py::test_resealed_numeric_values_cannot_impersonate_exact_json_boolean_or_integer_types[sqlite-risk_capital_qualified]
+FAILED trading/tests/test_financial_movement_journal.py::test_resealed_numeric_values_cannot_impersonate_exact_json_boolean_or_integer_types[sqlite-execution_authority]
+FAILED trading/tests/test_financial_movement_journal.py::test_resealed_numeric_values_cannot_impersonate_exact_json_boolean_or_integer_types[sqlite-trade_alpha_claimed]
+FAILED trading/tests/test_financial_movement_journal.py::test_resealed_numeric_values_cannot_impersonate_exact_json_boolean_or_integer_types[sqlite-scale]
+FAILED trading/tests/test_financial_movement_journal.py::test_resealed_numeric_values_cannot_impersonate_exact_json_boolean_or_integer_types[sqlite-recorded_at_ms]
+5 failed, 5 deselected in 2.68s

@@ -1,0 +1,54 @@
+{
+  "schema": "van.rebuild.hosted-pg-source/1",
+  "source_head": "733b7ac93e403048f2807df80f56b7038a4f5d48",
+  "updated_at_utc": "2026-10-26T20:55:23.862666+00:00",
+  "main_run": 40394743701,
+  "main_state_at_capture": "IN_PROGRESS; not a complete main-CI reconciliation",
+  "postgres_job_id": 121824675130,
+  "postgres_job_conclusion": "SUCCESS",
+  "actual_junit": {
+    "van-postgres-ledger-report/trading-source-report.xml": {
+      "cases": 4018,
+      "failure": 0,
+      "error": 0,
+      "skipped": 1
+    },
+    "van-postgres-ledger-report/voice-source-report.xml": {
+      "cases": 117,
+      "failure": 0,
+      "error": 0,
+      "skipped": 0
+    },
+    "van-postgres-ledger-report/postgres-ledger-report.xml": {
+      "cases": 26,
+      "failure": 0,
+      "error": 0,
+      "skipped": 0
+    }
+  },
+  "archive_receipts": [
+    {
+      "id": 12686148694,
+      "name": "van-forecast-runtime-source-report",
+      "bytes": 148638,
+      "sha256": "683746fd22c1051e3d8ea9b015f1d70da437dc03b0b220cb9658b09571dc2918",
+      "verified": true
+    },
+    {
+      "id": 12685287394,
+      "name": "van-native-source-parquet-report",
+      "bytes": 3232,
+      "sha256": "de00d10d1c0c7dd056f9b489ba083c8781377921827242deec99fa36a84ffed0",
+      "verified": true
+    },
+    {
+      "id": 12685703230,
+      "name": "van-postgres-ledger-report",
+      "bytes": 160082,
+      "sha256": "2d537453124033392027aa43846d6daaf7a35f44886f713301d4471e1a734b35",
+      "verified": true
+    }
+  ],
+  "qualification": "Published733b source only; no local arithmetic/depth or whole-main/native/unit/production qualification. One original private-DDS trading skip remains declared.",
+  "evidence": "ci/hosted_733b_partial_20261026"
+}

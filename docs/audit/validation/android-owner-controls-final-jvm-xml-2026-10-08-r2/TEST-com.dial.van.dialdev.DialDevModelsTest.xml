@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.dialdev.DialDevModelsTest" tests="15" skipped="0" failures="0" errors="0" timestamp="2026-10-08T04:57:38" hostname="052fefa249ff" time="0.021">
+  <properties/>
+  <testcase name="infrastructure reads the ladder, Orca, manager slots and the Oracle gate()" classname="com.dial.van.dialdev.DialDevModelsTest" time="0.002"/>
+  <testcase name="evidence keeps admission and the exact command()" classname="com.dial.van.dialdev.DialDevModelsTest" time="0.001"/>
+  <testcase name="a terminal tail marks redacted spans and never shows more than 200 lines()" classname="com.dial.van.dialdev.DialDevModelsTest" time="0.004"/>
+  <testcase name="a task without a heartbeat has no age, not zero()" classname="com.dial.van.dialdev.DialDevModelsTest" time="0.001"/>
+  <testcase name="a task row reads the TODO record and measures heartbeat on DIAL's clock()" classname="com.dial.van.dialdev.DialDevModelsTest" time="0.002"/>
+  <testcase name="the graph is navigable as a list, critical path first()" classname="com.dial.van.dialdev.DialDevModelsTest" time="0.002"/>
+  <testcase name="the completion flag on a task row reads as claimed, not passed()" classname="com.dial.van.dialdev.DialDevModelsTest" time="0.0"/>
+  <testcase name="sibling paths that merely share a prefix are not an overlap()" classname="com.dial.van.dialdev.DialDevModelsTest" time="0.001"/>
+  <testcase name="overlap warnings are DIAL's when sent, derived and labelled otherwise()" classname="com.dial.van.dialdev.DialDevModelsTest" time="0.001"/>
+  <testcase name="task views parse to the section 16_3 names and default to Now()" classname="com.dial.van.dialdev.DialDevModelsTest" time="0.001"/>
+  <testcase name="SSE frames dispatch on the blank line and name what changed()" classname="com.dial.van.dialdev.DialDevModelsTest" time="0.0"/>
+  <testcase name="home counts DIAL did not send stay null and render as a dash()" classname="com.dial.van.dialdev.DialDevModelsTest" time="0.0"/>
+  <testcase name="a diff lists files first and splits hunks per file on demand()" classname="com.dial.van.dialdev.DialDevModelsTest" time="0.0"/>
+  <testcase name="home keeps at most five Now rows and three Needs-you items()" classname="com.dial.van.dialdev.DialDevModelsTest" time="0.002"/>
+  <testcase name="the task detail reports an Android verification only when DIAL does()" classname="com.dial.van.dialdev.DialDevModelsTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

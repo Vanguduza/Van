@@ -1,0 +1,18 @@
+{
+  "/tmp/van-be004-r3-final-affected-venv.log": {
+    "path": "docs/rebuild/rev118/receipts/raw/account-demo-recovery-20261101/van-be004-r3-final-affected-venv.log",
+    "sha256": "9c75d8b2d73b407030ad2b6c2928f92547d5220330f1bd9d1649f4634c1e5201"
+  },
+  "/tmp/van-be004-r3-final-affected-venv.xml": {
+    "path": "docs/rebuild/rev118/receipts/raw/account-demo-recovery-20261101/van-be004-r3-final-affected-venv.xml",
+    "sha256": "42ce78eda35ef598a2b5f72f946879bf0a9c59280ee26577a667f428fe8a3ba8"
+  },
+  "/tmp/van-be004-r3-final-gateway.log": {
+    "path": "docs/rebuild/rev118/receipts/raw/account-demo-recovery-20261101/van-be004-r3-final-gateway.log",
+    "sha256": "dc305f9312902dc5996ba33d69120f96692a1540424af7b5954da73d37ca5d01"
+  },
+  "/tmp/van-be004-r3-final-gateway.xml": {
+    "path": "docs/rebuild/rev118/receipts/raw/account-demo-recovery-20261101/van-be004-r3-final-gateway.xml",
+    "sha256": "77dfe5d6dbaf06ef1e668e5a8ac4f9a6e035200cc50ca0f407e360651ffdbd17"
+  }
+}

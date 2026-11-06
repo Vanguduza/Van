@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.voice.AndroidOfflineTtsReadinessTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-10-08T04:57:40" hostname="052fefa249ff" time="0.005">
+  <properties/>
+  <testcase name="network default automatically switches to an installed offline voice()" classname="com.dial.van.voice.AndroidOfflineTtsReadinessTest" time="0.002"/>
+  <testcase name="missing selected voice and empty catalogue remain unavailable()" classname="com.dial.van.voice.AndroidOfflineTtsReadinessTest" time="0.0"/>
+  <testcase name="later loss of offline data revokes a previous usable result()" classname="com.dial.van.voice.AndroidOfflineTtsReadinessTest" time="0.0"/>
+  <testcase name="offline replacement selection is deterministic and respects locale()" classname="com.dial.van.voice.AndroidOfflineTtsReadinessTest" time="0.0"/>
+  <testcase name="network only engine stays silent without selecting a network voice()" classname="com.dial.van.voice.AndroidOfflineTtsReadinessTest" time="0.0"/>
+  <testcase name="setter success requires an independent selected voice readback()" classname="com.dial.van.voice.AndroidOfflineTtsReadinessTest" time="0.0"/>
+  <testcase name="advertised voice with missing data cannot be selected or spoken()" classname="com.dial.van.voice.AndroidOfflineTtsReadinessTest" time="0.0"/>
+  <testcase name="unsupported language cannot silently speak another language()" classname="com.dial.van.voice.AndroidOfflineTtsReadinessTest" time="0.0"/>
+  <testcase name="probe faults are explicit and keep the text fallback()" classname="com.dial.van.voice.AndroidOfflineTtsReadinessTest" time="0.0"/>
+  <testcase name="failed offline selection never enables the remote default()" classname="com.dial.van.voice.AndroidOfflineTtsReadinessTest" time="0.0"/>
+  <testcase name="initialization failure never probes or dispatches a platform voice()" classname="com.dial.van.voice.AndroidOfflineTtsReadinessTest" time="0.0"/>
+  <testcase name="installed offline platform voice actually enables Android fallback()" classname="com.dial.van.voice.AndroidOfflineTtsReadinessTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

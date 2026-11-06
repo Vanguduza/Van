@@ -1,0 +1,93 @@
+2026/10/26 03:45:40 INFO mlflow.store.db.utils: Creating initial MLflow database tables...
+2026/10/26 03:45:40 INFO mlflow.store.db.utils: Updating database tables
+No valid experiment found. Create a new experiment with name van_stack_fixture.
+2026/10/26 03:45:42 WARNING mlflow.tracking.context.registry: Encountered unexpected error during resolving tags: 'getpwuid(): uid not found: 1000'
+2026/10/26 03:45:42 WARNING mlflow.utils.git_utils: Failed to import Git (the Git executable is probably not on your PATH), so Git SHA is not available. Error: Failed to initialize: Bad git executable.
+The git executable must be specified in one of the following ways:
+    - be included in your $PATH
+    - be set via $GIT_PYTHON_GIT_EXECUTABLE
+    - explicitly set via git.refresh(<full-path-to-git-executable>)
+
+All git commands will error until this is rectified.
+
+This initial message can be silenced or aggravated in the future by setting the
+$GIT_PYTHON_REFRESH environment variable. Use one of the following values:
+    - quiet|q|silence|s|silent|none|n|0: for no message or exception
+    - warn|w|warning|log|l|1: for a warning message (logging level CRITICAL, displayed by default)
+    - error|e|exception|raise|r|2: for a raised exception
+
+Example:
+    export GIT_PYTHON_REFRESH=quiet
+
+2026/10/26 03:45:42 WARNING mlflow.utils.git_utils: Failed to import Git (the Git executable is probably not on your PATH), so Git branch is not available. Error: Failed to initialize: Bad git executable.
+The git executable must be specified in one of the following ways:
+    - be included in your $PATH
+    - be set via $GIT_PYTHON_GIT_EXECUTABLE
+    - explicitly set via git.refresh(<full-path-to-git-executable>)
+
+All git commands will error until this is rectified.
+
+This initial message can be silenced or aggravated in the future by setting the
+$GIT_PYTHON_REFRESH environment variable. Use one of the following values:
+    - quiet|q|silence|s|silent|none|n|0: for no message or exception
+    - warn|w|warning|log|l|1: for a warning message (logging level CRITICAL, displayed by default)
+    - error|e|exception|raise|r|2: for a raised exception
+
+Example:
+    export GIT_PYTHON_REFRESH=quiet
+
+2026/10/26 03:45:42 WARNING mlflow.utils.git_utils: Failed to import Git (the Git executable is probably not on your PATH), so Git repository URL is not available. Error: Failed to initialize: Bad git executable.
+The git executable must be specified in one of the following ways:
+    - be included in your $PATH
+    - be set via $GIT_PYTHON_GIT_EXECUTABLE
+    - explicitly set via git.refresh(<full-path-to-git-executable>)
+
+All git commands will error until this is rectified.
+
+This initial message can be silenced or aggravated in the future by setting the
+$GIT_PYTHON_REFRESH environment variable. Use one of the following values:
+    - quiet|q|silence|s|silent|none|n|0: for no message or exception
+    - warn|w|warning|log|l|1: for a warning message (logging level CRITICAL, displayed by default)
+    - error|e|exception|raise|r|2: for a raised exception
+
+Example:
+    export GIT_PYTHON_REFRESH=quiet
+
+/bin/sh: 1: git: not found
+/bin/sh: 1: git: not found
+/bin/sh: 1: git: not found
+ModuleNotFoundError. CatBoostModel are skipped. (optional: maybe installing CatBoostModel can fix it.)
+Training until validation scores don't improve for 2 rounds
+Did not meet early stopping. Best iteration is:
+[4]	train's l2: 0.220804	valid's l2: 1.91259
+{"case": "qlib_lightgbm", "status": "PASS", "detail": {"rows": 10, "native_format": "LIGHTGBM_TEXT", "max_abs_reload_error": 0.0, "artifact_sha256": "58ab9809acac5cd3e345b7a46c86f42bab563323023ea44eb25a86a0c0558e24", "actual_qlib_model_fit": true, "data_provider_used": false}, "elapsed_seconds": 8.080243523996614}
+{"case": "xgboost", "status": "PASS", "detail": {"rows": 10, "native_format": "XGBOOST_JSON", "max_abs_reload_error": 0.0, "artifact_sha256": "e63bf713e2fd45ae9d0a24790fef9dee6b872a4fe49ca543097cc402dd1e0bec"}, "elapsed_seconds": 0.005416990999947302}
+Seed set to 17
+GPU available: False, used: False
+TPU available: False, using: 0 TPU cores
+`Trainer(val_check_interval=1)` was configured so validation will run after every batch.
+/usr/local/lib/python3.12/site-packages/pytorch_lightning/utilities/_pytree.py:21: `isinstance(treespec, LeafSpec)` is deprecated, use `isinstance(treespec, TreeSpec) and treespec.is_leaf()` instead.
+`Trainer.fit` stopped: `max_steps=2` reached.
+GPU available: False, used: False
+TPU available: False, using: 0 TPU cores
+`Trainer(val_check_interval=1)` was configured so validation will run after every batch.
+/usr/local/lib/python3.12/site-packages/pytorch_lightning/utilities/_pytree.py:21: `isinstance(treespec, LeafSpec)` is deprecated, use `isinstance(treespec, TreeSpec) and treespec.is_leaf()` instead.
+Seed set to 17
+GPU available: False, used: False
+TPU available: False, using: 0 TPU cores
+/usr/local/lib/python3.12/site-packages/pytorch_lightning/utilities/_pytree.py:21: `isinstance(treespec, LeafSpec)` is deprecated, use `isinstance(treespec, TreeSpec) and treespec.is_leaf()` instead.
+{"case": "neuralforecast", "status": "PASS", "detail": {"rows": 2, "native_format": "NEURALFORECAST_V2_JSON_SAFETENSORS", "max_abs_reload_error": 0.0, "allow_pickle": false, "trust_remote": false, "artifacts": {"NHITS_0.safetensors": "dc79404f24105b1be4c7b3f9a51d49d723eb06552dda9eb99f958d8be85bd1b0", "configuration.json": "7bab4328fe11f4f261fd45e68db45954788dcea15d01eda160843ab19c5cab25"}}, "elapsed_seconds": 11.596699652000098}
+[I 2026-10-26 03:45:54,869] A new study created in RDB with name: van_fixed_stack_fixture
+[I 2026-10-26 03:45:54,940] Trial 0 finished with value: 0.43648484179882896 and parameters: {'fixture_x': -0.4106699946257806}. Best is trial 0 with value: 0.43648484179882896.
+[I 2026-10-26 03:45:54,987] Trial 1 finished with value: 0.03565544286853785 and parameters: {'fixture_x': 0.06117351121058823}. Best is trial 1 with value: 0.03565544286853785.
+{"case": "optuna", "status": "PASS", "detail": {"trial_count": 2, "states": ["COMPLETE", "COMPLETE"], "objective_is_fixture_math": true}, "elapsed_seconds": 0.5651560760015855}
+Materializing [1m[32m1[0m feature views from [1m[32m2026-10-26 02:46:00+00:00[0m to [1m[32m2026-10-26 03:46:00+00:00[0m into the [1m[32msqlite[0m online store.
+
+[1m[32mfixture_view[0m:
+{"case": "feast", "status": "PASS", "detail": {"registry_exists": true, "sqlite_online_value": [2.5], "offline_source": "LOCAL_FIXTURE_PARQUET", "network_provider_used": false}, "elapsed_seconds": 5.10049831699871}
+2026/10/26 03:46:00 INFO mlflow.store.db.utils: Creating initial MLflow database tables...
+2026/10/26 03:46:00 INFO mlflow.store.db.utils: Updating database tables
+2026/10/26 03:46:02 INFO mlflow.tracking.fluent: Experiment with name 'van_fixed_stack_fixture' does not exist. Creating a new experiment.
+2026/10/26 03:46:02 WARNING mlflow.tracking.context.registry: Encountered unexpected error during resolving tags: 'getpwuid(): uid not found: 1000'
+{"case": "mlflow", "status": "PASS", "detail": {"run_id": "3ec63e8a53f74b3cb6688173957b3e05", "readback_status": "FINISHED", "local_sqlite_metrics": true, "artifact_sha256": "b5f2ef99bf3fbed751213e0e5d04cae3f7202c9a28aec496c31375380c0da39c"}, "elapsed_seconds": 2.6069558119997964}
+{"status": "SOURCE_FIXTURE_SMOKE_PASS_NOT_UNIT_QUALIFICATION", "cases": 6}

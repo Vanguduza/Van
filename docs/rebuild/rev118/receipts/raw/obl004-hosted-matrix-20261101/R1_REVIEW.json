@@ -1,0 +1,115 @@
+{
+  "state": "BLOCKING_FINDINGS",
+  "scope": "Frozen nine-path OBL004 hosted-matrix SOURCE packet on53c; no hosted execution/native authority",
+  "blockers": [
+    {
+      "id": "OBL004-HOSTED-REVIEW01",
+      "status": "ROOT_ACCEPTED",
+      "source": ".github/workflows/van-ci.yml:1416 and other profile uploads; byte-identical mirror",
+      "problem": "Nine upload-artifact path inputs contain literal shell variable $RUNNER_TEMP. Action inputs do not shell-expand it, while actual producers write expanded absolute paths. Profiles will not be uploaded and full join refuses their absence.",
+      "affected_uploads": [
+        {
+          "job": "obl004-documentary",
+          "artifact": "van-obl004-profile-documentary-${{ matrix.cwd }}",
+          "path": "$RUNNER_TEMP/obl004-audit/documentary-${{ matrix.cwd }}/\n!$RUNNER_TEMP/obl004-audit/documentary-${{ matrix.cwd }}/**/basetemp/**"
+        },
+        {
+          "job": "obl004-trading-pg",
+          "artifact": "van-obl004-profile-trading_pg-${{ matrix.cwd }}",
+          "path": "$RUNNER_TEMP/obl004-audit/trading_pg-${{ matrix.cwd }}/\n!$RUNNER_TEMP/obl004-audit/trading_pg-${{ matrix.cwd }}/**/basetemp/**"
+        },
+        {
+          "job": "obl004-scenarios",
+          "artifact": "van-obl004-profile-scenarios-${{ matrix.cwd }}",
+          "path": "$RUNNER_TEMP/obl004-audit/scenarios-${{ matrix.cwd }}/\n!$RUNNER_TEMP/obl004-audit/scenarios-${{ matrix.cwd }}/**/basetemp/**"
+        },
+        {
+          "job": "obl004-scenarios",
+          "artifact": "van-obl004-profile-android_guards-${{ matrix.cwd }}",
+          "path": "$RUNNER_TEMP/obl004-audit/android_guards-${{ matrix.cwd }}/\n!$RUNNER_TEMP/obl004-audit/android_guards-${{ matrix.cwd }}/**/basetemp/**"
+        },
+        {
+          "job": "obl004-browser-namespace",
+          "artifact": "van-obl004-profile-browser-${{ matrix.cwd }}",
+          "path": "$RUNNER_TEMP/obl004-audit/browser-${{ matrix.cwd }}/\n!$RUNNER_TEMP/obl004-audit/browser-${{ matrix.cwd }}/**/basetemp/**"
+        },
+        {
+          "job": "obl004-browser-namespace",
+          "artifact": "van-obl004-profile-browser_uid-${{ matrix.cwd }}",
+          "path": "$RUNNER_TEMP/obl004-audit/browser_uid-${{ matrix.cwd }}/\n!$RUNNER_TEMP/obl004-audit/browser_uid-${{ matrix.cwd }}/**/basetemp/**"
+        },
+        {
+          "job": "obl004-browser-namespace",
+          "artifact": "van-obl004-profile-namespace-${{ matrix.cwd }}",
+          "path": "$RUNNER_TEMP/obl004-audit/namespace-${{ matrix.cwd }}/\n!$RUNNER_TEMP/obl004-audit/namespace-${{ matrix.cwd }}/**/basetemp/**"
+        },
+        {
+          "job": "obl004-private-dds",
+          "artifact": "van-obl004-profile-private_dds-${{ matrix.cwd }}",
+          "path": "$RUNNER_TEMP/obl004-audit/private_dds-${{ matrix.cwd }}/\n!$RUNNER_TEMP/obl004-audit/private_dds-${{ matrix.cwd }}/**/basetemp/**"
+        },
+        {
+          "job": "obl004-forecast-source",
+          "artifact": "van-obl004-profile-forecast-${{ matrix.cwd }}",
+          "path": "$RUNNER_TEMP/obl004-audit/forecast-${{ matrix.cwd }}/\n!$RUNNER_TEMP/obl004-audit/forecast-${{ matrix.cwd }}/**/basetemp/**"
+        }
+      ],
+      "repair": "Use resolved action-supported runner.temp expressions for nine profile inclusions/exclusions; preserve names, basetemp exclusion and missing-artifact refusal. Regression must bind actual producer outputs through upload/download normalization to join. Final aggregate upload is ALREADY correct and must remain so."
+    },
+    {
+      "id": "OBL004-HOSTED-REVIEW02",
+      "status": "ROOT_ACCEPTED",
+      "source": ".github/workflows/van-ci.yml:1191,1270 and mirror",
+      "problem": "Additive job IDs reuse original displayed check names backend-public-source-gateway (${{ matrix.shard }}) and backend-public-source, making required-check contexts ambiguous.",
+      "repair": "Give only additive workers/aggregate distinct OBL004 displayed names. Check all expanded contexts against unchanged original12 jobs and required gate."
+    }
+  ],
+  "positive_findings": {
+    "original12_job_objects_and_all_nonjob_fields_exact": true,
+    "mirror_identical": true,
+    "original_download_pattern": "van-backend-public-source-gateway-*",
+    "no_additive_artifact_matches_original_pattern": true,
+    "aggregate_upload_already_correct": "${{ runner.temp }}/obl004-full-matrix.json",
+    "current_inventory": {
+      "files": 804,
+      "unassigned": 0,
+      "roots": [
+        "backend/tests",
+        "tests",
+        "services",
+        "hermes/policy/tests",
+        "trading/tests"
+      ]
+    },
+    "native_prerequisites": "Four exact DDS/AGP nodes use existing real owners. Original nonowner skips require exact approved reasons; unexpected execution/failure cannot hide.",
+    "B1_NA": "Only three exact click/scroll/select negative nodes, exact reason and three pinned producer hashes. Explicit N/A never counted as executed pass.",
+    "storage": "StorageAudit implementation untouched. Startup hook permits tracked source/runtime reads, denies writes/SQLite/mkdir/network/process/.env/private state/both protected trees, and leaves HOME unchanged. Prehook manifest/runtime discovery and cache suppression are controlled test instrumentation, not OS isolation.",
+    "join": "Exact current source/cwd/runtime/config/plugins/storage, assigned node phases and JUnit required. Both cwd collections must agree; missing/duplicate/unassigned/failed/skipped owned executions block. needs+always preserves failure evidence."
+  },
+  "independent_evidence": {
+    "cli": "probe-results.json:3 actual production CLI+independent readback positives and5 pre-effect refusals",
+    "phase": "phase-probe-results.json:8 resealed receipt damages refused; actual original restored and accepted after each",
+    "imports": "Explicit worktree PYTHONPATH imports exact pinned collector. Child tools copied from pinned worktree into committed tiny source fixture.",
+    "author_terminal_verified": {
+      "cases": 175,
+      "failures": 0,
+      "errors": 0,
+      "skip": 0,
+      "xml_sha256": "141e2bca05d1fb589b072dcccf66df9b25fd7b40b92d2a6c230a57bffb5caed5",
+      "outer_exit": 0
+    },
+    "before_after": "before.json and after.json;9 current/archive pins plus patch/archive hashes unchanged"
+  },
+  "limits": [
+    "All ten full canonical-root/cwd cells remain UNEXECUTED pending real exact-head hosted evidence.",
+    "PriorFOCUSED03 146pass5fail19error and other failures preserved. FINAL04 is a separate175pass terminal.",
+    "Tiny synthetic producer and damaged-receipt probes are source instrumentation, not application/native qualification or performance evidence.",
+    "Existing Android fullapp unit/assemble/lint owner unchanged; integrated accounts candidate future hosted compilation not claimed.",
+    "Missing private/runtime/native prerequisites remain BLOCKED. Historical WAL/SHM/snapshot-owner disposition, full OBL004, PRE/formal/native admission and full374 mutation execution remain separate.",
+    "Sourcewatch6187 terminal failure and PR106 pending/unmerged left untouched."
+  ],
+  "review_correction": "An initial status message incorrectly included final aggregate upload in the bad-path set. Exact enumeration caught this; aggregate already uses runner.temp expression. Root/author notified before final receipt.",
+  "source_pins_unchanged": true,
+  "owned_fixtures_removed": true,
+  "tmp_free_after": 4468281344
+}

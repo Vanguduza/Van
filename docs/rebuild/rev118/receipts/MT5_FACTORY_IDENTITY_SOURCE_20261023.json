@@ -1,0 +1,508 @@
+{
+  "schema": "van.rebuild.mt5-factory-identity-source/1",
+  "observed_at_utc": "2026-10-23T05:02:21.120606+00:00",
+  "source_parent": "4700cba23e6afaeb7a55edda9e8771f18f6337ba",
+  "source_sha256": {
+    "trading/vati/execution/mt5_identity.py": "510fadd667de89c70f287d69f7788846930148badc7340207c27f9a9722a5e7d",
+    "trading/vati/execution/mt5_bridge.py": "99ce8f8ed099dfe811f369dc99b3f47f6bb491f0fa780cbd015ea7638fb9ecab",
+    "trading/vati/execution/mt5_pull.py": "94ad7d88998a35bc14cf1e79b5d3d442dc1b207ccbfc1e722d0d479d824078b0",
+    "trading/vati/app/service.py": "3377009afe0be66189dd0575d2d46fd9cd0cad6de4959e5220cf59bd1d12429f",
+    "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py": "bb6f804aa1b9db4c040f2aba4901912e6ffb052b4967c3da4e723c8f470a817d",
+    "deploy/van-trading-core/windows/mt5_worker/README.md": "440a60cc05911672de5faa87c8f52e374f6f88c09fca1089ecec12a4eefd2731",
+    "deploy/van-trading-core/mql5/VanBridgeEA.mq5": "4bdea422e163db651671a5c8e1e2aa09702fb01ca4178185d06fe59915737dbf",
+    "deploy/van-trading-core/mql5/README.md": "03c0e690dd90b59ec9b3e15a63f513823152541dcd4d0c4b15f0deaf56fb0dd0",
+    "trading/tests/test_mt5_client_nonce.py": "9544ef9d22f9a3abcc46c2262327f15c8c7eb784b30ce753ec7777ffc982328b",
+    "trading/tests/test_mt5_factory_identity.py": "b1f816cad81606d1cf0b19568772c54331da7d4063b23584d50335ce0bd5a323",
+    "trading/tests/test_mt5_bound_poll.py": "2a762d0e157828ec558fb09dc39acdc442007f0a0958c392844c4ce601e60114",
+    "trading/tests/test_mt5_physical_identity.py": "fe3bef82be40d1b20b07e1bf0fa772ebb2a5129269be3438d445b3cda0e4384b"
+  },
+  "executions": {
+    "before": {
+      "tests": 8,
+      "failures": 8,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.353,
+      "sha256": "f0b21b6b437c5f8502a1862e6a789eedcc02c891f27b11cf048fb608370b6880"
+    },
+    "first": {
+      "tests": 47,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 2.684,
+      "sha256": "cabda8e647cf5590f6fe1b1125dd8094ec3b12160da6d62a843cd409a4e06964"
+    },
+    "expanded": {
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.44,
+      "sha256": "57cff3a03f09389f458dca53076fb73f3a6c51949908437708a0c30e5d3491bd"
+    },
+    "wire": {
+      "tests": 62,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 6.98,
+      "sha256": "e7e0d9a14b5fe7154667bb718539f8ac0fa6cb51b423ac7db8a4765b47b7e676"
+    },
+    "wire-restored": {
+      "tests": 92,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 30,
+      "seconds": 7.117,
+      "sha256": "0a1f4248d4af2592ebb673fb5c7ee81a39033f5f315e91c4ca50537a045c72a4"
+    },
+    "final-focused": {
+      "tests": 70,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 7.062,
+      "sha256": "4046803fa329d05a7670bc9676f7d722a500e572150a8aaf33c4f66705f2e628"
+    },
+    "poll-controls": {
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.662,
+      "sha256": "0cd40d044a0229ae18f68753264001cbd3a1bb27f479ba20a144d4989d4e6947"
+    },
+    "rebuild": {
+      "tests": 78,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 35.853,
+      "sha256": "a716e04632f00f6ca52b115cc1651d59458632f07bf63de4752c5437ab7b55a2"
+    },
+    "final-full-pg": {
+      "tests": 2281,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 489.672,
+      "sha256": "e700cb7fef285f109adaea761c3b5d11d6b861c9a861303687d5e2f0fb692b57"
+    },
+    "client_nonce_before": {
+      "tests": 2,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.356,
+      "sha256": "b7bcf673ba76ca23898f8b9b8daf34b181eb6da1257277623c80541dfeaf7f9c"
+    },
+    "client_nonce_proposed": {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.312,
+      "sha256": "931deaa1f2d58cccbfeff359d3eeabaefa750365e7e92b74a397a2f844c96214"
+    },
+    "client_nonce_focused": {
+      "tests": 35,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 1.746,
+      "sha256": "55de5e982c632a34ec5badcba745546771d532b3cc0ec89aba2f7ae2ddf9fd2a"
+    }
+  },
+  "source_faults": {
+    "definitions": [
+      [
+        [
+          "trading/vati/execution/mt5_bridge.py",
+          "self._nonce = secrets.randbits(96) << 32",
+          "self._nonce = 0",
+          "reuse nonce one across restarted client connections"
+        ],
+        [
+          "trading/tests/test_mt5_client_nonce.py::test_a_new_client_after_a_service_restart_does_not_collide_with_the_previous_connection"
+        ]
+      ],
+      [
+        [
+          "trading/vati/execution/mt5_bridge.py",
+          "nonce = self._nonce",
+          "nonce = self._nonce & ~((1 << 32) - 1)",
+          "reuse one signed nonce throughout a connection"
+        ],
+        [
+          "trading/tests/test_mt5_client_nonce.py::test_parallel_connections_and_shared_client_calls_keep_distinct_signed_nonces"
+        ]
+      ],
+      [
+        [
+          "trading/vati/execution/mt5_bridge.py",
+          "response.get('identity_binding') != self.identity.as_dict()",
+          "False",
+          "admit a legacy worker without its native identity acknowledgement"
+        ],
+        [
+          "trading/tests/test_mt5_factory_identity.py::test_a_legacy_worker_without_binding_acknowledgement_cannot_receive_a_factory_entry"
+        ]
+      ],
+      [
+        [
+          "trading/vati/app/service.py",
+          "identity=identity))",
+          "identity=None))",
+          "omit the registry identity from the actual push factory"
+        ],
+        [
+          "trading/tests/test_mt5_factory_identity.py::test_an_actual_factory_cannot_verify_a_different_physical_account[login-999999-MT5]"
+        ]
+      ],
+      [
+        [
+          "trading/vati/app/service.py",
+          "return bound(Mt5PullAdapter(open_bridge_queue(secrets.get(\"BRIDGE_QUEUE\", \"\")), account_alias=account.alias, venue=account.router_venue,\n            identity=identity))",
+          "return bound(Mt5PullAdapter(open_bridge_queue(secrets.get(\"BRIDGE_QUEUE\", \"\")), account_alias=account.alias, venue=account.router_venue,\n            identity=None))",
+          "omit the registry identity from the actual pull factory"
+        ],
+        [
+          "trading/tests/test_mt5_factory_identity.py::test_an_actual_factory_cannot_verify_a_different_physical_account[login-999999-MT5_EA]"
+        ]
+      ],
+      [
+        [
+          "trading/vati/execution/mt5_identity.py",
+          "observed['demo'] is not self.demo",
+          "False",
+          "accept a native demo/live mismatch during account readback"
+        ],
+        [
+          "trading/tests/test_mt5_factory_identity.py::test_an_actual_factory_cannot_verify_a_different_physical_account[demo-False-MT5_EA]"
+        ]
+      ],
+      [
+        [
+          "trading/vati/execution/mt5_pull.py",
+          "bound == expected_identity and (op != 'ORDER_SEND' or allow_entry)",
+          "True and (op != 'ORDER_SEND' or allow_entry)",
+          "migrate an undelivered original to a new physical account"
+        ],
+        [
+          "trading/tests/test_mt5_bound_poll.py::test_a_queued_original_cannot_migrate_to_the_alias_new_physical_account"
+        ]
+      ],
+      [
+        [
+          "trading/vati/execution/mt5_pull.py",
+          "op != 'ORDER_SEND' or allow_entry",
+          "True",
+          "deliver an undelivered entry after the owner disables its profile"
+        ],
+        [
+          "trading/tests/test_mt5_bound_poll.py::test_current_disable_refuses_only_queued_entries_with_zero_native_effect"
+        ]
+      ],
+      [
+        [
+          "trading/vati/execution/mt5_pull.py",
+          "scope = key_provider.poll_binding(alias) if isinstance(key_provider, RegistryKeyProvider) else nullcontext((key,identity,allow_entry))",
+          "scope = nullcontext((key,identity,allow_entry))",
+          "reuse entry permission observed before the complete signed body arrived"
+        ],
+        [
+          "trading/tests/test_mt5_bound_poll.py::test_permission_is_reloaded_after_receiving_the_signed_poll_body"
+        ]
+      ],
+      [
+        [
+          "trading/vati/execution/mt5_pull.py",
+          "current_key is None or not hmac.compare_digest(key,current_key)",
+          "False",
+          "deliver with an old credential after its native key rotated"
+        ],
+        [
+          "trading/tests/test_mt5_bound_poll.py::test_key_rotation_after_authentication_blocks_the_old_poll_before_any_native_delivery"
+        ]
+      ],
+      [
+        [
+          "trading/vati/execution/mt5_pull.py",
+          "return self._entry_receipt(cmd,rows[0]['result'],now_ms=now_ms)",
+          "self._state()\n        return self._entry_receipt(cmd,rows[0]['result'],now_ms=now_ms)",
+          "make historical original readback depend on fresh current state"
+        ],
+        [
+          "trading/tests/test_mt5_bound_poll.py::test_matching_factory_claim_roundtrips_the_bound_wire_and_original_result"
+        ]
+      ],
+      [
+        [
+          "trading/vati/execution/mt5_pull.py",
+          "identity.server.encode().hex()",
+          "identity.server",
+          "let a native server name inject ambiguous pipe fields"
+        ],
+        [
+          "trading/tests/test_mt5_bound_poll.py::test_matching_factory_claim_roundtrips_the_bound_wire_and_original_result"
+        ]
+      ],
+      [
+        [
+          "trading/vati/execution/mt5_pull.py",
+          "str(c.get('order_type',''))",
+          "('LIMIT' if 'LIMIT' in c.get('comment','') else 'MARKET')",
+          "infer execution type from the original opaque intent label"
+        ],
+        [
+          "trading/tests/test_mt5_bound_poll.py::test_explicit_entry_type_is_independent_of_the_original_intent_label"
+        ]
+      ],
+      [
+        [
+          "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py",
+          "expected is not None and (",
+          "False and (",
+          "ignore the signed Linux physical binding at native dispatch"
+        ],
+        [
+          "trading/tests/test_mt5_physical_identity.py::test_the_signed_linux_binding_must_match_the_worker_native_readback_before_sending[server-Other-Server]"
+        ]
+      ],
+      [
+        [
+          "trading/vati/execution/mt5_pull.py",
+          "**({'expected_account':self.identity.as_dict()} if self.identity is not None else {})}",
+          "**({})}",
+          "lose the physical identity on a new original queue claim"
+        ],
+        [
+          "trading/tests/test_mt5_bound_poll.py::test_matching_factory_claim_roundtrips_the_bound_wire_and_original_result"
+        ]
+      ]
+    ],
+    "records": [
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "3be6ffcaecf85b5bd3eef3693ab214b0e7c9eb4e36d117fcf1825652de5eb298"
+      },
+      {
+        "phase": "mutation",
+        "why": "reuse nonce one across restarted client connections",
+        "returncode": 1,
+        "log_sha256": "a52d20b8030a6bda4694c1daea32f17ad945adb38632d75dcc682252a931b244"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "7fefcaf66f6e7137767bc25d16d128cbf7b8617ad0b6f14fbf9a0b8e7fdd81cd"
+      },
+      {
+        "phase": "mutation",
+        "why": "reuse one signed nonce throughout a connection",
+        "returncode": 1,
+        "log_sha256": "6b3de34df60e2206ea494da2fe9a2f5677b2961b0fec615e719dc9e9566c09a8"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "0d70d5e3025d41820ee8d7865e5ffaa062debd9f4fd30ca4b26f7820dfb180f9"
+      },
+      {
+        "phase": "mutation",
+        "why": "admit a legacy worker without its native identity acknowledgement",
+        "returncode": 1,
+        "log_sha256": "6566b7c2bbb4c79b9ad6b68566070fb9628f68848f4e6c8ac6480a3db6f5f12a"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "ac03dc55bdc1ce87ab5a711fdf5a7d72d345e62c471c4cb4e9de283e03475f14"
+      },
+      {
+        "phase": "mutation",
+        "why": "omit the registry identity from the actual push factory",
+        "returncode": 1,
+        "log_sha256": "4b6edfb61b72944fda0ddbfada773ab69bcc2ef89b05afdb3c20f5b578e95bab"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "ac03dc55bdc1ce87ab5a711fdf5a7d72d345e62c471c4cb4e9de283e03475f14"
+      },
+      {
+        "phase": "mutation",
+        "why": "omit the registry identity from the actual pull factory",
+        "returncode": 1,
+        "log_sha256": "7e43ce8e145bed4030133ed17dd585a1c9d8aed691c9b3a5ec47034ce1a62478"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "0cddb2f9522c5fc98e9503738cea759bed811b3ad3b391083a46a5d5f403e174"
+      },
+      {
+        "phase": "mutation",
+        "why": "accept a native demo/live mismatch during account readback",
+        "returncode": 1,
+        "log_sha256": "3b7027200feb1b29ce6a268cca8a52b9b2f4f20127e8280faf763f7f16ee720f"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "7b28864108e599fa40be5ef242a8e99369373309a24005493e03e6500fb2376c"
+      },
+      {
+        "phase": "mutation",
+        "why": "migrate an undelivered original to a new physical account",
+        "returncode": 1,
+        "log_sha256": "6cc03891254b8438668a4cf2ed74f4571f2a7e3fffb1e51d72b312ff9512f67d"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "ae43bdb47d7d0cf40576af0e7dd81cb1e94c4364677ce0650e287ab41ba59b45"
+      },
+      {
+        "phase": "mutation",
+        "why": "deliver an undelivered entry after the owner disables its profile",
+        "returncode": 1,
+        "log_sha256": "1758bd7e02327ddac70234b45c446e81efbed1168e7e1fb8f56d17f61f40d7ed"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "b073e50314014695a68935b2ad6af17f8207399a770db1f9332fe5e5a4e4b3e4"
+      },
+      {
+        "phase": "mutation",
+        "why": "reuse entry permission observed before the complete signed body arrived",
+        "returncode": 1,
+        "log_sha256": "d5b954a7f64eb0cac87e36cb1946bf4fe4dc4b95c3ce0be679d5a9f66057333c"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "0150df7866e210fb2f04c9789770a7b4247af72e996159c002291a98af216e25"
+      },
+      {
+        "phase": "mutation",
+        "why": "deliver with an old credential after its native key rotated",
+        "returncode": 1,
+        "log_sha256": "dd60d660782568318437d51c34bd0be5776a769007cfa65573a74580f6b5c23a"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "f494bf079c2d50da5c38ba7d4a4a3350bf95dbcccece57b4e4a109b47275587e"
+      },
+      {
+        "phase": "mutation",
+        "why": "make historical original readback depend on fresh current state",
+        "returncode": 1,
+        "log_sha256": "81a03d2232338eab689218aec9f15c0ccb32f61e30c75efe6a31658c16444974"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "208965a175cb8fa177f4a774346752d242b8a524b65e1690efbb0e0286af9300"
+      },
+      {
+        "phase": "mutation",
+        "why": "let a native server name inject ambiguous pipe fields",
+        "returncode": 1,
+        "log_sha256": "0c7f3fcc410edd219dacd2341b6a26b98c27befd66acb7b1ed1ad1bac1800cee"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "b3bccfeda444f1cf8e6272893a77859afc8a55ed15ed92548cd251e357720a9a"
+      },
+      {
+        "phase": "mutation",
+        "why": "infer execution type from the original opaque intent label",
+        "returncode": 1,
+        "log_sha256": "6a3cf04ce50a58845673e1c0c7e86a7b9c5a0aa19db86eae633daea5d4a2ddba"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "f69b41b567fe2583118441e8e8390afa756eecb8625fa01f5e10bcff2c1cef10"
+      },
+      {
+        "phase": "mutation",
+        "why": "ignore the signed Linux physical binding at native dispatch",
+        "returncode": 1,
+        "log_sha256": "9581f88ee4ac413226a91f1624262f210f1f346ab63176b2923d7a781d28bb5a"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "b0c2a4f117893eb8a929b5205b26397674924046f349e7f9aa1cca9ffdbadab9"
+      },
+      {
+        "phase": "mutation",
+        "why": "lose the physical identity on a new original queue claim",
+        "returncode": 1,
+        "log_sha256": "7b7c084accb5902af6d528a081ccd3e2bf5522c8b85957a90abf6897c33b0afb"
+      }
+    ],
+    "source_before_sha256": {
+      "trading/vati/execution/mt5_bridge.py": "99ce8f8ed099dfe811f369dc99b3f47f6bb491f0fa780cbd015ea7638fb9ecab",
+      "trading/vati/app/service.py": "3377009afe0be66189dd0575d2d46fd9cd0cad6de4959e5220cf59bd1d12429f",
+      "trading/vati/execution/mt5_pull.py": "94ad7d88998a35bc14cf1e79b5d3d442dc1b207ccbfc1e722d0d479d824078b0",
+      "trading/vati/execution/mt5_identity.py": "510fadd667de89c70f287d69f7788846930148badc7340207c27f9a9722a5e7d",
+      "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py": "bb6f804aa1b9db4c040f2aba4901912e6ffb052b4967c3da4e723c8f470a817d"
+    },
+    "source_after_sha256": {
+      "trading/vati/execution/mt5_bridge.py": "99ce8f8ed099dfe811f369dc99b3f47f6bb491f0fa780cbd015ea7638fb9ecab",
+      "trading/vati/app/service.py": "3377009afe0be66189dd0575d2d46fd9cd0cad6de4959e5220cf59bd1d12429f",
+      "trading/vati/execution/mt5_pull.py": "94ad7d88998a35bc14cf1e79b5d3d442dc1b207ccbfc1e722d0d479d824078b0",
+      "trading/vati/execution/mt5_identity.py": "510fadd667de89c70f287d69f7788846930148badc7340207c27f9a9722a5e7d",
+      "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py": "bb6f804aa1b9db4c040f2aba4901912e6ffb052b4967c3da4e723c8f470a817d"
+    },
+    "source_restored": true,
+    "journal_present": false
+  },
+  "private_postgresql_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "owner_export": {
+    "changed": [],
+    "applied": false,
+    "scope": "SOURCE_CONTRACTS_ONLY"
+  },
+  "legacy_preflight": {
+    "schema": "van.rebuild.mutation-registry-preflight/1",
+    "registry_sha256": "35d10c7b0f2b8319b7f7305828262c972b2a6451139d75b9e83c7d0062282955",
+    "mutation_count": 374,
+    "edit_count": 383,
+    "findings": [],
+    "execution_state": "NOT_RUN",
+    "status": "ANCHORS_VALID_BASELINES_AND_MUTATIONS_NOT_EXECUTED"
+  },
+  "retained_control_setup_failure": {
+    "description": "Initial nonce selection named a nonexistent test_venues.py and exited4 before tests; corrected selection follows. Not product evidence.",
+    "sha256": "ddee54aa41dc4dd25526f28ecd6f14e0bbf4d0030bbc7227e42a2dcc848556db"
+  },
+  "mql_native_execution": "NOT_COMPILED_OR_EXECUTED; source wire updated, Python HMAC/queue/factory behavior exercised with model terminal",
+  "qualification": "No native provider, physical host, financial effect, entire unit, production release or S24 claim. Original precision, epoch/deadline/risk, finality and whole-product obligations retained."
+}

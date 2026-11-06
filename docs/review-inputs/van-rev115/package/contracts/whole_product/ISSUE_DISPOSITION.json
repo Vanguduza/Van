@@ -1,0 +1,317 @@
+{
+  "audit_commit": "673a1cc6fa2549a747bd0e2097202ebeceffb5d1",
+  "issues": [
+    {
+      "architecture_sections": [
+        2,
+        3,
+        4
+      ],
+      "contract_ref": "contracts/whole_product/ARCHITECTURE_REV118.md",
+      "design_status": "ADDRESSED_BY_NORMATIVE_REV118_CONTRACT",
+      "id": "WPC-001",
+      "implementation_acceptance": "Each required action resolves to a real registered producer and client; success, refusal, unknown and recovery have independently observed postconditions. A missing binding blocks BG-001.",
+      "owners": [
+        "BE-032",
+        "BE-003",
+        "BQ-006"
+      ],
+      "runtime_status": "NOT_QUALIFIED",
+      "title": "The complete executable consumer catalogue is still a deliverable",
+      "verification_ref": "verification/verify_whole_product.py"
+    },
+    {
+      "architecture_sections": [
+        2,
+        12
+      ],
+      "contract_ref": "contracts/whole_product/ARCHITECTURE_REV118.md",
+      "design_status": "ADDRESSED_BY_NORMATIVE_REV118_CONTRACT",
+      "id": "WPC-002",
+      "implementation_acceptance": "Traceable results cover every required action and state family; altering the postcondition or pointing a test at a sibling action causes the relevant acceptance to fail.",
+      "owners": [
+        "BQ-006",
+        "UX-003",
+        "QA-001"
+      ],
+      "runtime_status": "NOT_QUALIFIED",
+      "title": "Inventory preservation does not yet provide executable per-action acceptance",
+      "verification_ref": "verification/verify_whole_product.py"
+    },
+    {
+      "architecture_sections": [
+        2,
+        12
+      ],
+      "contract_ref": "contracts/whole_product/ARCHITECTURE_REV118.md",
+      "design_status": "ADDRESSED_BY_NORMATIVE_REV118_CONTRACT",
+      "id": "WPC-003",
+      "implementation_acceptance": "Every feature primary has a reviewed acceptance obligation in the generated plan or an explicit delegation with shared exit evidence; no feature is certified solely by an unrelated unit.",
+      "owners": [
+        "UX-003",
+        "BQ-006",
+        "QA-001"
+      ],
+      "runtime_status": "NOT_QUALIFIED",
+      "title": "22 feature tests omit their declared primary frontend owner",
+      "verification_ref": "verification/verify_whole_product.py"
+    },
+    {
+      "architecture_sections": [
+        5
+      ],
+      "contract_ref": "contracts/whole_product/ARCHITECTURE_REV118.md",
+      "design_status": "ADDRESSED_BY_NORMATIVE_REV118_CONTRACT",
+      "id": "WPC-004",
+      "implementation_acceptance": "A fresh S24 installation reaches the intended authorized services without host/port/token entry; expired/replayed provisioning refuses; rotation and recovery work without reviving a revoked device.",
+      "owners": [
+        "BE-002",
+        "BE-031",
+        "FE-001",
+        "FE-022",
+        "QA-002"
+      ],
+      "runtime_status": "NOT_QUALIFIED",
+      "title": "Zero-configuration bootstrap needs an executable identity and recovery protocol",
+      "verification_ref": "verification/verify_whole_product.py"
+    },
+    {
+      "architecture_sections": [
+        6
+      ],
+      "contract_ref": "contracts/whole_product/ARCHITECTURE_REV118.md",
+      "design_status": "ADDRESSED_BY_NORMATIVE_REV118_CONTRACT",
+      "id": "WPC-005",
+      "implementation_acceptance": "Positive conversations and action readback run through real speech providers; ambiguous amounts/accounts require resolution; late audio/recognition cannot restart a cancelled turn or duplicate a command; spoken done follows verified effect, not transcript receipt.",
+      "owners": [
+        "BE-029",
+        "BE-002",
+        "BE-003",
+        "FE-021",
+        "BQ-004"
+      ],
+      "runtime_status": "NOT_QUALIFIED",
+      "title": "Conversation and spoken responses need a complete turn/audio contract",
+      "verification_ref": "verification/verify_whole_product.py"
+    },
+    {
+      "architecture_sections": [
+        7
+      ],
+      "contract_ref": "contracts/whole_product/ARCHITECTURE_REV118.md",
+      "design_status": "ADDRESSED_BY_NORMATIVE_REV118_CONTRACT",
+      "id": "WPC-006",
+      "implementation_acceptance": "Each supported mode has actual OS readback; unsupported background behaviour is clearly surfaced with an accessible supported alternative and no silent recording.",
+      "owners": [
+        "FE-005",
+        "FE-021",
+        "FE-022",
+        "QA-004"
+      ],
+      "runtime_status": "NOT_QUALIFIED",
+      "title": "Floating and voice lifecycle need a declared Android support matrix",
+      "verification_ref": "verification/verify_whole_product.py"
+    },
+    {
+      "architecture_sections": [
+        10
+      ],
+      "contract_ref": "contracts/whole_product/ARCHITECTURE_REV118.md",
+      "design_status": "ADDRESSED_BY_NORMATIVE_REV118_CONTRACT",
+      "id": "WPC-007",
+      "implementation_acceptance": "Exact source tests establish repairs, and independent evidence supports each promoted policy/model at its declared scope. No profitability label follows solely from model capability or winning trades.",
+      "owners": [
+        "BE-010",
+        "BE-012",
+        "BE-035",
+        "BE-036",
+        "BQ-007",
+        "BQ-009"
+      ],
+      "runtime_status": "NOT_QUALIFIED",
+      "title": "Strong trading specifications still need source repairs and economic proof",
+      "verification_ref": "verification/verify_whole_product.py"
+    },
+    {
+      "architecture_sections": [
+        2,
+        11
+      ],
+      "contract_ref": "contracts/whole_product/ARCHITECTURE_REV118.md",
+      "design_status": "ADDRESSED_BY_NORMATIVE_REV118_CONTRACT",
+      "id": "WPC-008",
+      "implementation_acceptance": "Required integrations have current permitted positive and refusal paths. Unsupported is a truthful state, not a way to count a required feature as complete; hosted fallback is tested where allowed.",
+      "owners": [
+        "BE-004",
+        "BE-005",
+        "BE-031",
+        "BE-032",
+        "BQ-002",
+        "BQ-004",
+        "BQ-006"
+      ],
+      "runtime_status": "NOT_QUALIFIED",
+      "title": "Provider capability and entitlement remain external dependencies",
+      "verification_ref": "verification/verify_whole_product.py"
+    },
+    {
+      "architecture_sections": [
+        7
+      ],
+      "contract_ref": "contracts/whole_product/ARCHITECTURE_REV118.md",
+      "design_status": "ADDRESSED_BY_NORMATIVE_REV118_CONTRACT",
+      "id": "WPC-009",
+      "implementation_acceptance": "One event remains one incident across channels; revoked/expired actions cannot execute from old notifications; critical state remains visible even when OS delivery is blocked.",
+      "owners": [
+        "BE-030",
+        "BE-031",
+        "FE-004",
+        "FE-005",
+        "FE-021",
+        "FE-022"
+      ],
+      "runtime_status": "NOT_QUALIFIED",
+      "title": "Notification and cross-surface state policy needs a complete delivery matrix",
+      "verification_ref": "verification/verify_whole_product.py"
+    },
+    {
+      "architecture_sections": [
+        8
+      ],
+      "contract_ref": "contracts/whole_product/ARCHITECTURE_REV118.md",
+      "design_status": "ADDRESSED_BY_NORMATIVE_REV118_CONTRACT",
+      "id": "WPC-010",
+      "implementation_acceptance": "Concurrent edits and late callbacks cannot overwrite newer state; unknown effects reconcile original operations; cancellation of a UI request never falsely reports native work cancelled.",
+      "owners": [
+        "BE-023",
+        "BE-024",
+        "BE-025",
+        "BE-026",
+        "BE-028",
+        "BE-034",
+        "BQ-004"
+      ],
+      "runtime_status": "NOT_QUALIFIED",
+      "title": "Work, agents, browser, automation and studio require operation-level lifecycle tables",
+      "verification_ref": "verification/verify_whole_product.py"
+    },
+    {
+      "architecture_sections": [
+        9
+      ],
+      "contract_ref": "contracts/whole_product/ARCHITECTURE_REV118.md",
+      "design_status": "ADDRESSED_BY_NORMATIVE_REV118_CONTRACT",
+      "id": "WPC-011",
+      "implementation_acceptance": "A scoped erasure is traceable through each applicable store/processor and re-index/restore path; inaccessible or retained exceptions remain disclosed rather than reported as deleted.",
+      "owners": [
+        "BE-027",
+        "BE-029",
+        "BE-033",
+        "BQ-005"
+      ],
+      "runtime_status": "NOT_QUALIFIED",
+      "title": "Privacy and erasure need a verifiable store-by-store lifecycle",
+      "verification_ref": "verification/verify_whole_product.py"
+    },
+    {
+      "architecture_sections": [
+        11
+      ],
+      "contract_ref": "contracts/whole_product/ARCHITECTURE_REV118.md",
+      "design_status": "ADDRESSED_BY_NORMATIVE_REV118_CONTRACT",
+      "id": "WPC-012",
+      "implementation_acceptance": "Representative load, dependency outage and restore drills meet the declared budgets or visibly degrade within policy; success is not inferred from an open port or healthy process.",
+      "owners": [
+        "BE-003",
+        "BE-029",
+        "BE-033",
+        "BQ-005",
+        "QA-004"
+      ],
+      "runtime_status": "NOT_QUALIFIED",
+      "title": "Recovery and capacity obligations need measurable operational budgets",
+      "verification_ref": "verification/verify_whole_product.py"
+    },
+    {
+      "architecture_sections": [
+        5,
+        11
+      ],
+      "contract_ref": "contracts/whole_product/ARCHITECTURE_REV118.md",
+      "design_status": "ADDRESSED_BY_NORMATIVE_REV118_CONTRACT",
+      "id": "WPC-013",
+      "implementation_acceptance": "The actual signed release installs/upgrades without orphaning owner/device state; incompatible versions refuse safely; rollback never restores obsolete authority or loses financial truth.",
+      "owners": [
+        "BE-002",
+        "BE-033",
+        "FE-001",
+        "QA-002",
+        "QA-005"
+      ],
+      "runtime_status": "NOT_QUALIFIED",
+      "title": "Signed app identity, upgrade and rollback need exact-build evidence",
+      "verification_ref": "verification/verify_whole_product.py"
+    },
+    {
+      "architecture_sections": [
+        3,
+        9
+      ],
+      "contract_ref": "contracts/whole_product/ARCHITECTURE_REV118.md",
+      "design_status": "ADDRESSED_BY_NORMATIVE_REV118_CONTRACT",
+      "id": "WPC-014",
+      "implementation_acceptance": "Negative tests fail at authoritative boundaries and leave correct receipts/state; display checks or sanitized screenshots alone cannot certify authorization.",
+      "owners": [
+        "BE-002",
+        "BE-025",
+        "BE-027",
+        "BE-029",
+        "BQ-005",
+        "QA-003"
+      ],
+      "runtime_status": "NOT_QUALIFIED",
+      "title": "Cross-domain security needs an explicit adversarial surface matrix",
+      "verification_ref": "verification/verify_whole_product.py"
+    },
+    {
+      "architecture_sections": [
+        7
+      ],
+      "contract_ref": "contracts/whole_product/ARCHITECTURE_REV118.md",
+      "design_status": "ADDRESSED_BY_NORMATIVE_REV118_CONTRACT",
+      "id": "WPC-015",
+      "implementation_acceptance": "Actual S24 receipts and accessibility/performance evidence certify the declared context/state matrix; visual degradation preserves essential controls and financial values.",
+      "owners": [
+        "UX-002",
+        "UX-003",
+        "FE-002",
+        "QA-004"
+      ],
+      "runtime_status": "NOT_QUALIFIED",
+      "title": "Readability, navigation and performance remain rendered-device obligations",
+      "verification_ref": "verification/verify_whole_product.py"
+    },
+    {
+      "architecture_sections": [
+        12
+      ],
+      "contract_ref": "contracts/whole_product/ARCHITECTURE_REV118.md",
+      "design_status": "ADDRESSED_BY_NORMATIVE_REV118_CONTRACT",
+      "id": "WPC-016",
+      "implementation_acceptance": "Current source/config/provider/build receipts support every applicable obligation and required independent/native gate. No counter, schema checker, simulator or emulator is relabelled as complete product/device evidence.",
+      "owners": [
+        "BQ-006",
+        "BG-001",
+        "QA-001",
+        "QA-002",
+        "QA-003",
+        "QA-004",
+        "QA-005"
+      ],
+      "runtime_status": "NOT_QUALIFIED",
+      "title": "No document result currently establishes full implementation or release acceptance",
+      "verification_ref": "verification/verify_whole_product.py"
+    }
+  ],
+  "revision": "1.18"
+}

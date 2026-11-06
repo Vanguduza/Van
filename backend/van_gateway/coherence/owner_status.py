@@ -198,6 +198,7 @@ COMPUTER_OPERATION: dict[OperationState, OwnerWorkStatus] = {
     OperationState.CHECKPOINTED: _W.WORKING,
     OperationState.COMPLETED: _W.DONE,
     OperationState.FAILED: _W.FAILED,
+    OperationState.OUTCOME_UNKNOWN: _W.COULD_NOT_VERIFY,
     OperationState.BLOCKED_POLICY: _W.REFUSED,
     OperationState.BLOCKED_UNSAFE: _W.REFUSED,
 }
@@ -218,6 +219,7 @@ KNOWLEDGE: dict[KnowledgeOperationStatus, OwnerWorkStatus] = {
 DECISION: dict[DecisionStatus, OwnerWorkStatus] = {
     DecisionStatus.OPEN: _W.WAITING_ON_YOU,
     DecisionStatus.APPROVED: _W.DONE,
+    DecisionStatus.ANSWERED: _W.DONE,
     DecisionStatus.REJECTED: _W.REFUSED,
     DecisionStatus.EXPIRED: _W.STOPPED,
 }
@@ -267,6 +269,14 @@ def project(vocabulary: str, status: object) -> OwnerWorkStatus:
     if table is None:
         return OwnerWorkStatus.UNKNOWN
     return table.get(status, OwnerWorkStatus.UNKNOWN)
+
+
+def qualified_outcome(status: OwnerWorkStatus, summary: str | None, *, finished: bool) -> str:
+    """A subsystem's result claim cannot replace its actual verification verdict."""
+    sentence = SENTENCE[status]
+    if finished and isinstance(summary, str) and summary.strip():
+        return summary if status == OwnerWorkStatus.DONE else f"{sentence}. Reported result: {summary}"
+    return sentence
 
 
 def describe(vocabulary: str, status: object) -> dict[str, object]:

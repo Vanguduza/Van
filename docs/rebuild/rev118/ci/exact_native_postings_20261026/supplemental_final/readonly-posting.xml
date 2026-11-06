@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="3.040" timestamp="2026-10-26T18:11:51.018955+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_financial_movement_runtime" name="test_projection_failure_preserves_native_facts_and_owner_read_never_writes" time="0.155"><failure message="AssertionError: assert ('UNAVAILABLE' == 'PENDING'&#10;  &#10;  - PENDING&#10;  + UNAVAILABLE)">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-482/test_projection_failure_preser0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7f61fa16bcb0&gt;
+
+    def test_projection_failure_preserves_native_facts_and_owner_read_never_writes(tmp_path,monkeypatch):
+        ledger,transport,adapter=setup(tmp_path)
+        with closing(ledger):
+            with monkeypatch.context() as patch:
+                patch.setattr(FinancialMovementBook,'materialize',lambda *_:(_ for _ in ()).throw(UnitError('fixture-private-note')))
+                result=capture_funding(ledger,adapter,adapter.sync_account(),now_ms=3000)
+            assert result['state']=='OBSERVED' and result['financial_movements']['state']=='UNAVAILABLE'
+            assert 'fixture-private-note' not in str(result)
+            snapshot(ledger,funding_observation=result);before=ledger.head(),ledger.count()
+            projection=account_states(ledger,[profile()])[0]['funding']['financial_movements']
+&gt;           assert projection['state']=='PENDING' and projection['pending_count']==1
+E           AssertionError: assert ('UNAVAILABLE' == 'PENDING'
+E             
+E             - PENDING
+E             + UNAVAILABLE)
+
+trading/tests/test_financial_movement_runtime.py:70: AssertionError</failure></testcase></testsuite></testsuites>

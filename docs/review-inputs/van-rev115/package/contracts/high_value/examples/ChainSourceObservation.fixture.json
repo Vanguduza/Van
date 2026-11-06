@@ -1,0 +1,30 @@
+{
+  "actual_provider_receipt_ref": null,
+  "available_at": "2026-10-17T10:00:00Z",
+  "cursor": "fixture:cursor:1",
+  "decision_cutoff": "2026-10-17T10:01:00Z",
+  "endpoint_capability": "READ_STATE",
+  "entitlement_state": "UNVERIFIED",
+  "expires_at": "2026-10-17T10:05:00Z",
+  "implementation_evidence_level": "SPEC_ONLY",
+  "new_purchase_required": false,
+  "observed_at": "2026-10-17T09:59:50Z",
+  "payload_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "provider": "SYNTHETIC_PROVIDER",
+  "reality": "SYNTHETIC",
+  "record_id": "fixture:ChainSourceObservation:1",
+  "research_source_class": "SYNTHETIC",
+  "schema_version": "1.0",
+  "source_published_at": "2026-10-17T09:59:40Z",
+  "source_refs": [
+    "fixture:controlled-input-only"
+  ],
+  "state_anchor": {
+    "chain_id": "eip155:8453",
+    "finality": "FINALIZED",
+    "hash": "synthetic-block-100",
+    "height": 100,
+    "state_epoch": 1
+  },
+  "trade_authorized": false
+}

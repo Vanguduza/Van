@@ -1,0 +1,14 @@
+{
+  "status": "SOURCE_IMPLEMENTED_WITH_BOUNDED_STATIC_IN_MEMORY_VALIDATION",
+  "current_R5_non_sensitive_memory_checks": 14,
+  "historical_R4_memory_reference_separate": 1,
+  "reviewer_current_test_or_probe_executions": 0,
+  "post_R5_feature_native_provider_integration": "UNEXECUTED_OPEN",
+  "prior_R4_source_results": "138exec/57distinct PRIORREV ONLY",
+  "historical_R4_independent": "2PASS1FAIL before automated content flag; preserved original receipt/raw; no retry/rephrase/relocation",
+  "initial_safe_selector_failure": "preserved;zero passes claimed",
+  "new_head_CI": null,
+  "unit_exit_established": false,
+  "model_cost": null,
+  "blocked_time": null
+}

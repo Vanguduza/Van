@@ -1,0 +1,7 @@
+{
+  "decision": "Root confirmed current lawful caller and historical target issuer are distinct; protective cleanup remains allowed for expired, revoked-source and corrupt/unverified target rows.",
+  "prevented_narrowing": "Provisional target issuer == caller and target expiry refusal were implementation mistakes, not canonical expectations. They are removed before freeze.",
+  "earlier_control_limits": "FOCUSED_01/02/03 and RECOVERY_01 are historical provisional controls; their cross-device-denial/target-expiry oracles are superseded, not evidence for final owner policy.",
+  "separation": "Current caller proof and request deadline authorize this operation. Target source validity controls use and effective ceiling. Target generation/digest/CAS prevent retargeting. Tampered original operation receipt remains unrecoverable with forensic data retained.",
+  "accounting_correction": "Root confirmed generation-only CAS; legitimate admission increments do not stale protective withdrawal. Previous usecount-stale refusal expectation superseded/not canonical. Accounting is separately reconciled and preserved atomically."
+}

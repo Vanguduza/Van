@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="26" time="1.237" timestamp="2026-10-26T08:13:51.128491+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_native_bar_windows" name="test_window_pins_actual_bar_vintages_and_keeps_unavailable_native_fields" time="0.060" /><testcase classname="trading.tests.test_native_bar_windows" name="test_same_millisecond_future_correction_cannot_change_pinned_original_window" time="0.039" /><testcase classname="trading.tests.test_native_bar_windows" name="test_late_capture_is_not_visible_before_its_local_availability" time="0.037" /><testcase classname="trading.tests.test_native_bar_windows" name="test_same_ticker_from_other_native_scope_cannot_supply_a_boundary[account_id-999]" time="0.026"><failure message="Failed: DID NOT RAISE NativeArchiveError">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-343/test_same_ticker_from_other_na0')
+field = 'account_id', value = 999
+
+    @pytest.mark.parametrize('field,value',[('account_id',999),('transport_host','live.ctraderapi.com'),
+        ('light',{'symbolId':13,'symbolName':'EUR/USD','enabled':True})])
+    def test_same_ticker_from_other_native_scope_cannot_supply_a_boundary(tmp_path,field,value):
+        book,c,sample,first=original(tmp_path);change={field:value}
+        if field=='light':change['detail']=dict(c.metadata['detail'],symbolId=13)
+        other=contract(**change);second=book.record('other-native-scope',other,replace(observation(other),has_more=False))
+&gt;       with pytest.raises(NativeArchiveError,match='BOUNDARY_CONFLICT'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE NativeArchiveError
+
+trading/tests/test_native_bar_windows.py:63: Failed</failure></testcase><testcase classname="trading.tests.test_native_bar_windows" name="test_same_ticker_from_other_native_scope_cannot_supply_a_boundary[transport_host-live.ctraderapi.com]" time="0.030"><failure message="Failed: DID NOT RAISE NativeArchiveError">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-343/test_same_ticker_from_other_na1')
+field = 'transport_host', value = 'live.ctraderapi.com'
+
+    @pytest.mark.parametrize('field,value',[('account_id',999),('transport_host','live.ctraderapi.com'),
+        ('light',{'symbolId':13,'symbolName':'EUR/USD','enabled':True})])
+    def test_same_ticker_from_other_native_scope_cannot_supply_a_boundary(tmp_path,field,value):
+        book,c,sample,first=original(tmp_path);change={field:value}
+        if field=='light':change['detail']=dict(c.metadata['detail'],symbolId=13)
+        other=contract(**change);second=book.record('other-native-scope',other,replace(observation(other),has_more=False))
+&gt;       with pytest.raises(NativeArchiveError,match='BOUNDARY_CONFLICT'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE NativeArchiveError
+
+trading/tests/test_native_bar_windows.py:63: Failed</failure></testcase><testcase classname="trading.tests.test_native_bar_windows" name="test_same_ticker_from_other_native_scope_cannot_supply_a_boundary[light-value2]" time="0.027"><failure message="Failed: DID NOT RAISE NativeArchiveError">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-343/test_same_ticker_from_other_na2')
+field = 'light'
+value = {'symbolId': 13, 'symbolName': 'EUR/USD', 'enabled': True}
+
+    @pytest.mark.parametrize('field,value',[('account_id',999),('transport_host','live.ctraderapi.com'),
+        ('light',{'symbolId':13,'symbolName':'EUR/USD','enabled':True})])
+    def test_same_ticker_from_other_native_scope_cannot_supply_a_boundary(tmp_path,field,value):
+        book,c,sample,first=original(tmp_path);change={field:value}
+        if field=='light':change['detail']=dict(c.metadata['detail'],symbolId=13)
+        other=contract(**change);second=book.record('other-native-scope',other,replace(observation(other),has_more=False))
+&gt;       with pytest.raises(NativeArchiveError,match='BOUNDARY_CONFLICT'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE NativeArchiveError
+
+trading/tests/test_native_bar_windows.py:63: Failed</failure></testcase><testcase classname="trading.tests.test_native_bar_windows" name="test_contract_metadata_revision_remains_exact_in_past_source_membership" time="0.032" /><testcase classname="trading.tests.test_native_bar_windows" name="test_pagination_cannot_be_relabelled_complete_dataset_coverage[True-INCOMPLETE_NATIVE_PAGE]" time="0.016" /><testcase classname="trading.tests.test_native_bar_windows" name="test_pagination_cannot_be_relabelled_complete_dataset_coverage[None-PAGINATION_UNAVAILABLE]" time="0.019" /><testcase classname="trading.tests.test_native_bar_windows" name="test_query_boundary_keeps_only_whole_bars_and_declares_excluded_intervals" time="0.018" /><testcase classname="trading.tests.test_native_bar_windows" name="test_empty_original_stays_in_lineage_without_invented_zero_bars" time="0.015" /><testcase classname="trading.tests.test_native_bar_windows" name="test_resource_limit_refuses_instead_of_truncating_source_membership[budget0]" time="0.027" /><testcase classname="trading.tests.test_native_bar_windows" name="test_resource_limit_refuses_instead_of_truncating_source_membership[budget1]" time="0.028" /><testcase classname="trading.tests.test_native_bar_windows" name="test_resource_limit_refuses_instead_of_truncating_source_membership[budget2]" time="0.036" /><testcase classname="trading.tests.test_native_bar_windows" name="test_unknown_revision_scope_clock_or_interval_never_becomes_empty_success[changes0]" time="0.018" /><testcase classname="trading.tests.test_native_bar_windows" name="test_unknown_revision_scope_clock_or_interval_never_becomes_empty_success[changes1]" time="0.017" /><testcase classname="trading.tests.test_native_bar_windows" name="test_unknown_revision_scope_clock_or_interval_never_becomes_empty_success[changes2]" time="0.015"><failure message="Failed: DID NOT RAISE NativeArchiveError">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-343/test_unknown_revision_scope_cl2')
+changes = {'boundary_ref': 'ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'}
+
+    @pytest.mark.parametrize('changes',[{'through_revision':True},{'through_revision':2},{'boundary_ref':'f'*64},
+        {'as_of_ms':400001},{'from_ms':True},{'to_ms':120000}])
+    def test_unknown_revision_scope_clock_or_interval_never_becomes_empty_success(tmp_path,changes):
+        book,c,sample,first=original(tmp_path)
+&gt;       with pytest.raises(NativeArchiveError):capture(book,c,first,**changes)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE NativeArchiveError
+
+trading/tests/test_native_bar_windows.py:113: Failed</failure></testcase><testcase classname="trading.tests.test_native_bar_windows" name="test_unknown_revision_scope_clock_or_interval_never_becomes_empty_success[changes3]" time="0.012" /><testcase classname="trading.tests.test_native_bar_windows" name="test_unknown_revision_scope_clock_or_interval_never_becomes_empty_success[changes4]" time="0.021" /><testcase classname="trading.tests.test_native_bar_windows" name="test_unknown_revision_scope_clock_or_interval_never_becomes_empty_success[changes5]" time="0.011" /><testcase classname="trading.tests.test_native_bar_windows" name="test_missing_derived_index_requires_original_reconciliation" time="0.025" /><testcase classname="trading.tests.test_native_bar_windows" name="test_corrupt_original_cannot_be_overridden_by_a_self_consistent_client_hash" time="0.019" /><testcase classname="trading.tests.test_native_bar_windows" name="test_source_window_cannot_self_grant_research_or_execution[authority_effect-ORDER]" time="0.022" /><testcase classname="trading.tests.test_native_bar_windows" name="test_source_window_cannot_self_grant_research_or_execution[provider_qualified-True]" time="0.024" /><testcase classname="trading.tests.test_native_bar_windows" name="test_source_window_cannot_self_grant_research_or_execution[qualified_for_research-True]" time="0.018" /><testcase classname="trading.tests.test_native_bar_windows" name="test_disabled_instrument_cannot_be_constructed_as_an_execution_contract" time="0.002" /></testsuite></testsuites>

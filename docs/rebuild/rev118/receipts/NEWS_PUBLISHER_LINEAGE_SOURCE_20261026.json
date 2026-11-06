@@ -1,0 +1,38 @@
+{
+  "schema": "van.rebuild.news-publisher-lineage-source/1",
+  "status": "SOURCE_TESTED_COMPONENT_NOT_UNIT_ACCEPTANCE",
+  "base_head": "752d265b11ba643ed309481b110248f8b7fe323b",
+  "updated_at_utc": "2026-10-26T02:01:26.332512+00:00",
+  "source_sha256": {
+    "trading/vati/core/events.py": "24f6e824d633179f31f5788fd0ac32c05f2b256adc9119a9b177235028fd3c20",
+    "trading/vati/events/news_ingress.py": "cac1d1f97a8ea437b307348ab8b3be88d5bfe326a8678085478216222ba8b8ad",
+    "trading/vati/events/news_lineage.py": "bdfe8926f14d1927393fec58ee3b9a466b5756e547e2a9b38f2e4904005a1718",
+    "trading/tests/test_news_publisher_lineage.py": "2d483894d2babcffd8bfe13bb03c4e8e82c2cdf4635989406f1608e687a8a9f8"
+  },
+  "executed": {
+    "baseline": "11 actual existing-API failures: publisher declarations discarded",
+    "follow_up": "2 failures: backdated enrichment and absent required-origin recovery marker;17 controls",
+    "orphan": "1 actual cold replay failure: orphan lineage could recreate missing headline/observation;35 deselected",
+    "harness": "First integration129pass/4PGskips plus1 child import failure because command omitted PYTHONPATH; corrected environment, assertions preserved. Evidence-reader KeyError used violations instead of actual forbidden_events; reader fixed before qualified fixture launch",
+    "earlier_snapshots": "729 and733 actual isolated PostgreSQL passes on prior source/test snapshots; no claim they pin final bytes",
+    "final_postgres": "734pass/0skip/audit0/exact final source+test hashes; isolated pinned PostgreSQL;owned fixture removed;pytestexit0",
+    "final_controls": "153pass/0skip;6 PostgreSQL cases explicitly deselected locally and executed in final fixture",
+    "supplemental_faults": "8 assertion-caught/0 setup errors/skips/audit violations;exact source restored;separate from canonical374",
+    "rebuild": "108 passed after final source and continuation updates",
+    "contracts": "Owner/frontend source contracts no drift;canonical mutation preflight374cases/383edits/0findings,not execution;consolidation0findings"
+  },
+  "evidence": "ci/news_lineage_20261026",
+  "qualification": {
+    "publisher_identity": "DECLARED_NOT_VERIFIED",
+    "qualified_independent_sources": 0,
+    "provider_qualified": false,
+    "native_clock_qualified": false,
+    "authority_effect": "NONE"
+  },
+  "remaining": [
+    "Official-feed parsing/raw capture and scheduled-value semantic crosschecking",
+    "Qualified publisher/source/entitlement/clock/consumer admission;OQ06 procurement open",
+    "No host memory/interruptible I/O/capacity/latency qualification",
+    "No unit/independent/owner/F15/BG001/economic/production/S24 acceptance"
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "aggregate_input_digest": "f441c87b44ac0fd8f6eeb971bbcff4d7cfe801399d0c52b29311948d902f24ff",
+  "inputs": {
+    "CANONICAL_AUTHORITY.json": "0c4baf531afb4757c664e5b9b17add6901d929c77fb342f9546df4e1f4c19e66",
+    "contracts/BACKEND_SERVICE_CATALOG.json": "20b7b54c6cfa52dfd71723b521dde5da84634286b69fd0db281f90fa714dc855",
+    "design/ALL_SURFACE_CONTRACTS.json": "591377771234ec32402626bbf817a210038136138dc1e4b85d204fe838ae05f0",
+    "plan/DEVELOPMENT_PLAN.json": "a732f7a28c0aa7cae3cbce055e6e861a31fb4e6ee293cc6efded7a62df51b94e",
+    "plan/PROPOSED_SCOPE_LOCK.json": "22d4d51ba522fc29e0ee8b67fa84712e109125a2d20200d0cc1c17e7c967afc9",
+    "plan/render_plan.py": "79c0c189836ed70d8b40164accacf97a7be7022ea82b0bcfc09a8a7d58bfda68",
+    "traceability/FORECAST_PACKET_CROSSWALK.json": "135e1690f920427a9e79c1554064ed3a30b29a3af50825b388adccb4f66858b5",
+    "traceability/LEGACY_349_ACTIONS.json": "4fe9dd0b7050203e0cac8a479c0a21993b890082aed15b28ab85250410c7830d",
+    "traceability/REQUIREMENTS_AND_DU_MAPPING.json": "e999f3ca85b3bf4ca6a700d09d8225cf85d983472a436f5c9053f583e976fa7a",
+    "verification/TEST_CONTRACTS.json": "064a1198b47353a76e7acfd0e7767b27c26ce09abd4c4b28395ae0891d4fa10a"
+  },
+  "rendered_plan_sha256": "9e1f2b380bc0681ca58162f19069eba009bbf390489ddccea3b69c573bee4e8d",
+  "schema": "van.canonical.plan.provenance/1.0",
+  "scope": "Deterministic document identity only; not owner signature or F15"
+}

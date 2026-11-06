@@ -1,0 +1,18 @@
+{
+  "suite": "contracts",
+  "command": [
+    "/workspace/.onboarding/van-venv/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "tests/contracts"
+  ],
+  "cwd": "/workspace/Van",
+  "started_at_utc": "2026-10-07T11:31:20.420954+00:00",
+  "finished_at_utc": "2026-10-07T11:32:31.676678+00:00",
+  "exit_code": 0,
+  "input_files": 833,
+  "source_unchanged": true,
+  "changed_inputs": [],
+  "live_device_executed": false
+}

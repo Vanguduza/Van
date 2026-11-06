@@ -1,0 +1,10 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+__ test_scan_quota_is_atomic_and_survives_service_restart_and_clock_rollback ___
+backend/tests/test_market_monitor_runtime.py:158: in test_scan_quota_is_atomic_and_survives_service_restart_and_clock_rollback
+    with pytest.raises(MonitorError, match='MONITOR_SCAN_QUOTA_REACHED'):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE MonitorError
+=========================== short test summary info ============================
+FAILED backend/tests/test_market_monitor_runtime.py::test_scan_quota_is_atomic_and_survives_service_restart_and_clock_rollback
+1 failed in 0.29s

@@ -1,0 +1,24 @@
+{
+  "command": [
+    "env",
+    "PYTHONPATH=backend:backend/tests:trading:trading/tests:.",
+    "DIAL_REPO=/workspace/van-review-2026-10-18/dial-development-system",
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "tools/rebuild/source_storage_audit.py",
+    "--report",
+    "/workspace/van-risk-arithmetic-rebuild-audit-20261027.json",
+    "tests/rebuild",
+    "tests/contracts/test_van_private_core_topology.py",
+    "--junitxml=/workspace/van-risk-arithmetic-rebuild-20261027.xml",
+    "-q"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 1046883,
+  "started_at_utc": "2026-10-27T06:13:06.098253+00:00",
+  "timeout_seconds": 600,
+  "state": "COMPLETED",
+  "command_pid": 1046884,
+  "exit": 0,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-27T06:16:16.343849+00:00"
+}

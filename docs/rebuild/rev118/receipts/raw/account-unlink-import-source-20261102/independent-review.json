@@ -1,0 +1,245 @@
+{
+  "disposition": "NO_BLOCKING_FINDING_NARROW_IMPORT4_AND_DERIVED_MAPPING_REVIEW",
+  "source4": {
+    "trading/tests/test_account_unlink_currentness.py": "aae58de4d30a746c783fbb9d76b5675174501aff8ddb303829c4f6c52d585e0f",
+    "backend/tests/test_account_unlink_review.py": "8b0412a56980c1c5cbbc12af45217fb41e839ef698b06507837a067919d14fba",
+    "backend/tests/test_account_update_review.py": "eaa45b4b612213b74783d8e951fb02d42400f56037ae4b8c67bb2769a20c704f",
+    "backend/tests/test_trading_oauth_scope.py": "54267a0f3e82d51c10395defffeb579e4b094009449f42e3c0a3757b3d111920"
+  },
+  "source4_patch_sha256": "2e862113aa7c2cfbeb6dd14d371a9e907c0bfa0d2b870f4bca6871f7ee3e23d9",
+  "source4_zip_sha256": "05c65ba04e03b787a390ed45333be73501b0f3ed0023d3554f86022559abb1bd",
+  "source4_AST": "All161 assertions AND all non-import AST exact after only declared ImportFrom module qualifications. Fixture definitions/childscript/args/timeouts/skips untouched, no copiedhelper/sys.modules aliases.",
+  "label9_unchanged": {
+    "trading/vati/funding/classification_journal.py": "59c7f1b9b8a1b1dd4fb416319655d43fcc938fdcb7df006aad9ffa4258d75beb",
+    "backend/van_gateway/trading/funding_classification_api.py": "b306abaacc9bf625333e50bc80487bd9d02e4801b8e3bab976e28b8908b62f7f",
+    "trading/tests/test_funding_classification_journal.py": "3b25920ce903b021923f7030995d649b258f6d5a71d00784aaff7e58a170943d",
+    "backend/tests/test_funding_classification_api.py": "70daa49eaee117c8342d546bef0e531ae612f6e00f490519b461530ef1c87f38",
+    "backend/tests/test_funding_classification_authority.py": "b4787821b263b04feabaf44cc50553dfda714ee4d056578c8b5d1b8185b55d77",
+    "trading/vati/funding/runtime.py": "f12a4ba303b40cc77415ce5a3d760690a3bef737f665ff6ef4cc6ce14aec5efc",
+    "trading/vati/core/events.py": "31480e73e4f067b0e980e592e5527a6a943aea6f634775914fe880c485bafd3a",
+    "backend/van_gateway/app.py": "53ddf7e582e30feff0dd823ec57a7d725d686deeb2a0626759a64abf9db08328",
+    "backend/van_gateway/context/forget.py": "73ab8c429419ce1c5aae4911a602586d0cdc3427b1a2b6fa17d4b81d9cae2784"
+  },
+  "other_published_batch": "Two intentional import-only test exceptions in published8; native production/waitfix and other6 remain exact. No unlink/cancel/product change accepted here.",
+  "independent_actual": {
+    "real_PG_owner_PYTHONPATH": "/workspace/van-review-2026-10-18/publish/backend:/workspace/van-review-2026-10-18/publish/trading:/workspace/van-review-2026-10-18/publish",
+    "qualification": "Absolute equivalents of backend:trading:. only; no backend/tests fallback. Native PostgreSQL not executed.",
+    "collection": "Two exact target nodes collect in identical ordered identity under root/backend cwd, collection only.",
+    "runtime_PASS_executions": 4,
+    "runtime_unique_case_ids": 2,
+    "per_cwd_PASS": 2,
+    "skip": 0,
+    "all4_commands_exit0": true,
+    "cases": [
+      [
+        "trading.tests.test_account_unlink_currentness",
+        "test_actual_registered_unlink_rechecks_current_envelope_at_writer_and_retains_original_history[healthy_cached]"
+      ],
+      [
+        "backend.tests.test_account_update_review",
+        "test_exact_native_before_after_is_signed_and_applied_without_losing_connection"
+      ]
+    ],
+    "receipt": "/tmp/van-label-import-review-vf3ou8d5/terminal.json",
+    "receipt_sha256": "3025472e8d203a93166ca173b29e991f43a312720dd076455713d636bcc9c20f",
+    "runs": [
+      {
+        "tag": "root-collect",
+        "command": [
+          "/workspace/van-backend-venv-20261025/bin/python",
+          "-B",
+          "-m",
+          "pytest",
+          "/workspace/van-review-2026-10-18/publish/trading/tests/test_account_unlink_currentness.py::test_actual_registered_unlink_rechecks_current_envelope_at_writer_and_retains_original_history[healthy_cached]",
+          "/workspace/van-review-2026-10-18/publish/backend/tests/test_account_update_review.py::test_exact_native_before_after_is_signed_and_applied_without_losing_connection",
+          "--rootdir=/workspace/van-review-2026-10-18/publish",
+          "-c",
+          "/workspace/van-review-2026-10-18/publish/pytest.ini",
+          "-p",
+          "pytest_asyncio.plugin",
+          "-p",
+          "anyio.pytest_plugin",
+          "-p",
+          "no:cacheprovider",
+          "-o",
+          "asyncio_mode=auto",
+          "-q",
+          "--basetemp=/tmp/van-label-import-review-vf3ou8d5/root-collect/fixtures",
+          "--junitxml=/tmp/van-label-import-review-vf3ou8d5/root-collect/junit.xml",
+          "--collect-only"
+        ],
+        "cwd": "/workspace/van-review-2026-10-18/publish",
+        "exit": 0,
+        "seconds": 3.4573259353637695,
+        "limit_reason": null,
+        "group_absent": true,
+        "root": "/tmp/van-label-import-review-vf3ou8d5/root-collect"
+      },
+      {
+        "tag": "root-runtime",
+        "command": [
+          "/workspace/van-backend-venv-20261025/bin/python",
+          "-B",
+          "-m",
+          "pytest",
+          "/workspace/van-review-2026-10-18/publish/trading/tests/test_account_unlink_currentness.py::test_actual_registered_unlink_rechecks_current_envelope_at_writer_and_retains_original_history[healthy_cached]",
+          "/workspace/van-review-2026-10-18/publish/backend/tests/test_account_update_review.py::test_exact_native_before_after_is_signed_and_applied_without_losing_connection",
+          "--rootdir=/workspace/van-review-2026-10-18/publish",
+          "-c",
+          "/workspace/van-review-2026-10-18/publish/pytest.ini",
+          "-p",
+          "pytest_asyncio.plugin",
+          "-p",
+          "anyio.pytest_plugin",
+          "-p",
+          "no:cacheprovider",
+          "-o",
+          "asyncio_mode=auto",
+          "-q",
+          "--basetemp=/tmp/van-label-import-review-vf3ou8d5/root-runtime/fixtures",
+          "--junitxml=/tmp/van-label-import-review-vf3ou8d5/root-runtime/junit.xml"
+        ],
+        "cwd": "/workspace/van-review-2026-10-18/publish",
+        "exit": 0,
+        "seconds": 7.984142065048218,
+        "limit_reason": null,
+        "group_absent": true,
+        "root": "/tmp/van-label-import-review-vf3ou8d5/root-runtime"
+      },
+      {
+        "tag": "backend-collect",
+        "command": [
+          "/workspace/van-backend-venv-20261025/bin/python",
+          "-B",
+          "-m",
+          "pytest",
+          "/workspace/van-review-2026-10-18/publish/trading/tests/test_account_unlink_currentness.py::test_actual_registered_unlink_rechecks_current_envelope_at_writer_and_retains_original_history[healthy_cached]",
+          "/workspace/van-review-2026-10-18/publish/backend/tests/test_account_update_review.py::test_exact_native_before_after_is_signed_and_applied_without_losing_connection",
+          "--rootdir=/workspace/van-review-2026-10-18/publish",
+          "-c",
+          "/workspace/van-review-2026-10-18/publish/pytest.ini",
+          "-p",
+          "pytest_asyncio.plugin",
+          "-p",
+          "anyio.pytest_plugin",
+          "-p",
+          "no:cacheprovider",
+          "-o",
+          "asyncio_mode=auto",
+          "-q",
+          "--basetemp=/tmp/van-label-import-review-vf3ou8d5/backend-collect/fixtures",
+          "--junitxml=/tmp/van-label-import-review-vf3ou8d5/backend-collect/junit.xml",
+          "--collect-only"
+        ],
+        "cwd": "/workspace/van-review-2026-10-18/publish/backend",
+        "exit": 0,
+        "seconds": 3.1070539951324463,
+        "limit_reason": null,
+        "group_absent": true,
+        "root": "/tmp/van-label-import-review-vf3ou8d5/backend-collect"
+      },
+      {
+        "tag": "backend-runtime",
+        "command": [
+          "/workspace/van-backend-venv-20261025/bin/python",
+          "-B",
+          "-m",
+          "pytest",
+          "/workspace/van-review-2026-10-18/publish/trading/tests/test_account_unlink_currentness.py::test_actual_registered_unlink_rechecks_current_envelope_at_writer_and_retains_original_history[healthy_cached]",
+          "/workspace/van-review-2026-10-18/publish/backend/tests/test_account_update_review.py::test_exact_native_before_after_is_signed_and_applied_without_losing_connection",
+          "--rootdir=/workspace/van-review-2026-10-18/publish",
+          "-c",
+          "/workspace/van-review-2026-10-18/publish/pytest.ini",
+          "-p",
+          "pytest_asyncio.plugin",
+          "-p",
+          "anyio.pytest_plugin",
+          "-p",
+          "no:cacheprovider",
+          "-o",
+          "asyncio_mode=auto",
+          "-q",
+          "--basetemp=/tmp/van-label-import-review-vf3ou8d5/backend-runtime/fixtures",
+          "--junitxml=/tmp/van-label-import-review-vf3ou8d5/backend-runtime/junit.xml"
+        ],
+        "cwd": "/workspace/van-review-2026-10-18/publish/backend",
+        "exit": 0,
+        "seconds": 10.875330924987793,
+        "limit_reason": null,
+        "group_absent": true,
+        "root": "/tmp/van-label-import-review-vf3ou8d5/backend-runtime"
+      }
+    ],
+    "retained_bytes": 8352030,
+    "fixture_cap": 16777216,
+    "retention": "All corrected-run cold fixtures/raw/XML retained with per-member SHA256/CRC32/owner/mode inventory. Child commands waited/group absent.",
+    "initial_failed_attempt": "/tmp/van-label-import-review-tzvze0si/FAILURE_RECEIPT.json: initial owncontroller incorrectly imposed2MiB filecap, rootcollect2IDs succeeded then2SQLitemigration setupI/O errors, remaining commandsUNEXECUTED. Error likely transientWAL/filecap. Identical source/targets with requestedstandard8MiB cap thenpass bothcwd. Failedraw/XML/colddata+exactinventory retained; not productfault/green/nativeproof."
+  },
+  "derived_mapping": {
+    "pins_generator_plus6_outputs": {
+      "tools/rebuild/refresh_owner_source_contracts.py": "0fbc3c6b8cec9526ec847451cf172a5c0102bea538004fba686c9e13a3dd0165",
+      "registries/owner_endpoints.json": "656ed4bb6b9134b75f1b4ff99ec5c77a4b4a8e8137e6c144ca192ce93d06ef5b",
+      "registries/owner_endpoint_schemas.json": "6ebe5ba01b79b7ba1c44c989e569df751964f34a54819566c319d8cba3c1f4c6",
+      "registries/owner_features.json": "f43873bd540c92124a243d3bcc2e2173feddcb54bf75e3b3b1a9353c8991c70f",
+      "registries/owner_screens.json": "beb40237c918238b8c5c4076140fba9f81bd7ff6df397ea62ceb8a059dff464a",
+      "docs/rebuild/rev118/backend/OWNER_REGISTRY_SOURCE_REFRESH_20261022.json": "7765f2d19951e07ada80ff293a81fff0d29018b262c29f242927331e4e289c09",
+      "docs/rebuild/rev118/backend/OWNER_REGISTRY_GENERATION.json": "fdbaf75dbe28bbc4b8f410ce3bcfc2fec49e94fb79430ac8045fce52d4d8d7af"
+    },
+    "extra_frontend_and_proposal_artifacts": {
+      "docs/rebuild/rev118/backend/OWNER_FRONTEND_SCREEN_REGISTRY.md": "7367e37ca36971733bc73f9299677cd614dc820cf7682f220493c01814f2f40c",
+      "docs/rebuild/rev118/BE006_CLASSIFICATION_CATALOG_PROPOSAL_20261102.json": "23e730351b5741ee66473a76094aa9596a0c430a3330c3f327a630dbd30a8b15"
+    },
+    "literal_generator_delta": "Exactly15line annotation extension in build(); entire original generator bytes inclapproved_preimage/HEADgeneration/outputallowlist/writeguard unchanged. No guard relaxation; genuine --check exit0 readonly/no outputmutations independentlyverified.",
+    "owner_id_correction": "ACTUAL existing OF-TRADING-003 Trading account setup and controlled actions, screens accounts/add; new extensions only003+van.trading.accounts. Rootconfirmed initial001taskmetadata mistaken. No overview/portfolio/risk001 mapping added. Writer notified to useactual003inuncommitteddocs/receipts.",
+    "scope": "Two actual classificationroutes only, BE006/\u00a77.9.5/VNX-F-ACCOUNTS-15; NONFINANCIAL_OWNER_STATE_ASSERTION_ONLY_NO_NATIVE_MONEY_OR_RISK_AUTHORITY; new_ui=false/live_qualified=false. Catalog PROPOSED_NOT_ADMITTED/newactionidnull/Android absent, frozen349 notissued. Actual endpointfields preserve POSTboundproof vsGETlawfulread distinction.",
+    "old_contracts": {
+      "old491_semantics_exact": true,
+      "now493": true,
+      "source_citation_moves": 134
+    },
+    "schemas": {
+      "old393_exact": true,
+      "now394_only_LabelInput": true
+    },
+    "old_feature_screen_identity_order_preserved": true,
+    "authorization": "Existing derivedsource refresher writes only4registries+2derived receipts under immutableapprovedpreimage/committedgeneration guard; inventoryqualification explicitly no owner/native/admission signature. Source-specific annotation binding is metadata, not a new LAC/issuer/payment/A4right.",
+    "genuine_export_history": "Initial own-dirty6 refusal preserved; writer restored only own6derivedoutputs toHEAD and genuine exporter reapplied. --checknowexact. No sourceguardweaken/selfissued admission inferred."
+  },
+  "preserved_author_evidence": {
+    "collection5799": {
+      "ordered_ids_equal_bothcwd": true,
+      "qualification": "COLLECTION_ONLY not5799passed"
+    },
+    "runtime": {
+      "PASS_executions": 12,
+      "unique_ids": 6,
+      "per_cwd": 6,
+      "audits": 0
+    },
+    "controller_cleanup_error": "Original AFTERcontroller exit1 duefinalcleanupfilename collision is retained, not relabeled0. All4subcommands0/JUnit/audits verified; unique cleanup supplement memberhashes/absence checked; no testrepeatclaimed.",
+    "semantic220": {
+      "executed_PASS": 220,
+      "skip": 0,
+      "receipt_sha256": "3c376d8ffd4b7424c03bef5e7d8652d2c8d075db44e237acce1ce2cb1b924a0e",
+      "JUnit_sha256": "b81bf8296d4ab2e8f2286400a8d4893c1965cebe02552de93a37163381d09eab",
+      "raw_sha256": "ad5d0a553bc4afb196c0653f8599eaf72fa86f80a9b7bfa29b4c00844c37408a",
+      "audit_sha256": "f159c056ef876b2852e522cf92ac940143fb1b43cf2b480fbad507dc745049bc",
+      "no_rerun_by_reviewer": true
+    },
+    "before": "Real exit2 bareunlinkowner +qualifiedtransitive exit1/test_trading_api preserved inoriginalraw; not import-only toy proof."
+  },
+  "limits": [
+    "Publishedc792 attempt remains FAILED/unqualified overall; initial26PGpasses do not qualify later fulltrading/currentimportrepair. Future exactheadhosted runtime required.",
+    "Kotlin0 GradleBOMconfiguration failure remains NOT_RUN assertions/mutations; no SDK/native claim.",
+    "Ownerlabel catalogamendment/Androidproducer/native/provider/PG/formalBE006/fullCI/S24/BG/intake/trustedbase gates remainOPEN.",
+    "No source/main/auth/hooks/canon/protected evidence edit/commit/push/CI/network/provider/nativefinancial/SDK effects or subagents by reviewer."
+  ],
+  "published_account_batch_other6_exact_HEAD": {
+    "trading/commander/accounts.py": "f12b42dfcf26c34a8328e34f95c70d964343a3909484ebf0b89a7a65d087ccc6",
+    "trading/commander/account_retirement.py": "b1894ad6407e17736241479794ebec494a03c039198de47ea94c2b4d5455c7dc",
+    "trading/commander/app.py": "1d0d614fbe867838abb01baefd4534fb65cb02724770354d15cfec807717ee98",
+    "trading/vati/accounts/registry.py": "6178715463eb89b33827d4dbd6cfe427ad9e65c2c00049caef0ec50633c74803",
+    "trading/tests/test_account_registry_atomic_rea.py": "be80eb54cab1adb6869b572eaccf31e92dc3710b7ad421310da72d9cc89ced73",
+    "backend/tests/test_stateful_link_binding.py": "63720c50d1ee5bba47bd6307a47a651ae96a778d0b32426e72b3ac5c7016a657"
+  }
+}

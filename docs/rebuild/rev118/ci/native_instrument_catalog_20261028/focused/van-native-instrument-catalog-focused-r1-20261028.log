@@ -1,0 +1,18 @@
+.........F.................                                              [100%]
+=================================== FAILURES ===================================
+_ test_readonly_existing_sqlite_reopens_original_without_schema_migration_or_writes _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-96/test_readonly_existing_sqlite_0')
+
+    def test_readonly_existing_sqlite_reopens_original_without_schema_migration_or_writes(tmp_path):
+        path=tmp_path/'source # original.sqlite';ledger=Ledger(path);store=NativeCatalogStore(ledger,clock=lambda:NOW+100)
+        receipt=store.record('original',captured());ledger.close();original=path.read_bytes()
+        reader=Ledger.open_read_only(path)
+        try:
+>           assert discover_instruments(NativeCatalogStore(reader),SCOPE)['receipt']==receipt
+E           AssertionError: assert None == {'record_ref': '61fe44a91061a520e33a9ac1b21708eab1a9862dd727c66577c1382a3b3711ac', 'revision': 1, 'request_id': 'origi...environment': 'DEMO', 'native_account_id': 12345, 'provider': 'CTRADER', 'transport_host': 'demo.ctraderapi.com'}, ...}
+
+trading/tests/test_instrument_catalog.py:103: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_instrument_catalog.py::test_readonly_existing_sqlite_reopens_original_without_schema_migration_or_writes
+1 failed, 26 passed, 9 deselected in 31.81s

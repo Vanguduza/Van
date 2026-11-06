@@ -1,0 +1,27 @@
+F.......                                                                 [100%]
+=================================== FAILURES ===================================
+____ test_original_receipt_fields_are_exact_not_a_related_success[change0] _____
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-18/test_original_receipt_fields_a0')
+change = {'revision': 3}
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize('change', [
+        {'revision':3}, {'revision':True}, {'request_id':'different'}, {'object_id':ALERT},
+        {'kind':'WATCHLIST'}, {'status':'RESTARTED'}, {'state_sha256':None}, {'authority_effect':'ORDER'},
+    ])
+    async def test_original_receipt_fields_are_exact_not_a_related_success(tmp_path,change):
+        s=await service(tmp_path); alert=await create_alert(s); ctx=await command(s,alert.object_id)
+        await AlertControlExecutor().execute(ctx)
+        row=await s.store.fetchone('SELECT result_json FROM market_monitor_operations WHERE request_id=?',(request_id(ctx.command_id),))
+        altered=json.loads(row['result_json']) | change
+        await s.store.execute('UPDATE market_monitor_operations SET result_json=? WHERE request_id=?',
+            (json.dumps(altered),request_id(ctx.command_id)))
+>       with pytest.raises(ValueError):await control_readback(s.store,ctx.command_id)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+backend/tests/test_market_monitor_commands.py:168: Failed
+=========================== short test summary info ============================
+FAILED backend/tests/test_market_monitor_commands.py::test_original_receipt_fields_are_exact_not_a_related_success[change0]
+1 failed, 7 passed in 4.29s

@@ -1,0 +1,111 @@
+{
+  "schema": "van.rebuild.hosted-browser-source/2",
+  "observed_at_utc": "2026-10-24T14:57:57.147191+00:00",
+  "source_head": "0ae8fe85e4d4026a226fcd11678d8bd2534a6f80",
+  "run_id": 40101905858,
+  "job_conclusion": "failure",
+  "reports": {
+    "report.xml": {
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "69546cb456e46953ec69d87b44840ec4f660e804cf0b36b24a990146fa6b4324"
+    },
+    "full-report.xml": {
+      "tests": 1543,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "sha256": "7d6053561b00e913e48f9dc3ebcb9ca1b05299547b871388876ec814c153e557"
+    },
+    "uid-report.xml": {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "75269cc093c91f298c0f8aede84992abec5cf5bfd563e5782e7e166abfe17095"
+    },
+    "firewall-report.xml": {
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "4a9033161defb88975caaa752c9fbac388b2ab790c00998186a5e137bade734d"
+    }
+  },
+  "source_files": [
+    "backend/tests/test_browser_action_plans.py",
+    "backend/tests/test_browser_api.py",
+    "backend/tests/test_browser_artifact_admission.py",
+    "backend/tests/test_browser_artifact_owner_http_e2e.py",
+    "backend/tests/test_browser_artifact_provider.py",
+    "backend/tests/test_browser_assignment_execution.py",
+    "backend/tests/test_browser_canary_origin.py",
+    "backend/tests/test_browser_completion_requires_verification.py",
+    "backend/tests/test_browser_egress_proxy.py",
+    "backend/tests/test_browser_egress_proxy_i8.py",
+    "backend/tests/test_browser_egress_proxy_i9.py",
+    "backend/tests/test_browser_escalation_boundary.py",
+    "backend/tests/test_browser_fabric.py",
+    "backend/tests/test_browser_flood_bounds.py",
+    "backend/tests/test_browser_guard_lost_regression.py",
+    "backend/tests/test_browser_i5_integration_g8.py",
+    "backend/tests/test_browser_injection_containment.py",
+    "backend/tests/test_browser_input_protocol.py",
+    "backend/tests/test_browser_interaction_router.py",
+    "backend/tests/test_browser_interactive_worker.py",
+    "backend/tests/test_browser_late_block_callers.py",
+    "backend/tests/test_browser_mission_binding_regression.py",
+    "backend/tests/test_browser_network_effect_guard.py",
+    "backend/tests/test_browser_network_guard_lease.py",
+    "backend/tests/test_browser_owner_command_e2e.py",
+    "backend/tests/test_browser_owner_file_grants.py",
+    "backend/tests/test_browser_owner_preemption.py",
+    "backend/tests/test_browser_producer_api.py",
+    "backend/tests/test_browser_quality_api.py",
+    "backend/tests/test_browser_repeated_owner_work.py",
+    "backend/tests/test_browser_review_i2_lifecycle.py",
+    "backend/tests/test_browser_review_i2_router.py",
+    "backend/tests/test_browser_review_i3.py",
+    "backend/tests/test_browser_review_i3_classifier.py",
+    "backend/tests/test_browser_review_i4_fail_safe_classifier.py",
+    "backend/tests/test_browser_review_i4_fence.py",
+    "backend/tests/test_browser_review_i5_fence.py",
+    "backend/tests/test_browser_review_i5_task_scope.py",
+    "backend/tests/test_browser_review_i6_scope.py",
+    "backend/tests/test_browser_sealed_resume.py",
+    "backend/tests/test_browser_semantic_worker.py",
+    "backend/tests/test_browser_subagent.py",
+    "backend/tests/test_browser_takeover_and_downloads.py",
+    "backend/tests/test_browser_task_preparation.py",
+    "backend/tests/test_browser_task_read_auth.py",
+    "backend/tests/test_browser_task_tombstones.py",
+    "backend/tests/test_harness_chromium_argv.py",
+    "backend/tests/test_harness_elements.py",
+    "backend/tests/test_harness_i5_redaction.py",
+    "backend/tests/test_harness_pseudo_hit_ownership.py"
+  ],
+  "storage_audits": {
+    "uid-storage-audit.json": {
+      "forbidden_events": [],
+      "sha256": "d39241159473775a99aa600d4288960764f9124ab964466a5715a95fcb0aeb64"
+    },
+    "storage-audit.json": {
+      "forbidden_events": [],
+      "sha256": "d39241159473775a99aa600d4288960764f9124ab964466a5715a95fcb0aeb64"
+    },
+    "full-storage-audit.json": {
+      "forbidden_events": [],
+      "sha256": "d39241159473775a99aa600d4288960764f9124ab964466a5715a95fcb0aeb64"
+    },
+    "firewall-storage-audit.json": {
+      "forbidden_events": [],
+      "sha256": "d39241159473775a99aa600d4288960764f9124ab964466a5715a95fcb0aeb64"
+    }
+  },
+  "archive_sha256": "1da135266a30215b2379eabb42b09e3926c09dcf44646161071f57e41a814682",
+  "failure": "Final coverage checker expected backend.tests module names, while actual pytest emits tests.*. All selected source cases executed; its only ordinary-run skip is the exact existing root UID case, executed successfully in the separate root fixture.",
+  "correction": "Checker matches actual tests.* and strips only backend/ from the selected source paths. The actual saved reports pass the corrected checker; induced unexpected-skip and missing-source-file controls are rejected, and restored reports pass again.",
+  "limits": "Original job remains FAILED. Correction has not executed on a new hosted head. Disposable namespace tests do not attest to deployed host firewall; backend, private DDS, trusted-main, native deployment and handset acceptance remain open."
+}

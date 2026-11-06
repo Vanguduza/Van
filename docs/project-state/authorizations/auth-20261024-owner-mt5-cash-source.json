@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "authorization_id": "auth-20261024-owner-mt5-cash-source",
+  "project": "van",
+  "authority": "OWNER_DERIVED",
+  "owner_instruction_sha256": "b9853d8dea01c04101e6035d73d64faad6a3ecc6590b7def69465af23cf0a648",
+  "owner_instruction_excerpt": "Why did you stop? This is an autonomous build task",
+  "derivation": "Bounded native-adapter source consequence of the existing owner instruction to finish the autonomous build. MT5 account telemetry must carry original cash-history observations and native credit so the source risk fence does not admit deposits or credit as trading gains. Covers only the existing EA and signed Windows worker source files. No deployment, terminal/account configuration, native execution, broker action or financial authority is granted.",
+  "source": {
+    "kind": "owner_session_instruction",
+    "channel": "codex",
+    "owner_attested": true,
+    "device_signature_claimed": false,
+    "cryptographic_signature_claimed": false,
+    "signed_ingress_claimed": false
+  },
+  "issued_at_utc": "2026-10-24T13:03:42.248338+00:00",
+  "branch_scope": "ccr-9e07e1af-8mgz1p and owner build continuation branches",
+  "authorized_paths": [
+    "deploy/van-trading-core/mql5/VanBridgeEA.mq5",
+    "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py"
+  ],
+  "reusable": true,
+  "revoked": false,
+  "limitations": [
+    "Candidate source development and source testing only; no bypass of hooks, protected-main admission, security, financial protection, signing, native certification or release gates.",
+    "No independent certificate, scope-lock signature, amendment admission, native host effect, purchase, financial effect or production release is authorized by this record.",
+    "Frozen blueprint bytes, existing authorization records and ledger rows remain immutable. No new frontend design before BG-001; inherited-source repairs remain permitted.",
+    "Work performed before formal PRE-003 admission must remain labeled candidate evidence, with dependencies and unissued acceptances visible."
+  ]
+}

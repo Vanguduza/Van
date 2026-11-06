@@ -1,0 +1,82 @@
+.............F...............                                            [100%]
+=================================== FAILURES ===================================
+___ test_real_add_then_proportional_residual_then_all_native_legs_close_once ___
+
+tmp_path = PosixPath('/tmp/van-recovery-family-two-leg-workflow-r1-20261101/test_real_add_then_proportiona0')
+
+    def test_real_add_then_proportional_residual_then_all_native_legs_close_once(tmp_path):
+        from vati.lifecycle.family_outcome import publish_family_outcome
+        from vati.lifecycle.family_action_journal import FamilyActionJournal
+        w,store,time,admitted,plan,history=admitted_source_world(tmp_path,
+            actual_runtime_lease=True,add_child=True,max_quantity='.20')
+        try:
+            family=w.lifecycle.families.get(plan.snapshot.family_id)
+            before={p.position_id:p.quantity for p in w.adapter.positions()}
+>           partial=w.lifecycle.request_family_reduction(family.family_id,action_key='two-leg-partial',
+                action='PARTIAL_CLOSE',requested_quantity=D('.04'),now_ms=time[0])
+
+trading/tests/test_family_governed_workflow.py:196: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = AccountTradeLifecycle(ledger=<vati.core.ledger.Ledger object at 0x7f78da924710>, adapter=PaperAdapter(venue='paper', a...WFhNTQzNTQzMjIwMGEifQ.MEQCIBiA2qXqRmpvRBFLtgJBC5VCTZLoWtFFwQD7Y6V28dgbAiBHdisMdhvjqpzA5BpzCtGMsZKwqIGc5IKiA7GkCA_4Tw'})
+family_id = 'family:ti-e2e-1', action_key = 'two-leg-partial'
+action = 'PARTIAL_CLOSE', now_ms = 1800000060000
+requested_quantity = Decimal('0.04'), explicit_targets = None
+explicit_signature = None, preview = False
+
+    def request_family_reduction(self, family_id: str, *, action_key: str,
+                                 action: str, now_ms: int,
+                                 requested_quantity=None, explicit_targets=None,
+                                 explicit_signature=None, preview: bool = False):
+        """Internal original lifecycle caller; not a public command surface.
+    
+        Policy selection comes from the configured existing governance owner.
+        The caller cannot supply a grant, native capability, lease or mandate.
+        """
+        from fractions import Fraction
+        from vati.execution.recovery_scope import NativePositionHistory
+        from vati.lifecycle.family_actions import FamilyPolicy, FamilyActionError, plan_reduction, exact_decimal, number
+        from vati.lifecycle.family_action_journal import FamilyActionJournal
+        from vati.lifecycle.family_execution import execute_original_action, reduce_original_receipts
+        from vati.lifecycle.family_membership import original_native_snapshot
+        from vati.lifecycle.family_runtime import runtime_fence_ref
+        from vati.risk.serde import mandate_binding_hash
+        from vati.risk.operational_grant import OperationalOptimizationGrants
+        if type(preview) is not bool:
+            raise FamilyActionError('family preview flag must be explicit boolean')
+        family = self.families.get(family_id)
+        journal = FamilyActionJournal(self.ledger)
+        request_hash = canonical_hash(dict(family_id=family_id, action=action,
+            requested_quantity=number(requested_quantity),
+            explicit_targets=None if explicit_targets is None else {k:number(v) for k,v in sorted(explicit_targets.items())},
+            explicit_signature_hash=None if explicit_signature is None else canonical_hash(explicit_signature)))
+        original = journal.find(family_id, action_key)
+        if original is not None:
+            if original.payload.get('request_hash') != request_hash:
+                raise FamilyActionError('original family request payload differs')
+            reduce_original_receipts(self, original, now_ms=now_ms)
+            progress = journal.progress(original)
+            if all(target['state'] != 'UNEXECUTED' for target in progress['targets']):
+                return progress
+        if (not isinstance(self.operational_grants, OperationalOptimizationGrants)
+                or not self.family_policy_grant_id or self.runtime_lease is None
+                or self.mandate is None or self.authority is None):
+            raise FamilyActionError('NOT_QUALIFIED: lifecycle governance/current runtime owners unavailable')
+        grants = self.operational_grants
+        current = grants.latest(self.family_policy_grant_id)
+        if current is None or current.payload['state'] != 'ADMITTED':
+            raise FamilyActionError('NOT_QUALIFIED: lifecycle policy has no current admitted grant')
+        current = grants.current(self.family_policy_grant_id, expected_ref=current.hash)
+        grant = current.payload['grant']
+        epoch = self.runtime_lease.epoch
+        fence = runtime_fence_ref(self.runtime_lease)
+        history = NativePositionHistory(self.ledger, account_alias=self.adapter.account_alias, venue=self.adapter.venue)
+        snapshot = original_native_snapshot(history, family, self.adapter)
+        if not snapshot.known:
+>           raise FamilyActionError('original family/native membership is unresolved')
+E           vati.lifecycle.family_actions.FamilyActionError: original family/native membership is unresolved
+
+trading/vati/app/trade_lifecycle.py:1276: FamilyActionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_family_governed_workflow.py::test_real_add_then_proportional_residual_then_all_native_legs_close_once
+1 failed, 28 passed in 2.92s

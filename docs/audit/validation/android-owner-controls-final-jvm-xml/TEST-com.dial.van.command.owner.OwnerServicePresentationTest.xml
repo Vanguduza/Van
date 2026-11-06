@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.command.owner.OwnerServicePresentationTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:57:31" hostname="052fefa249ff" time="0.009">
+  <properties/>
+  <testcase name="configured services do not imply verified readiness()" classname="com.dial.van.command.owner.OwnerServicePresentationTest" time="0.001"/>
+  <testcase name="owner controls keep advertised exact identifiers and required values()" classname="com.dial.van.command.owner.OwnerServicePresentationTest" time="0.001"/>
+  <testcase name="nullable worker proposal is never inferred from successful execution()" classname="com.dial.van.command.owner.OwnerServicePresentationTest" time="0.001"/>
+  <testcase name="mission receipt scope does not certify standalone browser execution()" classname="com.dial.van.command.owner.OwnerServicePresentationTest" time="0.001"/>
+  <testcase name="standalone browser completion never certifies its goal()" classname="com.dial.van.command.owner.OwnerServicePresentationTest" time="0.001"/>
+  <testcase name="unavailable controls and direct mutation shortcuts cannot be submitted()" classname="com.dial.van.command.owner.OwnerServicePresentationTest" time="0.0"/>
+  <testcase name="browser observations preserve trust injection and exact content digest references()" classname="com.dial.van.command.owner.OwnerServicePresentationTest" time="0.001"/>
+  <testcase name="failed local reads are unavailable rather than confirmed empty()" classname="com.dial.van.command.owner.OwnerServicePresentationTest" time="0.001"/>
+  <testcase name="missing result checks remain visible and empty checks do not certify success()" classname="com.dial.van.command.owner.OwnerServicePresentationTest" time="0.0"/>
+  <testcase name="automation engine success needs independent owner receipt()" classname="com.dial.van.command.owner.OwnerServicePresentationTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

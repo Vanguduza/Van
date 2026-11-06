@@ -1,0 +1,59 @@
+{
+  "schema": "van.supplemental-source-faults/1",
+  "control_sha256": {
+    "trading/vati/events/news_lineage.py": "bdfe8926f14d1927393fec58ee3b9a466b5756e547e2a9b38f2e4904005a1718",
+    "trading/vati/events/news_ingress.py": "cac1d1f97a8ea437b307348ab8b3be88d5bfe326a8678085478216222ba8b8ad"
+  },
+  "source_restored": true,
+  "cases": [
+    {
+      "case": "discard-rewritten-origin-connection",
+      "path": "trading/vati/events/news_lineage.py",
+      "exit": 1,
+      "mutated_sha256": "44271cfdf7bb4bcef867716ede5e5a090101cc22088ebd4029787631a05e5c25"
+    },
+    {
+      "case": "qualify-declared-sources",
+      "path": "trading/vati/events/news_lineage.py",
+      "exit": 1,
+      "mutated_sha256": "76f181dc5142f19bbb6dc7a3f585748d48433fb827e0142cd596e1150c4b5e5b"
+    },
+    {
+      "case": "skip-original-lineage-readback",
+      "path": "trading/vati/events/news_ingress.py",
+      "exit": 1,
+      "mutated_sha256": "574e7cb512538b8a1973a4ed8a7a8ef8e8e0dd79fb970422b7f2784d7f7468f8"
+    },
+    {
+      "case": "ignore-required-origin-recovery",
+      "path": "trading/vati/events/news_ingress.py",
+      "exit": 1,
+      "mutated_sha256": "63c66f51ae76c9d60981e2af5168be51efabb267a502e87eb24bb39bf483970c"
+    },
+    {
+      "case": "backdate-enrichment",
+      "path": "trading/vati/events/news_ingress.py",
+      "exit": 1,
+      "mutated_sha256": "cb3baa82dcfa70f90ed100637f5c9db51299823b0809eb464bd938da70f36364"
+    },
+    {
+      "case": "discard-recovered-lineage",
+      "path": "trading/vati/events/news_ingress.py",
+      "exit": 1,
+      "mutated_sha256": "7339623242bb7b54ea5e7de7d73d606e81c36d0e4eddffed30f2f1e1fa62bb4b"
+    },
+    {
+      "case": "accept-invalid-origin",
+      "path": "trading/vati/events/news_ingress.py",
+      "exit": 1,
+      "mutated_sha256": "58864c404206e42d0e1d1be78e18fdde15f01f7437af6ac9841f87773db3828e"
+    },
+    {
+      "case": "ignore-origin-availability",
+      "path": "trading/vati/events/news_lineage.py",
+      "exit": 1,
+      "mutated_sha256": "a497eb08a46a908c4358809ab7cbe14c8397a71e9c971a819f9b9f543ee63d53"
+    }
+  ],
+  "not_canonical_corpus": true
+}

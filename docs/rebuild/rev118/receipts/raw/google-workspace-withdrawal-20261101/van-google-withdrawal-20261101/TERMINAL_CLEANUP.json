@@ -1,0 +1,84 @@
+{
+  "at_utc": "2026-11-01T07:50:03.911879+00:00",
+  "owned_processes_active": false,
+  "raw_logs_and_failure_sqlite_retained": true,
+  "removed_terminal_owned_fixtures": [
+    {
+      "path": "/tmp/van-google-withdrawal-admission",
+      "files": 15,
+      "bytes": 26447872
+    },
+    {
+      "path": "/tmp/van-google-withdrawal-affected-01",
+      "files": 80,
+      "bytes": 154767360
+    },
+    {
+      "path": "/tmp/van-google-withdrawal-affected-02",
+      "files": 81,
+      "bytes": 156819456
+    },
+    {
+      "path": "/tmp/van-google-withdrawal-canary",
+      "files": 13,
+      "bytes": 26685440
+    },
+    {
+      "path": "/tmp/van-google-withdrawal-counterexample-02",
+      "files": 0,
+      "bytes": 0
+    },
+    {
+      "path": "/tmp/van-google-withdrawal-counterexample-03",
+      "files": 1,
+      "bytes": 2052096
+    },
+    {
+      "path": "/tmp/van-google-withdrawal-generation",
+      "files": 5,
+      "bytes": 6230288
+    },
+    {
+      "path": "/tmp/van-google-withdrawal-generation-02",
+      "files": 5,
+      "bytes": 9990144
+    },
+    {
+      "path": "/tmp/van-google-withdrawal-http",
+      "files": 21,
+      "bytes": 43130880
+    },
+    {
+      "path": "/tmp/van-google-withdrawal-http-02",
+      "files": 28,
+      "bytes": 53436416
+    },
+    {
+      "path": "/tmp/van-google-withdrawal-journal",
+      "files": 10,
+      "bytes": 20258816
+    },
+    {
+      "path": "/tmp/van-google-withdrawal-journal-02",
+      "files": 10,
+      "bytes": 20258816
+    },
+    {
+      "path": "/tmp/van-google-withdrawal-legacy",
+      "files": 17,
+      "bytes": 34906112
+    },
+    {
+      "path": "/tmp/van-google-withdrawal-owner-boundary",
+      "files": 16,
+      "bytes": 32841728
+    }
+  ],
+  "preserved": [
+    "All persistent raw *.log",
+    "COUNTEREXAMPLE_03_SQLITE_FIXTURES.zip",
+    "All frozen source/pins/patch/archive",
+    "JVM02_PRIOR_RESULT_XML.zip",
+    "Shared JDK/Gradle cache untouched (integration owner active)"
+  ]
+}

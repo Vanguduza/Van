@@ -1,0 +1,20 @@
+{
+ "schema": "van.rebuild.receipt.project-truth-verify/1",
+ "covers": {
+  "evaluated_head": "1cab6b2f5bd1e4e98c0a61538be34268f6280159",
+  "evaluated_range": "a16f7cb80b0169f93471d71bf6adab6cf03f7bf5..1cab6b2f5bd1e4e98c0a61538be34268f6280159",
+  "note": "Evaluates exactly the commits in the range. It does not cover commits made after 1cab6b2f (including the commit that adds this receipt); those need their own verification."
+ },
+ "command": "python3 tools/ci/project_truth_ledger.py verify",
+ "environment": {
+  "cwd": "detached git worktree checked out at the evaluated head (no uncommitted changes)",
+  "python": "Python 3.13.16"
+ },
+ "started_utc": "2026-10-21T19:49:12Z",
+ "finished_utc": "2026-10-21T19:57:41Z",
+ "exit_code": 0,
+ "result_line": "project-truth-ledger verify: GREEN \u2014 533 commit(s) in a16f7cb80b01..1cab6b2f5bd1",
+ "full_output": "project-truth-ledger verify: GREEN \u2014 533 commit(s) in a16f7cb80b01..1cab6b2f5bd1\n  lineage: programme-b-jev-openmuse-convergence-r1\n  baseline: a16f7cb80b0169f93471d71bf6adab6cf03f7bf5\n  ledger_source: worktree\n  trusted_records: worktree\n",
+ "full_output_sha256": "945487fad64af764dcfe697ff86fcda0bbbf2d9ad006bdcf59e08fd7a2431867",
+ "nature": "Local ledger consistency (worktree ledger and records). Not trusted-base admission: CI's trusted checker needs PR #94 on main."
+}

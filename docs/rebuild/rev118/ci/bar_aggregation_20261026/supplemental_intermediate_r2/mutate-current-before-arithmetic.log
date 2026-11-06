@@ -1,0 +1,25 @@
+...F
+=================================== FAILURES ===================================
+_ test_failed_arithmetic_neither_flushes_nor_partially_updates_original_state[volume-True] _
+
+same_interval = True, field = 'volume'
+
+    @pytest.mark.parametrize('same_interval',[False,True])
+    @pytest.mark.parametrize('field',['price','volume'])
+    def test_failed_arithmetic_neither_flushes_nor_partially_updates_original_state(same_interval,field):
+        agg=BarAggregator('EURUSD',60000);agg.push(Tick(1,Decimal('1'),Decimal('2'),Decimal('3')))
+        bid,ask,volume=(Decimal('1e999999999'),Decimal('1e999999999'),Decimal('0')) if field=='price' else (Decimal('3'),Decimal('4'),Decimal('1e999999999'))
+        with pytest.raises(Overflow):
+            agg.push(Tick(2 if same_interval else 60001,bid,ask,volume))
+        bar=agg.finish()
+>       assert (bar.start_ms,bar.ticks,bar.volume,bar.open,bar.close)==(0,1,Decimal('3'),Decimal('1.5'),Decimal('1.5'))
+E       AssertionError: assert (0, 1, Decima...ecimal('3.5')) == (0, 1, Decima...ecimal('1.5'))
+E         
+E         At index 4 diff: Decimal('3.5') != Decimal('1.5')
+E         Use -v to get more diff
+
+trading/tests/test_bar_aggregation_boundaries.py:89: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_bar_aggregation_boundaries.py::test_failed_arithmetic_neither_flushes_nor_partially_updates_original_state[volume-True]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 3 passed in 0.47s

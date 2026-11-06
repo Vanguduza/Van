@@ -1,0 +1,161 @@
+{
+  "disposition": "NO_BLOCKING_FINDING_IN_BOUNDED_SEVEN_TEST_OWNER_REVIEW",
+  "base": "ba792c27f906c1ca17b4d87d3c129d1b50e430a8",
+  "pins7_before_after": {
+    "trading/tests/test_capsule_migration.py": "f588b806f14e75ea337a5dff1c4c7a8b3044940a3da59176717c5da1e985b414",
+    "trading/tests/test_enhancement_closure.py": "27ca2d7e519aae2eeac2a27c0088f5312064487ab5b4dd01419f07937a01c026",
+    "trading/tests/test_feature_contract.py": "00600d60bbefa7438e305493ae6abed21e66b2b9089366b1f364d4f9c0d46146",
+    "trading/tests/test_research_and_drift.py": "e89772396b5f580c164b97d44bec6233a32f08c444343dcf17b267f4c47f1f5e",
+    "trading/tests/test_validation_certificates.py": "accbe86949c97a10b6826c72855e2c89b2f1a76c5b27c0b383adf28f60150764",
+    "trading/tests/test_mt5_nonce_durability.py": "039a2ec40ce1c9dcf07700dccc5f1412670a864d2c4a6699b09aa7d8f1832856",
+    "tests/contracts/test_artemis_console_boundary.py": "1c9f015f4ad322b6bfdba19fe768f6d6f8510a389dd0bdb43813978d1e3bc62f"
+  },
+  "patch_sha256": "102568cd418c401e41ad1c3e3a4907d9a6540ef7a09357217e5572ad01f27cd7",
+  "archive_sha256": "1a748b2d0620eace9d63f12fee8b66ee4de970f763ea734448f036763307e722",
+  "original_intent_review": [
+    "Repositoryassets and source-reader paths now resolve from exact test __file__ root, retaining real committed capsule registry/migration/history/feature/schema source rather than toy replacements.",
+    "Original CLI invocation/task/options/refusal bodies preserved. Positive migrate --check deliberately uses actual committed repository cwd; copied corruption tools still execute from copied source and tmp cwd where previously specified. No globalchdir/helper runnercwd/sourceoverride.",
+    "MT5 child import closure/order unchanged, now absolute ownroot entries. Child actualcwd still inherits caller, signedrequest/restart/nonces/one-controlledSDK-effect assertions remain exact. No realnative SDK claim.",
+    "Artemis scans actual nonempty Android tree and actual gateway/console source. Two added presenceguards prevent absent/emptyvacuous passes; original credential/privateendpoint/hardwareproof/governance assertions retained.",
+    "Unmodified validation_input_integrity consumer exactbaselinehash. No product/helper/certificateissuer/nativegate/ignore/skip change."
+  ],
+  "assertion_proof": {
+    "original175_AST_retained_in_order": true,
+    "added_asserts": 2,
+    "all_original_test_function_intents_preserved": true
+  },
+  "independent_controls": {
+    "pins_before": {
+      "trading/tests/test_capsule_migration.py": "f588b806f14e75ea337a5dff1c4c7a8b3044940a3da59176717c5da1e985b414",
+      "trading/tests/test_enhancement_closure.py": "27ca2d7e519aae2eeac2a27c0088f5312064487ab5b4dd01419f07937a01c026",
+      "trading/tests/test_feature_contract.py": "00600d60bbefa7438e305493ae6abed21e66b2b9089366b1f364d4f9c0d46146",
+      "trading/tests/test_research_and_drift.py": "e89772396b5f580c164b97d44bec6233a32f08c444343dcf17b267f4c47f1f5e",
+      "trading/tests/test_validation_certificates.py": "accbe86949c97a10b6826c72855e2c89b2f1a76c5b27c0b383adf28f60150764",
+      "trading/tests/test_mt5_nonce_durability.py": "039a2ec40ce1c9dcf07700dccc5f1412670a864d2c4a6699b09aa7d8f1832856",
+      "tests/contracts/test_artemis_console_boundary.py": "1c9f015f4ad322b6bfdba19fe768f6d6f8510a389dd0bdb43813978d1e3bc62f"
+    },
+    "pins_after": {
+      "trading/tests/test_capsule_migration.py": "f588b806f14e75ea337a5dff1c4c7a8b3044940a3da59176717c5da1e985b414",
+      "trading/tests/test_enhancement_closure.py": "27ca2d7e519aae2eeac2a27c0088f5312064487ab5b4dd01419f07937a01c026",
+      "trading/tests/test_feature_contract.py": "00600d60bbefa7438e305493ae6abed21e66b2b9089366b1f364d4f9c0d46146",
+      "trading/tests/test_research_and_drift.py": "e89772396b5f580c164b97d44bec6233a32f08c444343dcf17b267f4c47f1f5e",
+      "trading/tests/test_validation_certificates.py": "accbe86949c97a10b6826c72855e2c89b2f1a76c5b27c0b383adf28f60150764",
+      "trading/tests/test_mt5_nonce_durability.py": "039a2ec40ce1c9dcf07700dccc5f1412670a864d2c4a6699b09aa7d8f1832856",
+      "tests/contracts/test_artemis_console_boundary.py": "1c9f015f4ad322b6bfdba19fe768f6d6f8510a389dd0bdb43813978d1e3bc62f"
+    },
+    "archive_sha256": "1a748b2d0620eace9d63f12fee8b66ee4de970f763ea734448f036763307e722",
+    "patch_sha256": "102568cd418c401e41ad1c3e3a4907d9a6540ef7a09357217e5572ad01f27cd7",
+    "original_assertions": 175,
+    "current_assertions": 177,
+    "runs": [
+      {
+        "cwd": "/workspace/van-review-2026-10-18/publish",
+        "command": [
+          "/workspace/van-backend-venv-20261025/bin/python",
+          "-B",
+          "/workspace/van-review-2026-10-18/publish/tools/rebuild/source_storage_audit.py",
+          "--checkout-root",
+          "/workspace/van-review-2026-10-18/publish",
+          "--report",
+          "/tmp/van-cwd-independent-checkout-20261101-audit.json",
+          "/workspace/van-review-2026-10-18/publish/trading/tests/test_capsule_migration.py::test_clean_migration_is_accepted",
+          "/workspace/van-review-2026-10-18/publish/trading/tests/test_enhancement_closure.py::test_capsule_migration_is_settled",
+          "/workspace/van-review-2026-10-18/publish/trading/tests/test_enhancement_closure.py::test_migration_check_rejects_post_migration_capsule_drift",
+          "/workspace/van-review-2026-10-18/publish/trading/tests/test_feature_contract.py::test_requirements_read_the_key_nothing_read",
+          "/workspace/van-review-2026-10-18/publish/trading/tests/test_research_and_drift.py::test_fx_range_is_uncovered_and_the_map_derives_it_from_the_registry",
+          "/workspace/van-review-2026-10-18/publish/trading/tests/test_validation_certificates.py::test_promotion_to_demo_without_a_certificate_is_refused",
+          "/workspace/van-review-2026-10-18/publish/trading/tests/test_mt5_nonce_durability.py::test_actual_native_worker_process_restart_cannot_replay_a_signed_sdk_effect",
+          "/workspace/van-review-2026-10-18/publish/tests/contracts/test_artemis_console_boundary.py",
+          "-c",
+          "/workspace/van-review-2026-10-18/publish/pytest.ini",
+          "--rootdir=/workspace/van-review-2026-10-18/publish",
+          "--confcutdir=/workspace/van-review-2026-10-18/publish",
+          "-p",
+          "pytest_asyncio.plugin",
+          "-p",
+          "anyio.pytest_plugin",
+          "-p",
+          "no:cacheprovider",
+          "-q",
+          "--basetemp=/tmp/van-cwd-independent-checkout-20261101",
+          "--junitxml=/tmp/van-cwd-independent-checkout-20261101.xml"
+        ],
+        "exit": 0,
+        "cases": 9,
+        "peak_owned_bytes": 6695496,
+        "raw_bytes": 98,
+        "raw_hash": "492d413ae6e7fd0004c85ba2ba640555a31242736f50d1d88057b3003b147253",
+        "xml_hash": "4adf2e2ade143f5a5c3cec4d39e0f5b2d9c0b13b24994a8182b7c93eae5e7bac",
+        "audit_hash": "f159c056ef876b2852e522cf92ac940143fb1b43cf2b480fbad507dc745049bc",
+        "own_fixture_removed": true,
+        "empty_child_group": true,
+        "inventory_hash": "e62e48b8222f12cfb0899c2775f43cb60e1d1734587e984fdfce9f52e7d42692"
+      },
+      {
+        "cwd": "/workspace/van-review-2026-10-18/publish/backend",
+        "command": [
+          "/workspace/van-backend-venv-20261025/bin/python",
+          "-B",
+          "/workspace/van-review-2026-10-18/publish/tools/rebuild/source_storage_audit.py",
+          "--checkout-root",
+          "/workspace/van-review-2026-10-18/publish",
+          "--report",
+          "/tmp/van-cwd-independent-backend-20261101-audit.json",
+          "/workspace/van-review-2026-10-18/publish/trading/tests/test_capsule_migration.py::test_clean_migration_is_accepted",
+          "/workspace/van-review-2026-10-18/publish/trading/tests/test_enhancement_closure.py::test_capsule_migration_is_settled",
+          "/workspace/van-review-2026-10-18/publish/trading/tests/test_enhancement_closure.py::test_migration_check_rejects_post_migration_capsule_drift",
+          "/workspace/van-review-2026-10-18/publish/trading/tests/test_feature_contract.py::test_requirements_read_the_key_nothing_read",
+          "/workspace/van-review-2026-10-18/publish/trading/tests/test_research_and_drift.py::test_fx_range_is_uncovered_and_the_map_derives_it_from_the_registry",
+          "/workspace/van-review-2026-10-18/publish/trading/tests/test_validation_certificates.py::test_promotion_to_demo_without_a_certificate_is_refused",
+          "/workspace/van-review-2026-10-18/publish/trading/tests/test_mt5_nonce_durability.py::test_actual_native_worker_process_restart_cannot_replay_a_signed_sdk_effect",
+          "/workspace/van-review-2026-10-18/publish/tests/contracts/test_artemis_console_boundary.py",
+          "-c",
+          "/workspace/van-review-2026-10-18/publish/pytest.ini",
+          "--rootdir=/workspace/van-review-2026-10-18/publish",
+          "--confcutdir=/workspace/van-review-2026-10-18/publish",
+          "-p",
+          "pytest_asyncio.plugin",
+          "-p",
+          "anyio.pytest_plugin",
+          "-p",
+          "no:cacheprovider",
+          "-q",
+          "--basetemp=/tmp/van-cwd-independent-backend-20261101",
+          "--junitxml=/tmp/van-cwd-independent-backend-20261101.xml"
+        ],
+        "exit": 0,
+        "cases": 9,
+        "peak_owned_bytes": 6695494,
+        "raw_bytes": 98,
+        "raw_hash": "be474da49bb208e23107853e5ed640a4a24c95372799ffb18826022ccaa23a2b",
+        "xml_hash": "1daa269685a58e998ce4a5125b27b7cecf192572f65b6e5c37fe2450ade21cca",
+        "audit_hash": "01a3a193559e3c78b7100b0f4145096745b764603e7e8f7330c3f77788da6c6e",
+        "own_fixture_removed": true,
+        "empty_child_group": true,
+        "inventory_hash": "1442772bd386a53442d4a14d78b0f353d13ae687150228f3bd5d2c509cc72e15"
+      }
+    ],
+    "new_nonempty_guard_negative_controls": [
+      "absent",
+      "empty"
+    ],
+    "scope": "Actual committed assets/tools/FakeMT5 seam/current gateway imports, not real native MT5/SDK or whole integrated-candidate qualification; disjoint LAC inputs may integrate concurrently."
+  },
+  "author_original_controls": {
+    "unique_each_cwd": 157,
+    "case_executions": 314,
+    "all39_oldbad_covered": true,
+    "audit_runs": 10,
+    "all_terminal_waited_empty_groups": true,
+    "same_source_pins_before_after": true,
+    "prior_consumed_inputs_not_whole_current_integrated_candidate": true
+  },
+  "cleanup": "Both own per-cwdfixturetrees removed only after waited terminal child/emptygroup; inventories hashbound in probe. Guardmini fixtures automatically removed. Raw/XML/audit retained in owned/tmp,8MiBcap and128MiBbudget. No archives/peercleanup.",
+  "integration_scope_limit": "The cleared LAC134 paths are disjoint and may integrate concurrently. Author314 proof uses its original consumed-input selection; no claim it executes a new whole integratedcandidate. Soleintegrator must map changed consumers and perform appropriate currentselection. Independent18caseexecutions are a current narrow subset only.",
+  "qualification_limits": [
+    "157 unique IDs eachcwd,314 executions; not314unique, not fullbackend5715/native/PG/certification or wholematrix acceptance.",
+    "Original38tradingfail/error plusArtemis cwd failure and beforeMT5import failure retained; originalprivateDDS/VTIL optin remains explicitly unqualified.",
+    "Originalentry67/protectedrecord/hook/owner scope gates and PR106 remain separate.",
+    "No main/source edits/commits/native/provider/financial/PG/SDK/Gradle/CI/newagents byreviewer."
+  ]
+}

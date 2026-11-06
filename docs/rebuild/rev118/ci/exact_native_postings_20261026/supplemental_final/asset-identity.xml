@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="3" time="0.480" timestamp="2026-10-26T18:11:15.631229+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_exact_units" name="test_matching_display_names_do_not_allow_cross_currency_provider_or_realm_arithmetic[change0]" time="0.190" /><testcase classname="trading.tests.test_exact_units" name="test_matching_display_names_do_not_allow_cross_currency_provider_or_realm_arithmetic[change1]" time="0.001"><failure message="Failed: DID NOT RAISE UnitError">change = {'asset_ref': 'other-provider:asset:7'}
+
+    @pytest.mark.parametrize('change',[{'currency':'EUR'},{'asset_ref':'other-provider:asset:7'},
+        {'asset_ref':'same-provider:live:asset:7'}])
+    def test_matching_display_names_do_not_allow_cross_currency_provider_or_realm_arithmetic(change):
+        first=Money(100,2,'USD','provider:demo:asset:7')
+        other=Money(**({'minor_units':100,'scale':2,'currency':first.currency,'asset_ref':first.asset_ref}|change))
+&gt;       with pytest.raises(UnitError,match='CONVERSION_REQUIRED'):first+other
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE UnitError
+
+trading/tests/test_exact_units.py:54: Failed</failure></testcase><testcase classname="trading.tests.test_exact_units" name="test_matching_display_names_do_not_allow_cross_currency_provider_or_realm_arithmetic[change2]" time="0.002"><failure message="Failed: DID NOT RAISE UnitError">change = {'asset_ref': 'same-provider:live:asset:7'}
+
+    @pytest.mark.parametrize('change',[{'currency':'EUR'},{'asset_ref':'other-provider:asset:7'},
+        {'asset_ref':'same-provider:live:asset:7'}])
+    def test_matching_display_names_do_not_allow_cross_currency_provider_or_realm_arithmetic(change):
+        first=Money(100,2,'USD','provider:demo:asset:7')
+        other=Money(**({'minor_units':100,'scale':2,'currency':first.currency,'asset_ref':first.asset_ref}|change))
+&gt;       with pytest.raises(UnitError,match='CONVERSION_REQUIRED'):first+other
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE UnitError
+
+trading/tests/test_exact_units.py:54: Failed</failure></testcase></testsuite></testsuites>

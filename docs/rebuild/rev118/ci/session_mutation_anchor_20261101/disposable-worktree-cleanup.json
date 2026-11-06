@@ -1,0 +1,10 @@
+{
+  "at_utc": "2026-11-01T02:35:23.638291+00:00",
+  "worktree": "/workspace/van-lanes-20261101/mutation-ci-fix",
+  "sole_owned_registry_delta_preserved_in_main_and_patch": true,
+  "production_and_tests_restored": true,
+  "mutation_journal_absent": true,
+  "no_live_handles": true,
+  "normal_worktree_remove_exit": 0,
+  "independently_absent": true
+}

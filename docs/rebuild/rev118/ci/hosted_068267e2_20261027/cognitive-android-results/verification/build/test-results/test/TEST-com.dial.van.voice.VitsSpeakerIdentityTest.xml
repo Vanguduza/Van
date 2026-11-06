@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.voice.VitsSpeakerIdentityTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-27T05:23:25" hostname="runnervmtai0g" time="0.001">
+  <properties/>
+  <testcase name="invalid native rate or speaker metadata is still refused()" classname="com.dial.van.voice.VitsSpeakerIdentityTest" time="0.0"/>
+  <testcase name="multi speaker models retain their exact native identity bounds()" classname="com.dial.van.voice.VitsSpeakerIdentityTest" time="0.0"/>
+  <testcase name="zero native speaker count never authorizes another speaker identity()" classname="com.dial.van.voice.VitsSpeakerIdentityTest" time="0.0"/>
+  <testcase name="pinned LJS VITS uses speaker zero when the native speaker count is zero()" classname="com.dial.van.voice.VitsSpeakerIdentityTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

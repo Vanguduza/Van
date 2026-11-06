@@ -1,0 +1,12 @@
+{
+  "at_utc": "2026-10-27T07:07:51.572325+00:00",
+  "state": "CONTROLLED_INTERRUPTION_REQUESTED_NOT_A_PASS",
+  "reason": "Confirmed hosted b58 native margin-bound string compatibility failures; preserve assertions and fix runtime report before final qualification.",
+  "owned_pytest_pid": 1084262,
+  "source_parent_pid": 1083966,
+  "recorded_call_outcomes": {
+    "passed": 666
+  },
+  "signal": "SIGINT exact owned pytest only; source controller retains finally cleanup",
+  "previous_attempt": "No signal was sent by the earlier diagnostic: /proc/PID/task/PID/children was unavailable. Subsequent actual stat/argv readback confirmed all controllers alive; no worker-death claim is made."
+}

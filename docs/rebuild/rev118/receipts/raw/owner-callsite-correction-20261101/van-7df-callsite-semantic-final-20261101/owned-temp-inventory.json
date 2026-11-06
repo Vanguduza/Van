@@ -1,0 +1,2606 @@
+{
+  "directory": "/tmp/van-recovery-7df-callsite-semantic-final-20261101",
+  "at_utc": "2026-11-01T09:11:01.214116+00:00",
+  "files": [
+    {
+      "path": "test_original_export_must_be_s4/unit-usb-transport.json",
+      "bytes": 988,
+      "sha256": "728ed8ee7fb9910a1b40e4a433658edb71daed9eae567c4e16a0d1be1c9a2229"
+    },
+    {
+      "path": "test_original_export_must_be_s4/unit-original-admission-export.bin",
+      "bytes": 93,
+      "sha256": "20f5e5e2ec5f7472343793aec5a69d01e83d74aa1b327b70abae7b0b15a592d1"
+    },
+    {
+      "path": "test_original_export_must_be_s3/unit-usb-transport.json",
+      "bytes": 975,
+      "sha256": "8bd85ab7aaf2e708c12367f1dbf9c80419c162d437b25766c33ef657db2e3151"
+    },
+    {
+      "path": "test_original_export_must_be_s3/unit-original-admission-export.bin",
+      "bytes": 93,
+      "sha256": "20f5e5e2ec5f7472343793aec5a69d01e83d74aa1b327b70abae7b0b15a592d1"
+    },
+    {
+      "path": "test_original_export_must_be_s2/unit-usb-transport.json",
+      "bytes": 999,
+      "sha256": "6b4a9efd3a6f7935addbb89c012eac176b32532da6d49c560c6b7499c0762a88"
+    },
+    {
+      "path": "test_original_export_must_be_s2/unit-original-admission-export.bin",
+      "bytes": 93,
+      "sha256": "20f5e5e2ec5f7472343793aec5a69d01e83d74aa1b327b70abae7b0b15a592d1"
+    },
+    {
+      "path": "test_original_export_must_be_s1/unit-usb-transport.json",
+      "bytes": 999,
+      "sha256": "ecd937cea834b5b5b9ea4f808002eff80a7a1496fbfca7d41c17ce2bd714de47"
+    },
+    {
+      "path": "test_original_export_must_be_s1/unit-original-admission-export.bin",
+      "bytes": 16,
+      "sha256": "a013442b6696292ad9c79e42a39ac4f4fceea10a1fea85c16da38ea19adbc2fa"
+    },
+    {
+      "path": "test_original_export_must_be_s0/unit-usb-transport.json",
+      "bytes": 999,
+      "sha256": "ecd937cea834b5b5b9ea4f808002eff80a7a1496fbfca7d41c17ce2bd714de47"
+    },
+    {
+      "path": "test_offline_usb_import_cannot1/unit-usb-transport.json",
+      "bytes": 993,
+      "sha256": "7a4292739b5615227a2fa5b917a7fa8e6f5ac323df6792123bff55019477c4aa"
+    },
+    {
+      "path": "test_offline_usb_import_cannot1/unit-original-admission-export.bin",
+      "bytes": 93,
+      "sha256": "20f5e5e2ec5f7472343793aec5a69d01e83d74aa1b327b70abae7b0b15a592d1"
+    },
+    {
+      "path": "test_offline_usb_import_cannot0/unit-usb-transport.json",
+      "bytes": 988,
+      "sha256": "0113f7d793b4a200696b962c01dbdb9027159b67a7a5f07c052c8952ffec3b1c"
+    },
+    {
+      "path": "test_offline_usb_import_cannot0/unit-original-admission-export.bin",
+      "bytes": 93,
+      "sha256": "20f5e5e2ec5f7472343793aec5a69d01e83d74aa1b327b70abae7b0b15a592d1"
+    },
+    {
+      "path": "test_case_scoped_usb_review_ca0/unit-usb-transport.json",
+      "bytes": 999,
+      "sha256": "4e2c7498865e6ef5eeaa1a94c8d05e4c5bd736c1b0cde48e0dac877b4e93fb9b"
+    },
+    {
+      "path": "test_case_scoped_usb_review_ca0/unit-original-admission-export.bin",
+      "bytes": 93,
+      "sha256": "20f5e5e2ec5f7472343793aec5a69d01e83d74aa1b327b70abae7b0b15a592d1"
+    },
+    {
+      "path": "test_usb_import_integrity_is_c0/unit-usb-transport.json",
+      "bytes": 1001,
+      "sha256": "d90bc8b7bbfec835ff2b28eb880238f606757671cee67c2cee72da30e587ce19"
+    },
+    {
+      "path": "test_usb_import_integrity_is_c0/unit-original-admission-export.bin",
+      "bytes": 93,
+      "sha256": "20f5e5e2ec5f7472343793aec5a69d01e83d74aa1b327b70abae7b0b15a592d1"
+    },
+    {
+      "path": "test_usb_import_integrity_is_c0/backend_readback.bin",
+      "bytes": 138736,
+      "sha256": "d8863141c6e43c582d136a8f167b1f14dad8483c4e501ff4b900eef86c0433d8"
+    },
+    {
+      "path": "test_usb_import_integrity_is_c0/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_usb_import_integrity_is_c0/step_trace.bin",
+      "bytes": 325,
+      "sha256": "152ad59732b7d84e826224e2586fafdc48665b22111c08d3b7a2feb0f17487ba"
+    },
+    {
+      "path": "test_usb_import_integrity_is_c0/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_usb_import_integrity_is_c0/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_saved_usb_receipt_does_no2/unit-usb-transport.json",
+      "bytes": 999,
+      "sha256": "ecd937cea834b5b5b9ea4f808002eff80a7a1496fbfca7d41c17ce2bd714de47"
+    },
+    {
+      "path": "test_saved_usb_receipt_does_no2/unit-original-admission-export.bin",
+      "bytes": 93,
+      "sha256": "20f5e5e2ec5f7472343793aec5a69d01e83d74aa1b327b70abae7b0b15a592d1"
+    },
+    {
+      "path": "test_saved_usb_receipt_does_no1/unit-usb-transport.json",
+      "bytes": 999,
+      "sha256": "ecd937cea834b5b5b9ea4f808002eff80a7a1496fbfca7d41c17ce2bd714de47"
+    },
+    {
+      "path": "test_saved_usb_receipt_does_no1/unit-original-admission-export.bin",
+      "bytes": 93,
+      "sha256": "20f5e5e2ec5f7472343793aec5a69d01e83d74aa1b327b70abae7b0b15a592d1"
+    },
+    {
+      "path": "test_saved_usb_receipt_does_no0/unit-usb-transport.json",
+      "bytes": 999,
+      "sha256": "ecd937cea834b5b5b9ea4f808002eff80a7a1496fbfca7d41c17ce2bd714de47"
+    },
+    {
+      "path": "test_saved_usb_receipt_does_no0/unit-original-admission-export.bin",
+      "bytes": 93,
+      "sha256": "20f5e5e2ec5f7472343793aec5a69d01e83d74aa1b327b70abae7b0b15a592d1"
+    },
+    {
+      "path": "test_public_shared_or_inconsis3/unit-usb-transport.json",
+      "bytes": 999,
+      "sha256": "10e94cba657ba87b9864bfbdf9191dc1d0c511586b5449e01fa67f5484178298"
+    },
+    {
+      "path": "test_public_shared_or_inconsis3/unit-original-admission-export.bin",
+      "bytes": 93,
+      "sha256": "20f5e5e2ec5f7472343793aec5a69d01e83d74aa1b327b70abae7b0b15a592d1"
+    },
+    {
+      "path": "test_public_shared_or_inconsis2/unit-usb-transport.json",
+      "bytes": 996,
+      "sha256": "e038edb706c1a3fb3b25ed2a6446cf6b9ab33f775942f5b0473972ef808ef3e7"
+    },
+    {
+      "path": "test_public_shared_or_inconsis2/unit-original-admission-export.bin",
+      "bytes": 93,
+      "sha256": "20f5e5e2ec5f7472343793aec5a69d01e83d74aa1b327b70abae7b0b15a592d1"
+    },
+    {
+      "path": "test_public_shared_or_inconsis1/unit-usb-transport.json",
+      "bytes": 996,
+      "sha256": "4ea946b0a50ec3738c870c8b412ef4ecbdec737ba92901ceed3df9d2771e67ed"
+    },
+    {
+      "path": "test_public_shared_or_inconsis1/unit-original-admission-export.bin",
+      "bytes": 93,
+      "sha256": "20f5e5e2ec5f7472343793aec5a69d01e83d74aa1b327b70abae7b0b15a592d1"
+    },
+    {
+      "path": "test_public_shared_or_inconsis0/unit-usb-transport.json",
+      "bytes": 993,
+      "sha256": "225357aec289866445d7cbae4f0787e3c389b7111b13a9cbd7607b79420bfa41"
+    },
+    {
+      "path": "test_public_shared_or_inconsis0/unit-original-admission-export.bin",
+      "bytes": 93,
+      "sha256": "20f5e5e2ec5f7472343793aec5a69d01e83d74aa1b327b70abae7b0b15a592d1"
+    },
+    {
+      "path": "test_usb_original_receipt_mism13/unit-usb-transport.json",
+      "bytes": 995,
+      "sha256": "fa60831f0fed6d85140f68e34f1610f94157812c7301f11403fdfb0025f0d66e"
+    },
+    {
+      "path": "test_usb_original_receipt_mism13/unit-original-admission-export.bin",
+      "bytes": 93,
+      "sha256": "20f5e5e2ec5f7472343793aec5a69d01e83d74aa1b327b70abae7b0b15a592d1"
+    },
+    {
+      "path": "test_usb_original_receipt_mism12/unit-usb-transport.json",
+      "bytes": 980,
+      "sha256": "75ca596ddc8ca494c7650bf6a3db0944fe8f79852af111c42043a3394b199612"
+    },
+    {
+      "path": "test_usb_original_receipt_mism12/unit-original-admission-export.bin",
+      "bytes": 93,
+      "sha256": "20f5e5e2ec5f7472343793aec5a69d01e83d74aa1b327b70abae7b0b15a592d1"
+    },
+    {
+      "path": "test_usb_original_receipt_mism11/unit-usb-transport.json",
+      "bytes": 999,
+      "sha256": "5e3b3845214a739d6f0527fee8c42be4545b72f03d3fca172d0f67e591e1c07b"
+    },
+    {
+      "path": "test_usb_original_receipt_mism11/unit-original-admission-export.bin",
+      "bytes": 93,
+      "sha256": "20f5e5e2ec5f7472343793aec5a69d01e83d74aa1b327b70abae7b0b15a592d1"
+    },
+    {
+      "path": "test_usb_original_receipt_mism10/unit-usb-transport.json",
+      "bytes": 992,
+      "sha256": "b60c6e7b4559b02ec81d228dd353e9e6eb54c10bf3fb7a56cce403fc702dd980"
+    },
+    {
+      "path": "test_usb_original_receipt_mism10/unit-original-admission-export.bin",
+      "bytes": 93,
+      "sha256": "20f5e5e2ec5f7472343793aec5a69d01e83d74aa1b327b70abae7b0b15a592d1"
+    },
+    {
+      "path": "test_usb_original_receipt_mism9/unit-usb-transport.json",
+      "bytes": 999,
+      "sha256": "d620eae2e8fb710c9de904177a1f5ca07623e50acbc91fe80687bc8e0c9ec229"
+    },
+    {
+      "path": "test_usb_original_receipt_mism9/unit-original-admission-export.bin",
+      "bytes": 93,
+      "sha256": "20f5e5e2ec5f7472343793aec5a69d01e83d74aa1b327b70abae7b0b15a592d1"
+    },
+    {
+      "path": "test_usb_original_receipt_mism8/unit-usb-transport.json",
+      "bytes": 1005,
+      "sha256": "9daf621136173008b9bfb32030ae7647d428c46a7d7f9744e6972d88511c88ab"
+    },
+    {
+      "path": "test_usb_original_receipt_mism8/unit-original-admission-export.bin",
+      "bytes": 93,
+      "sha256": "20f5e5e2ec5f7472343793aec5a69d01e83d74aa1b327b70abae7b0b15a592d1"
+    },
+    {
+      "path": "test_usb_original_receipt_mism7/unit-usb-transport.json",
+      "bytes": 970,
+      "sha256": "3435c402c63981cfa578c7dee822e00244c8e2aebdc51599835ad515f70cb792"
+    },
+    {
+      "path": "test_usb_original_receipt_mism7/unit-original-admission-export.bin",
+      "bytes": 93,
+      "sha256": "20f5e5e2ec5f7472343793aec5a69d01e83d74aa1b327b70abae7b0b15a592d1"
+    },
+    {
+      "path": "test_usb_original_receipt_mism6/unit-usb-transport.json",
+      "bytes": 996,
+      "sha256": "637a415ce71fb2991c594cc2555eded17adc68ff8ddde18e9b6a40683fcbb303"
+    },
+    {
+      "path": "test_usb_original_receipt_mism6/unit-original-admission-export.bin",
+      "bytes": 93,
+      "sha256": "20f5e5e2ec5f7472343793aec5a69d01e83d74aa1b327b70abae7b0b15a592d1"
+    },
+    {
+      "path": "test_usb_original_receipt_mism5/unit-usb-transport.json",
+      "bytes": 1000,
+      "sha256": "32b05d3042bddedb7f74bc9323e96672685b32b595e797188caa0b879880b9ac"
+    },
+    {
+      "path": "test_usb_original_receipt_mism5/unit-original-admission-export.bin",
+      "bytes": 93,
+      "sha256": "20f5e5e2ec5f7472343793aec5a69d01e83d74aa1b327b70abae7b0b15a592d1"
+    },
+    {
+      "path": "test_usb_original_receipt_mism4/unit-usb-transport.json",
+      "bytes": 1000,
+      "sha256": "fb26ec4ff24946c0feb89f60a472bf244fd8411d245d5451518ed177fd12d923"
+    },
+    {
+      "path": "test_usb_original_receipt_mism4/unit-original-admission-export.bin",
+      "bytes": 93,
+      "sha256": "20f5e5e2ec5f7472343793aec5a69d01e83d74aa1b327b70abae7b0b15a592d1"
+    },
+    {
+      "path": "test_usb_original_receipt_mism3/unit-usb-transport.json",
+      "bytes": 1000,
+      "sha256": "d04cb3f0eff6b1385e7df99c44b6d15ebef2421b54290e2bd24b54ae34a3b0ea"
+    },
+    {
+      "path": "test_usb_original_receipt_mism3/unit-original-admission-export.bin",
+      "bytes": 93,
+      "sha256": "20f5e5e2ec5f7472343793aec5a69d01e83d74aa1b327b70abae7b0b15a592d1"
+    },
+    {
+      "path": "test_usb_original_receipt_mism2/unit-usb-transport.json",
+      "bytes": 1000,
+      "sha256": "d6921ba642e750d1a6bec6005dbb8027e538a535ad0c71a206a4a71c9634597d"
+    },
+    {
+      "path": "test_usb_original_receipt_mism2/unit-original-admission-export.bin",
+      "bytes": 93,
+      "sha256": "20f5e5e2ec5f7472343793aec5a69d01e83d74aa1b327b70abae7b0b15a592d1"
+    },
+    {
+      "path": "test_usb_original_receipt_mism1/unit-usb-transport.json",
+      "bytes": 1000,
+      "sha256": "d77d37ba6f2493f5186ec36c5a34f2536a7a5a8a32a395032a3c574e30e52fc9"
+    },
+    {
+      "path": "test_usb_original_receipt_mism1/unit-original-admission-export.bin",
+      "bytes": 93,
+      "sha256": "20f5e5e2ec5f7472343793aec5a69d01e83d74aa1b327b70abae7b0b15a592d1"
+    },
+    {
+      "path": "test_usb_original_receipt_mism0/unit-usb-transport.json",
+      "bytes": 1005,
+      "sha256": "8a93bee1ed709be227fa48e7038b64ea0082a73ca4b307c9f07b048bbfbe5cd2"
+    },
+    {
+      "path": "test_usb_original_receipt_mism0/unit-original-admission-export.bin",
+      "bytes": 93,
+      "sha256": "20f5e5e2ec5f7472343793aec5a69d01e83d74aa1b327b70abae7b0b15a592d1"
+    },
+    {
+      "path": "test_usb_wiring_or_fake_wirele5/unit-usb-transport.json",
+      "bytes": 8,
+      "sha256": "d121be3103007b41edf96f8262925f8c7d61894afe9a041843b631f69445bc57"
+    },
+    {
+      "path": "test_usb_wiring_or_fake_wirele5/unit-original-admission-export.bin",
+      "bytes": 93,
+      "sha256": "20f5e5e2ec5f7472343793aec5a69d01e83d74aa1b327b70abae7b0b15a592d1"
+    },
+    {
+      "path": "test_usb_wiring_or_fake_wirele4/unit-usb-transport.json",
+      "bytes": 999,
+      "sha256": "ecd937cea834b5b5b9ea4f808002eff80a7a1496fbfca7d41c17ce2bd714de47"
+    },
+    {
+      "path": "test_usb_wiring_or_fake_wirele4/unit-original-admission-export.bin",
+      "bytes": 93,
+      "sha256": "20f5e5e2ec5f7472343793aec5a69d01e83d74aa1b327b70abae7b0b15a592d1"
+    },
+    {
+      "path": "test_usb_wiring_or_fake_wirele3/unit-usb-transport.json",
+      "bytes": 999,
+      "sha256": "ecd937cea834b5b5b9ea4f808002eff80a7a1496fbfca7d41c17ce2bd714de47"
+    },
+    {
+      "path": "test_usb_wiring_or_fake_wirele3/unit-original-admission-export.bin",
+      "bytes": 93,
+      "sha256": "20f5e5e2ec5f7472343793aec5a69d01e83d74aa1b327b70abae7b0b15a592d1"
+    },
+    {
+      "path": "test_usb_wiring_or_fake_wirele2/unit-original-admission-export.bin",
+      "bytes": 93,
+      "sha256": "20f5e5e2ec5f7472343793aec5a69d01e83d74aa1b327b70abae7b0b15a592d1"
+    },
+    {
+      "path": "test_usb_wiring_or_fake_wirele1/unit-usb-transport.json",
+      "bytes": 999,
+      "sha256": "ecd937cea834b5b5b9ea4f808002eff80a7a1496fbfca7d41c17ce2bd714de47"
+    },
+    {
+      "path": "test_usb_wiring_or_fake_wirele1/unit-original-admission-export.bin",
+      "bytes": 93,
+      "sha256": "20f5e5e2ec5f7472343793aec5a69d01e83d74aa1b327b70abae7b0b15a592d1"
+    },
+    {
+      "path": "test_usb_wiring_or_fake_wirele0/unit-usb-transport.json",
+      "bytes": 999,
+      "sha256": "ecd937cea834b5b5b9ea4f808002eff80a7a1496fbfca7d41c17ce2bd714de47"
+    },
+    {
+      "path": "test_usb_wiring_or_fake_wirele0/unit-original-admission-export.bin",
+      "bytes": 93,
+      "sha256": "20f5e5e2ec5f7472343793aec5a69d01e83d74aa1b327b70abae7b0b15a592d1"
+    },
+    {
+      "path": "test_export_binding_and_curren0/unit-usb-transport.json",
+      "bytes": 999,
+      "sha256": "ecd937cea834b5b5b9ea4f808002eff80a7a1496fbfca7d41c17ce2bd714de47"
+    },
+    {
+      "path": "test_export_binding_and_curren0/unit-original-admission-export.bin",
+      "bytes": 93,
+      "sha256": "20f5e5e2ec5f7472343793aec5a69d01e83d74aa1b327b70abae7b0b15a592d1"
+    },
+    {
+      "path": "test_offline_speaker_erasure_w0/local_device_readback.bin",
+      "bytes": 139451,
+      "sha256": "f9b8c2363863ef8cce12a7d8ccf3d8fa386833a3e44fd544538bc19c3314cabe"
+    },
+    {
+      "path": "test_offline_speaker_erasure_w0/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_offline_speaker_erasure_w0/step_trace.bin",
+      "bytes": 325,
+      "sha256": "8244f2598494077e2b8ad07865e9bd68435fc00a19485ca6a0ce2301a53361cb"
+    },
+    {
+      "path": "test_offline_speaker_erasure_w0/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_offline_speaker_erasure_w0/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q17/local_device_readback.bin",
+      "bytes": 139446,
+      "sha256": "d0a2ab1edd1d07ba07d80db7a9fb087cf437fa9d597ca9a408435bbd682dbb2b"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q17/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q17/step_trace.bin",
+      "bytes": 325,
+      "sha256": "0848309537757b499359147581d7afb4a60c2761a79d3829712e811758a8b55e"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q17/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q17/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q16/local_device_readback.bin",
+      "bytes": 139430,
+      "sha256": "5c9b3f50c248b496d30a076a647c64347526cda10c293894e48f2e6e379d0fae"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q16/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q16/step_trace.bin",
+      "bytes": 325,
+      "sha256": "0848309537757b499359147581d7afb4a60c2761a79d3829712e811758a8b55e"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q16/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q16/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q15/local_device_readback.bin",
+      "bytes": 139443,
+      "sha256": "9b32608c7b5c10a7e7eb023b473dabd91e35f8f2350d1c3cbc5434d2b6ad6835"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q15/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q15/step_trace.bin",
+      "bytes": 325,
+      "sha256": "0848309537757b499359147581d7afb4a60c2761a79d3829712e811758a8b55e"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q15/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q15/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q14/local_device_readback.bin",
+      "bytes": 139446,
+      "sha256": "3691024ca1e375968e3519009ff9af68645bd9754f605ed79be9370cde1897a4"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q14/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q14/step_trace.bin",
+      "bytes": 325,
+      "sha256": "0848309537757b499359147581d7afb4a60c2761a79d3829712e811758a8b55e"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q14/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q14/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q13/local_device_readback.bin",
+      "bytes": 139384,
+      "sha256": "c27e8c0bd0e49347bbcd671ee05b3a4b586fca93f1944c2977c1bec43aea6bae"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q13/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q13/step_trace.bin",
+      "bytes": 325,
+      "sha256": "0848309537757b499359147581d7afb4a60c2761a79d3829712e811758a8b55e"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q13/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q13/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q12/local_device_readback.bin",
+      "bytes": 139450,
+      "sha256": "1158c0e0c304a9b2ffc4261860670395eaeaa8bddb5496b1f92980e358be5514"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q12/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q12/step_trace.bin",
+      "bytes": 325,
+      "sha256": "0848309537757b499359147581d7afb4a60c2761a79d3829712e811758a8b55e"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q12/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q12/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q11/local_device_readback.bin",
+      "bytes": 139443,
+      "sha256": "f5fadaf2e990c8d1796f31e0cf794ea8050e38044f435072fefc86907005e4f1"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q11/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q11/step_trace.bin",
+      "bytes": 325,
+      "sha256": "0848309537757b499359147581d7afb4a60c2761a79d3829712e811758a8b55e"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q11/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q11/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q10/local_device_readback.bin",
+      "bytes": 139446,
+      "sha256": "6b5a623f9e1a5bd24b8ba6e3efa4ee3e9942c4a0ac384c4e7df3ccf3d9b38f5e"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q10/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q10/step_trace.bin",
+      "bytes": 325,
+      "sha256": "0848309537757b499359147581d7afb4a60c2761a79d3829712e811758a8b55e"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q10/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q10/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q9/local_device_readback.bin",
+      "bytes": 139447,
+      "sha256": "43d98e5fe41ac8b617ee830a88b514c88a715543f54fcf09804af577dfb04ce9"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q9/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q9/step_trace.bin",
+      "bytes": 325,
+      "sha256": "0848309537757b499359147581d7afb4a60c2761a79d3829712e811758a8b55e"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q9/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q9/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q8/local_device_readback.bin",
+      "bytes": 139423,
+      "sha256": "35f6e7b8398c50e3695854fd10d5e401385041e095647f854c273d6d4a0fed78"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q8/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q8/step_trace.bin",
+      "bytes": 325,
+      "sha256": "0848309537757b499359147581d7afb4a60c2761a79d3829712e811758a8b55e"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q8/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q8/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q7/local_device_readback.bin",
+      "bytes": 139384,
+      "sha256": "16cd54d9536f184e3d737a418359a6525b2f9ec408304f1eb09a2c9c3ebb6465"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q7/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q7/step_trace.bin",
+      "bytes": 325,
+      "sha256": "0848309537757b499359147581d7afb4a60c2761a79d3829712e811758a8b55e"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q7/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q7/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q6/local_device_readback.bin",
+      "bytes": 139445,
+      "sha256": "8e18845be97dd09a070e110a3765b878e9a045114879161bb134021437e85342"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q6/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q6/step_trace.bin",
+      "bytes": 325,
+      "sha256": "0848309537757b499359147581d7afb4a60c2761a79d3829712e811758a8b55e"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q6/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q6/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q5/local_device_readback.bin",
+      "bytes": 139445,
+      "sha256": "abbd229aa84493b810278c5300175d6c242b9b2bcb1a0ef7e48df5ee22a02828"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q5/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q5/step_trace.bin",
+      "bytes": 325,
+      "sha256": "0848309537757b499359147581d7afb4a60c2761a79d3829712e811758a8b55e"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q5/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q5/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q4/local_device_readback.bin",
+      "bytes": 139445,
+      "sha256": "29805c21efbb525fe9a8a53420fd74e4f629a627b72f7d111be463b761519ae3"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q4/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q4/step_trace.bin",
+      "bytes": 325,
+      "sha256": "0848309537757b499359147581d7afb4a60c2761a79d3829712e811758a8b55e"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q4/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q4/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q3/local_device_readback.bin",
+      "bytes": 139474,
+      "sha256": "a83ed9679a0ce6083f25375d5be07a598f65cbd002327c3a9f2d81aa01f3762e"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q3/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q3/step_trace.bin",
+      "bytes": 325,
+      "sha256": "0848309537757b499359147581d7afb4a60c2761a79d3829712e811758a8b55e"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q3/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q3/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q2/local_device_readback.bin",
+      "bytes": 139434,
+      "sha256": "a19269be51945e6fbb7eca67775f41a3fe3cf134509c66470b29c21616983322"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q2/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q2/step_trace.bin",
+      "bytes": 325,
+      "sha256": "0848309537757b499359147581d7afb4a60c2761a79d3829712e811758a8b55e"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q2/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q2/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q1/local_device_readback.bin",
+      "bytes": 139439,
+      "sha256": "83b4aeeba8ad72a3ce32bc0c0902beb28bcb16539855fda1e9412bd443afcaf4"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q1/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q1/step_trace.bin",
+      "bytes": 325,
+      "sha256": "0848309537757b499359147581d7afb4a60c2761a79d3829712e811758a8b55e"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q1/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q1/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q0/local_device_readback.bin",
+      "bytes": 139446,
+      "sha256": "3b554e4bc4acf80a23628a84d3424aa85173f124d6f77813611b38bb04ab71c2"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q0/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q0/step_trace.bin",
+      "bytes": 325,
+      "sha256": "0848309537757b499359147581d7afb4a60c2761a79d3829712e811758a8b55e"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q0/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_speaker_metadata_cannot_q0/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_speaker_cases_use_private2/local_device_readback.bin",
+      "bytes": 139388,
+      "sha256": "715214cf7903535abc0270d0c449162558335f8c173997404cc0124b7238645f"
+    },
+    {
+      "path": "test_speaker_cases_use_private2/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_speaker_cases_use_private2/step_trace.bin",
+      "bytes": 325,
+      "sha256": "8244f2598494077e2b8ad07865e9bd68435fc00a19485ca6a0ce2301a53361cb"
+    },
+    {
+      "path": "test_speaker_cases_use_private2/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_speaker_cases_use_private2/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_speaker_cases_use_private1/local_device_readback.bin",
+      "bytes": 139419,
+      "sha256": "3afad110cbbccb5acb8fffc527439cd5ae84c172a6f3e48ccac5e053a8697720"
+    },
+    {
+      "path": "test_speaker_cases_use_private1/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_speaker_cases_use_private1/step_trace.bin",
+      "bytes": 325,
+      "sha256": "4f172e3bf6bfbf2a5d713690c41021add80d315c5557f9d0423243d9fb69c5d3"
+    },
+    {
+      "path": "test_speaker_cases_use_private1/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_speaker_cases_use_private1/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_speaker_cases_use_private0/local_device_readback.bin",
+      "bytes": 139446,
+      "sha256": "d0a2ab1edd1d07ba07d80db7a9fb087cf437fa9d597ca9a408435bbd682dbb2b"
+    },
+    {
+      "path": "test_speaker_cases_use_private0/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_speaker_cases_use_private0/step_trace.bin",
+      "bytes": 325,
+      "sha256": "0848309537757b499359147581d7afb4a60c2761a79d3829712e811758a8b55e"
+    },
+    {
+      "path": "test_speaker_cases_use_private0/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_speaker_cases_use_private0/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_provider_write_cannot_pas17/byte_effect_readback.bin",
+      "bytes": 147210,
+      "sha256": "73c7ea17670514754c978494ce6e7f879b6be1bb9559e5212622ef3414479878"
+    },
+    {
+      "path": "test_provider_write_cannot_pas17/transfer_bytes.bin",
+      "bytes": 41,
+      "sha256": "069e899c73ecbe786aa1f59e9e43ea48f20f1f85a46eed3ff93fbe7fdd8ab10f"
+    },
+    {
+      "path": "test_provider_write_cannot_pas17/backend_readback.bin",
+      "bytes": 139116,
+      "sha256": "713068d0e4ccfa504a888f98692ccc38e8cdd187f59394ba422a30e4d5093bcc"
+    },
+    {
+      "path": "test_provider_write_cannot_pas17/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_provider_write_cannot_pas17/step_trace.bin",
+      "bytes": 325,
+      "sha256": "129e010b7637b122c7af0a37a3e57660f4e07f55e35404da98a9f7020f6b8d78"
+    },
+    {
+      "path": "test_provider_write_cannot_pas17/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_provider_write_cannot_pas17/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_provider_write_cannot_pas16/byte_effect_readback.bin",
+      "bytes": 147020,
+      "sha256": "0cf5dc7436d24efa4e4cf97aaf973746c1e624b42ba2efbc3bf5cc04f4b864e0"
+    },
+    {
+      "path": "test_provider_write_cannot_pas16/transfer_bytes.bin",
+      "bytes": 41,
+      "sha256": "069e899c73ecbe786aa1f59e9e43ea48f20f1f85a46eed3ff93fbe7fdd8ab10f"
+    },
+    {
+      "path": "test_provider_write_cannot_pas16/backend_readback.bin",
+      "bytes": 139116,
+      "sha256": "713068d0e4ccfa504a888f98692ccc38e8cdd187f59394ba422a30e4d5093bcc"
+    },
+    {
+      "path": "test_provider_write_cannot_pas16/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_provider_write_cannot_pas16/step_trace.bin",
+      "bytes": 325,
+      "sha256": "129e010b7637b122c7af0a37a3e57660f4e07f55e35404da98a9f7020f6b8d78"
+    },
+    {
+      "path": "test_provider_write_cannot_pas16/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_provider_write_cannot_pas16/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_provider_write_cannot_pas15/byte_effect_readback.bin",
+      "bytes": 147208,
+      "sha256": "8bf7bd291528e82e6068c253cea8ab1cdc87a4b6e47b1c7e42c888fbb483547a"
+    },
+    {
+      "path": "test_provider_write_cannot_pas15/transfer_bytes.bin",
+      "bytes": 41,
+      "sha256": "069e899c73ecbe786aa1f59e9e43ea48f20f1f85a46eed3ff93fbe7fdd8ab10f"
+    },
+    {
+      "path": "test_provider_write_cannot_pas15/backend_readback.bin",
+      "bytes": 139116,
+      "sha256": "713068d0e4ccfa504a888f98692ccc38e8cdd187f59394ba422a30e4d5093bcc"
+    },
+    {
+      "path": "test_provider_write_cannot_pas15/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_provider_write_cannot_pas15/step_trace.bin",
+      "bytes": 325,
+      "sha256": "129e010b7637b122c7af0a37a3e57660f4e07f55e35404da98a9f7020f6b8d78"
+    },
+    {
+      "path": "test_provider_write_cannot_pas15/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_provider_write_cannot_pas15/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_provider_write_cannot_pas14/byte_effect_readback.bin",
+      "bytes": 147209,
+      "sha256": "a6d4a7c6810d8b2c1b59a92367498dba0b9b2d35c5a937336cb5d3104cad420f"
+    },
+    {
+      "path": "test_provider_write_cannot_pas14/transfer_bytes.bin",
+      "bytes": 41,
+      "sha256": "069e899c73ecbe786aa1f59e9e43ea48f20f1f85a46eed3ff93fbe7fdd8ab10f"
+    },
+    {
+      "path": "test_provider_write_cannot_pas14/backend_readback.bin",
+      "bytes": 139116,
+      "sha256": "713068d0e4ccfa504a888f98692ccc38e8cdd187f59394ba422a30e4d5093bcc"
+    },
+    {
+      "path": "test_provider_write_cannot_pas14/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_provider_write_cannot_pas14/step_trace.bin",
+      "bytes": 325,
+      "sha256": "129e010b7637b122c7af0a37a3e57660f4e07f55e35404da98a9f7020f6b8d78"
+    },
+    {
+      "path": "test_provider_write_cannot_pas14/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_provider_write_cannot_pas14/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_provider_write_cannot_pas13/byte_effect_readback.bin",
+      "bytes": 147004,
+      "sha256": "d37b7d737b83dfcc88682fff53bbdbf82484ed65ac8626a30a05786c496ac686"
+    },
+    {
+      "path": "test_provider_write_cannot_pas13/transfer_bytes.bin",
+      "bytes": 41,
+      "sha256": "069e899c73ecbe786aa1f59e9e43ea48f20f1f85a46eed3ff93fbe7fdd8ab10f"
+    },
+    {
+      "path": "test_provider_write_cannot_pas13/backend_readback.bin",
+      "bytes": 139116,
+      "sha256": "713068d0e4ccfa504a888f98692ccc38e8cdd187f59394ba422a30e4d5093bcc"
+    },
+    {
+      "path": "test_provider_write_cannot_pas13/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_provider_write_cannot_pas13/step_trace.bin",
+      "bytes": 325,
+      "sha256": "129e010b7637b122c7af0a37a3e57660f4e07f55e35404da98a9f7020f6b8d78"
+    },
+    {
+      "path": "test_provider_write_cannot_pas13/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_provider_write_cannot_pas13/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_provider_write_cannot_pas12/byte_effect_readback.bin",
+      "bytes": 147214,
+      "sha256": "88462024c4858be9363f682b219dea881dcfb6c0e13c0c98feb882c390fb26f7"
+    },
+    {
+      "path": "test_provider_write_cannot_pas12/transfer_bytes.bin",
+      "bytes": 41,
+      "sha256": "069e899c73ecbe786aa1f59e9e43ea48f20f1f85a46eed3ff93fbe7fdd8ab10f"
+    },
+    {
+      "path": "test_provider_write_cannot_pas12/backend_readback.bin",
+      "bytes": 139116,
+      "sha256": "713068d0e4ccfa504a888f98692ccc38e8cdd187f59394ba422a30e4d5093bcc"
+    },
+    {
+      "path": "test_provider_write_cannot_pas12/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_provider_write_cannot_pas12/step_trace.bin",
+      "bytes": 325,
+      "sha256": "129e010b7637b122c7af0a37a3e57660f4e07f55e35404da98a9f7020f6b8d78"
+    },
+    {
+      "path": "test_provider_write_cannot_pas12/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_provider_write_cannot_pas12/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_provider_write_cannot_pas11/byte_effect_readback.bin",
+      "bytes": 147205,
+      "sha256": "053bffb6b8249f905861fce338fb61b4cdba59190efa1bc7fa38649d624b6696"
+    },
+    {
+      "path": "test_provider_write_cannot_pas11/transfer_bytes.bin",
+      "bytes": 41,
+      "sha256": "069e899c73ecbe786aa1f59e9e43ea48f20f1f85a46eed3ff93fbe7fdd8ab10f"
+    },
+    {
+      "path": "test_provider_write_cannot_pas11/backend_readback.bin",
+      "bytes": 139116,
+      "sha256": "713068d0e4ccfa504a888f98692ccc38e8cdd187f59394ba422a30e4d5093bcc"
+    },
+    {
+      "path": "test_provider_write_cannot_pas11/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_provider_write_cannot_pas11/step_trace.bin",
+      "bytes": 325,
+      "sha256": "129e010b7637b122c7af0a37a3e57660f4e07f55e35404da98a9f7020f6b8d78"
+    },
+    {
+      "path": "test_provider_write_cannot_pas11/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_provider_write_cannot_pas11/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_provider_write_cannot_pas10/byte_effect_readback.bin",
+      "bytes": 147212,
+      "sha256": "44b12e8822142571dbff7015b65a65f6963dbb029bfc3d3a900885e6aded4fbe"
+    },
+    {
+      "path": "test_provider_write_cannot_pas10/transfer_bytes.bin",
+      "bytes": 41,
+      "sha256": "069e899c73ecbe786aa1f59e9e43ea48f20f1f85a46eed3ff93fbe7fdd8ab10f"
+    },
+    {
+      "path": "test_provider_write_cannot_pas10/backend_readback.bin",
+      "bytes": 139116,
+      "sha256": "713068d0e4ccfa504a888f98692ccc38e8cdd187f59394ba422a30e4d5093bcc"
+    },
+    {
+      "path": "test_provider_write_cannot_pas10/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_provider_write_cannot_pas10/step_trace.bin",
+      "bytes": 325,
+      "sha256": "129e010b7637b122c7af0a37a3e57660f4e07f55e35404da98a9f7020f6b8d78"
+    },
+    {
+      "path": "test_provider_write_cannot_pas10/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_provider_write_cannot_pas10/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_provider_write_cannot_pas9/byte_effect_readback.bin",
+      "bytes": 147210,
+      "sha256": "cad812c0332e02979564284e6e945b8cccc630dc624ec6b01ce2c284e29e38c6"
+    },
+    {
+      "path": "test_provider_write_cannot_pas9/transfer_bytes.bin",
+      "bytes": 41,
+      "sha256": "069e899c73ecbe786aa1f59e9e43ea48f20f1f85a46eed3ff93fbe7fdd8ab10f"
+    },
+    {
+      "path": "test_provider_write_cannot_pas9/backend_readback.bin",
+      "bytes": 139116,
+      "sha256": "713068d0e4ccfa504a888f98692ccc38e8cdd187f59394ba422a30e4d5093bcc"
+    },
+    {
+      "path": "test_provider_write_cannot_pas9/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_provider_write_cannot_pas9/step_trace.bin",
+      "bytes": 325,
+      "sha256": "129e010b7637b122c7af0a37a3e57660f4e07f55e35404da98a9f7020f6b8d78"
+    },
+    {
+      "path": "test_provider_write_cannot_pas9/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_provider_write_cannot_pas9/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_provider_write_cannot_pas8/byte_effect_readback.bin",
+      "bytes": 147209,
+      "sha256": "dc9f5c641e468011b1c8c745b344da6a534068c2403230a31f042e6895fb37f1"
+    },
+    {
+      "path": "test_provider_write_cannot_pas8/transfer_bytes.bin",
+      "bytes": 41,
+      "sha256": "069e899c73ecbe786aa1f59e9e43ea48f20f1f85a46eed3ff93fbe7fdd8ab10f"
+    },
+    {
+      "path": "test_provider_write_cannot_pas8/backend_readback.bin",
+      "bytes": 139116,
+      "sha256": "713068d0e4ccfa504a888f98692ccc38e8cdd187f59394ba422a30e4d5093bcc"
+    },
+    {
+      "path": "test_provider_write_cannot_pas8/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_provider_write_cannot_pas8/step_trace.bin",
+      "bytes": 325,
+      "sha256": "129e010b7637b122c7af0a37a3e57660f4e07f55e35404da98a9f7020f6b8d78"
+    },
+    {
+      "path": "test_provider_write_cannot_pas8/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_provider_write_cannot_pas8/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_provider_write_cannot_pas7/byte_effect_readback.bin",
+      "bytes": 147209,
+      "sha256": "9cc31fe631991887beadca5043edd97527bb46d750189a4d2cee9b1f444473de"
+    },
+    {
+      "path": "test_provider_write_cannot_pas7/transfer_bytes.bin",
+      "bytes": 41,
+      "sha256": "069e899c73ecbe786aa1f59e9e43ea48f20f1f85a46eed3ff93fbe7fdd8ab10f"
+    },
+    {
+      "path": "test_provider_write_cannot_pas7/backend_readback.bin",
+      "bytes": 139116,
+      "sha256": "713068d0e4ccfa504a888f98692ccc38e8cdd187f59394ba422a30e4d5093bcc"
+    },
+    {
+      "path": "test_provider_write_cannot_pas7/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_provider_write_cannot_pas7/step_trace.bin",
+      "bytes": 325,
+      "sha256": "129e010b7637b122c7af0a37a3e57660f4e07f55e35404da98a9f7020f6b8d78"
+    },
+    {
+      "path": "test_provider_write_cannot_pas7/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_provider_write_cannot_pas7/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_provider_write_cannot_pas6/byte_effect_readback.bin",
+      "bytes": 147200,
+      "sha256": "8c9249d9a46644d9f79453e5b25a2a05f60e3a1c6bf375e9d130cf48af735362"
+    },
+    {
+      "path": "test_provider_write_cannot_pas6/transfer_bytes.bin",
+      "bytes": 41,
+      "sha256": "069e899c73ecbe786aa1f59e9e43ea48f20f1f85a46eed3ff93fbe7fdd8ab10f"
+    },
+    {
+      "path": "test_provider_write_cannot_pas6/backend_readback.bin",
+      "bytes": 139116,
+      "sha256": "713068d0e4ccfa504a888f98692ccc38e8cdd187f59394ba422a30e4d5093bcc"
+    },
+    {
+      "path": "test_provider_write_cannot_pas6/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_provider_write_cannot_pas6/step_trace.bin",
+      "bytes": 325,
+      "sha256": "129e010b7637b122c7af0a37a3e57660f4e07f55e35404da98a9f7020f6b8d78"
+    },
+    {
+      "path": "test_provider_write_cannot_pas6/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_provider_write_cannot_pas6/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_provider_write_cannot_pas5/byte_effect_readback.bin",
+      "bytes": 147209,
+      "sha256": "c964e75dbeab2fce3e53c1604c867e7299af28049982c266b27c34358d467914"
+    },
+    {
+      "path": "test_provider_write_cannot_pas5/transfer_bytes.bin",
+      "bytes": 41,
+      "sha256": "069e899c73ecbe786aa1f59e9e43ea48f20f1f85a46eed3ff93fbe7fdd8ab10f"
+    },
+    {
+      "path": "test_provider_write_cannot_pas5/backend_readback.bin",
+      "bytes": 139116,
+      "sha256": "713068d0e4ccfa504a888f98692ccc38e8cdd187f59394ba422a30e4d5093bcc"
+    },
+    {
+      "path": "test_provider_write_cannot_pas5/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_provider_write_cannot_pas5/step_trace.bin",
+      "bytes": 325,
+      "sha256": "129e010b7637b122c7af0a37a3e57660f4e07f55e35404da98a9f7020f6b8d78"
+    },
+    {
+      "path": "test_provider_write_cannot_pas5/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_provider_write_cannot_pas5/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_provider_write_cannot_pas4/byte_effect_readback.bin",
+      "bytes": 147210,
+      "sha256": "20ab9084eec7e760a10d6d0b10ce6440e17ad15d6f6ba4a4838f69fde23f4c96"
+    },
+    {
+      "path": "test_provider_write_cannot_pas4/transfer_bytes.bin",
+      "bytes": 41,
+      "sha256": "069e899c73ecbe786aa1f59e9e43ea48f20f1f85a46eed3ff93fbe7fdd8ab10f"
+    },
+    {
+      "path": "test_provider_write_cannot_pas4/backend_readback.bin",
+      "bytes": 139116,
+      "sha256": "713068d0e4ccfa504a888f98692ccc38e8cdd187f59394ba422a30e4d5093bcc"
+    },
+    {
+      "path": "test_provider_write_cannot_pas4/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_provider_write_cannot_pas4/step_trace.bin",
+      "bytes": 325,
+      "sha256": "129e010b7637b122c7af0a37a3e57660f4e07f55e35404da98a9f7020f6b8d78"
+    },
+    {
+      "path": "test_provider_write_cannot_pas4/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_provider_write_cannot_pas4/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_provider_write_cannot_pas3/byte_effect_readback.bin",
+      "bytes": 147210,
+      "sha256": "732893713add382befe3cd111f5e87396beaa9d7dddb46344e26aa3a512e04de"
+    },
+    {
+      "path": "test_provider_write_cannot_pas3/transfer_bytes.bin",
+      "bytes": 41,
+      "sha256": "069e899c73ecbe786aa1f59e9e43ea48f20f1f85a46eed3ff93fbe7fdd8ab10f"
+    },
+    {
+      "path": "test_provider_write_cannot_pas3/backend_readback.bin",
+      "bytes": 139116,
+      "sha256": "713068d0e4ccfa504a888f98692ccc38e8cdd187f59394ba422a30e4d5093bcc"
+    },
+    {
+      "path": "test_provider_write_cannot_pas3/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_provider_write_cannot_pas3/step_trace.bin",
+      "bytes": 325,
+      "sha256": "129e010b7637b122c7af0a37a3e57660f4e07f55e35404da98a9f7020f6b8d78"
+    },
+    {
+      "path": "test_provider_write_cannot_pas3/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_provider_write_cannot_pas3/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_provider_write_cannot_pas2/byte_effect_readback.bin",
+      "bytes": 147205,
+      "sha256": "7812b4f455588feb00b95510e7dfa9cbe7515942f02eccd2e7cd42f4ab439a24"
+    },
+    {
+      "path": "test_provider_write_cannot_pas2/transfer_bytes.bin",
+      "bytes": 41,
+      "sha256": "069e899c73ecbe786aa1f59e9e43ea48f20f1f85a46eed3ff93fbe7fdd8ab10f"
+    },
+    {
+      "path": "test_provider_write_cannot_pas2/backend_readback.bin",
+      "bytes": 139116,
+      "sha256": "713068d0e4ccfa504a888f98692ccc38e8cdd187f59394ba422a30e4d5093bcc"
+    },
+    {
+      "path": "test_provider_write_cannot_pas2/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_provider_write_cannot_pas2/step_trace.bin",
+      "bytes": 325,
+      "sha256": "129e010b7637b122c7af0a37a3e57660f4e07f55e35404da98a9f7020f6b8d78"
+    },
+    {
+      "path": "test_provider_write_cannot_pas2/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_provider_write_cannot_pas2/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_provider_write_cannot_pas1/byte_effect_readback.bin",
+      "bytes": 147205,
+      "sha256": "a45fb4de4fdf27794d74c339ea6db52b59eaf0dd93adc37cae1b21bfbf5b1298"
+    },
+    {
+      "path": "test_provider_write_cannot_pas1/transfer_bytes.bin",
+      "bytes": 41,
+      "sha256": "069e899c73ecbe786aa1f59e9e43ea48f20f1f85a46eed3ff93fbe7fdd8ab10f"
+    },
+    {
+      "path": "test_provider_write_cannot_pas1/backend_readback.bin",
+      "bytes": 139116,
+      "sha256": "713068d0e4ccfa504a888f98692ccc38e8cdd187f59394ba422a30e4d5093bcc"
+    },
+    {
+      "path": "test_provider_write_cannot_pas1/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_provider_write_cannot_pas1/step_trace.bin",
+      "bytes": 325,
+      "sha256": "129e010b7637b122c7af0a37a3e57660f4e07f55e35404da98a9f7020f6b8d78"
+    },
+    {
+      "path": "test_provider_write_cannot_pas1/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_provider_write_cannot_pas1/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_provider_write_cannot_pas0/byte_effect_readback.bin",
+      "bytes": 139626,
+      "sha256": "0fd333f31549e04161c114613575ff6c2bffabc8bb1ccf920124cbca0f87ba95"
+    },
+    {
+      "path": "test_provider_write_cannot_pas0/transfer_bytes.bin",
+      "bytes": 41,
+      "sha256": "069e899c73ecbe786aa1f59e9e43ea48f20f1f85a46eed3ff93fbe7fdd8ab10f"
+    },
+    {
+      "path": "test_provider_write_cannot_pas0/backend_readback.bin",
+      "bytes": 139116,
+      "sha256": "713068d0e4ccfa504a888f98692ccc38e8cdd187f59394ba422a30e4d5093bcc"
+    },
+    {
+      "path": "test_provider_write_cannot_pas0/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_provider_write_cannot_pas0/step_trace.bin",
+      "bytes": 325,
+      "sha256": "129e010b7637b122c7af0a37a3e57660f4e07f55e35404da98a9f7020f6b8d78"
+    },
+    {
+      "path": "test_provider_write_cannot_pas0/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_provider_write_cannot_pas0/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_provider_write_import_nee1/byte_effect_readback.bin",
+      "bytes": 147496,
+      "sha256": "800d5eca600b29910b359b545a46fdb4ec43eb771c639f06b4d753477f88f39a"
+    },
+    {
+      "path": "test_provider_write_import_nee1/transfer_bytes.bin",
+      "bytes": 41,
+      "sha256": "069e899c73ecbe786aa1f59e9e43ea48f20f1f85a46eed3ff93fbe7fdd8ab10f"
+    },
+    {
+      "path": "test_provider_write_import_nee1/backend_readback.bin",
+      "bytes": 139116,
+      "sha256": "713068d0e4ccfa504a888f98692ccc38e8cdd187f59394ba422a30e4d5093bcc"
+    },
+    {
+      "path": "test_provider_write_import_nee1/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_provider_write_import_nee1/step_trace.bin",
+      "bytes": 325,
+      "sha256": "129e010b7637b122c7af0a37a3e57660f4e07f55e35404da98a9f7020f6b8d78"
+    },
+    {
+      "path": "test_provider_write_import_nee1/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_provider_write_import_nee1/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_provider_write_import_nee0/byte_effect_readback.bin",
+      "bytes": 147209,
+      "sha256": "9bec2e593a50c4f166f66fc19fd176c36b8ff6c1c453d27540d0378f846e5d83"
+    },
+    {
+      "path": "test_provider_write_import_nee0/transfer_bytes.bin",
+      "bytes": 41,
+      "sha256": "069e899c73ecbe786aa1f59e9e43ea48f20f1f85a46eed3ff93fbe7fdd8ab10f"
+    },
+    {
+      "path": "test_provider_write_import_nee0/backend_readback.bin",
+      "bytes": 139116,
+      "sha256": "713068d0e4ccfa504a888f98692ccc38e8cdd187f59394ba422a30e4d5093bcc"
+    },
+    {
+      "path": "test_provider_write_import_nee0/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_provider_write_import_nee0/step_trace.bin",
+      "bytes": 325,
+      "sha256": "129e010b7637b122c7af0a37a3e57660f4e07f55e35404da98a9f7020f6b8d78"
+    },
+    {
+      "path": "test_provider_write_import_nee0/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_provider_write_import_nee0/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_non_success_receipts_are_3/backend_readback.bin",
+      "bytes": 138736,
+      "sha256": "d8863141c6e43c582d136a8f167b1f14dad8483c4e501ff4b900eef86c0433d8"
+    },
+    {
+      "path": "test_non_success_receipts_are_3/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_non_success_receipts_are_3/step_trace.bin",
+      "bytes": 325,
+      "sha256": "152ad59732b7d84e826224e2586fafdc48665b22111c08d3b7a2feb0f17487ba"
+    },
+    {
+      "path": "test_non_success_receipts_are_3/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_non_success_receipts_are_3/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_non_success_receipts_are_2/backend_readback.bin",
+      "bytes": 138736,
+      "sha256": "d8863141c6e43c582d136a8f167b1f14dad8483c4e501ff4b900eef86c0433d8"
+    },
+    {
+      "path": "test_non_success_receipts_are_2/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_non_success_receipts_are_2/step_trace.bin",
+      "bytes": 325,
+      "sha256": "152ad59732b7d84e826224e2586fafdc48665b22111c08d3b7a2feb0f17487ba"
+    },
+    {
+      "path": "test_non_success_receipts_are_2/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_non_success_receipts_are_2/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_non_success_receipts_are_1/backend_readback.bin",
+      "bytes": 138736,
+      "sha256": "d8863141c6e43c582d136a8f167b1f14dad8483c4e501ff4b900eef86c0433d8"
+    },
+    {
+      "path": "test_non_success_receipts_are_1/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_non_success_receipts_are_1/step_trace.bin",
+      "bytes": 325,
+      "sha256": "152ad59732b7d84e826224e2586fafdc48665b22111c08d3b7a2feb0f17487ba"
+    },
+    {
+      "path": "test_non_success_receipts_are_1/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_non_success_receipts_are_1/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_non_success_receipts_are_0/backend_readback.bin",
+      "bytes": 138736,
+      "sha256": "d8863141c6e43c582d136a8f167b1f14dad8483c4e501ff4b900eef86c0433d8"
+    },
+    {
+      "path": "test_non_success_receipts_are_0/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_non_success_receipts_are_0/step_trace.bin",
+      "bytes": 325,
+      "sha256": "152ad59732b7d84e826224e2586fafdc48665b22111c08d3b7a2feb0f17487ba"
+    },
+    {
+      "path": "test_non_success_receipts_are_0/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_non_success_receipts_are_0/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_false_positive_evidence_i10/service_readback.bin",
+      "bytes": 138739,
+      "sha256": "a79a7214f663c9b269c8c5ad43ce4972cd5e6ce823c4514409aa5b333e3ba1d6"
+    },
+    {
+      "path": "test_false_positive_evidence_i10/hermes_receipt.bin",
+      "bytes": 138738,
+      "sha256": "b5f47b6420a6cddb44cf4b2e1643ee5aae548837e4990751852da8b88c0b52ce"
+    },
+    {
+      "path": "test_false_positive_evidence_i10/backend_readback.bin",
+      "bytes": 138739,
+      "sha256": "1769b036f39c9c9745e152181b61a45e04a4189f646ca06a47758381e3b7cdfa"
+    },
+    {
+      "path": "test_false_positive_evidence_i10/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_false_positive_evidence_i10/step_trace.bin",
+      "bytes": 325,
+      "sha256": "a5d320b951da73d8fc6933fd6f45b717751f9f9c9d673f237c233f487018d1d2"
+    },
+    {
+      "path": "test_false_positive_evidence_i10/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_false_positive_evidence_i10/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_false_positive_evidence_i9/service_readback.bin",
+      "bytes": 138739,
+      "sha256": "a79a7214f663c9b269c8c5ad43ce4972cd5e6ce823c4514409aa5b333e3ba1d6"
+    },
+    {
+      "path": "test_false_positive_evidence_i9/hermes_receipt.bin",
+      "bytes": 138738,
+      "sha256": "b5f47b6420a6cddb44cf4b2e1643ee5aae548837e4990751852da8b88c0b52ce"
+    },
+    {
+      "path": "test_false_positive_evidence_i9/backend_readback.bin",
+      "bytes": 138739,
+      "sha256": "1769b036f39c9c9745e152181b61a45e04a4189f646ca06a47758381e3b7cdfa"
+    },
+    {
+      "path": "test_false_positive_evidence_i9/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_false_positive_evidence_i9/step_trace.bin",
+      "bytes": 325,
+      "sha256": "a5d320b951da73d8fc6933fd6f45b717751f9f9c9d673f237c233f487018d1d2"
+    },
+    {
+      "path": "test_false_positive_evidence_i9/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_false_positive_evidence_i9/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_false_positive_evidence_i8/service_readback.bin",
+      "bytes": 138739,
+      "sha256": "a79a7214f663c9b269c8c5ad43ce4972cd5e6ce823c4514409aa5b333e3ba1d6"
+    },
+    {
+      "path": "test_false_positive_evidence_i8/hermes_receipt.bin",
+      "bytes": 138738,
+      "sha256": "b5f47b6420a6cddb44cf4b2e1643ee5aae548837e4990751852da8b88c0b52ce"
+    },
+    {
+      "path": "test_false_positive_evidence_i8/backend_readback.bin",
+      "bytes": 138739,
+      "sha256": "1769b036f39c9c9745e152181b61a45e04a4189f646ca06a47758381e3b7cdfa"
+    },
+    {
+      "path": "test_false_positive_evidence_i8/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_false_positive_evidence_i8/step_trace.bin",
+      "bytes": 325,
+      "sha256": "a5d320b951da73d8fc6933fd6f45b717751f9f9c9d673f237c233f487018d1d2"
+    },
+    {
+      "path": "test_false_positive_evidence_i8/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_false_positive_evidence_i8/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_false_positive_evidence_i7/service_readback.bin",
+      "bytes": 138739,
+      "sha256": "a79a7214f663c9b269c8c5ad43ce4972cd5e6ce823c4514409aa5b333e3ba1d6"
+    },
+    {
+      "path": "test_false_positive_evidence_i7/hermes_receipt.bin",
+      "bytes": 138738,
+      "sha256": "b5f47b6420a6cddb44cf4b2e1643ee5aae548837e4990751852da8b88c0b52ce"
+    },
+    {
+      "path": "test_false_positive_evidence_i7/backend_readback.bin",
+      "bytes": 138739,
+      "sha256": "1769b036f39c9c9745e152181b61a45e04a4189f646ca06a47758381e3b7cdfa"
+    },
+    {
+      "path": "test_false_positive_evidence_i7/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_false_positive_evidence_i7/step_trace.bin",
+      "bytes": 176,
+      "sha256": "2e962af82ea87c0b1d0093575958db9888ff2ad2e8235fd1a96c97f00a509bc3"
+    },
+    {
+      "path": "test_false_positive_evidence_i7/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_false_positive_evidence_i7/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_false_positive_evidence_i6/service_readback.bin",
+      "bytes": 138739,
+      "sha256": "a79a7214f663c9b269c8c5ad43ce4972cd5e6ce823c4514409aa5b333e3ba1d6"
+    },
+    {
+      "path": "test_false_positive_evidence_i6/hermes_receipt.bin",
+      "bytes": 138738,
+      "sha256": "b5f47b6420a6cddb44cf4b2e1643ee5aae548837e4990751852da8b88c0b52ce"
+    },
+    {
+      "path": "test_false_positive_evidence_i6/backend_readback.bin",
+      "bytes": 138739,
+      "sha256": "1769b036f39c9c9745e152181b61a45e04a4189f646ca06a47758381e3b7cdfa"
+    },
+    {
+      "path": "test_false_positive_evidence_i6/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "076d73d921a7f08c857645f3ebeadcaf0741ff1f959f5e527cf8a706cc2c5914"
+    },
+    {
+      "path": "test_false_positive_evidence_i6/step_trace.bin",
+      "bytes": 325,
+      "sha256": "a5d320b951da73d8fc6933fd6f45b717751f9f9c9d673f237c233f487018d1d2"
+    },
+    {
+      "path": "test_false_positive_evidence_i6/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_false_positive_evidence_i6/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_false_positive_evidence_i5/service_readback.bin",
+      "bytes": 138739,
+      "sha256": "1769b036f39c9c9745e152181b61a45e04a4189f646ca06a47758381e3b7cdfa"
+    },
+    {
+      "path": "test_false_positive_evidence_i5/hermes_receipt.bin",
+      "bytes": 138738,
+      "sha256": "b5f47b6420a6cddb44cf4b2e1643ee5aae548837e4990751852da8b88c0b52ce"
+    },
+    {
+      "path": "test_false_positive_evidence_i5/backend_readback.bin",
+      "bytes": 138739,
+      "sha256": "1769b036f39c9c9745e152181b61a45e04a4189f646ca06a47758381e3b7cdfa"
+    },
+    {
+      "path": "test_false_positive_evidence_i5/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_false_positive_evidence_i5/step_trace.bin",
+      "bytes": 325,
+      "sha256": "a5d320b951da73d8fc6933fd6f45b717751f9f9c9d673f237c233f487018d1d2"
+    },
+    {
+      "path": "test_false_positive_evidence_i5/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_false_positive_evidence_i5/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_false_positive_evidence_i4/service_readback.bin",
+      "bytes": 138739,
+      "sha256": "a79a7214f663c9b269c8c5ad43ce4972cd5e6ce823c4514409aa5b333e3ba1d6"
+    },
+    {
+      "path": "test_false_positive_evidence_i4/hermes_receipt.bin",
+      "bytes": 138733,
+      "sha256": "2107a8973444ce71302f8bbf381f1e18f75c1fca0dbd99a6a2c4f3e30fbae760"
+    },
+    {
+      "path": "test_false_positive_evidence_i4/backend_readback.bin",
+      "bytes": 138739,
+      "sha256": "1769b036f39c9c9745e152181b61a45e04a4189f646ca06a47758381e3b7cdfa"
+    },
+    {
+      "path": "test_false_positive_evidence_i4/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_false_positive_evidence_i4/step_trace.bin",
+      "bytes": 325,
+      "sha256": "a5d320b951da73d8fc6933fd6f45b717751f9f9c9d673f237c233f487018d1d2"
+    },
+    {
+      "path": "test_false_positive_evidence_i4/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_false_positive_evidence_i4/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_false_positive_evidence_i3/service_readback.bin",
+      "bytes": 138739,
+      "sha256": "a79a7214f663c9b269c8c5ad43ce4972cd5e6ce823c4514409aa5b333e3ba1d6"
+    },
+    {
+      "path": "test_false_positive_evidence_i3/hermes_receipt.bin",
+      "bytes": 138738,
+      "sha256": "b5f47b6420a6cddb44cf4b2e1643ee5aae548837e4990751852da8b88c0b52ce"
+    },
+    {
+      "path": "test_false_positive_evidence_i3/backend_readback.bin",
+      "bytes": 138739,
+      "sha256": "1769b036f39c9c9745e152181b61a45e04a4189f646ca06a47758381e3b7cdfa"
+    },
+    {
+      "path": "test_false_positive_evidence_i3/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_false_positive_evidence_i3/step_trace.bin",
+      "bytes": 325,
+      "sha256": "a5d320b951da73d8fc6933fd6f45b717751f9f9c9d673f237c233f487018d1d2"
+    },
+    {
+      "path": "test_false_positive_evidence_i3/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_false_positive_evidence_i3/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_false_positive_evidence_i2/service_readback.bin",
+      "bytes": 138739,
+      "sha256": "a79a7214f663c9b269c8c5ad43ce4972cd5e6ce823c4514409aa5b333e3ba1d6"
+    },
+    {
+      "path": "test_false_positive_evidence_i2/hermes_receipt.bin",
+      "bytes": 138738,
+      "sha256": "b5f47b6420a6cddb44cf4b2e1643ee5aae548837e4990751852da8b88c0b52ce"
+    },
+    {
+      "path": "test_false_positive_evidence_i2/backend_readback.bin",
+      "bytes": 138739,
+      "sha256": "f480c59e1dd8a1c46f2801d97995c7337a08c1f2dcc6515073e8af8273c83294"
+    },
+    {
+      "path": "test_false_positive_evidence_i2/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_false_positive_evidence_i2/step_trace.bin",
+      "bytes": 325,
+      "sha256": "a5d320b951da73d8fc6933fd6f45b717751f9f9c9d673f237c233f487018d1d2"
+    },
+    {
+      "path": "test_false_positive_evidence_i2/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_false_positive_evidence_i2/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_false_positive_evidence_i1/service_readback.bin",
+      "bytes": 138739,
+      "sha256": "a79a7214f663c9b269c8c5ad43ce4972cd5e6ce823c4514409aa5b333e3ba1d6"
+    },
+    {
+      "path": "test_false_positive_evidence_i1/hermes_receipt.bin",
+      "bytes": 138738,
+      "sha256": "b5f47b6420a6cddb44cf4b2e1643ee5aae548837e4990751852da8b88c0b52ce"
+    },
+    {
+      "path": "test_false_positive_evidence_i1/backend_readback.bin",
+      "bytes": 138739,
+      "sha256": "1769b036f39c9c9745e152181b61a45e04a4189f646ca06a47758381e3b7cdfa"
+    },
+    {
+      "path": "test_false_positive_evidence_i1/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_false_positive_evidence_i1/step_trace.bin",
+      "bytes": 325,
+      "sha256": "a5d320b951da73d8fc6933fd6f45b717751f9f9c9d673f237c233f487018d1d2"
+    },
+    {
+      "path": "test_false_positive_evidence_i1/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_false_positive_evidence_i1/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_false_positive_evidence_i0/service_readback.bin",
+      "bytes": 138739,
+      "sha256": "a79a7214f663c9b269c8c5ad43ce4972cd5e6ce823c4514409aa5b333e3ba1d6"
+    },
+    {
+      "path": "test_false_positive_evidence_i0/hermes_receipt.bin",
+      "bytes": 138738,
+      "sha256": "b5f47b6420a6cddb44cf4b2e1643ee5aae548837e4990751852da8b88c0b52ce"
+    },
+    {
+      "path": "test_false_positive_evidence_i0/backend_readback.bin",
+      "bytes": 138739,
+      "sha256": "1769b036f39c9c9745e152181b61a45e04a4189f646ca06a47758381e3b7cdfa"
+    },
+    {
+      "path": "test_false_positive_evidence_i0/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_false_positive_evidence_i0/step_trace.bin",
+      "bytes": 325,
+      "sha256": "a5d320b951da73d8fc6933fd6f45b717751f9f9c9d673f237c233f487018d1d2"
+    },
+    {
+      "path": "test_false_positive_evidence_i0/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_false_positive_evidence_i0/screenshot.bin",
+      "bytes": 7,
+      "sha256": "d67e2e944994496c8d8ec76eed0cf9f09679448d584b532bebf941852a37f5ed"
+    },
+    {
+      "path": "test_installed_phone_model_mus3/backend_readback.bin",
+      "bytes": 138736,
+      "sha256": "d8863141c6e43c582d136a8f167b1f14dad8483c4e501ff4b900eef86c0433d8"
+    },
+    {
+      "path": "test_installed_phone_model_mus3/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "a6cd83a94b8fdec3f11a2bf0e7075d2d91aee8ff7505d628b822b5f8d9702961"
+    },
+    {
+      "path": "test_installed_phone_model_mus3/step_trace.bin",
+      "bytes": 325,
+      "sha256": "152ad59732b7d84e826224e2586fafdc48665b22111c08d3b7a2feb0f17487ba"
+    },
+    {
+      "path": "test_installed_phone_model_mus3/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_installed_phone_model_mus3/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_installed_phone_model_mus2/backend_readback.bin",
+      "bytes": 138736,
+      "sha256": "d8863141c6e43c582d136a8f167b1f14dad8483c4e501ff4b900eef86c0433d8"
+    },
+    {
+      "path": "test_installed_phone_model_mus2/installed_apk_readback.bin",
+      "bytes": 242,
+      "sha256": "7b416fa7d73d4dceaedf0cb780ae7cff6a1b58b9bd8cfdabe77a07756ebb5b58"
+    },
+    {
+      "path": "test_installed_phone_model_mus2/step_trace.bin",
+      "bytes": 325,
+      "sha256": "152ad59732b7d84e826224e2586fafdc48665b22111c08d3b7a2feb0f17487ba"
+    },
+    {
+      "path": "test_installed_phone_model_mus2/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_installed_phone_model_mus2/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_installed_phone_model_mus1/backend_readback.bin",
+      "bytes": 138736,
+      "sha256": "d8863141c6e43c582d136a8f167b1f14dad8483c4e501ff4b900eef86c0433d8"
+    },
+    {
+      "path": "test_installed_phone_model_mus1/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "e3775263265549f35882af33149e208570bce9e27bc53f90d7616a6ec40cbc5e"
+    },
+    {
+      "path": "test_installed_phone_model_mus1/step_trace.bin",
+      "bytes": 325,
+      "sha256": "152ad59732b7d84e826224e2586fafdc48665b22111c08d3b7a2feb0f17487ba"
+    },
+    {
+      "path": "test_installed_phone_model_mus1/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_installed_phone_model_mus1/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_installed_phone_model_mus0/backend_readback.bin",
+      "bytes": 138736,
+      "sha256": "d8863141c6e43c582d136a8f167b1f14dad8483c4e501ff4b900eef86c0433d8"
+    },
+    {
+      "path": "test_installed_phone_model_mus0/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "c710e7d16024c41916c84b8c644384d1872f8b1ab9b64d154775c4d983ae961a"
+    },
+    {
+      "path": "test_installed_phone_model_mus0/step_trace.bin",
+      "bytes": 325,
+      "sha256": "152ad59732b7d84e826224e2586fafdc48665b22111c08d3b7a2feb0f17487ba"
+    },
+    {
+      "path": "test_installed_phone_model_mus0/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_installed_phone_model_mus0/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_even_consistent_synthetic0/backend_readback.bin",
+      "bytes": 138736,
+      "sha256": "d8863141c6e43c582d136a8f167b1f14dad8483c4e501ff4b900eef86c0433d8"
+    },
+    {
+      "path": "test_even_consistent_synthetic0/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_even_consistent_synthetic0/step_trace.bin",
+      "bytes": 325,
+      "sha256": "152ad59732b7d84e826224e2586fafdc48665b22111c08d3b7a2feb0f17487ba"
+    },
+    {
+      "path": "test_even_consistent_synthetic0/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_even_consistent_synthetic0/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_broker_success_alone_and_0/backend_readback.bin",
+      "bytes": 138736,
+      "sha256": "d8863141c6e43c582d136a8f167b1f14dad8483c4e501ff4b900eef86c0433d8"
+    },
+    {
+      "path": "test_broker_success_alone_and_0/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_broker_success_alone_and_0/step_trace.bin",
+      "bytes": 325,
+      "sha256": "152ad59732b7d84e826224e2586fafdc48665b22111c08d3b7a2feb0f17487ba"
+    },
+    {
+      "path": "test_broker_success_alone_and_0/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_broker_success_alone_and_0/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_successful_cli_exit_remai0/backend_readback.bin",
+      "bytes": 138736,
+      "sha256": "d8863141c6e43c582d136a8f167b1f14dad8483c4e501ff4b900eef86c0433d8"
+    },
+    {
+      "path": "test_successful_cli_exit_remai0/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_successful_cli_exit_remai0/step_trace.bin",
+      "bytes": 325,
+      "sha256": "152ad59732b7d84e826224e2586fafdc48665b22111c08d3b7a2feb0f17487ba"
+    },
+    {
+      "path": "test_successful_cli_exit_remai0/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_successful_cli_exit_remai0/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_phone_byte_functions_requ5/byte-effects.json",
+      "bytes": 140185,
+      "sha256": "7ac9fd54f4c9ad290cd4d87ecb50062b3af78aa53bd433fc620897ff21c9d702"
+    },
+    {
+      "path": "test_phone_byte_functions_requ5/CLIPBOARD_PASTE.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_phone_byte_functions_requ5/CLIPBOARD_COPY.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_phone_byte_functions_requ5/backend_readback.bin",
+      "bytes": 139153,
+      "sha256": "8478704d051a3fc443ab83d1337cd3dad3ade35b60070fd7c738d9587e52fe3b"
+    },
+    {
+      "path": "test_phone_byte_functions_requ5/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_phone_byte_functions_requ5/step_trace.bin",
+      "bytes": 325,
+      "sha256": "ee3e3bf138f7768c7672c85e9418c585c4b002b6d90a99710e0cc7def1a8e46f"
+    },
+    {
+      "path": "test_phone_byte_functions_requ5/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_phone_byte_functions_requ5/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_phone_byte_functions_requ4/byte-effects.json",
+      "bytes": 139434,
+      "sha256": "859b63dcdf7e8279e312d99ac791805149729ee4a653b24da86899c7dbef88ac"
+    },
+    {
+      "path": "test_phone_byte_functions_requ4/UPLOAD.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_phone_byte_functions_requ4/backend_readback.bin",
+      "bytes": 138948,
+      "sha256": "9db7283761ccd33434bf49324b3448c8cd36da5a71fca3b0b3e44a1fdc67de50"
+    },
+    {
+      "path": "test_phone_byte_functions_requ4/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_phone_byte_functions_requ4/step_trace.bin",
+      "bytes": 325,
+      "sha256": "6cfbe4042e3740f10f17e60d016e8171fe917b752aaa3ac1565ec9d93dfd024d"
+    },
+    {
+      "path": "test_phone_byte_functions_requ4/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_phone_byte_functions_requ4/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_phone_byte_functions_requ3/byte-effects.json",
+      "bytes": 139440,
+      "sha256": "ff4cbd301c6a8857695541983299d6ce948cc9c124fe5809dfbeeb891e1c9431"
+    },
+    {
+      "path": "test_phone_byte_functions_requ3/DOWNLOAD.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_phone_byte_functions_requ3/backend_readback.bin",
+      "bytes": 138948,
+      "sha256": "2d676b1b59752baa32f3ca947fdca7a2362a827fc8df307c135697c1dfd81e35"
+    },
+    {
+      "path": "test_phone_byte_functions_requ3/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_phone_byte_functions_requ3/step_trace.bin",
+      "bytes": 325,
+      "sha256": "234e940b7f51292cbd84c416852f2e949ab3b14b37ccca2047fc54ed582ebbef"
+    },
+    {
+      "path": "test_phone_byte_functions_requ3/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_phone_byte_functions_requ3/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_phone_byte_functions_requ2/byte-effects.json",
+      "bytes": 140187,
+      "sha256": "f450d0ce5544fea7de9398a655abc05bd3a16038a6ab59281f0472d2dc846228"
+    },
+    {
+      "path": "test_phone_byte_functions_requ2/CLIPBOARD_PASTE.bin",
+      "bytes": 32,
+      "sha256": "5a86f7388a6bc3616de6870493b111fbfb227692ca31d461140ebc3a44892a8c"
+    },
+    {
+      "path": "test_phone_byte_functions_requ2/CLIPBOARD_COPY.bin",
+      "bytes": 31,
+      "sha256": "f0c13ea158d837bee46fc044c7a44e048c97129be37a1d8b6bc042ceba8d406f"
+    },
+    {
+      "path": "test_phone_byte_functions_requ2/backend_readback.bin",
+      "bytes": 139153,
+      "sha256": "8478704d051a3fc443ab83d1337cd3dad3ade35b60070fd7c738d9587e52fe3b"
+    },
+    {
+      "path": "test_phone_byte_functions_requ2/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_phone_byte_functions_requ2/step_trace.bin",
+      "bytes": 325,
+      "sha256": "ee3e3bf138f7768c7672c85e9418c585c4b002b6d90a99710e0cc7def1a8e46f"
+    },
+    {
+      "path": "test_phone_byte_functions_requ2/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_phone_byte_functions_requ2/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_phone_byte_functions_requ1/byte-effects.json",
+      "bytes": 139435,
+      "sha256": "987f3bcf6cd4493fdde123bd7d93772c344c6e28e523df919aeb3b42b8e7c531"
+    },
+    {
+      "path": "test_phone_byte_functions_requ1/UPLOAD.bin",
+      "bytes": 23,
+      "sha256": "1f041c400755bb1455ef0b837fdd181f5bc840dca4cec5634fbe67a4cf248c52"
+    },
+    {
+      "path": "test_phone_byte_functions_requ1/backend_readback.bin",
+      "bytes": 138948,
+      "sha256": "9db7283761ccd33434bf49324b3448c8cd36da5a71fca3b0b3e44a1fdc67de50"
+    },
+    {
+      "path": "test_phone_byte_functions_requ1/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_phone_byte_functions_requ1/step_trace.bin",
+      "bytes": 325,
+      "sha256": "6cfbe4042e3740f10f17e60d016e8171fe917b752aaa3ac1565ec9d93dfd024d"
+    },
+    {
+      "path": "test_phone_byte_functions_requ1/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_phone_byte_functions_requ1/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_phone_byte_functions_requ0/byte-effects.json",
+      "bytes": 139441,
+      "sha256": "c75766153c4ffd823167bb9ad974aca479d428ca2e28cbfb394dc9d4e3c5b97b"
+    },
+    {
+      "path": "test_phone_byte_functions_requ0/DOWNLOAD.bin",
+      "bytes": 25,
+      "sha256": "290bfdb75ac30ae7fc62aac0ffb999f3917f845989acb280a2d88af2d50b2149"
+    },
+    {
+      "path": "test_phone_byte_functions_requ0/backend_readback.bin",
+      "bytes": 138948,
+      "sha256": "2d676b1b59752baa32f3ca947fdca7a2362a827fc8df307c135697c1dfd81e35"
+    },
+    {
+      "path": "test_phone_byte_functions_requ0/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_phone_byte_functions_requ0/step_trace.bin",
+      "bytes": 325,
+      "sha256": "234e940b7f51292cbd84c416852f2e949ab3b14b37ccca2047fc54ed582ebbef"
+    },
+    {
+      "path": "test_phone_byte_functions_requ0/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_phone_byte_functions_requ0/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_download_metadata_functio0/backend_readback.bin",
+      "bytes": 138759,
+      "sha256": "90c6d28b2190a71eaa7829a6eb238cd0aa18ed1c6be87b57fdd08f2b293d7614"
+    },
+    {
+      "path": "test_download_metadata_functio0/installed_apk_readback.bin",
+      "bytes": 239,
+      "sha256": "4237d1ff48c11b10e8539ee8fe96ed5b3728a1f0d7368278a56de7540dd7e4c5"
+    },
+    {
+      "path": "test_download_metadata_functio0/step_trace.bin",
+      "bytes": 325,
+      "sha256": "1078f0342dc83a3d5b2d9a9dbfeab2df0ec7c05a53bbbe6d8158c58dd06df698"
+    },
+    {
+      "path": "test_download_metadata_functio0/logcat.bin",
+      "bytes": 36,
+      "sha256": "70e87083a214e61c73607a90a24a4253ab300f8f95559c60f883796ae06f5f15"
+    },
+    {
+      "path": "test_download_metadata_functio0/screenshot.bin",
+      "bytes": 40,
+      "sha256": "6aaa263d0ea2df10131ae9966cc69f04f23c03f57ed1118f7c417cee6bccf96b"
+    },
+    {
+      "path": "test_main_uses_supplied_object2/registries/owner_endpoint_schemas.json",
+      "bytes": 48,
+      "sha256": "4270adbba9f5bced311f0a1351b6167d475f3508bd648ecc0a2bd9d6f12f8b90"
+    },
+    {
+      "path": "test_main_uses_supplied_object2/registries/owner_features.json",
+      "bytes": 40,
+      "sha256": "5f95304ededc389d40d77ab0310844600571f468b0ba258207dad114201b33f7"
+    },
+    {
+      "path": "test_main_uses_supplied_object2/registries/owner_screens.json",
+      "bytes": 39,
+      "sha256": "049fa29c55511ffedae5585d315391a47fae0974a635fc7c3b4d1467c8499b0c"
+    },
+    {
+      "path": "test_main_uses_supplied_object2/registries/owner_endpoints.json",
+      "bytes": 41,
+      "sha256": "8735384ef96de32c82ce40acaac8788f654c9d0e00bc9166c9b9372e81541323"
+    },
+    {
+      "path": "test_main_uses_supplied_object1/registries/owner_endpoint_schemas.json",
+      "bytes": 48,
+      "sha256": "4270adbba9f5bced311f0a1351b6167d475f3508bd648ecc0a2bd9d6f12f8b90"
+    },
+    {
+      "path": "test_main_uses_supplied_object1/registries/owner_features.json",
+      "bytes": 40,
+      "sha256": "5f95304ededc389d40d77ab0310844600571f468b0ba258207dad114201b33f7"
+    },
+    {
+      "path": "test_main_uses_supplied_object1/registries/owner_screens.json",
+      "bytes": 49,
+      "sha256": "534ac00e277f4006a0556409206742a8d627ce2e34c0d2b11ddba787d282b670"
+    },
+    {
+      "path": "test_main_uses_supplied_object1/registries/owner_endpoints.json",
+      "bytes": 41,
+      "sha256": "8735384ef96de32c82ce40acaac8788f654c9d0e00bc9166c9b9372e81541323"
+    },
+    {
+      "path": "test_main_uses_supplied_object0/registries/owner_endpoint_schemas.json",
+      "bytes": 56,
+      "sha256": "1ee7e884fab8f9723c5c29f30eefe54d4602a96fb8bb7559fb575fff142898f6"
+    },
+    {
+      "path": "test_main_uses_supplied_object0/registries/owner_features.json",
+      "bytes": 48,
+      "sha256": "714334ce3e8c262e27836e497d796d19307579b1a58b3e5b4f3e6d1e9717a305"
+    },
+    {
+      "path": "test_main_uses_supplied_object0/registries/owner_screens.json",
+      "bytes": 47,
+      "sha256": "02355c5a333585bbfdc959dfc3949c09f63ea29e9b5d45c7f2ef872a454c274f"
+    },
+    {
+      "path": "test_main_uses_supplied_object0/registries/owner_endpoints.json",
+      "bytes": 49,
+      "sha256": "461d46e6aa8c1dbac9ea48606fb6c42059afb7e84dc8c961bd66a7a5c107bb78"
+    }
+  ]
+}

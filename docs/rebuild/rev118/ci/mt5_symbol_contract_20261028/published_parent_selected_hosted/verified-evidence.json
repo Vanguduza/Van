@@ -1,0 +1,37 @@
+{
+  "source_commit": "d3ef2cdb75e5d9888438e62ce1566771d25c7cd4",
+  "artifact_id": 12805702109,
+  "bytes": 187441,
+  "sha256": "d0e2c8b1d2b860463aab878b31b2e3bf1f1434389289f2128055ea836b9ff102",
+  "xml": {
+    "extracted/trading-source-report.xml": {
+      "cases": 4831,
+      "passed": 4830,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 1,
+      "skip_reasons": [
+        {
+          "type": "pytest.skip",
+          "message": "dial-new checkout not available (set DIAL_REPO)"
+        }
+      ]
+    },
+    "extracted/voice-source-report.xml": {
+      "cases": 117,
+      "passed": 117,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skip_reasons": []
+    },
+    "extracted/postgres-ledger-report.xml": {
+      "cases": 26,
+      "passed": 26,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skip_reasons": []
+    }
+  }
+}

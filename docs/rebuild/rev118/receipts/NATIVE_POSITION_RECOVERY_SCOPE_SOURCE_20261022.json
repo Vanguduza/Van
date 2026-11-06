@@ -1,0 +1,199 @@
+{
+  "schema": "van.rebuild.native-position-recovery-scope-source/1",
+  "source_parent": "d5bddfccddc6b6db60c97daf8b2e1c7cfb76a22e",
+  "source_sha256": {
+    "trading/vati/execution/recovery_scope.py": "f883a9af95913bf35bb304d8c6c7d9b26e5eea88b0de4680890f334545aca9af",
+    "trading/vati/app/trade_lifecycle.py": "0225bb00cc662ed0d1cbe051870e20746f0c912d3e897d0b39e216d4f31a056e",
+    "trading/tests/test_native_position_recovery_scope.py": "50bd172bc3388d10435379dd305f31c7d528d86491816a320651462bab739b31",
+    "trading/tests/test_account_lifecycle.py": "11579c219963e64abb7a61f6ff2d842e8fa6f8961a20dd4f7332a054c328af3c",
+    "trading/tests/test_account_trade_lifecycle.py": "78a46364553a7810fd94ff14649bfe3ef785dc38ef0bdd4717ab844672f5afec"
+  },
+  "initial_counterexamples": {
+    "tests": 10,
+    "failures": 9,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "87876d1e449e5b57aa25798df24bfbaf59aca823f378118f0e4e8a44f784649f"
+  },
+  "full_trading_real_private_postgresql": {
+    "tests": 2017,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "5f856e5a3370a34161190b1396f6968b87fec3993122ee36c2a60e8a05864d1c"
+  },
+  "full_suite_note": "Implementation final; before final chain-test-only tightening from damaged command to separate damaged diagnostic row. Current tightened case passes in fault control and restored focus.",
+  "focused_restored": {
+    "tests": 28,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "899d84bd861ba3803455a26598510657ea1dd4ef6af73040f9269539ba1647b8"
+  },
+  "rebuild": {
+    "tests": 78,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "e7c5b46299289a82a0e95b6aff30d876a0891d57a0325a18e3e9b1443e2345dd"
+  },
+  "source_faults": {
+    "records": [
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "c018e871956ec1c81b8d47f6b7e25524940d4be5325dfe6036f6a4594c785204"
+      },
+      {
+        "phase": "mutation",
+        "why": "adopt an original command from a different account or venue",
+        "returncode": 1,
+        "log_sha256": "64add83bc763037dd98fa83edfac3e66784ebef323f85ee70c1e7c406d7e8ed4"
+      },
+      {
+        "phase": "mutation",
+        "why": "trust an imported command producer as native authority",
+        "returncode": 1,
+        "log_sha256": "f8fda4703739828477bf0e96278b89c7a27779cf83de8e45210d9460b0bc77cb"
+      },
+      {
+        "phase": "mutation",
+        "why": "ignore the original native command seal",
+        "returncode": 1,
+        "log_sha256": "849e7f2170763b8e895bce3a5f3fd267cf1d8ef0a936a75a1a3268c87abe949b"
+      },
+      {
+        "phase": "mutation",
+        "why": "join a command under a different original correlation identity",
+        "returncode": 1,
+        "log_sha256": "f2a66ab386f3c33b44a2a4ef1d1bba09c474cf1ff90c8cdef24b4ec69b8b9476"
+      },
+      {
+        "phase": "mutation",
+        "why": "choose a command despite conflicting original native identities",
+        "returncode": 1,
+        "log_sha256": "bb7d175a2fa0cbedbbcb1b54ae9bf6707d0c4c4b6f5665d8c7ec11e8be01e247"
+      },
+      {
+        "phase": "mutation",
+        "why": "adopt a position with a different original symbol",
+        "returncode": 1,
+        "log_sha256": "13193151749e0b9fb85fca6c16f898d916b6f99e2f5e535c82f8973ab3070b67"
+      },
+      {
+        "phase": "mutation",
+        "why": "adopt more current native quantity than the original command",
+        "returncode": 1,
+        "log_sha256": "24d5c11ef92c4b78d7b7fa3dcbeaed93e7ace9d2c2f10fa1117e6815e2e0966a"
+      },
+      {
+        "phase": "mutation",
+        "why": "report a missing venue stop as restored from an old remembered price",
+        "returncode": 1,
+        "log_sha256": "cf6ea759cee82c8b8e6987158020df2d8e526f087eedf769144725ccd9f7df13"
+      },
+      {
+        "phase": "mutation",
+        "why": "recover authority from a broken native ledger chain",
+        "returncode": 1,
+        "log_sha256": "de3826320cdbc96236e98d7a467e06ebe9030d4e3187e3129422211eae38ba91"
+      },
+      {
+        "phase": "mutation",
+        "why": "let the current mandate relabel a different native adapter account",
+        "returncode": 1,
+        "log_sha256": "d6897533f5cc1cedd5649e46c2ee8617fbfa2c2cfc7f7b1ecb8935f779c74db2"
+      }
+    ],
+    "definitions": [
+      [
+        "trading/vati/execution/recovery_scope.py",
+        "p['account_alias']==account_alias and p['venue']==venue",
+        "True",
+        "adopt an original command from a different account or venue"
+      ],
+      [
+        "trading/vati/execution/recovery_scope.py",
+        "event.kind is not EventKind.ORDER_COMMAND or event.producer!='vati-execution-router'",
+        "event.kind is not EventKind.ORDER_COMMAND",
+        "trust an imported command producer as native authority"
+      ],
+      [
+        "trading/vati/execution/recovery_scope.py",
+        "or p.get('command_hash')!=digest",
+        "or False",
+        "ignore the original native command seal"
+      ],
+      [
+        "trading/vati/execution/recovery_scope.py",
+        "or event.correlation_id!=iid",
+        "or False",
+        "join a command under a different original correlation identity"
+      ],
+      [
+        "trading/vati/execution/recovery_scope.py",
+        "if len(identities[iid])!=1:",
+        "if False:",
+        "choose a command despite conflicting original native identities"
+      ],
+      [
+        "trading/vati/execution/recovery_scope.py",
+        "position.symbol!=p['symbol']",
+        "False",
+        "adopt a position with a different original symbol"
+      ],
+      [
+        "trading/vati/execution/recovery_scope.py",
+        "or _positive(position.quantity)>_positive(p['quantity'])",
+        "or False",
+        "adopt more current native quantity than the original command"
+      ],
+      [
+        "trading/vati/app/trade_lifecycle.py",
+        "if software_stop else position.stop_price)",
+        "if software_stop else (position.stop_price or initial_stop))",
+        "report a missing venue stop as restored from an old remembered price"
+      ],
+      [
+        "trading/vati/execution/recovery_scope.py",
+        "if not ledger.verify_chain()[0]:",
+        "if False:",
+        "recover authority from a broken native ledger chain"
+      ],
+      [
+        "trading/vati/app/trade_lifecycle.py",
+        "if alias!=getattr(self.adapter,'account_alias',None):",
+        "if False:",
+        "let the current mandate relabel a different native adapter account"
+      ]
+    ],
+    "source_before_sha256": {
+      "trading/vati/app/trade_lifecycle.py": "0225bb00cc662ed0d1cbe051870e20746f0c912d3e897d0b39e216d4f31a056e",
+      "trading/vati/execution/recovery_scope.py": "f883a9af95913bf35bb304d8c6c7d9b26e5eea88b0de4680890f334545aca9af"
+    },
+    "source_after_sha256": {
+      "trading/vati/app/trade_lifecycle.py": "0225bb00cc662ed0d1cbe051870e20746f0c912d3e897d0b39e216d4f31a056e",
+      "trading/vati/execution/recovery_scope.py": "f883a9af95913bf35bb304d8c6c7d9b26e5eea88b0de4680890f334545aca9af"
+    },
+    "source_restored": true,
+    "journal_present": false
+  },
+  "fault_control": "16 passing source cases, then ten actual assertion-detected faults; restored source and no journal",
+  "private_fixture_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "fixture_changes": "Native producer names and actual routed account aliases replace placeholders; original economics/replay/protection assertions retained. Initial damaged-command-before-construction fixture stopped in router idempotency reader and was corrected to target recovery chain verification.",
+  "registry_refresh": "--check unchanged439endpoints262schemas; original IDs/history/authority retained",
+  "native_host_actions_executed": 0,
+  "physical_s24_cases_executed": 0,
+  "unit_acceptance": "NOT_ISSUED",
+  "release_qualified": false,
+  "remaining": [
+    "single-symbol startup recovery consumer and original entry context",
+    "native flat/pending/unknown financial-effect reconciliation",
+    "physical broker-account identity, migration and safe retirement",
+    "original native/independent/provider/signing/production/handset gates"
+  ]
+}

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="1.123" timestamp="2026-10-26T11:15:37.123220+00:00" hostname="2c5a245e39f1"><testcase classname="trading.worker_tests.test_dataset_candidate_archive" name="test_hidden_original_readback_is_not_a_success_receipt[sqlite]" time="0.187"><failure message="Failed: DID NOT RAISE DatasetPublicationUnknown">publication = (&lt;vati.core.ledger.Ledger object at 0x7f51da318f50&gt;, &lt;vati.research.dataset_archive.DatasetCandidateArchive object at ...tive_account_id":123,"schema":"vati.ctrader-symbol/1","transport_host":"demo.ctraderapi.com"}', received_at_ms=100000))
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7f51da754740&gt;
+
+    def test_hidden_original_readback_is_not_a_success_receipt(publication,monkeypatch):
+        ledger,archive,record,c=publication
+        with monkeypatch.context() as patch:
+            patch.setattr(archive,'lookup',lambda _:None)
+&gt;           with pytest.raises(DatasetPublicationUnknown,match='READBACK_UNAVAILABLE'):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE DatasetPublicationUnknown
+
+trading/worker_tests/test_dataset_candidate_archive.py:165: Failed</failure></testcase></testsuite></testsuites>

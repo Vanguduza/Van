@@ -134,23 +134,99 @@ class AuthService:
         device_secret: str,
         public_key_pem: str,
         label: str | None = None,
+        *,
+        device_access_token: str | None = None,
+        request_hash: str | None = None,
+        hardware_proved: bool = False,
+        proved_binding_id: str | None = None,
     ) -> PairingResult:
         if not pairing_token:
             raise AuthError("pairing_ticket_invalid", "Pairing ticket invalid or expired")
+        recoverable = device_access_token is not None
+        if recoverable:
+            if len(device_access_token) < 32 or not device_access_token.strip():
+                raise AuthError("device_access_token_invalid", "Device access token must contain at least 32 characters")
+            if not hardware_proved:
+                raise AuthError("pairing_hardware_proof_required", "Pairing recovery requires a fresh hardware proof")
+            if request_hash is None or len(request_hash) != 64 or any(c not in "0123456789abcdef" for c in request_hash):
+                raise AuthError("pairing_request_invalid", "Pairing recovery requires an exact request digest")
         cipher = self._cipher()
         encrypted_secret = cipher.encrypt(device_secret.encode("utf-8")).decode("utf-8")
         secret_hash = hashlib.sha256(device_secret.encode("utf-8")).hexdigest()
-        access_token = secrets.token_urlsafe(32)
+        access_token = device_access_token if recoverable else secrets.token_urlsafe(32)
         access_token_hash = hashlib.sha256(access_token.encode("utf-8")).hexdigest()
         ticket_hash = hashlib.sha256(pairing_token.encode("utf-8")).hexdigest()
-        now = int(time.time())
         async with self.store.connection() as db:
             await db.execute("BEGIN IMMEDIATE")
+            from van_gateway.auth.retirement import require_enrollment_available, require_fresh_approval_key
+            from van_gateway.auth.device_binding import DeviceBindingError
+            try:
+                await require_enrollment_available(db)
+            except DeviceBindingError as exc:
+                raise AuthError(exc.reason, "Owner device retirement is pending") from exc
+            await require_fresh_approval_key(db, public_key_pem)
+            # Waiting for the writer cannot extend a pairing ticket's authority.
+            now = int(time.time())
+            if recoverable or hardware_proved:
+                # A handler's proof must still name a live hardware binding at the
+                # enrollment's commit boundary. Revocation must not race a receipt retry.
+                cur = await db.execute(
+                    "SELECT binding_id, attestation_chain_verified FROM owner_device_bindings "
+                    "WHERE device_id = ? AND owner_principal_id = 'owner' AND status = 'ACTIVE'",
+                    (device_id,),
+                )
+                live_binding = await cur.fetchone()
+                if live_binding is None:
+                    await db.rollback()
+                    raise AuthError("pairing_binding_inactive", "Pairing recovery requires an active hardware binding")
+                if not live_binding["attestation_chain_verified"]:
+                    await db.rollback()
+                    raise AuthError("pairing_binding_unverified", "Pairing recovery requires a verified hardware attestation chain")
+                if proved_binding_id != live_binding["binding_id"]:
+                    await db.rollback()
+                    raise AuthError("pairing_binding_changed", "Hardware binding changed after pairing proof")
+            if recoverable:
+                cur = await db.execute(
+                    "SELECT device_id, request_hash, access_token_hash FROM pairing_attempts WHERE pairing_ticket_hash = ?",
+                    (ticket_hash,),
+                )
+                attempt = await cur.fetchone()
+                if attempt is not None:
+                    if (
+                        str(attempt["device_id"]) != device_id
+                        or not hmac.compare_digest(str(attempt["request_hash"]), request_hash)
+                        or not hmac.compare_digest(str(attempt["access_token_hash"]), access_token_hash)
+                    ):
+                        await db.rollback()
+                        raise AuthError("pairing_recovery_conflict", "Pairing recovery does not match the original enrollment")
+                    cur = await db.execute(
+                        "SELECT device_id, public_key_pem, enrolled_at_unix, revoked_at_unix, label, access_token_hash "
+                        "FROM devices WHERE device_id = ?",
+                        (device_id,),
+                    )
+                    enrolled = await cur.fetchone()
+                    if (
+                        enrolled is None
+                        or enrolled["revoked_at_unix"] is not None
+                        or not hmac.compare_digest(str(enrolled["access_token_hash"] or ""), access_token_hash)
+                    ):
+                        await db.rollback()
+                        raise AuthError("pairing_recovery_unavailable", "Original pairing credentials are no longer active")
+                    await db.commit()
+                    self._device_secrets[device_id] = device_secret.encode("utf-8")
+                    return PairingResult(
+                        DeviceRecord(
+                            str(enrolled["device_id"]), str(enrolled["public_key_pem"]),
+                            int(enrolled["enrolled_at_unix"]), None, enrolled["label"],
+                        ),
+                        access_token,
+                    )
             cur = await db.execute(
                 "SELECT label, expires_at_unix, used_at_unix FROM pairing_tickets WHERE ticket_hash = ?",
                 (ticket_hash,),
             )
             ticket = await cur.fetchone()
+            now = int(time.time())
             if ticket is None or ticket["used_at_unix"] is not None or int(ticket["expires_at_unix"]) <= now:
                 await db.rollback()
                 raise AuthError("pairing_ticket_invalid", "Pairing ticket invalid or expired")
@@ -164,6 +240,11 @@ class AuthService:
                 code = "device_revoked" if existing["revoked_at_unix"] is not None else "already_enrolled"
                 raise AuthError(code, "Device cannot be enrolled")
             effective_label = label or ticket["label"]
+            # Awaited identity reads can cross expiry even after the writer was
+            # acquired. Check before the first enrollment effect as well.
+            now = int(time.time())
+            if int(ticket["expires_at_unix"]) <= now:
+                raise AuthError("pairing_ticket_invalid", "Pairing ticket invalid or expired")
             await db.execute(
                 "INSERT INTO devices(device_id, public_key_pem, enrolled_at_unix, revoked_at_unix, label, encrypted_secret, access_token_hash) VALUES (?, ?, ?, NULL, ?, ?, ?)",
                 (device_id, public_key_pem, now, effective_label, encrypted_secret, access_token_hash),
@@ -182,6 +263,16 @@ class AuthService:
                 "UPDATE pairing_tickets SET used_at_unix = ? WHERE ticket_hash = ? AND used_at_unix IS NULL",
                 (now, ticket_hash),
             )
+            if recoverable:
+                await db.execute(
+                    "INSERT INTO pairing_attempts(pairing_ticket_hash, device_id, request_hash, access_token_hash, created_at_unix) "
+                    "VALUES (?, ?, ?, ?, ?)",
+                    (ticket_hash, device_id, request_hash, access_token_hash, now),
+                )
+            # None of these writes is public yet. Expiry during an awaited write
+            # rolls back device, grant, consumed ticket and recovery receipt together.
+            if int(ticket["expires_at_unix"]) <= int(time.time()):
+                raise AuthError("pairing_ticket_invalid", "Pairing ticket invalid or expired")
             await db.commit()
         self._device_secrets[device_id] = device_secret.encode("utf-8")
         return PairingResult(DeviceRecord(device_id, public_key_pem, now, None, effective_label), access_token)
@@ -199,24 +290,34 @@ class AuthService:
         return DeviceRecord(row["device_id"], row["public_key_pem"], int(row["enrolled_at_unix"]), None, row["label"])
 
     async def enroll(self, device_id: str, device_secret: str, public_key_pem: str, label: str | None = None) -> DeviceRecord:
-        existing = await self.store.fetchone("SELECT device_id, revoked_at_unix FROM devices WHERE device_id = ?", (device_id,))
-        if existing is not None:
-            if existing["revoked_at_unix"] is not None:
-                raise AuthError("device_revoked", "Device was revoked; re-enrollment denied")
-            raise AuthError("already_enrolled", "Device already enrolled")
+        from van_gateway.auth.retirement import require_enrollment_available, require_fresh_approval_key
+        from van_gateway.auth.device_binding import DeviceBindingError
         cipher = self._cipher()
         encrypted_secret = cipher.encrypt(device_secret.encode("utf-8")).decode("utf-8")
-        now = int(time.time())
-        await self.store.execute(
-            "INSERT INTO devices(device_id, public_key_pem, enrolled_at_unix, revoked_at_unix, label, encrypted_secret) VALUES (?, ?, ?, NULL, ?, ?)",
-            (device_id, public_key_pem, now, label, encrypted_secret),
-        )
-        self._device_secrets[device_id] = device_secret.encode("utf-8")
         secret_hash = hashlib.sha256(device_secret.encode("utf-8")).hexdigest()
-        await self.store.execute(
-            "INSERT INTO capability_grants(grant_id, device_id, capabilities_json, expires_at_unix, task_id, revoked_at_unix, created_at_unix) VALUES (?, ?, ?, ?, NULL, NULL, ?)",
-            (f"enroll-{device_id}", device_id, Store.dumps({"secret_sha256": secret_hash, "capabilities": ["owner"]}), now + ENROLMENT_GRANT_SECONDS, now),
-        )
+        async with self.store.connection() as db:
+            await db.execute("BEGIN IMMEDIATE")
+            existing = await (await db.execute("SELECT revoked_at_unix FROM devices WHERE device_id=?", (device_id,))).fetchone()
+            if existing is not None:
+                if existing["revoked_at_unix"] is not None:
+                    raise AuthError("device_revoked", "Device was revoked; re-enrollment denied")
+                raise AuthError("already_enrolled", "Device already enrolled")
+            try:
+                await require_enrollment_available(db)
+            except DeviceBindingError as exc:
+                raise AuthError(exc.reason, "Owner device retirement is pending") from exc
+            await require_fresh_approval_key(db, public_key_pem)
+            now = int(time.time())
+            await db.execute(
+                "INSERT INTO devices(device_id, public_key_pem, enrolled_at_unix, revoked_at_unix, label, encrypted_secret) VALUES (?, ?, ?, NULL, ?, ?)",
+                (device_id, public_key_pem, now, label, encrypted_secret),
+            )
+            await db.execute(
+                "INSERT INTO capability_grants(grant_id, device_id, capabilities_json, expires_at_unix, task_id, revoked_at_unix, created_at_unix) VALUES (?, ?, ?, ?, NULL, NULL, ?)",
+                (f"enroll-{device_id}", device_id, Store.dumps({"secret_sha256": secret_hash, "capabilities": ["owner"]}), now + ENROLMENT_GRANT_SECONDS, now),
+            )
+            await db.commit()
+        self._device_secrets[device_id] = device_secret.encode("utf-8")
         return DeviceRecord(device_id, public_key_pem, now, None, label)
 
     async def grant_status(self, device_id: str, *, now: int | None = None) -> dict:
@@ -257,19 +358,33 @@ class AuthService:
         An expired grant is deliberately not renewable: re-pairing is the path back, and
         silently reviving a grant the owner let lapse would make the expiry decorative.
         """
-        stamp = int(time.time()) if now is None else now
-        status = await self.grant_status(device_id, now=stamp)
-        if status["state"] in {"ABSENT", "REVOKED", "EXPIRED"}:
-            raise AuthError(
-                "grant_not_renewable",
-                f"enrolment grant for {device_id} is {status['state']}; pair the device again",
+        async with self.store.connection() as db:
+            await db.execute("BEGIN IMMEDIATE")
+            cursor = await db.execute(
+                "SELECT g.expires_at_unix, g.revoked_at_unix, "
+                "d.revoked_at_unix AS device_revoked_at_unix "
+                "FROM capability_grants g JOIN devices d ON d.device_id = g.device_id "
+                "WHERE g.grant_id = ? AND g.device_id = ?",
+                (f"enroll-{device_id}", device_id),
             )
-        await self.store.execute(
-            "UPDATE capability_grants SET expires_at_unix = ? WHERE grant_id = ? "
-            "AND revoked_at_unix IS NULL",
-            (stamp + ENROLMENT_GRANT_SECONDS, f"enroll-{device_id}"),
-        )
-        return await self.grant_status(device_id, now=stamp)
+            grant = await cursor.fetchone()
+            # Check the live authority after acquiring the writer, never a pre-lock
+            # status snapshot. Revocation and renewal share this same SQL boundary.
+            stamp = int(time.time()) if now is None else now
+            if (grant is None or grant["revoked_at_unix"] is not None
+                    or grant["device_revoked_at_unix"] is not None
+                    or int(grant["expires_at_unix"]) <= stamp):
+                raise AuthError("grant_not_renewable", "Enrollment grant is absent, revoked or expired; pair the device again")
+            await db.execute(
+                "UPDATE capability_grants SET expires_at_unix = ? WHERE grant_id = ?",
+                (max(int(grant["expires_at_unix"]), stamp + ENROLMENT_GRANT_SECONDS), f"enroll-{device_id}"),
+            )
+            # Check the original grant, not the proposed extension, after the write.
+            commit_stamp = int(time.time()) if now is None else now
+            if int(grant["expires_at_unix"]) <= commit_stamp:
+                raise AuthError("grant_not_renewable", "Enrollment grant expired before renewal committed; pair the device again")
+            await db.commit()
+        return await self.grant_status(device_id, now=commit_stamp)
 
     async def expiring_grants(self, *, now: int | None = None) -> list[dict]:
         """Every live grant that is expired or due for renewal, for the degraded surface."""
@@ -285,22 +400,19 @@ class AuthService:
         """Test/recovery helper; production restart restoration uses encrypted DB state."""
         self._device_secrets[device_id] = device_secret.encode("utf-8")
 
-    async def revoke(self, device_id: str) -> None:
-        now = int(time.time())
-        row = await self.store.fetchone("SELECT device_id FROM devices WHERE device_id = ?", (device_id,))
-        if row is None:
-            raise AuthError("unknown_device", "Device not found")
+    async def revoke(self, device_id: str) -> dict:
+        from van_gateway.auth.retirement import retire_device
+        now = int(time.time() * 1000)
         async with self.store.connection() as db:
-            await db.execute(
-                "UPDATE capability_grants SET revoked_at_unix = ? WHERE device_id = ? AND revoked_at_unix IS NULL",
-                (now, device_id),
-            )
-            await db.execute(
-                "UPDATE devices SET revoked_at_unix = ? WHERE device_id = ?",
-                (now, device_id),
-            )
+            await db.execute('BEGIN IMMEDIATE')
+            row = await (await db.execute('SELECT public_key_pem FROM devices WHERE device_id=?', (device_id,))).fetchone()
+            if row is None:
+                raise AuthError("unknown_device", "Device not found")
+            record = await retire_device(db, device_id=device_id, public_key_pem=row['public_key_pem'],
+                                         now_ms=now, reason="device revoked")
             await db.commit()
         self._device_secrets.pop(device_id, None)
+        return record
 
     async def require_device(self, device_id: str) -> DeviceRecord:
         row = await self.store.fetchone(

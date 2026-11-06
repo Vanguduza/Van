@@ -1,0 +1,31 @@
+.........F                                                               [100%]
+=================================== FAILURES ===================================
+___ test_rounding_a_reporting_ratio_cannot_hide_any_excess_over_signed_heat ____
+
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+mandate = TradingMandate(mandate_id='mandate-fx-primary', version='1.0.0', account_alias='fx_primary', venue='mt5', mode=<Author...se)), strategy_risk_budgets={}, trading_temperament=None, strategy_temperaments={}, temperament_owner_signature_ref='')
+
+    def test_rounding_a_reporting_ratio_cannot_hide_any_excess_over_signed_heat(eurusd, mandate):
+        contract = replace(eurusd, tick_value=Decimal('5e-102'))
+        positions = tuple(OpenPosition('GBPUSD', side, Decimal('1'), Decimal('0.000750075'),
+            Decimal('100000'), 'GBP', 'USD', has_broker_side_stop=True)
+            for side in (Direction.LONG, Direction.SHORT))
+        facts = snapshot(contract, equity=Decimal('10001'), balance=Decimal('10001'),
+            peak_equity=Decimal('10001'), day_start_equity=Decimal('10001'),
+            week_start_equity=Decimal('10001'), open_positions=positions)
+        # Existing gross heat equals the signed ceiling exactly. Opposing currency
+        # legs cancel, but gross loss does not. Any positive new loss must refuse.
+        original_loss = sum((Fraction(p.lots) * Fraction(p.stop_distance)
+                             * Fraction(p.value_per_price_unit_per_lot) for p in positions), Fraction())
+        assert original_loss / Fraction(facts.equity) == Fraction(mandate.max_open_stop_risk)
+        with localcontext(native_decimal_context()):
+            result = RiskAuthority(mandate).evaluate_safe(intent(), facts)
+>       assert result.decision is Decision.REJECTED
+E       AssertionError: assert <Decision.APPROVED: 'APPROVED'> is <Decision.REJECTED: 'REJECTED'>
+E        +  where <Decision.APPROVED: 'APPROVED'> = RiskDecision(trade_intent_id='ti-1', decision=<Decision.APPROVED: 'APPROVED'>, reason_code='OK', reason_detail='', app...e7eb6c80c', mandate_hash='e8e2de458db1f7319db784502e7405bbdfffb52d2eadcd43e56d07307f9385b3', approval_schema_version=2).decision
+E        +  and   <Decision.REJECTED: 'REJECTED'> = Decision.REJECTED
+
+trading/tests/test_risk_arithmetic_context.py:103: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_risk_arithmetic_context.py::test_rounding_a_reporting_ratio_cannot_hide_any_excess_over_signed_heat
+1 failed, 9 passed in 0.53s

@@ -1,0 +1,9 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_ test_event_alert_state_and_projection_witness_have_one_sqlite_rollback_boundary _
+backend/tests/test_market_monitor_runtime.py:54: in test_event_alert_state_and_projection_witness_have_one_sqlite_rollback_boundary
+    assert not await s.store.fetchall("SELECT * FROM events WHERE event_type='trading.alert.triggered'")
+E   assert not [<sqlite3.Row object at 0x7f150b08f730>]
+=========================== short test summary info ============================
+FAILED backend/tests/test_market_monitor_runtime.py::test_event_alert_state_and_projection_witness_have_one_sqlite_rollback_boundary
+1 failed in 0.31s

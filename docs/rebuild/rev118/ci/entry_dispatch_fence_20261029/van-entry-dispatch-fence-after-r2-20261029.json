@@ -1,0 +1,23 @@
+{
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "trading/tests/test_entry_dispatch_commit_fence.py",
+    "trading/tests/test_execution.py",
+    "trading/tests/test_mandate_dispatch_validity.py",
+    "trading/tests/test_dispatch_current_controls.py",
+    "trading/tests/test_router_native_entry_deadline.py",
+    "--junitxml=/workspace/van-entry-dispatch-fence-after-r2-20261029.xml"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 930412,
+  "started_at_utc": "2026-10-29T01:29:11.575543+00:00",
+  "timeout_seconds": 180,
+  "state": "COMPLETED",
+  "command_pid": 930415,
+  "exit": 0,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-29T01:29:15.153917+00:00"
+}

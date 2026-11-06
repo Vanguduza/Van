@@ -1,0 +1,138 @@
+{
+  "schema": "van.supplemental-source-faults/1",
+  "not_canonical_374": true,
+  "positive_control": {
+    "exit": 0,
+    "cases": 163,
+    "failures": 0,
+    "assertions": 0,
+    "errors": 0,
+    "skips": 0,
+    "storage_audit_violations": 0
+  },
+  "restored_control": {
+    "exit": 0,
+    "cases": 163,
+    "failures": 0,
+    "assertions": 0,
+    "errors": 0,
+    "skips": 0,
+    "storage_audit_violations": 0
+  },
+  "cases": [
+    {
+      "case": "accept-non-RFC-Unicode-fraction",
+      "path": "trading/vati/research/dataset_manifest.py",
+      "mutant_sha256": "b9935fbd0428da3f8f6db03c36be90501df877edcab5ed4ee9b0f32adb31e0d9",
+      "exit": 1,
+      "cases": 2,
+      "failures": 2,
+      "assertions": 2,
+      "errors": 0,
+      "skips": 0,
+      "storage_audit_violations": 0
+    },
+    {
+      "case": "round-away-nanosecond-leakage",
+      "path": "trading/vati/research/dataset_manifest.py",
+      "mutant_sha256": "dd38b30c4445b3cfa81653af04ee0979edd862ee887e91ae5a4b8a7d4d0e53da",
+      "exit": 1,
+      "cases": 2,
+      "failures": 2,
+      "assertions": 2,
+      "errors": 0,
+      "skips": 0,
+      "storage_audit_violations": 0
+    },
+    {
+      "case": "self-qualify-candidate",
+      "path": "trading/vati/research/dataset_manifest.py",
+      "mutant_sha256": "2eb22f14ebc540c129220ebf6fe23fc63b2510b904df4c5d5f24b6c9d4dbec2a",
+      "exit": 1,
+      "cases": 1,
+      "failures": 1,
+      "assertions": 1,
+      "errors": 0,
+      "skips": 0,
+      "storage_audit_violations": 0
+    },
+    {
+      "case": "ignore-extra-manifest-fields",
+      "path": "trading/vati/research/dataset_manifest.py",
+      "mutant_sha256": "1774c6e0b2aa9d899aad51823206bf6c0452252601f67dbdb7f634e14583e328",
+      "exit": 1,
+      "cases": 1,
+      "failures": 1,
+      "assertions": 1,
+      "errors": 0,
+      "skips": 0,
+      "storage_audit_violations": 0
+    },
+    {
+      "case": "ignore-actual-artifact-hash",
+      "path": "trading/vati/research/dataset_sources.py",
+      "mutant_sha256": "15cbcb120251043afd0f641164d160589b9d62aedcfb038d830e755f4c9bd9e4",
+      "exit": 1,
+      "cases": 1,
+      "failures": 1,
+      "assertions": 1,
+      "errors": 0,
+      "skips": 0,
+      "storage_audit_violations": 0
+    },
+    {
+      "case": "ignore-source-row-identity",
+      "path": "trading/vati/research/dataset_sources.py",
+      "mutant_sha256": "5fb42eb5c28e24e057b31836486618abb8daec5f3e4f22b0db92afc6cd19dfcb",
+      "exit": 1,
+      "cases": 1,
+      "failures": 1,
+      "assertions": 1,
+      "errors": 0,
+      "skips": 0,
+      "storage_audit_violations": 0
+    },
+    {
+      "case": "ignore-original-source-manifest",
+      "path": "trading/vati/research/dataset_sources.py",
+      "mutant_sha256": "d27116cdcafeb9a247b9a1c38290f69d6ce4954f1d2bd0df65151fdcd335674b",
+      "exit": 1,
+      "cases": 1,
+      "failures": 1,
+      "assertions": 1,
+      "errors": 0,
+      "skips": 0,
+      "storage_audit_violations": 0
+    },
+    {
+      "case": "ignore-actual-availability",
+      "path": "trading/vati/research/dataset_sources.py",
+      "mutant_sha256": "4262ad8ab59e2c383c85d5ac65ca22655e1a68b1d60929003466a0393aea061d",
+      "exit": 1,
+      "cases": 1,
+      "failures": 1,
+      "assertions": 1,
+      "errors": 0,
+      "skips": 0,
+      "storage_audit_violations": 0
+    },
+    {
+      "case": "accept-cli-duplicate-keys",
+      "path": "trading/vati/__main__.py",
+      "mutant_sha256": "432b56cb1c5cfbd35f87e7d3098e19805ed592bdaa9d848553c141d1ba3393f8",
+      "exit": 1,
+      "cases": 2,
+      "failures": 2,
+      "assertions": 2,
+      "errors": 0,
+      "skips": 0,
+      "storage_audit_violations": 0
+    }
+  ],
+  "restored": true,
+  "source_sha256": {
+    "trading/vati/research/dataset_manifest.py": "c451aa2cdf90237515b0865be499a9e98377dd6591f6657c947df22645c41d6e",
+    "trading/vati/research/dataset_sources.py": "036a96a1976385f3a0f6e8d0980c410354e0bdc856c79696d6fb764c701880de",
+    "trading/vati/__main__.py": "21a97174fff751972a8c05973a75a9790117f61ebe11c42d0db2b211655e822a"
+  }
+}

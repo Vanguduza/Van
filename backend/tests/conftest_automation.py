@@ -55,6 +55,28 @@ async def make_store(tmp_path) -> Store:
     return store
 
 
+async def rewrite_task_truth(store: Store, sql: str, params: tuple = ()) -> None:
+    """Test setup only — rewrite a browser_tasks row's task truth (``scope_json``, ``mutating``)
+    the way a store written before browser identity hardening could hold it (a legacy row with no scope, a
+    malformed flag). The current identity trigger refuses such an edit; it is dropped for the
+    one statement and re-created from the migration itself."""
+    # Preserve the actual current trigger, independent of migration renumbering.
+    # Replaying an old numeric migration may now add unrelated columns.
+    async with store.connection() as db:
+        cursor = await db.execute(
+            "SELECT sql FROM sqlite_master WHERE type='trigger' AND name=?",
+            ("browser_tasks_identity_immutable",))
+        row = await cursor.fetchone()
+        assert row is not None and row[0]
+        trigger_sql = row[0]
+        await db.execute("DROP TRIGGER browser_tasks_identity_immutable")
+        try:
+            await db.execute(sql, params)
+        finally:
+            await db.execute(trigger_sql)
+        await db.commit()
+
+
 async def enroll_device(store: Store, device_id: str = DEVICE_ID) -> str:
     await store.execute(
         "INSERT INTO devices(device_id, public_key_pem, enrolled_at_unix, revoked_at_unix, label) "
@@ -97,6 +119,8 @@ async def seal_owner_command(
     effective: ActionClass = ActionClass.A3,
     turn_id: str | None = "turn-1",
     owner_approved: bool = False,
+    typed_action_id: str | None = None,
+    typed_parameters: dict | None = None,
 ) -> CommandAuthorityRecord:
     now = int(time.time())
     record = CommandAuthorityRecord(
@@ -107,6 +131,8 @@ async def seal_owner_command(
         origin_channel=OriginChannel.VOICE,
         signed_action_class=effective,
         effective_action_class=effective,
+        typed_action_id=typed_action_id,
+        typed_parameter_constraints=typed_parameters or {},
         snapshot_id=snapshot_id,
         context_digest="sha256:ownerctx",
         issued_at_unix=now,

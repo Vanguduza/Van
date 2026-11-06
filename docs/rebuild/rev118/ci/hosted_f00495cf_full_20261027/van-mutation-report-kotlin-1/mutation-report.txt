@@ -1,0 +1,36 @@
+
+### android/verification (Gradle)
+CAUGHT             C40 an event with no sequence rewinds the stream to the beginning
+CAUGHT             C40 a socket page replaces the history instead of merging with it
+CAUGHT             C37 the owner waits for a question nothing asks
+CAUGHT             C36 a kill between the two halves of a persist loses the owner's command
+CAUGHT             C36 a command the Gateway is already running is sent a second time
+CAUGHT             C35 a reminder is read back as session work
+CAUGHT             C35 three failures on one path read as the first attempt after a restart
+CAUGHT             C34 a payload replayed from a device log provisions the phone again
+CAUGHT             C34 a payload from a format nobody has shipped is parsed as this one
+CAUGHT             C33 a queue that emptied keeps telling an operator the owner is waiting
+CAUGHT             C33 a spare path on the same road is held open and called redundancy
+CAUGHT             C33 a path is promoted without the session ever being resumed on it
+CAUGHT             C33 the record forgets what kind of command the owner was asked about
+CAUGHT             C32 every raw resize callback renegotiates the remote browser
+CAUGHT             C32 the held frame is stretched rather than letterboxed
+CAUGHT             C32 every keystroke reaches a suggestion provider
+CAUGHT             C32 Back closes the browser while the page has history
+CAUGHT             C32 a logged-in page's title is printed on the home screen
+CAUGHT             C32 attaching a file to a form is read as asking VAN to read it
+CAUGHT             C32 a stale snapshot is shown to the owner as the current state
+CAUGHT             C31 a clock step leaves the fps window anchored in the future
+CAUGHT             C31 a closed stream keeps reporting the age of the picture it lost
+CAUGHT             C31 what VAN sent is counted as what the owner received
+CAUGHT             C14 the wake word is shed under pressure
+CAUGHT             C14 catch-up stops being immediate, so pressure now stretches it
+CAUGHT             C30 a duplicate after a failover is spoken twice
+CAUGHT             C30 the phrasing outranks what the Gateway knows the command does
+CAUGHT             C30 VAN hears its own speaker and interrupts itself
+CAUGHT             C30 a substituted model decides what VAN hears
+
+29/29 caught
+
+================ SURVIVORS ================
+none

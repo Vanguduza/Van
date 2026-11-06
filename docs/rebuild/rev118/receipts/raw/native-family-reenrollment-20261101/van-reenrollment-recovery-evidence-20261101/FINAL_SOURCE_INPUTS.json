@@ -1,0 +1,26 @@
+{
+  "base": "2728a83ce203fec867dc536c8d4341c2ce4415cb",
+  "files": {
+    "backend/tests/test_owner_device_binding.py": "f85cb62b7b31575578da6b55cc0093b4bfc700f113c62ce19cbedfa83b9ac7f4",
+    "backend/tests/test_owner_device_reenrollment_api.py": "ff2e791b82351befcf54ffc1c162e3fb7e4032095df4625a86e3eea514fc485f",
+    "backend/tests/test_owner_device_reenrollment_recovery.py": "b059a669b85065488575554b89f39eed0bcbb434ad7bc1bc739f40c1272ce20e",
+    "backend/van_gateway/action/service.py": "270ebdb1a5e0930584cd54f0975a9718c77faae5997564f232183ec1a6241900",
+    "backend/van_gateway/app.py": "a7a00a8d082c4cccd8b5648cdd2faa4be2b79ea0e4b2fb6795de74a25d68379a",
+    "backend/van_gateway/auth/device_binding.py": "5be4571f3af4206eb2a9345c6b3aa8bc4afcdfa86cb0ff5915bc9960ebe12125",
+    "backend/van_gateway/auth/native_revocation.py": "8472ced7b5d7fa2425c05499533319e2c1046704fe56a172cd2f2e319e63fbfb",
+    "backend/van_gateway/auth/reenrollment.py": "78a4041ecd9fc3869137e1e79eb9872efd24c2c3fce1e75151736e86864ca134",
+    "backend/van_gateway/auth/retirement.py": "ff43ae1a1737fb844d189e7d8d238a7ca3033c6ca5a7cc2d9114abe4194ac01f",
+    "backend/van_gateway/auth/service.py": "74a377859cf661f063b51f79f3503faa7946134f4272169bbd34f757fc523e86",
+    "backend/van_gateway/session/service.py": "f23547c5e5e3f85d10911ae00aa3932616f581fb2131f7f66be6c12ace144053",
+    "backend/van_gateway/storage/db.py": "62c224572820d9dfe2ec2bf064bf22d32ce5f0516cb2bdc44d87197f6586c0f0",
+    "backend/van_gateway/storage/reenrollment_migration.py": "8624317d446e9d0ab9fc398ec7f45b56577136899c0a311747df227d6c989373"
+  },
+  "changed_after_229_pass": [
+    "backend/tests/test_owner_device_reenrollment_recovery.py",
+    "backend/van_gateway/storage/reenrollment_migration.py"
+  ],
+  "final_frozen_at_utc": "2026-11-01T05:37:10.877670+00:00",
+  "application_logic_unchanged_since_229_pass": true,
+  "final_migration_and_workflow": "34passed MIGRATION_AND_WORKFLOW_FINAL.log",
+  "migration_prior_sql_identity": "all59priorSQLunchanged MIGRATION_IDENTITY_FINAL.json"
+}

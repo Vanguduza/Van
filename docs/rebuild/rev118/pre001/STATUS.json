@@ -1,0 +1,31 @@
+{
+ "artefact_sha256": {
+  "OVERLAP_PRESERVATION.json": "886dab92548f0b0fdb310f7c84134e760e848d0ce58ab634d415efde7626548a",
+  "REF_INVENTORY.json": "5e182594988c56500da26b40bf704ceeed7ce999fdb7ee74c5a02d0394b9150e",
+  "SOURCE_CLASSIFICATION.json": "73e3f828ffc8aade7dba285d49b35cada6e472dea99c0a523ea101ef1f49da73",
+  "SOURCE_LEDGER.json": "0a708b4125ea076da24ae03e096a9ebef444cb620dde7abe68c0fed400788e9f",
+  "SYMBOL_VERIFICATION.json": "db0d3ef21ab891acf68222a2cec0d4014e26abd33e17373dc8fecdb1df621c01",
+  "TRACE_CHECK.json": "28db35bb6f2a86088d19cac4c2f96fc6f1b3988deb0d5200f57e974ec6759983"
+ },
+ "disposition_problems": [],
+ "note": "EVIDENCE_COMPLETE is not PRE-001 acceptance: the exit requires independent review of the no-loss mapping.",
+ "overlap_open": {
+  "count": 0,
+  "ids": [],
+  "of": 34
+ },
+ "packet": "VAN-PKT-001",
+ "refs_open": {
+  "count": 0,
+  "ids": [],
+  "of": 176
+ },
+ "source_head": "b02075f327ea8180ab6d269eba358cf8c5479878",
+ "source_unclassified": {
+  "count": 0,
+  "of": 2131
+ },
+ "status": "OPEN",
+ "trace_findings": 5,
+ "unit": "PRE-001"
+}

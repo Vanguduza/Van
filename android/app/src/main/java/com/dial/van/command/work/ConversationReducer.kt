@@ -62,7 +62,8 @@ object ConversationReducer {
             ?: OwnerWorkStatus.UNKNOWN
         val status = commandStatusFor(owner)
         val text = if (poll.finished && !poll.finalOutcome.isNullOrBlank()) {
-            poll.finalOutcome
+            if (owner == OwnerWorkStatus.DONE) poll.finalOutcome
+            else "${OwnerStatusProjection.sentenceFor(owner)}. Reported result: ${poll.finalOutcome}"
         } else {
             poll.sentence?.takeIf { it.isNotBlank() } ?: OwnerStatusProjection.sentenceFor(owner)
         }

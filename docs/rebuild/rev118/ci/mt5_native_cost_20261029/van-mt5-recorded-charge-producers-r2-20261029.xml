@@ -1,0 +1,337 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="27" time="2.843" timestamp="2026-10-29T00:07:02.672661+00:00" hostname="6e9feff21467"><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_actual_signed_worker_emits_only_observed_recorded_entry_components[-1.25--0.125-1.375]" time="0.040" /><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_actual_signed_worker_emits_only_observed_recorded_entry_components[0-0-0]" time="0.008" /><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_actual_signed_worker_emits_only_observed_recorded_entry_components[0.25-0--.25]" time="0.007" /><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_native_history_missing_a_required_component_retains_fill_and_unknown_cost[commission]" time="0.007" /><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_native_history_missing_a_required_component_retains_fill_and_unknown_cost[fee]" time="0.007" /><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_native_history_missing_a_required_component_retains_fill_and_unknown_cost[entry]" time="0.007" /><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_native_history_missing_a_required_component_retains_fill_and_unknown_cost[time_msc]" time="0.006" /><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_native_history_missing_a_required_component_retains_fill_and_unknown_cost[volume]" time="0.005" /><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_scope_unit_or_convention_mismatch_cannot_become_a_measured_charge[deal_id-99]" time="0.004" /><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_scope_unit_or_convention_mismatch_cannot_become_a_measured_charge[order_id-99]" time="0.004" /><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_scope_unit_or_convention_mismatch_cannot_become_a_measured_charge[position_ticket-99]" time="0.005" /><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_scope_unit_or_convention_mismatch_cannot_become_a_measured_charge[position_identifier-0]" time="0.005" /><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_scope_unit_or_convention_mismatch_cannot_become_a_measured_charge[symbol-GBPUSD]" time="0.005" /><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_scope_unit_or_convention_mismatch_cannot_become_a_measured_charge[side-SELL]" time="0.006" /><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_scope_unit_or_convention_mismatch_cannot_become_a_measured_charge[volume-99]" time="0.006" /><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_scope_unit_or_convention_mismatch_cannot_become_a_measured_charge[commission_delta-NaN]" time="0.005" /><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_scope_unit_or_convention_mismatch_cannot_become_a_measured_charge[fee_delta-None]" time="0.006" /><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_scope_unit_or_convention_mismatch_cannot_become_a_measured_charge[native_time_ms-True]" time="0.006" /><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_scope_unit_or_convention_mismatch_cannot_become_a_measured_charge[entry_type-INOUT]" time="0.006" /><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_scope_unit_or_convention_mismatch_cannot_become_a_measured_charge[cash_convention-UNQUALIFIED]" time="0.007" /><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_scope_unit_or_convention_mismatch_cannot_become_a_measured_charge[complete_future_charges-True]" time="0.006" /><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_scope_unit_or_convention_mismatch_cannot_become_a_measured_charge[settlement_final-True]" time="0.009" /><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_native_identity_and_explicit_producer_are_required" time="0.005" /><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_actual_ea_function_observes_charge_or_preserves_unavailability[entry-charge-zero-0]" time="2.009"><failure message="TypeError: argument should be a string or a Rational instance">ea = &lt;function ea.&lt;locals&gt;.run at 0x7fe429b24cc0&gt;
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-239/test_actual_ea_function_observ0')
+scenario = 'entry-charge-zero', expected = '0'
+
+    @pytest.mark.parametrize('scenario,expected', [('entry-charge-zero','0'),('entry-charge-debit','.26'),
+        ('entry-charge-rebate','-.25'),('entry-charge-unavailable',None)])
+    def test_actual_ea_function_observes_charge_or_preserves_unavailability(ea, tmp_path, scenario, expected):
+        result = ea(scenario)['results'][0]
+        assert result['status'] == 'FILLED' and result['sl_confirmed'] is True
+        queue = BridgeQueue(tmp_path/'observed-charges.sqlite3')
+        try:
+            # Identity is the fixed native model's actual account, not authority.
+            snapshot = ea('snapshot')['account']
+            identity = Mt5Identity(snapshot['login'],snapshot['server'],snapshot['currency'],snapshot['demo'])
+            receipt = Mt5PullAdapter(queue, identity=identity)._entry_receipt(pull_command(), result, now_ms=1700000000000)
+            assert receipt.status == 'FILLED' and receipt.protective_stop_confirmed
+            assert receipt.filled_qty == D(str(result['volume']))
+            if expected is None:
+                assert result['recorded_entry_charges'] is None and receipt.fees is None
+            else:
+                native = result['recorded_entry_charges']
+                oracle = -(Fraction(D(native['commission_delta'])) + Fraction(D(native['fee_delta'])))
+&gt;               assert Fraction(receipt.fees) == oracle and receipt.fees == D(expected)
+                       ^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_mt5_recorded_entry_charges.py:107: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = &lt;class 'fractions.Fraction'&gt;, numerator = None, denominator = None
+
+    def __new__(cls, numerator=0, denominator=None):
+        """Constructs a Rational.
+    
+        Takes a string like '3/2' or '1.5', another Rational instance, a
+        numerator/denominator pair, or a float.
+    
+        Examples
+        --------
+    
+        &gt;&gt;&gt; Fraction(10, -8)
+        Fraction(-5, 4)
+        &gt;&gt;&gt; Fraction(Fraction(1, 7), 5)
+        Fraction(1, 35)
+        &gt;&gt;&gt; Fraction(Fraction(1, 7), Fraction(2, 3))
+        Fraction(3, 14)
+        &gt;&gt;&gt; Fraction('314')
+        Fraction(314, 1)
+        &gt;&gt;&gt; Fraction('-35/4')
+        Fraction(-35, 4)
+        &gt;&gt;&gt; Fraction('3.1415') # conversion from numeric string
+        Fraction(6283, 2000)
+        &gt;&gt;&gt; Fraction('-47e-2') # string may include a decimal exponent
+        Fraction(-47, 100)
+        &gt;&gt;&gt; Fraction(1.47)  # direct construction from float (exact conversion)
+        Fraction(6620291452234629, 4503599627370496)
+        &gt;&gt;&gt; Fraction(2.25)
+        Fraction(9, 4)
+        &gt;&gt;&gt; Fraction(Decimal('1.47'))
+        Fraction(147, 100)
+    
+        """
+        self = super(Fraction, cls).__new__(cls)
+    
+        if denominator is None:
+            if type(numerator) is int:
+                self._numerator = numerator
+                self._denominator = 1
+                return self
+    
+            elif isinstance(numerator, numbers.Rational):
+                self._numerator = numerator.numerator
+                self._denominator = numerator.denominator
+                return self
+    
+            elif isinstance(numerator, (float, Decimal)):
+                # Exact conversion
+                self._numerator, self._denominator = numerator.as_integer_ratio()
+                return self
+    
+            elif isinstance(numerator, str):
+                # Handle construction from strings.
+                m = _RATIONAL_FORMAT.match(numerator)
+                if m is None:
+                    raise ValueError('Invalid literal for Fraction: %r' %
+                                     numerator)
+                numerator = int(m.group('num') or '0')
+                denom = m.group('denom')
+                if denom:
+                    denominator = int(denom)
+                else:
+                    denominator = 1
+                    decimal = m.group('decimal')
+                    if decimal:
+                        decimal = decimal.replace('_', '')
+                        scale = 10**len(decimal)
+                        numerator = numerator * scale + int(decimal)
+                        denominator *= scale
+                    exp = m.group('exp')
+                    if exp:
+                        exp = int(exp)
+                        if exp &gt;= 0:
+                            numerator *= 10**exp
+                        else:
+                            denominator *= 10**-exp
+                if m.group('sign') == '-':
+                    numerator = -numerator
+    
+            else:
+&gt;               raise TypeError("argument should be a string "
+                                "or a Rational instance")
+E               TypeError: argument should be a string or a Rational instance
+
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/fractions.py:264: TypeError</failure></testcase><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_actual_ea_function_observes_charge_or_preserves_unavailability[entry-charge-debit-.26]" time="0.013"><failure message="TypeError: argument should be a string or a Rational instance">ea = &lt;function ea.&lt;locals&gt;.run at 0x7fe429b24cc0&gt;
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-239/test_actual_ea_function_observ1')
+scenario = 'entry-charge-debit', expected = '.26'
+
+    @pytest.mark.parametrize('scenario,expected', [('entry-charge-zero','0'),('entry-charge-debit','.26'),
+        ('entry-charge-rebate','-.25'),('entry-charge-unavailable',None)])
+    def test_actual_ea_function_observes_charge_or_preserves_unavailability(ea, tmp_path, scenario, expected):
+        result = ea(scenario)['results'][0]
+        assert result['status'] == 'FILLED' and result['sl_confirmed'] is True
+        queue = BridgeQueue(tmp_path/'observed-charges.sqlite3')
+        try:
+            # Identity is the fixed native model's actual account, not authority.
+            snapshot = ea('snapshot')['account']
+            identity = Mt5Identity(snapshot['login'],snapshot['server'],snapshot['currency'],snapshot['demo'])
+            receipt = Mt5PullAdapter(queue, identity=identity)._entry_receipt(pull_command(), result, now_ms=1700000000000)
+            assert receipt.status == 'FILLED' and receipt.protective_stop_confirmed
+            assert receipt.filled_qty == D(str(result['volume']))
+            if expected is None:
+                assert result['recorded_entry_charges'] is None and receipt.fees is None
+            else:
+                native = result['recorded_entry_charges']
+                oracle = -(Fraction(D(native['commission_delta'])) + Fraction(D(native['fee_delta'])))
+&gt;               assert Fraction(receipt.fees) == oracle and receipt.fees == D(expected)
+                       ^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_mt5_recorded_entry_charges.py:107: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = &lt;class 'fractions.Fraction'&gt;, numerator = None, denominator = None
+
+    def __new__(cls, numerator=0, denominator=None):
+        """Constructs a Rational.
+    
+        Takes a string like '3/2' or '1.5', another Rational instance, a
+        numerator/denominator pair, or a float.
+    
+        Examples
+        --------
+    
+        &gt;&gt;&gt; Fraction(10, -8)
+        Fraction(-5, 4)
+        &gt;&gt;&gt; Fraction(Fraction(1, 7), 5)
+        Fraction(1, 35)
+        &gt;&gt;&gt; Fraction(Fraction(1, 7), Fraction(2, 3))
+        Fraction(3, 14)
+        &gt;&gt;&gt; Fraction('314')
+        Fraction(314, 1)
+        &gt;&gt;&gt; Fraction('-35/4')
+        Fraction(-35, 4)
+        &gt;&gt;&gt; Fraction('3.1415') # conversion from numeric string
+        Fraction(6283, 2000)
+        &gt;&gt;&gt; Fraction('-47e-2') # string may include a decimal exponent
+        Fraction(-47, 100)
+        &gt;&gt;&gt; Fraction(1.47)  # direct construction from float (exact conversion)
+        Fraction(6620291452234629, 4503599627370496)
+        &gt;&gt;&gt; Fraction(2.25)
+        Fraction(9, 4)
+        &gt;&gt;&gt; Fraction(Decimal('1.47'))
+        Fraction(147, 100)
+    
+        """
+        self = super(Fraction, cls).__new__(cls)
+    
+        if denominator is None:
+            if type(numerator) is int:
+                self._numerator = numerator
+                self._denominator = 1
+                return self
+    
+            elif isinstance(numerator, numbers.Rational):
+                self._numerator = numerator.numerator
+                self._denominator = numerator.denominator
+                return self
+    
+            elif isinstance(numerator, (float, Decimal)):
+                # Exact conversion
+                self._numerator, self._denominator = numerator.as_integer_ratio()
+                return self
+    
+            elif isinstance(numerator, str):
+                # Handle construction from strings.
+                m = _RATIONAL_FORMAT.match(numerator)
+                if m is None:
+                    raise ValueError('Invalid literal for Fraction: %r' %
+                                     numerator)
+                numerator = int(m.group('num') or '0')
+                denom = m.group('denom')
+                if denom:
+                    denominator = int(denom)
+                else:
+                    denominator = 1
+                    decimal = m.group('decimal')
+                    if decimal:
+                        decimal = decimal.replace('_', '')
+                        scale = 10**len(decimal)
+                        numerator = numerator * scale + int(decimal)
+                        denominator *= scale
+                    exp = m.group('exp')
+                    if exp:
+                        exp = int(exp)
+                        if exp &gt;= 0:
+                            numerator *= 10**exp
+                        else:
+                            denominator *= 10**-exp
+                if m.group('sign') == '-':
+                    numerator = -numerator
+    
+            else:
+&gt;               raise TypeError("argument should be a string "
+                                "or a Rational instance")
+E               TypeError: argument should be a string or a Rational instance
+
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/fractions.py:264: TypeError</failure></testcase><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_actual_ea_function_observes_charge_or_preserves_unavailability[entry-charge-rebate--.25]" time="0.008"><failure message="TypeError: argument should be a string or a Rational instance">ea = &lt;function ea.&lt;locals&gt;.run at 0x7fe429b24cc0&gt;
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-239/test_actual_ea_function_observ2')
+scenario = 'entry-charge-rebate', expected = '-.25'
+
+    @pytest.mark.parametrize('scenario,expected', [('entry-charge-zero','0'),('entry-charge-debit','.26'),
+        ('entry-charge-rebate','-.25'),('entry-charge-unavailable',None)])
+    def test_actual_ea_function_observes_charge_or_preserves_unavailability(ea, tmp_path, scenario, expected):
+        result = ea(scenario)['results'][0]
+        assert result['status'] == 'FILLED' and result['sl_confirmed'] is True
+        queue = BridgeQueue(tmp_path/'observed-charges.sqlite3')
+        try:
+            # Identity is the fixed native model's actual account, not authority.
+            snapshot = ea('snapshot')['account']
+            identity = Mt5Identity(snapshot['login'],snapshot['server'],snapshot['currency'],snapshot['demo'])
+            receipt = Mt5PullAdapter(queue, identity=identity)._entry_receipt(pull_command(), result, now_ms=1700000000000)
+            assert receipt.status == 'FILLED' and receipt.protective_stop_confirmed
+            assert receipt.filled_qty == D(str(result['volume']))
+            if expected is None:
+                assert result['recorded_entry_charges'] is None and receipt.fees is None
+            else:
+                native = result['recorded_entry_charges']
+                oracle = -(Fraction(D(native['commission_delta'])) + Fraction(D(native['fee_delta'])))
+&gt;               assert Fraction(receipt.fees) == oracle and receipt.fees == D(expected)
+                       ^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_mt5_recorded_entry_charges.py:107: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = &lt;class 'fractions.Fraction'&gt;, numerator = None, denominator = None
+
+    def __new__(cls, numerator=0, denominator=None):
+        """Constructs a Rational.
+    
+        Takes a string like '3/2' or '1.5', another Rational instance, a
+        numerator/denominator pair, or a float.
+    
+        Examples
+        --------
+    
+        &gt;&gt;&gt; Fraction(10, -8)
+        Fraction(-5, 4)
+        &gt;&gt;&gt; Fraction(Fraction(1, 7), 5)
+        Fraction(1, 35)
+        &gt;&gt;&gt; Fraction(Fraction(1, 7), Fraction(2, 3))
+        Fraction(3, 14)
+        &gt;&gt;&gt; Fraction('314')
+        Fraction(314, 1)
+        &gt;&gt;&gt; Fraction('-35/4')
+        Fraction(-35, 4)
+        &gt;&gt;&gt; Fraction('3.1415') # conversion from numeric string
+        Fraction(6283, 2000)
+        &gt;&gt;&gt; Fraction('-47e-2') # string may include a decimal exponent
+        Fraction(-47, 100)
+        &gt;&gt;&gt; Fraction(1.47)  # direct construction from float (exact conversion)
+        Fraction(6620291452234629, 4503599627370496)
+        &gt;&gt;&gt; Fraction(2.25)
+        Fraction(9, 4)
+        &gt;&gt;&gt; Fraction(Decimal('1.47'))
+        Fraction(147, 100)
+    
+        """
+        self = super(Fraction, cls).__new__(cls)
+    
+        if denominator is None:
+            if type(numerator) is int:
+                self._numerator = numerator
+                self._denominator = 1
+                return self
+    
+            elif isinstance(numerator, numbers.Rational):
+                self._numerator = numerator.numerator
+                self._denominator = numerator.denominator
+                return self
+    
+            elif isinstance(numerator, (float, Decimal)):
+                # Exact conversion
+                self._numerator, self._denominator = numerator.as_integer_ratio()
+                return self
+    
+            elif isinstance(numerator, str):
+                # Handle construction from strings.
+                m = _RATIONAL_FORMAT.match(numerator)
+                if m is None:
+                    raise ValueError('Invalid literal for Fraction: %r' %
+                                     numerator)
+                numerator = int(m.group('num') or '0')
+                denom = m.group('denom')
+                if denom:
+                    denominator = int(denom)
+                else:
+                    denominator = 1
+                    decimal = m.group('decimal')
+                    if decimal:
+                        decimal = decimal.replace('_', '')
+                        scale = 10**len(decimal)
+                        numerator = numerator * scale + int(decimal)
+                        denominator *= scale
+                    exp = m.group('exp')
+                    if exp:
+                        exp = int(exp)
+                        if exp &gt;= 0:
+                            numerator *= 10**exp
+                        else:
+                            denominator *= 10**-exp
+                if m.group('sign') == '-':
+                    numerator = -numerator
+    
+            else:
+&gt;               raise TypeError("argument should be a string "
+                                "or a Rational instance")
+E               TypeError: argument should be a string or a Rational instance
+
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/fractions.py:264: TypeError</failure></testcase><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_actual_ea_function_observes_charge_or_preserves_unavailability[entry-charge-unavailable-None]" time="0.007" /></testsuite></testsuites>

@@ -1,0 +1,33 @@
+{
+  "head": "d53eea63539d5829ff0ac4f5aa7b55155a3c7491",
+  "parent": "3732798104c476680cac8e22f833f2ed764d77e2",
+  "at_utc": "2026-10-28T13:53:09.171047+00:00",
+  "genuine_hook_exit": 0,
+  "committed_verification_exit": 0,
+  "committed_ledger": "GREEN192",
+  "required_baseline": "4fd466dec3910ed5de614bfbf95887ad619df5ca",
+  "normal_push_exit": 0,
+  "independent_remote_readback_exit": 0,
+  "remote_head": "d53eea63539d5829ff0ac4f5aa7b55155a3c7491",
+  "source_tests": {
+    "passed": 5272,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "audit_violations": 0,
+    "unique_calls_once": 5272,
+    "source_inputs_match_committed": 1259,
+    "additional_legacy_fixtures_match_committed": 2,
+    "owned_postgres_independently_absent": true,
+    "original_test_functions_AST_preserved": 2880
+  },
+  "additional_SQL_expiry_checks": 8,
+  "manifest": {
+    "files": 10358,
+    "mismatches": 0,
+    "actual_CLI_exit": 0
+  },
+  "native_EA_source": "UNCHANGED_FROM_INDEPENDENTLY_COMPILED_37327981",
+  "new_exact_head_CI": "PENDING_DISCOVERY",
+  "formal_native_production_S24_acceptances_issued": 0
+}

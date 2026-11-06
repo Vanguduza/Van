@@ -1,0 +1,14 @@
+{
+  "schema": "van.canonical-test-owner-cwd-source/1",
+  "at_utc": "2026-11-01T20:23:03.382303+00:00",
+  "base": "ba792c27f906c1ca17b4d87d3c129d1b50e430a8",
+  "source": "raw/cwd-test-owner-source-20261101/FROZEN_SOURCE_PINS.json",
+  "behavior": "Seven existing testowners bind actual committed testassets/scripts/source readers to their own checkout from __file__; MT5same childimportclosure/order becomesabsolute withoutchanging actualchildcwd. Parentcanonicalcwd remainscheckout/backend. Positive migrationCLI explicitly selectsitscommitted fixture; corruptedcopiedCLI keepsownedtmpcwd. No production/financial/API/storage/nonce/certificate or assertion weakening.",
+  "assertions": "175original assertionASTs retainedinorder,2additionalnonemptyAndroidsource guards prevent vacuousmissingtree success. ActualMT5before childModuleNotFoundError:test_mt5_worker/noeffectfile retained.",
+  "source_evidence": "BeforeLAC:157uniqueSOURCEIDs EACHactualcwd,314caseexecutions acrosssequentiallight/heavygroups;exact39historicalbadIDs passboth,0failure/error/skip/auditviolations/children;maxowned28,584,554B. Not314unique, notfull5715/PG/native qualification.",
+  "integration_reuse": "LAC9 changesonlyportfolio/service+DTO/directtest inputs. Eleven source/copy/app/importclosure consumers rerun atBOTHcwd afterintegration andpass0skip/audit0. Other146IDs preserve explicitly assessed unchanged asset/implementation inputevidence; earlier314notblindlyreused onchangedinputs. Validation_input_integrity source remainsunchanged.",
+  "failed_history": "Officialba817 tradingbackend25FAIL13ERROR1SKIP/5715;paired1710gatewayIDs same sourcegraph,backendadds1relativefilefailure to2pendingentry67failures. Originalnativeattempt remainsfailed/unqualified, localproofs do not rewritehistory. Prior64MiBadmissionrefusalunexecuted. Specificoldfailedproofvenv archived/verifiablyremoved underrootgrant,2063files4links allSHA/mode/CRC, volatile/nonportable; old73PASS2FAIL proof remainsfailed.",
+  "residual_qualification": "Exact SOURCE-only VTIL resolver testcase trading/tests/test_vtil_borrow.py::test_dial_resolver_selects_trading_knowledge_from_van_registry stillskipped inoriginalfullprofile: dial-new checkout not available (set DIAL_REPO). Two existingDDSspecial-node routes donotautomaticallyownit. ActualDIAL_REPOcontract/rightfulfixture routing isseparately assigned successor, not omitted/nativeprovider effect or currentpacketpass. Fullmatrix/native/unit/BG001/snapshot/backup/privateDDS/trustedbase and pendingentry67/intake remainunwaived.",
+  "persistence": "Small patch/pins/handoff/reviews/XMLpersisted; largefixtureinventories/failednativeZIPs/logs/coldruntime stayownedtmp withoriginalhash/pointers. Filesystem/environment persistence isnotguaranteed.",
+  "next": "Combineonlyreviewed7+9+truthfulsourcecitationbinding innewgenuinecommit afterba792; finalrequired4fdverify/one normalpush/exactreadbacks/newheadwatch. No historyrewrite or proposedPR106auth use."
+}

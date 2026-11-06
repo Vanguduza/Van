@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="5" time="0.436" timestamp="2026-10-28T19:44:45.323426+00:00" hostname="6e9feff21467"><testcase classname="trading.tests.test_native_close_movement" name="test_original_native_balance_delta_does_not_guess_commission_sign_or_future_fees" time="0.060" /><testcase classname="trading.tests.test_native_close_movement" name="test_unbound_balance_baseline_cannot_supply_a_closing_cash_delta[gap]" time="0.005" /><testcase classname="trading.tests.test_native_close_movement" name="test_unbound_balance_baseline_cannot_supply_a_closing_cash_delta[wrong_scope]" time="0.004" /><testcase classname="trading.tests.test_native_close_movement" name="test_unbound_balance_baseline_cannot_supply_a_closing_cash_delta[future_availability]" time="0.004" /><testcase classname="trading.tests.test_native_close_movement" name="test_existing_financial_owner_publishes_and_independently_reads_original_close_observation" time="0.168"><failure message="AttributeError: 'FinancialMovementBook' object has no attribute 'publish_close'">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-191/test_existing_financial_owner_0')
+
+    def test_existing_financial_owner_publishes_and_independently_reads_original_close_observation(tmp_path):
+        from vati.funding.movement_journal import FinancialMovementBook
+        ledger=Ledger(tmp_path/'facts.sqlite')
+        try:
+            before,event,scope=originals(ledger);book=FinancialMovementBook(ledger,clock=lambda:7000)
+&gt;           receipt=book.publish_close('original-close',scope_hash=scope,native_id=1,
+                    ^^^^^^^^^^^^^^^^^^
+                statement_ref=event.hash,balance_anchor_ref=before.hash)
+E               AttributeError: 'FinancialMovementBook' object has no attribute 'publish_close'
+
+trading/tests/test_native_close_movement.py:59: AttributeError</failure></testcase></testsuite></testsuites>

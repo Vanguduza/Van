@@ -1,0 +1,156 @@
+{
+  "schema": "van.rebuild.oauth-collision-recovery-source/1",
+  "source_parent": "658214bb6808b84335fac9fbc049bdca7000cf56",
+  "source_sha256": {
+    "backend/van_gateway/trading/accounts.py": "b88475f3fa3bde0215dcdd3e2a544a3c6215891e8fa6f3d16feb128e2d6fa285",
+    "backend/van_gateway/trading/oauth_effects.py": "750f46e378f8fb25c9651e56f5be85a5111af675836ebb99dad48a4ed2cdb0bb",
+    "backend/tests/test_trading_oauth_effects.py": "a7be22f9beadd7780d7fb23c58b8ea34e138ad5643c7174390f91f02025275fd"
+  },
+  "retained_broad_failure": "receipts/SOURCE_QUALIFICATION_9ea88ce2.json",
+  "focused_restored": {
+    "tests": 43,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "9dc11f65ea7ffc5ed1ca8a82716f6b98f925fa8c33ba223e7dc54946bbf941e4"
+  },
+  "rebuild": {
+    "tests": 78,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "05292acb73f1f5ba97df61fac6cd5a7698074f1451daba38988b343fd45233b3"
+  },
+  "source_faults": {
+    "records": [
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "9322b899d678e9469ec767d74ed532c4b72c21244f18db44a5444f04e3011ce4"
+      },
+      {
+        "phase": "mutation",
+        "why": "mistake an original unresolved link result for a fresh alias collision",
+        "returncode": 1,
+        "log_sha256": "b06b02f3fbce2de76e6a6a3b9d2cd77239a5f6bb4291fd5bcd455964d6f08872"
+      },
+      {
+        "phase": "mutation",
+        "why": "hide unresolved target history when a new OAuth state addresses the same alias",
+        "returncode": 1,
+        "log_sha256": "8518e879278123f453af00505ebb0651a65be6789b24462d856a42fb7d7cc63e"
+      },
+      {
+        "phase": "mutation",
+        "why": "allocate new-link authority for an ordinary existing-account collision",
+        "returncode": 1,
+        "log_sha256": "e6380690065df3799fe21091ba9d25e41cf0d8f2345ebcdb91f9eaa924d6626e"
+      }
+    ],
+    "definitions": [
+      [
+        "backend/van_gateway/trading/accounts.py",
+        "if await self.pending.effects.owns_link(str(args['state']),broker,owner_device_id):",
+        "if False:",
+        "mistake an original unresolved link result for a fresh alias collision"
+      ],
+      [
+        "backend/van_gateway/trading/accounts.py",
+        "original_uncertainty=(action in {'deriv_oauth_link','ctrader_link'} and args.get('state')\n                and await self.pending.effects.unresolved_link_target(alias))",
+        "original_uncertainty=False",
+        "hide unresolved target history when a new OAuth state addresses the same alias"
+      ],
+      [
+        "backend/van_gateway/trading/accounts.py",
+        "if action in {'deriv_create_demo','deriv_oauth_link','ctrader_link'} and snapshot.get('state')=='REGISTERED' and not original_uncertainty:",
+        "if False:",
+        "allocate new-link authority for an ordinary existing-account collision"
+      ]
+    ],
+    "tests": [
+      "backend/tests/test_trading_oauth_effects.py::test_link_effect_without_a_committed_receipt_is_not_repeated_or_bypassed_by_new_state",
+      "backend/tests/test_trading_oauth_effects.py::test_mismatched_native_link_receipt_stays_unconfirmed",
+      "backend/tests/test_trading_oauth_effects.py::test_a_new_link_cannot_replace_a_registered_alias_without_an_original_unresolved_effect",
+      "backend/tests/test_trading_oauth_effects.py::test_committed_link_receipt_survives_a_lost_response_and_a_new_reader",
+      "backend/tests/test_trading_oauth_effects.py::test_original_unconfirmed_link_read_does_not_depend_on_current_native_inventory"
+    ],
+    "source_before_sha256": "b88475f3fa3bde0215dcdd3e2a544a3c6215891e8fa6f3d16feb128e2d6fa285",
+    "source_after_sha256": "b88475f3fa3bde0215dcdd3e2a544a3c6215891e8fa6f3d16feb128e2d6fa285",
+    "source_restored": true,
+    "journal_present": false
+  },
+  "fault_control": "8 passing actual gateway cases, followed by three assertion-detected faults; source restored and journal absent",
+  "retained_initial_fault_run": {
+    "record": {
+      "records": [
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "log_sha256": "099e8aaf13c7bf07b5190a6a63b2082bdc4870f3d8f8ddc5e2ac325a499cdbbb"
+        },
+        {
+          "phase": "mutation",
+          "why": "mistake an original unresolved link result for a fresh alias collision",
+          "returncode": 0,
+          "log_sha256": "eee0a584a84abc7617534d93b0cd177ce44fc86fbd60c05d1f52b92e1faa2355"
+        },
+        {
+          "phase": "mutation",
+          "why": "hide unresolved target history when a new OAuth state addresses the same alias",
+          "returncode": 1,
+          "log_sha256": "849544c9eae1f6b74831884f7716624ebf0ef296a7816bc8d08e533cd17ec88e"
+        },
+        {
+          "phase": "mutation",
+          "why": "allocate new-link authority for an ordinary existing-account collision",
+          "returncode": 1,
+          "log_sha256": "1591eaf72135f064503dc72e6545fa818daab1cf7e5584608d84cabceb050898"
+        }
+      ],
+      "definitions": [
+        [
+          "backend/van_gateway/trading/accounts.py",
+          "if await self.pending.effects.owns_link(str(args['state']),broker,owner_device_id):",
+          "if False:",
+          "mistake an original unresolved link result for a fresh alias collision"
+        ],
+        [
+          "backend/van_gateway/trading/accounts.py",
+          "original_uncertainty=(action in {'deriv_oauth_link','ctrader_link'} and args.get('state')\n                and await self.pending.effects.unresolved_link_target(alias))",
+          "original_uncertainty=False",
+          "hide unresolved target history when a new OAuth state addresses the same alias"
+        ],
+        [
+          "backend/van_gateway/trading/accounts.py",
+          "if action in {'deriv_create_demo','deriv_oauth_link','ctrader_link'} and snapshot.get('state')=='REGISTERED' and not original_uncertainty:",
+          "if False:",
+          "allocate new-link authority for an ordinary existing-account collision"
+        ]
+      ],
+      "tests": [
+        "backend/tests/test_trading_oauth_effects.py::test_link_effect_without_a_committed_receipt_is_not_repeated_or_bypassed_by_new_state",
+        "backend/tests/test_trading_oauth_effects.py::test_mismatched_native_link_receipt_stays_unconfirmed",
+        "backend/tests/test_trading_oauth_effects.py::test_a_new_link_cannot_replace_a_registered_alias_without_an_original_unresolved_effect",
+        "backend/tests/test_trading_oauth_effects.py::test_committed_link_receipt_survives_a_lost_response_and_a_new_reader"
+      ],
+      "source_before_sha256": "b88475f3fa3bde0215dcdd3e2a544a3c6215891e8fa6f3d16feb128e2d6fa285",
+      "source_after_sha256": "b88475f3fa3bde0215dcdd3e2a544a3c6215891e8fa6f3d16feb128e2d6fa285",
+      "source_restored": true,
+      "journal_present": false
+    },
+    "explanation": "2/3 caught; original-state shortcut fault was neutral while current inventory was healthy because the target fence also preserved unknown recovery. Added actual original UNKNOWN read with unavailable inventory; final3/3 now exercise that boundary. No initial survivor counted as caught."
+  },
+  "registry_refresh": "--check unchanged439endpoints262schemas; original IDs/history/authority retained",
+  "native_host_actions_executed": 0,
+  "physical_s24_cases_executed": 0,
+  "unit_acceptance": "NOT_ISSUED",
+  "release_qualified": false,
+  "remaining": [
+    "fresh frozen exact corrected-source broad backend/contracts audit",
+    "single-symbol startup recovery: six valid source counterexamples saved in pending test fixture",
+    "native physical identity/migration/safe retirement/provider operation finality and original product programme",
+    "original independent, provider, production, signing and handset gates"
+  ]
+}

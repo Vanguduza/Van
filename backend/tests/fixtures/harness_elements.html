@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Harness element fixture</title></head>
+<body>
+<header><a href="/" id="home">Home</a></header>
+<nav aria-label="Primary"><a href="/docs?page=2&amp;token=abc123#frag" data-testid="docs-link">Docs</a></nav>
+<main>
+  <form id="payment" action="/checkout/pay?session=s3cr3t">
+    <label for="card">Card number</label>
+    <input id="card" name="cardnumber" autocomplete="cc-number" inputmode="numeric" maxlength="19" pattern="[0-9 ]*" value="4111 1111 1111 1111">
+    <label>CVC <input name="cvc" type="text" maxlength="4" value="123"></label>
+    <label for="pw">Password</label>
+    <input id="pw" type="password" name="password" value="hunter2-secret">
+    <input type="text" name="amount" aria-label="Amount to transfer" placeholder="0.00" value="250.00" data-account-token="tok_live_999" data-kind="money">
+    <textarea name="memo" aria-label="Memo">private memo text</textarea>
+    <select name="to" aria-label="Transfer to"><option value="acct-1">Savings 12345678</option></select>
+    <button id="pay" type="submit" aria-describedby="pay-help">Pay now</button>
+    <span id="pay-help">You will be charged immediately</span>
+    <input type="submit" value="Transfer funds" name="transfer">
+  </form>
+  <button class="nav-btn" data-testid="next">Next page</button>
+  <button>Read more</button><button>Read more</button>
+  <a href="/about" title="About the project">About</a>
+  <input type="search" name="q" placeholder="Search docs">
+  <input type="checkbox" id="agree" checked><label for="agree">I agree</label>
+  <div role="button" tabindex="0" onclick="void 0">Custom control</div>
+  <button hidden id="ghost">Ghost pay</button>
+  <button style="display:none" id="ghost2">Hidden transfer</button>
+  <input type="hidden" name="csrf" value="csrf-secret-value">
+  <div contenteditable="true" aria-label="Notes">typed owner notes</div>
+</main>
+<footer><a href="/logout">Log out</a></footer>
+</body>
+</html>

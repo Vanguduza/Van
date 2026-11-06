@@ -1,0 +1,11 @@
+{
+  "base_head": "ca981d19615f614a1c41f78618e04ea1582d620e",
+  "source_state": "Uncommitted RLock/depth repair; not original committed source",
+  "source_sha256": "888f5d63c61fb5585f2abd94c370303ed7cca28b5b8bcfd9c369b6817d1dfcf3",
+  "actual_SQL_error_failures": 2,
+  "passed_controls": 10,
+  "skips": 0,
+  "errors": 0,
+  "audit_violations": 0,
+  "owned_fixture_independently_absent": true
+}

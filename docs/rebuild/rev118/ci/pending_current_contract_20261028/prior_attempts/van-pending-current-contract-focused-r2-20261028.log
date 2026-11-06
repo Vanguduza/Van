@@ -1,0 +1,113 @@
+..FF.................................................................... [ 73%]
+..........................                                               [100%]
+=================================== FAILURES ===================================
+_ test_actual_native_owner_revalues_pending_loss_with_higher_current_contract[limits1-PORTFOLIO_HEAT-single] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-72/test_actual_native_owner_reval2')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+kind = 'single'
+limits = {'max_open_stop_risk': '0.010', 'max_currency_leg_exposure': '1'}
+expected = 'PORTFOLIO_HEAT'
+
+    @pytest.mark.parametrize('kind',['single','account'])
+    @pytest.mark.parametrize('limits,expected',[
+        ({'max_open_stop_risk':'0.012'},'CURRENCY_LEG_EXPOSURE'),
+        ({'max_open_stop_risk':'0.010','max_currency_leg_exposure':'1'},'PORTFOLIO_HEAT'),
+    ])
+    def test_actual_native_owner_revalues_pending_loss_with_higher_current_contract(tmp_path,eurusd,kind,limits,expected):
+        ledger,adapter,account,_,original=native_facts(tmp_path,eurusd)
+        _,first=command(ledger,original,'before-contract-change');receipt(ledger,first,status='ACCEPTED')
+        b=other_context(ledger,adapter,account,original,alias='second_alias')
+        current=replace(account,account_alias=b.account_alias,
+            funding_mark=replace(account.funding_mark,account_alias=b.account_alias),
+            used_margin=D(0),free_margin=account.equity,margin_level_pct=None)
+        # Existing risk owner receives a changed current contract for this symbol;
+        # no broker, native conversion or external account qualification is claimed.
+        terms=replace(eurusd,tick_value=eurusd.tick_value*2)
+        b=replace(b,symbol_contract=terms)
+        owner=producer(kind,ledger,adapter,current,b);now=NOW*1000+100
+        if kind=='single':facts=owner.snapshot(now_ms=now,quote_age_ms=0,strategy_id=intent().strategy_id)
+        else:
+            owner.clock=lambda:now
+            facts=owner._snapshot_for(N(symbol='EURUSD',strategy_id=intent().strategy_id))
+        assert facts.symbol_contract.tick_value==terms.tick_value
+        assert facts.reconciliation_ok and not facts.preservation_blocks_new_risk and not facts.open_positions
+>       grant=TradingMandate.from_mapping(mandate_dict(account_alias=b.account_alias,
+            max_positions_per_instrument=10,max_total_positions=20,**limits))
+
+trading/tests/test_pending_current_contract.py:38: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/risk/mandate.py:239: in from_mapping
+    policy = _effective_policy(data)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/risk/mandate.py:397: in _effective_policy
+    max_currency_leg_exposure=_fraction(data["max_currency_leg_exposure"], "max_currency_leg_exposure"),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = '1', name = 'max_currency_leg_exposure'
+
+    def _fraction(value: Any, name: str) -> Decimal:
+        d = _dec(value, name)
+        if d <= 0 or d >= 1:
+>           raise MandateError(f"{name}: must be a fraction in (0, 1), got {d}")
+E           vati.risk.mandate.MandateError: max_currency_leg_exposure: must be a fraction in (0, 1), got 1
+
+trading/vati/risk/mandate.py:124: MandateError
+_ test_actual_native_owner_revalues_pending_loss_with_higher_current_contract[limits1-PORTFOLIO_HEAT-account] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-72/test_actual_native_owner_reval3')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+kind = 'account'
+limits = {'max_open_stop_risk': '0.010', 'max_currency_leg_exposure': '1'}
+expected = 'PORTFOLIO_HEAT'
+
+    @pytest.mark.parametrize('kind',['single','account'])
+    @pytest.mark.parametrize('limits,expected',[
+        ({'max_open_stop_risk':'0.012'},'CURRENCY_LEG_EXPOSURE'),
+        ({'max_open_stop_risk':'0.010','max_currency_leg_exposure':'1'},'PORTFOLIO_HEAT'),
+    ])
+    def test_actual_native_owner_revalues_pending_loss_with_higher_current_contract(tmp_path,eurusd,kind,limits,expected):
+        ledger,adapter,account,_,original=native_facts(tmp_path,eurusd)
+        _,first=command(ledger,original,'before-contract-change');receipt(ledger,first,status='ACCEPTED')
+        b=other_context(ledger,adapter,account,original,alias='second_alias')
+        current=replace(account,account_alias=b.account_alias,
+            funding_mark=replace(account.funding_mark,account_alias=b.account_alias),
+            used_margin=D(0),free_margin=account.equity,margin_level_pct=None)
+        # Existing risk owner receives a changed current contract for this symbol;
+        # no broker, native conversion or external account qualification is claimed.
+        terms=replace(eurusd,tick_value=eurusd.tick_value*2)
+        b=replace(b,symbol_contract=terms)
+        owner=producer(kind,ledger,adapter,current,b);now=NOW*1000+100
+        if kind=='single':facts=owner.snapshot(now_ms=now,quote_age_ms=0,strategy_id=intent().strategy_id)
+        else:
+            owner.clock=lambda:now
+            facts=owner._snapshot_for(N(symbol='EURUSD',strategy_id=intent().strategy_id))
+        assert facts.symbol_contract.tick_value==terms.tick_value
+        assert facts.reconciliation_ok and not facts.preservation_blocks_new_risk and not facts.open_positions
+>       grant=TradingMandate.from_mapping(mandate_dict(account_alias=b.account_alias,
+            max_positions_per_instrument=10,max_total_positions=20,**limits))
+
+trading/tests/test_pending_current_contract.py:38: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/risk/mandate.py:239: in from_mapping
+    policy = _effective_policy(data)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/risk/mandate.py:397: in _effective_policy
+    max_currency_leg_exposure=_fraction(data["max_currency_leg_exposure"], "max_currency_leg_exposure"),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = '1', name = 'max_currency_leg_exposure'
+
+    def _fraction(value: Any, name: str) -> Decimal:
+        d = _dec(value, name)
+        if d <= 0 or d >= 1:
+>           raise MandateError(f"{name}: must be a fraction in (0, 1), got {d}")
+E           vati.risk.mandate.MandateError: max_currency_leg_exposure: must be a fraction in (0, 1), got 1
+
+trading/vati/risk/mandate.py:124: MandateError
+=========================== short test summary info ============================
+FAILED trading/tests/test_pending_current_contract.py::test_actual_native_owner_revalues_pending_loss_with_higher_current_contract[limits1-PORTFOLIO_HEAT-single]
+FAILED trading/tests/test_pending_current_contract.py::test_actual_native_owner_revalues_pending_loss_with_higher_current_contract[limits1-PORTFOLIO_HEAT-account]
+2 failed, 96 passed in 6.52s

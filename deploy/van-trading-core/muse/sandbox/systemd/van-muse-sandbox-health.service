@@ -1,0 +1,8 @@
+[Unit]
+Description=Verify VAN Muse gVisor sandbox and fail closed on drift
+After=van-muse-cdp-bridge.service
+Requires=van-muse-cdp-bridge.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/van-muse-sandbox-health

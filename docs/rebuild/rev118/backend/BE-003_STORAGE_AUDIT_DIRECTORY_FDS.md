@@ -1,0 +1,9 @@
+# Source storage auditor: actual directory-handle identities
+
+A258-case monitor/descriptor attempt passed its test assertions, then failed while pytest removed an external temporary directory named data. The instrument resolved that relative name against the checkout and produced a false forbidden-write report. Its late report also failed after the runner globals lost __file__. The attempt is retained as failed instrument execution, not an overall pass.
+
+Nine genuine before failures establish the defects: seven actual directory-FD operations could bypass the protected checkout path, external fd-based cleanup was incorrectly denied, and clearing the main-file global prevented a report. The instrument now resolves directory-handle paths for mkdir/remove/rmdir/rename/link/symlink, preserves logical and physical/symlink checks, and refuses an unresolvable handle. Its source hash is captured before pytest executes and its report is emitted in finally before interpreter globals clear. No cleanup allowlist or guard bypass was introduced.
+
+The existing14 filesystem-misuse probes remain; all10current regression cases pass. An isolated first QA invocation imported the old tool because of its product working directory and is retained separately; the correctly scoped QA and actual installed source pass. Final258monitor/descriptor cases and173native integrations complete under the repaired instrument with zero forbidden events;108rebuild cases pass. Explicit basetemp paths match the fresh hosted fixture lifecycle.
+
+This remains Python instrumentation, not an OS sandbox. Directory-FD-relative open audit events do not carry their directory handle; existing fd writes, native-library I/O and external processes remain outside its guarantee. Project Truth hooks and native security admission remain separate and unchanged.

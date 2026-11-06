@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.gateway.PermissionRevocationOperationsTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-11-01T07:00:20" hostname="07611d75dea7" time="0.085">
+  <properties/>
+  <testcase name="unavailable readback keeps original and restart never resubmits applied effect()" classname="com.dial.van.gateway.PermissionRevocationOperationsTest" time="0.044"/>
+  <testcase name="wrong scope unknown and malformed receipt cannot discard original()" classname="com.dial.van.gateway.PermissionRevocationOperationsTest" time="0.009"/>
+  <testcase name="only explicit different reviewed generation creates fresh intent and old unknown is retained()" classname="com.dial.van.gateway.PermissionRevocationOperationsTest" time="0.005"/>
+  <testcase name="corrupt history never starts a replacement operation()" classname="com.dial.van.gateway.PermissionRevocationOperationsTest" time="0.002"/>
+  <testcase name="profile or caller switch prevents any original lookup or mutation()" classname="com.dial.van.gateway.PermissionRevocationOperationsTest" time="0.003"/>
+  <testcase name="unverified local target can be withdrawn without claiming a historic issuer()" classname="com.dial.van.gateway.PermissionRevocationOperationsTest" time="0.001"/>
+  <testcase name="save failure precedes network and failed cleanup retains known original()" classname="com.dial.van.gateway.PermissionRevocationOperationsTest" time="0.003"/>
+  <testcase name="actual caller exchange recovers lost commit response with one effect and independent detail()" classname="com.dial.van.gateway.PermissionRevocationOperationsTest" time="0.003"/>
+  <testcase name="terminal refusal does not clear later explicit operation()" classname="com.dial.van.gateway.PermissionRevocationOperationsTest" time="0.003"/>
+  <testcase name="original body deadline and distinct historic issuer survive process restart()" classname="com.dial.van.gateway.PermissionRevocationOperationsTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

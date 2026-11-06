@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.command.nav.VanNavModelTest" tests="23" skipped="0" failures="0" errors="0" timestamp="2026-10-08T06:59:30" hostname="052fefa249ff" time="0.043">
+  <properties/>
+  <testcase name="deepLink parses every primary and more destination()" classname="com.dial.van.command.nav.VanNavModelTest" time="0.001"/>
+  <testcase name="every section 2_1 development route resolves to its own template()" classname="com.dial.van.command.nav.VanNavModelTest" time="0.002"/>
+  <testcase name="deepLink ignores a trailing query string()" classname="com.dial.van.command.nav.VanNavModelTest" time="0.014"/>
+  <testcase name="a literal segment beats a placeholder when two development templates both fit()" classname="com.dial.van.command.nav.VanNavModelTest" time="0.001"/>
+  <testcase name="restore keeps a development route across process death()" classname="com.dial.van.command.nav.VanNavModelTest" time="0.001"/>
+  <testcase name="the development templates are exactly the fifteen section 2_1 names, all registered()" classname="com.dial.van.command.nav.VanNavModelTest" time="0.0"/>
+  <testcase name="back on an unknown route is null rather than a guess()" classname="com.dial.van.command.nav.VanNavModelTest" time="0.0"/>
+  <testcase name="back returns each route's DNA-declared parent, and null at home()" classname="com.dial.van.command.nav.VanNavModelTest" time="0.001"/>
+  <testcase name="restore falls back to home for null, blank or unknown routes()" classname="com.dial.van.command.nav.VanNavModelTest" time="0.0"/>
+  <testcase name="missionRoute and projectRoute build routes VanRoute recognises()" classname="com.dial.van.command.nav.VanNavModelTest" time="0.001"/>
+  <testcase name="deepLink rejects a foreign scheme or unknown path()" classname="com.dial.van.command.nav.VanNavModelTest" time="0.0"/>
+  <testcase name="restore keeps a known concrete route, including one with an argument()" classname="com.dial.van.command.nav.VanNavModelTest" time="0.003"/>
+  <testcase name="development deep links use the van scheme and keep only declared queries()" classname="com.dial.van.command.nav.VanNavModelTest" time="0.006"/>
+  <testcase name="every route template has exactly one parent chain up to home()" classname="com.dial.van.command.nav.VanNavModelTest" time="0.001"/>
+  <testcase name="startDestination honours a new-style route already()" classname="com.dial.van.command.nav.VanNavModelTest" time="0.0"/>
+  <testcase name="deepLink bare scheme resolves to home()" classname="com.dial.van.command.nav.VanNavModelTest" time="0.001"/>
+  <testcase name="every work-dev route's parent is Work, and none is a new destination()" classname="com.dial.van.command.nav.VanNavModelTest" time="0.001"/>
+  <testcase name="startDestination falls back to home for an unrecognised extra()" classname="com.dial.van.command.nav.VanNavModelTest" time="0.001"/>
+  <testcase name="deepLink parses a concrete argument route()" classname="com.dial.van.command.nav.VanNavModelTest" time="0.0"/>
+  <testcase name="the development route builders produce routes VanRoute recognises()" classname="com.dial.van.command.nav.VanNavModelTest" time="0.001"/>
+  <testcase name="isPrimary is true only for the five adaptive-nav destinations()" classname="com.dial.van.command.nav.VanNavModelTest" time="0.001"/>
+  <testcase name="startDestination resolves a plain launch to home()" classname="com.dial.van.command.nav.VanNavModelTest" time="0.0"/>
+  <testcase name="startDestination maps every legacy CommandModule id somewhere known()" classname="com.dial.van.command.nav.VanNavModelTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

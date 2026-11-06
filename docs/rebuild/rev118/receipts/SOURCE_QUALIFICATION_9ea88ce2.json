@@ -1,0 +1,32 @@
+{
+  "schema": "van.rebuild.source-qualification/1",
+  "source_head": "9ea88ce2e0385ef014b7229f5f6fe1cdc9526685",
+  "scope": "backend/tests and tests/contracts; isolated frozen worktree with actual pinned DDS source",
+  "result": "FAIL_PARTIAL_RUN",
+  "stopped_after": 5,
+  "counts": {
+    "tests": 5006,
+    "failures": 5,
+    "errors": 0,
+    "skipped": 159
+  },
+  "passed": 4842,
+  "remaining_collection": "Not executed after maxfail=5; no full-pass claim",
+  "duration_seconds": 1024.237,
+  "failed_cases": [
+    "backend.tests.test_trading_oauth_effects.test_link_effect_without_a_committed_receipt_is_not_repeated_or_bypassed_by_new_state[after_material_before_receipt]",
+    "backend.tests.test_trading_oauth_effects.test_link_effect_without_a_committed_receipt_is_not_repeated_or_bypassed_by_new_state[after_receipt_before_commit]",
+    "backend.tests.test_trading_oauth_effects.test_mismatched_native_link_receipt_stays_unconfirmed[change0]",
+    "backend.tests.test_trading_oauth_effects.test_mismatched_native_link_receipt_stays_unconfirmed[change1]",
+    "backend.tests.test_trading_oauth_effects.test_mismatched_native_link_receipt_stays_unconfirmed[change2]"
+  ],
+  "finding": "Alias-collision preflight interrupted original and same-target unresolved OAuth link recovery before the native effect journal could classify it. Native effects were not replayed; original UNKNOWN recovery was obstructed.",
+  "xml_sha256": "af563624409577bd8aefec67a1fbce1d65b03ce0394725a339a057403bc41fe9",
+  "log_sha256": "70732e6a588222a12307011d5d040c4fb64127b2f02fb63341f6136b6932dd51",
+  "storage_audit": {
+    "forbidden_events": [],
+    "scope": "backend/tests plus tests/contracts; repo-root invocation; writes and SQLite opens under root/data or backend/data refused"
+  },
+  "worktree_clean": true,
+  "qualification": "Retained actual broad source failure, not waived by separate hosted emulator/mutation passes; candidate correction and fresh exact-source audit required."
+}

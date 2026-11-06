@@ -1,0 +1,82 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+____ test_authority_expiring_while_waiting_for_sql_writer_is_refused[pair] _____
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-0/test_authority_expiring_while_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f6acc993fb0>
+operation = 'pair'
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize('operation', ['pair', 'renew'])
+    async def test_authority_expiring_while_waiting_for_sql_writer_is_refused(tmp_path, monkeypatch, operation):
+        clock = [1000]
+        monkeypatch.setattr(service, 'time', SimpleNamespace(time=lambda: clock[0]))
+        store = Store(str(tmp_path / 'authority.sqlite'))
+        await store.migrate()
+        auth = AuthService(store, Fernet.generate_key().decode())
+        ticket = await auth.create_pairing_ticket(ttl_seconds=60)
+        if operation == 'renew':
+            await auth.enroll('phone', 'secret', 'PEM')
+            await store.execute('UPDATE capability_grants SET expires_at_unix = 1060')
+        started = asyncio.Event()
+        original = aiosqlite.Connection.execute
+        async def observed(db, sql, *args, **kwargs):
+            if sql == 'BEGIN IMMEDIATE' or sql.startswith('UPDATE capability_grants SET expires_at_unix'):
+                started.set()
+            return await original(db, sql, *args, **kwargs)
+        async with store.connection() as writer:
+            await writer.execute('BEGIN IMMEDIATE')
+            monkeypatch.setattr(aiosqlite.Connection, 'execute', observed)
+            task = asyncio.create_task(auth.pair_device(ticket.token, 'phone', 'secret', 'PEM') if operation == 'pair' else auth.renew_grant('phone'))
+            try:
+                await asyncio.wait_for(started.wait(), 2)
+                assert not task.done()
+                clock[0] = 1060
+                await writer.commit()
+>               with pytest.raises(AuthError) as error:
+                     ^^^^^^^^^^^^^^^^^^^^^^^^
+E               Failed: DID NOT RAISE AuthError
+
+backend/tests/test_lane_auth_commit_expiry.py:38: Failed
+____ test_authority_expiring_while_waiting_for_sql_writer_is_refused[renew] ____
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-0/test_authority_expiring_while_1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f6acc8232c0>
+operation = 'renew'
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize('operation', ['pair', 'renew'])
+    async def test_authority_expiring_while_waiting_for_sql_writer_is_refused(tmp_path, monkeypatch, operation):
+        clock = [1000]
+        monkeypatch.setattr(service, 'time', SimpleNamespace(time=lambda: clock[0]))
+        store = Store(str(tmp_path / 'authority.sqlite'))
+        await store.migrate()
+        auth = AuthService(store, Fernet.generate_key().decode())
+        ticket = await auth.create_pairing_ticket(ttl_seconds=60)
+        if operation == 'renew':
+            await auth.enroll('phone', 'secret', 'PEM')
+            await store.execute('UPDATE capability_grants SET expires_at_unix = 1060')
+        started = asyncio.Event()
+        original = aiosqlite.Connection.execute
+        async def observed(db, sql, *args, **kwargs):
+            if sql == 'BEGIN IMMEDIATE' or sql.startswith('UPDATE capability_grants SET expires_at_unix'):
+                started.set()
+            return await original(db, sql, *args, **kwargs)
+        async with store.connection() as writer:
+            await writer.execute('BEGIN IMMEDIATE')
+            monkeypatch.setattr(aiosqlite.Connection, 'execute', observed)
+            task = asyncio.create_task(auth.pair_device(ticket.token, 'phone', 'secret', 'PEM') if operation == 'pair' else auth.renew_grant('phone'))
+            try:
+                await asyncio.wait_for(started.wait(), 2)
+                assert not task.done()
+                clock[0] = 1060
+                await writer.commit()
+>               with pytest.raises(AuthError) as error:
+                     ^^^^^^^^^^^^^^^^^^^^^^^^
+E               Failed: DID NOT RAISE AuthError
+
+backend/tests/test_lane_auth_commit_expiry.py:38: Failed
+=========================== short test summary info ============================
+FAILED backend/tests/test_lane_auth_commit_expiry.py::test_authority_expiring_while_waiting_for_sql_writer_is_refused[pair]
+FAILED backend/tests/test_lane_auth_commit_expiry.py::test_authority_expiring_while_waiting_for_sql_writer_is_refused[renew]
+2 failed in 0.59s

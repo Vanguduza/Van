@@ -1,0 +1,60 @@
+......FF.................................                                [100%]
+=================================== FAILURES ===================================
+_ test_cross_instrument_shared_usd_leg_cannot_borrow_capacity_from_a_new_base_currency _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-178/test_cross_instrument_shared_u0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_cross_instrument_shared_usd_leg_cannot_borrow_capacity_from_a_new_base_currency(tmp_path,eurusd):
+>       sdk,clock,ledger,command,margin,current,authority,book,router=prepared(tmp_path,eurusd,
+            mandate_changes={'max_currency_leg_exposure':'0.003'})
+
+trading/tests/test_entry_resource_groups.py:123: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_provisional_resource_book.py:14: in prepared
+    sdk,clock,ledger,command,margin_ref,current_ref,router=current_entry(tmp_path,eurusd,
+trading/tests/test_current_entry_risk_source.py:30: in current_entry
+    command=replace(entry_command(original),expires_at_ms=mandate.expires_at_unix*1000,command_hash='').sealed()
+                    ^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+event = Event(kind=<EventKind.RISK_DECISION: 'RISK_DECISION'>, producer='vati-cycle', event_time_ms=1800000000000, received_ti... decision_time_ms=None, correlation_id='ti-1', hash='f19e6ed7b21d0bea646e612b8c52580710b146ad3a42039e3dd81857f8035eaf')
+
+    def entry_command(event):
+        i=event.payload['inputs']['intent'];decision=event.payload['decision']
+>       assert decision['decision'] in ('APPROVED','REDUCED'),decision['reason_code']
+E       AssertionError: CURRENCY_LEG_EXPOSURE
+E       assert 'REJECTED' in ('APPROVED', 'REDUCED')
+
+trading/tests/test_entry_margin_binding.py:20: AssertionError
+_ test_opposing_unfilled_hold_cannot_cancel_the_next_same_direction_currency_burden _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-178/test_opposing_unfilled_hold_ca0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_opposing_unfilled_hold_cannot_cancel_the_next_same_direction_currency_burden(tmp_path,eurusd):
+>       sdk,clock,ledger,command,margin,current,authority,book,router=prepared(tmp_path,eurusd,
+            mandate_changes={'max_positions_per_instrument':3,'max_currency_leg_exposure':'0.003'})
+
+trading/tests/test_entry_resource_groups.py:136: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_provisional_resource_book.py:14: in prepared
+    sdk,clock,ledger,command,margin_ref,current_ref,router=current_entry(tmp_path,eurusd,
+trading/tests/test_current_entry_risk_source.py:30: in current_entry
+    command=replace(entry_command(original),expires_at_ms=mandate.expires_at_unix*1000,command_hash='').sealed()
+                    ^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+event = Event(kind=<EventKind.RISK_DECISION: 'RISK_DECISION'>, producer='vati-cycle', event_time_ms=1800000000000, received_ti... decision_time_ms=None, correlation_id='ti-1', hash='6443d853fad275072e79f6a8ef5a3c025559503f3d3ac0ca228c502e86a31334')
+
+    def entry_command(event):
+        i=event.payload['inputs']['intent'];decision=event.payload['decision']
+>       assert decision['decision'] in ('APPROVED','REDUCED'),decision['reason_code']
+E       AssertionError: CURRENCY_LEG_EXPOSURE
+E       assert 'REJECTED' in ('APPROVED', 'REDUCED')
+
+trading/tests/test_entry_margin_binding.py:20: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_entry_resource_groups.py::test_cross_instrument_shared_usd_leg_cannot_borrow_capacity_from_a_new_base_currency
+FAILED trading/tests/test_entry_resource_groups.py::test_opposing_unfilled_hold_cannot_cancel_the_next_same_direction_currency_burden
+2 failed, 39 passed in 4.26s

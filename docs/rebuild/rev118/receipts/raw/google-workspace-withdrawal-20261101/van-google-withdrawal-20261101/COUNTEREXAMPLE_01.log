@@ -1,0 +1,22 @@
+
+==================================== ERRORS ====================================
+_______ ERROR collecting tests/test_google_owner_withdrawal_recovery.py ________
+ImportError while importing test module '/workspace/van-lanes-20261101/google-withdrawal/backend/tests/test_google_owner_withdrawal_recovery.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/tests/test_google_owner_withdrawal_recovery.py:4: in <module>
+    from test_google_owner_revoke_and_scrub import _settings, client
+backend/tests/test_google_owner_revoke_and_scrub.py:10: in <module>
+    from van_gateway.app import create_app
+backend/van_gateway/app.py:187: in <module>
+    from van_gateway.trading.runtime_controls import register_runtime_control_routes
+backend/van_gateway/trading/runtime_controls.py:15: in <module>
+    from vati.app.runtime_control_protocol import ACTIONS, RecoveryIntent, RecoveryProof, RuntimeControlError
+E   ModuleNotFoundError: No module named 'vati'
+=========================== short test summary info ============================
+ERROR backend/tests/test_google_owner_withdrawal_recovery.py
+!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 2.00s

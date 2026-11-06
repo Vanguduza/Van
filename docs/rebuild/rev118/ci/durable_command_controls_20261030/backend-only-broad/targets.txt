@@ -1,0 +1,5 @@
+trading/tests
+backend/tests/test_cognitive_fabric.py
+backend/tests/test_cognitive_twin.py
+backend/tests/test_context_admission_api.py
+backend/tests/test_context_lifecycle_governance.py

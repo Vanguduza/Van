@@ -1,0 +1,43 @@
+{
+  "active_owned_pytest_or_gradle_processes": [],
+  "raw_logs_retained": "/workspace/van-permission-revocation-20261101",
+  "removed_terminal_fixtures": [
+    {
+      "path": "/tmp/van-permission-revocation-final-affected-01",
+      "bytes": 164871085
+    },
+    {
+      "path": "/tmp/van-permission-revocation-final-core-01",
+      "bytes": 78503936
+    },
+    {
+      "path": "/tmp/van-permission-revocation-policy-01",
+      "bytes": 35045376
+    },
+    {
+      "path": "/tmp/van-permission-revocation-recovery-01",
+      "bytes": 24715264
+    },
+    {
+      "path": "/tmp/van-permission-revocation-focused-03",
+      "bytes": 59944960
+    },
+    {
+      "path": "/tmp/van-permission-revocation-focused-02",
+      "bytes": 55824384
+    },
+    {
+      "path": "/tmp/van-permission-revocation-focused-01",
+      "bytes": 45522944
+    },
+    {
+      "path": "/tmp/van-permission-revocation-counterexample-01",
+      "bytes": 2060288
+    }
+  ],
+  "retained_owned_review_toolchain": [
+    "/tmp/van-permission-revocation-gradle",
+    "/tmp/van-permission-revocation-jdk"
+  ],
+  "unrelated_paths_removed": false
+}

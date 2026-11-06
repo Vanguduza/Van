@@ -1,0 +1,10 @@
+{
+  "base_head": "b58bb578418ac1d49dc67078f616ac4c3eb8b3ef",
+  "scope": "Exact unchanged causal native margin report and original regression assertion; current separate position-projection WIP not assigned to published b58.",
+  "source_sha256": {
+    "trading/vati/risk/margin.py": "45def5dc71377cfeeab587a1228e03b89f19bb78c68c4c4fbd685ea64208d300",
+    "trading/vati/app/portfolio.py": "4edeb4ea65a2f390311c3bc5bee17cf68f7319f4afaa9eb778a0f963df701188",
+    "trading/tests/test_native_account_observation.py": "7fd2376bc9d15b7de5c8eae29156b52c30263ff11a2af1949151d939aec3a4b3"
+  },
+  "causal_source_bytes_match_b58": true
+}

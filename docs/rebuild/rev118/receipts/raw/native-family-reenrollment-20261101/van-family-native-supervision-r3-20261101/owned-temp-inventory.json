@@ -1,0 +1,116 @@
+{
+  "directory": "/tmp/van-recovery-family-native-supervision-r3-20261101",
+  "at_utc": "2026-11-01T05:04:11.459851+00:00",
+  "files": [
+    {
+      "path": "test_real_add_then_proportiona0/vati.sqlite",
+      "bytes": 102400,
+      "sha256": "9eb31b25c36bedd1223aac24429bb029daf10dc7e31d174f1540dea96cae841c"
+    },
+    {
+      "path": "test_real_lifecycle_caller_use0/vati.sqlite",
+      "bytes": 53248,
+      "sha256": "e90d72b76b9e78c0a288b9d2da626e0fb25115e4058a293a33ca21c0073b6ef4"
+    },
+    {
+      "path": "test_admitted_partial_effect_i0/vati.sqlite",
+      "bytes": 53248,
+      "sha256": "e1be1c99b7f13c969e103b8d7d87c98f88d2b14e7b929c27e876640fed9bfb65"
+    },
+    {
+      "path": "test_current_effect_context_ca9/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "5e64eb5297b8ea65d40df9ca27277fbf88fd2891c58f22e5ed7888a770fcdaa3"
+    },
+    {
+      "path": "test_current_effect_context_ca8/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "5d57c5ad0399d0155796f1c84358c5212ff840dd9f2ba44083876e47e8ab5ffa"
+    },
+    {
+      "path": "test_current_effect_context_ca7/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "fcc197090446625fb0ea6ab7b0e75be98914aa849543ab5e7b43b7c21b1a6f6c"
+    },
+    {
+      "path": "test_current_effect_context_ca6/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "8167f2ed5f95b7a02665b0821d1efaed7181d9cbb99db645536222af1a99a6c5"
+    },
+    {
+      "path": "test_current_effect_context_ca5/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "71ca5113a6806787f98e58583a1dfcd916dd42e8150a4432df7ec0ccb1f0ea1a"
+    },
+    {
+      "path": "test_current_effect_context_ca4/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "b1946bbd36846aac33e9b279347d7c5313ebc84fbd6ba27246981a425b01dabb"
+    },
+    {
+      "path": "test_current_effect_context_ca3/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "ae8f7181221d02ece3a7f4e68071692e5a3544e3a26d62e7248ee90ec5bbf680"
+    },
+    {
+      "path": "test_current_effect_context_ca2/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "4aef5b217284593ae0f126ee00afabe74ac781bc7ac6a81b4fbe2d347ebed0b8"
+    },
+    {
+      "path": "test_current_effect_context_ca1/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "3fbfb50fa1f9261d57eba2ee23c6fe8ffc0f27da0393a388bcb571286b829ef5"
+    },
+    {
+      "path": "test_current_effect_context_ca0/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "297709003510acda7697bb7b58ff621da99086b926af92af7a409b482c314cd1"
+    },
+    {
+      "path": "test_real_current_mandate_orig0/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "4a0b8e39477c0e73b791ae46a3e408844ba31857972ff8d991e5f0b30a96e191"
+    },
+    {
+      "path": "test_committed_other_writer_re0/vati.sqlite",
+      "bytes": 77824,
+      "sha256": "e51dec6eefc6feedda48a3d2402bdc45e278e1074c472e35fb6fde54ed9912d0"
+    },
+    {
+      "path": "test_original_unknown_full_tar0/vati.sqlite",
+      "bytes": 73728,
+      "sha256": "cc195bc6af3a37119708b95d123e2b00ba7c3e55af8bc3bbc97e661686c63ce9"
+    },
+    {
+      "path": "test_cold_flat_recovery_reduce0/vati.sqlite",
+      "bytes": 86016,
+      "sha256": "2e9e1c453ba5876b05fd0e40f5e6e5cc81720c4001913c0cf217915206f7c1c5"
+    },
+    {
+      "path": "test_cold_recovery_restores_or0/vati.sqlite",
+      "bytes": 90112,
+      "sha256": "ecb456fbcd83143b6cf37bdef92eea4b6b1e47191f11f9f8d59342d6e5248c0b"
+    },
+    {
+      "path": "test_missing_native_stop_force0/vati.sqlite",
+      "bytes": 94208,
+      "sha256": "4ad24d2f1210718c8148278fd49ddeb8c2590107c58e94b60e7f91970c295e3f"
+    },
+    {
+      "path": "test_mark_supervises_once_and_0/vati.sqlite",
+      "bytes": 73728,
+      "sha256": "a2c32ea62e865622fb392d50e6b73cd1cf3736587385a5bcd00ec04d3d53853a"
+    },
+    {
+      "path": "owner-authority0/owner_authority_keys.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "owner-authority0/owner_authority_keys.json",
+      "bytes": 212,
+      "sha256": "656e1606cdf6bcd98f17031837825419506ecfc7324a921b90000d8ff7a72a8b"
+    }
+  ]
+}

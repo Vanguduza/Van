@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="25" time="0.835" timestamp="2026-10-25T23:58:30.391577+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_news_durable_publication" name="test_failed_headline_publication_does_not_become_memory_success" time="0.170" /><testcase classname="trading.tests.test_news_durable_publication" name="test_cold_replay_reads_the_original_instead_of_appending_a_new_headline" time="0.005" /><testcase classname="trading.tests.test_news_durable_publication" name="test_lost_actual_sql_commit_reply_does_not_advance_memory_and_replay_preserves_original" time="0.004" /><testcase classname="trading.tests.test_news_durable_publication" name="test_independent_original_readback_is_required_before_headline_success" time="0.003" /><testcase classname="trading.tests.test_news_durable_publication" name="test_missing_known_original_cannot_be_recreated_or_reported_complete" time="0.004" /><testcase classname="trading.tests.test_news_durable_publication" name="test_corrupt_original_cannot_be_ignored_by_a_cold_publisher" time="0.006" /><testcase classname="trading.tests.test_news_durable_publication" name="test_failed_impact_publication_does_not_become_remembered_success" time="0.005" /><testcase classname="trading.tests.test_news_durable_publication" name="test_identical_impact_replay_keeps_one_original_receipt_and_memory_record" time="0.009"><failure message="vati.events.news_ingress.NewsIngressError: news impact original missing; not recreated">ledger = &lt;vati.core.ledger.Ledger object at 0x7f8ebe037e00&gt;
+
+    def test_identical_impact_replay_keeps_one_original_receipt_and_memory_record(ledger):
+        news=NewsIngress(ledger=ledger);h=story();news.ingest(h)
+        a=news.assess(h,subject_kind='POSITION',subject_id='p',symbol='EURUSD',now_ms=NOW)
+        original=next(ledger.iter(EventKind.EVENT_IMPACT));head=ledger.head()
+&gt;       b=news.assess(h,subject_kind='POSITION',subject_id='p',symbol='EURUSD',now_ms=NOW)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_news_durable_publication.py:106: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/events/news_ingress.py:702: in assess
+    self.persist_impact(impact, headline, now_ms=now_ms)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;vati.events.news_ingress.NewsIngress object at 0x7f8ebe1765d0&gt;
+impact = EventImpactAssessment(impact_id='88ab030dd3804be71872685e', headline_id='138bd873f2a6c652858d8f2f466ac369', subject_ki...66ac369cd194fb68ff43f2a00a3d50a892ec36f', 'publisher'), assessed_ms=1800000000000, impact_version='event-impact/5.1.2')
+headline = Headline(source_id='publisher', trust=&lt;SourceTrust.T1_PRIMARY: 'T1_PRIMARY'&gt;, published_ms=1800000000000, observed_ms=...bols=('EURUSD',), event_class='', severity=Decimal('1'), concern=&lt;Concern.UNCLEAR: 'UNCLEAR'&gt;, url='', body_excerpt='')
+now_ms = 1800000000000
+
+    def persist_impact(self, impact: EventImpactAssessment, headline: Headline,
+                       *, now_ms: Optional[int] = None) -&gt; None:
+        """Write one assessed impact to the ledger. No-op without a ledger.
+    
+        Separated from `assess` so a caller that assesses a whole universe can
+        decide what is worth keeping — a candidate scan touches every symbol on
+        every cycle, and recording a non-actionable impact for each of them on
+        each pass would bury the ones that argue for something.
+        """
+        if self._ledger is None:
+            return
+        at = now_ms if now_ms is not None else impact.assessed_ms
+        _milliseconds(at)
+        self.ingest(headline,now_ms=at)
+        payload=impact.body()|{'impact_hash':impact.digest,'headline_title':headline.title[:300]}
+        def read():
+            found=None
+            for event in self._ledger.iter(EventKind.EVENT_IMPACT,correlation_id=impact.subject_id):
+                if event.producer!=self._producer:continue
+                if not isinstance(event.payload,dict) or event.hash!=canonical_hash(event.body()):
+                    raise NewsIngressError('news impact original is corrupt')
+                if event.payload.get('impact_id')!=impact.impact_id:continue
+                if event.payload!=payload or event.event_time_ms!=impact.assessed_ms:
+                    raise NewsIngressError('news impact original terms conflict')
+                if found is not None:raise NewsIngressError('news impact original is ambiguous')
+                found=event
+            return found
+        with self._ledger.atomic():
+            if True:
+                # persist=False assessments may be recorded later. They are not
+                # evidence that a durable original already existed.
+                if impact.impact_id in self._published_impacts:
+&gt;                   raise NewsIngressError('news impact original missing; not recreated')
+E                   vati.events.news_ingress.NewsIngressError: news impact original missing; not recreated
+
+trading/vati/events/news_ingress.py:743: NewsIngressError</failure></testcase><testcase classname="trading.tests.test_news_durable_publication" name="test_a_distinct_relay_observation_is_durable_without_rewriting_the_original" time="0.005" /><testcase classname="trading.tests.test_news_durable_publication" name="test_cold_relay_replay_keeps_its_original_availability_instead_of_retry_time" time="0.006" /><testcase classname="trading.tests.test_news_durable_publication" name="test_failed_relay_publication_cannot_become_remembered_provenance" time="0.005" /><testcase classname="trading.tests.test_news_durable_publication" name="test_missing_known_observation_receipt_cannot_be_recreated" time="0.005" /><testcase classname="trading.tests.test_news_durable_publication" name="test_read_only_cold_recovery_restores_full_claims_and_relay_clocks" time="0.010" /><testcase classname="trading.tests.test_news_durable_publication" name="test_legacy_original_and_untimed_relay_labels_are_preserved_without_inventing_clocks" time="0.004" /><testcase classname="trading.tests.test_news_durable_publication" name="test_invalid_or_incomplete_recovery_refuses_partial_success_without_rewriting[corruption]" time="0.004" /><testcase classname="trading.tests.test_news_durable_publication" name="test_invalid_or_incomplete_recovery_refuses_partial_success_without_rewriting[missing-observation]" time="0.004" /><testcase classname="trading.tests.test_news_durable_publication" name="test_invalid_or_incomplete_recovery_refuses_partial_success_without_rewriting[capacity]" time="0.004" /><testcase classname="trading.tests.test_news_durable_publication" name="test_invalid_or_incomplete_recovery_refuses_partial_success_without_rewriting[chain]" time="0.004" /><testcase classname="trading.tests.test_news_durable_publication" name="test_two_actual_sql_writers_keep_one_original_and_one_observation" time="0.018" /><testcase classname="trading.tests.test_news_durable_publication" name="test_same_time_assessment_with_new_original_evidence_gets_a_distinct_impact" time="0.008" /><testcase classname="trading.tests.test_news_durable_publication" name="test_actual_process_death_after_commit_recovers_without_duplicate_publication" time="0.166" /><testcase classname="trading.tests.test_news_durable_publication" name="test_actual_native_writer_arbitration_and_cold_recovery[sqlite]" time="0.015" /><testcase classname="trading.tests.test_news_durable_publication" name="test_actual_native_commit_reply_loss_preserves_original_observation[sqlite]" time="0.012" /><testcase classname="trading.tests.test_news_durable_publication" name="test_observation_and_impact_readback_failure_keeps_completion_unknown_until_reconciled[NEWS_OBSERVATION]" time="0.006" /><testcase classname="trading.tests.test_news_durable_publication" name="test_observation_and_impact_readback_failure_keeps_completion_unknown_until_reconciled[EVENT_IMPACT]" time="0.007"><failure message="vati.events.news_ingress.NewsIngressError: news impact original is ambiguous">ledger = &lt;vati.core.ledger.Ledger object at 0x7f8ebe06a390&gt;
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7f8ebe06b320&gt;
+kind = &lt;EventKind.EVENT_IMPACT: 'EVENT_IMPACT'&gt;
+
+    @pytest.mark.parametrize('kind',[EventKind.NEWS_OBSERVATION,EventKind.EVENT_IMPACT])
+    def test_observation_and_impact_readback_failure_keeps_completion_unknown_until_reconciled(ledger,monkeypatch,kind):
+        news=NewsIngress(ledger=ledger);h=story();read=ledger.iter
+        if kind is EventKind.EVENT_IMPACT:news.ingest(h,now_ms=NOW)
+        def unavailable_after_commit(selected=None,correlation_id=None):
+            if selected is kind and not ledger._conn.in_transaction:return iter(())
+            return read(selected,correlation_id=correlation_id)
+        def apply():
+            if kind is EventKind.NEWS_OBSERVATION:return news.ingest(h,now_ms=NOW)
+            return news.assess(h,subject_kind='POSITION',subject_id='p',symbol='EURUSD',now_ms=NOW)
+        with monkeypatch.context() as patch:
+            patch.setattr(ledger,'iter',unavailable_after_commit)
+            with pytest.raises(OSError,match='not confirmed'):apply()
+        assert ledger.count(kind)==1
+        if kind is EventKind.NEWS_OBSERVATION:assert news.headlines()==[]
+        else:assert news.impacts_for('p')==[]
+&gt;       head=ledger.head();apply();assert ledger.count(kind)==1 and ledger.head()==head
+                           ^^^^^^^
+
+trading/tests/test_news_durable_publication.py:323: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_news_durable_publication.py:316: in apply
+    return news.assess(h,subject_kind='POSITION',subject_id='p',symbol='EURUSD',now_ms=NOW)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/events/news_ingress.py:702: in assess
+    self.persist_impact(impact, headline, now_ms=now_ms)
+trading/vati/events/news_ingress.py:747: in persist_impact
+    if read() is None:raise OSError('news impact original durable publication not confirmed')
+       ^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def read():
+        found=None
+        for event in self._ledger.iter(EventKind.EVENT_IMPACT,correlation_id=impact.subject_id):
+            if event.producer!=self._producer:continue
+            if not isinstance(event.payload,dict) or event.hash!=canonical_hash(event.body()):
+                raise NewsIngressError('news impact original is corrupt')
+            if event.payload.get('impact_id')!=impact.impact_id:continue
+            if event.payload!=payload or event.event_time_ms!=impact.assessed_ms:
+                raise NewsIngressError('news impact original terms conflict')
+&gt;           if found is not None:raise NewsIngressError('news impact original is ambiguous')
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           vati.events.news_ingress.NewsIngressError: news impact original is ambiguous
+
+trading/vati/events/news_ingress.py:735: NewsIngressError</failure></testcase></testsuite></testsuites>

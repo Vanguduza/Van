@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="8" skipped="0" tests="35" time="0.466" timestamp="2026-10-25T22:27:57.478453+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_calendar_causal_boundaries" name="test_future_observations_cannot_supply_an_actual_before_their_declared_availability" time="0.115" /><testcase classname="trading.tests.test_calendar_causal_boundaries" name="test_future_revision_does_not_erase_the_original_agreement_at_an_earlier_cutoff" time="0.001" /><testcase classname="trading.tests.test_calendar_causal_boundaries" name="test_revision_cannot_supersede_another_publishers_original_claim" time="0.001" /><testcase classname="trading.tests.test_calendar_causal_boundaries" name="test_nonfinite_actual_cannot_enter_a_calendar_record[NaN]" time="0.001" /><testcase classname="trading.tests.test_calendar_causal_boundaries" name="test_nonfinite_actual_cannot_enter_a_calendar_record[Infinity]" time="0.001" /><testcase classname="trading.tests.test_calendar_causal_boundaries" name="test_nonfinite_actual_cannot_enter_a_calendar_record[-Infinity]" time="0.001" /><testcase classname="trading.tests.test_calendar_causal_boundaries" name="test_equal_exact_values_with_different_decimal_scale_agree" time="0.001" /><testcase classname="trading.tests.test_calendar_causal_boundaries" name="test_ledger_availability_is_the_actual_declared_observation_time" time="0.005" /><testcase classname="trading.tests.test_calendar_causal_boundaries" name="test_failed_ledger_publication_cannot_be_remembered_as_success[schedule]" time="0.003" /><testcase classname="trading.tests.test_calendar_causal_boundaries" name="test_failed_ledger_publication_cannot_be_remembered_as_success[observe]" time="0.004" /><testcase classname="trading.tests.test_calendar_causal_boundaries" name="test_a_cold_recorder_does_not_publish_the_same_original_observation_twice" time="0.003"><failure message="AssertionError: assert 2 == 1&#10; +  where 2 = count(&lt;EventKind.CALENDAR_SCHEDULE: 'CALENDAR_SCHEDULE'&gt;)&#10; +    where count = &lt;vati.core.ledger.Ledger object at 0x7f5a2e40a690&gt;.count&#10; +    and   &lt;EventKind.CALENDAR_SCHEDULE: 'CALENDAR_SCHEDULE'&gt; = EventKind.CALENDAR_SCHEDULE">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-143/test_a_cold_recorder_does_not_0')
+
+    def test_a_cold_recorder_does_not_publish_the_same_original_observation_twice(tmp_path):
+        ledger=Ledger(tmp_path/'calendar.sqlite')
+        try:
+            for _ in range(2):
+                recorder=CalendarRecorder(ledger=ledger);scheduled=_sched(recorder)
+                recorder.observe(_obs(scheduled.event_key,'a','1',SCHED_MS+100))
+&gt;           assert ledger.count(EventKind.CALENDAR_SCHEDULE)==1
+E           AssertionError: assert 2 == 1
+E            +  where 2 = count(&lt;EventKind.CALENDAR_SCHEDULE: 'CALENDAR_SCHEDULE'&gt;)
+E            +    where count = &lt;vati.core.ledger.Ledger object at 0x7f5a2e40a690&gt;.count
+E            +    and   &lt;EventKind.CALENDAR_SCHEDULE: 'CALENDAR_SCHEDULE'&gt; = EventKind.CALENDAR_SCHEDULE
+
+trading/tests/test_calendar_causal_boundaries.py:98: AssertionError</failure></testcase><testcase classname="trading.tests.test_calendar_causal_boundaries" name="test_clock_defect_claims_remain_visible_but_cannot_verify_an_actual" time="0.001" /><testcase classname="trading.tests.test_calendar_causal_boundaries" name="test_forecast_only_observation_is_not_the_first_actual_release_latency" time="0.001" /><testcase classname="trading.tests.test_calendar_causal_boundaries" name="test_malformed_actual_is_skipped_with_error_instead_of_silently_becoming_missing" time="0.001" /><testcase classname="trading.tests.test_calendar_causal_boundaries" name="test_actual_commit_lost_ack_reconciles_original_without_duplicate_publication[schedule]" time="0.003"><failure message="AssertionError: assert (2 == 1)&#10; +  where 2 = count(&lt;EventKind.CALENDAR_SCHEDULE: 'CALENDAR_SCHEDULE'&gt;)&#10; +    where count = &lt;vati.core.ledger.Ledger object at 0x7f5a2e40b1a0&gt;.count">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-143/test_actual_commit_lost_ack_re0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7f5a2e40a960&gt;
+phase = 'schedule'
+
+    @pytest.mark.parametrize('phase',['schedule','observe'])
+    def test_actual_commit_lost_ack_reconciles_original_without_duplicate_publication(tmp_path,monkeypatch,phase):
+        ledger=Ledger(tmp_path/'calendar.sqlite');recorder=CalendarRecorder(ledger=ledger)
+        try:
+            if phase=='observe':scheduled=_sched(recorder)
+            atomic=ledger.atomic
+            @contextmanager
+            def commit_then_lose_ack():
+                outer=not ledger._conn.in_transaction
+                with atomic():yield ledger
+                if outer:raise OSError('fixture ACK lost after actual SQL commit')
+            with monkeypatch.context() as patch:
+                patch.setattr(ledger,'atomic',commit_then_lose_ack)
+                with pytest.raises(OSError,match='actual SQL commit'):
+                    if phase=='schedule':_sched(recorder)
+                    else:recorder.observe(_obs(scheduled.event_key,'a','1',SCHED_MS+100))
+            kind=EventKind.CALENDAR_SCHEDULE if phase=='schedule' else EventKind.CALENDAR_RELEASE
+            original=next(ledger.iter(kind));head=ledger.head()
+            if phase=='schedule':_sched(recorder)
+            else:recorder.observe(_obs(scheduled.event_key,'a','1',SCHED_MS+100))
+&gt;           assert ledger.count(kind)==1 and ledger.head()==head
+E           AssertionError: assert (2 == 1)
+E            +  where 2 = count(&lt;EventKind.CALENDAR_SCHEDULE: 'CALENDAR_SCHEDULE'&gt;)
+E            +    where count = &lt;vati.core.ledger.Ledger object at 0x7f5a2e40b1a0&gt;.count
+
+trading/tests/test_calendar_causal_boundaries.py:144: AssertionError</failure></testcase><testcase classname="trading.tests.test_calendar_causal_boundaries" name="test_actual_commit_lost_ack_reconciles_original_without_duplicate_publication[observe]" time="0.005"><failure message="AssertionError: assert (2 == 1)&#10; +  where 2 = count(&lt;EventKind.CALENDAR_RELEASE: 'CALENDAR_RELEASE'&gt;)&#10; +    where count = &lt;vati.core.ledger.Ledger object at 0x7f5a2e4742f0&gt;.count">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-143/test_actual_commit_lost_ack_re1')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7f5a2e4741a0&gt;
+phase = 'observe'
+
+    @pytest.mark.parametrize('phase',['schedule','observe'])
+    def test_actual_commit_lost_ack_reconciles_original_without_duplicate_publication(tmp_path,monkeypatch,phase):
+        ledger=Ledger(tmp_path/'calendar.sqlite');recorder=CalendarRecorder(ledger=ledger)
+        try:
+            if phase=='observe':scheduled=_sched(recorder)
+            atomic=ledger.atomic
+            @contextmanager
+            def commit_then_lose_ack():
+                outer=not ledger._conn.in_transaction
+                with atomic():yield ledger
+                if outer:raise OSError('fixture ACK lost after actual SQL commit')
+            with monkeypatch.context() as patch:
+                patch.setattr(ledger,'atomic',commit_then_lose_ack)
+                with pytest.raises(OSError,match='actual SQL commit'):
+                    if phase=='schedule':_sched(recorder)
+                    else:recorder.observe(_obs(scheduled.event_key,'a','1',SCHED_MS+100))
+            kind=EventKind.CALENDAR_SCHEDULE if phase=='schedule' else EventKind.CALENDAR_RELEASE
+            original=next(ledger.iter(kind));head=ledger.head()
+            if phase=='schedule':_sched(recorder)
+            else:recorder.observe(_obs(scheduled.event_key,'a','1',SCHED_MS+100))
+&gt;           assert ledger.count(kind)==1 and ledger.head()==head
+E           AssertionError: assert (2 == 1)
+E            +  where 2 = count(&lt;EventKind.CALENDAR_RELEASE: 'CALENDAR_RELEASE'&gt;)
+E            +    where count = &lt;vati.core.ledger.Ledger object at 0x7f5a2e4742f0&gt;.count
+
+trading/tests/test_calendar_causal_boundaries.py:144: AssertionError</failure></testcase><testcase classname="trading.tests.test_calendar_causal_boundaries" name="test_missing_in_process_original_is_not_recreated_from_a_memory_success[schedule]" time="0.003" /><testcase classname="trading.tests.test_calendar_causal_boundaries" name="test_missing_in_process_original_is_not_recreated_from_a_memory_success[observe]" time="0.004" /><testcase classname="trading.tests.test_calendar_causal_boundaries" name="test_revision_must_bind_the_latest_prior_source_version[missing]" time="0.001" /><testcase classname="trading.tests.test_calendar_causal_boundaries" name="test_revision_must_bind_the_latest_prior_source_version[old-branch]" time="0.001" /><testcase classname="trading.tests.test_calendar_causal_boundaries" name="test_revision_must_bind_the_latest_prior_source_version[future-clock]" time="0.001" /><testcase classname="trading.tests.test_calendar_causal_boundaries" name="test_as_of_report_does_not_leak_future_observation_counts" time="0.001" /><testcase classname="trading.tests.test_calendar_causal_boundaries" name="test_cold_recovery_reads_original_sealed_records_without_another_publication" time="0.005" /><testcase classname="trading.tests.test_calendar_causal_boundaries" name="test_legacy_envelope_clock_is_preserved_and_explicitly_unqualified_on_recovery" time="0.004"><failure message="vati.calendar.recorder.ObservationConflict: calendar original publication missing; not recreated">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-143/test_legacy_envelope_clock_is_0')
+
+    def test_legacy_envelope_clock_is_preserved_and_explicitly_unqualified_on_recovery(tmp_path):
+        ledger=Ledger(tmp_path/'calendar.sqlite')
+        try:
+            recorder=CalendarRecorder(ledger=ledger);scheduled=_sched(recorder)
+            observed=_obs(scheduled.event_key,'a','1',SCHED_MS+500)
+            legacy=make_event(EventKind.CALENDAR_RELEASE,PRODUCER,{**observed.body(),'observation_id':observed.observation_id},
+                event_time_ms=observed.released_ms,received_time_ms=observed.released_ms,correlation_id=observed.event_key)
+            ledger.append(legacy);before=ledger.head()
+            recovered=CalendarRecorder.from_ledger(ledger)
+            assert recovered.report()['legacy_envelope_availability_unqualified']==[observed.observation_id]
+            assert recovered.report(now_ms=SCHED_MS+100)['legacy_envelope_availability_unqualified']==[]
+            assert recovered.record(scheduled.event_key,now_ms=SCHED_MS+100).agreed_actual is None
+            assert next(ledger.iter(EventKind.CALENDAR_RELEASE)).received_time_ms==SCHED_MS
+&gt;           recovered.observe(observed)
+
+trading/tests/test_calendar_causal_boundaries.py:215: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/calendar/recorder.py:282: in observe
+    self._emit(EventKind.CALENDAR_RELEASE,{**obs.body(),'observation_id':oid},
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;vati.calendar.recorder.CalendarRecorder object at 0x7f5a2e475be0&gt;
+kind = &lt;EventKind.CALENDAR_RELEASE: 'CALENDAR_RELEASE'&gt;
+payload = {'event_key': 'NFP:1700000000000', 'source': 'a', 'actual': '1', 'observed_ms': 1700000000500, ...}
+event_ms = 1700000000000, corr = 'NFP:1700000000000'
+received_ms = 1700000000500, must_exist = True
+
+    def _emit(self, kind: EventKind, payload: dict, *, event_ms: int, corr: str, received_ms=None,must_exist=False) -&gt; None:
+        if self._ledger is None:
+            return
+        def original():
+            found=None
+            for event in self._ledger.iter(kind,correlation_id=corr):
+                if event.producer!=self._producer:continue
+                if not isinstance(event.payload,dict) or event.hash!=canonical_hash(event.body()):
+                    raise ObservationConflict('calendar original publication is corrupt')
+                if kind is EventKind.CALENDAR_RELEASE and event.payload.get('observation_id')!=payload['observation_id']:
+                    continue
+                if (event.payload!=payload
+                        or event.event_time_ms!=event_ms):
+                    raise ObservationConflict('calendar original publication conflicts or is corrupt')
+                if found is None:found=event
+            return found
+        # Local publication only: no provider I/O or memory success inside this
+        # writer. Stable original identity reconciles a lost acknowledgement.
+        with self._ledger.atomic():
+            if True:
+&gt;               if must_exist:raise ObservationConflict('calendar original publication missing; not recreated')
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               vati.calendar.recorder.ObservationConflict: calendar original publication missing; not recreated
+
+trading/vati/calendar/recorder.py:440: ObservationConflict</failure></testcase><testcase classname="trading.tests.test_calendar_causal_boundaries" name="test_corrupted_journal_refuses_calendar_recovery_without_repairing_originals" time="0.004" /><testcase classname="trading.tests.test_calendar_causal_boundaries" name="test_recovery_capacity_refuses_a_partial_success_snapshot" time="0.004" /><testcase classname="trading.tests.test_calendar_causal_boundaries" name="test_actual_concurrent_calendar_publishers_serialize_one_original_per_backend[sqlite]" time="0.018"><failure message="AssertionError: assert 4 == 1&#10; +  where 4 = count(&lt;EventKind.CALENDAR_RELEASE: 'CALENDAR_RELEASE'&gt;)&#10; +    where count = &lt;vati.core.ledger.Ledger object at 0x7f5a2e69fe60&gt;.count&#10; +    and   &lt;EventKind.CALENDAR_RELEASE: 'CALENDAR_RELEASE'&gt; = EventKind.CALENDAR_RELEASE">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-143/test_actual_concurrent_calenda0')
+backend = 'sqlite'
+
+    @pytest.mark.parametrize('backend',['sqlite','postgres'])
+    def test_actual_concurrent_calendar_publishers_serialize_one_original_per_backend(tmp_path,backend):
+        factory=ledger_factory(tmp_path,backend);initial=factory();initial.close()
+        def publish(_):
+            ledger=factory()
+            try:
+                recorder=CalendarRecorder(ledger=ledger);scheduled=_sched(recorder)
+                original=recorder.observe(_obs(scheduled.event_key,'original-publisher','1',SCHED_MS+100))
+                return original.observation_id
+            finally:ledger.close()
+        with ThreadPoolExecutor(max_workers=2) as pool:ids=list(pool.map(publish,range(4)))
+        cold=factory()
+        try:
+            assert len(set(ids))==1
+&gt;           assert cold.count(EventKind.CALENDAR_SCHEDULE)==cold.count(EventKind.CALENDAR_RELEASE)==1
+E           AssertionError: assert 4 == 1
+E            +  where 4 = count(&lt;EventKind.CALENDAR_RELEASE: 'CALENDAR_RELEASE'&gt;)
+E            +    where count = &lt;vati.core.ledger.Ledger object at 0x7f5a2e69fe60&gt;.count
+E            +    and   &lt;EventKind.CALENDAR_RELEASE: 'CALENDAR_RELEASE'&gt; = EventKind.CALENDAR_RELEASE
+
+trading/tests/test_calendar_causal_boundaries.py:264: AssertionError</failure></testcase><testcase classname="trading.tests.test_calendar_causal_boundaries" name="test_actual_calendar_commit_reply_loss_is_recovered_from_original_backend[sqlite]" time="0.005"><failure message="AssertionError: assert (2 == 1)&#10; +  where 2 = count(&lt;EventKind.CALENDAR_RELEASE: 'CALENDAR_RELEASE'&gt;)&#10; +    where count = &lt;vati.core.ledger.Ledger object at 0x7f5a2e4751c0&gt;.count&#10; +    and   &lt;EventKind.CALENDAR_RELEASE: 'CALENDAR_RELEASE'&gt; = EventKind.CALENDAR_RELEASE">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-143/test_actual_calendar_commit_re0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7f5a2e476060&gt;
+backend = 'sqlite'
+
+    @pytest.mark.parametrize('backend',['sqlite','postgres'])
+    def test_actual_calendar_commit_reply_loss_is_recovered_from_original_backend(tmp_path,monkeypatch,backend):
+        factory=ledger_factory(tmp_path,backend);ledger=factory()
+        try:
+            recorder=CalendarRecorder(ledger=ledger);scheduled=_sched(recorder)
+            observed=_obs(scheduled.event_key,'original-publisher','1',SCHED_MS+100)
+            atomic=ledger.atomic
+            @contextmanager
+            def commit_then_lose_reply():
+                outer=ledger._atomic_depth==0 if backend=='postgres' else not ledger._conn.in_transaction
+                with atomic():yield ledger
+                if outer:raise OSError('fixture lost original committed calendar reply')
+            with monkeypatch.context() as patch:
+                patch.setattr(ledger,'atomic',commit_then_lose_reply)
+                with pytest.raises(OSError,match='committed calendar reply'):recorder.observe(observed)
+            head=ledger.head();recorder.observe(observed)
+&gt;           assert ledger.count(EventKind.CALENDAR_RELEASE)==1 and ledger.head()==head
+E           AssertionError: assert (2 == 1)
+E            +  where 2 = count(&lt;EventKind.CALENDAR_RELEASE: 'CALENDAR_RELEASE'&gt;)
+E            +    where count = &lt;vati.core.ledger.Ledger object at 0x7f5a2e4751c0&gt;.count
+E            +    and   &lt;EventKind.CALENDAR_RELEASE: 'CALENDAR_RELEASE'&gt; = EventKind.CALENDAR_RELEASE
+
+trading/tests/test_calendar_causal_boundaries.py:287: AssertionError</failure></testcase><testcase classname="trading.tests.test_calendar_causal_boundaries" name="test_sealed_but_malformed_legacy_record_returns_controlled_recovery_failure" time="0.003" /><testcase classname="trading.tests.test_calendar_causal_boundaries" name="test_empty_calendar_cannot_accept_an_invalid_as_of_query[True]" time="0.001" /><testcase classname="trading.tests.test_calendar_causal_boundaries" name="test_empty_calendar_cannot_accept_an_invalid_as_of_query[-1]" time="0.001" /><testcase classname="trading.tests.test_calendar_causal_boundaries" name="test_empty_calendar_cannot_accept_an_invalid_as_of_query[1.5]" time="0.001" /><testcase classname="trading.tests.test_calendar_causal_boundaries" name="test_empty_calendar_cannot_accept_an_invalid_as_of_query[1700000000000]" time="0.001" /><testcase classname="trading.tests.test_calendar_causal_boundaries" name="test_cold_publisher_cannot_change_the_original_schedule_terms" time="0.003"><failure message="assert ([] == []&#10;  &#10;  Use -v to get more diff and 2 == 1)&#10; +  where 2 = count()&#10; +    where count = &lt;vati.core.ledger.Ledger object at 0x7f5a2e474b60&gt;.count">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-143/test_cold_publisher_cannot_cha0')
+
+    def test_cold_publisher_cannot_change_the_original_schedule_terms(tmp_path):
+        ledger=Ledger(tmp_path/'calendar.sqlite')
+        try:
+            recorder=CalendarRecorder(ledger=ledger);scheduled=_sched(recorder);head=ledger.head()
+            cold=CalendarRecorder(ledger=ledger)
+            with pytest.raises(ObservationConflict):cold.schedule(replace(scheduled,forecast=Decimal('999')))
+&gt;           assert cold.records()==[] and ledger.count()==1 and ledger.head()==head
+E           assert ([] == []
+E             
+E             Use -v to get more diff and 2 == 1)
+E            +  where 2 = count()
+E            +    where count = &lt;vati.core.ledger.Ledger object at 0x7f5a2e474b60&gt;.count
+
+trading/tests/test_calendar_causal_boundaries.py:322: AssertionError</failure></testcase><testcase classname="trading.tests.test_calendar_causal_boundaries" name="test_unconfirmed_original_readback_cannot_advance_memory_success" time="0.004"><failure message="AssertionError: assert (2 == 1)&#10; +  where 2 = count(&lt;EventKind.CALENDAR_RELEASE: 'CALENDAR_RELEASE'&gt;)&#10; +    where count = &lt;vati.core.ledger.Ledger object at 0x7f5a2e477560&gt;.count&#10; +    and   &lt;EventKind.CALENDAR_RELEASE: 'CALENDAR_RELEASE'&gt; = EventKind.CALENDAR_RELEASE">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-143/test_unconfirmed_original_read0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7f5a2e477410&gt;
+
+    def test_unconfirmed_original_readback_cannot_advance_memory_success(tmp_path,monkeypatch):
+        ledger=Ledger(tmp_path/'calendar.sqlite');recorder=CalendarRecorder(ledger=ledger)
+        try:
+            scheduled=_sched(recorder);observed=_obs(scheduled.event_key,'a','1',SCHED_MS+100);read=ledger.iter
+            def unavailable_after_commit(kind=None,correlation_id=None):
+                if kind is EventKind.CALENDAR_RELEASE and not ledger._conn.in_transaction:return iter(())
+                return read(kind,correlation_id=correlation_id)
+            with monkeypatch.context() as patch:
+                patch.setattr(ledger,'iter',unavailable_after_commit)
+                with pytest.raises(OSError,match='not confirmed'):recorder.observe(observed)
+            assert recorder.record(scheduled.event_key).observations==()
+            head=ledger.head();recorder.observe(observed)
+&gt;           assert ledger.count(EventKind.CALENDAR_RELEASE)==1 and ledger.head()==head
+E           AssertionError: assert (2 == 1)
+E            +  where 2 = count(&lt;EventKind.CALENDAR_RELEASE: 'CALENDAR_RELEASE'&gt;)
+E            +    where count = &lt;vati.core.ledger.Ledger object at 0x7f5a2e477560&gt;.count
+E            +    and   &lt;EventKind.CALENDAR_RELEASE: 'CALENDAR_RELEASE'&gt; = EventKind.CALENDAR_RELEASE
+
+trading/tests/test_calendar_causal_boundaries.py:338: AssertionError</failure></testcase></testsuite></testsuites>

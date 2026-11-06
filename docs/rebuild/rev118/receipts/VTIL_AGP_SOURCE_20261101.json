@@ -1,0 +1,48 @@
+{
+  "state": "REVIEWED_SOURCE_CORRECTION_NATIVE_QUALIFICATION_PENDING",
+  "base": "05560dd68663d724ca755fb05a7119b9f227b95b",
+  "source_pins": {
+    "tools/rebuild/canonical_source_audit.py": "a4ae760343de72e5f4b1147c2a76a83970ff5584605affc8725ef0bf71e84551",
+    "tests/rebuild/test_canonical_source_audit.py": "14e200c2aa91e4db0b1735a51f7ea4a39f47c67452e54a42524fa6920d7330ac",
+    ".github/workflows/van-ci.yml": "c2522db0b7889fcab76d190c9236604596cbc323aed61605ebc3302cbc72eece",
+    "tools/ci/github-actions-ci.yml": "c2522db0b7889fcab76d190c9236604596cbc323aed61605ebc3302cbc72eece",
+    "tests/contracts/test_android_instrumentation_abi.py": "00cebc810c199a29184436b0989637600f9350fa65506167e57651a84358ddef",
+    "tests/contracts/test_android_production_target.py": "abdb4ac40fbf90334d075f81ea626ace6803a392cdadc94d231a65c3db00b95c"
+  },
+  "evidence": {
+    "HANDOFF.json": "08f82877a3d5a3c665dcd22336b4c61cf86565d4b077d9f9dcf49cf1555fe587",
+    "SOURCE_PINS.json": "2bd18592c01b8af975153afa26d237c33e56b72f66a3827c80a73e72c535ca0d",
+    "SOURCE.patch": "4ef6f40a5963374ab7f8cb22c4d2ef3c8e33ba525ea679e9b9ec6521b93c5e5c",
+    "AGP_DELTA.patch": "1d27e7ab01503cbcc517d09403682187b9fec0c1a1ab6c95f9ade2daffceffb3",
+    "AGP_REVIEW.json": "3eddee5df07d7418dab7523ccb070b3baa4627c0f9c96c8e2e591c8c7657e679",
+    "VTIL_REVIEW.json": "8db09bbde0296383a9a363d05bc6465faf896ff1563824e9992beee177283c36",
+    "VTIL_AST_PRESERVATION.json": "491bdebfaff48e1010b585fc969387d8ca138870f7bf1b6179d0d77e234716a3",
+    "CONTROLS.json": "666cb2352f91ac671764281f53d12c7d800a3c1a26a6284067c9114fbd4aa076",
+    "OLD_NATIVE_FAILURE.json": "0755fdd7f6b0617b00ef49d4a2f9b0330aa0f136aba1df6f1fa2d91ef8a0945c"
+  },
+  "actual_source_controls": "VTIL author124; current combined136 passes/zero skips/audit0; overlapping separate selections, controlled Node fixture inputs; not native qualification",
+  "native_before": "055 run41347330145 terminal failure; real two AGP cases pass in each cwd but parents BLOCKED on checkout buildSrc outputs; pending entry67 and aggregate failures retained",
+  "old_watch": {
+    "session": 41555,
+    "controller_reaped": true,
+    "controller_exit": 0,
+    "watched_run_exit": 1
+  },
+  "limits": "PrivateDDS key missing BLOCKED; inherited NODE_PATH unqualified; all native/provider/unit/BG001/S24/ownerintake/fullmatrix gates open; no new AGP or DTO hosted proof. OAuth13 unreviewed isolated paths excluded. Large raw proof bytes remain volatile tmp at original handoff paths.",
+  "at_utc": "2026-11-01T21:17:02.168244+00:00",
+  "exact055_Android_metadata": [
+    {
+      "conclusion": "success",
+      "id": 124969853149,
+      "name": "android-and-visual-evidence",
+      "status": "completed"
+    },
+    {
+      "conclusion": "success",
+      "id": 124969853285,
+      "name": "android-instrumentation",
+      "status": "completed"
+    }
+  ],
+  "Android_scope": "Exact055 jobs terminal success, no test counts inferred; production signing/S24/formal admission separate."
+}

@@ -112,7 +112,7 @@ class World:
         self.contract = _contract()
         self.registry = CapsuleRegistry.load_dir(REG)
         self.engine = OpportunityEngine(self.registry, {}, self.mandate)
-        self.learning = LearningHooks(environment=Environment.LIMITED_LIVE, broker="paper")
+        self.learning = LearningHooks(environment=Environment.DEMO, broker="paper")
         self.news = NewsIngress(
             ledger=self.ledger,
             sources=[NewsSource(source_id="reuters", trust=SourceTrust.T1_PRIMARY,
@@ -407,7 +407,9 @@ def test_capsule_health_is_driven_by_the_decision_axis_downwards_only(world: Wor
     # have the authority refuse to open anything at all.
     world.lifecycle.snapshot_fn = lambda symbol: snapshot(world.contract)
 
-    trades = 32
+    # Paper cash belongs to DEMO, weighted at 0.5. Sixty genuine round trips
+    # satisfy the unchanged 30 weighted-sample boundary within its window.
+    trades = 60
     for i in range(trades):
         opened = now + i * 3_600_000
         intent = TradeIntent(
@@ -438,6 +440,11 @@ def test_capsule_health_is_driven_by_the_decision_axis_downwards_only(world: Wor
 
     adjustment = world.learning.health.live_adjustment(STRATEGY)
     assert adjustment is not None, "the learning boundary never produced an adjustment"
+    # A-VATI M3: every value the lifecycle observed agrees with the ledger evidence
+    # it cites (R from the review, process from the decision-quality verdict, cost
+    # from the TCA record), so no close was refused.
+    assert world.learning.refusals == []
+    assert world.learning.health.verdict(STRATEGY).weighted_samples == Decimal(trades) * Decimal('0.5')
     quality = world.lifecycle.decision_quality.health_multiplier(STRATEGY)
 
     health = world.engine.m.capsule_health.get(STRATEGY)

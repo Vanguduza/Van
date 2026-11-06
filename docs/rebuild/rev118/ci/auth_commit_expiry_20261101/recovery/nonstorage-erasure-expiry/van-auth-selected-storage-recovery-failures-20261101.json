@@ -1,0 +1,9 @@
+[
+  {
+    "duration": 12.525947074000214,
+    "nodeid": "tests/test_owner_record_erasure.py::test_actual_record_a4_erasure_retains_unselected_record_and_retry_receipt",
+    "original_longrepr": "client = (<httpx.AsyncClient object at 0x7f1e228bd790>, <fastapi.applications.FastAPI object at 0x7f1e0b30ebd0>, {'create_run': 0})\n\n    async def test_actual_record_a4_erasure_retains_unselected_record_and_retry_receipt(client):\n        ac, app, hermes = client\n        key = await _pair(ac, app)\n        selected = await _fact(app)\n        other = await app.state.owner_fact_author.state(device_id=\"dev-erasure\", subject=\"owner\",\n            predicate=\"other-memory\", value=\"keep-this-record\")\n        records = OwnerRecords(app.state.store)\n        page = await records.list(\"owner_facts\")\n        target = next(record for record in page[\"records\"] if any(field[\"name\"] == \"fact_id\" and field[\"value\"] == selected.fact_id for field in record[\"fields\"]))\n        plan = await records.erasure_plan(\"owner_facts\", target[\"record_id\"])\n        body, result = await _approve(ac, app, key, plan[\"command_text\"], \"erase-one-fact\")\n>       assert result[\"status\"] == \"accepted\", result\nE       AssertionError: {'status': 'denied', 'command_id': 'f4dd2e8b-b068-4943-95c8-fb7500bd5f65', 'idempotency_key': 'erase-one-fact', 'message': 'The current device approval no longer authorizes this erasure', ...}\nE       assert 'denied' == 'accepted'\nE         \nE         - accepted\nE         + denied\n\nbackend/tests/test_owner_record_erasure.py:27: AssertionError",
+    "outcome": "failed",
+    "phase": "call"
+  }
+]

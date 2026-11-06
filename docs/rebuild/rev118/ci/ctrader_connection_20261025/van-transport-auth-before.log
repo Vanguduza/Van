@@ -1,0 +1,154 @@
+FFFFFFFF                                                                 [100%]
+=================================== FAILURES ===================================
+_ test_replacement_connection_reauthenticates_and_refreshes_contracts_before_use _
+
+    def test_replacement_connection_reauthenticates_and_refreshes_contracts_before_use():
+        adapter, transport, responses, calls = fixture()
+        adapter._ensure_auth()
+        old_revision = adapter.symbol('EURUSD').contract_revision
+        adapter._last_spot[12] = (Decimal('1.1'), Decimal('1.2'))
+        calls.clear()
+        transport.connection_id = 2
+        responses['ProtoOASymbolByIdReq'][1]['symbol'][0]['minVolume'] = 2000
+        adapter._ensure_auth()
+>       assert calls[:2] == ['ProtoOAApplicationAuthReq', 'ProtoOAAccountAuthReq']
+E       AssertionError: assert [] == ['ProtoOAAppl...countAuthReq']
+E         
+E         Right contains 2 more items, first extra item: 'ProtoOAApplicationAuthReq'
+E         Use -v to get more diff
+
+trading/tests/test_ctrader_connection_auth.py:37: AssertionError
+_ test_wrong_native_authentication_response_never_authenticates_or_admits_cached_contracts[application_type] _
+
+invalid = 'application_type'
+
+    @pytest.mark.parametrize('invalid', ['application_type', 'account_type', 'other_account', 'bool_account'])
+    def test_wrong_native_authentication_response_never_authenticates_or_admits_cached_contracts(invalid):
+        adapter, transport, responses, calls = fixture()
+        adapter._load_symbols()
+        if invalid == 'application_type':
+            responses['ProtoOAApplicationAuthReq'][0] = 'ProtoHeartbeatEvent'
+        elif invalid == 'account_type':
+            responses['ProtoOAAccountAuthReq'][0] = 'ProtoOATraderRes'
+        else:
+            responses['ProtoOAAccountAuthReq'][1]['ctidTraderAccountId'] = True if invalid == 'bool_account' else 999
+>       with pytest.raises(VenueUnavailable):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_ctrader_connection_auth.py:53: Failed
+_ test_wrong_native_authentication_response_never_authenticates_or_admits_cached_contracts[account_type] _
+
+invalid = 'account_type'
+
+    @pytest.mark.parametrize('invalid', ['application_type', 'account_type', 'other_account', 'bool_account'])
+    def test_wrong_native_authentication_response_never_authenticates_or_admits_cached_contracts(invalid):
+        adapter, transport, responses, calls = fixture()
+        adapter._load_symbols()
+        if invalid == 'application_type':
+            responses['ProtoOAApplicationAuthReq'][0] = 'ProtoHeartbeatEvent'
+        elif invalid == 'account_type':
+            responses['ProtoOAAccountAuthReq'][0] = 'ProtoOATraderRes'
+        else:
+            responses['ProtoOAAccountAuthReq'][1]['ctidTraderAccountId'] = True if invalid == 'bool_account' else 999
+>       with pytest.raises(VenueUnavailable):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_ctrader_connection_auth.py:53: Failed
+_ test_wrong_native_authentication_response_never_authenticates_or_admits_cached_contracts[other_account] _
+
+invalid = 'other_account'
+
+    @pytest.mark.parametrize('invalid', ['application_type', 'account_type', 'other_account', 'bool_account'])
+    def test_wrong_native_authentication_response_never_authenticates_or_admits_cached_contracts(invalid):
+        adapter, transport, responses, calls = fixture()
+        adapter._load_symbols()
+        if invalid == 'application_type':
+            responses['ProtoOAApplicationAuthReq'][0] = 'ProtoHeartbeatEvent'
+        elif invalid == 'account_type':
+            responses['ProtoOAAccountAuthReq'][0] = 'ProtoOATraderRes'
+        else:
+            responses['ProtoOAAccountAuthReq'][1]['ctidTraderAccountId'] = True if invalid == 'bool_account' else 999
+>       with pytest.raises(VenueUnavailable):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_ctrader_connection_auth.py:53: Failed
+_ test_wrong_native_authentication_response_never_authenticates_or_admits_cached_contracts[bool_account] _
+
+invalid = 'bool_account'
+
+    @pytest.mark.parametrize('invalid', ['application_type', 'account_type', 'other_account', 'bool_account'])
+    def test_wrong_native_authentication_response_never_authenticates_or_admits_cached_contracts(invalid):
+        adapter, transport, responses, calls = fixture()
+        adapter._load_symbols()
+        if invalid == 'application_type':
+            responses['ProtoOAApplicationAuthReq'][0] = 'ProtoHeartbeatEvent'
+        elif invalid == 'account_type':
+            responses['ProtoOAAccountAuthReq'][0] = 'ProtoOATraderRes'
+        else:
+            responses['ProtoOAAccountAuthReq'][1]['ctidTraderAccountId'] = True if invalid == 'bool_account' else 999
+>       with pytest.raises(VenueUnavailable):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_ctrader_connection_auth.py:53: Failed
+_ test_connection_change_between_authentication_responses_refuses_the_mixed_handshake _
+
+    def test_connection_change_between_authentication_responses_refuses_the_mixed_handshake():
+        adapter, transport, responses, calls = fixture()
+        original = transport.call
+        def changed(name, body):
+            result = original(name, body)
+            if name == 'ProtoOAAccountAuthReq':
+                transport.connection_id = 2
+            return result
+        transport.call = changed
+>       with pytest.raises(VenueUnavailable):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_ctrader_connection_auth.py:69: Failed
+__ test_contract_refresh_across_connection_change_keeps_old_bytes_unavailable __
+
+    def test_contract_refresh_across_connection_change_keeps_old_bytes_unavailable():
+        adapter, transport, responses, calls = fixture()
+        adapter._ensure_auth()
+        previous = dict(adapter.symbols)
+        original = transport.call
+        def changed(name, body):
+            result = original(name, body)
+            if name == 'ProtoOASymbolByIdReq':
+                transport.connection_id += 1
+            return result
+        transport.call = changed
+>       with pytest.raises(VenueUnavailable):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_ctrader_connection_auth.py:86: Failed
+__ test_failed_reauthentication_fences_the_previous_contract_and_quote_cache ___
+
+    def test_failed_reauthentication_fences_the_previous_contract_and_quote_cache():
+        adapter, transport, responses, calls = fixture()
+        adapter._ensure_auth()
+        previous = dict(adapter.symbols)
+        adapter._last_spot[12] = (Decimal('1.1'), Decimal('1.2'))
+        transport.connection_id = 2
+        responses['ProtoOAAccountAuthReq'][0] = 'ProtoHeartbeatEvent'
+>       with pytest.raises(VenueUnavailable):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_ctrader_connection_auth.py:100: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_ctrader_connection_auth.py::test_replacement_connection_reauthenticates_and_refreshes_contracts_before_use
+FAILED trading/tests/test_ctrader_connection_auth.py::test_wrong_native_authentication_response_never_authenticates_or_admits_cached_contracts[application_type]
+FAILED trading/tests/test_ctrader_connection_auth.py::test_wrong_native_authentication_response_never_authenticates_or_admits_cached_contracts[account_type]
+FAILED trading/tests/test_ctrader_connection_auth.py::test_wrong_native_authentication_response_never_authenticates_or_admits_cached_contracts[other_account]
+FAILED trading/tests/test_ctrader_connection_auth.py::test_wrong_native_authentication_response_never_authenticates_or_admits_cached_contracts[bool_account]
+FAILED trading/tests/test_ctrader_connection_auth.py::test_connection_change_between_authentication_responses_refuses_the_mixed_handshake
+FAILED trading/tests/test_ctrader_connection_auth.py::test_contract_refresh_across_connection_change_keeps_old_bytes_unavailable
+FAILED trading/tests/test_ctrader_connection_auth.py::test_failed_reauthentication_fences_the_previous_contract_and_quote_cache
+8 failed in 0.23s

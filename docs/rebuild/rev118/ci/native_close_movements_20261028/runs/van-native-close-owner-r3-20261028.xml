@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="23" tests="81" time="2.524" timestamp="2026-10-28T19:52:46.457665+00:00" hostname="6e9feff21467"><testcase classname="trading.tests.test_native_close_movement" name="test_original_native_balance_delta_does_not_guess_commission_sign_or_future_fees" time="0.016" /><testcase classname="trading.tests.test_native_close_movement" name="test_unbound_balance_baseline_cannot_supply_a_closing_cash_delta[gap]" time="0.007" /><testcase classname="trading.tests.test_native_close_movement" name="test_unbound_balance_baseline_cannot_supply_a_closing_cash_delta[wrong_scope]" time="0.006" /><testcase classname="trading.tests.test_native_close_movement" name="test_unbound_balance_baseline_cannot_supply_a_closing_cash_delta[future_availability]" time="0.004" /><testcase classname="trading.tests.test_native_close_movement" name="test_existing_financial_owner_publishes_and_independently_reads_original_close_observation" time="0.008"><failure message="KeyError: 'original_received_ms'">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-195/test_existing_financial_owner_0')
+
+    def test_existing_financial_owner_publishes_and_independently_reads_original_close_observation(tmp_path):
+        from vati.funding.movement_journal import FinancialMovementBook
+        ledger=Ledger(tmp_path/'facts.sqlite')
+        try:
+            before,event,scope=originals(ledger);book=FinancialMovementBook(ledger,clock=lambda:7000)
+&gt;           receipt=book.publish_close('original-close',scope_hash=scope,native_id=1,
+                statement_ref=event.hash,balance_anchor_ref=before.hash)
+
+trading/tests/test_native_close_movement.py:59: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/funding/movement_journal.py:257: in publish_close
+    return self._publish(request_id,_close_request(scope_hash,native_id,statement_ref,balance_anchor_ref,anchor_native_id))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/funding/movement_journal.py:281: in _publish
+    source=self._current_source(requested,sources)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/funding/movement_journal.py:197: in _current_source
+    self._balance_points(requested['scope_hash'])
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;vati.funding.movement_journal.FinancialMovementBook object at 0x7f518951b620&gt;
+scope_hash = '9416990f89cc231045967018d529f8f2a4f42488499c86fb9f71bedc2f9c7f3b'
+
+    def _balance_points(self,scope_hash):
+        """Original native versions; source repetition is not a second effect."""
+        from vati.funding.reconciliation import _marks
+        if self.ledger.count(EventKind.ACCOUNT_SNAPSHOT)&gt;100000:
+            raise UnitError('FINANCIAL_NATIVE_BALANCE_ANCHOR_CAPACITY')
+        cash=FundingBook(self.ledger).observations(scope_hash)
+        deals=DealBook(self.ledger).observations(scope_hash)
+        if any(f['state']=='CONFLICT' for f in (cash,deals)):
+            raise UnitError('FINANCIAL_NATIVE_SOURCE_UNAVAILABLE_OR_CONFLICTED')
+        points={};effects={}
+        def add(version,balance,ref,native_id,available,kind):
+            if version is None:return
+            native_int(version,minimum=0)
+            amount=Fraction(Decimal(balance));known=points.get(version)
+            if known is not None and known['balance']!=amount:
+                raise UnitError('FINANCIAL_NATIVE_BALANCE_VERSION_CONFLICT')
+            if kind!='MARK':
+                identity=(kind,native_id)
+                if version in effects and effects[version]!=identity:
+                    raise UnitError('FINANCIAL_NATIVE_BALANCE_VERSION_CONFLICT')
+                effects[version]=identity
+            candidate={'balance':amount,'record_ref':ref,'native_id':native_id,'available_at_ms':available}
+            order=lambda p:(p['available_at_ms'],p['record_ref'],p['native_id'] or 0)
+            if known is None or order(candidate)&lt;order(known):points[version]=candidate
+        for event,mark in _marks(self.ledger,scope_hash):
+            add(mark.balance_version,str(mark.balance),event.hash,None,event.received_time_ms,'MARK')
+        for observed in cash['movements']:
+            row=observed['movement']
+            add(row['balance_version'],row['balance_after'],observed['original_statement_ref'],
+                row['native_id'],observed['original_received_ms'],'CASH')
+        for observed in deals['deals']:
+            row=observed['deal'];detail=row['close']
+            if detail is not None:
+                add(detail['balance_version'],detail['balance_after'],observed['original_statement_ref'],
+&gt;                   row['native_id'],observed['original_received_ms'],'CLOSE')
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               KeyError: 'original_received_ms'
+
+trading/vati/funding/movement_journal.py:237: KeyError</failure></testcase><testcase classname="trading.tests.test_native_close_movement" name="test_cash_or_prior_close_can_anchor_the_next_exact_native_balance_version[cash]" time="0.011" /><testcase classname="trading.tests.test_native_close_movement" name="test_cash_or_prior_close_can_anchor_the_next_exact_native_balance_version[close]" time="0.012" /><testcase classname="trading.tests.test_native_close_movement" name="test_current_native_version_ambiguity_blocks_new_close_postings[two_closes]" time="0.013"><failure message="KeyError: 'original_received_ms'">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-195/test_current_native_version_am0')
+collision = 'two_closes'
+
+    @pytest.mark.parametrize('collision',['two_closes','cash_and_close','contradictory_mark'])
+    def test_current_native_version_ambiguity_blocks_new_close_postings(tmp_path,collision):
+        from vati.funding.movement_journal import FinancialMovementBook
+        from test_native_balance_reconciliation import cash
+        ledger=Ledger(tmp_path/'facts.sqlite')
+        try:
+            before=snapshot(ledger,mark(1000));deals=(closed(),);cash_rows=()
+            if collision=='two_closes':deals+=(replace(closed(),native_id=2),)
+            elif collision=='cash_and_close':cash_rows=(cash(delta='10',balance='110',version=2),)
+            else:snapshot(ledger,mark(1100,balance='101',equity='101',version=1))
+            scope=observe(ledger,cash=cash_rows,deals=deals)
+            event=next(ledger.iter(EventKind.FUNDING_DEAL_STATEMENT));count=ledger.count()
+            with pytest.raises(ValueError,match='NATIVE_BALANCE_VERSION_CONFLICT'):
+&gt;               FinancialMovementBook(ledger,clock=lambda:7000).publish_close('ambiguous-close',scope_hash=scope,
+                    native_id=1,statement_ref=event.hash,balance_anchor_ref=before.hash)
+
+trading/tests/test_native_close_movement.py:112: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/funding/movement_journal.py:257: in publish_close
+    return self._publish(request_id,_close_request(scope_hash,native_id,statement_ref,balance_anchor_ref,anchor_native_id))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/funding/movement_journal.py:281: in _publish
+    source=self._current_source(requested,sources)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/funding/movement_journal.py:197: in _current_source
+    self._balance_points(requested['scope_hash'])
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;vati.funding.movement_journal.FinancialMovementBook object at 0x7f5189536810&gt;
+scope_hash = '9416990f89cc231045967018d529f8f2a4f42488499c86fb9f71bedc2f9c7f3b'
+
+    def _balance_points(self,scope_hash):
+        """Original native versions; source repetition is not a second effect."""
+        from vati.funding.reconciliation import _marks
+        if self.ledger.count(EventKind.ACCOUNT_SNAPSHOT)&gt;100000:
+            raise UnitError('FINANCIAL_NATIVE_BALANCE_ANCHOR_CAPACITY')
+        cash=FundingBook(self.ledger).observations(scope_hash)
+        deals=DealBook(self.ledger).observations(scope_hash)
+        if any(f['state']=='CONFLICT' for f in (cash,deals)):
+            raise UnitError('FINANCIAL_NATIVE_SOURCE_UNAVAILABLE_OR_CONFLICTED')
+        points={};effects={}
+        def add(version,balance,ref,native_id,available,kind):
+            if version is None:return
+            native_int(version,minimum=0)
+            amount=Fraction(Decimal(balance));known=points.get(version)
+            if known is not None and known['balance']!=amount:
+                raise UnitError('FINANCIAL_NATIVE_BALANCE_VERSION_CONFLICT')
+            if kind!='MARK':
+                identity=(kind,native_id)
+                if version in effects and effects[version]!=identity:
+                    raise UnitError('FINANCIAL_NATIVE_BALANCE_VERSION_CONFLICT')
+                effects[version]=identity
+            candidate={'balance':amount,'record_ref':ref,'native_id':native_id,'available_at_ms':available}
+            order=lambda p:(p['available_at_ms'],p['record_ref'],p['native_id'] or 0)
+            if known is None or order(candidate)&lt;order(known):points[version]=candidate
+        for event,mark in _marks(self.ledger,scope_hash):
+            add(mark.balance_version,str(mark.balance),event.hash,None,event.received_time_ms,'MARK')
+        for observed in cash['movements']:
+            row=observed['movement']
+            add(row['balance_version'],row['balance_after'],observed['original_statement_ref'],
+                row['native_id'],observed['original_received_ms'],'CASH')
+        for observed in deals['deals']:
+            row=observed['deal'];detail=row['close']
+            if detail is not None:
+                add(detail['balance_version'],detail['balance_after'],observed['original_statement_ref'],
+&gt;                   row['native_id'],observed['original_received_ms'],'CLOSE')
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               KeyError: 'original_received_ms'
+
+trading/vati/funding/movement_journal.py:237: KeyError</failure></testcase><testcase classname="trading.tests.test_native_close_movement" name="test_current_native_version_ambiguity_blocks_new_close_postings[cash_and_close]" time="0.012"><failure message="KeyError: 'original_received_ms'">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-195/test_current_native_version_am1')
+collision = 'cash_and_close'
+
+    @pytest.mark.parametrize('collision',['two_closes','cash_and_close','contradictory_mark'])
+    def test_current_native_version_ambiguity_blocks_new_close_postings(tmp_path,collision):
+        from vati.funding.movement_journal import FinancialMovementBook
+        from test_native_balance_reconciliation import cash
+        ledger=Ledger(tmp_path/'facts.sqlite')
+        try:
+            before=snapshot(ledger,mark(1000));deals=(closed(),);cash_rows=()
+            if collision=='two_closes':deals+=(replace(closed(),native_id=2),)
+            elif collision=='cash_and_close':cash_rows=(cash(delta='10',balance='110',version=2),)
+            else:snapshot(ledger,mark(1100,balance='101',equity='101',version=1))
+            scope=observe(ledger,cash=cash_rows,deals=deals)
+            event=next(ledger.iter(EventKind.FUNDING_DEAL_STATEMENT));count=ledger.count()
+            with pytest.raises(ValueError,match='NATIVE_BALANCE_VERSION_CONFLICT'):
+&gt;               FinancialMovementBook(ledger,clock=lambda:7000).publish_close('ambiguous-close',scope_hash=scope,
+                    native_id=1,statement_ref=event.hash,balance_anchor_ref=before.hash)
+
+trading/tests/test_native_close_movement.py:112: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/funding/movement_journal.py:257: in publish_close
+    return self._publish(request_id,_close_request(scope_hash,native_id,statement_ref,balance_anchor_ref,anchor_native_id))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/funding/movement_journal.py:281: in _publish
+    source=self._current_source(requested,sources)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/funding/movement_journal.py:197: in _current_source
+    self._balance_points(requested['scope_hash'])
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;vati.funding.movement_journal.FinancialMovementBook object at 0x7f51895f27e0&gt;
+scope_hash = '9416990f89cc231045967018d529f8f2a4f42488499c86fb9f71bedc2f9c7f3b'
+
+    def _balance_points(self,scope_hash):
+        """Original native versions; source repetition is not a second effect."""
+        from vati.funding.reconciliation import _marks
+        if self.ledger.count(EventKind.ACCOUNT_SNAPSHOT)&gt;100000:
+            raise UnitError('FINANCIAL_NATIVE_BALANCE_ANCHOR_CAPACITY')
+        cash=FundingBook(self.ledger).observations(scope_hash)
+        deals=DealBook(self.ledger).observations(scope_hash)
+        if any(f['state']=='CONFLICT' for f in (cash,deals)):
+            raise UnitError('FINANCIAL_NATIVE_SOURCE_UNAVAILABLE_OR_CONFLICTED')
+        points={};effects={}
+        def add(version,balance,ref,native_id,available,kind):
+            if version is None:return
+            native_int(version,minimum=0)
+            amount=Fraction(Decimal(balance));known=points.get(version)
+            if known is not None and known['balance']!=amount:
+                raise UnitError('FINANCIAL_NATIVE_BALANCE_VERSION_CONFLICT')
+            if kind!='MARK':
+                identity=(kind,native_id)
+                if version in effects and effects[version]!=identity:
+                    raise UnitError('FINANCIAL_NATIVE_BALANCE_VERSION_CONFLICT')
+                effects[version]=identity
+            candidate={'balance':amount,'record_ref':ref,'native_id':native_id,'available_at_ms':available}
+            order=lambda p:(p['available_at_ms'],p['record_ref'],p['native_id'] or 0)
+            if known is None or order(candidate)&lt;order(known):points[version]=candidate
+        for event,mark in _marks(self.ledger,scope_hash):
+            add(mark.balance_version,str(mark.balance),event.hash,None,event.received_time_ms,'MARK')
+        for observed in cash['movements']:
+            row=observed['movement']
+            add(row['balance_version'],row['balance_after'],observed['original_statement_ref'],
+&gt;               row['native_id'],observed['original_received_ms'],'CASH')
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: 'original_received_ms'
+
+trading/vati/funding/movement_journal.py:232: KeyError</failure></testcase><testcase classname="trading.tests.test_native_close_movement" name="test_current_native_version_ambiguity_blocks_new_close_postings[contradictory_mark]" time="0.007" /><testcase classname="trading.tests.test_financial_movement_journal" name="test_real_publication_independent_readback_and_original_replay_are_not_settlement[sqlite]" time="0.011" /><testcase classname="trading.tests.test_financial_movement_journal" name="test_real_publication_independent_readback_and_original_replay_are_not_settlement[postgres]" time="0.002"><skipped type="pytest.skip" message="requires actual isolated PostgreSQL funding fixture">/workspace/van-review-2026-10-18/publish/trading/tests/test_financial_movement_journal.py:42: requires actual isolated PostgreSQL funding fixture</skipped></testcase><testcase classname="trading.tests.test_financial_movement_journal" name="test_original_request_and_native_movement_identity_cannot_be_rebound[sqlite]" time="0.009" /><testcase classname="trading.tests.test_financial_movement_journal" name="test_original_request_and_native_movement_identity_cannot_be_rebound[postgres]" time="0.001"><skipped type="pytest.skip" message="requires actual isolated PostgreSQL funding fixture">/workspace/van-review-2026-10-18/publish/trading/tests/test_financial_movement_journal.py:53: requires actual isolated PostgreSQL funding fixture</skipped></testcase><testcase classname="trading.tests.test_financial_movement_journal" name="test_unknown_and_caller_owned_transactions_cannot_claim_committed_projection[sqlite]" time="0.006" /><testcase classname="trading.tests.test_financial_movement_journal" name="test_unknown_and_caller_owned_transactions_cannot_claim_committed_projection[postgres]" time="0.001"><skipped type="pytest.skip" message="requires actual isolated PostgreSQL funding fixture">/workspace/van-review-2026-10-18/publish/trading/tests/test_financial_movement_journal.py:62: requires actual isolated PostgreSQL funding fixture</skipped></testcase><testcase classname="trading.tests.test_financial_movement_journal" name="test_actual_lost_commit_ack_reconciles_original_without_second_financial_effect[sqlite]" time="0.009" /><testcase classname="trading.tests.test_financial_movement_journal" name="test_actual_lost_commit_ack_reconciles_original_without_second_financial_effect[postgres]" time="0.001"><skipped type="pytest.skip" message="requires actual isolated PostgreSQL funding fixture">/workspace/van-review-2026-10-18/publish/trading/tests/test_financial_movement_journal.py:73: requires actual isolated PostgreSQL funding fixture</skipped></testcase><testcase classname="trading.tests.test_financial_movement_journal" name="test_missing_original_readback_is_unknown_and_does_not_erase_actual_commit[sqlite]" time="0.006" /><testcase classname="trading.tests.test_financial_movement_journal" name="test_missing_original_readback_is_unknown_and_does_not_erase_actual_commit[postgres]" time="0.001"><skipped type="pytest.skip" message="requires actual isolated PostgreSQL funding fixture">/workspace/van-review-2026-10-18/publish/trading/tests/test_financial_movement_journal.py:87: requires actual isolated PostgreSQL funding fixture</skipped></testcase><testcase classname="trading.tests.test_financial_movement_journal" name="test_native_conflict_blocks_new_projection_but_preserves_historical_completion[sqlite-False]" time="0.006" /><testcase classname="trading.tests.test_financial_movement_journal" name="test_native_conflict_blocks_new_projection_but_preserves_historical_completion[sqlite-True]" time="0.011" /><testcase classname="trading.tests.test_financial_movement_journal" name="test_native_conflict_blocks_new_projection_but_preserves_historical_completion[postgres-False]" time="0.002"><skipped type="pytest.skip" message="requires actual isolated PostgreSQL funding fixture">/workspace/van-review-2026-10-18/publish/trading/tests/test_financial_movement_journal.py:96: requires actual isolated PostgreSQL funding fixture</skipped></testcase><testcase classname="trading.tests.test_financial_movement_journal" name="test_native_conflict_blocks_new_projection_but_preserves_historical_completion[postgres-True]" time="0.001"><skipped type="pytest.skip" message="requires actual isolated PostgreSQL funding fixture">/workspace/van-review-2026-10-18/publish/trading/tests/test_financial_movement_journal.py:96: requires actual isolated PostgreSQL funding fixture</skipped></testcase><testcase classname="trading.tests.test_financial_movement_journal" name="test_a_valid_seal_and_balanced_forgery_do_not_replace_original_native_amount[sqlite]" time="0.005" /><testcase classname="trading.tests.test_financial_movement_journal" name="test_a_valid_seal_and_balanced_forgery_do_not_replace_original_native_amount[postgres]" time="0.002"><skipped type="pytest.skip" message="requires actual isolated PostgreSQL funding fixture">/workspace/van-review-2026-10-18/publish/trading/tests/test_financial_movement_journal.py:111: requires actual isolated PostgreSQL funding fixture</skipped></testcase><testcase classname="trading.tests.test_financial_movement_journal" name="test_resealed_numeric_values_cannot_impersonate_exact_json_boolean_or_integer_types[sqlite-risk_capital_qualified]" time="0.004" /><testcase classname="trading.tests.test_financial_movement_journal" name="test_resealed_numeric_values_cannot_impersonate_exact_json_boolean_or_integer_types[sqlite-execution_authority]" time="0.004" /><testcase classname="trading.tests.test_financial_movement_journal" name="test_resealed_numeric_values_cannot_impersonate_exact_json_boolean_or_integer_types[sqlite-trade_alpha_claimed]" time="0.004" /><testcase classname="trading.tests.test_financial_movement_journal" name="test_resealed_numeric_values_cannot_impersonate_exact_json_boolean_or_integer_types[sqlite-scale]" time="0.005" /><testcase classname="trading.tests.test_financial_movement_journal" name="test_resealed_numeric_values_cannot_impersonate_exact_json_boolean_or_integer_types[sqlite-recorded_at_ms]" time="0.005" /><testcase classname="trading.tests.test_financial_movement_journal" name="test_resealed_numeric_values_cannot_impersonate_exact_json_boolean_or_integer_types[postgres-risk_capital_qualified]" time="0.002"><skipped type="pytest.skip" message="requires actual isolated PostgreSQL funding fixture">/workspace/van-review-2026-10-18/publish/trading/tests/test_financial_movement_journal.py:128: requires actual isolated PostgreSQL funding fixture</skipped></testcase><testcase classname="trading.tests.test_financial_movement_journal" name="test_resealed_numeric_values_cannot_impersonate_exact_json_boolean_or_integer_types[postgres-execution_authority]" time="0.001"><skipped type="pytest.skip" message="requires actual isolated PostgreSQL funding fixture">/workspace/van-review-2026-10-18/publish/trading/tests/test_financial_movement_journal.py:128: requires actual isolated PostgreSQL funding fixture</skipped></testcase><testcase classname="trading.tests.test_financial_movement_journal" name="test_resealed_numeric_values_cannot_impersonate_exact_json_boolean_or_integer_types[postgres-trade_alpha_claimed]" time="0.001"><skipped type="pytest.skip" message="requires actual isolated PostgreSQL funding fixture">/workspace/van-review-2026-10-18/publish/trading/tests/test_financial_movement_journal.py:128: requires actual isolated PostgreSQL funding fixture</skipped></testcase><testcase classname="trading.tests.test_financial_movement_journal" name="test_resealed_numeric_values_cannot_impersonate_exact_json_boolean_or_integer_types[postgres-scale]" time="0.001"><skipped type="pytest.skip" message="requires actual isolated PostgreSQL funding fixture">/workspace/van-review-2026-10-18/publish/trading/tests/test_financial_movement_journal.py:128: requires actual isolated PostgreSQL funding fixture</skipped></testcase><testcase classname="trading.tests.test_financial_movement_journal" name="test_resealed_numeric_values_cannot_impersonate_exact_json_boolean_or_integer_types[postgres-recorded_at_ms]" time="0.001"><skipped type="pytest.skip" message="requires actual isolated PostgreSQL funding fixture">/workspace/van-review-2026-10-18/publish/trading/tests/test_financial_movement_journal.py:128: requires actual isolated PostgreSQL funding fixture</skipped></testcase><testcase classname="trading.tests.test_financial_movement_journal" name="test_global_projection_capacity_refuses_before_append_and_preserves_source[sqlite-source-count]" time="0.004" /><testcase classname="trading.tests.test_financial_movement_journal" name="test_global_projection_capacity_refuses_before_append_and_preserves_source[sqlite-bytes]" time="0.004" /><testcase classname="trading.tests.test_financial_movement_journal" name="test_global_projection_capacity_refuses_before_append_and_preserves_source[sqlite-movements]" time="0.010" /><testcase classname="trading.tests.test_financial_movement_journal" name="test_global_projection_capacity_refuses_before_append_and_preserves_source[postgres-source-count]" time="0.002"><skipped type="pytest.skip" message="requires actual isolated PostgreSQL funding fixture">/workspace/van-review-2026-10-18/publish/trading/tests/test_financial_movement_journal.py:149: requires actual isolated PostgreSQL funding fixture</skipped></testcase><testcase classname="trading.tests.test_financial_movement_journal" name="test_global_projection_capacity_refuses_before_append_and_preserves_source[postgres-bytes]" time="0.001"><skipped type="pytest.skip" message="requires actual isolated PostgreSQL funding fixture">/workspace/van-review-2026-10-18/publish/trading/tests/test_financial_movement_journal.py:149: requires actual isolated PostgreSQL funding fixture</skipped></testcase><testcase classname="trading.tests.test_financial_movement_journal" name="test_global_projection_capacity_refuses_before_append_and_preserves_source[postgres-movements]" time="0.001"><skipped type="pytest.skip" message="requires actual isolated PostgreSQL funding fixture">/workspace/van-review-2026-10-18/publish/trading/tests/test_financial_movement_journal.py:149: requires actual isolated PostgreSQL funding fixture</skipped></testcase><testcase classname="trading.tests.test_financial_movement_journal" name="test_independent_sql_connections_publish_the_same_original_once[sqlite]" time="0.010" /><testcase classname="trading.tests.test_financial_movement_journal" name="test_independent_sql_connections_publish_the_same_original_once[postgres]" time="0.001"><skipped type="pytest.skip" message="requires actual isolated PostgreSQL funding fixture">/workspace/van-review-2026-10-18/publish/trading/tests/test_financial_movement_journal.py:167: requires actual isolated PostgreSQL funding fixture</skipped></testcase><testcase classname="trading.tests.test_financial_movement_journal" name="test_bounded_materialization_recovers_older_committed_source_windows[sqlite]" time="0.023" /><testcase classname="trading.tests.test_financial_movement_journal" name="test_bounded_materialization_recovers_older_committed_source_windows[postgres]" time="0.001"><skipped type="pytest.skip" message="requires actual isolated PostgreSQL funding fixture">/workspace/van-review-2026-10-18/publish/trading/tests/test_financial_movement_journal.py:188: requires actual isolated PostgreSQL funding fixture</skipped></testcase><testcase classname="trading.tests.test_financial_movement_journal" name="test_materialization_reconciles_original_unknown_then_resumes_remaining_rows[sqlite]" time="0.019" /><testcase classname="trading.tests.test_financial_movement_journal" name="test_materialization_reconciles_original_unknown_then_resumes_remaining_rows[postgres]" time="0.001"><skipped type="pytest.skip" message="requires actual isolated PostgreSQL funding fixture">/workspace/van-review-2026-10-18/publish/trading/tests/test_financial_movement_journal.py:210: requires actual isolated PostgreSQL funding fixture</skipped></testcase><testcase classname="trading.tests.test_financial_movement_journal" name="test_conflict_projection_preserves_historical_rows_and_never_materializes_new_cash[sqlite]" time="0.012" /><testcase classname="trading.tests.test_financial_movement_journal" name="test_conflict_projection_preserves_historical_rows_and_never_materializes_new_cash[postgres]" time="0.002"><skipped type="pytest.skip" message="requires actual isolated PostgreSQL funding fixture">/workspace/van-review-2026-10-18/publish/trading/tests/test_financial_movement_journal.py:224: requires actual isolated PostgreSQL funding fixture</skipped></testcase><testcase classname="trading.tests.test_financial_movement_journal" name="test_materialization_limits_are_strict_and_readonly_requests_cannot_write[sqlite-True]" time="0.003" /><testcase classname="trading.tests.test_financial_movement_journal" name="test_materialization_limits_are_strict_and_readonly_requests_cannot_write[sqlite-0]" time="0.003" /><testcase classname="trading.tests.test_financial_movement_journal" name="test_materialization_limits_are_strict_and_readonly_requests_cannot_write[sqlite-1001]" time="0.003" /><testcase classname="trading.tests.test_financial_movement_journal" name="test_materialization_limits_are_strict_and_readonly_requests_cannot_write[postgres-True]" time="0.001"><skipped type="pytest.skip" message="requires actual isolated PostgreSQL funding fixture">/workspace/van-review-2026-10-18/publish/trading/tests/test_financial_movement_journal.py:236: requires actual isolated PostgreSQL funding fixture</skipped></testcase><testcase classname="trading.tests.test_financial_movement_journal" name="test_materialization_limits_are_strict_and_readonly_requests_cannot_write[postgres-0]" time="0.002"><skipped type="pytest.skip" message="requires actual isolated PostgreSQL funding fixture">/workspace/van-review-2026-10-18/publish/trading/tests/test_financial_movement_journal.py:236: requires actual isolated PostgreSQL funding fixture</skipped></testcase><testcase classname="trading.tests.test_financial_movement_journal" name="test_materialization_limits_are_strict_and_readonly_requests_cannot_write[postgres-1001]" time="0.002"><skipped type="pytest.skip" message="requires actual isolated PostgreSQL funding fixture">/workspace/van-review-2026-10-18/publish/trading/tests/test_financial_movement_journal.py:236: requires actual isolated PostgreSQL funding fixture</skipped></testcase><testcase classname="trading.tests.test_financial_movement_projection" name="test_native_economic_classes_keep_exact_original_sources_and_balanced_legs[BALANCE_DEPOSIT-0.01234567-OBSERVED_CASH_NOT_SETTLEMENT-EXTERNAL_CAPITAL]" time="0.004" /><testcase classname="trading.tests.test_financial_movement_projection" name="test_native_economic_classes_keep_exact_original_sources_and_balanced_legs[BALANCE_WITHDRAW--0.01234567-OBSERVED_CASH_NOT_SETTLEMENT-EXTERNAL_CAPITAL]" time="0.004" /><testcase classname="trading.tests.test_financial_movement_projection" name="test_native_economic_classes_keep_exact_original_sources_and_balanced_legs[BALANCE_DEPOSIT_NONWITHDRAWABLE_BONUS-1-RESTRICTED_CREDIT_MEMORANDUM-RESTRICTED_CREDIT]" time="0.004" /><testcase classname="trading.tests.test_financial_movement_projection" name="test_native_economic_classes_keep_exact_original_sources_and_balanced_legs[NATIVE_UNKNOWN-1-UNRESOLVED_NATIVE_MOVEMENT-UNRESOLVED]" time="0.003" /><testcase classname="trading.tests.test_financial_movement_projection" name="test_native_economic_classes_keep_exact_original_sources_and_balanced_legs[BALANCE_DEPOSIT--1-UNRESOLVED_NATIVE_MOVEMENT-UNRESOLVED]" time="0.004" /><testcase classname="trading.tests.test_financial_movement_projection" name="test_native_economic_classes_keep_exact_original_sources_and_balanced_legs[BALANCE_DEPOSIT_IB_COMMISSIONS-1-OBSERVED_CASH_NOT_SETTLEMENT-OTHER_BUSINESS_INCOME_OR_EXPENSE]" time="0.005" /><testcase classname="trading.tests.test_financial_movement_projection" name="test_native_economic_classes_keep_exact_original_sources_and_balanced_legs[BALANCE_WITHDRAW_ROLLOVER--1-OBSERVED_CASH_NOT_SETTLEMENT-ACCOUNT_INCOME_OR_EXPENSE]" time="0.007" /><testcase classname="trading.tests.test_financial_movement_projection" name="test_native_economic_classes_keep_exact_original_sources_and_balanced_legs[BALANCE_DEPOSIT_CONVERTED_BONUS-1-OBSERVED_CASH_NOT_SETTLEMENT-BROKER_SUPPORT_CAPITAL]" time="0.005" /><testcase classname="trading.tests.test_financial_movement_projection" name="test_native_economic_classes_keep_exact_original_sources_and_balanced_legs[BALANCE_DEPOSIT-0-OBSERVED_CASH_NOT_SETTLEMENT-EXTERNAL_CAPITAL]" time="0.004" /><testcase classname="trading.tests.test_financial_movement_projection" name="test_native_realm_and_asset_identity_cannot_be_erased_by_currency_label" time="0.005" /><testcase classname="trading.tests.test_financial_movement_projection" name="test_even_sealed_incompatible_native_envelopes_cannot_be_projected[producer]" time="0.003" /><testcase classname="trading.tests.test_financial_movement_projection" name="test_even_sealed_incompatible_native_envelopes_cannot_be_projected[kind]" time="0.003" /><testcase classname="trading.tests.test_financial_movement_projection" name="test_even_sealed_incompatible_native_envelopes_cannot_be_projected[seal]" time="0.003" /><testcase classname="trading.tests.test_financial_movement_projection" name="test_even_sealed_incompatible_native_envelopes_cannot_be_projected[scope]" time="0.004" /><testcase classname="trading.tests.test_financial_movement_projection" name="test_even_sealed_incompatible_native_envelopes_cannot_be_projected[key]" time="0.004" /><testcase classname="trading.tests.test_financial_movement_projection" name="test_even_sealed_incompatible_native_envelopes_cannot_be_projected[self-grant]" time="0.004" /><testcase classname="trading.tests.test_financial_movement_projection" name="test_even_sealed_incompatible_native_envelopes_cannot_be_projected[conflict]" time="0.003" /><testcase classname="trading.tests.test_financial_movement_projection" name="test_even_sealed_incompatible_native_envelopes_cannot_be_projected[clock]" time="0.003" /><testcase classname="trading.tests.test_financial_movement_projection" name="test_missing_native_row_early_availability_and_mutation_never_invent_postings" time="0.004" /><testcase classname="trading.tests.test_financial_movement_runtime" name="test_real_capture_and_current_owner_report_read_exact_native_postings" time="0.017" /><testcase classname="trading.tests.test_financial_movement_runtime" name="test_native_source_committed_before_restart_is_projected_from_older_window" time="0.017" /><testcase classname="trading.tests.test_financial_movement_runtime" name="test_projection_failure_preserves_native_facts_and_owner_read_never_writes" time="0.018" /><testcase classname="trading.tests.test_financial_movement_runtime" name="test_actual_projection_commit_lost_ack_is_unknown_then_original_recovers" time="0.017" /><testcase classname="trading.tests.test_financial_movement_runtime" name="test_readonly_projection_unavailable_does_not_claim_empty_or_qualified_cash" time="0.012" /><testcase classname="trading.tests.test_financial_movement_runtime" name="test_actual_separate_worker_publishes_and_reaps_its_owned_reader_thread" time="0.015" /></testsuite></testsuites>

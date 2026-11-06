@@ -1,0 +1,30 @@
+import json,os,shutil,subprocess,tempfile
+from pathlib import Path
+ROOT=Path('/workspace/van-review-2026-10-18/publish');OUT=Path('/workspace/van-ci-shards-independent-review-20261101');assert shutil.disk_usage('/tmp').free>=4*1024**3
+results=[]
+for mode in ('collection-module-skip','empty-inventory','empty-shard','teardown-failure'):
+ with tempfile.TemporaryDirectory(prefix='van-ci-edge-review-',dir='/tmp') as temp:
+  base=Path(temp);repo=base/'source';repo.mkdir()
+  for rel in ('tools/rebuild/backend_public_source.py','tools/rebuild/public_source_shards.py','tools/rebuild/source_storage_audit.py'):
+   dest=repo/rel;dest.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(ROOT/rel,dest)
+  (repo/'tools/rebuild/backend_public_source_costs.json').write_text('{"costs":{}}')
+  for rel in ('tests/contracts/test_artemis_acceptance_plan.py','tests/contracts/test_artemis_usb_acceptance.py','tests/contracts/test_van_browser_core_firewall.py'):
+   p=repo/rel;p.parent.mkdir(parents=True,exist_ok=True);p.write_text('# excluded fixture\n')
+  for i in range(3 if mode=='empty-shard' else 4):
+   p=repo/f'backend/tests/test_case_{i}.py';p.parent.mkdir(parents=True,exist_ok=True)
+   text=f'def test_case_{i}():\n    assert True\n'
+   if mode=='empty-inventory':text='# selected empty module\n'
+   if mode=='collection-module-skip' and i==0:text='import pytest\npytest.skip("unqualified collection-time module skip",allow_module_level=True)\n'
+   if mode=='teardown-failure' and i==0:text='import pytest\n@pytest.fixture(autouse=True)\ndef guard():\n    yield\n    raise AssertionError("actual teardown failure")\n'+text
+   p.write_text(text)
+  subprocess.run(['git','init','-q'],cwd=repo,check=True);subprocess.run(['git','add','.'],cwd=repo,check=True);subprocess.run(['git','-c','user.name=Owned SOURCE fixture','-c','user.email=source@example.test','-c','core.hooksPath=/dev/null','commit','-qm','isolated source fixture'],cwd=repo,check=True)
+  head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=repo,text=True).strip();output=base/'evidence';env={**os.environ,'PYTHONPATH':str(repo),'GITHUB_RUN_ID':'independent-edge-fixture','GITHUB_RUN_ATTEMPT':'1'}
+  for key in ('PYTEST_ADDOPTS','PYTEST_PLUGINS','VATI_TEST_PG_DSN'):env.pop(key,None)
+  cmd=[os.sys.executable,str(repo/'tools/rebuild/backend_public_source.py'),'run-shard' if mode=='teardown-failure' else 'collect','--output',str(output),'--runtime','gateway','--shards','4','--shard-index','0','--expected-commit',head,'--basetemp',str(base/'basetemp')]
+  run=subprocess.run(cmd,cwd=repo,env=env,text=True,capture_output=True,timeout=30);(OUT/(mode+'.log')).write_text(run.stdout+run.stderr);assert run.returncode!=0
+  terminal=json.loads((output/'terminal.json').read_text()) if (output/'terminal.json').exists() else None
+  parent=json.loads((output/'run.json').read_text());assert parent['terminal'] and parent['exit']!=0
+  phases=[json.loads(line) for line in (output/'phases.jsonl').read_text().splitlines()]
+  if mode=='teardown-failure':assert any(p['when']=='call' and p['outcome']=='passed' for p in phases) and any(p['when']=='teardown' and p['outcome']=='failed' for p in phases)
+  results.append({'case':mode,'result':'REFUSES_AS_REQUIRED','parent_exit':parent['exit'],'pytest_exit':terminal['pytest_exit'] if terminal else None,'phases':phases,'owned_tmp_cleanup':True})
+(OUT/'edge-results.json').write_text(json.dumps({'results':results,'native_four_worker_qualification':False},indent=2));print(json.dumps([{'case':r['case'],'exit':r['parent_exit'],'result':r['result']} for r in results]))

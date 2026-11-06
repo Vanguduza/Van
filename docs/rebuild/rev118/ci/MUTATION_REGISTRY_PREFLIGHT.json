@@ -1,0 +1,209 @@
+{
+  "schema": "van.rebuild.mutation-registry-preflight/1",
+  "registry_sha256": "301ff7f5000b7e563bb8dc8b363dc386505ced827795b204bb9315e5f72fa0fc",
+  "mutation_count": 374,
+  "edit_count": 376,
+  "findings": [
+    {
+      "kind": "SOURCE_ANCHOR_MISSING",
+      "path": "../android/app/src/main/java/com/dial/van/control/VanCommandController.kt",
+      "mutation": "C38 the offline path assembles its own payload again",
+      "anchor": "            gateway.buildCommandBody("
+    },
+    {
+      "kind": "SOURCE_ANCHOR_MISSING",
+      "path": "van_gateway/session/service.py",
+      "mutation": "C36 a refused message keeps its idempotency key and the corrected resend is refused",
+      "anchor": "            \"DELETE FROM van_session_messages WHERE message_id = ?\","
+    },
+    {
+      "kind": "SOURCE_ANCHOR_MISSING",
+      "path": "van_gateway/session/router.py",
+      "mutation": "C36 an envelope nobody can carry out is written into the admission table first",
+      "anchor": "        delegate = self._delegate_for(envelope.kind)\n        if delegate is None:\n            return"
+    },
+    {
+      "kind": "SOURCE_ANCHOR_MISSING",
+      "path": "van_gateway/app.py",
+      "mutation": "C36 the Gateway holds the message and tells the phone to send it again",
+      "anchor": "            states[identity] = row[\"admitted_state\"] if row is not None else \"UNKNOWN\""
+    },
+    {
+      "kind": "SOURCE_ANCHOR_MISSING",
+      "path": "van_gateway/app.py",
+      "mutation": "C24 the routes mount with no signing key configured",
+      "anchor": "    if browser_stream_grants is not None:\n        app.include_router(build_interactive_router("
+    },
+    {
+      "kind": "SOURCE_ANCHOR_MISSING",
+      "path": "van_gateway/session/service.py",
+      "mutation": "C26 a different payload under a known key is executed",
+      "anchor": "        if existing[\"payload_digest\"] != digest:"
+    },
+    {
+      "kind": "SOURCE_ANCHOR_MISSING",
+      "path": "android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt",
+      "mutation": "C20 the work screen has no render branch",
+      "anchor": "            CommandModule.MISSIONS -> MissionsModule(app, glass)\n"
+    },
+    {
+      "kind": "SOURCE_TARGET_MISSING",
+      "path": "android/app/src/main/java/com/dial/van/command/CommandModule.kt",
+      "mutation": "C20 the work screen is not navigable"
+    },
+    {
+      "kind": "SOURCE_TARGET_MISSING",
+      "path": "android/app/src/main/java/com/dial/van/command/modules/MissionsModule.kt",
+      "mutation": "C20 the work screen never binds the repository result"
+    },
+    {
+      "kind": "SOURCE_TARGET_MISSING",
+      "path": "android/app/src/main/java/com/dial/van/command/modules/MissionsModule.kt",
+      "mutation": "C20 the open mission is lost on rotation"
+    },
+    {
+      "kind": "TEST_TARGET_MISSING",
+      "path": "tests/test_google_capabilities_have_routes.py"
+    },
+    {
+      "kind": "TEST_TARGET_MISSING",
+      "path": "tests/test_control_scopes.py"
+    },
+    {
+      "kind": "SOURCE_TARGET_MISSING",
+      "path": "van_gateway/app.py",
+      "mutation": "C19 two new routes fall outside the scope set"
+    },
+    {
+      "kind": "SOURCE_TARGET_MISSING",
+      "path": "van_gateway/google/service.py",
+      "mutation": "C19 Google provider executes an A4 record that never received owner approval"
+    },
+    {
+      "kind": "SOURCE_TARGET_MISSING",
+      "path": "van_gateway/app.py",
+      "mutation": "C19 the owner's tasks reachable with a device token (both guards removed)"
+    },
+    {
+      "kind": "SOURCE_TARGET_MISSING",
+      "path": "van_gateway/app.py",
+      "mutation": "C19 the owner's tasks reachable with a device token (both guards removed)"
+    },
+    {
+      "kind": "TEST_TARGET_MISSING",
+      "path": "tests/test_irreversible_work_waits_on_assumptions.py"
+    },
+    {
+      "kind": "SOURCE_TARGET_MISSING",
+      "path": "van_gateway/runtime_api.py",
+      "mutation": "C19 the premise ingress moves and nothing records"
+    },
+    {
+      "kind": "SOURCE_TARGET_MISSING",
+      "path": "van_gateway/reasoning/kernel.py",
+      "mutation": "C19 agreeing with a preference counts as unsupported agreement"
+    },
+    {
+      "kind": "SOURCE_TARGET_MISSING",
+      "path": "van_gateway/reasoning/kernel.py",
+      "mutation": "C19 a correction is counted as agreement"
+    },
+    {
+      "kind": "SOURCE_TARGET_MISSING",
+      "path": "van_gateway/reasoning/kernel.py",
+      "mutation": "C19 citing evidence no longer makes agreement well-founded"
+    },
+    {
+      "kind": "SOURCE_ANCHOR_MISSING",
+      "path": "tools/audit/kotlin_reachability.py",
+      "mutation": "C15 a symbol named in a line comment counts as a call site",
+      "anchor": "    text = re.sub(r\"//[^\\n]*\", \" \", text)"
+    },
+    {
+      "kind": "SOURCE_ANCHOR_MISSING",
+      "path": "tools/audit/kotlin_reachability.py",
+      "mutation": "C15 a symbol named in a KDoc counts as a call site",
+      "anchor": "    text = re.sub(r\"/\\*.*?\\*/\", \" \", text, flags=re.DOTALL)"
+    },
+    {
+      "kind": "SOURCE_ANCHOR_MISSING",
+      "path": "tools/audit/kotlin_reachability.py",
+      "mutation": "C15 a symbol named in a string counts as a call site",
+      "anchor": "    text = re.sub(r'\"(?:[^\"\\\\\\n]|\\\\.)*\"', ' \"\" ', text)"
+    },
+    {
+      "kind": "SOURCE_ANCHOR_MISSING",
+      "path": "tools/audit/kotlin_reachability.py",
+      "mutation": "C15 strip everything, so all code looks dead",
+      "anchor": "    text = re.sub(r\"//[^\\n]*\", \" \", text)"
+    },
+    {
+      "kind": "SOURCE_ANCHOR_MISSING",
+      "path": ".github/workflows/van-ci.yml",
+      "mutation": "C12 drop the APK upload entirely",
+      "anchor": "      - name: Upload debug APK\n        uses: actions/upload-artifact@v4\n        with:\n          name"
+    },
+    {
+      "kind": "SOURCE_ANCHOR_MISSING",
+      "path": ".github/workflows/van-ci.yml",
+      "mutation": "C12 point the upload at a variant the build never assembles",
+      "anchor": "path: android/app/build/outputs/apk/debug/*.apk"
+    },
+    {
+      "kind": "SOURCE_ANCHOR_MISSING",
+      "path": "services/browser_control_agent/agent.py",
+      "mutation": "C29 file:/// reads the host's disk into a page the owner is watching",
+      "anchor": "    if not (url.startswith(\"https://\") or url.startswith(\"http://\")):"
+    },
+    {
+      "kind": "SOURCE_ANCHOR_MISSING",
+      "path": "services/browser_control_agent/cdp.py",
+      "mutation": "C29 a hostname is accepted, and resolves on a machine we do not control",
+      "anchor": "            raise CdpUnavailable(\"cdp_endpoint_must_be_a_loopback_literal\") from exc"
+    },
+    {
+      "kind": "SOURCE_ANCHOR_MISSING",
+      "path": "android/app/src/main/java/com/dial/van/session/SessionDownstream.kt",
+      "mutation": "C40 nothing is ever taken out of flight, so a resume resends everything",
+      "anchor": "        if (messageId.isNotEmpty() && frame.has(\"accepted\")) {"
+    },
+    {
+      "kind": "SOURCE_ANCHOR_MISSING",
+      "path": "android/app/src/main/java/com/dial/van/events/VanEventStreamStore.kt",
+      "mutation": "C40 a socket page replaces the history instead of merging with it",
+      "anchor": "        val next = EventStream.applyPage(_state.value, page)"
+    },
+    {
+      "kind": "SOURCE_ANCHOR_MISSING",
+      "path": "android/app/src/main/java/com/dial/van/session/OfflineSubmission.kt",
+      "mutation": "C37 an A4 that will never be sent is described as queued",
+      "anchor": "                \"Not sent \u2014 this one needs you online. Nothing was changed.\","
+    },
+    {
+      "kind": "SOURCE_ANCHOR_MISSING",
+      "path": "android/app/src/main/java/com/dial/van/session/SessionReconciliation.kt",
+      "mutation": "C36 a command the Gateway has never heard of is treated as delivered",
+      "anchor": "        if (state == null || state == UNKNOWN) Verdict.RESEND else Verdict.SETTLE"
+    },
+    {
+      "kind": "SOURCE_ANCHOR_MISSING",
+      "path": "android/app/src/main/java/com/dial/van/session/SessionReconciliation.kt",
+      "mutation": "C36 a command the Gateway is already running is sent a second time",
+      "anchor": "        if (state == null || state == UNKNOWN) Verdict.RESEND else Verdict.SETTLE"
+    },
+    {
+      "kind": "SOURCE_ANCHOR_MISSING",
+      "path": "android/app/src/main/java/com/dial/van/connectivity/ProvisioningPayload.kt",
+      "mutation": "C34 a release build is pointed at a plain-http gateway",
+      "anchor": "        if (!isAcceptableUrl(gatewayUrl, allowInsecureLoopback)) {"
+    },
+    {
+      "kind": "SOURCE_ANCHOR_MISSING",
+      "path": "android/app/src/main/java/com/dial/van/connectivity/ProvisioningPayload.kt",
+      "mutation": "C34 every build treats loopback http as acceptable, not only a debug one",
+      "anchor": "        if (url.startsWith(\"https://\", ignoreCase = true)) return true\n        if (!allowInsecureLoo"
+    }
+  ],
+  "execution_state": "NOT_RUN",
+  "status": "INVALID_REGISTRY"
+}

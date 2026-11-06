@@ -1,0 +1,9 @@
+{
+  "scope": "DOCUMENT_AND_SYNTHETIC_FIXTURE_ONLY_NOT_ECONOMIC_OR_RUNTIME_QUALIFICATION",
+  "schemas": 18,
+  "fixtures": 12,
+  "findings": [],
+  "mutation_count": 0,
+  "mutations_detected": 0,
+  "mutations": []
+}

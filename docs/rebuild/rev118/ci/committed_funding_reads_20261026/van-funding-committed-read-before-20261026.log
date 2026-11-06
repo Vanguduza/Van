@@ -1,0 +1,69 @@
+FFF.F                                                                    [100%]
+=================================== FAILURES ===================================
+_ test_period_cannot_consume_a_closing_source_from_its_callers_writer[sqlite] __
+
+source = (<vati.core.ledger.Ledger object at 0x7fa9b9f2cb00>, '9416990f89cc231045967018d529f8f2a4f42488499c86fb9f71bedc2f9c7f3b')
+
+    def test_period_cannot_consume_a_closing_source_from_its_callers_writer(source):
+        ledger,scope=source;before=ledger.head(),ledger.count()
+        with pytest.raises(RollbackFixture):
+            with ledger.atomic():
+                closing=closing_snapshot(ledger)
+>               with pytest.raises(LedgerError,match='committed_source'):
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               Failed: DID NOT RAISE LedgerError
+
+trading/tests/test_funding_committed_reads.py:52: Failed
+_ test_native_funding_prerequisite_holds_before_the_original_closing_fact_commits[sqlite] _
+
+source = (<vati.core.ledger.Ledger object at 0x7fa9b9f2d490>, '9416990f89cc231045967018d529f8f2a4f42488499c86fb9f71bedc2f9c7f3b')
+
+    def test_native_funding_prerequisite_holds_before_the_original_closing_fact_commits(source):
+        ledger,scope=source;adapter,account=native(mark(3500,equity='110'))
+        before=ledger.head(),ledger.count();requests=list(adapter.transport.requests)
+        with pytest.raises(RollbackFixture):
+            with ledger.atomic():
+                closing_snapshot(ledger)
+                readiness=funding_risk_fence(ledger,adapter,account,now_ms=7000)
+>               assert readiness.available is False
+E               AssertionError: assert True is False
+E                +  where True = FundingRiskFence(available=True, reason='NATIVE_FUNDING_NO_CAPITAL_CHANGE:646a33cabbad87fa41765c32ecd05c43a8a920eff72f39f3bc9a9318bd8e73f1:adee3d7ee589871d11920b98f18efcf6c1d469a8b82b7b9f8b546716015c832d').available
+
+trading/tests/test_funding_committed_reads.py:68: AssertionError
+______ test_owner_read_cannot_publish_uncommitted_funding_lineage[sqlite] ______
+
+source = (<vati.core.ledger.Ledger object at 0x7fa9b9f2e030>, '9416990f89cc231045967018d529f8f2a4f42488499c86fb9f71bedc2f9c7f3b')
+
+    def test_owner_read_cannot_publish_uncommitted_funding_lineage(source):
+        ledger,scope=source;before=ledger.head(),ledger.count()
+        with pytest.raises(RollbackFixture):
+            with ledger.atomic():
+                closing=closing_snapshot(ledger)
+>               with pytest.raises(LedgerError,match='committed_source'):
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               Failed: DID NOT RAISE LedgerError
+
+trading/tests/test_funding_committed_reads.py:80: Failed
+_ test_incremental_verification_does_not_misreport_corruption_after_owned_writer_rollback[sqlite] _
+
+source = (<vati.core.ledger.Ledger object at 0x7fa9b9f2e780>, '9416990f89cc231045967018d529f8f2a4f42488499c86fb9f71bedc2f9c7f3b')
+
+    def test_incremental_verification_does_not_misreport_corruption_after_owned_writer_rollback(source):
+        ledger,scope=source;assert ledger.verify_incremental()[0]
+        before=ledger.head(),ledger.count()
+        with pytest.raises(RollbackFixture):
+            with ledger.atomic():
+                closing_snapshot(ledger)
+                assert ledger.verify_incremental()[0]
+                raise RollbackFixture()
+        assert (ledger.head(),ledger.count())==before and ledger.verify_chain()[0]
+>       assert ledger.verify_incremental()[0]
+E       assert False
+
+trading/tests/test_funding_committed_reads.py:106: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_funding_committed_reads.py::test_period_cannot_consume_a_closing_source_from_its_callers_writer[sqlite]
+FAILED trading/tests/test_funding_committed_reads.py::test_native_funding_prerequisite_holds_before_the_original_closing_fact_commits[sqlite]
+FAILED trading/tests/test_funding_committed_reads.py::test_owner_read_cannot_publish_uncommitted_funding_lineage[sqlite]
+FAILED trading/tests/test_funding_committed_reads.py::test_incremental_verification_does_not_misreport_corruption_after_owned_writer_rollback[sqlite]
+4 failed, 1 passed, 5 deselected in 3.58s

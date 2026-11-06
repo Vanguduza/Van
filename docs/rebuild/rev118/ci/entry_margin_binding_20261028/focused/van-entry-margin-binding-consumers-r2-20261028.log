@@ -1,0 +1,460 @@
+..............................................FF.........                [100%]
+=================================== FAILURES ===================================
+_ test_actual_router_binds_ctrader_mandate_and_original_quote_through_wire_dispatch[False] _
+
+self = <vati.execution.router.ExecutionRouter object at 0x7f03d583ac90>
+command = OrderCommand(trade_intent_id='ti-1', decision_hash='a444d699ceea056938e938c76b195439c05b94d1a37d13e419052c8673f5777a',...egy_version='4.2.1', lease_epoch=None, command_hash='8d4c8029de77512acccf179da5c29cdff9755082379dc214af86de9d6551db2f')
+adapter = CtraderAdapter(transport=<vati.execution.ctrader.transport.CtraderTransport object at 0x7f03d5851d30>, client_id='fixt...der.depth.DepthBook object at 0x7f03d58525a0>, _depth_subscriptions={}, _depth_control_states={}, _depth_retired=set())
+now_ms = 1800000000000
+
+    def _native_entry_margin(self, command, adapter, *, now_ms):
+        from vati.execution.mt5_bridge import Mt5BridgeAdapter
+        from vati.execution.mt5_pull import Mt5PullAdapter
+        from vati.execution.ctrader.adapter import CtraderAdapter
+        if not isinstance(adapter,(Mt5BridgeAdapter,Mt5PullAdapter,CtraderAdapter)):
+            return None
+        from vati.risk.native_margin_book import NativeMarginBook
+        from vati.funding.native import native_int
+        rows=[e for e in self.ledger.iter(EventKind.RISK_DECISION,correlation_id=command.trade_intent_id)
+            if isinstance(e.payload,dict) and isinstance(e.payload.get('decision'),dict)
+            and e.payload['decision'].get('decision_hash')==command.decision_hash]
+        if len(rows)!=1:
+            raise RouterError('native entry margin requires one original durable risk input; not dispatched')
+        clock=self.clock if self.clock is not None else lambda:now_ms
+        book=NativeMarginBook(self.ledger,clock=clock)
+        deadline=min(now_ms+4000,command.expires_at_ms) if command.expires_at_ms is not None else now_ms+4000
+        try:
+>           receipt=book.capture_entry(adapter,rows[0].hash,command,deadline_ms=deadline)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/vati/execution/router.py:216: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/risk/native_margin_book.py:162: in capture_entry
+    try:return capture_entry(self,adapter,original_input_ref,command,deadline_ms=deadline_ms)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/risk/entry_margin.py:220: in capture_entry
+    receipt=book.capture(adapter,original_input_ref,command.symbol,command.quantity,deadline_ms=deadline_ms,**kwargs)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/risk/native_margin_book.py:157: in capture
+    observation=adapter.expected_margin(symbol,lots,context=original.context,deadline_ms=deadline_ms,**kwargs)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/ctrader/adapter.py:388: in expected_margin
+    return read_expected_margin(self, symbol, lots, context=context, deadline_ms=deadline_ms)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+adapter = CtraderAdapter(transport=<vati.execution.ctrader.transport.CtraderTransport object at 0x7f03d5851d30>, client_id='fixt...der.depth.DepthBook object at 0x7f03d58525a0>, _depth_subscriptions={}, _depth_control_states={}, _depth_retired=set())
+symbol = 'EURUSD', lots = Decimal('0.18')
+context = NativeAccountRiskContext(provider='CTRADER', physical_account_key='native-account:v1:47a78f9982ff367d9ebe5a739a6931b88...ANCE_PLUS_NATIVE_NET_UNREALIZED_EXCLUDING_SEPARATE_BONUSES"}', risk_capital_qualified=False, execution_authority=False)
+deadline_ms = 1800000000101
+
+    def read_expected_margin(adapter,symbol,lots,*,context,deadline_ms):
+        """Bind original quantity, native account/asset, symbol and connection."""
+        try:
+            started=native_integer(adapter.clock(),maximum=253402300799000)
+            native_integer(deadline_ms,minimum=started+1,maximum=253402300799000)
+            if (type(lots) is not Decimal or not lots.is_finite() or lots<=0
+                    or len(lots.as_tuple().digits)>512 or abs(lots.as_tuple().exponent)>128
+                    or not isinstance(symbol,str) or not 1<=len(symbol)<=256):
+                raise ValueError('original exact native quantity required')
+            source=inspect_context(context)
+            if (context.provider!='CTRADER' or context.account_alias!=adapter.account_alias
+                    or source['observed_at_ms']>started):raise ValueError('native account source invalid')
+            adapter._ensure_auth()
+            connection=getattr(adapter.transport,'connection_id',None)
+            native_integer(connection,minimum=1)
+            spec=adapter.symbol(symbol)
+            contract=spec.native_contract
+            if type(contract) is not NativeSymbolContract or contract.received_at_ms>started:
+                raise ValueError('original native contract unavailable')
+            scope=contract.native_scope;mark=source['mark']
+            if (scope['native_account_id']!=adapter.ctid_trader_account_id
+                    or mark['native_account_id']!=scope['native_account_id']
+                    or scope['transport_host']!=getattr(adapter.transport,'host',None)
+                    or scope['environment']!=mark['environment']
+                    or scope['native_symbol_id']!=spec.symbol_id or spec.contract_revision!=contract.revision):
+                raise ValueError('original native account/symbol scope changed')
+            detail=contract.metadata['detail']
+            if (spec.name!=contract.metadata['light']['symbolName'] or spec.digits!=detail['digits']
+                    or any(getattr(spec,field)!=detail[key] for field,key in (
+                    ('lot_size_cents','lotSize'),('min_volume','minVolume'),
+                    ('step_volume','stepVolume'),('max_volume','maxVolume')))):
+                raise ValueError('native volume metadata changed')
+            volume=_exact_volume(lots,detail)
+            before=adapter._native_trader_identity()
+            currency=adapter._currency
+            if before['depositAssetId']!=mark['deposit_asset_id'] or currency!=source['currency']:
+                raise ValueError('native deposit asset changed')
+            request={'ctidTraderAccountId':adapter.ctid_trader_account_id,'symbolId':spec.symbol_id,'volume':[volume]}
+            name,response=adapter.transport.call('ProtoOAExpectedMarginReq',request)
+            if (name!='ProtoOAExpectedMarginRes' or not isinstance(response,dict)
+                    or native_integer(response['ctidTraderAccountId'],minimum=1)!=adapter.ctid_trader_account_id
+                    or not isinstance(response.get('margin'),list) or len(response['margin'])!=1):
+                raise ValueError('native expected margin response mismatch')
+            digits=native_integer(response['moneyDigits'],maximum=18)
+            row=response['margin'][0]
+            if native_integer(row['volume'],minimum=1)!=volume:raise ValueError('native quoted volume mismatch')
+            buy=native_integer(row['buyMargin']);sell=native_integer(row['sellMargin'])
+            after=adapter._native_trader_identity()
+            received=native_integer(adapter.clock(),minimum=started,maximum=deadline_ms-1)
+            if (not adapter._auth_is_current() or connection!=getattr(adapter.transport,'connection_id',None)
+                    or adapter._currency!=currency or after['depositAssetId']!=before['depositAssetId']
+                    or after.get('leverageInCents')!=before.get('leverageInCents')):
+                raise ValueError('native connection, asset or leverage changed during quote')
+            body={'schema':'vati.ctrader-expected-margin/1','account_alias':context.account_alias,
+                'physical_account_key':context.physical_account_key,'monetary_scope_hash':context.monetary_scope_hash,
+                'native_account_id':adapter.ctid_trader_account_id,'deposit_asset_id':before['depositAssetId'],
+                'currency':currency,'symbol':spec.name,'native_symbol_id':spec.symbol_id,
+                'native_contract_revision':contract.revision,'native_contract':contract.body(),
+                'native_account_context':asdict(context),'original_quantity':str(lots),'native_volume':volume,
+                'requested_at_ms':started,'received_at_ms':received,'valid_until_ms':deadline_ms,
+                'request':request,'response':response,'native_trader_before':before,'native_trader_after':after,
+                'buy_margin':Money(buy,digits,currency,context.monetary_scope_hash).body(),
+                'sell_margin':Money(sell,digits,currency,context.monetary_scope_hash).body(),
+                'valuation_basis':'NATIVE_CURRENT_PRICE_ESTIMATE_NO_ORDER_PRICE_INPUT',
+                'calculation_limitations':_LIMITATIONS,
+                'budget_denomination':'ACCOUNT_MONETARY_SCOPE_NOT_PAYMENT_ASSET_OR_CONVERSION_PROOF',
+                'provider_qualified':False,'reservation_qualified':False,'execution_authority':False}
+            body['source_ref']=canonical_hash(body)
+            return ExpectedMarginObservation.from_body(body)
+        except (KeyError,TypeError,ValueError,ArithmeticError,AttributeError):
+>           raise VenueUnavailable('cTrader original expected-margin scope, precision, quantity or deadline unavailable') from None
+E           vati.execution.base.VenueUnavailable: cTrader original expected-margin scope, precision, quantity or deadline unavailable
+
+trading/vati/execution/ctrader/margin_quote.py:193: VenueUnavailable
+
+The above exception was the direct cause of the following exception:
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-145/test_actual_router_binds_ctrad0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+late = False
+
+    @pytest.mark.parametrize('late',[False,True])
+    def test_actual_router_binds_ctrader_mandate_and_original_quote_through_wire_dispatch(tmp_path,eurusd,late):
+        from conftest import NOW,mandate_dict,snapshot,intent
+        from vati.core import Ledger,EventKind
+        from vati.execution import ExecutionRouter,ProtectionManager
+        from vati.execution.risk_refresh import CurrentRiskFacts
+        from vati.execution.pretrade import MarketReference
+        from vati.risk import RiskAuthority,TradingMandate,KillSwitch,Decision
+        a,_,wire,clock=ctrader();clock['ms']=NOW*1000
+        grant=mandate_dict(venue='ctrader',account_alias=a.account_alias,expires_at_unix=NOW+1)
+        m=TradingMandate.from_mapping(grant)
+        trade=intent(venue='ctrader',account_alias=a.account_alias)
+        from types import SimpleNamespace
+        from vati.execution.ctrader.contracts import NativeSymbolContract
+        from vati.funding.native import NativeAccountMark
+        from vati.risk.account_context import context_for_account
+        from test_native_risk_history_inputs import record
+        ledger=Ledger();wire.margin_reads=[]
+        contract=NativeSymbolContract.capture(account_id=12345,transport_host=a.transport.host,
+            light={'symbolId':1,'symbolName':'EURUSD','enabled':True},detail={'symbolId':1,'digits':5,'pipPosition':4,
+                'lotSize':10000000,'minVolume':1000,'stepVolume':1000,'maxVolume':1000000000},received_at_ms=clock['ms'])
+        a.symbols['EURUSD'].native_contract=contract;a.symbols['EURUSD'].contract_revision=contract.revision
+        a._symbol_snapshot_valid=True
+        mark=NativeAccountMark('CTRADER','DEMO',a.account_alias,12345,2,'USD',clock['ms'],D('10000'),D('10000'),1,None,None,None)
+        account=SimpleNamespace(verified=True,funding_mark=mark,account_alias=a.account_alias,
+            balance=mark.balance,equity=mark.net_equity,currency=mark.currency)
+        context=context_for_account(ledger,a,account,now_ms=clock['ms'])
+        facts=snapshot(replace(eurusd,venue='ctrader'),account_alias=a.account_alias,native_account_context=context)
+        authority=RiskAuthority(m);approved=authority.evaluate_safe(trade,facts)
+        assert approved.decision in {Decision.APPROVED,Decision.REDUCED}
+        original=record(ledger,facts,request=trade,grant=grant)
+        assert original.payload['decision']['decision_hash']==approved.decision_hash
+        armed={'entry':False}
+        def current(*args,**kwargs):
+            assert any(name=='ProtoOAExpectedMarginReq' for name,_ in wire.margin_reads)
+            armed['entry']=True
+            return CurrentRiskFacts(facts,clock['ms'])
+        router=ExecutionRouter(ledger=ledger,adapters={'ctrader':a},kill_switch=KillSwitch(),protection=ProtectionManager(),clock=lambda:clock['ms'],current_risk_authority=authority,current_risk_facts_provider=current)
+        if late:
+            class LastWriteLock:
+                def __enter__(self):
+                    if armed['entry']:clock['ms']=NOW*1000+101
+                def __exit__(self,*args):pass
+            a.transport._lock=LastWriteLock()
+>       result=router.execute(trade,approved,m,now_ms=clock['ms'],entry_type='MARKET',market_reference=MarketReference(trade.entry,0,100))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_provider_entry_deadline.py:178: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/execution/router.py:557: in execute
+    native_margin=self._native_entry_margin(cmd,adapter,now_ms=now_ms)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.router.ExecutionRouter object at 0x7f03d583ac90>
+command = OrderCommand(trade_intent_id='ti-1', decision_hash='a444d699ceea056938e938c76b195439c05b94d1a37d13e419052c8673f5777a',...egy_version='4.2.1', lease_epoch=None, command_hash='8d4c8029de77512acccf179da5c29cdff9755082379dc214af86de9d6551db2f')
+adapter = CtraderAdapter(transport=<vati.execution.ctrader.transport.CtraderTransport object at 0x7f03d5851d30>, client_id='fixt...der.depth.DepthBook object at 0x7f03d58525a0>, _depth_subscriptions={}, _depth_control_states={}, _depth_retired=set())
+now_ms = 1800000000000
+
+    def _native_entry_margin(self, command, adapter, *, now_ms):
+        from vati.execution.mt5_bridge import Mt5BridgeAdapter
+        from vati.execution.mt5_pull import Mt5PullAdapter
+        from vati.execution.ctrader.adapter import CtraderAdapter
+        if not isinstance(adapter,(Mt5BridgeAdapter,Mt5PullAdapter,CtraderAdapter)):
+            return None
+        from vati.risk.native_margin_book import NativeMarginBook
+        from vati.funding.native import native_int
+        rows=[e for e in self.ledger.iter(EventKind.RISK_DECISION,correlation_id=command.trade_intent_id)
+            if isinstance(e.payload,dict) and isinstance(e.payload.get('decision'),dict)
+            and e.payload['decision'].get('decision_hash')==command.decision_hash]
+        if len(rows)!=1:
+            raise RouterError('native entry margin requires one original durable risk input; not dispatched')
+        clock=self.clock if self.clock is not None else lambda:now_ms
+        book=NativeMarginBook(self.ledger,clock=clock)
+        deadline=min(now_ms+4000,command.expires_at_ms) if command.expires_at_ms is not None else now_ms+4000
+        try:
+            receipt=book.capture_entry(adapter,rows[0].hash,command,deadline_ms=deadline)
+            read=book.lookup_entry(command.command_hash,receipt['source_ref'])
+            observed=native_int(clock(),minimum=now_ms)
+            if (read is None or read['receipt']!=receipt
+                    or receipt['original_input_ref']!=rows[0].hash
+                    or receipt['reservation_qualified'] is not False or receipt['execution_authority'] is not False
+                    or not read['observation']['received_at_ms']<=observed<read['observation']['valid_until_ms']
+                    or command.expires_at_ms is not None and observed>=command.expires_at_ms):
+                raise ValueError('original bound margin readback is unavailable or expired')
+            return receipt['record_ref'],read['observation']['valid_until_ms']
+        except Exception as exc:
+            source=getattr(exc,'source_ref','')
+>           raise RouterError('native entry margin evidence unavailable: '+type(exc).__name__+
+                (' source_ref='+source if isinstance(source,str) and source else '')+'; not dispatched') from exc
+E           vati.execution.router.RouterError: native entry margin evidence unavailable: VenueUnavailable; not dispatched
+
+trading/vati/execution/router.py:228: RouterError
+_ test_actual_router_binds_ctrader_mandate_and_original_quote_through_wire_dispatch[True] _
+
+self = <vati.execution.router.ExecutionRouter object at 0x7f03d57e2960>
+command = OrderCommand(trade_intent_id='ti-1', decision_hash='877ee425ca59bf47a0798ff731086257645fee8fdf231a4e1499625d88b41e20',...egy_version='4.2.1', lease_epoch=None, command_hash='46bb39215a4066ac416ff3fac800776a91541b0dfe2c7cefac270dc5da51ce4b')
+adapter = CtraderAdapter(transport=<vati.execution.ctrader.transport.CtraderTransport object at 0x7f03d5817ad0>, client_id='fixt...der.depth.DepthBook object at 0x7f03d5815df0>, _depth_subscriptions={}, _depth_control_states={}, _depth_retired=set())
+now_ms = 1800000000000
+
+    def _native_entry_margin(self, command, adapter, *, now_ms):
+        from vati.execution.mt5_bridge import Mt5BridgeAdapter
+        from vati.execution.mt5_pull import Mt5PullAdapter
+        from vati.execution.ctrader.adapter import CtraderAdapter
+        if not isinstance(adapter,(Mt5BridgeAdapter,Mt5PullAdapter,CtraderAdapter)):
+            return None
+        from vati.risk.native_margin_book import NativeMarginBook
+        from vati.funding.native import native_int
+        rows=[e for e in self.ledger.iter(EventKind.RISK_DECISION,correlation_id=command.trade_intent_id)
+            if isinstance(e.payload,dict) and isinstance(e.payload.get('decision'),dict)
+            and e.payload['decision'].get('decision_hash')==command.decision_hash]
+        if len(rows)!=1:
+            raise RouterError('native entry margin requires one original durable risk input; not dispatched')
+        clock=self.clock if self.clock is not None else lambda:now_ms
+        book=NativeMarginBook(self.ledger,clock=clock)
+        deadline=min(now_ms+4000,command.expires_at_ms) if command.expires_at_ms is not None else now_ms+4000
+        try:
+>           receipt=book.capture_entry(adapter,rows[0].hash,command,deadline_ms=deadline)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/vati/execution/router.py:216: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/risk/native_margin_book.py:162: in capture_entry
+    try:return capture_entry(self,adapter,original_input_ref,command,deadline_ms=deadline_ms)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/risk/entry_margin.py:220: in capture_entry
+    receipt=book.capture(adapter,original_input_ref,command.symbol,command.quantity,deadline_ms=deadline_ms,**kwargs)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/risk/native_margin_book.py:157: in capture
+    observation=adapter.expected_margin(symbol,lots,context=original.context,deadline_ms=deadline_ms,**kwargs)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/ctrader/adapter.py:388: in expected_margin
+    return read_expected_margin(self, symbol, lots, context=context, deadline_ms=deadline_ms)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+adapter = CtraderAdapter(transport=<vati.execution.ctrader.transport.CtraderTransport object at 0x7f03d5817ad0>, client_id='fixt...der.depth.DepthBook object at 0x7f03d5815df0>, _depth_subscriptions={}, _depth_control_states={}, _depth_retired=set())
+symbol = 'EURUSD', lots = Decimal('0.18')
+context = NativeAccountRiskContext(provider='CTRADER', physical_account_key='native-account:v1:47a78f9982ff367d9ebe5a739a6931b88...ANCE_PLUS_NATIVE_NET_UNREALIZED_EXCLUDING_SEPARATE_BONUSES"}', risk_capital_qualified=False, execution_authority=False)
+deadline_ms = 1800000000101
+
+    def read_expected_margin(adapter,symbol,lots,*,context,deadline_ms):
+        """Bind original quantity, native account/asset, symbol and connection."""
+        try:
+            started=native_integer(adapter.clock(),maximum=253402300799000)
+            native_integer(deadline_ms,minimum=started+1,maximum=253402300799000)
+            if (type(lots) is not Decimal or not lots.is_finite() or lots<=0
+                    or len(lots.as_tuple().digits)>512 or abs(lots.as_tuple().exponent)>128
+                    or not isinstance(symbol,str) or not 1<=len(symbol)<=256):
+                raise ValueError('original exact native quantity required')
+            source=inspect_context(context)
+            if (context.provider!='CTRADER' or context.account_alias!=adapter.account_alias
+                    or source['observed_at_ms']>started):raise ValueError('native account source invalid')
+            adapter._ensure_auth()
+            connection=getattr(adapter.transport,'connection_id',None)
+            native_integer(connection,minimum=1)
+            spec=adapter.symbol(symbol)
+            contract=spec.native_contract
+            if type(contract) is not NativeSymbolContract or contract.received_at_ms>started:
+                raise ValueError('original native contract unavailable')
+            scope=contract.native_scope;mark=source['mark']
+            if (scope['native_account_id']!=adapter.ctid_trader_account_id
+                    or mark['native_account_id']!=scope['native_account_id']
+                    or scope['transport_host']!=getattr(adapter.transport,'host',None)
+                    or scope['environment']!=mark['environment']
+                    or scope['native_symbol_id']!=spec.symbol_id or spec.contract_revision!=contract.revision):
+                raise ValueError('original native account/symbol scope changed')
+            detail=contract.metadata['detail']
+            if (spec.name!=contract.metadata['light']['symbolName'] or spec.digits!=detail['digits']
+                    or any(getattr(spec,field)!=detail[key] for field,key in (
+                    ('lot_size_cents','lotSize'),('min_volume','minVolume'),
+                    ('step_volume','stepVolume'),('max_volume','maxVolume')))):
+                raise ValueError('native volume metadata changed')
+            volume=_exact_volume(lots,detail)
+            before=adapter._native_trader_identity()
+            currency=adapter._currency
+            if before['depositAssetId']!=mark['deposit_asset_id'] or currency!=source['currency']:
+                raise ValueError('native deposit asset changed')
+            request={'ctidTraderAccountId':adapter.ctid_trader_account_id,'symbolId':spec.symbol_id,'volume':[volume]}
+            name,response=adapter.transport.call('ProtoOAExpectedMarginReq',request)
+            if (name!='ProtoOAExpectedMarginRes' or not isinstance(response,dict)
+                    or native_integer(response['ctidTraderAccountId'],minimum=1)!=adapter.ctid_trader_account_id
+                    or not isinstance(response.get('margin'),list) or len(response['margin'])!=1):
+                raise ValueError('native expected margin response mismatch')
+            digits=native_integer(response['moneyDigits'],maximum=18)
+            row=response['margin'][0]
+            if native_integer(row['volume'],minimum=1)!=volume:raise ValueError('native quoted volume mismatch')
+            buy=native_integer(row['buyMargin']);sell=native_integer(row['sellMargin'])
+            after=adapter._native_trader_identity()
+            received=native_integer(adapter.clock(),minimum=started,maximum=deadline_ms-1)
+            if (not adapter._auth_is_current() or connection!=getattr(adapter.transport,'connection_id',None)
+                    or adapter._currency!=currency or after['depositAssetId']!=before['depositAssetId']
+                    or after.get('leverageInCents')!=before.get('leverageInCents')):
+                raise ValueError('native connection, asset or leverage changed during quote')
+            body={'schema':'vati.ctrader-expected-margin/1','account_alias':context.account_alias,
+                'physical_account_key':context.physical_account_key,'monetary_scope_hash':context.monetary_scope_hash,
+                'native_account_id':adapter.ctid_trader_account_id,'deposit_asset_id':before['depositAssetId'],
+                'currency':currency,'symbol':spec.name,'native_symbol_id':spec.symbol_id,
+                'native_contract_revision':contract.revision,'native_contract':contract.body(),
+                'native_account_context':asdict(context),'original_quantity':str(lots),'native_volume':volume,
+                'requested_at_ms':started,'received_at_ms':received,'valid_until_ms':deadline_ms,
+                'request':request,'response':response,'native_trader_before':before,'native_trader_after':after,
+                'buy_margin':Money(buy,digits,currency,context.monetary_scope_hash).body(),
+                'sell_margin':Money(sell,digits,currency,context.monetary_scope_hash).body(),
+                'valuation_basis':'NATIVE_CURRENT_PRICE_ESTIMATE_NO_ORDER_PRICE_INPUT',
+                'calculation_limitations':_LIMITATIONS,
+                'budget_denomination':'ACCOUNT_MONETARY_SCOPE_NOT_PAYMENT_ASSET_OR_CONVERSION_PROOF',
+                'provider_qualified':False,'reservation_qualified':False,'execution_authority':False}
+            body['source_ref']=canonical_hash(body)
+            return ExpectedMarginObservation.from_body(body)
+        except (KeyError,TypeError,ValueError,ArithmeticError,AttributeError):
+>           raise VenueUnavailable('cTrader original expected-margin scope, precision, quantity or deadline unavailable') from None
+E           vati.execution.base.VenueUnavailable: cTrader original expected-margin scope, precision, quantity or deadline unavailable
+
+trading/vati/execution/ctrader/margin_quote.py:193: VenueUnavailable
+
+The above exception was the direct cause of the following exception:
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-145/test_actual_router_binds_ctrad1')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+late = True
+
+    @pytest.mark.parametrize('late',[False,True])
+    def test_actual_router_binds_ctrader_mandate_and_original_quote_through_wire_dispatch(tmp_path,eurusd,late):
+        from conftest import NOW,mandate_dict,snapshot,intent
+        from vati.core import Ledger,EventKind
+        from vati.execution import ExecutionRouter,ProtectionManager
+        from vati.execution.risk_refresh import CurrentRiskFacts
+        from vati.execution.pretrade import MarketReference
+        from vati.risk import RiskAuthority,TradingMandate,KillSwitch,Decision
+        a,_,wire,clock=ctrader();clock['ms']=NOW*1000
+        grant=mandate_dict(venue='ctrader',account_alias=a.account_alias,expires_at_unix=NOW+1)
+        m=TradingMandate.from_mapping(grant)
+        trade=intent(venue='ctrader',account_alias=a.account_alias)
+        from types import SimpleNamespace
+        from vati.execution.ctrader.contracts import NativeSymbolContract
+        from vati.funding.native import NativeAccountMark
+        from vati.risk.account_context import context_for_account
+        from test_native_risk_history_inputs import record
+        ledger=Ledger();wire.margin_reads=[]
+        contract=NativeSymbolContract.capture(account_id=12345,transport_host=a.transport.host,
+            light={'symbolId':1,'symbolName':'EURUSD','enabled':True},detail={'symbolId':1,'digits':5,'pipPosition':4,
+                'lotSize':10000000,'minVolume':1000,'stepVolume':1000,'maxVolume':1000000000},received_at_ms=clock['ms'])
+        a.symbols['EURUSD'].native_contract=contract;a.symbols['EURUSD'].contract_revision=contract.revision
+        a._symbol_snapshot_valid=True
+        mark=NativeAccountMark('CTRADER','DEMO',a.account_alias,12345,2,'USD',clock['ms'],D('10000'),D('10000'),1,None,None,None)
+        account=SimpleNamespace(verified=True,funding_mark=mark,account_alias=a.account_alias,
+            balance=mark.balance,equity=mark.net_equity,currency=mark.currency)
+        context=context_for_account(ledger,a,account,now_ms=clock['ms'])
+        facts=snapshot(replace(eurusd,venue='ctrader'),account_alias=a.account_alias,native_account_context=context)
+        authority=RiskAuthority(m);approved=authority.evaluate_safe(trade,facts)
+        assert approved.decision in {Decision.APPROVED,Decision.REDUCED}
+        original=record(ledger,facts,request=trade,grant=grant)
+        assert original.payload['decision']['decision_hash']==approved.decision_hash
+        armed={'entry':False}
+        def current(*args,**kwargs):
+            assert any(name=='ProtoOAExpectedMarginReq' for name,_ in wire.margin_reads)
+            armed['entry']=True
+            return CurrentRiskFacts(facts,clock['ms'])
+        router=ExecutionRouter(ledger=ledger,adapters={'ctrader':a},kill_switch=KillSwitch(),protection=ProtectionManager(),clock=lambda:clock['ms'],current_risk_authority=authority,current_risk_facts_provider=current)
+        if late:
+            class LastWriteLock:
+                def __enter__(self):
+                    if armed['entry']:clock['ms']=NOW*1000+101
+                def __exit__(self,*args):pass
+            a.transport._lock=LastWriteLock()
+>       result=router.execute(trade,approved,m,now_ms=clock['ms'],entry_type='MARKET',market_reference=MarketReference(trade.entry,0,100))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_provider_entry_deadline.py:178: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/execution/router.py:557: in execute
+    native_margin=self._native_entry_margin(cmd,adapter,now_ms=now_ms)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.router.ExecutionRouter object at 0x7f03d57e2960>
+command = OrderCommand(trade_intent_id='ti-1', decision_hash='877ee425ca59bf47a0798ff731086257645fee8fdf231a4e1499625d88b41e20',...egy_version='4.2.1', lease_epoch=None, command_hash='46bb39215a4066ac416ff3fac800776a91541b0dfe2c7cefac270dc5da51ce4b')
+adapter = CtraderAdapter(transport=<vati.execution.ctrader.transport.CtraderTransport object at 0x7f03d5817ad0>, client_id='fixt...der.depth.DepthBook object at 0x7f03d5815df0>, _depth_subscriptions={}, _depth_control_states={}, _depth_retired=set())
+now_ms = 1800000000000
+
+    def _native_entry_margin(self, command, adapter, *, now_ms):
+        from vati.execution.mt5_bridge import Mt5BridgeAdapter
+        from vati.execution.mt5_pull import Mt5PullAdapter
+        from vati.execution.ctrader.adapter import CtraderAdapter
+        if not isinstance(adapter,(Mt5BridgeAdapter,Mt5PullAdapter,CtraderAdapter)):
+            return None
+        from vati.risk.native_margin_book import NativeMarginBook
+        from vati.funding.native import native_int
+        rows=[e for e in self.ledger.iter(EventKind.RISK_DECISION,correlation_id=command.trade_intent_id)
+            if isinstance(e.payload,dict) and isinstance(e.payload.get('decision'),dict)
+            and e.payload['decision'].get('decision_hash')==command.decision_hash]
+        if len(rows)!=1:
+            raise RouterError('native entry margin requires one original durable risk input; not dispatched')
+        clock=self.clock if self.clock is not None else lambda:now_ms
+        book=NativeMarginBook(self.ledger,clock=clock)
+        deadline=min(now_ms+4000,command.expires_at_ms) if command.expires_at_ms is not None else now_ms+4000
+        try:
+            receipt=book.capture_entry(adapter,rows[0].hash,command,deadline_ms=deadline)
+            read=book.lookup_entry(command.command_hash,receipt['source_ref'])
+            observed=native_int(clock(),minimum=now_ms)
+            if (read is None or read['receipt']!=receipt
+                    or receipt['original_input_ref']!=rows[0].hash
+                    or receipt['reservation_qualified'] is not False or receipt['execution_authority'] is not False
+                    or not read['observation']['received_at_ms']<=observed<read['observation']['valid_until_ms']
+                    or command.expires_at_ms is not None and observed>=command.expires_at_ms):
+                raise ValueError('original bound margin readback is unavailable or expired')
+            return receipt['record_ref'],read['observation']['valid_until_ms']
+        except Exception as exc:
+            source=getattr(exc,'source_ref','')
+>           raise RouterError('native entry margin evidence unavailable: '+type(exc).__name__+
+                (' source_ref='+source if isinstance(source,str) and source else '')+'; not dispatched') from exc
+E           vati.execution.router.RouterError: native entry margin evidence unavailable: VenueUnavailable; not dispatched
+
+trading/vati/execution/router.py:228: RouterError
+=============================== warnings summary ===============================
+../../van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py:53
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED trading/tests/test_provider_entry_deadline.py::test_actual_router_binds_ctrader_mandate_and_original_quote_through_wire_dispatch[False]
+FAILED trading/tests/test_provider_entry_deadline.py::test_actual_router_binds_ctrader_mandate_and_original_quote_through_wire_dispatch[True]
+2 failed, 55 passed, 2 warnings in 2.91s

@@ -1,0 +1,26 @@
+{
+  "observed_at_utc": "2026-10-29T01:11:12.576121+00:00",
+  "meaning": "Primary API/source semantics, not native account qualification, fee schedule, sign certificate or live acceptance.",
+  "references": [
+    {
+      "url": "https://www.mql5.com/en/docs/python_metatrader5/mt5historydealsget_py",
+      "finding": "Python ticket filter selects an ORDER ticket; select the exact returned deal. Returned fields include order,position_id,volume,commission,fee and native time. Error returnsNone, distinct from an empty result."
+    },
+    {
+      "url": "https://www.mql5.com/en/docs/constants/tradingconstants/dealproperties",
+      "finding": "Native deal properties identify entry type,order,stable position,symbol,volume,commission and separate deal fee. Missing properties cannot be inferred as0."
+    },
+    {
+      "url": "https://www.mql5.com/en/docs/database/databaseexecute",
+      "finding": "Official history aggregation example adds commission and swap to profit; this supplies the recorded signed-cash-component convention, not an account-specific native qualification."
+    },
+    {
+      "url": "https://www.metatrader5.com/en/terminal/help/trading/performing_deals",
+      "finding": "Immediate deal commission is distinct from deferred day/month charges and blocked funds. Observed zero or an immediate cost does not complete future charges or settlement."
+    }
+  ],
+  "implementation_limits": [
+    "EntryINonly,exactresultjoin,registeredaccountidentity,declaredcashconvention;ambiguous/read-failed data staysnull.",
+    "Futurecosts,raw-sourceallocation/correction,brokernativequalification andeconomicfinality remain open."
+  ]
+}

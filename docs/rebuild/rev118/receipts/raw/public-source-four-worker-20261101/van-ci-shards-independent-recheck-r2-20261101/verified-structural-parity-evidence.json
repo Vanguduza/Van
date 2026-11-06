@@ -1,0 +1,56 @@
+{
+  "workflow_otherjobs_top_level_unchanged": true,
+  "mirror_byte_identical": true,
+  "scope_roots_exclusions_five_skip_mappings_runtime_ast_unchanged": true,
+  "frozen_mutation_corpus_unchanged": true,
+  "r1_test_names_retained_no_assert_count_reduction": true,
+  "parity": {
+    "gateway": {
+      "count": 5990,
+      "full_node_config_root_confcut_plugins_entrypoints_equal": true,
+      "entrypoints": [
+        [
+          "anyio",
+          "4.15.1",
+          "anyio",
+          "anyio.pytest_plugin"
+        ],
+        [
+          "pytest-asyncio",
+          "1.4.0",
+          "asyncio",
+          "pytest_asyncio.plugin"
+        ]
+      ],
+      "collection_only": true,
+      "artifact_sha256": {
+        "original": "7b5d7ba8fd25aaf2b0175e595705352b72a2734e75926ec270ba87ce5086eed2",
+        "explicit": "7b5d7ba8fd25aaf2b0175e595705352b72a2734e75926ec270ba87ce5086eed2"
+      }
+    },
+    "media": {
+      "count": 198,
+      "full_node_config_root_confcut_plugins_entrypoints_equal": true,
+      "entrypoints": [
+        [
+          "pytest-asyncio",
+          "1.4.0",
+          "asyncio",
+          "pytest_asyncio.plugin"
+        ]
+      ],
+      "collection_only": true,
+      "artifact_sha256": {
+        "original": "934b827707edaeec53b6fe7b2282f6bdd4ada1998788c93c47ba3dfdbf5cb3cc",
+        "explicit": "934b827707edaeec53b6fe7b2282f6bdd4ada1998788c93c47ba3dfdbf5cb3cc"
+      }
+    }
+  },
+  "r12_verified_actual_xml": {
+    "tests": 92,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "limits": "Parity executes zero application cases; R12instrument evidence not native4worker qualification/performance."
+}

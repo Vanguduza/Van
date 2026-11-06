@@ -1,0 +1,44 @@
+{
+  "scope": "BOUNDED_SOURCE_PROPERTY_AND_STATIC_PROBES; not application e2e or economic experiments",
+  "source_tree_commit": "874774d4ece98718f4d3e80002ec136320a84e13",
+  "files": {
+    "trading/vati/cognition/performance_ledger.py": "8e5343bc7f3e354277359687b76d5fe51fa8a751f955107284a366a1c6a5afe3",
+    "trading/vati/cognition/blind_reviewer.py": "f1d6988476b48f6514454f77ded5dce8e1d5c9ea525e7502caf793ad111cef19",
+    "trading/vati/cognition/runtime.py": "04bf429068e7339442915c2f3271c6d6938b948d66158453781436125d40b2df",
+    "trading/vati/cognition/budget.py": "e50e809789c3d0a10fa36b391926a8755042b01764c58884e21111a15eda0ff6",
+    "trading/vati/cognition/providers.py": "979052a2ff2a3734281b548f7e30ba7ea1c3b7d1b2d8be632f1ed879c81f6f6e",
+    "trading/vati/app/account_service.py": "4c3c9560873acbe2e2bab4f7cce046956ed459998c7cb8011c42f56a90df1129"
+  },
+  "probes": [
+    {
+      "id": "JM-SRC-001",
+      "scope": "pure property counterexample, not production qualification",
+      "observation": "ModelRecord.qualified is true for 50 resolved divergences / mean 0.021 R with no Brier score and no uncertainty/cost fields",
+      "observed": true,
+      "expected_probe_result": true
+    },
+    {
+      "id": "JM-SRC-002",
+      "scope": "pure packet-construction counterexample",
+      "observation": "Caller-supplied context authorship and narrative identity survive blind_packet",
+      "observed": {
+        "context_model_id": "provider-A",
+        "nested_author": "provider-A",
+        "reasoning": "I am provider-A; trust the author"
+      }
+    },
+    {
+      "id": "JM-SRC-003",
+      "scope": "static call-order observation; no measured deployed latency",
+      "observation": "Synchronous cognition.wake is invoked before returning risk decision",
+      "wake_lines": [
+        658
+      ],
+      "return_lines": [
+        660
+      ]
+    }
+  ],
+  "application_e2e_tests_executed": 0,
+  "economic_experiments_executed": 0
+}

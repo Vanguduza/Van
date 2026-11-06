@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.overlay.OverlayVisibilityPolicyTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-08T06:59:31" hostname="052fefa249ff" time="0.008">
+  <properties/>
+  <testcase name="the screen being off stops the animation()" classname="com.dial.van.overlay.OverlayVisibilityPolicyTest" time="0.001"/>
+  <testcase name="the keyboard and a full-screen app are distinct reasons from being fully occluded()" classname="com.dial.van.overlay.OverlayVisibilityPolicyTest" time="0.001"/>
+  <testcase name="a frozen overlay always says why()" classname="com.dial.van.overlay.OverlayVisibilityPolicyTest" time="0.003"/>
+  <testcase name="a detached view does not animate()" classname="com.dial.van.overlay.OverlayVisibilityPolicyTest" time="0.001"/>
+  <testcase name="minimized is a size, not a pause()" classname="com.dial.van.overlay.OverlayVisibilityPolicyTest" time="0.0"/>
+  <testcase name="a full-screen app in front pauses the overlay and says why()" classname="com.dial.van.overlay.OverlayVisibilityPolicyTest" time="0.0"/>
+  <testcase name="every combination resolves to exactly one target()" classname="com.dial.van.overlay.OverlayVisibilityPolicyTest" time="0.0"/>
+  <testcase name="destroying wins over everything()" classname="com.dial.van.overlay.OverlayVisibilityPolicyTest" time="0.0"/>
+  <testcase name="the keyboard covering VAN pauses the overlay and says why()" classname="com.dial.van.overlay.OverlayVisibilityPolicyTest" time="0.0"/>
+  <testcase name="a fully covered overlay does not animate()" classname="com.dial.van.overlay.OverlayVisibilityPolicyTest" time="0.0"/>
+  <testcase name="a paused overlay is CREATED, not STOPPED or destroyed()" classname="com.dial.van.overlay.OverlayVisibilityPolicyTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

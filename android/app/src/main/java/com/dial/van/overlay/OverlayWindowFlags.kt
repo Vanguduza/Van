@@ -16,7 +16,10 @@ import com.dial.van.visual.VanGlassTokens
 internal object OverlayWindowFlags {
 
     fun base(presentation: VanOverlayPresentation): Int {
-        var flags = WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+        // Focusable must not mean touch-modal: taps OUTSIDE this small overlay
+        // belong to the underlying app. This does not pass through covered pixels.
+        var flags = WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or
+            WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
         if (presentation !in WORKBOARDS) {
             flags = flags or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
         }

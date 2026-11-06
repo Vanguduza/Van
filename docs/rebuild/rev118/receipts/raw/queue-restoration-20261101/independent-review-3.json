@@ -1,0 +1,89 @@
+{
+  "schema": "van.independent-queue-derivative-source-review/1",
+  "at_utc": "2026-11-01T13:45:03.483025+00:00",
+  "disposition": "NO_BLOCKING_FINDING_WITHIN_FROZEN_TEN_PATH_DERIVATIVE_RECONCILIATION",
+  "blockers": [],
+  "base": "c0063940a7573597934e62ada558d4dc942cfad0",
+  "source_pins": {
+    "docs/rebuild/rev118/SOURCE_WORKMAP.json": "f41e5522990534179b3c19f976b1aa93bf7ba01a00119d0e2c098fa82c13f8e9",
+    "docs/rebuild/rev118/backend/OWNER_FRONTEND_SCREEN_REGISTRY.md": "31754daa66e29cbc0e3166084a2c62f4f2dc5d7323e639ec45431a2cf25b29e8",
+    "docs/rebuild/rev118/backend/OWNER_REGISTRY_GENERATION.json": "5019ddffc31fb83db9abed9192cc752708bdfac7cab1cf857cc579317934c440",
+    "docs/rebuild/rev118/backend/OWNER_REGISTRY_SOURCE_REFRESH_20261022.json": "5d532c8dd1b96dd13dafcb8babb98927168995f8b8076ada06384858ba132a8f",
+    "registries/owner_endpoint_schemas.json": "68e782eeceda99dcd5291a6d6c70365adf17fe4e7c2e7614bd1fd84667b2957e",
+    "registries/owner_endpoints.json": "1582d4f7414ff63ecae6e22ece1e0963ecd47623c53fe426a0931a932346ddca",
+    "registries/owner_features.json": "e65586036102bc1127b9ba2faf539aceace7629cce51d1a14db87ea13d4a4939",
+    "registries/owner_screens.json": "0608485ae4d1cf9df62420f5369493f736794cbfabda9eb64012527f7a4725e9",
+    "tools/audit/mutation_suite.py": "789f46dfefa7b022d869751e1548ca95a74177d6b51c4699f8d2692cdcc8c450",
+    "tools/rebuild/refresh_owner_source_contracts.py": "da6f947fea89207c025f40a7fa5d1d968589743fd7ff2586c3118d68ce9555c0"
+  },
+  "source_archive_patch_before_after_exact": true,
+  "archive_sha256": "5bdc27f5a885e9d77eb95499660c33720afa31a62b832ad981e93e1549dbc990",
+  "patch_sha256": "841ebfb702f720b29bb608a1fc257d0a39a9051666f15aacbb5c5458c5326d89",
+  "checks": {
+    "derived10_current_archive_before_after_exact": true,
+    "queue41_verifier2_pins_exact": true,
+    "catalogue374_ids_order_targets_tests_preserved": true,
+    "edits383_exact5retargets": true,
+    "all5newanchors_unique": true,
+    "six_exact_R1_R2_current_target_test_hashes_match": true,
+    "fifth_async_save_edit_in_actual_captured_assertion_failure": true,
+    "schemas379_to380_only_additive_reference_and_optional_resume_property": true,
+    "endpoints487_unchanged_except_source_citations": true,
+    "features42_surfaces78": true,
+    "semantic220_XML_pass0skip_and_assertions_unchanged": true
+  },
+  "owner_check": "Independently ran actual current canonical --check: terminal0, changed[], appliedfalse",
+  "citation_review": "Four exact replacement needles only, no wildcard/authority mapping change. Queue compatibility constructor passes actual gateway into private transport; replacement dispatch227 and captured ingress222 remain real GatewayClient calls; WSS332 is actual same original envelope send after durable/current-context checks. Other recorded citations retain original exact needles/receiver scope with current file hashes/lines.",
+  "inventory": "All487 endpoint identities and every endpoint field excluding source citation unchanged (including auth/proof/readiness/request/response).379old schema bodies unchanged except one additive optional ResumeBody property; required list unchanged. New schema onlyOriginalCommandReference. Workmap131units/counts unchanged, including349actions/105sourcefunctions/42groups/78surfaces and canonical324/1610/234/93.",
+  "mutation_review": {
+    "catalogue": "Independently evaluated only constant-data AST, no mutation executor.374same IDs/order/targets/testselection,383edits; exactlyfive retargets match reconciliation record; allfive replacement anchors unique.",
+    "fifth_control": "Captured C39_ASYNC log directly contains exact editor.apply() + if(false) edit and intended synchronous-save AssertionError (1fail4pass); original control5pass. This is the retained Python source-shape durability oracle, not Android native/runtime proof. Rewrite calls apply as a statement then false Boolean guard, preserving Kotlin types; avoids old global .commit()->.apply() boolean-branch type error.",
+    "reuse_basis": "Allsix target/testcurrent hashes independently equalR1frozenZIP andR2/current pinned values. OthertransitiveR2changes explicitly limited; R2SDK43/JVM73 separate controls. No need additional mutant run because exact fifth edit is already executed in captured control.",
+    "C36_actual_XML": [
+      {
+        "archive": "C36_CONTROL_XML.zip",
+        "cases": 24,
+        "intended_assertion_failures": 0,
+        "errors": 0,
+        "skips": 0
+      },
+      {
+        "archive": "C36_MUTANT_1_XML.zip",
+        "cases": 24,
+        "intended_assertion_failures": 6,
+        "errors": 0,
+        "skips": 0
+      },
+      {
+        "archive": "C36_MUTANT_2_XML.zip",
+        "cases": 24,
+        "intended_assertion_failures": 9,
+        "errors": 0,
+        "skips": 0
+      },
+      {
+        "archive": "C36_MUTANT_3_XML.zip",
+        "cases": 24,
+        "intended_assertion_failures": 7,
+        "errors": 0,
+        "skips": 0
+      }
+    ],
+    "scope": "Captured selected mutation proofs only, not current full374 corpus or native qualification."
+  },
+  "provided_semantic_evidence": "220actual current XML cases0failure/error/skip; exact8consumer test sources identical c006 assertions; supplied canonical/frontend generation receipts retained.",
+  "queue41_verifier2_exact": true,
+  "artifacts": [
+    "review_inputs.py",
+    "checks.json",
+    "checks.log",
+    "before.json",
+    "after.json",
+    "owner-check.log"
+  ],
+  "limits": [
+    "No edits, candidate commits, generators --apply, mutation application to candidate, Gradle, CI dispatch/native effects or subagents. Narrow read-only guard and data checks only.",
+    "Source provenance/metadata reconciliation only. Original c006 aggregate remainsFAILED despite fourworker success; media198 separate; no fullunion/native qualification/speed claim.",
+    "Original guard refusal logs and failed/earlier receipts preserved; new genuine hooks/committed baseline/finalexactheadCI/publication remain separate integration gates."
+  ]
+}

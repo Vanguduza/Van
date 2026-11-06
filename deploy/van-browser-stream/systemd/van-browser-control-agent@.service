@@ -1,0 +1,31 @@
+[Unit]
+Description=VAN private mTLS control agent for profile %i
+After=van-browser-chromium@%i.service
+BindsTo=van-browser-chromium@%i.service
+
+[Service]
+Type=simple
+User=van-control-%i
+Group=van-control-%i
+EnvironmentFile=/etc/van-browser-stream/profiles/%i/control.env
+ExecStart=/opt/van-browser-stream/venv/bin/python -m services.browser_control_agent.server
+WorkingDirectory=/opt/van-browser-stream/src
+Restart=on-failure
+RestartPreventExitStatus=2
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+ProtectProc=invisible
+ProcSubset=pid
+RestrictSUIDSGID=true
+InaccessiblePaths=-/var/lib/van-browser-profiles -/var/lib/van-browser-transfers -/etc/van-browser-stream/profiles/%i/stream-pki -/etc/van-browser-stream/profiles/%i/control-pki/ca.key -/run/docker.sock
+ReadWritePaths=/var/log/van-browser-stream/%i/control
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

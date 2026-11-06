@@ -1,0 +1,22 @@
+..............F                                                          [100%]
+=================================== FAILURES ===================================
+______________ test_actual_cli_closes_its_own_durable_connection _______________
+
+files = (PosixPath('/tmp/pytest-of-agent/pytest-326/test_actual_cli_closes_its_own0/news.json'), PosixPath('/tmp/pytest-of-age...closes_its_own0/feed.xml'), PosixPath('/tmp/pytest-of-agent/pytest-326/test_actual_cli_closes_its_own0/ledger.sqlite'))
+capsys = <_pytest.capture.CaptureFixture object at 0x7fbdcabbaf30>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fbdcabb9880>
+
+    def test_actual_cli_closes_its_own_durable_connection(files,capsys,monkeypatch):
+        close=Ledger.close;closed=[]
+        def observed(self):
+            close(self);closed.append(self)
+        monkeypatch.setattr(Ledger,'close',observed)
+        assert invoke(files,capsys)[0]==0
+>       assert len(closed)==1
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+trading/tests/test_news_cli_source.py:167: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_news_cli_source.py::test_actual_cli_closes_its_own_durable_connection
+1 failed, 14 passed in 0.97s

@@ -1,0 +1,1 @@
+trading/tests/test_restated_trade_projection.py::test_postgres_native_projection_crash_restart_and_logical_ledger_isolation

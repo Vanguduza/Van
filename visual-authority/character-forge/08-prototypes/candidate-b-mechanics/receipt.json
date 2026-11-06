@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "status": "NON_CANONICAL_MECHANICS_PROTOTYPE",
+  "candidate_b_sha256": "cf7f51793692bfe8ea2e5f58f1a12e64d3a76468a85cb19d76d0db64ccef374c",
+  "scene_sha256": "dfaf6ae3badb6a5e97c33a74f5825b31170734b62af58ae646f99a461fbc9749",
+  "rive_sha256": "f569526b370df5cc0020d9de311095500dfd6b8d19ca80ad8ecbf0eaf1c797e0",
+  "rive_version": "rive 1.1.1",
+  "artboard": "Van",
+  "state_machine": "VanRuntime",
+  "durable_states": 18,
+  "finite_actions": 14,
+  "visemes": 5,
+  "trace_paths": 183,
+  "vector_trace_sha256": {
+    "body": "7a9e81c4f912159412221098106ff7f6dc501f22041a103a95ba91f307165023",
+    "head": "d3f47113f344b8c225e267c39f29c87e911544014645fcf79583a21b697738f7",
+    "forearm_l": "2b3d9f8143cdd088d6c958ead2e80686aaf865676a5739037a11475b5c49a8bf",
+    "forearm_r": "90518ba5f6f962f7b1a3edab8c838840bc35f9e66ab8fc6173511d6018d5d142",
+    "orb": "7d1ab93f40568e062b56ff1a643a080645d0d4ebfe0d879704b0ddf8b6cde606"
+  },
+  "aura_embedded": false,
+  "production_admissible": false,
+  "note": "Candidate-B cut-out traced to non-canonical vectors for mechanics proof; M1 reviewed semantic vectors and M2 owner pass remain mandatory."
+}

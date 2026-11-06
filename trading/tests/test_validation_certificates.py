@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import dataclasses
 from decimal import Decimal
 
@@ -26,7 +28,8 @@ from vati.validation.builder import (
     build_strategy_validation_certificate,
 )
 
-REG = "trading/strategies/registry"
+ROOT = Path(__file__).resolve().parents[2]
+REG = str(ROOT / "trading/strategies/registry")
 
 
 # --- strategy certificate -------------------------------------------------

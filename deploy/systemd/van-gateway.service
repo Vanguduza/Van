@@ -1,18 +1,19 @@
 [Unit]
 Description=VAN secure owner-authority gateway
-After=network-online.target hermes-gateway.service
+After=network-online.target
 Wants=network-online.target
 
 [Service]
 Type=simple
 WorkingDirectory=%h/.local/share/van/runtime/backend
 Environment=PYTHONUNBUFFERED=1
-Environment=PYTHONPATH=%h/.local/share/van/runtime/backend
+Environment=PYTHONPATH=%h/.local/share/van/runtime/backend:%h/.local/share/van/runtime
 EnvironmentFile=%h/.config/van/google-workspace.env
 EnvironmentFile=%h/.config/van/gateway.env
 EnvironmentFile=-%h/.config/van/trading-commander.env
-# Loopback 127.0.0.1:8787 exactly as before; plus the phone's direct mutual-TLS listener
-# (0.0.0.0:8443) when gateway.env sets VAN_MTLS_ENABLED. See van_gateway/mtls/serve.py.
+EnvironmentFile=-%h/.config/van/owner-core.env
+# Loopback remains local. The selected core profile binds device mTLS to private
+# WireGuard 10.77.0.4:8443; Hermes is an authenticated remote dependency.
 ExecStart=%h/.local/share/van/venv/bin/python -m van_gateway.mtls.serve
 Restart=on-failure
 RestartSec=3

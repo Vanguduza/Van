@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="9" time="2.308" timestamp="2026-10-26T18:01:00.519267+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_financial_movement_projection" name="test_native_economic_classes_keep_exact_original_sources_and_balanced_legs[BALANCE_DEPOSIT-0.01234567-OBSERVED_CASH_NOT_SETTLEMENT-EXTERNAL_CAPITAL]" time="0.050" /><testcase classname="trading.tests.test_financial_movement_projection" name="test_native_economic_classes_keep_exact_original_sources_and_balanced_legs[BALANCE_WITHDRAW--0.01234567-OBSERVED_CASH_NOT_SETTLEMENT-EXTERNAL_CAPITAL]" time="0.009" /><testcase classname="trading.tests.test_financial_movement_projection" name="test_native_economic_classes_keep_exact_original_sources_and_balanced_legs[BALANCE_DEPOSIT_NONWITHDRAWABLE_BONUS-1-RESTRICTED_CREDIT_MEMORANDUM-RESTRICTED_CREDIT]" time="0.019"><failure message="AssertionError: assert ('OBSERVED_CASH_NOT_SETTLEMENT' == 'RESTRICTED_CREDIT_MEMORANDUM'&#10;  &#10;  - RESTRICTED_CREDIT_MEMORANDUM&#10;  + OBSERVED_CASH_NOT_SETTLEMENT)">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-465/test_native_economic_classes_k2')
+operation = 'BALANCE_DEPOSIT_NONWITHDRAWABLE_BONUS', delta = '1'
+state = 'RESTRICTED_CREDIT_MEMORANDUM', category = 'RESTRICTED_CREDIT'
+
+    @pytest.mark.parametrize('operation,delta,state,category',[
+        ('BALANCE_DEPOSIT','0.01234567','OBSERVED_CASH_NOT_SETTLEMENT','EXTERNAL_CAPITAL'),
+        ('BALANCE_WITHDRAW','-0.01234567','OBSERVED_CASH_NOT_SETTLEMENT','EXTERNAL_CAPITAL'),
+        ('BALANCE_DEPOSIT_NONWITHDRAWABLE_BONUS','1','RESTRICTED_CREDIT_MEMORANDUM','RESTRICTED_CREDIT'),
+        ('NATIVE_UNKNOWN','1','UNRESOLVED_NATIVE_MOVEMENT','UNRESOLVED'),
+        ('BALANCE_DEPOSIT','-1','UNRESOLVED_NATIVE_MOVEMENT','UNRESOLVED'),
+        ('BALANCE_DEPOSIT_IB_COMMISSIONS','1','OBSERVED_CASH_NOT_SETTLEMENT','OTHER_BUSINESS_INCOME_OR_EXPENSE'),
+        ('BALANCE_WITHDRAW_ROLLOVER','-1','OBSERVED_CASH_NOT_SETTLEMENT','ACCOUNT_INCOME_OR_EXPENSE'),
+        ('BALANCE_DEPOSIT_CONVERTED_BONUS','1','OBSERVED_CASH_NOT_SETTLEMENT','BROKER_SUPPORT_CAPITAL'),
+        ('BALANCE_DEPOSIT','0','OBSERVED_CASH_NOT_SETTLEMENT','EXTERNAL_CAPITAL'),
+    ])
+    def test_native_economic_classes_keep_exact_original_sources_and_balanced_legs(tmp_path,operation,delta,state,category):
+        source,event=original(tmp_path,operation,delta)
+        movement=FinancialMovement(event,source.movements[0].native_id,recorded_at_ms=6000);body=movement.body()
+&gt;       assert body['state']==state and body['classification']['category']==category
+E       AssertionError: assert ('OBSERVED_CASH_NOT_SETTLEMENT' == 'RESTRICTED_CREDIT_MEMORANDUM'
+E         
+E         - RESTRICTED_CREDIT_MEMORANDUM
+E         + OBSERVED_CASH_NOT_SETTLEMENT)
+
+trading/tests/test_financial_movement_projection.py:40: AssertionError</failure></testcase><testcase classname="trading.tests.test_financial_movement_projection" name="test_native_economic_classes_keep_exact_original_sources_and_balanced_legs[NATIVE_UNKNOWN-1-UNRESOLVED_NATIVE_MOVEMENT-UNRESOLVED]" time="0.017" /><testcase classname="trading.tests.test_financial_movement_projection" name="test_native_economic_classes_keep_exact_original_sources_and_balanced_legs[BALANCE_DEPOSIT--1-UNRESOLVED_NATIVE_MOVEMENT-UNRESOLVED]" time="0.015" /><testcase classname="trading.tests.test_financial_movement_projection" name="test_native_economic_classes_keep_exact_original_sources_and_balanced_legs[BALANCE_DEPOSIT_IB_COMMISSIONS-1-OBSERVED_CASH_NOT_SETTLEMENT-OTHER_BUSINESS_INCOME_OR_EXPENSE]" time="0.014" /><testcase classname="trading.tests.test_financial_movement_projection" name="test_native_economic_classes_keep_exact_original_sources_and_balanced_legs[BALANCE_WITHDRAW_ROLLOVER--1-OBSERVED_CASH_NOT_SETTLEMENT-ACCOUNT_INCOME_OR_EXPENSE]" time="0.017" /><testcase classname="trading.tests.test_financial_movement_projection" name="test_native_economic_classes_keep_exact_original_sources_and_balanced_legs[BALANCE_DEPOSIT_CONVERTED_BONUS-1-OBSERVED_CASH_NOT_SETTLEMENT-BROKER_SUPPORT_CAPITAL]" time="0.012" /><testcase classname="trading.tests.test_financial_movement_projection" name="test_native_economic_classes_keep_exact_original_sources_and_balanced_legs[BALANCE_DEPOSIT-0-OBSERVED_CASH_NOT_SETTLEMENT-EXTERNAL_CAPITAL]" time="0.015" /></testsuite></testsuites>

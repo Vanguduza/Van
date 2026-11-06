@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.control.VanCommandControllerTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-08T06:59:31" hostname="052fefa249ff" time="0.151">
+  <properties/>
+  <testcase name="declining a stale approval cannot discard a newer challenge()" classname="com.dial.van.control.VanCommandControllerTest" time="0.019"/>
+  <testcase name="ambiguous dispatch stores the exact original command instead of resigning it()" classname="com.dial.van.control.VanCommandControllerTest" time="0.007"/>
+  <testcase name="gateway upgraded A4 approval cannot be stored after its receipt is lost()" classname="com.dial.van.control.VanCommandControllerTest" time="0.025"/>
+  <testcase name="a lost server error remains recoverable but an authenticated refusal is never queued()" classname="com.dial.van.control.VanCommandControllerTest" time="0.023"/>
+  <testcase name="Gmail send cannot bypass challenge bound content review on another screen()" classname="com.dial.van.control.VanCommandControllerTest" time="0.013"/>
+  <testcase name="intermediate status changes do not multiply pending copies of the same command()" classname="com.dial.van.control.VanCommandControllerTest" time="0.013"/>
+  <testcase name="overlapping polls append and speak a terminal answer only once()" classname="com.dial.van.control.VanCommandControllerTest" time="0.05"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

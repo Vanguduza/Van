@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/workspace/van-parquet-faults-20261026.py", line 41, in <module>
+    assert result['exit']==1 and result['assertions']>0 and result['errors']==result['skips']==result['storage_audit_violations']==0,results[-1]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: {'case': 'self-qualify-derived-data', 'path': 'trading/vati_forecast_worker/source_partitions.py', 'mutant_sha256': '00df0772fa01e79ae0675739fc0aec186549a0bb8daf420a6841142857cb8974', 'exit': 1, 'cases': 1, 'failures': 1, 'assertions': 0, 'errors': 0, 'skips': 0, 'storage_audit_violations': 0}

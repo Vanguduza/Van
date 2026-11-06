@@ -1,0 +1,45 @@
+{
+  "started_at_utc": "2026-11-01T03:25:04.454031+00:00",
+  "source_parent": "d43bd396765204a4843cdb7485535e9fcd7af3ce",
+  "owned_temp_preflight": {
+    "path": "/tmp/van-recovery-family-operational-grant-r1-20261101",
+    "free_bytes_before": 8923205632,
+    "free_inodes_before": 2304131,
+    "minimum_free_bytes": 4294967296,
+    "no_preexisting_directory": true
+  },
+  "source_pins": {
+    "trading/vati/execution/paper.py": "b0d7c6a71f2422a66ec16b4e7cf8da677d95f0543706f64ea06b8e5f5a47882a",
+    "trading/vati/lifecycle/family_actions.py": "8a80e8113a97631896fc7bc406b799088a83cce37587a998bd1a721a03075fbe",
+    "trading/vati/lifecycle/family.py": "e9131a3758fcaa59f9ef43e18ab124c0a2fe6193d520295aceee5b1899a10709",
+    "trading/vati/lifecycle/family_membership.py": "8f713bbe62639bff48303a036a940905ae7ed90aff57df14320e00aef7e5b476",
+    "trading/vati/lifecycle/family_action_journal.py": "52531d6b74cae1b067cf4702e0526050863e605af516d1bf38aa0b1b8f75cb56",
+    "trading/vati/execution/exit_journal.py": "679b8ad00ff7b29c5e8fe6176324468d32bbcd73b95107c35ca72f0ae6d5a892",
+    "trading/vati/execution/router.py": "543e65544858d89174b7565f3bc3acdd984f62821862c234c8fdde3e8f503f50",
+    "trading/vati/app/trade_lifecycle.py": "13481a3b73e962f6d6f76dfd077f9ad17a72376c8937c61ab424f8f66826909e",
+    "trading/vati/risk/operational_grant.py": "4c35e677040d6e6f30fbc086ad5316a39119f81006e361278cb0b01ed6aeeb0a",
+    "trading/tests/test_lifecycle_operational_grant.py": "bbd029c8bb431c04ed3d16223e426deb3451a33b0b345a387c3843ba0334657b"
+  },
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "tools/rebuild/source_storage_audit.py",
+    "--report",
+    "/workspace/van-family-operational-grant-r1-20261101/storage-audit.json",
+    "trading/tests/test_lifecycle_operational_grant.py",
+    "--basetemp=/tmp/van-recovery-family-operational-grant-r1-20261101",
+    "--junitxml=/workspace/van-family-operational-grant-r1-20261101/tests.xml",
+    "-q"
+  ],
+  "exit": 0,
+  "owned_temp_cleanup": {
+    "path": "/tmp/van-recovery-family-operational-grant-r1-20261101",
+    "files": 11,
+    "inventory": "/workspace/van-family-operational-grant-r1-20261101/owned-temp-inventory.json",
+    "inventory_sha256": "eb6792eb05001f72502eedf7bc9261f6fd67be59e29b88d0bfd81ea41a9ab766",
+    "free_bytes_before_cleanup": 8922955776,
+    "free_bytes_after_cleanup": 8923205632,
+    "free_inodes_after": 2304131,
+    "independently_absent": true
+  },
+  "completed_at_utc": "2026-11-01T03:25:05.279248+00:00"
+}

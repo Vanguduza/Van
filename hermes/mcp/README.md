@@ -48,12 +48,14 @@ Allowed tools are deliberately narrow:
 - `context_fact_candidate` / `context_edge_candidate` — INFERRED/MODEL_DERIVED only
 - `knowledge_status`, `vekl_query`, `obsidian_query`, `notebook_enterprise_recent`,
   `notebook_enterprise_get`, `notebook_consumer_ask`, `knowledge_action_execute`
-- `google_status`, `google_capabilities`, `google_gmail_search`, `google_calendar_agenda`,
+- `google_status`, `google_capabilities`, `google_gmail_search`, `google_gmail_thread`,
+  `google_gmail_attachment_import`, `google_calendar_agenda`, `google_calendar_review`,
   `google_drive_search`, `google_contacts_resolve`, `google_tasks_list`, `google_job_plan`,
   `google_action_execute`
 - `trading_portfolio`, `trading_positions`, `trading_risk`, `trading_market_state`,
   `trading_trade_detail`, `trading_status` — read-only; no halt, ticket or account tool
 - `reminder_create` — on the owner's behalf; `text` must be the owner's own words
+- `suggestion_create` — evidence-backed owner suggestion only; creates Attention and never executes its proposed prompt
 - `attention_list`, `briefing_read` — read-only
 - `browser_task_create`, `browser_assignment_run`, `browser_task_status`,
   `browser_task_evidence` — creation carries `command_id`/`mission_id` (that route has no
@@ -75,6 +77,18 @@ requires a separate trusted gateway/owner path (GAP-F-015: this shim's memory-ca
 tools and AGENTS.md's "may submit inferred/model-derived memory candidates" now agree).
 
 The context graph is a bounded temporal retrieval primitive, not an autonomous GraphRAG loop. Deterministic lexical retrieval runs locally over current owner facts and graph edges without embeddings, model inference or a remote call. Hot-context capsules are revision-sealed, bounded caches of evidence references used to reduce repeated lookup latency; they are invalidated by context revision/expiry and are never a new truth store. Exact facts remain ahead of graph/lexical retrieval in the critical path; external research remains an escalation.
+
+## Shared DIAL Jev judgment capability
+
+| Server | Purpose | Credential model |
+|---|---|---|
+| `dial_jev` | Optional System-1 typed judgments, bounded subordinate reasoning, module-evaluation packets and independent evaluator proposal/review evidence | Private loopback DIAL Jev control token; no TypeSafe credential reaches VAN; no shell, lifecycle transition, global-control, repository-write or trading execution tool |
+
+`dial_jev` is subordinate evidence beneath Hermes. Its tool surface is intentionally bounded:
+`jev_registered_batch`, `jev_subordinate`, `jev_evaluation_packet`,
+`jev_record_evaluation_proposal`, `jev_record_evaluation_review`, and `jev_status`.
+Jev can be completely bypassed or physically detached without disabling VAN. Trading use is permitted
+only inside an already-active VATI cognition run and can never set size, risk, stops, mandate or execution.
 
 ## Trading (van-trading-core)
 

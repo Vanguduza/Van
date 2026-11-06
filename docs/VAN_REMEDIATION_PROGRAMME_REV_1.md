@@ -269,6 +269,10 @@ point — those paths are green because nothing verifies them.
 **Closes:** `P0-VERIFY-001`, `P0-EXEC-002`, `P1-AUTO-001`, `P0-TRADE-001`, `P1-GOOG-002`, and the
 verification half of `P2-COH-002` — `VerifierRegistry` becomes the single verification system and
 automation's `WorkflowVerifier` is retired into it.
+> **Implementation note (2026-10-09 audit).** As built, the two verifier systems were kept and the
+> *observations* were unified instead: `backend/van_gateway/verification/observations.py` holds each
+> independent observation once and both `VerifierRegistry` and `WorkflowVerifier` wrap it. The
+> owning rule is `verification.independent_observation` in `docs/project-state/AUTHORITY_MAP.yaml`.
 **Disposes:** #25, #26 WIRE; #66 REPLACE.
 
 **Work:** `MissionService.transition` executes a registered verifier from `VerifierRegistry` rather

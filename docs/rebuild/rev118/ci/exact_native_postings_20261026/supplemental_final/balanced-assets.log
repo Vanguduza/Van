@@ -1,0 +1,46 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_ test_offsetting_labels_cannot_conceal_an_unbalanced_or_foreign_asset[counter0] _
+
+counter = Money(minor_units=-122, scale=2, currency='USD', asset_ref='asset:USD')
+
+    @pytest.mark.parametrize('counter',[
+        Money(-122,2,'USD','asset:USD'),Money(-123,2,'EUR','asset:USD'),
+        Money(-123,2,'USD','other-provider:USD')])
+    def test_offsetting_labels_cannot_conceal_an_unbalanced_or_foreign_asset(counter):
+>       with pytest.raises(UnitError,match='UNBALANCED'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE UnitError
+
+trading/tests/test_exact_units.py:111: Failed
+_ test_offsetting_labels_cannot_conceal_an_unbalanced_or_foreign_asset[counter1] _
+
+counter = Money(minor_units=-123, scale=2, currency='EUR', asset_ref='asset:USD')
+
+    @pytest.mark.parametrize('counter',[
+        Money(-122,2,'USD','asset:USD'),Money(-123,2,'EUR','asset:USD'),
+        Money(-123,2,'USD','other-provider:USD')])
+    def test_offsetting_labels_cannot_conceal_an_unbalanced_or_foreign_asset(counter):
+>       with pytest.raises(UnitError,match='UNBALANCED'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE UnitError
+
+trading/tests/test_exact_units.py:111: Failed
+_ test_offsetting_labels_cannot_conceal_an_unbalanced_or_foreign_asset[counter2] _
+
+counter = Money(minor_units=-123, scale=2, currency='USD', asset_ref='other-provider:USD')
+
+    @pytest.mark.parametrize('counter',[
+        Money(-122,2,'USD','asset:USD'),Money(-123,2,'EUR','asset:USD'),
+        Money(-123,2,'USD','other-provider:USD')])
+    def test_offsetting_labels_cannot_conceal_an_unbalanced_or_foreign_asset(counter):
+>       with pytest.raises(UnitError,match='UNBALANCED'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE UnitError
+
+trading/tests/test_exact_units.py:111: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_exact_units.py::test_offsetting_labels_cannot_conceal_an_unbalanced_or_foreign_asset[counter0]
+FAILED trading/tests/test_exact_units.py::test_offsetting_labels_cannot_conceal_an_unbalanced_or_foreign_asset[counter1]
+FAILED trading/tests/test_exact_units.py::test_offsetting_labels_cannot_conceal_an_unbalanced_or_foreign_asset[counter2]
+3 failed in 1.50s

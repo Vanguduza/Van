@@ -1,0 +1,2 @@
+Thinking mode does not support the
+temperature

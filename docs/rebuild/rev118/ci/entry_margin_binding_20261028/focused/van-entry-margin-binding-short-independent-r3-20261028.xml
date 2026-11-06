@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="1.341" timestamp="2026-10-28T16:39:10.719741+00:00" hostname="6e9feff21467"><testcase classname="test_van_short_entry_margin_binding_20261028" name="test_original_short_selects_actual_sell_estimate_and_never_sends[mt5]" time="0.451"><failure message="vati.risk.native_margin_book.NativeMarginError: ENTRY_MARGIN_COMMAND_ORIGINAL_APPROVAL_MISMATCH">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-153/test_original_short_selects_ac0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+provider = 'mt5'
+
+    @pytest.mark.parametrize('provider',['mt5','ctrader'])
+    def test_original_short_selects_actual_sell_estimate_and_never_sends(tmp_path,eurusd,provider):
+        if provider=='mt5':
+            sdk,worker,adapter,now,ledger,context=mt5_source(tmp_path,at=NOW*1000)
+            facts=snapshot(eurusd,account_alias=adapter.account_alias,balance=D('10000'),equity=D('10000'),
+                used_margin=D('0'),free_margin=D('10000'),margin_level_pct=None,native_account_context=context)
+            book=NativeMarginBook(ledger,clock=lambda:now['ms']);quantity=D('.10')
+        else:
+            ledger,adapter,old,book,now,facts=setup_book(tmp_path,eurusd)
+            facts=replace(facts,used_margin=D('0'),free_margin=D('10000'),margin_level_pct=None)
+            quantity=D('.123')
+        try:
+            request=intent(venue=provider,account_alias=adapter.account_alias,direction=Direction.SHORT,stop=D('1.11'))
+            original=record(ledger,facts,request=request)
+            cmd=replace(entry_command(original),quantity=quantity,command_hash='').sealed()
+&gt;           receipt=book.capture_entry(adapter,original.hash,cmd,deadline_ms=NOW*1000+2000)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+../../test_van_short_entry_margin_binding_20261028.py:31: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/risk/native_margin_book.py:170: in capture_entry
+    try:return capture_entry(self,adapter,original_input_ref,command,deadline_ms=deadline_ms)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/risk/entry_margin.py:214: in capture_entry
+    _,original=_original(book,original_input_ref,command,at=book._now())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+book = &lt;vati.risk.native_margin_book.NativeMarginBook object at 0x7ff9e19314c0&gt;
+original_input_ref = 'cddd2d5edfa1f5d3c4260bda2e0bb74b8ca5fe6a879b41d8204966b47457200c'
+command = OrderCommand(trade_intent_id='ti-1', decision_hash='ba5587f534836bf7cc6d5d0097048a5a7503470f70c1df9c3ff61ec7f77a3bf3',...egy_version='4.2.1', lease_epoch=None, command_hash='9e8b5f132d3d8f9d98f2937c9c1ec1cef7281f035b002ce59d85d20204259e9d')
+at = 1800000000000
+
+    def _original(book,original_input_ref,command,*,at):
+        body=_body(command)
+        source=original_native_risk_input(book.ledger,original_input_ref,available_at_ms=at)
+        rows=[e for e in book.ledger.iter(EventKind.RISK_DECISION,correlation_id=source.trade_intent_id)
+              if e.hash==original_input_ref]
+        if len(rows)!=1:raise NativeMarginError('ENTRY_MARGIN_ORIGINAL_INPUT_UNAVAILABLE')
+        event=rows[0];intent=event.payload['inputs']['intent'];decision=event.payload['decision']
+        if (source.recorded_decision not in ('APPROVED','REDUCED')
+                or body['trade_intent_id']!=source.trade_intent_id
+                or body['decision_hash']!=source.decision_hash
+                or any(body[k]!=intent[k] for k in ['account_alias','venue','symbol','direction',
+                    'strategy_id','strategy_version','idempotency_key'])
+                or command.quantity&gt;_amount(Decimal(decision['approved_size']),positive=True)
+                or body['loss_model']!=event.payload['inputs']['snapshot']['symbol_contract']['loss_model']):
+&gt;           raise NativeMarginError('ENTRY_MARGIN_COMMAND_ORIGINAL_APPROVAL_MISMATCH')
+E           vati.risk.native_margin_book.NativeMarginError: ENTRY_MARGIN_COMMAND_ORIGINAL_APPROVAL_MISMATCH
+
+trading/vati/risk/entry_margin.py:91: NativeMarginError</failure></testcase><testcase classname="test_van_short_entry_margin_binding_20261028" name="test_original_short_selects_actual_sell_estimate_and_never_sends[ctrader]" time="0.019"><failure message="vati.risk.native_margin_book.NativeMarginError: ENTRY_MARGIN_COMMAND_ORIGINAL_APPROVAL_MISMATCH">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-153/test_original_short_selects_ac1')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+provider = 'ctrader'
+
+    @pytest.mark.parametrize('provider',['mt5','ctrader'])
+    def test_original_short_selects_actual_sell_estimate_and_never_sends(tmp_path,eurusd,provider):
+        if provider=='mt5':
+            sdk,worker,adapter,now,ledger,context=mt5_source(tmp_path,at=NOW*1000)
+            facts=snapshot(eurusd,account_alias=adapter.account_alias,balance=D('10000'),equity=D('10000'),
+                used_margin=D('0'),free_margin=D('10000'),margin_level_pct=None,native_account_context=context)
+            book=NativeMarginBook(ledger,clock=lambda:now['ms']);quantity=D('.10')
+        else:
+            ledger,adapter,old,book,now,facts=setup_book(tmp_path,eurusd)
+            facts=replace(facts,used_margin=D('0'),free_margin=D('10000'),margin_level_pct=None)
+            quantity=D('.123')
+        try:
+            request=intent(venue=provider,account_alias=adapter.account_alias,direction=Direction.SHORT,stop=D('1.11'))
+            original=record(ledger,facts,request=request)
+            cmd=replace(entry_command(original),quantity=quantity,command_hash='').sealed()
+&gt;           receipt=book.capture_entry(adapter,original.hash,cmd,deadline_ms=NOW*1000+2000)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+../../test_van_short_entry_margin_binding_20261028.py:31: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/risk/native_margin_book.py:170: in capture_entry
+    try:return capture_entry(self,adapter,original_input_ref,command,deadline_ms=deadline_ms)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/risk/entry_margin.py:214: in capture_entry
+    _,original=_original(book,original_input_ref,command,at=book._now())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+book = &lt;vati.risk.native_margin_book.NativeMarginBook object at 0x7ff9e0e1f350&gt;
+original_input_ref = 'ff192a4f183a650893c3e1bd83e3f46184d815763aef7a94e67abc83a6f4fdf5'
+command = OrderCommand(trade_intent_id='ti-1', decision_hash='5540e8fdcf788615eb402c5903e75afe037461e25e1c3d072ac659106a3dcda7',...egy_version='4.2.1', lease_epoch=None, command_hash='3b361a1ef24adaa55ed7dd702a6b12993213f1a863567696a17c3397ef6264a4')
+at = 1800000001000
+
+    def _original(book,original_input_ref,command,*,at):
+        body=_body(command)
+        source=original_native_risk_input(book.ledger,original_input_ref,available_at_ms=at)
+        rows=[e for e in book.ledger.iter(EventKind.RISK_DECISION,correlation_id=source.trade_intent_id)
+              if e.hash==original_input_ref]
+        if len(rows)!=1:raise NativeMarginError('ENTRY_MARGIN_ORIGINAL_INPUT_UNAVAILABLE')
+        event=rows[0];intent=event.payload['inputs']['intent'];decision=event.payload['decision']
+        if (source.recorded_decision not in ('APPROVED','REDUCED')
+                or body['trade_intent_id']!=source.trade_intent_id
+                or body['decision_hash']!=source.decision_hash
+                or any(body[k]!=intent[k] for k in ['account_alias','venue','symbol','direction',
+                    'strategy_id','strategy_version','idempotency_key'])
+                or command.quantity&gt;_amount(Decimal(decision['approved_size']),positive=True)
+                or body['loss_model']!=event.payload['inputs']['snapshot']['symbol_contract']['loss_model']):
+&gt;           raise NativeMarginError('ENTRY_MARGIN_COMMAND_ORIGINAL_APPROVAL_MISMATCH')
+E           vati.risk.native_margin_book.NativeMarginError: ENTRY_MARGIN_COMMAND_ORIGINAL_APPROVAL_MISMATCH
+
+trading/vati/risk/entry_margin.py:91: NativeMarginError</failure></testcase></testsuite></testsuites>

@@ -1,0 +1,21 @@
+{
+  "container": "van-ml004-36696d3967b24bffb013748cc3cc3e80",
+  "image_id": "sha256:5802a92ac475b9a2af74b20290c80084f329e0d487099dc7b3aa6c3198b98d1f",
+  "role": "RESEARCH_FIXTURE_SMOKE",
+  "status": "EXECUTED_PENDING_REPORT_RECONCILIATION",
+  "removed": true,
+  "container_id": "faef7ff827791da4c9952ab4ac1edf16a6a8e5ff33d62f8799fbc0f27bf0847e",
+  "creation_seconds": 0.04588627399999723,
+  "exit": 0,
+  "container_exit": 0,
+  "oom_killed": false,
+  "limit_reason": null,
+  "declared_kernel_configuration": {
+    "NanoCpus": 2000000000,
+    "Memory": 6442450944,
+    "PidsLimit": 256,
+    "ReadonlyRootfs": true,
+    "NetworkMode": "none",
+    "Init": true
+  }
+}

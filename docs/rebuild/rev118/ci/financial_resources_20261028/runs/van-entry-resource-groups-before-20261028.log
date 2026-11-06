@@ -1,0 +1,250 @@
+FFFF.                                                                    [100%]
+=================================== FAILURES ===================================
+___ test_real_entry_projection_keeps_slots_integer_and_money_in_native_scope ___
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-175/test_real_entry_projection_kee0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_real_entry_projection_keeps_slots_integer_and_money_in_native_scope(tmp_path,eurusd):
+        sdk,clock,ledger,command,margin,current,authority,book,router=prepared(tmp_path,eurusd)
+        try:
+            body=projection(ledger,command,margin,current,clock)
+>           assert body['slot_burdens']=={'account':1,'instrument:EURUSD':1}
+                   ^^^^^^^^^^^^^^^^^^^^
+E           KeyError: 'slot_burdens'
+
+trading/tests/test_entry_resource_groups.py:52: KeyError
+___ test_two_unfilled_entries_cannot_share_one_signed_instrument_slot[False] ___
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-175/test_two_unfilled_entries_cann0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+opposite = False
+
+    @pytest.mark.parametrize('opposite',[False,True])
+    def test_two_unfilled_entries_cannot_share_one_signed_instrument_slot(tmp_path,eurusd,opposite):
+        sdk,clock,ledger,command,margin,current,authority,book,router=prepared(tmp_path,eurusd)
+        try:
+            book.reserve_entry(command,margin,current,authority)
+            other,m,c=another_entry(ledger,command,authority,router,clock,
+                direction=Direction.SHORT if opposite else None)
+            before=ledger.count()
+>           with pytest.raises(ResourceHoldError,match='RESOURCE_SLOT_CAPACITY_EXCEEDED:instrument:EURUSD'):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE ResourceHoldError
+
+trading/tests/test_entry_resource_groups.py:70: Failed
+___ test_two_unfilled_entries_cannot_share_one_signed_instrument_slot[True] ____
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-175/test_two_unfilled_entries_cann1')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+opposite = True
+
+    @pytest.mark.parametrize('opposite',[False,True])
+    def test_two_unfilled_entries_cannot_share_one_signed_instrument_slot(tmp_path,eurusd,opposite):
+        sdk,clock,ledger,command,margin,current,authority,book,router=prepared(tmp_path,eurusd)
+        try:
+            book.reserve_entry(command,margin,current,authority)
+            other,m,c=another_entry(ledger,command,authority,router,clock,
+                direction=Direction.SHORT if opposite else None)
+            before=ledger.count()
+>           with pytest.raises(ResourceHoldError,match='RESOURCE_SLOT_CAPACITY_EXCEEDED:instrument:EURUSD'):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE ResourceHoldError
+
+trading/tests/test_entry_resource_groups.py:70: Failed
+_ test_resealed_individually_valid_source_cannot_overdraw_original_resource_history _
+
+cls = <class 'vati.risk.mandate.TradingMandate'>
+data = {'account_alias': 'native', 'allowed_strategies': ['FX-TREND-03', 'FX-LONDON-BREAKOUT-04', 'GOLD-NY-RECLAIM-04'], 'exp..._synthetics', 'martingale', 'revenge_risk_increase', 'risk_doubling_after_loss', 'silent_strategy_mutation', ...], ...}
+ceilings = PlatformCeilings(max_risk_per_trade=Decimal('0.0200'), max_open_stop_risk=Decimal('0.0600'), max_daily_loss=Decimal('0...max_weekly_drawdown=Decimal('0.1000'), max_currency_leg_exposure=Decimal('0.0400'), policy_version='risk-policy/2.0.0')
+authority = None
+
+    @classmethod
+    def from_mapping(
+        cls,
+        data: Mapping[str, Any],
+        *,
+        ceilings: PlatformCeilings = PlatformCeilings(),
+        authority: "OwnerAuthorityVerifier | None" = None,
+    ) -> "TradingMandate":
+        required = (
+            "mandate_id", "version", "account_alias", "venue", "mode", "instruments",
+            "allowed_strategies", "max_risk_per_trade", "max_open_stop_risk",
+            "max_daily_loss", "max_weekly_drawdown", "max_currency_leg_exposure",
+            "max_consecutive_losses", "max_positions_per_instrument", "max_total_positions",
+            "tier1_event_policy", "weekend_hold_allowed", "forbidden",
+            "owner_signature_ref", "signed_at_unix", "expires_at_unix",
+        )
+        missing = [k for k in required if k not in data]
+        if missing:
+            raise MandateError(f"mandate missing fields: {missing}")
+    
+        try:
+            AuthorizationMode(str(data["mode"]))
+        except ValueError as exc:
+            raise MandateError(f"invalid mode: {data['mode']!r}") from exc
+    
+        policy = _effective_policy(data)
+    
+        # A standing grant covers the complete effective policy, including
+        # defaults. An unchanged identity/version cannot authorize altered
+        # accounts, scope, bounds, expiry or later mutable allocation maps.
+        verifier = authority if authority is not None else OwnerAuthorityVerifier()
+        try:
+>           verified = verifier.verify(
+                str(data["owner_signature_ref"]),
+                act="mandate-admit",
+                subject=mandate_subject(policy),
+                now_unix=int(data.get("signed_at_unix") or time.time()),
+                # A mandate is a standing document, re-read on every process start, so it
+                # is not a one-shot act. Its complete policy and lifetime remain bound.
+                single_use=False,
+                max_lifetime_seconds=MAX_STANDING_LIFETIME_SECONDS,
+            )
+
+trading/vati/risk/mandate.py:246: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.authority.OwnerAuthorityVerifier object at 0x7fd4c1d16420>
+token = 'van-oa1.eyJhY3QiOiJtYW5kYXRlLWFkbWl0IiwiZXhwIjoxODAwMDAwMDAxLCJpYXQiOjE3OTk5OTY0MDAsImtpZCI6Im93bmVyLXRlc3QtMSIsIm5vb...jYjdiY2Q1MmViNzliN2MifQ.MEQCIA5fgbHj2AImlRI5TG3VdAKCswgi4PR-TXY1YBl_alivAiB_8XKtiww7xrfy13G993iAEffXcQEEsh1_v8pf_IQyNg'
+act = 'mandate-admit'
+subject = 'mandate-v2:320478042f082f1eb8da793f80884590693465adde36801c40f0fbb467f2e7fa'
+now_unix = 1799996400, single_use = False, max_lifetime_seconds = 7776000
+
+    def verify(
+        self,
+        token: str | None,
+        *,
+        act: str,
+        subject: str,
+        now_unix: int | None = None,
+        single_use: bool = True,
+        max_lifetime_seconds: int = MAX_ACT_LIFETIME_SECONDS,
+    ) -> OwnerAuthority:
+        """Verify a token for one act on one subject.
+    
+        `single_use` is on by default because most acts are decisions made once. It is
+        turned off only for a standing document, which is re-read every time the process
+        starts; there the replay bound is the document's own expiry and the fact that the
+        signature covers its version, so a widened mandate needs a new signature.
+        """
+        now = int(time.time()) if now_unix is None else int(now_unix)
+        if not token or not str(token).strip():
+            raise OwnerAuthorityError(
+                f"{act} requires owner authority: no token supplied"
+            )
+        parts = str(token).strip().split(".")
+        if len(parts) != 3 or parts[0] != PREFIX:
+            raise OwnerAuthorityError(
+                f"{act} requires owner authority: not a {PREFIX} token. "
+                "A bare reference string is not a signature."
+            )
+        try:
+            payload = json.loads(_unb64u(parts[1]))
+            signature = _unb64u(parts[2])
+        except (ValueError, json.JSONDecodeError) as exc:
+            raise OwnerAuthorityError(f"{act}: owner authority is malformed") from exc
+    
+        key_id = str(payload.get("kid", ""))
+        if not key_id or key_id in self.revoked_key_ids:
+            raise OwnerAuthorityError(f"{act}: owner authority key {key_id!r} is not usable")
+        verified_registry_path = self.registry_path
+        if verified_registry_path is not None:
+            try:
+                self.keys = load_owner_keys(verified_registry_path)
+            except (OSError, ValueError, TypeError) as exc:
+                raise OwnerAuthorityError(f"{act}: current owner authority registry is unavailable") from exc
+        pem = self.keys.get(key_id)
+        if not pem:
+            raise OwnerAuthorityError(
+                f"{act}: owner authority key {key_id!r} is not registered on this host"
+            )
+    
+        if str(payload.get("act", "")) != act:
+            raise OwnerAuthorityError(
+                f"{act}: owner authority is for {payload.get('act')!r}, not this act"
+            )
+        if str(payload.get("subject", "")) != subject:
+>           raise OwnerAuthorityError(
+                f"{act}: owner authority is for {payload.get('subject')!r}, not {subject!r}"
+            )
+E           vati.authority.OwnerAuthorityError: mandate-admit: owner authority is for 'mandate-v2:a197a774480d996a553f0df7a71d7770278dab22616dcb7d1cb7bcd52eb79b7c', not 'mandate-v2:320478042f082f1eb8da793f80884590693465adde36801c40f0fbb467f2e7fa'
+
+trading/vati/authority.py:266: OwnerAuthorityError
+
+The above exception was the direct cause of the following exception:
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-175/test_resealed_individually_val0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_resealed_individually_valid_source_cannot_overdraw_original_resource_history(tmp_path,eurusd):
+>       sdk,clock,ledger,command,margin,current,authority,book,router=prepared(tmp_path,eurusd,
+            native_margin=D('2500'),mandate_changes={'max_positions_per_instrument':2})
+
+trading/tests/test_entry_resource_groups.py:77: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_provisional_resource_book.py:14: in prepared
+    sdk,clock,ledger,command,margin_ref,current_ref,router=current_entry(tmp_path,eurusd,
+trading/tests/test_current_entry_risk_source.py:20: in current_entry
+    mandate=TradingMandate.from_mapping(raw)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = <class 'vati.risk.mandate.TradingMandate'>
+data = {'account_alias': 'native', 'allowed_strategies': ['FX-TREND-03', 'FX-LONDON-BREAKOUT-04', 'GOLD-NY-RECLAIM-04'], 'exp..._synthetics', 'martingale', 'revenge_risk_increase', 'risk_doubling_after_loss', 'silent_strategy_mutation', ...], ...}
+ceilings = PlatformCeilings(max_risk_per_trade=Decimal('0.0200'), max_open_stop_risk=Decimal('0.0600'), max_daily_loss=Decimal('0...max_weekly_drawdown=Decimal('0.1000'), max_currency_leg_exposure=Decimal('0.0400'), policy_version='risk-policy/2.0.0')
+authority = None
+
+    @classmethod
+    def from_mapping(
+        cls,
+        data: Mapping[str, Any],
+        *,
+        ceilings: PlatformCeilings = PlatformCeilings(),
+        authority: "OwnerAuthorityVerifier | None" = None,
+    ) -> "TradingMandate":
+        required = (
+            "mandate_id", "version", "account_alias", "venue", "mode", "instruments",
+            "allowed_strategies", "max_risk_per_trade", "max_open_stop_risk",
+            "max_daily_loss", "max_weekly_drawdown", "max_currency_leg_exposure",
+            "max_consecutive_losses", "max_positions_per_instrument", "max_total_positions",
+            "tier1_event_policy", "weekend_hold_allowed", "forbidden",
+            "owner_signature_ref", "signed_at_unix", "expires_at_unix",
+        )
+        missing = [k for k in required if k not in data]
+        if missing:
+            raise MandateError(f"mandate missing fields: {missing}")
+    
+        try:
+            AuthorizationMode(str(data["mode"]))
+        except ValueError as exc:
+            raise MandateError(f"invalid mode: {data['mode']!r}") from exc
+    
+        policy = _effective_policy(data)
+    
+        # A standing grant covers the complete effective policy, including
+        # defaults. An unchanged identity/version cannot authorize altered
+        # accounts, scope, bounds, expiry or later mutable allocation maps.
+        verifier = authority if authority is not None else OwnerAuthorityVerifier()
+        try:
+            verified = verifier.verify(
+                str(data["owner_signature_ref"]),
+                act="mandate-admit",
+                subject=mandate_subject(policy),
+                now_unix=int(data.get("signed_at_unix") or time.time()),
+                # A mandate is a standing document, re-read on every process start, so it
+                # is not a one-shot act. Its complete policy and lifetime remain bound.
+                single_use=False,
+                max_lifetime_seconds=MAX_STANDING_LIFETIME_SECONDS,
+            )
+        except OwnerAuthorityError as exc:
+>           raise MandateError(f"mandate is not owner-signed: {exc}") from exc
+E           vati.risk.mandate.MandateError: mandate is not owner-signed: mandate-admit: owner authority is for 'mandate-v2:a197a774480d996a553f0df7a71d7770278dab22616dcb7d1cb7bcd52eb79b7c', not 'mandate-v2:320478042f082f1eb8da793f80884590693465adde36801c40f0fbb467f2e7fa'
+
+trading/vati/risk/mandate.py:257: MandateError
+=========================== short test summary info ============================
+FAILED trading/tests/test_entry_resource_groups.py::test_real_entry_projection_keeps_slots_integer_and_money_in_native_scope
+FAILED trading/tests/test_entry_resource_groups.py::test_two_unfilled_entries_cannot_share_one_signed_instrument_slot[False]
+FAILED trading/tests/test_entry_resource_groups.py::test_two_unfilled_entries_cannot_share_one_signed_instrument_slot[True]
+FAILED trading/tests/test_entry_resource_groups.py::test_resealed_individually_valid_source_cannot_overdraw_original_resource_history
+4 failed, 1 passed in 1.67s

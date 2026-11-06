@@ -1,0 +1,54 @@
+{
+  "schema": "van.account-disconnect-namespace-source/1",
+  "created_utc": "2026-11-03T07:13:40.435663+00:00",
+  "base": "e172190cf71864775a629c278b97540b24a31279",
+  "qualification": "SOURCE_CANDIDATE_ONLY",
+  "production_change": "Existing missing-key initialization eligibility is scoped to the current sealed ledger namespace with a bound SQL parameter; no additional key mechanism or authority. ANY own-namespace history still refuses initialization; foreign rows remain immutable and cannot become own facts.",
+  "observed_source_failure": {
+    "exact_head": "e172190cf71864775a629c278b97540b24a31279",
+    "van_ci": 41592287947,
+    "job": 125771527643,
+    "phase": "Public trading source regressions",
+    "outcome": "2failed5882passed1skip",
+    "PG_diagnostic": {
+      "exception_class": "AccountEffectUnknown",
+      "stage": "HANDLER_ENTERED",
+      "http_status": null,
+      "account_present": true,
+      "phase_and_facts": "pytest tuple repr elided; no inference claimed"
+    },
+    "hypothesis": "Global unscoped facts lookup encounters previous fixture namespace history while next fixture has a distinct namespace and secrets root. Actual pure-SQL predicate tests confirm logical isolation; original end-to-end PG positive remains pending hosted execution."
+  },
+  "source_test_changes": [
+    "Capture the real native shared-credential named refusal before the generic wrapper, rethrow unchanged, require actual paired admission and native REFUSED409, preserve all original other-reference/file/no-effect assertions.",
+    "Print only already-whitelisted diagnostic class/status/stage/account-presence/phase/private-fact enums on PG failure to avoid pytest repr elision. Original positive200/rowguard/CAS/entry-fence assertions unchanged."
+  ],
+  "local_validation": {
+    "actual_cases": 3,
+    "passed": 3,
+    "skipped": 0,
+    "exit": 0,
+    "receipt": "e172-namespace-sql/receipt.json",
+    "scope": "Two actual production predicate cases in SQLite memory plus original exception-identity memory control. Empty-own, foreign-only, existing-own refusal, bound namespace with SQL punctuation, all rows unchanged. No files/key/HMAC/credential/provider/financial effects; original MT5/shared credential cases NOT_RUN locally."
+  },
+  "limits": {
+    "full_BE004": "OPEN eight verbs/11requirements/21acceptances/20contexts/6actions",
+    "formal_native_acceptance": false,
+    "original_PG_end_to_end": "OPEN; must pass original hosted positive before claiming resolved",
+    "entry67": "KNOWNFAILURE scope excluded; exact-path PR106 OPEN/unmerged/no reviewed apply authority",
+    "previous_failures": "6933 seven cases, e172 two cases and capkill/initial frontend guard failure all retained",
+    "OBSERVE": "Six source WIP files parked with exact source/preimages exclusive ZIP126ee38e...; not folded into this repair",
+    "metadata_scope": "No requirement/context/action/feature/unit retirement; frozen canonical bytes and frontend42/105/78 retained",
+    "guards": "Actual normal owner/frontend/workmap/mutation consistency/PRE003 manifest CLI and consolidation required on final packet; source scope JSON is not canonical manifest CLI"
+  },
+  "resource": {
+    "cap_bytes": 268435456,
+    "per_file_bytes": 8388608,
+    "scratch_reserve_each_bytes": 2147483648,
+    "memory_headroom_bytes": 4294967296,
+    "actual_terminal_allocation_bytes": 154101753,
+    "runner_sha256": "860336803885aa36cff080294bf1144a0009b4b09a72ee9454d875863142d7f4"
+  },
+  "model_usage": null,
+  "cost": null
+}

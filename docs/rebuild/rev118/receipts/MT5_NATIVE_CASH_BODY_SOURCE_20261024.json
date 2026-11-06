@@ -1,0 +1,70 @@
+{
+  "schema": "van.rebuild.mt5-cash-native-bodies-source/1",
+  "source_parent": "6578ac42c008fca73c81d55454754063e0c0c332",
+  "observed_at_utc": "2026-10-24T13:26:09.811618+00:00",
+  "source_sha256": {
+    "trading/tests/mql_terminal_fixture.cpp": "f4b6830239cba319d734674991a07a933ffb0aa1bc312d9dec07a7de5d7c2c31",
+    "trading/tests/test_mql_native_function_bodies.py": "fc0377a29bf499c5c3cf9c49ef29b8fb0e887397b31ea48aac6797a5c51cfeab"
+  },
+  "unchanged_ea_sha256": "4aec4966abee9558b1fb4641e4824117a723b9f9db1c46afd1888f0f01914b97",
+  "native_metaeditor": "receipts/NATIVE_METAEDITOR_6578ac42.json",
+  "controlled_body_suite": {
+    "tests": 90,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "xml_sha256": "17e7f9cfedf4be999c8051cd2b9a0ff0d310d9e4d71c09b52d2f1678ea04e7d5",
+    "log_sha256": "f4e4c3cb9db81c63798e7604155cd20982ecd76dc67af5f26b1bc7f0e36b9d1a"
+  },
+  "fault_control_pairs": {
+    "baseline": {
+      "exit_code": 0,
+      "log_sha256": "38cb23039a61e2a82b18f280ebf58ac73f141e02a17dadcd0b7b3f8f371091bf",
+      "xml_sha256": "8085fceeff9fac6286f293e211f2ada2eb8b371605d752ab13134100866611a3"
+    },
+    "source_sha256": "4aec4966abee9558b1fb4641e4824117a723b9f9db1c46afd1888f0f01914b97",
+    "cases": [
+      {
+        "case": "failed-query-as-complete",
+        "fault": {
+          "exit_code": 1,
+          "log_sha256": "24bd384ed1f2caa3261738ebafde02ddd1f8b1cd4fed10b18c759a6b74550b2d",
+          "xml_sha256": "f9e02321e21686d72408049095b60fdca36b56231d1a6f5b1295ae7c6e2a06b8"
+        },
+        "restored": {
+          "exit_code": 0,
+          "log_sha256": "a3027ba69f7764395e68d9a40fb31ff37cdc201fcaa653b3090d7253f77c358a",
+          "xml_sha256": "e6ac4663a13fb2ff8176c3348b7717bf0f1a4385f07aa2b1a93aeee5a16bc8cf"
+        }
+      },
+      {
+        "case": "omit-native-credit",
+        "fault": {
+          "exit_code": 1,
+          "log_sha256": "2cf79dbbdb80731976c41abc0f565e97f4770068e27d434027e3cf96f3c993d0",
+          "xml_sha256": "ed51fc8051e9de6174031615c32f222dca093d75efd8d6abc6f8ddc655ed811a"
+        },
+        "restored": {
+          "exit_code": 0,
+          "log_sha256": "f6b196515067991c033786b984f1bd3f6ec18ac4ae86a52972643f739743a155",
+          "xml_sha256": "7bbfc47ca724d5e55971670302b47b0db4e7326f9b43648302afc2a682e2536b"
+        }
+      },
+      {
+        "case": "tiny-fee-rounded-away",
+        "fault": {
+          "exit_code": 1,
+          "log_sha256": "86e5d365b0816ffaab9daec3a981bd9033b2d0151b68e93a73ad6a11b6f304db",
+          "xml_sha256": "4f1dd044eb942a65b33c1ab22da0f59ce605ee089841c306f8873c4993f4cf62"
+        },
+        "restored": {
+          "exit_code": 0,
+          "log_sha256": "f8fe742ba032d372fdd802d2f7a57a3aa201f2a1a13022406872006612bf27cb",
+          "xml_sha256": "d1c0b98e7f21508a2d21757203874fd974b13c844d6233f5c219a346ebb72008"
+        }
+      }
+    ],
+    "qualification": "Controlled C++ terminal model executes extracted unchanged EA function bodies. This is not MetaTrader runtime, broker, money or device acceptance."
+  },
+  "qualification": "Actual EA bodies extracted unchanged, compiled C++17 with Wall/Werror and exercised against explicit deterministic test terminal. The native MetaEditor result is independent compilation evidence. Neither is broker/terminal execution or provider, financial, production, F15/BG, unit or handset acceptance."
+}

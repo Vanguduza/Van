@@ -1,0 +1,15 @@
+# BE-014: headline availability, declared trust and reduce-only arithmetic
+
+Status: source-tested component. The news, calendar and source-health unit remains in progress.
+
+Twelve initial failed assertions exposed future headlines entering earlier assessments, future relay labels entering evidence, feed rows promoting their own trust, explicit zero timestamps being replaced, invalid multiplier floors, nonfinite materiality and impact identities colliding across subject kinds. Two healthy controls passed. Three further failures exposed backdated observations and reports ignoring a supplied ingress clock. A final failure exposed replay moving an original relay clock backwards. All original failure reports remain.
+
+Assessments, candidate risk, relay evidence and report counts now respect declared publication/observation time and any supplied ingress clock. Exact replay preserves its original in-memory capture clock. An earlier available relay remains usable when a future claim was loaded first; an equal-time relay does not replace the original terms. Reports no longer count unavailable headlines or impacts at an earlier cutoff. A caller supplying no ingress clock receives declared-observation semantics, not a fabricated native receipt time.
+
+Feed row trust is capped by the registered source label and may be lowered. Unknown sources stay UNTRUSTED. These labels remain declarations, not publisher identity or provider admission. Direct typed Headline construction preserves its existing internal declared-trust API. Reports explicitly state provider_qualified false, authority_effect NONE and the clock-admission limitation.
+
+News rows share the exact explicit-time parser with calendars. Fields explicitly named milliseconds retain their units and zero value. Typed headlines require signed integer millisecond clocks. Multiplier inputs must be finite and floors remain in [0,1]; finite out-of-range materiality keeps the existing clamp. Available adverse headlines retain the existing reduce-only sizing behavior. New impact identities include subject kind, with an explicit event-impact version increment; existing ledger rows are not rewritten.
+
+Final evidence: 617 related cases pass against actual pinned isolated PostgreSQL with zero skips/storage-audit violations and matching source hashes. All 51 final controls pass. Nine final supplemental faults are assertion-caught with no setup errors and exact restoration; these are separate from the canonical mutation corpus. Earlier 125-case integration, initial 617-case integration and prior fault run are retained. The final 617-case run follows removal of one redundant report field and pins the current production bytes.
+
+This packet preserves in-memory chronology. Durable relay observations, original publication before memory, cold replay/recovery, service source-health/failure integration, provider identity, entitlements, native clocks and ingestion remain next work. No complete unit, independent/native/owner, F15, BG-001, provider, production, profitability or S24 acceptance is issued. Evidence: ci/news_causal_20261025 and receipts/NEWS_CAUSAL_SOURCE_20261025.json.

@@ -1,0 +1,126 @@
+{
+  "schema": "van.independent-ci-native-repair-source-review/1",
+  "at_utc": "2026-11-01T12:31:39.162373+00:00",
+  "reviewer": "policy_review_sol",
+  "disposition": "NO_BLOCKING_FINDING_WITHIN_BOUNDED_THREE_PATH_SOURCE_RECHECK",
+  "base": "a5d63df4310ecda331aa5f6c6995ed46a42739f8",
+  "candidate_root": "/workspace/van-review-2026-10-18/publish",
+  "source_before_after": {
+    "tools/rebuild/public_source_shards.py": "90e9e670940da327baace21335569a447f0d12e1b8aaed3061cd86fe55628837",
+    "tools/rebuild/backend_public_source.py": "f6cb4d2fdb4a661873c33fd10d0ab10e1fa59ef00be9ba3d82591a46bdbf72b5",
+    "tests/rebuild/test_public_source_shards.py": "ad15ef4db64ff1f3a06386af78b209e28bde8208d32632a6f41c5ac261f7db29"
+  },
+  "archive_sha256": "d2123b03dbe3f91c5e8a0ae9e63a1b811e1bf3a9d2dc3825827d37b5ce9c1d39",
+  "patch_sha256": "51c7b2298eea1934cbfd23a8899df58f607d020a777a4ccbe1594aba8219b0f0",
+  "exact_source_archive_patch_verified": true,
+  "blockers": [],
+  "reviewed_boundaries": [
+    {
+      "source": "tools/rebuild/public_source_shards.py:28,79,99,104,127,163,197,381,390,470",
+      "finding": "Captured original reporter serializer leaves application patches intact; real recorder errors propagate. Strict pre-run extras/bytecode check remains. Post-run candidates require unchanged tracked regular HEAD source, exact header/interpreter/optimization and fresh compiled typed full code graph; only verified same-hash outputs retired after nonimportable archive/readback. Aggregate independently repeats proof."
+    },
+    {
+      "source": "tools/rebuild/backend_public_source.py:106,144,157",
+      "finding": "Freshness guard includes generated-bytecode.json; parent compares child candidate list, hash-binds required cache archive, and returns nonzero for parent observation errors."
+    },
+    {
+      "source": "tests/rebuild/test_public_source_shards.py:340,423,445,508,539,552",
+      "finding": "Existing refusal assertions retained; fixtures adapted for new mandatory provenance. New reporter/cache/fresh-evidence refusals exercise repair without weakening application tests or gate selection."
+    }
+  ],
+  "independent_probes": {
+    "results": [
+      {
+        "case": "reporter keeps application json patch and records all3 phases",
+        "result": "PASS"
+      },
+      {
+        "case": "true reporter encoding error propagates",
+        "result": "PASS"
+      },
+      {
+        "case": "true reporter write error propagates",
+        "result": "PASS"
+      },
+      {
+        "case": "actual11native modules+frozenset twohashseeds parentproof/archive/reverify",
+        "result": "PASS"
+      },
+      {
+        "case": "checkedhash opt1 parentproof/reverify",
+        "result": "PASS"
+      },
+      {
+        "case": "uncheckedhash opt2 parentproof/reverify",
+        "result": "PASS"
+      },
+      {
+        "case": "strict preexisting cache refused and preserved",
+        "result": "PASS"
+      },
+      {
+        "case": "validheader forgedpayload refused and preserved",
+        "result": "PASS"
+      },
+      {
+        "case": "independent validheader bool-int substitution",
+        "result": "REFUSES_AS_REQUIRED"
+      },
+      {
+        "case": "independent validheader signed-zero substitution",
+        "result": "REFUSES_AS_REQUIRED"
+      }
+    ],
+    "storage_preflight": {
+      "free_bytes_before": 4344459264,
+      "reserve_bytes": 4294967296
+    },
+    "production_import": "/workspace/van-review-2026-10-18/publish/tools/rebuild/public_source_shards.py",
+    "production_import_sha256": "90e9e670940da327baace21335569a447f0d12e1b8aaed3061cd86fe55628837",
+    "all3_archive_patch_before_after_pins_match": true,
+    "owned_tmp_cleanup": true,
+    "fixture_only_git_commits": true,
+    "no_cache_import_or_execution": true,
+    "native_fourworker_qualification": false
+  },
+  "saved_evidence_independently_checked": {
+    "original_real_case": {
+      "cases": 1,
+      "failures": 0,
+      "errors": 0,
+      "skips": 0
+    },
+    "fixed_real_permission_module": {
+      "cases": 18,
+      "failures": 0,
+      "errors": 0,
+      "skips": 0
+    },
+    "actual_saved_module_cache_payloads_reverified_without_execution": 11,
+    "final_guard_junit": {
+      "cases": 89,
+      "failures": 0,
+      "errors": 0,
+      "skips": 0
+    },
+    "three_path_only_delta_and_unchanged_workflow_mirror_dependencies_application_assertion": true,
+    "current_source_archive_patch_exact_after": true
+  },
+  "artifacts": [
+    "probe.py",
+    "probe.log",
+    "probe-results.json",
+    "before.json",
+    "after.json",
+    "evidence_check.py",
+    "evidence-check.log",
+    "evidence-check.json"
+  ],
+  "cleanup": "Owned narrow /tmp fixtures removed via TemporaryDirectory; no own worker/child remains; production imports use -B and explicit source PYTHONPATH. Existing candidate caches observed dated before review were left untouched.",
+  "limits": [
+    "No edits to candidate source, commits, CI dispatch, Gradle, native effects, full local suites or cache execution/import. Tiny fixture-only git commits are isolated and removed.",
+    "Actual saved18-case permission receipt and11-module cache receipt precede only freshness-guard addition; final89-case receipt covers current3 pins. Independent probes rerun current repair callbacks/cache logic; counts overlap and are not summed.",
+    "Original native run remains FAILED/unqualified;925 cases incomplete/unknown, separate media198 passed is not fullunion evidence. No native four-worker qualification or speed claim.",
+    "Corrective publication and a future genuine exact-head native execution remain separate gates."
+  ]
+}

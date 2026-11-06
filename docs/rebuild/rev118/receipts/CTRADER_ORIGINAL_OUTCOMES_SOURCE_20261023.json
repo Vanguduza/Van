@@ -1,0 +1,439 @@
+{
+  "schema": "van.rebuild.ctrader-original-outcomes-source/1",
+  "observed_at_utc": "2026-10-23T13:39:37.750954+00:00",
+  "source_parent": "26bc936e6a44ddb844b24192394a1ac3b0e94aec",
+  "source_sha256": {
+    "trading/vati/execution/ctrader/adapter.py": "66a741ee9645b63c07fdd23881df527d2027ff0d85b365b6dc0a0505a0d251b4",
+    "trading/tests/test_ctrader_original_outcomes.py": "dd22185dbf4e6b6aafdbfa3b99a1b345be96cd47f03e94c01b8ba0b83043ad95"
+  },
+  "executions": {
+    "original_before": {
+      "tests": 24,
+      "failures": 22,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.225,
+      "sha256": "d2800e8dcbb6e1e96ce5ebafbaaf1e42f0d7c440c6faa170a422e61f7cce0dbb"
+    },
+    "isolated_first": {
+      "tests": 35,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.94,
+      "sha256": "dc89bc60278e4c76dc965eb197991b08baeea79aef66f1a8808a01b1c642be82"
+    },
+    "malformed_gap_before": {
+      "tests": 24,
+      "failures": 8,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.214,
+      "sha256": "3439181d896e9390ef428d1e53670df76b2abb03a2ede4311946c0d785ec29f7"
+    },
+    "isolated_focused": {
+      "tests": 54,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.609,
+      "sha256": "109b1ef94cdbd4ba669f010906de450ea7ecffbde89ada564e1ff3781c08a81f"
+    },
+    "integrated_focused": {
+      "tests": 54,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.789,
+      "sha256": "f90a0c70ac8d82898a310bfe4d14a6cae49991f00c8ef50efc360141141d528e"
+    },
+    "full_trading_actual_pg": {
+      "tests": 2478,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 533.933,
+      "sha256": "1afabff91149dec97a76053a0b1d78da3b474bfe67b5ada0e3da4c1e4955b888"
+    }
+  },
+  "fault_campaign": {
+    "definitions": [
+      [
+        "report lost entry reply as proven rejection",
+        "return self._unknown(now_ms,\"native entry reply unavailable; reconcile original before retrying\",cmd=cmd)",
+        "return rej(\"not sent\")"
+      ],
+      [
+        "claim stop confirmed without native readback",
+        "if actual is None or not actual.is_finite() or actual!=new_stop:",
+        "if False:"
+      ],
+      [
+        "accept another account close",
+        "and b['ctidTraderAccountId']==self.ctid_trader_account_id and type(deal.get('positionId')) is int",
+        "and True and type(deal.get('positionId')) is int"
+      ],
+      [
+        "accept an old close order",
+        "and deal['orderId']==order_id and order.get('closingOrder') is True",
+        "and True and order.get('closingOrder') is True"
+      ],
+      [
+        "accept an entry deal as close",
+        "and deal['orderId']==order_id and order.get('closingOrder') is True",
+        "and deal['orderId']==order_id and True"
+      ],
+      [
+        "invent missing close quantity",
+        "filled=deal['filledVolume'];price=Decimal(str(deal['executionPrice']))",
+        "filled=deal.get('filledVolume',vol);price=Decimal(str(deal['executionPrice']))"
+      ],
+      [
+        "report partial close as full request fill",
+        "state='FILLED' if ev[1]['executionType']=='ORDER_FILLED' and filled==vol else 'PARTIAL'",
+        "state='FILLED'"
+      ],
+      [
+        "coerce native close quantity",
+        "filled=deal['filledVolume'];price=Decimal(str(deal['executionPrice']))",
+        "filled=int(deal['filledVolume']);price=Decimal(str(deal['executionPrice']))"
+      ],
+      [
+        "invent entry fill from requested price",
+        "native_quantity=deal['filledVolume'];px=Decimal(str(deal['executionPrice']))",
+        "native_quantity=deal['filledVolume'];px=Decimal(str(deal.get('executionPrice',cmd.entry_price)))"
+      ],
+      [
+        "accept entry above native max",
+        "if volume > sym.max_volume:",
+        "if False:"
+      ],
+      [
+        "accept foreign remaining protection",
+        "if not protected and remaining.get('positionId')==int(position_id):",
+        "if not protected:"
+      ]
+    ],
+    "records": [
+      {
+        "case": 0,
+        "phase": "control",
+        "reason": "report lost entry reply as proven rejection",
+        "exit_code": 0,
+        "counts": {
+          "tests": 24,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "39cf992e8adbafa9b1eafd0cb8a4599db2a9374b881a2ccc12e8c2466f7e9b6c"
+      },
+      {
+        "case": 0,
+        "phase": "fault",
+        "reason": "report lost entry reply as proven rejection",
+        "exit_code": 1,
+        "counts": {
+          "tests": 24,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 1,
+        "xml_sha256": "5eb1d98dcfe072224d0e9c829816a62b6e3165a112e8f2946e5fbf80f956652b"
+      },
+      {
+        "case": 1,
+        "phase": "control",
+        "reason": "claim stop confirmed without native readback",
+        "exit_code": 0,
+        "counts": {
+          "tests": 24,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "5f42c9e5773ce821e9cde19149094bac28e57e1469fc1c8521cab4d042671da9"
+      },
+      {
+        "case": 1,
+        "phase": "fault",
+        "reason": "claim stop confirmed without native readback",
+        "exit_code": 1,
+        "counts": {
+          "tests": 24,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 1,
+        "xml_sha256": "1b8289cdfede7b8e0259246f5f94c2f017aa3b02cb87d1d751e256f03ee93641"
+      },
+      {
+        "case": 2,
+        "phase": "control",
+        "reason": "accept another account close",
+        "exit_code": 0,
+        "counts": {
+          "tests": 24,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "7495013f7e9d7ae9ce8357af2c599bc4b6ceda89e33ce576c858727b3f0f7037"
+      },
+      {
+        "case": 2,
+        "phase": "fault",
+        "reason": "accept another account close",
+        "exit_code": 1,
+        "counts": {
+          "tests": 24,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 1,
+        "xml_sha256": "3ea7183309d5940bffbeecf0ef1445f9bca2c5b0d3bf2bf4ea3e1dbb0bbaf085"
+      },
+      {
+        "case": 3,
+        "phase": "control",
+        "reason": "accept an old close order",
+        "exit_code": 0,
+        "counts": {
+          "tests": 24,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "aa6ca8853a976bdfe963d884be1eb58249766cb55d5994023c324506b4186af2"
+      },
+      {
+        "case": 3,
+        "phase": "fault",
+        "reason": "accept an old close order",
+        "exit_code": 1,
+        "counts": {
+          "tests": 24,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 1,
+        "xml_sha256": "a926d8fd72f2a4d07320d410510fbc87a234a893453f2ba7229a3846b3a92802"
+      },
+      {
+        "case": 4,
+        "phase": "control",
+        "reason": "accept an entry deal as close",
+        "exit_code": 0,
+        "counts": {
+          "tests": 24,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "12668ff6512cace1cf06c2a4a25addbddad88c363ae2b583c5b0dee2a7589720"
+      },
+      {
+        "case": 4,
+        "phase": "fault",
+        "reason": "accept an entry deal as close",
+        "exit_code": 1,
+        "counts": {
+          "tests": 24,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 1,
+        "xml_sha256": "3a80ba5a9b5ac11108e9569c53ea131c3d72f68ae1697b59d0a3b52eed282751"
+      },
+      {
+        "case": 5,
+        "phase": "control",
+        "reason": "invent missing close quantity",
+        "exit_code": 0,
+        "counts": {
+          "tests": 24,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "982559642956cd39cb027384abcc18e42e7e5426d93fd0d11db75f5018243ea1"
+      },
+      {
+        "case": 5,
+        "phase": "fault",
+        "reason": "invent missing close quantity",
+        "exit_code": 1,
+        "counts": {
+          "tests": 24,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 1,
+        "xml_sha256": "83465bb064265ee74fd540ad2020153c1907aa20c0a1ef6d4c1e7c2ea3d1fe46"
+      },
+      {
+        "case": 6,
+        "phase": "control",
+        "reason": "report partial close as full request fill",
+        "exit_code": 0,
+        "counts": {
+          "tests": 24,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "e696ec08f68f55e3b9e3118e32ffa1327eb95bc25382117a1db9dbff80044983"
+      },
+      {
+        "case": 6,
+        "phase": "fault",
+        "reason": "report partial close as full request fill",
+        "exit_code": 1,
+        "counts": {
+          "tests": 24,
+          "failures": 3,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 3,
+        "xml_sha256": "53028247f6aad3d6088a591d1fbe5d4d1cec69542dc2063e047a462f31b3dfa4"
+      },
+      {
+        "case": 7,
+        "phase": "control",
+        "reason": "coerce native close quantity",
+        "exit_code": 0,
+        "counts": {
+          "tests": 24,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "544db1e01ad4e0dc4edcf02a253220dd9d3ec08839ec2ae48ea5d6824ad122fe"
+      },
+      {
+        "case": 7,
+        "phase": "fault",
+        "reason": "coerce native close quantity",
+        "exit_code": 1,
+        "counts": {
+          "tests": 24,
+          "failures": 2,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 2,
+        "xml_sha256": "c7d759bb74f83d34f9667544c3aec17a970eefcda8fa575197a0036656543890"
+      },
+      {
+        "case": 8,
+        "phase": "control",
+        "reason": "invent entry fill from requested price",
+        "exit_code": 0,
+        "counts": {
+          "tests": 24,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "a6f254a54723766409168dd6838f1bc7d61e3d2c9f405e44c14d55c30a5ddedb"
+      },
+      {
+        "case": 8,
+        "phase": "fault",
+        "reason": "invent entry fill from requested price",
+        "exit_code": 1,
+        "counts": {
+          "tests": 24,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 1,
+        "xml_sha256": "ff4c56f8c86e3eaa135cc1d2f3b461eca57e2ff1ae50a843c25c8192477560b8"
+      },
+      {
+        "case": 9,
+        "phase": "control",
+        "reason": "accept entry above native max",
+        "exit_code": 0,
+        "counts": {
+          "tests": 24,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "207352649ded94009ff8fcdbab631ad75c935fbf5bb4f1fd30bd94b781e4f32d"
+      },
+      {
+        "case": 9,
+        "phase": "fault",
+        "reason": "accept entry above native max",
+        "exit_code": 1,
+        "counts": {
+          "tests": 24,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 1,
+        "xml_sha256": "4bbbed3fa3c7e03579dfb9721e27a1e78933128e4e2724c458a62415baef3d41"
+      },
+      {
+        "case": 10,
+        "phase": "control",
+        "reason": "accept foreign remaining protection",
+        "exit_code": 0,
+        "counts": {
+          "tests": 24,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "eaa8a8d44a64f9440aa194e4ec9d105a58c7107f7d41d8c606b521ff38d4793e"
+      },
+      {
+        "case": 10,
+        "phase": "fault",
+        "reason": "accept foreign remaining protection",
+        "exit_code": 1,
+        "counts": {
+          "tests": 24,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 1,
+        "xml_sha256": "6e69e3e304eca27e8540206130f214762c9fcb101b8750d05c0f2b5b58286df3"
+      }
+    ],
+    "source_sha256": "66a741ee9645b63c07fdd23881df527d2027ff0d85b365b6dc0a0505a0d251b4",
+    "source_restored": true
+  },
+  "initial_fault_oracle_attempt": {
+    "sha256": "db5736b3ace72f8a77fffd012484c7b50618b2e86675fa922070f540b5c6c785",
+    "result": "The first mutation caused the intended assertion but the reader expected a non-existent pytest XML type attribute. Corrected reader validates pytest AssertionError/assert message; entire 11-case campaign rerun."
+  },
+  "private_pg_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "qualification": "Candidate source only. FILLED means requested close quantity completed, not blanket entire-position flatness. Current native quantity/protection evidence is distinct from settled financial maturity or provider/production/whole-unit/handset acceptance. Original native provider and risk/session/deadline/epoch obligations remain."
+}

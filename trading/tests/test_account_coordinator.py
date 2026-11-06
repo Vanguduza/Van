@@ -552,3 +552,26 @@ def test_lease_epoch_is_passed_to_the_execution_join():
     c = _coordinator(book, [_StubEvaluator("EURUSD", (cand("eur", "EURUSD"),))], lease=lease)
     c.step(now_ms=1_000, bars_by_symbol={"EURUSD": [1]})
     assert book.executions[0][3] == lease.epoch
+
+
+def test_a_router_refusal_ends_that_candidate_not_the_pass():
+    """A STOP entry on a venue without stop orders is refused; the other candidates still run."""
+    from vati.execution.router import RouterError
+    book = _Book(capacity=2)
+
+    def execute(candidate, *rest):
+        if candidate.symbol == "EURUSD":
+            raise RouterError("ENTRY_TYPE_NOT_SUPPORTED: venue mt5 cannot place STOP entries")
+        return book.execute(candidate, *rest)
+
+    c = AccountDecisionCoordinator(
+        CoordinatorConfig(account_alias=ALIAS),
+        evaluators=[_StubEvaluator("EURUSD", (cand("eur", "EURUSD"),)), _StubEvaluator("GBPUSD", (cand("gbp", "GBPUSD"),))],
+        allocator=OpportunityPortfolioAllocator(),
+        snapshot_fn=book.snapshot, risk_fn=book.risk, execute_fn=execute,
+        risk_pct_fn=lambda candidate: Decimal("0.005"),
+    )
+    result = c.step(now_ms=1_000, bars_by_symbol={"EURUSD": [1], "GBPUSD": [1]})
+    by = {o.symbol: o for o in result.outcomes}
+    assert by["EURUSD"].decision == "EXECUTION_REFUSED" and "ENTRY_TYPE_NOT_SUPPORTED" in by["EURUSD"].reason
+    assert by["GBPUSD"].decision != "EXECUTION_REFUSED"

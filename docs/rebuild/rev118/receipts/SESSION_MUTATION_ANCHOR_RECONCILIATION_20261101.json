@@ -1,0 +1,380 @@
+{
+  "schema": "van.session-mutation-anchor-reconciliation/1",
+  "at_utc": "2026-11-01T02:37:42.925740+00:00",
+  "source_parent": "f8758db746582439819c1c1129ca64a8cf9fca7d",
+  "authorization_ids": [
+    "auth-20261022-owner-mutation-registry-reconciliation",
+    "auth-20261022-owner-autonomous-candidate-build"
+  ],
+  "scope": "Exactly2retained mutation identities retargeted after session expiry ownership moved; production and inherited assertion files unchanged.",
+  "registry_sha256": "cbf114a3374538eeb1403d3f066ee4f22d2405b32e6a7f6b752fa9fe0d9a99df",
+  "registry_before_sha256": "35d10c7b0f2b8319b7f7305828262c972b2a6451139d75b9e83c7d0062282955",
+  "retained_mutation_identities": 374,
+  "retained_edit_count": 383,
+  "global_consistency": {
+    "schema": "van.rebuild.mutation-registry-preflight/1",
+    "registry_sha256": "cbf114a3374538eeb1403d3f066ee4f22d2405b32e6a7f6b752fa9fe0d9a99df",
+    "mutation_count": 374,
+    "edit_count": 383,
+    "findings": [],
+    "execution_state": "NOT_RUN",
+    "status": "ANCHORS_VALID_BASELINES_AND_MUTATIONS_NOT_EXECUTED"
+  },
+  "original_hosted_failures": [
+    {
+      "head": "f8758db746582439819c1c1129ca64a8cf9fca7d",
+      "run_id": 41264944814,
+      "job_id": 124725802238,
+      "original_conclusion": "failure",
+      "mutation_execution": "NOT_RUN",
+      "preflight": {
+        "schema": "van.rebuild.mutation-registry-preflight/1",
+        "registry_sha256": "35d10c7b0f2b8319b7f7305828262c972b2a6451139d75b9e83c7d0062282955",
+        "mutation_count": 374,
+        "edit_count": 383,
+        "findings": [
+          {
+            "kind": "SOURCE_ANCHOR_MISSING",
+            "path": "van_gateway/session/router.py",
+            "mutation": "C36 an envelope nobody can carry out is written into the admission table first",
+            "anchor": "        delegate = self._delegate_for(envelope.kind)\n        if delegate is None:\n            return"
+          },
+          {
+            "kind": "SOURCE_ANCHOR_MISSING",
+            "path": "van_gateway/session/router.py",
+            "mutation": "C26 an expired command executes late",
+            "anchor": "        if envelope.expires_at_ms is not None and envelope.expires_at_ms <= now:"
+          }
+        ],
+        "execution_state": "NOT_RUN",
+        "status": "INVALID_REGISTRY"
+      }
+    },
+    {
+      "head": "f8758db746582439819c1c1129ca64a8cf9fca7d",
+      "run_id": 41264944814,
+      "job_id": 124725802315,
+      "original_conclusion": "failure",
+      "mutation_execution": "NOT_RUN",
+      "preflight": {
+        "schema": "van.rebuild.mutation-registry-preflight/1",
+        "registry_sha256": "35d10c7b0f2b8319b7f7305828262c972b2a6451139d75b9e83c7d0062282955",
+        "mutation_count": 374,
+        "edit_count": 383,
+        "findings": [
+          {
+            "kind": "SOURCE_ANCHOR_MISSING",
+            "path": "van_gateway/session/router.py",
+            "mutation": "C36 an envelope nobody can carry out is written into the admission table first",
+            "anchor": "        delegate = self._delegate_for(envelope.kind)\n        if delegate is None:\n            return"
+          },
+          {
+            "kind": "SOURCE_ANCHOR_MISSING",
+            "path": "van_gateway/session/router.py",
+            "mutation": "C26 an expired command executes late",
+            "anchor": "        if envelope.expires_at_ms is not None and envelope.expires_at_ms <= now:"
+          }
+        ],
+        "execution_state": "NOT_RUN",
+        "status": "INVALID_REGISTRY"
+      }
+    },
+    {
+      "head": "f8758db746582439819c1c1129ca64a8cf9fca7d",
+      "run_id": 41264944814,
+      "job_id": 124725802228,
+      "original_conclusion": "failure",
+      "mutation_execution": "NOT_RUN",
+      "preflight": {
+        "schema": "van.rebuild.mutation-registry-preflight/1",
+        "registry_sha256": "35d10c7b0f2b8319b7f7305828262c972b2a6451139d75b9e83c7d0062282955",
+        "mutation_count": 374,
+        "edit_count": 383,
+        "findings": [
+          {
+            "kind": "SOURCE_ANCHOR_MISSING",
+            "path": "van_gateway/session/router.py",
+            "mutation": "C36 an envelope nobody can carry out is written into the admission table first",
+            "anchor": "        delegate = self._delegate_for(envelope.kind)\n        if delegate is None:\n            return"
+          },
+          {
+            "kind": "SOURCE_ANCHOR_MISSING",
+            "path": "van_gateway/session/router.py",
+            "mutation": "C26 an expired command executes late",
+            "anchor": "        if envelope.expires_at_ms is not None and envelope.expires_at_ms <= now:"
+          }
+        ],
+        "execution_state": "NOT_RUN",
+        "status": "INVALID_REGISTRY"
+      }
+    },
+    {
+      "head": "f8758db746582439819c1c1129ca64a8cf9fca7d",
+      "run_id": 41264944814,
+      "job_id": 124725802217,
+      "original_conclusion": "failure",
+      "mutation_execution": "NOT_RUN",
+      "preflight": {
+        "schema": "van.rebuild.mutation-registry-preflight/1",
+        "registry_sha256": "35d10c7b0f2b8319b7f7305828262c972b2a6451139d75b9e83c7d0062282955",
+        "mutation_count": 374,
+        "edit_count": 383,
+        "findings": [
+          {
+            "kind": "SOURCE_ANCHOR_MISSING",
+            "path": "van_gateway/session/router.py",
+            "mutation": "C36 an envelope nobody can carry out is written into the admission table first",
+            "anchor": "        delegate = self._delegate_for(envelope.kind)\n        if delegate is None:\n            return"
+          },
+          {
+            "kind": "SOURCE_ANCHOR_MISSING",
+            "path": "van_gateway/session/router.py",
+            "mutation": "C26 an expired command executes late",
+            "anchor": "        if envelope.expires_at_ms is not None and envelope.expires_at_ms <= now:"
+          }
+        ],
+        "execution_state": "NOT_RUN",
+        "status": "INVALID_REGISTRY"
+      }
+    },
+    {
+      "head": "f8758db746582439819c1c1129ca64a8cf9fca7d",
+      "run_id": 41264944814,
+      "job_id": 124725802405,
+      "original_conclusion": "failure",
+      "mutation_execution": "NOT_RUN",
+      "preflight": {
+        "schema": "van.rebuild.mutation-registry-preflight/1",
+        "registry_sha256": "35d10c7b0f2b8319b7f7305828262c972b2a6451139d75b9e83c7d0062282955",
+        "mutation_count": 374,
+        "edit_count": 383,
+        "findings": [
+          {
+            "kind": "SOURCE_ANCHOR_MISSING",
+            "path": "van_gateway/session/router.py",
+            "mutation": "C36 an envelope nobody can carry out is written into the admission table first",
+            "anchor": "        delegate = self._delegate_for(envelope.kind)\n        if delegate is None:\n            return"
+          },
+          {
+            "kind": "SOURCE_ANCHOR_MISSING",
+            "path": "van_gateway/session/router.py",
+            "mutation": "C26 an expired command executes late",
+            "anchor": "        if envelope.expires_at_ms is not None and envelope.expires_at_ms <= now:"
+          }
+        ],
+        "execution_state": "NOT_RUN",
+        "status": "INVALID_REGISTRY"
+      }
+    }
+  ],
+  "actual_affected_execution": {
+    "schema": "van.current-session-mutation-reconciliation/1",
+    "completed_at_utc": "2026-11-01T02:33:54.123272+00:00",
+    "source_parent": "f8758db746582439819c1c1129ca64a8cf9fca7d",
+    "source_worktree": "/workspace/van-lanes-20261101/mutation-ci-fix",
+    "source_sha256": {
+      "backend/van_gateway/session/router.py": "a4ac504cbfd6e885b285c8959aeae4543600c26f362e1ae85e36989660972c55",
+      "backend/van_gateway/session/service.py": "2a6c0a1d064a22d3945f84883088bca9174f040b18cf7f1cdd5ae244944f8eac",
+      "backend/tests/test_van_hermes_session.py": "fa39711dd0d961559f2a1456cb33a7acc5aa770874b54d5c61055b7fed14cb2e",
+      "backend/tests/test_session_transport_api.py": "f8603b46ab346a07b8e22c186729a8dbcc7cebe3618aca540b46d55587cdfe9f",
+      "tools/audit/mutation.py": "48a7a5d0573c796c1042b400dce7501e88e36196466b810d22ae4b07ac9e8e6a",
+      "tools/audit/mutation_suite.py": "cbf114a3374538eeb1403d3f066ee4f22d2405b32e6a7f6b752fa9fe0d9a99df"
+    },
+    "registry_sha256": "cbf114a3374538eeb1403d3f066ee4f22d2405b32e6a7f6b752fa9fe0d9a99df",
+    "diagnostic_plugin_sha256": "385ae93838b84913edbf9c74e72fef3656c8b5a74e9b26531a758225e4c0d189",
+    "results": [
+      {
+        "identity": "C36 an envelope nobody can carry out is written into the admission table first",
+        "unmodified_control": {
+          "kind": "baseline",
+          "reason": null,
+          "exit": 0,
+          "tests": 47,
+          "failed_assertions": [],
+          "errors": 0,
+          "skipped": 0,
+          "source_restored": true,
+          "cleanup": {
+            "path": "/tmp/van-recovery-mutation-c36-20261101",
+            "files": 47,
+            "inventory": "/workspace/van-mutation-affected-20261101/c36/baseline-temp/owned-temp-inventory.json",
+            "inventory_sha256": "b698e30553226551fd0490ffbec28bb4a713f32f414c9f8db798a129d4d3ee99",
+            "free_bytes_before_cleanup": 8832167936,
+            "free_bytes_after_cleanup": 8923205632,
+            "free_inodes_after": 2304131,
+            "independently_absent": true
+          },
+          "actual_command": [
+            "/workspace/van-backend-venv-20261025/bin/python",
+            "-m",
+            "pytest",
+            "tests/test_session_transport_api.py",
+            "tests/test_van_hermes_session.py",
+            "-q"
+          ]
+        },
+        "actual_semantic_mutant": {
+          "kind": "mutation",
+          "reason": "C36 an envelope nobody can carry out is written into the admission table first",
+          "exit": 1,
+          "tests": 47,
+          "failed_assertions": [
+            "test_a_kind_with_no_delegate_is_not_written_into_the_admission_table"
+          ],
+          "errors": 0,
+          "skipped": 0,
+          "source_restored": true,
+          "cleanup": {
+            "path": "/tmp/van-recovery-mutation-c36-20261101",
+            "files": 47,
+            "inventory": "/workspace/van-mutation-affected-20261101/c36/mutation-temp/owned-temp-inventory.json",
+            "inventory_sha256": "77956d58194a64f93bddaa7aeb46a6a90f4248e0886058aa041c9baac74b563c",
+            "free_bytes_before_cleanup": 8832167936,
+            "free_bytes_after_cleanup": 8923205632,
+            "free_inodes_after": 2304131,
+            "independently_absent": true
+          },
+          "actual_command": [
+            "/workspace/van-backend-venv-20261025/bin/python",
+            "-m",
+            "pytest",
+            "tests/test_session_transport_api.py",
+            "tests/test_van_hermes_session.py",
+            "-q"
+          ]
+        },
+        "survivors": []
+      },
+      {
+        "identity": "C26 an expired command executes late",
+        "unmodified_control": {
+          "kind": "baseline",
+          "reason": null,
+          "exit": 0,
+          "tests": 31,
+          "failed_assertions": [],
+          "errors": 0,
+          "skipped": 0,
+          "source_restored": true,
+          "cleanup": {
+            "path": "/tmp/van-recovery-mutation-c26-20261101",
+            "files": 31,
+            "inventory": "/workspace/van-mutation-affected-20261101/c26/baseline-temp/owned-temp-inventory.json",
+            "inventory_sha256": "63381145b1c6a5a38972703a67e0c27f7948dc5b8fb701e62c1f8a3189e5684f",
+            "free_bytes_before_cleanup": 8864542720,
+            "free_bytes_after_cleanup": 8923205632,
+            "free_inodes_after": 2304131,
+            "independently_absent": true
+          },
+          "actual_command": [
+            "/workspace/van-backend-venv-20261025/bin/python",
+            "-m",
+            "pytest",
+            "tests/test_van_hermes_session.py",
+            "-q"
+          ]
+        },
+        "actual_semantic_mutant": {
+          "kind": "mutation",
+          "reason": "C26 an expired command executes late",
+          "exit": 1,
+          "tests": 31,
+          "failed_assertions": [
+            "test_an_expired_envelope_is_not_executed_late"
+          ],
+          "errors": 0,
+          "skipped": 0,
+          "source_restored": true,
+          "cleanup": {
+            "path": "/tmp/van-recovery-mutation-c26-20261101",
+            "files": 31,
+            "inventory": "/workspace/van-mutation-affected-20261101/c26/mutation-temp/owned-temp-inventory.json",
+            "inventory_sha256": "ea1f2e44f804489217fdc8078db68310bf860b1fab5ebbb9e559d082841d018c",
+            "free_bytes_before_cleanup": 8864542720,
+            "free_bytes_after_cleanup": 8923205632,
+            "free_inodes_after": 2304131,
+            "independently_absent": true
+          },
+          "actual_command": [
+            "/workspace/van-backend-venv-20261025/bin/python",
+            "-m",
+            "pytest",
+            "tests/test_van_hermes_session.py",
+            "-q"
+          ]
+        },
+        "survivors": []
+      }
+    ],
+    "production_and_test_assertions_changed": false,
+    "scope": "Only2retargeted retainedmutationidentities executed; global374case consistency checked separately; no fullcorpus/nativeacceptance claim."
+  },
+  "registry_control_tests": {
+    "passed": 22,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "disposable_worktree_cleanup": {
+    "at_utc": "2026-11-01T02:35:23.638291+00:00",
+    "worktree": "/workspace/van-lanes-20261101/mutation-ci-fix",
+    "sole_owned_registry_delta_preserved_in_main_and_patch": true,
+    "production_and_tests_restored": true,
+    "mutation_journal_absent": true,
+    "no_live_handles": true,
+    "normal_worktree_remove_exit": 0,
+    "independently_absent": true
+  },
+  "semantics": [
+    "C36 still moves delegate availability checking after durable admission; only the fresh now_ms call anchor is reconciled.",
+    "C26 now discards the incoming expiry before both current admission/dispatch checks, producing the original forbidden late execution; changing only one redundant guard would not violate that invariant."
+  ],
+  "suites_overlap": true,
+  "full_mutation_corpus_executed_locally": false,
+  "hosted_complete_mutation_execution": "REQUIRED_ON_PUBLISHED_EXACT_HEAD",
+  "production_and_test_assertions_changed": false,
+  "unit_native_production_acceptance": "NOT_ISSUED",
+  "raw_files": {
+    "docs/rebuild/rev118/ci/session_mutation_anchor_20261101/original-hosted/van-successor-mutation-job-124725802238-20261101.log": "076aa77375f8e25da25f866bb61efd0760171be0ff15226f1290134a529100b0",
+    "docs/rebuild/rev118/ci/session_mutation_anchor_20261101/original-hosted/van-successor-mutation-job-124725802315-20261101.log": "68ebe95258806181b88ea2289f864d603aff98627d9ee798ea5bb9dbb52be815",
+    "docs/rebuild/rev118/ci/session_mutation_anchor_20261101/original-hosted/van-successor-mutation-job-124725802228-20261101.log": "1dac378c8c8c455fb8a2e3dd75818e8b8ae37302c79bf740fe3f9e86e9775f53",
+    "docs/rebuild/rev118/ci/session_mutation_anchor_20261101/original-hosted/van-successor-mutation-job-124725802217-20261101.log": "0dfd00091a7de287c181309879be27570409f968a09eab8fd3b3e434b0429a3f",
+    "docs/rebuild/rev118/ci/session_mutation_anchor_20261101/original-hosted/van-successor-mutation-job-124725802405-20261101.log": "ec0c80d643a12209976d190518de77eacbf973ec17969d7df1821270c4b8c513",
+    "docs/rebuild/rev118/ci/session_mutation_anchor_20261101/affected/c26/baseline-storage-audit.json": "489258a07c3b5936e1b69d960be9509740316e88914771981418468c26f904e6",
+    "docs/rebuild/rev118/ci/session_mutation_anchor_20261101/affected/c26/baseline-temp/owned-temp-inventory.json": "63381145b1c6a5a38972703a67e0c27f7948dc5b8fb701e62c1f8a3189e5684f",
+    "docs/rebuild/rev118/ci/session_mutation_anchor_20261101/affected/c26/baseline.log": "3de92c9c268f256063b519086580f1aa6f62af3c27aa5acb699979c5228d2ab3",
+    "docs/rebuild/rev118/ci/session_mutation_anchor_20261101/affected/c26/baseline.xml": "c555d78186ef98f29b5cc5a1b056625c34b9066c951f24b0be9f93ab5c38ea91",
+    "docs/rebuild/rev118/ci/session_mutation_anchor_20261101/affected/c26/current-audit.json": "a79c001d9c3ac25cf525e7c4b2f1c3d7dad9c14749ac2ec75a19f861d5e70c09",
+    "docs/rebuild/rev118/ci/session_mutation_anchor_20261101/affected/c26/current.xml": "9f3622f31982ced915499b605ffa19117600238e7fb64024f47700ab18243962",
+    "docs/rebuild/rev118/ci/session_mutation_anchor_20261101/affected/c26/mutation-storage-audit.json": "a79c001d9c3ac25cf525e7c4b2f1c3d7dad9c14749ac2ec75a19f861d5e70c09",
+    "docs/rebuild/rev118/ci/session_mutation_anchor_20261101/affected/c26/mutation-temp/owned-temp-inventory.json": "ea1f2e44f804489217fdc8078db68310bf860b1fab5ebbb9e559d082841d018c",
+    "docs/rebuild/rev118/ci/session_mutation_anchor_20261101/affected/c26/mutation.log": "7986e9d325c77d359ef5e468d13fedeee7503e8662949f36f6abfdff3816cc77",
+    "docs/rebuild/rev118/ci/session_mutation_anchor_20261101/affected/c26/mutation.xml": "9f3622f31982ced915499b605ffa19117600238e7fb64024f47700ab18243962",
+    "docs/rebuild/rev118/ci/session_mutation_anchor_20261101/affected/c36/baseline-storage-audit.json": "489258a07c3b5936e1b69d960be9509740316e88914771981418468c26f904e6",
+    "docs/rebuild/rev118/ci/session_mutation_anchor_20261101/affected/c36/baseline-temp/owned-temp-inventory.json": "b698e30553226551fd0490ffbec28bb4a713f32f414c9f8db798a129d4d3ee99",
+    "docs/rebuild/rev118/ci/session_mutation_anchor_20261101/affected/c36/baseline.log": "ee3369da80bcc626d12a41c5ebff979aab703e45f8678c0065451f52766d443e",
+    "docs/rebuild/rev118/ci/session_mutation_anchor_20261101/affected/c36/baseline.xml": "48b49a8f7fabac7e2b373c477b2ef100a25f53826b5416661cb915f16043abbd",
+    "docs/rebuild/rev118/ci/session_mutation_anchor_20261101/affected/c36/current-audit.json": "a79c001d9c3ac25cf525e7c4b2f1c3d7dad9c14749ac2ec75a19f861d5e70c09",
+    "docs/rebuild/rev118/ci/session_mutation_anchor_20261101/affected/c36/current.xml": "99ad2af0866697e938714f61328c7de19acf6aaa8db008130274be50dbf6d293",
+    "docs/rebuild/rev118/ci/session_mutation_anchor_20261101/affected/c36/mutation-storage-audit.json": "a79c001d9c3ac25cf525e7c4b2f1c3d7dad9c14749ac2ec75a19f861d5e70c09",
+    "docs/rebuild/rev118/ci/session_mutation_anchor_20261101/affected/c36/mutation-temp/owned-temp-inventory.json": "77956d58194a64f93bddaa7aeb46a6a90f4248e0886058aa041c9baac74b563c",
+    "docs/rebuild/rev118/ci/session_mutation_anchor_20261101/affected/c36/mutation.log": "5d4533d345601e4343495b05191d9ba1efb83ba544832871675ff560841131cc",
+    "docs/rebuild/rev118/ci/session_mutation_anchor_20261101/affected/c36/mutation.xml": "99ad2af0866697e938714f61328c7de19acf6aaa8db008130274be50dbf6d293",
+    "docs/rebuild/rev118/ci/session_mutation_anchor_20261101/affected/receipt.json": "6afb48d49893b2fd867106141fb52de63383ca341eafa4d0936b96023a5117de",
+    "docs/rebuild/rev118/ci/session_mutation_anchor_20261101/registry-controls/controls.log": "c1c71524d7bc84dbd22340b4dcb33dd5246702c4272f6dfec8a4803d9bf3bc5e",
+    "docs/rebuild/rev118/ci/session_mutation_anchor_20261101/registry-controls/controls.xml": "f5dbe9945c1ff5b47e3948064f41ba785cf53aa61e09f68f714c9c4634030c23",
+    "docs/rebuild/rev118/ci/session_mutation_anchor_20261101/registry-controls/owned-temp-inventory.json": "20266cdd37d2d6c652c062eb614827103200d2bae03a1bf461806bf182e6c0c1",
+    "docs/rebuild/rev118/ci/session_mutation_anchor_20261101/registry-controls/receipt.json": "68016b72f27df1e131a37b36cffbc41a979ff5ba373c9045c230cffb2a36ea61",
+    "docs/rebuild/rev118/ci/session_mutation_anchor_20261101/registry-controls/storage-audit.json": "03b5b2afac2978cda8a845c9a6eec9e8d20b13abe2960e09fcc8f1fccbcc2cb7",
+    "docs/rebuild/rev118/ci/session_mutation_anchor_20261101/controller/terminal.json": "2f915f567d14d5de7ac5b23e29b08c70ed71682bdf3f7d871044c78881ef54cf",
+    "docs/rebuild/rev118/ci/session_mutation_anchor_20261101/controller/output.log": "f16a16542b982e7fce6fdde09ce2d82d976df7dd333f10b7e195730cc82d0403",
+    "docs/rebuild/rev118/ci/session_mutation_anchor_20261101/controller/run.py": "a5f1da8304711589762e81a6dd7b617f38bc56755c60545acfb585f67c23c4f4",
+    "docs/rebuild/rev118/ci/session_mutation_anchor_20261101/controller/storage-audit-plugin.py": "385ae93838b84913edbf9c74e72fef3656c8b5a74e9b26531a758225e4c0d189",
+    "docs/rebuild/rev118/ci/session_mutation_anchor_20261101/controller/owned-temp-helper.py": "269a50d3584068bf78e28a3b52fa75810b063f5bde31d0eecf8f89b79f67b163",
+    "docs/rebuild/rev118/ci/session_mutation_anchor_20261101/reconciliation.json": "2537bfb967744c24efca33d3d64de944e2e7e0e1b4972d55b86b979d7b44706b",
+    "docs/rebuild/rev118/ci/session_mutation_anchor_20261101/source.patch": "c77ac9cf590f756f82d520d18b4b193f5ef748f71630fcc6ed161c9e92f0cfad",
+    "docs/rebuild/rev118/ci/session_mutation_anchor_20261101/disposable-worktree-cleanup.json": "7da791c1f6fa9cb2af42ff4260aae48d5842bd7ff676baab132a2eb77b0dd005",
+    "docs/rebuild/rev118/ci/session_mutation_anchor_20261101/final-registry-preflight.json": "131959a4576e7b5a8ebd678f508cca5c1107c9e4cc15c27d3c22121e5ac1b299",
+    "docs/rebuild/rev118/ci/session_mutation_anchor_20261101/evidence-builder.py": "cfb34c890e0686941ddb528b4c5483b51ef51ba98e9d14dd76673d9c241d68f6"
+  }
+}

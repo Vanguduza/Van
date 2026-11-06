@@ -1,0 +1,36 @@
+
+### android/verification (Gradle)
+CAUGHT             C40 every event arriving on the socket is dropped
+CAUGHT             C40 the saved cursor goes backwards and the owner reads a morning twice
+CAUGHT             C37 an irreversible command is queued for a silent replay when the network returns
+CAUGHT             C37 a command stored offline is sent addressed to a session that does not exist
+CAUGHT             C36 a command the Gateway has never heard of is treated as delivered
+CAUGHT             C35 a record with no policy is guessed as retryable, so an approval replays silently
+CAUGHT             C35 something needing the owner present is stored as freely replayable
+CAUGHT             C34 the phone accepts a payload that expired an hour ago
+CAUGHT             C34 a standing credential arrives in a provisioning payload and is kept
+CAUGHT             C34 the build-time PEM keeps its escaped newlines and no signature ever verifies
+CAUGHT             C33 Data Saver is ignored and a spare socket runs on the owner's mobile data
+CAUGHT             C33 a re-granted epoch promotes, leaving two authoritative paths
+CAUGHT             C33 a command whose window closed is still sent
+CAUGHT             C32 a drag never converges because the cadence never clears
+CAUGHT             C32 the tail of the previous size is adopted as the new one
+CAUGHT             C32 VAN chooses the insecure scheme on the owner's behalf
+CAUGHT             C32 closing a tab lands the owner on the first one
+CAUGHT             C32 a shortcut falls back to whichever profile is available
+CAUGHT             C32 a page load displaces a trading warning
+CAUGHT             C32 the owner's filename goes into a log line
+CAUGHT             C31 a session that has shown nothing reports a current picture
+CAUGHT             C31 a NaN decode rate reaches the gateway
+CAUGHT             C31 the audio decoder's drops are reported as the picture's
+CAUGHT             C14 pressure is the last input rather than the worst
+CAUGHT             C14 a stopped subsystem keeps a cadence
+CAUGHT             C30 a segment the owner already heard is re-queued and spoken again
+CAUGHT             C30 an irreversible request is classified as ordinary work and queued
+CAUGHT             C30 an engine whose offline data vanished fails silently instead of saying so
+CAUGHT             C30 a rolling recording of the owner's room is written to disk
+
+29/29 caught
+
+================ SURVIVORS ================
+none

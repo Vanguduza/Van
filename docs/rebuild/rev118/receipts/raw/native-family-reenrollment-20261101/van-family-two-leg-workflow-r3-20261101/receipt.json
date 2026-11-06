@@ -1,0 +1,57 @@
+{
+  "started_at_utc": "2026-11-01T04:14:49.630341+00:00",
+  "source_parent": "2728a83ce203fec867dc536c8d4341c2ce4415cb",
+  "owned_temp_preflight": {
+    "path": "/tmp/van-recovery-family-two-leg-workflow-r3-20261101",
+    "free_bytes_before": 8923205632,
+    "free_inodes_before": 2304130,
+    "minimum_free_bytes": 4294967296,
+    "no_preexisting_directory": true
+  },
+  "source_pins": {
+    "trading/vati/execution/paper.py": "f7a84387195d4259f9658893d96167d02fd33a9acf2a3162bcd1b4324d00ce7e",
+    "trading/vati/lifecycle/family_actions.py": "6178ee58be87881ecb2aaa8cf52f02a4446b5fea119e1b7c69359fb176fd38e8",
+    "trading/vati/lifecycle/family.py": "c4fa5f46ed64ab0707c7aadfd72a5193e4ddfb637342b642c0cf73dd6e1ea1e3",
+    "trading/vati/lifecycle/family_membership.py": "1b58c60275ef35d9fed805430d70ef36a2addd112d85f2617dd30a11f724f082",
+    "trading/vati/lifecycle/family_action_journal.py": "28df2cc05b358fa00f1f2a674f676b004fc92fcb000eb179272e29c53d24558e",
+    "trading/vati/execution/exit_journal.py": "669c71707d6d43bcbe02ed3f643a51650ca5778e937836fb5730bf90f3fb691b",
+    "trading/vati/execution/router.py": "64425fe610638670afd889387561c2095cfaef3ca36fcd0de0e05a9b4cfa5815",
+    "trading/vati/app/trade_lifecycle.py": "b94cc434e752f245c9c18ecc1de6b9d4fe88241c1b60a37f4a629aaf76f507dd",
+    "trading/vati/risk/operational_grant.py": "cce46c97faa35c73a1d254ea02617e530d8269430eb66c474556bf0300a1f45c",
+    "trading/vati/lifecycle/family_execution.py": "054dd20611b0956301dbb17839fb24536bef205cff8bc8dd4ae03beb56a03479",
+    "trading/vati/lifecycle/family_runtime.py": "529b2ed081d3109b03beb8533caadc0a80c103c71a5ebe8726db12a2f5ca4500",
+    "trading/commander/lifecycle_policies.py": "753704dfbebd880e8190367ace10e5692cdd3f7bb983e417e45f7bb16bc9d37d",
+    "trading/commander/app.py": "1cd89c9a2ea0c538583f5a018b81a666b3b5532d94041611651d47dc6cb21c48",
+    "trading/vati/app/service.py": "62557d2a7fac021c3fadb293e64daf67392ba49561903ac3d6346069cc1e36ab",
+    "trading/vati/app/account_service.py": "95e5857725c5b3b08d4837c83f618c1472733d60231423000542c6595cefd071",
+    "trading/tests/test_family_governed_workflow.py": "002a80b0ab5ea0f2f2095ba8c45b3add65ae364a1f7617973537ae40eecfb83e",
+    "trading/tests/test_family_native_protection.py": "b800d6d7b4bf1a3628b9dec0b86d7cd3e9ca078742ac477b13ca82c2b45f3b23",
+    "trading/tests/test_family_native_membership.py": "eca9b823505576cf547b51ae12dc8ae792993c3ecd1b3f5727879cdf46eff6c5",
+    "trading/tests/test_active_trade_e2e.py": "1af083490604c932e8da0a5d7ae3b48b4ba2e2193c6cbb2b9067efe928b1cfc9"
+  },
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "tools/rebuild/source_storage_audit.py",
+    "--report",
+    "/workspace/van-family-two-leg-workflow-r3-20261101/storage-audit.json",
+    "trading/tests/test_family_governed_workflow.py",
+    "trading/tests/test_family_native_protection.py",
+    "trading/tests/test_family_native_membership.py",
+    "trading/tests/test_active_trade_e2e.py",
+    "--basetemp=/tmp/van-recovery-family-two-leg-workflow-r3-20261101",
+    "--junitxml=/workspace/van-family-two-leg-workflow-r3-20261101/tests.xml",
+    "-q"
+  ],
+  "exit": 0,
+  "owned_temp_cleanup": {
+    "path": "/tmp/van-recovery-family-two-leg-workflow-r3-20261101",
+    "files": 31,
+    "inventory": "/workspace/van-family-two-leg-workflow-r3-20261101/owned-temp-inventory.json",
+    "inventory_sha256": "1e4a4f081dae7c114c48a0995e45d2c6a51a46175bf7026b2e9066c4612403e0",
+    "free_bytes_before_cleanup": 8920489984,
+    "free_bytes_after_cleanup": 8923205632,
+    "free_inodes_after": 2304130,
+    "independently_absent": true
+  },
+  "completed_at_utc": "2026-11-01T04:14:53.318943+00:00"
+}

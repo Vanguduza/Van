@@ -1,15 +1,24 @@
 package com.dial.van.session
 
 import com.dial.van.gateway.VanGatewayClient
+import com.dial.van.gateway.SessionOpenRecoveryException
 import com.dial.van.telemetry.SessionTelemetry
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
@@ -27,8 +36,8 @@ import org.json.JSONObject
  * goes into a tunnel, and shows them an empty screen rather than an error.
  *
  * What lives here is the machinery — the socket, the coroutine, the outbox. What lives in
- * [TransportSupervisor], [SessionEnvelope] and [ResumePolicy] is every decision this makes,
- * because those are the parts that can be executed in the JVM harness and this is not.
+     * [TransportSupervisor], [SessionEnvelope] and [ResumePolicy] is the pure policy. The JVM
+     * harness also executes this adapter with test-only gateway and socket implementations.
  *
  * The rule this file exists to enforce, stated once: **a resend is the same message.**
  * `readdress` moves an envelope to a new path without touching its identity, and the outbox
@@ -83,7 +92,21 @@ class VanHermesSessionManager(
      * a build with no reader drops events loudly in review rather than quietly at runtime.
      */
     private val onDownstreamPage: (com.dial.van.events.EventPage) -> Unit = {},
+    /** Optional transport seam; production still uses the pinned TLS client below. */
+    private val webSocketFactory: WebSocket.Factory? = null,
+    private val httpCarrierFactory: ((Request, WebSocketListener, String, Long) -> WebSocket)? = null,
+    private val reconnectDelayMillis: (Int) -> Long = { attempt ->
+        (1_000L shl attempt.coerceIn(0, 5)).coerceAtMost(30_000L)
+    },
+    /** Selection only, never an authorization grant; production reads its actual client. */
+    private val ownerSelection: () -> Pair<String, String> = {
+        gateway.permissionProfileIdentity() to gateway.deviceIdOrEmpty()
+    },
+    /** Existing owner UI consumes the actual original outcome, never a native-success inference. */
+    private val onRecoveredOriginal: (JSONObject) -> Unit = {},
 ) {
+
+    var onSpeechResume: () -> Unit = {}
 
     data class State(
         val vanSessionId: String? = null,
@@ -135,10 +158,24 @@ class VanHermesSessionManager(
 
     private val outbox = ArrayDeque<QueuedMessage>()
     private val inFlight = LinkedHashMap<String, JSONObject>()
+    // Metadata for the existing explicitly transient branch, never persisted or
+    // represented as durable restart recovery. The existing outbox/inFlight own bytes.
+    private val transientEntries = LinkedHashMap<String, OutboxEntry>()
+    private val transientOwners = LinkedHashMap<String, Pair<String, String>>()
+    private var outboxRestored = false
+    private var restoredSessionConflict = false
     private val _state = MutableStateFlow(State(outboxIsDurable = store != null))
     val state: StateFlow<State> = _state.asStateFlow()
 
-    private var socket: WebSocket? = null
+    @Volatile private var socket: WebSocket? = null
+    private val connectMutex = Mutex()
+    private var socketReady = false
+    @Volatile private var reconnectWanted = false
+    private var connectionGeneration = 0L
+    private var reconnectJob: Job? = null
+    private var failedWssConnections = 0
+    private var usingHttpCarrier = false
+    private val activePathId: String get() = if (usingHttpCarrier) HTTP_PATH_ID else PRIMARY_PATH_ID
     private var interactionActive: Boolean = false
     private var lastEventSeq: Long = 0
 
@@ -183,11 +220,15 @@ class VanHermesSessionManager(
      * @param requiresLiveOwnerContext true when the request only means anything now —
      *   "read that back to me", "cancel it".
      */
+    @Synchronized
     fun submit(
         kind: String,
         payload: JSONObject,
         actionClass: String,
         requiresLiveOwnerContext: Boolean = false,
+        originalProfile: String? = null,
+        priorTransportAttempt: Boolean = false,
+        httpPreparation: Boolean = false,
     ): SubmissionOutcome {
         // §20.14 — storable with no session, because that is what offline means.
         //
@@ -197,7 +238,38 @@ class VanHermesSessionManager(
         // is stored addressed to nothing and `flushOutbox` rebinds it to the session that
         // exists by then. A live socket is still required to *send*, which is the branch
         // below; only storage tolerates the placeholder.
-        val sessionId = _state.value.vanSessionId ?: SessionEnvelope.UNBOUND_SESSION_ID
+        val selected = ownerSelection()
+        val profile = originalProfile ?: selected.first
+        val originalDevice = if (priorTransportAttempt) payload.optString("device_id") else selected.second
+        if (originalDevice.isBlank() || profile.isBlank()) return SubmissionOutcome.Refused("original_owner_unknown")
+        val sameProfile = profile == selected.first && originalDevice == selected.second
+        val sessionId = _state.value.vanSessionId?.takeIf { sameProfile } ?: SessionEnvelope.UNBOUND_SESSION_ID
+        if (kind == "command.submit" && payload.optString("command_id").isNotBlank() &&
+            payload.optString("idempotency_key").isNotBlank()) {
+            val originals = store?.restore() ?: transientEntries.values.mapNotNull { original ->
+                val raw = inFlight[original.messageId] ?: outbox.firstOrNull { it.entry.messageId == original.messageId }?.envelope
+                raw?.let { original to it.toString() }
+            }
+            for ((original, raw) in originals) {
+                val outer = runCatching { JSONObject(raw) }.getOrNull() ?: continue
+                val originalBody = outer.optJSONObject("payload") ?: continue
+                if (outer.optString("kind") != kind || originalBody.optString("command_id") != payload.optString("command_id") ||
+                    originalBody.optString("idempotency_key") != payload.optString("idempotency_key")) continue
+                if (original.profileId != profile || outer.optString("device_id") != originalDevice ||
+                    SessionEnvelope.payloadDigest(originalBody) != SessionEnvelope.payloadDigest(payload)) {
+                    return SubmissionOutcome.Refused("original_command_selection_changed")
+                }
+                if (priorTransportAttempt && original.sessionOnlyOrigin == true) {
+                    val observed = original.copy(neverDispatched = false, sessionOnlyOrigin = false)
+                    if (store != null) store.persist(observed, raw) else transientEntries[original.messageId] = observed
+                    outbox.indexOfFirst { it.entry.messageId == original.messageId }.takeIf { it >= 0 }?.let { index ->
+                        outbox[index] = outbox[index].copy(entry = observed)
+                    }
+                }
+                return if (original.messageId in inFlight) SubmissionOutcome.Sent(original.messageId)
+                       else SubmissionOutcome.Queued(original.messageId)
+            }
+        }
         val messageId = "msg_${UUID.randomUUID()}"
         // §20.12 — lifted out of the payload and onto the envelope.
         //
@@ -211,7 +283,7 @@ class VanHermesSessionManager(
             vanSessionId = sessionId,
             sessionEpoch = _state.value.sessionEpoch,
             pathEpoch = _state.value.pathEpoch,
-            deviceId = gateway.deviceIdOrEmpty(),
+            deviceId = originalDevice,
             kind = kind,
             createdAtMs = System.currentTimeMillis(),
             payload = payload,
@@ -220,15 +292,22 @@ class VanHermesSessionManager(
             commandId = commandId,
         )
 
-        val live = socket
-        if (live != null && live.send(envelope.toString())) {
-            inFlight[envelope.getString("message_id")] = envelope
-            return SubmissionOutcome.Sent(envelope.getString("message_id"))
-        }
-
-        // §20.14 — classified before storage, and `admit` returns null for what must
-        // never be kept. There is no branch here that could store an A4: the only way to
-        // keep one would be to not call this.
+        // Classify before either storage or a live write: send only queues bytes locally.
+        // Eligible work must survive a kill even when the link looked healthy at submit.
+        // A4/A5 and other prohibited classes stay solely in memory on a live path.
+        val storedAt = System.currentTimeMillis()
+        val originalIssued = if (kind == "command.submit" && payload.has("issued_at_unix")) {
+            val seconds = payload.optLong("issued_at_unix", 0)
+            if (seconds <= 0 || seconds > (Long.MAX_VALUE - DurableOutbox.DEFAULT_TTL_MS) / 1000) return SubmissionOutcome.Refused("original_command_time_invalid")
+            seconds * 1000
+        } else storedAt
+        val defaultDeadline = originalIssued + DurableOutbox.DEFAULT_TTL_MS
+        val signedDeadline = if (kind == "command.submit" && payload.has("expires_at_unix") && !payload.isNull("expires_at_unix")) {
+            val seconds = payload.optLong("expires_at_unix", 0)
+            if (seconds <= 0 || seconds > Long.MAX_VALUE / 1000) return SubmissionOutcome.Refused("original_command_expiry_invalid")
+            seconds * 1000
+        } else defaultDeadline
+        val originalDeadline = minOf(defaultDeadline, signedDeadline)
         val entry = DurableOutbox.admit(
             messageId = messageId,
             commandId = commandId ?: messageId,
@@ -237,13 +316,28 @@ class VanHermesSessionManager(
             actionClass = actionClass,
             requiresLiveOwnerContext = requiresLiveOwnerContext,
             payloadRef = envelope.getString("message_id"),
-            nowMs = System.currentTimeMillis(),
-        ) ?: return SubmissionOutcome.Refused("offline_and_not_storable")
+            nowMs = originalIssued,
+            ttlMs = originalDeadline - originalIssued,
+        )
+        if (entry != null) envelope.put("expires_at_ms", entry.expiresAtMs)
+        val originalEntry = entry?.copy(neverDispatched = !priorTransportAttempt, profileId = profile,
+            sessionOnlyOrigin = !priorTransportAttempt, httpPrepared = if (httpPreparation) true else null)
+        if (originalEntry != null) {
+            if (store != null) store.persist(originalEntry, envelope.toString())
+            else transientEntries[messageId] = originalEntry
+        } else transientOwners[messageId] = profile to originalDevice
+
+        val live = socket.takeIf { socketReady && sameProfile && !priorTransportAttempt }
+        val deliveryAttempted = live != null && prepareSessionSend(originalEntry, envelope)
+        if (deliveryAttempted && live!!.send(envelope.toString())) {
+            inFlight[envelope.getString("message_id")] = envelope
+            return SubmissionOutcome.Sent(envelope.getString("message_id"))
+        }
+        if (entry == null) return SubmissionOutcome.Refused("offline_and_not_storable")
 
         // Written before it is queued in memory, not after. The other order loses the
         // command to a kill in between, and the whole point of this record is the kill.
-        store?.persist(entry, envelope.toString())
-        outbox.addLast(QueuedMessage(entry, envelope))
+        outbox.addLast(QueuedMessage((originalEntry ?: entry).let { if (deliveryAttempted) it.copy(neverDispatched = false) else it }, envelope))
         publishOutboxDepth()
         return if (entry.storability == CommandStorability.REQUIRE_RECONFIRM_ON_RECONNECT) {
             SubmissionOutcome.QueuedNeedsReconfirm(entry.messageId)
@@ -258,16 +352,20 @@ class VanHermesSessionManager(
      * Stamped rather than re-classified, so the record still says what kind of command
      * this was when someone later asks why it ran.
      */
+    @Synchronized
     fun reconfirm(messageId: String, nowMs: Long = System.currentTimeMillis()): Boolean {
         val index = outbox.indexOfFirst { it.entry.messageId == messageId }
         if (index < 0) return false
         val queued = outbox[index]
+        if (!currentOriginal(queued.entry, queued.envelope) ||
+            (queued.entry.neverDispatched != true && !ownedTransportRecovery(queued.entry, queued.envelope))) return false
         val reconfirmed = OwnerReconfirmationSurface.reconfirm(queued.entry, nowMs)
             ?: return false
         // §20.15 — the owner said yes, and that has to outlive the app. A reconfirmation
         // held only in memory means the owner is asked twice for the same command, which
         // is the failure mode that trains someone to stop reading the question.
-        store?.persist(reconfirmed, queued.envelope.toString())
+        if (store != null) store.persist(reconfirmed, queued.envelope.toString())
+        else transientEntries[messageId] = reconfirmed
         outbox[index] = queued.copy(entry = reconfirmed)
         return true
     }
@@ -279,11 +377,18 @@ class VanHermesSessionManager(
      * second copy is persisted for presentation. Only entries the deterministic outbox
      * currently classifies as NeedsReconfirmation are returned.
      */
+    @Synchronized
     fun pendingOwnerReconfirmations(
         nowMs: Long = System.currentTimeMillis(),
     ): List<OwnerReconfirmationRequest> =
         outbox.mapNotNull { queued ->
-            OwnerReconfirmationSurface.project(queued.entry, queued.envelope, nowMs)
+            if (!currentOriginal(queued.entry, queued.envelope) ||
+                (queued.entry.neverDispatched != true && !ownedTransportRecovery(queued.entry, queued.envelope))) return@mapNotNull null
+            OwnerReconfirmationSurface.project(queued.entry, queued.envelope, nowMs)?.let { request ->
+                if (queued.entry.neverDispatched == true) request else request.copy(
+                    ownerReadableState = "Original outcome unconfirmed. Confirm recovery of this same operation.",
+                    recoveryOnly = true)
+            }
         }
 
     /**
@@ -293,6 +398,7 @@ class VanHermesSessionManager(
      * and the ordinary reconnect flush sends it later. The same message/idempotency
      * identity is preserved in both cases.
      */
+    @Synchronized
     fun reconfirmAndFlush(
         messageId: String,
         nowMs: Long = System.currentTimeMillis(),
@@ -308,23 +414,67 @@ class VanHermesSessionManager(
      * This cannot be used as a generic queue-delete API: only an entry that the outbox is
      * presently holding for the owner's answer may be removed.
      */
+    @Synchronized
     fun cancelReconfirmation(
         messageId: String,
         nowMs: Long = System.currentTimeMillis(),
     ): Boolean {
         val queued = outbox.firstOrNull { it.entry.messageId == messageId } ?: return false
+        if (!currentOriginal(queued.entry, queued.envelope) || queued.entry.neverDispatched != true) return false
         if (OwnerReconfirmationSurface.project(queued.entry, queued.envelope, nowMs) == null) {
             return false
         }
         if (!outbox.remove(queued)) return false
         store?.forget(messageId)
+        transientEntries.remove(messageId)
+        transientOwners.remove(messageId)
         publishOutboxDepth()
         return true
     }
 
+    private val recoveryHeld = mutableSetOf<String>()
+    private val originalRecoveryAllowed = mutableSetOf<String>()
+
+    private fun currentOriginal(entry: OutboxEntry, envelope: JSONObject): Boolean =
+        ownerSelection().let { (profile, device) -> entry.profileId == profile &&
+            envelope.optString("device_id") == device }
+
+    private fun ownedTransportRecovery(entry: OutboxEntry, envelope: JSONObject): Boolean =
+        entry.messageId in originalRecoveryAllowed && entry.sessionOnlyOrigin == true &&
+            envelope.optString("kind") in setOf("mission.message", "mission.cancel", "decision.answer") &&
+            envelope.optString("van_session_id") == _state.value.vanSessionId &&
+            entry.expiresAtMs - entry.createdAtMs <= DurableOutbox.DEFAULT_TTL_MS &&
+            !entry.expired(System.currentTimeMillis())
+
+    /** Commit loss-of-never-sent provenance before any socket can observe the bytes. */
+    private fun prepareSessionSend(entry: OutboxEntry?, envelope: JSONObject): Boolean {
+        if (entry == null) return transientOwners[envelope.optString("message_id")] == ownerSelection()
+        if (!currentOriginal(entry, envelope) || entry.expired(System.currentTimeMillis())) return false
+        val attempted = entry.copy(neverDispatched = false)
+        val durable = store
+        if (durable == null) {
+            transientEntries[entry.messageId] = attempted
+            return true
+        }
+        return runCatching { durable.persist(attempted, envelope.toString()) }.isSuccess
+    }
+
+    @Synchronized
+    private fun originalCommandReferences(): List<JSONObject> = (store?.restore() ?: transientEntries.values.mapNotNull { entry ->
+        val original = inFlight[entry.messageId] ?: outbox.firstOrNull { it.entry.messageId == entry.messageId }?.envelope
+        original?.let { entry to it.toString() }
+    }).mapNotNull { (entry, raw) ->
+        runCatching { ownerSelection().let { (profile, device) ->
+            OriginalCommandReference.fromStored(entry, JSONObject(raw), profile, device)
+        } }.getOrNull()
+    }.take(50)
+
     /** §20.15 — what the owner's screen shows for each queued item. */
     fun queuedForOwner(nowMs: Long = System.currentTimeMillis()): List<Pair<String, String>> =
-        outbox.map { it.entry.messageId to DurableOutbox.ownerReadableState(it.entry, nowMs) }
+        outbox.map { it.entry.messageId to if (it.entry.neverDispatched != true || it.entry.messageId in recoveryHeld)
+            if (it.entry.httpPrepared == true) "Original request prepared; delivery remains unconfirmed"
+            else "Delivery held; the original outcome is unconfirmed"
+            else DurableOutbox.ownerReadableState(it.entry, nowMs) }
 
     sealed class SubmissionOutcome {
         data class Sent(val messageId: String) : SubmissionOutcome()
@@ -336,6 +486,7 @@ class VanHermesSessionManager(
     }
 
     /** Whether the owner is waiting on something, which sets the heartbeat cadence (§20.8). */
+    @Synchronized
     fun setInteractionActive(active: Boolean) {
         interactionActive = active
         reconsiderStandby()
@@ -347,6 +498,7 @@ class VanHermesSessionManager(
      * Fed from the resource envelope rather than sampled here: the battery and Data Saver
      * readings are the runtime's, and a second sampler would be a second answer.
      */
+    @Synchronized
     fun setStandbyConditions(
         batteryPercent: Int,
         charging: Boolean,
@@ -389,29 +541,125 @@ class VanHermesSessionManager(
      * the identity already exists and outlives any one carrier (§20.3).
      */
     suspend fun start() {
+        reconnectWanted = true
+        connect()
+    }
+
+    private suspend fun connect() = connectMutex.withLock {
+        val generation = synchronized(this) {
+            if (!reconnectWanted || !gateway.isPaired() || socket != null) return@withLock
+            if (failedWssConnections >= 2 && (webSocketFactory == null || httpCarrierFactory != null)) usingHttpCarrier = true
+            connectionGeneration += 1
+            connectionGeneration
+        }
         restoreOutbox()
-        // Enrol or renew the client certificate before the first request that needs it.
-        // A failure here is not fatal: the connect below fails the same way and the
-        // supervisor's normal offline/retry path takes it from there.
+        if (restoredSessionConflict) return@withLock
+        val persistedIdentity = try { gateway.restoredSessionIdentity() }
+        catch (_: Exception) {
+            _state.value = _state.value.copy(supervisor = SupervisorState.OFFLINE_LOCAL, reason = "session_identity_invalid")
+            return@withLock
+        }
+        if (persistedIdentity != null && _state.value.vanSessionId == null) {
+            _state.value = _state.value.copy(vanSessionId = persistedIdentity.getString("van_session_id"),
+                sessionEpoch = persistedIdentity.getInt("session_epoch"), pathEpoch = persistedIdentity.getInt("path_epoch"))
+        } else if (persistedIdentity != null && persistedIdentity.optString("van_session_id") != _state.value.vanSessionId) {
+            restoredSessionConflict = true
+            _state.value = _state.value.copy(supervisor = SupervisorState.OFFLINE_LOCAL, reason = "stored_session_identity_conflict")
+            return@withLock
+        }
         runCatching { gateway.ensureTlsIdentity() }
         if (_state.value.vanSessionId == null) {
-            val opened = runCatching {
-                gateway.sessionOpen(pathId = PRIMARY_PATH_ID, routeId = "primary-ingress")
-            }.getOrNull() ?: run {
-                publish(SupervisorState.OFFLINE_LOCAL)
-                return
+            val opened = try {
+                gateway.sessionOpen(pathId = activePathId, routeId = "primary-ingress",
+                    protocol = if (usingHttpCarrier) "HTTP_SSE" else "WSS",
+                    pathClass = if (usingHttpCarrier) "B_STREAMING" else "A_REALTIME")
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (missing: SessionOpenRecoveryException) {
+                reconnectWanted = false
+                _state.value = _state.value.copy(supervisor = SupervisorState.OFFLINE_LOCAL, reason = missing.message.orEmpty())
+                return@withLock
+            } catch (failure: Exception) {
+                synchronized(this) {
+                    if (generation == connectionGeneration) {
+                        _state.value = _state.value.copy(
+                            supervisor = SupervisorState.OFFLINE_LOCAL,
+                            reason = failure.message ?: "session_open_failed",
+                        )
+                        scheduleReconnect()
+                    }
+                }
+                return@withLock
             }
-            _state.value = _state.value.copy(
-                vanSessionId = opened.optString("van_session_id"),
-                sessionEpoch = opened.optInt("session_epoch", 0),
-                pathEpoch = opened.optInt("path_epoch", 0),
-            )
+            synchronized(this) {
+                if (!reconnectWanted || generation != connectionGeneration) return@withLock
+                val sessionId = opened.optString("van_session_id").takeIf { it.isNotBlank() }
+                if (sessionId == null) {
+                    scheduleReconnect()
+                    return@withLock
+                }
+                _state.value = _state.value.copy(
+                    vanSessionId = sessionId,
+                    sessionEpoch = opened.optInt("session_epoch", 0),
+                    pathEpoch = opened.optInt("path_epoch", 0),
+                )
+            }
         }
-        val sessionId = _state.value.vanSessionId ?: return
+        val sessionId = _state.value.vanSessionId ?: return@withLock
         val socketUrl = gateway.sessionSocketUrl(sessionId)
-        val request = Request.Builder().url(socketUrl).build()
-        socket = clientFor(socketUrl).newWebSocket(request, Listener())
-        publish(SupervisorState.PRIMARY_CONNECTING)
+        synchronized(this) {
+            if (!reconnectWanted || generation != connectionGeneration) return@withLock
+            socketReady = false
+            publish(SupervisorState.PRIMARY_CONNECTING)
+            val request = Request.Builder().url(socketUrl).apply {
+                gateway.sessionSocketHeaders().forEach { (name, value) -> header(name, value) }
+            }.build()
+            val listener = Listener(generation)
+            if (usingHttpCarrier) {
+                socket = httpCarrierFactory?.invoke(request, listener, sessionId, lastEventSeq) ?:
+                    HttpSessionCarrier(request, scope, listener,
+                        post = { gateway.sessionUpstream(it) }, downstream = { gateway.sessionDownstream(sessionId, lastEventSeq) })
+                (socket as? HttpSessionCarrier)?.start()
+            } else socket = (webSocketFactory ?: clientFor(socketUrl)).newWebSocket(request, listener)
+        }
+    }
+
+    /** One retry worker, with a bounded delay, shared by startup and transport recovery. */
+    @Synchronized
+    private fun scheduleReconnect() {
+        if (!reconnectWanted || !gateway.isPaired() || reconnectJob?.isActive == true) return
+        reconnectJob = scope.launch(Dispatchers.IO, start = CoroutineStart.LAZY) {
+            try {
+                var attempt = 0
+                while (isActive && reconnectWanted && gateway.isPaired() && socket == null) {
+                    delay(reconnectDelayMillis(attempt).coerceAtLeast(1L))
+                    connect()
+                    attempt += 1
+                }
+            } finally {
+                val ownJob = currentCoroutineContext()[Job]
+                synchronized(this@VanHermesSessionManager) {
+                    if (reconnectJob === ownJob) reconnectJob = null
+                    // A failure may arrive as this worker exits after creating a socket.
+                    if (reconnectWanted && socket == null) scheduleReconnect()
+                }
+            }
+        }
+        reconnectJob?.start()
+    }
+
+    @Synchronized
+    private fun transportFailed(webSocket: WebSocket, generation: Long, reason: String, failedHandshake: Boolean = true) {
+        if (!reconnectWanted || generation != connectionGeneration || socket !== webSocket) return
+        connectionGeneration += 1 // callbacks from this socket can no longer change the session
+        socket = null
+        socketReady = false
+        if (!usingHttpCarrier && failedHandshake) failedWssConnections += 1
+        webSocket.cancel()
+        markSuspect()
+        observe(connected = false, lastRxAgeMs = Long.MAX_VALUE / 2, writeFailures = 1)
+        _state.value = _state.value.copy(supervisor = SupervisorState.RECOVERING, reason = reason)
+        scheduleReconnect()
     }
 
     /**
@@ -422,26 +670,57 @@ class VanHermesSessionManager(
      * this. Idempotent, because `start` is called again on every reconnect and a second
      * restore must not duplicate what the first one loaded.
      */
+    @Synchronized
     private fun restoreOutbox() {
         val store = this.store ?: return
-        if (outbox.isNotEmpty()) return
+        if (outboxRestored) return
+        val held = outbox.map { it.entry.messageId }.toSet() + inFlight.keys
         for ((entry, envelopeJson) in store.restore()) {
+            if (entry.messageId in held) continue
             val envelope = runCatching { JSONObject(envelopeJson) }.getOrNull() ?: continue
             outbox.addLast(QueuedMessage(entry, envelope))
+        }
+        outboxRestored = true
+        val addressed = outbox.map { it.envelope }.filterNot(SessionEnvelope::isUnbound)
+        val sessions = addressed.map { it.optString("van_session_id") to it.optInt("session_epoch", -1) }.toSet()
+        if (_state.value.vanSessionId == null && sessions.isNotEmpty()) {
+            val address = sessions.singleOrNull()
+            if (address == null || address.first.isBlank() || address.second < 0) {
+                restoredSessionConflict = true
+                _state.value = _state.value.copy(
+                    supervisor = SupervisorState.OFFLINE_LOCAL,
+                    reason = "queued work belongs to conflicting sessions; recovery needs review",
+                )
+            } else {
+                // Recover the recorded logical authority before opening a fresh session.
+                // A new socket resumes this identity and the server decides what it holds.
+                _state.value = _state.value.copy(
+                    vanSessionId = address.first, sessionEpoch = address.second,
+                    pathEpoch = addressed.maxOf { it.optInt("path_epoch", 0) },
+                )
+            }
         }
         publishOutboxDepth()
     }
 
+    @Synchronized
     fun close() {
+        reconnectWanted = false
+        connectionGeneration += 1
+        reconnectJob?.cancel()
+        reconnectJob = null
+        socketReady = false
         socket?.close(1000, "owner_closed")
         socket = null
+        failedWssConnections = 0
+        usingHttpCarrier = false
         publish(SupervisorState.OFFLINE_LOCAL)
     }
 
-    private inner class Listener : WebSocketListener() {
+    private inner class Listener(private val generation: Long) : WebSocketListener() {
 
         override fun onOpen(webSocket: WebSocket, response: Response) {
-            scope.launch(Dispatchers.IO) { resume() }
+            scope.launch(Dispatchers.IO) { resume(webSocket, generation) }
         }
 
         /**
@@ -457,50 +736,66 @@ class VanHermesSessionManager(
          * to do about each shape.
          */
         override fun onMessage(webSocket: WebSocket, text: String) {
-            val message = runCatching { JSONObject(text) }.getOrNull() ?: return
-            observe(connected = true, lastRxAgeMs = 0, writeFailures = 0)
-            when (val frame = SessionDownstream.parse(message)) {
-                is SessionDownstream.Frame.Event -> {
-                    // §20.1's SHALL: durable downstream pages go into the existing
-                    // reducer, not into a second one. `applyPage` is seq-keyed, so a
-                    // frame that overlaps what a REST replay already delivered does not
-                    // show the owner the same thing twice.
-                    frame.page.nextCursor.takeIf { it > lastEventSeq }?.let { lastEventSeq = it }
-                    onDownstreamPage(frame.page)
+            synchronized(this@VanHermesSessionManager) {
+                if (generation != connectionGeneration || socket !== webSocket) return
+                val message = runCatching { JSONObject(text) }.getOrNull() ?: return
+                observe(connected = true, lastRxAgeMs = 0, writeFailures = 0)
+                when (val frame = SessionDownstream.parse(message)) {
+                    is SessionDownstream.Frame.Event -> {
+                        // §20.1's SHALL: durable downstream pages go into the existing
+                        // reducer, not into a second one. `applyPage` is seq-keyed, so a
+                        // frame that overlaps what a REST replay already delivered does not
+                        // show the owner the same thing twice.
+                        frame.page.nextCursor.takeIf { it > lastEventSeq }?.let { lastEventSeq = it }
+                        onDownstreamPage(frame.page)
+                    }
+                    is SessionDownstream.Frame.Acknowledgement -> {
+                        if (frame.resultPending) {
+                            // The durable admission exists, but its result is not yet a
+                            // receipt. Retain the original envelope and let resume ask
+                            // whether execution finished, without minting another command.
+                            if (frame.messageId in inFlight) {
+                                transportFailed(webSocket, generation, "session_result_pending", failedHandshake = false)
+                            }
+                            return
+                        }
+                        // Accepted or refused, it is answered and no longer in flight. A
+                        // refusal left in flight would be re-sent by the next resume, which
+                        // is sending the Gateway something it has already declined.
+                        val original = store?.restore()?.firstOrNull { it.first.messageId == frame.messageId }
+                        if (original != null) {
+                            val envelope = runCatching { JSONObject(original.second) }.getOrNull() ?: return
+                            if (!currentOriginal(original.first, envelope) ||
+                                envelope.optString("van_session_id") != _state.value.vanSessionId) return
+                        } else if (frame.messageId !in inFlight ||
+                            (transientEntries[frame.messageId] == null && transientOwners[frame.messageId] != ownerSelection())) return
+                        inFlight.remove(frame.messageId)
+                        store?.forget(frame.messageId)
+                        transientEntries.remove(frame.messageId)
+                        transientOwners.remove(frame.messageId)
+                    }
+                    SessionDownstream.Frame.Unrecognised -> Unit
                 }
-                is SessionDownstream.Frame.Acknowledgement -> {
-                    // Accepted or refused, it is answered and no longer in flight. A
-                    // refusal left in flight would be re-sent by the next resume, which
-                    // is sending the Gateway something it has already declined.
-                    inFlight.remove(frame.messageId)
-                }
-                SessionDownstream.Frame.Unrecognised -> Unit
             }
         }
 
         override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-            observe(connected = false, lastRxAgeMs = Long.MAX_VALUE / 2, writeFailures = 1)
-            // The decision of what to do next is the supervisor's, not this callback's.
-            val target = supervisor.failoverTarget(PRIMARY_PATH_ID)
-            markSuspect()
-            _state.value = _state.value.copy(
-                supervisor = if (target == null) {
-                    SupervisorState.OFFLINE_LOCAL
-                } else {
-                    supervisor.stateDuringFailover(supervisor.healthOf(PRIMARY_PATH_ID))
-                },
-                reason = t.message ?: "transport_failed",
-            )
+            transportFailed(webSocket, generation, t.message ?: "transport_failed")
+        }
+
+        override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
+            webSocket.close(code, reason)
+            transportFailed(webSocket, generation, reason.ifBlank { "transport_closed" })
         }
 
         override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-            observe(connected = false, lastRxAgeMs = Long.MAX_VALUE / 2, writeFailures = 0)
+            transportFailed(webSocket, generation, reason.ifBlank { "transport_closed" })
         }
     }
 
     private fun observe(connected: Boolean, lastRxAgeMs: Long, writeFailures: Int) {
         supervisor.observe(
-            PRIMARY_PATH_ID,
+            activePathId,
             PathObservation(
                 connected = connected,
                 rttMs = 0,
@@ -574,16 +869,27 @@ class VanHermesSessionManager(
         failover = null
     }
 
+    /** Reconcile existing originals on the owner's existing retry control. */
+    fun requestRecovery() {
+        scope.launch {
+            val current = synchronized(this@VanHermesSessionManager) { socket?.let { it to connectionGeneration } }
+            if (current == null) start() else resume(current.first, current.second)
+        }
+    }
+
     /**
      * §20.9 — re-establish the session, and say honestly which of the three things happened.
      *
      * A reconnect that silently created a new session would lose the turn the owner was in
      * the middle of. [ResumePolicy] separates the cases; this acts on them.
      */
-    private suspend fun resume() {
-        val local = _state.value
+    private suspend fun resume(webSocket: WebSocket, generation: Long) {
+        val local = synchronized(this) {
+            if (generation != connectionGeneration || socket !== webSocket) return
+            _state.value
+        }
         val sessionId = local.vanSessionId ?: return
-        val response = runCatching {
+        val response = try {
             gateway.sessionResume(
                 vanSessionId = sessionId,
                 sessionEpoch = local.sessionEpoch,
@@ -591,77 +897,124 @@ class VanHermesSessionManager(
                 pendingCommandIds = pendingIdentities().map {
                     SessionReconciliation.identityOf(it.messageId, it.commandId)
                 },
-                pathId = PRIMARY_PATH_ID,
+                originalCommandReferences = originalCommandReferences(),
+                pathId = activePathId,
                 routeId = "primary-ingress",
+                pathClass = if (usingHttpCarrier) "B_STREAMING" else "A_REALTIME",
             )
-        }.getOrNull()
-        val refusal = response?.optString("refusal")?.takeIf { it.isNotBlank() }
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (failure: Exception) {
+            // A lost HTTP answer is not a server declaration that this session is gone.
+            transportFailed(webSocket, generation, failure.message ?: "resume_failed")
+            return
+        }
+        val refusal = response.optString("refusal").takeIf { it.isNotBlank() }
         val serverEpoch = if (refusal == null) {
-            response?.optInt("session_epoch", -1)?.takeIf { it >= 0 }
+            response.optInt("session_epoch", -1).takeIf { it >= 0 }
         } else {
             null
         }
 
-        when (ResumePolicy.classify(local.sessionEpoch, serverEpoch, refusal)) {
-            ResumeOutcome.RESUMED -> {
-                response?.let { adoptCursor(it) }
-                adoptGrantedPathEpoch(response)
-                flushOutbox()
+        if (refusal == null && serverEpoch == null) {
+            transportFailed(webSocket, generation, "resume_response_invalid")
+            return
+        }
+        synchronized(this) {
+            if (generation != connectionGeneration || socket !== webSocket) return
+            when (ResumePolicy.classify(local.sessionEpoch, serverEpoch, refusal)) {
+                ResumeOutcome.RESUMED -> {
+                    if (!usingHttpCarrier) failedWssConnections = 0
+                    adoptCursor(response)
+                    adoptGrantedPathEpoch(response)
+                    socketReady = true
+                    observe(connected = true, lastRxAgeMs = 0, writeFailures = 0)
+                    resendInFlight()
+                    flushOutbox()
+                }
+                ResumeOutcome.RESUMED_WITH_NEW_EPOCH -> {
+                    if (!usingHttpCarrier) failedWssConnections = 0
+                    adoptCursor(response)
+                    _state.value = _state.value.copy(sessionEpoch = serverEpoch ?: local.sessionEpoch)
+                    adoptGrantedPathEpoch(response)
+                    socketReady = true
+                    observe(connected = true, lastRxAgeMs = 0, writeFailures = 0)
+                    // Everything unacknowledged goes again under the new epoch, as itself.
+                    //
+                    // Re-sent directly rather than pushed through the outbox, because these
+                    // are not the same kind of thing. The outbox holds work *stored across an
+                    // outage*, and §20.14 forbids keeping an A4 there. This is work already
+                    // sent on a live session whose acknowledgement was lost in the failover —
+                    // seconds old, same turn, same idempotency key — and §20.12's
+                    // effectively-once admission is exactly what makes re-sending it safe.
+                    // Routing it through the outbox would refuse an unacknowledged A4 and the
+                    // owner's instruction would vanish at the moment the path recovered.
+                    resendInFlight()
+                    flushOutbox()
+                }
+                ResumeOutcome.SESSION_REPLACED -> Unit // handled below, outside the state lock
+                ResumeOutcome.REFUSED -> {
+                    failover?.abandon()
+                    // Authenticated refusals require owner/deployment recovery, not replay.
+                    socketReady = false
+                    reconnectWanted = false
+                    socket = null
+                    connectionGeneration += 1
+                    webSocket.cancel()
+                    _state.value = _state.value.copy(
+                        supervisor = SupervisorState.OFFLINE_LOCAL,
+                        reason = refusal ?: "resume_refused",
+                    )
+                }
             }
-            ResumeOutcome.RESUMED_WITH_NEW_EPOCH -> {
-                response?.let { adoptCursor(it) }
-                _state.value = local.copy(sessionEpoch = serverEpoch ?: local.sessionEpoch)
-                adoptGrantedPathEpoch(response)
-                // Everything unacknowledged goes again under the new epoch, as itself.
-                //
-                // Re-sent directly rather than pushed through the outbox, because these
-                // are not the same kind of thing. The outbox holds work *stored across an
-                // outage*, and §20.14 forbids keeping an A4 there. This is work already
-                // sent on a live session whose acknowledgement was lost in the failover —
-                // seconds old, same turn, same idempotency key — and §20.12's
-                // effectively-once admission is exactly what makes re-sending it safe.
-                // Routing it through the outbox would refuse an unacknowledged A4 and the
-                // owner's instruction would vanish at the moment the path recovered.
-                resendInFlight()
-                flushOutbox()
+        }
+        if (refusal == null && synchronized(this) { generation == connectionGeneration && socket === webSocket }) {
+            onSpeechResume()
+        }
+        if (ResumePolicy.classify(local.sessionEpoch, serverEpoch, refusal) != ResumeOutcome.SESSION_REPLACED) return
+        val fresh = try {
+            gateway.sessionOpen(pathId = activePathId, routeId = "primary-ingress",
+                protocol = if (usingHttpCarrier) "HTTP_SSE" else "WSS",
+                pathClass = if (usingHttpCarrier) "B_STREAMING" else "A_REALTIME")
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (missing: SessionOpenRecoveryException) {
+            synchronized(this) {
+                reconnectWanted = false
+                _state.value = _state.value.copy(supervisor = SupervisorState.OFFLINE_LOCAL, reason = missing.message.orEmpty())
             }
-            ResumeOutcome.SESSION_REPLACED -> {
-                failover?.abandon()
-                val fresh = runCatching {
-                    gateway.sessionOpen(pathId = PRIMARY_PATH_ID, routeId = "primary-ingress")
-                }.getOrNull() ?: return
-                _state.value = local.copy(
-                    vanSessionId = fresh.optString("van_session_id"),
-                    sessionEpoch = fresh.optInt("session_epoch", 0),
-                    pathEpoch = fresh.optInt("path_epoch", 0),
-                    authoritativePathId = PRIMARY_PATH_ID,
-                    reason = "previous session is gone; this is a new one",
-                )
-                failover = null
-                suspectAtNanos = 0L
-                // Deliberately not flushed: work addressed to a session that no longer
-                // exists is not the same work, and replaying it silently into a new one is
-                // how an owner's cancelled instruction gets performed.
-                //
-                // Dropped from the disk as well as from memory, and the owner is told.
-                // Clearing only the in-memory queue left the records on disk, so the very
-                // next `start()` restored them and flushed them into the new session —
-                // the decision made here reversed by a restart, which is the failure mode
-                // that arrived with durability and was invisible without it.
-                val dropped = DurableOutbox.abandonAll(outbox.map { it.entry }, store)
-                abandoned += dropped
-                tell(dropped, System.currentTimeMillis())
-                outbox.clear()
-                inFlight.clear()
-                publishOutboxDepth()
+            return
+        } catch (failure: Exception) {
+            transportFailed(webSocket, generation, failure.message ?: "session_replacement_failed")
+            return
+        }
+        synchronized(this) {
+            if (generation != connectionGeneration || socket !== webSocket) return
+            val freshId = fresh.optString("van_session_id").takeIf { it.isNotBlank() }
+            if (freshId == null) {
+                transportFailed(webSocket, generation, "session_open_response_invalid")
+                return
             }
-            ResumeOutcome.REFUSED -> {
-                failover?.abandon()
-                _state.value = local.copy(
-                    supervisor = SupervisorState.OFFLINE_LOCAL,
-                    reason = refusal ?: "resume_refused",
-                )
-            }
+            failover?.abandon()
+            _state.value = _state.value.copy(
+                vanSessionId = freshId,
+                sessionEpoch = fresh.optInt("session_epoch", 0),
+                pathEpoch = fresh.optInt("path_epoch", 0),
+                authoritativePathId = activePathId,
+                reason = "previous session is gone; this is a new one",
+            )
+            failover = null
+            suspectAtNanos = 0L
+            val droppable = outbox.filter { it.entry.neverDispatched == true && currentOriginal(it.entry, it.envelope) }
+            val dropped = DurableOutbox.abandonAll(droppable.map { it.entry }, store)
+            abandoned += dropped
+            tell(dropped, System.currentTimeMillis())
+            outbox.removeAll(droppable.toSet())
+            dropped.forEach { transientEntries.remove(it.messageId); transientOwners.remove(it.messageId) }
+            recoveryHeld.addAll(outbox.map { it.entry.messageId } + inFlight.keys)
+            publishOutboxDepth()
+            // The socket's handshake belongs to the old id; attach to the new session.
+            transportFailed(webSocket, generation, "previous session is gone; this is a new one")
         }
     }
 
@@ -692,14 +1045,14 @@ class VanHermesSessionManager(
         val granted = resume?.optInt("new_path_epoch", -1) ?: -1
         if (granted < 0) return
         if (failover != null) {
-            completeFailover(granted, PRIMARY_PATH_ID)
+            completeFailover(granted, activePathId)
             return
         }
         // An ordinary resume — a first connect, or a reconnect on the same path. There is
         // no transaction to promote and no interruption to time, but the grant is still
         // the grant.
         if (granted > _state.value.pathEpoch) {
-            _state.value = _state.value.copy(pathEpoch = granted)
+            _state.value = _state.value.copy(pathEpoch = granted, authoritativePathId = activePathId)
         }
     }
 
@@ -717,26 +1070,34 @@ class VanHermesSessionManager(
      * about only the attempted ones would therefore miss precisely the kill this
      * reconciliation exists for, and that command would be delivered twice.
      */
+    @Synchronized
     private fun pendingIdentities(): List<SessionReconciliation.Pending> {
         val pending = mutableListOf<SessionReconciliation.Pending>()
+        val originals = store?.restore()?.associate { it.first.messageId to it.first } ?: transientEntries
         for ((messageId, envelope) in inFlight) {
-            pending += SessionReconciliation.Pending(
-                messageId = messageId,
-                commandId = envelope.optString("command_id").takeIf { it.isNotBlank() },
-            )
+            val original = originals[messageId]
+            if (original != null) {
+                if (!currentOriginal(original, envelope)) continue
+            } else if (transientOwners[messageId] != ownerSelection()) continue
+            pending += SessionReconciliation.Pending(messageId,
+                envelope.optString("command_id").takeIf { it.isNotBlank() },
+                kind = envelope.optString("kind"), sessionOnlyOrigin = original?.sessionOnlyOrigin == true,
+                sameOriginalSession = envelope.optString("van_session_id") == _state.value.vanSessionId)
         }
         for (queued in outbox) {
-            pending += SessionReconciliation.Pending(
-                messageId = queued.entry.messageId,
-                commandId = queued.entry.commandId,
-            )
+            if (!currentOriginal(queued.entry, queued.envelope)) continue
+            pending += SessionReconciliation.Pending(queued.entry.messageId, queued.entry.commandId,
+                neverDispatched = queued.entry.neverDispatched == true,
+                kind = queued.envelope.optString("kind"), sessionOnlyOrigin = queued.entry.sessionOnlyOrigin == true,
+                sameOriginalSession = queued.envelope.optString("van_session_id") == _state.value.vanSessionId)
         }
         return pending
     }
 
+    @Synchronized
     private fun adoptCursor(resume: JSONObject) {
         lastEventSeq = resume.optLong("replay_from_seq", lastEventSeq)
-        val answers = resume.optJSONObject("command_states") ?: return
+        val answers = resume.optJSONObject("command_states") ?: JSONObject()
         val states = buildMap<String, String> {
             answers.keys().forEach { key -> put(key, answers.optString(key)) }
         }
@@ -745,16 +1106,36 @@ class VanHermesSessionManager(
         // the identity the question was asked by is the identity the answer is matched
         // by. Anything the Gateway did not recognise stays exactly where it is and goes
         // again under its own message id and idempotency key.
-        val settled = SessionReconciliation.plan(pendingIdentities(), states).settle.toSet()
+        val receipts = resume.optJSONObject("original_command_results") ?: JSONObject()
+        val originals = store?.restore() ?: transientEntries.values.mapNotNull { entry ->
+            (inFlight[entry.messageId] ?: outbox.firstOrNull { it.entry.messageId == entry.messageId }?.envelope)
+                ?.let { entry to it.toString() }
+        }
+        val verified = mutableMapOf<String, JSONObject>()
+        val (profile, device) = ownerSelection()
+        for ((entry, raw) in originals) {
+            if (states[entry.commandId] != "ORIGINAL_COMPLETED") continue
+            val envelope = runCatching { JSONObject(raw) }.getOrNull() ?: continue
+            OriginalCommandReference.verifiedResult(entry, envelope, profile, device,
+                receipts.optJSONObject(entry.commandId))?.let { verified[entry.messageId] = it }
+        }
+        val pending = pendingIdentities().map { it.copy(verifiedOriginalRead = it.messageId in verified) }
+        val plan = SessionReconciliation.plan(pending, states)
+        recoveryHeld.clear()
+        recoveryHeld.addAll(plan.hold)
+        originalRecoveryAllowed.clear()
+        originalRecoveryAllowed.addAll(plan.resend)
+        val settled = plan.settle.toSet()
         if (settled.isEmpty()) return
+        // The read fact names the existing durable result owner. Notify with its
+        // actual accepted/running/refused state before releasing delivery metadata.
+        settled.mapNotNull { verified[it] }.forEach(onRecoveredOriginal)
         inFlight.keys.removeAll(settled)
+        settled.forEach { store?.forget(it); transientEntries.remove(it); transientOwners.remove(it) }
         // Removed from the queue *and* from the disk. Leaving the record behind is the
         // restart loop: restored on the next start, flushed again, and the owner's one
         // instruction performed once more after every process death.
         val kept = outbox.filterNot { it.entry.messageId in settled }
-        for (queued in outbox) {
-            if (queued.entry.messageId in settled) store?.forget(queued.entry.messageId)
-        }
         outbox.clear()
         outbox.addAll(kept)
         publishOutboxDepth()
@@ -766,13 +1147,22 @@ class VanHermesSessionManager(
      * The envelope keeps its `message_id` and `idempotency_key`, so a Gateway that did
      * receive the first copy recognises this one and does not run it twice.
      */
+    @Synchronized
     private fun resendInFlight() {
-        val live = socket ?: return
-        val epoch = _state.value.pathEpoch
+        val live = socket.takeIf { socketReady } ?: return
+        val local = _state.value
+        val sessionId = local.vanSessionId ?: return
         val pending = inFlight.values.toList()
-        inFlight.clear()
         for (envelope in pending) {
-            val readdressed = SessionEnvelope.readdress(envelope, epoch)
+            val messageId = envelope.getString("message_id")
+            if (messageId in recoveryHeld) continue
+            val entry = if (store != null) store.restore().firstOrNull { it.first.messageId == messageId }?.first
+                else transientEntries[messageId]
+            if (entry == null || !currentOriginal(entry, envelope) || !ownedTransportRecovery(entry, envelope) ||
+                DurableOutbox.flush(entry, System.currentTimeMillis()) !is FlushVerdict.Send ||
+                envelope.optString("van_session_id") != sessionId) continue
+            val readdressed = SessionEnvelope.readdress(envelope, local.pathEpoch)
+            if (!prepareSessionSend(entry, readdressed)) continue
             if (!live.send(readdressed.toString())) {
                 // The new path died during the resume. Keep it in flight rather than
                 // dropping it: the next resume will try again, and losing it here would
@@ -784,8 +1174,9 @@ class VanHermesSessionManager(
         }
     }
 
+    @Synchronized
     private fun flushOutbox() {
-        val live = socket ?: return
+        val live = socket.takeIf { socketReady } ?: return
         // A socket implies a session, because the socket is opened against one. Guarded
         // anyway and guarded *here*, so the rebind below cannot be the thing that decides
         // to stop mid-flush — an early return inside the loop would append what was held
@@ -802,12 +1193,18 @@ class VanHermesSessionManager(
                 held.addLast(queued)
                 continue
             }
+            if (!currentOriginal(queued.entry, queued.envelope) || queued.entry.messageId in recoveryHeld ||
+                (queued.entry.neverDispatched != true && !ownedTransportRecovery(queued.entry, queued.envelope))) {
+                held.addLast(queued)
+                continue
+            }
             when (DurableOutbox.flush(queued.entry, now)) {
                 is FlushVerdict.Expired -> {
                     // Dropped, not held: the window closed and the owner is told it did
                     // not happen rather than asked about something they have forgotten.
                     expired += queued.entry
                     store?.forget(queued.entry.messageId)
+                    transientEntries.remove(queued.entry.messageId)
                     tell(listOf(queued.entry), now)
                 }
                 is FlushVerdict.NeedsReconfirmation, is FlushVerdict.Refused -> {
@@ -830,22 +1227,24 @@ class VanHermesSessionManager(
                         queued.envelope
                     }
                     val readdressed = SessionEnvelope.readdress(bound, epoch)
+                    if (!prepareSessionSend(queued.entry, readdressed)) {
+                        held.addLast(queued)
+                        continue
+                    }
                     if (live.send(readdressed.toString())) {
                         inFlight[readdressed.getString("message_id")] = readdressed
-                        // After the write, never before. Forgetting first would lose the
-                        // command to a kill between the two — the same defect as never
-                        // persisting, arriving one instruction later.
-                        store?.forget(queued.entry.messageId)
+                        // WebSocket.send only enqueues bytes. Keep the durable record until
+                        // an acknowledgement or resume reconciliation confirms admission.
                     } else {
                         // The socket went away mid-flush. Everything after this keeps its
                         // order, which is why the remainder is moved rather than retried.
-                        held.addLast(
-                            queued.copy(
-                                entry = DurableOutbox.attempted(
-                                    queued.entry, _state.value.authoritativePathId,
-                                ),
-                            ),
+                        val attempted = queued.copy(
+                            entry = DurableOutbox.attempted(queued.entry, _state.value.authoritativePathId).copy(neverDispatched = false),
+                            envelope = readdressed,
                         )
+                        if (store != null) store.persist(attempted.entry, attempted.envelope.toString())
+                        else transientEntries[attempted.entry.messageId] = attempted.entry
+                        held.addLast(attempted)
                         stop = true
                     }
                 }
@@ -869,6 +1268,7 @@ class VanHermesSessionManager(
      */
     private val abandoned = mutableListOf<OutboxEntry>()
 
+    @Synchronized
     fun expiredSinceLastRead(): List<OutboxEntry> {
         val taken = expired.toList()
         expired.clear()
@@ -890,6 +1290,7 @@ class VanHermesSessionManager(
     }
 
     /** Everything that will not be sent, whatever the reason, taken once. */
+    @Synchronized
     fun undeliveredSinceLastRead(): List<OutboxEntry> {
         val taken = expired + abandoned
         expired.clear()
@@ -898,6 +1299,7 @@ class VanHermesSessionManager(
     }
 
     /** Anything the owner still has to be asked about before it runs. */
+    @Synchronized
     fun awaitingReconfirmation(): List<OutboxEntry> =
         outbox.map { it.entry }.filter {
             DurableOutbox.flush(it, System.currentTimeMillis()) is FlushVerdict.NeedsReconfirmation
@@ -920,6 +1322,7 @@ class VanHermesSessionManager(
 
     companion object {
         const val PRIMARY_PATH_ID = "primary-wss"
+        const val HTTP_PATH_ID = "fallback-http2"
 
         /**
          * §20.6 — what this build actually has.
@@ -940,9 +1343,9 @@ class VanHermesSessionManager(
                 supportsFullDuplex = true,
             ),
             TransportPathDescriptor(
-                pathId = "fallback-http2",
-                pathClass = PathClass.C_REPLAY_FLOOR,
-                protocol = "HTTP2",
+                pathId = HTTP_PATH_ID,
+                pathClass = PathClass.B_STREAMING,
+                protocol = "HTTP_SSE",
                 endpoint = "/v1/session/events-stream",
                 routeId = "primary-ingress",
                 priority = 50,

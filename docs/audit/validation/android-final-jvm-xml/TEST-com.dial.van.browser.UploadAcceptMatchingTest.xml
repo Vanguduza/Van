@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.browser.UploadAcceptMatchingTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:11:46" hostname="052fefa249ff" time="0.002">
+  <properties/>
+  <testcase name="an exact type matches exactly, parameters and case aside()" classname="com.dial.van.browser.UploadAcceptMatchingTest" time="0.0"/>
+  <testcase name="a file with no extension does not match an extension rule()" classname="com.dial.van.browser.UploadAcceptMatchingTest" time="0.0"/>
+  <testcase name="no accept attribute means anything()" classname="com.dial.van.browser.UploadAcceptMatchingTest" time="0.0"/>
+  <testcase name="an extension matches on the extension()" classname="com.dial.van.browser.UploadAcceptMatchingTest" time="0.0"/>
+  <testcase name="any of several accepted forms is enough()" classname="com.dial.van.browser.UploadAcceptMatchingTest" time="0.0"/>
+  <testcase name="star slash star takes everything()" classname="com.dial.van.browser.UploadAcceptMatchingTest" time="0.001"/>
+  <testcase name="a wildcard type matches its family()" classname="com.dial.van.browser.UploadAcceptMatchingTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

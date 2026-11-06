@@ -1,0 +1,63 @@
+{
+  "state": "TERMINAL_EXPECTED_BEFORE_MISSING_YAML",
+  "before_lock_sha256": "95504e01ef04029f410b2b23dc7fff3e02d7e7327513388a3b065f1a87ce9941",
+  "official14_wheels_reverified": true,
+  "workspace_admission_floor": 67108864,
+  "tmp_reserve": 2147483648,
+  "owned_budget": 134217728,
+  "file_cap": 8388608,
+  "steps": [
+    {
+      "label": "fresh-venv",
+      "command": [
+        "/workspace/van-backend-venv-20261025/bin/python",
+        "-B",
+        "-m",
+        "venv",
+        "/tmp/van-recovery-ba817-ci-repair-20261101/venv"
+      ],
+      "exit": 0,
+      "seconds": 3.855386336996162,
+      "peak_owned_bytes": 12954314
+    },
+    {
+      "label": "install-before",
+      "command": [
+        "/tmp/van-recovery-ba817-ci-repair-20261101/venv/bin/python",
+        "-B",
+        "-m",
+        "pip",
+        "install",
+        "--no-cache-dir",
+        "--no-compile",
+        "--no-index",
+        "--find-links",
+        "/workspace/van-ci-shards-documentary-dependency-20261101/wheels",
+        "--require-hashes",
+        "-r",
+        "/tmp/van-recovery-ba817-ci-repair-20261101/BEFORE_HASHED.lock"
+      ],
+      "exit": 0,
+      "seconds": 1.7035130329968524,
+      "peak_owned_bytes": 20703408
+    },
+    {
+      "label": "before-missing-yaml",
+      "command": [
+        "/tmp/van-recovery-ba817-ci-repair-20261101/venv/bin/python",
+        "-B",
+        "-m",
+        "pytest",
+        "tests/rebuild/test_canonical_source_audit.py::test_added_profile_install_overlays_preserve_their_declared_lock_versions",
+        "--basetemp=/tmp/van-recovery-ba817-ci-repair-20261101/pytest-before",
+        "--junitxml=/tmp/van-recovery-ba817-ci-repair-20261101/BEFORE.xml",
+        "-q"
+      ],
+      "exit": 1,
+      "seconds": 1.0936168859989266,
+      "peak_owned_bytes": 20703988
+    }
+  ],
+  "started": "2026-11-01T19:33:47.627484+00:00",
+  "completed": "2026-11-01T19:33:54.289665+00:00"
+}

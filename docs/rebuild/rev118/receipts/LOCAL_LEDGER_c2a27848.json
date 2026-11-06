@@ -1,0 +1,9 @@
+{
+  "schema": "van.rebuild.local-ledger-verification/1",
+  "source_head": "c2a278488f00bacaf912853ed6e711a5b1de986a",
+  "baseline": "4fd466dec3910ed5de614bfbf95887ad619df5ca",
+  "exit": 0,
+  "commit_count": 15,
+  "output": "project-truth-ledger verify: GREEN \u2014 15 commit(s) in 4fd466dec391..c2a278488f00\n  baseline: 4fd466dec3910ed5de614bfbf95887ad619df5ca\n  ledger_source: c2a278488f00:docs/project-state/LOCAL_CHANGE_LEDGER.jsonl\n  trusted_records: c2a278488f00\n",
+  "trusted_main_admission": false
+}

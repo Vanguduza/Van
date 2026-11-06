@@ -1,0 +1,86 @@
+{
+  "status": "FROZEN_SOURCE_REQUIRES_INDEPENDENT_REVIEW",
+  "base": "c792a1e6e7e1e942b56d00a3929d7b54f6eac13f",
+  "paths": {
+    "trading/tests/test_account_unlink_currentness.py": {
+      "before_sha256": "4abd5642062e30f5e23fd953b3c30b5517eb12b5e8f39c27dc0497fa6097f00d",
+      "after_sha256": "aae58de4d30a746c783fbb9d76b5675174501aff8ddb303829c4f6c52d585e0f",
+      "exact_import_module_changes": {
+        "test_account_unlink_review": "backend.tests.test_account_unlink_review"
+      },
+      "all_other_ast_exact": true,
+      "all_asserts": 31
+    },
+    "backend/tests/test_account_unlink_review.py": {
+      "before_sha256": "b57fd1b21f979f18d06f22c0bc2833bb3febcd4135ccf830c9412867751d7cf2",
+      "after_sha256": "8b0412a56980c1c5cbbc12af45217fb41e839ef698b06507837a067919d14fba",
+      "exact_import_module_changes": {
+        "test_trading_api": "backend.tests.test_trading_api",
+        "test_account_update_review": "backend.tests.test_account_update_review",
+        "test_trading_oauth_scope": "backend.tests.test_trading_oauth_scope"
+      },
+      "all_other_ast_exact": true,
+      "all_asserts": 54
+    },
+    "backend/tests/test_account_update_review.py": {
+      "before_sha256": "c4fa99375516fd0c52833ff4dc941c7e68dc1d6e185418e4093c489606b25d0b",
+      "after_sha256": "eaa45b4b612213b74783d8e951fb02d42400f56037ae4b8c67bb2769a20c704f",
+      "exact_import_module_changes": {
+        "test_trading_api": "backend.tests.test_trading_api",
+        "test_trading_oauth_scope": "backend.tests.test_trading_oauth_scope"
+      },
+      "all_other_ast_exact": true,
+      "all_asserts": 56
+    },
+    "backend/tests/test_trading_oauth_scope.py": {
+      "before_sha256": "d14de3b0bba7d523beda7dbc3143bf83080c5a6ddb0be5670768b0d150636c00",
+      "after_sha256": "54267a0f3e82d51c10395defffeb579e4b094009449f42e3c0a3757b3d111920",
+      "exact_import_module_changes": {
+        "test_trading_api": "backend.tests.test_trading_api"
+      },
+      "all_other_ast_exact": true,
+      "all_asserts": 20
+    }
+  },
+  "body_fixture_assertion_AST_exact_except_import_module_names": true,
+  "assertions_preserved": 161,
+  "collection": {
+    "root": 5799,
+    "backend": 5799,
+    "ordered_node_identity_equal": true,
+    "ordered_sha256": "905f8b495775896198ef7842c8fa67209f1cd0ffeadae09ebad8b2d830efe340",
+    "qualification": "COLLECTION_ONLY includes new label journal tests; full trading runtime/PG not executed"
+  },
+  "runtime": {
+    "root": 6,
+    "backend": 6,
+    "unique_cases": 6,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "audits_forbidden_events": 0
+  },
+  "controller_history": "After controller exit1 ONLY because shared cleanup output filename already existed on final cleanup; all four original child commands exited0 and audit/XML/pins checks succeeded before failure. Original AFTER.json unchanged. No tests repeated. Separate scoped cleanup below reconciles this real controller error.",
+  "cleanup_supplement": {
+    "path": "/tmp/van-recovery-pytest-label-import-runtime-backend-20261102",
+    "files": 50,
+    "inventory": "/tmp/van-label-pg-import-portability-20261102/runtime-backend-cleanup/owned-temp-inventory.json",
+    "inventory_sha256": "386cca80f0ae07142ac7ff466d0b26b25aa003eec6dd9f91376340133edb95cf",
+    "free_bytes_before_cleanup": 2267774976,
+    "free_bytes_after_cleanup": 2280374272,
+    "free_inodes_after": 2198338,
+    "independently_absent": true
+  },
+  "original_before": "before.log exit2 ModuleNotFoundError/test_account_unlink_review; qualified-closure-before.log exit1/test_trading_api",
+  "published8_intentional_import_test_exceptions": [
+    "backend/tests/test_account_unlink_review.py",
+    "trading/tests/test_account_unlink_currentness.py"
+  ],
+  "other_published8_exact": true,
+  "reviewed_label9_exact": true,
+  "patch_sha256": "2e862113aa7c2cfbeb6dd14d371a9e907c0bfa0d2b870f4bca6871f7ee3e23d9",
+  "source_zip_sha256": "05c65ba04e03b787a390ed45333be73501b0f3ed0023d3554f86022559abb1bd",
+  "raw_paths_volatile": "/tmp/van-label-pg-import-portability-20261102",
+  "no_pg_production_or_native_claim": true,
+  "at": "2026-11-02T01:50:07.768851+00:00"
+}

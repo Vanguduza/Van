@@ -1,0 +1,38 @@
+{
+  "results": [
+    {
+      "case": "rapid_unlink",
+      "verdict": "PASS",
+      "observed_terminal": 0,
+      "injected_monitor_error": false,
+      "finally": {
+        "child_pid": 1577870,
+        "child_exit": 0,
+        "waited": true,
+        "group_absent": true
+      },
+      "controller_threads": 0,
+      "source_semantics_changed": false
+    },
+    {
+      "case": "monitor_error",
+      "verdict": "PASS",
+      "observed_terminal": null,
+      "injected_monitor_error": true,
+      "finally": {
+        "child_pid": 1577871,
+        "child_exit": -15,
+        "waited": true,
+        "group_absent": true
+      },
+      "controller_threads": 0,
+      "source_semantics_changed": false
+    }
+  ],
+  "external_helper_sha256": {
+    "controller_preflight.py": "20d801e3e2682d6b4c8e9b303e45136fe9a8d67aa5035a45cb882e9e5f87dbfe",
+    "controller_lifecycle.py": "7f9b7c78150209e7365851f8d7bc63b5c4ea6577b1e4dca1fc384ff8437db3b3",
+    "run_shm.py": "b227080c2c22dd105e2b3a3864c6d3f70bca776583f218c2afe5b442d5336968"
+  },
+  "no_repository_mutation": true
+}

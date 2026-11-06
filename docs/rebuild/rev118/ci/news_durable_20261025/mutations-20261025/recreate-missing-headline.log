@@ -1,0 +1,17 @@
+....F....................                                                [100%]
+=================================== FAILURES ===================================
+_____ test_missing_known_original_cannot_be_recreated_or_reported_complete _____
+
+ledger = <vati.core.ledger.Ledger object at 0x7f4d17117230>
+
+    def test_missing_known_original_cannot_be_recreated_or_reported_complete(ledger):
+        news=NewsIngress(ledger=ledger);h=story();news.ingest(h)
+        ledger._conn.execute('DELETE FROM events WHERE kind=?',(EventKind.NEWS_HEADLINE.value,))
+>       with pytest.raises(NewsIngressError,match='missing'):news.ingest(h)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE NewsIngressError
+
+trading/tests/test_news_durable_publication.py:79: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_news_durable_publication.py::test_missing_known_original_cannot_be_recreated_or_reported_complete
+1 failed, 24 passed, 2 deselected in 0.83s

@@ -12,12 +12,13 @@ The important cases here are the refusals:
 * a second paired device may not touch the owner's session;
 * Hermes' internal control credential is not a substitute for the owner's device on these
   routes, and the owner's device is not a substitute for Hermes on the others;
-* with no signing key configured, the routes do not exist at all rather than issuing a
-  credential no stream host can verify.
+* with no signing key configured, interactive credential/effect routes do not exist;
+  the owner-authenticated read-only provider catalog reports unavailable contracts.
 """
 
 from __future__ import annotations
 
+import time
 import pytest
 import pytest_asyncio
 from cryptography.fernet import Fernet
@@ -414,22 +415,71 @@ class TestSessionLifecycleRoutes:
 
 @pytest.mark.asyncio
 class TestUnconfiguredDeployment:
-    async def test_without_a_signing_key_the_routes_do_not_exist(self, tmp_path, monkeypatch):
-        """§42.5 — no route is better than a route that issues an unverifiable credential.
+    async def test_without_a_signing_key_provider_preparation_has_no_execution_authority(self, tmp_path, monkeypatch):
+        """§42.5 — absent signing authority cannot issue a credential or effect.
 
-        This is the state of every deployment until the owner provisions a stream host, and
-        it must be visibly absent rather than quietly broken.
+        Read-only readiness remains visible for an existing owner's session;
+        availability does not follow from the mere existence of that catalog.
         """
         monkeypatch.setenv("VAN_DATABASE_PATH", str(tmp_path / "unconfigured.sqlite3"))
         monkeypatch.setenv("VAN_HERMES_BASE_URL", "http://hermes.invalid")
         monkeypatch.setenv("VAN_GOOGLE_TOKEN_FERNET_KEY", Fernet.generate_key().decode())
         monkeypatch.setenv("VAN_DEVICE_SECRET_FERNET_KEY", Fernet.generate_key().decode())
         monkeypatch.setenv("VAN_INGRESS_TOKEN", INGRESS)
+        monkeypatch.setenv("VAN_INTERNAL_CONTROL_TOKEN", INTERNAL)
         monkeypatch.setenv("VAN_BROWSER_STREAM_SIGNING_KEY_FILE", "")
         get_settings.cache_clear()
         app = create_app()
         try:
-            paths = {p for p in app.openapi()["paths"] if "interactive-sessions" in p}
-            assert paths == set()
+            catalog_path = f"{SESSIONS}/{{session_id}}/file-provider-contracts"
+            schema = app.openapi()["paths"]
+            request_path=f"{SESSIONS}/{{session_id}}/file-provider-requests"
+            assert {p for p in schema if "interactive-sessions" in p} == {catalog_path,request_path,
+                request_path+"/{request_id}",request_path+"/{request_id}/cancel",request_path+"/{request_id}/observation"}
+            assert set(schema[catalog_path]) == {"get"}
+            assert set(schema[request_path])=={"get","post"}
+            assert app.state.browser_stream_grants is None
+            assert app.state.browser_producers is None
+            assert app.state.browser_action_plans is None
+            async with app.router.lifespan_context(app):
+                owner = await _device(app)
+                other = await _device(app, "other-phone")
+                await app.state.browser.broker.register_profile(profile_alias="authenticated_owner")
+                from van_gateway.browser.interactive_models import Viewport
+                # An existing session may outlive a removed deployment signing
+                # key. Fixture state creates no stream credential or native work.
+                session = await app.state.interactive_sessions.create(owner_device_id=owner.device.device_id,
+                    profile_alias="authenticated_owner", viewport=Viewport(width=1080, height=1920, device_scale_factor=1))
+                path = f"{SESSIONS}/{session.session_id}/file-provider-contracts"
+                async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+                    assert (await ac.get(path)).status_code == 401
+                    assert (await ac.get(path, headers={"X-Van-Ingress-Token":INGRESS})).status_code == 401
+                    assert (await ac.get(path, headers={"X-Van-Ingress-Token":INGRESS,"X-Van-Internal-Token":INTERNAL})).status_code == 401
+                    assert (await ac.get(path, headers=_headers(other))).status_code == 404
+                    response = await ac.get(path, headers=_headers(owner))
+                    assert response.status_code == 200, response.text
+                    readiness = response.json()
+                    assert readiness["live_effects_verified"] == 0 and len(readiness["contracts"]) == 2
+                    assert all(row["executable"] is False and row["target_contract_qualified"] is False
+                        and row["state"] == "UNAVAILABLE" and row["reason"] == "TARGET_CONTRACT_UNBOUND"
+                        for row in readiness["contracts"])
+                    requests=f"{SESSIONS}/{session.session_id}/file-provider-requests"
+                    assert (await ac.get(requests)).status_code==401
+                    assert (await ac.get(requests,headers=_headers(other))).status_code==409
+                    assert (await ac.get(requests,headers=_headers(owner))).json()=={"session_id":session.session_id,"requests":[]}
+                    refused=await ac.post(requests,headers=_headers(owner),json={"download_id":"unbound-file",
+                        "provider":"ORACLE_OWNER_ARCHIVE","owner_namespace":"owner","project_namespace":"van",
+                        "content_sha256":"0"*64,"byte_size":1,"deadline_ms":int(time.time()*1000)+30000,"idempotency_key":"unbound-draft"})
+                    assert refused.status_code==409 and "unbound" in refused.text
+                    # Even an owner's valid bearer cannot impersonate a
+                    # separately provisioned provider's verified mTLS scope.
+                    for operation in ("introspect","claim"):
+                        private=await ac.post(f"/v1/browser/artifact-provider/admissions/bfa_test/{operation}",
+                            headers=_headers(owner),json={"signed_admission":"x"*64})
+                        assert private.status_code in {401,403,503}
+                    for absent_path in (SESSIONS, f"{SESSIONS}/{session.session_id}/stream-grant",
+                        f"{SESSIONS}/{session.session_id}/transfer-grants", f"{SESSIONS}/{session.session_id}/action-plans"):
+                        refused = await ac.post(absent_path, json={}, headers=_headers(owner))
+                        assert refused.status_code == 404, (absent_path, refused.text)
         finally:
             get_settings.cache_clear()

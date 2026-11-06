@@ -1,0 +1,70 @@
+{
+  "schema": "van.rev118.mt5-pending-receipts-source/1",
+  "source_parent": "3732798104c476680cac8e22f833f2ed764d77e2",
+  "observed_at_utc": "2026-10-28T13:46:45.827152+00:00",
+  "implementation": "Actual native EA PLACED acknowledgments now remain ACCEPTED with the exact uint64 native order ID, zero filled quantity, no invented average fill or position, and only explicitly confirmed protection. Missing or invalid broker clocks remain unknown. Contradictory pending acknowledgments retain UNKNOWN and require original reconciliation. Submit independently reads the original durable SQL claim/result; timeout, stale account availability and replay cannot create a new claim or renew its completion. Valid original completion clocks and receipt hashes survive duplicate results, reopen and historical recovery. Corrupt/unavailable completion clocks withhold local receipt availability without erasing a known effect. Existing supported entry types remain MARKET; no new entry permission or native execution is added. Final full source qualification:5272passed0skip/fail/error/audit,actualinner/outerexit0,everycallonce,all1259inputhashesmatch,ownedPostgreSQLindependentlyabsent. 2880 original test functions retain identical AST.0formal/native/production/S24acceptancesissued.",
+  "source_files_sha256": {
+    "trading/vati/execution/mt5_pull.py": "1ff81c1d17fac2669511ec789c814a16c27262192e38db6810402d499b215d87",
+    "trading/tests/mql_terminal_fixture.cpp": "c3a8ac49a6496db6cc65a171f8f6d3d934a3f1a9baeb833d1f2424266599b926",
+    "trading/tests/test_mt5_pending_receipts.py": "6d33c20461431ce8cd48374606d0e937f8e7dda19f067c2557fe8cc84ce7b746"
+  },
+  "source_result": {
+    "actual_inner_exit": 0,
+    "actual_outer_exit": 0,
+    "passed": 5272,
+    "skipped": 0,
+    "failures": 0,
+    "errors": 0,
+    "audit_violations": 0,
+    "unique_calls_once": 5272,
+    "pinned_inputs_matched": 1259,
+    "original_test_functions_AST_preserved": 2880,
+    "owned_postgres_independently_absent": true,
+    "raw": "ci/mt5_pending_receipts_20261028/sql_r1"
+  },
+  "additional_explicit_expiry_readback": {
+    "checks_passed": 8,
+    "actual_exit": 0,
+    "source_hashes_match": true,
+    "new_native_effects": false,
+    "scope": "Actual bounded native claims, first completion, database reopen and unchanged result/hash after command expiry; all six terminal statuses plus QUEUED/TAKEN uncertainty."
+  },
+  "retained_failures": [
+    "Baseline actualexit1:2 actual EA ACCEPTED responses misclassified UNKNOWN.",
+    "Focusedr1 actualexit1:105passed1failed; reopened test adapter omitted original physical-account binding. Exact binding restored in fixture; production identity matching unchanged.",
+    "Parent selected artifact download actualexit1: advertised ZIP URL returned695-byte JSON artifact metadata instead of192716-byte ZIP. Rejected by byte-size check before extraction. Repeated supported download returned the same metadata; direct approved GitHub archive request was403. Original job logs are separately observed; no original JUnit archive verification claimed."
+  ],
+  "published_parent_evidence": {
+    "head": "3732798104c476680cac8e22f833f2ed764d77e2",
+    "source_tests_passed": 5215,
+    "committed_ledger": "GREEN191",
+    "native_compiler": "SOURCE_COMPILED_0_ERRORS_0_WARNINGS_EXACT_UNCHANGED_EA",
+    "native_proof": "ci/mt5_pending_receipts_20261028/published_parent_native_compiler/verified-evidence.json",
+    "hosted_job_log": {
+      "run": 40692934675,
+      "job": 122832127397,
+      "trading_passed": 4987,
+      "trading_declared_private_DDS_skips": 1,
+      "postgres_passed": 26,
+      "voice_passed": 117,
+      "original_JUnit_archive_verified": false
+    },
+    "main_CI": "IN_PROGRESS_AT_OBSERVATION_TWO_MANDATORY_FAILURES",
+    "mandatory_failure_reasons": [
+      "DDS_CONTRACT_READ_DEPLOY_KEY unprovisioned",
+      "trusted main8eb18898 lacks tools/ci/project_truth_ledger.py"
+    ]
+  },
+  "source_authorizations": [
+    "auth-20261022-owner-autonomous-candidate-build"
+  ],
+  "formal_acceptances_issued": 0,
+  "limitations": [
+    "The exact production EA functions execute through an explicit C++ terminal API model. Actual MetaEditor compilation is separately verified for unchanged parent source, not an owner-connected terminal or provider acceptance.",
+    "ACCEPTED is a pending effect, never a fill, cash settlement, verified native stop execution, reservation release or renewed financial authority. Full working-order/partial-fill/cancel reconciliation and economic finality remain required.",
+    "Corrupt or missing completion clocks retain a known native effect with received_time_unix_ms=None; consumers must reconcile. No fabricated availability timestamp repairs missing source facts.",
+    "Shared all-origin transactional cash/margin/stop-risk reservations, post-entry margin floors, fee/fill contingencies, qualified FX/contracts and active-policy arbitration remain open.",
+    "Every remaining backend/forecast/learning/crypto/assistant/operations and Android requirement remains required. Profitability is evidence-based, never guaranteed."
+  ],
+  "next": "Genuine hooks, mandatory committed verification against4fd466de, normal push and independent exact remote readback, exact-head hosted checks. Continue shared financial reservations and complete native working-order/economic reconciliation under original financial owners; retain full backend-to-Android programme."
+}

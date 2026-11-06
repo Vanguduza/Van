@@ -1,0 +1,16 @@
+{
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "tools/rebuild/mutation_registry.py",
+    "--check"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 134553,
+  "started_at_utc": "2026-10-30T12:33:30.306501+00:00",
+  "timeout_seconds": 180,
+  "state": "COMPLETED",
+  "command_pid": 134566,
+  "exit": 0,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-30T12:33:30.580414+00:00"
+}

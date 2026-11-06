@@ -1,0 +1,7 @@
+trading/tests/test_native_catalog_store.py
+trading/tests/test_native_symbol_catalog.py
+trading/tests/test_native_bar_windows.py
+trading/tests/test_native_market_archive.py
+trading/tests/test_ctrader.py
+trading/tests/test_ctrader_read_budget.py
+trading/tests/test_ctrader_read_capacity.py

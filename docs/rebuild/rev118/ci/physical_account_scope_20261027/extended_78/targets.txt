@@ -1,0 +1,5 @@
+trading/tests/test_physical_account_lease_postgres.py
+trading/tests/test_account_retirement_native_guards.py
+trading/tests/test_single_session_profile_authority.py
+trading/tests/test_single_session_unknown_entry.py
+trading/tests/test_single_session_recovery.py

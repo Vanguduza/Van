@@ -1,0 +1,96 @@
+{
+  "artifact_id": 12848606466,
+  "run_id": 40755754628,
+  "artifact_bytes": 157275,
+  "artifact_sha256": "2c42bb4b8c3c2e7d55891282b0ca13b70f5608086d857e69bb7736568ed00ccb",
+  "metadata_workflow_run": {
+    "id": 40755754628,
+    "repository_id": 1369211561,
+    "head_repository_id": 1369211561,
+    "head_branch": "ccr-9e07e1af-8mgz1p",
+    "head_sha": "8ff365d42bb118620d3b53a0d932edeb085b1350"
+  },
+  "CRC_and_safe_unique_paths_verified": true,
+  "members": {
+    "gateway-report.xml": {
+      "bytes": 1001599,
+      "sha256": "a40ca413052371b07b51f2859b88c37ff784091362f8fb8403fef1bf01469d30"
+    },
+    "gateway-storage-audit.json": {
+      "bytes": 545,
+      "sha256": "128b04a8c8f58c8d4d335db930e1fabd533499ca88e5c1c3afb2e49eb25caea1"
+    },
+    "media-report.xml": {
+      "bytes": 35977,
+      "sha256": "ec1cdd9a55fc49e6341e4881583bb2879d9e2abec83574b17043213864380a95"
+    },
+    "media-storage-audit.json": {
+      "bytes": 545,
+      "sha256": "128b04a8c8f58c8d4d335db930e1fabd533499ca88e5c1c3afb2e49eb25caea1"
+    },
+    "selection.json": {
+      "bytes": 73514,
+      "sha256": "22c0ab0f6702d3e4505bb52fccd8ecfa326c952b33950a897b4f6ff037444347"
+    },
+    "summary.json": {
+      "bytes": 13928,
+      "sha256": "2fff1663cc625d1d5457dcea4bda8d28de0c0593292f4aba9495a17c12fa0dbd"
+    },
+    "tested-commit.txt": {
+      "bytes": 41,
+      "sha256": "d125e8f85abc7e57857ebc013765a214db50fcef6e6488e6526664cac6d7f154"
+    }
+  },
+  "junit": {
+    "gateway-report.xml": {
+      "cases": 5879,
+      "passed": 5872,
+      "failure": 0,
+      "error": 0,
+      "skipped": 7,
+      "declared_tests": 5879
+    },
+    "media-report.xml": {
+      "cases": 198,
+      "passed": 198,
+      "failure": 0,
+      "error": 0,
+      "skipped": 0,
+      "declared_tests": 198
+    }
+  },
+  "source_binding_state": "EXACT_TESTED_HEAD_AND_ORIGINAL_ARTIFACT_VERIFIED",
+  "native_or_production_acceptance": false,
+  "explicit_tested_commit": "8ff365d42bb118620d3b53a0d932edeb085b1350",
+  "declared_skips": [
+    {
+      "id": "backend.tests.test_jev_browser_eligibility::test_vendored_dds_files_are_the_audited_blobs",
+      "reason": "DDS checkout not present; blob hashes pinned above"
+    },
+    {
+      "id": "backend.tests.test_jev_no_generic_executor::test_no_fabric_or_generic_operation_survives_the_b1_validator[click]",
+      "reason": "member of the B1 closed set by definition"
+    },
+    {
+      "id": "backend.tests.test_jev_no_generic_executor::test_no_fabric_or_generic_operation_survives_the_b1_validator[scroll]",
+      "reason": "member of the B1 closed set by definition"
+    },
+    {
+      "id": "backend.tests.test_jev_no_generic_executor::test_no_fabric_or_generic_operation_survives_the_b1_validator[select]",
+      "reason": "member of the B1 closed set by definition"
+    },
+    {
+      "id": "tests.contracts.test_android_instrumentation_abi::test_actual_agp_direct_package_release_refuses_missing_core_deployment_profile",
+      "reason": "opt-in actual AGP release guard check"
+    },
+    {
+      "id": "tests.contracts.test_android_production_target::test_actual_agp_valid_target_still_refuses_missing_production_signing",
+      "reason": "opt-in actual AGP signing guard check"
+    },
+    {
+      "id": "tests.contracts.test_ci_dds_contract_pin::test_recorded_blobs_are_the_pinned_dds_blobs_when_dds_is_present",
+      "reason": "no DDS git clone beside this checkout; the CI step verifies the same table itself"
+    }
+  ],
+  "storage_audit_violations": 0
+}

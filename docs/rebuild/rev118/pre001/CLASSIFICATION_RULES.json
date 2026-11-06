@@ -1,0 +1,1365 @@
+{
+ "schema": "van.rebuild.pre001.classification-rules/1",
+ "rule": "Ordered; first matching regex (Python re.search against the repository path) wins. Hand-authored judgement by the lead, pending independent review. 'units' names the Rev1.18 plan units that own the file's behaviour or acceptance; 'class' is the migration disposition at PRE stage, before any unit has been implemented. Nothing here asserts that a file satisfies its unit.",
+ "kinds": [
+  "EXECUTABLE_SOURCE",
+  "TEST",
+  "TEST_FIXTURE",
+  "BUILD_CONFIG",
+  "RUNTIME_CONFIG",
+  "GENERATED_LOCK",
+  "VENDOR",
+  "VENDOR_BINARY",
+  "ASSET",
+  "LICENSE_NOTICE",
+  "DOCUMENTATION",
+  "AGENT_PROFILE",
+  "DEV_PREVIEW_TOOL",
+  "TOOLING",
+  "DATA_REGISTRY",
+  "DEPLOYMENT_SOURCE",
+  "GENERATED_SNAPSHOT"
+ ],
+ "classes": {
+  "RETAIN": "Keep unchanged through migration unless its owning unit finds a defect.",
+  "ADAPT": "Keep as the migration baseline and modify inside its owning unit; historical defects must be revalidated at the implementation head.",
+  "EXTEND": "Keep and add the missing Rev1.18 behaviour in the owning unit.",
+  "REPLACE": "A new implementation is required; the current file stays until parity evidence exists.",
+  "RETIRE_AFTER_PARITY": "Legacy presentation: retained and working until REL-002 parity and owner-approved retirement; no new feature work before BG-001."
+ },
+ "rules": [
+  {
+   "id": "R-ROOT-LICENSE",
+   "re": "^LICENSE$",
+   "kind": "LICENSE_NOTICE",
+   "units": [
+    "REL-001"
+   ],
+   "class": "RETAIN",
+   "why": "Repository licence."
+  },
+  {
+   "id": "R-ROOT-STATE",
+   "re": "^(CLAUDE\\.md|README\\.md|VERSION|PROJECT_CANONICAL_STATE\\.json|CONSOLIDATION_STATE\\.json)$",
+   "kind": "DOCUMENTATION",
+   "units": [
+    "BE-001"
+   ],
+   "class": "ADAPT",
+   "why": "Entry instructions, version (0.5.0-dev) and consolidation/canonical state records."
+  },
+  {
+   "id": "R-ROOT-CONFIG",
+   "re": "^(pytest\\.ini|\\.gitignore)$",
+   "kind": "BUILD_CONFIG",
+   "units": [
+    "BE-001",
+    "QA-001"
+   ],
+   "class": "RETAIN",
+   "why": "Canonical test discovery roots and ignore rules (test-discovery boundary verified by tools/consolidation/verify.py)."
+  },
+  {
+   "id": "R-CLAUDE",
+   "re": "^\\.claude/",
+   "kind": "TOOLING",
+   "units": [
+    "BE-034"
+   ],
+   "class": "RETAIN",
+   "why": "Agent harness project settings; not product authority."
+  },
+  {
+   "id": "R-GITHOOKS",
+   "re": "^\\.githooks/",
+   "kind": "TOOLING",
+   "units": [
+    "BE-001"
+   ],
+   "class": "RETAIN",
+   "why": "Project Truth ledger hooks; must be preserved."
+  },
+  {
+   "id": "R-CODEOWNERS",
+   "re": "^\\.github/CODEOWNERS$",
+   "kind": "BUILD_CONFIG",
+   "units": [
+    "BE-001",
+    "REL-001"
+   ],
+   "class": "RETAIN",
+   "why": "Code-owner review on authorization records and protected paths."
+  },
+  {
+   "id": "R-WORKFLOWS",
+   "re": "^\\.github/workflows/",
+   "kind": "BUILD_CONFIG",
+   "units": [
+    "REL-001",
+    "QA-001",
+    "BE-001"
+   ],
+   "class": "ADAPT",
+   "why": "CI, cognitive Android build, owner release and ledger workflows; release signing gates preserved."
+  },
+  {
+   "id": "R-DATA",
+   "re": "^data/",
+   "kind": "GENERATED_SNAPSHOT",
+   "units": [
+    "BE-003"
+   ],
+   "class": "RETAIN",
+   "why": "Committed SQLite schema snapshot: 87 tables, only migration/action-definition/capability seed rows, no owner or device rows (row counts read without contents). OBS-004."
+  },
+  {
+   "id": "R-REG-TRUTH",
+   "re": "^registries/project_truth_ledger_baselines\\.json$",
+   "kind": "DATA_REGISTRY",
+   "units": [
+    "BE-001"
+   ],
+   "class": "RETAIN",
+   "why": "Project Truth ledger baselines."
+  },
+  {
+   "id": "R-REG-KEYS",
+   "re": "^registries/owner_authority_keys\\.json$",
+   "kind": "DATA_REGISTRY",
+   "units": [
+    "BE-002"
+   ],
+   "class": "RETAIN",
+   "why": "Owner authority public keys (no private keys)."
+  },
+  {
+   "id": "R-REG-GATES",
+   "re": "^registries/production_activation_gates\\.json$",
+   "kind": "DATA_REGISTRY",
+   "units": [
+    "BE-033",
+    "REL-001"
+   ],
+   "class": "RETAIN",
+   "why": "Production activation gates."
+  },
+  {
+   "id": "R-REG-PROJECTS",
+   "re": "^registries/(projects|project_mounts)\\.json$",
+   "kind": "DATA_REGISTRY",
+   "units": [
+    "BE-023"
+   ],
+   "class": "ADAPT",
+   "why": "Project registry and mounts."
+  },
+  {
+   "id": "R-REG-DEPS",
+   "re": "^registries/(remote_browser|automation_browser)_dependencies\\.json$",
+   "kind": "DATA_REGISTRY",
+   "units": [
+    "BE-025",
+    "BE-028"
+   ],
+   "class": "ADAPT",
+   "why": "Pinned browser/automation runtime dependencies."
+  },
+  {
+   "id": "R-REG-PROVIDERS",
+   "re": "^registries/(google_capabilities|cognitive_providers)\\.json$",
+   "kind": "DATA_REGISTRY",
+   "units": [
+    "BE-031",
+    "BE-024"
+   ],
+   "class": "ADAPT",
+   "why": "Provider capability registries; model/provider identity requires qualification, not marketing names."
+  },
+  {
+   "id": "R-REG-CATALOG",
+   "re": "^registries/",
+   "kind": "DATA_REGISTRY",
+   "units": [
+    "BE-032"
+   ],
+   "class": "EXTEND",
+   "why": "Owner screens/features/endpoints/schemas and capability catalog: inputs to the Rev1.18 whole-product consumption catalog."
+  },
+  {
+   "id": "R-CONFIG",
+   "re": "^config/",
+   "kind": "RUNTIME_CONFIG",
+   "units": [
+    "BE-028",
+    "BE-025"
+   ],
+   "class": "ADAPT",
+   "why": "Automation and browser runtime configuration."
+  },
+  {
+   "id": "R-VISUAL-AUTH",
+   "re": "^visual-authority/",
+   "kind": "ASSET",
+   "units": [
+    "UX-002",
+    "FE-002"
+   ],
+   "class": "RETAIN",
+   "why": "Locked visual authority and character-forge sources/prototypes; original visuals must stay unchanged."
+  },
+  {
+   "id": "R-ROOT-TESTS-CONTRACTS",
+   "re": "^tests/contracts/",
+   "kind": "TEST",
+   "units": [
+    "BE-032",
+    "BQ-006"
+   ],
+   "class": "ADAPT",
+   "why": "Cross-cutting contract tests (owner endpoints/schemas, Kotlin/gateway contracts, Artemis source contracts needing the pinned DDS sibling)."
+  },
+  {
+   "id": "R-ROOT-TESTS-HERMES",
+   "re": "^tests/hermes/",
+   "kind": "TEST",
+   "units": [
+    "BE-024"
+   ],
+   "class": "ADAPT",
+   "why": "Hermes profile/installer tests."
+  },
+  {
+   "id": "R-ROOT-TESTS",
+   "re": "^tests/",
+   "kind": "TEST",
+   "units": [
+    "BQ-005"
+   ],
+   "class": "ADAPT",
+   "why": "Cross-domain scenario tests."
+  },
+  {
+   "id": "R-TOOLS-TRUTH",
+   "re": "^tools/(ci|consolidation)/",
+   "kind": "TOOLING",
+   "units": [
+    "BE-001"
+   ],
+   "class": "RETAIN",
+   "why": "Project Truth ledger and consolidation verifier."
+  },
+  {
+   "id": "R-TOOLS-CERT",
+   "re": "^tools/(certification|audit)/",
+   "kind": "TOOLING",
+   "units": [
+    "BQ-006",
+    "QA-001"
+   ],
+   "class": "ADAPT",
+   "why": "Certification/audit harnesses; their outputs are not independent certificates."
+  },
+  {
+   "id": "R-TOOLS-RELEASE",
+   "re": "^tools/release/",
+   "kind": "TOOLING",
+   "units": [
+    "REL-001"
+   ],
+   "class": "RETAIN",
+   "why": "Owner release tooling (signing inputs supplied at release, never committed)."
+  },
+  {
+   "id": "R-TOOLS-PROVISION",
+   "re": "^tools/provisioning/",
+   "kind": "TOOLING",
+   "units": [
+    "BE-002"
+   ],
+   "class": "ADAPT",
+   "why": "Signed device provisioning tooling."
+  },
+  {
+   "id": "R-TOOLS-GOOGLE",
+   "re": "^tools/google/",
+   "kind": "TOOLING",
+   "units": [
+    "BE-031"
+   ],
+   "class": "ADAPT",
+   "why": "Google provider setup tooling."
+  },
+  {
+   "id": "R-TOOLS-HERMES",
+   "re": "^tools/hermes/",
+   "kind": "TOOLING",
+   "units": [
+    "BE-024"
+   ],
+   "class": "ADAPT",
+   "why": "Hermes profile installer (PR-16 disposition)."
+  },
+  {
+   "id": "R-TOOLS-PROJECTS",
+   "re": "^tools/projects/",
+   "kind": "TOOLING",
+   "units": [
+    "BE-023"
+   ],
+   "class": "ADAPT",
+   "why": "Project tooling."
+  },
+  {
+   "id": "R-TOOLS-FORGE",
+   "re": "^tools/character_forge/",
+   "kind": "TOOLING",
+   "units": [
+    "UX-002",
+    "FE-004"
+   ],
+   "class": "RETAIN",
+   "why": "Character/orb asset pipeline feeding locked visual authority."
+  },
+  {
+   "id": "R-TOOLS-RUNTIME",
+   "re": "^tools/",
+   "kind": "TOOLING",
+   "units": [
+    "BE-033"
+   ],
+   "class": "ADAPT",
+   "why": "Runtime/gateway launch, live Project Truth sync and build-readiness scripts."
+  },
+  {
+   "id": "R-DEPLOY-MT5",
+   "re": "^deploy/van-trading-core/windows/mt5_worker/",
+   "kind": "DEPLOYMENT_SOURCE",
+   "units": [
+    "BE-010",
+    "BE-033"
+   ],
+   "class": "ADAPT",
+   "why": "MT5 worker deployment for the venue adapter."
+  },
+  {
+   "id": "R-DEPLOY-MUSE",
+   "re": "^deploy/van-trading-core/(muse|hermes)/",
+   "kind": "DEPLOYMENT_SOURCE",
+   "units": [
+    "BE-024",
+    "BE-033"
+   ],
+   "class": "ADAPT",
+   "why": "Muse sandbox/runtime and Hermes deployment."
+  },
+  {
+   "id": "R-DEPLOY-BROWSER",
+   "re": "^deploy/(van-browser-core|van-browser-stream|van-computer-worker)/|^deploy/van-trading-core/(browser|web-acquisition)/",
+   "kind": "DEPLOYMENT_SOURCE",
+   "units": [
+    "BE-025",
+    "BE-033"
+   ],
+   "class": "ADAPT",
+   "why": "Browser core/stream, computer worker and web acquisition deployments, including executable harness_service.py."
+  },
+  {
+   "id": "R-DEPLOY-AUTOMATION",
+   "re": "^deploy/van-trading-core/(automation|temporal)/",
+   "kind": "DEPLOYMENT_SOURCE",
+   "units": [
+    "BE-028",
+    "BE-033"
+   ],
+   "class": "ADAPT",
+   "why": "Automation (n8n) and Temporal deployment."
+  },
+  {
+   "id": "R-DEPLOY-CORE",
+   "re": "^deploy/(van-owner-core|van-private-core)/",
+   "kind": "DEPLOYMENT_SOURCE",
+   "units": [
+    "BE-024",
+    "BE-033"
+   ],
+   "class": "ADAPT",
+   "why": "Owner/private core deployment."
+  },
+  {
+   "id": "R-DEPLOY-FORGE",
+   "re": "^deploy/character-forge/",
+   "kind": "DEPLOYMENT_SOURCE",
+   "units": [
+    "UX-002"
+   ],
+   "class": "RETAIN",
+   "why": "Character forge build host deployment."
+  },
+  {
+   "id": "R-DEPLOY",
+   "re": "^deploy/",
+   "kind": "DEPLOYMENT_SOURCE",
+   "units": [
+    "BE-033"
+   ],
+   "class": "ADAPT",
+   "why": "Trading-core host deployment: Supabase, systemd, Caddy, SPMRF and bootstrap. Source is not proof of deployment."
+  },
+  {
+   "id": "R-VENDOR-VEKL",
+   "re": "^trading/vekl/vendor/",
+   "kind": "VENDOR",
+   "units": [
+    "BE-034"
+   ],
+   "class": "RETAIN",
+   "why": "Vendored DIAL engineering-knowledge modules with PROVENANCE.json; development tooling, not product runtime. Literal third-party adoption rules (DEC-039) apply to changes."
+  },
+  {
+   "id": "R-VEKL",
+   "re": "^trading/vekl/",
+   "kind": "TOOLING",
+   "units": [
+    "BE-034"
+   ],
+   "class": "RETAIN",
+   "why": "VEKL engineering-resource server and its test: development-system adapter."
+  },
+  {
+   "id": "R-VTIL",
+   "re": "^trading/vtil/",
+   "kind": "DATA_REGISTRY",
+   "units": [
+    "BE-034"
+   ],
+   "class": "RETAIN",
+   "why": "Engineering resource/skill registries and tooling for the development workspace."
+  },
+  {
+   "id": "R-GRADLE-JAR",
+   "re": "^android/gradle/wrapper/gradle-wrapper\\.jar$",
+   "kind": "VENDOR_BINARY",
+   "units": [
+    "REL-001"
+   ],
+   "class": "RETAIN",
+   "why": "Gradle wrapper binary; pinned by gradle-wrapper.properties."
+  },
+  {
+   "id": "R-LOCK",
+   "re": "(^backend/requirements\\.lock$|^android/voice/acquisition-lock\\.json$|^trading/architecture/stack_lock\\.json$)",
+   "kind": "GENERATED_LOCK",
+   "units": [
+    "BE-033"
+   ],
+   "class": "RETAIN",
+   "why": "Generated or pinned dependency/asset locks; regenerate with repository tooling only."
+  },
+  {
+   "id": "R-VOICE-LICENSES",
+   "re": "^android/voice/source/licenses/",
+   "kind": "LICENSE_NOTICE",
+   "units": [
+    "FE-021",
+    "REL-001"
+   ],
+   "class": "RETAIN",
+   "why": "Licence notices for retained local speech assets (Sherpa/Piper/ONNX)."
+  },
+  {
+   "id": "R-VOICE-ASSETS",
+   "re": "^android/voice/",
+   "kind": "ASSET",
+   "units": [
+    "FE-021",
+    "BE-029"
+   ],
+   "class": "RETAIN",
+   "why": "Admitted local Sherpa wake/ASR/TTS/speaker source assets and manifests; contract requires retention, no silent cloud substitution."
+  },
+  {
+   "id": "R-ANDROID-TOOLS",
+   "re": "^android/tools/",
+   "kind": "TOOLING",
+   "units": [
+    "FE-021",
+    "REL-001"
+   ],
+   "class": "RETAIN",
+   "why": "Voice asset packaging and its test; build prerequisite for the sealed bundle."
+  },
+  {
+   "id": "R-ANDROID-PREVIEW",
+   "re": "^android/(visual-preview|preview-render)/",
+   "kind": "DEV_PREVIEW_TOOL",
+   "units": [
+    "UX-002"
+   ],
+   "class": "RETIRE_AFTER_PARITY",
+   "why": "Desktop preview renderer of legacy presentation; not evidence of native UI (OQ-14). Kept until UX-002 goldens replace it."
+  },
+  {
+   "id": "R-ANDROID-VERIFY-RES",
+   "re": "^android/verification/src/test/resources/",
+   "kind": "TEST_FIXTURE",
+   "units": [
+    "FE-001",
+    "QA-003"
+   ],
+   "class": "RETAIN",
+   "why": "JVM test fixtures (e.g. unrelated test server certificate)."
+  },
+  {
+   "id": "R-ANDROID-VERIFY",
+   "re": "^android/verification/",
+   "kind": "TEST",
+   "units": [
+    "FE-001",
+    "QA-001"
+   ],
+   "class": "ADAPT",
+   "why": "Pure-JVM tests of the Android baseline; reverse-coverage input for QA-001 parity."
+  },
+  {
+   "id": "R-ANDROID-INSTR",
+   "re": "^android/app/src/(androidTest|test)/",
+   "kind": "TEST",
+   "units": [
+    "QA-004",
+    "FE-001"
+   ],
+   "class": "ADAPT",
+   "why": "Instrumentation/unit tests and fixtures of the current app."
+  },
+  {
+   "id": "R-ANDROID-DEBUG",
+   "re": "^android/app/src/debug/",
+   "kind": "BUILD_CONFIG",
+   "units": [
+    "BE-002",
+    "REL-001"
+   ],
+   "class": "ADAPT",
+   "why": "Debug-only manifest/sources; OBS-001 (app-wide debug cleartext) to resolve in BE-002."
+  },
+  {
+   "id": "R-ANDROID-RES",
+   "re": "^android/app/src/main/res/",
+   "kind": "ASSET",
+   "units": [
+    "FE-002",
+    "UX-002"
+   ],
+   "class": "ADAPT",
+   "why": "Themes, colours, strings, launcher identity (approved Candidate B launcher). Locked visual authorities govern replacement."
+  },
+  {
+   "id": "R-ANDROID-MANIFEST",
+   "re": "^android/app/src/main/AndroidManifest\\.xml$",
+   "kind": "BUILD_CONFIG",
+   "units": [
+    "FE-001",
+    "FE-003",
+    "REL-001"
+   ],
+   "class": "ADAPT",
+   "why": "Package com.dial.van identity, components and permissions; signing continuity required."
+  },
+  {
+   "id": "R-ANDROID-UI",
+   "re": "^android/app/src/main/java/com/dial/van/(command|visual|design|overlay|status|degraded|projects|dialdev|mission|memory|trading|browser|share)/",
+   "kind": "EXECUTABLE_SOURCE",
+   "units": [
+    "FE-003",
+    "REL-002"
+   ],
+   "class": "RETIRE_AFTER_PARITY",
+   "why": "Legacy Compose presentation and screen-local state. Remains the working migration baseline; new native surfaces only after BG-001 (FE units by context) and retirement only after REL-002 parity. Non-presentation logic found inside must be lifted to FE-001 ports during its unit."
+  },
+  {
+   "id": "R-ANDROID-VOICE",
+   "re": "^android/app/src/main/java/com/dial/van/voice/",
+   "kind": "EXECUTABLE_SOURCE",
+   "units": [
+    "FE-021",
+    "BE-029"
+   ],
+   "class": "ADAPT",
+   "why": "Local Sherpa wake/ASR/TTS, EnergyVadGate, speaker binding; contract retains these and the POST/SSE fallback."
+  },
+  {
+   "id": "R-ANDROID-TRUST",
+   "re": "^android/app/src/main/java/com/dial/van/(gateway|connectivity|security|session|provisioning|onboarding)/",
+   "kind": "EXECUTABLE_SOURCE",
+   "units": [
+    "FE-001",
+    "FE-022",
+    "BE-002"
+   ],
+   "class": "ADAPT",
+   "why": "Gateway client, signed provisioning, mTLS/pinning, sessions and enrollment: zero-configuration trust chain carried forward with rotation/revocation additions."
+  },
+  {
+   "id": "R-ANDROID-PLUMBING",
+   "re": "^android/app/src/main/java/com/dial/van/",
+   "kind": "EXECUTABLE_SOURCE",
+   "units": [
+    "FE-001"
+   ],
+   "class": "ADAPT",
+   "why": "Application, queue, events, telemetry, runtime, control, cognitive and notification plumbing: device-side ports and lifecycle."
+  },
+  {
+   "id": "R-ANDROID-BUILDSRC",
+   "re": "^android/buildSrc/",
+   "kind": "BUILD_CONFIG",
+   "units": [
+    "REL-001"
+   ],
+   "class": "ADAPT",
+   "why": "Production target configuration used by the signed build."
+  },
+  {
+   "id": "R-ANDROID-BUILD",
+   "re": "^android/(app/)?[^/]*\\.(kts|properties|pro|bat|example)$|^android/gradlew$|^android/gradle/|^android/verification/(build|settings)\\.gradle\\.kts$",
+   "kind": "BUILD_CONFIG",
+   "units": [
+    "REL-001",
+    "FE-001"
+   ],
+   "class": "RETAIN",
+   "why": "Gradle/build configuration and examples; signing material is excluded by design (examples only)."
+  },
+  {
+   "id": "R-ANDROID-DOC",
+   "re": "^android/[^/]*\\.md$",
+   "kind": "DOCUMENTATION",
+   "units": [
+    "FE-001"
+   ],
+   "class": "ADAPT",
+   "why": "Android build/runtime notes."
+  },
+  {
+   "id": "R-SERVICES-TESTS",
+   "re": "^services/.*/tests/",
+   "kind": "TEST",
+   "units": [
+    "BE-025",
+    "BQ-004"
+   ],
+   "class": "ADAPT",
+   "why": "Browser control/stream service tests (separate media-worker environment)."
+  },
+  {
+   "id": "R-SERVICES",
+   "re": "^services/",
+   "kind": "EXECUTABLE_SOURCE",
+   "units": [
+    "BE-025"
+   ],
+   "class": "ADAPT",
+   "why": "Browser control agent, browser stream host and computer worker: remote interaction runtime."
+  },
+  {
+   "id": "R-HERMES-POLICY-TEST",
+   "re": "^hermes/policy/tests/",
+   "kind": "TEST",
+   "units": [
+    "BE-024"
+   ],
+   "class": "ADAPT",
+   "why": "Hermes policy hook tests."
+  },
+  {
+   "id": "R-HERMES-CODE",
+   "re": "^hermes/(policy|mcp)/.*\\.(py|mjs)$",
+   "kind": "EXECUTABLE_SOURCE",
+   "units": [
+    "BE-024"
+   ],
+   "class": "ADAPT",
+   "why": "Hermes policy hook and owner-runtime MCP bridge."
+  },
+  {
+   "id": "R-HERMES-PROFILE",
+   "re": "^hermes/",
+   "kind": "AGENT_PROFILE",
+   "units": [
+    "BE-024"
+   ],
+   "class": "ADAPT",
+   "why": "Hermes VAN profile, skills, bot and provider prompts: agent configuration, not owner authority."
+  },
+  {
+   "id": "R-BE-FIXTURES",
+   "re": "^backend/tests/fixtures/",
+   "kind": "TEST_FIXTURE",
+   "units": [
+    "BE-025",
+    "BE-027"
+   ],
+   "class": "RETAIN",
+   "why": "Browser/Jev adversarial corpora, harness HTML and cognitive-twin compiler fixtures with provenance files."
+  },
+  {
+   "id": "R-BE-TEST-HELPERS",
+   "re": "^backend/tests/(attestation_fixtures|automation_runtime_fixture|cdp_harness_kit|conftest_automation|dial_dev_fakes)\\.py$",
+   "kind": "TEST",
+   "units": [
+    "BQ-004",
+    "BQ-005"
+   ],
+   "class": "ADAPT",
+   "why": "Shared backend test harnesses and fakes; fakes never count as live acceptance."
+  },
+  {
+   "id": "R-BE-T-DEV",
+   "re": "^backend/tests/test_[a-z0-9_]*(dial_dev|github)",
+   "kind": "TEST",
+   "units": [
+    "BE-034"
+   ],
+   "class": "ADAPT",
+   "why": "DIAL development proxy and independent GitHub verification tests."
+  },
+  {
+   "id": "R-BE-T-AUTOMATION",
+   "re": "^backend/tests/test_[a-z0-9_]*(automation|n8n|standing|reminder|schedule)",
+   "kind": "TEST",
+   "units": [
+    "BE-028"
+   ],
+   "class": "ADAPT",
+   "why": "Automation, standing authority and scheduling tests."
+  },
+  {
+   "id": "R-BE-T-BROWSER",
+   "re": "^backend/tests/test_[a-z0-9_]*(browser|artifact_provider|assignment|harness|stagehand|interactive|web_acquisition|computer|egress)",
+   "kind": "TEST",
+   "units": [
+    "BE-025"
+   ],
+   "class": "ADAPT",
+   "why": "Browser, harness, Stagehand, remote interaction and acquisition tests."
+  },
+  {
+   "id": "R-BE-T-ARTEMIS",
+   "re": "^backend/tests/test_(artemis|visual_acceptance)",
+   "kind": "TEST",
+   "units": [
+    "BE-026"
+   ],
+   "class": "ADAPT",
+   "why": "Artemis console and device-bound visual acceptance tests."
+  },
+  {
+   "id": "R-BE-T-VOICE",
+   "re": "^backend/tests/test_[a-z0-9_]*(voice|speech|speaker|conversation)",
+   "kind": "TEST",
+   "units": [
+    "BE-029"
+   ],
+   "class": "ADAPT",
+   "why": "Conversation, speech and speaker-binding tests."
+  },
+  {
+   "id": "R-BE-T-PROVIDERS",
+   "re": "^backend/tests/test_[a-z0-9_]*(google|gmail|workspace_oauth|oauth|calendar_effect|hosted_provider|provider_transport)",
+   "kind": "TEST",
+   "units": [
+    "BE-031"
+   ],
+   "class": "ADAPT",
+   "why": "Connected provider (Google/Gmail/OAuth) tests."
+  },
+  {
+   "id": "R-BE-T-AGENTS",
+   "re": "^backend/tests/test_[a-z0-9_]*(jev|hermes|private_core|commander|openmuse|runtime_resolver|local_typed|local_admission)",
+   "kind": "TEST",
+   "units": [
+    "BE-024"
+   ],
+   "class": "ADAPT",
+   "why": "Hermes, Jev, Muse/OpenMuse and private-core agent integration tests."
+  },
+  {
+   "id": "R-BE-T-TRADING",
+   "re": "^backend/tests/test_[a-z0-9_]*trading",
+   "kind": "TEST",
+   "units": [
+    "BE-012",
+    "BE-032"
+   ],
+   "class": "ADAPT",
+   "why": "Gateway trading read-model, ticket and event-bridge tests."
+  },
+  {
+   "id": "R-BE-T-DEVICE",
+   "re": "^backend/tests/test_[a-z0-9_]*(pairing|device|mtls|auth|ingress|permission|control_scopes|authority|session|provisioning|credential|bootstrap|scoped_internal|sealed_parameter|owner_approval_parameters|config_identity)",
+   "kind": "TEST",
+   "units": [
+    "BE-002"
+   ],
+   "class": "ADAPT",
+   "why": "Device identity, pairing, mTLS, ingress trust, scopes and authority tests."
+  },
+  {
+   "id": "R-BE-T-MEMORY",
+   "re": "^backend/tests/test_[a-z0-9_]*(memory|erasure|knowledge|context|cognitive|cognition|epistemics|learning|owner_model|goals|relationship|personal|document|understanding|proactive|suggest|twin|record|owner_declaration|owner_artifacts|research|evolution|timeparse)",
+   "kind": "TEST",
+   "units": [
+    "BE-027"
+   ],
+   "class": "ADAPT",
+   "why": "Memory, knowledge, context, owner model, learning and erasure tests."
+  },
+  {
+   "id": "R-BE-T-WORK",
+   "re": "^backend/tests/test_[a-z0-9_]*(mission|action_runtime|command|decision|project|work_status|orchestr|irreversible|a4_|approval|_action|a4_owner|suggestions|owner_domain|owner_runtime|owner_context|owner_service|owner_standing|dispatch_run)",
+   "kind": "TEST",
+   "units": [
+    "BE-023"
+   ],
+   "class": "ADAPT",
+   "why": "Commands, missions, decisions, approvals and workflow tests."
+  },
+  {
+   "id": "R-BE-T-ATTENTION",
+   "re": "^backend/tests/test_[a-z0-9_]*(attention|notification|briefing)",
+   "kind": "TEST",
+   "units": [
+    "BE-030"
+   ],
+   "class": "ADAPT",
+   "why": "Attention and notification tests."
+  },
+  {
+   "id": "R-BE-T-OPS",
+   "re": "^backend/tests/test_[a-z0-9_]*(observability|ops_|production|openapi|degraded|project_isolation|temporal_durable|rev31)",
+   "kind": "TEST",
+   "units": [
+    "BE-033"
+   ],
+   "class": "ADAPT",
+   "why": "Observability, operations, production activation and runtime wiring tests."
+  },
+  {
+   "id": "R-BE-T-DURABLE",
+   "re": "^backend/tests/test_[a-z0-9_]*(idempotency|attestation|recovery|replay|audit|verification_is_performed|verifier|receipt|readback|predicate|correlation|storage|interaction_router|postcondition|network_candidate)",
+   "kind": "TEST",
+   "units": [
+    "BE-003"
+   ],
+   "class": "ADAPT",
+   "why": "Idempotency, recovery, replay, receipts, readback and verification tests."
+  },
+  {
+   "id": "R-BE-T-CATALOG",
+   "re": "^backend/tests/test_[a-z0-9_]*(capability|owner_status_kotlin|extra_apis|gateway|typed_command|cognition_is_real|external_reality|owner_work)",
+   "kind": "TEST",
+   "units": [
+    "BE-032"
+   ],
+   "class": "ADAPT",
+   "why": "Capability catalog, typed command, gateway surface and Kotlin consumption-contract tests."
+  },
+  {
+   "id": "R-BE-T-PAYMENT",
+   "re": "^backend/tests/test_payment_boundary",
+   "kind": "TEST",
+   "units": [
+    "BE-007",
+    "BE-028"
+   ],
+   "class": "ADAPT",
+   "why": "Payment prohibition boundary for agents/automation."
+  },
+  {
+   "id": "R-BE-G-DEVICE",
+   "re": "^backend/van_gateway/(auth|mtls|connectivity|session|authority|approval|action)/",
+   "kind": "EXECUTABLE_SOURCE",
+   "units": [
+    "BE-002"
+   ],
+   "class": "ADAPT",
+   "why": "Device auth, mTLS, connectivity, session, authority descriptors and action admission."
+  },
+  {
+   "id": "R-BE-G-DURABLE",
+   "re": "^backend/van_gateway/(idempotency|events|audit|storage|verification)/",
+   "kind": "EXECUTABLE_SOURCE",
+   "units": [
+    "BE-003"
+   ],
+   "class": "ADAPT",
+   "why": "Idempotency, event store, audit chain, storage and verification. OBS-002 applies."
+  },
+  {
+   "id": "R-BE-G-WORK",
+   "re": "^backend/van_gateway/(command|mission|decisions|projects)/|^backend/van_gateway/orchestrator\\.py$",
+   "kind": "EXECUTABLE_SOURCE",
+   "units": [
+    "BE-023"
+   ],
+   "class": "ADAPT",
+   "why": "Commands, missions, decisions, projects and orchestration."
+  },
+  {
+   "id": "R-BE-G-AGENTS",
+   "re": "^backend/van_gateway/(hermes|jev|private_core)/|^backend/van_gateway/runtime_api\\.py$",
+   "kind": "EXECUTABLE_SOURCE",
+   "units": [
+    "BE-024"
+   ],
+   "class": "ADAPT",
+   "why": "Hermes bridge, the single Jev client and private core runtime API."
+  },
+  {
+   "id": "R-BE-G-BROWSER",
+   "re": "^backend/van_gateway/(browser|computer_use|artifacts)/",
+   "kind": "EXECUTABLE_SOURCE",
+   "units": [
+    "BE-025"
+   ],
+   "class": "ADAPT",
+   "why": "Browser fabric, computer use and artifact intake."
+  },
+  {
+   "id": "R-BE-G-ARTEMIS",
+   "re": "^backend/van_gateway/(artemis|visual)/",
+   "kind": "EXECUTABLE_SOURCE",
+   "units": [
+    "BE-026"
+   ],
+   "class": "ADAPT",
+   "why": "Artemis console and device-bound visual acceptance."
+  },
+  {
+   "id": "R-BE-G-MEMORY",
+   "re": "^backend/van_gateway/(cognitive|coherence|context|epistemics|understanding|reasoning|learning|evolution|proactive|suggestions|documents|knowledge|research|goals)/|^backend/van_gateway/owner_privacy\\.py$",
+   "kind": "EXECUTABLE_SOURCE",
+   "units": [
+    "BE-027"
+   ],
+   "class": "ADAPT",
+   "why": "Memory, knowledge, context, goals, learning and privacy/erasure."
+  },
+  {
+   "id": "R-BE-G-AUTOMATION",
+   "re": "^backend/van_gateway/(automation|reminders)/",
+   "kind": "EXECUTABLE_SOURCE",
+   "units": [
+    "BE-028"
+   ],
+   "class": "ADAPT",
+   "why": "Automation fabric and reminders."
+  },
+  {
+   "id": "R-BE-G-VOICE",
+   "re": "^backend/van_gateway/(voice|conversations)/",
+   "kind": "EXECUTABLE_SOURCE",
+   "units": [
+    "BE-029"
+   ],
+   "class": "ADAPT",
+   "why": "Voice/speech streams and conversations."
+  },
+  {
+   "id": "R-BE-G-ATTENTION",
+   "re": "^backend/van_gateway/(attention|notifications|briefing)/",
+   "kind": "EXECUTABLE_SOURCE",
+   "units": [
+    "BE-030"
+   ],
+   "class": "ADAPT",
+   "why": "Attention, notifications and briefings."
+  },
+  {
+   "id": "R-BE-G-PROVIDERS",
+   "re": "^backend/van_gateway/(google|degraded)/",
+   "kind": "EXECUTABLE_SOURCE",
+   "units": [
+    "BE-031"
+   ],
+   "class": "ADAPT",
+   "why": "Connected Google providers and degraded-state catalog."
+  },
+  {
+   "id": "R-BE-G-CATALOG",
+   "re": "^backend/van_gateway/(capability|trading)/|^backend/van_gateway/(owner_api|owner_models|models)\\.py$",
+   "kind": "EXECUTABLE_SOURCE",
+   "units": [
+    "BE-032"
+   ],
+   "class": "EXTEND",
+   "why": "Capability catalog, owner API/models and gateway trading read models: the backend-to-frontend consumption surface Rev1.18 extends to all 349 actions."
+  },
+  {
+   "id": "R-BE-G-DEV",
+   "re": "^backend/van_gateway/dial_dev/",
+   "kind": "EXECUTABLE_SOURCE",
+   "units": [
+    "BE-034"
+   ],
+   "class": "ADAPT",
+   "why": "DIAL development proxy/stream adapters."
+  },
+  {
+   "id": "R-BE-G-OPS",
+   "re": "^backend/van_gateway/(observability|ops)/|^backend/van_gateway/(app|config|__init__)\\.py$",
+   "kind": "EXECUTABLE_SOURCE",
+   "units": [
+    "BE-033"
+   ],
+   "class": "ADAPT",
+   "why": "Application assembly, configuration, observability and operations (backup, PKI, retention, scheduler)."
+  },
+  {
+   "id": "R-BE-TOOLS",
+   "re": "^backend/tools/",
+   "kind": "TOOLING",
+   "units": [
+    "BE-027"
+   ],
+   "class": "RETAIN",
+   "why": "Context retrieval benchmark."
+  },
+  {
+   "id": "R-BE-CONFIG",
+   "re": "^backend/(requirements\\.txt|pytest\\.ini)$",
+   "kind": "BUILD_CONFIG",
+   "units": [
+    "BE-033"
+   ],
+   "class": "RETAIN",
+   "why": "Backend dependency manifest and test configuration."
+  },
+  {
+   "id": "R-BE-DOC",
+   "re": "^backend/README\\.md$",
+   "kind": "DOCUMENTATION",
+   "units": [
+    "BE-033"
+   ],
+   "class": "ADAPT",
+   "why": "Backend notes."
+  },
+  {
+   "id": "R-TR-T-EXEC",
+   "re": "^trading/tests/test_[a-z0-9_]*(execution|exits|rounding|ctrader|mt5|position_adjustment|active_trade|account_trade_lifecycle|consolidated_ledger)",
+   "kind": "TEST",
+   "units": [
+    "BE-010",
+    "BE-012"
+   ],
+   "class": "ADAPT",
+   "why": "Venue execution, exits, rounding, MT5/cTrader, lifecycle and consolidated ledger transaction tests."
+  },
+  {
+   "id": "R-TR-T-LEDGER",
+   "re": "^trading/tests/test_[a-z0-9_]*(ledger|tradebook|portfolio)",
+   "kind": "TEST",
+   "units": [
+    "BE-006",
+    "BE-012"
+   ],
+   "class": "ADAPT",
+   "why": "Ledger reconciliation, tradebook and portfolio tests."
+  },
+  {
+   "id": "R-TR-T-ACCOUNTS",
+   "re": "^trading/tests/test_[a-z0-9_]*account",
+   "kind": "TEST",
+   "units": [
+    "BE-004"
+   ],
+   "class": "ADAPT",
+   "why": "Account coordinator, lifecycle and registry tests."
+  },
+  {
+   "id": "R-TR-T-RISK",
+   "re": "^trading/tests/test_[a-z0-9_]*(mandate|sizing|heat|risk|authority|lockout|capital|owner_authority)",
+   "kind": "TEST",
+   "units": [
+    "BE-009"
+   ],
+   "class": "ADAPT",
+   "why": "Mandate, risk, sizing, heat governor, lockouts and authority property tests."
+  },
+  {
+   "id": "R-TR-T-NEWS",
+   "re": "^trading/tests/test_[a-z0-9_]*(news|calendar|events)",
+   "kind": "TEST",
+   "units": [
+    "BE-014",
+    "BE-015"
+   ],
+   "class": "ADAPT",
+   "why": "News ingress, calendar and event tests."
+  },
+  {
+   "id": "R-TR-T-DEPLOY",
+   "re": "^trading/tests/test_[a-z0-9_]*(infra|oci|n8n|supabase|stack_lock|deployment|browser_stack)",
+   "kind": "TEST",
+   "units": [
+    "BE-033"
+   ],
+   "class": "ADAPT",
+   "why": "Deployment topology, bootstrap and stack-lock tests (source only, not deployment proof)."
+  },
+  {
+   "id": "R-TR-T-AGENTS",
+   "re": "^trading/tests/test_[a-z0-9_]*(commander|jev)",
+   "kind": "TEST",
+   "units": [
+    "BE-024"
+   ],
+   "class": "ADAPT",
+   "why": "Trading commander and Jev boundary tests."
+  },
+  {
+   "id": "R-TR-T-VTIL",
+   "re": "^trading/tests/test_vtil",
+   "kind": "TEST",
+   "units": [
+    "BE-034"
+   ],
+   "class": "ADAPT",
+   "why": "VTIL registry tests."
+  },
+  {
+   "id": "R-TR-T-CONTRACTS",
+   "re": "^trading/tests/test_contract_schemas",
+   "kind": "TEST",
+   "units": [
+    "BE-032"
+   ],
+   "class": "ADAPT",
+   "why": "Trading contract schema tests."
+  },
+  {
+   "id": "R-TR-T-MARKET",
+   "re": "^trading/tests/test_[a-z0-9_]*(core_and_market|mtf|zse|feature|intelligence|cognition|cognitive|thesis|temperament|context_world|translator|route_pretrade)",
+   "kind": "TEST",
+   "units": [
+    "BE-008",
+    "BE-021",
+    "BE-013"
+   ],
+   "class": "ADAPT",
+   "why": "Market data, features, intelligence, cognition, temperament and pre-trade routing tests."
+  },
+  {
+   "id": "R-TR-T-RESEARCH",
+   "re": "^trading/tests/",
+   "kind": "TEST",
+   "units": [
+    "BE-035",
+    "BE-036"
+   ],
+   "class": "ADAPT",
+   "why": "Strategies, arbiter, capsules, validation, backtest, research, drift, learning, evolution, Rev5.1 governance/certification and remaining trading tests; conftest helpers."
+  },
+  {
+   "id": "R-TR-EXEC",
+   "re": "^trading/vati/execution/",
+   "kind": "EXECUTABLE_SOURCE",
+   "units": [
+    "BE-010",
+    "BE-012"
+   ],
+   "class": "ADAPT",
+   "why": "Router, venue adapters, style selector and TCA. Historical findings R05 (TCA spread double count) and R07 (slice cap) must be revalidated at implementation head before fixing."
+  },
+  {
+   "id": "R-TR-RISK",
+   "re": "^trading/vati/risk/|^trading/vati/authority\\.py$",
+   "kind": "EXECUTABLE_SOURCE",
+   "units": [
+    "BE-009"
+   ],
+   "class": "ADAPT",
+   "why": "RiskAuthority, sizing, heat and lockouts."
+  },
+  {
+   "id": "R-TR-ACCOUNTS",
+   "re": "^trading/vati/accounts/",
+   "kind": "EXECUTABLE_SOURCE",
+   "units": [
+    "BE-004"
+   ],
+   "class": "ADAPT",
+   "why": "Account registry (atomic updates from 3b2c9e04)."
+  },
+  {
+   "id": "R-TR-APP",
+   "re": "^trading/vati/app/",
+   "kind": "EXECUTABLE_SOURCE",
+   "units": [
+    "BE-009",
+    "BE-010",
+    "BE-012"
+   ],
+   "class": "ADAPT",
+   "why": "Account service/coordinator, cycle and trade lifecycle; includes consolidation-modified files."
+  },
+  {
+   "id": "R-TR-CORE",
+   "re": "^trading/vati/core/",
+   "kind": "EXECUTABLE_SOURCE",
+   "units": [
+    "BE-006",
+    "BE-003"
+   ],
+   "class": "ADAPT",
+   "why": "Ledger (SQLite/PostgreSQL) and core primitives; consolidation-modified atomic reads."
+  },
+  {
+   "id": "R-TR-MARKET",
+   "re": "^trading/vati/(market_data|zse)/",
+   "kind": "EXECUTABLE_SOURCE",
+   "units": [
+    "BE-008"
+   ],
+   "class": "EXTEND",
+   "why": "Market data and ZSE module; crypto spot feeds are additive Rev1.18 scope."
+  },
+  {
+   "id": "R-TR-STRATEGY",
+   "re": "^trading/vati/(strategies|arbiter)/",
+   "kind": "EXECUTABLE_SOURCE",
+   "units": [
+    "BE-013"
+   ],
+   "class": "ADAPT",
+   "why": "Strategy registry and arbiter."
+  },
+  {
+   "id": "R-TR-LEARNING",
+   "re": "^trading/vati/(learning|evolution|research|validation|backtest)/",
+   "kind": "EXECUTABLE_SOURCE",
+   "units": [
+    "BE-035",
+    "BE-036"
+   ],
+   "class": "ADAPT",
+   "why": "Evaluator, validation, research, learning evidence and evolution; evaluator qualification precedes economic claims."
+  },
+  {
+   "id": "R-TR-INTEL",
+   "re": "^trading/vati/(cognition|intelligence)/",
+   "kind": "EXECUTABLE_SOURCE",
+   "units": [
+    "BE-021",
+    "BE-036"
+   ],
+   "class": "ADAPT",
+   "why": "Trading cognition and cross-signal intelligence; advisory only, never a risk dependency."
+  },
+  {
+   "id": "R-TR-EVENTS",
+   "re": "^trading/vati/(events|calendar)/",
+   "kind": "EXECUTABLE_SOURCE",
+   "units": [
+    "BE-014",
+    "BE-015"
+   ],
+   "class": "ADAPT",
+   "why": "News/calendar ingestion and event analysis."
+  },
+  {
+   "id": "R-TR-LIFECYCLE",
+   "re": "^trading/vati/(lifecycle|readmodels)/",
+   "kind": "EXECUTABLE_SOURCE",
+   "units": [
+    "BE-012",
+    "BE-032"
+   ],
+   "class": "ADAPT",
+   "why": "Position lifecycle and read models."
+  },
+  {
+   "id": "R-TR-CONTRACTS",
+   "re": "^trading/vati/contracts/",
+   "kind": "EXECUTABLE_SOURCE",
+   "units": [
+    "BE-032"
+   ],
+   "class": "ADAPT",
+   "why": "Trading contract schemas."
+  },
+  {
+   "id": "R-TR-OPS",
+   "re": "^trading/vati/(observability|vtil)/|^trading/vati/(__init__|__main__)\\.py$",
+   "kind": "EXECUTABLE_SOURCE",
+   "units": [
+    "BE-033"
+   ],
+   "class": "ADAPT",
+   "why": "Trading observability, VTIL borrow and entry points."
+  },
+  {
+   "id": "R-TR-COMMANDER",
+   "re": "^trading/commander/",
+   "kind": "EXECUTABLE_SOURCE",
+   "units": [
+    "BE-024",
+    "BE-004"
+   ],
+   "class": "ADAPT",
+   "why": "Hermes trading commander (accounts/strategies MCP); bounded by RiskAuthority."
+  },
+  {
+   "id": "R-TR-REGISTRY",
+   "re": "^trading/strategies/",
+   "kind": "DATA_REGISTRY",
+   "units": [
+    "BE-013"
+   ],
+   "class": "ADAPT",
+   "why": "Strategy capsule registry and migrations."
+  },
+  {
+   "id": "R-TR-EXAMPLE",
+   "re": "^trading/examples/",
+   "kind": "RUNTIME_CONFIG",
+   "units": [
+    "BE-009"
+   ],
+   "class": "RETAIN",
+   "why": "Example mandate; not a signed mandate."
+  },
+  {
+   "id": "R-TR-ARCH",
+   "re": "^trading/architecture/",
+   "kind": "RUNTIME_CONFIG",
+   "units": [
+    "BE-033"
+   ],
+   "class": "RETAIN",
+   "why": "Proposed architecture layers (non-authoritative) and stack configuration."
+  },
+  {
+   "id": "R-TR-TOOLS",
+   "re": "^trading/tools/",
+   "kind": "TOOLING",
+   "units": [
+    "BE-033",
+    "BE-035"
+   ],
+   "class": "RETAIN",
+   "why": "Gate-failure induction, PostgreSQL qualification, capsule migration and architecture checks."
+  },
+  {
+   "id": "R-TR-DOC",
+   "re": "^trading/README\\.md$",
+   "kind": "DOCUMENTATION",
+   "units": [
+    "BE-010"
+   ],
+   "class": "ADAPT",
+   "why": "Trading core notes."
+  }
+ ]
+}

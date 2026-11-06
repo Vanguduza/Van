@@ -1,0 +1,38 @@
+schema_version: 1
+status: NON_CANONICAL_REFERENCE_ONLY
+purpose: Mechanics references used to accelerate VAN while Candidate B remains the sole visual identity.
+visual_authority:
+  decision: CF-D-05-REV2_1
+  candidate_b: visual-authority/character-forge/01-master-candidates/van_master_source_candidate_b.png
+  sha256: cf7f51793692bfe8ea2e5f58f1a12e64d3a76468a85cb19d76d0db64ccef374c
+policy:
+  third_party_asset_bytes_imported: false
+  third_party_character_art_imported: false
+  mechanics_only: true
+  identity_override: forbidden
+  aura_inside_rive: forbidden
+references:
+  - name: Interactive Character Rig - Bones, Joysticks and Data Binding
+    url: https://rive.app/marketplace/28370-53642-interactive-character-rig-bones-joysticks-and-data-binding/
+    adapted_mechanics: [layered_rig, gaze_inputs, independent_face_controls]
+  - name: Bob - Lip-sync Character System
+    url: https://rive.app/marketplace/28111-53105-bob-lip-sync-character-system-in-rive/
+    adapted_mechanics: [viseme_layer, speech_separation]
+  - name: Expression Grid
+    url: https://rive.app/marketplace/24941-46557-expression-grid/
+    adapted_mechanics: [modular_face_components]
+  - name: Facial Expression Demo
+    url: https://rive.app/marketplace/669-1300-facial-expression-demo/
+    adapted_mechanics: [expression_blending_pattern]
+implementation:
+  public_contract: visual-authority/rive_contract.json
+  durable_pose_layer: 18 states
+  finite_action_layer: 14 actions
+  speech_viseme_layer: 5 visemes
+  source_art: Candidate B only
+  prototype_builder: tools/character_forge/build_candidate_b_rive_prototype.py
+  prototype_riv: visual-authority/character-forge/08-prototypes/candidate-b-mechanics/build/van_candidate_b_mechanics_proto.riv
+promotion:
+  prototype_is_not_m1: true
+  prototype_is_not_m2: true
+  required_next_gate: reviewed semantic vector layer sheet from Candidate B

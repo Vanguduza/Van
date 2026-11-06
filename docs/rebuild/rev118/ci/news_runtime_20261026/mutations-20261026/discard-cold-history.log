@@ -1,0 +1,80 @@
+FF..................FF...................                                [100%]
+=================================== FAILURES ===================================
+_ test_service_builder_restores_durable_history_when_the_file_is_missing[session] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-243/test_service_builder_restores_0')
+ledger = <vati.core.ledger.Ledger object at 0x7f38f6b6dca0>, kind = 'session'
+
+    @pytest.mark.parametrize('kind',['session','account'])
+    def test_service_builder_restores_durable_history_when_the_file_is_missing(tmp_path,ledger,kind):
+        h=Headline(source_id='publisher',trust=SourceTrust.T1_PRIMARY,published_ms=NOW,
+            observed_ms=NOW,title='Original policy decision',symbols=('EURUSD',),severity=Decimal('1'))
+        NewsIngress(ledger=ledger).ingest(h,now_ms=NOW)
+        value=service(kind,ledger,configured(tmp_path/'missing.jsonl'));news=build(value,kind)
+>       assert news.headlines()==[h]
+E       AssertionError: assert [] == [Headline(sou...y_excerpt='')]
+E         
+E         Right contains one more item: Headline(source_id='publisher', trust=<SourceTrust.T1_PRIMARY: 'T1_PRIMARY'>, published_ms=1800000000000, observed_ms=...bols=('EURUSD',), event_class='', severity=Decimal('1'), concern=<Concern.UNCLEAR: 'UNCLEAR'>, url='', body_excerpt='')
+E         Use -v to get more diff
+
+trading/tests/test_news_runtime_health.py:56: AssertionError
+_ test_service_builder_restores_durable_history_when_the_file_is_missing[account] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-243/test_service_builder_restores_1')
+ledger = <vati.core.ledger.Ledger object at 0x7f38f69c60f0>, kind = 'account'
+
+    @pytest.mark.parametrize('kind',['session','account'])
+    def test_service_builder_restores_durable_history_when_the_file_is_missing(tmp_path,ledger,kind):
+        h=Headline(source_id='publisher',trust=SourceTrust.T1_PRIMARY,published_ms=NOW,
+            observed_ms=NOW,title='Original policy decision',symbols=('EURUSD',),severity=Decimal('1'))
+        NewsIngress(ledger=ledger).ingest(h,now_ms=NOW)
+        value=service(kind,ledger,configured(tmp_path/'missing.jsonl'));news=build(value,kind)
+>       assert news.headlines()==[h]
+E       AssertionError: assert [] == [Headline(sou...y_excerpt='')]
+E         
+E         Right contains one more item: Headline(source_id='publisher', trust=<SourceTrust.T1_PRIMARY: 'T1_PRIMARY'>, published_ms=1800000000000, observed_ms=...bols=('EURUSD',), event_class='', severity=Decimal('1'), concern=<Concern.UNCLEAR: 'UNCLEAR'>, url='', body_excerpt='')
+E         Use -v to get more diff
+
+trading/tests/test_news_runtime_health.py:56: AssertionError
+_ test_recovery_refusal_preserves_corrupt_originals_without_writing_new_health[session] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-243/test_recovery_refusal_preserve0')
+ledger = <vati.core.ledger.Ledger object at 0x7f38f6a3b2f0>, kind = 'session'
+
+    @pytest.mark.parametrize('kind',['session','account'])
+    def test_recovery_refusal_preserves_corrupt_originals_without_writing_new_health(tmp_path,ledger,kind):
+        path=tmp_path/'news.json';path.write_text(json.dumps([row()]))
+        news=NewsIngress(ledger=ledger);news.ingest(news.headline_from_row(row()),now_ms=NOW)
+        ledger._conn.execute("UPDATE events SET payload_json='{}' WHERE kind='NEWS_HEADLINE'")
+        head=ledger.head();count=ledger.count();value=service(kind,ledger,configured(path));news=build(value,kind)
+>       assert news.source_health['state']=='RECOVERY_UNAVAILABLE' and news.source_health['coverage']=='UNKNOWN'
+E       AssertionError: assert ('PUBLICATION_UNKNOWN' == 'RECOVERY_UNAVAILABLE'
+E         
+E         - RECOVERY_UNAVAILABLE
+E         + PUBLICATION_UNKNOWN)
+
+trading/tests/test_news_runtime_health.py:179: AssertionError
+_ test_recovery_refusal_preserves_corrupt_originals_without_writing_new_health[account] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-243/test_recovery_refusal_preserve1')
+ledger = <vati.core.ledger.Ledger object at 0x7f38f6a65850>, kind = 'account'
+
+    @pytest.mark.parametrize('kind',['session','account'])
+    def test_recovery_refusal_preserves_corrupt_originals_without_writing_new_health(tmp_path,ledger,kind):
+        path=tmp_path/'news.json';path.write_text(json.dumps([row()]))
+        news=NewsIngress(ledger=ledger);news.ingest(news.headline_from_row(row()),now_ms=NOW)
+        ledger._conn.execute("UPDATE events SET payload_json='{}' WHERE kind='NEWS_HEADLINE'")
+        head=ledger.head();count=ledger.count();value=service(kind,ledger,configured(path));news=build(value,kind)
+>       assert news.source_health['state']=='RECOVERY_UNAVAILABLE' and news.source_health['coverage']=='UNKNOWN'
+E       AssertionError: assert ('PUBLICATION_UNKNOWN' == 'RECOVERY_UNAVAILABLE'
+E         
+E         - RECOVERY_UNAVAILABLE
+E         + PUBLICATION_UNKNOWN)
+
+trading/tests/test_news_runtime_health.py:179: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_news_runtime_health.py::test_service_builder_restores_durable_history_when_the_file_is_missing[session]
+FAILED trading/tests/test_news_runtime_health.py::test_service_builder_restores_durable_history_when_the_file_is_missing[account]
+FAILED trading/tests/test_news_runtime_health.py::test_recovery_refusal_preserves_corrupt_originals_without_writing_new_health[session]
+FAILED trading/tests/test_news_runtime_health.py::test_recovery_refusal_preserves_corrupt_originals_without_writing_new_health[account]
+4 failed, 37 passed, 2 deselected in 1.23s

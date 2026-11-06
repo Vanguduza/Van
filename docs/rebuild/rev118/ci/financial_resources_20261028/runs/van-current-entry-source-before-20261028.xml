@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="0.293" timestamp="2026-10-28T17:07:58.246967+00:00" hostname="6e9feff21467"><testcase classname="trading.tests.test_current_entry_risk_source" name="test_original_current_risk_and_native_margin_are_one_exact_entry_source" time="0.014"><failure message="ModuleNotFoundError: No module named 'vati.risk.current_entry_source'">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-156/test_original_current_risk_and0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_original_current_risk_and_native_margin_are_one_exact_entry_source(tmp_path,eurusd):
+&gt;       from vati.risk.current_entry_source import current_entry_source
+E       ModuleNotFoundError: No module named 'vati.risk.current_entry_source'
+
+trading/tests/test_current_entry_risk_source.py:22: ModuleNotFoundError</failure></testcase><testcase classname="trading.tests.test_current_entry_risk_source" name="test_expired_source_is_original_data_and_never_a_fresh_reservation_grant" time="0.002"><failure message="ModuleNotFoundError: No module named 'vati.risk.current_entry_source'">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-156/test_expired_source_is_origina0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_expired_source_is_original_data_and_never_a_fresh_reservation_grant(tmp_path,eurusd):
+&gt;       from vati.risk.current_entry_source import current_entry_source
+E       ModuleNotFoundError: No module named 'vati.risk.current_entry_source'
+
+trading/tests/test_current_entry_risk_source.py:41: ModuleNotFoundError</failure></testcase></testsuite></testsuites>

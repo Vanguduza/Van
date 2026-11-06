@@ -9,8 +9,10 @@ import com.dial.van.status.OwnerStatusProjection
 import com.dial.van.status.OwnerWorkStatus
 import com.dial.van.status.VanCommandStatus
 import com.dial.van.status.commandStatusFor
-import com.dial.van.visual.VanLiveVisualState
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,6 +20,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.roundToInt
 
 /** Every owner input surface converges here before crossing the signed gateway boundary. */
@@ -46,10 +49,14 @@ data class VanConversationMessage(
      *  decides whether the eventual answer is worth speaking, same rule [shouldSpeak] uses
      *  for the synchronous one. Null on an OWNER message (its own source is [VanOwnerCommand.source]). */
     val source: VanCommandSource? = null,
+    val voiceContextId: String? = null,
+    val askedAtEpochMs: Long = createdAtEpochMs,
     /** GAP-F-019 — `context_gaps` from the dispatch response, already turned into the
      *  "VAN did not know: …" sentence a Work screen renders under the reply. Null when the
      *  gateway reported no gaps. */
     val contextGapsSentence: String? = null,
+    /** Local observed receipt; Work renders it only after terminal command success. */
+    val memoryEffectReceipt: com.dial.van.memory.MemoryEffectReceipt? = null,
 )
 
 data class VanOwnerCommand(
@@ -72,6 +79,7 @@ data class VanOwnerCommand(
      * on its own: the gateway verifies each value against its own keys and policies.
      */
     val clientContext: Map<String, String> = emptyMap(),
+    val askedAtEpochMs: Long = System.currentTimeMillis(),
 )
 
 data class PendingA4Approval(
@@ -82,6 +90,9 @@ data class PendingA4Approval(
     val resolvedActionId: String,
     val noStaleReplay: Boolean,
     val maxAgeSeconds: Int?,
+    /** Gateway-resolved arguments shown before granting the exact action. */
+    val resolvedParametersJson: String? = null,
+    val approvalPreviewJson: String? = null,
 )
 
 data class VanConversationState(
@@ -103,9 +114,31 @@ class VanCommandController(
      * for — reading every status change aloud is how an assistant gets muted.
      */
     private val speak: (String) -> Unit = {},
+    private val nowMs: () -> Long = System::currentTimeMillis,
 ) {
     private val _state = MutableStateFlow(VanConversationState())
     val state: StateFlow<VanConversationState> = _state.asStateFlow()
+    private val pollingCommands = ConcurrentHashMap.newKeySet<String>()
+    @Volatile private var voiceContextId: String? = null
+    var speakResult: ((SpokenCommandResult) -> Unit)? = null
+    var onOwnerInput: () -> Unit = {}
+
+    fun invalidateVoiceContext() {
+        voiceContextId = null
+        onOwnerInput()
+    }
+
+    fun isSpeechContextCurrent(result: SpokenCommandResult): Boolean =
+        voiceContextId == result.contextId &&
+            com.dial.van.voice.DelayedAnswerPolicy.decide(
+                result.askedAtEpochMs, nowMs(), true, true,
+            ) == com.dial.van.voice.DelayedAnswerAction.SPEAK_NOW
+
+    private fun deliverSpeech(result: SpokenCommandResult) {
+        if (!isSpeechContextCurrent(result)) return
+        speakResult?.invoke(result) ?: speak(result.text)
+    }
+
 
     /**
      * §20.14 — where a command goes when it could not be sent.
@@ -120,6 +153,7 @@ class VanCommandController(
      * It returns whether the command was actually stored.
      */
     var storeForLater: ((body: org.json.JSONObject, needsReconfirm: Boolean) -> Boolean)? = null
+    var storeOriginalForLater: ((org.json.JSONObject, Boolean, String, Boolean) -> Boolean)? = null
 
     fun selectProject(projectId: String?) {
         _state.update { it.copy(selectedProjectId = projectId) }
@@ -217,6 +251,8 @@ class VanCommandController(
         val normalized = command.text.trim()
         if (normalized.isEmpty()) return
 
+        invalidateVoiceContext()
+        if (command.source == VanCommandSource.VOICE) voiceContextId = command.turnId ?: command.idempotencyKey
         val ownerMessage = VanConversationMessage(
             role = VanMessageRole.OWNER,
             text = normalized,
@@ -237,6 +273,13 @@ class VanCommandController(
         // `Dispatchers.IO` because the failure branch writes to the encrypted outbox with
         // a synchronous `commit()`, and the scope's default pool is sized for CPU work.
         scope.launch(Dispatchers.IO) {
+            var preparedBody: String? = null
+            val originalProfile = gateway.permissionProfileIdentity()
+            var priorHttpAttempt = false
+            var originalOwned = false
+            var recoveryRequired = false
+            val operation = currentCoroutineContext()
+            val originalDevice = gateway.deviceIdOrEmpty()
             try {
                 val response = gateway.dispatchCommand(
                     text = normalized,
@@ -251,16 +294,76 @@ class VanCommandController(
                     speechEvidenceRef = command.speechEvidenceRef,
                     speakerEvidenceMilli = command.speakerEvidenceMilli,
                     clientContext = command.clientContext,
+                    onPreparedCommand = {
+                        check(gateway.permissionProfileIdentity() == originalProfile) { "Active profile changed" }
+                        preparedBody = it
+                    },
+                    beforeDispatch = {
+                        operation.ensureActive()
+                        check(gateway.permissionProfileIdentity() == originalProfile && gateway.deviceIdOrEmpty() == originalDevice) {
+                            "Active owner or profile changed"
+                        }
+                        // Recovery-only ownership precedes any uncertain HTTP effect.
+                        // Mark ambiguous BEFORE transport; this is never replay authority.
+                        val policy = OfflineSubmission.decide(command.actionClass, false, false, "")
+                        if (storeOriginalForLater != null && policy is OfflineSubmission.Verdict.Store) {
+                            recoveryRequired = true
+                            if (!originalOwned) {
+                                originalOwned = storeSignedBody(command, policy.needsReconfirm, preparedBody, originalProfile, true)
+                                check(originalOwned) { "Original recovery could not be saved" }
+                            }
+                        }
+                        operation.ensureActive()
+                        check(gateway.permissionProfileIdentity() == originalProfile && gateway.deviceIdOrEmpty() == originalDevice) {
+                            "Active owner or profile changed"
+                        }
+                        priorHttpAttempt = true
+                    },
                 )
                 recordResponse(command, response)
+            } catch (cancelled: CancellationException) {
+                if (priorHttpAttempt) recordFailure(command, cancelled, preparedBody, originalProfile, true, originalOwned)
+                else recordUnsent(command, "Cancelled before dispatch. Original recovery data was retained if saved.")
+                throw cancelled
             } catch (t: Throwable) {
-                recordFailure(command, t)
+                if (recoveryRequired && !priorHttpAttempt) recordUnsent(command, if (!originalOwned)
+                    "Not sent: original recovery could not be saved." else "Not sent: owner context changed. Original recovery data was retained.")
+                else recordFailure(command, t, preparedBody, originalProfile, priorHttpAttempt, originalOwned)
             }
         }
     }
 
-    fun approvePendingA4(activity: FragmentActivity) {
+    private fun recordUnsent(command: VanOwnerCommand, message: String) {
+        _state.update { it.copy(submitting = false, lastError = message,
+            messages = it.messages + VanConversationMessage(role = VanMessageRole.SYSTEM,
+                text = message, projectId = command.projectId, status = VanCommandStatus.REFUSED)) }
+    }
+
+    /** A local refusal of this exact pending challenge never grants execution authority. */
+    fun discardPendingA4(challengeId: String) {
+        _state.update { current ->
+            val pending = current.pendingA4Approval
+            if (pending?.challengeId != challengeId || current.submitting) current
+            else current.copy(pendingA4Approval = null, lastError = null,
+                messages = current.messages + VanConversationMessage(
+                    role = VanMessageRole.SYSTEM, text = "Approval declined. This action was not authorized.",
+                    projectId = pending.command.projectId, status = VanCommandStatus.REFUSED,
+                ))
+        }
+    }
+
+    fun approvePendingA4(activity: FragmentActivity, reviewedGmailDraftDigest: String? = null) {
+        if (_state.value.submitting) return
         val pending = _state.value.pendingA4Approval ?: return
+        if (pending.resolvedActionId == "google.gmail.send") {
+            val expected = runCatching {
+                org.json.JSONObject(pending.resolvedParametersJson ?: "{}").getString("draft_content_sha256")
+            }.getOrNull()
+            if (expected == null || !expected.matches(Regex("[0-9a-f]{64}")) || reviewedGmailDraftDigest != expected) {
+                _state.update { it.copy(lastError = "Review the exact draft contents in Work before approving this send.") }
+                return
+            }
+        }
         val now = System.currentTimeMillis() / 1000L
         if (now >= pending.expiresAtUnix) {
             _state.update {
@@ -287,12 +390,20 @@ class VanCommandController(
             return
         }
 
+        _state.update { current ->
+            if (current.pendingA4Approval?.challengeId == pending.challengeId)
+                current.copy(submitting = true, lastError = null) else current
+        }
+        if (_state.value.pendingA4Approval?.challengeId != pending.challengeId) return
+
         gate.requestA4CommandApproval(
             signature = signingSignature,
             challenge = pending.challenge,
             onApproved = { signatureBase64 ->
+                if (_state.value.pendingA4Approval?.challengeId != pending.challengeId) return@requestA4CommandApproval
                 _state.update { it.copy(submitting = true, lastError = null) }
-                scope.launch {
+                scope.launch(Dispatchers.IO) {
+                    var preparedBody: String? = null
                     try {
                         val approvedAt = System.currentTimeMillis() / 1000L
                         val replayWindow = (pending.maxAgeSeconds ?: 60).coerceIn(1, 60)
@@ -312,15 +423,21 @@ class VanCommandController(
                             speechEvidenceRef = pending.command.speechEvidenceRef,
                             speakerEvidenceMilli = pending.command.speakerEvidenceMilli,
                             clientContext = pending.command.clientContext,
+                            onPreparedCommand = { preparedBody = it },
                         )
                         recordResponse(pending.command, response)
+                    } catch (cancelled: CancellationException) {
+                        throw cancelled
                     } catch (t: Throwable) {
-                        recordFailure(pending.command, t)
+                        // A gateway-upgraded A1 request is now approval-bearing A4.
+                        // Losing the receipt must never store its biometric proof.
+                        recordFailure(pending.command.copy(actionClass = "A4"), t, preparedBody)
                     }
                 }
             },
             onDenied = { reason ->
                 _state.update {
+                    if (it.pendingA4Approval?.challengeId != pending.challengeId) return@update it
                     it.copy(
                         submitting = false,
                         lastError = reason,
@@ -358,6 +475,8 @@ class VanCommandController(
                     resolvedActionId = actionId,
                     noStaleReplay = response.optBoolean("no_stale_replay", false),
                     maxAgeSeconds = response.optInt("max_age_seconds", 0).takeIf { it > 0 },
+                    resolvedParametersJson = response.optJSONObject("resolved_parameters")?.toString(),
+                    approvalPreviewJson = response.optJSONObject("approval_preview")?.toString(),
                 )
             } else {
                 null
@@ -381,6 +500,19 @@ class VanCommandController(
                 (0 until array.length()).mapNotNull { array.optJSONObject(it)?.optString("label") }
             }.orEmpty(),
         )
+        val memoryReceipt = response.optJSONObject("local_execution")?.let { receipt ->
+            val counts = receipt.optJSONObject("removed_counts") ?: org.json.JSONObject()
+            val affected = receipt.optJSONArray("affected_stores")
+            val kept = receipt.optJSONObject("kept_deliberately") ?: org.json.JSONObject()
+            com.dial.van.memory.MemoryEffectReceipt.observed(
+                actionId = receipt.optString("action_id"),
+                verificationState = receipt.optString("verification_state"),
+                removedCounts = counts.keys().asSequence().associateWith { counts.optLong(it, -1L) },
+                affectedStores = if (affected == null) emptySet() else (0 until affected.length()).map { affected.optString(it) }.toSet(),
+                evidenceRef = receipt.optString("evidence_ref"),
+                retainedReasons = kept.keys().asSequence().map { kept.optString(it) }.toList(),
+            )
+        }
 
         _state.update {
             it.copy(
@@ -391,20 +523,28 @@ class VanCommandController(
                     commandId = response.optString("command_id").ifBlank { null },
                     status = status,
                     source = command.source,
+                    voiceContextId = command.turnId ?: command.idempotencyKey,
+                    askedAtEpochMs = command.askedAtEpochMs,
                     contextGapsSentence = gapsSentence,
+                    memoryEffectReceipt = memoryReceipt,
                 ),
                 submitting = false,
                 pendingA4Approval = pending,
                 lastError = if (status == VanCommandStatus.FAILED) responseText else null,
             )
         }
-        if (shouldSpeak(command, ownerStatus)) speak(responseText)
+        if (shouldSpeak(command, ownerStatus)) deliverSpeech(SpokenCommandResult(
+            commandId = response.optString("command_id").ifBlank { null },
+            resultRef = response.optString("result_ref").ifBlank { null },
+            text = responseText, contextId = command.turnId ?: command.idempotencyKey,
+            askedAtEpochMs = command.askedAtEpochMs,
+        ))
     }
 
     /**
      * GAP-F-011 — the conversational surface never received the completed answer.
      *
-     * Polled every 4s by the Work screen while any VAN message's status is unfinished
+     * Polled by the application while any VAN message's status is unfinished
      * ([com.dial.van.command.work.ConversationReducer.needsPolling]). The original message's
      * status is updated in place (so it stops being polled) and the answer is appended as a
      * new VAN message, same as the synchronous path — the owner sees the thread move, rather
@@ -414,11 +554,15 @@ class VanCommandController(
         val pending = _state.value.messages.filter {
             it.role == VanMessageRole.VAN &&
                 com.dial.van.command.work.ConversationReducer.needsPolling(it.commandId, it.status)
-        }
+        }.asReversed().distinctBy { it.commandId }.asReversed()
         for (message in pending) {
             val commandId = message.commandId ?: continue
+            if (!pollingCommands.add(commandId)) continue
             scope.launch(Dispatchers.IO) {
-                val response = runCatching { gateway.commandStatus(commandId) }.getOrNull() ?: return@launch
+                try {
+                val response = try { gateway.commandStatus(commandId) }
+                catch (cancelled: CancellationException) { throw cancelled }
+                catch (_: Exception) { return@launch }
                 val outcome = com.dial.van.command.work.ConversationReducer.outcomeFor(
                     com.dial.van.command.work.ConversationReducer.PollResult(
                         ownerStatus = response.optString("owner_status").ifBlank { null },
@@ -430,10 +574,16 @@ class VanCommandController(
                 // Nothing new to say yet (still WORKING) — leave the thread as it is rather
                 // than appending "Working on it" again every 4 seconds.
                 if (outcome.status == message.status) return@launch
-                _state.update { s ->
-                    s.copy(
-                        messages = s.messages.map {
-                            if (it.id == message.id) it.copy(status = outcome.status) else it
+                var applied = false
+                while (true) {
+                    val current = _state.value
+                    val latest = current.messages.lastOrNull { it.role == VanMessageRole.VAN && it.commandId == commandId }
+                    if (latest?.id != message.id || latest.status != message.status) break
+                    val next = current.copy(
+                        messages = current.messages.map {
+                            if (it.role == VanMessageRole.VAN && it.commandId == commandId &&
+                                com.dial.van.command.work.ConversationReducer.needsPolling(it.commandId, it.status))
+                                it.copy(status = outcome.status) else it
                         } + VanConversationMessage(
                             role = VanMessageRole.VAN,
                             text = outcome.text,
@@ -441,10 +591,19 @@ class VanCommandController(
                             commandId = commandId,
                             status = outcome.status,
                             source = message.source,
+                            voiceContextId = message.voiceContextId,
+                            askedAtEpochMs = message.askedAtEpochMs,
                         ),
                     )
+                    if (_state.compareAndSet(current, next)) { applied = true; break }
                 }
-                if (!outcome.keepPolling && shouldSpeakPolledOutcome(message.source)) speak(outcome.text)
+                if (applied && !outcome.keepPolling && shouldSpeakPolledOutcome(message.source)) {
+                    message.voiceContextId?.let { contextId -> deliverSpeech(SpokenCommandResult(
+                        commandId = commandId, resultRef = response.optString("result_ref").ifBlank { null },
+                        text = outcome.text, contextId = contextId, askedAtEpochMs = message.askedAtEpochMs,
+                    )) }
+                }
+                } finally { pollingCommands.remove(commandId) }
             }
         }
     }
@@ -485,11 +644,11 @@ class VanCommandController(
      * replayed later and whether an A4 may be stored at all are the two rules worth
      * getting right, and they belong somewhere a test can execute them.
      */
-    private fun recordFailure(command: VanOwnerCommand, throwable: Throwable) {
+    private fun recordFailure(command: VanOwnerCommand, throwable: Throwable, preparedBody: String? = null, originalProfile: String? = null, priorHttpAttempt: Boolean = false, originalOwned: Boolean = false) {
         val safeMessage = throwable.message?.take(240) ?: throwable::class.java.simpleName
         // An HTTP status came back, so the command arrived and was answered. A timeout or
         // a dropped connection did not, and only that may be held.
-        val gatewayAnswered = throwable is GatewayHttpException
+        val gatewayAnswered = throwable is GatewayHttpException && throwable.code in 400..499 && throwable.code != 408
         val verdict = OfflineSubmission.decide(
             actionClass = command.actionClass,
             // No separate signal for this at this call site yet: nothing upstream marks a
@@ -502,13 +661,18 @@ class VanCommandController(
             failureSummary = safeMessage,
             noStaleReplay = command.noStaleReplay,
         )
-        val stored = when (verdict) {
-            is OfflineSubmission.Verdict.Store -> storeSignedBody(command, verdict.needsReconfirm)
+        val stored = originalOwned || when (verdict) {
+            is OfflineSubmission.Verdict.Store -> storeSignedBody(command, verdict.needsReconfirm, preparedBody, originalProfile, priorHttpAttempt)
             is OfflineSubmission.Verdict.Drop -> false
         }
         // Said rather than assumed. A build with no outbox behind `storeForLater`, or a
         // store that refused, must not leave the owner told their work was saved.
-        val text = if (stored) verdict.ownerMessage else when (verdict) {
+        val text = if (gatewayAnswered) verdict.ownerMessage
+            else if (stored && storeOriginalForLater != null && priorHttpAttempt)
+            "Saved the original request. Its delivery outcome is unconfirmed; VAN will recover that original result."
+            else if (stored) verdict.ownerMessage
+            else if (priorHttpAttempt) "Original delivery outcome is unconfirmed; recovery was not saved. Check its state before issuing it again."
+            else when (verdict) {
             is OfflineSubmission.Verdict.Drop -> verdict.ownerMessage
             is OfflineSubmission.Verdict.Store -> "Not sent, and not saved: $safeMessage"
         }
@@ -518,7 +682,9 @@ class VanCommandController(
                     role = VanMessageRole.SYSTEM,
                     text = text,
                     projectId = command.projectId,
-                    status = if (stored) VanCommandStatus.QUEUED else VanCommandStatus.FAILED,
+                    status = if (gatewayAnswered) VanCommandStatus.REFUSED else if (stored) VanCommandStatus.QUEUED
+                        else if (priorHttpAttempt) VanCommandStatus.UNKNOWN else VanCommandStatus.FAILED,
+                    commandId = preparedBody?.let { raw -> runCatching { org.json.JSONObject(raw).optString("command_id").takeIf { it.isNotBlank() } }.getOrNull() },
                 ),
                 submitting = false,
                 lastError = if (stored) null else safeMessage,
@@ -527,7 +693,7 @@ class VanCommandController(
     }
 
     /**
-     * Build the body the Gateway would have received, and hand *that* to the outbox.
+     * Retain the exact body prepared for the original dispatch in the outbox.
      *
      * The first version stored `{text, action_class, idempotency_key}`, which is not a
      * command: `CommandRequest` requires `command_id`, `issued_at_unix` and `signature`,
@@ -535,28 +701,33 @@ class VanCommandController(
      * The owner would have been told their work was saved and it would have been rejected
      * on their behalf hours later — nothing looking wrong until it was too late to redo.
      *
-     * Signed here rather than at flush time so that `issued_at_unix` is the moment the
-     * owner issued it. Re-signing later would make a day-old instruction look fresh and
-     * defeat the Gateway's own stale-intent refusal.
+     * Rebuilding after a lost response minted a new command id, nonce and issued time
+     * under the old idempotency key, causing a conflict against the original attempt.
+     * The prepared body also retains client context and any original replay expiry.
      */
-    private fun storeSignedBody(command: VanOwnerCommand, needsReconfirm: Boolean): Boolean {
-        val store = storeForLater ?: return false
-        val body = runCatching {
-            gateway.buildCommandBody(
-                text = command.text.trim(),
-                actionClass = command.actionClass,
-                projectId = command.projectId,
-                idempotencyKey = command.idempotencyKey,
-                approvalToken = command.approvalToken,
-                turnId = command.turnId,
-                originChannel = originChannel(command.source),
-                expiresAtUnix = command.expiresAtUnix,
-                noStaleReplay = command.noStaleReplay,
-                speechEvidenceRef = command.speechEvidenceRef,
-                speakerEvidenceMilli = command.speakerEvidenceMilli,
-            )
-        }.getOrNull() ?: return false
-        return store(body, needsReconfirm)
+    private fun storeSignedBody(command: VanOwnerCommand, needsReconfirm: Boolean, preparedBody: String?, originalProfile: String?, priorHttpAttempt: Boolean): Boolean {
+        val body = OfflineSubmission.preparedReplay(preparedBody, command.idempotencyKey) ?: return false
+        storeOriginalForLater?.let { return originalProfile != null && it(body, needsReconfirm, originalProfile, priorHttpAttempt) }
+        return storeForLater?.invoke(body, needsReconfirm) ?: false
+    }
+
+    /** Project an already-owned original result without inferring native completion. */
+    fun reportRecoveredOriginal(readback: org.json.JSONObject) {
+        val result = readback.optJSONObject("result") ?: return
+        val command = result.optString("command_id").takeIf { it.isNotBlank() } ?: return
+        val owner = readback.optJSONObject("owner_result")
+        val missionState = owner?.optString("mission_state")?.takeUnless { it.isBlank() || it == "null" }
+        val status = if (missionState != null) OwnerStatusProjection.fromMissionState(missionState)
+                     else OwnerStatusProjection.fromCommandResult(result.optString("status"))
+        val line = "Original request recovered. ${OwnerStatusProjection.sentenceFor(status)}"
+        _state.update { current ->
+            val found = current.messages.any { it.role == VanMessageRole.SYSTEM && it.commandId == command }
+            current.copy(messages = if (found) current.messages.map {
+                if (it.role == VanMessageRole.SYSTEM && it.commandId == command)
+                    it.copy(text = line, status = commandStatusFor(status)) else it
+            } else current.messages + VanConversationMessage(role = VanMessageRole.SYSTEM,
+                text = line, commandId = command, status = commandStatusFor(status)))
+        }
     }
 
     /**

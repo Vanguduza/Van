@@ -1,0 +1,90 @@
+{
+  "state": "TERMINAL",
+  "source_before": {
+    "trading/commander/accounts.py": "6b20d5ae1ee01f00672287bb0d9183f41083c57874b5c53afa1ea339f648082a",
+    "trading/commander/account_effects.py": "8a842f27aa24bce106371cfb454c1feb224a494665e69645f6979f0c476487a2",
+    "trading/commander/app.py": "aa353acaa9ac8d74a51e6f2e500cae7ecdbc382e64413da4ccfae75fdbd85540",
+    "trading/vati/accounts/registry.py": "e7925dc1cacb1ce84af601fbbfb870220f43e6bd423fa52855d4900ce96f0be9",
+    "backend/tests/test_account_update_review.py": "c4fa99375516fd0c52833ff4dc941c7e68dc1d6e185418e4093c489606b25d0b",
+    "trading/tests/test_account_registry_atomic_rea.py": "0f371d8d35d609d585fd615b6e0393298749b839608bea3ac66f85a858a53674"
+  },
+  "scope": "Actual completecanonical/workflowcontrols oncombined6sourcepaths; exactownedAGPoutputinit setup/argv/coreASTcontrol +allVTIL controls retained. Controlledfixturemodels only; no newAGP/SDK/platformNode/hosted/privatequalification. Earlier136VTIL4 run retainedonitsoriginalinputpins, not silentlyreusedastestfileunchanged.",
+  "outer_node_inputs_shape": {
+    "NODE_OPTIONS": {
+      "present": false,
+      "nonempty": false,
+      "sha256": null
+    },
+    "NODE_PATH": {
+      "present": true,
+      "nonempty": true,
+      "sha256": "dbc7bc884f72c70bb3d320e868da710a56a621286fba48b3c6b610776b41b4fd"
+    },
+    "NODE_COMPILE_CACHE": {
+      "present": false,
+      "nonempty": false,
+      "sha256": null
+    },
+    "NODE_DISABLE_COMPILE_CACHE": {
+      "present": false,
+      "nonempty": false,
+      "sha256": null
+    }
+  },
+  "tmp_reserve": 2147483648,
+  "owned_run_budget": 134217728,
+  "file_cap": 8388608,
+  "started": "2026-11-01T23:58:30.491794+00:00",
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "-B",
+    "/workspace/van-review-2026-10-18/publish/tools/rebuild/source_storage_audit.py",
+    "--checkout-root",
+    "/workspace/van-review-2026-10-18/publish",
+    "--report",
+    "/tmp/van-recovery-upsert-shared-consumers-20261101/audit.json",
+    "trading/tests/test_account_credential_atomicity.py",
+    "trading/tests/test_account_retirement_native_guards.py",
+    "trading/tests/test_account_resource_versions.py",
+    "--rootdir=/workspace/van-review-2026-10-18/publish",
+    "-c",
+    "/workspace/van-review-2026-10-18/publish/pytest.ini",
+    "-p",
+    "pytest_asyncio.plugin",
+    "-p",
+    "anyio.pytest_plugin",
+    "--basetemp=/tmp/van-recovery-pytest-upsert-shared-20261101",
+    "--junitxml=/tmp/van-recovery-upsert-shared-consumers-20261101/tests.xml",
+    "-q"
+  ],
+  "exit": 0,
+  "child_pid": 1217365,
+  "child_waited": true,
+  "peak_owned_bytes": 5401772,
+  "seconds": 7.441303546002018,
+  "children_remaining": [],
+  "tests": 36,
+  "failures": 0,
+  "errors": 0,
+  "skips": 0,
+  "cleanup": {
+    "path": "/tmp/van-recovery-pytest-upsert-shared-20261101",
+    "files": 192,
+    "inventory": "/tmp/van-recovery-upsert-shared-consumers-20261101/owned-temp-inventory.json",
+    "inventory_sha256": "0b32e3148173a3535acbc7d859cfcee2b74d881c06e184f1a3d4825b65337ad4",
+    "free_bytes_before_cleanup": 2427162624,
+    "free_bytes_after_cleanup": 2428956672,
+    "free_inodes_after": 2203340,
+    "independently_absent": true
+  },
+  "source_after": {
+    "trading/commander/accounts.py": "6b20d5ae1ee01f00672287bb0d9183f41083c57874b5c53afa1ea339f648082a",
+    "trading/commander/account_effects.py": "8a842f27aa24bce106371cfb454c1feb224a494665e69645f6979f0c476487a2",
+    "trading/commander/app.py": "aa353acaa9ac8d74a51e6f2e500cae7ecdbc382e64413da4ccfae75fdbd85540",
+    "trading/vati/accounts/registry.py": "e7925dc1cacb1ce84af601fbbfb870220f43e6bd423fa52855d4900ce96f0be9",
+    "backend/tests/test_account_update_review.py": "c4fa99375516fd0c52833ff4dc941c7e68dc1d6e185418e4093c489606b25d0b",
+    "trading/tests/test_account_registry_atomic_rea.py": "0f371d8d35d609d585fd615b6e0393298749b839608bea3ac66f85a858a53674"
+  },
+  "outer_node_environment_unchanged": true,
+  "completed": "2026-11-01T23:58:38.018008+00:00"
+}

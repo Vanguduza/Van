@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="18.648" timestamp="2026-10-26T00:31:00.950683+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_news_runtime_health" name="test_changed_file_capacity_policy_gets_a_new_health_receipt_without_rewriting_history" time="0.524"><failure message="AssertionError: assert '5bf97bd47d941a3eee9140efcd5c94eeb5c69174055f024793c296c74a0c2859' != '5bf97bd47d941a3eee9140efcd5c94eeb5c69174055f024793c296c74a0c2859'">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-235/test_changed_file_capacity_pol0')
+ledger = &lt;vati.core.ledger.Ledger object at 0x7efd0f4641d0&gt;
+
+    def test_changed_file_capacity_policy_gets_a_new_health_receipt_without_rewriting_history(tmp_path,ledger):
+        path=tmp_path/'news.json';path.write_text(json.dumps([row()]));value=service('account',ledger,configured(path)|{'max_rows':100})
+        news=build(value,'account');original=health_records(ledger)[0];first=news.source_health['source_ref']
+        value.cfg.news['max_rows']=101
+        result=value.refresh_news(NOW+1)
+&gt;       assert result['source_health']['source_ref']!=first
+E       AssertionError: assert '5bf97bd47d941a3eee9140efcd5c94eeb5c69174055f024793c296c74a0c2859' != '5bf97bd47d941a3eee9140efcd5c94eeb5c69174055f024793c296c74a0c2859'
+
+trading/tests/test_news_runtime_health.py:260: AssertionError</failure></testcase><testcase classname="trading.tests.test_news_runtime_health" name="test_file_health_does_not_count_a_future_observation_as_an_available_headline" time="0.014"><failure message="assert 1 == 0">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-235/test_file_health_does_not_coun0')
+ledger = &lt;vati.core.ledger.Ledger object at 0x7efd0f340410&gt;
+
+    def test_file_health_does_not_count_a_future_observation_as_an_available_headline(tmp_path,ledger):
+        path=tmp_path/'news.json';path.write_text(json.dumps([row()|{'observed_ms':NOW+1000}]))
+        value=service('account',ledger,configured(path));news=build(value,'account')
+        assert news.headlines(as_of_ms=NOW)==[]
+&gt;       assert news.source_health['last_known_headlines']==0
+E       assert 1 == 0
+
+trading/tests/test_news_runtime_health.py:269: AssertionError</failure></testcase></testsuite></testsuites>

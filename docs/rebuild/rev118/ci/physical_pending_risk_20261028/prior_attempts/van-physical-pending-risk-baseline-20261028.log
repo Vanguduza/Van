@@ -1,0 +1,76 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+_ test_second_alias_cannot_reuse_pending_risk_capacity_at_the_actual_snapshot_owner[single] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-64/test_second_alias_cannot_reuse0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+kind = 'single'
+
+    @pytest.mark.parametrize('kind',['single','account'])
+    def test_second_alias_cannot_reuse_pending_risk_capacity_at_the_actual_snapshot_owner(tmp_path,eurusd,kind):
+        ledger,adapter,account,_,facts=native_facts(tmp_path,eurusd)
+        _,first=command(ledger,facts,'first-pending-risk')
+        receipt(ledger,first,status='ACCEPTED')
+        b=other_context(ledger,adapter,account,facts,alias='second_alias')
+        current=replace(account,account_alias=b.account_alias,
+            funding_mark=replace(account.funding_mark,account_alias=b.account_alias),
+            used_margin=D(0),free_margin=account.equity,margin_level_pct=None)
+        service=producer(kind,ledger,adapter,current,b)
+        now=NOW*1000+100
+        if kind=='single':
+            snapshot=service.snapshot(now_ms=now,quote_age_ms=0,strategy_id=intent().strategy_id)
+        else:
+            service.clock=lambda:now
+            snapshot=service._snapshot_for(N(symbol='EURUSD',strategy_id=intent().strategy_id))
+        assert snapshot.reconciliation_ok and not snapshot.preservation_blocks_new_risk, snapshot
+        assert snapshot.open_positions==()
+        grant=TradingMandate.from_mapping(mandate_dict(account_alias=b.account_alias,venue=adapter.venue,
+            max_open_stop_risk='0.005',max_positions_per_instrument=10,max_total_positions=20))
+        result=RiskAuthority(grant).evaluate_safe(intent(account_alias=b.account_alias,venue=adapter.venue),snapshot)
+>       assert result.decision.value=='REJECTED' and result.reason_code=='PORTFOLIO_HEAT',result
+E       AssertionError: RiskDecision(trade_intent_id='ti-1', decision=<Decision.APPROVED: 'APPROVED'>, reason_code='OK', reason_detail='', app...2c3606bf0', mandate_hash='e138fa0e4d74c119cecf84b6d3a65e6945d5bb79b2c20cc795b43bb0c8b98d8e', approval_schema_version=2)
+E       assert ('APPROVED' == 'REJECTED'
+E         
+E         - REJECTED
+E         + APPROVED)
+
+trading/tests/test_physical_pending_risk.py:37: AssertionError
+_ test_second_alias_cannot_reuse_pending_risk_capacity_at_the_actual_snapshot_owner[account] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-64/test_second_alias_cannot_reuse1')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+kind = 'account'
+
+    @pytest.mark.parametrize('kind',['single','account'])
+    def test_second_alias_cannot_reuse_pending_risk_capacity_at_the_actual_snapshot_owner(tmp_path,eurusd,kind):
+        ledger,adapter,account,_,facts=native_facts(tmp_path,eurusd)
+        _,first=command(ledger,facts,'first-pending-risk')
+        receipt(ledger,first,status='ACCEPTED')
+        b=other_context(ledger,adapter,account,facts,alias='second_alias')
+        current=replace(account,account_alias=b.account_alias,
+            funding_mark=replace(account.funding_mark,account_alias=b.account_alias),
+            used_margin=D(0),free_margin=account.equity,margin_level_pct=None)
+        service=producer(kind,ledger,adapter,current,b)
+        now=NOW*1000+100
+        if kind=='single':
+            snapshot=service.snapshot(now_ms=now,quote_age_ms=0,strategy_id=intent().strategy_id)
+        else:
+            service.clock=lambda:now
+            snapshot=service._snapshot_for(N(symbol='EURUSD',strategy_id=intent().strategy_id))
+        assert snapshot.reconciliation_ok and not snapshot.preservation_blocks_new_risk, snapshot
+        assert snapshot.open_positions==()
+        grant=TradingMandate.from_mapping(mandate_dict(account_alias=b.account_alias,venue=adapter.venue,
+            max_open_stop_risk='0.005',max_positions_per_instrument=10,max_total_positions=20))
+        result=RiskAuthority(grant).evaluate_safe(intent(account_alias=b.account_alias,venue=adapter.venue),snapshot)
+>       assert result.decision.value=='REJECTED' and result.reason_code=='PORTFOLIO_HEAT',result
+E       AssertionError: RiskDecision(trade_intent_id='ti-1', decision=<Decision.APPROVED: 'APPROVED'>, reason_code='OK', reason_detail='', app...2c3606bf0', mandate_hash='464dfdd63237f09b1e2b5c49d34b1497fb969a0a3d5773d0b9c324da7c8ba615', approval_schema_version=2)
+E       assert ('APPROVED' == 'REJECTED'
+E         
+E         - REJECTED
+E         + APPROVED)
+
+trading/tests/test_physical_pending_risk.py:37: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_physical_pending_risk.py::test_second_alias_cannot_reuse_pending_risk_capacity_at_the_actual_snapshot_owner[single]
+FAILED trading/tests/test_physical_pending_risk.py::test_second_alias_cannot_reuse_pending_risk_capacity_at_the_actual_snapshot_owner[account]
+2 failed in 1.07s

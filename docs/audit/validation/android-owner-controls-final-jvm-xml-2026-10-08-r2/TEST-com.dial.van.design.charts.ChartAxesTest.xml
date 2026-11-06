@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.design.charts.ChartAxesTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-10-08T04:57:38" hostname="052fefa249ff" time="0.014">
+  <properties/>
+  <testcase name="timeLabel granularity depends on the overall span, not the individual tick()" classname="com.dial.van.design.charts.ChartAxesTest" time="0.008"/>
+  <testcase name="timeTicks of an instant returns the single instant()" classname="com.dial.van.design.charts.ChartAxesTest" time="0.0"/>
+  <testcase name="niceNumber rounds to 1-2-5 times a power of ten()" classname="com.dial.van.design.charts.ChartAxesTest" time="0.0"/>
+  <testcase name="ticks rejects a target count below 2()" classname="com.dial.van.design.charts.ChartAxesTest" time="0.0"/>
+  <testcase name="ticks of a flat series is the single value()" classname="com.dial.van.design.charts.ChartAxesTest" time="0.0"/>
+  <testcase name="niceNumber non-round mode always rounds up, never clipping the range()" classname="com.dial.van.design.charts.ChartAxesTest" time="0.0"/>
+  <testcase name="ticks never produces an unreadable fractional step for a round number range()" classname="com.dial.van.design.charts.ChartAxesTest" time="0.0"/>
+  <testcase name="valueLabel decimal precision follows the step()" classname="com.dial.van.design.charts.ChartAxesTest" time="0.001"/>
+  <testcase name="timeTicks stay within the requested span()" classname="com.dial.van.design.charts.ChartAxesTest" time="0.0"/>
+  <testcase name="timeTicks snap to human boundaries for an hour-scale span()" classname="com.dial.van.design.charts.ChartAxesTest" time="0.001"/>
+  <testcase name="ticks span the requested range with nice values()" classname="com.dial.van.design.charts.ChartAxesTest" time="0.0"/>
+  <testcase name="ticks handles a reversed min and max()" classname="com.dial.van.design.charts.ChartAxesTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,8 @@
+{
+  "base_head": "f00495cf996aaf9adb0a177db61c083640c2965e",
+  "source_sha256": "ec9d3e26f60b56d05ba9fa101a334eb1ecc858875f5de24a5b842f0d5501b0f6",
+  "source_state": "Uncommitted expiry-only repair; original canonical binding logic unchanged",
+  "failed": 7,
+  "passed": 0,
+  "production_evidence": false
+}

@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "authorization_id": "auth-20260930-owner-derived-programme-b-review-i7-remediation",
+  "project": "van",
+  "authority": "OWNER_DERIVED",
+  "owner_instruction_sha256": "1fc63b2f9355a9c8534003a65e0bd8550288092795b4d07d2dcb2dec371107b0",
+  "owner_instruction_digest_input": "UTF-8 bytes of the verbatim selected answer label \"Network-effect guard (Recommended)\", no quotes, no trailing newline",
+  "owner_instruction_record": "docs/decisions/OWNER-DECISION-20260930-NETWORK-EFFECT-GUARD.md",
+  "owner_instruction_excerpt": "Network-effect guard (Recommended)",
+  "additional_owner_answers": {
+    "beacons": {
+      "label": "Block silently, continue (Recommended)",
+      "sha256": "64b65ff7f660819d6f5bcf153cc8eb6362f38ef7d0f02752bea00ada8b9d7158"
+    },
+    "ledger": {
+      "label": "Yes to owner derived treatment and  enforce van's ledger",
+      "sha256": "1fb51f92482bc51e4c6d7fc1ef508b3070a56c0d024dd773927367162ce72dfb"
+    }
+  },
+  "source": {
+    "kind": "owner_session_instruction",
+    "channel": "claude_code",
+    "request_id": "claude-code-session_01ELKqm4GCPmPvF3ggKkgB1J-20260930",
+    "owner_attested": true,
+    "device_signature_claimed": false,
+    "cryptographic_signature_claimed": false,
+    "signed_ingress_claimed": false
+  },
+  "signature_note": "Derived authority; no signature claimed. Review I7 showed the guard chosen by the owner ('catches handler-driven payments whatever the label') missed delayed writes; keeping it on for the whole lease and freezing on a block is a necessary consequence of that choice. The background-write drop rule implements the owner's 'Block silently, continue' answer. The CI trusted-ref change follows 'enforce van's ledger'. The remaining I7 minors (argv test, guard canary in qualify.sh, replaceState, migration 38 immutability, stale comments, settle-window test) are review remediation. The owner did not review these diffs.",
+  "purpose": "Authorize unit G11's commits and their integration merge.",
+  "authorized_paths": [
+    ".github/workflows/van-ci.yml",
+    "backend/tests/cdp_harness_kit.py",
+    "backend/tests/conftest_automation.py",
+    "backend/tests/test_browser_i5_integration_g8.py",
+    "backend/tests/test_browser_network_effect_guard.py",
+    "backend/tests/test_browser_network_guard_lease.py",
+    "backend/tests/test_browser_review_i5_fence.py",
+    "backend/tests/test_browser_review_i5_task_scope.py",
+    "backend/tests/test_browser_review_i6_scope.py",
+    "backend/tests/test_browser_task_tombstones.py",
+    "backend/tests/test_harness_chromium_argv.py",
+    "backend/van_gateway/app.py",
+    "backend/van_gateway/browser/adapters.py",
+    "backend/van_gateway/browser/api.py",
+    "backend/van_gateway/browser/interaction_router.py",
+    "backend/van_gateway/browser/service.py",
+    "backend/van_gateway/browser/task_scope.py",
+    "backend/van_gateway/knowledge/service.py",
+    "backend/van_gateway/storage/db.py",
+    "deploy/van-browser-core/README.md",
+    "deploy/van-browser-core/bootstrap.sh",
+    "deploy/van-browser-core/browser/guard_canary.py",
+    "deploy/van-browser-core/browser/harness_service.py",
+    "deploy/van-browser-core/qualify.sh",
+    "deploy/van-browser-core/runtime.env.example",
+    "tests/contracts/test_project_truth_ledger.py",
+    "tools/ci/README.md",
+    "tools/ci/github-actions-ci.yml"
+  ],
+  "commit_scope": {
+    "commits": [
+      "a505fa0c1e93a5a58bee01fc7f85a632a392787b",
+      "513af7973ac6ee2967f1b6bcc37501712f756ec5",
+      "abac2012c14206b9006ba176ffa94b1ddd8540af",
+      "2468975db3ad2be1da1dd0f2552c861f93bf0c79"
+    ]
+  },
+  "limits": [
+    "Covers only the listed paths in the listed commits.",
+    "May not redefine product, money, security or owner-control intent.",
+    "Opens no production gate; not reusable."
+  ],
+  "issued_at_utc": "2026-09-30T00:00:00Z",
+  "recorded_by": "integrator (session_01ELKqm4GCPmPvF3ggKkgB1J)",
+  "material_scope_expansion": false,
+  "feature_removal": false,
+  "business_model_change": false,
+  "security_authority_change": false,
+  "owner_control_boundary_change": false,
+  "legal_position_change": false,
+  "money_or_custody_model_change": false,
+  "locked_provider_change": false,
+  "reusable": false,
+  "revoked": false
+}

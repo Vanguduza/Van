@@ -99,6 +99,12 @@ class SessionOutboxDurabilityTest {
                 .filter { it.kind == kind && !it.isExpired(NOW_FOR_READS) }
                 .sortedBy { it.createdAtEpochMs }
 
+        override fun recoveryRecordsOfKind(kind: String): List<QueuedCommand> =
+            disk.values
+                .map { json.decodeFromString(QueuedCommand.serializer(), it) }
+                .filter { it.kind == kind }
+                .sortedBy { it.createdAtEpochMs }
+
         companion object {
             /** Reads are not the subject here; expiry has its own tests. */
             const val NOW_FOR_READS = 1_700_000_000_000L
@@ -269,7 +275,9 @@ class SessionOutboxDurabilityTest {
         // join was not.
         val disk = FaultyRecordStore()
         val store = EncryptedSessionOutboxStore(disk)
-        store.persist(admit("msg_5"), envelope("msg_5"))
+        // Fresh fixture producer, before any socket/HTTP attempt; not a restored-row inference.
+        store.persist(admit("msg_5").copy(neverDispatched = true,
+            profileId = "SOURCE-test-profile", sessionOnlyOrigin = true), envelope("msg_5"))
 
         // --- the process dies. A new adapter over the same bytes is all that survives.
         val afterRestart = EncryptedSessionOutboxStore(disk)
@@ -277,9 +285,10 @@ class SessionOutboxDurabilityTest {
         assertEquals("msg_5", restored.messageId)
         assertEquals("cmd_msg_5", restored.commandId)
 
-        // §20.12 — the Gateway has never heard of it, so it goes.
+        // The producer proves no prior attempt. UNKNOWN alone would not authorize delivery.
         val plan = SessionReconciliation.plan(
-            listOf(SessionReconciliation.Pending(restored.messageId, restored.commandId)),
+            listOf(SessionReconciliation.Pending(restored.messageId, restored.commandId,
+                neverDispatched = restored.neverDispatched == true)),
             mapOf("cmd_msg_5" to SessionReconciliation.UNKNOWN),
         )
         assertEquals(listOf("msg_5"), plan.resend)

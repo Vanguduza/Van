@@ -67,12 +67,14 @@ async def collect(
     *,
     scheduler: Any | None = None,
     pki_dir: str | None = None,
+    device_pki_dir: str | None = None,
     backup_root: str | None = None,
 ) -> dict[str, Any]:
     """Everything an operator needs that is not a counter."""
     return {
         "scheduler": (await scheduler.status()) if scheduler is not None else {"running": False},
         "pki": pki.scan(pki_dir) if pki_dir else {"present": False, "days_remaining": None},
+        "device_pki": pki.scan_device(device_pki_dir),
         "backup": latest_backup(backup_root),
     }
 
@@ -88,6 +90,9 @@ def ops_facts(health: dict[str, Any]) -> dict[str, float]:
     days = health.get("pki", {}).get("days_remaining")
     if days is not None:
         facts["pki_days_remaining"] = float(days)
+    device_days = health.get("device_pki", {}).get("days_remaining")
+    if device_days is not None:
+        facts["device_pki_days_remaining"] = float(device_days)
     backup = health.get("backup", {})
     if backup.get("configured"):
         age = backup.get("age_seconds")

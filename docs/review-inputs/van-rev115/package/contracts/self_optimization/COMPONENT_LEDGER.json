@@ -1,0 +1,2098 @@
+{
+  "components": [
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BG-001 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Remove outcome subscription: integration fails; an always-fallback or always-reject stub cannot qualify.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Remove outcome subscription: integration fails; an always-fallback or always-reject stub cannot qualify.",
+      "implementation_target": "Actual outcome producer, durable evidence, selector and evolution consumers form one integrated VATI loop.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Registered service evidence changes a later eligible choice and a valid candidate reaches authorized test binding.",
+      "owner_units": [
+        "BE-036",
+        "BQ-007",
+        "BG-001"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-036 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Restart replays learned state, current binding and outstanding parent policies unchanged.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-SO-001",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-SO-001-POS",
+        "T-VAN-SO-001-NEG",
+        "T-VAN-SO-001-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BQ-007 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Research process attempts production alias, risk budget or order credentials: denied.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Research process attempts production alias, risk budget or order credentials: denied.",
+      "implementation_target": "Operational choices are automatic under qualified grants; novel policies require independent qualification and authorized promotion.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Eligible method switch uses standing grant without per-trade owner intervention.",
+      "owner_units": [
+        "BE-002",
+        "BE-010",
+        "BE-036",
+        "BQ-007"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-002 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Expired/revoked grant selects still-valid fallback or suppresses entry while protection remains active.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-SO-002",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-SO-002-POS",
+        "T-VAN-SO-002-NEG",
+        "T-VAN-SO-002-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BQ-007 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Direct, API, event and restore attempts to write EXECUTION_POLICY or mandate through learning boundary all fail.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Direct, API, event and restore attempts to write EXECUTION_POLICY or mandate through learning boundary all fail.",
+      "implementation_target": "Evidence update, operational selection and policy mutation are three different typed effects.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Reducer writes only evidence projection; selector emits sealed decision.",
+      "owner_units": [
+        "BE-002",
+        "BE-036",
+        "BQ-007"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-002 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Restore validates allowed target/scope before publishing evidence state.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-SO-003",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-SO-003-POS",
+        "T-VAN-SO-003-NEG",
+        "T-VAN-SO-003-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BE-010 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Individually in-range but unqualified combination, wrong account or policy hash is refused.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Individually in-range but unqualified combination, wrong account or policy hash is refused.",
+      "implementation_target": "Bind policy/artifact/qualification/venue/account/product/expiry and tested joint parameters to existing mandate.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Valid method and joint parameter profile remain inside objective reservation.",
+      "owner_units": [
+        "BE-002",
+        "BE-009",
+        "BE-010"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-002 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Partial activation retains prior binding and reports unknown activation until readback.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-SO-004",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-SO-004-POS",
+        "T-VAN-SO-004-NEG",
+        "T-VAN-SO-004-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BE-010 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Highest-profit-looking infeasible method cannot be reintroduced by scoring/fallback.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Highest-profit-looking infeasible method cannot be reintroduced by scoring/fallback.",
+      "implementation_target": "Filter authorization, venue capability, order semantics, data, urgency, deadline and protection before scoring.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Lowest admitted feasible cost wins with complete reasons.",
+      "owner_units": [
+        "BE-009",
+        "BE-010"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-009 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Capability revision or risk change requires fresh validation before next child.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-SO-005",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-SO-005-POS",
+        "T-VAN-SO-005-NEG",
+        "T-VAN-SO-005-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BQ-007 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Use source `filtered or scored` bypass with only passive evidence: test fails.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Use source `filtered or scored` bypass with only passive evidence: test fails.",
+      "implementation_target": "Empty urgent-compatible candidates choose explicit emergency route or refusal appropriate to objective purpose.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Urgent entry selects only admitted urgent method.",
+      "owner_units": [
+        "BE-010",
+        "BQ-007"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-010 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Mandatory exit uses qualified emergency response despite missing learned samples.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-SO-006",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-SO-006-POS",
+        "T-VAN-SO-006-NEG",
+        "T-VAN-SO-006-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BE-010 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Change global template after issuing decision: replay cannot change order type.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Change global template after issuing decision: replay cannot change order type.",
+      "implementation_target": "Registry insertion order never decides fallback; decision binds immutable chosen semantics.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Permutation of equivalent registry insertion order gives identical chosen method and payload.",
+      "owner_units": [
+        "BE-010"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-010 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Restart loads exact still-valid template/registry epoch or reports incompatible binding.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-SO-007",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-SO-007-POS",
+        "T-VAN-SO-007-NEG",
+        "T-VAN-SO-007-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BE-036 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Censored high-cost population or missing fee cannot make policy appear costless.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Censored high-cost population or missing fee cannot make policy appear costless.",
+      "implementation_target": "Do not call a mixture of medians an expectation or missing cost zero; record units, estimator and uncertainty.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Known synthetic distribution verifies declared estimator and full objective loss.",
+      "owner_units": [
+        "BE-012",
+        "BE-035",
+        "BE-036"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-012 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Corrected fees/marks restate evidence without rewriting original decision.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-SO-008",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-SO-008-POS",
+        "T-VAN-SO-008-NEG",
+        "T-VAN-SO-008-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BE-036 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Same ticker across spot/CFD or USD/USDT cannot share scope by string equality.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Same ticker across spot/CFD or USD/USDT cannot share scope by string equality.",
+      "implementation_target": "Version canonical bucket key, product, side, amount/participation, fees, volatility, event and regime.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Different size/liquidity cohorts yield distinct statistics and justified pooling.",
+      "owner_units": [
+        "BE-008",
+        "BE-012",
+        "BE-036"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-008 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Missing bucket metadata restores as unknown rather than guessing current context.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-SO-009",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-SO-009-POS",
+        "T-VAN-SO-009-NEG",
+        "T-VAN-SO-009-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BE-036 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Ten duplicate/partial fill events cannot increase independent parent sample count tenfold.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Ten duplicate/partial fill events cannot increase independent parent sample count tenfold.",
+      "implementation_target": "Order finality, cash/fee finality and markout maturity are separate; child messages are not independent trades.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Partial parent matures only eligible fields at each horizon.",
+      "owner_units": [
+        "BE-012",
+        "BE-036"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-012 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Late data updates only appropriate maturity/revision contribution.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-SO-010",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-SO-010-POS",
+        "T-VAN-SO-010-NEG",
+        "T-VAN-SO-010-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BE-036 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Backtest or model explanation inserted as real venue fill: rejected.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Backtest or model explanation inserted as real venue fill: rejected.",
+      "implementation_target": "Live/demo/paper/shadow/backtest/counterfactual provenance stays separate and source-authorized.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Actual demo observations drive permitted demo policy; historical observations feed labeled research.",
+      "owner_units": [
+        "BE-003",
+        "BE-012",
+        "BE-036"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-003 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Original environment survives replay and cache rehydration.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-SO-011",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-SO-011-POS",
+        "T-VAN-SO-011-NEG",
+        "T-VAN-SO-011-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BQ-002 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Replacement reuses reservation while old child can fill: refused.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Replacement reuses reservation while old child can fill: refused.",
+      "implementation_target": "Account coordinator owns total worst-case exposure, including uncertain and cancel-pending children.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Two children plus confirmed fills fit the authorized parent and account envelope.",
+      "owner_units": [
+        "BE-009",
+        "BE-010",
+        "BQ-002"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-009 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Crash restores reservations before new strategy decisions.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-SO-012",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-SO-012-POS",
+        "T-VAN-SO-012-NEG",
+        "T-VAN-SO-012-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BE-010 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Lost acknowledgement causes blind new client ID submission: test fails.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Lost acknowledgement causes blind new client ID submission: test fails.",
+      "implementation_target": "Exact command and causal/fence identity committed before side effect; no exactly-once network assumption.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Crash after commit before send safely resumes according to durable outbox.",
+      "owner_units": [
+        "BE-003",
+        "BE-010"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-003 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Query exact historical and open/fill sources resolves uncertainty without duplicate effect.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-SO-013",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-SO-013-POS",
+        "T-VAN-SO-013-NEG",
+        "T-VAN-SO-013-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BE-012 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Late fill after local cancel request cannot be dropped or counted as cancelled.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Late fill after local cancel request cannot be dropped or counted as cancelled.",
+      "implementation_target": "Cancel request does not release exposure; all feasible interleavings join authoritative facts.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Partial fill plus confirmed cancelled remainder leaves filled position protected.",
+      "owner_units": [
+        "BE-010",
+        "BE-012"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-010 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Reconnect reconciles terminal order and cumulative actual fills before release.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-SO-014",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-SO-014-POS",
+        "T-VAN-SO-014-NEG",
+        "T-VAN-SO-014-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BE-010 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Unsupported amendment cannot silently recreate a larger live order.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Unsupported amendment cannot silently recreate a larger live order.",
+      "implementation_target": "Distinguish atomic amend, cancel-replace, identity/priority change and unsupported operations.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Supported amend preserves approved residual quantity with authoritative readback.",
+      "owner_units": [
+        "BE-010"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-010 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Unknown amendment preserves old/new possible exposure until reconciled.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-SO-015",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-SO-015-POS",
+        "T-VAN-SO-015-NEG",
+        "T-VAN-SO-015-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BQ-001 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Rejected emergency close cannot emit flat/protected success.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Rejected emergency close cannot emit flat/protected success.",
+      "implementation_target": "Immediate and pending fills share confirmed-protection/recovery behavior; flatten request is not flatness.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Resting partial fill with missing stop enters actual protection recovery.",
+      "owner_units": [
+        "BE-010",
+        "BE-012",
+        "BQ-001"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-010 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Outage recovery retains unresolved exposure, denies new risk and resumes reconciliation.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-SO-016",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-SO-016-POS",
+        "T-VAN-SO-016-NEG",
+        "T-VAN-SO-016-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BE-010 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Missing propagation falls back to 24h: regression fails.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Missing propagation falls back to 24h: regression fails.",
+      "implementation_target": "Use approved deadline/TIF; adapter defaults and restarts cannot extend it.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Four-hour objective expires at its actual bound through router and adapter.",
+      "owner_units": [
+        "BE-010"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-010 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Expired parent after restart cancels remainder where possible and handles late fills.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-SO-017",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-SO-017-POS",
+        "T-VAN-SO-017-NEG",
+        "T-VAN-SO-017-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BE-035 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Marketable limit charged beyond limit or stop silently sent as limit: fails.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Marketable limit charged beyond limit or stop silently sent as limit: fails.",
+      "implementation_target": "Preserve requested order type and side-correct limit; touching does not imply unlimited fills.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Buy limit never worse than limit; stop-limit triggers then obeys limit under declared model.",
+      "owner_units": [
+        "BE-010",
+        "BE-035"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-010 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Price/product filters changing mid-review require revalidation not hidden widening.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-SO-018",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-SO-018-POS",
+        "T-VAN-SO-018-NEG",
+        "T-VAN-SO-018-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BE-012 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Duplicate cumulative values treated as incremental create excess inventory: fails.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Duplicate cumulative values treated as incremental create excess inventory: fails.",
+      "implementation_target": "Authoritative fill identity, correction/bust and fee currency feed one cash/position state.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Partial fills and third-asset fees reconcile exact balances.",
+      "owner_units": [
+        "BE-003",
+        "BE-012"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-003 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Corrections compensate previous contribution and invalidate downstream analytics.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-SO-019",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-SO-019-POS",
+        "T-VAN-SO-019-NEG",
+        "T-VAN-SO-019-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BE-033 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Corrupt/truncated anchor or stale checkpoint cannot skip integrity validation.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Corrupt/truncated anchor or stale checkpoint cannot skip integrity validation.",
+      "implementation_target": "Verified anchor plus tail reduces repeated work without accepting tampered history.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Incremental replay matches full verification on exact source fixture.",
+      "owner_units": [
+        "BE-003",
+        "BE-033"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-003 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Restart or detected corruption follows qualified revalidation and blocks unsafe dispatch.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-SO-020",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-SO-020-POS",
+        "T-VAN-SO-020-NEG",
+        "T-VAN-SO-020-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BQ-007 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Unit-test-only observe call with no production subscriber fails integration.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Unit-test-only observe call with no production subscriber fails integration.",
+      "implementation_target": "Register actual outcome consumer, persist update and prove later decision effect.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Actual callback/event consumes mature outcomes into selector snapshot.",
+      "owner_units": [
+        "BE-012",
+        "BE-036",
+        "BQ-007"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-012 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Consumer crash after applying event resumes from committed cursor without double count.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-SO-021",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-SO-021-POS",
+        "T-VAN-SO-021-NEG",
+        "T-VAN-SO-021-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BE-036 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Advance cursor before storing contribution or publish partial snapshot: fails.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Advance cursor before storing contribution or publish partial snapshot: fails.",
+      "implementation_target": "Observation contribution, consumed revision and cursor/snapshot publish atomically.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Replay produces same observation set and snapshot hash.",
+      "owner_units": [
+        "BE-003",
+        "BE-036"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-003 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Checkpoint plus tail rebuilds identical learned state after interruption.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-SO-022",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-SO-022-POS",
+        "T-VAN-SO-022-NEG",
+        "T-VAN-SO-022-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BE-036 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Corrected and old observation both counted as independent outcomes: fails.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Corrected and old observation both counted as independent outcomes: fails.",
+      "implementation_target": "No retroactive editing of issued decision; affected future statistics/models are invalidated or restated.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Fee correction yields new snapshot while original decision hash remains.",
+      "owner_units": [
+        "BE-003",
+        "BE-036"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-003 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Revoked source cannot reappear via cached prior state after restart.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-SO-023",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-SO-023-POS",
+        "T-VAN-SO-023-NEG",
+        "T-VAN-SO-023-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BE-036 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Unknown or out-of-domain input fabricated as confidence zero or free cost: fails.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Unknown or out-of-domain input fabricated as confidence zero or free cost: fails.",
+      "implementation_target": "Use only fresh mature compatible evidence; pooling/fallback is versioned and justified.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Thin cohort uses known scoped fallback with explicit reason.",
+      "owner_units": [
+        "BE-036"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-036 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Expired estimator falls back while risk-reduction path remains available.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-SO-024",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-SO-024-POS",
+        "T-VAN-SO-024-NEG",
+        "T-VAN-SO-024-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BE-036 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Noise-driven alternating policy on every tick violates churn bound.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Noise-driven alternating policy on every tick violates churn bound.",
+      "implementation_target": "Qualified hysteresis, tie tolerance, persistence and joint action envelope constrain parameter changes.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Evidence improvement changes next method only when stability conditions hold.",
+      "owner_units": [
+        "BE-010",
+        "BE-036"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-010 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Safety invalidation overrides persistence into admitted emergency/fallback state.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-SO-025",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-SO-025-POS",
+        "T-VAN-SO-025-NEG",
+        "T-VAN-SO-025-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BE-033 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Synchronous cognition wake delays protection or shares broker secret: fails.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Synchronous cognition wake delays protection or shares broker secret: fails.",
+      "implementation_target": "Remote interpretation/training stays off decision/protection path; bounded queues and credentials.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Core continues safe order recovery while research worker is delayed.",
+      "owner_units": [
+        "BE-021",
+        "BE-024",
+        "BE-028",
+        "BE-033"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-021 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Worker kill/queue exhaustion records task failure and preserves local execution.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-SO-026",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-SO-026-POS",
+        "T-VAN-SO-026-NEG",
+        "T-VAN-SO-026-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BE-036 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Only winning experiments retained or hypothesis changed after outcome: fails.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Only winning experiments retained or hypothesis changed after outcome: fails.",
+      "implementation_target": "Weekly/drift jobs register target/comparator/budget and every attempted or cancelled candidate.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Valid trigger creates one deduplicated study with failed and successful variants retained.",
+      "owner_units": [
+        "BE-022",
+        "BE-028",
+        "BE-036"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-022 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Repeated trigger/restart resumes attempt or records supersession without losing failure history.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-SO-027",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-SO-027-POS",
+        "T-VAN-SO-027-NEG",
+        "T-VAN-SO-027-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BQ-007 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Unqualified fill semantics used to declare profitable candidate: blocked.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Unqualified fill semantics used to declare profitable candidate: blocked.",
+      "implementation_target": "Price/time/cost/account oracle and causal tests are prerequisites to candidate efficacy.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Known matching/account paths agree with independent oracle.",
+      "owner_units": [
+        "BE-035",
+        "BE-036",
+        "BQ-007"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-035 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Evaluator revision invalidates affected qualification without deleting original runs.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-SO-028",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-SO-028-POS",
+        "T-VAN-SO-028-NEG",
+        "T-VAN-SO-028-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "VAN-ML-PKT-008 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Calendar years merely counted as folds or inspected holdout retuned: refuses qualification.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Calendar years merely counted as folds or inspected holdout retuned: refuses qualification.",
+      "implementation_target": "Fit/selection/calibration/test records reflect actual chronology, with overlap controls.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Candidate chosen from past folds evaluated on unseen next interval.",
+      "owner_units": [
+        "BE-035",
+        "BE-036",
+        "VAN-ML-PKT-008"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-035 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Interrupted fold resumes same artifact/data or starts a new explicit attempt.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-SO-029",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-SO-029-POS",
+        "T-VAN-SO-029-NEG",
+        "T-VAN-SO-029-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "VAN-ML-PKT-008 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Negative shift/full-frame scaler/future revised release is caught at offending boundary.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Negative shift/full-frame scaler/future revised release is caught at offending boundary.",
+      "implementation_target": "Mutating later information cannot affect earlier features, decisions or commands.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Clean deterministic pipeline has identical prefixes despite future poisoning.",
+      "owner_units": [
+        "BE-035",
+        "VAN-ML-PKT-008"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-035 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Cached forecast state cannot bypass a poisoned epoch on restore.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-SO-030",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-SO-030-POS",
+        "T-VAN-SO-030-NEG",
+        "T-VAN-SO-030-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "VAN-ML-PKT-010 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Sum independent unconstrained symbol returns or scale old R as changed-trade outcome: fails.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Sum independent unconstrained symbol returns or scale old R as changed-trade outcome: fails.",
+      "implementation_target": "Each arm has its own cash/reservations/holdings while receiving same permissible information and resource limits.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Different execution paths produce separately reconciled account outcomes.",
+      "owner_units": [
+        "BE-035",
+        "BE-036",
+        "VAN-ML-PKT-010"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-035 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Resume comparison reconstructs each arm separately and preserves common cutoffs.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-SO-031",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-SO-031-POS",
+        "T-VAN-SO-031-NEG",
+        "T-VAN-SO-031-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BQ-009 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Zero-support context or guessed propensity cannot qualify off-policy benefit.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Zero-support context or guessed propensity cannot qualify off-policy benefit.",
+      "implementation_target": "No live randomized exploration by default; off-policy claims require propensity/overlap assumptions.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Qualified deterministic exploitation works without experimental authority.",
+      "owner_units": [
+        "BE-036",
+        "BQ-009"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-036 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Loss of experiment authorization returns to exploitation without affecting safety.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-SO-032",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-SO-032-POS",
+        "T-VAN-SO-032-NEG",
+        "T-VAN-SO-032-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BQ-009 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Mocked response, pooled PBO mislabeled per instrument or reward-only success cannot promote.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Mocked response, pooled PBO mislabeled per instrument or reward-only success cannot promote.",
+      "implementation_target": "Qualification binds exact cohort/evaluator/artifact, uncertainty and operational limits; author cannot self-certify.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Sealed candidate meets registered evidence in appropriate forward/demo environment.",
+      "owner_units": [
+        "BE-036",
+        "BQ-007",
+        "BQ-009"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-036 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Expired or revoked qualification blocks later activation and exposes reason.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-SO-033",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-SO-033-POS",
+        "T-VAN-SO-033-NEG",
+        "T-VAN-SO-033-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BE-036 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Mid-parent mutable alias switch or mixed model/selector snapshot: fails.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Mid-parent mutable alias switch or mixed model/selector snapshot: fails.",
+      "implementation_target": "New bindings require qualified and authenticated promotion; open parents retain policy unless explicit compatible migration.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "New objective uses new epoch; existing parent remains on approved old epoch.",
+      "owner_units": [
+        "BE-002",
+        "BE-010",
+        "BE-036"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-002 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Crash in epoch swap resolves one binding using durable promotion identity and readback.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-SO-034",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-SO-034-POS",
+        "T-VAN-SO-034-NEG",
+        "T-VAN-SO-034-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BE-036 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Rollback erases fills, resets lockouts or resurrects revoked evidence: fails.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Rollback erases fills, resets lockouts or resurrects revoked evidence: fails.",
+      "implementation_target": "Safety response immediate; economic monitoring uses qualified windows/sequential method; rollback never restores account history.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Degraded policy stops new use and selects still-qualified compatible baseline.",
+      "owner_units": [
+        "BE-012",
+        "BE-033",
+        "BE-036"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-012 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "No valid fallback keeps new entries closed while positions/protection remain supervised.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-SO-035",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-SO-035-POS",
+        "T-VAN-SO-035-NEG",
+        "T-VAN-SO-035-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BE-036 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Never-fill, cancel-late, favorable-horizon choice or rebate-only metric wins by missingness: fails.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Never-fill, cancel-late, favorable-horizon choice or rebate-only metric wins by missingness: fails.",
+      "implementation_target": "Frozen benchmark/horizon includes partial/non-fill costs and explicit fees without double counting.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Known fill and residual opportunity examples reconcile declared loss and actual cash separately.",
+      "owner_units": [
+        "BE-012",
+        "BE-035",
+        "BE-036"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-012 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Missing benchmark yields uncertainty/inconclusive, never zero cost.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-SO-036",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-SO-036-POS",
+        "T-VAN-SO-036-NEG",
+        "T-VAN-SO-036-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BQ-007 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Always-refuse loop or synthetic gain reported as live improvement: fails.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Always-refuse loop or synthetic gain reported as live improvement: fails.",
+      "implementation_target": "Full positive loop is mandatory; real candidate may correctly fail economic tests.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Controlled known-better method changes later selection and actual integration path.",
+      "owner_units": [
+        "BE-036",
+        "BQ-007"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-036 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Negative real evidence preserves baseline and research history.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-SO-037",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-SO-037-POS",
+        "T-VAN-SO-037-NEG",
+        "T-VAN-SO-037-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "FE-013 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Adaptive badge green while observer disconnected or summary says profitable without scope: fails.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Adaptive badge green while observer disconnected or summary says profitable without scope: fails.",
+      "implementation_target": "Expose active binding, changed decision, evidence/maturity, authority and fallback without ungrounded profit claims.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Owner can inspect why a later method changed and the precise supporting record.",
+      "owner_units": [
+        "BE-030",
+        "BE-032",
+        "FE-009",
+        "FE-013"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-030 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Offline view displays last-known state and age, not current success.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-SO-038",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-SO-038-POS",
+        "T-VAN-SO-038-NEG",
+        "T-VAN-SO-038-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BE-036 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Good returns enlarge parent risk or clear strategy suspension: denied.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Good returns enlarge parent risk or clear strategy suspension: denied.",
+      "implementation_target": "Learned state can evolve under qualified rule; rule/action/reward/scope changes use policy evolution; risk changes keep own authority.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Updated observation changes estimator state but not mandate.",
+      "owner_units": [
+        "BE-002",
+        "BE-009",
+        "BE-036"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-002 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Restored parameter vector is checked against correct policy/grant version.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-SO-039",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-SO-039-POS",
+        "T-VAN-SO-039-NEG",
+        "T-VAN-SO-039-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BE-012 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Opposing strategies net without ownership or release unknown orders: fails.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Opposing strategies net without ownership or release unknown orders: fails.",
+      "implementation_target": "Target delta accounts for actual holdings/working orders, netting mode and manual/strategy ownership.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Target two held five produces authorized reduction of three, not another long entry.",
+      "owner_units": [
+        "BE-009",
+        "BE-010",
+        "BE-012"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-009 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "External manual trade triggers reconciliation and target revalidation.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-SO-040",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-SO-040-POS",
+        "T-VAN-SO-040-NEG",
+        "T-VAN-SO-040-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BE-035 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Ignore selected slices and send full amount or fake volume to use POV: fails.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Ignore selected slices and send full amount or fake volume to use POV: fails.",
+      "implementation_target": "Immediate/passive/chase/TWAP/participation/target methods have positive supported paths and constrained unsupported refusal.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Admitted multislice method sends bounded children with recoverable state.",
+      "owner_units": [
+        "BE-010",
+        "BE-035"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-010 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Interrupted executor recovers child/parent allocation and deadline.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-SO-041",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-SO-041-POS",
+        "T-VAN-SO-041-NEG",
+        "T-VAN-SO-041-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "VAN-ML-PKT-025 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Remove a mandated plugin for simplicity or activate unqualified ensemble: fails.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Remove a mandated plugin for simplicity or activate unqualified ensemble: fails.",
+      "implementation_target": "Required forecasting plugins are complete integrations, while active selection uses qualified minimal stack.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Each mandated model roundtrip works and may correctly be economically rejected.",
+      "owner_units": [
+        "BE-013",
+        "BE-036",
+        "VAN-ML-PKT-025"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-013 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Model expiry/outage leaves independent qualified execution fallback.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-SO-042",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-SO-042-POS",
+        "T-VAN-SO-042-NEG",
+        "T-VAN-SO-042-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "PRE-002 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Misleading no-edge assertion, run cherry-picking or no evaluator receipt cannot authorize design replacement.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Misleading no-edge assertion, run cherry-picking or no evaluator receipt cannot authorize design replacement.",
+      "implementation_target": "DesignChangeProposal binds source/data/evaluator/alternatives/uncertainty, complexity effects and affected contracts.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Controlled evidence produces reviewable precise contract amendment.",
+      "owner_units": [
+        "BE-035",
+        "BE-036",
+        "PRE-002"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-035 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Corrected dataset triggers proposal re-evaluation with original result retained.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-SO-043",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-SO-043-POS",
+        "T-VAN-SO-043-NEG",
+        "T-VAN-SO-043-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BG-001 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Missing observer or mock-only required venue cannot pass BG from document checks.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Missing observer or mock-only required venue cannot pass BG from document checks.",
+      "implementation_target": "Every new lifecycle/crypto operation has producer, caller, tests and scoped evidence before frontend.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Independent backend verifier traces positive operational and governed loops plus old markets.",
+      "owner_units": [
+        "BE-032",
+        "BQ-006",
+        "BG-001"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-032 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Affected backend revision reopens BG before affected UI resumes.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-SO-044",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-SO-044-POS",
+        "T-VAN-SO-044-NEG",
+        "T-VAN-SO-044-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BQ-001 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Read-only crypto research, importable SDK or paper-only adapter cannot claim spot execution complete.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Read-only crypto research, importable SDK or paper-only adapter cannot claim spot execution complete.",
+      "implementation_target": "At least one eligible supported CEX spot integration; same risk/router/lifecycle owners and current markets preserved.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Approved manual and automated spot orders complete real permitted venue lifecycle.",
+      "owner_units": [
+        "BE-004",
+        "BE-010",
+        "BE-011",
+        "BQ-001"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-004 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Venue outage preserves old markets isolation and honest crypto unavailable state.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-CRYPTO-001",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-CRYPTO-001-POS",
+        "T-VAN-CRYPTO-001-NEG",
+        "T-VAN-CRYPTO-001-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BE-008 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Ticker equality merges distinct exposure/fee regimes: fails.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Ticker equality merges distinct exposure/fee regimes: fails.",
+      "implementation_target": "API family, account/subaccount, native product, spot type, base/quote/network identities are versioned.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "BTC-USD, BTC-USDT and BTC CFD resolve to separate instruments.",
+      "owner_units": [
+        "BE-004",
+        "BE-008"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-004 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Delisting/migration invalidates product cache without changing historical identity.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-CRYPTO-002",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-CRYPTO-002-POS",
+        "T-VAN-CRYPTO-002-NEG",
+        "T-VAN-CRYPTO-002-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BE-010 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Rounding widens stop/quantity or dust becomes zero-quantity send: refused.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Rounding widens stop/quantity or dust becomes zero-quantity send: refused.",
+      "implementation_target": "Tick/step/min-notional/max limits and fee reserves apply before exact risk approval.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Permitted quantity and price roundtrip within venue filters and approved loss.",
+      "owner_units": [
+        "BE-008",
+        "BE-009",
+        "BE-010"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-008 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Filter revision during review requires re-price/re-approval where material.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-CRYPTO-003",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-CRYPTO-003-POS",
+        "T-VAN-CRYPTO-003-NEG",
+        "T-VAN-CRYPTO-003-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BE-007 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Optimizer attempts withdrawal/deposit/credential rotation or wrong subaccount: denied.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Optimizer attempts withdrawal/deposit/credential rotation or wrong subaccount: denied.",
+      "implementation_target": "Trading workers lack withdrawal scope; secret references and account grants remain per environment.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Trade/query/cancel work using least-privilege permitted credentials.",
+      "owner_units": [
+        "BE-002",
+        "BE-005",
+        "BE-007"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-002 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Key rotation revokes old scope, reconciles unknown orders and restores connection without leaking secrets.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-CRYPTO-004",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-CRYPTO-004-POS",
+        "T-VAN-CRYPTO-004-NEG",
+        "T-VAN-CRYPTO-004-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BE-012 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Sell more base than owned or treat USDT depeg as fixed USD value: fails.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Sell more base than owned or treat USDT depeg as fixed USD value: fails.",
+      "implementation_target": "Buy reserves quote, sell owned base; fees/base/quote/third assets and cash conversion explicit; no leverage.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Partial fills and fee token depletion reconcile holdings and quote resources.",
+      "owner_units": [
+        "BE-006",
+        "BE-009",
+        "BE-012"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-006 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Late fee correction restates balances/TCA under durable accounting.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-CRYPTO-005",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-CRYPTO-005-POS",
+        "T-VAN-CRYPTO-005-NEG",
+        "T-VAN-CRYPTO-005-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BE-010 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Connected heartbeat masks stale book or gap accepted for POV: fails.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Connected heartbeat masks stale book or gap accepted for POV: fails.",
+      "implementation_target": "Sequence/checksum, timestamps, snapshot boundaries, fill IDs and resync per selected provider.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Reconnect reconstructs coherent book and authenticated orders/fills.",
+      "owner_units": [
+        "BE-008",
+        "BE-010"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-008 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Gap stops affected entry algorithms; authoritative resync before reenable.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-CRYPTO-006",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-CRYPTO-006-POS",
+        "T-VAN-CRYPTO-006-NEG",
+        "T-VAN-CRYPTO-006-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BE-035 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Post-only reject retried as market or synthetic stop marked exchange protected: fails.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Post-only reject retried as market or synthetic stop marked exchange protected: fails.",
+      "implementation_target": "No silent coercion, native/synthetic stop distinction, amend priority and trigger sources explicit.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Supported order kind performs correct live-test semantics and truthful protection.",
+      "owner_units": [
+        "BE-010",
+        "BE-012",
+        "BE-035"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-010 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Unknown amendment keeps possible exposure; conditional fill triggers exact recovery.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-CRYPTO-007",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-CRYPTO-007-POS",
+        "T-VAN-CRYPTO-007-NEG",
+        "T-VAN-CRYPTO-007-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BE-033 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "429/network timeout assumed no side effect or maintenance ignored: fails.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "429/network timeout assumed no side effect or maintenance ignored: fails.",
+      "implementation_target": "24/7 operation still handles maintenance; nonce/clock constraints; cancel/query headroom protected.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Burst research load cannot starve authenticated cancel/reconcile path.",
+      "owner_units": [
+        "BE-008",
+        "BE-010",
+        "BE-033"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-008 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Restart rebuilds server clock/session/stream before eligible trading.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-CRYPTO-008",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-CRYPTO-008-POS",
+        "T-VAN-CRYPTO-008-NEG",
+        "T-VAN-CRYPTO-008-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BQ-002 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Timer cancels protective stop while status remains protected: fails.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Timer cancels protective stop while status remains protected: fails.",
+      "implementation_target": "Account-wide cancellation must be assessed against protective/manual orders; no automatic blanket enabling.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Qualified configuration proves cancellation scope and remaining-position protection.",
+      "owner_units": [
+        "BE-010",
+        "BE-012",
+        "BQ-002"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-010 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Disconnect with DMS expiry tracks unresolved protection and actual remaining inventory.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-CRYPTO-009",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-CRYPTO-009-POS",
+        "T-VAN-CRYPTO-009-NEG",
+        "T-VAN-CRYPTO-009-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BQ-002 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Replay/static response labeled real venue fill/settlement: gate rejects.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Replay/static response labeled real venue fill/settlement: gate rejects.",
+      "implementation_target": "Provider chosen by eligible current access; mocked Coinbase Advanced output cannot qualify matching or latency.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Appropriate actual permitted environment proves authenticated order/query/cancel/economic readback.",
+      "owner_units": [
+        "BE-005",
+        "BE-010",
+        "BQ-001",
+        "BQ-002"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-005 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Unavailable required provider remains blocked with precise alternate qualification plan.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-CRYPTO-010",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-CRYPTO-010-POS",
+        "T-VAN-CRYPTO-010-NEG",
+        "T-VAN-CRYPTO-010-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "VAN-ML-PKT-010 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "FX pip/fill model copied into crypto without quantity/fee adaptation: fails.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "FX pip/fill model copied into crypto without quantity/fee adaptation: fails.",
+      "implementation_target": "Crypto full-account arms include correct data conventions, fees, liquidity drought, maintenance, delisting and stablecoin stress.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Known fixture and independent oracle agree on spot balances and objective costs.",
+      "owner_units": [
+        "BE-035",
+        "VAN-ML-PKT-010"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-035 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Data revision restates study with old output preserved and qualification invalidation.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-CRYPTO-011",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-CRYPTO-011-POS",
+        "T-VAN-CRYPTO-011-NEG",
+        "T-VAN-CRYPTO-011-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BE-010 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Single surviving token or safe-to-buy badge triggers funded order/wallet signing: denied.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Single surviving token or safe-to-buy badge triggers funded order/wallet signing: denied.",
+      "implementation_target": "Chain discovery remains read-only; only independently admitted exchange products may enter actual order universe.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Qualified chain facts annotate permitted research/strategy input without authority.",
+      "owner_units": [
+        "BE-037",
+        "BE-041",
+        "BE-043",
+        "BE-044",
+        "BE-010"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-037 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Reorg/proxy update invalidates research evidence and dependent eligibility without rewriting fill facts.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-CRYPTO-012",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-CRYPTO-012-POS",
+        "T-VAN-CRYPTO-012-NEG",
+        "T-VAN-CRYPTO-012-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BE-010 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Perpetual order, borrow, leverage switch or new funded venue through spot grant: denied.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Perpetual order, borrow, leverage switch or new funded venue through spot grant: denied.",
+      "implementation_target": "Spot support does not imply margin/perps/options/DEX/withdraw authority; any extension needs product-specific qualification.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Spot account operates within owned inventory and existing signed mandate.",
+      "owner_units": [
+        "BE-002",
+        "BE-004",
+        "BE-009",
+        "BE-010"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-002 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Unsupported market status remains visible and cannot be auto-enabled after restart.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-CRYPTO-013",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-CRYPTO-013-POS",
+        "T-VAN-CRYPTO-013-NEG",
+        "T-VAN-CRYPTO-013-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "FE-011 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Demo badge, buy-direction color or connected API mistaken for qualification/profit: fails.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Demo badge, buy-direction color or connected API mistaken for qualification/profit: fails.",
+      "implementation_target": "Markets/accounts/order/positions/news/learning show genuine venue and assets, permissions, fee/protection/recovery states.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "User completes context-specific manual review and follows actual receipt in both themes.",
+      "owner_units": [
+        "BE-032",
+        "FE-006",
+        "FE-007",
+        "FE-008",
+        "FE-009",
+        "FE-011"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-032 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "App reconnect deep link recovers correct account/order and stale disclosure without resubmission.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-CRYPTO-014",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-CRYPTO-014-POS",
+        "T-VAN-CRYPTO-014-NEG",
+        "T-VAN-CRYPTO-014-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "PRE-002 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Install donor bot with parallel order key/ledger or duplicate model registry: reject design.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Install donor bot with parallel order key/ledger or duplicate model registry: reject design.",
+      "implementation_target": "Extend existing boundaries; justify any new process/store with measured isolation/correctness benefit.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Single router/capital/qualification owners handle both new capabilities.",
+      "owner_units": [
+        "BE-001",
+        "BE-033",
+        "PRE-002"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-001 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Degraded shared component follows one tested fallback without duplicate trading owner.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-LEAN-001",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-LEAN-001-POS",
+        "T-VAN-LEAN-001-NEG",
+        "T-VAN-LEAN-001-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "PRE-002 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "More components or higher backtest Sharpe without cost/ablation evidence cannot justify activation.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "More components or higher backtest Sharpe without cost/ablation evidence cannot justify activation.",
+      "implementation_target": "Each candidate lists operational cost, maintenance/state burden, alternatives and incremental evidence; safety complexity is mandatory.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Simpler active baseline retained when challenger offers no material benefit.",
+      "owner_units": [
+        "BE-036",
+        "BQ-009",
+        "PRE-002"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-036 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Removal/fallback restores required capability and retains history.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-LEAN-002",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-LEAN-002-POS",
+        "T-VAN-LEAN-002-NEG",
+        "T-VAN-LEAN-002-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BQ-006 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Drop NeuralForecast plugin, funding feature or old action for lean scope: verifier fails.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Drop NeuralForecast plugin, funding feature or old action for lean scope: verifier fails.",
+      "implementation_target": "All inherited requirement/action/context objects remain, with explicit semantic additions not automatic deletion.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Every source section/gap and inherited ID maps to owner/contract/test.",
+      "owner_units": [
+        "PRE-002",
+        "BE-001",
+        "BQ-006"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "PRE-002 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Amendments preserve prior hashes and explicit owner-approved supersession.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-LEAN-003",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-LEAN-003-POS",
+        "T-VAN-LEAN-003-NEG",
+        "T-VAN-LEAN-003-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "UX-003 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Empty producer or generic success field presented as learning enabled: fails.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Empty producer or generic success field presented as learning enabled: fails.",
+      "implementation_target": "Internal optimizer states become contextual typed views; no new default global tab or dense Home.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Relevant existing screen exposes exact status/evidence/action details on demand.",
+      "owner_units": [
+        "BE-032",
+        "UX-001",
+        "UX-003"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BE-032 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Fallback/unknown/corrected state remains clear after gateway or device restart.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-LEAN-004",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-LEAN-004-POS",
+        "T-VAN-LEAN-004-NEG",
+        "T-VAN-LEAN-004-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BE-036 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Backtest PASS self-signs policy or changes live mandate: denied.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Backtest PASS self-signs policy or changes live mandate: denied.",
+      "implementation_target": "Astra proposals bind experimental evidence and causal claims; result classes and amendment path explicit.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Valid controlled study produces precise revisable design recommendation.",
+      "owner_units": [
+        "PRE-002",
+        "BE-035",
+        "BE-036"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "PRE-002 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "Corrected result withdraws recommendation and dependent candidate qualification.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-LEAN-005",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-LEAN-005-POS",
+        "T-VAN-LEAN-005-NEG",
+        "T-VAN-LEAN-005-REC"
+      ]
+    },
+    {
+      "anti_gap": "Delete producer/caller or guard: appropriate named acceptance must fail",
+      "authority": "Existing owner/account/RiskAuthority/router for money; narrow operational grant for selection; independent authorized policy promotion",
+      "construction_and_registration": "Implementation packet must name DI registration/event subscription and real production caller; fixture-only injection not sufficient.",
+      "consumer": "BQ-006 proof/effect consumer; exact caller admitted in packet",
+      "counterexample": "Relabel frontend code as research or qualify subset backend to begin UX: rejects.",
+      "executor": "Owning unit implementation; all venue effects through ExecutionRouter",
+      "failure": "Relabel frontend code as research or qualify subset backend to begin UX: rejects.",
+      "implementation_target": "All new capabilities feed sole BG and existing context/material contracts; no early native renderer.",
+      "independent_verifier": "Existing qualified DIAL verifier, not worker self-approval",
+      "observable_effect": "Headless backend integration completes before graphite/porcelain context customization.",
+      "owner_units": [
+        "BG-001",
+        "UX-002",
+        "FE-002",
+        "BQ-006"
+      ],
+      "persistence": "Immutable source/decision/outcome revisions plus durable cursor/reservation/artifact binding as applicable",
+      "producer": "BG-001 actual registered service source; confirm exact symbol in PRE-001",
+      "recovery": "New backend omission during UX reopens affected BG contracts, no UI-side financial workaround.",
+      "remaining_symbol_binding": "PRE-001/PRE-002/implementation packet obligation, not fabricated existing runtime wiring",
+      "requirement_id": "VAN-LEAN-006",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing account/event/qualified artifact owner per contract; no parallel financial ledger",
+      "test_refs": [
+        "T-VAN-LEAN-006-POS",
+        "T-VAN-LEAN-006-NEG",
+        "T-VAN-LEAN-006-REC"
+      ]
+    },
+    {
+      "anti_gap": "Remove relevant native guard or consumer and require named acceptance to fail; document checker is not runtime proof",
+      "authority": "Current native typed authority; operational selection within grant; independent qualification and authorized policy promotion",
+      "construction_and_registration": "Bind exact constructor/subscription and actual production call path in owning unit; fail consumer-removal integration test",
+      "consumer": "Lose cancel reply; authenticated lookup proves cancelled with partial fills; record fills once, retain protection and release only proven unused reservation.",
+      "counterexample": "A timeout, absent REST result or expired local timer never proves cancellation or flat exposure.",
+      "executor": "Existing VATI router/account/research owner as appropriate",
+      "failure": "A timeout, absent REST result or expired local timer never proves cancellation or flat exposure.",
+      "implementation_target": "Complete unknown-order, cancellation and expiry recovery",
+      "independent_verifier": "Native qualified independent reviewer; not self-issued by this pack",
+      "observable_effect": "Lose cancel reply; authenticated lookup proves cancelled with partial fills; record fills once, retain protection and release only proven unused reservation.",
+      "owner_units": [
+        "BE-010",
+        "BE-012",
+        "BQ-002",
+        "BG-001"
+      ],
+      "persistence": "Revision-aware durable transactions, original command identity and immutable causal snapshots",
+      "producer": "Existing owner named by source crosswalk; new behavior remains a target, not an existing deployed claim",
+      "recovery": "Restart at cancel-send and query boundaries, then accept late fill/correction without resubmission.",
+      "remaining_symbol_binding": "Owning implementation acceptance; current source candidates are pinned in review/SOURCE_ADMISSION_CROSSWALK.json",
+      "requirement_id": "VAN-RV-001",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing durable account/event/research authority; no new parallel truth store",
+      "test_refs": [
+        "T-VAN-RV-001-POS",
+        "T-VAN-RV-001-NEG",
+        "T-VAN-RV-001-REC"
+      ]
+    },
+    {
+      "anti_gap": "Remove relevant native guard or consumer and require named acceptance to fail; document checker is not runtime proof",
+      "authority": "Current native typed authority; operational selection within grant; independent qualification and authorized policy promotion",
+      "construction_and_registration": "Bind exact constructor/subscription and actual production call path in owning unit; fail consumer-removal integration test",
+      "consumer": "Dispatch resolves current qualified policy, mandate, reservation, epoch and objective; positive decimal venue increments and complete mature costs validate.",
+      "counterexample": "Remove only POLICY_QUALIFIED at dispatch and reseal unsigned locks; named semantic check still fails. Reject zero tick and mature unknown costs.",
+      "executor": "Existing VATI router/account/research owner as appropriate",
+      "failure": "Remove only POLICY_QUALIFIED at dispatch and reseal unsigned locks; named semantic check still fails. Reject zero tick and mature unknown costs.",
+      "implementation_target": "Semantic admission independent of mutable hash locks",
+      "independent_verifier": "Native qualified independent reviewer; not self-issued by this pack",
+      "observable_effect": "Dispatch resolves current qualified policy, mandate, reservation, epoch and objective; positive decimal venue increments and complete mature costs validate.",
+      "owner_units": [
+        "BE-002",
+        "BE-010",
+        "BQ-001",
+        "BG-001"
+      ],
+      "persistence": "Revision-aware durable transactions, original command identity and immutable causal snapshots",
+      "producer": "Existing owner named by source crosswalk; new behavior remains a target, not an existing deployed claim",
+      "recovery": "Expiry/revocation at any preactivation or drain stage blocks new risk, reconciles in-flight effects and cannot reactivate revoked fallback.",
+      "remaining_symbol_binding": "Owning implementation acceptance; current source candidates are pinned in review/SOURCE_ADMISSION_CROSSWALK.json",
+      "requirement_id": "VAN-RV-002",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing durable account/event/research authority; no new parallel truth store",
+      "test_refs": [
+        "T-VAN-RV-002-POS",
+        "T-VAN-RV-002-NEG",
+        "T-VAN-RV-002-REC"
+      ]
+    },
+    {
+      "anti_gap": "Remove relevant native guard or consumer and require named acceptance to fail; document checker is not runtime proof",
+      "authority": "Current native typed authority; operational selection within grant; independent qualification and authorized policy promotion",
+      "construction_and_registration": "Bind exact constructor/subscription and actual production call path in owning unit; fail consumer-removal integration test",
+      "consumer": "Real registered consumer applies newer observation revision once, persists cursor/contribution/snapshot atomically, and later eligible selector consumes its fingerprint.",
+      "counterexample": "Deliver older revision after correction and conflicting equal revision; older evidence cannot overwrite current contribution and conflict is quarantined.",
+      "executor": "Existing VATI router/account/research owner as appropriate",
+      "failure": "Deliver older revision after correction and conflicting equal revision; older evidence cannot overwrite current contribution and conflict is quarantined.",
+      "implementation_target": "Revision precedence and durable causal feedback",
+      "independent_verifier": "Native qualified independent reviewer; not self-issued by this pack",
+      "observable_effect": "Real registered consumer applies newer observation revision once, persists cursor/contribution/snapshot atomically, and later eligible selector consumes its fingerprint.",
+      "owner_units": [
+        "BE-003",
+        "BE-012",
+        "BE-036",
+        "BQ-007",
+        "BG-001"
+      ],
+      "persistence": "Revision-aware durable transactions, original command identity and immutable causal snapshots",
+      "producer": "Existing owner named by source crosswalk; new behavior remains a target, not an existing deployed claim",
+      "recovery": "Kill actual process before/after commit, replay bounded journal and verify identical logical snapshot/selection with AS_DECIDED unchanged.",
+      "remaining_symbol_binding": "Owning implementation acceptance; current source candidates are pinned in review/SOURCE_ADMISSION_CROSSWALK.json",
+      "requirement_id": "VAN-RV-003",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing durable account/event/research authority; no new parallel truth store",
+      "test_refs": [
+        "T-VAN-RV-003-POS",
+        "T-VAN-RV-003-NEG",
+        "T-VAN-RV-003-REC"
+      ]
+    },
+    {
+      "anti_gap": "Remove relevant native guard or consumer and require named acceptance to fail; document checker is not runtime proof",
+      "authority": "Current native typed authority; operational selection within grant; independent qualification and authorized policy promotion",
+      "construction_and_registration": "Bind exact constructor/subscription and actual production call path in owning unit; fail consumer-removal integration test",
+      "consumer": "One gross base unit filled with 0.01 base fee consumes the entire one-unit execution budget; cash/base/fee-asset postings balance under explicit valuation.",
+      "counterexample": "Fees, exits or netting cannot reopen entry allowance; TCA decomposition must equal direct signed fill-versus-reference cost plus nonembedded charges.",
+      "executor": "Existing VATI router/account/research owner as appropriate",
+      "failure": "Fees, exits or netting cannot reopen entry allowance; TCA decomposition must equal direct signed fill-versus-reference cost plus nonembedded charges.",
+      "implementation_target": "Gross execution budget and conserved multi-asset economics",
+      "independent_verifier": "Native qualified independent reviewer; not self-issued by this pack",
+      "observable_effect": "One gross base unit filled with 0.01 base fee consumes the entire one-unit execution budget; cash/base/fee-asset postings balance under explicit valuation.",
+      "owner_units": [
+        "BE-006",
+        "BE-009",
+        "BE-010",
+        "BE-012",
+        "BE-035",
+        "BQ-009",
+        "BG-001"
+      ],
+      "persistence": "Revision-aware durable transactions, original command identity and immutable causal snapshots",
+      "producer": "Existing owner named by source crosswalk; new behavior remains a target, not an existing deployed claim",
+      "recovery": "Late fee and fill bust append compensating facts, preserve old decision snapshots and reconcile reservations without automatic re-entry.",
+      "remaining_symbol_binding": "Owning implementation acceptance; current source candidates are pinned in review/SOURCE_ADMISSION_CROSSWALK.json",
+      "requirement_id": "VAN-RV-004",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing durable account/event/research authority; no new parallel truth store",
+      "test_refs": [
+        "T-VAN-RV-004-POS",
+        "T-VAN-RV-004-NEG",
+        "T-VAN-RV-004-REC"
+      ]
+    },
+    {
+      "anti_gap": "Remove relevant native guard or consumer and require named acceptance to fail; document checker is not runtime proof",
+      "authority": "Current native typed authority; operational selection within grant; independent qualification and authorized policy promotion",
+      "construction_and_registration": "Bind exact constructor/subscription and actual production call path in owning unit; fail consumer-removal integration test",
+      "consumer": "Quantized slices jointly satisfy parent quantity, fresh depth participation, minimum lot/notional, maximum slices, deadline and command budget.",
+      "counterexample": "Quantity 200, depth 10, participation 0.25 and max 8 slices is infeasible for a one-snapshot plan; never issue eight slices of 25 claiming a cap of 2.5.",
+      "executor": "Existing VATI router/account/research owner as appropriate",
+      "failure": "Quantity 200, depth 10, participation 0.25 and max 8 slices is infeasible for a one-snapshot plan; never issue eight slices of 25 claiming a cap of 2.5.",
+      "implementation_target": "Joint slice, participation and lifetime feasibility",
+      "independent_verifier": "Native qualified independent reviewer; not self-issued by this pack",
+      "observable_effect": "Quantized slices jointly satisfy parent quantity, fresh depth participation, minimum lot/notional, maximum slices, deadline and command budget.",
+      "owner_units": [
+        "BE-009",
+        "BE-010",
+        "BE-035",
+        "BQ-002",
+        "BG-001"
+      ],
+      "persistence": "Revision-aware durable transactions, original command identity and immutable causal snapshots",
+      "producer": "Existing owner named by source crosswalk; new behavior remains a target, not an existing deployed claim",
+      "recovery": "Replanning uses newly observed depth/time under same grant; restart retains lifetime counters and does not repeat unconfirmed slices.",
+      "remaining_symbol_binding": "Owning implementation acceptance; current source candidates are pinned in review/SOURCE_ADMISSION_CROSSWALK.json",
+      "requirement_id": "VAN-RV-005",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing durable account/event/research authority; no new parallel truth store",
+      "test_refs": [
+        "T-VAN-RV-005-POS",
+        "T-VAN-RV-005-NEG",
+        "T-VAN-RV-005-REC"
+      ]
+    },
+    {
+      "anti_gap": "Remove relevant native guard or consumer and require named acceptance to fail; document checker is not runtime proof",
+      "authority": "Current native typed authority; operational selection within grant; independent qualification and authorized policy promotion",
+      "construction_and_registration": "Bind exact constructor/subscription and actual production call path in owning unit; fail consumer-removal integration test",
+      "consumer": "Reconcile Opus lockout/execution/ledger fixes with canon Jev/temperament/evidence, PR-only Muse/owner controls and their callers; full parity holds.",
+      "counterexample": "Selecting newer review-input source or main alone must fail retained-feature/caller tests; deleting actual outcome subscription fails later-selection acceptance.",
+      "executor": "Existing VATI router/account/research owner as appropriate",
+      "failure": "Selecting newer review-input source or main alone must fail retained-feature/caller tests; deleting actual outcome subscription fails later-selection acceptance.",
+      "implementation_target": "Preserve source contributions and verify actual feedback consumers",
+      "independent_verifier": "Native qualified independent reviewer; not self-issued by this pack",
+      "observable_effect": "Reconcile Opus lockout/execution/ledger fixes with canon Jev/temperament/evidence, PR-only Muse/owner controls and their callers; full parity holds.",
+      "owner_units": [
+        "BE-001",
+        "BE-003",
+        "BE-010",
+        "BE-036",
+        "BQ-007",
+        "BG-001"
+      ],
+      "persistence": "Revision-aware durable transactions, original command identity and immutable causal snapshots",
+      "producer": "Existing owner named by source crosswalk; new behavior remains a target, not an existing deployed claim",
+      "recovery": "Shared-store migrations restore learned state, lockout clocks and account owners; asynchronous Jev outage cannot delay protection.",
+      "remaining_symbol_binding": "Owning implementation acceptance; current source candidates are pinned in review/SOURCE_ADMISSION_CROSSWALK.json",
+      "requirement_id": "VAN-RV-006",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing durable account/event/research authority; no new parallel truth store",
+      "test_refs": [
+        "T-VAN-RV-006-POS",
+        "T-VAN-RV-006-NEG",
+        "T-VAN-RV-006-REC"
+      ]
+    },
+    {
+      "anti_gap": "Remove relevant native guard or consumer and require named acceptance to fail; document checker is not runtime proof",
+      "authority": "Current native typed authority; operational selection within grant; independent qualification and authorized policy promotion",
+      "construction_and_registration": "Bind exact constructor/subscription and actual production call path in owning unit; fail consumer-removal integration test",
+      "consumer": "Qualified event oracle, immutable licensed inputs, full trial census and availability-time features support matched objective and whole-account arms with predeclared costs and uncertainty.",
+      "counterexample": "Calendar years alone are not walk-forward; bid data cannot silently become mid; poisoned-future changes to earlier decisions fail; fixed JPY conversion is not current USD P&L.",
+      "executor": "Existing VATI router/account/research owner as appropriate",
+      "failure": "Calendar years alone are not walk-forward; bid data cannot silently become mid; poisoned-future changes to earlier decisions fail; fixed JPY conversion is not current USD P&L.",
+      "implementation_target": "Qualified evaluator and complete trial/account comparison",
+      "independent_verifier": "Native qualified independent reviewer; not self-issued by this pack",
+      "observable_effect": "Qualified event oracle, immutable licensed inputs, full trial census and availability-time features support matched objective and whole-account arms with predeclared costs and uncertainty.",
+      "owner_units": [
+        "BE-035",
+        "BE-036",
+        "BQ-009",
+        "BG-001"
+      ],
+      "persistence": "Revision-aware durable transactions, original command identity and immutable causal snapshots",
+      "producer": "Existing owner named by source crosswalk; new behavior remains a target, not an existing deployed claim",
+      "recovery": "Failed/pruned runs and corrections remain in census; evaluator changes invalidate dependent claims and rerun only affected studies.",
+      "remaining_symbol_binding": "Owning implementation acceptance; current source candidates are pinned in review/SOURCE_ADMISSION_CROSSWALK.json",
+      "requirement_id": "VAN-RV-007",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing durable account/event/research authority; no new parallel truth store",
+      "test_refs": [
+        "T-VAN-RV-007-POS",
+        "T-VAN-RV-007-NEG",
+        "T-VAN-RV-007-REC"
+      ]
+    },
+    {
+      "anti_gap": "Remove relevant native guard or consumer and require named acceptance to fail; document checker is not runtime proof",
+      "authority": "Current native typed authority; operational selection within grant; independent qualification and authorized policy promotion",
+      "construction_and_registration": "Bind exact constructor/subscription and actual production call path in owning unit; fail consumer-removal integration test",
+      "consumer": "Selected eligible CEX spot adapter demonstrates genuine matching, recovery and settlement/protection for its admitted scope; contextual app contracts expose exact state and receipts.",
+      "counterexample": "Mock, read-only HTTP response, chain research or unsupported required attached protection cannot close actual trading integration.",
+      "executor": "Existing VATI router/account/research owner as appropriate",
+      "failure": "Mock, read-only HTTP response, chain research or unsupported required attached protection cannot close actual trading integration.",
+      "implementation_target": "Eligible CEX spot target and backend consumer acceptance",
+      "independent_verifier": "Native qualified independent reviewer; not self-issued by this pack",
+      "observable_effect": "Selected eligible CEX spot adapter demonstrates genuine matching, recovery and settlement/protection for its admitted scope; contextual app contracts expose exact state and receipts.",
+      "owner_units": [
+        "BE-004",
+        "BE-005",
+        "BE-010",
+        "BE-032",
+        "BQ-001",
+        "BQ-002",
+        "BG-001"
+      ],
+      "persistence": "Revision-aware durable transactions, original command identity and immutable causal snapshots",
+      "producer": "Existing owner named by source crosswalk; new behavior remains a target, not an existing deployed claim",
+      "recovery": "Private-stream gaps, API clock/rate-limit stress and account-wide cancellation recover without cancelling manual/protective orders outside scope; unavailable provider remains an explicit gate.",
+      "remaining_symbol_binding": "Owning implementation acceptance; current source candidates are pinned in review/SOURCE_ADMISSION_CROSSWALK.json",
+      "requirement_id": "VAN-RV-008",
+      "runtime_evidence": "NOT_RUN / NOT_ISSUED",
+      "state_owner": "Existing durable account/event/research authority; no new parallel truth store",
+      "test_refs": [
+        "T-VAN-RV-008-POS",
+        "T-VAN-RV-008-NEG",
+        "T-VAN-RV-008-REC"
+      ]
+    }
+  ],
+  "revision": "1.15",
+  "schema": "van.self-optimization.causal-ledger/1.0"
+}

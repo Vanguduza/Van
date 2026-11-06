@@ -1,0 +1,336 @@
+{
+  "caught": 52,
+  "counts": {
+    "actions": 349,
+    "atoms": 171,
+    "backend": 74,
+    "backend_verification": 10,
+    "features": 93,
+    "forecast_aliases": 48,
+    "nodes": 121,
+    "requirements": 205,
+    "surfaces": 228,
+    "tests": 1185,
+    "truth": 18
+  },
+  "findings": [],
+  "negative_cases": [
+    {
+      "case": "drop funds requirement",
+      "caught": true,
+      "expected_code": "SCOPE_SET_CHANGED",
+      "finding_count": 39
+    },
+    {
+      "case": "drop orb requirement",
+      "caught": true,
+      "expected_code": "SCOPE_SET_CHANGED",
+      "finding_count": 32
+    },
+    {
+      "case": "drop weekly research requirement",
+      "caught": true,
+      "expected_code": "SCOPE_SET_CHANGED",
+      "finding_count": 4
+    },
+    {
+      "case": "duplicate requirement",
+      "caught": true,
+      "expected_code": "DUPLICATE_ID",
+      "finding_count": 2
+    },
+    {
+      "case": "edit source requirement",
+      "caught": true,
+      "expected_code": "SCOPE_RECORD_CHANGED",
+      "finding_count": 1
+    },
+    {
+      "case": "orphan requirement",
+      "caught": true,
+      "expected_code": "UNMAPPED_REQUIREMENT",
+      "finding_count": 2
+    },
+    {
+      "case": "remove requirement test",
+      "caught": true,
+      "expected_code": "MISSING_REQUIREMENT_TEST",
+      "finding_count": 2
+    },
+    {
+      "case": "drop legacy action",
+      "caught": true,
+      "expected_code": "SCOPE_SET_CHANGED",
+      "finding_count": 2
+    },
+    {
+      "case": "edit legacy action",
+      "caught": true,
+      "expected_code": "SCOPE_RECORD_CHANGED",
+      "finding_count": 1
+    },
+    {
+      "case": "duplicate legacy action",
+      "caught": true,
+      "expected_code": "DUPLICATE_ID",
+      "finding_count": 2
+    },
+    {
+      "case": "orphan action surface",
+      "caught": true,
+      "expected_code": "ACTION_SURFACE_MISSING",
+      "finding_count": 2
+    },
+    {
+      "case": "drop surface",
+      "caught": true,
+      "expected_code": "SCOPE_SET_CHANGED",
+      "finding_count": 2
+    },
+    {
+      "case": "empty screen backend",
+      "caught": true,
+      "expected_code": "INCOMPLETE_SURFACE",
+      "finding_count": 2
+    },
+    {
+      "case": "remove dark-light contract",
+      "caught": true,
+      "expected_code": "INCOMPLETE_SURFACE",
+      "finding_count": 2
+    },
+    {
+      "case": "drop truth mapping",
+      "caught": true,
+      "expected_code": "ATOM_BINDING_MISSING",
+      "finding_count": 2
+    },
+    {
+      "case": "unknown truth mapping",
+      "caught": true,
+      "expected_code": "UNKNOWN_PRODUCT_TRUTH",
+      "finding_count": 2
+    },
+    {
+      "case": "unmapped feature",
+      "caught": true,
+      "expected_code": "FEATURE_MAPPING_MISSING",
+      "finding_count": 2
+    },
+    {
+      "case": "cycle",
+      "caught": true,
+      "expected_code": "CYCLE_OR_MISSING_DEPENDENCY",
+      "finding_count": 3
+    },
+    {
+      "case": "unknown prerequisite",
+      "caught": true,
+      "expected_code": "UNKNOWN_DEPENDENCY",
+      "finding_count": 3
+    },
+    {
+      "case": "duplicate unit",
+      "caught": true,
+      "expected_code": "DUPLICATE_ID",
+      "finding_count": 4
+    },
+    {
+      "case": "duplicate prerequisite",
+      "caught": true,
+      "expected_code": "DUPLICATE_DEPENDENCY",
+      "finding_count": 2
+    },
+    {
+      "case": "backend starts before F15",
+      "caught": true,
+      "expected_code": "CODE_BEFORE_F15",
+      "finding_count": 2
+    },
+    {
+      "case": "UX before whole backend",
+      "caught": true,
+      "expected_code": "UI_BEFORE_BACKEND",
+      "finding_count": 2
+    },
+    {
+      "case": "frontend before backend",
+      "caught": true,
+      "expected_code": "UI_BEFORE_BACKEND",
+      "finding_count": 2
+    },
+    {
+      "case": "backend waits on new UI",
+      "caught": true,
+      "expected_code": "BACKEND_DEPENDS_ON_FRONTEND",
+      "finding_count": 75
+    },
+    {
+      "case": "missing explicit backend gate member",
+      "caught": true,
+      "expected_code": "BG_INCOMPLETE_SCOPE",
+      "finding_count": 2
+    },
+    {
+      "case": "wrong backend set",
+      "caught": true,
+      "expected_code": "BACKEND_SCOPE_MISMATCH",
+      "finding_count": 1
+    },
+    {
+      "case": "rename backend into feature",
+      "caught": true,
+      "expected_code": "SCOPE_RECORD_CHANGED",
+      "finding_count": 63
+    },
+    {
+      "case": "partial unit masquerades as full",
+      "caught": true,
+      "expected_code": "THIN_UNIT",
+      "finding_count": 2
+    },
+    {
+      "case": "marked implemented without receipt",
+      "caught": true,
+      "expected_code": "FALSE_IMPLEMENTATION_STATE",
+      "finding_count": 2
+    },
+    {
+      "case": "remove evidence requirement",
+      "caught": true,
+      "expected_code": "RECEIPT_REMOVED",
+      "finding_count": 2
+    },
+    {
+      "case": "empty backend operations",
+      "caught": true,
+      "expected_code": "INCOMPLETE_SERVICE_CONTRACT",
+      "finding_count": 2
+    },
+    {
+      "case": "omitted service",
+      "caught": true,
+      "expected_code": "SERVICE_SCOPE_MISMATCH",
+      "finding_count": 2
+    },
+    {
+      "case": "candidate generator skips evaluator",
+      "caught": true,
+      "expected_code": "PRODUCER_NOT_UPSTREAM",
+      "finding_count": 7
+    },
+    {
+      "case": "training skips qualified evaluator",
+      "caught": true,
+      "expected_code": "PRODUCER_NOT_UPSTREAM",
+      "finding_count": 2
+    },
+    {
+      "case": "catalogue omits strategy research",
+      "caught": true,
+      "expected_code": "PRODUCER_NOT_UPSTREAM",
+      "finding_count": 5
+    },
+    {
+      "case": "invent child frontend entry gate",
+      "caught": true,
+      "expected_code": "FORECAST_DUPLICATE_GATE",
+      "finding_count": 2
+    },
+    {
+      "case": "drop forecast obligation",
+      "caught": true,
+      "expected_code": "FORECAST_OBLIGATION_LOSS",
+      "finding_count": 2
+    },
+    {
+      "case": "drop forecast requirement",
+      "caught": true,
+      "expected_code": "SCOPE_SET_CHANGED",
+      "finding_count": 2
+    },
+    {
+      "case": "test fabricated passed",
+      "caught": true,
+      "expected_code": "FALSE_TEST_CLAIM",
+      "finding_count": 2
+    },
+    {
+      "case": "test orphan unit",
+      "caught": true,
+      "expected_code": "TEST_OWNER_MISSING",
+      "finding_count": 2
+    },
+    {
+      "case": "duplicate test",
+      "caught": true,
+      "expected_code": "DUPLICATE_ID",
+      "finding_count": 2
+    },
+    {
+      "case": "old schedule active",
+      "caught": true,
+      "expected_code": "OLD_PLAN_AUTHORITY",
+      "finding_count": 1
+    },
+    {
+      "case": "second F15 authority",
+      "caught": true,
+      "expected_code": "DUPLICATE_GATE_AUTHORITY",
+      "finding_count": 1
+    },
+    {
+      "case": "waive whole backend",
+      "caught": true,
+      "expected_code": "OWNER_SCOPE_WEAKENED",
+      "finding_count": 1
+    },
+    {
+      "case": "claim owner signed",
+      "caught": true,
+      "expected_code": "FALSE_AUTHORITY_CLAIM",
+      "finding_count": 1
+    },
+    {
+      "case": "blanket B4 waiver",
+      "caught": true,
+      "expected_code": "B4_WAIVER",
+      "finding_count": 1
+    },
+    {
+      "case": "self issue F15",
+      "caught": true,
+      "expected_code": "SELF_ISSUED_CERTIFICATE",
+      "finding_count": 1
+    },
+    {
+      "case": "self issue backend complete",
+      "caught": true,
+      "expected_code": "SELF_ISSUED_CERTIFICATE",
+      "finding_count": 1
+    },
+    {
+      "case": "reopen accepted OQ21",
+      "caught": true,
+      "expected_code": "OQ21_REOPENED_OR_ACTIVATED",
+      "finding_count": 1
+    },
+    {
+      "case": "duplicate owner question",
+      "caught": true,
+      "expected_code": "DUPLICATE_QUESTION",
+      "finding_count": 1
+    },
+    {
+      "case": "duplicate JSON key",
+      "caught": true,
+      "expected_code": "DUPLICATE_JSON_KEY"
+    }
+  ],
+  "schema": "van.document.check/1.0",
+  "scope_lock_sha256": "22d4d51ba522fc29e0ee8b67fa84712e109125a2d20200d0cc1c17e7c967afc9",
+  "scope_signature_status": "PREPARED_NOT_OWNER_SIGNED",
+  "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+  "status": "SPECIFICATION_STRUCTURAL_PASS_NOT_F15",
+  "total": 52
+}

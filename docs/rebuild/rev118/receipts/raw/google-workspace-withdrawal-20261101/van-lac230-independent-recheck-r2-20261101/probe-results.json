@@ -1,0 +1,62 @@
+{
+  "imports": {
+    "service": "/workspace/van-lanes-20261101/google-withdrawal/backend/van_gateway/google/service.py",
+    "mesh": "/workspace/van-lanes-20261101/google-withdrawal/backend/van_gateway/google/mesh.py"
+  },
+  "results": [
+    {
+      "case": "pending changedtoken context durableREFUSED originalrequest no neweffect",
+      "result": "PASS",
+      "extra": null
+    },
+    {
+      "case": "completed wrongowner device profile revokedcaller deny",
+      "result": "PASS",
+      "extra": null
+    },
+    {
+      "case": "tampered original sealedreceipt preserves replacement",
+      "result": "PASS",
+      "extra": null
+    },
+    {
+      "case": "pending expiry versus completed historical recovery",
+      "result": "PASS",
+      "extra": null
+    },
+    {
+      "case": "original independent modeledtokenreplacement counterexample now GETPOST200 unchangedreceipt",
+      "result": "OBSERVED",
+      "extra": {
+        "normal_existing_enrollment_renewal_receipt_status": 200,
+        "trusted_token_replacement_modeled_not_existing_rotation_producer": true,
+        "actual_http_status_with_newtoken": 200,
+        "original_receipt_status_after_token_replacement": 200,
+        "original_receipt_error": {
+          "caller_device_id": "phone",
+          "changed": true,
+          "completed_at_ms": 1793520505099,
+          "connection_generation": "6a94a982d97b47e9a18ca0c0293ae215",
+          "effect_scope": "gateway_held_workspace_credential_only",
+          "expected_revision": "be457a94f2e8e5842935aaf05930afb67243c1eabb0d0259aeff2875a806aa0e",
+          "operation_id": "workspace-withdraw-43f286d3b3c545f9b57786866ea493af",
+          "owner_id": "owner",
+          "provider_token_revoked": false,
+          "reason_code": null,
+          "request_deadline_ms": 1793521105071,
+          "state": "APPLIED",
+          "withdrawn": true
+        },
+        "original_sealed_record_sha256": "e99512c66c9d28e470581cf94c2f6101610d34f226cfc6d6cee50d6a923e00f6",
+        "original_unchanged": true
+      }
+    },
+    {
+      "case": "completedREFUSED modeledtokenreplacement GETPOST history original",
+      "result": "PASS",
+      "extra": null
+    }
+  ],
+  "all12source_archive_patchpins_verified_unchanged": true,
+  "owned_tmp_cleanup": true
+}

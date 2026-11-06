@@ -1,15 +1,12 @@
 package com.dial.van.visual
 
 import android.content.Context
-import android.os.Build
-import android.os.PowerManager
+import android.database.ContentObserver
+import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
-import android.view.WindowManager
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -19,10 +16,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
@@ -50,8 +49,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import com.dial.van.runtime.DeviceRuntimeReadings
-import com.dial.van.runtime.VanResourceEnvelope
 import java.io.IOException
 import kotlin.math.PI
 import kotlin.math.min
@@ -65,7 +62,20 @@ fun VanAvatar(
     onDecision: (VanRenderDecision) -> Unit = VanRendererStatusPublisher::publish,
     /** Aura Rev 2 — reports where VAN is on screen so the aura can wrap him. */
     onSilhouette: (VanSilhouette?) -> Unit = {},
+    animate: Boolean = true,
+    budget: VanEffectBudget = VanEffectBudget.FULL,
+    reducedMotion: Boolean = rememberReducedMotion(),
+    phase: Float? = null,
+    orbPhase: Float? = null,
 ) {
+    val motionEnabled = vanMotionEnabled(budget, animate = animate, reducedMotion = reducedMotion)
+    // In standalone callers one active-time clock supplies BOTH independent phases.
+    // VanEmbodiment passes its existing shared body/slow phases without a second loop.
+    val localMotion = if (phase == null || orbPhase == null) {
+        rememberVanMotionFrame(state.durableState, motionEnabled)
+    } else null
+    val effectivePhase = phase ?: localMotion?.phase ?: 0f
+    val effectiveOrbPhase = orbPhase ?: localMotion?.slowPhase ?: 0f
     val context = LocalContext.current
     var decision by remember(context) { mutableStateOf(resolveRenderer(context)) }
 
@@ -76,24 +86,29 @@ fun VanAvatar(
             state = state,
             modifier = modifier,
             onSilhouette = onSilhouette,
+            // Visibility and animation policy are separate: a visible still
+            // character must refresh a changed status without an idle loop.
+            animate = animate,
+            budget = budget,
+            reducedMotion = reducedMotion,
             onLoadFailed = {
                 decision = VanVisualRuntime.decide(
                     assetBytes = null,
                     riveRuntimeAvailable = false,
-                    ownerArtAvailable = VanStateArt.artAvailable(context),
                     loadFailed = true,
                     candidateBAvailable = true,
                 )
             },
         )
 
-        VanRenderer.OWNER_ART -> VanOwnerArtAvatar(state = state, modifier = modifier)
-
         VanRenderer.CANDIDATE_B -> VanCandidateBAvatar(
             state = state,
             modifier = modifier,
             presentation = presentation,
             onSilhouette = onSilhouette,
+            motionEnabled = motionEnabled,
+            reducedMotion = reducedMotion,
+            phase = effectivePhase,
         )
 
         VanRenderer.CANVAS -> {
@@ -103,6 +118,10 @@ fun VanAvatar(
                 state = state,
                 modifier = modifier,
                 presentation = presentation,
+                motionEnabled = motionEnabled,
+                reducedMotion = reducedMotion,
+                phase = effectivePhase,
+                orbPhase = effectiveOrbPhase,
             )
         }
     }
@@ -119,6 +138,9 @@ fun VanCandidateBAvatar(
     modifier: Modifier = Modifier,
     presentation: VanPresentation = VanPresentation.COMPACT,
     onSilhouette: (VanSilhouette?) -> Unit = {},
+    motionEnabled: Boolean = true,
+    reducedMotion: Boolean = rememberReducedMotion(),
+    phase: Float? = null,
 ) {
     val image = ImageBitmap.imageResource(com.dial.van.R.drawable.van_candidate_b_front)
     // Aura Rev 2 — the art's own alpha is the silhouette, built once per framing.
@@ -134,13 +156,14 @@ fun VanCandidateBAvatar(
     }
     val palette = VanStatusPalette.forState(state.durableState)
     val description = vanContentDescription(state)
-    val reducedMotion = rememberReducedMotion()
-    val phase = vanIdlePhase(state.durableState, reducedMotion)
-    val motion = VanCharacterMotion.sample(state, phase, reducedMotion)
+    val enabled = vanMotionEnabled(VanEffectBudget.FULL, animate = motionEnabled, reducedMotion = reducedMotion)
+    val effectivePhase = phase ?: vanIdlePhase(state.durableState, reducedMotion, enabled)
+    val still = !enabled
+    val motion = VanCharacterMotion.sample(state, effectivePhase, still)
     val framing = VanFraming.forPresentation(presentation)
     val marks = VanScene.stateMarks(
         state,
-        VanSceneFrame(presentation = presentation, phase = phase, reducedMotion = reducedMotion),
+        VanSceneFrame(presentation = presentation, phase = effectivePhase, reducedMotion = still),
     )
     val filter = if (palette.desaturation > 0.01f) {
         ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(1f - palette.desaturation) })
@@ -189,38 +212,6 @@ private fun unitAlphaOf(image: ImageBitmap): ByteArray? = try {
     null
 }
 
-/** Owner-art fallback stays opaque but receives tiny state-aware micro-motion. */
-@Composable
-fun VanOwnerArtAvatar(state: VanVisualState, modifier: Modifier = Modifier) {
-    val palette = VanStatusPalette.forState(state.durableState)
-    val resId = VanStateArt.drawableFor(state.durableState) ?: return
-    val description = vanContentDescription(state)
-    val reducedMotion = rememberReducedMotion()
-    val phase = vanIdlePhase(state.durableState, reducedMotion)
-    val motion = VanCharacterMotion.sample(state, phase, reducedMotion)
-
-    val filter = if (palette.desaturation > 0.01f) {
-        ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(1f - palette.desaturation) })
-    } else {
-        null
-    }
-
-    Image(
-        painter = painterResource(id = resId),
-        contentDescription = description,
-        modifier = modifier
-            .offset(x = motion.offsetXDp.dp, y = motion.offsetYDp.dp)
-            .graphicsLayer {
-                rotationZ = motion.rotationDeg
-                scaleX = motion.scale
-                scaleY = motion.scale
-            },
-        contentScale = ContentScale.Fit,
-        alpha = palette.dim,
-        colorFilter = filter,
-    )
-}
-
 /**
  * Complete VAN embodiment. Character pose follows local activity; Zone B follows that same local
  * activity; Zone C independently follows [VanVisualState.resolvedSemanticState].
@@ -230,7 +221,7 @@ fun VanEmbodiment(
     state: VanVisualState,
     modifier: Modifier = Modifier,
     presentation: VanPresentation = VanPresentation.COMPACT,
-    budget: VanEffectBudget = VanEffectBudget.FULL,
+    budget: VanEffectBudget = rememberVanEffectBudget(),
     onDecision: (VanRenderDecision) -> Unit = VanRendererStatusPublisher::publish,
     characterFraction: Float = 1f,
     /**
@@ -250,30 +241,42 @@ fun VanEmbodiment(
     // times a second during speech, and restarting a 120-420ms blend that often would be the
     // exact snap-on-change P1-AURA-002 exists to remove). Zero outside LISTENING/SPEAKING —
     // see `reactToVoiceAmplitude`'s doc — so this is a no-op for every other state.
-    val activitySpec = rememberBlendedAura(state.durableState, budget).reactToVoiceAmplitude(state.mouthOpen)
+    val reducedMotion = rememberReducedMotion()
+    var cadenceMissed by remember { mutableStateOf(false) }
+    val effectiveBudget = VanEffectPolicy.withCadencePressure(budget, cadenceMissed)
+    val motionEnabled = vanMotionEnabled(effectiveBudget, animate = animate, reducedMotion = reducedMotion)
+    // The same clock drives movement and cadence feedback. No extra measurement frame loop.
+    val sharedMotion = rememberVanMotionFrame(
+        state.durableState, motionEnabled, onCadenceChanged = { cadenceMissed = it },
+    )
+    val activitySpec = rememberBlendedAura(
+        state.durableState,
+        effectiveBudget,
+        enabled = motionEnabled,
+    ).reactToVoiceAmplitude(state.mouthOpen)
     // Aura Rev 2 — a live trade drives the outer field unless authority, health or offline
     // truth outranks it (VanPresenceFrame decides; this only reads the result).
     val semanticSpec = rememberBlendedAura(
         state.resolvedSemanticState,
-        budget,
-        VanAuraSpecs.semanticSpecFor(state, budget),
+        effectiveBudget,
+        VanAuraSpecs.semanticSpecFor(state, effectiveBudget),
+        enabled = motionEnabled,
     )
-    val phase = vanIdlePhase(state.durableState, !budget.allowMotion, animate = animate)
+    val phase = sharedMotion.phase
     val body = characterFraction.coerceIn(0.40f, 1f)
 
-    // Aura Rev 2 (CF-D-08) — where VAN is on screen (Rive alpha, B art alpha or layout), a
-    // long second clock so the fire never visibly repeats, and a brief pulse on a closed trade.
+    // Both aura phases use the body's active-time clock; hidden time advances neither.
     var silhouette by remember { mutableStateOf<VanSilhouette?>(null) }
-    val slowPhase = rememberSlowAuraPhase(enabled = budget.allowMotion && animate)
-    val pulse = rememberAuraPulse(state.auraPulseGeneration)
+    val slowPhase = sharedMotion.slowPhase
+    val pulse = rememberAuraPulse(state.auraPulseGeneration, motionEnabled)
     val framing = VanFraming.forPresentation(presentation)
 
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         VanAuraLayer(
             spec = activitySpec,
             semanticSpec = semanticSpec,
-            phase = phase,
-            budget = budget,
+            phase = sharedMotion.auraPhase,
+            budget = effectiveBudget,
             characterScale = body,
             framing = framing,
             silhouette = silhouette,
@@ -288,13 +291,18 @@ fun VanEmbodiment(
             presentation = presentation,
             onDecision = onDecision,
             onSilhouette = { silhouette = it },
+            animate = animate,
+            budget = effectiveBudget,
+            reducedMotion = reducedMotion,
+            phase = phase,
+            orbPhase = slowPhase,
         )
-        // Faint wisps over the legs and forearms, and the rim light on VAN's edge.
+        // Faint FILLED wisps over lower limbs; no stroked aura rim or field arcs.
         VanAuraLayer(
             spec = activitySpec,
             semanticSpec = semanticSpec,
-            phase = phase,
-            budget = budget,
+            phase = sharedMotion.auraPhase,
+            budget = effectiveBudget,
             characterScale = body,
             framing = framing,
             silhouette = silhouette,
@@ -306,35 +314,22 @@ fun VanEmbodiment(
     }
 }
 
-/**
- * Aura Rev 2 — a second, long clock (23.7 s, unrelated to any state period) so the combined
- * motion never visibly loops. A constant duration, so it never restarts on a state change.
- */
-@Composable
-private fun rememberSlowAuraPhase(enabled: Boolean): Float {
-    if (!enabled) return 0f
-    val transition = rememberInfiniteTransition(label = "van-aura-slow")
-    val value by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(tween(durationMillis = 23_700, easing = LinearEasing)),
-        label = "van-aura-slow-phase",
-    )
-    return value
-}
-
 /** One brief white expansion each time [generation] advances (a live position closed). */
 @Composable
-private fun rememberAuraPulse(generation: Int): Float {
+private fun rememberAuraPulse(generation: Int, enabled: Boolean = true): Float {
     val pulse = remember { Animatable(0f) }
     var seen by remember { mutableStateOf(generation) }
-    LaunchedEffect(generation) {
-        if (generation == seen) return@LaunchedEffect
+    var wasEnabled by remember { mutableStateOf(enabled) }
+    LaunchedEffect(generation, enabled) {
+        val shouldPulse = enabled && wasEnabled && generation != seen
         seen = generation
+        wasEnabled = enabled
+        pulse.snapTo(0f)
+        if (!shouldPulse) return@LaunchedEffect
         pulse.snapTo(1f)
         pulse.animateTo(0f, tween(durationMillis = 900, easing = LinearEasing))
     }
-    return pulse.value
+    return if (enabled) pulse.value else 0f
 }
 
 /**
@@ -350,14 +345,23 @@ private fun rememberBlendedAura(
     state: VanDurableState,
     budget: VanEffectBudget,
     target: VanAuraSpec = VanAuraSpecs.forState(state, budget),
+    enabled: Boolean = budget.allowMotion,
 ): VanAuraSpec {
     var transition by remember { mutableStateOf<VanAuraTransition?>(null) }
     var previousState by remember { mutableStateOf(state) }
     var spec by remember { mutableStateOf(target) }
 
     // Keyed on the target itself: a trading change retargets as smoothly as a state change.
-    LaunchedEffect(target) {
+    LaunchedEffect(target, enabled) {
+        if (!enabled) {
+            transition = null
+            previousState = state
+            spec = target
+            return@LaunchedEffect
+        }
         if (!spec.differsFrom(target)) {
+            transition = null
+            previousState = state
             spec = target
             return@LaunchedEffect
         }
@@ -382,44 +386,20 @@ private fun rememberBlendedAura(
             }
         }
     }
-    return spec
+    return if (enabled) spec else target
 }
 
+/** Retained public source/binary entry point; native subscription is shared in its own adapter. */
 @Composable
-fun rememberVanEffectBudget(): VanEffectBudget {
-    val context = LocalContext.current
-    val reducedMotion = rememberReducedMotion()
-    return remember(context, reducedMotion) {
-        val power = context.getSystemService(PowerManager::class.java)
-        val thermal = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            runCatching { power?.currentThermalStatus ?: 0 }.getOrDefault(0)
-        } else {
-            0
-        }
-        val blurEnabled = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            runCatching {
-                context.getSystemService(WindowManager::class.java)?.isCrossWindowBlurEnabled ?: false
-            }.getOrDefault(false)
-        } else {
-            false
-        }
-        // P3-PERF-003 — resolved through the runtime envelope rather than beside it. The
-        // ladder still decides; the envelope may only make its answer weaker. Before this,
-        // a phone at four percent with power-save switched off rendered the full field,
-        // because battery *level* was not an input to anything.
-        VanResourceEnvelope.effectBudget(
-            DeviceRuntimeReadings.read(context),
-            VanEffectConditions(
-                batterySaver = power?.isPowerSaveMode == true,
-                thermalStatus = thermal,
-                reducedMotion = reducedMotion,
-                crossWindowBlurEnabled = blurEnabled,
-            ),
-        )
-    }
-}
+fun rememberVanEffectBudget(): VanEffectBudget = rememberObservedVanEffectBudget()
 
 private fun resolveRenderer(context: Context): VanRenderDecision {
+    // Review resolution validates the entire exact bundle before selecting Rive.
+    // Invalid/missing review data falls back visibly; it never borrows production assets.
+    if (com.dial.van.BuildConfig.VAN_CHARACTER_REVIEW) {
+        val size = runCatching { VanCharacterAssets.load(context).bytes.size.toLong() }.getOrDefault(0L)
+        return VanVisualRuntime.decide(size, riveRuntimeAvailable(), candidateBAvailable = true)
+    }
     val bytes = try {
         context.assets.open(RiveBindingContract.ASSET_FILE).use { stream ->
             var total = 0L
@@ -428,6 +408,7 @@ private fun resolveRenderer(context: Context): VanRenderDecision {
                 val read = stream.read(buffer)
                 if (read <= 0) break
                 total += read
+                if (total > VanAssetReadLimits.RIVE_BYTES) break
             }
             total
         }
@@ -437,7 +418,6 @@ private fun resolveRenderer(context: Context): VanRenderDecision {
     return VanVisualRuntime.decide(
         assetBytes = bytes,
         riveRuntimeAvailable = riveRuntimeAvailable(),
-        ownerArtAvailable = VanStateArt.artAvailable(context),
         // Bundled with the app (res/drawable-nodpi/van_candidate_b_front.png).
         candidateBAvailable = true,
     )
@@ -450,18 +430,45 @@ private fun riveRuntimeAvailable(): Boolean = try {
     false
 }
 
+private fun readReducedMotion(context: Context): Boolean = runCatching {
+    Settings.Global.getFloat(
+        context.contentResolver,
+        Settings.Global.ANIMATOR_DURATION_SCALE,
+        1f,
+    ) == 0f
+}.getOrDefault(true)
+
 @Composable
 fun rememberReducedMotion(): Boolean {
     val context = LocalContext.current
-    return remember(context) {
-        runCatching {
-            Settings.Global.getFloat(
-                context.contentResolver,
-                Settings.Global.ANIMATOR_DURATION_SCALE,
-                1f,
-            ) == 0f
-        }.getOrDefault(false)
+    var reducedMotion by remember(context) { mutableStateOf(readReducedMotion(context)) }
+    DisposableEffect(context) {
+        val resolver = context.contentResolver
+        var disposed = false
+        var registered = false
+        val observer = object : ContentObserver(Handler(Looper.getMainLooper())) {
+            override fun onChange(selfChange: Boolean) {
+                if (!disposed) reducedMotion = readReducedMotion(context)
+            }
+        }
+        try {
+            resolver.registerContentObserver(
+                Settings.Global.getUriFor(Settings.Global.ANIMATOR_DURATION_SCALE),
+                false,
+                observer,
+            )
+            registered = true
+            reducedMotion = readReducedMotion(context)
+        } catch (_: SecurityException) {
+            reducedMotion = true
+        }
+        onDispose {
+            // Queued main-thread notifications must not update a disposed composition.
+            disposed = true
+            if (registered) runCatching { resolver.unregisterContentObserver(observer) }
+        }
     }
+    return reducedMotion || LocalVanPresentationPreferences.current.reducedMotion
 }
 
 @Composable
@@ -469,14 +476,23 @@ fun VanCanvasAvatar(
     state: VanVisualState,
     modifier: Modifier = Modifier,
     presentation: VanPresentation = VanPresentation.COMPACT,
+    motionEnabled: Boolean = true,
+    reducedMotion: Boolean = rememberReducedMotion(),
+    phase: Float? = null,
+    orbPhase: Float? = null,
 ) {
-    val reducedMotion = rememberReducedMotion()
-    val phase = vanIdlePhase(state.durableState, reducedMotion)
+    val enabled = vanMotionEnabled(VanEffectBudget.FULL, animate = motionEnabled, reducedMotion = reducedMotion)
+    val localMotion = if (phase == null || orbPhase == null) {
+        rememberVanMotionFrame(state.durableState, enabled)
+    } else null
+    val effectivePhase = phase ?: localMotion?.phase ?: 0f
+    val effectiveOrbPhase = orbPhase ?: localMotion?.slowPhase ?: 0f
     val frame = VanSceneFrame(
         presentation = presentation,
-        phase = phase,
-        blink = if (reducedMotion) 0f else blinkFor(phase),
-        reducedMotion = reducedMotion,
+        phase = effectivePhase,
+        blink = if (enabled) blinkFor(effectivePhase) else 0f,
+        reducedMotion = !enabled,
+        orbPhase = effectiveOrbPhase,
     )
     val ops = VanScene.build(state, frame)
     val description = vanContentDescription(state)
@@ -506,25 +522,55 @@ private fun vanIdlePhase(
     animate: Boolean = true,
     sampler: VanFrameBudgetSampler? = null,
 ): Float {
-    if (reducedMotion) return NEUTRAL_PHASE
-    // Survives state changes on purpose: the clock is keyed on nothing, so a new state
-    // gives it a new period and not a new clock.
-    val clock = remember { VanAnimationClock() }
-    var phase by remember { mutableStateOf(clock.phase) }
-    val period = VanMotionPeriods.periodMillisFor(state)
+    return rememberVanMotionFrame(state, animate && !reducedMotion, sampler).phase
+}
 
-    LaunchedEffect(animate, period) {
-        if (!animate) return@LaunchedEffect
-        var previous = 0L
-        while (true) {
-            withFrameNanos { frameNanos ->
-                if (previous != 0L) sampler?.recordNanos(previous, frameNanos)
-                previous = frameNanos
-                phase = clock.advance(frameNanos, period)
+private data class VanMotionFrame(val phase: Float, val slowPhase: Float, val auraPhase: Float = VanAuraMotionPhase.REST_PHASE)
+
+@Composable
+private fun rememberVanMotionFrame(
+    state: VanDurableState,
+    enabled: Boolean,
+    sampler: VanFrameBudgetSampler? = null,
+    onCadenceChanged: ((Boolean) -> Unit)? = null,
+): VanMotionFrame {
+    val clock = remember { VanAnimationClock(initialPhase = NEUTRAL_PHASE) }
+    var frame by remember { mutableStateOf(VanMotionFrame(clock.phase, 0f)) }
+    val period by rememberUpdatedState(VanMotionPeriods.periodMillisFor(state))
+    val currentSampler by rememberUpdatedState(sampler)
+    val currentCadenceCallback by rememberUpdatedState(onCadenceChanged)
+    val refreshRate = rememberVanDisplayRefreshRate()
+    val cadence = remember { VanFrameCadenceFeedback() }
+
+    // State/period changes retain phase; a display-rate change starts a new cadence window.
+    LaunchedEffect(enabled, refreshRate) {
+        clock.suspendTiming()
+        cadence.configure(refreshRate, enabled)
+        var reported = cadence.missed
+        currentCadenceCallback?.invoke(reported)
+        if (!enabled) return@LaunchedEffect
+        var previous: Long? = null
+        try {
+            while (true) {
+                withFrameNanos { frameNanos ->
+                    previous?.let { currentSampler?.recordNanos(it, frameNanos) }
+                    previous = frameNanos
+                    val missed = cadence.record(frameNanos)
+                    if (missed != reported) {
+                        reported = missed
+                        currentCadenceCallback?.invoke(missed)
+                    }
+                    val phase = clock.advance(frameNanos, period)
+                    val slow = (clock.elapsedNanos % 23_700_000_000L).toFloat() / 23_700_000_000f
+                    frame = VanMotionFrame(phase, slow, VanAuraMotionPhase.at(clock.elapsedNanos))
+                }
             }
+        } finally {
+            clock.suspendTiming()
+            cadence.pause()
         }
     }
-    return phase
+    return frame
 }
 
 private fun blinkFor(phase: Float): Float {

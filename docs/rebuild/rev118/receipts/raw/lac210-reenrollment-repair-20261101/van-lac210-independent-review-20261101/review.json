@@ -1,0 +1,86 @@
+{
+  "schema": "van.independent-lac210-source-review/1",
+  "state": "BOUNDED_FROZEN_SOURCE_REVIEW_COMPLETE_NO_BLOCKING_FINDING",
+  "reviewer": "Sol medium independent bounded SOURCE review; root retains decisions",
+  "base": "32d519332ecd251d932e841db84ca0a25712b255",
+  "source_identity": {
+    "path_count": 10,
+    "source_archive_patch_verified": true,
+    "source_unchanged_during_review": true,
+    "before": "before.json",
+    "after": [
+      "after-jvm.json",
+      "after-http.json",
+      "final-source-pins.json"
+    ],
+    "patch_sha256": "e4fe85b9ac707bbea9c6a2a2615a17e64b045b1bd927f6cbd555b66d705395eb",
+    "archive_sha256": "60d45bf34816dfc66ae85671e8429806ef7ddc621a7b039038c5b2b44175a902"
+  },
+  "blocking_findings": [],
+  "canonical_mapping": {
+    "action": "LAC-210 / WP-ACT-LAC-210",
+    "source": "docs/review-inputs/van-rev115/package/traceability/LEGACY_349_ACTIONS.json:3521",
+    "finding": "Exact grant inspection, independent use/remaining-scope readback and explicit revocation; NX007 exact-action/approval and NX021 privacy/stale/unknown obligations retained. Uses existing PermissionRegistry and authenticated owner control path, no native/provider authority from registry withdrawal."
+  },
+  "reviewed_contracts": [
+    {
+      "path": "backend/van_gateway/capability/owner_permissions.py:344",
+      "finding": "Target immutable generation/source digest includes original grant/witness/authority; mutable usage accounting has separate revision. Valid admission increments cannot stale same-generation protective withdrawal. Writer reads current accounting independently and preserves it."
+    },
+    {
+      "path": "backend/van_gateway/capability/owner_permissions.py:404",
+      "finding": "Current lawful caller/device/token/proof identity is separate from historical target issuer. Legacy/corrupt/expired/revoked-issuer target can be inspected and defensively revoked with effective0 and local-only/source-unverified labels. No forged historical issuer/native retirement metadata is supplied."
+    },
+    {
+      "path": "backend/van_gateway/capability/owner_permissions.py:421",
+      "finding": "GET detail emits inert encrypted stateless proposal, with exact operation/caller context/target/generation and server-owned10min deadline. It writes no command/grant/operation. Current actor/token/binding is independently checked again under revocation writer, not inferred from proposal."
+    },
+    {
+      "path": "backend/van_gateway/capability/owner_permissions.py:456",
+      "finding": "Original result is encrypted and strictly schema/request/outcome-bound, with forensic journal retained. Exact APPLIED receipt replays after proposal expiry and lawful same-owner token renewal. Pending expired/context-changed intent is durably REFUSED; new generation requires explicit fresh confirmation rather than retargeting."
+    },
+    {
+      "path": "backend/van_gateway/capability/owner_permissions.py:506",
+      "finding": "Grant withdrawal and original protected receipt share one SQLite transaction, deadline checked at writer/effect. Future actual effect guard reads revoked grant and preserved admission reservations. Submitted or unknown external effects remain reconciliation facts; no retry refund or duplicate effect authority is created."
+    },
+    {
+      "path": "android/app/src/main/java/com/dial/van/gateway/PermissionRevocationOperations.kt:49",
+      "finding": "Original body is persisted in protected existing client storage before submit. Original operation readback and independently matching current revoked grant/effective0 precede applied cleanup. Profile/device/current generation scope guards prevent silent retarget; oldUNKNOWN other generations remain. Terminal explicit refusal permits fresh user-reviewed confirmation."
+    },
+    {
+      "path": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1624",
+      "finding": "Real existing HTTP caller uses the tested persisted exchange, original operation GET and proved POST, with actual profile/baseURL and device access credentials. Android full app/Compose/VanGatewayClient compilation remains unexecuted locally."
+    }
+  ],
+  "independent_probes": {
+    "backend": "http-probe-results.json",
+    "backend_count": 5,
+    "backend_results": [
+      "Historical retired other-device issuer cleanup PASS",
+      "Corrupt target effective0/actual dispatch guard/defensive cleanup PASS",
+      "Admission increments do not stale revocation; future use refused PASS",
+      "Caller retirement after HTTP authentication before writer refuses PASS",
+      "Custom completed exact original GET and POST replay after lawful same-device token renewal PASS"
+    ],
+    "jvm": "jvm-probe-results.json",
+    "jvm_scope": "Independently compiled exact pure helper with cached Kotlin compiler/JDK and dependency hashes recorded; bounded profile-switch completed-readback observation only. Worker14JVM tests were read as evidence, not independently rerun.",
+    "owned_tmp_cleanup": true,
+    "imports_and_dependency_pins": [
+      "http-probe-results.json",
+      "jvm-import-pins.json"
+    ],
+    "no_native_effects": true
+  },
+  "nonblocking_observation": {
+    "path": "android/app/src/main/java/com/dial/van/gateway/PermissionRevocationOperations.kt:108",
+    "finding": "Switching profile during final detail callback can finish already-known APPLIED receipt cleanup if exact original-generation current readback matches. Probe observed success/old record cleared. This did not demonstrate UNKNOWN loss, reauthorization or unsafe effect; treated as nonblocking completed-history behavior under roots stated boundary. Pending profile/device switch is checked before submit; original completed receipt is recoverable under lawful same owner/token renewal."
+  },
+  "integration_requirements_and_limits": [
+    "Existing intentional VanGatewayClient citation review owner-source generator blocker must be resolved by actual anchor/source mapping review, then regenerate owner/frontend derived registries; no autogenerated blessing.",
+    "New owner_permission_revocation: runtime_meta journal prefix must be preserved by rightful retention owner. Integrator already owns disjoint retention/action/app baseline repairs; this review grants no retention bypass.",
+    "Guarded reconciliation onto actual repaired published base and narrow actual-runtime-consumer recheck remain required. Old32d reenrollment/device-wide action revoke/retention/audit CI failures are separate baseline findings and were not blamed on this packet.",
+    "149unique backend/14pureJVM0skip are worker evidence with pinned IDs; independent scope was five narrow HTTP probes plus one exact-helper JVM observation, not a broad CI rerun.",
+    "No SDK36/full app/Compose/VanGatewayClient native compile, device/provider/native/unit acceptance, F15/BG/PRE success or financial authority is issued. Genuine hooks/committed verification/normal publication/readback and exact-head CI remain required.",
+    "All original frozen inputs/logs/counterexamples remain untouched; source changes invalidate affected pins."
+  ]
+}

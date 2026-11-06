@@ -1,0 +1,50 @@
+FFFF                                                                     [100%]
+=================================== FAILURES ===================================
+_ test_original_native_balance_delta_does_not_guess_commission_sign_or_future_fees _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-189/test_original_native_balance_d0')
+
+    def test_original_native_balance_delta_does_not_guess_commission_sign_or_future_fees(tmp_path):
+>       from vati.funding.close_postings import FinancialCloseMovement
+E       ModuleNotFoundError: No module named 'vati.funding.close_postings'
+
+trading/tests/test_native_close_movement.py:19: ModuleNotFoundError
+____ test_unbound_balance_baseline_cannot_supply_a_closing_cash_delta[gap] _____
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-189/test_unbound_balance_baseline_0')
+damage = 'gap'
+
+    @pytest.mark.parametrize('damage',['gap','wrong_scope','future_availability'])
+    def test_unbound_balance_baseline_cannot_supply_a_closing_cash_delta(tmp_path,damage):
+>       from vati.funding.close_postings import FinancialCloseMovement
+E       ModuleNotFoundError: No module named 'vati.funding.close_postings'
+
+trading/tests/test_native_close_movement.py:43: ModuleNotFoundError
+_ test_unbound_balance_baseline_cannot_supply_a_closing_cash_delta[wrong_scope] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-189/test_unbound_balance_baseline_1')
+damage = 'wrong_scope'
+
+    @pytest.mark.parametrize('damage',['gap','wrong_scope','future_availability'])
+    def test_unbound_balance_baseline_cannot_supply_a_closing_cash_delta(tmp_path,damage):
+>       from vati.funding.close_postings import FinancialCloseMovement
+E       ModuleNotFoundError: No module named 'vati.funding.close_postings'
+
+trading/tests/test_native_close_movement.py:43: ModuleNotFoundError
+_ test_unbound_balance_baseline_cannot_supply_a_closing_cash_delta[future_availability] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-189/test_unbound_balance_baseline_2')
+damage = 'future_availability'
+
+    @pytest.mark.parametrize('damage',['gap','wrong_scope','future_availability'])
+    def test_unbound_balance_baseline_cannot_supply_a_closing_cash_delta(tmp_path,damage):
+>       from vati.funding.close_postings import FinancialCloseMovement
+E       ModuleNotFoundError: No module named 'vati.funding.close_postings'
+
+trading/tests/test_native_close_movement.py:43: ModuleNotFoundError
+=========================== short test summary info ============================
+FAILED trading/tests/test_native_close_movement.py::test_original_native_balance_delta_does_not_guess_commission_sign_or_future_fees
+FAILED trading/tests/test_native_close_movement.py::test_unbound_balance_baseline_cannot_supply_a_closing_cash_delta[gap]
+FAILED trading/tests/test_native_close_movement.py::test_unbound_balance_baseline_cannot_supply_a_closing_cash_delta[wrong_scope]
+FAILED trading/tests/test_native_close_movement.py::test_unbound_balance_baseline_cannot_supply_a_closing_cash_delta[future_availability]
+4 failed in 0.28s

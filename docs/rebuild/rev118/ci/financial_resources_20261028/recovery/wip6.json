@@ -1,0 +1,27 @@
+{
+  "base": "b876fc27f35765244fb169dbde1030f2b79b836e",
+  "created_at": "2026-10-28T19:18:53.481888+00:00",
+  "state": "IN_PROGRESS_NOT_QUALIFIED_RESERVATION_OR_EXECUTION_AUTHORITY",
+  "files": {
+    "docs/rebuild/rev118/backend/BE-009_010_SHARED_RESOURCE_WORK.md": "e0057779ef2dc038b33492c3cd54dec312c5469c8296184a27338153145acdba",
+    "trading/tests/test_current_entry_risk_source.py": "5de51acd0b5fd8bb6716ca6d0c4954c7bfa8288b1639939958af09d5920b3f6a",
+    "trading/tests/test_current_entry_risk_source_postgres.py": "080562d069c4f4fcc754f6661c39dc502ff81ed5b2c607817252692dce5e009f",
+    "trading/tests/test_entry_resource_groups.py": "7686a87a4a654b2cbade8e3ac157fca43bc70ef03a4d7588b5f62db7dbc0921f",
+    "trading/tests/test_entry_resource_projection.py": "b0ac71af42fced8d9bb53522ed6dddb40e1a97d568652988963b4a25afadfdd2",
+    "trading/tests/test_provisional_resource_book.py": "81b216f22adda87a3ab99af5802e74fee8ec81da66b20dc3c9418bf2cd385f40",
+    "trading/tests/test_provisional_resource_book_postgres.py": "6ad933547f78f67cf59b22a01214589c368444d5c32b033a04e4ecfd8f35ddec",
+    "trading/vati/risk/current_entry_source.py": "778852d3f5099fa323ebd909f5cd19789e3096d736d897d6955be034a35ca59b",
+    "trading/vati/risk/entry_resource_projection.py": "9352429da5e1c426e19961bfb81610bc2aa1562f2797fe49e9aaf985bb5b8336",
+    "trading/vati/risk/heat.py": "220d2193a9d9f6f77fb01329316966c7c63d868b1d37227f4cce8aea276d926c",
+    "trading/vati/risk/provisional_resource_book.py": "90e5da78b872b1af8266dc4f4e615a552ec932303ff8612bf4689e7e2aa94fef"
+  },
+  "evidence": {
+    "broad_pre_receipt_fix": "5390 passed0; all1274pins matched then; ownedPGabsent",
+    "final_source_SQL_r5": "122passed0 actualinnerouter0; sourcepinvalidationpending builder",
+    "independent_receipt_after": "1pass0 actualexit0; before1fail",
+    "remaining": "All full reservation/economic/policy/consumer/acceptance requirements remain explicit in shared resource work document."
+  },
+  "archive": "/workspace/van-financial-resource-owner-wip6-20261028.zip",
+  "size": 28938,
+  "sha256": "51b8818a872edfc475b95586ccf655c0bd53e6de4afe3b5fd9530ffe973c3986"
+}

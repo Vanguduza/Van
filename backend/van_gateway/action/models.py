@@ -33,7 +33,7 @@ class ExecutionStatus(str, Enum):
     REVOKED = "REVOKED"
 
 
-_TERMINAL = {
+TERMINAL_EXECUTION_STATUSES = frozenset({
     ExecutionStatus.VERIFIED_SUCCESS,
     ExecutionStatus.UNVERIFIABLE,
     ExecutionStatus.CONTEXT_INSUFFICIENT,
@@ -46,7 +46,7 @@ _TERMINAL = {
     ExecutionStatus.DENIED,
     ExecutionStatus.EXPIRED,
     ExecutionStatus.REVOKED,
-}
+})
 
 
 class VerifierType(str, Enum):
@@ -89,7 +89,7 @@ class ActionExecution(BaseModel):
 
     @property
     def terminal(self) -> bool:
-        return self.status in _TERMINAL
+        return self.status in TERMINAL_EXECUTION_STATUSES
 
 
 class VerificationObservation(BaseModel):

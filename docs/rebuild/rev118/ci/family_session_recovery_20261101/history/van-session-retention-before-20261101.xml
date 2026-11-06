@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="2.411" timestamp="2026-11-01T00:54:31.026746+00:00" hostname="b6ffa15f7e81"><testcase classname="tests.test_lane_session_commit_expiry" name="test_retention_removes_original_deadline_with_its_message_only" time="0.251"><failure message="assert &lt;sqlite3.Row object at 0x7f1ab3813850&gt; is None">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-19/test_retention_removes_origina0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7f1ab3797a10&gt;
+
+    @pytest.mark.asyncio
+    async def test_retention_removes_original_deadline_with_its_message_only(tmp_path, monkeypatch):
+        from van_gateway.ops.retention import RetentionService
+        clock, store, service, router, envelope, calls = await setup(tmp_path, monkeypatch)
+        assert (await router.route(envelope)).accepted
+        future = 10 * 365 * 24 * 60 * 60 * 1000
+        young = envelope.model_copy(update={'message_id':'young-message', 'idempotency_key':'young-key', 'expires_at_ms':None})
+        await service.admit(young, now_ms=future)
+        await store.execute("INSERT INTO runtime_meta(key,value,updated_at_unix_ms) VALUES('unrelated-owner-setting','preserve',1)")
+        results = await RetentionService(store).prune(now_ms=future, tables=('van_session_messages',))
+        assert sum(result.deleted for result in results if result.table == 'van_session_messages') == 1
+        assert await store.fetchone('SELECT * FROM van_session_messages WHERE message_id=?', (envelope.message_id,)) is None
+&gt;       assert await store.fetchone('SELECT * FROM runtime_meta WHERE key=?', (f'session_expiry:{envelope.message_id}',)) is None
+E       assert &lt;sqlite3.Row object at 0x7f1ab3813850&gt; is None
+
+backend/tests/test_lane_session_commit_expiry.py:281: AssertionError</failure></testcase></testsuite></testsuites>

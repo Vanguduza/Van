@@ -1,0 +1,17 @@
+{
+  "schema": "van.rebuild.source-qualification/1",
+  "source_head": "2fb3c8c6bd98cabcef5009d26a022cc0523af1fb",
+  "command": "pytest backend/tests tests/contracts -q --disable-warnings --maxfail=5; isolated repo-root storage audit",
+  "passed": 6580,
+  "skipped": 166,
+  "failed": 0,
+  "warnings": 7,
+  "seconds": "1531.23",
+  "junit_sha256": "f99b54bea757e64e8627e7f4b3be1f90c29d5af4925c9ba9421da552ca27e8d6",
+  "storage_audit": {
+    "forbidden_events": [],
+    "scope": "backend/tests plus tests/contracts; repo-root invocation; writes and SQLite opens under root/data or backend/data refused"
+  },
+  "checkout_clean_after": true,
+  "scope": "Complete source backend/contracts suite at the pinned commit, not canonical 1610 acceptance identities or live release."
+}

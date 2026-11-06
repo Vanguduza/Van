@@ -1,0 +1,61 @@
+....................F................................................... [ 48%]
+........................................................................ [ 96%]
+.....                                                                    [100%]
+=================================== FAILURES ===================================
+_ test_explicit_original_targets_need_distinct_exact_signed_authority_and_replay_once _
+
+tmp_path = PosixPath('/tmp/van-recovery-family-native-supervision-r5-20261101/test_explicit_original_targets0')
+
+    def test_explicit_original_targets_need_distinct_exact_signed_authority_and_replay_once(tmp_path):
+        w,store,time,admitted,plan,history=admitted_source_world(tmp_path,
+            actual_runtime_lease=True,policy_version='EXPLICIT_LEGS_V1')
+        try:
+            fid=plan.snapshot.family_id;pid=w.adapter.positions()[0].position_id
+            request=dict(action='PARTIAL_CLOSE',requested_quantity=D('.04'),explicit_targets={pid:D('.04')})
+            preview=w.lifecycle.request_family_reduction(fid,action_key='explicit-original',preview=True,
+                now_ms=time[0],**request)
+            assert preview['execution_authority'] is False and len(w.adapter.positions())==1
+            with pytest.raises((PolicyAdmissionError,ValueError)):
+>               w.lifecycle.request_family_reduction(fid,action_key='explicit-original',now_ms=time[0],**request)
+
+trading/tests/test_family_governed_workflow.py:242: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/app/trade_lifecycle.py:1332: in request_family_reduction
+    explicit_ref = grants.authorize_plan(current,plan,history=history,mandate=self.mandate,
+trading/vati/risk/operational_grant.py:431: in authorize_plan
+    verified=self.owner.verify(explicit_signature,act='lifecycle-explicit-targets',
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.authority.OwnerAuthorityVerifier object at 0x7fef9e1511c0>
+token = None, act = 'lifecycle-explicit-targets'
+subject = 'lifecycle-operational-grant/1:5dc212b00f2678270183f8085ae6e316bbecf8622f5fc0212bdd700f28b10f04'
+now_unix = 1800000000, single_use = False, max_lifetime_seconds = 900
+
+    def verify(
+        self,
+        token: str | None,
+        *,
+        act: str,
+        subject: str,
+        now_unix: int | None = None,
+        single_use: bool = True,
+        max_lifetime_seconds: int = MAX_ACT_LIFETIME_SECONDS,
+    ) -> OwnerAuthority:
+        """Verify a token for one act on one subject.
+    
+        `single_use` is on by default because most acts are decisions made once. It is
+        turned off only for a standing document, which is re-read every time the process
+        starts; there the replay bound is the document's own expiry and the fact that the
+        signature covers its version, so a widened mandate needs a new signature.
+        """
+        now = int(time.time()) if now_unix is None else int(now_unix)
+        if not token or not str(token).strip():
+>           raise OwnerAuthorityError(
+                f"{act} requires owner authority: no token supplied"
+            )
+E           vati.authority.OwnerAuthorityError: lifecycle-explicit-targets requires owner authority: no token supplied
+
+trading/vati/authority.py:231: OwnerAuthorityError
+=========================== short test summary info ============================
+FAILED trading/tests/test_family_governed_workflow.py::test_explicit_original_targets_need_distinct_exact_signed_authority_and_replay_once
+1 failed, 148 passed in 5.33s

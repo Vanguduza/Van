@@ -1,0 +1,23 @@
+{
+ "counts": {
+  "acceptance_identities": 1610,
+  "contexts": 234,
+  "domain_scenarios": 72,
+  "features": 93,
+  "owner_actions": 349,
+  "requirements": 324,
+  "source_atoms": 171,
+  "surfaces": 234,
+  "truth_atoms": 22,
+  "units": 131
+ },
+ "findings": [
+  "UNIT_WITHOUT_TESTS:BQ-003",
+  "UNIT_WITHOUT_TESTS:BQ-004",
+  "UNIT_WITHOUT_TESTS:QA-002",
+  "UNIT_WITHOUT_TESTS:QA-003",
+  "UNIT_WITHOUT_TESTS:REL-002"
+ ],
+ "schema": "van.rebuild.pre001.trace/1",
+ "scope": "Registry linkage only. A linked row is not an implementation; implementation presence is judged per unit at its own exit."
+}

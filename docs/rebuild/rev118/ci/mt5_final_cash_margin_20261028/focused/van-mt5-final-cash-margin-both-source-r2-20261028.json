@@ -1,0 +1,21 @@
+{
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "tools/rebuild/source_storage_audit.py",
+    "--report",
+    "/workspace/van-mt5-final-cash-margin-both-source-r2-20261028-audit.json",
+    "trading/tests/test_mt5_final_cash_margin.py",
+    "tests/rebuild/test_mt5_cash_unit_source.py",
+    "--junitxml=/workspace/van-mt5-final-cash-margin-both-source-r2-20261028.xml",
+    "-q"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 438849,
+  "started_at_utc": "2026-10-28T12:18:57.200076+00:00",
+  "timeout_seconds": 300,
+  "state": "COMPLETED",
+  "command_pid": 438852,
+  "exit": 0,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-28T12:18:59.979878+00:00"
+}

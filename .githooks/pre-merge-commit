@@ -1,0 +1,7 @@
+#!/bin/sh
+# VAN Project Truth ledger — append a LOCAL_CHANGE_LEDGER.jsonl row for the change being
+# committed and stage it with the commit. Refuses the commit (exit 3) when a changed file is
+# not covered by a selectable owner authorization record. See tools/ci/README.md.
+# Installed by tools/ci/install_project_truth_hooks.sh (core.hooksPath=.githooks).
+top=$(git rev-parse --show-toplevel) || exit 2
+exec "${PYTHON:-python3}" "$top/tools/ci/project_truth_ledger.py" record --stage --hook pre-merge-commit

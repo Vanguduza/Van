@@ -1,0 +1,19 @@
+{
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "-m",
+    "pytest",
+    "trading/tests/test_mt5_recorded_entry_charges.py::test_optional_charge_read_cannot_delay_recovery_of_an_unprotected_native_fill",
+    "-q",
+    "--junitxml=/workspace/van-mt5-unprotected-cost-before-20261029.xml"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 889397,
+  "started_at_utc": "2026-10-29T00:18:36.581462+00:00",
+  "timeout_seconds": 90,
+  "state": "COMPLETED",
+  "command_pid": 889400,
+  "exit": 1,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-29T00:18:38.104524+00:00"
+}

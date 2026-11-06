@@ -1,0 +1,376 @@
+{
+  "schema": "van.rebuild.research-lake-integrity-source/1",
+  "observed_at_utc": "2026-10-23T15:44:10.006627+00:00",
+  "source_parent": "74fe2ea77a3ff7b774ad6592405404539e4eb2d3",
+  "source_sha256": {
+    "trading/vati/market_data/feeds/lake.py": "a7deb3f0aeb8508df01c47bdbac5ec34f13e1846f8f94f50f9024156809f6fba",
+    "trading/vati/market_data/feeds/csv_source.py": "c3fcaf9e21e313dbc75c9010fac84afc2f164d8f89dc89f0cf121a8865e76835",
+    "trading/tests/test_bar_lake_integrity.py": "94f50c6a46d0d41fcf2cf4bcc87d734f016a12da4d4458291dcb7e12d90effd6"
+  },
+  "executions": {
+    "original_before": {
+      "tests": 11,
+      "failures": 11,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.094,
+      "xml_sha256": "8b097be6cbfeebdf2da798d047cd990d54010cdb130933e0cb19cfd7dc67a494"
+    },
+    "initial_affected_with_unavailable_pg": {
+      "tests": 37,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "seconds": 33.285,
+      "xml_sha256": "b201090b9aeae273b2cbbf0f6dbcbdc6830412bae604311b5105c263c834f57c"
+    },
+    "isolated_final": {
+      "tests": 22,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.906,
+      "xml_sha256": "25adeae671497ec52ed18d58bb0791eaa8aaf4acee0e04dcd095b76b9217e46b"
+    },
+    "integrated_audited": {
+      "tests": 22,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 1.009,
+      "xml_sha256": "dcc73a077377ccc2173e9b7e1e4923897fdd8343878445088fe416439a61a883"
+    },
+    "full_trading_actual_pg": {
+      "tests": 2539,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 509.415,
+      "xml_sha256": "0ab1f84b401262b5e9b7e4c047f9670936d3c9d8475598a24d3d6720434cc53c"
+    }
+  },
+  "fault_campaign": {
+    "definitions": [
+      [
+        "accept mismatched instrument on write",
+        "trading/vati/market_data/feeds/lake.py",
+        "            if bar.symbol.upper() != symbol:",
+        "            if False:",
+        "trading/tests/test_bar_lake_integrity.py::test_wrong_instrument_cannot_be_labelled_as_requested_symbol"
+      ],
+      [
+        "accept nonfinite volume",
+        "trading/vati/market_data/feeds/lake.py",
+        "            if any(not value.is_finite() for value in values):",
+        "            if False:",
+        "trading/tests/test_bar_lake_integrity.py::test_nonfinite_volume_is_not_a_valid_research_observation"
+      ],
+      [
+        "trust false slice row count",
+        "trading/vati/market_data/feeds/lake.py",
+        "                if (len(bars), bars[0].start_ms, bars[-1].end_ms) != (item.bars,item.start_ms,item.end_ms):",
+        "                if False:",
+        "trading/tests/test_bar_lake_integrity.py::test_manifest_claims_must_match_the_hashed_slice"
+      ],
+      [
+        "parse reopened bytes after hashing a prior snapshot",
+        "trading/vati/market_data/feeds/lake.py",
+        "bars_from_csv_bytes(gzip.decompress(blob))",
+        "__import__('vati.market_data.feeds.csv_source',fromlist=['bars_from_csv']).bars_from_csv(path)",
+        "trading/tests/test_bar_lake_integrity.py::test_hash_verification_and_csv_parse_use_the_same_snapshot"
+      ],
+      [
+        "drop concurrent manifest writer lock",
+        "trading/vati/market_data/feeds/lake.py",
+        "with exclusive_state_lock(manifest):",
+        "with __import__('contextlib').nullcontext():",
+        "trading/tests/test_bar_lake_integrity.py::test_concurrent_appenders_do_not_overwrite_an_unseen_manifest"
+      ],
+      [
+        "write an external lock before refusing symlinked manifest",
+        "trading/vati/market_data/feeds/lake.py",
+        "        if manifest.is_symlink():\n            raise ValueError(\"lake manifest must not be a symlink\")",
+        "        # broken: lock resolves symlink before refusing source",
+        "trading/tests/test_bar_lake_integrity.py::test_symlinked_manifest_is_refused_before_creating_an_external_lock"
+      ],
+      [
+        "silently pick one conflicting overlapping fact",
+        "trading/vati/market_data/feeds/lake.py",
+        "            if previous is not None and previous != bar:",
+        "            if False:",
+        "trading/tests/test_bar_lake_integrity.py::test_overlapping_slices_with_conflicting_market_facts_require_reconciliation"
+      ],
+      [
+        "disable requested digest validation",
+        "trading/vati/market_data/feeds/lake.py",
+        "            if verify and hashlib.sha256(blob).hexdigest() != item.sha256:",
+        "            if False:",
+        "trading/tests/test_bar_lake_integrity.py::test_valid_csv_tampering_is_rejected_even_when_gzip_and_shape_are_valid"
+      ]
+    ],
+    "records": [
+      {
+        "case": 0,
+        "phase": "control",
+        "reason": "accept mismatched instrument on write",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "f4a1a5567b23199b4e84e560bc0546221f046af1a4cd4f74f2f860f8040b4ce4"
+      },
+      {
+        "case": 0,
+        "phase": "fault",
+        "reason": "accept mismatched instrument on write",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "911b45667de43d7681fbcd95fae904e840435c7a0f0152e0119006716b408c70"
+      },
+      {
+        "case": 1,
+        "phase": "control",
+        "reason": "accept nonfinite volume",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "e7be51f88c6db632d8761a4aafd38e3ade2e939d760c11c40f47a975ec184289"
+      },
+      {
+        "case": 1,
+        "phase": "fault",
+        "reason": "accept nonfinite volume",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "54045fc3a3f16170326a61fb1ed0c49793b35a5eb2c55b6617ec1c6c9014ce52"
+      },
+      {
+        "case": 2,
+        "phase": "control",
+        "reason": "trust false slice row count",
+        "exit_code": 0,
+        "counts": {
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "0d04095aca25e2a849ab74dbb34476a2175492880902f18737426b90f13d859d"
+      },
+      {
+        "case": 2,
+        "phase": "fault",
+        "reason": "trust false slice row count",
+        "exit_code": 1,
+        "counts": {
+          "tests": 4,
+          "failures": 2,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 2,
+        "xml_sha256": "96cc074d5a611e8b5ae9932ec520f795f234492e244a32e6eb7daa09ec604de0"
+      },
+      {
+        "case": 3,
+        "phase": "control",
+        "reason": "parse reopened bytes after hashing a prior snapshot",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "c2b000c71ed340f270f465ea5845f31008d34d5a538725e0409f58619970238a"
+      },
+      {
+        "case": 3,
+        "phase": "fault",
+        "reason": "parse reopened bytes after hashing a prior snapshot",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "88272bc9cf17e6b297d669d6dbb29b1183c7ee5a19a7d0892909ab77f23981cf"
+      },
+      {
+        "case": 4,
+        "phase": "control",
+        "reason": "drop concurrent manifest writer lock",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "ad64f24091b5e2747ca682f859b6eaba6912ead43224963287701b25f081eefa"
+      },
+      {
+        "case": 4,
+        "phase": "fault",
+        "reason": "drop concurrent manifest writer lock",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "14bda6ab9a942f0f193b8e86d394f6332079efef84389f7b0af29fab0361b903"
+      },
+      {
+        "case": 5,
+        "phase": "control",
+        "reason": "write an external lock before refusing symlinked manifest",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "5c4569f69afc6e6d7abb6ac255b8cec0c7fba161903ea241535621d63904b05e"
+      },
+      {
+        "case": 5,
+        "phase": "fault",
+        "reason": "write an external lock before refusing symlinked manifest",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "d82ebc6cd30e8839271fb87c7919019fb8338a018edcb47159211aaf086a0326"
+      },
+      {
+        "case": 6,
+        "phase": "control",
+        "reason": "silently pick one conflicting overlapping fact",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "53ddf2de8b336c4ee34aadec89ba5a0a073b9f8d1312ca0f1d0549c9401c24df"
+      },
+      {
+        "case": 6,
+        "phase": "fault",
+        "reason": "silently pick one conflicting overlapping fact",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "e21ab2c813f8a088293c30d5f512d173a6fd54d8d5b4140cf6c94e73cf723504"
+      },
+      {
+        "case": 7,
+        "phase": "control",
+        "reason": "disable requested digest validation",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "f6c47b5b07e46d81c338b6225ce1492672000434ffad938f46fda808f8b4d43b"
+      },
+      {
+        "case": 7,
+        "phase": "fault",
+        "reason": "disable requested digest validation",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "94f77bbedf0a7c2ed83f255af8ad7f5a7509ba566443682dd8484df2deb4ed10"
+      }
+    ],
+    "before": {
+      "trading/vati/market_data/feeds/lake.py": "a7deb3f0aeb8508df01c47bdbac5ec34f13e1846f8f94f50f9024156809f6fba"
+    },
+    "after": {
+      "trading/vati/market_data/feeds/lake.py": "a7deb3f0aeb8508df01c47bdbac5ec34f13e1846f8f94f50f9024156809f6fba"
+    },
+    "source_restored": true
+  },
+  "private_pg_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "storage_audit": {
+    "schema": "van.source-storage-audit/1",
+    "forbidden_events": [],
+    "source_sha256": "d4e270150fb0da6e8d79b449dd0de68fd1f97b3ccea3d282f31d91297edbd495",
+    "root": "/workspace/van-review-2026-10-18/publish",
+    "scope": "SQLite opens, path-based writable opens and directory/link/rename/delete events under data and backend/data",
+    "limits": "Python audit events only; existing fd writes, native-library raw I/O and external processes are not an OS sandbox. Git state is checked separately."
+  },
+  "public_historical_probe": {
+    "schema": "van.rebuild.public-historical-source-probe/1",
+    "observed_at_utc": "2026-10-23T15:41:54.427203+00:00",
+    "source_url": "https://datafeed.dukascopy.com/datafeed/EURUSD/2024/00/02/10h_ticks.bi5",
+    "scope": "One public historical hour; bounded HTTPS read, current decoder/aggregator and temporary lake readback. No account, order or deployment effects; does not adopt source-use rights or qualify a production feed.",
+    "result": "NOT_VERIFIED",
+    "error_type": "HTTPError",
+    "detail": "HTTP Error 429: Too Many Requests"
+  },
+  "legacy_mutation_preflight": {
+    "schema": "van.rebuild.mutation-registry-preflight/1",
+    "registry_sha256": "35d10c7b0f2b8319b7f7305828262c972b2a6451139d75b9e83c7d0062282955",
+    "mutation_count": 374,
+    "edit_count": 383,
+    "findings": [],
+    "execution_state": "NOT_RUN",
+    "status": "ANCHORS_VALID_BASELINES_AND_MUTATIONS_NOT_EXECUTED"
+  },
+  "qualification": "Candidate source only. Exact-byte/identity/atomic-manifest checks do not establish source-use rights, live freshness, causal/pit-safe learning, provider adoption, profitability or whole-unit/native/production/handset acceptance. Explicit verify=False does not qualify unverified data."
+}

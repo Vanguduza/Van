@@ -1,0 +1,9 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+____ test_a_first_sample_already_above_the_line_is_not_an_observed_crossing ____
+backend/tests/test_market_monitor_measurements.py:176: in test_a_first_sample_already_above_the_line_is_not_an_observed_crossing
+    assert not fire and current.state == 'BASELINE'
+E   assert (not True)
+=========================== short test summary info ============================
+FAILED backend/tests/test_market_monitor_measurements.py::test_a_first_sample_already_above_the_line_is_not_an_observed_crossing
+1 failed in 0.21s

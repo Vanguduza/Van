@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/workspace/van-native-dataset-faults-20261026.py", line 29, in <module>
+    assert result['exit']==1 and result['assertion_failures']>0 and result['errors']==result['skips']==result['audit_violations']==0,result
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: {'exit': 1, 'cases': 26, 'assertion_failures': 0, 'failures': 4, 'errors': 0, 'skips': 0, 'audit_violations': 0, 'case': 'ignore-pinned-source-reference', 'path': 'trading/vati/market_data/native_windows.py', 'mutated_sha256': '119cb62bb788954ac62afa378de9216b85422579182671e50333ab7bc1493ee5'}

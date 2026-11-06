@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 
 import pytest
+from backend.tests.test_trading_api import client,_env
 from fastapi.testclient import TestClient
 
 from commander.accounts import AccountControlSettings, redact_args
@@ -30,9 +31,16 @@ class FakeDeriv:
         elif "new_account_virtual" in m:
             self.out.append({"req_id": rid, "error": {"message": "InvalidToken: code expired", "code": "InvalidToken"}} if m["verification_code"] != "ABC123" else {"req_id": rid, "new_account_virtual": {"client_id": "VRTC900", "oauth_token": "a1-virtualtoken", "currency": "USD", "balance": 10000}})
         elif "authorize" in m:
-            self.out.append({"req_id": rid, "authorize": {"loginid": "VRTC900", "balance": "10000.00", "currency": "USD"}} if m["authorize"] in ("a1-virtualtoken", "a1-linked") else {"req_id": rid, "error": {"message": "InvalidToken", "code": "InvalidToken"}})
+            profiles = {"a1-virtualtoken": ("VRTC900", 1), "a1-linked": ("VRTC900", 1),
+                        "a1-live": ("CR12345", 0), "a1-real": ("CR777", 0)}
+            account = profiles.get(m["authorize"])
+            self.out.append({"req_id": rid, "authorize": {"loginid": account[0], "is_virtual": account[1],
+                "scopes": ["read", "trade"], "balance": "10000.00", "currency": "USD"}} if account else
+                {"req_id": rid, "error": {"message": "InvalidToken", "code": "InvalidToken"}})
         elif "ping" in m:
             self.out.append({"req_id": rid, "ping": "pong"})
+        elif "portfolio" in m:
+            self.out.append({"req_id": rid, "portfolio": {"contracts": []}})
         else:
             self.out.append({"req_id": rid})
     def recv(self):
@@ -54,12 +62,14 @@ def env(tmp_path):
     return TestClient(create_app(st)), tmp_path, deriv, fakes
 
 
-def test_upsert_credentials_verify_remove_never_echo_secrets(env):
+@pytest.mark.asyncio
+async def test_upsert_credentials_verify_remove_never_echo_secrets(env,client):
+    gateway_client,gateway_app=client
     client, tmp, deriv, fakes = env
     assert "account_upsert" in COMMANDS and "mt5_ea_issue_key" in COMMANDS
     r = post(client, "account_upsert", {"alias": "Deriv Demo", "broker": "DERIV"}); assert r.status_code == 422           # alias rule
     r = post(client, "account_upsert", {"alias": "deriv_demo", "broker": "DERIV", "server": "1089", "label": "Deriv demo"})
-    assert r.status_code == 200 and r.json()["result"]["account"]["safety_identity"] == "DEMO" and r.json()["result"]["account"]["credential_ref"] == {"kind": "file"}
+    assert r.status_code == 200 and r.json()["result"]["account"]["safety_identity"] == "READ ONLY" and r.json()["result"]["account"]["mode"] == "OBSERVE" and r.json()["result"]["account"]["credential_ref"] == {"kind": "file"}
     sec = tmp / "secrets" / "deriv_demo.env"
     assert sec.is_file() and oct(sec.stat().st_mode & 0o777) == "0o600"
     r = post(client, "account_credentials", {"alias": "deriv_demo", "secrets": {"DERIV_API_TOKEN": "a1-linked", "EVIL": "x"}}); assert r.status_code == 422
@@ -70,7 +80,19 @@ def test_upsert_credentials_verify_remove_never_echo_secrets(env):
     assert v["ok"] is True and v["equity"] == "10000.00" and v["currency"] == "USD" and "token" not in json.dumps(v).lower()
     audit = (tmp / "log" / "commander-audit.jsonl").read_text()
     assert "a1-linked" not in audit and "[REDACTED]" in audit
-    assert post(client, "account_remove", {"alias": "deriv_demo"}).json()["result"]["removed"] and not sec.exists()
+    removed = post(client, "account_remove", {"alias": "deriv_demo"})
+    # A transport signature and an internal helper do not replace both proofs.
+    assert removed.status_code==422 and 'IMMEDIATE_DISCONNECT' in removed.text
+    assert sec.exists() and AccountRegistry(tmp/'accounts.json').get('deriv_demo')
+    from van_gateway.trading.accounts import LocalAccountControl
+    from backend.tests.test_account_update_review import immediate_challenge
+    gateway_app.state.onboarding.control=LocalAccountControl(str(tmp/'accounts.json'),str(tmp/'secrets'),
+        deriv_connector=deriv.connector,operation_ledger=str(tmp/'l.sqlite'))
+    gateway_app.state.account_lifecycle.bind_local_admission_verifier()
+    body,_=await immediate_challenge(gateway_client,'deriv_demo')
+    admitted=await gateway_client.post('/v1/trading/accounts/action',json=body)
+    assert admitted.status_code==200 and admitted.json()['removed'],admitted.text
+    assert not sec.exists()
     assert post(client, "account_verify", {"alias": "deriv_demo"}).status_code == 404
     assert redact_args({"alias": "x", "secrets": {"K": "v"}, "code": "c"}) == {"alias": "x", "secrets": "[REDACTED]", "code": "[REDACTED]"}
 
@@ -80,17 +102,33 @@ def test_deriv_demo_creation_and_oauth_link(env):
     assert post(client, "deriv_verify_email", {"email": "not-an-email"}).status_code == 422
     r = post(client, "deriv_verify_email", {"email": "owner@example.com", "app_id": "1089"}).json()["result"]
     assert r["sent"] and deriv.msgs[-1] == {"verify_email": "owner@example.com", "type": "account_opening"}
-    bad = post(client, "deriv_create_demo", {"alias": "deriv_demo", "verification_code": "WRONG", "client_password": "Pa55word!", "residence": "zw"})
-    assert bad.status_code == 502 and "code expired" in bad.json()["detail"]
     r = post(client, "deriv_create_demo", {"alias": "deriv_demo", "verification_code": "ABC123", "client_password": "Pa55word!", "residence": "ZW"})
     assert r.status_code == 200 and r.json()["result"]["client_id"] == "VRTC900" and "Pa55word" not in r.text and "a1-virtualtoken" not in r.text
-    assert deriv.msgs[-1]["residence"] == "zw" and deriv.msgs[-1]["type"] == "trading"
+    creation = next(m for m in reversed(deriv.msgs) if "new_account_virtual" in m)
+    assert creation["residence"] == "zw" and creation["type"] == "trading"
     reg = AccountRegistry(tmp / "accounts.json"); a = reg.get("deriv_demo")
     assert a.broker == "DERIV" and a.login == "VRTC900" and a.demo and reg.credentials("deriv_demo")["DERIV_API_TOKEN"] == "a1-virtualtoken"
+    assert a.mode=="OBSERVE" and a.safety_identity=="READ ONLY"
     assert post(client, "account_verify", {"alias": "deriv_demo"}).json()["result"]["ok"] is True
-    r = post(client, "deriv_oauth_link", {"alias": "deriv_real", "loginid": "CR12345", "token": "a1-linked", "currency": "USD"}).json()["result"]
+    linked = post(client,"deriv_oauth_link",{"alias":"deriv_linked_demo","loginid":"VRTC900","token":"a1-linked","currency":"USD"}).json()["result"]["account"]
+    assert linked["mode"]=="OBSERVE" and linked["demo"] is True and linked["safety_identity"]=="READ ONLY"
+    r = post(client, "deriv_oauth_link", {"alias": "deriv_real", "loginid": "CR12345", "token": "a1-live", "currency": "USD"}).json()["result"]
     assert r["account"]["safety_identity"] == "READ ONLY" and r["account"]["demo"] is False and r["account"]["mode"] == "OBSERVE"   # a real account starts read-only until an owner mandate says otherwise
     assert (tmp / "log" / "commander-audit.jsonl").read_text().count("a1-linked") == 0
+
+
+def test_demo_provider_error_is_original_unknown_not_permission_to_create_again(env):
+    client, tmp, deriv, _ = env
+    args = {"alias":"deriv_demo", "verification_code":"WRONG", "client_password":"Pa55word!", "residence":"zw"}
+    bad = post(client,"deriv_create_demo",args)
+    assert bad.status_code == 409 and bad.json()['detail']['code']=='account_operation_unconfirmed'
+    original = bad.json()['detail']['operation_id']
+    state = post(client,'account_operation',{'operation_id':original,'device_id':'source-test-owner'})
+    assert state.json()['result']['effect_state']=='UNKNOWN'
+    retry = post(client,'deriv_create_demo',{**args,'alias':'other_alias','verification_code':'ABC123'})
+    assert retry.status_code==409
+    assert len([m for m in deriv.msgs if 'new_account_virtual' in m])==1
+    assert not (tmp/'accounts.json').exists()
 
 
 def test_ctrader_discover_exchange_and_link(env):
@@ -102,7 +140,7 @@ def test_ctrader_discover_exchange_and_link(env):
     tok = post(client, "ctrader_oauth_exchange", {"client_id": "a", "client_secret": "s", "code": "good", "redirect_uri": "https://gw/cb"}).json()["result"]
     assert tok["access_token"] == "ct-at"
     r = post(client, "ctrader_link", {"alias": "ct_demo", "client_id": "app-id", "client_secret": "app-secret", "access_token": "tok", "refresh_token": "rt", "ctid_trader_account_id": 12345, "is_live": False, "label": "FP Markets demo"}).json()["result"]
-    assert r["account"]["broker"] == "CTRADER" and r["account"]["login"] == "12345" and r["account"]["safety_identity"] == "DEMO"
+    assert r["account"]["broker"] == "CTRADER" and r["account"]["login"] == "12345" and r["account"]["safety_identity"] == "READ ONLY" and r["account"]["mode"] == "OBSERVE"
     v = post(client, "account_verify", {"alias": "ct_demo"}).json()["result"]
     assert v["ok"] is True and v["balance"] == "10053.09"
     sec = (tmp / "secrets" / "ct_demo.env").read_text()
@@ -115,6 +153,7 @@ def test_mt5_ea_key_issue_and_verify(env, monkeypatch):
     monkeypatch.setenv("VAN_MT5_PULL_QUEUE", str(tmp / "pull.sqlite"))
     r = post(client, "mt5_ea_issue_key", {"alias": "mt5_ea", "login": "12345678", "server": "Broker-Demo", "label": "MT5 demo"}).json()["result"]
     key = r["signing_key"]
+    assert r['account']['mode']=='OBSERVE' and r['account']['safety_identity']=='READ ONLY'
     assert len(key) == 64 and r["ea_inputs"] == {"Alias": "mt5_ea", "SigningKey": key, "BridgeUrl": "https://trading.example.com"} and r["account"]["broker"] == "MT5_EA"
     assert f"BRIDGE_SIGNING_KEY={key}" in (tmp / "secrets" / "mt5_ea.env").read_text()
     v = post(client, "account_verify", {"alias": "mt5_ea"}).json()["result"]
@@ -125,3 +164,27 @@ def test_mt5_ea_key_issue_and_verify(env, monkeypatch):
     assert post(client, "account_verify", {"alias": "mt5_ea"}).json()["result"]["ok"] is True
     # the audit never carries the key
     assert key not in (tmp / "log" / "commander-audit.jsonl").read_text()
+    # Existing explicitly admitted mode, mandate and omitted native identity
+    # survive key rotation; initial defaults grant no trading authority.
+    from dataclasses import replace
+    reg=AccountRegistry(tmp/'accounts.json');original=reg.get('mt5_ea')
+    admitted=replace(original,mode='DEMO_TRADER',mandate_ref='existing-admitted-control',enabled=False,notes='Owner retained notes',venue='mt5-owner')
+    reg.replace(admitted)
+    rotated=post(client,'mt5_ea_issue_key',{'alias':'mt5_ea'}).json()['result']['account']
+    assert rotated['mode']=='DEMO_TRADER' and rotated['mandate_ref']==admitted.mandate_ref
+    current=AccountRegistry(reg.path).get('mt5_ea')
+    for field in ('login','server','currency','demo','bridge_url','enabled','notes','venue','credential_ref'):
+        assert getattr(current,field)==getattr(admitted,field)
+
+
+@pytest.mark.parametrize('action,args', [
+    ('account_upsert', {'alias': 'bad_flag', 'broker': 'PAPER', 'demo': 'false'}),
+    ('ctrader_link', {'alias': 'bad_flag', 'ctid_trader_account_id': 12345, 'is_live': 'false'}),
+    ('mt5_ea_issue_key', {'alias': 'bad_flag', 'login': '123', 'server': 'demo', 'demo': 1}),
+])
+def test_account_mutations_refuse_ambiguous_environment_flags_before_writing(env, action, args):
+    client, tmp, _, _ = env
+    response = post(client, action, args)
+    assert response.status_code == 422
+    assert 'JSON boolean' in response.json()['detail']
+    assert not (tmp/'accounts.json').exists() and not (tmp/'secrets'/'bad_flag.env').exists()

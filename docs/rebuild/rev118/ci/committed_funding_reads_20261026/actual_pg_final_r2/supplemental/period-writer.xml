@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="1.458" timestamp="2026-10-26T19:46:17.644271+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_funding_committed_reads" name="test_period_cannot_consume_a_closing_source_from_its_callers_writer[sqlite]" time="0.029"><failure message="Failed: DID NOT RAISE LedgerError">source = (&lt;vati.core.ledger.Ledger object at 0x7f783c5382f0&gt;, '9416990f89cc231045967018d529f8f2a4f42488499c86fb9f71bedc2f9c7f3b')
+
+    def test_period_cannot_consume_a_closing_source_from_its_callers_writer(source):
+        ledger,scope=source;before=ledger.head(),ledger.count()
+        with pytest.raises(RollbackFixture):
+            with ledger.atomic():
+                closing=closing_snapshot(ledger)
+&gt;               with pytest.raises(LedgerError,match='committed_source'):
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               Failed: DID NOT RAISE LedgerError
+
+trading/tests/test_funding_committed_reads.py:51: Failed</failure></testcase></testsuite></testsuites>

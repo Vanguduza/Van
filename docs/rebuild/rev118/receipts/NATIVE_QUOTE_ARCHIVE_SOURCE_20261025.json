@@ -1,0 +1,40 @@
+{
+  "schema": "van.rebuild.native-quote-archive-source/1",
+  "status": "SOURCE_TESTED_COMPONENT_NOT_UNIT_OR_FULL_RUN_ACCEPTANCE",
+  "base_head": "ad1d3941d6a0257ee9966fd66f02eddb76af04de",
+  "updated_at_utc": "2026-10-25T22:14:16.701534+00:00",
+  "source_sha256": {
+    "trading/vati/market_data/native_archive.py": "78c4089025d938d1acb0a3b64669aa8607281cc3c24ee81424f12be6a49561b6",
+    "trading/vati/market_data/native_quotes.py": "17a2f8b5ddd849905b718534751d13f09fbc804f7b83a56d62603ea8ba03044b",
+    "trading/tests/test_native_quote_archive.py": "09d210fc9127fb1d7081869106e5ed2369cfe33f916cecf2e46c293426d56bfb"
+  },
+  "executed": {
+    "initial": "86pass/0skip/audit0",
+    "socket_recovery": "125pass, then127pass/0skip/audit0 including actual durable-record process death and one native connection for8concurrent identical collectors",
+    "postgres_initial": "1017pass/0skip/audit0 before final capacity conservation and archive availability controls",
+    "postgres_final": "1019 unique pass/0skip/audit0/exact source hashes, actual pinned isolatedPostgreSQL, owned fixture removed and client children waited",
+    "final_focus": "129pass/0skip/audit0 after four supplemental assertion-caught faults/no errors/exact restoration",
+    "compatibility": "Actual committed ad1d3941 bar archive implementation generated original capture; current refactor replayed it, receipt and JSON bytes unchanged",
+    "rebuild": "108pass at initial quote implementation; final additional guards affect only quote validation, final focus/nativePG verify them",
+    "source_contracts": "No derived owner/feature/screen drift, original479endpoints/369schemas and42groups/105functions/78surfaces preserved; consolidation0findings",
+    "canonical_mutations": "374cases/383edits/preflight0findings, NOT_EXECUTED_ON_THIS_PACKET"
+  },
+  "broader_case_evidence": {
+    "status": "ALL3338_UNIQUE_IDENTITIES_HAVE_POSITIVE_CALL_AND_TEARDOWN_EVIDENCE_NOT_AN_OVERALL_FULL_RUN_PASS",
+    "first_run": "TIMEOUT600S, oneF without surviving diagnostic; provisionalSQLiteprocessarbitration identity. Isolatedcase1pass and unchanged casepasses in retry. Original cause remains unknown; no lease logic or assertions changed. No finalJUnit/audit.",
+    "retry": "TIMEOUT1800S;3072completed positivecaseandteardown streamingreports,0failedphases; no finalJUnit/audit, source-audit resultUNKNOWN",
+    "tail": "266pass/0skip/audit0/exact source hashes, actual isolatedPG, finalJUnit/audit/exit0 and fixture cleanup confirmed",
+    "coverage_receipt": "ci/native_quote_archive_20261025/van-native-quotes-full-case-coverage.json",
+    "no_relabel": "Both whole-suite attempts remain nonpassing/incomplete; missing reports are not inferred from case outcomes"
+  },
+  "limits": [
+    "Snapshot captures, not complete tick/live-bar fanout or continuous stream coverage",
+    "Historic availability and original age policy are preserved; current freshness explicitly not evaluated",
+    "Budget snapshot is not source/clock/provider/memory/capacity qualification",
+    "Legacy archive chain is integrity evidence, not adversarial authentication; deleting every record/anchor externally is not detectable",
+    "Governed host/service isolation, licensing/entitlements/source health/calendars/depth and qualified consumers remain",
+    "No unit/native/owner/F15/BG001/provider/economic/production/S24 acceptance",
+    "Source remains local-only; normal CLI publication blocked by invalid injected credential"
+  ],
+  "evidence": "ci/native_quote_archive_20261025"
+}

@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="56" time="2.326" timestamp="2026-10-28T11:51:22.982859+00:00" hostname="6e9feff21467"><testcase classname="trading.tests.test_mt5_worker" name="test_worker_verifies_signature_nonce_skew_and_serves_the_contract" time="0.081"><failure message="AssertionError: assert ('REJECTED' == 'FILLED'&#10;  &#10;  - FILLED&#10;  + REJECTED)">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-104/test_worker_verifies_signature0')
+
+    def test_worker_verifies_signature_nonce_skew_and_serves_the_contract(tmp_path):
+        now = {"ms": 1_000_000}
+        w, _ = make_worker(tmp_path, lambda: now["ms"])
+        client = Mt5BridgeClient(signing_key=KEY, transport=w.handle, max_skew_ms=5000)
+        adapter = Mt5BridgeAdapter(client, account_alias="fx_primary", clock=lambda: now["ms"])
+        acct = adapter.sync_account()
+        assert acct.equity == D("10250.5") and acct.verified and acct.currency == "USD"
+        assert w.t.mt5.login_calls == [(12345678, "Broker-Demo", "pw-redacted")]
+        # the same signed request replayed is refused; a forged signature is refused; an unknown op is refused; skew is refused
+        req = client.sent[-1].__dict__
+        assert w.handle(req)["error"] == "nonce replayed"
+        assert w.handle({**req, "nonce": 99, "signature": "0" * 64})["error"] == "bad signature"
+        bad = client.sign(worker_mod.__dict__["Worker"] and __import__("vati.execution.mt5_bridge", fromlist=["BridgeRequest"]).BridgeRequest("shell", 98, now["ms"], {}))
+        assert w.handle(bad.__dict__)["error"] == "op not in contract"
+        late = client.sign(__import__("vati.execution.mt5_bridge", fromlist=["BridgeRequest"]).BridgeRequest("positions", 97, now["ms"] - 60_000, {"alias": "fx_primary"}))
+        assert w.handle(late.__dict__)["error"] == "clock skew"
+        # unknown alias → error as data; the client raises VenueUnavailable only on transport/nonce faults
+        r = client.call("positions", {"alias": "ghost"}, now_ms=now["ms"])
+        assert "not configured" in r["error"]
+        # order without SL refused by the worker even if a client tried
+        r = client.call("order_send", {"alias": "fx_primary", "symbol": "EURUSD", "type": "BUY", "volume": "0.1", "price": "1.1", "sl": None, "order_type": "MARKET"}, now_ms=now["ms"])
+        assert r["status"] == "REJECTED" and "sl" in r["reason"]
+        cmd = OrderCommand("intent-1", "d" * 64, "k", "fx_primary", "mt5", "EURUSD", Direction.LONG, "MARKET", D("0.10"), D("1.10008"), D("1.09800"), StopMode.VENUE, LossModel.STOP_DISTANCE, targets=(D("1.10600"),), max_slippage=D("0.0002")).sealed()
+        rec = adapter.submit(cmd, now_ms=now["ms"])
+&gt;       assert rec.status == "FILLED" and rec.protective_stop_confirmed and rec.protective_stop_price == D("1.09800") and rec.broker_position_id == "700"
+E       AssertionError: assert ('REJECTED' == 'FILLED'
+E         
+E         - FILLED
+E         + REJECTED)
+
+trading/tests/test_mt5_worker.py:99: AssertionError</failure></testcase><testcase classname="trading.tests.test_mt5_worker" name="test_full_mtls_round_trip_client_transport_to_worker_https_server" time="0.911"><failure message="AssertionError: assert 'REJECTED' == 'FILLED'&#10;  &#10;  - FILLED&#10;  + REJECTED">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-104/test_full_mtls_round_trip_clie0')
+
+    def test_full_mtls_round_trip_client_transport_to_worker_https_server(tmp_path):
+        ca = _cert(tmp_path, "van-trading-bridge-ca", "")
+        skey, scrt = _cert(tmp_path, "mt5-worker", "DNS:localhost,IP:127.0.0.1", ca)
+        ckey, ccrt = _cert(tmp_path, "vati-core-client", "DNS:vati-core-client", ca)
+        now = {"ms": int(time.time() * 1000)}
+        w, _ = make_worker(tmp_path, lambda: int(time.time() * 1000))
+        ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER); ctx.minimum_version = ssl.TLSVersion.TLSv1_2
+        ctx.load_cert_chain(str(scrt), str(skey)); ctx.load_verify_locations(str(ca[1])); ctx.verify_mode = ssl.CERT_REQUIRED
+        srv = ThreadingHTTPServer(("127.0.0.1", 0), worker_mod.make_handler(w)); srv.socket = ctx.wrap_socket(srv.socket, server_side=True)
+        port = srv.server_address[1]; th = threading.Thread(target=srv.serve_forever, daemon=True); th.start()
+        try:
+            # without a client certificate the worker's TLS handshake rejects us
+            no_cert = Mt5HttpTransport(f"https://localhost:{port}", ca_file=str(ca[1]))
+            with pytest.raises(VenueUnavailable):
+                Mt5BridgeClient(signing_key=KEY, transport=no_cert).call("sync_account", {"alias": "fx_primary"}, now_ms=now["ms"])
+            t = Mt5HttpTransport(f"https://localhost:{port}", ca_file=str(ca[1]), client_cert=str(ccrt), client_key=str(ckey))
+            adapter = Mt5BridgeAdapter(Mt5BridgeClient(signing_key=KEY, transport=t), account_alias="fx_primary")
+            assert adapter.heartbeat(now_ms=int(time.time() * 1000)).connected
+            assert adapter.sync_account().equity == D("10250.5")
+            # wrong signing key on the client side → the worker answers "bad signature" and the adapter's sync raises KeyError→ treated as fault by callers
+            bad = Mt5BridgeClient(signing_key=b"x" * 32, transport=t)
+            assert bad.call("positions", {"alias": "fx_primary"}, now_ms=int(time.time() * 1000))["error"] == "bad signature"
+            # The optional core deadline survives real TLS/JSON/HMAC transport and
+            # the actual worker dispatch path. The terminal SDK is the fixture.
+            live_now=int(time.time()*1000)
+            cmd=OrderCommand('deadline-tls','d'*64,'original','fx_primary','mt5','EURUSD',Direction.LONG,
+                'MARKET',D('.1'),D('1.1'),D('1.09'),StopMode.VENUE,LossModel.STOP_DISTANCE,
+                expires_at_ms=live_now+5000).sealed()
+&gt;           assert adapter.submit(cmd,now_ms=live_now).status=='FILLED'
+E           AssertionError: assert 'REJECTED' == 'FILLED'
+E             
+E             - FILLED
+E             + REJECTED
+
+trading/tests/test_mt5_worker.py:157: AssertionError</failure></testcase><testcase classname="trading.tests.test_mt5_expected_margin_worker" name="test_actual_signed_worker_preserves_request_price_scope_and_unapproved_native_estimate" time="0.016" /><testcase classname="trading.tests.test_mt5_expected_margin_worker" name="test_invalid_original_native_request_has_no_quote_or_order_effect[changes0]" time="0.007" /><testcase classname="trading.tests.test_mt5_expected_margin_worker" name="test_invalid_original_native_request_has_no_quote_or_order_effect[changes1]" time="0.007" /><testcase classname="trading.tests.test_mt5_expected_margin_worker" name="test_invalid_original_native_request_has_no_quote_or_order_effect[changes2]" time="0.004" /><testcase classname="trading.tests.test_mt5_expected_margin_worker" name="test_invalid_original_native_request_has_no_quote_or_order_effect[changes3]" time="0.011" /><testcase classname="trading.tests.test_mt5_expected_margin_worker" name="test_invalid_original_native_request_has_no_quote_or_order_effect[changes4]" time="0.009" /><testcase classname="trading.tests.test_mt5_expected_margin_worker" name="test_invalid_original_native_request_has_no_quote_or_order_effect[changes5]" time="0.005" /><testcase classname="trading.tests.test_mt5_expected_margin_worker" name="test_invalid_original_native_request_has_no_quote_or_order_effect[changes6]" time="0.006" /><testcase classname="trading.tests.test_mt5_expected_margin_worker" name="test_invalid_original_native_request_has_no_quote_or_order_effect[changes7]" time="0.009" /><testcase classname="trading.tests.test_mt5_expected_margin_worker" name="test_invalid_original_native_request_has_no_quote_or_order_effect[changes8]" time="0.007" /><testcase classname="trading.tests.test_mt5_expected_margin_worker" name="test_invalid_original_native_request_has_no_quote_or_order_effect[changes9]" time="0.008" /><testcase classname="trading.tests.test_mt5_expected_margin_worker" name="test_invalid_original_native_request_has_no_quote_or_order_effect[changes10]" time="0.005" /><testcase classname="trading.tests.test_mt5_expected_margin_worker" name="test_unmeasured_invalid_margin_never_becomes_zero[None]" time="0.005" /><testcase classname="trading.tests.test_mt5_expected_margin_worker" name="test_unmeasured_invalid_margin_never_becomes_zero[-1]" time="0.004" /><testcase classname="trading.tests.test_mt5_expected_margin_worker" name="test_unmeasured_invalid_margin_never_becomes_zero[nan]" time="0.005" /><testcase classname="trading.tests.test_mt5_expected_margin_worker" name="test_unmeasured_invalid_margin_never_becomes_zero[inf]" time="0.004" /><testcase classname="trading.tests.test_mt5_expected_margin_worker" name="test_unmeasured_invalid_margin_never_becomes_zero[True]" time="0.004" /><testcase classname="trading.tests.test_mt5_expected_margin_worker" name="test_native_margin_deadline_is_rechecked_after_actual_sdk_read" time="0.007" /><testcase classname="trading.tests.test_mt5_expected_margin_worker" name="test_explicit_zero_margin_and_disabled_trade_permission_remain_readable" time="0.005" /><testcase classname="trading.tests.test_mt5_expected_margin_worker" name="test_missing_original_native_margin_semantics_never_use_account_defaults[margin_mode-None]" time="0.006" /><testcase classname="trading.tests.test_mt5_expected_margin_worker" name="test_missing_original_native_margin_semantics_never_use_account_defaults[margin_mode-True]" time="0.008" /><testcase classname="trading.tests.test_mt5_expected_margin_worker" name="test_missing_original_native_margin_semantics_never_use_account_defaults[leverage-None]" time="0.007" /><testcase classname="trading.tests.test_mt5_expected_margin_worker" name="test_missing_original_native_margin_semantics_never_use_account_defaults[currency_digits-None]" time="0.008" /><testcase classname="trading.tests.test_mt5_expected_margin_worker" name="test_native_margin_semantics_cannot_change_inside_the_original_read[margin_mode-0]" time="0.007" /><testcase classname="trading.tests.test_mt5_expected_margin_worker" name="test_native_margin_semantics_cannot_change_inside_the_original_read[leverage-100]" time="0.006" /><testcase classname="trading.tests.test_mt5_expected_margin_worker" name="test_native_margin_semantics_cannot_change_inside_the_original_read[currency_digits-3]" time="0.004" /><testcase classname="trading.tests.test_mt5_physical_identity" name="test_a_signed_request_cannot_send_on_a_different_physical_identity_or_ambiguous_permission[actual0]" time="0.003" /><testcase classname="trading.tests.test_mt5_physical_identity" name="test_a_signed_request_cannot_send_on_a_different_physical_identity_or_ambiguous_permission[actual1]" time="0.006" /><testcase classname="trading.tests.test_mt5_physical_identity" name="test_a_signed_request_cannot_send_on_a_different_physical_identity_or_ambiguous_permission[actual2]" time="0.006" /><testcase classname="trading.tests.test_mt5_physical_identity" name="test_a_signed_request_cannot_send_on_a_different_physical_identity_or_ambiguous_permission[actual3]" time="0.003" /><testcase classname="trading.tests.test_mt5_physical_identity" name="test_a_signed_request_cannot_send_on_a_different_physical_identity_or_ambiguous_permission[actual4]" time="0.003" /><testcase classname="trading.tests.test_mt5_physical_identity" name="test_matching_native_identity_remains_functional_and_read_only_permission_stays_readable" time="0.004"><failure message="AssertionError: assert ('REJECTED' == 'FILLED'&#10;  &#10;  - FILLED&#10;  + REJECTED)">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-104/test_matching_native_identity_0')
+
+    def test_matching_native_identity_remains_functional_and_read_only_permission_stays_readable(tmp_path):
+        _,client,fake=build(tmp_path)
+&gt;       assert send(client)['status']=='FILLED' and len(fake.sent)==1
+E       AssertionError: assert ('REJECTED' == 'FILLED'
+E         
+E         - FILLED
+E         + REJECTED)
+
+trading/tests/test_mt5_physical_identity.py:48: AssertionError</failure></testcase><testcase classname="trading.tests.test_mt5_physical_identity" name="test_the_terminal_login_cache_cannot_transfer_a_login_number_across_servers" time="0.000" /><testcase classname="trading.tests.test_mt5_physical_identity" name="test_parallel_aliases_cannot_switch_the_terminal_between_identity_check_and_send" time="0.510"><failure message="assert False&#10; +  where False = all(&lt;generator object test_parallel_aliases_cannot_switch_the_terminal_between_identity_check_and_send.&lt;locals&gt;.&lt;genexpr&gt; at 0x7faf3a038ee0&gt;)">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-104/test_parallel_aliases_cannot_s0')
+
+    def test_parallel_aliases_cannot_switch_the_terminal_between_identity_check_and_send(tmp_path):
+        class Terminal:
+            def __init__(self):
+                self.selected=None;self.sends=[];self.first_sending=threading.Event();self.second_sending=threading.Event()
+            def login(self,login,server,password):self.selected=server;return True
+            def account(self):return {'login':12345678,'server':self.selected,'currency':'USD','demo':True,'trade_allowed':True}
+            def order_send(self,body,*,before_dispatch):
+                if body['alias']=='account_one':
+                    self.first_sending.set();self.second_sending.wait(timeout=0.5)
+                else:self.second_sending.set()
+                before_dispatch()
+                self.sends.append((body['alias'],self.selected))
+                return {'status':'FILLED'}
+        terminal=Terminal();cfg={'nonce_store':str(tmp_path/'worker-nonces.sqlite'),'accounts':{}}
+        for alias in ['account_one','account_two']:
+            cfg['accounts'][alias]={'login':12345678,'server':alias,'currency':'USD','demo':True}
+        worker=worker_mod.Worker(cfg,terminal,KEY,clock=lambda:1000000)
+        from vati.execution.mt5_bridge import BridgeRequest
+        signer=Mt5BridgeClient(signing_key=KEY)
+        requests=[signer.sign(BridgeRequest('order_send',index+1,1000000,{'alias':alias})).__dict__
+            for index,alias in enumerate(cfg['accounts'])]
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            first=pool.submit(worker.handle,requests[0])
+            assert terminal.first_sending.wait(timeout=2)
+            second=pool.submit(worker.handle,requests[1])
+            results=[first.result(),second.result()]
+&gt;       assert all(r.get('status')=='FILLED' for r in results)
+E       assert False
+E        +  where False = all(&lt;generator object test_parallel_aliases_cannot_switch_the_terminal_between_identity_check_and_send.&lt;locals&gt;.&lt;genexpr&gt; at 0x7faf3a038ee0&gt;)
+
+trading/tests/test_mt5_physical_identity.py:88: AssertionError</failure></testcase><testcase classname="trading.tests.test_mt5_physical_identity" name="test_waiting_for_native_login_cannot_extend_a_signed_entry_request_lifetime" time="0.006" /><testcase classname="trading.tests.test_mt5_physical_identity" name="test_unknown_or_ambiguous_native_trade_mode_cannot_establish_demo_identity[None]" time="0.004" /><testcase classname="trading.tests.test_mt5_physical_identity" name="test_unknown_or_ambiguous_native_trade_mode_cannot_establish_demo_identity[False]" time="0.003" /><testcase classname="trading.tests.test_mt5_physical_identity" name="test_unknown_or_ambiguous_native_trade_mode_cannot_establish_demo_identity[1]" time="0.003" /><testcase classname="trading.tests.test_mt5_physical_identity" name="test_unknown_or_ambiguous_native_trade_mode_cannot_establish_demo_identity[0]" time="0.004" /><testcase classname="trading.tests.test_mt5_physical_identity" name="test_incomplete_profile_cannot_open_credentials_or_log_into_a_terminal[currency-None]" time="0.003" /><testcase classname="trading.tests.test_mt5_physical_identity" name="test_incomplete_profile_cannot_open_credentials_or_log_into_a_terminal[demo-true]" time="0.003" /><testcase classname="trading.tests.test_mt5_physical_identity" name="test_incomplete_profile_cannot_open_credentials_or_log_into_a_terminal[demo-None]" time="0.004" /><testcase classname="trading.tests.test_mt5_physical_identity" name="test_incomplete_profile_cannot_open_credentials_or_log_into_a_terminal[server-]" time="0.006" /><testcase classname="trading.tests.test_mt5_physical_identity" name="test_incomplete_profile_cannot_open_credentials_or_log_into_a_terminal[login-True]" time="0.004" /><testcase classname="trading.tests.test_mt5_physical_identity" name="test_incomplete_profile_cannot_open_credentials_or_log_into_a_terminal[login-12345678.5]" time="0.004" /><testcase classname="trading.tests.test_mt5_physical_identity" name="test_incomplete_profile_cannot_open_credentials_or_log_into_a_terminal[login-\uff11\uff12\uff13\uff14\uff15\uff16\uff17\uff18]" time="0.004" /><testcase classname="trading.tests.test_mt5_physical_identity" name="test_the_signed_linux_binding_must_match_the_worker_native_readback_before_sending[login-999999]" time="0.004" /><testcase classname="trading.tests.test_mt5_physical_identity" name="test_the_signed_linux_binding_must_match_the_worker_native_readback_before_sending[server-Other-Server]" time="0.003" /><testcase classname="trading.tests.test_mt5_physical_identity" name="test_the_signed_linux_binding_must_match_the_worker_native_readback_before_sending[currency-EUR]" time="0.004" /><testcase classname="trading.tests.test_mt5_physical_identity" name="test_the_signed_linux_binding_must_match_the_worker_native_readback_before_sending[demo-False]" time="0.003" /><testcase classname="trading.tests.test_mt5_physical_identity" name="test_the_signed_linux_binding_must_match_the_worker_native_readback_before_sending[demo-1]" time="0.003" /><testcase classname="trading.tests.test_mt5_final_cash_margin" name="test_original_signed_entry_cannot_spend_credit_or_more_than_cash_free_capacity[facts0]" time="0.007" /><testcase classname="trading.tests.test_mt5_final_cash_margin" name="test_original_signed_entry_cannot_spend_credit_or_more_than_cash_free_capacity[facts1]" time="0.008" /><testcase classname="trading.tests.test_mt5_final_cash_margin" name="test_original_signed_entry_with_sufficient_native_cash_retains_fill_and_protection" time="0.009" /></testsuite></testsuites>

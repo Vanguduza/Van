@@ -1,0 +1,14 @@
+{
+  "base_head": "b58bb578418ac1d49dc67078f616ac4c3eb8b3ef",
+  "scope": "Actual two source projection methods and actual Deriv portfolio parser over isolated replies. No live provider/order/financial authority or end-to-end approval bypass proof.",
+  "source_sha256": {
+    "trading/vati/app/account_service.py": "de5471b861e0e11a6cc56fc8f455d4d7e67aec09c01c00c4862120e008a79a3b",
+    "trading/vati/app/cycle.py": "d46b43e9c31aec81bd9edcd0f466f1e6465f710208c85ed95487b23eecdf3387",
+    "trading/vati/risk/contracts.py": "73c0a80c1a31d43190d153f05a7337ca149676cf88c033adf69e43c8e090eea8",
+    "trading/vati/risk/heat.py": "2db8bde31f4bdae9b275769cdb67f02349fb1de0d40311fe1a39eab785976fda",
+    "trading/vati/risk/arithmetic.py": "084751a442d3898f1cf02253364be70732702327017ecab5e11283c532cbac19",
+    "trading/vati/risk/serde.py": "d704e182da46db4971ed300271da329b84adc25f762280424bef14760ba0bc87",
+    "trading/vati/execution/deriv.py": "6edc0cec416712dbb961495b4f64079afe6114397f58c03cbf434815ee5e24a6"
+  },
+  "all_causal_source_bytes_match_committed_head": true
+}

@@ -1,0 +1,15 @@
+.........F..........                                                     [100%]
+=================================== FAILURES ===================================
+___ test_two_transport_labels_cannot_make_an_unqualified_file_live_eligible ____
+
+    def test_two_transport_labels_cannot_make_an_unqualified_file_live_eligible():
+        events=events_from_records([row(source='transport-a'),row(source='transport-b')])
+        report=calendar_report(events,now_ms=events[0].release_ms-1000)
+        assert events[0].verified_sources==2  # Preserve the legacy declared count.
+>       assert report['live_eligible']==0 and report['declared_agreement']==1
+E       assert (1 == 0)
+
+trading/tests/test_calendar_feed_boundaries.py:61: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_calendar_feed_boundaries.py::test_two_transport_labels_cannot_make_an_unqualified_file_live_eligible
+1 failed, 19 passed in 0.27s

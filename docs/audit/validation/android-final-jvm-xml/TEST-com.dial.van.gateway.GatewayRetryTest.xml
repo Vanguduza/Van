@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.gateway.GatewayRetryTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:11:47" hostname="052fefa249ff" time="0.012">
+  <properties/>
+  <testcase name="every draw falls inside its window()" classname="com.dial.van.gateway.GatewayRetryTest" time="0.006"/>
+  <testcase name="an answer is not a failure()" classname="com.dial.van.gateway.GatewayRetryTest" time="0.001"/>
+  <testcase name="the server's own try-later codes are retried()" classname="com.dial.van.gateway.GatewayRetryTest" time="0.0"/>
+  <testcase name="retries are bounded()" classname="com.dial.van.gateway.GatewayRetryTest" time="0.001"/>
+  <testcase name="jitter actually decorrelates callers()" classname="com.dial.van.gateway.GatewayRetryTest" time="0.001"/>
+  <testcase name="the backoff grows and stops growing()" classname="com.dial.van.gateway.GatewayRetryTest" time="0.0"/>
+  <testcase name="the breaker opens after sustained failure and closes on success()" classname="com.dial.van.gateway.GatewayRetryTest" time="0.002"/>
+  <testcase name="an intermittent failure does not open the breaker()" classname="com.dial.van.gateway.GatewayRetryTest" time="0.0"/>
+  <testcase name="a transport failure is retried()" classname="com.dial.van.gateway.GatewayRetryTest" time="0.0"/>
+  <testcase name="nothing is both an answer and a try-later()" classname="com.dial.van.gateway.GatewayRetryTest" time="0.0"/>
+  <testcase name="a success is not retried()" classname="com.dial.van.gateway.GatewayRetryTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

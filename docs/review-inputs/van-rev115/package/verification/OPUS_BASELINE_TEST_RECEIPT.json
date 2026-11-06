@@ -1,0 +1,42 @@
+{
+  "base_sha": "8eb1889822fc8a83f219977c15340172e16acd91",
+  "executed_in_this_consolidation": true,
+  "first_document_attempt": "NOT_RUN due to sparse docs; docs subsequently materialized on same immutable source and successful runs recorded.",
+  "focused_trading": {
+    "command": "/home/ubuntu/work/van-pr49-qual-venv/bin/python -m pytest -q trading/tests/test_recoverable_lockouts.py trading/tests/test_execution_scale_and_rounding.py trading/tests/test_ledger_incremental_verify.py",
+    "cwd": "/home/ubuntu/work/van-pr101-review-a39f241-20261017",
+    "elapsed_seconds": 10.56,
+    "exit_code": 0,
+    "passed": 43
+  },
+  "host": "van-trading-core",
+  "limitations": [
+    "Not the full trading suite",
+    "No live broker execution",
+    "No Android new-build/device qualification",
+    "No F15/BG certificate"
+  ],
+  "method": "Global DIAL prepared/owner-authorized read-only test invocation",
+  "plan_check": {
+    "exit_code": 0,
+    "reported_findings": 0
+  },
+  "plan_selftest": {
+    "cases_caught": 23,
+    "exit_code": 0
+  },
+  "qualification": "FOCUSED_SOURCE_TEST_EVIDENCE_NOT_MERGE_OR_PRODUCTION_PROOF",
+  "source_sha": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+  "state_check": {
+    "exit_code": 0,
+    "reported_findings": 0
+  },
+  "state_selftest": {
+    "cases_caught": 24,
+    "exit_code": 0
+  },
+  "vm_receipt_paths": [
+    "/home/ubuntu/work/van-canonical-reconciliation-20261017/OPUS_BASELINE_TEST_RECEIPT.json",
+    "/home/ubuntu/work/van-canonical-reconciliation-20261017/OPUS_DOCUMENT_REPRODUCTION.json"
+  ]
+}

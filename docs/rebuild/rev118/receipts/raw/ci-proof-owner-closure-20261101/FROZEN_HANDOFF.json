@@ -1,0 +1,62 @@
+{
+  "state": "FROZEN_BA817_DOCUMENTARY_DEPENDENCY_AND_AGP_CACHE_ROUTING_FOR_INDEPENDENT_RECHECK",
+  "base": "ba817c4a6aeaf9a8272d81270f6d0abaf7c18feb",
+  "at_utc": "2026-11-01T19:38:57.985560+00:00",
+  "source_pins": {
+    "tools/rebuild/requirements.lock": "c78cc4d3b5e258e0e78d4d27cea6577d07d2c373cd1d5e47c924a22a7f7839b4",
+    "tests/rebuild/test_canonical_source_audit.py": "174dd4bf7de121eec28f08264022c3a19bcddf7d4d671ccc17dc3f3f53b3dbd8",
+    "tests/contracts/test_android_instrumentation_abi.py": "97e79cd5ef3ca1eed235d0267a6f2e48ad131ad1c39b060d3a3dc8059bae2ffe",
+    "tests/contracts/test_android_production_target.py": "9ed798582fce61760971ca723542a6130641a350a6b920b4aa2e3c4ae72a9e40",
+    "docs/rebuild/rev118/pre003/SUBMISSION_MANIFEST.json": "1d0553edfe22732501073fde4c2e3795f002f662c90c2c453fddf9ddf0bbe8d6"
+  },
+  "semantic_source_paths": [
+    "tools/rebuild/requirements.lock",
+    "tests/rebuild/test_canonical_source_audit.py",
+    "tests/contracts/test_android_instrumentation_abi.py",
+    "tests/contracts/test_android_production_target.py"
+  ],
+  "derived_manifest": "Fifth path only current canonical hashmanifest; future publication docs require truthful regeneration, no semantic authority.",
+  "archive_sha256": "7093d4d5eab30efa966b9cffa3b07fe8c44de8c142b06ae7d6f0d0bad0d6282f",
+  "patch_sha256": "7eb1f262927c897d09b6de638b78b2a2cd70b55ecb22d5c14bbb21d65495982d",
+  "root_scope": "Only declared documentarylock PyYAML6.0.3 +exact2existing AGP invocation owners official --project-cache-dir under tmp_path +existing focusedtests/canonicalmanifest. No workflow/helper/application/lockmatcher/assertion/prerequisite relaxation.",
+  "diagnosis": "/tmp/van-recovery-ba817-three-job-diagnosis-20261101",
+  "actual_failed_native_history": {
+    "rebuild-documentary_124951486617": "346PASS1missingyamlFAIL/347/0skip",
+    "documentary_checkout_124951486579": "officialartifact13097630295 same347/346PASS1FAIL0skip; collect0/execute1",
+    "scenarios_backend_124951486696": "scenarios officialartifact13097168862 has8PASS0skip/execute0; actual failedstep is separateandroid_guards/backend execute",
+    "android_guards_backend": "officialartifact13097064761 has2PASS0fail/error/skip; parentBLOCKED on uncommittedandroid/.gradle caches. Strictprovenance correctly refused; nativeattempt remainsFAILED/unqualified."
+  },
+  "actual_source_before": {
+    "receipt": "BEFORE_RUNTIME.json",
+    "fresh14wheel_install_exit": 0,
+    "failing_case_exit": 1,
+    "cause": "Actual ModuleNotFoundError yaml, preservedXML/log; main was observedcleanba817 and code mutation occurred only after this terminal.",
+    "budget_peak": 20703988
+  },
+  "actual_source_after": {
+    "receipt": "AFTER_CONTROLS.json",
+    "tests": 97,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "exit": 0,
+    "storage_audit_forbidden_events": 0,
+    "budget_peak": 28701942,
+    "runtime": "Same genuinely fresh beforevenv, full exact15 --require-hashes afterprojection installed/metadata matched/pipcheck0; not a second recreatedvenv or wholebackend/nativequalification."
+  },
+  "dependency": "All14oldversion/hashproof specs retained/reverified vs preservedofficialTLSmetadata. PyYAML6.0.3 wheel807870B officialTLSmetadata digest matched; actualMETADATA Name/Version exact, no Requires-Dist. OriginalAndroid6.0.2 remains unchanged. No globalinstall/cache writes.",
+  "agp_oracles": "Two param sourcecontrols execute exact original test-function bodies with controlled recorder; immutableba817 AST equality after removing onlytwo addedargs proves original asserts/skip/wrapper/cwd/dryrun/release/signing/profile/timeout preserved. Actual evaluatedcommands route unique pertest outsidecheckouttmpcache. This is bounded source commandrouting, NOT a realAGP result; no localSDK/Java/native run. Real2guards and fullpostsourceproof remain exactfuturehosted obligation.",
+  "preservation": "Workflow/mirror/helper/producer/verifier strictownership/provenance allbyteidenticalHEAD;374IDs/383anchors valid NOT_RUN. Fullfive-root/two-cwd union, source/native/formal/unit/BG001/snapshot/backup remainunqualified. Allpriorfailedruns/PR106unmerged/proposedauthunused/protectedevidenceunchanged.",
+  "transport": "Decodedlog strings savedexactUTF8; officialZIPbytecounts/SHA/CRC bound. Initial internal extractor refused repeated identical opaqueIDreferences before download; deduplicated sameID safely, no signedURL/providerobject printed. Sanitized excerpts are explicitly excerpts, never originaltransport bytes.",
+  "owned_jobs": "Before29461 andafter85713 terminal/reaped; installers/testchildren waited; no Gradle/SDK/sourceCI dispatch/rerun/cancel. Original nativewatch56665/run41341233137 untouched; no repeatednativepoll. Freshvenv and owned fixtureoutputs retained for review, notdeleted.",
+  "resources": {
+    "workspace_hardfloor": 33554432,
+    "newbatch_admission": 67108864,
+    "tmp_reserve": 2147483648,
+    "focused_owned_budget": 134217728,
+    "raw_file_cap": 8388608,
+    "workspace_free": 69660672,
+    "tmp_free": 4136452096
+  },
+  "next": "Independentbounded source/dependency/invocationrouting recheck, then genuine sourcepublication with docs/manifest/4fdverification/normalpush/exactreadback after root disposition. No commit/push before review."
+}

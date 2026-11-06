@@ -1,0 +1,17 @@
+{
+  "base_commit": "068267e2901d0e1d62c29d101e83860916461bec",
+  "state": "UNCOMMITTED_RISK_ARITHMETIC_WIP_R2_BEFORE_COST_BOUNDARY_FIX",
+  "created_at_utc": "2026-10-27T06:06:20.142074+00:00",
+  "files": {
+    "trading/tests/test_risk_arithmetic_context.py": "30106a6dd6bee7769878a5542e5d41f527d832a9bfe4338f962bd8254096e0e0",
+    "trading/tools/induce_gate_failures.py": "95ddc03fc583a26c01ce220a23692c9a3e858b7423996044dcc4ec5a920d57ae",
+    "trading/vati/core/decimal_context.py": "15dc1aae40fe48525b0b1e4e753c925f7ee206b1865b0b36962349cc74319d8c",
+    "trading/vati/risk/arithmetic.py": "084751a442d3898f1cf02253364be70732702327017ecab5e11283c532cbac19",
+    "trading/vati/risk/authority.py": "9853a678e68f70f45d0ba5e2731af61c686cbc4f20e3021c00f32307a09ea3ec",
+    "trading/vati/risk/contracts.py": "73c0a80c1a31d43190d153f05a7337ca149676cf88c033adf69e43c8e090eea8",
+    "trading/vati/risk/governor.py": "23ebef031f74ed023bd1545ee9ce89bdbf482b834dd415d8fe966e6d7dbafe34",
+    "trading/vati/risk/heat.py": "2db8bde31f4bdae9b275769cdb67f02349fb1de0d40311fe1a39eab785976fda",
+    "trading/vati/risk/margin.py": "7afd1c8d82127c755e97b89b84b487b1049cac0f2f6a04eafacaffc1ea22db3c",
+    "trading/vati/risk/sizing.py": "46341b76147cd4456c5505c4267c1a0faaf29e018c6f14b5f4ee18f49b4374f7"
+  }
+}

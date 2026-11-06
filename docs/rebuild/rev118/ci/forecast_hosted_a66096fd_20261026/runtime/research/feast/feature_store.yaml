@@ -1,0 +1,9 @@
+entity_key_serialization_version: 3
+offline_store:
+  type: file
+online_store:
+  path: /work/feast/online.db
+  type: sqlite
+project: van_stack_fixture
+provider: local
+registry: /work/feast/registry.db

@@ -1,0 +1,176 @@
+{
+  "at_utc": "2026-11-01T13:35:12.791089+00:00",
+  "state": "FROZEN_DERIVED_ONLY_FOR_NARROW_INDEPENDENT_REVIEW",
+  "base": "c0063940a7573597934e62ada558d4dc942cfad0",
+  "paths": {
+    "docs/rebuild/rev118/SOURCE_WORKMAP.json": "f41e5522990534179b3c19f976b1aa93bf7ba01a00119d0e2c098fa82c13f8e9",
+    "docs/rebuild/rev118/backend/OWNER_FRONTEND_SCREEN_REGISTRY.md": "31754daa66e29cbc0e3166084a2c62f4f2dc5d7323e639ec45431a2cf25b29e8",
+    "docs/rebuild/rev118/backend/OWNER_REGISTRY_GENERATION.json": "5019ddffc31fb83db9abed9192cc752708bdfac7cab1cf857cc579317934c440",
+    "docs/rebuild/rev118/backend/OWNER_REGISTRY_SOURCE_REFRESH_20261022.json": "5d532c8dd1b96dd13dafcb8babb98927168995f8b8076ada06384858ba132a8f",
+    "registries/owner_endpoint_schemas.json": "68e782eeceda99dcd5291a6d6c70365adf17fe4e7c2e7614bd1fd84667b2957e",
+    "registries/owner_endpoints.json": "1582d4f7414ff63ecae6e22ece1e0963ecd47623c53fe426a0931a932346ddca",
+    "registries/owner_features.json": "e65586036102bc1127b9ba2faf539aceace7629cce51d1a14db87ea13d4a4939",
+    "registries/owner_screens.json": "0608485ae4d1cf9df62420f5369493f736794cbfabda9eb64012527f7a4725e9",
+    "tools/audit/mutation_suite.py": "789f46dfefa7b022d869751e1548ca95a74177d6b51c4699f8d2692cdcc8c450",
+    "tools/rebuild/refresh_owner_source_contracts.py": "da6f947fea89207c025f40a7fa5d1d968589743fd7ff2586c3118d68ce9555c0"
+  },
+  "archive_sha256": "5bdc27f5a885e9d77eb95499660c33720afa31a62b832ad981e93e1549dbc990",
+  "patch_sha256": "841ebfb702f720b29bb608a1fc257d0a39a9051666f15aacbb5c5458c5326d89",
+  "archive_readback_cached_applycheck": "PASS no indexmutation",
+  "queue41pins_unchanged": true,
+  "owner_citation_changes": {
+    "android/app/src/main/java/com/dial/van/gateway/QueueReplayer.kt:139": {
+      "file": "android/app/src/main/java/com/dial/van/gateway/QueueReplayer.kt",
+      "old_line": 139,
+      "new_line": 227,
+      "old_sha256": "80542c710453e2ef3acf1b6f7cff3493ff0682a84340d5fcae54c9caaf357df6",
+      "new_sha256": "59b9b2b118337909be54411db6e080688c6f82230ec2a6474a056477a45f6c2e",
+      "exact_anchor": "                val result = gateway.dispatchCommand(",
+      "reviewed_replacement_anchor": "        return gateway.dispatchCommand(text = text, actionClass = command.actionClassEnum().name,",
+      "reason": "Preserve the existing queue's real gateway invocation through its reviewed transport seam, exact prepared original, current owner/profile fence and independent result readback; the seam grants no execution authority."
+    },
+    "android/app/src/main/java/com/dial/van/gateway/QueueReplayer.kt:23": {
+      "file": "android/app/src/main/java/com/dial/van/gateway/QueueReplayer.kt",
+      "old_line": 23,
+      "new_line": 220,
+      "old_sha256": "80542c710453e2ef3acf1b6f7cff3493ff0682a84340d5fcae54c9caaf357df6",
+      "new_sha256": "59b9b2b118337909be54411db6e080688c6f82230ec2a6474a056477a45f6c2e",
+      "exact_anchor": "    private val gateway: VanGatewayClient,",
+      "reviewed_replacement_anchor": "private class GatewayQueueReplayTransport(private val gateway: VanGatewayClient) : QueueReplayTransport {",
+      "reason": "The same existing GatewayClient receiver is now owned by the private replay transport; the compatibility constructor wires it into the same queue owner without granting new authority."
+    },
+    "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt:454": {
+      "file": "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt",
+      "old_line": 454,
+      "new_line": 573,
+      "old_sha256": "02ee077fa5c071d9a2335d0f84673f950a18b7bcbd881880b30adf7d87be5e0e",
+      "new_sha256": "5aa0cb038a81cf094b8664ac983822477fa17e0176511ce0679d0424d88b3282",
+      "exact_anchor": "                gateway.sessionOpen(pathId = activePathId, routeId = \"primary-ingress\","
+    },
+    "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt:48": {
+      "file": "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt",
+      "old_line": 48,
+      "new_line": 48,
+      "old_sha256": "02ee077fa5c071d9a2335d0f84673f950a18b7bcbd881880b30adf7d87be5e0e",
+      "new_sha256": "5aa0cb038a81cf094b8664ac983822477fa17e0176511ce0679d0424d88b3282",
+      "exact_anchor": "    private val gateway: VanGatewayClient,"
+    },
+    "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt:836": {
+      "file": "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt",
+      "old_line": 836,
+      "new_line": 976,
+      "old_sha256": "02ee077fa5c071d9a2335d0f84673f950a18b7bcbd881880b30adf7d87be5e0e",
+      "new_sha256": "5aa0cb038a81cf094b8664ac983822477fa17e0176511ce0679d0424d88b3282",
+      "exact_anchor": "            gateway.sessionOpen(pathId = activePathId, routeId = \"primary-ingress\","
+    },
+    "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt:757": {
+      "file": "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt",
+      "old_line": 757,
+      "new_line": 893,
+      "old_sha256": "02ee077fa5c071d9a2335d0f84673f950a18b7bcbd881880b30adf7d87be5e0e",
+      "new_sha256": "5aa0cb038a81cf094b8664ac983822477fa17e0176511ce0679d0424d88b3282",
+      "exact_anchor": "            gateway.sessionResume("
+    },
+    "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt:502": {
+      "file": "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt",
+      "old_line": 502,
+      "new_line": 621,
+      "old_sha256": "02ee077fa5c071d9a2335d0f84673f950a18b7bcbd881880b30adf7d87be5e0e",
+      "new_sha256": "5aa0cb038a81cf094b8664ac983822477fa17e0176511ce0679d0424d88b3282",
+      "exact_anchor": "                        post = { gateway.sessionUpstream(it) }, downstream = { gateway.sessionDownstream(sessionId, lastEventSeq) })"
+    },
+    "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt:490": {
+      "file": "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt",
+      "old_line": 490,
+      "new_line": 609,
+      "old_sha256": "02ee077fa5c071d9a2335d0f84673f950a18b7bcbd881880b30adf7d87be5e0e",
+      "new_sha256": "5aa0cb038a81cf094b8664ac983822477fa17e0176511ce0679d0424d88b3282",
+      "exact_anchor": "        val socketUrl = gateway.sessionSocketUrl(sessionId)"
+    },
+    "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt:47": {
+      "file": "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt",
+      "old_line": 47,
+      "new_line": 47,
+      "old_sha256": "02ee077fa5c071d9a2335d0f84673f950a18b7bcbd881880b30adf7d87be5e0e",
+      "new_sha256": "5aa0cb038a81cf094b8664ac983822477fa17e0176511ce0679d0424d88b3282",
+      "exact_anchor": "class VanHermesSessionManager("
+    },
+    "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt:265": {
+      "file": "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt",
+      "old_line": 265,
+      "new_line": 332,
+      "old_sha256": "02ee077fa5c071d9a2335d0f84673f950a18b7bcbd881880b30adf7d87be5e0e",
+      "new_sha256": "5aa0cb038a81cf094b8664ac983822477fa17e0176511ce0679d0424d88b3282",
+      "exact_anchor": "        if (live != null && live.send(envelope.toString())) {",
+      "reviewed_replacement_anchor": "        if (deliveryAttempted && live!!.send(envelope.toString())) {",
+      "reason": "Retain the actual original session-envelope WebSocket send after the reviewed durable ownership and current-context boundary; no new transport or command authority."
+    },
+    "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt:992": {
+      "file": "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt",
+      "old_line": 992,
+      "new_line": 1166,
+      "old_sha256": "02ee077fa5c071d9a2335d0f84673f950a18b7bcbd881880b30adf7d87be5e0e",
+      "new_sha256": "5aa0cb038a81cf094b8664ac983822477fa17e0176511ce0679d0424d88b3282",
+      "exact_anchor": "            if (!live.send(readdressed.toString())) {"
+    },
+    "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt:1050": {
+      "file": "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt",
+      "old_line": 1050,
+      "new_line": 1234,
+      "old_sha256": "02ee077fa5c071d9a2335d0f84673f950a18b7bcbd881880b30adf7d87be5e0e",
+      "new_sha256": "5aa0cb038a81cf094b8664ac983822477fa17e0176511ce0679d0424d88b3282",
+      "exact_anchor": "                    if (live.send(readdressed.toString())) {"
+    },
+    "android/app/src/main/java/com/dial/van/gateway/QueueReplayer.kt:112": {
+      "file": "android/app/src/main/java/com/dial/van/gateway/QueueReplayer.kt",
+      "old_line": 112,
+      "new_line": 222,
+      "old_sha256": "80542c710453e2ef3acf1b6f7cff3493ff0682a84340d5fcae54c9caaf357df6",
+      "new_sha256": "59b9b2b118337909be54411db6e080688c6f82230ec2a6474a056477a45f6c2e",
+      "exact_anchor": "                        gateway.ingestCapturedContext(payload)",
+      "reviewed_replacement_anchor": "    override suspend fun ingestCapturedContext(payload: JSONObject) { gateway.ingestCapturedContext(payload) }",
+      "reason": "Retain captured-context ingress through the same actual GatewayClient invocation in the private transport; third-party content is never promoted to an owner command by replay."
+    }
+  },
+  "catalog_exact5_changes": "/workspace/van-queue-integration-20261101/CATALOG_EXACT_FIVE_RECONCILIATION.json",
+  "why5vs4": "Four oldtext edits missing. Fifth originalC39case generic.commit text stillmatches but now selects wrongboolean fullclear guard; retarget realpersisthelper with validasyncmutation to preserveoriginaldurabilityoracle rather than Kotlin typeerror.374samecaseIDs/order/targets/testselections;383sameeditcount.",
+  "semantic_execution_reuse_basis": "/workspace/van-queue-integration-20261101/MUTATION_REUSE_SOURCE_BASIS.json",
+  "captured_semantic_proofs": {
+    "C39": "/workspace/van-queue-restoration-20261101/MUTATION_C39_CONTROL.log +ASYNC/ATOMIC logs;5unmutated controlsPASS,2 intended assertionkill observations",
+    "C36": "/workspace/van-queue-restoration-20261101/C36_PROOFS.json;24controlsPASS,3mutants produce6/9/7actual intended assertionfailures. Historical classifierfalse-refusal retained/corrected fromactualJUnittypes.",
+    "scope": "Exact6target+selectedtestfile hashes equalR1/R2/main. OtherR2transitivecaller files changed; separatelyvalidatedSDK43/JVM73. These are capturedselectedproofs, NOT currentfull374execution; futureexactheadcorpusrequired."
+  },
+  "owner_and_frontend": "Canonical --apply terminal0; no JSONbyhand; initialthree exactanchorrefusals retained externalowner-refresh*.log",
+  "semantic_consumers": {
+    "selection": "/workspace/van-queue-integration-20261101/semantic-consumers/receipt.json",
+    "modules": 8,
+    "cases": 220,
+    "fail": 0,
+    "error": 0,
+    "skip": 0,
+    "assertions_unchanged": true
+  },
+  "inventory": {
+    "endpoints_old_new": [
+      487,
+      487
+    ],
+    "schemas_old_new": [
+      379,
+      380
+    ],
+    "old_endpoint_identities_removed": 0,
+    "schema_identities_removed": 0,
+    "schema_identities_added": [
+      "OriginalCommandReference"
+    ],
+    "existing_schema_bodies_changed": [
+      "ResumeBody"
+    ],
+    "feature_groups": 42,
+    "located_functions": 105,
+    "surfaces": 78
+  },
+  "scope": "Ownercitation/generation/sourceworkmap and5existingmutationeditanchors only; no action/featureidentity removal/newauthority. Preserve frozen349actions,131/324/1610/234/93,42/105/78. No41featuresource changes by derivativeprocess.",
+  "remaining": "Boundedindependentreview, truthful docs/manifest/genuinehook+committed4fdverification/normalpush andnewexactheadCI; originalc006aggregateFAILED, no qualification/speedclaim."
+}

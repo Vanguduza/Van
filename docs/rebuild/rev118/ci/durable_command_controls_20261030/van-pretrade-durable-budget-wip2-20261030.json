@@ -1,0 +1,17 @@
+{
+  "path": "/workspace/van-pretrade-durable-budget-wip2-20261030.zip",
+  "bytes": 30204,
+  "sha256": "3576bb899002c95e4197b67089a905afd1aa44774946bdef4dbe1dfe04b816c5",
+  "manifest": {
+    "source_parent": "524e1ca2aadc076642b5e237e0b9765065610927",
+    "state": "SOURCE_FOCUSED171PASS_NOT_FINAL_FULL_OR_INDEPENDENT_ACCEPTANCE",
+    "files": {
+      "trading/vati/execution/pretrade.py": "1e9596c42c27842c2cff72351bb595207b6c1a180174cac1fff2fb2e0af70064",
+      "trading/vati/execution/router.py": "971231b7702a59ce2375dd88f46acb07810f606438724f26c21cd3558a3edf55",
+      "trading/vati/execution/command_history.py": "e921bfea7798207ee396208c8cd10a9fa1be893802a2257226e2b43eeef559ac",
+      "trading/tests/test_pretrade_durable_command_budget.py": "3b56ae1bbaabadb38a35ef465746e9d9fbaf0cc98c4e14492c5210bfc7b05a5e",
+      "trading/tests/test_pretrade_durable_command_budget_postgres.py": "c6c58c9403fbed870962e96a8a1ef7fd2f43971bc2c820a2999573c90837c24a",
+      "trading/tests/test_entry_dispatch_commit_fence_postgres.py": "a449aaf7211ad9c4122bafc27003601218f02cf5374aac99c99d03efe4b0556c"
+    }
+  }
+}

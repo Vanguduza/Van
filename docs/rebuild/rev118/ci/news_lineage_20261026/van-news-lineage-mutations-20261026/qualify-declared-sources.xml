@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="34" time="1.174" timestamp="2026-10-26T01:56:38.537870+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_news_publisher_lineage" name="test_rewritten_syndicated_stories_form_one_declared_cluster" time="0.143"><failure message="assert 2 == 0">ledger = &lt;vati.core.ledger.Ledger object at 0x7f6f217f3a40&gt;
+
+    def test_rewritten_syndicated_stories_form_one_declared_cluster(ledger):
+        news = NewsIngress(ledger=ledger)
+        assert news.ingest_rows([row(), row('wire-b', 'Central bank publishes its policy decision')], now_ms=NOW)['accepted'] == 2
+        report = lineage(news)
+        assert report['story_clusters'] == 1
+        cluster, = report['clusters']
+        assert cluster['transport_source_ids'] == ['wire-a', 'wire-b']
+        assert cluster['declared_original_publishers'] == ['central-bank']
+        assert len(cluster['headline_ids']) == 2
+&gt;       assert report['qualified_independent_sources'] == 0
+E       assert 2 == 0
+
+trading/tests/test_news_publisher_lineage.py:47: AssertionError</failure></testcase><testcase classname="trading.tests.test_news_publisher_lineage" name="test_invalid_explicit_origin_is_skipped_without_publishing_a_headline[None]" time="0.005" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_invalid_explicit_origin_is_skipped_without_publishing_a_headline[origin1]" time="0.003" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_invalid_explicit_origin_is_skipped_without_publishing_a_headline[origin2]" time="0.003" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_invalid_explicit_origin_is_skipped_without_publishing_a_headline[origin3]" time="0.003" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_invalid_explicit_origin_is_skipped_without_publishing_a_headline[origin4]" time="0.004" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_invalid_explicit_origin_is_skipped_without_publishing_a_headline[origin5]" time="0.004" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_originless_legacy_rows_stay_unknown_and_do_not_infer_publisher_from_transport" time="0.006" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_cold_recovery_restores_lineage_without_republishing_originals" time="0.014" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_declared_origin_does_not_backdate_earlier_unknown_observation" time="0.007" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_lineage_result_cannot_mutate_original_evidence" time="0.005" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_origin_enrichment_cannot_precede_the_original_observations_availability" time="0.009" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_lineage_append_failure_rolls_back_headline_and_observation_before_memory" time="0.013" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_lost_sql_commit_reply_keeps_memory_unknown_and_cold_replay_reads_original" time="0.008" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_lineage_requires_independent_readback_before_memory_success" time="0.014" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_conflicting_origin_cannot_rewrite_an_original_observation" time="0.007" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_exact_title_with_contradictory_origins_is_one_conflicted_cluster" time="0.012"><failure message="assert 2 == 0">ledger = &lt;vati.core.ledger.Ledger object at 0x7f6f216165a0&gt;
+
+    def test_exact_title_with_contradictory_origins_is_one_conflicted_cluster(ledger):
+        news = NewsIngress(ledger=ledger)
+        news.ingest_rows([row(), row('wire-b', original_publisher={'publisher_id':'other', 'story_id':'x'})], now_ms=NOW)
+        report = lineage(news); cluster, = report['clusters']
+        assert cluster['state'] == 'CONFLICTING_ORIGIN'
+&gt;       assert report['qualified_independent_sources'] == 0
+E       assert 2 == 0
+
+trading/tests/test_news_publisher_lineage.py:177: AssertionError</failure></testcase><testcase classname="trading.tests.test_news_publisher_lineage" name="test_future_origin_does_not_reveal_future_publisher_or_transport" time="0.007" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_atomic_origin_marker_refuses_deleted_lineage_after_cold_start" time="0.008" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_even_correctly_sealed_invalid_or_orphaned_lineage_is_refused[change0]" time="0.011" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_even_correctly_sealed_invalid_or_orphaned_lineage_is_refused[change1]" time="0.006" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_even_correctly_sealed_invalid_or_orphaned_lineage_is_refused[change2]" time="0.006" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_even_correctly_sealed_invalid_or_orphaned_lineage_is_refused[change3]" time="0.006" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_even_correctly_sealed_invalid_or_orphaned_lineage_is_refused[change4]" time="0.006" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_even_correctly_sealed_invalid_or_orphaned_lineage_is_refused[change5]" time="0.005" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_even_correctly_sealed_invalid_or_orphaned_lineage_is_refused[change6]" time="0.009" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_ambiguous_duplicate_lineage_refuses_recovery_and_replay" time="0.007" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_recovery_capacity_includes_lineage_receipts" time="0.008" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_actual_service_file_builder_exposes_lineage_and_recovers_it" time="0.014" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_real_sql_lineage_commit_reply_loss_is_reconciled[sqlite]" time="0.007"><failure message="assert 2 == 0">backend = 'sqlite'
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-265/test_real_sql_lineage_commit_r0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7f6f2148c7a0&gt;
+
+    @pytest.mark.parametrize('backend', ['sqlite', 'postgres'])
+    def test_real_sql_lineage_commit_reply_loss_is_reconciled(backend, tmp_path, monkeypatch):
+        import os
+        if backend == 'sqlite':
+            value = Ledger(tmp_path/'native-lineage.sqlite')
+        else:
+            dsn = os.environ.get('VATI_TEST_PG_DSN')
+            if not dsn or os.environ.get('VATI_TEST_PG_ISOLATED_FIXTURE') != '1':
+                pytest.skip('requires isolated PostgreSQL fixture')
+            import uuid
+            from vati.core.ledger_pg import PostgresLedger
+            value = PostgresLedger(dsn, ledger_name='lineage_' + uuid.uuid4().hex)
+        try:
+            atomic = value.atomic; news = NewsIngress(ledger=value)
+            @contextmanager
+            def lost():
+                outer = value._atomic_depth == 0 if backend == 'postgres' else not value._conn.in_transaction
+                with atomic():
+                    yield value
+                if outer:
+                    raise OSError('fixture native committed lineage reply lost')
+            with monkeypatch.context() as patch:
+                patch.setattr(value, 'atomic', lost)
+                with pytest.raises(OSError):
+                    news.ingest_rows([row()], now_ms=NOW)
+            head = value.head(); original, = records(value)
+            restored = NewsIngress.from_ledger(value)
+            restored.ingest_rows([row()], now_ms=NOW+10)
+            assert value.head() == head and records(value) == [original]
+            assert value.count() == 3 and value.verify_chain()[0]
+&gt;           assert lineage(restored)['qualified_independent_sources'] == 0
+E           assert 2 == 0
+
+trading/tests/test_news_publisher_lineage.py:284: AssertionError</failure></testcase><testcase classname="trading.tests.test_news_publisher_lineage" name="test_concurrent_native_publishers_retain_one_original_lineage[sqlite]" time="0.024" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_actual_child_death_after_sql_commit_restores_lineage_once" time="0.449" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_sealed_backdated_lineage_cannot_be_replayed_as_a_valid_original" time="0.016" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_orphaned_lineage_cannot_recreate_missing_headline_and_observation" time="0.018" /></testsuite></testsuites>

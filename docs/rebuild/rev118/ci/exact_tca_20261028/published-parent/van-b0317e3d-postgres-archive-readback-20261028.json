@@ -1,0 +1,54 @@
+{
+  "artifact_id": 12850203447,
+  "run_id": 40766386824,
+  "artifact_bytes": 199151,
+  "artifact_sha256": "3ca950ac4e31eb735e5ebe9bd70af61fcd02ff33cded5b24528f6e49e3b8ad04",
+  "head_sha": "b0317e3dd3f01748abe6cf92504c6d965e0956bb",
+  "binding": "EXACT_WORKFLOW_HEAD_ORIGINAL_ARTIFACT_DIGEST_AND_ORIGINAL_CHECKOUT_LOG_VERIFIED",
+  "CRC_and_safe_unique_paths_verified": true,
+  "members": {
+    "postgres-ledger-report.xml": {
+      "bytes": 4452,
+      "sha256": "248ce5f02c059907d2ac94c78d86ac1bd6f6dce4c1587a859559b0e8fc5feffa"
+    },
+    "trading-source.log": {
+      "bytes": 699981,
+      "sha256": "0dd2942e7d2182d1d0347762ac7db2f569099e9b383c51dcde613192af51be15"
+    },
+    "trading-source-report.xml": {
+      "bytes": 830535,
+      "sha256": "f7adefbe4ee97a1f9d94caccbc09cd45466c29c5910f950dce38ed63c54dd797"
+    },
+    "voice-source-report.xml": {
+      "bytes": 17643,
+      "sha256": "b0756d9626e5f21552983ea04b6da1d142cb11285bd9e160ee789baae9a04976"
+    }
+  },
+  "junit": {
+    "postgres-ledger-report.xml": {
+      "cases": 26,
+      "passed": 26,
+      "failure": 0,
+      "error": 0,
+      "skipped": 0
+    },
+    "trading-source-report.xml": {
+      "cases": 5183,
+      "passed": 5182,
+      "failure": 0,
+      "error": 0,
+      "skipped": 1
+    },
+    "voice-source-report.xml": {
+      "cases": 117,
+      "passed": 117,
+      "failure": 0,
+      "error": 0,
+      "skipped": 0
+    }
+  },
+  "declared_skips": [
+    "dial-new checkout not available (set DIAL_REPO)"
+  ],
+  "native_or_production_acceptance": false
+}

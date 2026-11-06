@@ -1,0 +1,84 @@
+{
+  "schema": "van.public-official-rss-source-observation/1",
+  "source_sha256": {
+    "trading/vati/events/news_feed.py": "18497f7014acccbd3eb3126ec0dde96a61012eab15d3c428538e28a956522011",
+    "trading/vati/events/news_runtime.py": "8939bb0b8c1c20d9a8cedf3ee462eeece919c022c25d7fa7267f9ac2ea151fd3",
+    "trading/vati/events/news_ingress.py": "a5da30fe05cc7974c735be4173e858e30044fd8620a991457365932cb67e5cf2"
+  },
+  "http_observation": {
+    "url": "https://www.federalreserve.gov/feeds/press_all.xml",
+    "observed_at_utc": "2026-10-26T01:38:10.469112+00:00",
+    "qualification": "PUBLIC_HTTP_OBSERVATION_ONLY_NOT_PROVIDER_LICENCE_LATENCY_OR_NATIVE_FEED_ADMISSION",
+    "status": 200,
+    "final_url": "https://www.federalreserve.gov/feeds/press_all.xml",
+    "headers": {
+      "date": "Mon, 26 Oct 2026 01:38:10 GMT",
+      "content-type": "text/xml",
+      "content-length": "14813",
+      "etag": "\"dae62af7f5ddd1:0\"",
+      "last-modified": "Fri, 16 Oct 2026 15:00:18 GMT"
+    },
+    "bytes": 14813,
+    "over_limit": false,
+    "body_sha256": "529e889a916423a3979c1bebdd94c2b8d402889700d8c85cc4d125b7f538d327",
+    "elapsed_seconds": 0.269
+  },
+  "worker_file_capture_ms": 1792981152151,
+  "clock_basis": "Actual worker wall clock at first file capture;not native publisher admission",
+  "headlines": 20,
+  "newest_published_ms": 1792162800000,
+  "raw_sha256": "529e889a916423a3979c1bebdd94c2b8d402889700d8c85cc4d125b7f538d327",
+  "replay_unchanged_head": true,
+  "raw_snapshots": 1,
+  "ledger_chain_valid": true,
+  "source_health": {
+    "source": "news",
+    "source_kind": "FILE_SNAPSHOT",
+    "source_scope": "public-source-probe",
+    "state": "READY_DECLARED",
+    "coverage": "DECLARED_SNAPSHOT_ONLY",
+    "source_ref": "5dcd4e19332b06efc78e4a5db6d02260ef7db52458df7cb2d16c8d0d050e2e71",
+    "input_sha256": "529e889a916423a3979c1bebdd94c2b8d402889700d8c85cc4d125b7f538d327",
+    "source_profile": {
+      "path_ref": "a6b782ccfeacda014d4e2e7b2d5631e4c03d931aed0a98ca60efafb6f5ec445a",
+      "sources": [],
+      "max_file_bytes": 8388608,
+      "max_rows": 10000,
+      "max_recovery_events": 100000,
+      "relevance_window_ms": 21600000,
+      "adapter": {
+        "input_format": "rss2",
+        "source_id": "public-fed-rss-probe",
+        "publisher_id": "federal-reserve-board",
+        "relevance": {}
+      }
+    },
+    "records_in_input": 20,
+    "skipped_in_batch": 0,
+    "error_code": null,
+    "provider_qualified": false,
+    "live_eligible": false,
+    "authority_effect": "NONE",
+    "last_known_source_snapshot": {
+      "snapshot_key": "1b412d1c5772e30a5b9b9196303fc8b1c328b0899a8b3c3f04cc9274f1cacad0",
+      "receipt_hash": "2bc465174014168a08e4f22a5b435fbb6b22caadefabbc848c16cfee5cf78273",
+      "raw_sha256": "529e889a916423a3979c1bebdd94c2b8d402889700d8c85cc4d125b7f538d327",
+      "captured_ms": 1792981152151,
+      "parser_version": "news-rss2/1",
+      "provider_qualified": false,
+      "native_clock_qualified": false,
+      "authority_effect": "NONE"
+    },
+    "checked_ms": 1792981152300,
+    "clock_basis": "SUPPLIED_SERVICE_CLOCK_NOT_NATIVE_PUBLISHER_ADMISSION",
+    "last_known_headlines": 20,
+    "durable_health": "CONFIRMED_ORIGINAL",
+    "receipt_hash": "19e5dcf934aec5a38babd66b90a33d9c58afc340cc93b2dd6feb6cdc7dc4b08e",
+    "transition_observed_ms": 1792981152151
+  },
+  "provider_qualified": false,
+  "live_eligible": false,
+  "latency_qualification": "NOT_ISSUED",
+  "entitlement_qualification": "NOT_ISSUED",
+  "earlier_parser_smoke": "20entries parsed using synthetic fixture observed_ms1800000000000;not actual capture timing evidence"
+}

@@ -1,0 +1,92 @@
+FFF..............                                                        [100%]
+=================================== FAILURES ===================================
+_ test_actual_native_source_actor_applies_original_owner_reset_or_refuses_unavailable_source[False] _
+
+runtime = (SessionService(cfg=ServiceConfig(account_alias='paper_lease', symbol='EURUSD', base='EUR', quote='USD', timeframe='H1...enabled=True, mandate_ref='', notes='')), {'ms': 1758344400000}, <function runtime.<locals>.request at 0x7f6b0650a840>)
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-22/test_actual_native_source_acto0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+missing_source = False
+
+    @pytest.mark.parametrize('missing_source',[False,True])
+    def test_actual_native_source_actor_applies_original_owner_reset_or_refuses_unavailable_source(runtime,tmp_path,eurusd,missing_source):
+        service,clock,request,account,facts=native_source(runtime,tmp_path,eurusd)
+>       loss(service,clock,facts,'original-own-loss');refresh(service,clock,facts)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_physical_recovery_actor.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+service = SessionService(cfg=ServiceConfig(account_alias='paper_lease', symbol='EURUSD', base='EUR', quote='USD', timeframe='H1'...='', credential_ref=CredentialRef(env_var=None, secrets_file=None), demo=True, enabled=True, mandate_ref='', notes=''))
+clock = {'ms': 1758344400000}
+facts = RiskSnapshot(now_unix=1758344400, account_alias='paper_lease', account_verified=True, equity=Decimal('10000'), balance...Y_MINUS_NATIVE_ACCOUNT_CREDIT"}', risk_capital_qualified=False, execution_authority=False), native_risk_basis_ref=None)
+trade = 'original-own-loss'
+
+    def loss(service,clock,facts,trade):
+        c=service.runner.cycle
+        event=record(c.ledger,facts,now_ms=clock['ms'],request=intent(
+            trade_intent_id=trade,account_alias=facts.account_alias,venue=facts.symbol_contract.venue))
+>       assert event.payload['decision']['decision'] in {'APPROVED','REDUCED'}
+E       AssertionError: assert 'REJECTED' in {'APPROVED', 'REDUCED'}
+
+trading/tests/test_physical_recovery_actor.py:47: AssertionError
+_ test_actual_native_source_actor_applies_original_owner_reset_or_refuses_unavailable_source[True] _
+
+runtime = (SessionService(cfg=ServiceConfig(account_alias='paper_lease', symbol='EURUSD', base='EUR', quote='USD', timeframe='H1...enabled=True, mandate_ref='', notes='')), {'ms': 1758344400000}, <function runtime.<locals>.request at 0x7f6b06556ca0>)
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-22/test_actual_native_source_acto1')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+missing_source = True
+
+    @pytest.mark.parametrize('missing_source',[False,True])
+    def test_actual_native_source_actor_applies_original_owner_reset_or_refuses_unavailable_source(runtime,tmp_path,eurusd,missing_source):
+        service,clock,request,account,facts=native_source(runtime,tmp_path,eurusd)
+>       loss(service,clock,facts,'original-own-loss');refresh(service,clock,facts)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_physical_recovery_actor.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+service = SessionService(cfg=ServiceConfig(account_alias='paper_lease', symbol='EURUSD', base='EUR', quote='USD', timeframe='H1'...='', credential_ref=CredentialRef(env_var=None, secrets_file=None), demo=True, enabled=True, mandate_ref='', notes=''))
+clock = {'ms': 1758344400000}
+facts = RiskSnapshot(now_unix=1758344400, account_alias='paper_lease', account_verified=True, equity=Decimal('10000'), balance...Y_MINUS_NATIVE_ACCOUNT_CREDIT"}', risk_capital_qualified=False, execution_authority=False), native_risk_basis_ref=None)
+trade = 'original-own-loss'
+
+    def loss(service,clock,facts,trade):
+        c=service.runner.cycle
+        event=record(c.ledger,facts,now_ms=clock['ms'],request=intent(
+            trade_intent_id=trade,account_alias=facts.account_alias,venue=facts.symbol_contract.venue))
+>       assert event.payload['decision']['decision'] in {'APPROVED','REDUCED'}
+E       AssertionError: assert 'REJECTED' in {'APPROVED', 'REDUCED'}
+
+trading/tests/test_physical_recovery_actor.py:47: AssertionError
+______ test_actor_rechecks_new_native_loss_before_applying_reviewed_reset ______
+
+runtime = (SessionService(cfg=ServiceConfig(account_alias='paper_lease', symbol='EURUSD', base='EUR', quote='USD', timeframe='H1...enabled=True, mandate_ref='', notes='')), {'ms': 1758344400000}, <function runtime.<locals>.request at 0x7f6b06557e20>)
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-22/test_actor_rechecks_new_native0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_actor_rechecks_new_native_loss_before_applying_reviewed_reset(runtime,tmp_path,eurusd):
+        service,clock,request,_,facts=native_source(runtime,tmp_path,eurusd)
+>       loss(service,clock,facts,'first');refresh(service,clock,facts)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_physical_recovery_actor.py:89: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+service = SessionService(cfg=ServiceConfig(account_alias='paper_lease', symbol='EURUSD', base='EUR', quote='USD', timeframe='H1'...='', credential_ref=CredentialRef(env_var=None, secrets_file=None), demo=True, enabled=True, mandate_ref='', notes=''))
+clock = {'ms': 1758344400000}
+facts = RiskSnapshot(now_unix=1758344400, account_alias='paper_lease', account_verified=True, equity=Decimal('10000'), balance...Y_MINUS_NATIVE_ACCOUNT_CREDIT"}', risk_capital_qualified=False, execution_authority=False), native_risk_basis_ref=None)
+trade = 'first'
+
+    def loss(service,clock,facts,trade):
+        c=service.runner.cycle
+        event=record(c.ledger,facts,now_ms=clock['ms'],request=intent(
+            trade_intent_id=trade,account_alias=facts.account_alias,venue=facts.symbol_contract.venue))
+>       assert event.payload['decision']['decision'] in {'APPROVED','REDUCED'}
+E       AssertionError: assert 'REJECTED' in {'APPROVED', 'REDUCED'}
+
+trading/tests/test_physical_recovery_actor.py:47: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_physical_recovery_actor.py::test_actual_native_source_actor_applies_original_owner_reset_or_refuses_unavailable_source[False]
+FAILED trading/tests/test_physical_recovery_actor.py::test_actual_native_source_actor_applies_original_owner_reset_or_refuses_unavailable_source[True]
+FAILED trading/tests/test_physical_recovery_actor.py::test_actor_rechecks_new_native_loss_before_applying_reviewed_reset
+3 failed, 14 passed in 1.70s

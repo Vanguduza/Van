@@ -1,0 +1,5 @@
+trading/tests/test_family_committed_recovery_postgres.py
+trading/tests/test_account_runtime_recovery.py
+trading/tests/test_postgres_ledger_isolation.py
+trading/tests/test_family_durable_projection_postgres.py
+trading/tests/test_native_position_recovery_scope.py

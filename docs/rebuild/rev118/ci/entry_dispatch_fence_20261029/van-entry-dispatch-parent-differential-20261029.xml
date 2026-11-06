@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="0.667" timestamp="2026-10-29T01:36:36.503298+00:00" hostname="6e9feff21467"><testcase classname="trading.tests.test_entry_dispatch_parent_differential" name="test_preexisting_independent_routers_cannot_dispatch_the_same_original_twice" time="0.512"><failure message="AssertionError: assert 2 == 1&#10; +  where 2 = count(&lt;EventKind.ORDER_COMMAND: 'ORDER_COMMAND'&gt;)&#10; +    where count = &lt;vati.core.ledger.Ledger object at 0x7f47fd10e690&gt;.count&#10; +    and   &lt;EventKind.ORDER_COMMAND: 'ORDER_COMMAND'&gt; = EventKind.ORDER_COMMAND">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-254/test_preexisting_independent_r0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_preexisting_independent_routers_cannot_dispatch_the_same_original_twice(tmp_path, eurusd):
+        mandate, trade, decision = approved_entry(eurusd)
+        path = tmp_path / 'entry.sqlite'
+        first, second = (Ledger(path), Ledger(path))
+        left, right = (PaperAdapter(), PaperAdapter())
+        try:
+            a, b = (sender(first, left), sender(second, right))
+            a.execute(trade, decision, mandate, now_ms=NOW * 1000)
+            try:
+                b.execute(trade, decision, mandate, now_ms=NOW * 1000 + 1)
+            except RouterError:
+                pass
+&gt;           assert first.count(EventKind.ORDER_COMMAND) == 1
+E           AssertionError: assert 2 == 1
+E            +  where 2 = count(&lt;EventKind.ORDER_COMMAND: 'ORDER_COMMAND'&gt;)
+E            +    where count = &lt;vati.core.ledger.Ledger object at 0x7f47fd10e690&gt;.count
+E            +    and   &lt;EventKind.ORDER_COMMAND: 'ORDER_COMMAND'&gt; = EventKind.ORDER_COMMAND
+
+../../van-entry-dispatch-parent-runtime-42-20261029/trading/tests/test_entry_dispatch_parent_differential.py:36: AssertionError</failure></testcase><testcase classname="trading.tests.test_entry_dispatch_parent_differential" name="test_ambient_transaction_cannot_send_before_its_command_is_committed" time="0.005"><failure message="AssertionError: native effect escaped an uncommitted caller transaction&#10;assert not [VenuePosition(position_id='P1', symbol='EURUSD', direction=&lt;Direction.LONG: 'LONG'&gt;, quantity=Decimal('0.18'), entry_...10017'), stop_price=Decimal('1.09790'), trade_intent_id='ti-1', loss_model=&lt;LossModel.STOP_DISTANCE: 'STOP_DISTANCE'&gt;)]&#10; +  where [VenuePosition(position_id='P1', symbol='EURUSD', direction=&lt;Direction.LONG: 'LONG'&gt;, quantity=Decimal('0.18'), entry_...10017'), stop_price=Decimal('1.09790'), trade_intent_id='ti-1', loss_model=&lt;LossModel.STOP_DISTANCE: 'STOP_DISTANCE'&gt;)] = positions()&#10; +    where positions = PaperAdapter(venue='paper', account_alias='paper_primary', equity=Decimal('10000'), currency='USD', spread=Decimal('0....=1, realised_pnl=Decimal('0'), closed=[], last_price={'EURUSD': Decimal('1.10010')}, pending={}, symbol_contracts=None).positions">eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_ambient_transaction_cannot_send_before_its_command_is_committed(eurusd):
+        mandate, trade, decision = approved_entry(eurusd)
+        ledger, adapter = (Ledger(), PaperAdapter())
+        try:
+            router = sender(ledger, adapter)
+            with ledger.atomic():
+                try:
+                    router.execute(trade, decision, mandate, now_ms=NOW * 1000)
+                except RouterError:
+                    pass
+&gt;               assert not adapter.positions(), 'native effect escaped an uncommitted caller transaction'
+E               AssertionError: native effect escaped an uncommitted caller transaction
+E               assert not [VenuePosition(position_id='P1', symbol='EURUSD', direction=&lt;Direction.LONG: 'LONG'&gt;, quantity=Decimal('0.18'), entry_...10017'), stop_price=Decimal('1.09790'), trade_intent_id='ti-1', loss_model=&lt;LossModel.STOP_DISTANCE: 'STOP_DISTANCE'&gt;)]
+E                +  where [VenuePosition(position_id='P1', symbol='EURUSD', direction=&lt;Direction.LONG: 'LONG'&gt;, quantity=Decimal('0.18'), entry_...10017'), stop_price=Decimal('1.09790'), trade_intent_id='ti-1', loss_model=&lt;LossModel.STOP_DISTANCE: 'STOP_DISTANCE'&gt;)] = positions()
+E                +    where positions = PaperAdapter(venue='paper', account_alias='paper_primary', equity=Decimal('10000'), currency='USD', spread=Decimal('0....=1, realised_pnl=Decimal('0'), closed=[], last_price={'EURUSD': Decimal('1.10010')}, pending={}, symbol_contracts=None).positions
+
+../../van-entry-dispatch-parent-runtime-42-20261029/trading/tests/test_entry_dispatch_parent_differential.py:53: AssertionError</failure></testcase></testsuite></testsuites>

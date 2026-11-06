@@ -1,0 +1,32 @@
+{
+  "schema": "van.rebuild.native-read-capacity-source/1",
+  "status": "SOURCE_TESTED_COMPONENT_NOT_UNIT_ACCEPTANCE",
+  "base_head": "5934d42738459784a15037d3d590f19bafae7f7b",
+  "updated_at_utc": "2026-10-25T21:04:30.348392+00:00",
+  "source_sha256": {
+    "trading/vati/execution/ctrader/transport.py": "52352be2366a0d425032802e2ab6a54e51475a6b10651e14d63627ae8b4046a9",
+    "trading/vati/execution/ctrader/adapter.py": "9f0ac1232f0c1de699ee519004dacf3744a3e2bab43414fd026834821eb306c6",
+    "trading/tests/test_ctrader_read_capacity.py": "3f3122b5f87534678518d91a91881859070256aec8502030a6d49f4a9165d28a"
+  },
+  "executed": {
+    "initial_spec": "20 failed/1 passed; API did not exist, not20 production bugs",
+    "first_implementation": "76 passed/1 incorrect oracle: absent optional isServerEvent expected false, pinned codec/proto preserve absence; no product behavior changed",
+    "focused": "113 passed/0 skips/audit0",
+    "postgres_initial": "Fixture schema setup returned2 after pg_isready, before functional assertions. Container removed; failed receipt retained. Not a functional pass.",
+    "postgres_final": "982 unique passed/0 skips/audit0, exact source hashes, pinned isolated PostgreSQL, schema tested via actual SQL over TCP before suite, owned container removed and client children waited",
+    "final_controls": "24 passed/0 skips/audit0 after exact production source restoration",
+    "supplemental_faults": "3/3 assertion-caught/no setup errors; independent of canonical374",
+    "rebuild": "108 passed/0 skips",
+    "source_contracts": "No changes, frontend registry no drift, consolidation0findings",
+    "canonical_mutation_registry": "374cases/383edits/0findings, NOT_EXECUTED_ON_THIS_PACKET"
+  },
+  "limits": [
+    "Per independent native read operation, includes incoming heartbeat/RPC/event frame headers",
+    "Encoded byte reservations exclude4-byte prefixes; admitted header is not decoded/delivered data",
+    "Not a vendor maximum, process-memory sandbox, total service quota or rate qualification",
+    "Generic financial transport and funding reader retain existing policies",
+    "No durable quote/tick/live-bar journal or governed production source worker is activated",
+    "No unit/native/provider/economic/production/S24 acceptance; source remains local-only pending normal push"
+  ],
+  "evidence": "ci/native_read_capacity_20261025"
+}

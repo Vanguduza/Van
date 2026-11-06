@@ -1,0 +1,50 @@
+{
+  "source_head": "1b53cf9199dc3b8ec01cbc4a6125cc90afad2ae6",
+  "observed_at_utc": "2026-11-01T00:44:31.273101+00:00",
+  "source_hashes": {
+    "trading/vati/lifecycle/family.py": "321eb64bd1285e76737bfa89d7286805634c8c93b888514c3c97e64467386694",
+    "trading/vati/lifecycle/envelope.py": "fcd84d466b10e66c57cddfbccd510ab5af5e9e3132bf7fbdea7e26d488f2f477",
+    "trading/vati/lifecycle/expansion.py": "315d704db16fab23dcd958da3b66a32fc74da0e1ae7644e52a7af5fed8456604",
+    "trading/vati/lifecycle/preservation.py": "0cf752d7b653c24d42ff6f88a2c4c044eb18c0177a3a4e00567f995ad43589a4",
+    "trading/vati/app/trade_lifecycle.py": "92006a2ec5fef6b0395af5630e4694fc9603cef3a9846373aa40aba068a078f4",
+    "trading/vati/execution/recovery_scope.py": "86485e26ce300d453c94dfe78041a472e3efb0d11c927a7c8fa755d29e780b97"
+  },
+  "probe_environment": "/workspace/van-backend-venv-20261025/bin/python; PYTHONPATH=trading",
+  "observed_probes": [
+    {
+      "case": "ledger.append raises OSError during open_family",
+      "actual": {
+        "registry_length": 1,
+        "intent_mapping_present": true
+      },
+      "required": "Uncommitted candidate must not become usable current family state."
+    },
+    {
+      "case": "LONG root1@1 + scale2@1.5, stop set to rounded average",
+      "actual": {
+        "exact_basis": "4/3",
+        "stop": "1.333333333333333333333333333",
+        "stop_below_true_basis": true,
+        "_stop_secured": true
+      },
+      "required": "Exact accounting value must govern safety comparison."
+    }
+  ],
+  "review_findings": [
+    "ADD records root intent instead of actual child intent; provenance/recovery needs original child command/receipt linkage.",
+    "NativePositionHistory.position_command bounds current position by root requested quantity; netted additions and hedged children require explicit scoped treatment.",
+    "Recovery entries omit scale_ins_used even when family scale history may be restored.",
+    "All registry mutators publish memory before ledger append; exercise failure, readback and replay boundaries.",
+    "Supervisor skips non-open families; ensure divergence/unresolved recovery still explicitly blocks new risk."
+  ],
+  "required_boundary_scenarios": [
+    "legacy serialized snapshot unchanged; recompute current accounting from original members without validating old hash against new projection",
+    "duplicate member/snapshot replay does not change lifetime counters",
+    "missing family snapshot after committed native fill",
+    "regressing/conflicting snapshots refuse or remain unresolved",
+    "foreign account/symbol/direction/producer/correlation rejected",
+    "partial original entry fill distinguished from requested command quantity",
+    "current venue protection preserved during uncertain family recovery"
+  ],
+  "authority": "source regression review only; no native or formal acceptance"
+}

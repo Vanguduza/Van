@@ -1,0 +1,58 @@
+{
+  "scope": "CANDIDATE_SOURCE_ONLY",
+  "base": "7d78156f0fc2176baab561d3b7761b889696ca05",
+  "hosted_original": {
+    "run": 41714547408,
+    "attempt": 1,
+    "state": "FAILURE",
+    "jobs": 41,
+    "success": 27,
+    "failure": 14,
+    "trading_pg_backend": {
+      "artifact": 13270706572,
+      "sha256": "2635d9aa9dfe120906f9c6125f17191fe88d7fca1018b2a63c2b0642e20b2265",
+      "assertion_clean_cases": 5933,
+      "qualification": "BLOCKED"
+    },
+    "trading_pg_checkout": {
+      "artifact": 13270672789,
+      "sha256": "9b5df44e9bb7650f3819f4abd3b133ca34f36fba75b75f2800dfa9ee8762ac94",
+      "assertion_clean_cases": 5933,
+      "qualification": "BLOCKED"
+    },
+    "browser_backend": {
+      "artifact": 13272030958,
+      "sha256": "cd449aca871d1ab6b3fba8396a825e5f3c32b365abb3c369658e24260a3a75c4",
+      "assertion_clean_cases": 1547,
+      "qualification": "BLOCKED"
+    },
+    "browser_checkout": {
+      "artifact": 13271710743,
+      "sha256": "8e4703a817f97789b2dd1e10c138df4c80a54163bebcd6d2b69b24497dfe4fc9",
+      "assertion_clean_cases": 1547,
+      "qualification": "BLOCKED"
+    },
+    "audit_failure": "OWNED_CHILD_BASELINE_UNPROVEN at inner sessionfinish; missing terminal evidence; outer cleanup succeeded. Actual hosted predicate cause unknown.",
+    "matrix": "12 blocked cells, zero certificates; original source reports remain failed/blocked."
+  },
+  "local_reproduction": {
+    "archive": "SEVEN_D_INNER_TRACKER_REPRO_COMPLETE_20261103T2118Z.zip",
+    "sha256": "3e69bbe1402df1dc3bd1a01bd39da2405b2d9d6d02d56a0f16fa9c0eb3a046fc",
+    "scope": "Synthetic Python spawn joined child with resource tracker alive until interpreter exit; reproduces predicate. Not proof of hosted cause."
+  },
+  "change": "Versioned parent-post protocol limited to trading_pg and browser. Child retains actual exit, phase, identity, runtime and protected observations and marks source observation pending. Exact outer owner must prove clean unforced wait and ECHILD before actual supervised parent source/cache post-observation; both states and immutable artifacts, UUID, source, profile and cwd are bound by the reader. Other profiles retain /2; old blocked records are not upgraded.",
+  "verification": {
+    "full_auditor": "222 passed, zero skips, 129.40s; exact source, supervised no owned descendants",
+    "directed": "Synthetic tracker/no tracker, both cwd and both profiles; resealed artifact/identity/source tampering, nonzero child, live descendant and actual source drift; existing /2 documentary both cwd. These overlap full module.",
+    "review": "Independent integration owner source review of exact shared delta found no concrete issue; real hosted browser and PostgreSQL remain unqualified."
+  },
+  "gateway_fixture": {
+    "failure": "backend-cwd gateway (1) expected one command but observed account_review plus one mt5_ea_issue_key. Hosted subaction unobserved.",
+    "diagnosis": "Controlled isolated diagnostic captured actual ops.retention invoking account_lifecycle_archive_due in the lost-ACK window; initial expectation of one scheduler call failed because automatic and deliberate scheduler runs both occurred; failed diagnostic retained. This proves a mechanism, not hosted identity.",
+    "change": "Only the lost-ACK test receives an app fixture with optional automatic scheduler disabled before startup. Original mutation count, UNKNOWN, durable readback, secret and replay assertions unchanged; production scheduler untouched.",
+    "tests": "11 passed: original lost-ACK, signed recovery neighbors, scheduler suite; separate real retention diagnostic 1 passed. Independent Luna fixture review clear."
+  },
+  "protected_entry_67": "HELD pending actual PR106 code-owner review/trusted merge; unchanged",
+  "formal_acceptance": false,
+  "exact_new_hosted_qualification": "PENDING"
+}

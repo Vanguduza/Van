@@ -1,0 +1,200 @@
+{
+  "archive_sha256": "24071999f2206a6044ad17330a085c9e0a1546fc90f1c809892b8acaae6097e3",
+  "members": [
+    {
+      "path": ".git/code-hardening-20261105/actual-binary-articulation/context-15-EXPLAIN_OPEN_PALMS.png",
+      "sha256": "57033c885db5a5755a6b4fe1b24e05378e12948e9a1c332546fcde3df0167f5f",
+      "bytes": 239393
+    },
+    {
+      "path": ".git/code-hardening-20261105/actual-binary-articulation/context-16-COMPARE_OPTIONS.png",
+      "sha256": "95748e260f3ac738667833cda1a6ece20c62ed9c7a7b161b44539bf0514990b8",
+      "bytes": 241026
+    },
+    {
+      "path": ".git/code-hardening-20261105/actual-binary-articulation/context-17-THINK_CHIN.png",
+      "sha256": "d93331e11ec7f0be36b35df354dce9ec9d8d66647783a9c2d5904dc2571b5116",
+      "bytes": 237703
+    },
+    {
+      "path": ".git/code-hardening-20261105/actual-binary-articulation/context-18-INSPECT_TARGET.png",
+      "sha256": "325fc85fda44a2d7457d776cd4e4d4862e7446ece13050d9a75d7841a66e0f13",
+      "bytes": 233774
+    },
+    {
+      "path": ".git/code-hardening-20261105/actual-binary-articulation/context-19-LISTEN_EMPHASIS.png",
+      "sha256": "e46b61d655635e230a04ecc720dcb7259fc17470aa05f1a744c1a764e55f93b5",
+      "bytes": 238511
+    },
+    {
+      "path": ".git/code-hardening-20261105/actual-binary-articulation/context-20-POLITE_REFUSAL.png",
+      "sha256": "661a3f9e557bd7bc7019c7d7897e1b6a0adc00cd0d76ed21d8ad8c519eca58c8",
+      "bytes": 237109
+    },
+    {
+      "path": ".git/code-hardening-20261105/actual-binary-articulation/context-21-ACKNOWLEDGE_ERROR.png",
+      "sha256": "29f131daf8290379a27f117f7d0e95aa64bacf4288300ce364b5b05532f4bcdc",
+      "bytes": 233616
+    },
+    {
+      "path": ".git/code-hardening-20261105/actual-binary-articulation/context-22-YIELD_TO_INTERRUPTION.png",
+      "sha256": "e52689ec0030780fde8f1bfca7a0c741f09ec07c40a95d432e9c13c1d6f57847",
+      "bytes": 238803
+    },
+    {
+      "path": ".git/code-hardening-20261105/actual-binary-articulation/context-23-REQUEST_CLARIFICATION.png",
+      "sha256": "7c6751f7e0be4b47be259a4c16a552d29686d65b4922492b7196caa3bb1d3d06",
+      "bytes": 235968
+    },
+    {
+      "path": ".git/code-hardening-20261105/actual-binary-articulation/context-24-HANDOFF_RESULT.png",
+      "sha256": "69cab0f1b4f66df730968223f2f01581562d9df68d5ceec8ae9c0ecd0bf383ae",
+      "bytes": 238521
+    },
+    {
+      "path": ".git/code-hardening-20261105/actual-binary-articulation/context-25-RECOVERY_READY.png",
+      "sha256": "7754b216d696779dd27f4d5c09e52b829333fac68627c7434d30d3711741cd0c",
+      "bytes": 238107
+    },
+    {
+      "path": ".git/code-hardening-20261105/actual-binary-articulation/context-26-GUIDE_NEXT_STEP.png",
+      "sha256": "e2ecfe03a918c71f132cef522390634dc5f8739a9e554be4833e04d8d3912bbe",
+      "bytes": 234540
+    },
+    {
+      "path": ".git/code-hardening-20261105/actual-binary-articulation/joint-review-17.png",
+      "sha256": "dd1bcc4e782c77141aea7ee4c38cc4cfc059ed552196646584a152ed497e22a0",
+      "bytes": 236104
+    },
+    {
+      "path": ".git/code-hardening-20261105/actual-binary-articulation/joint-review-26.png",
+      "sha256": "cd32e3da93923561971b3e4b0e626ad94fcb7b5dbc16388cf513e324825d88e4",
+      "bytes": 233408
+    },
+    {
+      "path": ".git/code-hardening-20261105/actual-binary-articulation/joint-review-3.png",
+      "sha256": "93dd8b2c47cb148f2b6509a138ac0080b6619a9de921ec04c5f94f287b6e618b",
+      "bytes": 229783
+    },
+    {
+      "path": ".git/code-hardening-20261105/actual-binary-articulation/joint-review-4.png",
+      "sha256": "253809b87514275f36e06fc36f7dee6a4ab29a8abf948ef2e879363692bfbcf7",
+      "bytes": 235885
+    },
+    {
+      "path": ".git/code-hardening-20261105/actual-binary-articulation/joint-review-5.png",
+      "sha256": "1236b3e11c7611f4b5901ab27c7864ba9f8a937c22897e4a03af41b2026c7e88",
+      "bytes": 229643
+    },
+    {
+      "path": ".git/code-hardening-20261105/actual-binary-articulation/joint-review-8.png",
+      "sha256": "909fa06cb8f705ddab19247cf5a9ecae0e26df65508ee85782129cf9d1007235",
+      "bytes": 230696
+    },
+    {
+      "path": ".git/code-hardening-20261105/actual-binary-articulation/receipt.json",
+      "sha256": "c5fb7591326020c4b432ff4914632498bbe88f26f716afd6947ade9d99a5ff00",
+      "bytes": 124813
+    },
+    {
+      "path": ".git/code-hardening-20261105/actual-binary-natural-motion/receipt.json",
+      "sha256": "8a5be6bbc1de8b105f59cde953c0045f2ad12ade782a92476d3b9f61cc165744",
+      "bytes": 2894
+    },
+    {
+      "path": ".git/code-hardening-20261105/actual-binary-original45.json",
+      "sha256": "6f3d821f22b0ea7edb1dcc6ee8534fa2687e9d39df53fadacce0af89ab6fb5c0",
+      "bytes": 4246
+    },
+    {
+      "path": ".git/code-hardening-20261105/context-packaging-tests.log",
+      "sha256": "28e5d0f98e4ab145255fee565fa61a58e2d0c92f328aaf37b0f2771fd9171df7",
+      "bytes": 7264
+    },
+    {
+      "path": ".git/code-hardening-20261105/final-manifest-aura-architecture.json",
+      "sha256": "5a4bb0370573bcfcd6712b26a0c945da10317622b4e5b7663b267e1460f8bc71",
+      "bytes": 3193
+    },
+    {
+      "path": ".git/code-hardening-20261105/final-mutation-preflight.json",
+      "sha256": "c40e432a79cc165e7a3dcef1d979c3972ec06c854094a81f874c36e50a8b5ed5",
+      "bytes": 311
+    },
+    {
+      "path": ".git/code-hardening-20261105/native-final/whole-application.receipt.json",
+      "sha256": "6353c67b5ad2b4ec293eb203089616844d4a86ab093158d452e1fc8c4134c848",
+      "bytes": 58796
+    },
+    {
+      "path": ".git/code-hardening-20261105/native-wiring-final.log",
+      "sha256": "a85807fa37c42fadf4d62f738ff649aa4299d380b3a399aca1e93edcc31d1842",
+      "bytes": 2933
+    },
+    {
+      "path": ".git/code-hardening-20261105/original-r2-run.log",
+      "sha256": "1ed46b83e89be8e275b9dcec045d4801b19475dae29525975bdfd1bab3cc4acd",
+      "bytes": 9884
+    },
+    {
+      "path": ".git/code-hardening-20261105/packaging-missing-tts-enum/compile-integration.log",
+      "sha256": "a6b46abf1538022e317293dd61a4947ceec616edf09e2f517eb73263ed9cd2f7",
+      "bytes": 3170
+    },
+    {
+      "path": ".git/code-hardening-20261105/pure/compile-integration.log",
+      "sha256": "ef874b80332d25827baf541442e99fabe72660164fce77860829eb9ecb820f5a",
+      "bytes": 650
+    },
+    {
+      "path": ".git/code-hardening-20261105/pure/integration-junit/TEST-junit-jupiter.xml",
+      "sha256": "05ed70f022b871d67f1a56691a4eba93c5b6caf5b5f21ddeb35ea144c5acda75",
+      "bytes": 145211
+    },
+    {
+      "path": ".git/code-hardening-20261105/pure/integration-junit/TEST-junit-platform-suite.xml",
+      "sha256": "3b50608b682eb1676380b821c60581f5c75ac79276ccb6bf667060a09368d987",
+      "bytes": 7008
+    },
+    {
+      "path": ".git/code-hardening-20261105/pure/integration-junit/TEST-junit-vintage.xml",
+      "sha256": "11475e100c102121761c3f99b7ad06d50fb6c91c24d972599253db58081c84e6",
+      "bytes": 6987
+    },
+    {
+      "path": ".git/code-hardening-20261105/pure/integration-receipt.json",
+      "sha256": "562887103ea40573100f39881b7fcfe575c698e19785a5514b79e2832d7bb818",
+      "bytes": 12943
+    },
+    {
+      "path": ".git/code-hardening-20261105/pure/tests-integration.log",
+      "sha256": "26716730033b3a8262aed498843c9ad3e9212d8aef00dbb04edf7264ac01dfc1",
+      "bytes": 548
+    },
+    {
+      "path": ".git/code-hardening-20261105/retained-independent-wiring-final.log",
+      "sha256": "3f6b77a2d2334f9156937d74a003f73197b47c02f46a279e9a4fdc2a2e32dc74",
+      "bytes": 1736
+    },
+    {
+      "path": ".git/code-hardening-20261105/retained-usability-final.log",
+      "sha256": "8644f4a273517f886d00d337650788ca308b7e22571f96614606cd3d6b6f1041",
+      "bytes": 2998
+    },
+    {
+      "path": ".git/code-hardening-20261105/voice-bundle-acquisition.receipt.json",
+      "sha256": "92c20c59959f2c38b1efdc688015d5d35ea805f184f150adfd135c1b74776fa7",
+      "bytes": 941
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/source-receipt.json",
+      "sha256": "15f014c879fc2d5f19e85e261c8014bf5306fb9235094a3b56f4f11a95d0db36",
+      "bytes": 14517
+    },
+    {
+      "path": "visual-authority/character-forge/08-prototypes/candidate-b-mechanics/raster-full-r5/van.context.json",
+      "sha256": "39a5d1947c9dd057e6616eb2656042945fbe098bc1ec13339d9f3bc74c5342ed",
+      "bytes": 1784
+    }
+  ]
+}

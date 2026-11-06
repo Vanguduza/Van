@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "authorization_id": "auth-20260930-owner-derived-programme-a-ledger-push-trust",
+  "project": "van",
+  "authority": "OWNER_DERIVED",
+  "owner_instruction_sha256": "1fb51f92482bc51e4c6d7fc1ef508b3070a56c0d024dd773927367162ce72dfb",
+  "owner_instruction_digest_input": "UTF-8 bytes of the verbatim owner answer (double space preserved), no quotes, no trailing newline",
+  "owner_instruction_record": "docs/decisions/OWNER-DECISION-20260930-OWNER-DERIVED-AND-LEDGER-ENFORCEMENT.md",
+  "owner_instruction_excerpt": "Yes to owner derived treatment and  enforce van's ledger",
+  "source": {
+    "kind": "owner_session_instruction",
+    "channel": "claude_code",
+    "request_id": "claude-code-session_01ELKqm4GCPmPvF3ggKkgB1J-20260930",
+    "owner_attested": true,
+    "device_signature_claimed": false,
+    "cryptographic_signature_claimed": false,
+    "signed_ingress_claimed": false
+  },
+  "signature_note": "Derived authority; no signature claimed. Review I7 (MINOR 9) showed the push-trigger ledger job trusted github.event.before, so two chained pushes could neuter the checker; taking the trusted checker from a protected ref is a necessary consequence of the owner's order to enforce VAN's ledger. Mirrors the same change on Programme B. The owner did not review this diff.",
+  "purpose": "Authorize unit G11's CI trusted-ref change on Programme A.",
+  "authorized_paths": [
+    ".github/workflows/van-ci.yml",
+    "tests/contracts/test_project_truth_ledger.py",
+    "tools/ci/README.md",
+    "tools/ci/github-actions-ci.yml"
+  ],
+  "commit_scope": {
+    "commits": [
+      "ade0654076f3e81ab7a626cc57781880a2250c30"
+    ]
+  },
+  "limits": [
+    "Covers only the listed paths in the listed commit.",
+    "Opens no production gate; not reusable."
+  ],
+  "issued_at_utc": "2026-09-30T00:00:00Z",
+  "recorded_by": "integrator (session_01ELKqm4GCPmPvF3ggKkgB1J)",
+  "material_scope_expansion": false,
+  "feature_removal": false,
+  "business_model_change": false,
+  "security_authority_change": false,
+  "owner_control_boundary_change": false,
+  "legal_position_change": false,
+  "money_or_custody_model_change": false,
+  "locked_provider_change": false,
+  "reusable": false,
+  "revoked": false
+}

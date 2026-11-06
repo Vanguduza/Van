@@ -1,0 +1,11 @@
+{
+  "baseline": "4fd466dec3910ed5de614bfbf95887ad619df5ca",
+  "commits": 263,
+  "findings": [],
+  "head": "d78368f2df1426a124072e7e04d703327f229ccd",
+  "ledger_source": "d78368f2df14:docs/project-state/LOCAL_CHANGE_LEDGER.jsonl",
+  "mode": "verify",
+  "start": "4fd466dec3910ed5de614bfbf95887ad619df5ca",
+  "status": "GREEN",
+  "trusted_records": "d78368f2df14"
+}

@@ -1,0 +1,67 @@
+{
+  "schema": "van.rebuild.physical-account-source/1",
+  "base_head": "b0a61313e5167bafca4dbeea96f2bfcc5c7c6b90",
+  "updated_at_utc": "2026-10-27T05:01:03.760952+00:00",
+  "status": "SOURCE_TESTED_COMPONENT_NOT_UNIT_ACCEPTANCE",
+  "acceptance": "NOT_ISSUED",
+  "units": [
+    "BE-009"
+  ],
+  "implementation": "Native sending profiles in both runtime builders now require the existing logical alias lease and an additional expected physical-account lease. The original alias/public epoch, holder, CAS, owner controls and native identity checks remain. cTrader uses the actual factory host and normalized account ID; MT5 bridge/EA share exact native server/login; Deriv uses native login/environment, excluding client app and endpoint aliases. Display, credential, route and currency labels cannot split one expected scope. Non-sending/paper/owner-ticket paths retain their original contract. Both rows remain locked through final submission; partial acquisition/renewal refuses and releases only this holder/epoch. Unchanged b0 actual PostgreSQL builders reproduced4duplicate-account failures with8controls. 128first focused,78extended and52current pure checks pass; counts overlap and earlier snapshots differ. The extended run includes actual peer lock waits across nested fences, guards, SQL errors and original body failures, plus retirement/profile/unknown-effect/recovery controls. Published b0 cognitive Python broad collection failed because its locked environment lacks optional psycopg. Imports in both PG test modules now occur behind the unchanged canonical pg_dsn fixture; no assertion, case or opt-in rule was removed. Controlled absent-driver collection changes from2errors to4388collected/0errors, not a runtime pass.79focused cognitive runtime cases also pass under that explicit absent-driver fixture. First combined run was deliberately interrupted for that fix, with raw signal/pytest teardown error retained and fixture independently absent. Stable current combined922actualSQL/HTTP cases pass 0skip/audit0/all1167source-test hashes matching/ownedPGindependentlyabsent;165rebuild/private-topology checks pass. This does not share financial history/reservations or solve alias handover/unknown-effect reconciliation, fence old binaries, qualify a mixed cohort or establish native connectivity. No unit, production, economic or S24 acceptance.",
+  "source_sha256": {
+    "trading/vati/accounts/physical_scope.py": "be3f035b19e51cc6af17e3d04827433f5e664125514b2427981399587bc37354",
+    "trading/vati/app/physical_account_lease.py": "d7abe7c1c14e6d79b25dd99605c24b9c1932c56cb19ab4bd7629d39a5b900a41",
+    "trading/vati/app/service.py": "17f3b4c4d271277cd5c6956d384ac5fd7c199b262aa675f7386a0f2cdb2e761d",
+    "trading/vati/app/account_service.py": "de5471b861e0e11a6cc56fc8f455d4d7e67aec09c01c00c4862120e008a79a3b",
+    "trading/tests/test_physical_account_builders.py": "a1bd32915bc177dbb9416d5a9eb6687231ae2904c2461f77a3c2485520699673",
+    "trading/tests/test_physical_account_lease.py": "2cfddd265206b237ca3d708f8f92cf04e5f6f771e6a7bab1da5d856834db1ac8",
+    "trading/tests/test_physical_account_lease_postgres.py": "98befd98665e30e0fda3c64e41e100ab3e03c72b5efbec3ff4f6e353d3ee052a",
+    "trading/tests/test_postgres_lease_guard_ownership.py": "ebef573f89828bd3d6096bba47a686887b766c0cad55a40c8b8ad9dfb49ab997"
+  },
+  "actual_tests": {
+    "baseline_failed": 4,
+    "baseline_passed_controls": 8,
+    "first_focused": 128,
+    "extended": 78,
+    "current_pure": 52,
+    "new_scope_cases": 68,
+    "stable_combined": 922,
+    "stable_skips": 0,
+    "audit_violations": 0,
+    "current_source_hashes": 1167,
+    "owned_fixture_independently_absent": true,
+    "rebuild": 165,
+    "counts_overlap": true
+  },
+  "absent_driver_collection": {
+    "environment": "EXPLICIT_SIMULATED_ABSENCE_NOT_HOSTED_RUNTIME",
+    "before_errors": 2,
+    "after_collected": 4388,
+    "after_errors": 0,
+    "collection_runtime_tests_executed": 0,
+    "separate_actual_focused_runtime_passes": 79
+  },
+  "contracts": {
+    "endpoints": 483,
+    "schemas": 376,
+    "original_coverage": [
+      42,
+      105,
+      78
+    ],
+    "drift": false
+  },
+  "canonical_mutation_preflight": {
+    "cases": 374,
+    "edits": 383,
+    "findings": [],
+    "execution": "NOT_RUN"
+  },
+  "remaining": [
+    "Shared physical-account financial lineage and all-origin risk/reservations",
+    "Cross-alias handover, unresolved effects, retirement and provider reconciliation",
+    "Coherent runtime cohort drain/migration and independent native qualification",
+    "Full canonical backend, provisioning/signing/deployment and Android/S24 programme"
+  ],
+  "evidence": "ci/physical_account_scope_20261027"
+}

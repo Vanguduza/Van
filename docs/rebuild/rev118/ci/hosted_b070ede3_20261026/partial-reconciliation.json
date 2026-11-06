@@ -1,0 +1,90 @@
+{
+  "exact_source_head": "b070ede371980f7596d116c3e585023f9b4bf57a",
+  "junit": {
+    "van-market-monitor-source/report.xml": {
+      "total": 258,
+      "passed": 258,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-browser-guard-source/uid-report.xml": {
+      "total": 1,
+      "passed": 1,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-browser-guard-source/full-report.xml": {
+      "total": 1548,
+      "passed": 1547,
+      "skips": 1,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-browser-guard-source/report.xml": {
+      "total": 11,
+      "passed": 11,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-browser-guard-source/firewall-report.xml": {
+      "total": 10,
+      "passed": 10,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-postgres-ledger-report/trading-source-report.xml": {
+      "total": 3726,
+      "passed": 3725,
+      "skips": 1,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-postgres-ledger-report/voice-source-report.xml": {
+      "total": 117,
+      "passed": 117,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-postgres-ledger-report/postgres-ledger-report.xml": {
+      "total": 26,
+      "passed": 26,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-actual-release-guards/report.xml": {
+      "total": 2,
+      "passed": 2,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-backend-public-source/media-report.xml": {
+      "total": 198,
+      "passed": 198,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-backend-public-source/gateway-report.xml": {
+      "total": 5782,
+      "passed": 5775,
+      "skips": 7,
+      "failures": 0,
+      "errors": 0
+    }
+  },
+  "canonical_mutations": {
+    "unique_caught_once": 374,
+    "edits": 383,
+    "survivors": 0,
+    "unexecuted": 0,
+    "counter_matches_actual_registry": true
+  },
+  "native_or_unit_acceptance": false
+}

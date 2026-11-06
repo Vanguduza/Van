@@ -1,0 +1,21 @@
+.........F...............                                                [100%]
+=================================== FAILURES ===================================
+_ test_cold_relay_replay_keeps_its_original_availability_instead_of_retry_time _
+
+ledger = <vati.core.ledger.Ledger object at 0x7f34a3e0fdd0>
+
+    def test_cold_relay_replay_keeps_its_original_availability_instead_of_retry_time(ledger):
+        news=NewsIngress(ledger=ledger);h=story();news.ingest(h,now_ms=NOW)
+        relay=story(source_id='relay',observed_ms=NOW+1000);news.ingest(relay,now_ms=NOW+1000)
+        head=ledger.head();cold=NewsIngress(ledger=ledger)
+        assert cold.ingest(relay,now_ms=NOW+2000) is None
+        impacts=cold.assess_subject(subject_kind='POSITION',subject_id='p',symbol='EURUSD',now_ms=NOW+1000,persist=False)
+>       assert len(impacts)==1 and 'relay' in impacts[0].evidence_refs
+E       AssertionError: assert (1 == 1 and 'relay' in ('138bd873f2a6c652858d8f2f466ac369cd194fb68ff43f2a00a3d50a892ec36f', 'publisher'))
+E        +  where 1 = len([EventImpactAssessment(impact_id='3e96da932e066a3877d559be', headline_id='138bd873f2a6c652858d8f2f466ac369', subject_k...6ac369cd194fb68ff43f2a00a3d50a892ec36f', 'publisher'), assessed_ms=1800000001000, impact_version='event-impact/5.1.2')])
+E        +  and   ('138bd873f2a6c652858d8f2f466ac369cd194fb68ff43f2a00a3d50a892ec36f', 'publisher') = EventImpactAssessment(impact_id='3e96da932e066a3877d559be', headline_id='138bd873f2a6c652858d8f2f466ac369', subject_ki...66ac369cd194fb68ff43f2a00a3d50a892ec36f', 'publisher'), assessed_ms=1800000001000, impact_version='event-impact/5.1.2').evidence_refs
+
+trading/tests/test_news_durable_publication.py:128: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_news_durable_publication.py::test_cold_relay_replay_keeps_its_original_availability_instead_of_retry_time
+1 failed, 24 passed, 2 deselected in 0.80s

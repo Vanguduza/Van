@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "authorization_id": "auth-20260929-owner-stagehand-private-plane-gates",
+  "project": "van",
+  "authority": "OWNER_EXPLICIT",
+  "owner_instruction_sha256": "64f1c0560ef88776d0d199392d315767ea3576827e335ba2da8081d12e307c81",
+  "owner_instruction_record": "docs/decisions/OWNER-DECISIONS-20260929-STAGEHAND-PRIVATE-PLANE.md",
+  "owner_instruction_excerpt": "These decisions close OQ-STAGEHAND-HOST, OQ-STAGEHAND-SIGNED-INGRESS, OQ-VAN-PRIVATE-PLANE-HOST, OQ-STAGEHAND-MODEL and OQ-STAGEHAND-VERSION-AT-ADOPTION. ... HEALTH GOVERNANCE BUG — MUST FIX",
+  "source": {
+    "kind": "owner_session_instruction",
+    "channel": "claude_code",
+    "request_id": "claude-code-session_01ELKqm4GCPmPvF3ggKkgB1J-20260929",
+    "owner_attested": true,
+    "device_signature_claimed": false,
+    "cryptographic_signature_claimed": false,
+    "signed_ingress_claimed": false
+  },
+  "signature_note": "Owner message in a Claude Code session. No device, biometric or cryptographic signature is claimed, and this record is not signed-ingress evidence (decisions section 2 keeps SIGNED_INGRESS_PENDING).",
+  "issued_at_utc": "2026-09-29T00:00:00Z",
+  "base_sha": "379d6ab2f08a78f62813a70d6e30a8b7622fa856",
+  "branch_scope": "gpt/jev-openmuse-convergence-r1-van-20260929 (unit-k-gates worktree branch, integrated by the Programme B integrator)",
+  "authorized_paths": [
+    "docs/decisions/OWNER-DECISIONS-20260929-STAGEHAND-PRIVATE-PLANE.md",
+    "docs/decisions/VAN-ADOPT-STAGEHAND-001.yaml (append-only)",
+    "docs/project-state/authorizations/**",
+    "docs/project-state/MISSION_PROVENANCE_MEMORY_FABRIC_JEV_20260929.md (provenance correction only)",
+    "backend/van_gateway/automation/health.py",
+    "backend/van_gateway/automation/production_gates.py",
+    "registries/production_activation_gates.json",
+    "backend/tests/**",
+    "tests/contracts/**"
+  ],
+  "excluded_paths": [
+    "backend/van_gateway/browser/** (unit G)",
+    "deploy/** (unit M)"
+  ],
+  "decision_sections_in_scope": [
+    "1 (recorded)",
+    "2",
+    "3 (recorded)",
+    "4",
+    "5",
+    "6"
+  ],
+  "change_classes": [
+    "decision_registration",
+    "project_truth_reconciliation",
+    "governance_gate_fix",
+    "verification"
+  ],
+  "material_scope_expansion": false,
+  "feature_removal": false,
+  "business_model_change": false,
+  "security_authority_change": false,
+  "owner_control_boundary_change": false,
+  "legal_position_change": false,
+  "money_or_custody_model_change": false,
+  "locked_provider_change": false,
+  "reusable": false,
+  "revoked": false
+}

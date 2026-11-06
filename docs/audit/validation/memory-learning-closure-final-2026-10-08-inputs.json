@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "created_at_utc": "2026-10-08T04:52:56.851081+00:00",
+  "scope": "Scoped source sampled while focused final run is active; final whole-production source manifest separately authoritative.",
+  "files": {
+    "backend/tests/test_decision_details.py": "bd52a51caeaf10df4e9be2fe2b70c374b19f70933baee186258151f1d402ac8c",
+    "backend/tests/test_decision_resolution_recovery.py": "ec01c5453eccb04ff7ec851fa0c1c882ab11272e7c9a8f32980c02697c938a19",
+    "backend/tests/test_knowledge_runtime.py": "951139d81cd02948f5ac8761d1a0c9d50f2ca9700eb793866f8f15b69bdf42c1",
+    "backend/tests/test_observed_learning_producers.py": "347e64fe823cdd853a3128bb12ab12d01167dae53c4ca4e22fc685022d25b41c",
+    "backend/tests/test_owner_declaration_writers.py": "368ddbeafcc71de4a005a0b19075835d9d6a6e256f1c147c2ab096663139c26c",
+    "backend/tests/test_owner_memory_erasure.py": "cb02d3ae776a4f20a33811fb5a2c7b190ceb704d180155d0f69d1710ef88da31",
+    "backend/tests/test_owner_record_controls.py": "64b2450cb65343854988a88aac40a12e32e4fbcade957755fcce300b6a26179d",
+    "backend/tests/test_owner_record_erasure.py": "d8f31fd6dd1885820274944a6d99f4f39d8142e47af98d2244bd0c9ed3df1d00",
+    "backend/van_gateway/context/memory_erasure.py": "39a8f0ee2fbf7087d989ccceef4e61fed3f70b39829e3f6ca300e2d6a4a556c0",
+    "backend/van_gateway/knowledge/evidence.py": "cf4e30ba3a4c4f6aca0e47fc5546307acd0247296e5ce486d027e542b3c9792e",
+    "backend/van_gateway/learning/observations.py": "f5f61eac887f61742196d4d55140313a3717c9938d9f10394afb9a8988a18362",
+    "backend/van_gateway/owner_api.py": "4304d59bd4cd636ac6a3925d5b67f00a67b6345272bd69773986398a7182fe96",
+    "backend/van_gateway/owner_privacy.py": "e7bab160d24962dfe83490d71ae2636b633517d711b68e0d13c74b1a5cee8aa4",
+    "backend/van_gateway/understanding/api.py": "3d0174755622cf079bc84d73cfd4b143dc58890729a0f4389f293d4ef0c8f7e8",
+    "backend/van_gateway/understanding/record_models.py": "c91e86f69b7415e40df0179deab4dbaecbcc367a7127593496ac7acd3ce375be",
+    "backend/van_gateway/understanding/records.py": "2c55cc5943fa75790734f6fb0e6e25d6488a3cebab48076a27d4b146a6c32bdd"
+  }
+}

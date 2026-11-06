@@ -1,0 +1,76 @@
+{
+  "schema": "van.rebuild.source-qualification/1",
+  "source_head": "2e93ab52066565dc81edf9a92ed3423e70c64edc",
+  "observed_at_utc": "2026-10-23T15:23:43.345298+00:00",
+  "result": "PASS_WITH_LISTED_SKIPS",
+  "backend_contracts": {
+    "tests": 6989,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 9,
+    "passed": 6980,
+    "seconds": 2805.503,
+    "xml_sha256": "736b341c69747b2b7a122c8c8fd95aee0b21efc9f5c1e36ddb6af9523877dc74"
+  },
+  "trading": {
+    "tests": 2500,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 2500,
+    "seconds": 510.719,
+    "xml_sha256": "c510ac52b9ab5768216ca96886ec0019734bed16a7b1fde4c2cf98c0afc9148c"
+  },
+  "storage_audit": {
+    "schema": "van.source-storage-audit/1",
+    "forbidden_events": [],
+    "source_sha256": "d4e270150fb0da6e8d79b449dd0de68fd1f97b3ccea3d282f31d91297edbd495",
+    "root": "/workspace/van-autonomous-qualification-20261022/Van",
+    "scope": "SQLite opens, path-based writable opens and directory/link/rename/delete events under data and backend/data",
+    "limits": "Python audit events only; existing fd writes, native-library raw I/O and external processes are not an OS sandbox. Git state is checked separately."
+  },
+  "private_pg_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "worktree_clean": true,
+  "backend_skips": [
+    {
+      "case": "backend.tests.test_browser_egress_proxy_i8::test_only_the_configured_client_uid_may_use_a_listener",
+      "reason": "needs root and setpriv"
+    },
+    {
+      "case": "backend.tests.test_jev_no_generic_executor::test_no_fabric_or_generic_operation_survives_the_b1_validator[click]",
+      "reason": "member of the B1 closed set by definition"
+    },
+    {
+      "case": "backend.tests.test_jev_no_generic_executor::test_no_fabric_or_generic_operation_survives_the_b1_validator[scroll]",
+      "reason": "member of the B1 closed set by definition"
+    },
+    {
+      "case": "backend.tests.test_jev_no_generic_executor::test_no_fabric_or_generic_operation_survives_the_b1_validator[select]",
+      "reason": "member of the B1 closed set by definition"
+    },
+    {
+      "case": "tests.contracts.test_van_browser_core_firewall::test_live_ruleset_drops_browser_udp_and_direct_tcp",
+      "reason": "needs root, unshare -n, nft and setpriv"
+    },
+    {
+      "case": "tests.contracts.test_van_browser_core_firewall::test_live_dns_to_an_off_host_resolver_is_udp_only",
+      "reason": "needs root, unshare -n, nft and setpriv"
+    },
+    {
+      "case": "tests.contracts.test_van_browser_core_firewall::test_live_qualify_reports_the_firewall_and_the_proxy_green",
+      "reason": "needs root, unshare -n, nft and setpriv"
+    },
+    {
+      "case": "tests.contracts.test_van_browser_core_firewall::test_live_qualify_fails_without_the_ruleset",
+      "reason": "needs root, unshare -n, nft and setpriv"
+    },
+    {
+      "case": "tests.contracts.test_van_browser_core_firewall::test_live_qualify_does_not_take_a_kernel_reset_for_the_ruleset",
+      "reason": "needs root, unshare -n, nft and setpriv"
+    }
+  ],
+  "qualification": "Exact frozen candidate source with actual private PostgreSQL, Chromium, Android build dependencies and pinned DDS. Does not promote later commits, certify whole units, native/provider execution, production or handset acceptance."
+}

@@ -1,0 +1,38 @@
+{
+  "asset_id": "eip155:8453:0x1111111111111111111111111111111111111111",
+  "available_at": "2026-10-17T10:00:00Z",
+  "cash_currency": "USD",
+  "decision_cutoff": "2026-10-17T10:01:00Z",
+  "expires_at": "2026-10-17T10:05:00Z",
+  "implementation_evidence_level": "SPEC_ONLY",
+  "included_cost_components": [
+    "entry_spread",
+    "entry_impact"
+  ],
+  "observed_cash_amount": "100",
+  "payload_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "pool_id": "fixture:pool:1",
+  "price_convention": "TOTAL_CASH_FOR_REQUESTED_SIZE",
+  "quantity": "10",
+  "quantity_unit": "TOKEN_BASE_UNITS",
+  "quote_id": "fixture:quote:1",
+  "quote_status": "CURRENT",
+  "reality": "SYNTHETIC",
+  "record_id": "fixture:ExecutableQuoteFacts:1",
+  "research_source_class": "SYNTHETIC",
+  "router_id": "fixture:router:1",
+  "schema_version": "1.0",
+  "side": "BUY",
+  "source_refs": [
+    "fixture:controlled-input-only"
+  ],
+  "state_anchor": {
+    "chain_id": "eip155:8453",
+    "finality": "FINALIZED",
+    "hash": "synthetic-block-100",
+    "height": 100,
+    "state_epoch": 1
+  },
+  "trade_authorized": false,
+  "venue": "SYNTHETIC_DEX"
+}

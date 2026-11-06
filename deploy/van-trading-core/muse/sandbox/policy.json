@@ -1,0 +1,19 @@
+{
+  "AutofillAddressEnabled": false,
+  "AutofillCreditCardEnabled": false,
+  "BackgroundModeEnabled": false,
+  "BrowserSignin": 0,
+  "DefaultGeolocationSetting": 2,
+  "DefaultNotificationsSetting": 2,
+  "DeveloperToolsAvailability": 1,
+  "DownloadDirectory": "/home/muse/downloads",
+  "ExtensionInstallBlocklist": [
+    "*"
+  ],
+  "PasswordManagerEnabled": false,
+  "PromptForDownloadLocation": false,
+  "SafeBrowsingProtectionLevel": 2,
+  "SyncDisabled": true,
+  "RemoteDebuggingAllowed": true,
+  "HeadlessMode": 1
+}

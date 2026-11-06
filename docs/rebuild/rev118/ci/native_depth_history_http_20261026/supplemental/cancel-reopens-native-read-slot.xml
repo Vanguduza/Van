@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="23.592" timestamp="2026-10-26T22:28:22.563530+00:00" hostname="2c5a245e39f1"><testcase classname="tests.test_native_depth_history" name="test_cancelled_call_keeps_its_original_worker_slot_until_the_read_finishes" time="5.207"><failure message="AssertionError: owned read control was not released&#10;assert False&#10; +  where False = wait(5)&#10; +    where wait = &lt;threading.Event at 0x7f53ffbf01d0: unset&gt;.wait">@pytest.mark.asyncio
+    async def test_cancelled_call_keeps_its_original_worker_slot_until_the_read_finishes():
+        started=threading.Event();release=threading.Event();lock=threading.Lock();state={'active':0,'count':0}
+        class Blocking:
+            def native_depth_history(self,**request):
+                with lock:
+                    state['active']+=1;state['count']+=1
+                    if state['active']==2:started.set()
+                try:
+                    assert release.wait(5),'owned read control was not released'
+                    raise DepthHistoryError('NATIVE_DEPTH_SOURCE_UNCONFIGURED')
+                finally:
+                    with lock:state['active']-=1
+        app=FastAPI();app.include_router(build_depth_history_router(Blocking()))
+        async with AsyncClient(transport=ASGITransport(app=app),base_url='http://fixture') as ac:
+            first=asyncio.create_task(ac.get(PATH,params=QUERY));second=asyncio.create_task(ac.get(PATH,params=QUERY))
+            try:
+                assert await asyncio.to_thread(started.wait,3)
+                first.cancel()
+                with pytest.raises(asyncio.CancelledError):await first
+&gt;               busy=await ac.get(PATH,params=QUERY)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend/tests/test_native_depth_history.py:171: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../van-backend-venv-20261025/lib/python3.12/site-packages/httpx/_client.py:1768: in get
+    return await self.request(
+../../van-backend-venv-20261025/lib/python3.12/site-packages/httpx/_client.py:1540: in request
+    return await self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../van-backend-venv-20261025/lib/python3.12/site-packages/httpx/_client.py:1629: in send
+    response = await self._send_handling_auth(
+../../van-backend-venv-20261025/lib/python3.12/site-packages/httpx/_client.py:1657: in _send_handling_auth
+    response = await self._send_handling_redirects(
+../../van-backend-venv-20261025/lib/python3.12/site-packages/httpx/_client.py:1694: in _send_handling_redirects
+    response = await self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../van-backend-venv-20261025/lib/python3.12/site-packages/httpx/_client.py:1730: in _send_single_request
+    response = await transport.handle_async_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../van-backend-venv-20261025/lib/python3.12/site-packages/httpx/_transports/asgi.py:170: in handle_async_request
+    await self.app(scope, receive, send)
+../../van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/applications.py:1163: in __call__
+    await super().__call__(scope, receive, send)
+../../van-backend-venv-20261025/lib/python3.12/site-packages/starlette/applications.py:96: in __call__
+    await self.middleware_stack(scope, receive, send)
+../../van-backend-venv-20261025/lib/python3.12/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+../../van-backend-venv-20261025/lib/python3.12/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+../../van-backend-venv-20261025/lib/python3.12/site-packages/starlette/middleware/exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+../../van-backend-venv-20261025/lib/python3.12/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+../../van-backend-venv-20261025/lib/python3.12/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+../../van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/middleware/asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+../../van-backend-venv-20261025/lib/python3.12/site-packages/starlette/routing.py:670: in __call__
+    await self.middleware_stack(scope, receive, send)
+../../van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/routing.py:2734: in app
+    await route.handle(scope, receive, send)
+../../van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/routing.py:1780: in handle
+    await self.original_router.handle(scope, receive, send)
+../../van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/routing.py:2789: in handle
+    await included_router._handle_selected(scope, receive, send)
+../../van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/routing.py:1800: in _handle_selected
+    await original_route.handle(scope, receive, send)
+../../van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/routing.py:1279: in handle
+    await app(scope, receive, send)
+../../van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/routing.py:158: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+../../van-backend-venv-20261025/lib/python3.12/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+../../van-backend-venv-20261025/lib/python3.12/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+../../van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/routing.py:144: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+backend/van_gateway/trading/native_depth_history.py:111: in private
+    try:response=await original(request)
+                 ^^^^^^^^^^^^^^^^^^^^^^^
+../../van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/routing.py:706: in app
+    raw_response = await run_endpoint_function(
+../../van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/routing.py:352: in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/van_gateway/trading/native_depth_history.py:154: in history
+    return await task
+           ^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/threads.py:25: in to_thread
+    return await loop.run_in_executor(None, func_call)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/concurrent/futures/thread.py:59: in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;test_native_depth_history.test_cancelled_call_keeps_its_original_worker_slot_until_the_read_finishes.&lt;locals&gt;.Blocking object at 0x7f53ffbf0680&gt;
+request = {'environment': 'DEMO', 'native_account_id': 123, 'native_symbol_id': 12, 'revision': None, ...}
+
+    def native_depth_history(self,**request):
+        with lock:
+            state['active']+=1;state['count']+=1
+            if state['active']==2:started.set()
+        try:
+&gt;           assert release.wait(5),'owned read control was not released'
+E           AssertionError: owned read control was not released
+E           assert False
+E            +  where False = wait(5)
+E            +    where wait = &lt;threading.Event at 0x7f53ffbf01d0: unset&gt;.wait
+
+backend/tests/test_native_depth_history.py:160: AssertionError</failure></testcase></testsuite></testsuites>

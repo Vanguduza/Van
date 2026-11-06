@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "authorization_id": "auth-20260930-owner-derived-van-ledger-review-i6-g9a",
+  "project": "van",
+  "authority": "OWNER_DERIVED",
+  "owner_instruction_sha256": "1fb51f92482bc51e4c6d7fc1ef508b3070a56c0d024dd773927367162ce72dfb",
+  "owner_instruction_digest_input": "UTF-8 bytes of the verbatim owner answer \"Yes to owner derived treatment and  enforce van's ledger\" (double space preserved) with no quotes and no trailing newline",
+  "owner_instruction_record": "docs/decisions/OWNER-DECISION-20260930-OWNER-DERIVED-AND-LEDGER-ENFORCEMENT.md",
+  "owner_instruction_excerpt": "Yes to owner derived treatment and  enforce van's ledger",
+  "derived_from": {
+    "owner_answer_2026_09_30": "enforce van's ledger (question 2 of docs/decisions/OWNER-DECISION-20260930-OWNER-DERIVED-AND-LEDGER-ENFORCEMENT.md)",
+    "sibling_authorization": "auth-20260930-owner-van-ledger-enforcement",
+    "why_derived": "Independent review I6 (M1, M2) showed the checker the owner ordered did not enforce what the records claim: rows could cite non-reusable records for any commit, a PR could authorize itself, edit a record, pick its own baseline and config, and run its own checker. Closing those gaps is a necessary consequence of 'enforce van's ledger'. The design (commit scopes, scope bindings, intake commits, base-ref trust, CODEOWNERS) is the integrator's (unit G9a), not separately approved by the owner."
+  },
+  "source": {
+    "kind": "owner_session_instruction",
+    "channel": "claude_code",
+    "request_id": "claude-code-session_01ELKqm4GCPmPvF3ggKkgB1J-20260930",
+    "owner_attested": true,
+    "device_signature_claimed": false,
+    "cryptographic_signature_claimed": false,
+    "signed_ingress_claimed": false
+  },
+  "signature_note": "The owner answered in a Claude Code session. No device, biometric or cryptographic signature is claimed. This record is not signed-ingress evidence. The owner did not approve each commit or each file.",
+  "limits": [
+    "No signature of any kind is claimed.",
+    "The authority is derived: it covers only the listed files in the commits listed in commit_scope (unit G9a on both programme branches), and no other commit.",
+    "It does not authorize any product, browser, trading, Jev, Android, Hermes, deploy or storage change, and it does not open any production activation gate.",
+    "It may not redefine security, owner-control or money/custody intent. CODEOWNERS names the repository owner for governance paths; it grants no one else anything.",
+    "Branch protection (required check, code-owner review) is a GitHub setting outside the repository; this record does not claim it is enabled.",
+    "Not reusable: exact paths, exact commits."
+  ],
+  "issued_at_utc": "2026-09-30T00:00:00Z",
+  "base_sha": {
+    "programme_b": "72e721205118ce5339fd6104daa27079fee613c1",
+    "programme_a": "8780c9908150547bb6bdfbd0310d7feb08f4dbd6"
+  },
+  "branch_scope": "gpt/jev-openmuse-convergence-r1-van-20260929 (unit-g9a) and gpt/memory-fabric-rev1-2-van-20260929 (unit-g9a-a); byte-identical on both",
+  "commit_scope": {
+    "commits": [
+      "280f5ab10c097a71caed0b5b9a1b844049632feb",
+      "780d60b430c1189561a79607329a18e710251e9e",
+      "96b8574e1d2cba43b6f1d952e31dfc48cd8a5fdc",
+      "77bee4b70b9306b328f55d56fc93b9a50b3aed1e",
+      "a2be27b4877b378ca850a7b70b5e5410f844009b",
+      "c770b5bb67c795ba22c3fdc0eedb7e21910dde56"
+    ],
+    "derivation": "git rev-list 72e72120..<unit-g9a code head> (Programme B) and git rev-list 8780c990..<unit-g9a-a code head> (Programme A)",
+    "note": "The unit G9a code commits on each branch. The intake commit that adds this record and the ledger-only commit that adds its rows are not listed: an intake commit is authorized by no record, and a ledger-only commit needs no row."
+  },
+  "authorized_paths": [
+    ".github/CODEOWNERS",
+    ".github/workflows/van-ci.yml",
+    "tests/contracts/ledger_guard_mutations.py",
+    "tests/contracts/test_project_truth_ledger.py",
+    "tools/ci/README.md",
+    "tools/ci/github-actions-ci.yml",
+    "tools/ci/project_truth_ledger.py"
+  ],
+  "reusable": false,
+  "revoked": false,
+  "decision_sections_in_scope": [
+    "2026-09-30 answer, question 2"
+  ],
+  "change_classes": [
+    "project_truth_enforcement",
+    "verification"
+  ],
+  "material_scope_expansion": false,
+  "feature_removal": false,
+  "business_model_change": false,
+  "security_authority_change": false,
+  "owner_control_boundary_change": false,
+  "legal_position_change": false,
+  "money_or_custody_model_change": false,
+  "locked_provider_change": false
+}

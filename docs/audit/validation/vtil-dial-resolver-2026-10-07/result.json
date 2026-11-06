@@ -1,0 +1,120 @@
+{
+  "artifacts": [
+    {
+      "bytes": 3118,
+      "path": "docs/audit/validation/vtil-dial-resolver-2026-10-07/inputs-before.json",
+      "sha256": "57c647bf6b4d324c7e31a521367a4ad413d339519d6ddea77e3312a70a122b21"
+    },
+    {
+      "bytes": 3118,
+      "path": "docs/audit/validation/vtil-dial-resolver-2026-10-07/inputs-after.json",
+      "sha256": "c27201a500029fdfcd8b5131dc4c1ae2e42d5f8bda18e617a344a7684bcd451c"
+    },
+    {
+      "bytes": 386,
+      "path": "docs/audit/validation/vtil-dial-resolver-2026-10-07/test-result.xml",
+      "sha256": "d0c56947bbd2706eab4c9bc612be50d7be66cc64488e1068cfe3241d1134fa2c"
+    },
+    {
+      "bytes": 365,
+      "path": "docs/audit/validation/vtil-dial-resolver-2026-10-07/test.log",
+      "sha256": "677009e76bb296893302a6ed2ce8f4249ad6aa48c46236f3bceca0e912cc72d1"
+    },
+    {
+      "bytes": 5423,
+      "path": "docs/audit/validation/vtil-dial-resolver-2026-10-07/probe-report.json",
+      "sha256": "8a907c82f6afb6bee6c9d81f287beb51d4f4417c7bf38f0eb06cc87f3339d283"
+    },
+    {
+      "bytes": 0,
+      "path": "docs/audit/validation/vtil-dial-resolver-2026-10-07/probe-stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "commands": [
+    {
+      "command": "DIAL_REPO=/workspace/dial-development-system /workspace/.onboarding/van-venv/bin/python -m pytest trading/tests/test_vtil_borrow.py::test_dial_resolver_selects_trading_knowledge_from_van_registry -q -rA --junitxml=docs/audit/validation/vtil-dial-resolver-2026-10-07/test-result.xml",
+      "exit_code": 0
+    },
+    {
+      "command": "DIAL_REPO=/workspace/dial-development-system node trading/vtil/tools/resolve_probe.mjs",
+      "exit_code": 0
+    }
+  ],
+  "date": "2026-10-07",
+  "dial_dirty_after": false,
+  "dial_dirty_before": false,
+  "dial_git_head": "64d6b7158c723b7700e5b53175ea8048d4e92d00",
+  "dial_repo": "/workspace/dial-development-system",
+  "elapsed_seconds": 0.216,
+  "execution_scope": "Local cloud checkout only. Unmodified DDS resolver imported against VAN registry through a temporary mirror. No DDS source/registry/live changes.",
+  "failed": 0,
+  "golden_case_count": 5,
+  "golden_cases": [
+    {
+      "case_id": "VT-001",
+      "leaked": [],
+      "missing": [],
+      "ok": true,
+      "policy_version": "vekl-2.1",
+      "resolver_version": "purpose-role-minimal-coalition-v1",
+      "selected_count": 4
+    },
+    {
+      "case_id": "VT-002",
+      "leaked": [],
+      "missing": [],
+      "ok": true,
+      "policy_version": "vekl-2.1",
+      "resolver_version": "purpose-role-minimal-coalition-v1",
+      "selected_count": 4
+    },
+    {
+      "case_id": "VT-003",
+      "leaked": [],
+      "missing": [],
+      "ok": true,
+      "policy_version": "vekl-2.1",
+      "resolver_version": "purpose-role-minimal-coalition-v1",
+      "selected_count": 4
+    },
+    {
+      "case_id": "VT-004",
+      "leaked": [],
+      "missing": [],
+      "ok": true,
+      "policy_version": "vekl-2.1",
+      "resolver_version": "purpose-role-minimal-coalition-v1",
+      "selected_count": 7
+    },
+    {
+      "case_id": "VT-005",
+      "leaked": [],
+      "missing": [],
+      "ok": true,
+      "policy_version": "vekl-2.1",
+      "resolver_version": "purpose-role-minimal-coalition-v1",
+      "selected_count": 8
+    }
+  ],
+  "input_set_sha256": "a1a0c0577cdfda736b5e04f7462907b12dcf8a7168541d2304d35036a96eae5a",
+  "limits": [
+    "This removes the environmental skip only for this explicitly DIAL_REPO-bound local selection; the broader historical run retained its original skip.",
+    "Five fixed cases establish registry validation and selection/exclusion semantics under VEKL2.1, not arbitrary-task completeness.",
+    "No external resource retrieval, admitted live DIAL runtime/governor observation, credentials, broker deployment, trade execution, hosted-provider connectivity or phone acceptance was performed.",
+    "Resolver source hashes and checkout HEAD identify local evidence; they are not a deployment signature."
+  ],
+  "probe_status": "GREEN",
+  "registry_validation": {
+    "failures": [],
+    "ok": true,
+    "resource_count": 25,
+    "source_count": 21
+  },
+  "schema_version": 1,
+  "skipped": 0,
+  "source_inputs_changed": [],
+  "status": "PASSED",
+  "test_selection": "trading/tests/test_vtil_borrow.py::test_dial_resolver_selects_trading_knowledge_from_van_registry",
+  "tests": 1
+}

@@ -1,0 +1,34 @@
+{
+  "candidate_head": "42b34f43657dcc64503e951d946f4231c4f3022d",
+  "artifact_id": 12866600442,
+  "archive_bytes": 206786,
+  "archive_sha256": "9b8d4aff8779ec8eb3e795eaadfd06a7167734af947c231e61a56a180593868a",
+  "crc_verified": true,
+  "entries": {
+    "trading-source-report.xml": "5287daa7340ff9aabddb5a16cb8211f2ecedf7cdde91e49fad166831d8321993",
+    "trading-source.log": "6681f029160b3d1a84c84de764536d5c5d1f876ced473b6d47e1a9e36b727ca3",
+    "postgres-ledger-report.xml": "65e6317f9d9a63f89c0c13139ffe7b99d6c820b1019b5654a5d44e5b887ca859",
+    "voice-source-report.xml": "0b7cebc55f08e4fceba8c6d110adbd39480ab8a77f79820764838b4d8f253a71"
+  },
+  "junit_results": {
+    "trading-source-report.xml": {
+      "passed": 5343,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "postgres-ledger-report.xml": {
+      "passed": 26,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "voice-source-report.xml": {
+      "passed": 117,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "qualification": "HOSTED_SOURCE_ONLY_NOT_NATIVE_ACCOUNT_OR_DEVICE_ACCEPTANCE"
+}

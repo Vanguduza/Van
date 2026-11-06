@@ -1,0 +1,35 @@
+{
+  "schema": "van.rebuild.mutation-reconciliation/1",
+  "part": "python",
+  "reference": "e56a38c8d5b51b7c64d3d4ac04e2d8a59f6c9b36",
+  "preserved_case_count": 374,
+  "selected_case_count": 1,
+  "registry_sha256": "c247672b5d3e2a26495c7a015bfc019467c41ba40c658a84dd46d0efb08d3e23",
+  "results": [
+    {
+      "kind": "baseline",
+      "mutation": null,
+      "exit": 0,
+      "verdict": "PASS",
+      "log_sha256": "9fb8588f63d636d0c838de1b045c6c79a92f38130cc7e1847720484a1cfdb841",
+      "failed_oracles": [],
+      "summary": "...............................                                          [100%]\n31 passed in 2.50s\n"
+    },
+    {
+      "kind": "mutation",
+      "mutation": "C26 an unknown kind is routed rather than refused",
+      "exit": 1,
+      "verdict": "ASSERTION_DETECTED",
+      "log_sha256": "caa5d8e7a5306c155bb3fdf9c3191eb5072c1a50ea84d684af86ae8e2728e158",
+      "failed_oracles": [
+        "FAILED tests/test_van_hermes_session.py::TestSessionRouter::test_a_kind_with_no_delegate_is_not_written_into_the_admission_table",
+        "FAILED tests/test_van_hermes_session.py::TestSessionRouter::test_an_unknown_kind_is_refused_rather_than_interpreted",
+        "FAILED tests/test_van_hermes_session.py::TestSessionRouter::test_an_unknown_kind_does_not_consume_an_idempotency_key"
+      ],
+      "summary": "\"\"Why the kind is checked before admission rather than after.\n    \n        A second refusal exists further down, where the delegate lookup fails, so deleting\n        the early check refuses the same message and every test still passed. The\n        difference only shows when the unknown kind carries an idempotency key: refused\n        late, the key has already been recorded, and the owner's *real* command arriving\n        under it is then answered ALREADY_KNOWN and silently never runs.\n        \"\"\"\n        service, router = await self._router(tmp_path)\n        session, epoch = await service.open(device_id=DEVICE, path=_path(), now_ms=1_000)\n        refused = await router.route(\n            _envelope(session, epoch, kind=\"command.run_shell\", idempotency_key=\"k1\")\n        )\n>       assert refused.accepted is False\nE       AssertionError: assert True is False\nE        +  where True = RoutedResult(accepted=True, kind='command.run_shell', result={'command_id': 'cmd_1', 'status': 'accepted'}, refusal=None, admission=<CommandAdmission.ADMITTED: 'ADMITTED'>).accepted\n\ntests/test_van_hermes_session.py:551: AssertionError\n=========================== short test summary info ============================\nFAILED tests/test_van_hermes_session.py::TestSessionRouter::test_a_kind_with_no_delegate_is_not_written_into_the_admission_table\nFAILED tests/test_van_hermes_session.py::TestSessionRouter::test_an_unknown_kind_is_refused_rather_than_interpreted\nFAILED tests/test_van_hermes_session.py::TestSessionRouter::test_an_unknown_kind_does_not_consume_an_idempotency_key\n3 failed, 28 passed in 2.70s\n"
+    }
+  ],
+  "status": "PASS",
+  "duration_seconds": 5.799,
+  "source_state": "UNCOMMITTED_CORRECTION_AFTER_fca473cc"
+}

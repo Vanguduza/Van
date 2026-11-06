@@ -1,0 +1,17 @@
+{
+  "data_dir": "",
+  "family": "vits",
+  "length_scale": 1.0,
+  "lexicon": "tts/lexicon.txt",
+  "model": "tts/vits-ljs.onnx",
+  "noise_scale": 0.667,
+  "noise_scale_w": 0.8,
+  "num_threads": 2,
+  "runtime": "sherpa-onnx",
+  "runtime_version": "1.13.8",
+  "schema_version": 1,
+  "silence_scale": 0.2,
+  "speaker_id": 0,
+  "speed": 1.0,
+  "tokens": "tts/tokens.txt"
+}

@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="0.951" timestamp="2026-10-28T04:58:16.192462+00:00" hostname="6e9feff21467"><testcase classname="trading.tests.test_funding_baseline_preservation" name="test_qualified_native_observation_can_seed_the_original_baselines[account]" time="0.286"><failure message="AttributeError: 'AccountCoordinatorService' object has no attribute 'mandate'">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-37/test_qualified_native_observat0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+producer = 'account'
+
+    @pytest.mark.parametrize('producer', ['single', 'account'])
+    def test_qualified_native_observation_can_seed_the_original_baselines(tmp_path, eurusd, producer):
+        ledger, _, _ = book(tmp_path)
+        adapter, _ = native(mark(3500, equity='97'))
+        service = runtime(producer, adapter, ledger, eurusd, '0')
+&gt;       value = snapshot(service, producer)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_funding_baseline_preservation.py:55: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_funding_baseline_preservation.py:32: in snapshot
+    else service._snapshot_for(N(symbol='EURUSD', strategy_id='')))
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;vati.app.account_service.AccountCoordinatorService object at 0x7f9772571700&gt;
+candidate = namespace(symbol='EURUSD', strategy_id='')
+
+    def _snapshot_for(self, candidate: CandidateOpportunity) -&gt; RiskSnapshot:
+        assert self.adapter is not None and self.account is not None
+        contract = self.contracts[candidate.symbol.upper()]
+        started_ms = self.clock()
+        acct = self.adapter.sync_account()
+        now_ms = max(started_ms,self.clock())
+        hb = self.adapter.heartbeat(now_ms=now_ms)
+        report = reconcile(self._ledger_positions(), self.adapter.positions(), account_verified=acct.verified)
+        from vati.app.account_recovery import unresolved_account_entries
+        originals_unresolved=bool(unresolved_account_entries(self))
+        positions = self._open_positions()
+        store_ok = self._risk_store_ok()
+        now_ms = max(now_ms, self.clock())
+        from vati.funding.risk_fence import funding_risk_fence
+        from vati.funding.mt5_runtime import capture_cached_mt5
+        native_capture = capture_cached_mt5(self._ledger, acct, now_ms=now_ms)
+        funding = funding_risk_fence(self._ledger, self.adapter, acct, now_ms=now_ms)
+        from vati.risk.account_context import context_with_funding_hold
+        native_context, funding = context_with_funding_hold(self._ledger, self.adapter, acct, funding,
+            now_ms=now_ms, mt5_capture=native_capture)
+        basis_ref = None
+        if funding.available and native_context is not None:
+            from vati.risk.physical_runtime import project_native_risk
+            from vati.funding.risk_fence import FundingRiskFence
+            policy = (self.lifecycle.streaks.policy if self.lifecycle is not None
+&gt;               else LockoutPolicy(self.mandate.max_consecutive_losses))
+                                   ^^^^^^^^^^^^
+E           AttributeError: 'AccountCoordinatorService' object has no attribute 'mandate'
+
+trading/vati/app/account_service.py:663: AttributeError</failure></testcase><testcase classname="trading.tests.test_funding_risk_fence" name="test_risk_capture_uses_post_native_io_clock_and_ages_quotes[account-17]" time="0.009"><failure message="AttributeError: 'AccountCoordinatorService' object has no attribute 'mandate'">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-37/test_risk_capture_uses_post_na0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+producer = 'account', quote_age = 17
+
+    @pytest.mark.parametrize('producer,quote_age',[('single',17),('account',17),('single',-1)])
+    def test_risk_capture_uses_post_native_io_clock_and_ages_quotes(tmp_path,eurusd,producer,quote_age):
+        ledger,_,_=book(tmp_path);adapter,clock=clocked_native(mark(8000,equity='98'))
+        if producer=='single':
+            from test_recoverable_lockouts import _cycle
+            service=_cycle(eurusd,ledger);service.adapter=adapter;service._lease_clock=lambda:clock['now']
+            value=service.snapshot(now_ms=7000,quote_age_ms=quote_age)
+        else:
+            from vati.app.account_service import AccountCoordinatorService
+            service=AccountCoordinatorService.__new__(AccountCoordinatorService)
+            service.adapter=adapter;service.account=N();service._ledger=ledger;service.clock=lambda:clock['now']
+            service.contracts={'EURUSD':eurusd};service.peak_equity=D('100');service.day_start_equity=D('100');service.week_start_equity=D('100')
+            service._entries={};service.cfg=N(account_alias='ctrader_primary',max_quote_age_ms=5000)
+            service._ledger_positions=lambda:[];service._risk_store_ok=lambda:True
+            def opened():clock['now']+=500;return ()
+            service._open_positions=opened;service._drawdown_top_state=lambda:None
+            service.lifecycle=None;service.consecutive_losses=0;service.kill=N(active=[])
+            service.evaluators={'EURUSD':N(last_state=N(as_of_ms=7000,quote_age_ms=quote_age,event_window=None,integrity=MarketIntegrityState.NORMAL))}
+&gt;           value=service._snapshot_for(N(symbol='EURUSD',strategy_id=''))
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_funding_risk_fence.py:220: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;vati.app.account_service.AccountCoordinatorService object at 0x7f9771fe3110&gt;
+candidate = namespace(symbol='EURUSD', strategy_id='')
+
+    def _snapshot_for(self, candidate: CandidateOpportunity) -&gt; RiskSnapshot:
+        assert self.adapter is not None and self.account is not None
+        contract = self.contracts[candidate.symbol.upper()]
+        started_ms = self.clock()
+        acct = self.adapter.sync_account()
+        now_ms = max(started_ms,self.clock())
+        hb = self.adapter.heartbeat(now_ms=now_ms)
+        report = reconcile(self._ledger_positions(), self.adapter.positions(), account_verified=acct.verified)
+        from vati.app.account_recovery import unresolved_account_entries
+        originals_unresolved=bool(unresolved_account_entries(self))
+        positions = self._open_positions()
+        store_ok = self._risk_store_ok()
+        now_ms = max(now_ms, self.clock())
+        from vati.funding.risk_fence import funding_risk_fence
+        from vati.funding.mt5_runtime import capture_cached_mt5
+        native_capture = capture_cached_mt5(self._ledger, acct, now_ms=now_ms)
+        funding = funding_risk_fence(self._ledger, self.adapter, acct, now_ms=now_ms)
+        from vati.risk.account_context import context_with_funding_hold
+        native_context, funding = context_with_funding_hold(self._ledger, self.adapter, acct, funding,
+            now_ms=now_ms, mt5_capture=native_capture)
+        basis_ref = None
+        if funding.available and native_context is not None:
+            from vati.risk.physical_runtime import project_native_risk
+            from vati.funding.risk_fence import FundingRiskFence
+            policy = (self.lifecycle.streaks.policy if self.lifecycle is not None
+&gt;               else LockoutPolicy(self.mandate.max_consecutive_losses))
+                                   ^^^^^^^^^^^^
+E           AttributeError: 'AccountCoordinatorService' object has no attribute 'mandate'
+
+trading/vati/app/account_service.py:663: AttributeError</failure></testcase></testsuite></testsuites>

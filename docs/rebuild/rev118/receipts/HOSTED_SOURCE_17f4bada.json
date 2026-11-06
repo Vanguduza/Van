@@ -1,0 +1,139 @@
+{
+  "schema": "van.rebuild.hosted-source/1",
+  "run_id": 39835601715,
+  "source_head": "17f4badac6f7b23d2efb219ada60af7ef2afd506",
+  "tested_merge": "11d246886e67dc533745851f52842e824873f675",
+  "identical_source_tree": "95a46be8d35db3e3e997f825fbabd53d57cc432d",
+  "jobs": [
+    {
+      "id": 120022964997,
+      "name": "postgres-ledger",
+      "conclusion": "success"
+    },
+    {
+      "id": 120022965527,
+      "name": "android-and-visual-evidence",
+      "conclusion": "success"
+    },
+    {
+      "id": 120022965543,
+      "name": "mutation (python-2, python, 2/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120022965555,
+      "name": "android-instrumentation",
+      "conclusion": "failure"
+    },
+    {
+      "id": 120022965566,
+      "name": "mutation (python-3, python, 3/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120022965606,
+      "name": "project-truth-ledger",
+      "conclusion": "failure"
+    },
+    {
+      "id": 120022965662,
+      "name": "mutation (kotlin-1, kotlin, 1/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120022965720,
+      "name": "mutation (kotlin-3, kotlin, 3/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120022965724,
+      "name": "backend",
+      "conclusion": "failure"
+    },
+    {
+      "id": 120022965735,
+      "name": "rebuild-documentary",
+      "conclusion": "success"
+    },
+    {
+      "id": 120022965776,
+      "name": "mutation (kotlin-2, kotlin, 2/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120022965821,
+      "name": "mutation (browser-agent, browser-agent, 0/1)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120022965828,
+      "name": "mutation (python-0, python, 0/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120022965980,
+      "name": "mutation (python-1, python, 1/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120022965982,
+      "name": "mutation (kotlin-0, kotlin, 0/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120031674020,
+      "name": "character-forge-gate",
+      "conclusion": "failure"
+    }
+  ],
+  "public_source": {
+    "voice-source-report.xml": {
+      "tests": 117,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "f01aac898da37b694346760c6794482f7deeef551eb844370ce01c83312d2ad3"
+    },
+    "trading-source-report.xml": {
+      "tests": 1931,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "sha256": "1233d63dc70d5fdfa7af7f405fbaa7a6c197644536f20bd2e807bee146724748"
+    },
+    "postgres-ledger-report.xml": {
+      "tests": 26,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "1c005c8a7ff625b120a1c91d1cc0a44c06792296828ac4fe834856a17db993d5"
+    }
+  },
+  "legacy_mutations": {
+    "caught": 374,
+    "survived": 0,
+    "receipt": "ci/MUTATION_CORPUS_17f4bada.json"
+  },
+  "instrumentation": {
+    "job_conclusion": "failure",
+    "reported_counts": {
+      "tests": 12,
+      "failures": 1,
+      "skipped": 1
+    },
+    "voice_methods": {},
+    "index_sha256": "a4989e6baa2d934781946a01bd786dc681a238498768dafa1b03e7361c9a3a2c",
+    "logcat_sha256": "a6614c15552ab869b323094399d1e0f87ff1a6d5f150bead1e2c0f79b1f92f0c",
+    "complete": false,
+    "failure_evidence": "Android 12 system_server RemoteAnimationController.onAnimationFinished IndexOutOfBoundsException precedes DeadSystem/DeadObject exceptions in launcher/phone/Van. Run aborts; missing methods are NOT passes. Retain original Rive failure and rerun on new source."
+  },
+  "retained_failures": {
+    "backend": "Private DDS contract read key is not provisioned",
+    "project-truth-ledger": "Current main lacks trusted-base bootstrap checker",
+    "logs": {
+      "backend-job.log": "2272bd94af6b264df25c280905de932b7bce0ee3f9a0b173b40dcde927265cf7",
+      "project-truth-ledger-job.log": "649546191a768abd31dcd58e792cb54e025cc4372029b9441eb24ac79dbf2f42"
+    }
+  },
+  "qualification": "Hosted source/emulator evidence only. No S24, production, provider, independent gate or whole-unit acceptance."
+}

@@ -1,0 +1,39 @@
+.F                                                                       [100%]
+=================================== FAILURES ===================================
+_ test_mt5_query_and_owner_snapshot_cannot_escape_the_callers_writer[sqlite-owner] _
+
+source = (<vati.core.ledger.Ledger object at 0x7f9a5533d0d0>, '9416990f89cc231045967018d529f8f2a4f42488499c86fb9f71bedc2f9c7f3b')
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-519/test_mt5_query_and_owner_snaps1')
+consumer = 'owner'
+
+    @pytest.mark.parametrize('consumer',['risk','owner'])
+    def test_mt5_query_and_owner_snapshot_cannot_escape_the_callers_writer(source,tmp_path,consumer):
+        from test_mt5_funding_contract import frame
+        from test_mt5_funding_runtime import publish, profile as mt5_profile
+        from vati.execution.base import AccountState
+        from vati.execution.mt5_identity import Mt5Identity
+        from vati.execution.mt5_pull import Mt5PullAdapter, BridgeQueue
+        from vati.funding.mt5_runtime import capture_cached_mt5
+        ledger,scope=source;native_frame=frame();queue=BridgeQueue(tmp_path/'mt5-source-read.sqlite')
+        adapter=Mt5PullAdapter(queue,account_alias='native',clock=lambda:10000,
+            identity=Mt5Identity('12345678','Broker-Demo','USD',True))
+        account=AccountState('native',native_frame.net_equity,native_frame.balance,'USD',True,funding_mark=native_frame)
+        before=ledger.head(),ledger.count()
+        try:
+            with pytest.raises(RollbackFixture):
+                with ledger.atomic():
+                    observation=capture_cached_mt5(ledger,account,now_ms=10000)
+                    event=publish(ledger,account,observation)
+                    if consumer=='risk':
+                        readiness=funding_risk_fence(ledger,adapter,account,now_ms=11000)
+                        assert readiness.available is False
+                        assert readiness.reason.startswith('FUNDING_RISK_EVIDENCE_UNAVAILABLE:')
+                    else:
+>                       with pytest.raises(LedgerError,match='committed_source'):
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E                       Failed: DID NOT RAISE LedgerError
+
+trading/tests/test_funding_committed_reads.py:131: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_funding_committed_reads.py::test_mt5_query_and_owner_snapshot_cannot_escape_the_callers_writer[sqlite-owner]
+1 failed, 1 passed, 2 deselected in 1.70s

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.visual.VanPresenceTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-08T06:36:49" hostname="052fefa249ff" time="0.007">
+  <properties/>
+  <testcase name="ownerDecisionCanCoexistWithGoogleUnverified" classname="com.dial.van.visual.VanPresenceTest" time="0.001"/>
+  <testcase name="uplinkLossOutranksOtherBrokenSubsystems" classname="com.dial.van.visual.VanPresenceTest" time="0.001"/>
+  <testcase name="everyDurableStateHasALabelForTheOverlayChrome" classname="com.dial.van.visual.VanPresenceTest" time="0.001"/>
+  <testcase name="healthyMeshReachesLiveStates" classname="com.dial.van.visual.VanPresenceTest" time="0.001"/>
+  <testcase name="lostUplinkForcesOfflinePoseAndSemanticState" classname="com.dial.van.visual.VanPresenceTest" time="0.001"/>
+  <testcase name="nominalTruthAllowsLiveWorkingStateToDriveChromeAndEmbodiment" classname="com.dial.van.visual.VanPresenceTest" time="0.0"/>
+  <testcase name="visualStateNeverLowersExistingUrgencyAndDoesNotLeakHealthIntoPose" classname="com.dial.van.visual.VanPresenceTest" time="0.0"/>
+  <testcase name="defaultRuntimeTruthPresentsDegradedBecauseGoogleMeshIsUnverified" classname="com.dial.van.visual.VanPresenceTest" time="0.0"/>
+  <testcase name="googleUnverifiedDoesNotSuppressLiveListeningPose" classname="com.dial.van.visual.VanPresenceTest" time="0.001"/>
+  <testcase name="nonUplinkBreakagePresentsDegradedSemanticTruth" classname="com.dial.van.visual.VanPresenceTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

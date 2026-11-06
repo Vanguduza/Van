@@ -1,0 +1,380 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="12" skipped="0" tests="14" time="1.003" timestamp="2026-10-26T00:17:39.291932+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_news_runtime_health" name="test_service_builder_restores_durable_history_when_the_file_is_missing[session]" time="0.054"><failure message="AssertionError: assert [] == [Headline(sou...y_excerpt='')]&#10;  &#10;  Right contains one more item: Headline(source_id='publisher', trust=&lt;SourceTrust.T1_PRIMARY: 'T1_PRIMARY'&gt;, published_ms=1800000000000, observed_ms=...bols=('EURUSD',), event_class='', severity=Decimal('1'), concern=&lt;Concern.UNCLEAR: 'UNCLEAR'&gt;, url='', body_excerpt='')&#10;  Use -v to get more diff">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-230/test_service_builder_restores_0')
+ledger = &lt;vati.core.ledger.Ledger object at 0x7f9aaa82be90&gt;, kind = 'session'
+
+    @pytest.mark.parametrize('kind',['session','account'])
+    def test_service_builder_restores_durable_history_when_the_file_is_missing(tmp_path,ledger,kind):
+        h=Headline(source_id='publisher',trust=SourceTrust.T1_PRIMARY,published_ms=NOW,
+            observed_ms=NOW,title='Original policy decision',symbols=('EURUSD',),severity=Decimal('1'))
+        NewsIngress(ledger=ledger).ingest(h,now_ms=NOW)
+        value=service(kind,ledger,configured(tmp_path/'missing.jsonl'));news=build(value,kind)
+&gt;       assert news.headlines()==[h]
+E       AssertionError: assert [] == [Headline(sou...y_excerpt='')]
+E         
+E         Right contains one more item: Headline(source_id='publisher', trust=&lt;SourceTrust.T1_PRIMARY: 'T1_PRIMARY'&gt;, published_ms=1800000000000, observed_ms=...bols=('EURUSD',), event_class='', severity=Decimal('1'), concern=&lt;Concern.UNCLEAR: 'UNCLEAR'&gt;, url='', body_excerpt='')
+E         Use -v to get more diff
+
+trading/tests/test_news_runtime_health.py:54: AssertionError</failure></testcase><testcase classname="trading.tests.test_news_runtime_health" name="test_service_builder_restores_durable_history_when_the_file_is_missing[account]" time="0.009"><failure message="AssertionError: assert [] == [Headline(sou...y_excerpt='')]&#10;  &#10;  Right contains one more item: Headline(source_id='publisher', trust=&lt;SourceTrust.T1_PRIMARY: 'T1_PRIMARY'&gt;, published_ms=1800000000000, observed_ms=...bols=('EURUSD',), event_class='', severity=Decimal('1'), concern=&lt;Concern.UNCLEAR: 'UNCLEAR'&gt;, url='', body_excerpt='')&#10;  Use -v to get more diff">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-230/test_service_builder_restores_1')
+ledger = &lt;vati.core.ledger.Ledger object at 0x7f9aaa75db80&gt;, kind = 'account'
+
+    @pytest.mark.parametrize('kind',['session','account'])
+    def test_service_builder_restores_durable_history_when_the_file_is_missing(tmp_path,ledger,kind):
+        h=Headline(source_id='publisher',trust=SourceTrust.T1_PRIMARY,published_ms=NOW,
+            observed_ms=NOW,title='Original policy decision',symbols=('EURUSD',),severity=Decimal('1'))
+        NewsIngress(ledger=ledger).ingest(h,now_ms=NOW)
+        value=service(kind,ledger,configured(tmp_path/'missing.jsonl'));news=build(value,kind)
+&gt;       assert news.headlines()==[h]
+E       AssertionError: assert [] == [Headline(sou...y_excerpt='')]
+E         
+E         Right contains one more item: Headline(source_id='publisher', trust=&lt;SourceTrust.T1_PRIMARY: 'T1_PRIMARY'&gt;, published_ms=1800000000000, observed_ms=...bols=('EURUSD',), event_class='', severity=Decimal('1'), concern=&lt;Concern.UNCLEAR: 'UNCLEAR'&gt;, url='', body_excerpt='')
+E         Use -v to get more diff
+
+trading/tests/test_news_runtime_health.py:54: AssertionError</failure></testcase><testcase classname="trading.tests.test_news_runtime_health" name="test_bad_news_file_does_not_abort_the_service_news_builder[session]" time="0.003"><failure message="Failed: optional unreadable news aborted builder: JSONDecodeError">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-230/test_bad_news_file_does_not_ab0')
+ledger = &lt;vati.core.ledger.Ledger object at 0x7f9aaa75f590&gt;, kind = 'session'
+
+    @pytest.mark.parametrize('kind',['session','account'])
+    def test_bad_news_file_does_not_abort_the_service_news_builder(tmp_path,ledger,kind):
+        path=tmp_path/'news.json';path.write_text('{')
+        value=service(kind,ledger,configured(path))
+&gt;       try:news=build(value,kind)
+                 ^^^^^^^^^^^^^^^^^
+
+trading/tests/test_news_runtime_health.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_news_runtime_health.py:44: in build
+    value.news=value._build_news() if kind=='session' else value._build_news(None)
+               ^^^^^^^^^^^^^^^^^^^
+trading/vati/app/service.py:270: in _build_news
+    ingress.ingest_rows(rows_from_file(path), now_ms=self.clock())
+                        ^^^^^^^^^^^^^^^^^^^^
+trading/vati/events/news_ingress.py:1011: in rows_from_file
+    data = json.loads(text)
+           ^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/__init__.py:346: in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/decoder.py:338: in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;json.decoder.JSONDecoder object at 0x7f9aaccca7e0&gt;, s = '{', idx = 0
+
+    def raw_decode(self, s, idx=0):
+        """Decode a JSON document from ``s`` (a ``str`` beginning with
+        a JSON document) and return a 2-tuple of the Python
+        representation and the index in ``s`` where the document ended.
+    
+        This can be used to decode a JSON document from a string that may
+        have extraneous data at the end.
+    
+        """
+        try:
+&gt;           obj, end = self.scan_once(s, idx)
+                       ^^^^^^^^^^^^^^^^^^^^^^
+E           json.decoder.JSONDecodeError: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)
+
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/decoder.py:354: JSONDecodeError
+
+During handling of the above exception, another exception occurred:
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-230/test_bad_news_file_does_not_ab0')
+ledger = &lt;vati.core.ledger.Ledger object at 0x7f9aaa75f590&gt;, kind = 'session'
+
+    @pytest.mark.parametrize('kind',['session','account'])
+    def test_bad_news_file_does_not_abort_the_service_news_builder(tmp_path,ledger,kind):
+        path=tmp_path/'news.json';path.write_text('{')
+        value=service(kind,ledger,configured(path))
+        try:news=build(value,kind)
+&gt;       except Exception as exc:pytest.fail('optional unreadable news aborted builder: '+type(exc).__name__)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: optional unreadable news aborted builder: JSONDecodeError
+
+trading/tests/test_news_runtime_health.py:65: Failed</failure></testcase><testcase classname="trading.tests.test_news_runtime_health" name="test_bad_news_file_does_not_abort_the_service_news_builder[account]" time="0.004"><failure message="Failed: optional unreadable news aborted builder: JSONDecodeError">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-230/test_bad_news_file_does_not_ab1')
+ledger = &lt;vati.core.ledger.Ledger object at 0x7f9aaa75e510&gt;, kind = 'account'
+
+    @pytest.mark.parametrize('kind',['session','account'])
+    def test_bad_news_file_does_not_abort_the_service_news_builder(tmp_path,ledger,kind):
+        path=tmp_path/'news.json';path.write_text('{')
+        value=service(kind,ledger,configured(path))
+&gt;       try:news=build(value,kind)
+                 ^^^^^^^^^^^^^^^^^
+
+trading/tests/test_news_runtime_health.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_news_runtime_health.py:44: in build
+    value.news=value._build_news() if kind=='session' else value._build_news(None)
+                                                           ^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/account_service.py:479: in _build_news
+    ingress.ingest_rows(rows_from_file(path), now_ms=self.clock())
+                        ^^^^^^^^^^^^^^^^^^^^
+trading/vati/events/news_ingress.py:1011: in rows_from_file
+    data = json.loads(text)
+           ^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/__init__.py:346: in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/decoder.py:338: in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;json.decoder.JSONDecoder object at 0x7f9aaccca7e0&gt;, s = '{', idx = 0
+
+    def raw_decode(self, s, idx=0):
+        """Decode a JSON document from ``s`` (a ``str`` beginning with
+        a JSON document) and return a 2-tuple of the Python
+        representation and the index in ``s`` where the document ended.
+    
+        This can be used to decode a JSON document from a string that may
+        have extraneous data at the end.
+    
+        """
+        try:
+&gt;           obj, end = self.scan_once(s, idx)
+                       ^^^^^^^^^^^^^^^^^^^^^^
+E           json.decoder.JSONDecodeError: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)
+
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/decoder.py:354: JSONDecodeError
+
+During handling of the above exception, another exception occurred:
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-230/test_bad_news_file_does_not_ab1')
+ledger = &lt;vati.core.ledger.Ledger object at 0x7f9aaa75e510&gt;, kind = 'account'
+
+    @pytest.mark.parametrize('kind',['session','account'])
+    def test_bad_news_file_does_not_abort_the_service_news_builder(tmp_path,ledger,kind):
+        path=tmp_path/'news.json';path.write_text('{')
+        value=service(kind,ledger,configured(path))
+        try:news=build(value,kind)
+&gt;       except Exception as exc:pytest.fail('optional unreadable news aborted builder: '+type(exc).__name__)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: optional unreadable news aborted builder: JSONDecodeError
+
+trading/tests/test_news_runtime_health.py:65: Failed</failure></testcase><testcase classname="trading.tests.test_news_runtime_health" name="test_missing_refresh_is_unknown_coverage_not_an_empty_success[session]" time="0.003"><failure message="AssertionError: assert None == 'MISSING'&#10; +  where None = &lt;built-in method get of dict object at 0x7f9aaa840680&gt;('state')&#10; +    where &lt;built-in method get of dict object at 0x7f9aaa840680&gt; = {}.get&#10; +      where {} = &lt;built-in method get of dict object at 0x7f9aaa61e200&gt;('source_health', {})&#10; +        where &lt;built-in method get of dict object at 0x7f9aaa61e200&gt; = {'event_risk_multiplier': '1'}.get">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-230/test_missing_refresh_is_unknow0')
+ledger = &lt;vati.core.ledger.Ledger object at 0x7f9aaa75dc70&gt;, kind = 'session'
+
+    @pytest.mark.parametrize('kind',['session','account'])
+    def test_missing_refresh_is_unknown_coverage_not_an_empty_success(tmp_path,ledger,kind):
+        value=service(kind,ledger,configured(tmp_path/'missing.json'));build(value,kind)
+        result=value.refresh_news(NOW)
+&gt;       assert result.get('source_health',{}).get('state')=='MISSING'
+E       AssertionError: assert None == 'MISSING'
+E        +  where None = &lt;built-in method get of dict object at 0x7f9aaa840680&gt;('state')
+E        +    where &lt;built-in method get of dict object at 0x7f9aaa840680&gt; = {}.get
+E        +      where {} = &lt;built-in method get of dict object at 0x7f9aaa61e200&gt;('source_health', {})
+E        +        where &lt;built-in method get of dict object at 0x7f9aaa61e200&gt; = {'event_risk_multiplier': '1'}.get
+
+trading/tests/test_news_runtime_health.py:74: AssertionError</failure></testcase><testcase classname="trading.tests.test_news_runtime_health" name="test_missing_refresh_is_unknown_coverage_not_an_empty_success[account]" time="0.004"><failure message="AssertionError: assert None == 'MISSING'&#10; +  where None = &lt;built-in method get of dict object at 0x7f9aaa2f5380&gt;('state')&#10; +    where &lt;built-in method get of dict object at 0x7f9aaa2f5380&gt; = {}.get&#10; +      where {} = &lt;built-in method get of dict object at 0x7f9aaa2f50c0&gt;('source_health', {})&#10; +        where &lt;built-in method get of dict object at 0x7f9aaa2f50c0&gt; = {'accepted': 0, 'duplicates': 0, 'skipped': 0}.get">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-230/test_missing_refresh_is_unknow1')
+ledger = &lt;vati.core.ledger.Ledger object at 0x7f9aaa75c560&gt;, kind = 'account'
+
+    @pytest.mark.parametrize('kind',['session','account'])
+    def test_missing_refresh_is_unknown_coverage_not_an_empty_success(tmp_path,ledger,kind):
+        value=service(kind,ledger,configured(tmp_path/'missing.json'));build(value,kind)
+        result=value.refresh_news(NOW)
+&gt;       assert result.get('source_health',{}).get('state')=='MISSING'
+E       AssertionError: assert None == 'MISSING'
+E        +  where None = &lt;built-in method get of dict object at 0x7f9aaa2f5380&gt;('state')
+E        +    where &lt;built-in method get of dict object at 0x7f9aaa2f5380&gt; = {}.get
+E        +      where {} = &lt;built-in method get of dict object at 0x7f9aaa2f50c0&gt;('source_health', {})
+E        +        where &lt;built-in method get of dict object at 0x7f9aaa2f50c0&gt; = {'accepted': 0, 'duplicates': 0, 'skipped': 0}.get
+
+trading/tests/test_news_runtime_health.py:74: AssertionError</failure></testcase><testcase classname="trading.tests.test_news_runtime_health" name="test_malformed_jsonl_line_keeps_both_valid_neighbors_and_a_parse_diagnostic" time="0.003"><failure message="Failed: one malformed line discarded its valid neighbors: JSONDecodeError">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-230/test_malformed_jsonl_line_keep0')
+ledger = &lt;vati.core.ledger.Ledger object at 0x7f9aaa75cb30&gt;
+
+    def test_malformed_jsonl_line_keeps_both_valid_neighbors_and_a_parse_diagnostic(tmp_path,ledger):
+        path=tmp_path/'news.jsonl';path.write_text(json.dumps(row('First'))+'\n{bad\n'+json.dumps(row('Second'))+'\n')
+        news=NewsIngress(ledger=ledger)
+&gt;       try:counts=news.ingest_rows(rows_from_file(path),now_ms=NOW)
+                                    ^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_news_runtime_health.py:81: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/events/news_ingress.py:1009: in rows_from_file
+    out.append(json.loads(line))
+               ^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/__init__.py:346: in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/decoder.py:338: in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;json.decoder.JSONDecoder object at 0x7f9aaccca7e0&gt;, s = '{bad', idx = 0
+
+    def raw_decode(self, s, idx=0):
+        """Decode a JSON document from ``s`` (a ``str`` beginning with
+        a JSON document) and return a 2-tuple of the Python
+        representation and the index in ``s`` where the document ended.
+    
+        This can be used to decode a JSON document from a string that may
+        have extraneous data at the end.
+    
+        """
+        try:
+&gt;           obj, end = self.scan_once(s, idx)
+                       ^^^^^^^^^^^^^^^^^^^^^^
+E           json.decoder.JSONDecodeError: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)
+
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/decoder.py:354: JSONDecodeError
+
+During handling of the above exception, another exception occurred:
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-230/test_malformed_jsonl_line_keep0')
+ledger = &lt;vati.core.ledger.Ledger object at 0x7f9aaa75cb30&gt;
+
+    def test_malformed_jsonl_line_keeps_both_valid_neighbors_and_a_parse_diagnostic(tmp_path,ledger):
+        path=tmp_path/'news.jsonl';path.write_text(json.dumps(row('First'))+'\n{bad\n'+json.dumps(row('Second'))+'\n')
+        news=NewsIngress(ledger=ledger)
+        try:counts=news.ingest_rows(rows_from_file(path),now_ms=NOW)
+&gt;       except Exception as exc:pytest.fail('one malformed line discarded its valid neighbors: '+type(exc).__name__)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: one malformed line discarded its valid neighbors: JSONDecodeError
+
+trading/tests/test_news_runtime_health.py:82: Failed</failure></testcase><testcase classname="trading.tests.test_news_runtime_health" name="test_invalid_file_envelope_cannot_become_an_empty_success[bad0]" time="0.002"><failure message="Failed: DID NOT RAISE ValueError">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-230/test_invalid_file_envelope_can0')
+bad = {}
+
+    @pytest.mark.parametrize('bad',[{}, {'headlines':None}, {'headlines':{}}])
+    def test_invalid_file_envelope_cannot_become_an_empty_success(tmp_path,bad):
+        path=tmp_path/'news.json';path.write_text(json.dumps(bad))
+&gt;       with pytest.raises(ValueError):rows_from_file(path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_news_runtime_health.py:91: Failed</failure></testcase><testcase classname="trading.tests.test_news_runtime_health" name="test_invalid_file_envelope_cannot_become_an_empty_success[bad1]" time="0.002"><failure message="TypeError: 'NoneType' object is not iterable">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-230/test_invalid_file_envelope_can1')
+bad = {'headlines': None}
+
+    @pytest.mark.parametrize('bad',[{}, {'headlines':None}, {'headlines':{}}])
+    def test_invalid_file_envelope_cannot_become_an_empty_success(tmp_path,bad):
+        path=tmp_path/'news.json';path.write_text(json.dumps(bad))
+&gt;       with pytest.raises(ValueError):rows_from_file(path)
+                                       ^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_news_runtime_health.py:91: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+path = PosixPath('/tmp/pytest-of-agent/pytest-230/test_invalid_file_envelope_can1/news.json')
+key = 'headlines'
+
+    def rows_from_file(path: str | Path, key: str = "headlines") -&gt; list[dict]:
+        """JSON array, `{"headlines": [...]}`, or JSON Lines.
+    
+        JSON Lines is the shape a tailing transport produces, and a malformed line
+        in the middle of a stream must not discard the lines around it.
+        """
+        p = Path(path)
+        text = p.read_text(encoding="utf-8")
+        if p.suffix.lower() in (".jsonl", ".ndjson"):
+            out = []
+            for line in text.splitlines():
+                line = line.strip()
+                if not line or line.startswith("#"):
+                    continue
+                out.append(json.loads(line))
+            return out
+        data = json.loads(text)
+        if isinstance(data, list):
+            return list(data)
+&gt;       return list(data.get(key, []))
+               ^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: 'NoneType' object is not iterable
+
+trading/vati/events/news_ingress.py:1014: TypeError</failure></testcase><testcase classname="trading.tests.test_news_runtime_health" name="test_invalid_file_envelope_cannot_become_an_empty_success[bad2]" time="0.002"><failure message="Failed: DID NOT RAISE ValueError">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-230/test_invalid_file_envelope_can2')
+bad = {'headlines': {}}
+
+    @pytest.mark.parametrize('bad',[{}, {'headlines':None}, {'headlines':{}}])
+    def test_invalid_file_envelope_cannot_become_an_empty_success(tmp_path,bad):
+        path=tmp_path/'news.json';path.write_text(json.dumps(bad))
+&gt;       with pytest.raises(ValueError):rows_from_file(path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_news_runtime_health.py:91: Failed</failure></testcase><testcase classname="trading.tests.test_news_runtime_health" name="test_corrected_file_recovers_from_partial_without_erasing_original_history[session]" time="0.003"><failure message="json.decoder.JSONDecodeError: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-230/test_corrected_file_recovers_f0')
+ledger = &lt;vati.core.ledger.Ledger object at 0x7f9aaa75d4f0&gt;, kind = 'session'
+
+    @pytest.mark.parametrize('kind',['session','account'])
+    def test_corrected_file_recovers_from_partial_without_erasing_original_history(tmp_path,ledger,kind):
+        path=tmp_path/'news.jsonl';path.write_text(json.dumps(row('First'))+'\n{bad\n')
+&gt;       value=service(kind,ledger,configured(path));news=build(value,kind)
+                                                         ^^^^^^^^^^^^^^^^^
+
+trading/tests/test_news_runtime_health.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_news_runtime_health.py:44: in build
+    value.news=value._build_news() if kind=='session' else value._build_news(None)
+               ^^^^^^^^^^^^^^^^^^^
+trading/vati/app/service.py:270: in _build_news
+    ingress.ingest_rows(rows_from_file(path), now_ms=self.clock())
+                        ^^^^^^^^^^^^^^^^^^^^
+trading/vati/events/news_ingress.py:1009: in rows_from_file
+    out.append(json.loads(line))
+               ^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/__init__.py:346: in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/decoder.py:338: in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;json.decoder.JSONDecoder object at 0x7f9aaccca7e0&gt;, s = '{bad', idx = 0
+
+    def raw_decode(self, s, idx=0):
+        """Decode a JSON document from ``s`` (a ``str`` beginning with
+        a JSON document) and return a 2-tuple of the Python
+        representation and the index in ``s`` where the document ended.
+    
+        This can be used to decode a JSON document from a string that may
+        have extraneous data at the end.
+    
+        """
+        try:
+&gt;           obj, end = self.scan_once(s, idx)
+                       ^^^^^^^^^^^^^^^^^^^^^^
+E           json.decoder.JSONDecodeError: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)
+
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/decoder.py:354: JSONDecodeError</failure></testcase><testcase classname="trading.tests.test_news_runtime_health" name="test_corrected_file_recovers_from_partial_without_erasing_original_history[account]" time="0.004"><failure message="json.decoder.JSONDecodeError: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-230/test_corrected_file_recovers_f1')
+ledger = &lt;vati.core.ledger.Ledger object at 0x7f9aaa75e390&gt;, kind = 'account'
+
+    @pytest.mark.parametrize('kind',['session','account'])
+    def test_corrected_file_recovers_from_partial_without_erasing_original_history(tmp_path,ledger,kind):
+        path=tmp_path/'news.jsonl';path.write_text(json.dumps(row('First'))+'\n{bad\n')
+&gt;       value=service(kind,ledger,configured(path));news=build(value,kind)
+                                                         ^^^^^^^^^^^^^^^^^
+
+trading/tests/test_news_runtime_health.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_news_runtime_health.py:44: in build
+    value.news=value._build_news() if kind=='session' else value._build_news(None)
+                                                           ^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/account_service.py:479: in _build_news
+    ingress.ingest_rows(rows_from_file(path), now_ms=self.clock())
+                        ^^^^^^^^^^^^^^^^^^^^
+trading/vati/events/news_ingress.py:1009: in rows_from_file
+    out.append(json.loads(line))
+               ^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/__init__.py:346: in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/decoder.py:338: in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;json.decoder.JSONDecoder object at 0x7f9aaccca7e0&gt;, s = '{bad', idx = 0
+
+    def raw_decode(self, s, idx=0):
+        """Decode a JSON document from ``s`` (a ``str`` beginning with
+        a JSON document) and return a 2-tuple of the Python
+        representation and the index in ``s`` where the document ended.
+    
+        This can be used to decode a JSON document from a string that may
+        have extraneous data at the end.
+    
+        """
+        try:
+&gt;           obj, end = self.scan_once(s, idx)
+                       ^^^^^^^^^^^^^^^^^^^^^^
+E           json.decoder.JSONDecodeError: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)
+
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/decoder.py:354: JSONDecodeError</failure></testcase><testcase classname="trading.tests.test_news_runtime_health" name="test_absent_optional_news_configuration_keeps_the_existing_disabled_behavior[session]" time="0.004" /><testcase classname="trading.tests.test_news_runtime_health" name="test_absent_optional_news_configuration_keeps_the_existing_disabled_behavior[account]" time="0.003" /></testsuite></testsuites>

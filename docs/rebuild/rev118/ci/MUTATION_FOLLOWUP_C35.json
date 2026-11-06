@@ -1,0 +1,35 @@
+{
+  "schema": "van.rebuild.mutation-reconciliation/1",
+  "part": "kotlin",
+  "reference": "e56a38c8d5b51b7c64d3d4ac04e2d8a59f6c9b36",
+  "preserved_case_count": 374,
+  "selected_case_count": 1,
+  "registry_sha256": "28ead2c151539fa47f6ebb46c393ec4820e5fa4522bb335b767c11cfbbdbc318",
+  "results": [
+    {
+      "kind": "baseline",
+      "mutation": null,
+      "exit": 0,
+      "verdict": "PASS",
+      "log_sha256": "519e22dfbd62d998952697fa9882952b1a013dadd31c174d182191d567c4117b",
+      "failed_oracles": [],
+      "summary": "d device missing its recognizer is not told to install Sherpa() PASSED\n\nVoiceSecondPassPolicyTest > an easy turn does not pay for a second pass() PASSED\n\nVoiceSecondPassPolicyTest > low confidence is a reason() PASSED\n\nVoiceSecondPassPolicyTest > a correction the owner has made before is a reason() PASSED\n\nVoiceSecondPassPolicyTest > nothing heard is a reason to try again() PASSED\n\nVoiceSecondPassPolicyTest > a confidence outside the valid range is ignored rather than treated as low() PASSED\n\nVoiceTurnLifecycleTest > cancelled turn cannot admit late final or processed transcript() PASSED\n\nVoiceTurnLifecycleTest > replacement rejects old callbacks even with same owner turn id() PASSED\n\nVoiceTurnLifecycleTest > finishing audio permits one final transcript while duplicate finals are rejected() PASSED\n\nVoiceTurnTest > only a completed answer counts as heard() PASSED\n\nVoiceTurnTest > a failover keeps the turn and the command() PASSED\n\nVoiceTurnTest > speaking survives a transport failover() PASSED\n\nWakeModelAssetTest > a plausible model with no pinned digest is accepted() PASSED\n\nWakeModelAssetTest > no model at all is absent, and says so() PASSED\n\nWakeModelAssetTest > a matching digest is accepted whatever its case() PASSED\n\nWakeModelAssetTest > a placeholder is not a model() PASSED\n\nWakeModelAssetTest > only READY reports ready() PASSED\n\nWakeModelAssetTest > a model that is not the one the release pinned is refused() PASSED\n\nWakeModelAssetTest > every state has a sentence and none of them names an enum or a path() PASSED\n\nBUILD SUCCESSFUL in 14s\n5 actionable tasks: 5 executed\n"
+    },
+    {
+      "kind": "mutation",
+      "mutation": "C35 the queue's day-long default silently replaces the outbox's four-hour window",
+      "exit": 1,
+      "verdict": "ASSERTION_DETECTED",
+      "log_sha256": "e95951b30293ecea4eb5fcde0803026ebdda71fbdb42bcb7ffe2fdd66790901e",
+      "failed_oracles": [
+        "OutboxPersistenceTest > the expiry that survives is the entrys own and not the queues default() FAILED",
+        "OutboxPersistenceTest > an entry survives a round trip through the queue record unchanged() FAILED",
+        "RestartSeamTest > a command that expired while the process was dead is dropped and the owner told() FAILED"
+      ],
+      "summary": "ard is a reason to try again() PASSED\n\nVoiceSecondPassPolicyTest > a confidence outside the valid range is ignored rather than treated as low() PASSED\n\nVoiceTurnLifecycleTest > cancelled turn cannot admit late final or processed transcript() PASSED\n\nVoiceTurnLifecycleTest > replacement rejects old callbacks even with same owner turn id() PASSED\n\nVoiceTurnLifecycleTest > finishing audio permits one final transcript while duplicate finals are rejected() PASSED\n\nVoiceTurnTest > only a completed answer counts as heard() PASSED\n\nVoiceTurnTest > a failover keeps the turn and the command() PASSED\n\nVoiceTurnTest > speaking survives a transport failover() PASSED\n\nWakeModelAssetTest > a plausible model with no pinned digest is accepted() PASSED\n\nWakeModelAssetTest > no model at all is absent, and says so() PASSED\n\nWakeModelAssetTest > a matching digest is accepted whatever its case() PASSED\n\nWakeModelAssetTest > a placeholder is not a model() PASSED\n\nWakeModelAssetTest > only READY reports ready() PASSED\n\nWakeModelAssetTest > a model that is not the one the release pinned is refused() PASSED\n\nWakeModelAssetTest > every state has a sentence and none of them names an enum or a path() PASSED\n\n> Task :test FAILED\n5 actionable tasks: 5 executed\n\n1273 tests completed, 3 failed\n\nFAILURE: Build failed with an exception.\n\n* What went wrong:\nExecution failed for task ':test'.\n> There were failing tests. See the report at: file:///workspace/van-review-2026-10-18/publish/android/verification/build/reports/tests/test/index.html\n\n* Try:\n> Run with --scan to get full insights.\n\nBUILD FAILED in 15s\n"
+    }
+  ],
+  "status": "PASS",
+  "duration_seconds": 29.9,
+  "source_state": "UNCOMMITTED_CANDIDATE_AFTER_5d6372fd"
+}

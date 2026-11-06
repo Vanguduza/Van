@@ -1,0 +1,154 @@
+[
+  {
+    "artifact_id": 12702370657,
+    "name": "van-browser-guard-source",
+    "bytes": 34236,
+    "sha256": "84a372508e0b16eafd7cfd0956df3923b29cbf1fe481a929ce1741c1e6f53cc1",
+    "github_digest": "sha256:84a372508e0b16eafd7cfd0956df3923b29cbf1fe481a929ce1741c1e6f53cc1",
+    "crc_path_symlink_verified": true
+  },
+  {
+    "artifact_id": 12702182422,
+    "name": "van-backend-public-source",
+    "bytes": 156319,
+    "sha256": "ffee0e41040024c23ba50220fc57da3d8d610b9952799cedf2ec8c01098ba6b9",
+    "github_digest": "sha256:ffee0e41040024c23ba50220fc57da3d8d610b9952799cedf2ec8c01098ba6b9",
+    "crc_path_symlink_verified": true
+  },
+  {
+    "artifact_id": 12701405988,
+    "name": "van-voice-runtime",
+    "bytes": 793,
+    "sha256": "0694bf921cb3570b3094f98840ffafe16a5b05b29da5c8d6925d0cdb0b3bef23",
+    "github_digest": "sha256:0694bf921cb3570b3094f98840ffafe16a5b05b29da5c8d6925d0cdb0b3bef23",
+    "crc_path_symlink_verified": true
+  },
+  {
+    "artifact_id": 12701381150,
+    "name": "van-mutation-report-kotlin-0",
+    "bytes": 1527,
+    "sha256": "b0be63da216348fc7b3036f59a3cdd1c46397dfb1d6f10ed357a3f7c67420b85",
+    "github_digest": "sha256:b0be63da216348fc7b3036f59a3cdd1c46397dfb1d6f10ed357a3f7c67420b85",
+    "crc_path_symlink_verified": true
+  },
+  {
+    "artifact_id": 12701335074,
+    "name": "van-actual-release-guards",
+    "bytes": 441,
+    "sha256": "d4d780e938a26095d4b06a3245441e786e58c4592f7c79a07fa14964de2d2659",
+    "github_digest": "sha256:d4d780e938a26095d4b06a3245441e786e58c4592f7c79a07fa14964de2d2659",
+    "crc_path_symlink_verified": true
+  },
+  {
+    "artifact_id": 12701301031,
+    "name": "van-mutation-report-kotlin-2",
+    "bytes": 1529,
+    "sha256": "df1e0e9d2fa4c2fb0fe9fa46ee75bd9e8fa396b317a98f43bf2447908d85c1df",
+    "github_digest": "sha256:df1e0e9d2fa4c2fb0fe9fa46ee75bd9e8fa396b317a98f43bf2447908d85c1df",
+    "crc_path_symlink_verified": true
+  },
+  {
+    "artifact_id": 12701152653,
+    "name": "van-character-forge-validation-binding",
+    "bytes": 2102,
+    "sha256": "4d6afa6796a887dcef4707872596115537a84559104a7dbdf0b8191c327688b2",
+    "github_digest": "sha256:4d6afa6796a887dcef4707872596115537a84559104a7dbdf0b8191c327688b2",
+    "crc_path_symlink_verified": true
+  },
+  {
+    "artifact_id": 12701082386,
+    "name": "van-mutation-report-kotlin-3",
+    "bytes": 1541,
+    "sha256": "cf7312eaf407d480254c3c652a2350ae61ad94c894e69fe2741fc49d548dbd21",
+    "github_digest": "sha256:cf7312eaf407d480254c3c652a2350ae61ad94c894e69fe2741fc49d548dbd21",
+    "crc_path_symlink_verified": true
+  },
+  {
+    "artifact_id": 12701013308,
+    "name": "van-instrumentation-report",
+    "bytes": 10653,
+    "sha256": "79b65e5077816dbe023782000da72048753388cd6da85afd0f3e06244d6f5609",
+    "github_digest": "sha256:79b65e5077816dbe023782000da72048753388cd6da85afd0f3e06244d6f5609",
+    "crc_path_symlink_verified": true
+  },
+  {
+    "artifact_id": 12700854456,
+    "name": "van-mutation-report-python-0",
+    "bytes": 2295,
+    "sha256": "0bd6a4bf101b423509f5156feda94e3eab22915983cccd482f43fa06706883da",
+    "github_digest": "sha256:0bd6a4bf101b423509f5156feda94e3eab22915983cccd482f43fa06706883da",
+    "crc_path_symlink_verified": true
+  },
+  {
+    "artifact_id": 12700743280,
+    "name": "van-mutation-report-kotlin-1",
+    "bytes": 1491,
+    "sha256": "eb30f3f432f4242939f7696e5f5bc853629a48c080b2054578edfe49d3b7a83f",
+    "github_digest": "sha256:eb30f3f432f4242939f7696e5f5bc853629a48c080b2054578edfe49d3b7a83f",
+    "crc_path_symlink_verified": true
+  },
+  {
+    "artifact_id": 12700737868,
+    "name": "van-postgres-ledger-report",
+    "bytes": 168653,
+    "sha256": "a66ae0ea0f3af7200f5c804f4891ade164cb16669c69de0f1d8c8c238012471b",
+    "github_digest": "sha256:a66ae0ea0f3af7200f5c804f4891ade164cb16669c69de0f1d8c8c238012471b",
+    "crc_path_symlink_verified": true
+  },
+  {
+    "artifact_id": 12700714829,
+    "name": "van-mutation-report-python-1",
+    "bytes": 2034,
+    "sha256": "1b181b861cd983ad8e6304b50a30f04e6841a95ef4c63f637a66f49ed19b7ef0",
+    "github_digest": "sha256:1b181b861cd983ad8e6304b50a30f04e6841a95ef4c63f637a66f49ed19b7ef0",
+    "crc_path_symlink_verified": true
+  },
+  {
+    "artifact_id": 12700698046,
+    "name": "van-mutation-report-python-3",
+    "bytes": 2351,
+    "sha256": "42e38314e244afd7b2ee83517398d2dbf9115c4d164495186791d23cb87ea07c",
+    "github_digest": "sha256:42e38314e244afd7b2ee83517398d2dbf9115c4d164495186791d23cb87ea07c",
+    "crc_path_symlink_verified": true
+  },
+  {
+    "artifact_id": 12700692002,
+    "name": "van-market-monitor-source",
+    "bytes": 7163,
+    "sha256": "de4aeefb0d20dcb7648ae249cf81aace58f611c16a5a4e2276d7112ca0eb02ea",
+    "github_digest": "sha256:de4aeefb0d20dcb7648ae249cf81aace58f611c16a5a4e2276d7112ca0eb02ea",
+    "crc_path_symlink_verified": true
+  },
+  {
+    "artifact_id": 12700597347,
+    "name": "van-mutation-report-browser-agent",
+    "bytes": 1362,
+    "sha256": "ebf675a3f38f8099bbd44739f24748a00401b15816931fb5b2f4665bd91936d1",
+    "github_digest": "sha256:ebf675a3f38f8099bbd44739f24748a00401b15816931fb5b2f4665bd91936d1",
+    "crc_path_symlink_verified": true
+  },
+  {
+    "artifact_id": 12700549320,
+    "name": "van-mutation-report-python-2",
+    "bytes": 2078,
+    "sha256": "520f20e08ca3d5941d566a11411a251493ac1c57ef880586c2ff19281f2143a9",
+    "github_digest": "sha256:520f20e08ca3d5941d566a11411a251493ac1c57ef880586c2ff19281f2143a9",
+    "crc_path_symlink_verified": true
+  },
+  {
+    "artifact_id": 12700881880,
+    "name": "van-native-source-parquet-report",
+    "bytes": 3224,
+    "sha256": "44c64f43845398b806e1643090f74737dce593d6fa328da5d1419abffd0789ab",
+    "github_digest": "sha256:44c64f43845398b806e1643090f74737dce593d6fa328da5d1419abffd0789ab",
+    "crc_path_symlink_verified": true
+  },
+  {
+    "artifact_id": 12700687260,
+    "name": "van-forecast-runtime-source-report",
+    "bytes": 148657,
+    "sha256": "c2fe0db00bd5228576f6b5e87c2112ec9c29203f8c2fe99827960ec1899d10c8",
+    "github_digest": "sha256:c2fe0db00bd5228576f6b5e87c2112ec9c29203f8c2fe99827960ec1899d10c8",
+    "crc_path_symlink_verified": true
+  }
+]

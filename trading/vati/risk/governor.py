@@ -8,6 +8,7 @@ from decimal import Decimal
 from vati.risk.contracts import KillSwitchTrigger
 from vati.risk.mandate import DrawdownTier
 from vati.authority import OwnerAuthorityVerifier
+from vati.risk.arithmetic import fraction, decimal
 
 ZERO = Decimal("0")
 ONE = Decimal("1")
@@ -25,7 +26,7 @@ class DrawdownVerdict:
 def drawdown_verdict(peak_equity: Decimal, equity: Decimal, tiers: tuple[DrawdownTier, ...]) -> DrawdownVerdict:
     if peak_equity <= ZERO or equity <= ZERO:
         return DrawdownVerdict(Decimal("Infinity"), ZERO, True, True, len(tiers) - 1)
-    dd = max(ZERO, (peak_equity - equity) / peak_equity)
+    dd = max(0, (fraction(peak_equity) - fraction(equity)) / fraction(peak_equity))
     applied = -1
     multiplier = ONE
     top_only = False
@@ -34,7 +35,7 @@ def drawdown_verdict(peak_equity: Decimal, equity: Decimal, tiers: tuple[Drawdow
             applied = i
             multiplier = tier.multiplier
             top_only = top_only or tier.top_tier_only
-    return DrawdownVerdict(dd, multiplier, top_only, multiplier == ZERO, applied)
+    return DrawdownVerdict(decimal(dd), multiplier, top_only, multiplier == ZERO, applied)
 
 
 @dataclass

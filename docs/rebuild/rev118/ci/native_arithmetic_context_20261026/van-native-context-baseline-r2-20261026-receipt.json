@@ -1,0 +1,11 @@
+{
+  "source_head": "733b7ac93e403048f2807df80f56b7038a4f5d48",
+  "baseline_checkout_clean": true,
+  "regression_sha256": "83cfc7dcce382fcc9f6a808f21b077bc05570e6af5c9b52dde6c1beee8885032",
+  "source_sha256": {
+    "trading/vati/funding/journal.py": "685b858931b41e2d86bc3cf820cb1b9004f9256930ca677518218f2336044b8e",
+    "trading/vati/funding/deal_journal.py": "e6404ce9f7722d94e46a9bd785b57a90f580d571f53bd056ae9aa1e470cc25d5",
+    "trading/vati/funding/mt5.py": "d9d31be2bbef043c96e3fc96e8d5d4abbffd5455de0ff93602652b92dc7fc272",
+    "trading/vati/execution/ctrader/adapter.py": "01e1a0f2d6c69dfb79b8cfbdeed3dd4e6547811ba55019a85ddf55960db2c815"
+  }
+}

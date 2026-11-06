@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.command.nav.ConcreteRouteRestorationTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:11:46" hostname="052fefa249ff" time="0.007">
+  <properties/>
+  <testcase name="reserved characters stay one encoded identifier and missing arguments cannot be persisted()" classname="com.dial.van.command.nav.ConcreteRouteRestorationTest" time="0.004"/>
+  <testcase name="process recreation retains the exact selected mission and project()" classname="com.dial.van.command.nav.ConcreteRouteRestorationTest" time="0.002"/>
+  <testcase name="development arguments survive without becoming unresolved templates()" classname="com.dial.van.command.nav.ConcreteRouteRestorationTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

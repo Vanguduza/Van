@@ -1,0 +1,47 @@
+{
+  "schema": "van.supplemental-source-faults/1",
+  "not_canonical_374": true,
+  "positive_control": {
+    "exit": 0,
+    "cases": 75,
+    "assertion_failures": 0,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "audit_violations": 0
+  },
+  "restored_control": null,
+  "cases": [
+    {
+      "exit": 1,
+      "cases": 26,
+      "assertion_failures": 2,
+      "failures": 2,
+      "errors": 0,
+      "skips": 0,
+      "audit_violations": 0,
+      "case": "include-later-same-clock-vintages",
+      "path": "trading/vati/market_data/native_windows.py",
+      "mutated_sha256": "04b4e49ab1ad9b4f91a8e6092b88a0dfcf0879ce2c40a6e9397544efb8f5892c"
+    },
+    {
+      "exit": 1,
+      "cases": 26,
+      "assertion_failures": 0,
+      "failures": 4,
+      "errors": 0,
+      "skips": 0,
+      "audit_violations": 0,
+      "case": "ignore-pinned-source-reference",
+      "path": "trading/vati/market_data/native_windows.py",
+      "mutated_sha256": "119cb62bb788954ac62afa378de9216b85422579182671e50333ab7bc1493ee5"
+    }
+  ],
+  "source_restored": true,
+  "source_sha256": {
+    "trading/vati/market_data/native_windows.py": "a0b380c0c6fa488c5d05e75062db85e222a0ff053400a928ee36e0b3c0fd5485",
+    "trading/vati/execution/ctrader/catalog.py": "34d7b3687640d1eeef39d0bd88503969db8efff88ee47ac389cde24534628b49",
+    "trading/vati/market_data/catalog_store.py": "a6fb2e4b080ffffa80a5a2067628cd614a6ac20681d408f2b7b0d0811277d1a9",
+    "trading/vati/execution/ctrader/adapter.py": "4787f8aeca733d4abe4b422389f8a1e9d4b0fe7db783d94d01d3ff90249f2b30"
+  }
+}

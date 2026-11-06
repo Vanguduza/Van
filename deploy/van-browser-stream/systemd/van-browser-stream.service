@@ -1,0 +1,30 @@
+[Unit]
+Description=VAN native Browser Stream Host (HTTPS, WebRTC, one-use owner transfers)
+After=van-browser-chromium.service van-browser-transfer-stage.service
+BindsTo=van-browser-chromium.service
+Requires=van-browser-transfer-stage.service
+
+[Service]
+Type=simple
+User=van-stream
+Group=van-browser-transfer
+EnvironmentFile=/etc/van-browser-stream/runtime.env
+ExecStart=/opt/van-browser-stream/venv/bin/python -m services.browser_stream_host.server
+WorkingDirectory=/opt/van-browser-stream/src
+Restart=on-failure
+RestartPreventExitStatus=2
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+InaccessiblePaths=-/var/lib/van-browser-profiles -/opt/van-browser-stream/pki/agent.key -/opt/van-browser-stream/pki/control-producer.token
+ReadWritePaths=/var/lib/van-browser-transfers /var/log/van-browser-stream
+UMask=0007
+
+[Install]
+WantedBy=multi-user.target

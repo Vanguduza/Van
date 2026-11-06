@@ -1,0 +1,1470 @@
+diff --git a/backend/tests/test_owner_device_binding.py b/backend/tests/test_owner_device_binding.py
+index 2267231f..8d5fc670 100644
+--- a/backend/tests/test_owner_device_binding.py
++++ b/backend/tests/test_owner_device_binding.py
+@@ -451,20 +451,19 @@ class TestOwnerDeviceBinding:
+         assert rows[0]["revoke_reason"] == "phone lost"
+ 
+     async def test_rebinding_revokes_and_issues_in_one_step(self, tmp_path):
+-        service, _ = await self._service(tmp_path)
+-        token, challenge = await service.create_bootstrap_token(now_ms=1_000)
+-        pem, _ = _keypair()
+-        await service.bind(
+-            token=token, device_id="s24", public_key_pem=pem,
+-            attestation_extension=_attestation(challenge.encode()), now_ms=1_100,
+-        )
+-        new_token, new_challenge = await service.rebind_token(
+-            reason="replaced handset", now_ms=4_000
+-        )
++        # The durable recovery owner also retires paired/native authority before the
++        # replacement credential becomes usable; the binding owner cannot do that alone.
++        from test_owner_device_reenrollment_recovery import setup
++        fixture = await setup(tmp_path)
++        service = fixture.bindings
++        fixture.native.available = True
++        result = await fixture.service.start(**fixture.request)
++        assert result["phase"] == "READY"
++        new_token, new_challenge = result["bootstrap_token"], result["attestation_challenge"]
+         replacement_pem, _ = _keypair()
+         binding = await service.bind(
+             token=new_token, device_id="s24-new", public_key_pem=replacement_pem,
+-            attestation_extension=_attestation(new_challenge.encode()), now_ms=4_100,
++            attestation_extension=_attestation(new_challenge.encode()),
+         )
+         assert binding.device_id == "s24-new"
+         assert (await service.active()).device_id == "s24-new"
+diff --git a/backend/van_gateway/action/service.py b/backend/van_gateway/action/service.py
+index 49b8b1a0..e0cf7156 100644
+--- a/backend/van_gateway/action/service.py
++++ b/backend/van_gateway/action/service.py
+@@ -395,22 +395,11 @@ class ActionRuntime:
+         return self._row_to_execution(row) if row is not None else None
+ 
+     async def revoke_privileged_for_device(self, requested_by: str) -> int:
+-        from van_gateway.action.models import TERMINAL_EXECUTION_STATUSES
+         now = int(time.time() * 1000)
+-        terminal = tuple(sorted(status.value for status in TERMINAL_EXECUTION_STATUSES))
+-        placeholders = ",".join("?" for _ in terminal)
+         async with self.store.connection() as db:
+-            cur = await db.execute(
+-                f"""
+-                UPDATE action_executions
+-                SET status=?, error_code='DEVICE_OR_GRANT_REVOKED', updated_at_unix_ms=?
+-                WHERE requested_by=? AND action_class IN ('A2','A3','A4')
+-                  AND status NOT IN ({placeholders})
+-                """,
+-                (ExecutionStatus.REVOKED.value, now, requested_by, *terminal),
+-            )
++            count = await revoke_privileged_in_transaction(db, requested_by, now)
+             await db.commit()
+-            return int(cur.rowcount if cur.rowcount is not None and cur.rowcount >= 0 else 0)
++            return count
+ 
+     async def _persist_execution(self, execution: ActionExecution, *, permission_parameters: dict[str, Any] | None = None) -> ActionExecution:
+         async with self.store.connection() as db:
+@@ -467,3 +456,14 @@ class ActionRuntime:
+             evidence_pointer=str(row["evidence_pointer"]) if row["evidence_pointer"] is not None else None,
+             error_code=str(row["error_code"]) if row["error_code"] is not None else None,
+         )
++
++
++async def revoke_privileged_in_transaction(db, requested_by: str, now: int) -> int:
++    """Retire undispatched authority while preserving original uncertain effects."""
++    cur = await db.execute(
++        "UPDATE action_executions SET status='REVOKED',error_code='DEVICE_OR_GRANT_REVOKED',updated_at_unix_ms=? "
++        "WHERE requested_by=? AND action_class IN ('A2','A3','A4') AND status IN "
++        "('RECEIVED','RESOLVING','CONTEXT_READY','PLANNED','AUTHORIZED','PREFLIGHT_PASSED')",
++        (now, requested_by),
++    )
++    return max(0, cur.rowcount)
+diff --git a/backend/van_gateway/app.py b/backend/van_gateway/app.py
+index 293df646..62e0cd26 100644
+--- a/backend/van_gateway/app.py
++++ b/backend/van_gateway/app.py
+@@ -17,7 +17,7 @@ from pathlib import Path
+ 
+ from fastapi import FastAPI, Header, HTTPException, Request
+ from fastapi.responses import JSONResponse, PlainTextResponse, RedirectResponse
+-from pydantic import BaseModel, Field, StrictBool, ValidationError
++from pydantic import BaseModel, ConfigDict, Field, StrictBool, ValidationError
+ 
+ from van_gateway.action.service import ActionPolicyError
+ from van_gateway.artemis.console import ArtemisConsoleProxy
+@@ -472,7 +472,12 @@ class ProvisioningStatusBody(BaseModel):
+     bootstrap_token: str = Field(min_length=32, max_length=256)
+ 
+ class RebindBody(BaseModel):
+-    reason: str
++    model_config = ConfigDict(extra="forbid")
++    reason: str = Field(min_length=1, max_length=1000)
++    operation_id: str | None = Field(default=None, min_length=16, max_length=128)
++    expected_binding_id: str | None = None
++    expected_bound_at_ms: int | None = Field(default=None, strict=True, ge=0)
++    gateway_url: str | None = None
+ 
+ 
+ def _read_stream_signing_key(path: str) -> str:
+@@ -1156,13 +1161,15 @@ def create_app() -> FastAPI:
+         speech_cleanup = asyncio.create_task(expire_speech_text())
+         recovery_dispatch = asyncio.create_task(runtime_recovery_dispatcher.run())
+         revocation_dispatch = asyncio.create_task(native_owner_revocations.run())
++        reenrollment_dispatch = asyncio.create_task(owner_device_reenrollment.run())
+         try:
+             yield
+         finally:
+             speech_cleanup.cancel()
+             recovery_dispatch.cancel()
+             revocation_dispatch.cancel()
+-            await asyncio.gather(speech_cleanup, recovery_dispatch, revocation_dispatch, return_exceptions=True)
++            reenrollment_dispatch.cancel()
++            await asyncio.gather(speech_cleanup, recovery_dispatch, revocation_dispatch, reenrollment_dispatch, return_exceptions=True)
+             speech_streams.clear()
+             await dial_dev_attention.stop()
+             await scheduler.stop()
+@@ -1678,6 +1685,11 @@ def create_app() -> FastAPI:
+         ),
+         kid=settings.connectivity_signing_kid,
+     )
++    from van_gateway.auth.reenrollment import OwnerDeviceReenrollment
++    owner_device_reenrollment = OwnerDeviceReenrollment(store=store, auth=auth,
++        native_revocations=native_owner_revocations, device_ca=lambda: app.state.device_ca,
++        connectivity=connectivity_config)
++    app.state.owner_device_reenrollment = owner_device_reenrollment
+     app.state.owner_device_bindings = owner_device_bindings
+     app.state.connectivity_config = connectivity_config
+     app.state.van_sessions = van_sessions
+@@ -1775,6 +1787,8 @@ def create_app() -> FastAPI:
+             # The scope that can mint owner-device authority, and the reason this module
+             # exists. Not granted to the legacy token.
+             return ControlScope.DEVICE_ENROLMENT
++        if method == "GET" and re.fullmatch(r"/v1/devices/rebindings/[^/]+", path):
++            return ControlScope.DEVICE_ENROLMENT
+         if method == "GET" and re.fullmatch(r"/v1/devices/[^/]+/revocations/[^/]+", path):
+             return ControlScope.DEVICE_ENROLMENT
+         if method == "POST" and path.startswith("/v1/devices/") and path.endswith("/revoke"):
+@@ -2213,6 +2227,21 @@ def create_app() -> FastAPI:
+                 except (ValueError, binascii.Error) as exc:
+                     raise DeviceBindingError("device_proof_malformed") from exc
+                 raw_body = await request.body()
++                # Original pairing recovery retains its 409 unavailable outcome when
++                # paired authority was retired. Verify the archived exact proof solely
++                # to report that refusal; it cannot authorize enrollment or renewal.
++                retired = await store.fetchone("SELECT revoked_at_unix FROM devices WHERE device_id=?", (body.device_id,))
++                if body.device_access_token is not None and retired is not None and retired["revoked_at_unix"] is not None:
++                    archived = await binding_service.for_device(body.device_id)
++                    if archived is not None:
++                        from van_gateway.auth.device_proof import verify_request_proof, DeviceProofError
++                        try:
++                            verify_request_proof(public_key_pem=archived.public_key_pem, signature=signature,
++                                method="POST", path="/v1/devices/pair", device_id=body.device_id,
++                                issued_at_ms=issued_at_ms, body=raw_body)
++                        except DeviceProofError as exc:
++                            raise DeviceBindingError(exc.reason) from exc
++                        raise AuthError("pairing_recovery_unavailable", "Original pairing credentials are no longer active")
+                 binding = await binding_service.require_proof(
+                     device_id=body.device_id, signature=signature, method="POST",
+                     path="/v1/devices/pair", issued_at_ms=issued_at_ms, body=raw_body,
+@@ -2302,9 +2331,21 @@ def create_app() -> FastAPI:
+             native_revocation = await auth.revoke(device_id)
+         except AuthError as exc:
+             raise HTTPException(status_code=404, detail=exc.message) from exc
+-        revoked_executions = await owner_runtime.actions.revoke_privileged_for_device(f"device:{device_id}")
+-        device_ca = getattr(app.state, "device_ca", None)
+-        revoked_certificates = device_ca.revoke_device(device_id) if device_ca is not None else 0
++        await owner_runtime.actions.revoke_privileged_for_device(f"device:{device_id}")
++        retirement = await store.fetchone("SELECT actions_retired FROM device_certificate_retirements WHERE device_id=?", (device_id,))
++        revoked_executions = retirement["actions_retired"] if retirement else 0
++        revoked_certificates = 0
++        certificate_retirement_phase = "PENDING"
++        try:
++            revoked_certificates = await owner_device_reenrollment.retire_certificates(device_id) or 0
++            certificate_receipt = await store.fetchone(
++                "SELECT certificates_retired_at_ms FROM device_certificate_retirements WHERE device_id=?", (device_id,))
++            if certificate_receipt is not None and certificate_receipt["certificates_retired_at_ms"] is not None:
++                certificate_retirement_phase = "APPLIED"
++        except Exception:
++            # Local CA/file/marker failure cannot delay independent native retirement.
++            certificate_retirement_phase = "UNKNOWN"
++            logging.getLogger("van.device-retirement").warning("original device certificate retirement remains pending")
+         try:
+             native_revocation = await native_owner_revocations.reconcile_operation(native_revocation['operation_id'])
+         except (OSError, ValueError, TypeError):
+@@ -2314,6 +2355,7 @@ def create_app() -> FastAPI:
+             "device_id": device_id,
+             "revoked_privileged_executions": revoked_executions,
+             "revoked_client_certificates": revoked_certificates,
++            "certificate_retirement_phase": certificate_retirement_phase,
+             "native_authority_revocation": native_revocation,
+         }
+ 
+@@ -2341,7 +2383,15 @@ def create_app() -> FastAPI:
+         if not isinstance(csr_pem, str) or len(csr_pem) > 8192:
+             raise HTTPException(status_code=400, detail="csr_invalid")
+         try:
+-            issued = device_ca.issue_client(csr_pem, device_id, days=settings.mtls_client_cert_days)
++            # The SQL writer fences a proof checked before retirement from issuing a
++            # certificate after the CA outbox has independently completed its readback.
++            async with store.connection() as db:
++                await db.execute("BEGIN IMMEDIATE")
++                live = await (await db.execute("SELECT revoked_at_unix FROM devices WHERE device_id=?", (device_id,))).fetchone()
++                if live is None or live["revoked_at_unix"] is not None:
++                    raise HTTPException(403, "device_revoked")
++                issued = device_ca.issue_client(csr_pem, device_id, days=settings.mtls_client_cert_days)
++                await db.commit()
+         except PkiError as exc:
+             raise HTTPException(status_code=400, detail=exc.code) from exc
+         return {
+@@ -2387,7 +2437,10 @@ def create_app() -> FastAPI:
+     @app.post("/v1/devices/bootstrap/create")
+     async def create_bootstrap(body: BootstrapCreateBody):
+         """ADR-RB-026 — the installer's one-time credential, for the deployment pipeline."""
+-        token, challenge = await _require_binding_service().create_bootstrap_token(note=body.note)
++        try:
++            token, challenge = await _require_binding_service().create_bootstrap_token(note=body.note)
++        except DeviceBindingError as exc:
++            raise HTTPException(409, exc.reason) from exc
+         await audit.record(
+             result="ok", capability="device.bootstrap.create", after={"note": body.note}
+         )
+@@ -2418,9 +2471,12 @@ def create_app() -> FastAPI:
+             validated_gateway_url = validate_gateway_url(body.gateway_url)
+         except ConnectivityError as exc:
+             raise HTTPException(status_code=400, detail=exc.reason) from exc
+-        token, challenge = await _require_binding_service().create_bootstrap_token(
+-            note=body.note, ttl_ms=PROVISIONING_TTL_MS,
+-        )
++        try:
++            token, challenge = await _require_binding_service().create_bootstrap_token(
++                note=body.note, ttl_ms=PROVISIONING_TTL_MS,
++            )
++        except DeviceBindingError as exc:
++            raise HTTPException(409, exc.reason) from exc
+         # Both credentials, minted together, because provisioning is one act. A device
+         # that paired but did not bind would hold working tokens and no hardware identity,
+         # which is §0D.3's failure exactly: an APK copied to another handset would work.
+@@ -2610,18 +2666,42 @@ def create_app() -> FastAPI:
+             "last_proof_at_ms": binding.last_proof_at_ms,
+         }
+ 
++    def _rebind_error(exc):
++        status = 404 if exc.reason == "rebind_operation_unknown" else 409
++        if exc.reason in {"connectivity_signing_unconfigured", "device_secret_encryption_unconfigured", "rebind_original_response_unavailable"}:
++            status = 503
++        return HTTPException(status_code=status, detail=exc.reason)
++
+     @app.post("/v1/devices/rebind")
+-    async def rebind_owner_device(body: RebindBody):
+-        """§0D.3's recovery path: revoke the current binding and issue one enrolment token.
++    async def rebind_owner_device(body: RebindBody, x_van_internal_token: str | None = Header(default=None)):
++        """Recover one exact replacement intent under the dedicated installer scope."""
++        require_internal_control(x_van_internal_token, ControlScope.DEVICE_ENROLMENT)
++        _require_binding_service()
++        try:
++            result = await owner_device_reenrollment.start(
++                operator_id=hashlib.sha256(x_van_internal_token.encode()).hexdigest(),
++                reason=body.reason, operation_id=body.operation_id,
++                expected_binding_id=body.expected_binding_id, expected_bound_at_ms=body.expected_bound_at_ms,
++                gateway_url=body.gateway_url)
++        except DeviceBindingError as exc:
++            raise _rebind_error(exc) from exc
++        except AuthError as exc:
++            raise HTTPException(503, exc.code) from exc
++        except ConnectivityError as exc:
++            raise HTTPException(400, exc.reason) from exc
++        return JSONResponse(result, headers={"Cache-Control": "no-store"})
+ 
+-        Administrative on purpose. A device that could rebind on its own behalf would be a
+-        way to become the owner's phone by asserting that it is.
+-        """
+-        token, challenge = await _require_binding_service().rebind_token(reason=body.reason)
+-        await audit.record(
+-            result="ok", capability="device.rebind", after={"reason": body.reason}
+-        )
+-        return {"bootstrap_token": token, "attestation_challenge": challenge}
++    @app.get("/v1/devices/rebindings/{operation_id}")
++    async def original_device_rebinding(operation_id: str, x_van_internal_token: str | None = Header(default=None)):
++        require_internal_control(x_van_internal_token, ControlScope.DEVICE_ENROLMENT)
++        try:
++            result = await owner_device_reenrollment.recover(operation_id=operation_id,
++                operator_id=hashlib.sha256(x_van_internal_token.encode()).hexdigest(), reconcile=False)
++        except DeviceBindingError as exc:
++            raise _rebind_error(exc) from exc
++        except AuthError as exc:
++            raise HTTPException(503, exc.code) from exc
++        return JSONResponse(result, headers={"Cache-Control": "no-store"})
+ 
+     @app.get("/v1/connectivity/manifest")
+     async def connectivity_manifest(request: Request, known_version: int = 0):
+diff --git a/backend/van_gateway/auth/device_binding.py b/backend/van_gateway/auth/device_binding.py
+index e26ce9dc..43d6d03e 100644
+--- a/backend/van_gateway/auth/device_binding.py
++++ b/backend/van_gateway/auth/device_binding.py
+@@ -97,18 +97,23 @@ class OwnerDeviceBindingService:
+             raise DeviceBindingError("bootstrap_ttl_invalid")
+         token = secrets.token_urlsafe(32)
+         challenge = secrets.token_urlsafe(24)
+-        await self.store.execute(
+-            """
+-            INSERT INTO owner_device_bootstrap_tokens(
+-              token_id, token_sha256, owner_principal_id, challenge,
+-              created_at_ms, expires_at_ms, note
+-            ) VALUES (?, ?, ?, ?, ?, ?, ?)
+-            """,
+-            (
+-                f"boot_{uuid.uuid4().hex}", _sha256(token), owner_principal_id, challenge,
+-                now, now + ttl_ms, note,
+-            ),
+-        )
++        from van_gateway.auth.retirement import require_enrollment_available
++        async with self.store.connection() as db:
++            await db.execute("BEGIN IMMEDIATE")
++            await require_enrollment_available(db, owner_principal_id=owner_principal_id)
++            await db.execute(
++                """
++                INSERT INTO owner_device_bootstrap_tokens(
++                  token_id, token_sha256, owner_principal_id, challenge,
++                  created_at_ms, expires_at_ms, note
++                ) VALUES (?, ?, ?, ?, ?, ?, ?)
++                """,
++                (
++                    f"boot_{uuid.uuid4().hex}", _sha256(token), owner_principal_id, challenge,
++                    now, now + ttl_ms, note,
++                ),
++            )
++            await db.commit()
+         return token, challenge
+ 
+     async def challenge_for(self, token: str, *, now_ms: int | None = None) -> str:
+@@ -259,6 +264,9 @@ class OwnerDeviceBindingService:
+         fingerprint = key_fingerprint(public_key_pem)
+         binding_id = f"bind_{uuid.uuid4().hex}"
+         async with self.store.connection() as db:
++            await db.execute("BEGIN IMMEDIATE")
++            from van_gateway.auth.retirement import require_enrollment_available
++            await require_enrollment_available(db, owner_principal_id=owner_principal_id)
+             # Recheck expiry at the atomic consumption, after cryptographic validation.
+             consumed_now = int(time.time() * 1000) if now_ms is None else now
+             cur = await db.execute(
+@@ -378,18 +386,12 @@ class OwnerDeviceBindingService:
+         self, *, reason: str, owner_principal_id: str = OWNER_PRINCIPAL,
+         now_ms: int | None = None,
+     ) -> tuple[str, str]:
+-        """§0D.3's recovery: revoke, then issue one bootstrap token for the new phone.
++        """Compatibility refusal: replacement requires the durable scoped intent owner.
+ 
+-        Both halves in one call, because a revoke without a way back is how an owner ends
+-        up locked out of their own assistant, and a token issued without a revoke would
+-        mean two phones could be bound at once — which the database would refuse anyway,
+-        confusingly, at the last possible moment.
++        This old helper cannot bind an operator, original generation or native retirement
++        receipt. Production recovery uses OwnerDeviceReenrollment through the scoped API.
+         """
+-        now = int(time.time() * 1000) if now_ms is None else now_ms
+-        await self.revoke(owner_principal_id=owner_principal_id, reason=reason, now_ms=now)
+-        return await self.create_bootstrap_token(
+-            note=f"rebind: {reason}", now_ms=now, owner_principal_id=owner_principal_id
+-        )
++        raise DeviceBindingError("rebind_operation_identity_required")
+ 
+     # ------------------------------------------------------------------ internals
+ 
+diff --git a/backend/van_gateway/auth/native_revocation.py b/backend/van_gateway/auth/native_revocation.py
+index bc0fb30d..3894a225 100644
+--- a/backend/van_gateway/auth/native_revocation.py
++++ b/backend/van_gateway/auth/native_revocation.py
+@@ -53,6 +53,7 @@ class DeviceRevocationResponse(BaseModel):
+     device_id: str
+     revoked_privileged_executions: int
+     revoked_client_certificates: int
++    certificate_retirement_phase: Literal['PENDING','APPLIED','UNKNOWN'] = 'PENDING'
+     native_authority_revocation: NativeOwnerKeyRevocationState
+ 
+ 
+diff --git a/backend/van_gateway/auth/service.py b/backend/van_gateway/auth/service.py
+index 92fcff42..8ad50b3d 100644
+--- a/backend/van_gateway/auth/service.py
++++ b/backend/van_gateway/auth/service.py
+@@ -158,6 +158,13 @@ class AuthService:
+         ticket_hash = hashlib.sha256(pairing_token.encode("utf-8")).hexdigest()
+         async with self.store.connection() as db:
+             await db.execute("BEGIN IMMEDIATE")
++            from van_gateway.auth.retirement import require_enrollment_available, require_fresh_approval_key
++            from van_gateway.auth.device_binding import DeviceBindingError
++            try:
++                await require_enrollment_available(db)
++            except DeviceBindingError as exc:
++                raise AuthError(exc.reason, "Owner device retirement is pending") from exc
++            await require_fresh_approval_key(db, public_key_pem)
+             # Waiting for the writer cannot extend a pairing ticket's authority.
+             now = int(time.time())
+             if recoverable or hardware_proved:
+@@ -283,24 +290,34 @@ class AuthService:
+         return DeviceRecord(row["device_id"], row["public_key_pem"], int(row["enrolled_at_unix"]), None, row["label"])
+ 
+     async def enroll(self, device_id: str, device_secret: str, public_key_pem: str, label: str | None = None) -> DeviceRecord:
+-        existing = await self.store.fetchone("SELECT device_id, revoked_at_unix FROM devices WHERE device_id = ?", (device_id,))
+-        if existing is not None:
+-            if existing["revoked_at_unix"] is not None:
+-                raise AuthError("device_revoked", "Device was revoked; re-enrollment denied")
+-            raise AuthError("already_enrolled", "Device already enrolled")
++        from van_gateway.auth.retirement import require_enrollment_available, require_fresh_approval_key
++        from van_gateway.auth.device_binding import DeviceBindingError
+         cipher = self._cipher()
+         encrypted_secret = cipher.encrypt(device_secret.encode("utf-8")).decode("utf-8")
+-        now = int(time.time())
+-        await self.store.execute(
+-            "INSERT INTO devices(device_id, public_key_pem, enrolled_at_unix, revoked_at_unix, label, encrypted_secret) VALUES (?, ?, ?, NULL, ?, ?)",
+-            (device_id, public_key_pem, now, label, encrypted_secret),
+-        )
+-        self._device_secrets[device_id] = device_secret.encode("utf-8")
+         secret_hash = hashlib.sha256(device_secret.encode("utf-8")).hexdigest()
+-        await self.store.execute(
+-            "INSERT INTO capability_grants(grant_id, device_id, capabilities_json, expires_at_unix, task_id, revoked_at_unix, created_at_unix) VALUES (?, ?, ?, ?, NULL, NULL, ?)",
+-            (f"enroll-{device_id}", device_id, Store.dumps({"secret_sha256": secret_hash, "capabilities": ["owner"]}), now + ENROLMENT_GRANT_SECONDS, now),
+-        )
++        async with self.store.connection() as db:
++            await db.execute("BEGIN IMMEDIATE")
++            existing = await (await db.execute("SELECT revoked_at_unix FROM devices WHERE device_id=?", (device_id,))).fetchone()
++            if existing is not None:
++                if existing["revoked_at_unix"] is not None:
++                    raise AuthError("device_revoked", "Device was revoked; re-enrollment denied")
++                raise AuthError("already_enrolled", "Device already enrolled")
++            try:
++                await require_enrollment_available(db)
++            except DeviceBindingError as exc:
++                raise AuthError(exc.reason, "Owner device retirement is pending") from exc
++            await require_fresh_approval_key(db, public_key_pem)
++            now = int(time.time())
++            await db.execute(
++                "INSERT INTO devices(device_id, public_key_pem, enrolled_at_unix, revoked_at_unix, label, encrypted_secret) VALUES (?, ?, ?, NULL, ?, ?)",
++                (device_id, public_key_pem, now, label, encrypted_secret),
++            )
++            await db.execute(
++                "INSERT INTO capability_grants(grant_id, device_id, capabilities_json, expires_at_unix, task_id, revoked_at_unix, created_at_unix) VALUES (?, ?, ?, ?, NULL, NULL, ?)",
++                (f"enroll-{device_id}", device_id, Store.dumps({"secret_sha256": secret_hash, "capabilities": ["owner"]}), now + ENROLMENT_GRANT_SECONDS, now),
++            )
++            await db.commit()
++        self._device_secrets[device_id] = device_secret.encode("utf-8")
+         return DeviceRecord(device_id, public_key_pem, now, None, label)
+ 
+     async def grant_status(self, device_id: str, *, now: int | None = None) -> dict:
+@@ -384,29 +401,18 @@ class AuthService:
+         self._device_secrets[device_id] = device_secret.encode("utf-8")
+ 
+     async def revoke(self, device_id: str) -> dict:
+-        from van_gateway.auth.native_revocation import pending_record, public, PREFIX
+-        import json
+-        now = int(time.time())
++        from van_gateway.auth.retirement import retire_device
++        now = int(time.time() * 1000)
+         async with self.store.connection() as db:
+             await db.execute('BEGIN IMMEDIATE')
+-            cursor = await db.execute('SELECT device_id,public_key_pem,revoked_at_unix FROM devices WHERE device_id=?',(device_id,))
+-            row = await cursor.fetchone()
++            row = await (await db.execute('SELECT public_key_pem FROM devices WHERE device_id=?', (device_id,))).fetchone()
+             if row is None:
+                 raise AuthError("unknown_device", "Device not found")
+-            record=pending_record(device_id,row['public_key_pem'],int(row['revoked_at_unix']) if row['revoked_at_unix'] is not None else now)
+-            await db.execute(
+-                "UPDATE capability_grants SET revoked_at_unix = ? WHERE device_id = ? AND revoked_at_unix IS NULL",
+-                (now, device_id),
+-            )
+-            await db.execute(
+-                "UPDATE devices SET revoked_at_unix = COALESCE(revoked_at_unix, ?) WHERE device_id = ?",
+-                (now, device_id),
+-            )
+-            await db.execute('INSERT OR IGNORE INTO runtime_meta(key,value,updated_at_unix_ms) VALUES(?,?,?)',
+-                (PREFIX+record['operation_id'],json.dumps(record,sort_keys=True,separators=(',',':')),now*1000))
++            record = await retire_device(db, device_id=device_id, public_key_pem=row['public_key_pem'],
++                                         now_ms=now, reason="device revoked")
+             await db.commit()
+         self._device_secrets.pop(device_id, None)
+-        return public(record)
++        return record
+ 
+     async def require_device(self, device_id: str) -> DeviceRecord:
+         row = await self.store.fetchone(
+diff --git a/backend/van_gateway/session/service.py b/backend/van_gateway/session/service.py
+index ad006a86..d4f8beb1 100644
+--- a/backend/van_gateway/session/service.py
++++ b/backend/van_gateway/session/service.py
+@@ -98,6 +98,9 @@ class VanHermesSessionService:
+         )
+         async with self.store.connection() as db:
+             await db.execute("BEGIN IMMEDIATE")
++            device = await (await db.execute("SELECT revoked_at_unix FROM devices WHERE device_id=?", (device_id,))).fetchone()
++            if device is not None and device["revoked_at_unix"] is not None:
++                raise SessionError("device_revoked")
+             cur = await db.execute("SELECT device_id,state FROM van_sessions WHERE van_session_id = ?", (session_id,))
+             prior = await cur.fetchone()
+             if prior is not None:
+diff --git a/backend/van_gateway/storage/db.py b/backend/van_gateway/storage/db.py
+index 326a5be6..701c29e1 100644
+--- a/backend/van_gateway/storage/db.py
++++ b/backend/van_gateway/storage/db.py
+@@ -9,8 +9,9 @@ from typing import Any, AsyncIterator
+ 
+ import aiosqlite
+ 
+-SCHEMA_VERSION = 59
++SCHEMA_VERSION = 60
+ 
++from van_gateway.storage.reenrollment_migration import MIGRATION_60
+ from van_gateway.storage.chart_migration import MIGRATION_56
+ from van_gateway.learning.schema import MIGRATION_57
+ from van_gateway.storage.monitor_migrations import MIGRATION_58, MIGRATION_59
+@@ -2549,6 +2550,7 @@ MIGRATIONS: dict[int, str] = {
+     57: MIGRATION_57,
+     58: MIGRATION_58,
+     59: MIGRATION_59,
++    60: MIGRATION_60,
+ 
+ }
+ 
+diff --git a/backend/tests/test_owner_device_reenrollment_api.py b/backend/tests/test_owner_device_reenrollment_api.py
+new file mode 100644
+index 00000000..c486e400
+--- /dev/null
++++ b/backend/tests/test_owner_device_reenrollment_api.py
+@@ -0,0 +1,144 @@
++"""Existing installer/admin registration plus actual HTTP enrollment consumers."""
++from __future__ import annotations
++
++import base64
++from dataclasses import replace
++import hashlib
++import json
++
++import pytest
++
++from attestation_fixtures import signed_attestation_chain
++from test_device_proof_enforcement import client, _settings, INTERNAL, INGRESS
++from test_mtls_pki import csr_for
++from test_bootstrap_recovery_api import _headers, _encoded, _attest
++from test_owner_device_binding import _attestation, _keypair
++from test_owner_device_reenrollment_recovery import NativeFixture
++from van_gateway.browser.stream_grants import generate_signing_key
++from van_gateway.config import get_settings
++from van_gateway.mtls.pki import DeviceCA, init_ca
++
++pytestmark = pytest.mark.asyncio
++INSTALLER = "reenrollment-test-installer-0123456789"
++HEADERS = {"X-Van-Internal-Token": INSTALLER}
++
++
++@pytest.fixture(autouse=True)
++def installer_settings(_settings, monkeypatch):
++    monkeypatch.setenv("VAN_DEVICE_ENROLMENT_TOKEN", INSTALLER)
++    monkeypatch.setenv("VAN_SCHEDULER_ENABLED", "false")
++    get_settings.cache_clear()
++
++
++async def original(app, tmp_path):
++    pem, _ = _keypair()
++    ticket = await app.state.auth.create_pairing_ticket("original")
++    await app.state.auth.pair_device(ticket.token,"original-phone","s"*32,pem)
++    token, challenge = await app.state.owner_device_bindings.create_bootstrap_token()
++    binding = await app.state.owner_device_bindings.bind(token=token,device_id="original-phone",public_key_pem=pem,
++        attestation_extension=_attestation(challenge.encode()),attestation_chain_verified=True)
++    ca_dir = tmp_path / "reenrollment-ca"
++    init_ca(ca_dir)
++    app.state.device_ca = DeviceCA(ca_dir)
++    native = NativeFixture()
++    app.state.strategy_promotions.control = native
++    signing = generate_signing_key("reenrollment-connectivity-fixture")
++    app.state.connectivity_config.private_pem = signing.private_pem
++    app.state.connectivity_config.kid = signing.kid
++    request = dict(reason="lost handset",operation_id="replacement-http-original-0001",
++        expected_binding_id=binding.binding_id,expected_bound_at_ms=binding.bound_at_ms,gateway_url="https://gateway.example")
++    return request, native
++
++
++async def test_scoped_original_http_recovery_then_actual_attestation_pair_and_status(client,tmp_path):
++    ac, app = client
++    request, native = await original(app,tmp_path)
++    wrong = await ac.post("/v1/devices/rebind",json=request,headers={"X-Van-Internal-Token":INTERNAL})
++    assert wrong.status_code == 403
++    assert await app.state.owner_device_bindings.active()
++    pending = await ac.post("/v1/devices/rebind",json=request,headers=HEADERS)
++    assert pending.status_code == 200,pending.text
++    assert pending.json()["phase"] == "RETIRING" and pending.json()["envelope"] is None
++    assert pending.headers["cache-control"] == "no-store"
++    calls = len(native.calls)
++    before = [dict(row) for row in await app.state.store.fetchall("SELECT * FROM owner_device_reenrollments")]
++    read = await ac.get("/v1/devices/rebindings/"+request["operation_id"],headers=HEADERS)
++    assert read.status_code == 200 and len(native.calls) == calls
++    assert [dict(row) for row in await app.state.store.fetchall("SELECT * FROM owner_device_reenrollments")] == before
++    ordinary = await ac.post("/v1/devices/bootstrap/create",json={},headers=HEADERS)
++    assert ordinary.status_code == 409 and ordinary.json()["detail"] == "device_retirement_pending"
++    native.available = True
++    ready = await ac.post("/v1/devices/rebind",json=request,headers=HEADERS)
++    assert ready.status_code == 200,ready.text
++    response = ready.json()
++    assert response["phase"] == "READY"
++    assert response["expires_at_ms"] == pending.json()["expires_at_ms"]
++    assert (await ac.post("/v1/devices/rebind",json={**request,"reason":"different"},headers=HEADERS)).status_code == 409
++    # The signed original replacement envelope feeds the existing public consumers.
++    payload = response["envelope"]["payload"]
++    pem,key = _keypair()
++    extension = _attestation(payload["attestation_challenge"].encode())
++    chain,root = signed_attestation_chain(pem,extension)
++    bindings = app.state.owner_device_bindings
++    bindings.policy = replace(bindings.policy,allowed_root_fingerprints=frozenset({root}))
++    enrollment = dict(token=payload["bootstrap_token"],device_id="replacement-phone",public_key_pem=pem,
++        attestation_extension_b64=base64.b64encode(extension).decode(),
++        attestation_chain_b64=[base64.b64encode(c).decode() for c in chain])
++    await _attest(ac,enrollment,key)
++    pair = dict(pairing_token=payload["pairing_token"],device_id="replacement-phone",device_secret="r"*32,
++        public_key_pem=pem,device_access_token="a"*32)
++    body = _encoded(pair)
++    paired = await ac.post("/v1/devices/pair",content=body,
++        headers=_headers(key,"/v1/devices/pair","replacement-phone",body))
++    assert paired.status_code == 200,paired.text
++    status = await ac.post("/v1/devices/provisioning-status",json={"bootstrap_token":payload["bootstrap_token"]},headers=HEADERS)
++    assert status.status_code == 200,status.text
++    assert status.json()["state"] == "NEEDS_TLS_CERTIFICATE"
++    assert status.json()["steps"]["binding"] is True and status.json()["steps"]["pairing"] is True
++    owner_headers = {"X-Van-Ingress-Token":INGRESS,"X-Van-Device-Token":"a"*32}
++    csr,_ = csr_for("replacement-phone")
++    certificate_body = _encoded({"csr_pem":csr})
++    certificate = await ac.post("/v1/devices/tls-certificate",content=certificate_body,
++        headers=_headers(key,"/v1/devices/tls-certificate","replacement-phone",certificate_body,authenticated=owner_headers))
++    assert certificate.status_code == 200,certificate.text
++    session_body = _encoded({"open_request_id":"replacement-session-original-0001"})
++    session = await ac.post("/v1/session/open",content=session_body,
++        headers=_headers(key,"/v1/session/open","replacement-phone",session_body,authenticated=owner_headers))
++    assert session.status_code == 200,session.text
++    transport = await ac.post("/v1/devices/provisioning-status",json={"bootstrap_token":payload["bootstrap_token"]},headers=HEADERS)
++    assert transport.json()["state"] == "NEEDS_SESSION_ADMISSION"
++    assert transport.json()["steps"]["tls_certificate"] is True
++    # HTTP opening alone never claims actual transport/owner/Hermes acceptance.
++    assert transport.json()["steps"]["session_admitted"] is False
++    assert transport.json()["owner_e2e_verified"] is False
++    current = await bindings.active()
++    replay = await ac.post("/v1/devices/rebind",json=request,headers=HEADERS)
++    assert replay.status_code == 200 and replay.json()["envelope"] == response["envelope"]
++    assert (await bindings.active()).binding_id == current.binding_id
++
++
++@pytest.mark.parametrize("update", [{"operation_id":None,"expected_binding_id":"wrong"},
++    {"expected_binding_id":"wrong"},{"expected_bound_at_ms":0}])
++async def test_missing_or_stale_original_preconditions_refuse_without_retiring(client,tmp_path,update):
++    ac,app = client
++    request,_ = await original(app,tmp_path)
++    response = await ac.post("/v1/devices/rebind",json={**request,**update},headers=HEADERS)
++    assert response.status_code == 409,response.text
++    assert (await app.state.owner_device_bindings.active()).binding_id == request["expected_binding_id"]
++    assert not await app.state.store.fetchall("SELECT * FROM device_certificate_retirements")
++
++
++async def test_normal_revoke_attempts_native_retirement_despite_ca_error(client,tmp_path,monkeypatch):
++    ac,app=client
++    request,native=await original(app,tmp_path)
++    native.available=True
++    def unavailable(*args,**kwargs):
++        raise OSError("synthetic CA owner unavailable")
++    monkeypatch.setattr(app.state.device_ca,"revoke_device",unavailable)
++    response=await ac.post("/v1/devices/original-phone/revoke",headers=HEADERS)
++    assert response.status_code==200,response.text
++    assert response.json()["certificate_retirement_phase"]=="UNKNOWN"
++    assert response.json()["native_authority_revocation"]["phase"]=="APPLIED"
++    assert (await app.state.owner_device_bindings.for_device("original-phone")).status.value=="REVOKED"
++    denied=await ac.post("/v1/devices/bootstrap/create",json={},headers=HEADERS)
++    assert denied.status_code==409 and denied.json()["detail"]=="device_retirement_pending"
+diff --git a/backend/tests/test_owner_device_reenrollment_recovery.py b/backend/tests/test_owner_device_reenrollment_recovery.py
+new file mode 100644
+index 00000000..1b1b992b
+--- /dev/null
++++ b/backend/tests/test_owner_device_reenrollment_recovery.py
+@@ -0,0 +1,344 @@
++"""LAC-348 source evidence with real SQLite/CA files and strict native fixture receipts.
++
++The authenticated native transport is synthetic; these are not deployed/device gates.
++"""
++from __future__ import annotations
++
++import asyncio
++import hashlib
++import json
++import time
++from types import SimpleNamespace
++
++import pytest
++from cryptography.fernet import Fernet
++
++from conftest_automation import make_store
++from test_owner_device_binding import _attestation, _keypair, _policy
++from test_mtls_pki import csr_for
++from van_gateway.auth.device_binding import DeviceBindingError, OwnerDeviceBindingService
++from van_gateway.auth.native_revocation import NativeOwnerRevocations
++from van_gateway.auth.reenrollment import OwnerDeviceReenrollment
++from van_gateway.auth.service import AuthError, AuthService
++from van_gateway.browser.stream_grants import generate_signing_key
++from van_gateway.connectivity.config import ConnectivityConfigService
++from van_gateway.mtls.pki import DeviceCA, init_ca
++from van_gateway.storage.db import Store
++from vati.authority_registry import revocation_record
++
++pytestmark = pytest.mark.asyncio
++
++
++class NativeFixture:
++    def __init__(self):
++        self.available = False
++        self.calls = []
++
++    def run(self, command, target):
++        assert command == "owner_authority_revoke"
++        self.calls.append(dict(target))
++        if not self.available:
++            raise TimeoutError("synthetic acknowledgement loss")
++        proof = revocation_record(target["device_id"], target["key_id"])
++        return {**proof, "phase": "APPLIED", "revoked": True, "key_active": False,
++                "revocation_ref": hashlib.sha256(json.dumps(proof,sort_keys=True,separators=(",", ":")).encode()).hexdigest(),
++                "registry_ref": "b" * 64}
++
++
++async def setup(tmp_path):
++    store = await make_store(tmp_path)
++    fernet = Fernet.generate_key().decode()
++    auth = AuthService(store, fernet)
++    bindings = OwnerDeviceBindingService(store, _policy())
++    token, challenge = await bindings.create_bootstrap_token()
++    pem, key = _keypair()
++    binding = await bindings.bind(token=token, device_id="original-phone",public_key_pem=pem,
++        attestation_extension=_attestation(challenge.encode()),attestation_chain_verified=True)
++    ticket = await auth.create_pairing_ticket("original")
++    await auth.pair_device(ticket.token,"original-phone","s"*32,pem)
++    old_unspent, _ = await bindings.create_bootstrap_token()
++    other_token, _ = await bindings.create_bootstrap_token(owner_principal_id="other-owner")
++    await store.execute("INSERT INTO van_sessions(van_session_id,session_epoch,device_id,principal_type,state,created_at_ms) "
++        "VALUES('original-session',1,'original-phone','OWNER_DEVICE','ACTIVE',?)",(int(time.time()*1000),))
++    ca_dir = tmp_path / "ca"
++    init_ca(ca_dir)
++    ca = DeviceCA(ca_dir)
++    ca.issue_client(csr_for("original-phone")[0],"original-phone")
++    ca.issue_client(csr_for("unrelated-phone")[0],"unrelated-phone")
++    native = NativeFixture()
++    native_owner = NativeOwnerRevocations(store=store,promotions=SimpleNamespace(control=native))
++    signing = generate_signing_key("reenrollment-fixture")
++    connectivity = ConnectivityConfigService(store,private_pem=signing.private_pem,kid=signing.kid)
++    service = OwnerDeviceReenrollment(store=store,auth=auth,native_revocations=native_owner,
++        device_ca=lambda:ca,connectivity=connectivity)
++    request = dict(operator_id="installer-actor",reason="lost handset",operation_id="replacement-original-0001",
++        expected_binding_id=binding.binding_id,expected_bound_at_ms=binding.bound_at_ms,gateway_url="https://gateway.example")
++    return SimpleNamespace(store=store,auth=auth,bindings=bindings,binding=binding,service=service,native=native,
++        native_owner=native_owner,request=request,fernet=fernet,old_unspent=old_unspent,other_token=other_token,ca=ca,
++        connectivity=connectivity)
++
++
++async def test_original_retirement_is_durable_inert_and_recovered_after_restart(tmp_path):
++    f = await setup(tmp_path)
++    pending = await f.service.start(**f.request)
++    assert pending["phase"] == "RETIRING" and pending["bootstrap_token"] is None and pending["envelope"] is None
++    assert pending["native_authority_revocation"]["phase"] == "PENDING"
++    assert (await f.bindings.for_device("original-phone")).status.value == "REVOKED"
++    with pytest.raises(AuthError,match="revoked"):
++        await f.auth.require_device("original-phone")
++    assert (await f.store.fetchone("SELECT state FROM van_sessions WHERE van_session_id='original-session'"))[0] == "CLOSED"
++    with pytest.raises(DeviceBindingError,match="revoked"):
++        await f.bindings.challenge_for(f.old_unspent)
++    assert await f.bindings.challenge_for(f.other_token)
++    with pytest.raises(DeviceBindingError,match="retirement_pending"):
++        await f.bindings.create_bootstrap_token()
++    inert = await f.store.fetchone("SELECT * FROM owner_device_reenrollments")
++    assert await f.store.fetchone("SELECT token_id FROM owner_device_bootstrap_tokens WHERE token_sha256=?",
++        (inert["bootstrap_token_sha256"],)) is None
++    raw = open(f.store.path,"rb").read()
++    secret = json.loads(f.auth._cipher().decrypt(inert["encrypted_response"].encode()))
++    assert secret["bootstrap_token"].encode() not in raw
++    assert secret["envelope"]["payload"]["pairing_token"].encode() not in raw
++    # New service objects and connections, same durable identities and original deadline.
++    reopened = Store(f.store.path)
++    await reopened.migrate()
++    auth = AuthService(reopened,f.fernet)
++    native_owner = NativeOwnerRevocations(store=reopened,promotions=SimpleNamespace(control=f.native))
++    recovered = OwnerDeviceReenrollment(store=reopened,auth=auth,native_revocations=native_owner,
++        device_ca=lambda:f.ca,connectivity=f.connectivity)
++    f.native.available = True
++    ready = await recovered.start(**f.request)
++    assert ready["phase"] == "READY" and ready["expires_at_ms"] == pending["expires_at_ms"]
++    assert ready["bootstrap_token"] == secret["bootstrap_token"]
++    assert ready["envelope"] == secret["envelope"]
++    assert len({x["operation_id"] for x in f.native.calls}) == 1
++    assert ready["native_authority_revocation"]["phase"] == "APPLIED"
++    assert (await recovered.start(**f.request)) == ready
++    replacement = OwnerDeviceBindingService(reopened,_policy())
++    pem, _ = _keypair()
++    bound = await replacement.bind(token=ready["bootstrap_token"],device_id="replacement-phone",public_key_pem=pem,
++        attestation_extension=_attestation(ready["attestation_challenge"].encode()),attestation_chain_verified=True)
++    assert bound.device_id == "replacement-phone"
++    assert (await recovered.start(**f.request))["bootstrap_token"] == ready["bootstrap_token"]
++    assert (await replacement.active()).binding_id == bound.binding_id
++    ticket = ready["envelope"]["payload"]["pairing_token"]
++    await auth.pair_device(ticket,"replacement-phone","r"*32,pem)
++    with pytest.raises(AuthError,match="fresh installation identity"):
++        other_ticket = await auth.create_pairing_ticket("old-key")
++        await auth.pair_device(other_ticket.token,"resurrected-phone","r"*32,f.binding.public_key_pem)
++
++
++async def test_request_conflict_wrong_operator_stale_cas_and_legacy_ambiguity_do_not_retire_new_binding(tmp_path):
++    f = await setup(tmp_path)
++    wrong = {**f.request,"expected_bound_at_ms": f.binding.bound_at_ms+1}
++    with pytest.raises(DeviceBindingError,match="precondition_failed"):
++        await f.service.start(**wrong)
++    assert (await f.bindings.active()).binding_id == f.binding.binding_id
++    f.native.available = True
++    legacy = dict(operator_id="installer-actor",reason="lost handset")
++    ready = await f.service.start(**legacy)
++    assert ready["phase"] == "READY"
++    assert (await f.service.start(**legacy)) == ready
++    pem, _ = _keypair()
++    bound = await f.bindings.bind(token=ready["bootstrap_token"],device_id="fresh-phone",public_key_pem=pem,
++        attestation_extension=_attestation(ready["attestation_challenge"].encode()))
++    with pytest.raises(DeviceBindingError,match="identity_required"):
++        await f.service.start(**legacy)
++    with pytest.raises(DeviceBindingError,match="operation_unknown"):
++        await f.service.recover(operation_id=ready["operation_id"],operator_id="wrong-operator")
++    assert (await f.bindings.active()).binding_id == bound.binding_id
++
++
++async def test_atomic_intent_failure_rolls_back_all_local_retirement(tmp_path):
++    f = await setup(tmp_path)
++    await f.store.execute("CREATE TRIGGER fail_reenrollment BEFORE INSERT ON owner_device_reenrollments "
++        "BEGIN SELECT RAISE(ABORT,'synthetic receipt failure'); END")
++    with pytest.raises(Exception,match="synthetic receipt failure"):
++        await f.service.start(**f.request)
++    assert (await f.bindings.active()).binding_id == f.binding.binding_id
++    assert (await f.auth.require_device("original-phone")).revoked_at_unix is None
++    assert await f.bindings.challenge_for(f.old_unspent)
++    assert not await f.store.fetchall("SELECT * FROM device_certificate_retirements")
++    assert not await f.store.fetchall("SELECT * FROM runtime_meta WHERE key GLOB 'native_owner_revocation:*'")
++
++
++async def test_concurrent_original_retries_and_expiry_never_extend_credential(tmp_path):
++    f = await setup(tmp_path)
++    pending = await f.service.start(**f.request)
++    with pytest.raises(DeviceBindingError,match="operation_conflict"):
++        await f.service.start(**{**f.request,"reason":"different intent"})
++    # Background reconciliation may finish after the original credential's deadline.
++    f.native.available = True
++    expired = await f.service.recover(operation_id=f.request["operation_id"],operator_id=f.request["operator_id"],
++        now_ms=pending["expires_at_ms"])
++    assert expired["phase"] == "EXPIRED" and expired["bootstrap_token"] is None
++    assert not await f.store.fetchall("SELECT token_id FROM owner_device_bootstrap_tokens WHERE token_sha256 IN "
++        "(SELECT bootstrap_token_sha256 FROM owner_device_reenrollments)")
++    assert (await f.service.start(**f.request,now_ms=pending["expires_at_ms"]+1000))["expires_at_ms"] == pending["expires_at_ms"]
++
++
++async def test_ca_marker_failure_and_native_unknown_replay_original_without_enabling_credentials(tmp_path,monkeypatch):
++    f = await setup(tmp_path)
++    f.native.available = True
++    execute = f.store.execute
++    async def fail_marker(sql,params=()):
++        if "UPDATE device_certificate_retirements SET certificates_retired_at_ms" in sql:
++            raise OSError("synthetic CA marker failure after actual revocation")
++        return await execute(sql,params)
++    with monkeypatch.context() as scoped:
++        scoped.setattr(f.store,"execute",fail_marker)
++        pending = await f.service.start(**f.request)
++    assert pending["phase"] == "RETIRING" and pending["bootstrap_token"] is None
++    assert pending["native_authority_revocation"]["phase"] == "APPLIED"
++    assert pending["certificates_retired"] is False
++    listing = f.ca.listing()
++    assert next(c for c in listing if c["device_id"]=="original-phone")["revoked_at_unix"]
++    assert not next(c for c in listing if c["device_id"]=="unrelated-phone").get("revoked_at_unix")
++    f.native.available = True
++    ready = await f.service.start(**f.request)
++    assert ready["phase"] == "READY" and ready["expires_at_ms"] == pending["expires_at_ms"]
++    assert len(await f.store.fetchall("SELECT * FROM owner_device_reenrollments")) == 1
++
++
++async def test_two_competing_intents_have_one_exact_winner_and_normal_revoke_has_same_barrier(tmp_path):
++    f = await setup(tmp_path)
++    requests = [f.request,{**f.request,"operation_id":"replacement-competing-0002"}]
++    results = await asyncio.gather(*(f.service.start(**r) for r in requests),return_exceptions=True)
++    assert sum(isinstance(r,dict) for r in results)==1
++    assert sum(isinstance(r,DeviceBindingError) for r in results)==1
++    assert len(await f.store.fetchall("SELECT * FROM owner_device_reenrollments"))==1
++    assert len(await f.store.fetchall("SELECT * FROM device_certificate_retirements"))==1
++    with pytest.raises(AuthError,match="retirement is pending"):
++        ticket = await f.auth.create_pairing_ticket("bypass")
++        await f.auth.pair_device(ticket.token,"bypass-phone","r"*32,_keypair()[0])
++    with pytest.raises(AuthError,match="retirement is pending"):
++        await f.auth.enroll("bypass-legacy-phone","r"*32,_keypair()[0])
++    # The normal revoke writer also retires the hardware binding and fences bootstrap.
++    other_path=tmp_path/"normal-revoke"
++    other_path.mkdir()
++    g = await setup(other_path)
++    await g.auth.revoke("original-phone")
++    assert (await g.bindings.for_device("original-phone")).status.value=="REVOKED"
++    with pytest.raises(DeviceBindingError,match="retirement_pending"):
++        await g.bindings.create_bootstrap_token()
++
++
++async def test_undispatched_actions_retire_but_submitted_effects_and_unrelated_work_remain(tmp_path):
++    f = await setup(tmp_path)
++    await f.store.execute("INSERT INTO action_definitions(action_id,action_class,mutates_state,allowed_principals_json,"
++        "verifier_type,parameter_schema_json,updated_at_unix_ms) VALUES('replacement-test-action','A3',1,'[]','RECEIPT','{}',0)")
++    rows=[("ready","AUTHORIZED","device:original-phone"),("effect","SUBMITTED","device:original-phone"),
++          ("verifying","VERIFYING","device:original-phone"),("other","AUTHORIZED","device:unrelated-phone")]
++    for identity,status,requester in rows:
++        await f.store.execute("INSERT INTO action_executions(execution_id,command_id,action_id,action_class,principal_type,"
++            "requested_by,status,idempotency_key,parameters_digest,correlation_json,updated_at_unix_ms) "
++            "VALUES(?,?,'replacement-test-action','A3','OWNER_DEVICE',?,?,?,'digest','{}',0)",
++            (identity,identity,requester,status,identity))
++    await f.service.start(**f.request)
++    states={r["execution_id"]:r["status"] for r in await f.store.fetchall("SELECT execution_id,status FROM action_executions")}
++    assert states=={"ready":"REVOKED","effect":"SUBMITTED","verifying":"VERIFYING","other":"AUTHORIZED"}
++    from van_gateway.session.service import VanHermesSessionService,SessionError
++    with pytest.raises(SessionError,match="device_revoked"):
++        await VanHermesSessionService(f.store).open(device_id="original-phone")
++
++
++async def test_changed_signing_configuration_replays_original_and_corrupt_secret_fails_closed(tmp_path):
++    f=await setup(tmp_path)
++    f.native.available=True
++    ready=await f.service.start(**f.request)
++    f.connectivity.private_pem=None
++    assert (await f.service.start(**f.request))["envelope"]==ready["envelope"]
++    await f.store.execute("UPDATE owner_device_reenrollments SET encrypted_response='corrupt'")
++    with pytest.raises(DeviceBindingError,match="original_response_unavailable"):
++        await f.service.start(**f.request)
++
++
++@pytest.mark.parametrize("column,value",[("request_digest","changed"),("original_bound_at_ms",0),
++    ("original_binding_id","unrelated-binding"),("original_device_id","unrelated-phone"),
++    ("native_operation_id","0"*64),("challenge","changed"),("bootstrap_token_sha256","0"*64),
++    ("reason","changed"),("gateway_url","https://different.example"),("legacy",1)])
++async def test_corrupt_original_identity_refuses_before_ca_or_native_recovery(tmp_path,column,value):
++    f=await setup(tmp_path)
++    # Persist the valid initial intent while both effects are deliberately unavailable.
++    f.service.device_ca=lambda:None
++    await f.service.start(**f.request)
++    f.native.calls.clear()
++    f.service.device_ca=lambda:f.ca
++    f.native.available=True
++    await f.store.execute(f"UPDATE owner_device_reenrollments SET {column}=?",(value,))
++    with pytest.raises(DeviceBindingError,match="original_response_unavailable"):
++        await f.service.recover(operation_id=f.request["operation_id"],operator_id=f.request["operator_id"])
++    assert not f.native.calls
++    assert not next(c for c in f.ca.listing() if c["device_id"]=="original-phone").get("revoked_at_unix")
++
++
++@pytest.mark.parametrize("crash",["before_commit","after_commit"])
++async def test_actual_process_death_preserves_original_transaction_or_recovery(tmp_path,crash):
++    import os
++    import subprocess
++    import sys
++    from pathlib import Path
++    key=Fernet.generate_key().decode()
++    program = r"""
++import asyncio,os,sys
++from pathlib import Path
++from cryptography.fernet import Fernet
++from test_owner_device_reenrollment_recovery import setup
++async def main():
++    fixture=await setup(Path(sys.argv[1]))
++    fixture.auth._fernet=Fernet(os.environ['VAN_REENROLLMENT_CRASH_TEST_KEY'].encode())
++    if sys.argv[2]=='before_commit':
++        import aiosqlite
++        original=aiosqlite.Connection.execute
++        async def execute(self,sql,*args,**kwargs):
++            if sql.startswith('INSERT INTO owner_device_reenrollments'):
++                os._exit(27)
++            return await original(self,sql,*args,**kwargs)
++        aiosqlite.Connection.execute=execute
++    else:
++        async def die(**kwargs):os._exit(28)
++        fixture.service.recover=die
++    await fixture.service.start(**fixture.request)
++asyncio.run(main())
++"""
++    result=subprocess.run([sys.executable,"-c",program,str(tmp_path),crash],
++        env={**os.environ,"VAN_REENROLLMENT_CRASH_TEST_KEY":key},capture_output=True,timeout=30)
++    (tmp_path/"child.stdout").write_bytes(result.stdout)
++    (tmp_path/"child.stderr").write_bytes(result.stderr)
++    assert result.returncode==(27 if crash=="before_commit" else 28),result.stderr.decode()
++    store=Store(str(tmp_path/"van.sqlite3"))
++    await store.migrate()
++    device=await store.fetchone("SELECT revoked_at_unix FROM devices WHERE device_id='original-phone'")
++    rows=await store.fetchall("SELECT * FROM owner_device_reenrollments")
++    if crash=="before_commit":
++        assert not rows and device[0] is None
++        assert not await store.fetchall("SELECT * FROM device_certificate_retirements")
++        assert (await OwnerDeviceBindingService(store,_policy()).active()).device_id=="original-phone"
++        return
++    assert device[0] is not None and len(rows)==1
++    row=rows[0]
++    native=NativeFixture()
++    native.available=True
++    service=OwnerDeviceReenrollment(store=store,auth=AuthService(store,key),
++        native_revocations=NativeOwnerRevocations(store=store,promotions=SimpleNamespace(control=native)),
++        device_ca=lambda:DeviceCA(tmp_path/"ca"),connectivity=None)
++    ready=await service.recover(operation_id=row["operation_id"],operator_id=row["operator_id"])
++    assert ready["phase"]=="READY" and ready["expires_at_ms"]==row["expires_at_ms"]
++    assert len({call["operation_id"] for call in native.calls})==1
++    assert len(await store.fetchall("SELECT * FROM owner_device_reenrollments"))==1
++
++
++async def test_interrupted_migration_ddl_restarts_without_losing_original_replacement(tmp_path):
++    f=await setup(tmp_path)
++    pending=await f.service.start(**f.request)
++    original=dict(await f.store.fetchone("SELECT * FROM owner_device_reenrollments"))
++    # Store.migrate executes DDL before its version marker. Simulate death between
++    # those boundaries, retaining the actual installed schema and original data.
++    await f.store.execute("DELETE FROM schema_migrations WHERE version=60")
++    reopened=Store(f.store.path)
++    await reopened.migrate()
++    assert dict(await reopened.fetchone("SELECT * FROM owner_device_reenrollments"))==original
++    assert (await reopened.fetchone("SELECT COUNT(*) FROM schema_migrations WHERE version=60"))[0]==1
++    assert pending["operation_id"]==original["operation_id"]
++    await reopened.migrate()
++    assert dict(await reopened.fetchone("SELECT * FROM owner_device_reenrollments"))==original
+diff --git a/backend/van_gateway/auth/reenrollment.py b/backend/van_gateway/auth/reenrollment.py
+new file mode 100644
+index 00000000..5678ab55
+--- /dev/null
++++ b/backend/van_gateway/auth/reenrollment.py
+@@ -0,0 +1,292 @@
++"""LAC-348 supported replacement, retaining the original intent through uncertainty.
++
++Credentials are encrypted with the existing device-secret key. They remain inert until
++the original native key and local certificates have independently been retired.
++"""
++from __future__ import annotations
++
++import asyncio
++import hashlib
++import json
++import logging
++import re
++import secrets
++import time
++import uuid
++
++from cryptography.fernet import InvalidToken
++
++from van_gateway.auth.device_binding import DeviceBindingError, OWNER_PRINCIPAL
++from van_gateway.auth.retirement import retire_device
++from van_gateway.connectivity.provisioning import (
++    PROVISIONING_TTL_MS, build_provisioning_payload, sign_provisioning_payload,
++)
++
++LOG = logging.getLogger(__name__)
++
++
++def digest(value):
++    return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
++
++
++class OwnerDeviceReenrollment:
++    def __init__(self, *, store, auth, native_revocations, device_ca, connectivity):
++        self.store, self.auth = store, auth
++        self.native_revocations = native_revocations
++        self.device_ca, self.connectivity = device_ca, connectivity
++
++    async def start(self, *, operator_id, reason, operation_id=None, expected_binding_id=None,
++                    expected_bound_at_ms=None, gateway_url=None, now_ms=None):
++        if not reason.strip() or len(reason) > 1000:
++            raise DeviceBindingError("rebind_reason_invalid")
++        legacy = operation_id is None
++        if legacy:
++            if expected_binding_id is not None or expected_bound_at_ms is not None:
++                raise DeviceBindingError("rebind_identity_required")
++            operation_id = "legacy-" + digest({"operator": operator_id, "owner": OWNER_PRINCIPAL})
++        elif not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{15,127}", operation_id):
++            raise DeviceBindingError("rebind_operation_invalid")
++        elif not expected_binding_id or type(expected_bound_at_ms) is not int:
++            raise DeviceBindingError("rebind_precondition_required")
++        request_digest = digest({"operator": operator_id, "owner": OWNER_PRINCIPAL, "reason": reason,
++                                 "binding": expected_binding_id, "bound_at_ms": expected_bound_at_ms,
++                                 "gateway_url": gateway_url})
++        # A replay consumes the protected original response, even after signing rotation.
++        existing = await self.store.fetchone("SELECT * FROM owner_device_reenrollments WHERE operation_id=?", (operation_id,))
++        if existing is not None:
++            if existing["operator_id"] != operator_id or existing["request_digest"] != request_digest:
++                raise DeviceBindingError("rebind_operation_conflict")
++            if legacy:
++                active = await self.store.fetchone("SELECT binding_id FROM owner_device_bindings WHERE owner_principal_id=? AND status='ACTIVE'", (OWNER_PRINCIPAL,))
++                if active is not None and active["binding_id"] != existing["original_binding_id"]:
++                    raise DeviceBindingError("rebind_identity_required")
++            return await self.recover(operation_id=operation_id, operator_id=operator_id, now_ms=now_ms)
++        # Encryption/configuration failures precede the retirement transaction.
++        cipher = self.auth._cipher()
++        now = int(time.time() * 1000) if now_ms is None else now_ms
++        token, challenge, pairing = secrets.token_urlsafe(32), secrets.token_urlsafe(24), secrets.token_urlsafe(32)
++        envelope = None
++        if gateway_url is not None:
++            if not self.connectivity.private_pem or not self.connectivity.kid:
++                raise DeviceBindingError("connectivity_signing_unconfigured")
++            active = await self.connectivity.active()
++            payload = build_provisioning_payload(gateway_url=gateway_url, bootstrap_token=token,
++                pairing_token=pairing, attestation_challenge=challenge, now_ms=now,
++                manifest_version=active.manifest_version if active else 0)
++            envelope = {"payload": payload, "signature": sign_provisioning_payload(
++                payload, private_pem=self.connectivity.private_pem), "kid": self.connectivity.kid}
++        secret = {"bootstrap_token": token, "attestation_challenge": challenge, "envelope": envelope}
++        async with self.store.connection() as db:
++            await db.execute("BEGIN IMMEDIATE")
++            existing = await (await db.execute(
++                "SELECT * FROM owner_device_reenrollments WHERE operation_id=?", (operation_id,)
++            )).fetchone()
++            if existing is not None:
++                if existing["operator_id"] != operator_id or existing["request_digest"] != request_digest:
++                    raise DeviceBindingError("rebind_operation_conflict")
++                if legacy:
++                    active = await (await db.execute(
++                        "SELECT binding_id FROM owner_device_bindings WHERE owner_principal_id=? AND status='ACTIVE'",
++                        (OWNER_PRINCIPAL,),
++                    )).fetchone()
++                    if active is not None and active["binding_id"] != existing["original_binding_id"]:
++                        raise DeviceBindingError("rebind_identity_required")
++                await db.commit()
++            else:
++                binding = await (await db.execute(
++                    "SELECT * FROM owner_device_bindings WHERE owner_principal_id=? AND status='ACTIVE'",
++                    (OWNER_PRINCIPAL,),
++                )).fetchone()
++                if binding is None:
++                    raise DeviceBindingError("rebind_original_binding_unavailable")
++                if not legacy and (binding["binding_id"] != expected_binding_id
++                                   or binding["bound_at_ms"] != expected_bound_at_ms):
++                    raise DeviceBindingError("rebind_precondition_failed")
++                pending = await (await db.execute(
++                    "SELECT operation_id FROM owner_device_reenrollments WHERE owner_principal_id=? AND phase='RETIRING'",
++                    (OWNER_PRINCIPAL,),
++                )).fetchone()
++                if pending is not None:
++                    raise DeviceBindingError("rebind_operation_in_progress")
++                committed_now = int(time.time() * 1000) if now_ms is None else now_ms
++                if now + PROVISIONING_TTL_MS <= committed_now:
++                    raise DeviceBindingError("rebind_credential_expired")
++                native = await retire_device(db, device_id=binding["device_id"],
++                    public_key_pem=binding["public_key_pem"], now_ms=committed_now, reason=reason)
++                # Superseded enrollment credentials belong to this owner only.
++                await db.execute(
++                    "UPDATE owner_device_bootstrap_tokens SET revoked_at_ms=? "
++                    "WHERE owner_principal_id=? AND consumed_at_ms IS NULL AND revoked_at_ms IS NULL",
++                    (committed_now, OWNER_PRINCIPAL),
++                )
++                secret["identity"] = {"operation_id":operation_id,"operator_id":operator_id,
++                    "owner_principal_id":OWNER_PRINCIPAL,"request_digest":request_digest,
++                    "original_binding_id":binding["binding_id"],"original_bound_at_ms":binding["bound_at_ms"],
++                    "original_device_id":binding["device_id"],"native_operation_id":native["operation_id"],
++                    "created_at_ms":now,"expires_at_ms":now+PROVISIONING_TTL_MS,
++                    "reason":reason,"gateway_url":gateway_url,"legacy":int(legacy)}
++                secret["native_key_id"] = native["key_id"]
++                encrypted = cipher.encrypt(json.dumps(secret, sort_keys=True).encode()).decode()
++                await db.execute(
++                    "INSERT INTO owner_device_reenrollments(operation_id,operator_id,owner_principal_id,request_digest,"
++                    "legacy,original_binding_id,original_bound_at_ms,original_device_id,native_operation_id,phase,"
++                    "created_at_ms,expires_at_ms,encrypted_response,bootstrap_token_sha256,pairing_ticket_sha256,"
++                    "challenge,gateway_url,reason) VALUES(?,?,?,?,?,?,?,?,?,'RETIRING',?,?,?,?,?,?,?,?)",
++                    (operation_id,operator_id,OWNER_PRINCIPAL,request_digest,int(legacy),binding["binding_id"],
++                     binding["bound_at_ms"],binding["device_id"],native["operation_id"],now,now+PROVISIONING_TTL_MS,
++                     encrypted,hashlib.sha256(token.encode()).hexdigest(),
++                     hashlib.sha256(pairing.encode()).hexdigest() if envelope else None,challenge,gateway_url,reason),
++                )
++                await db.commit()
++                self.auth._device_secrets.pop(binding["device_id"], None)
++        return await self.recover(operation_id=operation_id, operator_id=operator_id, now_ms=now_ms)
++
++    async def retire_certificates(self, device_id):
++        row = await self.store.fetchone(
++            "SELECT * FROM device_certificate_retirements WHERE device_id=?", (device_id,))
++        if row is None or row["certificates_retired_at_ms"] is not None:
++            return
++        ca = self.device_ca()
++        if ca is None:
++            return  # An unavailable issuer is not authoritative absence.
++        count = await asyncio.to_thread(ca.revoke_device, device_id, "owner device retired")
++        current = await asyncio.to_thread(ca.listing)
++        if any(c.get("device_id") == device_id and not c.get("revoked_at_unix") for c in current):
++            return
++        await self.store.execute(
++            "UPDATE device_certificate_retirements SET certificates_retired_at_ms=? WHERE device_id=?",
++            (int(time.time() * 1000),device_id),
++        )
++
++        return count
++
++    def _original_secret(self, row):
++        try:
++            secret = json.loads(self.auth._cipher().decrypt(row["encrypted_response"].encode()))
++            identity = secret["identity"]
++            keys = ("operation_id","operator_id","owner_principal_id","request_digest","original_binding_id",
++                    "original_bound_at_ms","original_device_id","native_operation_id","created_at_ms","expires_at_ms",
++                    "reason","gateway_url","legacy")
++            if set(identity) != set(keys) or any(identity[k] != row[k] for k in keys):
++                raise ValueError("original identity changed")
++            if (hashlib.sha256(secret["bootstrap_token"].encode()).hexdigest() != row["bootstrap_token_sha256"]
++                    or secret["attestation_challenge"] != row["challenge"]):
++                raise ValueError("original credential changed")
++            envelope = secret["envelope"]
++            if row["gateway_url"] is not None:
++                payload = envelope["payload"]
++                if (payload["bootstrap_token"] != secret["bootstrap_token"]
++                        or payload["attestation_challenge"] != secret["attestation_challenge"]
++                        or payload["gateway_url"] != row["gateway_url"].rstrip("/")
++                        or payload["issued_at_ms"] != row["created_at_ms"]
++                        or payload["expires_at_ms"] != row["expires_at_ms"]
++                        or hashlib.sha256(payload["pairing_token"].encode()).hexdigest() != row["pairing_ticket_sha256"]):
++                    raise ValueError("original envelope changed")
++            elif envelope is not None or row["pairing_ticket_sha256"] is not None:
++                raise ValueError("unexpected original envelope")
++            return secret
++        except (InvalidToken, ValueError, TypeError, KeyError, AttributeError):
++            raise DeviceBindingError("rebind_original_response_unavailable") from None
++
++    async def recover(self, *, operation_id, operator_id, now_ms=None, reconcile=True):
++        row = await self.store.fetchone("SELECT * FROM owner_device_reenrollments WHERE operation_id=?", (operation_id,))
++        if row is None or row["operator_id"] != operator_id:
++            raise DeviceBindingError("rebind_operation_unknown")
++        secret = self._original_secret(row)  # Verify original identity before either recovery effect.
++        if reconcile:
++            try:
++                await self.retire_certificates(row["original_device_id"])
++            except Exception:
++                LOG.warning("original device certificate retirement remains pending")
++        # Native retirement remains independent of an unavailable local CA/marker.
++        try:
++            if reconcile:
++                await self.native_revocations.reconcile_operation(row["native_operation_id"])
++            native = await self.native_revocations.original(row["native_operation_id"])
++        except (OSError, ValueError, TypeError):
++            native = {"operation_id":row["native_operation_id"],"device_id":row["original_device_id"],
++                      "key_id":secret["native_key_id"],"phase":"UNKNOWN","native_result":None}
++        async with self.store.connection() as db:
++            await db.execute("BEGIN IMMEDIATE")
++            row = await (await db.execute("SELECT * FROM owner_device_reenrollments WHERE operation_id=?", (operation_id,))).fetchone()
++            secret = self._original_secret(row)
++            now = int(time.time() * 1000) if now_ms is None else now_ms
++            cert = await (await db.execute("SELECT certificates_retired_at_ms FROM device_certificate_retirements WHERE device_id=?",
++                (row["original_device_id"],))).fetchone()
++            phase = row["phase"]
++            if reconcile and phase == "RETIRING" and native["phase"] == "APPLIED" and cert and cert[0] is not None:
++                original = await (await db.execute("SELECT status FROM owner_device_bindings WHERE binding_id=?",
++                    (row["original_binding_id"],))).fetchone()
++                active = await (await db.execute("SELECT binding_id FROM owner_device_bindings WHERE owner_principal_id=? AND status='ACTIVE'",
++                    (row["owner_principal_id"],))).fetchone()
++                if original is None or original["status"] != "REVOKED" or active is not None:
++                    raise DeviceBindingError("rebind_precondition_failed")
++                if now >= row["expires_at_ms"]:
++                    phase = "EXPIRED"
++                else:
++                    now = int(time.time() * 1000) if now_ms is None else now_ms
++                    if now >= row["expires_at_ms"]:
++                        raise DeviceBindingError("rebind_credential_expired")
++                    await db.execute(
++                        "INSERT INTO owner_device_bootstrap_tokens(token_id,token_sha256,owner_principal_id,challenge,created_at_ms,expires_at_ms,note) "
++                        "VALUES(?,?,?,?,?,?,?)", ("boot_"+uuid.uuid4().hex,row["bootstrap_token_sha256"],row["owner_principal_id"],
++                        row["challenge"],row["created_at_ms"],row["expires_at_ms"],"rebind: "+row["reason"]),
++                    )
++                    if row["pairing_ticket_sha256"]:
++                        await db.execute("INSERT INTO pairing_tickets(ticket_hash,label,expires_at_unix,created_at_unix) VALUES(?,?,?,?)",
++                            (row["pairing_ticket_sha256"],"owner-device",row["expires_at_ms"]//1000,row["created_at_ms"]//1000))
++                    phase = "READY"
++                await db.execute("UPDATE owner_device_reenrollments SET phase=? WHERE operation_id=?", (phase,operation_id))
++            await db.commit()
++        response = {"operation_id": operation_id, "phase": phase, "original_binding_id": row["original_binding_id"],
++                    "original_device_id": row["original_device_id"], "expires_at_ms": row["expires_at_ms"],
++                    "native_authority_revocation": native, "certificates_retired": bool(cert and cert[0] is not None),
++                    "bootstrap_token": None, "attestation_challenge": None, "envelope": None}
++        if phase == "READY":
++            if now >= row["expires_at_ms"]:
++                response["phase"] = "EXPIRED"
++            else:
++                response.update({k:secret[k] for k in ("bootstrap_token","attestation_challenge","envelope")})
++        return response
++
++    async def _batch(self, table, identity, predicate, cursor_key):
++        cursor = await self.store.fetchone("SELECT value FROM runtime_meta WHERE key=?", (cursor_key,))
++        after = cursor["value"] if cursor else ""
++        # Table/column/predicate are fixed internal call-site literals, never request input.
++        query = f"SELECT * FROM {table} WHERE {predicate} AND {identity}>? ORDER BY {identity} LIMIT 50"
++        rows = await self.store.fetchall(query, (after,))
++        if not rows and after:
++            rows = await self.store.fetchall(query, ("",))
++        return rows
++
++    async def _cursor(self, key, value):
++        await self.store.execute("INSERT INTO runtime_meta(key,value,updated_at_unix_ms) VALUES(?,?,?) "
++            "ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at_unix_ms=excluded.updated_at_unix_ms",
++            (key,value,int(time.time()*1000)))
++
++    async def reconcile_once(self):
++        cert_cursor = "owner_device_certificate_retirement_cursor_v1"
++        certificates = await self._batch("device_certificate_retirements", "device_id",
++            "certificates_retired_at_ms IS NULL", cert_cursor)
++        for row in certificates:
++            try:
++                await self.retire_certificates(row["device_id"])
++            except Exception:
++                LOG.warning("original device certificate retirement remains pending")
++            await self._cursor(cert_cursor,row["device_id"])
++        cursor = "owner_device_reenrollment_cursor_v1"
++        rows = await self._batch("owner_device_reenrollments", "operation_id", "phase='RETIRING'", cursor)
++        for row in rows:
++            try:
++                await self.recover(operation_id=row["operation_id"],operator_id=row["operator_id"])
++            except Exception:
++                LOG.warning("original owner-device replacement remains pending")
++            await self._cursor(cursor,row["operation_id"])
++
++    async def run(self):
++        while True:
++            try:
++                await self.reconcile_once()
++            except Exception:
++                LOG.warning("owner-device retirement reconciliation is unavailable")
++            await asyncio.sleep(5)
+diff --git a/backend/van_gateway/auth/retirement.py b/backend/van_gateway/auth/retirement.py
+new file mode 100644
+index 00000000..b3e4a953
+--- /dev/null
++++ b/backend/van_gateway/auth/retirement.py
+@@ -0,0 +1,103 @@
++"""One local writer for device retirement; remote effects retain their own receipts."""
++from __future__ import annotations
++
++import json
++
++
++async def retire_device(db, *, device_id: str, public_key_pem: str, now_ms: int, reason: str):
++    """Caller owns BEGIN IMMEDIATE. Never relabel a submitted effect as cancelled."""
++    from van_gateway.auth.native_revocation import PREFIX, pending_record, public
++
++    device = await (await db.execute(
++        "SELECT public_key_pem, revoked_at_unix FROM devices WHERE device_id=?", (device_id,)
++    )).fetchone()
++    key = device["public_key_pem"] if device else public_key_pem
++    stamp = int(device["revoked_at_unix"]) if device and device["revoked_at_unix"] is not None else now_ms // 1000
++    record = pending_record(device_id, key, stamp)
++    await db.execute(
++        "UPDATE devices SET revoked_at_unix=COALESCE(revoked_at_unix,?) WHERE device_id=?",
++        (stamp, device_id),
++    )
++    await db.execute(
++        "UPDATE capability_grants SET revoked_at_unix=? WHERE device_id=? AND revoked_at_unix IS NULL",
++        (stamp, device_id),
++    )
++    await db.execute(
++        "UPDATE owner_device_bootstrap_tokens SET revoked_at_ms=? WHERE consumed_at_ms IS NULL AND revoked_at_ms IS NULL "
++        "AND owner_principal_id=COALESCE((SELECT owner_principal_id FROM owner_device_bindings WHERE device_id=?),'owner')",
++        (now_ms,device_id),
++    )
++    await db.execute(
++        "UPDATE owner_device_bindings SET status='REVOKED',revoked_at_ms=?,revoke_reason=? "
++        "WHERE device_id=? AND status='ACTIVE'", (now_ms, reason, device_id),
++    )
++    from van_gateway.action.service import revoke_privileged_in_transaction
++    actions_retired = await revoke_privileged_in_transaction(db, f"device:{device_id}", now_ms)
++    await db.execute(
++        "UPDATE van_session_paths SET retired_at_ms=COALESCE(retired_at_ms,?) WHERE van_session_id IN "
++        "(SELECT van_session_id FROM van_sessions WHERE device_id=?)", (now_ms, device_id),
++    )
++    await db.execute(
++        "UPDATE van_sessions SET state='CLOSED',closed_at_ms=COALESCE(closed_at_ms,?) "
++        "WHERE device_id=? AND state='ACTIVE'", (now_ms, device_id),
++    )
++    await db.execute(
++        "INSERT OR IGNORE INTO runtime_meta(key,value,updated_at_unix_ms) VALUES(?,?,?)",
++        (PREFIX + record["operation_id"], json.dumps(record, sort_keys=True, separators=(",", ":")), now_ms),
++    )
++    await db.execute(
++        "INSERT OR IGNORE INTO device_certificate_retirements(device_id,native_operation_id,requested_at_ms,actions_retired) "
++        "VALUES(?,?,?,?)", (device_id, record["operation_id"], now_ms, actions_retired),
++    )
++    return public(record)
++
++
++async def require_enrollment_available(db, *, owner_principal_id="owner"):
++    row = await (await db.execute(
++        "SELECT operation_id FROM owner_device_reenrollments WHERE owner_principal_id=? AND phase='RETIRING'",
++        (owner_principal_id,),
++    )).fetchone()
++    if row is not None:
++        from van_gateway.auth.device_binding import DeviceBindingError
++        raise DeviceBindingError("device_retirement_pending")
++    # Normal device revocation uses the same barrier, even without a replacement intent.
++    from van_gateway.auth.native_revocation import NativeOwnerRevocations, PREFIX, pending_record
++    retirements = await (await db.execute(
++        "SELECT r.certificates_retired_at_ms,r.native_operation_id,m.value FROM device_certificate_retirements r "
++        "LEFT JOIN owner_device_bindings b ON b.device_id=r.device_id "
++        "LEFT JOIN runtime_meta m ON m.key=?||r.native_operation_id "
++        "WHERE COALESCE(b.owner_principal_id,'owner')=?", (PREFIX,owner_principal_id),
++    )).fetchall()
++    for retirement in retirements:
++        try:
++            record = json.loads(retirement["value"])
++            expected = pending_record(record["device_id"],record["public_key_pem"],record["requested_at_unix"])
++            applied = (record["phase"] == "APPLIED" and expected["operation_id"] == retirement["native_operation_id"]
++                       and all(record[k] == expected[k] for k in expected if k not in {"phase","native_result"})
++                       and NativeOwnerRevocations._matches_native(record,record["native_result"]))
++        except (ValueError, TypeError, KeyError):
++            applied = False
++        if retirement["certificates_retired_at_ms"] is None or not applied:
++            from van_gateway.auth.device_binding import DeviceBindingError
++            raise DeviceBindingError("device_retirement_pending")
++
++
++
++async def require_fresh_approval_key(db, public_key_pem: str):
++    """Decoded key identity, so PEM reformatting cannot resurrect a retired owner key."""
++    from van_gateway.auth.native_revocation import PREFIX, pending_record
++    from van_gateway.auth.service import AuthError
++    candidate = pending_record("candidate", public_key_pem, 0)["key_id"]
++    if candidate is None:
++        return  # Existing legacy enrolment validation retains its own contract.
++    rows = await (await db.execute("SELECT value FROM runtime_meta WHERE key GLOB ?", (PREFIX + "*",))).fetchall()
++    for row in rows:
++        try:
++            record = json.loads(row["value"])
++            retired = pending_record(record["device_id"], record["public_key_pem"], record["requested_at_unix"])
++        except (ValueError, TypeError, KeyError):
++            raise AuthError("device_retirement_unavailable", "Owner key retirement history is unavailable") from None
++        if any(record[k] != retired[k] for k in retired if k not in {"phase", "native_result"}):
++            raise AuthError("device_retirement_unavailable", "Owner key retirement history is unavailable")
++        if retired["key_id"] == candidate:
++            raise AuthError("device_key_retired", "Retired owner key requires a fresh installation identity")
+diff --git a/backend/van_gateway/storage/reenrollment_migration.py b/backend/van_gateway/storage/reenrollment_migration.py
+new file mode 100644
+index 00000000..3998e789
+--- /dev/null
++++ b/backend/van_gateway/storage/reenrollment_migration.py
+@@ -0,0 +1,34 @@
++"""LAC-348 original replacement intent and local certificate retirement outbox."""
++
++MIGRATION_60 = """
++CREATE TABLE IF NOT EXISTS owner_device_reenrollments (
++ operation_id TEXT PRIMARY KEY,
++ operator_id TEXT NOT NULL,
++ owner_principal_id TEXT NOT NULL,
++ request_digest TEXT NOT NULL,
++ legacy INTEGER NOT NULL DEFAULT 0,
++ original_binding_id TEXT NOT NULL,
++ original_bound_at_ms INTEGER NOT NULL,
++ original_device_id TEXT NOT NULL,
++ native_operation_id TEXT NOT NULL,
++ phase TEXT NOT NULL CHECK(phase IN ('RETIRING','READY','EXPIRED')),
++ created_at_ms INTEGER NOT NULL,
++ expires_at_ms INTEGER NOT NULL,
++ encrypted_response TEXT NOT NULL,
++ bootstrap_token_sha256 TEXT NOT NULL UNIQUE,
++ pairing_ticket_sha256 TEXT,
++ challenge TEXT NOT NULL,
++ gateway_url TEXT,
++ reason TEXT NOT NULL
++);
++CREATE INDEX IF NOT EXISTS idx_reenrollments_owner ON owner_device_reenrollments(owner_principal_id, phase);
++CREATE UNIQUE INDEX IF NOT EXISTS uq_reenrollment_retiring_owner
++ ON owner_device_reenrollments(owner_principal_id) WHERE phase = 'RETIRING';
++CREATE TABLE IF NOT EXISTS device_certificate_retirements (
++ device_id TEXT PRIMARY KEY,
++ native_operation_id TEXT NOT NULL,
++ requested_at_ms INTEGER NOT NULL,
++ actions_retired INTEGER NOT NULL DEFAULT 0,
++ certificates_retired_at_ms INTEGER
++);
++"""

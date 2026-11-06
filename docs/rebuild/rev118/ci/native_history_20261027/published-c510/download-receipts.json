@@ -1,0 +1,51 @@
+[
+  {
+    "artifact_id": 12729694388,
+    "name": "van-postgres-ledger-report",
+    "bytes": 174609,
+    "sha256": "047ef8f586ecab61e33eac1370a5f3ec7d60ca871e6f90899940c7adb83b3f8f",
+    "github_digest_matched": true,
+    "zip_crc_paths_symlinks_checked": true,
+    "members": [
+      "postgres-ledger-report.xml",
+      "trading-source.log",
+      "trading-source-report.xml",
+      "voice-source-report.xml"
+    ],
+    "junit": [
+      {
+        "path": "postgres-ledger-report.xml",
+        "cases": 26,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0
+      },
+      {
+        "path": "trading-source-report.xml",
+        "cases": 4460,
+        "failures": 0,
+        "errors": 0,
+        "skips": 1
+      },
+      {
+        "path": "voice-source-report.xml",
+        "cases": 117,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0
+      }
+    ]
+  },
+  {
+    "artifact_id": 12730399246,
+    "name": "van-voice-runtime",
+    "bytes": 794,
+    "sha256": "4378534ea8ec56ab39d6115ccae95799bd8893b6c44d92daa6aa12ff0ac964cd",
+    "github_digest_matched": true,
+    "zip_crc_paths_symlinks_checked": true,
+    "members": [
+      "logcat.txt"
+    ],
+    "junit": []
+  }
+]

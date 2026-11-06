@@ -7,6 +7,8 @@ import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -18,6 +20,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -44,6 +48,7 @@ import com.dial.van.design.components.StatusChip
 import com.dial.van.design.components.VanPanel
 import com.dial.van.security.BiometricGate
 import com.dial.van.trading.AccountOnboarding
+import com.dial.van.trading.AccountOperationRecovery
 import com.dial.van.trading.AccountOnboarding.Broker
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -54,6 +59,7 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.longOrNull
 import kotlinx.serialization.json.put
 
 /**
@@ -72,13 +78,24 @@ fun AccountOnboardingScreen(app: VanApplication, onDone: () -> Unit) {
     var broker by remember { mutableStateOf(Broker.DERIV) }
     var status by remember { mutableStateOf("") }
     var busy by remember { mutableStateOf(false) }
+    var recovery by remember { mutableStateOf(runCatching { app.gatewayClient.pendingAccountOperations() }) }
+    var ownerReview by remember { mutableStateOf<Pair<String, () -> Unit>?>(null) }
+    var resumeReady by remember { mutableStateOf<Set<String>>(emptySet()) }
 
     fun submit(action: String, args: JsonObject, then: (AccountOnboarding.ActionOutcome) -> Unit = {}) {
+        if (AccountOperationRecovery.requiresOriginalReadback(action,args) && recovery.isFailure) {
+            status = "Check the original account change before trying this account again."
+            return
+        }
+        var approvedIssuedAt: Long? = null
         val send: (JsonObject?) -> Unit = { proof ->
             busy = true; status = "Signing and sending…"
             scope.launch {
-                val outcome = runCatching { app.gatewayClient.tradingAccountAction(action, args, proof) }
-                    .fold(onSuccess = { (code, body) -> AccountOnboarding.parseOutcome(action, body, code) }, onFailure = { AccountOnboarding.ActionOutcome(false, "Gateway unreachable: ${it.message?.take(80)}") })
+                val outcome = runCatching { app.gatewayClient.tradingAccountAction(action, args, proof, approvedIssuedAt) }
+                    .fold(onSuccess = { (code, body) -> AccountOnboarding.parseOutcome(action, body, code,
+                        requireOriginalReceipt = action in AccountOperationRecovery.OAUTH_LINK_ACTIONS && args["state"] != null) }, onFailure = {
+                        AccountOnboarding.ActionOutcome(false, "Account change not confirmed. Check the original result before trying again.") })
+                recovery = runCatching { app.gatewayClient.pendingAccountOperations() }
                 status = outcome.message; busy = false; then(outcome)
             }
         }
@@ -93,9 +110,18 @@ fun AccountOnboardingScreen(app: VanApplication, onDone: () -> Unit) {
                 ?.let { runCatching { Json.parseToJsonElement(it.second).jsonObject }.getOrNull() }
             val canonical = parsed?.get("approval_challenge")?.jsonPrimitive?.contentOrNull
             val challengeId = parsed?.get("approval_challenge_id")?.jsonPrimitive?.contentOrNull
-            if (canonical.isNullOrBlank() || challengeId.isNullOrBlank()) {
+            val expiresAt = parsed?.get("approval_expires_at_unix")?.jsonPrimitive?.longOrNull
+            approvedIssuedAt = parsed?.get("issued_at_unix")?.jsonPrimitive?.longOrNull
+            if (canonical.isNullOrBlank() || challengeId.isNullOrBlank() || approvedIssuedAt == null || expiresAt == null) {
                 busy = false
-                status = "Could not obtain an approval challenge; nothing was sent."
+                val refusal = challenge?.let { runCatching { Json.parseToJsonElement(it.second).jsonObject["detail"]?.jsonPrimitive?.contentOrNull }.getOrNull() }
+                status = refusal?.takeIf { it.contains("Original", ignoreCase = true) }?.take(240)
+                    ?: "Could not obtain an approval challenge; nothing was sent."
+                return@launch
+            }
+            val resolved = (parsed["resolved_review"] as? JsonObject)?.let(AccountOnboarding::resolvedReviewText)
+            if (action in setOf("account_upsert", "account_remove") && resolved == null) {
+                busy = false; status = "Native account review is unavailable; nothing was sent."
                 return@launch
             }
             val signature = runCatching { app.gatewayClient.newA4ApprovalSignature() }.getOrNull()
@@ -105,13 +131,20 @@ fun AccountOnboardingScreen(app: VanApplication, onDone: () -> Unit) {
                 return@launch
             }
             busy = false
-            gate.requestA4CommandApproval(
+            val requestApproval: () -> Unit = approval@{
+                if (System.currentTimeMillis() / 1000L >= expiresAt) {
+                    status = "Approval expired. Review and approve again; nothing was sent."
+                    return@approval
+                }
+                gate.requestA4CommandApproval(
                 signature = signature,
                 challenge = canonical,
                 title = "Approve trading account change",
                 subtitle = AccountOnboarding.approvalSubtitle(action),
                 onApproved = { signatureBase64 ->
-                    send(
+                    if (System.currentTimeMillis() / 1000L >= expiresAt) {
+                        status = "Approval expired. Review and approve again; nothing was sent."
+                    } else send(
                         buildJsonObject {
                             put("challenge_id", challengeId)
                             put("signature_b64", signatureBase64)
@@ -121,6 +154,8 @@ fun AccountOnboardingScreen(app: VanApplication, onDone: () -> Unit) {
                 },
                 onDenied = { reason -> status = "Owner approval was not granted: $reason" },
             )
+            }
+            if (resolved != null) ownerReview = resolved to requestApproval else requestApproval()
         }
     }
 
@@ -132,6 +167,43 @@ fun AccountOnboardingScreen(app: VanApplication, onDone: () -> Unit) {
         item { SectionHeader(title = "Add trading account") }
         item { TradingTabs(Broker.entries.map { it.label }, broker.label) { l -> broker = Broker.entries.first { it.label == l } } }
         item { Text(broker.blurb, style = tokens.type.label, color = tokens.color.textTertiary) }
+        if (recovery.isFailure) item {
+            Text("Account recovery history could not be read. Account changes are paused.", style = tokens.type.body,
+                color = tokens.color.forStatusRole(StatusSemantics.ROLE_EVENT_RISK))
+        }
+        recovery.getOrNull().orEmpty().forEach { operation ->
+            val operationKey = (operation.scope?.nativeOwnerDomain ?: "unbound") + ":" + operation.operationId
+            item(key = "account-operation:" + operationKey) {
+                Column {
+                    Text("${operation.alias}: original account change needs checking", style = tokens.type.body,
+                        color = tokens.color.textSecondary)
+                    Text(if (operation.scope == null) "Legacy connection is unbound; native owner reconciliation is required."
+                        else "Original connection: ${operation.scope.root}", style = tokens.type.label, color = tokens.color.textSecondary)
+                    Button(enabled = !busy, onClick = {
+                        busy = true
+                        scope.launch {
+                            val outcome = runCatching { app.gatewayClient.tradingAccountOperation(operation) }
+                                .fold(onSuccess = { (code, body) ->
+                                    val result = runCatching { Json.parseToJsonElement(body).jsonObject }.getOrNull()
+                                    resumeReady = if (result?.get("effect_state")?.jsonPrimitive?.contentOrNull == "NOT_DISPATCHED")
+                                        resumeReady + operationKey else resumeReady - operationKey
+                                    AccountOnboarding.parseOutcome(operation.action, body, code, requireOriginalReceipt = operation.oauthState != null)
+                                },
+                                    onFailure = { AccountOnboarding.ActionOutcome(false, "Original result is unavailable. No account change was repeated.") })
+                            recovery = runCatching { app.gatewayClient.pendingAccountOperations() }
+                            status = outcome.message; busy = false
+                        }
+                    }) { Text("Check original result") }
+                    if (operationKey in resumeReady && operation.dispatchStage == "PREPARED" && operation.oauthArguments != null) {
+                        Button(enabled = !busy, onClick = {
+                            val arguments = runCatching { app.gatewayClient.originalLinkResumeArguments(operation) }.getOrNull()
+                            if (arguments == null) status = "Original scope or dispatch proof changed. Check the original result; nothing was sent."
+                            else submit(operation.action, arguments)
+                        }) { Text("Review and resume original link") }
+                    }
+                }
+            }
+        }
         item {
             when (broker) {
                 Broker.DERIV -> DerivForm(ctx, busy, ::submit)
@@ -158,6 +230,15 @@ fun AccountOnboardingScreen(app: VanApplication, onDone: () -> Unit) {
                     "account links as READ ONLY until an owner-signed mandate changes its mode.",
             )
         }
+    }
+    ownerReview?.let { (text, proceed) ->
+        AlertDialog(
+            onDismissRequest = { ownerReview = null; status = "Account review cancelled; nothing was sent." },
+            title = { Text("Review account settings") },
+            text = { Column(Modifier.verticalScroll(rememberScrollState())) { Text(text) } },
+            confirmButton = { TextButton(onClick = { ownerReview = null; proceed() }) { Text("Continue to owner approval") } },
+            dismissButton = { TextButton(onClick = { ownerReview = null; status = "Account review cancelled; nothing was sent." }) { Text("Cancel") } },
+        )
     }
 }
 

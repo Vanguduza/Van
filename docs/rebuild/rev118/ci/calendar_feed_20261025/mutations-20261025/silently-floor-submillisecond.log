@@ -1,0 +1,28 @@
+...FF...............                                                     [100%]
+=================================== FAILURES ===================================
+_ test_sub_millisecond_time_is_not_silently_made_available_earlier[_parse_ms0] _
+
+parser = <function _parse_ms at 0x7f47f30f6c00>
+
+    @pytest.mark.parametrize('parser',[_parse_ms,recorder._parse_ms])
+    def test_sub_millisecond_time_is_not_silently_made_available_earlier(parser):
+>       with pytest.raises(ValueError):parser('2026-10-14T12:30:00.123001Z')
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_calendar_feed_boundaries.py:29: Failed
+_ test_sub_millisecond_time_is_not_silently_made_available_earlier[_parse_ms1] _
+
+parser = <function _parse_ms at 0x7f47f2f8d300>
+
+    @pytest.mark.parametrize('parser',[_parse_ms,recorder._parse_ms])
+    def test_sub_millisecond_time_is_not_silently_made_available_earlier(parser):
+>       with pytest.raises(ValueError):parser('2026-10-14T12:30:00.123001Z')
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_calendar_feed_boundaries.py:29: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_calendar_feed_boundaries.py::test_sub_millisecond_time_is_not_silently_made_available_earlier[_parse_ms0]
+FAILED trading/tests/test_calendar_feed_boundaries.py::test_sub_millisecond_time_is_not_silently_made_available_earlier[_parse_ms1]
+2 failed, 18 passed in 2.03s

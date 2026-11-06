@@ -1,0 +1,452 @@
+FFFFF.FFFF.                                                              [100%]
+=================================== FAILURES ===================================
+_ test_original_native_source_record_read_and_replay_are_context_independent[sqlite-cash-narrow] _
+
+ledger = <vati.core.ledger.Ledger object at 0x7f4f5d7f0800>, mode = 'narrow'
+source_factory = <function statement at 0x7f4f5f36c4a0>
+book_type = <class 'vati.funding.journal.FundingBook'>
+
+    @pytest.mark.parametrize('mode',['narrow','trapping'])
+    @pytest.mark.parametrize('source_factory,book_type',[(cash_statement,FundingBook),(deal_statement,DealBook)],ids=['cash','deals'])
+    def test_original_native_source_record_read_and_replay_are_context_independent(ledger,mode,source_factory,book_type):
+        source=source_factory()
+        # Extra zeros are numerically exact at native precision; Rounded is not a source defect.
+        if book_type is FundingBook:
+            source=replace(source,movements=(replace(source.movements[0],delta=D('0.01234567000')),))
+        else:
+            source=replace(source,deals=(replace(source.deals[0],commission=D('-0.23000')),))
+        original_body=source.body();book=book_type(ledger,clock=lambda:5000)
+        with caller_context(mode):
+>           receipt=book.record_statement(source)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+../test_native_funding_context_baseline_20261026.py:53: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/funding/journal.py:76: in record_statement
+    self._validate(statement);received=native_int(self.clock(),minimum=statement.observed_at_ms)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+statement = NativeCashStatement(provider='CTRADER', environment='DEMO', account_alias='ctrader_primary', native_account_id=12345, ...mal('1005.31234567'), equity_after=Decimal('1005.31239567'), balance_version=9, occurred_at_ms=1500, money_digits=8),))
+
+    @staticmethod
+    def _validate(statement):
+        if not isinstance(statement,NativeCashStatement) or statement.provider!='CTRADER' or statement.environment not in {'DEMO','LIVE'}:
+            raise ValueError('funding_native_scope_invalid')
+        native_int(statement.native_account_id,minimum=1);native_int(statement.deposit_asset_id,minimum=1)
+        if not isinstance(statement.currency,str) or not statement.currency.strip():raise ValueError('funding_native_currency_invalid')
+        for value in (statement.from_ms,statement.to_ms,statement.observed_at_ms):native_int(value,minimum=0)
+        if not statement.from_ms<=statement.to_ms<=statement.observed_at_ms:raise ValueError('funding_native_window_invalid')
+        seen=set()
+        for row in statement.movements:
+            native_int(row.native_id,minimum=1);native_int(row.money_digits,minimum=0,maximum=18)
+            native_int(row.occurred_at_ms,minimum=statement.from_ms,maximum=statement.to_ms)
+            if row.native_id in seen:raise ValueError('funding_native_identity_duplicated')
+            if not isinstance(row.operation,str) or not row.operation:raise ValueError('funding_native_operation_invalid')
+            for value in (row.delta,row.balance_after):
+                if not isinstance(value,Decimal) or not value.is_finite():raise ValueError('funding_native_money_invalid')
+            for value in (row.delta,row.balance_after,row.equity_after):
+                if value is None:continue
+                if not isinstance(value,Decimal) or not value.is_finite():raise ValueError('funding_native_money_invalid')
+                if not native_money(-(2**63),row.money_digits)<=value<=native_money(2**63-1,row.money_digits):raise ValueError('funding_native_money_invalid')
+                with localcontext() as context:
+                    context.prec=80
+>                   if value.quantize(native_money(1,row.money_digits))!=value:raise ValueError('funding_native_precision_invalid')
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E                   decimal.InvalidOperation: [<class 'decimal.InvalidOperation'>]
+
+trading/vati/funding/journal.py:54: InvalidOperation
+_ test_original_native_source_record_read_and_replay_are_context_independent[sqlite-cash-trapping] _
+
+ledger = <vati.core.ledger.Ledger object at 0x7f4f5d81abd0>, mode = 'trapping'
+source_factory = <function statement at 0x7f4f5f36c4a0>
+book_type = <class 'vati.funding.journal.FundingBook'>
+
+    @pytest.mark.parametrize('mode',['narrow','trapping'])
+    @pytest.mark.parametrize('source_factory,book_type',[(cash_statement,FundingBook),(deal_statement,DealBook)],ids=['cash','deals'])
+    def test_original_native_source_record_read_and_replay_are_context_independent(ledger,mode,source_factory,book_type):
+        source=source_factory()
+        # Extra zeros are numerically exact at native precision; Rounded is not a source defect.
+        if book_type is FundingBook:
+            source=replace(source,movements=(replace(source.movements[0],delta=D('0.01234567000')),))
+        else:
+            source=replace(source,deals=(replace(source.deals[0],commission=D('-0.23000')),))
+        original_body=source.body();book=book_type(ledger,clock=lambda:5000)
+        with caller_context(mode):
+>           receipt=book.record_statement(source)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+../test_native_funding_context_baseline_20261026.py:53: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/funding/journal.py:76: in record_statement
+    self._validate(statement);received=native_int(self.clock(),minimum=statement.observed_at_ms)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+statement = NativeCashStatement(provider='CTRADER', environment='DEMO', account_alias='ctrader_primary', native_account_id=12345, ...mal('1005.31234567'), equity_after=Decimal('1005.31239567'), balance_version=9, occurred_at_ms=1500, money_digits=8),))
+
+    @staticmethod
+    def _validate(statement):
+        if not isinstance(statement,NativeCashStatement) or statement.provider!='CTRADER' or statement.environment not in {'DEMO','LIVE'}:
+            raise ValueError('funding_native_scope_invalid')
+        native_int(statement.native_account_id,minimum=1);native_int(statement.deposit_asset_id,minimum=1)
+        if not isinstance(statement.currency,str) or not statement.currency.strip():raise ValueError('funding_native_currency_invalid')
+        for value in (statement.from_ms,statement.to_ms,statement.observed_at_ms):native_int(value,minimum=0)
+        if not statement.from_ms<=statement.to_ms<=statement.observed_at_ms:raise ValueError('funding_native_window_invalid')
+        seen=set()
+        for row in statement.movements:
+            native_int(row.native_id,minimum=1);native_int(row.money_digits,minimum=0,maximum=18)
+            native_int(row.occurred_at_ms,minimum=statement.from_ms,maximum=statement.to_ms)
+            if row.native_id in seen:raise ValueError('funding_native_identity_duplicated')
+            if not isinstance(row.operation,str) or not row.operation:raise ValueError('funding_native_operation_invalid')
+            for value in (row.delta,row.balance_after):
+                if not isinstance(value,Decimal) or not value.is_finite():raise ValueError('funding_native_money_invalid')
+            for value in (row.delta,row.balance_after,row.equity_after):
+                if value is None:continue
+                if not isinstance(value,Decimal) or not value.is_finite():raise ValueError('funding_native_money_invalid')
+                if not native_money(-(2**63),row.money_digits)<=value<=native_money(2**63-1,row.money_digits):raise ValueError('funding_native_money_invalid')
+                with localcontext() as context:
+                    context.prec=80
+>                   if value.quantize(native_money(1,row.money_digits))!=value:raise ValueError('funding_native_precision_invalid')
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E                   decimal.Rounded: [<class 'decimal.Rounded'>]
+
+trading/vati/funding/journal.py:54: Rounded
+_ test_original_native_source_record_read_and_replay_are_context_independent[sqlite-deals-narrow] _
+
+ledger = <vati.core.ledger.Ledger object at 0x7f4f5d818a70>, mode = 'narrow'
+source_factory = <function statement at 0x7f4f5d7d8d60>
+book_type = <class 'vati.funding.deal_journal.DealBook'>
+
+    @pytest.mark.parametrize('mode',['narrow','trapping'])
+    @pytest.mark.parametrize('source_factory,book_type',[(cash_statement,FundingBook),(deal_statement,DealBook)],ids=['cash','deals'])
+    def test_original_native_source_record_read_and_replay_are_context_independent(ledger,mode,source_factory,book_type):
+        source=source_factory()
+        # Extra zeros are numerically exact at native precision; Rounded is not a source defect.
+        if book_type is FundingBook:
+            source=replace(source,movements=(replace(source.movements[0],delta=D('0.01234567000')),))
+        else:
+            source=replace(source,deals=(replace(source.deals[0],commission=D('-0.23000')),))
+        original_body=source.body();book=book_type(ledger,clock=lambda:5000)
+        with caller_context(mode):
+>           receipt=book.record_statement(source)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+../test_native_funding_context_baseline_20261026.py:53: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/funding/journal.py:76: in record_statement
+    self._validate(statement);received=native_int(self.clock(),minimum=statement.observed_at_ms)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/funding/deal_journal.py:58: in _validate
+    for value in (detail.gross_profit,detail.swap,detail.commission,detail.balance_after):money(value,detail.money_digits)
+                                                                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = Decimal('1005.30123456'), digits = 8
+
+    def money(value,digits):
+        native_int(digits,minimum=0,maximum=18)
+        if not isinstance(value,Decimal) or not value.is_finite():raise ValueError('funding_native_deal_money_invalid')
+        if not native_money(-(2**63),digits)<=value<=native_money(2**63-1,digits):raise ValueError('funding_native_deal_money_invalid')
+        with localcontext() as ctx:
+            ctx.prec=80
+>           if value.quantize(native_money(1,digits))!=value:raise ValueError('funding_native_deal_precision_invalid')
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           decimal.InvalidOperation: [<class 'decimal.InvalidOperation'>]
+
+trading/vati/funding/deal_journal.py:39: InvalidOperation
+_ test_original_native_source_record_read_and_replay_are_context_independent[sqlite-deals-trapping] _
+
+ledger = <vati.core.ledger.Ledger object at 0x7f4f5d81b950>, mode = 'trapping'
+source_factory = <function statement at 0x7f4f5d7d8d60>
+book_type = <class 'vati.funding.deal_journal.DealBook'>
+
+    @pytest.mark.parametrize('mode',['narrow','trapping'])
+    @pytest.mark.parametrize('source_factory,book_type',[(cash_statement,FundingBook),(deal_statement,DealBook)],ids=['cash','deals'])
+    def test_original_native_source_record_read_and_replay_are_context_independent(ledger,mode,source_factory,book_type):
+        source=source_factory()
+        # Extra zeros are numerically exact at native precision; Rounded is not a source defect.
+        if book_type is FundingBook:
+            source=replace(source,movements=(replace(source.movements[0],delta=D('0.01234567000')),))
+        else:
+            source=replace(source,deals=(replace(source.deals[0],commission=D('-0.23000')),))
+        original_body=source.body();book=book_type(ledger,clock=lambda:5000)
+        with caller_context(mode):
+>           receipt=book.record_statement(source)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+../test_native_funding_context_baseline_20261026.py:53: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/funding/journal.py:76: in record_statement
+    self._validate(statement);received=native_int(self.clock(),minimum=statement.observed_at_ms)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/funding/deal_journal.py:51: in _validate
+    if row.commission is not None:money(row.commission,row.money_digits)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = Decimal('-0.23000'), digits = 2
+
+    def money(value,digits):
+        native_int(digits,minimum=0,maximum=18)
+        if not isinstance(value,Decimal) or not value.is_finite():raise ValueError('funding_native_deal_money_invalid')
+        if not native_money(-(2**63),digits)<=value<=native_money(2**63-1,digits):raise ValueError('funding_native_deal_money_invalid')
+        with localcontext() as ctx:
+            ctx.prec=80
+>           if value.quantize(native_money(1,digits))!=value:raise ValueError('funding_native_deal_precision_invalid')
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           decimal.Rounded: [<class 'decimal.Rounded'>]
+
+trading/vati/funding/deal_journal.py:39: Rounded
+_ test_mt5_net_equity_preserves_native_decimal_text_without_caller_flags[narrow] _
+
+mode = 'narrow'
+
+    @pytest.mark.parametrize('mode',['narrow','trapping'])
+    def test_mt5_net_equity_preserves_native_decimal_text_without_caller_flags(mode):
+        source=frame();body=source.body()
+        with caller_context(mode):
+>           assert source.net_equity==D('10000')
+                   ^^^^^^^^^^^^^^^^^
+
+../test_native_funding_context_baseline_20261026.py:66: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = Mt5FundingFrame(account_alias='native', login=12345678, server='Broker-Demo', currency='USD', demo=True, observed_at_m...00, balance=Decimal('10000'), reported_equity=Decimal('10200'), credit=Decimal('200'), currency_digits=2, movements=())
+
+    @property
+    def net_equity(self):
+        with localcontext() as c:
+            c.prec=512
+>           return self.reported_equity-self.credit
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           decimal.Overflow: [<class 'decimal.Overflow'>]
+
+trading/vati/funding/mt5.py:82: Overflow
+_ test_ctrader_original_pnl_and_margin_are_independent_of_caller_context[narrow] _
+
+mode = 'narrow'
+
+    @pytest.mark.parametrize('mode',['narrow','trapping'])
+    def test_ctrader_original_pnl_and_margin_are_independent_of_caller_context(mode):
+        native=NativeFunds();native.trader['totalMarginCalculationType']='SUM'
+        native.pnl['positionUnrealizedPnL'][0]['netUnrealizedPnL']=-25001
+        native.positions[0].update(usedMargin=123456789,moneyDigits=8)
+        adapter=ctrader(native)
+        expected=adapter.sync_account()
+        assert expected.equity==D('75.5299') and expected.used_margin==D('1.23456789')
+        with caller_context(mode):
+>           actual=adapter.sync_account()
+                   ^^^^^^^^^^^^^^^^^^^^^^
+
+../test_native_funding_context_baseline_20261026.py:80: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/execution/ctrader/adapter.py:367: in sync_account
+    unrealised = self._native_unrealised(margin_mode=t.get("totalMarginCalculationType"))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = CtraderAdapter(transport=<test_ctrader_money_precision.NativeFunds object at 0x7f4f5d81bb90>, client_id='fixture', cli...k=<vati.execution.ctrader.spots.SpotBook object at 0x7f4f5d81b860>, _spot_subscriptions=set(), _spot_control_states={})
+margin_mode = 'SUM'
+
+    def _native_unrealised(self, *, margin_mode=None) -> Decimal:
+        """Broker net mark in deposit currency, never a missing-quote zero.
+    
+        The native response defines its own decimal exponent and excludes
+        potential closing commission. This is current equity, not settled PnL.
+        A changed or incomplete position set needs a fresh read, not a guess.
+        """
+        self._native_used_margin = None
+        try:
+            positions = self._positions_raw()
+            expected = [p['positionId'] for p in positions]
+            if (any(type(i) is not int or not 0<i<2**63 for i in expected)
+                or len(set(expected))!=len(expected)):raise ValueError()
+            name,r = self.transport.call('ProtoOAGetPositionUnrealizedPnLReq',
+                {'ctidTraderAccountId':self.ctid_trader_account_id})
+            if (name!='ProtoOAGetPositionUnrealizedPnLRes' or not isinstance(r,dict)
+                or type(r.get('ctidTraderAccountId')) is not int
+                or r['ctidTraderAccountId']!=self.ctid_trader_account_id):raise ValueError()
+            digits=r['moneyDigits'];rows=r.get('positionUnrealizedPnL',[])
+            if type(digits) is not int or not 0<=digits<=18 or not isinstance(rows,list):raise ValueError()
+            observed=[];total=0
+            for row in rows:
+                if not isinstance(row,dict):raise ValueError()
+                pid=row['positionId'];net=row['netUnrealizedPnL'];gross=row['grossUnrealizedPnL']
+                if (type(pid) is not int or not 0<pid<2**63
+                    or any(type(v) is not int or not -(2**63)<=v<2**63 for v in (net,gross))):raise ValueError()
+                observed.append(pid);total+=net
+            if len(set(observed))!=len(observed) or set(observed)!=set(expected):raise ValueError()
+            after = self._positions_raw()
+            if (len(after) != len(positions) or len({p['positionId'] for p in after}) != len(after)
+                or {p['positionId']:p for p in after} != {p['positionId']:p for p in positions}):
+                raise ValueError()
+            try:
+                self._native_used_margin = self._position_margin(positions, margin_mode)
+            except (KeyError,TypeError,ValueError,ArithmeticError):
+                self._native_used_margin = None
+            return Decimal(total)/(Decimal(10)**digits)
+        except (CtraderApiError,KeyError,TypeError,ValueError,ArithmeticError):
+>           raise VenueUnavailable('cTrader native deposit-currency position PnL unavailable or inconsistent') from None
+E           vati.execution.base.VenueUnavailable: cTrader native deposit-currency position PnL unavailable or inconsistent
+
+trading/vati/execution/ctrader/adapter.py:506: VenueUnavailable
+_ test_ctrader_original_pnl_and_margin_are_independent_of_caller_context[trapping] _
+
+mode = 'trapping'
+
+    @pytest.mark.parametrize('mode',['narrow','trapping'])
+    def test_ctrader_original_pnl_and_margin_are_independent_of_caller_context(mode):
+        native=NativeFunds();native.trader['totalMarginCalculationType']='SUM'
+        native.pnl['positionUnrealizedPnL'][0]['netUnrealizedPnL']=-25001
+        native.positions[0].update(usedMargin=123456789,moneyDigits=8)
+        adapter=ctrader(native)
+        expected=adapter.sync_account()
+        assert expected.equity==D('75.5299') and expected.used_margin==D('1.23456789')
+        with caller_context(mode):
+>           actual=adapter.sync_account()
+                   ^^^^^^^^^^^^^^^^^^^^^^
+
+../test_native_funding_context_baseline_20261026.py:80: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/execution/ctrader/adapter.py:367: in sync_account
+    unrealised = self._native_unrealised(margin_mode=t.get("totalMarginCalculationType"))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = CtraderAdapter(transport=<test_ctrader_money_precision.NativeFunds object at 0x7f4f5d81a2a0>, client_id='fixture', cli...k=<vati.execution.ctrader.spots.SpotBook object at 0x7f4f5d81aa50>, _spot_subscriptions=set(), _spot_control_states={})
+margin_mode = 'SUM'
+
+    def _native_unrealised(self, *, margin_mode=None) -> Decimal:
+        """Broker net mark in deposit currency, never a missing-quote zero.
+    
+        The native response defines its own decimal exponent and excludes
+        potential closing commission. This is current equity, not settled PnL.
+        A changed or incomplete position set needs a fresh read, not a guess.
+        """
+        self._native_used_margin = None
+        try:
+            positions = self._positions_raw()
+            expected = [p['positionId'] for p in positions]
+            if (any(type(i) is not int or not 0<i<2**63 for i in expected)
+                or len(set(expected))!=len(expected)):raise ValueError()
+            name,r = self.transport.call('ProtoOAGetPositionUnrealizedPnLReq',
+                {'ctidTraderAccountId':self.ctid_trader_account_id})
+            if (name!='ProtoOAGetPositionUnrealizedPnLRes' or not isinstance(r,dict)
+                or type(r.get('ctidTraderAccountId')) is not int
+                or r['ctidTraderAccountId']!=self.ctid_trader_account_id):raise ValueError()
+            digits=r['moneyDigits'];rows=r.get('positionUnrealizedPnL',[])
+            if type(digits) is not int or not 0<=digits<=18 or not isinstance(rows,list):raise ValueError()
+            observed=[];total=0
+            for row in rows:
+                if not isinstance(row,dict):raise ValueError()
+                pid=row['positionId'];net=row['netUnrealizedPnL'];gross=row['grossUnrealizedPnL']
+                if (type(pid) is not int or not 0<pid<2**63
+                    or any(type(v) is not int or not -(2**63)<=v<2**63 for v in (net,gross))):raise ValueError()
+                observed.append(pid);total+=net
+            if len(set(observed))!=len(observed) or set(observed)!=set(expected):raise ValueError()
+            after = self._positions_raw()
+            if (len(after) != len(positions) or len({p['positionId'] for p in after}) != len(after)
+                or {p['positionId']:p for p in after} != {p['positionId']:p for p in positions}):
+                raise ValueError()
+            try:
+                self._native_used_margin = self._position_margin(positions, margin_mode)
+            except (KeyError,TypeError,ValueError,ArithmeticError):
+                self._native_used_margin = None
+            return Decimal(total)/(Decimal(10)**digits)
+        except (CtraderApiError,KeyError,TypeError,ValueError,ArithmeticError):
+>           raise VenueUnavailable('cTrader native deposit-currency position PnL unavailable or inconsistent') from None
+E           vati.execution.base.VenueUnavailable: cTrader native deposit-currency position PnL unavailable or inconsistent
+
+trading/vati/execution/ctrader/adapter.py:506: VenueUnavailable
+_________ test_unrepresentable_native_precision_remains_rejected[cash] _________
+
+book_type = <class 'vati.funding.journal.FundingBook'>
+source_factory = <function statement at 0x7f4f5f36c4a0>
+
+    @pytest.mark.parametrize('book_type,source_factory',[(FundingBook,cash_statement),(DealBook,deal_statement)],ids=['cash','deals'])
+    def test_unrepresentable_native_precision_remains_rejected(book_type,source_factory):
+        source=source_factory()
+        if book_type is FundingBook:source=replace(source,movements=(replace(source.movements[0],delta=D('0.000000001')),))
+        else:source=replace(source,deals=(replace(source.deals[0],commission=D('0.000000001')),))
+        with caller_context('trapping'):
+>           with pytest.raises(ValueError,match='precision_invalid'):book_type._validate(source)
+                                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+../test_native_funding_context_baseline_20261026.py:92: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+statement = NativeCashStatement(provider='CTRADER', environment='DEMO', account_alias='ctrader_primary', native_account_id=12345, ...mal('1005.31234567'), equity_after=Decimal('1005.31239567'), balance_version=9, occurred_at_ms=1500, money_digits=8),))
+
+    @staticmethod
+    def _validate(statement):
+        if not isinstance(statement,NativeCashStatement) or statement.provider!='CTRADER' or statement.environment not in {'DEMO','LIVE'}:
+            raise ValueError('funding_native_scope_invalid')
+        native_int(statement.native_account_id,minimum=1);native_int(statement.deposit_asset_id,minimum=1)
+        if not isinstance(statement.currency,str) or not statement.currency.strip():raise ValueError('funding_native_currency_invalid')
+        for value in (statement.from_ms,statement.to_ms,statement.observed_at_ms):native_int(value,minimum=0)
+        if not statement.from_ms<=statement.to_ms<=statement.observed_at_ms:raise ValueError('funding_native_window_invalid')
+        seen=set()
+        for row in statement.movements:
+            native_int(row.native_id,minimum=1);native_int(row.money_digits,minimum=0,maximum=18)
+            native_int(row.occurred_at_ms,minimum=statement.from_ms,maximum=statement.to_ms)
+            if row.native_id in seen:raise ValueError('funding_native_identity_duplicated')
+            if not isinstance(row.operation,str) or not row.operation:raise ValueError('funding_native_operation_invalid')
+            for value in (row.delta,row.balance_after):
+                if not isinstance(value,Decimal) or not value.is_finite():raise ValueError('funding_native_money_invalid')
+            for value in (row.delta,row.balance_after,row.equity_after):
+                if value is None:continue
+                if not isinstance(value,Decimal) or not value.is_finite():raise ValueError('funding_native_money_invalid')
+                if not native_money(-(2**63),row.money_digits)<=value<=native_money(2**63-1,row.money_digits):raise ValueError('funding_native_money_invalid')
+                with localcontext() as context:
+                    context.prec=80
+>                   if value.quantize(native_money(1,row.money_digits))!=value:raise ValueError('funding_native_precision_invalid')
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E                   decimal.Inexact: [<class 'decimal.Inexact'>, <class 'decimal.Rounded'>]
+
+trading/vati/funding/journal.py:54: Inexact
+________ test_unrepresentable_native_precision_remains_rejected[deals] _________
+
+book_type = <class 'vati.funding.deal_journal.DealBook'>
+source_factory = <function statement at 0x7f4f5d7d8d60>
+
+    @pytest.mark.parametrize('book_type,source_factory',[(FundingBook,cash_statement),(DealBook,deal_statement)],ids=['cash','deals'])
+    def test_unrepresentable_native_precision_remains_rejected(book_type,source_factory):
+        source=source_factory()
+        if book_type is FundingBook:source=replace(source,movements=(replace(source.movements[0],delta=D('0.000000001')),))
+        else:source=replace(source,deals=(replace(source.deals[0],commission=D('0.000000001')),))
+        with caller_context('trapping'):
+>           with pytest.raises(ValueError,match='precision_invalid'):book_type._validate(source)
+                                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+../test_native_funding_context_baseline_20261026.py:92: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/funding/deal_journal.py:51: in _validate
+    if row.commission is not None:money(row.commission,row.money_digits)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = Decimal('1E-9'), digits = 2
+
+    def money(value,digits):
+        native_int(digits,minimum=0,maximum=18)
+        if not isinstance(value,Decimal) or not value.is_finite():raise ValueError('funding_native_deal_money_invalid')
+        if not native_money(-(2**63),digits)<=value<=native_money(2**63-1,digits):raise ValueError('funding_native_deal_money_invalid')
+        with localcontext() as ctx:
+            ctx.prec=80
+>           if value.quantize(native_money(1,digits))!=value:raise ValueError('funding_native_deal_precision_invalid')
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           decimal.Inexact: [<class 'decimal.Inexact'>, <class 'decimal.Rounded'>]
+
+trading/vati/funding/deal_journal.py:39: Inexact
+=========================== short test summary info ============================
+FAILED ../test_native_funding_context_baseline_20261026.py::test_original_native_source_record_read_and_replay_are_context_independent[sqlite-cash-narrow]
+FAILED ../test_native_funding_context_baseline_20261026.py::test_original_native_source_record_read_and_replay_are_context_independent[sqlite-cash-trapping]
+FAILED ../test_native_funding_context_baseline_20261026.py::test_original_native_source_record_read_and_replay_are_context_independent[sqlite-deals-narrow]
+FAILED ../test_native_funding_context_baseline_20261026.py::test_original_native_source_record_read_and_replay_are_context_independent[sqlite-deals-trapping]
+FAILED ../test_native_funding_context_baseline_20261026.py::test_mt5_net_equity_preserves_native_decimal_text_without_caller_flags[narrow]
+FAILED ../test_native_funding_context_baseline_20261026.py::test_ctrader_original_pnl_and_margin_are_independent_of_caller_context[narrow]
+FAILED ../test_native_funding_context_baseline_20261026.py::test_ctrader_original_pnl_and_margin_are_independent_of_caller_context[trapping]
+FAILED ../test_native_funding_context_baseline_20261026.py::test_unrepresentable_native_precision_remains_rejected[cash]
+FAILED ../test_native_funding_context_baseline_20261026.py::test_unrepresentable_native_precision_remains_rejected[deals]
+9 failed, 2 passed, 4 deselected in 13.26s

@@ -1,0 +1,1231 @@
+﻿2026-10-26T08:29:32.7640696Z Current runner version: '2.338.0'
+2026-10-26T08:29:32.7659119Z ##[group]Runner Image Provisioner
+2026-10-26T08:29:32.7659843Z Hosted Compute Agent
+2026-10-26T08:29:32.7660203Z Version: 20261021.618
+2026-10-26T08:29:32.7660623Z Commit: 21505ad2541d5be6135ed84fc33697146cf75b8e
+2026-10-26T08:29:32.7661073Z Build Date: 2026-10-21T00:45:21Z
+2026-10-26T08:29:32.7661490Z Worker ID: {b3ae6a5f-7bfd-48f0-9cf8-e08cc90327fb}
+2026-10-26T08:29:32.7661989Z Region: centralus
+2026-10-26T08:29:32.7662332Z Cloud: Azure
+2026-10-26T08:29:32.7662659Z ##[endgroup]
+2026-10-26T08:29:32.7663732Z ##[group]Operating System
+2026-10-26T08:29:32.7664133Z Ubuntu
+2026-10-26T08:29:32.7664537Z 24.04.5
+2026-10-26T08:29:32.7664857Z LTS
+2026-10-26T08:29:32.7665169Z ##[endgroup]
+2026-10-26T08:29:32.7665550Z ##[group]Runner Image
+2026-10-26T08:29:32.7665913Z Image: ubuntu-24.04
+2026-10-26T08:29:32.7666359Z Version: 20261012.334.1
+2026-10-26T08:29:32.7667370Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261012.334/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-26T08:29:32.7668372Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261012.334
+2026-10-26T08:29:32.7668937Z ##[endgroup]
+2026-10-26T08:29:32.7669695Z ##[group]GITHUB_TOKEN Permissions
+2026-10-26T08:29:32.7670930Z Contents: read
+2026-10-26T08:29:32.7671324Z Metadata: read
+2026-10-26T08:29:32.7671700Z ##[endgroup]
+2026-10-26T08:29:32.7673103Z Secret source: Actions
+2026-10-26T08:29:32.7673732Z Cache mode: write
+2026-10-26T08:29:32.7674171Z Prepare workflow directory
+2026-10-26T08:29:32.7904962Z Prepare all required actions
+2026-10-26T08:29:32.7948152Z Getting action download info
+2026-10-26T08:29:33.0238501Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-26T08:29:33.0861174Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-10-26T08:29:33.2778602Z Complete job name: cpu-source-runtime
+2026-10-26T08:29:33.3330185Z ##[group]Run actions/checkout@v4
+2026-10-26T08:29:33.3330616Z with:
+2026-10-26T08:29:33.3330863Z   repository: Vanguduza/Van
+2026-10-26T08:29:33.3333053Z   token: ***
+2026-10-26T08:29:33.3333296Z   ssh-strict: true
+2026-10-26T08:29:33.3333541Z   ssh-user: git
+2026-10-26T08:29:33.3333787Z   persist-credentials: true
+2026-10-26T08:29:33.3334056Z   clean: true
+2026-10-26T08:29:33.3334306Z   sparse-checkout-cone-mode: true
+2026-10-26T08:29:33.3334599Z   fetch-depth: 1
+2026-10-26T08:29:33.3334840Z   fetch-tags: false
+2026-10-26T08:29:33.3335089Z   show-progress: true
+2026-10-26T08:29:33.3335341Z   lfs: false
+2026-10-26T08:29:33.3335574Z   submodules: false
+2026-10-26T08:29:33.3335827Z   set-safe-directory: true
+2026-10-26T08:29:33.3336117Z   allow-unsafe-pr-checkout: false
+2026-10-26T08:29:33.3336471Z ##[endgroup]
+2026-10-26T08:29:33.3998125Z Syncing repository: Vanguduza/Van
+2026-10-26T08:29:33.4000059Z ##[group]Getting Git version info
+2026-10-26T08:29:33.4000783Z Working directory is '/home/runner/work/Van/Van'
+2026-10-26T08:29:33.4001620Z [command]/usr/bin/git version
+2026-10-26T08:29:33.4074093Z git version 2.55.0
+2026-10-26T08:29:33.4092807Z ##[endgroup]
+2026-10-26T08:29:33.4102349Z Temporarily overriding HOME='/home/runner/work/_temp/a5c4934f-006b-4916-a13c-2244d4a361f4' before making global git config changes
+2026-10-26T08:29:33.4112763Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-26T08:29:33.4113730Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Van/Van
+2026-10-26T08:29:33.4145578Z Deleting the contents of '/home/runner/work/Van/Van'
+2026-10-26T08:29:33.4151383Z ##[group]Initializing the repository
+2026-10-26T08:29:33.4159330Z [command]/usr/bin/git init /home/runner/work/Van/Van
+2026-10-26T08:29:33.4226462Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-26T08:29:33.4227439Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-26T08:29:33.4228322Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-26T08:29:33.4229490Z hint: call:
+2026-10-26T08:29:33.4229842Z hint:
+2026-10-26T08:29:33.4230297Z hint: 	git config --global init.defaultBranch <name>
+2026-10-26T08:29:33.4230841Z hint:
+2026-10-26T08:29:33.4231359Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-26T08:29:33.4232191Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-26T08:29:33.4232852Z hint:
+2026-10-26T08:29:33.4233238Z hint: 	git branch -m <name>
+2026-10-26T08:29:33.4233672Z hint:
+2026-10-26T08:29:33.4234220Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-26T08:29:33.4235058Z Initialized empty Git repository in /home/runner/work/Van/Van/.git/
+2026-10-26T08:29:33.4238539Z [command]/usr/bin/git remote add origin https://github.com/Vanguduza/Van
+2026-10-26T08:29:33.4282160Z ##[endgroup]
+2026-10-26T08:29:33.4282881Z ##[group]Disabling automatic garbage collection
+2026-10-26T08:29:33.4298426Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-26T08:29:33.4332655Z ##[endgroup]
+2026-10-26T08:29:33.4333183Z ##[group]Setting up auth
+2026-10-26T08:29:33.4338612Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-26T08:29:33.4381268Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-26T08:29:33.4654216Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-26T08:29:33.4682743Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-26T08:29:33.4887851Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-26T08:29:33.4917301Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-26T08:29:33.5090172Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-26T08:29:33.5124230Z ##[endgroup]
+2026-10-26T08:29:33.5124929Z ##[group]Fetching the repository
+2026-10-26T08:29:33.5132144Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +dbdae79c6fa074a814188852d1f794dd4a3890e3:refs/remotes/pull/105/merge
+2026-10-26T08:29:39.6551351Z From https://github.com/Vanguduza/Van
+2026-10-26T08:29:39.6552884Z  * [new ref]         dbdae79c6fa074a814188852d1f794dd4a3890e3 -> pull/105/merge
+2026-10-26T08:29:39.6556808Z ##[endgroup]
+2026-10-26T08:29:39.6558206Z ##[group]Determining the checkout info
+2026-10-26T08:29:39.6559508Z ##[endgroup]
+2026-10-26T08:29:39.6561533Z [command]/usr/bin/git sparse-checkout disable
+2026-10-26T08:29:39.6606031Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-26T08:29:39.6633798Z ##[group]Checking out the ref
+2026-10-26T08:29:39.6635774Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/105/merge
+2026-10-26T08:29:40.4954744Z Note: switching to 'refs/remotes/pull/105/merge'.
+2026-10-26T08:29:40.4956125Z 
+2026-10-26T08:29:40.4956353Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-10-26T08:29:40.4956852Z changes and commit them, and you can discard any commits you make in this
+2026-10-26T08:29:40.4957539Z state without impacting any branches by switching back to a branch.
+2026-10-26T08:29:40.4957835Z 
+2026-10-26T08:29:40.4958062Z If you want to create a new branch to retain commits you create, you may
+2026-10-26T08:29:40.4958525Z do so (now or later) by using -c with the switch command. Example:
+2026-10-26T08:29:40.4958772Z 
+2026-10-26T08:29:40.4958901Z   git switch -c <new-branch-name>
+2026-10-26T08:29:40.4959082Z 
+2026-10-26T08:29:40.4959308Z Or undo this operation with:
+2026-10-26T08:29:40.4959733Z 
+2026-10-26T08:29:40.4959835Z   git switch -
+2026-10-26T08:29:40.4959986Z 
+2026-10-26T08:29:40.4960244Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-10-26T08:29:40.4960523Z 
+2026-10-26T08:29:40.4960857Z HEAD is now at dbdae79 Merge b070ede371980f7596d116c3e585023f9b4bf57a into 8eb1889822fc8a83f219977c15340172e16acd91
+2026-10-26T08:29:40.5017719Z ##[endgroup]
+2026-10-26T08:29:40.5057314Z [command]/usr/bin/git log -1 --format=%H
+2026-10-26T08:29:40.5081184Z dbdae79c6fa074a814188852d1f794dd4a3890e3
+2026-10-26T08:29:40.5253700Z ##[group]Run mkdir -p /tmp/van-forecast-source-evidence
+2026-10-26T08:29:40.5254042Z [36;1mmkdir -p /tmp/van-forecast-source-evidence[0m
+2026-10-26T08:29:40.5254356Z [36;1mgit rev-parse HEAD > /tmp/van-forecast-source-evidence/tested-head.txt[0m
+2026-10-26T08:29:40.5254746Z [36;1msha256sum trading/vati_forecast_worker/locks/* > /tmp/van-forecast-source-evidence/lock-digests.txt[0m
+2026-10-26T08:29:40.5255097Z [36;1mpython3 -m trading.vati_forecast_worker.inventory \[0m
+2026-10-26T08:29:40.5255413Z [36;1m  --output /tmp/van-forecast-source-evidence/source-wheel-sbom.json[0m
+2026-10-26T08:29:40.5457543Z shell: /usr/bin/bash -e {0}
+2026-10-26T08:29:40.5457767Z ##[endgroup]
+2026-10-26T08:29:40.5848892Z {"components": 232, "status": "SOURCE_INVENTORY_NOT_ADMISSION"}
+2026-10-26T08:29:40.6032244Z ##[group]Run docker build --secret id=system_ca,src=/etc/ssl/certs/ca-certificates.crt --progress plain \
+2026-10-26T08:29:40.6032714Z [36;1mdocker build --secret id=system_ca,src=/etc/ssl/certs/ca-certificates.crt --progress plain \[0m
+2026-10-26T08:29:40.6033085Z [36;1m  --tag van-forecast-source:40292596591 trading/vati_forecast_worker[0m
+2026-10-26T08:29:40.6033396Z [36;1mdocker image inspect van-forecast-source:40292596591 --format '{{.Id}}' \[0m
+2026-10-26T08:29:40.6033685Z [36;1m  > /tmp/van-forecast-source-evidence/image-id.txt[0m
+2026-10-26T08:29:40.6088267Z shell: /usr/bin/bash -e {0}
+2026-10-26T08:29:40.6088444Z ##[endgroup]
+2026-10-26T08:29:41.0583194Z #0 building with "default" instance using docker driver
+2026-10-26T08:29:41.0583406Z 
+2026-10-26T08:29:41.0583544Z #1 [internal] load build definition from Dockerfile
+2026-10-26T08:29:41.0583747Z #1 transferring dockerfile: 1.36kB done
+2026-10-26T08:29:41.0583902Z #1 DONE 0.0s
+2026-10-26T08:29:41.0583978Z 
+2026-10-26T08:29:41.0584186Z #2 [auth] library/python:pull token for registry-1.docker.io
+2026-10-26T08:29:41.2085038Z #2 DONE 0.0s
+2026-10-26T08:29:41.2085224Z 
+2026-10-26T08:29:41.2085602Z #3 [internal] load metadata for docker.io/library/python@sha256:6a0e06f5ba0b373d051aabd3fffb9b873f27f9a2a3a14bcbe37dee6f0e3bbc70
+2026-10-26T08:29:41.5883860Z #3 DONE 0.7s
+2026-10-26T08:29:41.7101613Z 
+2026-10-26T08:29:41.7102276Z #4 [internal] load .dockerignore
+2026-10-26T08:29:41.7102611Z #4 transferring context: 78B done
+2026-10-26T08:29:41.7102970Z #4 DONE 0.0s
+2026-10-26T08:29:41.7103066Z 
+2026-10-26T08:29:41.7103126Z #5 [internal] load build context
+2026-10-26T08:29:41.7103469Z #5 transferring context: 154.05kB done
+2026-10-26T08:29:41.7103724Z #5 DONE 0.0s
+2026-10-26T08:29:41.7103806Z 
+2026-10-26T08:29:41.7104162Z #6 [stage-0 1/7] FROM docker.io/library/python@sha256:6a0e06f5ba0b373d051aabd3fffb9b873f27f9a2a3a14bcbe37dee6f0e3bbc70
+2026-10-26T08:29:41.7104867Z #6 resolve docker.io/library/python@sha256:6a0e06f5ba0b373d051aabd3fffb9b873f27f9a2a3a14bcbe37dee6f0e3bbc70 done
+2026-10-26T08:29:41.7105448Z #6 sha256:fd4548892b7d74acf5f52391380b45441b4ec55f6c2e1506030c2af26fd3e3f6 0B / 3.34MB 0.1s
+2026-10-26T08:29:41.7105971Z #6 sha256:87463122edacdc60df8c7840549960acce4dfb91a2b2aa36f563f62e0cd991db 0B / 13.68MB 0.1s
+2026-10-26T08:29:41.7106513Z #6 sha256:6a0e06f5ba0b373d051aabd3fffb9b873f27f9a2a3a14bcbe37dee6f0e3bbc70 6.55kB / 6.55kB done
+2026-10-26T08:29:41.7107196Z #6 sha256:57d96f71de145a98e7ceca18ee4ade77bba4103a33a72dfaea026b23625c6bf0 1.75kB / 1.75kB done
+2026-10-26T08:29:41.7107752Z #6 sha256:3c4d812a6efe003770aafbdba65f9c1960ba8234ab23a133934205a70bdcda77 5.68kB / 5.68kB done
+2026-10-26T08:29:41.7108604Z #6 sha256:11422d7ca1a44390a32bd8d8d9dc5946b4d053b3bbd9507d682e35584ba84a26 0B / 28.25MB 0.1s
+2026-10-26T08:29:41.9103815Z #6 sha256:fd4548892b7d74acf5f52391380b45441b4ec55f6c2e1506030c2af26fd3e3f6 3.34MB / 3.34MB 0.2s done
+2026-10-26T08:29:41.9104422Z #6 sha256:87463122edacdc60df8c7840549960acce4dfb91a2b2aa36f563f62e0cd991db 1.05MB / 13.68MB 0.3s
+2026-10-26T08:29:41.9104832Z #6 sha256:11422d7ca1a44390a32bd8d8d9dc5946b4d053b3bbd9507d682e35584ba84a26 7.34MB / 28.25MB 0.3s
+2026-10-26T08:29:41.9105207Z #6 sha256:b52d28f2ade3944bb78458d2d77f25816d73cb5566d86dd897c9b8829a853ad8 249B / 249B 0.3s done
+2026-10-26T08:29:42.1103660Z #6 sha256:87463122edacdc60df8c7840549960acce4dfb91a2b2aa36f563f62e0cd991db 2.10MB / 13.68MB 0.5s
+2026-10-26T08:29:42.1104056Z #6 sha256:11422d7ca1a44390a32bd8d8d9dc5946b4d053b3bbd9507d682e35584ba84a26 14.68MB / 28.25MB 0.5s
+2026-10-26T08:29:42.3106129Z #6 sha256:87463122edacdc60df8c7840549960acce4dfb91a2b2aa36f563f62e0cd991db 4.19MB / 13.68MB 0.7s
+2026-10-26T08:29:42.3107762Z #6 sha256:11422d7ca1a44390a32bd8d8d9dc5946b4d053b3bbd9507d682e35584ba84a26 22.02MB / 28.25MB 0.7s
+2026-10-26T08:29:42.5098952Z #6 sha256:87463122edacdc60df8c7840549960acce4dfb91a2b2aa36f563f62e0cd991db 5.24MB / 13.68MB 0.9s
+2026-10-26T08:29:42.5099683Z #6 sha256:11422d7ca1a44390a32bd8d8d9dc5946b4d053b3bbd9507d682e35584ba84a26 28.25MB / 28.25MB 0.9s
+2026-10-26T08:29:42.6155345Z #6 sha256:87463122edacdc60df8c7840549960acce4dfb91a2b2aa36f563f62e0cd991db 6.29MB / 13.68MB 1.0s
+2026-10-26T08:29:42.6157199Z #6 sha256:11422d7ca1a44390a32bd8d8d9dc5946b4d053b3bbd9507d682e35584ba84a26 28.25MB / 28.25MB 1.0s done
+2026-10-26T08:29:42.6157745Z #6 extracting sha256:11422d7ca1a44390a32bd8d8d9dc5946b4d053b3bbd9507d682e35584ba84a26
+2026-10-26T08:29:42.7273008Z #6 sha256:87463122edacdc60df8c7840549960acce4dfb91a2b2aa36f563f62e0cd991db 7.34MB / 13.68MB 1.1s
+2026-10-26T08:29:42.9767120Z #6 sha256:87463122edacdc60df8c7840549960acce4dfb91a2b2aa36f563f62e0cd991db 8.39MB / 13.68MB 1.3s
+2026-10-26T08:29:43.0837456Z #6 sha256:87463122edacdc60df8c7840549960acce4dfb91a2b2aa36f563f62e0cd991db 9.44MB / 13.68MB 1.4s
+2026-10-26T08:29:43.2069118Z #6 sha256:87463122edacdc60df8c7840549960acce4dfb91a2b2aa36f563f62e0cd991db 10.49MB / 13.68MB 1.5s
+2026-10-26T08:29:43.3098833Z #6 sha256:87463122edacdc60df8c7840549960acce4dfb91a2b2aa36f563f62e0cd991db 11.53MB / 13.68MB 1.7s
+2026-10-26T08:29:43.3099463Z #6 extracting sha256:11422d7ca1a44390a32bd8d8d9dc5946b4d053b3bbd9507d682e35584ba84a26 0.7s done
+2026-10-26T08:29:43.3099803Z #6 extracting sha256:fd4548892b7d74acf5f52391380b45441b4ec55f6c2e1506030c2af26fd3e3f6
+2026-10-26T08:29:43.5107392Z #6 sha256:87463122edacdc60df8c7840549960acce4dfb91a2b2aa36f563f62e0cd991db 13.68MB / 13.68MB 1.9s
+2026-10-26T08:29:43.5107818Z #6 extracting sha256:fd4548892b7d74acf5f52391380b45441b4ec55f6c2e1506030c2af26fd3e3f6 0.1s done
+2026-10-26T08:29:43.7612912Z #6 sha256:87463122edacdc60df8c7840549960acce4dfb91a2b2aa36f563f62e0cd991db 13.68MB / 13.68MB 1.9s done
+2026-10-26T08:29:45.9078756Z #6 extracting sha256:87463122edacdc60df8c7840549960acce4dfb91a2b2aa36f563f62e0cd991db
+2026-10-26T08:29:46.4052624Z #6 extracting sha256:87463122edacdc60df8c7840549960acce4dfb91a2b2aa36f563f62e0cd991db 0.3s done
+2026-10-26T08:29:46.5262322Z #6 extracting sha256:b52d28f2ade3944bb78458d2d77f25816d73cb5566d86dd897c9b8829a853ad8
+2026-10-26T08:29:46.7133807Z #6 extracting sha256:b52d28f2ade3944bb78458d2d77f25816d73cb5566d86dd897c9b8829a853ad8 done
+2026-10-26T08:29:46.7135712Z #6 DONE 4.9s
+2026-10-26T08:29:46.7135857Z 
+2026-10-26T08:29:46.7135960Z #7 [stage-0 2/7] WORKDIR /bootstrap
+2026-10-26T08:29:46.7136222Z #7 DONE 0.0s
+2026-10-26T08:29:46.7136328Z 
+2026-10-26T08:29:46.7136426Z #8 [stage-0 3/7] COPY locks/ ./locks/
+2026-10-26T08:29:46.7136660Z #8 DONE 0.0s
+2026-10-26T08:29:46.7136766Z 
+2026-10-26T08:29:46.7137101Z #9 [stage-0 4/7] COPY verify_wheels.py ./verify_wheels.py
+2026-10-26T08:29:46.7137418Z #9 DONE 0.0s
+2026-10-26T08:29:46.7137519Z 
+2026-10-26T08:29:46.7139881Z #10 [stage-0 5/7] RUN --mount=type=secret,id=system_ca,required=true     export SOURCE_DATE_EPOCH=315532800 PYTHONHASHSEED=0 PIP_DISABLE_PIP_VERSION_CHECK=1 PIP_PROGRESS_BAR=off &&     PIP_CERT=/run/secrets/system_ca python -m pip install --no-deps --require-hashes       -r locks/build-cp312-linux-x86_64.lock &&     PIP_CERT=/run/secrets/system_ca python -m pip wheel --no-deps --no-build-isolation --require-hashes       --wheel-dir /wheelhouse -r locks/research-cp312-linux-x86_64.source.lock &&     python verify_wheels.py /wheelhouse locks/wheel-manifest-cp312-linux-x86_64.json &&     python -m pip install --no-index --no-deps --require-hashes --find-links /wheelhouse       -r locks/research-cp312-linux-x86_64.wheel.lock &&     python -m pip check &&     rm -rf /wheelhouse /root/.cache/pip
+2026-10-26T08:29:47.5847905Z #10 1.022 Collecting packaging==26.3 (from -r locks/build-cp312-linux-x86_64.lock (line 1))
+2026-10-26T08:29:47.7997300Z #10 1.100   Downloading packaging-26.3-py3-none-any.whl (129 kB)
+2026-10-26T08:29:47.7997809Z #10 1.237 Collecting setuptools==84.2.1 (from -r locks/build-cp312-linux-x86_64.lock (line 2))
+2026-10-26T08:29:47.9129204Z #10 1.252   Downloading setuptools-84.2.1-py3-none-any.whl (876 kB)
+2026-10-26T08:29:47.9129748Z #10 1.336 Collecting wheel==0.48.0 (from -r locks/build-cp312-linux-x86_64.lock (line 3))
+2026-10-26T08:29:47.9130418Z #10 1.350   Downloading wheel-0.48.0-py3-none-any.whl (33 kB)
+2026-10-26T08:29:48.0668827Z #10 1.354 Installing collected packages: wheel, setuptools, packaging
+2026-10-26T08:29:48.2867605Z #10 1.724 Successfully installed packaging-26.3 setuptools-84.2.1 wheel-0.48.0
+2026-10-26T08:29:48.4373076Z #10 1.724 WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
+2026-10-26T08:29:49.1713501Z #10 2.609 Collecting torch@ https://download-r2.pytorch.org/whl/cpu/torch-2.14.1%2Bcpu-cp312-cp312-manylinux_2_28_x86_64.whl (from -r locks/research-cp312-linux-x86_64.source.lock (line 206))
+2026-10-26T08:29:49.4082335Z #10 2.695   Downloading https://download-r2.pytorch.org/whl/cpu/torch-2.14.1%2Bcpu-cp312-cp312-manylinux_2_28_x86_64.whl (196.3 MB)
+2026-10-26T08:29:51.4407959Z #10 4.878 Collecting aiohappyeyeballs==2.7.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 1))
+2026-10-26T08:29:51.6715984Z #10 4.959   Downloading aiohappyeyeballs-2.7.1-py3-none-any.whl (15 kB)
+2026-10-26T08:29:51.8723289Z #10 5.310 Collecting aiohttp==3.14.5 (from -r locks/research-cp312-linux-x86_64.source.lock (line 2))
+2026-10-26T08:29:52.0241623Z #10 5.326   Downloading aiohttp-3.14.5-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (1.9 MB)
+2026-10-26T08:29:52.0242357Z #10 5.462 Collecting aiosignal==1.4.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 3))
+2026-10-26T08:29:52.1361992Z #10 5.477   Downloading aiosignal-1.4.0-py3-none-any.whl (7.5 kB)
+2026-10-26T08:29:52.1362572Z #10 5.499 Collecting alembic==1.20.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 4))
+2026-10-26T08:29:52.1363088Z #10 5.514   Downloading alembic-1.20.1-py3-none-any.whl (270 kB)
+2026-10-26T08:29:52.1363586Z #10 5.530 Collecting annotated-doc==0.0.5 (from -r locks/research-cp312-linux-x86_64.source.lock (line 5))
+2026-10-26T08:29:52.1364058Z #10 5.545   Downloading annotated_doc-0.0.5-py3-none-any.whl (5.3 kB)
+2026-10-26T08:29:52.1364595Z #10 5.559 Collecting annotated-types==0.8.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 6))
+2026-10-26T08:29:52.1365083Z #10 5.574   Downloading annotated_types-0.8.0-py3-none-any.whl (13 kB)
+2026-10-26T08:29:52.2376101Z #10 5.593 Collecting anyio==4.15.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 7))
+2026-10-26T08:29:52.2376815Z #10 5.608   Downloading anyio-4.15.1-py3-none-any.whl (132 kB)
+2026-10-26T08:29:52.2377827Z #10 5.628 Collecting argon2-cffi==25.1.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 8))
+2026-10-26T08:29:52.2378624Z #10 5.643   Downloading argon2_cffi-25.1.0-py3-none-any.whl (14 kB)
+2026-10-26T08:29:52.2379137Z #10 5.660 Collecting argon2-cffi-bindings==26.1.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 9))
+2026-10-26T08:29:52.2379807Z #10 5.675   Downloading argon2_cffi_bindings-26.1.0-cp310-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl (26 kB)
+2026-10-26T08:29:52.3408852Z #10 5.693 Collecting arrow==1.4.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 10))
+2026-10-26T08:29:52.3409908Z #10 5.708   Downloading arrow-1.4.0-py3-none-any.whl (68 kB)
+2026-10-26T08:29:52.3410222Z #10 5.763 Collecting ast-serialize==0.13.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 11))
+2026-10-26T08:29:52.3410608Z #10 5.778   Downloading ast_serialize-0.13.1-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (1.3 MB)
+2026-10-26T08:29:52.4499751Z #10 5.811 Collecting asttokens==3.0.2 (from -r locks/research-cp312-linux-x86_64.source.lock (line 12))
+2026-10-26T08:29:52.4500562Z #10 5.826   Downloading asttokens-3.0.2-py3-none-any.whl (28 kB)
+2026-10-26T08:29:52.4501510Z #10 5.841 Collecting async-lru==2.4.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 13))
+2026-10-26T08:29:52.4502264Z #10 5.856   Downloading async_lru-2.4.0-py3-none-any.whl (10 kB)
+2026-10-26T08:29:52.4502698Z #10 5.873 Collecting attrs==26.1.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 14))
+2026-10-26T08:29:52.4503142Z #10 5.888   Downloading attrs-26.1.0-py3-none-any.whl (67 kB)
+2026-10-26T08:29:52.5925667Z #10 5.904 Collecting babel==2.18.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 15))
+2026-10-26T08:29:52.5926124Z #10 5.919   Downloading babel-2.18.0-py3-none-any.whl (10.2 MB)
+2026-10-26T08:29:52.5926432Z #10 6.030 Collecting beautifulsoup4==4.15.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 16))
+2026-10-26T08:29:52.6985016Z #10 6.045   Downloading beautifulsoup4-4.15.0-py3-none-any.whl (109 kB)
+2026-10-26T08:29:52.6985576Z #10 6.071 Collecting bigtree==1.5.3 (from -r locks/research-cp312-linux-x86_64.source.lock (line 17))
+2026-10-26T08:29:52.6986198Z #10 6.086   Downloading bigtree-1.5.3-py3-none-any.whl (137 kB)
+2026-10-26T08:29:52.6986725Z #10 6.105 Collecting bleach==6.4.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 18))
+2026-10-26T08:29:52.6987386Z #10 6.120   Downloading bleach-6.4.0-py3-none-any.whl (165 kB)
+2026-10-26T08:29:52.6987835Z #10 6.136 Collecting blinker==1.9.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 19))
+2026-10-26T08:29:52.8468005Z #10 6.151   Downloading blinker-1.9.0-py3-none-any.whl (8.5 kB)
+2026-10-26T08:29:52.8468801Z #10 6.170 Collecting cachetools==7.2.5 (from -r locks/research-cp312-linux-x86_64.source.lock (line 20))
+2026-10-26T08:29:52.8469202Z #10 6.185   Downloading cachetools-7.2.5-py3-none-any.whl (19 kB)
+2026-10-26T08:29:52.8469500Z #10 6.204 Collecting certifi==2026.10.23 (from -r locks/research-cp312-linux-x86_64.source.lock (line 21))
+2026-10-26T08:29:52.8469821Z #10 6.219   Downloading certifi-2026.10.23-py3-none-any.whl (135 kB)
+2026-10-26T08:29:52.8470104Z #10 6.284 Collecting cffi==2.1.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 22))
+2026-10-26T08:29:52.9549462Z #10 6.299   Downloading cffi-2.1.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (221 kB)
+2026-10-26T08:29:52.9550150Z #10 6.377 Collecting charset-normalizer==3.5.2 (from -r locks/research-cp312-linux-x86_64.source.lock (line 23))
+2026-10-26T08:29:52.9550881Z #10 6.392   Downloading charset_normalizer-3.5.2-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (257 kB)
+2026-10-26T08:29:53.0614399Z #10 6.412 Collecting clarabel==0.11.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 24))
+2026-10-26T08:29:53.0615061Z #10 6.427   Downloading clarabel-0.11.1-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (1.2 MB)
+2026-10-26T08:29:53.0615877Z #10 6.449 Collecting click==8.5.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 25))
+2026-10-26T08:29:53.0616353Z #10 6.467   Downloading click-8.5.0-py3-none-any.whl (125 kB)
+2026-10-26T08:29:53.0616808Z #10 6.484 Collecting cloudpickle==3.1.2 (from -r locks/research-cp312-linux-x86_64.source.lock (line 26))
+2026-10-26T08:29:53.0617522Z #10 6.499   Downloading cloudpickle-3.1.2-py3-none-any.whl (22 kB)
+2026-10-26T08:29:53.2027684Z #10 6.516 Collecting colorama==0.4.6 (from -r locks/research-cp312-linux-x86_64.source.lock (line 27))
+2026-10-26T08:29:53.2028236Z #10 6.531   Downloading colorama-0.4.6-py2.py3-none-any.whl (25 kB)
+2026-10-26T08:29:53.2028720Z #10 6.549 Collecting colorlog==6.12.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 28))
+2026-10-26T08:29:53.2029192Z #10 6.564   Downloading colorlog-6.12.0-py3-none-any.whl (12 kB)
+2026-10-26T08:29:53.2029629Z #10 6.583 Collecting comm==0.2.3 (from -r locks/research-cp312-linux-x86_64.source.lock (line 29))
+2026-10-26T08:29:53.2030095Z #10 6.598   Downloading comm-0.2.3-py3-none-any.whl (7.3 kB)
+2026-10-26T08:29:53.2030546Z #10 6.640 Collecting contourpy==1.4.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 30))
+2026-10-26T08:29:53.3899368Z #10 6.655   Downloading contourpy-1.4.0-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (383 kB)
+2026-10-26T08:29:53.3900076Z #10 6.679 Collecting coreforecast==0.0.19 (from -r locks/research-cp312-linux-x86_64.source.lock (line 31))
+2026-10-26T08:29:53.3900688Z #10 6.694   Downloading coreforecast-0.0.19-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (374 kB)
+2026-10-26T08:29:53.3901307Z #10 6.827 Collecting cryptography==50.0.2 (from -r locks/research-cp312-linux-x86_64.source.lock (line 32))
+2026-10-26T08:29:53.5040611Z #10 6.843   Downloading cryptography-50.0.2-cp311-abi3-manylinux_2_34_x86_64.whl (4.8 MB)
+2026-10-26T08:29:53.5041195Z #10 6.923 Collecting cvxpy==1.9.3 (from -r locks/research-cp312-linux-x86_64.source.lock (line 33))
+2026-10-26T08:29:53.6103117Z #10 6.941   Downloading cvxpy-1.9.3-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (4.5 MB)
+2026-10-26T08:29:53.6103611Z #10 7.001 Collecting cycler==0.12.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 34))
+2026-10-26T08:29:53.6103907Z #10 7.016   Downloading cycler-0.12.1-py3-none-any.whl (8.3 kB)
+2026-10-26T08:29:53.6104213Z #10 7.048 Collecting dask==2026.8.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 35))
+2026-10-26T08:29:53.7407121Z #10 7.066   Downloading dask-2026.8.0-py3-none-any.whl (1.5 MB)
+2026-10-26T08:29:53.7407667Z #10 7.101 Collecting databricks-sdk==0.157.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 36))
+2026-10-26T08:29:53.7408002Z #10 7.116   Downloading databricks_sdk-0.157.0-py3-none-any.whl (1.1 MB)
+2026-10-26T08:29:53.7408300Z #10 7.178 Collecting debugpy==1.8.22 (from -r locks/research-cp312-linux-x86_64.source.lock (line 37))
+2026-10-26T08:29:53.8552602Z #10 7.193   Downloading debugpy-1.8.22-cp312-cp312-manylinux_2_34_x86_64.whl (4.0 MB)
+2026-10-26T08:29:53.8553123Z #10 7.230 Collecting defusedxml==0.7.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 38))
+2026-10-26T08:29:53.8553441Z #10 7.245   Downloading defusedxml-0.7.1-py2.py3-none-any.whl (25 kB)
+2026-10-26T08:29:53.8553746Z #10 7.261 Collecting dill==0.4.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 39))
+2026-10-26T08:29:53.8554021Z #10 7.276   Downloading dill-0.4.1-py3-none-any.whl (120 kB)
+2026-10-26T08:29:53.8554300Z #10 7.293 Collecting dnspython==2.9.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 40))
+2026-10-26T08:29:54.0007527Z #10 7.308   Downloading dnspython-2.9.0-py3-none-any.whl (354 kB)
+2026-10-26T08:29:54.0008942Z #10 7.330 Collecting docker==7.2.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 41))
+2026-10-26T08:29:54.0009241Z #10 7.345   Downloading docker-7.2.0-py3-none-any.whl (148 kB)
+2026-10-26T08:29:54.0009621Z #10 7.372 Collecting executing==2.3.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 42))
+2026-10-26T08:29:54.0010161Z #10 7.387   Downloading executing-2.3.0-py3-none-any.whl (29 kB)
+2026-10-26T08:29:54.0011418Z #10 7.438 Collecting fastapi==0.162.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 43))
+2026-10-26T08:29:54.1127623Z #10 7.453   Downloading fastapi-0.162.0-py3-none-any.whl (148 kB)
+2026-10-26T08:29:54.1128075Z #10 7.483 Collecting fastjsonschema==2.22.2 (from -r locks/research-cp312-linux-x86_64.source.lock (line 44))
+2026-10-26T08:29:54.1128394Z #10 7.499   Downloading fastjsonschema-2.22.2-py3-none-any.whl (27 kB)
+2026-10-26T08:29:54.1128690Z #10 7.534 Collecting feast==0.67.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 45))
+2026-10-26T08:29:54.1128960Z #10 7.550   Downloading feast-0.67.0-py3-none-any.whl (9.3 MB)
+2026-10-26T08:29:54.3137673Z #10 7.751 Collecting filelock==4.2.4 (from -r locks/research-cp312-linux-x86_64.source.lock (line 46))
+2026-10-26T08:29:54.4261424Z #10 7.766   Downloading filelock-4.2.4-py3-none-any.whl (162 kB)
+2026-10-26T08:29:54.4261845Z #10 7.782 Collecting fire==0.7.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 47))
+2026-10-26T08:29:54.4262126Z #10 7.797   Downloading fire-0.7.1-py3-none-any.whl (115 kB)
+2026-10-26T08:29:54.4262612Z #10 7.815 Collecting flask==3.1.3 (from -r locks/research-cp312-linux-x86_64.source.lock (line 48))
+2026-10-26T08:29:54.4262896Z #10 7.830   Downloading flask-3.1.3-py3-none-any.whl (103 kB)
+2026-10-26T08:29:54.4263178Z #10 7.849 Collecting flask-cors==6.0.5 (from -r locks/research-cp312-linux-x86_64.source.lock (line 49))
+2026-10-26T08:29:54.4263464Z #10 7.864   Downloading flask_cors-6.0.5-py3-none-any.whl (16 kB)
+2026-10-26T08:29:54.5347307Z #10 7.957 Collecting fonttools==4.67.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 50))
+2026-10-26T08:29:54.5348110Z #10 7.972   Downloading fonttools-4.67.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (5.4 MB)
+2026-10-26T08:29:54.6814839Z #10 8.029 Collecting fqdn==1.6.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 51))
+2026-10-26T08:29:54.6815232Z #10 8.044   Downloading fqdn-1.6.0-py3-none-any.whl (12 kB)
+2026-10-26T08:29:54.6815532Z #10 8.119 Collecting frozenlist==1.8.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 52))
+2026-10-26T08:29:54.7997390Z #10 8.134   Downloading frozenlist-1.8.0-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (242 kB)
+2026-10-26T08:29:54.7997963Z #10 8.156 Collecting fsspec==2026.9.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 53))
+2026-10-26T08:29:54.7998270Z #10 8.171   Downloading fsspec-2026.9.0-py3-none-any.whl (221 kB)
+2026-10-26T08:29:54.7998567Z #10 8.200 Collecting gitdb==4.0.12 (from -r locks/research-cp312-linux-x86_64.source.lock (line 54))
+2026-10-26T08:29:54.7998854Z #10 8.215   Downloading gitdb-4.0.12-py3-none-any.whl (62 kB)
+2026-10-26T08:29:54.7999134Z #10 8.237 Collecting gitpython==3.2.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 55))
+2026-10-26T08:29:54.9215008Z #10 8.252   Downloading gitpython-3.2.1-py3-none-any.whl (231 kB)
+2026-10-26T08:29:54.9215523Z #10 8.283 Collecting google-auth==2.62.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 56))
+2026-10-26T08:29:54.9215968Z #10 8.298   Downloading google_auth-2.62.0-py3-none-any.whl (267 kB)
+2026-10-26T08:29:54.9216282Z #10 8.322 Collecting graphene==3.4.3 (from -r locks/research-cp312-linux-x86_64.source.lock (line 57))
+2026-10-26T08:29:54.9216580Z #10 8.336   Downloading graphene-3.4.3-py2.py3-none-any.whl (114 kB)
+2026-10-26T08:29:54.9216878Z #10 8.359 Collecting graphql-core==3.2.13 (from -r locks/research-cp312-linux-x86_64.source.lock (line 58))
+2026-10-26T08:29:55.0228815Z #10 8.374   Downloading graphql_core-3.2.13-py3-none-any.whl (268 kB)
+2026-10-26T08:29:55.0229237Z #10 8.391 Collecting graphql-relay==3.2.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 59))
+2026-10-26T08:29:55.0229557Z #10 8.406   Downloading graphql_relay-3.2.0-py3-none-any.whl (16 kB)
+2026-10-26T08:29:55.0230098Z #10 8.424 Collecting gunicorn==26.2.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 60))
+2026-10-26T08:29:55.0230393Z #10 8.439   Downloading gunicorn-26.2.0-py3-none-any.whl (228 kB)
+2026-10-26T08:29:55.0230683Z #10 8.460 Collecting gym==0.26.2 (from -r locks/research-cp312-linux-x86_64.source.lock (line 61))
+2026-10-26T08:29:55.2404580Z #10 8.477   Downloading gym-0.26.2.tar.gz (721 kB)
+2026-10-26T08:29:55.2404861Z #10 8.527   Preparing metadata (pyproject.toml): started
+2026-10-26T08:29:55.4637511Z #10 8.901   Preparing metadata (pyproject.toml): finished with status 'done'
+2026-10-26T08:29:55.5672051Z #10 8.920 Collecting gym-notices==0.1.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 62))
+2026-10-26T08:29:55.5672726Z #10 8.935   Downloading gym_notices-0.1.0-py3-none-any.whl (3.3 kB)
+2026-10-26T08:29:55.5673243Z #10 8.951 Collecting h11==0.16.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 63))
+2026-10-26T08:29:55.5673729Z #10 8.966   Downloading h11-0.16.0-py3-none-any.whl (37 kB)
+2026-10-26T08:29:55.5674197Z #10 9.005 Collecting highspy==1.15.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 64))
+2026-10-26T08:29:55.6797203Z #10 9.020   Downloading highspy-1.15.1-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (5.0 MB)
+2026-10-26T08:29:55.6797861Z #10 9.074 Collecting httpcore==1.0.9 (from -r locks/research-cp312-linux-x86_64.source.lock (line 65))
+2026-10-26T08:29:55.6798161Z #10 9.088   Downloading httpcore-1.0.9-py3-none-any.whl (78 kB)
+2026-10-26T08:29:55.6798450Z #10 9.117 Collecting httptools==0.9.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 66))
+2026-10-26T08:29:55.7807149Z #10 9.132   Downloading httptools-0.9.0-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (552 kB)
+2026-10-26T08:29:55.7807843Z #10 9.152 Collecting httpx==0.28.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 67))
+2026-10-26T08:29:55.7808320Z #10 9.167   Downloading httpx-0.28.1-py3-none-any.whl (73 kB)
+2026-10-26T08:29:55.7808797Z #10 9.185 Collecting huey==3.5.3 (from -r locks/research-cp312-linux-x86_64.source.lock (line 68))
+2026-10-26T08:29:55.7809255Z #10 9.201   Downloading huey-3.5.3-py3-none-any.whl (139 kB)
+2026-10-26T08:29:55.7809700Z #10 9.218 Collecting idna==3.20 (from -r locks/research-cp312-linux-x86_64.source.lock (line 69))
+2026-10-26T08:29:55.8928201Z #10 9.233   Downloading idna-3.20-py3-none-any.whl (69 kB)
+2026-10-26T08:29:55.8928840Z #10 9.258 Collecting importlib-metadata==9.1.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 70))
+2026-10-26T08:29:55.8929347Z #10 9.273   Downloading importlib_metadata-9.1.0-py3-none-any.whl (28 kB)
+2026-10-26T08:29:55.8929706Z #10 9.316 Collecting ipykernel==7.4.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 71))
+2026-10-26T08:29:55.8930002Z #10 9.330   Downloading ipykernel-7.4.0-py3-none-any.whl (123 kB)
+2026-10-26T08:29:55.9952142Z #10 9.362 Collecting ipython==9.17.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 72))
+2026-10-26T08:29:55.9952703Z #10 9.377   Downloading ipython-9.17.1-py3-none-any.whl (639 kB)
+2026-10-26T08:29:55.9953244Z #10 9.395 Collecting ipython-pygments-lexers==1.1.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 73))
+2026-10-26T08:29:55.9953840Z #10 9.410   Downloading ipython_pygments_lexers-1.1.1-py3-none-any.whl (8.1 kB)
+2026-10-26T08:29:55.9954356Z #10 9.433 Collecting ipywidgets==8.1.9 (from -r locks/research-cp312-linux-x86_64.source.lock (line 74))
+2026-10-26T08:29:56.1031785Z #10 9.448   Downloading ipywidgets-8.1.9-py3-none-any.whl (140 kB)
+2026-10-26T08:29:56.1032600Z #10 9.462 Collecting isoduration==20.11.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 75))
+2026-10-26T08:29:56.1033319Z #10 9.477   Downloading isoduration-20.11.0-py3-none-any.whl (11 kB)
+2026-10-26T08:29:56.1033846Z #10 9.492 Collecting itsdangerous==2.2.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 76))
+2026-10-26T08:29:56.1034473Z #10 9.507   Downloading itsdangerous-2.2.0-py3-none-any.whl (16 kB)
+2026-10-26T08:29:56.1036069Z #10 9.525 Collecting jedi==0.20.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 77))
+2026-10-26T08:29:56.1036362Z #10 9.541   Downloading jedi-0.20.1-py2.py3-none-any.whl (4.9 MB)
+2026-10-26T08:29:56.2051802Z #10 9.607 Collecting jinja2==3.1.6 (from -r locks/research-cp312-linux-x86_64.source.lock (line 78))
+2026-10-26T08:29:56.2052175Z #10 9.622   Downloading jinja2-3.1.6-py3-none-any.whl (134 kB)
+2026-10-26T08:29:56.2052576Z #10 9.643 Collecting joblib==1.6.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 79))
+2026-10-26T08:29:56.3080528Z #10 9.658   Downloading joblib-1.6.0-py3-none-any.whl (306 kB)
+2026-10-26T08:29:56.3081161Z #10 9.678 Collecting json5==0.17.3 (from -r locks/research-cp312-linux-x86_64.source.lock (line 80))
+2026-10-26T08:29:56.3081592Z #10 9.693   Downloading json5-0.17.3-py3-none-any.whl (34 kB)
+2026-10-26T08:29:56.3082105Z #10 9.709 Collecting jsonpointer==3.5 (from -r locks/research-cp312-linux-x86_64.source.lock (line 81))
+2026-10-26T08:29:56.3082432Z #10 9.724   Downloading jsonpointer-3.5-py3-none-any.whl (9.1 kB)
+2026-10-26T08:29:56.3082730Z #10 9.746 Collecting jsonschema==4.26.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 82))
+2026-10-26T08:29:56.4139448Z #10 9.761   Downloading jsonschema-4.26.0-py3-none-any.whl (90 kB)
+2026-10-26T08:29:56.4139850Z #10 9.777 Collecting jsonschema-specifications==2025.9.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 83))
+2026-10-26T08:29:56.4140232Z #10 9.792   Downloading jsonschema_specifications-2025.9.1-py3-none-any.whl (18 kB)
+2026-10-26T08:29:56.4140565Z #10 9.807 Collecting jupyter==1.1.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 84))
+2026-10-26T08:29:56.4140863Z #10 9.821   Downloading jupyter-1.1.1-py2.py3-none-any.whl (2.7 kB)
+2026-10-26T08:29:56.4141175Z #10 9.836 Collecting jupyter-builder==1.2.3 (from -r locks/research-cp312-linux-x86_64.source.lock (line 85))
+2026-10-26T08:29:56.4141505Z #10 9.851   Downloading jupyter_builder-1.2.3-py3-none-any.whl (947 kB)
+2026-10-26T08:29:56.5179628Z #10 9.877 Collecting jupyter-client==8.10.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 86))
+2026-10-26T08:29:56.5180258Z #10 9.892   Downloading jupyter_client-8.10.0-py3-none-any.whl (110 kB)
+2026-10-26T08:29:56.5180797Z #10 9.955 Collecting jupyter-console==6.6.3 (from -r locks/research-cp312-linux-x86_64.source.lock (line 87))
+2026-10-26T08:29:56.6323271Z #10 9.972   Downloading jupyter_console-6.6.3-py3-none-any.whl (24 kB)
+2026-10-26T08:29:56.6323807Z #10 9.992 Collecting jupyter-core==5.9.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 88))
+2026-10-26T08:29:56.6324281Z #10 10.01   Downloading jupyter_core-5.9.1-py3-none-any.whl (29 kB)
+2026-10-26T08:29:56.6324605Z #10 10.02 Collecting jupyter-events==0.12.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 89))
+2026-10-26T08:29:56.6324926Z #10 10.04   Downloading jupyter_events-0.12.1-py3-none-any.whl (19 kB)
+2026-10-26T08:29:56.6325247Z #10 10.05 Collecting jupyter-lsp==2.3.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 90))
+2026-10-26T08:29:56.6325541Z #10 10.07   Downloading jupyter_lsp-2.3.1-py3-none-any.whl (77 kB)
+2026-10-26T08:29:56.7632276Z #10 10.10 Collecting jupyter-server==2.21.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 91))
+2026-10-26T08:29:56.7632857Z #10 10.11   Downloading jupyter_server-2.21.1-py3-none-any.whl (394 kB)
+2026-10-26T08:29:56.7633427Z #10 10.13 Collecting jupyter-server-terminals==0.5.4 (from -r locks/research-cp312-linux-x86_64.source.lock (line 92))
+2026-10-26T08:29:56.7634010Z #10 10.14   Downloading jupyter_server_terminals-0.5.4-py3-none-any.whl (13 kB)
+2026-10-26T08:29:56.7634528Z #10 10.20 Collecting jupyterlab==4.6.4 (from -r locks/research-cp312-linux-x86_64.source.lock (line 93))
+2026-10-26T08:29:56.9292229Z #10 10.22   Downloading jupyterlab-4.6.4-py3-none-any.whl (17.2 MB)
+2026-10-26T08:29:56.9372683Z #10 10.37 Collecting jupyterlab-pygments==0.3.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 94))
+2026-10-26T08:29:57.0710146Z #10 10.39   Downloading jupyterlab_pygments-0.3.0-py3-none-any.whl (15 kB)
+2026-10-26T08:29:57.0710791Z #10 10.41 Collecting jupyterlab-server==2.28.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 95))
+2026-10-26T08:29:57.0711399Z #10 10.43   Downloading jupyterlab_server-2.28.1-py3-none-any.whl (60 kB)
+2026-10-26T08:29:57.0711933Z #10 10.45 Collecting jupyterlab-widgets==3.0.17 (from -r locks/research-cp312-linux-x86_64.source.lock (line 96))
+2026-10-26T08:29:57.0712456Z #10 10.46   Downloading jupyterlab_widgets-3.0.17-py3-none-any.whl (217 kB)
+2026-10-26T08:29:57.0712945Z #10 10.51 Collecting kiwisolver==1.5.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 97))
+2026-10-26T08:29:57.2023423Z #10 10.52   Downloading kiwisolver-1.5.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (1.5 MB)
+2026-10-26T08:29:57.2024120Z #10 10.54 Collecting lark==1.3.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 98))
+2026-10-26T08:29:57.2024581Z #10 10.56   Downloading lark-1.3.1-py3-none-any.whl (113 kB)
+2026-10-26T08:29:57.2025028Z #10 10.64 Collecting librt==0.16.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 99))
+2026-10-26T08:29:57.3107146Z #10 10.66   Downloading librt-0.16.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (531 kB)
+2026-10-26T08:29:57.3107893Z #10 10.68 Collecting lightgbm==4.7.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 100))
+2026-10-26T08:29:57.3108527Z #10 10.69   Downloading lightgbm-4.7.0-py3-none-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (3.5 MB)
+2026-10-26T08:29:57.3109136Z #10 10.73 Collecting lightning-utilities==0.15.3 (from -r locks/research-cp312-linux-x86_64.source.lock (line 101))
+2026-10-26T08:29:57.3109655Z #10 10.75   Downloading lightning_utilities-0.15.3-py3-none-any.whl (31 kB)
+2026-10-26T08:29:57.4442618Z #10 10.76 Collecting locket==1.0.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 102))
+2026-10-26T08:29:57.4443233Z #10 10.78   Downloading locket-1.0.0-py2.py3-none-any.whl (4.4 kB)
+2026-10-26T08:29:57.4443820Z #10 10.79 Collecting loguru==0.7.3 (from -r locks/research-cp312-linux-x86_64.source.lock (line 103))
+2026-10-26T08:29:57.4444260Z #10 10.81   Downloading loguru-0.7.3-py3-none-any.whl (61 kB)
+2026-10-26T08:29:57.4444606Z #10 10.83 Collecting mako==1.4.3 (from -r locks/research-cp312-linux-x86_64.source.lock (line 104))
+2026-10-26T08:29:57.4444874Z #10 10.84   Downloading mako-1.4.3-py3-none-any.whl (80 kB)
+2026-10-26T08:29:57.4445156Z #10 10.88 Collecting markupsafe==3.0.4 (from -r locks/research-cp312-linux-x86_64.source.lock (line 105))
+2026-10-26T08:29:57.5560995Z #10 10.90   Downloading markupsafe-3.0.4-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (22 kB)
+2026-10-26T08:29:57.5563666Z #10 10.98 Collecting matplotlib==3.11.2 (from -r locks/research-cp312-linux-x86_64.source.lock (line 106))
+2026-10-26T08:29:57.5564521Z #10 10.99   Downloading matplotlib-3.11.2-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (9.9 MB)
+2026-10-26T08:29:57.6602481Z #10 11.08 Collecting matplotlib-inline==0.2.2 (from -r locks/research-cp312-linux-x86_64.source.lock (line 107))
+2026-10-26T08:29:57.6603152Z #10 11.10   Downloading matplotlib_inline-0.2.2-py3-none-any.whl (9.5 kB)
+2026-10-26T08:29:57.7835218Z #10 11.12 Collecting mistune==3.4.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 108))
+2026-10-26T08:29:57.7835689Z #10 11.13   Downloading mistune-3.4.0-py3-none-any.whl (70 kB)
+2026-10-26T08:29:57.7835994Z #10 11.22 Collecting mlflow==3.17.2 (from -r locks/research-cp312-linux-x86_64.source.lock (line 109))
+2026-10-26T08:29:57.9394406Z #10 11.24   Downloading mlflow-3.17.2-py3-none-any.whl (12.0 MB)
+2026-10-26T08:29:57.9395008Z #10 11.38 Collecting mlflow-skinny==3.17.2 (from -r locks/research-cp312-linux-x86_64.source.lock (line 110))
+2026-10-26T08:29:58.0688895Z #10 11.39   Downloading mlflow_skinny-3.17.2-py3-none-any.whl (4.1 MB)
+2026-10-26T08:29:58.0689561Z #10 11.44 Collecting mlflow-tracing==3.17.2 (from -r locks/research-cp312-linux-x86_64.source.lock (line 111))
+2026-10-26T08:29:58.0689939Z #10 11.46   Downloading mlflow_tracing-3.17.2-py3-none-any.whl (2.0 MB)
+2026-10-26T08:29:58.0690256Z #10 11.51 Collecting mmh3==5.3.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 112))
+2026-10-26T08:29:58.1813747Z #10 11.52   Downloading mmh3-5.3.1-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (103 kB)
+2026-10-26T08:29:58.1814602Z #10 11.54 Collecting mpmath==1.3.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 113))
+2026-10-26T08:29:58.1815169Z #10 11.55   Downloading mpmath-1.3.0-py3-none-any.whl (536 kB)
+2026-10-26T08:29:58.1815612Z #10 11.60 Collecting msgpack==1.2.3 (from -r locks/research-cp312-linux-x86_64.source.lock (line 114))
+2026-10-26T08:29:58.1816238Z #10 11.62   Downloading msgpack-1.2.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (472 kB)
+2026-10-26T08:29:58.3366580Z #10 11.77 Collecting multidict==7.2.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 115))
+2026-10-26T08:29:58.5660279Z #10 11.79   Downloading multidict-7.2.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (516 kB)
+2026-10-26T08:29:58.5661008Z #10 11.85 Collecting mypy==2.4.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 116))
+2026-10-26T08:29:58.5661674Z #10 11.87   Downloading mypy-2.4.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (15.6 MB)
+2026-10-26T08:29:58.5662331Z #10 12.00 Collecting mypy-extensions==1.1.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 117))
+2026-10-26T08:29:58.7545059Z #10 12.02   Downloading mypy_extensions-1.1.0-py3-none-any.whl (5.0 kB)
+2026-10-26T08:29:58.7545506Z #10 12.05 Collecting narwhals==2.27.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 118))
+2026-10-26T08:29:58.7545845Z #10 12.07   Downloading narwhals-2.27.1-py3-none-any.whl (483 kB)
+2026-10-26T08:29:58.7546134Z #10 12.09 Collecting nbclient==0.11.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 119))
+2026-10-26T08:29:58.7546431Z #10 12.10   Downloading nbclient-0.11.0-py3-none-any.whl (25 kB)
+2026-10-26T08:29:58.7546725Z #10 12.19 Collecting nbconvert==7.17.2 (from -r locks/research-cp312-linux-x86_64.source.lock (line 120))
+2026-10-26T08:29:58.8569581Z #10 12.21   Downloading nbconvert-7.17.2-py3-none-any.whl (262 kB)
+2026-10-26T08:29:58.8570402Z #10 12.23 Collecting nbformat==5.11.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 121))
+2026-10-26T08:29:58.8571054Z #10 12.24   Downloading nbformat-5.11.1-py3-none-any.whl (79 kB)
+2026-10-26T08:29:58.8571779Z #10 12.26 Collecting nest-asyncio2==1.7.4 (from -r locks/research-cp312-linux-x86_64.source.lock (line 122))
+2026-10-26T08:29:58.8572133Z #10 12.27   Downloading nest_asyncio2-1.7.4-py3-none-any.whl (8.5 kB)
+2026-10-26T08:29:58.8572470Z #10 12.29 Collecting networkx==3.7 (from -r locks/research-cp312-linux-x86_64.source.lock (line 123))
+2026-10-26T08:29:58.9706513Z #10 12.31   Downloading networkx-3.7-py3-none-any.whl (2.1 MB)
+2026-10-26T08:29:58.9707084Z #10 12.35 Collecting neuralforecast==3.3.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 124))
+2026-10-26T08:29:58.9707421Z #10 12.36   Downloading neuralforecast-3.3.0-py3-none-any.whl (331 kB)
+2026-10-26T08:29:58.9707734Z #10 12.39 Collecting notebook==7.6.3 (from -r locks/research-cp312-linux-x86_64.source.lock (line 125))
+2026-10-26T08:29:58.9708109Z #10 12.41   Downloading notebook-7.6.3-py3-none-any.whl (5.5 MB)
+2026-10-26T08:29:59.1520675Z #10 12.46 Collecting notebook-shim==0.2.4 (from -r locks/research-cp312-linux-x86_64.source.lock (line 126))
+2026-10-26T08:29:59.1521232Z #10 12.48   Downloading notebook_shim-0.2.4-py3-none-any.whl (13 kB)
+2026-10-26T08:29:59.1521526Z #10 12.59 Collecting numpy==2.5.4 (from -r locks/research-cp312-linux-x86_64.source.lock (line 127))
+2026-10-26T08:29:59.3124093Z #10 12.61   Downloading numpy-2.5.4-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (16.7 MB)
+2026-10-26T08:29:59.3124797Z #10 12.75 Collecting opentelemetry-api==1.45.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 128))
+2026-10-26T08:29:59.4149873Z #10 12.76   Downloading opentelemetry_api-1.45.1-py3-none-any.whl (60 kB)
+2026-10-26T08:29:59.4150673Z #10 12.78 Collecting opentelemetry-proto==1.45.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 129))
+2026-10-26T08:29:59.4151264Z #10 12.80   Downloading opentelemetry_proto-1.45.1-py3-none-any.whl (72 kB)
+2026-10-26T08:29:59.4151770Z #10 12.82 Collecting opentelemetry-sdk==1.45.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 130))
+2026-10-26T08:29:59.4152187Z #10 12.83   Downloading opentelemetry_sdk-1.45.1-py3-none-any.whl (140 kB)
+2026-10-26T08:29:59.4152567Z #10 12.85 Collecting opentelemetry-semantic-conventions==0.66b1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 131))
+2026-10-26T08:29:59.5389525Z #10 12.87   Downloading opentelemetry_semantic_conventions-0.66b1-py3-none-any.whl (206 kB)
+2026-10-26T08:29:59.5390143Z #10 12.89 Collecting optuna==5.0.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 132))
+2026-10-26T08:29:59.5390663Z #10 12.90   Downloading optuna-5.0.0-py3-none-any.whl (442 kB)
+2026-10-26T08:29:59.5390944Z #10 12.98 Collecting osqp==1.1.3 (from -r locks/research-cp312-linux-x86_64.source.lock (line 133))
+2026-10-26T08:29:59.6462591Z #10 12.99   Downloading osqp-1.1.3-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (354 kB)
+2026-10-26T08:29:59.6463157Z #10 13.01 Collecting packaging==26.3 (from -r locks/research-cp312-linux-x86_64.source.lock (line 134))
+2026-10-26T08:29:59.6463467Z #10 13.01   Using cached packaging-26.3-py3-none-any.whl (129 kB)
+2026-10-26T08:29:59.6463796Z #10 13.08 Collecting pandas==2.3.3 (from -r locks/research-cp312-linux-x86_64.source.lock (line 135))
+2026-10-26T08:29:59.7912588Z #10 13.10   Downloading pandas-2.3.3-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (12.4 MB)
+2026-10-26T08:29:59.7913015Z #10 13.23 Collecting pandocfilters==1.5.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 136))
+2026-10-26T08:29:59.9018084Z #10 13.24   Downloading pandocfilters-1.5.1-py2.py3-none-any.whl (8.7 kB)
+2026-10-26T08:29:59.9018551Z #10 13.26 Collecting parso==0.8.7 (from -r locks/research-cp312-linux-x86_64.source.lock (line 137))
+2026-10-26T08:29:59.9018844Z #10 13.28   Downloading parso-0.8.7-py2.py3-none-any.whl (107 kB)
+2026-10-26T08:29:59.9019130Z #10 13.29 Collecting partd==1.4.2 (from -r locks/research-cp312-linux-x86_64.source.lock (line 138))
+2026-10-26T08:29:59.9019413Z #10 13.31   Downloading partd-1.4.2-py3-none-any.whl (18 kB)
+2026-10-26T08:29:59.9019693Z #10 13.32 Collecting pathspec==1.1.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 139))
+2026-10-26T08:29:59.9019976Z #10 13.34   Downloading pathspec-1.1.1-py3-none-any.whl (57 kB)
+2026-10-26T08:30:00.0827876Z #10 13.35 Collecting pexpect==4.9.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 140))
+2026-10-26T08:30:00.0828459Z #10 13.37   Downloading pexpect-4.9.0-py2.py3-none-any.whl (63 kB)
+2026-10-26T08:30:00.1179139Z #10 13.56 Collecting pillow==13.0.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 141))
+2026-10-26T08:30:00.2179603Z #10 13.57   Downloading pillow-13.0.0-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (7.1 MB)
+2026-10-26T08:30:00.2180261Z #10 13.64 Collecting platformdirs==4.13.5 (from -r locks/research-cp312-linux-x86_64.source.lock (line 142))
+2026-10-26T08:30:00.2180750Z #10 13.66   Downloading platformdirs-4.13.5-py3-none-any.whl (32 kB)
+2026-10-26T08:30:00.3231145Z #10 13.67 Collecting prettytable==3.18.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 143))
+2026-10-26T08:30:00.3231850Z #10 13.69   Downloading prettytable-3.18.0-py3-none-any.whl (37 kB)
+2026-10-26T08:30:00.3232813Z #10 13.71 Collecting prometheus-client==0.24.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 144))
+2026-10-26T08:30:00.3233400Z #10 13.72   Downloading prometheus_client-0.24.1-py3-none-any.whl (64 kB)
+2026-10-26T08:30:00.3233904Z #10 13.75 Collecting prompt-toolkit==3.0.53 (from -r locks/research-cp312-linux-x86_64.source.lock (line 145))
+2026-10-26T08:30:00.3234295Z #10 13.76   Downloading prompt_toolkit-3.0.53-py3-none-any.whl (392 kB)
+2026-10-26T08:30:00.4717672Z #10 13.81 Collecting propcache==0.5.4 (from -r locks/research-cp312-linux-x86_64.source.lock (line 146))
+2026-10-26T08:30:00.4718438Z #10 13.82   Downloading propcache-0.5.4-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (250 kB)
+2026-10-26T08:30:00.4719113Z #10 13.91 Collecting protobuf==7.36.2 (from -r locks/research-cp312-linux-x86_64.source.lock (line 147))
+2026-10-26T08:30:00.5821014Z #10 13.92   Downloading protobuf-7.36.2-cp310-abi3-manylinux2014_x86_64.whl (343 kB)
+2026-10-26T08:30:00.5821734Z #10 13.97 Collecting psutil==7.2.2 (from -r locks/research-cp312-linux-x86_64.source.lock (line 148))
+2026-10-26T08:30:00.5822369Z #10 13.99   Downloading psutil-7.2.2-cp36-abi3-manylinux2010_x86_64.manylinux_2_12_x86_64.manylinux_2_28_x86_64.whl (155 kB)
+2026-10-26T08:30:00.5823256Z #10 14.00 Collecting ptyprocess==0.7.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 149))
+2026-10-26T08:30:00.5823748Z #10 14.02   Downloading ptyprocess-0.7.0-py2.py3-none-any.whl (13 kB)
+2026-10-26T08:30:00.6848848Z #10 14.03 Collecting pure-eval==0.2.4 (from -r locks/research-cp312-linux-x86_64.source.lock (line 150))
+2026-10-26T08:30:00.6849993Z #10 14.05   Downloading pure_eval-0.2.4-py3-none-any.whl (11 kB)
+2026-10-26T08:30:00.6851820Z #10 14.11 Collecting pyarrow==25.0.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 151))
+2026-10-26T08:30:00.6853047Z #10 14.12   Downloading pyarrow-25.0.1-cp312-cp312-manylinux_2_28_x86_64.whl (50.1 MB)
+2026-10-26T08:30:01.1142796Z #10 14.55 Collecting pyasn1==0.6.4 (from -r locks/research-cp312-linux-x86_64.source.lock (line 152))
+2026-10-26T08:30:01.2604360Z #10 14.57   Downloading pyasn1-0.6.4-py3-none-any.whl (84 kB)
+2026-10-26T08:30:01.2604913Z #10 14.59 Collecting pyasn1-modules==0.4.2 (from -r locks/research-cp312-linux-x86_64.source.lock (line 153))
+2026-10-26T08:30:01.2605336Z #10 14.60   Downloading pyasn1_modules-0.4.2-py3-none-any.whl (181 kB)
+2026-10-26T08:30:01.2605642Z #10 14.62 Collecting pycparser==3.12 (from -r locks/research-cp312-linux-x86_64.source.lock (line 154))
+2026-10-26T08:30:01.2605942Z #10 14.63   Downloading pycparser-3.12-py3-none-any.whl (62 kB)
+2026-10-26T08:30:01.2606229Z #10 14.70 Collecting pydantic==2.14.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 155))
+2026-10-26T08:30:01.4266186Z #10 14.71   Downloading pydantic-2.14.1-py3-none-any.whl (488 kB)
+2026-10-26T08:30:01.7575573Z #10 15.19 Collecting pydantic-core==2.50.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 156))
+2026-10-26T08:30:01.8791344Z #10 15.21   Downloading pydantic_core-2.50.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.2 MB)
+2026-10-26T08:30:01.8792316Z #10 15.24 Collecting pydantic-settings==2.16.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 157))
+2026-10-26T08:30:01.8793053Z #10 15.26   Downloading pydantic_settings-2.16.1-py3-none-any.whl (80 kB)
+2026-10-26T08:30:01.8793817Z #10 15.28 Collecting pygments==2.21.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 158))
+2026-10-26T08:30:01.8794156Z #10 15.29   Downloading pygments-2.21.0-py3-none-any.whl (1.3 MB)
+2026-10-26T08:30:01.8794447Z #10 15.32 Collecting pyjwt==2.15.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 159))
+2026-10-26T08:30:02.0447611Z #10 15.33   Downloading pyjwt-2.15.1-py3-none-any.whl (33 kB)
+2026-10-26T08:30:02.1850914Z #10 15.62 Collecting pymongo==4.19.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 160))
+2026-10-26T08:30:02.2896658Z #10 15.64   Downloading pymongo-4.19.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (1.1 MB)
+2026-10-26T08:30:02.2897741Z #10 15.67 Collecting pyparsing==3.3.3 (from -r locks/research-cp312-linux-x86_64.source.lock (line 161))
+2026-10-26T08:30:02.2898208Z #10 15.69   Downloading pyparsing-3.3.3-py3-none-any.whl (126 kB)
+2026-10-26T08:30:02.2898667Z #10 15.73 Collecting pyqlib==0.9.7 (from -r locks/research-cp312-linux-x86_64.source.lock (line 162))
+2026-10-26T08:30:02.3999873Z #10 15.74   Downloading pyqlib-0.9.7-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (1.4 MB)
+2026-10-26T08:30:02.4000527Z #10 15.77 Collecting python-dateutil==2.9.0.post0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 163))
+2026-10-26T08:30:02.4002189Z #10 15.79   Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+2026-10-26T08:30:02.4002934Z #10 15.80 Collecting python-dotenv==1.2.4 (from -r locks/research-cp312-linux-x86_64.source.lock (line 164))
+2026-10-26T08:30:02.4003493Z #10 15.82   Downloading python_dotenv-1.2.4-py3-none-any.whl (23 kB)
+2026-10-26T08:30:02.4004118Z #10 15.84 Collecting python-json-logger==4.2.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 165))
+2026-10-26T08:30:02.5360208Z #10 15.85   Downloading python_json_logger-4.2.0-py3-none-any.whl (14 kB)
+2026-10-26T08:30:02.5361038Z #10 15.87 Collecting python-redis-lock==4.0.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 166))
+2026-10-26T08:30:02.5361772Z #10 15.89   Downloading python_redis_lock-4.0.1-py3-none-any.whl (12 kB)
+2026-10-26T08:30:02.5362781Z #10 15.92 Collecting pytorch-lightning==2.6.6 (from -r locks/research-cp312-linux-x86_64.source.lock (line 167))
+2026-10-26T08:30:02.5363385Z #10 15.93   Downloading pytorch_lightning-2.6.6-py3-none-any.whl (853 kB)
+2026-10-26T08:30:02.5363870Z #10 15.97 Collecting pytz==2026.5 (from -r locks/research-cp312-linux-x86_64.source.lock (line 168))
+2026-10-26T08:30:02.7110163Z #10 15.99   Downloading pytz-2026.5-py2.py3-none-any.whl (506 kB)
+2026-10-26T08:30:02.7110726Z #10 16.02 Collecting pyyaml==6.0.3 (from -r locks/research-cp312-linux-x86_64.source.lock (line 169))
+2026-10-26T08:30:02.7111379Z #10 16.03   Downloading pyyaml-6.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (807 kB)
+2026-10-26T08:30:02.7112019Z #10 16.15 Collecting pyzmq==27.2.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 170))
+2026-10-26T08:30:02.8296737Z #10 16.16   Downloading pyzmq-27.2.0-cp312-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl (872 kB)
+2026-10-26T08:30:02.8297516Z #10 16.19 Collecting qdldl==0.1.9.post1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 171))
+2026-10-26T08:30:02.8298012Z #10 16.21   Downloading qdldl-0.1.9.post1-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (1.5 MB)
+2026-10-26T08:30:02.8298377Z #10 16.27 Collecting ray==2.59.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 172))
+2026-10-26T08:30:02.9988823Z #10 16.29   Downloading ray-2.59.0-cp312-cp312-manylinux2014_x86_64.whl (78.9 MB)
+2026-10-26T08:30:03.5836111Z #10 17.02 Collecting redis==8.1.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 173))
+2026-10-26T08:30:03.6898036Z #10 17.04   Downloading redis-8.1.0-py3-none-any.whl (560 kB)
+2026-10-26T08:30:03.6898848Z #10 17.06 Collecting referencing==0.37.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 174))
+2026-10-26T08:30:03.6899561Z #10 17.08   Downloading referencing-0.37.0-py3-none-any.whl (26 kB)
+2026-10-26T08:30:03.6900161Z #10 17.10 Collecting requests==2.34.2 (from -r locks/research-cp312-linux-x86_64.source.lock (line 175))
+2026-10-26T08:30:03.6900490Z #10 17.11   Downloading requests-2.34.2-py3-none-any.whl (73 kB)
+2026-10-26T08:30:03.6900802Z #10 17.13 Collecting rfc3339-validator==0.1.4 (from -r locks/research-cp312-linux-x86_64.source.lock (line 176))
+2026-10-26T08:30:03.9012147Z #10 17.14   Downloading rfc3339_validator-0.1.4-py2.py3-none-any.whl (3.5 kB)
+2026-10-26T08:30:03.9012998Z #10 17.16 Collecting rfc3986-validator==0.1.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 177))
+2026-10-26T08:30:03.9013924Z #10 17.17   Downloading rfc3986_validator-0.1.1-py2.py3-none-any.whl (4.2 kB)
+2026-10-26T08:30:03.9014450Z #10 17.19 Collecting rfc3987-syntax==1.1.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 178))
+2026-10-26T08:30:03.9014961Z #10 17.20   Downloading rfc3987_syntax-1.1.0-py3-none-any.whl (8.0 kB)
+2026-10-26T08:30:03.9015411Z #10 17.34 Collecting rpds-py==2026.9.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 179))
+2026-10-26T08:30:04.0672528Z #10 17.35   Downloading rpds_py-2026.9.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (371 kB)
+2026-10-26T08:30:04.1107092Z #10 17.55 Collecting ruamel-yaml==0.19.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 180))
+2026-10-26T08:30:04.2606784Z #10 17.56   Downloading ruamel_yaml-0.19.1-py3-none-any.whl (118 kB)
+2026-10-26T08:30:04.2607364Z #10 17.63 Collecting safetensors==0.8.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 181))
+2026-10-26T08:30:04.2607775Z #10 17.65   Downloading safetensors-0.8.0-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (516 kB)
+2026-10-26T08:30:04.2608147Z #10 17.70 Collecting scikit-learn==1.9.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 182))
+2026-10-26T08:30:04.4095955Z #10 17.71   Downloading scikit_learn-1.9.1-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (9.2 MB)
+2026-10-26T08:30:04.4096384Z #10 17.85 Collecting scipy==1.18.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 183))
+2026-10-26T08:30:04.5753853Z #10 17.86   Downloading scipy-1.18.1-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (35.3 MB)
+2026-10-26T08:30:04.7101411Z #10 18.15 Collecting scs==3.3.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 184))
+2026-10-26T08:30:04.8790547Z #10 18.17   Downloading scs-3.3.1-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (43.2 MB)
+2026-10-26T08:30:05.1690635Z #10 18.61 Collecting send2trash==2.1.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 185))
+2026-10-26T08:30:05.2701182Z #10 18.62   Downloading send2trash-2.1.0-py3-none-any.whl (17 kB)
+2026-10-26T08:30:05.2701551Z #10 18.69 Collecting setuptools==84.2.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 186))
+2026-10-26T08:30:05.2701882Z #10 18.69   Using cached setuptools-84.2.1-py3-none-any.whl (876 kB)
+2026-10-26T08:30:05.2702161Z #10 18.71 Collecting six==1.17.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 187))
+2026-10-26T08:30:05.3807477Z #10 18.72   Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+2026-10-26T08:30:05.3808065Z #10 18.74 Collecting skops==0.16.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 188))
+2026-10-26T08:30:05.3808526Z #10 18.75   Downloading skops-0.16.0-py3-none-any.whl (148 kB)
+2026-10-26T08:30:05.3808808Z #10 18.77 Collecting smmap==5.0.3 (from -r locks/research-cp312-linux-x86_64.source.lock (line 189))
+2026-10-26T08:30:05.3809110Z #10 18.78   Downloading smmap-5.0.3-py3-none-any.whl (24 kB)
+2026-10-26T08:30:05.3809392Z #10 18.80 Collecting soupsieve==3.0.4 (from -r locks/research-cp312-linux-x86_64.source.lock (line 190))
+2026-10-26T08:30:05.3809679Z #10 18.82   Downloading soupsieve-3.0.4-py3-none-any.whl (42 kB)
+2026-10-26T08:30:05.5757604Z #10 18.84 Collecting sparsediffpy==0.6.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 191))
+2026-10-26T08:30:05.5758337Z #10 18.86   Downloading sparsediffpy-0.6.1-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (12.1 MB)
+2026-10-26T08:30:05.6942148Z #10 19.13 Collecting sqlalchemy==2.1.6 (from -r locks/research-cp312-linux-x86_64.source.lock (line 192))
+2026-10-26T08:30:05.8058004Z #10 19.15   Downloading sqlalchemy-2.1.6-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (4.7 MB)
+2026-10-26T08:30:05.8058776Z #10 19.20 Collecting sqlparse==0.6.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 193))
+2026-10-26T08:30:05.8059417Z #10 19.21   Downloading sqlparse-0.6.0-py3-none-any.whl (50 kB)
+2026-10-26T08:30:05.8059938Z #10 19.23 Collecting stack-data==0.6.3 (from -r locks/research-cp312-linux-x86_64.source.lock (line 194))
+2026-10-26T08:30:05.8060552Z #10 19.24   Downloading stack_data-0.6.3-py3-none-any.whl (24 kB)
+2026-10-26T08:30:05.9356084Z #10 19.27 Collecting starlette==1.10.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 195))
+2026-10-26T08:30:05.9356436Z #10 19.28   Downloading starlette-1.10.0-py3-none-any.whl (80 kB)
+2026-10-26T08:30:05.9356720Z #10 19.30 Collecting sympy==1.14.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 196))
+2026-10-26T08:30:05.9357387Z #10 19.32   Downloading sympy-1.14.0-py3-none-any.whl (6.3 MB)
+2026-10-26T08:30:05.9357808Z #10 19.37 Collecting tabulate==0.10.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 197))
+2026-10-26T08:30:06.0471208Z #10 19.39   Downloading tabulate-0.10.0-py3-none-any.whl (39 kB)
+2026-10-26T08:30:06.0471812Z #10 19.41 Collecting tenacity==8.5.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 198))
+2026-10-26T08:30:06.0472284Z #10 19.42   Downloading tenacity-8.5.0-py3-none-any.whl (28 kB)
+2026-10-26T08:30:06.0472686Z #10 19.44 Collecting tensorboardx==2.6.5 (from -r locks/research-cp312-linux-x86_64.source.lock (line 199))
+2026-10-26T08:30:06.0473191Z #10 19.45   Downloading tensorboardx-2.6.5-py3-none-any.whl (87 kB)
+2026-10-26T08:30:06.0473483Z #10 19.47 Collecting termcolor==3.3.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 200))
+2026-10-26T08:30:06.0473769Z #10 19.48   Downloading termcolor-3.3.0-py3-none-any.whl (7.7 kB)
+2026-10-26T08:30:06.1528484Z #10 19.50 Collecting terminado==0.18.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 201))
+2026-10-26T08:30:06.1529272Z #10 19.52   Downloading terminado-0.18.1-py3-none-any.whl (14 kB)
+2026-10-26T08:30:06.1529960Z #10 19.53 Collecting threadpoolctl==3.7.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 202))
+2026-10-26T08:30:06.1530507Z #10 19.55   Downloading threadpoolctl-3.7.0-py3-none-any.whl (26 kB)
+2026-10-26T08:30:06.1530861Z #10 19.56 Collecting tinycss2==1.5.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 203))
+2026-10-26T08:30:06.1531156Z #10 19.58   Downloading tinycss2-1.5.1-py3-none-any.whl (28 kB)
+2026-10-26T08:30:06.1531441Z #10 19.59 Collecting toml==0.10.2 (from -r locks/research-cp312-linux-x86_64.source.lock (line 204))
+2026-10-26T08:30:06.3853947Z #10 19.61   Downloading toml-0.10.2-py2.py3-none-any.whl (16 kB)
+2026-10-26T08:30:06.3854461Z #10 19.62 Collecting toolz==1.2.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 205))
+2026-10-26T08:30:06.3854852Z #10 19.64   Downloading toolz-1.2.0-py3-none-any.whl (60 kB)
+2026-10-26T08:30:06.3855254Z #10 19.66 Collecting torchmetrics==1.9.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 207))
+2026-10-26T08:30:06.3855666Z #10 19.67   Downloading torchmetrics-1.9.0-py3-none-any.whl (983 kB)
+2026-10-26T08:30:06.4343852Z #10 19.87 Collecting tornado==6.6 (from -r locks/research-cp312-linux-x86_64.source.lock (line 208))
+2026-10-26T08:30:06.5487295Z #10 19.89   Downloading tornado-6.6-cp311-abi3-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (529 kB)
+2026-10-26T08:30:06.5487742Z #10 19.91 Collecting tqdm==4.70.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 209))
+2026-10-26T08:30:06.5488029Z #10 19.93   Downloading tqdm-4.70.1-py3-none-any.whl (80 kB)
+2026-10-26T08:30:06.5488322Z #10 19.95 Collecting traitlets==5.16.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 210))
+2026-10-26T08:30:06.5488619Z #10 19.96   Downloading traitlets-5.16.1-py3-none-any.whl (86 kB)
+2026-10-26T08:30:06.5488908Z #10 19.99 Collecting typeguard==4.6.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 211))
+2026-10-26T08:30:06.6580541Z #10 20.00   Downloading typeguard-4.6.0-py3-none-any.whl (36 kB)
+2026-10-26T08:30:06.6581055Z #10 20.02 Collecting types-greenlet==3.5.0.20260518 (from -r locks/research-cp312-linux-x86_64.source.lock (line 212))
+2026-10-26T08:30:06.6581635Z #10 20.03   Downloading types_greenlet-3.5.0.20260518-py3-none-any.whl (8.8 kB)
+2026-10-26T08:30:06.6581975Z #10 20.05 Collecting typing-extensions==4.16.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 213))
+2026-10-26T08:30:06.6582315Z #10 20.07   Downloading typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+2026-10-26T08:30:06.6582636Z #10 20.08 Collecting typing-inspection==0.4.4 (from -r locks/research-cp312-linux-x86_64.source.lock (line 214))
+2026-10-26T08:30:06.6582960Z #10 20.10   Downloading typing_inspection-0.4.4-py3-none-any.whl (14 kB)
+2026-10-26T08:30:06.7589545Z #10 20.11 Collecting tzdata==2026.5 (from -r locks/research-cp312-linux-x86_64.source.lock (line 215))
+2026-10-26T08:30:06.7589885Z #10 20.13   Downloading tzdata-2026.5-py2.py3-none-any.whl (347 kB)
+2026-10-26T08:30:06.7590195Z #10 20.14 Collecting uri-template==1.3.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 216))
+2026-10-26T08:30:06.7590525Z #10 20.16   Downloading uri_template-1.3.0-py3-none-any.whl (11 kB)
+2026-10-26T08:30:06.7590815Z #10 20.18 Collecting urllib3==2.8.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 217))
+2026-10-26T08:30:06.7591095Z #10 20.20   Downloading urllib3-2.8.0-py3-none-any.whl (135 kB)
+2026-10-26T08:30:06.8644492Z #10 20.22 Collecting utilsforecast==0.2.17 (from -r locks/research-cp312-linux-x86_64.source.lock (line 218))
+2026-10-26T08:30:06.8644858Z #10 20.23   Downloading utilsforecast-0.2.17-py3-none-any.whl (50 kB)
+2026-10-26T08:30:06.8645256Z #10 20.26 Collecting uvicorn==0.54.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 219))
+2026-10-26T08:30:06.8645542Z #10 20.27   Downloading uvicorn-0.54.0-py3-none-any.whl (87 kB)
+2026-10-26T08:30:06.8645842Z #10 20.29 Collecting uvicorn-worker==0.4.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 220))
+2026-10-26T08:30:06.8646149Z #10 20.30   Downloading uvicorn_worker-0.4.0-py3-none-any.whl (5.4 kB)
+2026-10-26T08:30:06.9862666Z #10 20.33 Collecting uvloop==0.23.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 221))
+2026-10-26T08:30:06.9863372Z #10 20.35   Downloading uvloop-0.23.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (4.5 MB)
+2026-10-26T08:30:06.9864047Z #10 20.42 Collecting watchfiles==1.3.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 222))
+2026-10-26T08:30:07.1006184Z #10 20.44   Downloading watchfiles-1.3.0-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (458 kB)
+2026-10-26T08:30:07.1006597Z #10 20.46 Collecting wcwidth==0.9.4 (from -r locks/research-cp312-linux-x86_64.source.lock (line 223))
+2026-10-26T08:30:07.1007164Z #10 20.48   Downloading wcwidth-0.9.4-cp310-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (785 kB)
+2026-10-26T08:30:07.1007530Z #10 20.49 Collecting webcolors==25.10.0 (from -r locks/research-cp312-linux-x86_64.source.lock (line 224))
+2026-10-26T08:30:07.1007830Z #10 20.51   Downloading webcolors-25.10.0-py3-none-any.whl (14 kB)
+2026-10-26T08:30:07.1008149Z #10 20.52 Collecting webencodings==0.6.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 225))
+2026-10-26T08:30:07.1008450Z #10 20.54   Downloading webencodings-0.6.1-py3-none-any.whl (8.7 kB)
+2026-10-26T08:30:07.2036362Z #10 20.56 Collecting websocket-client==1.9.2 (from -r locks/research-cp312-linux-x86_64.source.lock (line 226))
+2026-10-26T08:30:07.2037092Z #10 20.57   Downloading websocket_client-1.9.2-py3-none-any.whl (95 kB)
+2026-10-26T08:30:07.2037602Z #10 20.64 Collecting websockets==17.3 (from -r locks/research-cp312-linux-x86_64.source.lock (line 227))
+2026-10-26T08:30:07.3172082Z #10 20.66   Downloading websockets-17.3-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (225 kB)
+2026-10-26T08:30:07.3172798Z #10 20.68 Collecting werkzeug==3.1.9 (from -r locks/research-cp312-linux-x86_64.source.lock (line 228))
+2026-10-26T08:30:07.3173287Z #10 20.69   Downloading werkzeug-3.1.9-py3-none-any.whl (228 kB)
+2026-10-26T08:30:07.3174074Z #10 20.72 Collecting widgetsnbextension==4.0.16 (from -r locks/research-cp312-linux-x86_64.source.lock (line 229))
+2026-10-26T08:30:07.3174628Z #10 20.73   Downloading widgetsnbextension-4.0.16-py3-none-any.whl (2.2 MB)
+2026-10-26T08:30:07.3175165Z #10 20.75 Collecting xgboost-cpu==3.4.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 230))
+2026-10-26T08:30:07.4838717Z #10 20.77   Downloading xgboost_cpu-3.4.1-py3-none-manylinux_2_28_x86_64.whl (5.8 MB)
+2026-10-26T08:30:07.5028814Z #10 20.94 Collecting yarl==1.25.1 (from -r locks/research-cp312-linux-x86_64.source.lock (line 231))
+2026-10-26T08:30:07.7053000Z #10 20.96   Downloading yarl-1.25.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (117 kB)
+2026-10-26T08:30:07.7053652Z #10 20.98 Collecting zipp==4.1.2 (from -r locks/research-cp312-linux-x86_64.source.lock (line 232))
+2026-10-26T08:30:07.7054060Z #10 20.99   Downloading zipp-4.1.2-py3-none-any.whl (10 kB)
+2026-10-26T08:30:08.0174207Z #10 21.45 Saved /wheelhouse/aiohappyeyeballs-2.7.1-py3-none-any.whl
+2026-10-26T08:30:08.1175619Z #10 21.46 Saved /wheelhouse/aiohttp-3.14.5-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
+2026-10-26T08:30:08.1176262Z #10 21.46 Saved /wheelhouse/aiosignal-1.4.0-py3-none-any.whl
+2026-10-26T08:30:08.1177249Z #10 21.46 Saved /wheelhouse/alembic-1.20.1-py3-none-any.whl
+2026-10-26T08:30:08.1177686Z #10 21.46 Saved /wheelhouse/annotated_doc-0.0.5-py3-none-any.whl
+2026-10-26T08:30:08.1178026Z #10 21.46 Saved /wheelhouse/annotated_types-0.8.0-py3-none-any.whl
+2026-10-26T08:30:08.1178342Z #10 21.46 Saved /wheelhouse/anyio-4.15.1-py3-none-any.whl
+2026-10-26T08:30:08.1178647Z #10 21.46 Saved /wheelhouse/argon2_cffi-25.1.0-py3-none-any.whl
+2026-10-26T08:30:08.1179446Z #10 21.46 Saved /wheelhouse/argon2_cffi_bindings-26.1.0-cp310-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl
+2026-10-26T08:30:08.1182428Z #10 21.46 Saved /wheelhouse/arrow-1.4.0-py3-none-any.whl
+2026-10-26T08:30:08.1182888Z #10 21.46 Saved /wheelhouse/ast_serialize-0.13.1-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+2026-10-26T08:30:08.1183516Z #10 21.46 Saved /wheelhouse/asttokens-3.0.2-py3-none-any.whl
+2026-10-26T08:30:08.1183845Z #10 21.46 Saved /wheelhouse/async_lru-2.4.0-py3-none-any.whl
+2026-10-26T08:30:08.1184416Z #10 21.46 Saved /wheelhouse/attrs-26.1.0-py3-none-any.whl
+2026-10-26T08:30:08.1184726Z #10 21.46 Saved /wheelhouse/babel-2.18.0-py3-none-any.whl
+2026-10-26T08:30:08.1185191Z #10 21.46 Saved /wheelhouse/beautifulsoup4-4.15.0-py3-none-any.whl
+2026-10-26T08:30:08.1185529Z #10 21.46 Saved /wheelhouse/bigtree-1.5.3-py3-none-any.whl
+2026-10-26T08:30:08.1185832Z #10 21.46 Saved /wheelhouse/bleach-6.4.0-py3-none-any.whl
+2026-10-26T08:30:08.1186133Z #10 21.46 Saved /wheelhouse/blinker-1.9.0-py3-none-any.whl
+2026-10-26T08:30:08.1186449Z #10 21.46 Saved /wheelhouse/cachetools-7.2.5-py3-none-any.whl
+2026-10-26T08:30:08.1186778Z #10 21.46 Saved /wheelhouse/certifi-2026.10.23-py3-none-any.whl
+2026-10-26T08:30:08.1187324Z #10 21.46 Saved /wheelhouse/cffi-2.1.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl
+2026-10-26T08:30:08.1187947Z #10 21.46 Saved /wheelhouse/charset_normalizer-3.5.2-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
+2026-10-26T08:30:08.1188569Z #10 21.46 Saved /wheelhouse/clarabel-0.11.1-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+2026-10-26T08:30:08.1189208Z #10 21.47 Saved /wheelhouse/click-8.5.0-py3-none-any.whl
+2026-10-26T08:30:08.1189538Z #10 21.47 Saved /wheelhouse/cloudpickle-3.1.2-py3-none-any.whl
+2026-10-26T08:30:08.1190004Z #10 21.47 Saved /wheelhouse/colorama-0.4.6-py2.py3-none-any.whl
+2026-10-26T08:30:08.1190258Z #10 21.47 Saved /wheelhouse/colorlog-6.12.0-py3-none-any.whl
+2026-10-26T08:30:08.1190458Z #10 21.47 Saved /wheelhouse/comm-0.2.3-py3-none-any.whl
+2026-10-26T08:30:08.1190735Z #10 21.47 Saved /wheelhouse/contourpy-1.4.0-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl
+2026-10-26T08:30:08.1191170Z #10 21.47 Saved /wheelhouse/coreforecast-0.0.19-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl
+2026-10-26T08:30:08.1191692Z #10 21.47 Saved /wheelhouse/cryptography-50.0.2-cp311-abi3-manylinux_2_34_x86_64.whl
+2026-10-26T08:30:08.1192012Z #10 21.47 Saved /wheelhouse/cvxpy-1.9.3-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl
+2026-10-26T08:30:08.1192285Z #10 21.47 Saved /wheelhouse/cycler-0.12.1-py3-none-any.whl
+2026-10-26T08:30:08.1192483Z #10 21.47 Saved /wheelhouse/dask-2026.8.0-py3-none-any.whl
+2026-10-26T08:30:08.1192693Z #10 21.47 Saved /wheelhouse/databricks_sdk-0.157.0-py3-none-any.whl
+2026-10-26T08:30:08.1192948Z #10 21.47 Saved /wheelhouse/debugpy-1.8.22-cp312-cp312-manylinux_2_34_x86_64.whl
+2026-10-26T08:30:08.1193237Z #10 21.47 Saved /wheelhouse/defusedxml-0.7.1-py2.py3-none-any.whl
+2026-10-26T08:30:08.1193446Z #10 21.47 Saved /wheelhouse/dill-0.4.1-py3-none-any.whl
+2026-10-26T08:30:08.1193644Z #10 21.47 Saved /wheelhouse/dnspython-2.9.0-py3-none-any.whl
+2026-10-26T08:30:08.1193854Z #10 21.47 Saved /wheelhouse/docker-7.2.0-py3-none-any.whl
+2026-10-26T08:30:08.1194052Z #10 21.47 Saved /wheelhouse/executing-2.3.0-py3-none-any.whl
+2026-10-26T08:30:08.1194253Z #10 21.47 Saved /wheelhouse/fastapi-0.162.0-py3-none-any.whl
+2026-10-26T08:30:08.1194475Z #10 21.47 Saved /wheelhouse/fastjsonschema-2.22.2-py3-none-any.whl
+2026-10-26T08:30:08.1194774Z #10 21.48 Saved /wheelhouse/feast-0.67.0-py3-none-any.whl
+2026-10-26T08:30:08.1195482Z #10 21.48 Saved /wheelhouse/filelock-4.2.4-py3-none-any.whl
+2026-10-26T08:30:08.1195880Z #10 21.48 Saved /wheelhouse/fire-0.7.1-py3-none-any.whl
+2026-10-26T08:30:08.1196305Z #10 21.48 Saved /wheelhouse/flask-3.1.3-py3-none-any.whl
+2026-10-26T08:30:08.1196503Z #10 21.48 Saved /wheelhouse/flask_cors-6.0.5-py3-none-any.whl
+2026-10-26T08:30:08.1196843Z #10 21.48 Saved /wheelhouse/fonttools-4.67.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl
+2026-10-26T08:30:08.1197263Z #10 21.48 Saved /wheelhouse/fqdn-1.6.0-py3-none-any.whl
+2026-10-26T08:30:08.1197574Z #10 21.48 Saved /wheelhouse/frozenlist-1.8.0-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl
+2026-10-26T08:30:08.1197890Z #10 21.48 Saved /wheelhouse/fsspec-2026.9.0-py3-none-any.whl
+2026-10-26T08:30:08.1198090Z #10 21.48 Saved /wheelhouse/gitdb-4.0.12-py3-none-any.whl
+2026-10-26T08:30:08.1198291Z #10 21.48 Saved /wheelhouse/gitpython-3.2.1-py3-none-any.whl
+2026-10-26T08:30:08.1198498Z #10 21.48 Saved /wheelhouse/google_auth-2.62.0-py3-none-any.whl
+2026-10-26T08:30:08.1198713Z #10 21.48 Saved /wheelhouse/graphene-3.4.3-py2.py3-none-any.whl
+2026-10-26T08:30:08.1198933Z #10 21.48 Saved /wheelhouse/graphql_core-3.2.13-py3-none-any.whl
+2026-10-26T08:30:08.1199149Z #10 21.48 Saved /wheelhouse/graphql_relay-3.2.0-py3-none-any.whl
+2026-10-26T08:30:08.1199360Z #10 21.48 Saved /wheelhouse/gunicorn-26.2.0-py3-none-any.whl
+2026-10-26T08:30:08.1199565Z #10 21.48 Saved /wheelhouse/gym_notices-0.1.0-py3-none-any.whl
+2026-10-26T08:30:08.1199762Z #10 21.48 Saved /wheelhouse/h11-0.16.0-py3-none-any.whl
+2026-10-26T08:30:08.1200033Z #10 21.48 Saved /wheelhouse/highspy-1.15.1-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl
+2026-10-26T08:30:08.1200319Z #10 21.48 Saved /wheelhouse/httpcore-1.0.9-py3-none-any.whl
+2026-10-26T08:30:08.1200633Z #10 21.49 Saved /wheelhouse/httptools-0.9.0-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl
+2026-10-26T08:30:08.1200947Z #10 21.49 Saved /wheelhouse/httpx-0.28.1-py3-none-any.whl
+2026-10-26T08:30:08.1201157Z #10 21.49 Saved /wheelhouse/huey-3.5.3-py3-none-any.whl
+2026-10-26T08:30:08.1201484Z #10 21.49 Saved /wheelhouse/idna-3.20-py3-none-any.whl
+2026-10-26T08:30:08.1201697Z #10 21.49 Saved /wheelhouse/importlib_metadata-9.1.0-py3-none-any.whl
+2026-10-26T08:30:08.1201919Z #10 21.49 Saved /wheelhouse/ipykernel-7.4.0-py3-none-any.whl
+2026-10-26T08:30:08.1202120Z #10 21.49 Saved /wheelhouse/ipython-9.17.1-py3-none-any.whl
+2026-10-26T08:30:08.1202346Z #10 21.49 Saved /wheelhouse/ipython_pygments_lexers-1.1.1-py3-none-any.whl
+2026-10-26T08:30:08.1202701Z #10 21.49 Saved /wheelhouse/ipywidgets-8.1.9-py3-none-any.whl
+2026-10-26T08:30:08.1202916Z #10 21.49 Saved /wheelhouse/isoduration-20.11.0-py3-none-any.whl
+2026-10-26T08:30:08.1203132Z #10 21.49 Saved /wheelhouse/itsdangerous-2.2.0-py3-none-any.whl
+2026-10-26T08:30:08.1203344Z #10 21.49 Saved /wheelhouse/jedi-0.20.1-py2.py3-none-any.whl
+2026-10-26T08:30:08.1203544Z #10 21.49 Saved /wheelhouse/jinja2-3.1.6-py3-none-any.whl
+2026-10-26T08:30:08.1203737Z #10 21.49 Saved /wheelhouse/joblib-1.6.0-py3-none-any.whl
+2026-10-26T08:30:08.1203926Z #10 21.49 Saved /wheelhouse/json5-0.17.3-py3-none-any.whl
+2026-10-26T08:30:08.1204123Z #10 21.49 Saved /wheelhouse/jsonpointer-3.5-py3-none-any.whl
+2026-10-26T08:30:08.1204334Z #10 21.49 Saved /wheelhouse/jsonschema-4.26.0-py3-none-any.whl
+2026-10-26T08:30:08.1204677Z #10 21.49 Saved /wheelhouse/jsonschema_specifications-2025.9.1-py3-none-any.whl
+2026-10-26T08:30:08.1204925Z #10 21.49 Saved /wheelhouse/jupyter-1.1.1-py2.py3-none-any.whl
+2026-10-26T08:30:08.1205147Z #10 21.49 Saved /wheelhouse/jupyter_builder-1.2.3-py3-none-any.whl
+2026-10-26T08:30:08.1205370Z #10 21.49 Saved /wheelhouse/jupyter_client-8.10.0-py3-none-any.whl
+2026-10-26T08:30:08.1205592Z #10 21.49 Saved /wheelhouse/jupyter_console-6.6.3-py3-none-any.whl
+2026-10-26T08:30:08.1205891Z #10 21.49 Saved /wheelhouse/jupyter_core-5.9.1-py3-none-any.whl
+2026-10-26T08:30:08.1206109Z #10 21.49 Saved /wheelhouse/jupyter_events-0.12.1-py3-none-any.whl
+2026-10-26T08:30:08.1206323Z #10 21.49 Saved /wheelhouse/jupyter_lsp-2.3.1-py3-none-any.whl
+2026-10-26T08:30:08.1206540Z #10 21.49 Saved /wheelhouse/jupyter_server-2.21.1-py3-none-any.whl
+2026-10-26T08:30:08.1206775Z #10 21.49 Saved /wheelhouse/jupyter_server_terminals-0.5.4-py3-none-any.whl
+2026-10-26T08:30:08.1207164Z #10 21.50 Saved /wheelhouse/jupyterlab-4.6.4-py3-none-any.whl
+2026-10-26T08:30:08.1207392Z #10 21.50 Saved /wheelhouse/jupyterlab_pygments-0.3.0-py3-none-any.whl
+2026-10-26T08:30:08.1207626Z #10 21.50 Saved /wheelhouse/jupyterlab_server-2.28.1-py3-none-any.whl
+2026-10-26T08:30:08.1207865Z #10 21.50 Saved /wheelhouse/jupyterlab_widgets-3.0.17-py3-none-any.whl
+2026-10-26T08:30:08.1208166Z #10 21.50 Saved /wheelhouse/kiwisolver-1.5.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl
+2026-10-26T08:30:08.1208443Z #10 21.50 Saved /wheelhouse/lark-1.3.1-py3-none-any.whl
+2026-10-26T08:30:08.1208750Z #10 21.50 Saved /wheelhouse/librt-0.16.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
+2026-10-26T08:30:08.1209125Z #10 21.50 Saved /wheelhouse/lightgbm-4.7.0-py3-none-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl
+2026-10-26T08:30:08.1209427Z #10 21.50 Saved /wheelhouse/lightning_utilities-0.15.3-py3-none-any.whl
+2026-10-26T08:30:08.1209652Z #10 21.50 Saved /wheelhouse/locket-1.0.0-py2.py3-none-any.whl
+2026-10-26T08:30:08.1209854Z #10 21.50 Saved /wheelhouse/loguru-0.7.3-py3-none-any.whl
+2026-10-26T08:30:08.1210046Z #10 21.50 Saved /wheelhouse/mako-1.4.3-py3-none-any.whl
+2026-10-26T08:30:08.1210354Z #10 21.50 Saved /wheelhouse/markupsafe-3.0.4-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
+2026-10-26T08:30:08.1210758Z #10 21.51 Saved /wheelhouse/matplotlib-3.11.2-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl
+2026-10-26T08:30:08.1211058Z #10 21.51 Saved /wheelhouse/matplotlib_inline-0.2.2-py3-none-any.whl
+2026-10-26T08:30:08.1211277Z #10 21.51 Saved /wheelhouse/mistune-3.4.0-py3-none-any.whl
+2026-10-26T08:30:08.1211479Z #10 21.51 Saved /wheelhouse/mlflow-3.17.2-py3-none-any.whl
+2026-10-26T08:30:08.1211686Z #10 21.51 Saved /wheelhouse/mlflow_skinny-3.17.2-py3-none-any.whl
+2026-10-26T08:30:08.1211905Z #10 21.51 Saved /wheelhouse/mlflow_tracing-3.17.2-py3-none-any.whl
+2026-10-26T08:30:08.1212208Z #10 21.51 Saved /wheelhouse/mmh3-5.3.1-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl
+2026-10-26T08:30:08.1212500Z #10 21.51 Saved /wheelhouse/mpmath-1.3.0-py3-none-any.whl
+2026-10-26T08:30:08.1212803Z #10 21.51 Saved /wheelhouse/msgpack-1.2.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
+2026-10-26T08:30:08.1213326Z #10 21.51 Saved /wheelhouse/multidict-7.2.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
+2026-10-26T08:30:08.1213742Z #10 21.52 Saved /wheelhouse/mypy-2.4.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
+2026-10-26T08:30:08.1214057Z #10 21.52 Saved /wheelhouse/mypy_extensions-1.1.0-py3-none-any.whl
+2026-10-26T08:30:08.1214276Z #10 21.52 Saved /wheelhouse/narwhals-2.27.1-py3-none-any.whl
+2026-10-26T08:30:08.1214482Z #10 21.52 Saved /wheelhouse/nbclient-0.11.0-py3-none-any.whl
+2026-10-26T08:30:08.1214685Z #10 21.52 Saved /wheelhouse/nbconvert-7.17.2-py3-none-any.whl
+2026-10-26T08:30:08.1214893Z #10 21.52 Saved /wheelhouse/nbformat-5.11.1-py3-none-any.whl
+2026-10-26T08:30:08.1215103Z #10 21.52 Saved /wheelhouse/nest_asyncio2-1.7.4-py3-none-any.whl
+2026-10-26T08:30:08.1215309Z #10 21.52 Saved /wheelhouse/networkx-3.7-py3-none-any.whl
+2026-10-26T08:30:08.1215525Z #10 21.52 Saved /wheelhouse/neuralforecast-3.3.0-py3-none-any.whl
+2026-10-26T08:30:08.1215745Z #10 21.52 Saved /wheelhouse/notebook-7.6.3-py3-none-any.whl
+2026-10-26T08:30:08.1215952Z #10 21.52 Saved /wheelhouse/notebook_shim-0.2.4-py3-none-any.whl
+2026-10-26T08:30:08.1216309Z #10 21.53 Saved /wheelhouse/numpy-2.5.4-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl
+2026-10-26T08:30:08.1216595Z #10 21.53 Saved /wheelhouse/opentelemetry_api-1.45.1-py3-none-any.whl
+2026-10-26T08:30:08.1216834Z #10 21.53 Saved /wheelhouse/opentelemetry_proto-1.45.1-py3-none-any.whl
+2026-10-26T08:30:08.1217199Z #10 21.53 Saved /wheelhouse/opentelemetry_sdk-1.45.1-py3-none-any.whl
+2026-10-26T08:30:08.1217463Z #10 21.53 Saved /wheelhouse/opentelemetry_semantic_conventions-0.66b1-py3-none-any.whl
+2026-10-26T08:30:08.1217720Z #10 21.53 Saved /wheelhouse/optuna-5.0.0-py3-none-any.whl
+2026-10-26T08:30:08.1217985Z #10 21.53 Saved /wheelhouse/osqp-1.1.3-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl
+2026-10-26T08:30:08.1218262Z #10 21.53 Saved /wheelhouse/packaging-26.3-py3-none-any.whl
+2026-10-26T08:30:08.1218533Z #10 21.53 Saved /wheelhouse/pandas-2.3.3-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl
+2026-10-26T08:30:08.1218820Z #10 21.53 Saved /wheelhouse/pandocfilters-1.5.1-py2.py3-none-any.whl
+2026-10-26T08:30:08.1219046Z #10 21.53 Saved /wheelhouse/parso-0.8.7-py2.py3-none-any.whl
+2026-10-26T08:30:08.1219246Z #10 21.53 Saved /wheelhouse/partd-1.4.2-py3-none-any.whl
+2026-10-26T08:30:08.1219443Z #10 21.53 Saved /wheelhouse/pathspec-1.1.1-py3-none-any.whl
+2026-10-26T08:30:08.1219653Z #10 21.53 Saved /wheelhouse/pexpect-4.9.0-py2.py3-none-any.whl
+2026-10-26T08:30:08.1219930Z #10 21.53 Saved /wheelhouse/pillow-13.0.0-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl
+2026-10-26T08:30:08.1220217Z #10 21.53 Saved /wheelhouse/platformdirs-4.13.5-py3-none-any.whl
+2026-10-26T08:30:08.1220438Z #10 21.53 Saved /wheelhouse/prettytable-3.18.0-py3-none-any.whl
+2026-10-26T08:30:08.1220663Z #10 21.53 Saved /wheelhouse/prometheus_client-0.24.1-py3-none-any.whl
+2026-10-26T08:30:08.1220896Z #10 21.54 Saved /wheelhouse/prompt_toolkit-3.0.53-py3-none-any.whl
+2026-10-26T08:30:08.1221223Z #10 21.54 Saved /wheelhouse/propcache-0.5.4-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
+2026-10-26T08:30:08.1221576Z #10 21.54 Saved /wheelhouse/protobuf-7.36.2-cp310-abi3-manylinux2014_x86_64.whl
+2026-10-26T08:30:08.1221922Z #10 21.54 Saved /wheelhouse/psutil-7.2.2-cp36-abi3-manylinux2010_x86_64.manylinux_2_12_x86_64.manylinux_2_28_x86_64.whl
+2026-10-26T08:30:08.1222241Z #10 21.54 Saved /wheelhouse/ptyprocess-0.7.0-py2.py3-none-any.whl
+2026-10-26T08:30:08.1222559Z #10 21.54 Saved /wheelhouse/pure_eval-0.2.4-py3-none-any.whl
+2026-10-26T08:30:08.1222822Z #10 21.55 Saved /wheelhouse/pyarrow-25.0.1-cp312-cp312-manylinux_2_28_x86_64.whl
+2026-10-26T08:30:08.1223059Z #10 21.55 Saved /wheelhouse/pyasn1-0.6.4-py3-none-any.whl
+2026-10-26T08:30:08.1223264Z #10 21.55 Saved /wheelhouse/pyasn1_modules-0.4.2-py3-none-any.whl
+2026-10-26T08:30:08.1223578Z #10 21.55 Saved /wheelhouse/pycparser-3.12-py3-none-any.whl
+2026-10-26T08:30:08.1223784Z #10 21.55 Saved /wheelhouse/pydantic-2.14.1-py3-none-any.whl
+2026-10-26T08:30:08.1224067Z #10 21.55 Saved /wheelhouse/pydantic_core-2.50.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+2026-10-26T08:30:08.1224369Z #10 21.55 Saved /wheelhouse/pydantic_settings-2.16.1-py3-none-any.whl
+2026-10-26T08:30:08.1224594Z #10 21.55 Saved /wheelhouse/pygments-2.21.0-py3-none-any.whl
+2026-10-26T08:30:08.1224794Z #10 21.55 Saved /wheelhouse/pyjwt-2.15.1-py3-none-any.whl
+2026-10-26T08:30:08.1225101Z #10 21.55 Saved /wheelhouse/pymongo-4.19.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
+2026-10-26T08:30:08.1225416Z #10 21.55 Saved /wheelhouse/pyparsing-3.3.3-py3-none-any.whl
+2026-10-26T08:30:08.1225686Z #10 21.55 Saved /wheelhouse/pyqlib-0.9.7-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl
+2026-10-26T08:30:08.1225988Z #10 21.55 Saved /wheelhouse/python_dateutil-2.9.0.post0-py2.py3-none-any.whl
+2026-10-26T08:30:08.1226234Z #10 21.55 Saved /wheelhouse/python_dotenv-1.2.4-py3-none-any.whl
+2026-10-26T08:30:08.1226456Z #10 21.55 Saved /wheelhouse/python_json_logger-4.2.0-py3-none-any.whl
+2026-10-26T08:30:08.1226769Z #10 21.55 Saved /wheelhouse/python_redis_lock-4.0.1-py3-none-any.whl
+2026-10-26T08:30:08.1227115Z #10 21.56 Saved /wheelhouse/pytorch_lightning-2.6.6-py3-none-any.whl
+2026-10-26T08:30:08.2344586Z #10 21.56 Saved /wheelhouse/pytz-2026.5-py2.py3-none-any.whl
+2026-10-26T08:30:08.2345457Z #10 21.56 Saved /wheelhouse/pyyaml-6.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
+2026-10-26T08:30:08.2346063Z #10 21.56 Saved /wheelhouse/pyzmq-27.2.0-cp312-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl
+2026-10-26T08:30:08.2346633Z #10 21.56 Saved /wheelhouse/qdldl-0.1.9.post1-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl
+2026-10-26T08:30:08.2347338Z #10 21.58 Saved /wheelhouse/ray-2.59.0-cp312-cp312-manylinux2014_x86_64.whl
+2026-10-26T08:30:08.2347751Z #10 21.58 Saved /wheelhouse/redis-8.1.0-py3-none-any.whl
+2026-10-26T08:30:08.2348186Z #10 21.58 Saved /wheelhouse/referencing-0.37.0-py3-none-any.whl
+2026-10-26T08:30:08.2348510Z #10 21.58 Saved /wheelhouse/requests-2.34.2-py3-none-any.whl
+2026-10-26T08:30:08.2349789Z #10 21.58 Saved /wheelhouse/rfc3339_validator-0.1.4-py2.py3-none-any.whl
+2026-10-26T08:30:08.2350176Z #10 21.58 Saved /wheelhouse/rfc3986_validator-0.1.1-py2.py3-none-any.whl
+2026-10-26T08:30:08.2350544Z #10 21.58 Saved /wheelhouse/rfc3987_syntax-1.1.0-py3-none-any.whl
+2026-10-26T08:30:08.2350996Z #10 21.58 Saved /wheelhouse/rpds_py-2026.9.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+2026-10-26T08:30:08.2351448Z #10 21.58 Saved /wheelhouse/ruamel_yaml-0.19.1-py3-none-any.whl
+2026-10-26T08:30:08.2351889Z #10 21.58 Saved /wheelhouse/safetensors-0.8.0-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+2026-10-26T08:30:08.2352453Z #10 21.58 Saved /wheelhouse/scikit_learn-1.9.1-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl
+2026-10-26T08:30:08.2353007Z #10 21.59 Saved /wheelhouse/scipy-1.18.1-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl
+2026-10-26T08:30:08.2353526Z #10 21.60 Saved /wheelhouse/scs-3.3.1-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl
+2026-10-26T08:30:08.2353951Z #10 21.60 Saved /wheelhouse/send2trash-2.1.0-py3-none-any.whl
+2026-10-26T08:30:08.2354281Z #10 21.60 Saved /wheelhouse/setuptools-84.2.1-py3-none-any.whl
+2026-10-26T08:30:08.2354591Z #10 21.60 Saved /wheelhouse/six-1.17.0-py2.py3-none-any.whl
+2026-10-26T08:30:08.2354906Z #10 21.60 Saved /wheelhouse/skops-0.16.0-py3-none-any.whl
+2026-10-26T08:30:08.2355219Z #10 21.60 Saved /wheelhouse/smmap-5.0.3-py3-none-any.whl
+2026-10-26T08:30:08.2355525Z #10 21.60 Saved /wheelhouse/soupsieve-3.0.4-py3-none-any.whl
+2026-10-26T08:30:08.2355966Z #10 21.61 Saved /wheelhouse/sparsediffpy-0.6.1-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl
+2026-10-26T08:30:08.2356825Z #10 21.61 Saved /wheelhouse/sqlalchemy-2.1.6-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
+2026-10-26T08:30:08.2357557Z #10 21.61 Saved /wheelhouse/sqlparse-0.6.0-py3-none-any.whl
+2026-10-26T08:30:08.2357895Z #10 21.61 Saved /wheelhouse/stack_data-0.6.3-py3-none-any.whl
+2026-10-26T08:30:08.2358241Z #10 21.61 Saved /wheelhouse/starlette-1.10.0-py3-none-any.whl
+2026-10-26T08:30:08.2358620Z #10 21.61 Saved /wheelhouse/sympy-1.14.0-py3-none-any.whl
+2026-10-26T08:30:08.2358938Z #10 21.61 Saved /wheelhouse/tabulate-0.10.0-py3-none-any.whl
+2026-10-26T08:30:08.2359438Z #10 21.61 Saved /wheelhouse/tenacity-8.5.0-py3-none-any.whl
+2026-10-26T08:30:08.2359841Z #10 21.61 Saved /wheelhouse/tensorboardx-2.6.5-py3-none-any.whl
+2026-10-26T08:30:08.2360285Z #10 21.61 Saved /wheelhouse/termcolor-3.3.0-py3-none-any.whl
+2026-10-26T08:30:08.2360600Z #10 21.61 Saved /wheelhouse/terminado-0.18.1-py3-none-any.whl
+2026-10-26T08:30:08.2360914Z #10 21.61 Saved /wheelhouse/threadpoolctl-3.7.0-py3-none-any.whl
+2026-10-26T08:30:08.2361228Z #10 21.61 Saved /wheelhouse/tinycss2-1.5.1-py3-none-any.whl
+2026-10-26T08:30:08.2361432Z #10 21.61 Saved /wheelhouse/toml-0.10.2-py2.py3-none-any.whl
+2026-10-26T08:30:08.2361629Z #10 21.61 Saved /wheelhouse/toolz-1.2.0-py3-none-any.whl
+2026-10-26T08:30:08.2361994Z #10 21.61 Saved /wheelhouse/torchmetrics-1.9.0-py3-none-any.whl
+2026-10-26T08:30:08.2362310Z #10 21.61 Saved /wheelhouse/tornado-6.6-cp311-abi3-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl
+2026-10-26T08:30:08.2362773Z #10 21.61 Saved /wheelhouse/tqdm-4.70.1-py3-none-any.whl
+2026-10-26T08:30:08.2363109Z #10 21.61 Saved /wheelhouse/traitlets-5.16.1-py3-none-any.whl
+2026-10-26T08:30:08.2363317Z #10 21.61 Saved /wheelhouse/typeguard-4.6.0-py3-none-any.whl
+2026-10-26T08:30:08.2363544Z #10 21.62 Saved /wheelhouse/types_greenlet-3.5.0.20260518-py3-none-any.whl
+2026-10-26T08:30:08.2363791Z #10 21.62 Saved /wheelhouse/typing_extensions-4.16.0-py3-none-any.whl
+2026-10-26T08:30:08.2364031Z #10 21.62 Saved /wheelhouse/typing_inspection-0.4.4-py3-none-any.whl
+2026-10-26T08:30:08.2364252Z #10 21.62 Saved /wheelhouse/tzdata-2026.5-py2.py3-none-any.whl
+2026-10-26T08:30:08.2364465Z #10 21.62 Saved /wheelhouse/uri_template-1.3.0-py3-none-any.whl
+2026-10-26T08:30:08.2364670Z #10 21.62 Saved /wheelhouse/urllib3-2.8.0-py3-none-any.whl
+2026-10-26T08:30:08.2364889Z #10 21.62 Saved /wheelhouse/utilsforecast-0.2.17-py3-none-any.whl
+2026-10-26T08:30:08.2365102Z #10 21.62 Saved /wheelhouse/uvicorn-0.54.0-py3-none-any.whl
+2026-10-26T08:30:08.2365312Z #10 21.62 Saved /wheelhouse/uvicorn_worker-0.4.0-py3-none-any.whl
+2026-10-26T08:30:08.2365632Z #10 21.62 Saved /wheelhouse/uvloop-0.23.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
+2026-10-26T08:30:08.2366017Z #10 21.62 Saved /wheelhouse/watchfiles-1.3.0-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+2026-10-26T08:30:08.2366363Z #10 21.62 Saved /wheelhouse/wcwidth-0.9.4-cp310-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl
+2026-10-26T08:30:08.2366645Z #10 21.62 Saved /wheelhouse/webcolors-25.10.0-py3-none-any.whl
+2026-10-26T08:30:08.2366864Z #10 21.62 Saved /wheelhouse/webencodings-0.6.1-py3-none-any.whl
+2026-10-26T08:30:08.2367252Z #10 21.62 Saved /wheelhouse/websocket_client-1.9.2-py3-none-any.whl
+2026-10-26T08:30:08.2367581Z #10 21.62 Saved /wheelhouse/websockets-17.3-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl
+2026-10-26T08:30:08.2367895Z #10 21.62 Saved /wheelhouse/werkzeug-3.1.9-py3-none-any.whl
+2026-10-26T08:30:08.2368121Z #10 21.62 Saved /wheelhouse/widgetsnbextension-4.0.16-py3-none-any.whl
+2026-10-26T08:30:08.2368381Z #10 21.62 Saved /wheelhouse/xgboost_cpu-3.4.1-py3-none-manylinux_2_28_x86_64.whl
+2026-10-26T08:30:08.2368723Z #10 21.62 Saved /wheelhouse/yarl-1.25.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
+2026-10-26T08:30:08.2369027Z #10 21.62 Saved /wheelhouse/zipp-4.1.2-py3-none-any.whl
+2026-10-26T08:30:08.2369271Z #10 21.67 Saved /wheelhouse/torch-2.14.1+cpu-cp312-cp312-manylinux_2_28_x86_64.whl
+2026-10-26T08:30:08.3865004Z #10 21.67 Building wheels for collected packages: gym
+2026-10-26T08:30:08.3865345Z #10 21.67   Building wheel for gym (pyproject.toml): started
+2026-10-26T08:30:08.7225745Z #10 22.16   Building wheel for gym (pyproject.toml): finished with status 'done'
+2026-10-26T08:30:08.8762365Z #10 22.16   Created wheel for gym: filename=gym-0.26.2-py3-none-any.whl size=827728 sha256=62ee4cd5b252e1bd45211a7ab59823446575e91062db8503faf9c2744de1e3e1
+2026-10-26T08:30:08.8763079Z #10 22.16   Stored in directory: /root/.cache/pip/wheels/95/51/6c/9bb05ebbe7c5cb8171dfaa3611f32622ca4658d53f31c79077
+2026-10-26T08:30:08.8763470Z #10 22.16 Successfully built gym
+2026-10-26T08:30:09.9984265Z #10 23.44 {"verified_wheels": 232}
+2026-10-26T08:30:10.8211160Z #10 24.26 Looking in links: /wheelhouse
+2026-10-26T08:30:10.9301508Z #10 24.27 Processing /wheelhouse/aiohappyeyeballs-2.7.1-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 1))
+2026-10-26T08:30:10.9302181Z #10 24.27 Processing /wheelhouse/aiohttp-3.14.5-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 2))
+2026-10-26T08:30:10.9303094Z #10 24.28 Processing /wheelhouse/aiosignal-1.4.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 3))
+2026-10-26T08:30:10.9303547Z #10 24.28 Processing /wheelhouse/alembic-1.20.1-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 4))
+2026-10-26T08:30:10.9303991Z #10 24.28 Processing /wheelhouse/annotated_doc-0.0.5-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 5))
+2026-10-26T08:30:10.9304464Z #10 24.28 Processing /wheelhouse/annotated_types-0.8.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 6))
+2026-10-26T08:30:10.9304905Z #10 24.28 Processing /wheelhouse/anyio-4.15.1-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 7))
+2026-10-26T08:30:10.9305350Z #10 24.28 Processing /wheelhouse/argon2_cffi-25.1.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 8))
+2026-10-26T08:30:10.9305899Z #10 24.29 Processing /wheelhouse/argon2_cffi_bindings-26.1.0-cp310-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 9))
+2026-10-26T08:30:10.9306427Z #10 24.29 Processing /wheelhouse/arrow-1.4.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 10))
+2026-10-26T08:30:10.9307167Z #10 24.29 Processing /wheelhouse/ast_serialize-0.13.1-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 11))
+2026-10-26T08:30:10.9307996Z #10 24.29 Processing /wheelhouse/asttokens-3.0.2-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 12))
+2026-10-26T08:30:10.9308669Z #10 24.29 Processing /wheelhouse/async_lru-2.4.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 13))
+2026-10-26T08:30:10.9309105Z #10 24.30 Processing /wheelhouse/attrs-26.1.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 14))
+2026-10-26T08:30:10.9309543Z #10 24.30 Processing /wheelhouse/babel-2.18.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 15))
+2026-10-26T08:30:10.9309990Z #10 24.32 Processing /wheelhouse/beautifulsoup4-4.15.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 16))
+2026-10-26T08:30:10.9310437Z #10 24.32 Processing /wheelhouse/bigtree-1.5.3-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 17))
+2026-10-26T08:30:10.9310862Z #10 24.32 Processing /wheelhouse/bleach-6.4.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 18))
+2026-10-26T08:30:10.9311285Z #10 24.32 Processing /wheelhouse/blinker-1.9.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 19))
+2026-10-26T08:30:10.9311853Z #10 24.32 Processing /wheelhouse/cachetools-7.2.5-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 20))
+2026-10-26T08:30:10.9312322Z #10 24.32 Processing /wheelhouse/certifi-2026.10.23-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 21))
+2026-10-26T08:30:10.9312833Z #10 24.33 Processing /wheelhouse/cffi-2.1.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 22))
+2026-10-26T08:30:10.9313463Z #10 24.33 Processing /wheelhouse/charset_normalizer-3.5.2-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 23))
+2026-10-26T08:30:10.9314249Z #10 24.33 Processing /wheelhouse/clarabel-0.11.1-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 24))
+2026-10-26T08:30:10.9314992Z #10 24.33 Processing /wheelhouse/click-8.5.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 25))
+2026-10-26T08:30:10.9315730Z #10 24.34 Processing /wheelhouse/cloudpickle-3.1.2-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 26))
+2026-10-26T08:30:10.9316503Z #10 24.34 Processing /wheelhouse/colorama-0.4.6-py2.py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 27))
+2026-10-26T08:30:10.9317036Z #10 24.34 Processing /wheelhouse/colorlog-6.12.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 28))
+2026-10-26T08:30:10.9317474Z #10 24.34 Processing /wheelhouse/comm-0.2.3-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 29))
+2026-10-26T08:30:10.9317982Z #10 24.34 Processing /wheelhouse/contourpy-1.4.0-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 30))
+2026-10-26T08:30:10.9318573Z #10 24.34 Processing /wheelhouse/coreforecast-0.0.19-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 31))
+2026-10-26T08:30:10.9319137Z #10 24.35 Processing /wheelhouse/cryptography-50.0.2-cp311-abi3-manylinux_2_34_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 32))
+2026-10-26T08:30:10.9319685Z #10 24.35 Processing /wheelhouse/cvxpy-1.9.3-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 33))
+2026-10-26T08:30:10.9320175Z #10 24.37 Processing /wheelhouse/cycler-0.12.1-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 34))
+2026-10-26T08:30:11.0312695Z #10 24.37 Processing /wheelhouse/dask-2026.8.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 35))
+2026-10-26T08:30:11.0313484Z #10 24.38 Processing /wheelhouse/databricks_sdk-0.157.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 36))
+2026-10-26T08:30:11.0314269Z #10 24.38 Processing /wheelhouse/debugpy-1.8.22-cp312-cp312-manylinux_2_34_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 37))
+2026-10-26T08:30:11.0314977Z #10 24.39 Processing /wheelhouse/defusedxml-0.7.1-py2.py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 38))
+2026-10-26T08:30:11.0315454Z #10 24.39 Processing /wheelhouse/dill-0.4.1-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 39))
+2026-10-26T08:30:11.0315886Z #10 24.39 Processing /wheelhouse/dnspython-2.9.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 40))
+2026-10-26T08:30:11.0316318Z #10 24.40 Processing /wheelhouse/docker-7.2.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 41))
+2026-10-26T08:30:11.0316747Z #10 24.40 Processing /wheelhouse/executing-2.3.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 42))
+2026-10-26T08:30:11.0317412Z #10 24.40 Processing /wheelhouse/fastapi-0.162.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 43))
+2026-10-26T08:30:11.0318188Z #10 24.41 Processing /wheelhouse/fastjsonschema-2.22.2-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 44))
+2026-10-26T08:30:11.0318636Z #10 24.41 Processing /wheelhouse/feast-0.67.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 45))
+2026-10-26T08:30:11.0319065Z #10 24.47 Processing /wheelhouse/filelock-4.2.4-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 46))
+2026-10-26T08:30:11.1329250Z #10 24.47 Processing /wheelhouse/fire-0.7.1-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 47))
+2026-10-26T08:30:11.1330063Z #10 24.47 Processing /wheelhouse/flask-3.1.3-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 48))
+2026-10-26T08:30:11.1330798Z #10 24.47 Processing /wheelhouse/flask_cors-6.0.5-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 49))
+2026-10-26T08:30:11.1331697Z #10 24.48 Processing /wheelhouse/fonttools-4.67.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 50))
+2026-10-26T08:30:11.1332592Z #10 24.49 Processing /wheelhouse/fqdn-1.6.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 51))
+2026-10-26T08:30:11.1333832Z #10 24.49 Processing /wheelhouse/frozenlist-1.8.0-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 52))
+2026-10-26T08:30:11.1334792Z #10 24.50 Processing /wheelhouse/fsspec-2026.9.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 53))
+2026-10-26T08:30:11.1335751Z #10 24.51 Processing /wheelhouse/gitdb-4.0.12-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 54))
+2026-10-26T08:30:11.1336499Z #10 24.51 Processing /wheelhouse/gitpython-3.2.1-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 55))
+2026-10-26T08:30:11.1337747Z #10 24.51 Processing /wheelhouse/google_auth-2.62.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 56))
+2026-10-26T08:30:11.1338537Z #10 24.52 Processing /wheelhouse/graphene-3.4.3-py2.py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 57))
+2026-10-26T08:30:11.1339308Z #10 24.52 Processing /wheelhouse/graphql_core-3.2.13-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 58))
+2026-10-26T08:30:11.1340046Z #10 24.53 Processing /wheelhouse/graphql_relay-3.2.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 59))
+2026-10-26T08:30:11.1340821Z #10 24.53 Processing /wheelhouse/gunicorn-26.2.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 60))
+2026-10-26T08:30:11.1341570Z #10 24.53 Processing /wheelhouse/gym-0.26.2-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 61))
+2026-10-26T08:30:11.1342276Z #10 24.54 Processing /wheelhouse/gym_notices-0.1.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 62))
+2026-10-26T08:30:11.1343009Z #10 24.54 Processing /wheelhouse/h11-0.16.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 63))
+2026-10-26T08:30:11.1343835Z #10 24.54 Processing /wheelhouse/highspy-1.15.1-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 64))
+2026-10-26T08:30:11.1344681Z #10 24.55 Processing /wheelhouse/httpcore-1.0.9-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 65))
+2026-10-26T08:30:11.1345595Z #10 24.55 Processing /wheelhouse/httptools-0.9.0-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 66))
+2026-10-26T08:30:11.1346612Z #10 24.55 Processing /wheelhouse/httpx-0.28.1-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 67))
+2026-10-26T08:30:11.1347930Z #10 24.55 Processing /wheelhouse/huey-3.5.3-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 68))
+2026-10-26T08:30:11.1348729Z #10 24.56 Processing /wheelhouse/idna-3.20-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 69))
+2026-10-26T08:30:11.1349554Z #10 24.56 Processing /wheelhouse/importlib_metadata-9.1.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 70))
+2026-10-26T08:30:11.1350331Z #10 24.56 Processing /wheelhouse/ipykernel-7.4.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 71))
+2026-10-26T08:30:11.1351082Z #10 24.56 Processing /wheelhouse/ipython-9.17.1-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 72))
+2026-10-26T08:30:11.1351877Z #10 24.57 Processing /wheelhouse/ipython_pygments_lexers-1.1.1-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 73))
+2026-10-26T08:30:11.1352693Z #10 24.57 Processing /wheelhouse/ipywidgets-8.1.9-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 74))
+2026-10-26T08:30:11.1353485Z #10 24.57 Processing /wheelhouse/isoduration-20.11.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 75))
+2026-10-26T08:30:11.2369998Z #10 24.57 Processing /wheelhouse/itsdangerous-2.2.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 76))
+2026-10-26T08:30:11.2370910Z #10 24.57 Processing /wheelhouse/jedi-0.20.1-py2.py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 77))
+2026-10-26T08:30:11.2371646Z #10 24.60 Processing /wheelhouse/jinja2-3.1.6-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 78))
+2026-10-26T08:30:11.2372379Z #10 24.60 Processing /wheelhouse/joblib-1.6.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 79))
+2026-10-26T08:30:11.2373115Z #10 24.61 Processing /wheelhouse/json5-0.17.3-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 80))
+2026-10-26T08:30:11.2373904Z #10 24.61 Processing /wheelhouse/jsonpointer-3.5-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 81))
+2026-10-26T08:30:11.2374676Z #10 24.61 Processing /wheelhouse/jsonschema-4.26.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 82))
+2026-10-26T08:30:11.2375534Z #10 24.61 Processing /wheelhouse/jsonschema_specifications-2025.9.1-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 83))
+2026-10-26T08:30:11.2376388Z #10 24.61 Processing /wheelhouse/jupyter-1.1.1-py2.py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 84))
+2026-10-26T08:30:11.2378089Z #10 24.61 Processing /wheelhouse/jupyter_builder-1.2.3-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 85))
+2026-10-26T08:30:11.2378881Z #10 24.62 Processing /wheelhouse/jupyter_client-8.10.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 86))
+2026-10-26T08:30:11.2379679Z #10 24.62 Processing /wheelhouse/jupyter_console-6.6.3-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 87))
+2026-10-26T08:30:11.2380483Z #10 24.62 Processing /wheelhouse/jupyter_core-5.9.1-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 88))
+2026-10-26T08:30:11.2381279Z #10 24.62 Processing /wheelhouse/jupyter_events-0.12.1-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 89))
+2026-10-26T08:30:11.2382063Z #10 24.63 Processing /wheelhouse/jupyter_lsp-2.3.1-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 90))
+2026-10-26T08:30:11.2382817Z #10 24.63 Processing /wheelhouse/jupyter_server-2.21.1-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 91))
+2026-10-26T08:30:11.2383614Z #10 24.63 Processing /wheelhouse/jupyter_server_terminals-0.5.4-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 92))
+2026-10-26T08:30:11.2384772Z #10 24.63 Processing /wheelhouse/jupyterlab-4.6.4-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 93))
+2026-10-26T08:30:11.2385580Z #10 24.66 Processing /wheelhouse/jupyterlab_pygments-0.3.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 94))
+2026-10-26T08:30:11.2386385Z #10 24.66 Processing /wheelhouse/jupyterlab_server-2.28.1-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 95))
+2026-10-26T08:30:11.2387333Z #10 24.67 Processing /wheelhouse/jupyterlab_widgets-3.0.17-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 96))
+2026-10-26T08:30:11.2388244Z #10 24.67 Processing /wheelhouse/kiwisolver-1.5.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 97))
+2026-10-26T08:30:11.2389109Z #10 24.67 Processing /wheelhouse/lark-1.3.1-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 98))
+2026-10-26T08:30:11.3383190Z #10 24.68 Processing /wheelhouse/librt-0.16.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 99))
+2026-10-26T08:30:11.3384920Z #10 24.68 Processing /wheelhouse/lightgbm-4.7.0-py3-none-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 100))
+2026-10-26T08:30:11.3386005Z #10 24.69 Processing /wheelhouse/lightning_utilities-0.15.3-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 101))
+2026-10-26T08:30:11.3387113Z #10 24.69 Processing /wheelhouse/locket-1.0.0-py2.py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 102))
+2026-10-26T08:30:11.3387980Z #10 24.69 Processing /wheelhouse/loguru-0.7.3-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 103))
+2026-10-26T08:30:11.3388954Z #10 24.69 Processing /wheelhouse/mako-1.4.3-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 104))
+2026-10-26T08:30:11.3390078Z #10 24.70 Processing /wheelhouse/markupsafe-3.0.4-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 105))
+2026-10-26T08:30:11.3391306Z #10 24.70 Processing /wheelhouse/matplotlib-3.11.2-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 106))
+2026-10-26T08:30:11.3392364Z #10 24.72 Processing /wheelhouse/matplotlib_inline-0.2.2-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 107))
+2026-10-26T08:30:11.3393294Z #10 24.72 Processing /wheelhouse/mistune-3.4.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 108))
+2026-10-26T08:30:11.3394204Z #10 24.72 Processing /wheelhouse/mlflow-3.17.2-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 109))
+2026-10-26T08:30:11.3395109Z #10 24.75 Processing /wheelhouse/mlflow_skinny-3.17.2-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 110))
+2026-10-26T08:30:11.3396044Z #10 24.76 Processing /wheelhouse/mlflow_tracing-3.17.2-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 111))
+2026-10-26T08:30:11.3397265Z #10 24.77 Processing /wheelhouse/mmh3-5.3.1-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 112))
+2026-10-26T08:30:11.3398323Z #10 24.77 Processing /wheelhouse/mpmath-1.3.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 113))
+2026-10-26T08:30:11.3399373Z #10 24.77 Processing /wheelhouse/msgpack-1.2.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 114))
+2026-10-26T08:30:11.3400653Z #10 24.78 Processing /wheelhouse/multidict-7.2.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 115))
+2026-10-26T08:30:11.4385178Z #10 24.78 Processing /wheelhouse/mypy-2.4.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 116))
+2026-10-26T08:30:11.4386513Z #10 24.80 Processing /wheelhouse/mypy_extensions-1.1.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 117))
+2026-10-26T08:30:11.4387577Z #10 24.80 Processing /wheelhouse/narwhals-2.27.1-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 118))
+2026-10-26T08:30:11.4388509Z #10 24.81 Processing /wheelhouse/nbclient-0.11.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 119))
+2026-10-26T08:30:11.4389465Z #10 24.81 Processing /wheelhouse/nbconvert-7.17.2-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 120))
+2026-10-26T08:30:11.4390466Z #10 24.81 Processing /wheelhouse/nbformat-5.11.1-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 121))
+2026-10-26T08:30:11.4391427Z #10 24.82 Processing /wheelhouse/nest_asyncio2-1.7.4-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 122))
+2026-10-26T08:30:11.4392731Z #10 24.82 Processing /wheelhouse/networkx-3.7-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 123))
+2026-10-26T08:30:11.4393683Z #10 24.83 Processing /wheelhouse/neuralforecast-3.3.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 124))
+2026-10-26T08:30:11.4394612Z #10 24.83 Processing /wheelhouse/notebook-7.6.3-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 125))
+2026-10-26T08:30:11.4395508Z #10 24.84 Processing /wheelhouse/notebook_shim-0.2.4-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 126))
+2026-10-26T08:30:11.4396519Z #10 24.84 Processing /wheelhouse/numpy-2.5.4-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 127))
+2026-10-26T08:30:11.4397750Z #10 24.86 Processing /wheelhouse/opentelemetry_api-1.45.1-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 128))
+2026-10-26T08:30:11.4398733Z #10 24.87 Processing /wheelhouse/opentelemetry_proto-1.45.1-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 129))
+2026-10-26T08:30:11.4399727Z #10 24.87 Processing /wheelhouse/opentelemetry_sdk-1.45.1-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 130))
+2026-10-26T08:30:11.4400748Z #10 24.87 Processing /wheelhouse/opentelemetry_semantic_conventions-0.66b1-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 131))
+2026-10-26T08:30:11.4401761Z #10 24.87 Processing /wheelhouse/optuna-5.0.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 132))
+2026-10-26T08:30:11.4402764Z #10 24.88 Processing /wheelhouse/osqp-1.1.3-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 133))
+2026-10-26T08:30:11.5747789Z #10 24.88 Requirement already satisfied: packaging==26.3 in /usr/local/lib/python3.12/site-packages (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 134)) (26.3)
+2026-10-26T08:30:11.5748526Z #10 24.88 Processing /wheelhouse/pandas-2.3.3-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 135))
+2026-10-26T08:30:11.5749071Z #10 24.92 Processing /wheelhouse/pandocfilters-1.5.1-py2.py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 136))
+2026-10-26T08:30:11.5749545Z #10 24.92 Processing /wheelhouse/parso-0.8.7-py2.py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 137))
+2026-10-26T08:30:11.5749988Z #10 24.92 Processing /wheelhouse/partd-1.4.2-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 138))
+2026-10-26T08:30:11.5750433Z #10 24.92 Processing /wheelhouse/pathspec-1.1.1-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 139))
+2026-10-26T08:30:11.5751240Z #10 24.92 Processing /wheelhouse/pexpect-4.9.0-py2.py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 140))
+2026-10-26T08:30:11.5751760Z #10 24.92 Processing /wheelhouse/pillow-13.0.0-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 141))
+2026-10-26T08:30:11.5752283Z #10 24.94 Processing /wheelhouse/platformdirs-4.13.5-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 142))
+2026-10-26T08:30:11.5752746Z #10 24.94 Processing /wheelhouse/prettytable-3.18.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 143))
+2026-10-26T08:30:11.5753219Z #10 24.94 Processing /wheelhouse/prometheus_client-0.24.1-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 144))
+2026-10-26T08:30:11.5753689Z #10 24.94 Processing /wheelhouse/prompt_toolkit-3.0.53-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 145))
+2026-10-26T08:30:11.5754260Z #10 24.94 Processing /wheelhouse/propcache-0.5.4-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 146))
+2026-10-26T08:30:11.5754964Z #10 24.95 Processing /wheelhouse/protobuf-7.36.2-cp310-abi3-manylinux2014_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 147))
+2026-10-26T08:30:11.5755537Z #10 24.95 Processing /wheelhouse/psutil-7.2.2-cp36-abi3-manylinux2010_x86_64.manylinux_2_12_x86_64.manylinux_2_28_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 148))
+2026-10-26T08:30:11.5756085Z #10 24.95 Processing /wheelhouse/ptyprocess-0.7.0-py2.py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 149))
+2026-10-26T08:30:11.5756544Z #10 24.95 Processing /wheelhouse/pure_eval-0.2.4-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 150))
+2026-10-26T08:30:11.5757172Z #10 24.95 Processing /wheelhouse/pyarrow-25.0.1-cp312-cp312-manylinux_2_28_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 151))
+2026-10-26T08:30:11.5757653Z #10 25.01 Processing /wheelhouse/pyasn1-0.6.4-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 152))
+2026-10-26T08:30:11.7737395Z #10 25.01 Processing /wheelhouse/pyasn1_modules-0.4.2-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 153))
+2026-10-26T08:30:11.7738262Z #10 25.02 Processing /wheelhouse/pycparser-3.12-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 154))
+2026-10-26T08:30:11.7738977Z #10 25.02 Processing /wheelhouse/pydantic-2.14.1-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 155))
+2026-10-26T08:30:11.7739853Z #10 25.02 Processing /wheelhouse/pydantic_core-2.50.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 156))
+2026-10-26T08:30:11.7740826Z #10 25.03 Processing /wheelhouse/pydantic_settings-2.16.1-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 157))
+2026-10-26T08:30:11.7741606Z #10 25.03 Processing /wheelhouse/pygments-2.21.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 158))
+2026-10-26T08:30:11.7742337Z #10 25.03 Processing /wheelhouse/pyjwt-2.15.1-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 159))
+2026-10-26T08:30:11.7743211Z #10 25.03 Processing /wheelhouse/pymongo-4.19.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 160))
+2026-10-26T08:30:11.7744175Z #10 25.04 Processing /wheelhouse/pyparsing-3.3.3-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 161))
+2026-10-26T08:30:11.7745104Z #10 25.04 Processing /wheelhouse/pyqlib-0.9.7-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 162))
+2026-10-26T08:30:11.7746476Z #10 25.05 Processing /wheelhouse/python_dateutil-2.9.0.post0-py2.py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 163))
+2026-10-26T08:30:11.7747495Z #10 25.05 Processing /wheelhouse/python_dotenv-1.2.4-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 164))
+2026-10-26T08:30:11.7748245Z #10 25.05 Processing /wheelhouse/python_json_logger-4.2.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 165))
+2026-10-26T08:30:11.7749037Z #10 25.05 Processing /wheelhouse/python_redis_lock-4.0.1-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 166))
+2026-10-26T08:30:11.7749817Z #10 25.06 Processing /wheelhouse/pytorch_lightning-2.6.6-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 167))
+2026-10-26T08:30:11.7750607Z #10 25.07 Processing /wheelhouse/pytz-2026.5-py2.py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 168))
+2026-10-26T08:30:11.7751523Z #10 25.07 Processing /wheelhouse/pyyaml-6.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 169))
+2026-10-26T08:30:11.7752765Z #10 25.07 Processing /wheelhouse/pyzmq-27.2.0-cp312-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 170))
+2026-10-26T08:30:11.7753791Z #10 25.08 Processing /wheelhouse/qdldl-0.1.9.post1-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 171))
+2026-10-26T08:30:11.7754739Z #10 25.08 Processing /wheelhouse/ray-2.59.0-cp312-cp312-manylinux2014_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 172))
+2026-10-26T08:30:11.7755512Z #10 25.21 Processing /wheelhouse/redis-8.1.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 173))
+2026-10-26T08:30:11.9100980Z #10 25.22 Processing /wheelhouse/referencing-0.37.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 174))
+2026-10-26T08:30:11.9101820Z #10 25.22 Processing /wheelhouse/requests-2.34.2-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 175))
+2026-10-26T08:30:11.9102680Z #10 25.22 Processing /wheelhouse/rfc3339_validator-0.1.4-py2.py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 176))
+2026-10-26T08:30:11.9103508Z #10 25.22 Processing /wheelhouse/rfc3986_validator-0.1.1-py2.py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 177))
+2026-10-26T08:30:11.9104293Z #10 25.22 Processing /wheelhouse/rfc3987_syntax-1.1.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 178))
+2026-10-26T08:30:11.9105213Z #10 25.22 Processing /wheelhouse/rpds_py-2026.9.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 179))
+2026-10-26T08:30:11.9106121Z #10 25.22 Processing /wheelhouse/ruamel_yaml-0.19.1-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 180))
+2026-10-26T08:30:11.9107257Z #10 25.23 Processing /wheelhouse/safetensors-0.8.0-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 181))
+2026-10-26T08:30:11.9108269Z #10 25.23 Processing /wheelhouse/scikit_learn-1.9.1-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 182))
+2026-10-26T08:30:11.9109281Z #10 25.25 Processing /wheelhouse/scipy-1.18.1-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 183))
+2026-10-26T08:30:11.9110190Z #10 25.30 Processing /wheelhouse/scs-3.3.1-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 184))
+2026-10-26T08:30:11.9111468Z #10 25.35 Processing /wheelhouse/send2trash-2.1.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 185))
+2026-10-26T08:30:12.1330934Z #10 25.35 Requirement already satisfied: setuptools==84.2.1 in /usr/local/lib/python3.12/site-packages (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 186)) (84.2.1)
+2026-10-26T08:30:12.1331608Z #10 25.35 Processing /wheelhouse/six-1.17.0-py2.py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 187))
+2026-10-26T08:30:12.1332067Z #10 25.35 Processing /wheelhouse/skops-0.16.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 188))
+2026-10-26T08:30:12.1332512Z #10 25.35 Processing /wheelhouse/smmap-5.0.3-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 189))
+2026-10-26T08:30:12.1332986Z #10 25.36 Processing /wheelhouse/soupsieve-3.0.4-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 190))
+2026-10-26T08:30:12.1333531Z #10 25.36 Processing /wheelhouse/sparsediffpy-0.6.1-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 191))
+2026-10-26T08:30:12.1334613Z #10 25.37 Processing /wheelhouse/sqlalchemy-2.1.6-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 192))
+2026-10-26T08:30:12.1335175Z #10 25.38 Processing /wheelhouse/sqlparse-0.6.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 193))
+2026-10-26T08:30:12.1335631Z #10 25.39 Processing /wheelhouse/stack_data-0.6.3-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 194))
+2026-10-26T08:30:12.1336084Z #10 25.39 Processing /wheelhouse/starlette-1.10.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 195))
+2026-10-26T08:30:12.1336532Z #10 25.39 Processing /wheelhouse/sympy-1.14.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 196))
+2026-10-26T08:30:12.1337228Z #10 25.40 Processing /wheelhouse/tabulate-0.10.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 197))
+2026-10-26T08:30:12.1337674Z #10 25.41 Processing /wheelhouse/tenacity-8.5.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 198))
+2026-10-26T08:30:12.1338133Z #10 25.41 Processing /wheelhouse/tensorboardx-2.6.5-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 199))
+2026-10-26T08:30:12.1338591Z #10 25.41 Processing /wheelhouse/termcolor-3.3.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 200))
+2026-10-26T08:30:12.1339040Z #10 25.41 Processing /wheelhouse/terminado-0.18.1-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 201))
+2026-10-26T08:30:12.1339499Z #10 25.41 Processing /wheelhouse/threadpoolctl-3.7.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 202))
+2026-10-26T08:30:12.1339961Z #10 25.42 Processing /wheelhouse/tinycss2-1.5.1-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 203))
+2026-10-26T08:30:12.1340412Z #10 25.42 Processing /wheelhouse/toml-0.10.2-py2.py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 204))
+2026-10-26T08:30:12.1340856Z #10 25.42 Processing /wheelhouse/toolz-1.2.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 205))
+2026-10-26T08:30:12.1341344Z #10 25.42 Processing /wheelhouse/torch-2.14.1+cpu-cp312-cp312-manylinux_2_28_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 206))
+2026-10-26T08:30:12.2576447Z #10 25.69 Processing /wheelhouse/torchmetrics-1.9.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 207))
+2026-10-26T08:30:12.4885768Z #10 25.71 Processing /wheelhouse/tornado-6.6-cp311-abi3-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 208))
+2026-10-26T08:30:12.4887491Z #10 25.72 Processing /wheelhouse/tqdm-4.70.1-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 209))
+2026-10-26T08:30:12.4888326Z #10 25.72 Processing /wheelhouse/traitlets-5.16.1-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 210))
+2026-10-26T08:30:12.4889146Z #10 25.72 Processing /wheelhouse/typeguard-4.6.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 211))
+2026-10-26T08:30:12.4890007Z #10 25.72 Processing /wheelhouse/types_greenlet-3.5.0.20260518-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 212))
+2026-10-26T08:30:12.4890852Z #10 25.72 Processing /wheelhouse/typing_extensions-4.16.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 213))
+2026-10-26T08:30:12.4891750Z #10 25.73 Processing /wheelhouse/typing_inspection-0.4.4-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 214))
+2026-10-26T08:30:12.4893275Z #10 25.73 Processing /wheelhouse/tzdata-2026.5-py2.py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 215))
+2026-10-26T08:30:12.4894089Z #10 25.73 Processing /wheelhouse/uri_template-1.3.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 216))
+2026-10-26T08:30:12.4895160Z #10 25.73 Processing /wheelhouse/urllib3-2.8.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 217))
+2026-10-26T08:30:12.4895948Z #10 25.73 Processing /wheelhouse/utilsforecast-0.2.17-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 218))
+2026-10-26T08:30:12.4896738Z #10 25.74 Processing /wheelhouse/uvicorn-0.54.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 219))
+2026-10-26T08:30:12.4897645Z #10 25.74 Processing /wheelhouse/uvicorn_worker-0.4.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 220))
+2026-10-26T08:30:12.4898630Z #10 25.74 Processing /wheelhouse/uvloop-0.23.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 221))
+2026-10-26T08:30:12.4899740Z #10 25.75 Processing /wheelhouse/watchfiles-1.3.0-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 222))
+2026-10-26T08:30:12.4900769Z #10 25.75 Processing /wheelhouse/wcwidth-0.9.4-cp310-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 223))
+2026-10-26T08:30:12.4901674Z #10 25.75 Processing /wheelhouse/webcolors-25.10.0-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 224))
+2026-10-26T08:30:12.4902465Z #10 25.75 Processing /wheelhouse/webencodings-0.6.1-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 225))
+2026-10-26T08:30:12.4903261Z #10 25.75 Processing /wheelhouse/websocket_client-1.9.2-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 226))
+2026-10-26T08:30:12.4904273Z #10 25.76 Processing /wheelhouse/websockets-17.3-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 227))
+2026-10-26T08:30:12.4905255Z #10 25.76 Processing /wheelhouse/werkzeug-3.1.9-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 228))
+2026-10-26T08:30:12.4906093Z #10 25.76 Processing /wheelhouse/widgetsnbextension-4.0.16-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 229))
+2026-10-26T08:30:12.4907092Z #10 25.76 Processing /wheelhouse/xgboost_cpu-3.4.1-py3-none-manylinux_2_28_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 230))
+2026-10-26T08:30:12.4908112Z #10 25.77 Processing /wheelhouse/yarl-1.25.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 231))
+2026-10-26T08:30:12.4909060Z #10 25.78 Processing /wheelhouse/zipp-4.1.2-py3-none-any.whl (from -r locks/research-cp312-linux-x86_64.wheel.lock (line 232))
+2026-10-26T08:30:12.7929770Z #10 26.23 Installing collected packages: stack-data, qdldl, pytz, pure-eval, ptyprocess, pexpect, mpmath, jupyter, huey, gym-notices, graphene, zipp, yarl, xgboost-cpu, widgetsnbextension, werkzeug, websockets, websocket-client, webencodings, webcolors, wcwidth, watchfiles, uvloop, uvicorn-worker, uvicorn, utilsforecast, urllib3, uri-template, tzdata, typing-inspection, typing-extensions, types-greenlet, typeguard, traitlets, tqdm, tornado, torchmetrics, torch, toolz, toml, tinycss2, threadpoolctl, terminado, termcolor, tensorboardx, tenacity, tabulate, sympy, starlette, sqlparse, sqlalchemy, sparsediffpy, soupsieve, smmap, skops, six, send2trash, scs, scipy, scikit-learn, safetensors, ruamel-yaml, rpds-py, rfc3987-syntax, rfc3986-validator, rfc3339-validator, requests, referencing, redis, ray, pyzmq, pyyaml, pytorch-lightning, python-redis-lock, python-json-logger, python-dotenv, python-dateutil, pyqlib, pyparsing, pymongo, pyjwt, pygments, pydantic-settings, pydantic-core, pydantic, pycparser, pyasn1-modules, pyasn1, pyarrow, psutil, protobuf, propcache, prompt-toolkit, prometheus-client, prettytable, platformdirs, pillow, pathspec, partd, parso, pandocfilters, pandas, osqp, optuna, opentelemetry-semantic-conventions, opentelemetry-sdk, opentelemetry-proto, opentelemetry-api, numpy, notebook-shim, notebook, neuralforecast, networkx, nest-asyncio2, nbformat, nbconvert, nbclient, narwhals, mypy-extensions, mypy, multidict, msgpack, mmh3, mlflow-tracing, mlflow-skinny, mlflow, mistune, matplotlib-inline, matplotlib, markupsafe, mako, loguru, locket, lightning-utilities, lightgbm, librt, lark, kiwisolver, jupyterlab-widgets, jupyterlab-server, jupyterlab-pygments, jupyterlab, jupyter-server-terminals, jupyter-server, jupyter-lsp, jupyter-events, jupyter-core, jupyter-console, jupyter-client, jupyter-builder, jsonschema-specifications, jsonschema, jsonpointer, json5, joblib, jinja2, jedi, itsdangerous, isoduration, ipywidgets, ipython-pygments-lexers, ipython, ipykernel, importlib-metadata, idna, httpx, httptools, httpcore, highspy, h11, gym, gunicorn, graphql-relay, graphql-core, google-auth, gitpython, gitdb, fsspec, frozenlist, fqdn, fonttools, flask-cors, flask, fire, filelock, feast, fastjsonschema, fastapi, executing, docker, dnspython, dill, defusedxml, debugpy, databricks-sdk, dask, cycler, cvxpy, cryptography, coreforecast, contourpy, comm, colorlog, colorama, cloudpickle, click, clarabel, charset-normalizer, cffi, certifi, cachetools, blinker, bleach, bigtree, beautifulsoup4, babel, attrs, async-lru, asttokens, ast-serialize, arrow, argon2-cffi-bindings, argon2-cffi, anyio, annotated-types, annotated-doc, alembic, aiosignal, aiohttp, aiohappyeyeballs
+2026-10-26T08:31:00.7803453Z #10 74.22 Successfully installed aiohappyeyeballs-2.7.1 aiohttp-3.14.5 aiosignal-1.4.0 alembic-1.20.1 annotated-doc-0.0.5 annotated-types-0.8.0 anyio-4.15.1 argon2-cffi-25.1.0 argon2-cffi-bindings-26.1.0 arrow-1.4.0 ast-serialize-0.13.1 asttokens-3.0.2 async-lru-2.4.0 attrs-26.1.0 babel-2.18.0 beautifulsoup4-4.15.0 bigtree-1.5.3 bleach-6.4.0 blinker-1.9.0 cachetools-7.2.5 certifi-2026.10.23 cffi-2.1.1 charset-normalizer-3.5.2 clarabel-0.11.1 click-8.5.0 cloudpickle-3.1.2 colorama-0.4.6 colorlog-6.12.0 comm-0.2.3 contourpy-1.4.0 coreforecast-0.0.19 cryptography-50.0.2 cvxpy-1.9.3 cycler-0.12.1 dask-2026.8.0 databricks-sdk-0.157.0 debugpy-1.8.22 defusedxml-0.7.1 dill-0.4.1 dnspython-2.9.0 docker-7.2.0 executing-2.3.0 fastapi-0.162.0 fastjsonschema-2.22.2 feast-0.67.0 filelock-4.2.4 fire-0.7.1 flask-3.1.3 flask-cors-6.0.5 fonttools-4.67.0 fqdn-1.6.0 frozenlist-1.8.0 fsspec-2026.9.0 gitdb-4.0.12 gitpython-3.2.1 google-auth-2.62.0 graphene-3.4.3 graphql-core-3.2.13 graphql-relay-3.2.0 gunicorn-26.2.0 gym-0.26.2 gym-notices-0.1.0 h11-0.16.0 highspy-1.15.1 httpcore-1.0.9 httptools-0.9.0 httpx-0.28.1 huey-3.5.3 idna-3.20 importlib-metadata-9.1.0 ipykernel-7.4.0 ipython-9.17.1 ipython-pygments-lexers-1.1.1 ipywidgets-8.1.9 isoduration-20.11.0 itsdangerous-2.2.0 jedi-0.20.1 jinja2-3.1.6 joblib-1.6.0 json5-0.17.3 jsonpointer-3.5 jsonschema-4.26.0 jsonschema-specifications-2025.9.1 jupyter-1.1.1 jupyter-builder-1.2.3 jupyter-client-8.10.0 jupyter-console-6.6.3 jupyter-core-5.9.1 jupyter-events-0.12.1 jupyter-lsp-2.3.1 jupyter-server-2.21.1 jupyter-server-terminals-0.5.4 jupyterlab-4.6.4 jupyterlab-pygments-0.3.0 jupyterlab-server-2.28.1 jupyterlab-widgets-3.0.17 kiwisolver-1.5.1 lark-1.3.1 librt-0.16.0 lightgbm-4.7.0 lightning-utilities-0.15.3 locket-1.0.0 loguru-0.7.3 mako-1.4.3 markupsafe-3.0.4 matplotlib-3.11.2 matplotlib-inline-0.2.2 mistune-3.4.0 mlflow-3.17.2 mlflow-skinny-3.17.2 mlflow-tracing-3.17.2 mmh3-5.3.1 mpmath-1.3.0 msgpack-1.2.3 multidict-7.2.1 mypy-2.4.0 mypy-extensions-1.1.0 narwhals-2.27.1 nbclient-0.11.0 nbconvert-7.17.2 nbformat-5.11.1 nest-asyncio2-1.7.4 networkx-3.7 neuralforecast-3.3.0 notebook-7.6.3 notebook-shim-0.2.4 numpy-2.5.4 opentelemetry-api-1.45.1 opentelemetry-proto-1.45.1 opentelemetry-sdk-1.45.1 opentelemetry-semantic-conventions-0.66b1 optuna-5.0.0 osqp-1.1.3 pandas-2.3.3 pandocfilters-1.5.1 parso-0.8.7 partd-1.4.2 pathspec-1.1.1 pexpect-4.9.0 pillow-13.0.0 platformdirs-4.13.5 prettytable-3.18.0 prometheus-client-0.24.1 prompt-toolkit-3.0.53 propcache-0.5.4 protobuf-7.36.2 psutil-7.2.2 ptyprocess-0.7.0 pure-eval-0.2.4 pyarrow-25.0.1 pyasn1-0.6.4 pyasn1-modules-0.4.2 pycparser-3.12 pydantic-2.14.1 pydantic-core-2.50.1 pydantic-settings-2.16.1 pygments-2.21.0 pyjwt-2.15.1 pymongo-4.19.0 pyparsing-3.3.3 pyqlib-0.9.7 python-dateutil-2.9.0.post0 python-dotenv-1.2.4 python-json-logger-4.2.0 python-redis-lock-4.0.1 pytorch-lightning-2.6.6 pytz-2026.5 pyyaml-6.0.3 pyzmq-27.2.0 qdldl-0.1.9.post1 ray-2.59.0 redis-8.1.0 referencing-0.37.0 requests-2.34.2 rfc3339-validator-0.1.4 rfc3986-validator-0.1.1 rfc3987-syntax-1.1.0 rpds-py-2026.9.1 ruamel-yaml-0.19.1 safetensors-0.8.0 scikit-learn-1.9.1 scipy-1.18.1 scs-3.3.1 send2trash-2.1.0 six-1.17.0 skops-0.16.0 smmap-5.0.3 soupsieve-3.0.4 sparsediffpy-0.6.1 sqlalchemy-2.1.6 sqlparse-0.6.0 stack-data-0.6.3 starlette-1.10.0 sympy-1.14.0 tabulate-0.10.0 tenacity-8.5.0 tensorboardx-2.6.5 termcolor-3.3.0 terminado-0.18.1 threadpoolctl-3.7.0 tinycss2-1.5.1 toml-0.10.2 toolz-1.2.0 torch-2.14.1+cpu torchmetrics-1.9.0 tornado-6.6 tqdm-4.70.1 traitlets-5.16.1 typeguard-4.6.0 types-greenlet-3.5.0.20260518 typing-extensions-4.16.0 typing-inspection-0.4.4 tzdata-2026.5 uri-template-1.3.0 urllib3-2.8.0 utilsforecast-0.2.17 uvicorn-0.54.0 uvicorn-worker-0.4.0 uvloop-0.23.0 watchfiles-1.3.0 wcwidth-0.9.4 webcolors-25.10.0 webencodings-0.6.1 websocket-client-1.9.2 websockets-17.3 werkzeug-3.1.9 widgetsnbextension-4.0.16 xgboost-cpu-3.4.1 yarl-1.25.1 zipp-4.1.2
+2026-10-26T08:31:00.9308693Z #10 74.22 WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
+2026-10-26T08:31:01.7211832Z #10 75.16 No broken requirements found.
+2026-10-26T08:31:08.3891345Z #10 DONE 81.8s
+2026-10-26T08:31:08.5596583Z 
+2026-10-26T08:31:08.5597247Z #11 [stage-0 6/7] COPY . /opt/van/vati_forecast_worker/
+2026-10-26T08:31:08.5597584Z #11 DONE 0.0s
+2026-10-26T08:31:08.5597729Z 
+2026-10-26T08:31:08.5597814Z #12 [stage-0 7/7] WORKDIR /work
+2026-10-26T08:31:08.5598019Z #12 DONE 0.0s
+2026-10-26T08:31:08.5598120Z 
+2026-10-26T08:31:08.5598199Z #13 exporting to image
+2026-10-26T08:31:08.5598391Z #13 exporting layers
+2026-10-26T08:31:17.0538338Z #13 exporting layers 8.6s done
+2026-10-26T08:31:17.0692234Z #13 writing image sha256:c4cfd3da14394e51dd210d8296578eee0e04c80a57cef9d0df12a9adc820e09f done
+2026-10-26T08:31:17.0692704Z #13 naming to docker.io/library/van-forecast-source:40292596591 done
+2026-10-26T08:31:17.0692961Z #13 DONE 8.6s
+2026-10-26T08:31:17.0928411Z ##[group]Run image_id="$(cat /tmp/van-forecast-source-evidence/image-id.txt)"
+2026-10-26T08:31:17.0928886Z [36;1mimage_id="$(cat /tmp/van-forecast-source-evidence/image-id.txt)"[0m
+2026-10-26T08:31:17.0929168Z [36;1mpython3 tools/rebuild/run_forecast_runtime_smoke.py --image "$image_id" \[0m
+2026-10-26T08:31:17.0929429Z [36;1m  --output /tmp/van-forecast-source-evidence/runtime[0m
+2026-10-26T08:31:17.0984761Z shell: /usr/bin/bash -e {0}
+2026-10-26T08:31:17.0984913Z ##[endgroup]
+2026-10-26T08:31:41.1732950Z ##[group]Run python3 - <<'PY'
+2026-10-26T08:31:41.1733170Z [36;1mpython3 - <<'PY'[0m
+2026-10-26T08:31:41.1733314Z [36;1mfrom pathlib import Path[0m
+2026-10-26T08:31:41.1733460Z [36;1mimport json[0m
+2026-10-26T08:31:41.1733633Z [36;1mroot=Path('/tmp/van-forecast-source-evidence/runtime')[0m
+2026-10-26T08:31:41.1733871Z [36;1mrecord=json.loads((root/'receipt.json').read_text())[0m
+2026-10-26T08:31:41.1734151Z [36;1massert record['status']=='SOURCE_FIXTURE_RESEARCH_AND_COLD_INFERENCE_PASS_NOT_ADMISSION'[0m
+2026-10-26T08:31:41.1734421Z [36;1massert record['source_snapshot_unchanged'][0m
+2026-10-26T08:31:41.1734670Z [36;1massert record['research']['removed'] and record['inference']['removed'][0m
+2026-10-26T08:31:41.1734960Z [36;1massert record['research']['container_id']!=record['inference']['container_id'][0m
+2026-10-26T08:31:41.1735201Z [36;1mfor role in ('research','inference'):[0m
+2026-10-26T08:31:41.1735430Z [36;1m    observed=record[role]['declared_kernel_configuration'][0m
+2026-10-26T08:31:41.1735720Z [36;1m    assert observed['NetworkMode']=='none' and observed['ReadonlyRootfs'] and observed['Init'][0m
+2026-10-26T08:31:41.1735959Z [36;1mPY[0m
+2026-10-26T08:31:41.1791256Z shell: /usr/bin/bash -e {0}
+2026-10-26T08:31:41.1791412Z ##[endgroup]
+2026-10-26T08:31:41.2098003Z ##[group]Run actions/upload-artifact@v4
+2026-10-26T08:31:41.2098176Z with:
+2026-10-26T08:31:41.2098317Z   name: van-forecast-runtime-source-report
+2026-10-26T08:31:41.2098498Z   path: /tmp/van-forecast-source-evidence/
+2026-10-26T08:31:41.2098667Z   if-no-files-found: error
+2026-10-26T08:31:41.2098815Z   compression-level: 6
+2026-10-26T08:31:41.2098940Z   overwrite: false
+2026-10-26T08:31:41.2099070Z   include-hidden-files: false
+2026-10-26T08:31:41.2099208Z ##[endgroup]
+2026-10-26T08:31:41.3166254Z (node:2561) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-26T08:31:41.3167023Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-26T08:31:41.3270041Z With the provided path, there will be 43 files uploaded
+2026-10-26T08:31:41.3277313Z Artifact name is valid!
+2026-10-26T08:31:41.3277655Z Root directory input is valid!
+2026-10-26T08:31:41.6269043Z Beginning upload of artifact content to blob storage
+2026-10-26T08:31:41.6742828Z (node:2561) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-26T08:31:41.9668427Z Uploaded bytes 145091
+2026-10-26T08:31:42.0172973Z Finished uploading artifact content to blob storage!
+2026-10-26T08:31:42.0173503Z SHA256 digest of uploaded artifact zip is b53ac49baf400c9881c37ce6b7fe5d21e09072455b5d821d29fcafcc76bb3ac4
+2026-10-26T08:31:42.0174976Z Finalizing artifact upload
+2026-10-26T08:31:42.5171435Z Artifact van-forecast-runtime-source-report.zip successfully finalized. Artifact ID 12636473856
+2026-10-26T08:31:42.5172142Z Artifact van-forecast-runtime-source-report has been successfully uploaded! Final size is 145091 bytes. Artifact ID is 12636473856
+2026-10-26T08:31:42.5176577Z Artifact download URL: https://github.com/Vanguduza/Van/actions/runs/40292596591/artifacts/12636473856
+2026-10-26T08:31:42.5344117Z Post job cleanup.
+2026-10-26T08:31:42.5880040Z [command]/usr/bin/git version
+2026-10-26T08:31:42.5913166Z git version 2.55.0
+2026-10-26T08:31:42.5938302Z Temporarily overriding HOME='/home/runner/work/_temp/9f3693bc-c73b-4129-9a65-a1852f81c56d' before making global git config changes
+2026-10-26T08:31:42.5939039Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-26T08:31:42.5942288Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Van/Van
+2026-10-26T08:31:42.5973895Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-26T08:31:42.6002270Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-26T08:31:42.6220155Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-26T08:31:42.6246086Z http.https://github.com/.extraheader
+2026-10-26T08:31:42.6255859Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-26T08:31:42.6286584Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-26T08:31:42.6501254Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-26T08:31:42.6532410Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-26T08:31:42.6844379Z Cleaning up orphan processes
+2026-10-26T08:31:42.7093904Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+

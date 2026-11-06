@@ -1,0 +1,112 @@
+FF...................FFF..F........                                      [100%]
+=================================== FAILURES ===================================
+_ test_future_observations_cannot_supply_an_actual_before_their_declared_availability _
+
+    def test_future_observations_cannot_supply_an_actual_before_their_declared_availability():
+        recorder=CalendarRecorder();scheduled=_sched(recorder)
+        for source in ('a','b'):recorder.observe(_obs(scheduled.event_key,source,'150000',SCHED_MS+500))
+        past=recorder.record(scheduled.event_key,now_ms=SCHED_MS+100)
+>       assert past.agreed_actual is None and past.observations==()
+E       AssertionError: assert (Decimal('150000') is None)
+E        +  where Decimal('150000') = ReleaseRecord(scheduled=ScheduledRelease(event_key='NFP:1700000000000', name='NFP', scheduled_ms=1700000000000, curren...RIFIED'>, agreed_actual=Decimal('150000'), agreeing_sources=('a', 'b'), dissenting=(), first_observed_ms=1700000000500).agreed_actual
+
+trading/tests/test_calendar_causal_boundaries.py:21: AssertionError
+_ test_future_revision_does_not_erase_the_original_agreement_at_an_earlier_cutoff _
+
+    def test_future_revision_does_not_erase_the_original_agreement_at_an_earlier_cutoff():
+        recorder=CalendarRecorder();scheduled=_sched(recorder)
+        first=recorder.observe(_obs(scheduled.event_key,'a','150000',SCHED_MS+100))
+        recorder.observe(_obs(scheduled.event_key,'b','150000',SCHED_MS+100))
+        recorder.observe(replace(first,actual=Decimal('142000'),observed_ms=SCHED_MS+9000,
+            revision_of=first.observation_id))
+        past=recorder.record(scheduled.event_key,now_ms=SCHED_MS+200)
+>       assert past.status is ReleaseStatus.VERIFIED and past.agreed_actual==Decimal('150000')
+E       AssertionError: assert (<ReleaseStatus.DISPUTED: 'DISPUTED'> is <ReleaseStatus.VERIFIED: 'VERIFIED'>)
+E        +  where <ReleaseStatus.DISPUTED: 'DISPUTED'> = ReleaseRecord(scheduled=ScheduledRelease(event_key='NFP:1700000000000', name='NFP', scheduled_ms=1700000000000, curren...ISPUTED'>, agreed_actual=None, agreeing_sources=('b',), dissenting=(('a', '142000'),), first_observed_ms=1700000000100).status
+E        +  and   <ReleaseStatus.VERIFIED: 'VERIFIED'> = ReleaseStatus.VERIFIED
+
+trading/tests/test_calendar_causal_boundaries.py:33: AssertionError
+__________ test_as_of_report_does_not_leak_future_observation_counts ___________
+
+    def test_as_of_report_does_not_leak_future_observation_counts():
+        recorder=CalendarRecorder();scheduled=_sched(recorder)
+        recorder.observe(_obs(scheduled.event_key,'a','1',SCHED_MS+500))
+>       assert recorder.report(now_ms=SCHED_MS+100)['observations']==0
+E       assert 1 == 0
+
+trading/tests/test_calendar_causal_boundaries.py:180: AssertionError
+_ test_cold_recovery_reads_original_sealed_records_without_another_publication _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-139/test_cold_recovery_reads_origi0')
+
+    def test_cold_recovery_reads_original_sealed_records_without_another_publication(tmp_path):
+        path=tmp_path/'calendar.sqlite';ledger=Ledger(path)
+        recorder=CalendarRecorder(ledger=ledger);scheduled=_sched(recorder)
+        for source in ('a','b'):recorder.observe(_obs(scheduled.event_key,source,'1',SCHED_MS+500))
+        before=ledger.head();ledger.close();cold=Ledger(path)
+        try:
+            recovered=CalendarRecorder.from_ledger(cold)
+>           assert recovered.record(scheduled.event_key,now_ms=SCHED_MS+100).agreed_actual is None
+E           AssertionError: assert Decimal('1') is None
+E            +  where Decimal('1') = ReleaseRecord(scheduled=ScheduledRelease(event_key='NFP:1700000000000', name='NFP', scheduled_ms=1700000000000, curren...: 'VERIFIED'>, agreed_actual=Decimal('1'), agreeing_sources=('a', 'b'), dissenting=(), first_observed_ms=1700000000500).agreed_actual
+E            +    where ReleaseRecord(scheduled=ScheduledRelease(event_key='NFP:1700000000000', name='NFP', scheduled_ms=1700000000000, curren...: 'VERIFIED'>, agreed_actual=Decimal('1'), agreeing_sources=('a', 'b'), dissenting=(), first_observed_ms=1700000000500) = record('NFP:1700000000000', now_ms=(1700000000000 + 100))
+E            +      where record = <vati.calendar.recorder.CalendarRecorder object at 0x7f7ac0ebde80>.record
+E            +      and   'NFP:1700000000000' = ScheduledRelease(event_key='NFP:1700000000000', name='NFP', scheduled_ms=1700000000000, currencies=('USD',), tier=1, unit='', forecast=Decimal('160000'), previous=None).event_key
+
+trading/tests/test_calendar_causal_boundaries.py:193: AssertionError
+_ test_legacy_envelope_clock_is_preserved_and_explicitly_unqualified_on_recovery _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-139/test_legacy_envelope_clock_is_0')
+
+    def test_legacy_envelope_clock_is_preserved_and_explicitly_unqualified_on_recovery(tmp_path):
+        ledger=Ledger(tmp_path/'calendar.sqlite')
+        try:
+            recorder=CalendarRecorder(ledger=ledger);scheduled=_sched(recorder)
+            observed=_obs(scheduled.event_key,'a','1',SCHED_MS+500)
+            legacy=make_event(EventKind.CALENDAR_RELEASE,PRODUCER,{**observed.body(),'observation_id':observed.observation_id},
+                event_time_ms=observed.released_ms,received_time_ms=observed.released_ms,correlation_id=observed.event_key)
+            ledger.append(legacy);before=ledger.head()
+            recovered=CalendarRecorder.from_ledger(ledger)
+            assert recovered.report()['legacy_envelope_availability_unqualified']==[observed.observation_id]
+>           assert recovered.report(now_ms=SCHED_MS+100)['legacy_envelope_availability_unqualified']==[]
+E           AssertionError: assert ['e6ee6bee9b5...2063319d8ea2'] == []
+E             
+E             Left contains one more item: 'e6ee6bee9b52f3cd07812063319d8ea2'
+E             Use -v to get more diff
+
+trading/tests/test_calendar_causal_boundaries.py:212: AssertionError
+_ test_actual_concurrent_calendar_publishers_serialize_one_original_per_backend[sqlite] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-139/test_actual_concurrent_calenda0')
+backend = 'sqlite'
+
+    @pytest.mark.parametrize('backend',['sqlite','postgres'])
+    def test_actual_concurrent_calendar_publishers_serialize_one_original_per_backend(tmp_path,backend):
+        factory=ledger_factory(tmp_path,backend);initial=factory();initial.close()
+        def publish(_):
+            ledger=factory()
+            try:
+                recorder=CalendarRecorder(ledger=ledger);scheduled=_sched(recorder)
+                original=recorder.observe(_obs(scheduled.event_key,'original-publisher','1',SCHED_MS+100))
+                return original.observation_id
+            finally:ledger.close()
+        with ThreadPoolExecutor(max_workers=2) as pool:ids=list(pool.map(publish,range(4)))
+        cold=factory()
+        try:
+            assert len(set(ids))==1
+            assert cold.count(EventKind.CALENDAR_SCHEDULE)==cold.count(EventKind.CALENDAR_RELEASE)==1
+            recovered=CalendarRecorder.from_ledger(cold)
+            assert recovered.records()[0].agreed_actual==Decimal('1') and cold.verify_chain()[0]
+>           assert recovered.records(now_ms=SCHED_MS+99)[0].agreed_actual is None
+E           AssertionError: assert Decimal('1') is None
+E            +  where Decimal('1') = ReleaseRecord(scheduled=ScheduledRelease(event_key='NFP:1700000000000', name='NFP', scheduled_ms=1700000000000, curren..., agreed_actual=Decimal('1'), agreeing_sources=('original-publisher',), dissenting=(), first_observed_ms=1700000000100).agreed_actual
+
+trading/tests/test_calendar_causal_boundaries.py:267: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_calendar_causal_boundaries.py::test_future_observations_cannot_supply_an_actual_before_their_declared_availability
+FAILED trading/tests/test_calendar_causal_boundaries.py::test_future_revision_does_not_erase_the_original_agreement_at_an_earlier_cutoff
+FAILED trading/tests/test_calendar_causal_boundaries.py::test_as_of_report_does_not_leak_future_observation_counts
+FAILED trading/tests/test_calendar_causal_boundaries.py::test_cold_recovery_reads_original_sealed_records_without_another_publication
+FAILED trading/tests/test_calendar_causal_boundaries.py::test_legacy_envelope_clock_is_preserved_and_explicitly_unqualified_on_recovery
+FAILED trading/tests/test_calendar_causal_boundaries.py::test_actual_concurrent_calendar_publishers_serialize_one_original_per_backend[sqlite]
+6 failed, 29 passed, 2 deselected in 0.50s

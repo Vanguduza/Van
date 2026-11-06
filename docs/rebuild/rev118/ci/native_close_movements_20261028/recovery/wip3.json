@@ -1,0 +1,25 @@
+{
+  "base": "8ff365d42bb118620d3b53a0d932edeb085b1350",
+  "created_at": "2026-10-28T20:23:56.132489+00:00",
+  "state": "IN_PROGRESS_NOT_SETTLEMENT_OR_RISK_ADMISSION",
+  "files": {
+    "trading/vati/funding/movement_journal.py": "bb8aa6f5111baf33adb07ec798351db6ef965c2581ab025238b6012dfe962352",
+    "trading/vati/funding/runtime.py": "e02cddf4b95d7ffc2dc6e76671c0b289e60ff7c509b4a1b65c5d4eaa60cd0460",
+    "trading/vati/funding/close_postings.py": "fdc0c8dfcdd369f7d63fab55c45e4f570dcabcf081955d8a1edb52237a719b50",
+    "trading/tests/test_native_close_movement.py": "b3cc822e538e5d51725e806bd4c4ce5e5624bf75377eba2cfe46efd56b3d9db9",
+    "trading/tests/test_native_close_movement_postgres.py": "9bf06b2d302347ee024da0437a87863d9f2f0ae98c2f4f4c0b3ab82c95f2dd24"
+  },
+  "verified_checks": {
+    "consumers_SQL_passed": 449,
+    "skips_failures_errors_audit": 0,
+    "matched_pins": 1277,
+    "owned_PG_independently_absent": true,
+    "prior_focused_SQL_passed": 163,
+    "original_test_files_not_modified": true
+  },
+  "actual_receipt": "/workspace/van-native-close-movement-consumers-sql-r1-20261028/receipt.json",
+  "next": "Inspect final code, regenerate/check affected evidence and manifest, genuine hook/required-baseline verify/normalpush/exactCI; continue full economic obligations/currentpolicy/cohort/reservations/effects. No whole-unit or native qualification.",
+  "archive": "/workspace/van-native-close-movement-wip3-20261028.zip",
+  "bytes": 17823,
+  "sha256": "d535edbc3ed58b227ae008826b6575c87f4002819f466224810d656877cf49a9"
+}

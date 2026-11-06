@@ -1,0 +1,77 @@
+{
+  "at_utc": "2026-11-01T10:57:38.003709+00:00",
+  "state": "R2_FROZEN_FOR_INDEPENDENT_CI4_REVIEW_01_RECHECK_NOT_COMMITTED_NOT_NATIVE_QUALIFIED",
+  "base": "fd33b0759b9ae170f8bdfdf27f9afe7082da7830",
+  "owned_paths": {
+    ".github/workflows/van-ci.yml": "d01072bb9580f97191c42887f66edb0bc4b67e52790c971e548987f079e54292",
+    "tools/ci/github-actions-ci.yml": "d01072bb9580f97191c42887f66edb0bc4b67e52790c971e548987f079e54292",
+    "tools/rebuild/backend_public_source.py": "36d743ea8489c39b67cda800b0b1016cb32b0b3df779a5714d6d5288b06cac0b",
+    "tools/rebuild/public_source_shards.py": "cbab1119dfbe47c7d7a27b45590c009559d60d719a6483c761f37b48ed8b4973",
+    "tools/rebuild/backend_public_source_costs.json": "87bea238bd0bbd85bc75bf5a3f1271284d2da7d8833a60ef2805e5f9220f1779",
+    "tests/rebuild/test_public_source_shards.py": "ae895b4887587e8df0a4ed9d687b7b9139ec3b6975b107af2933cd8cb4cf75fc",
+    "tests/contracts/test_ci_public_source_shards.py": "5d80f268b9af8b9827e025af3c9fd2f37edbd110301be6257568190fcb5eb87a",
+    "docs/rebuild/rev118/ci/PUBLIC_SOURCE_SHARDS_20261101.md": "9f81c330dff73bf9124f8808ea46c0b9191ba6de7fc083cc57908e8ce3331177"
+  },
+  "before_sha256": {
+    ".github/workflows/van-ci.yml": "dac912c785c2993a2498f00f9073842efdb3646a46ae70faf0b9f95c24792535",
+    "tools/ci/github-actions-ci.yml": "dac912c785c2993a2498f00f9073842efdb3646a46ae70faf0b9f95c24792535",
+    "tools/rebuild/backend_public_source.py": "8c1a4ce1e6e92905a609efc52ed1ac9467696eb4b1b86d49656839e31f61ddd4",
+    "tools/rebuild/public_source_shards.py": null,
+    "tools/rebuild/backend_public_source_costs.json": null,
+    "tests/rebuild/test_public_source_shards.py": null,
+    "tests/contracts/test_ci_public_source_shards.py": null,
+    "docs/rebuild/rev118/ci/PUBLIC_SOURCE_SHARDS_20261101.md": null
+  },
+  "changed_since_r1": [
+    "tools/rebuild/backend_public_source.py",
+    "tools/rebuild/public_source_shards.py",
+    "tests/rebuild/test_public_source_shards.py",
+    "docs/rebuild/rev118/ci/PUBLIC_SOURCE_SHARDS_20261101.md"
+  ],
+  "archive_sha256": "7199a898e5802790898b63eb93abaaffea603b89f5057c0820c004420722b82c",
+  "patch_sha256": "7bf7270ed1ab6d7fc8586af31cd1571fd6c12ff50a08fb4ce146216fb92d4358",
+  "archive_current_bytes_verified": true,
+  "cached_applycheck": "PASS no index mutation",
+  "original_review": "/workspace/van-ci-shards-independent-review-20261101/review.json",
+  "original_counterexample": "/workspace/van-ci-shards-independent-review-20261101/untracked-collection-results.json",
+  "original_archive": "/workspace/van-ci-shards-wip-r1-20261101/SOURCE.zip",
+  "original_archive_sha256": "87bfc6e299e450c9bc2320c791f12ce1deb444b5172475a939685b32b890de0b",
+  "actual_instrument_tests": {
+    "passed": 92,
+    "skipped": 0,
+    "seconds": 18.07,
+    "receipt": "/workspace/van-ci-shards-focused-r12-20261101/receipt.json",
+    "junit": "/workspace/van-ci-shards-focused-r12-20261101/tests.xml",
+    "log": "/workspace/van-ci-shards-focused-r12-20261101/tests.log",
+    "storage_audit": "/workspace/van-ci-shards-focused-r12-20261101/storage-audit.json",
+    "all_before_after_pins_unchanged": true
+  },
+  "actual_runtime_parity": {
+    "receipt": "/workspace/van-ci-shards-runtime-parity-20261101/PARITY_RECEIPT.json",
+    "gateway_original_explicit_full_collection": 5990,
+    "media_original_explicit_full_collection": 198,
+    "effective_config_root_conftest_cut_plugin_sources_entrypoints_nodeids": "identical within each original locked runtime",
+    "scope": "Full collection only. Zero application cases executed by parity checks; not native hosted qualification. Gateway backend lock versions all equal; media genuine require-hashes lock plus original observed pytest versions."
+  },
+  "repair_contract": [
+    "Refuse EVERY ordinary/ignored untracked input except exact inert public-evidence filenames under explicit artifact roots and exact root pytest-cache data filenames; no extension-only trust",
+    "Refuse added conftest, Python/plugin/native/bytecode/config AND data consumed by parametrization; no .gitignore authority or owner-file deletion",
+    "Committed root pytest.ini, explicit root/confcutdir and canonical original PYTHONPATH; no foreign import/startup/optimized assertion inputs",
+    "Disable ambient plugin autoload and explicitly preserve observed gateway asyncio+anyio vs media asyncio-only; native installed entrypoints must match; effective config/plugin code hashes and environment imported paths verified",
+    "Real tiny producers preserve tracked conftest fixtures, full collection/execute/media/control/teardown; actual ordinary+ignored collector/data/config/bytecode injection refuses with original8 IDs and inert-output positive8 IDs"
+  ],
+  "preserved_failures": [
+    "R6 and R8 reserve refusal before tests",
+    "R9 unknown-hook naming instrument error (87pass2fail), corrected without application changes",
+    "R11 synthetic fixture ignored its uncommitted costs JSON (91pass1fail); guard correctly refused, fixture committed its original costs before final92pass",
+    "Original independent CI4-REVIEW-01 omission and all prior native failed/cancelled runs"
+  ],
+  "workflow_scope": "Required backend-public-source ID/display name retained; other jobs/top-level triggers/concurrency/permissions/environment/fixtures unchanged; exact mirror and frozen mutation bytes checked in final92cases. No new authorization/checker/ledger/native credential scope.",
+  "remaining": [
+    "Independent exact counterexample recheck before commit/push",
+    "Final canonical/manifest/genuine hooks/required4fd baseline verification and normal publication",
+    "Future exact-head native4 isolated worker terminal execution/union/skips/failures and actual runtime evidence; no speed/qualification from estimates"
+  ],
+  "owned_jobs": "All local instrument/parity controllers terminal/reaped; no active watch or SDK/Gradle task from this lane",
+  "native_fd33_readback": "/workspace/van-ci-shards-wip-r1-20261101/FD33_CI_FREEZE_READBACK.json"
+}

@@ -28,6 +28,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from decimal import Decimal
+from fractions import Fraction
 from enum import Enum
 from typing import Any, Optional
 
@@ -35,6 +36,7 @@ from vati.core.canonical import canonical_hash, dec
 from vati.core.events import EventKind, make_event
 from vati.lifecycle.family import FamilyState, PositionFamily
 from vati.risk.contracts import Direction
+from vati.risk.arithmetic import fraction, decimal
 
 PRODUCER = "vati-risk-envelope"
 ENVELOPE_VERSION = "risk-envelope/5.1.0"
@@ -108,6 +110,13 @@ class PositionRiskEnvelope:
     equity: Decimal
     assessed_ms: int
     envelope_version: str = ENVELOPE_VERSION
+    _credit_exact: Optional[Fraction] = field(default=None, repr=False, compare=False)
+
+    @property
+    def worst_case_exact(self) -> Fraction:
+        credit = (fraction(self.protected_profit_credit) if self._credit_exact is None
+                  else self._credit_exact)
+        return max(Fraction(0), fraction(self.open_risk_money) - credit)
 
     @property
     def worst_case_loss(self) -> Decimal:
@@ -116,20 +125,19 @@ class PositionRiskEnvelope:
         Credit reduces the number only when it was earned by a certificate,
         which is the whole content of INV-PPC-001.
         """
-        loss = self.open_risk_money - self.protected_profit_credit
-        return loss if loss > ZERO else ZERO
+        return decimal(self.worst_case_exact)
 
     @property
     def open_risk_pct(self) -> Optional[Decimal]:
         if self.equity <= ZERO:
             return None
-        return self.open_risk_money / self.equity
+        return decimal(fraction(self.open_risk_money) / fraction(self.equity))
 
     @property
     def worst_case_pct(self) -> Optional[Decimal]:
         if self.equity <= ZERO:
             return None
-        return self.worst_case_loss / self.equity
+        return decimal(self.worst_case_exact / fraction(self.equity))
 
     @property
     def risk_is_known(self) -> bool:
@@ -163,6 +171,23 @@ class PositionRiskEnvelope:
         return canonical_hash(self.body())
 
 
+@dataclass(frozen=True)
+class NativeFamilyRiskEnvelope(PositionRiskEnvelope):
+    """Per-leg native stop risk; no aggregate stop certifies protection."""
+    native_membership_ref: str = ""
+    leg_protections: tuple = ()
+    native_risk_known: bool = False
+
+    @property
+    def risk_is_known(self) -> bool:
+        return self.native_risk_known
+
+    def body(self):
+        return {**super().body(), "native_membership_ref": self.native_membership_ref,
+                "leg_protections": list(self.leg_protections),
+                "envelope_version": "native-family-risk-envelope/1"}
+
+
 class EnvelopeCalculator:
     """Computes envelopes, and decides what banked profit is allowed to mean."""
 
@@ -193,15 +218,16 @@ class EnvelopeCalculator:
         if not cert.valid_at(now_ms):
             # An expired certificate gives zero, not its last known value.
             return ZERO, HaircutReason.CERTIFICATE_EXPIRED
-        return realised * MAX_PROTECTED_PROFIT_FRACTION, HaircutReason.NONE
+        return Fraction(realised) * fraction(MAX_PROTECTED_PROFIT_FRACTION), HaircutReason.NONE
 
     def compute(self, family: PositionFamily, *, mark: Decimal,
                 value_per_price_unit: Decimal, equity: Decimal,
                 now_ms: int) -> PositionRiskEnvelope:
         mark = dec(mark)
         vpu = dec(value_per_price_unit)
-        realised = family.realised_money * vpu
-        unrealised = family.unrealised_money(mark) * vpu
+        realised_exact = family.accounting()[3] * fraction(vpu)
+        realised = decimal(realised_exact)
+        unrealised = decimal(family.unrealised_exact(mark) * fraction(vpu))
 
         if family.current_stop is None:
             # Unknown stop is unbounded risk. Using the mark-to-zero distance
@@ -210,13 +236,13 @@ class EnvelopeCalculator:
             open_risk = ZERO
             credit, reason = ZERO, HaircutReason.STOP_UNKNOWN
         else:
-            distance = abs(mark - family.current_stop)
+            distance = abs(fraction(mark) - fraction(family.current_stop))
             if family.direction is Direction.LONG and family.current_stop > mark:
-                distance = ZERO      # stop already through the mark; exit is due
+                distance = 0         # stop already through the mark; exit is due
             if family.direction is Direction.SHORT and family.current_stop < mark:
-                distance = ZERO
-            open_risk = distance * family.net_quantity * vpu
-            credit, reason = self._credit(family, realised, now_ms)
+                distance = 0
+            open_risk = decimal(distance * family.accounting()[0] * fraction(vpu))
+            credit, reason = self._credit(family, realised_exact, now_ms)
 
         env = PositionRiskEnvelope(
             family_id=family.family_id, account_alias=family.account_alias,
@@ -224,7 +250,8 @@ class EnvelopeCalculator:
             average_entry=family.average_entry, current_stop=family.current_stop,
             mark=mark, value_per_price_unit=vpu, open_risk_money=open_risk,
             realised_money=realised, unrealised_money=unrealised,
-            protected_profit_credit=credit, haircut_reason=reason,
+            protected_profit_credit=decimal(credit), haircut_reason=reason,
+            _credit_exact=Fraction(credit),
             equity=dec(equity), assessed_ms=now_ms)
 
         if self._ledger is not None:
@@ -234,16 +261,50 @@ class EnvelopeCalculator:
                 correlation_id=family.family_id))
         return env
 
+    def compute_native(self, family, snapshot, *, mark, value_per_price_unit, equity, now_ms):
+        """Keep family economics, but sum the actual independent native risks."""
+        if (snapshot.family_id != family.family_id or snapshot.account_alias != family.account_alias
+                or snapshot.symbol != family.symbol or snapshot.direction != family.direction.value):
+            raise ValueError("native family risk scope differs from original family")
+        mark, vpu = dec(mark), dec(value_per_price_unit)
+        known = snapshot.known and snapshot.remaining_exact == family.accounting()[0]
+        risk = Fraction(0); protections = []
+        for leg in snapshot.legs:
+            active = leg.remaining is None or leg.remaining > ZERO
+            confirmed = not active or (leg.protection_confirmed and leg.stop is not None)
+            known = known and confirmed
+            protections.append({"position_id": leg.position_id, "trade_intent_id": leg.trade_intent_id,
+                "remaining": None if leg.remaining is None else str(leg.remaining),
+                "stop": None if leg.stop is None else str(leg.stop), "confirmed": confirmed,
+                "source_refs": list(leg.source_refs)})
+            if active and leg.remaining is not None and leg.stop is not None:
+                distance = (fraction(mark)-fraction(leg.stop) if family.direction is Direction.LONG
+                            else fraction(leg.stop)-fraction(mark))
+                risk += max(Fraction(0), distance) * fraction(leg.remaining) * fraction(vpu)
+        env = NativeFamilyRiskEnvelope(family_id=family.family_id, account_alias=family.account_alias,
+            symbol=family.symbol, net_quantity=family.net_quantity, average_entry=family.average_entry,
+            current_stop=None, mark=mark, value_per_price_unit=vpu, open_risk_money=decimal(risk),
+            realised_money=decimal(family.accounting()[3]*fraction(vpu)),
+            unrealised_money=decimal(family.unrealised_exact(mark)*fraction(vpu)),
+            protected_profit_credit=ZERO, haircut_reason=(HaircutReason.NO_CERTIFICATE if known
+                else HaircutReason.STOP_UNKNOWN), equity=dec(equity), assessed_ms=now_ms,
+            _credit_exact=Fraction(0),native_membership_ref=snapshot.digest,
+            leg_protections=tuple(protections), native_risk_known=bool(known))
+        if self._ledger is not None:
+            self._ledger.append(make_event(EventKind.POSITION_RISK_ENVELOPE,self._producer,env.body(),
+                event_time_ms=now_ms,received_time_ms=now_ms,correlation_id=family.family_id))
+        return env
+
     def portfolio_worst_case(self, envelopes: list[PositionRiskEnvelope]) -> dict[str, Any]:
         """Sum of family worst cases. Families with unknown risk are named
         rather than counted as zero."""
         unknown = [e.family_id for e in envelopes if not e.risk_is_known]
-        total = sum((e.worst_case_loss for e in envelopes if e.risk_is_known), ZERO)
+        total = decimal(sum((e.worst_case_exact for e in envelopes if e.risk_is_known), 0))
         return {
             "envelope_version": ENVELOPE_VERSION,
             "families": len(envelopes),
             "worst_case_loss": str(total),
-            "credited": str(sum((e.protected_profit_credit for e in envelopes), ZERO)),
+            "credited": str(decimal(sum((fraction(e.protected_profit_credit) for e in envelopes), 0))),
             "families_with_unknown_risk": unknown,
             "risk_fully_known": not unknown,
         }

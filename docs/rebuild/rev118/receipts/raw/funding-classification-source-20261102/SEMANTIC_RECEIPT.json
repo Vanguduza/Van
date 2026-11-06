@@ -1,0 +1,101 @@
+{
+  "state": "TERMINAL",
+  "source_before": {
+    "trading/vati/funding/classification_journal.py": "59c7f1b9b8a1b1dd4fb416319655d43fcc938fdcb7df006aad9ffa4258d75beb",
+    "backend/van_gateway/trading/funding_classification_api.py": "b306abaacc9bf625333e50bc80487bd9d02e4801b8e3bab976e28b8908b62f7f",
+    "trading/tests/test_funding_classification_journal.py": "3b25920ce903b021923f7030995d649b258f6d5a71d00784aaff7e58a170943d",
+    "backend/tests/test_funding_classification_api.py": "70daa49eaee117c8342d546bef0e531ae612f6e00f490519b461530ef1c87f38",
+    "backend/tests/test_funding_classification_authority.py": "b4787821b263b04feabaf44cc50553dfda714ee4d056578c8b5d1b8185b55d77",
+    "trading/vati/funding/runtime.py": "f12a4ba303b40cc77415ce5a3d760690a3bef737f665ff6ef4cc6ce14aec5efc",
+    "trading/vati/core/events.py": "31480e73e4f067b0e980e592e5527a6a943aea6f634775914fe880c485bafd3a",
+    "backend/van_gateway/app.py": "53ddf7e582e30feff0dd823ec57a7d725d686deeb2a0626759a64abf9db08328",
+    "backend/van_gateway/context/forget.py": "73ab8c429419ce1c5aae4911a602586d0cdc3427b1a2b6fa17d4b81d9cae2784"
+  },
+  "scope": "All eight existing reference-derived registry/function/workmap semantic consumer modules after canonical owner source regeneration; source-only, no native qualification.",
+  "outer_node_inputs_shape": {
+    "NODE_OPTIONS": {
+      "present": false,
+      "nonempty": false,
+      "sha256": null
+    },
+    "NODE_PATH": {
+      "present": true,
+      "nonempty": true,
+      "sha256": "dbc7bc884f72c70bb3d320e868da710a56a621286fba48b3c6b610776b41b4fd"
+    },
+    "NODE_COMPILE_CACHE": {
+      "present": false,
+      "nonempty": false,
+      "sha256": null
+    },
+    "NODE_DISABLE_COMPILE_CACHE": {
+      "present": false,
+      "nonempty": false,
+      "sha256": null
+    }
+  },
+  "tmp_reserve": 2147483648,
+  "owned_run_budget": 134217728,
+  "file_cap": 8388608,
+  "started": "2026-11-02T01:46:23.307479+00:00",
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "-B",
+    "/workspace/van-review-2026-10-18/publish/tools/rebuild/source_storage_audit.py",
+    "--checkout-root",
+    "/workspace/van-review-2026-10-18/publish",
+    "--report",
+    "/tmp/van-recovery-funding-label-semantic-20261102/audit.json",
+    "tests/contracts/test_artemis_acceptance_plan.py",
+    "tests/contracts/test_artemis_usb_acceptance.py",
+    "tests/contracts/test_ci_dds_contract_pin.py",
+    "tests/contracts/test_native_artemis_plan.py",
+    "tests/contracts/test_owner_endpoint_registry.py",
+    "tests/contracts/test_owner_redesign_registry.py",
+    "tests/rebuild/test_owner_registry_refresh.py",
+    "tests/rebuild/test_source_workmap.py",
+    "--rootdir=/workspace/van-review-2026-10-18/publish",
+    "-c",
+    "/workspace/van-review-2026-10-18/publish/pytest.ini",
+    "-p",
+    "pytest_asyncio.plugin",
+    "-p",
+    "anyio.pytest_plugin",
+    "--basetemp=/tmp/van-recovery-pytest-funding-label-semantic-20261102",
+    "--junitxml=/tmp/van-recovery-funding-label-semantic-20261102/tests.xml",
+    "-q"
+  ],
+  "exit": 0,
+  "child_pid": 1341313,
+  "child_waited": true,
+  "peak_owned_bytes": 17129149,
+  "seconds": 37.39162977300293,
+  "children_remaining": [],
+  "tests": 220,
+  "failures": 0,
+  "errors": 0,
+  "skips": 0,
+  "cleanup": {
+    "path": "/tmp/van-recovery-pytest-funding-label-semantic-20261102",
+    "files": 520,
+    "inventory": "/tmp/van-recovery-funding-label-semantic-20261102/owned-temp-inventory.json",
+    "inventory_sha256": "f944a1dcad9d5ee4611659c300d16d4276a5e2c7abd47befc4c8280b3f58d511",
+    "free_bytes_before_cleanup": 2262999040,
+    "free_bytes_after_cleanup": 2281979904,
+    "free_inodes_after": 2198360,
+    "independently_absent": true
+  },
+  "source_after": {
+    "trading/vati/funding/classification_journal.py": "59c7f1b9b8a1b1dd4fb416319655d43fcc938fdcb7df006aad9ffa4258d75beb",
+    "backend/van_gateway/trading/funding_classification_api.py": "b306abaacc9bf625333e50bc80487bd9d02e4801b8e3bab976e28b8908b62f7f",
+    "trading/tests/test_funding_classification_journal.py": "3b25920ce903b021923f7030995d649b258f6d5a71d00784aaff7e58a170943d",
+    "backend/tests/test_funding_classification_api.py": "70daa49eaee117c8342d546bef0e531ae612f6e00f490519b461530ef1c87f38",
+    "backend/tests/test_funding_classification_authority.py": "b4787821b263b04feabaf44cc50553dfda714ee4d056578c8b5d1b8185b55d77",
+    "trading/vati/funding/runtime.py": "f12a4ba303b40cc77415ce5a3d760690a3bef737f665ff6ef4cc6ce14aec5efc",
+    "trading/vati/core/events.py": "31480e73e4f067b0e980e592e5527a6a943aea6f634775914fe880c485bafd3a",
+    "backend/van_gateway/app.py": "53ddf7e582e30feff0dd823ec57a7d725d686deeb2a0626759a64abf9db08328",
+    "backend/van_gateway/context/forget.py": "73ab8c429419ce1c5aae4911a602586d0cdc3427b1a2b6fa17d4b81d9cae2784"
+  },
+  "outer_node_environment_unchanged": true,
+  "completed": "2026-11-02T01:47:00.837434+00:00"
+}

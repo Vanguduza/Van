@@ -80,7 +80,7 @@ class N8nManagementClient:
             raise N8nClientError("AUTOMATION_FABRIC_UNCONFIGURED")
         self._assert_private_host()
 
-    def _assert_private_host(self) -> None:
+    def _assert_private_host(self, url: str | None = None) -> None:
         """§14 — management API binds to loopback or a dedicated private interface.
 
         The test is ``is_global`` rather than ``not is_private``: Python treats
@@ -90,7 +90,10 @@ class N8nManagementClient:
         """
         if self.allow_non_private_host:
             return
-        host = urlparse(self.base_url).hostname or ""
+        parsed = urlparse(self.base_url if url is None else url)
+        if parsed.scheme not in {"http", "https"} or not parsed.hostname or parsed.username or parsed.password:
+            raise N8nClientError("AUTOMATION_MANAGEMENT_URL_INVALID")
+        host = parsed.hostname
         try:
             address = ipaddress.ip_address(host)
         except ValueError:
@@ -107,26 +110,37 @@ class N8nManagementClient:
             timeout=self.timeout_seconds,
             transport=self.transport,
             headers={"X-N8N-API-KEY": self._api_key, "Accept": "application/json"},
+            follow_redirects=False,
+            trust_env=False,
         )
 
     async def _request(self, method: str, path: str, **kwargs: Any) -> httpx.Response:
         self._assert_usable()
         last: Exception | None = None
-        for attempt in range(self.MAX_ATTEMPTS):
+        attempts = self.MAX_ATTEMPTS if method.upper() in {"GET", "HEAD"} else 1
+        for attempt in range(attempts):
             try:
                 async with self._client() as client:
                     response = await client.request(method, path, **kwargs)
-                if response.status_code in (429, 502, 503, 504) and attempt + 1 < self.MAX_ATTEMPTS:
+                if response.status_code in (429, 502, 503, 504) and attempt + 1 < attempts:
                     last = N8nClientError("AUTOMATION_FABRIC_UNAVAILABLE", str(response.status_code))
                 elif response.status_code == 401:
                     raise N8nClientError("AUTOMATION_CREDENTIAL_EXPIRED")
+                elif 300 <= response.status_code < 400:
+                    raise N8nClientError("AUTOMATION_UPSTREAM_REDIRECT")
                 elif response.status_code >= 400:
                     raise N8nClientError("AUTOMATION_REQUEST_FAILED", f"{response.status_code}")
                 else:
                     return response
-            except httpx.HTTPError as exc:
+            except httpx.TimeoutException as exc:
+                if attempts == 1:
+                    raise N8nClientError("N8N_TIMEOUT") from exc
                 last = exc
-            if attempt + 1 < self.MAX_ATTEMPTS:
+            except httpx.HTTPError as exc:
+                if attempts == 1:
+                    raise N8nClientError("N8N_UNREACHABLE") from exc
+                last = exc
+            if attempt + 1 < attempts:
                 # P3-OPS-006: this was `time.sleep`, inside an `async def`, inside the
                 # gateway's single event loop. Every other request the gateway was
                 # serving stopped for the duration — including the owner's — because
@@ -134,14 +148,15 @@ class N8nManagementClient:
                 await asyncio.sleep(
                     self.BACKOFF_SECONDS[min(attempt, len(self.BACKOFF_SECONDS) - 1)]
                 )
-        raise N8nClientError("AUTOMATION_FABRIC_UNAVAILABLE", str(last) if last else None)
+        raise N8nClientError("AUTOMATION_FABRIC_UNAVAILABLE")
 
     # ------------------------------------------------------------ operations
 
     async def create_workflow(self, graph: dict[str, Any]) -> str:
         response = await self._request("POST", "/workflows", json=graph)
-        workflow_id = response.json().get("id")
-        if not workflow_id:
+        payload = self._json_object(response)
+        workflow_id = payload.get("id")
+        if not isinstance(workflow_id, str) or not workflow_id:
             raise N8nClientError("AUTOMATION_RESPONSE_MALFORMED")
         return str(workflow_id)
 
@@ -155,10 +170,33 @@ class N8nManagementClient:
         await self._request("POST", f"/workflows/{workflow_id}/deactivate")
 
     async def get_workflow(self, workflow_id: str) -> dict[str, Any]:
-        return dict((await self._request("GET", f"/workflows/{workflow_id}")).json())
+        return self._json_object(await self._request("GET", f"/workflows/{workflow_id}"))
 
     async def get_execution(self, execution_id: str) -> dict[str, Any]:
-        return dict((await self._request("GET", f"/executions/{execution_id}")).json())
+        return self._json_object(await self._request("GET", f"/executions/{execution_id}"))
+
+    @staticmethod
+    def _json_object(response: httpx.Response) -> dict[str, Any]:
+        try:
+            payload = response.json()
+        except ValueError as exc:
+            raise N8nClientError("AUTOMATION_RESPONSE_MALFORMED") from exc
+        if not isinstance(payload, dict):
+            raise N8nClientError("AUTOMATION_RESPONSE_MALFORMED")
+        return payload
+
+    async def create_worker_credential(self, worker_token: str) -> str:
+        """Bind the dedicated callback token to n8n's real header credential type."""
+        schema = self._json_object(await self._request("GET", "/credentials/schema/httpHeaderAuth"))
+        properties = schema.get("properties")
+        if not isinstance(properties, dict) or not {"name", "value"} <= properties.keys():
+            raise N8nClientError("AUTOMATION_HEADER_CREDENTIAL_SCHEMA_UNSUPPORTED")
+        response = await self._request("POST", "/credentials", json={"name": "van-automation-worker",
+            "type": "httpHeaderAuth", "data": {"name": "X-Van-Internal-Token", "value": worker_token}})
+        payload = self._json_object(response)
+        if not isinstance(payload.get("id"), str) or not payload["id"]:
+            raise N8nClientError("AUTOMATION_RESPONSE_MALFORMED")
+        return payload["id"]
 
     def webhook_url(self, path: str) -> str:
         """The production webhook URL for a trigger path.
@@ -205,16 +243,26 @@ class N8nManagementClient:
         self._assert_usable()
         path = await self.trigger_path(workflow_id)
         url = self.webhook_url(path)
-        async with httpx.AsyncClient(
-            timeout=self.timeout_seconds, transport=self.transport
-        ) as client:
-            response = await client.post(url, json=envelope)
+        self._assert_private_host(url)
+        try:
+            async with httpx.AsyncClient(
+                timeout=self.timeout_seconds, transport=self.transport,
+                follow_redirects=False, trust_env=False,
+            ) as client:
+                response = await client.post(url, json=envelope)
+        except httpx.TimeoutException as exc:
+            # A timeout may follow a real side effect. Do not retry this POST.
+            raise N8nClientError("N8N_TIMEOUT") from exc
+        except httpx.HTTPError as exc:
+            raise N8nClientError("N8N_UNREACHABLE") from exc
         if response.status_code == 404:
             # n8n answers 404 on a webhook whose workflow is not active. That is a
             # deployment fault with a specific remedy, not a generic request failure.
             raise N8nClientError("AUTOMATION_WORKFLOW_NOT_ACTIVE", workflow_id)
         if response.status_code >= 400:
             raise N8nClientError("AUTOMATION_REQUEST_FAILED", str(response.status_code))
+        if 300 <= response.status_code < 400:
+            raise N8nClientError("AUTOMATION_UPSTREAM_REDIRECT")
         try:
             payload = response.json()
         except ValueError:
@@ -225,11 +273,22 @@ class N8nManagementClient:
 
     async def runtime_version(self) -> str:
         """Used by the canary; also how §274 drift is detected."""
-        payload = (await self._request("GET", "/settings")).json()
+        # The public /api/v1 API has no settings route. n8n's read-only
+        # frontend settings endpoint is the same one the host provisioner uses.
+        root = self.base_url.split("/api/v1")[0].rstrip("/")
+        try:
+            envelope = (await self._request("GET", f"{root}/rest/settings")).json()
+        except ValueError as exc:
+            raise N8nClientError("AUTOMATION_RESPONSE_MALFORMED") from exc
+        if not isinstance(envelope, dict):
+            raise N8nClientError("AUTOMATION_RESPONSE_MALFORMED")
+        payload = envelope.get("data", envelope)
+        if not isinstance(payload, dict):
+            raise N8nClientError("AUTOMATION_RESPONSE_MALFORMED")
         version = payload.get("versionCli") or payload.get("version")
-        if not version:
-            raise N8nClientError("AUTOMATION_RESPONSE_MALFORMED", "no version in /settings")
-        return str(version)
+        if not isinstance(version, str) or not version:
+            raise N8nClientError("AUTOMATION_RESPONSE_MALFORMED", "no version in /rest/settings")
+        return version
 
     # --------------------------------------------------------------- status
 

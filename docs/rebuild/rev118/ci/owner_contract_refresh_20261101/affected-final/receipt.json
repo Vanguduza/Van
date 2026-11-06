@@ -1,0 +1,46 @@
+{
+  "started_at_utc": "2026-11-01T03:38:32.335509+00:00",
+  "source_parent": "d43bd396765204a4843cdb7485535e9fcd7af3ce",
+  "owned_temp_preflight": {
+    "path": "/tmp/van-recovery-d43-endpoint-registry-affected-r3-20261101",
+    "free_bytes_before": 8923205632,
+    "free_inodes_before": 2304130,
+    "minimum_free_bytes": 4294967296,
+    "no_preexisting_directory": true
+  },
+  "source_pins": {
+    "backend/van_gateway/app.py": "e09319aa0c6309c96eb739a69acea83c4448886fa73af7a79905156c49ca18f0",
+    "registries/owner_endpoints.json": "5365b2e8f45399c86bf6cdd8c07e3d0da49f0af1d00753ca7a3a968c03949e40",
+    "registries/owner_endpoint_schemas.json": "6819288c0d2db8c552fe4914edbc7aa553b4b0e869eb98eef4e6700ff3a8b83d",
+    "tools/audit/export_owner_endpoints.py": "2516a71afea980abc8dfd77cdb41f70978998163b93fa09caafb386b241812f3",
+    "pytest.ini": "f0d599da4fd7a6dd5a24d6a26cdb593f9c8b9c81b43096fdcccfe04dc39a05b2",
+    "tests/contracts/test_owner_endpoint_registry.py": "90d7d18869d6d30b936c6ec54610cbdda673d79cfc314b2ef2e676d49b9f4c7b",
+    "tests/contracts/test_owner_redesign_registry.py": "f62be41f47f127ffc83275aca417ad8d00c31a34d27d599fa46006e5e2ab74c3",
+    "tests/rebuild/test_owner_registry_refresh.py": "2fc772f4612293aa46184a52ca302c2b6507ab56a5b04fb56f58e8551616ba48"
+  },
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "/workspace/van-source-import-proof-runner-20261101.py",
+    "/workspace/van-d43-endpoint-registry-affected-r3-20261101/actual-imports.json",
+    "--report",
+    "/workspace/van-d43-endpoint-registry-affected-r3-20261101/storage-audit.json",
+    "tests/contracts/test_owner_endpoint_registry.py",
+    "tests/contracts/test_owner_redesign_registry.py",
+    "tests/rebuild/test_owner_registry_refresh.py",
+    "--basetemp=/tmp/van-recovery-d43-endpoint-registry-affected-r3-20261101",
+    "--junitxml=/workspace/van-d43-endpoint-registry-affected-r3-20261101/tests.xml",
+    "-q"
+  ],
+  "exit": 0,
+  "owned_temp_cleanup": {
+    "path": "/tmp/van-recovery-d43-endpoint-registry-affected-r3-20261101",
+    "files": 12,
+    "inventory": "/workspace/van-d43-endpoint-registry-affected-r3-20261101/owned-temp-inventory.json",
+    "inventory_sha256": "09e6b2e0b86fcd3f56ae0d9c75c3ee232fd60cd5da9d4ca2eb419311f8dc7ffd",
+    "free_bytes_before_cleanup": 8923156480,
+    "free_bytes_after_cleanup": 8923205632,
+    "free_inodes_after": 2304130,
+    "independently_absent": true
+  },
+  "completed_at_utc": "2026-11-01T03:38:39.424708+00:00"
+}

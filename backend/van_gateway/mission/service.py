@@ -17,12 +17,15 @@ succeeded. There is no argument a caller can make to get past that.
 from __future__ import annotations
 
 import json
+import asyncio
+import hashlib
 import logging
 import time
 import uuid
 from typing import Any
 
 from van_gateway.mission.verifiers import VerifierRegistry
+from van_gateway.mission.hermes_results import HermesResultInbox
 from van_gateway.observability import instruments
 from van_gateway.observability.correlation import for_command
 from van_gateway.observability.logging import log_event
@@ -98,8 +101,15 @@ class MissionService:
         # P1-LEARN-001 — the learning stores had no caller that recorded a real outcome.
         # A mission reaching a terminal state is the outcome; this is where it is written.
         self.learning = learning
+        self.hermes_results = HermesResultInbox(self)
+        self.terminal_projector = None
 
     # ------------------------------------------------------------- creation
+
+    @staticmethod
+    def report_learning_unavailable(mission_id: str, stage: str, error: Exception) -> None:
+        log_event(logging.getLogger("van.learning"),logging.WARNING,"learning projection unavailable",
+            mission_id=mission_id,error_class=type(error).__name__,detail={"stage":stage})
 
     async def create(
         self,
@@ -151,43 +161,51 @@ class MissionService:
             deadline_ms=deadline_ms,
             parent_mission_id=parent_mission_id,
         )
-        await self.store.execute(
-            """
-            INSERT INTO missions(
-              mission_id, owner_principal_id, project_id, origin, origin_channel, title, goal,
-              mission_class, success_contract_json, constraints_json, authority_envelope_json,
-              sensitivity, context_snapshot_id, state, priority, created_at_ms, updated_at_ms,
-              deadline_ms, attention_policy, plan_revision, current_phase, parent_mission_id,
-              final_outcome, verification_state, verification_record_json, learning_record_id
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, NULL,
-                      ?, NULL, NULL)
-            """,
-            (
-                mission.mission_id, owner_principal_id, project_id, origin.value,
-                origin_channel.value, mission.title, mission.goal, mission.mission_class,
-                Store.dumps(mission.success_contract.model_dump(mode="json")),
-                Store.dumps(mission.constraints),
-                Store.dumps(mission.authority_envelope.model_dump(mode="json")),
-                sensitivity.value, context_snapshot_id, mission.state.value, priority,
-                now, now, deadline_ms, mission.attention_policy, 0, parent_mission_id,
-                mission.verification_state.value,
-            ),
+        created_event = MissionEvent(
+            event_id=f"mev_{uuid.uuid4().hex}", mission_id=mission.mission_id,
+            event_type=MissionEventType.MISSION_CREATED,
+            actor=PrincipalType.OWNER_DEVICE
+            if origin in (MissionOrigin.OWNER_VOICE, MissionOrigin.OWNER_TEXT, MissionOrigin.OWNER_UI)
+            else PrincipalType.SYSTEM,
+            occurred_at_ms=now, summary=mission.title,
         )
+        async with self.store.connection() as db:
+            await db.execute("BEGIN IMMEDIATE")
+            await db.execute(
+                """
+                INSERT INTO missions(
+                  mission_id, owner_principal_id, project_id, origin, origin_channel, title, goal,
+                  mission_class, success_contract_json, constraints_json, authority_envelope_json,
+                  sensitivity, context_snapshot_id, state, priority, created_at_ms, updated_at_ms,
+                  deadline_ms, attention_policy, plan_revision, current_phase, parent_mission_id,
+                  final_outcome, verification_state, verification_record_json, learning_record_id
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, NULL,
+                          ?, NULL, NULL)
+                """,
+                (
+                    mission.mission_id, owner_principal_id, project_id, origin.value,
+                    origin_channel.value, mission.title, mission.goal, mission.mission_class,
+                    Store.dumps(mission.success_contract.model_dump(mode="json")),
+                    Store.dumps(mission.constraints),
+                    Store.dumps(mission.authority_envelope.model_dump(mode="json")),
+                    sensitivity.value, context_snapshot_id, mission.state.value, priority,
+                    now, now, deadline_ms, mission.attention_policy, 0, parent_mission_id,
+                    mission.verification_state.value,
+                ),
+            )
+            await self._persist_event(db, created_event)
+            capture_generation = await self._enqueue_learning(db, mission.mission_id, "OPENED", now)
+            await db.commit()
+        await self._publish_event(created_event)
         if self.learning is not None:
             # P2-MEM-001 — a mission is a stated owner goal and, where it needed the
             # owner's presence, a decision they could have declined. Both stores existed
             # with no producer; this is the event they were waiting for.
-            await self.learning.record_mission_opened(mission, now_ms=now)
-        await self.record_event(
-            mission_id=mission.mission_id,
-            event_type=MissionEventType.MISSION_CREATED,
-            actor=PrincipalType.OWNER_DEVICE
-            if origin in (MissionOrigin.OWNER_VOICE, MissionOrigin.OWNER_TEXT,
-                          MissionOrigin.OWNER_UI)
-            else PrincipalType.SYSTEM,
-            summary=mission.title,
-            now_ms=now,
-        )
+            try:
+                await self.learning.record_mission_opened(mission, now_ms=now)
+                await self._ack_learning(mission.mission_id, "OPENED", expected_generation=capture_generation)
+            except Exception as exc:
+                self.report_learning_unavailable(mission.mission_id,"capture",exc)
         return mission
 
     # ----------------------------------------------------------- transition
@@ -248,32 +266,45 @@ class MissionService:
             )
             verification_state = verification.status
 
-        await self.store.execute(
-            "UPDATE missions SET state = ?, verification_state = ?, "
-            "verification_record_json = COALESCE(?, verification_record_json), "
-            "final_outcome = COALESCE(?, final_outcome), updated_at_ms = ? "
-            "WHERE mission_id = ? AND state = ?",
-            (
-                target.value, verification_state.value,
-                Store.dumps(verification.model_dump(mode="json")) if verification else None,
-                final_outcome, now, mission_id, current.value,
-            ),
-        )
         event_type = EVENT_FOR_STATE.get(target)
-        if event_type is not None:
-            await self.record_event(
-                mission_id=mission_id, event_type=event_type, actor=actor,
-                summary=summary or final_outcome or target.value,
-                severity="WARN" if target in (MissionState.FAILED, MissionState.BLOCKED_POLICY,
-                                              MissionState.BLOCKED_UNSAFE) else "INFO",
-                # A verification receipt outranks a caller-supplied pointer: the receipt is
-                # what a success claim rests on, and the caller does not get to substitute
-                # its own reference for it.
-                evidence_ref=(verification.evidence_refs[0]
-                              if verification and verification.evidence_refs
-                              else evidence_ref),
-                now_ms=now,
+        event = MissionEvent(
+            event_id=f"mev_{uuid.uuid4().hex}", mission_id=mission_id, event_type=event_type,
+            actor=actor, occurred_at_ms=now,
+            summary=summary or final_outcome or target.value,
+            severity="WARN" if target in (MissionState.FAILED, MissionState.BLOCKED_POLICY,
+                                          MissionState.BLOCKED_UNSAFE) else "INFO",
+            evidence_ref=(verification.evidence_refs[0] if verification and verification.evidence_refs else evidence_ref),
+        ) if event_type is not None else None
+        learning_generations = {}
+        async with self.store.connection() as db:
+            changed = await db.execute(
+                "UPDATE missions SET state = ?, verification_state = ?, "
+                "verification_record_json = COALESCE(?, verification_record_json), "
+                "final_outcome = COALESCE(?, final_outcome), updated_at_ms = ? "
+                "WHERE mission_id = ? AND state = ?",
+                (
+                    target.value, verification_state.value,
+                    Store.dumps(verification.model_dump(mode="json")) if verification else None,
+                    final_outcome, now, mission_id, current.value,
+                ),
             )
+            if changed.rowcount != 1:
+                await db.rollback()
+                raise MissionError("MISSION_STATE_PRECONDITION_FAILED", current.value)
+            if event is not None:
+                await self._persist_event(db, event)
+            if target is MissionState.AUTHORIZED:
+                await self._enqueue_learning(db, mission_id, "OPENED", now)
+            if target in TERMINAL_STATES:
+                for stage in ("MISSION_OUTCOME", "STRATEGY_OUTCOME", "DECISION_OUTCOME"):
+                    learning_generations[stage] = await self._enqueue_learning(db, mission_id, stage, now)
+                await db.execute(
+                    "INSERT OR IGNORE INTO mission_projection_outbox(mission_id, created_at_ms) VALUES(?,?)",
+                    (mission_id, now),
+                )
+            await db.commit()
+        if event is not None:
+            await self._publish_event(event)
         refreshed = await self.get(mission_id)
         assert refreshed is not None
         if refreshed.is_terminal:
@@ -292,13 +323,18 @@ class MissionService:
                 },
             )
         if self.learning is not None and refreshed.is_terminal:
-            await self.learning.record_mission_outcome(
-                mission_id=mission_id,
-                state=refreshed.state,
-                goal=refreshed.goal,
-                verification_status=(verification.status.value if verification else None),
-                evidence_refs=(verification.evidence_refs if verification else []),
-            )
+            try:
+                await self.learning.record_mission_outcome(
+                    mission_id=mission_id,
+                    state=refreshed.state,
+                    goal=refreshed.goal,
+                    verification_status=(verification.status.value if verification else None),
+                    evidence_refs=(verification.evidence_refs if verification else []),
+                    now_ms=refreshed.updated_at_ms,
+                )
+                await self._ack_learning(mission_id, "MISSION_OUTCOME", expected_generation=learning_generations["MISSION_OUTCOME"])
+            except Exception as exc:
+                self.report_learning_unavailable(mission_id,"mission_outcome",exc)
             # P1-LEARN-003 — the same terminal event, read as evidence about the approach
             # rather than about this one mission.
             #
@@ -307,11 +343,117 @@ class MissionService:
             # terminal state incremented failure_count: a cancellation, a policy refusal
             # and an UNVERIFIABLE run all read as "this approach does not work", and three
             # of them would have demoted a strategy that had never once failed.
-            await self.learning.record_strategy_outcome(refreshed, state=refreshed.state)
+            try:
+                await self.learning.record_strategy_outcome(refreshed, state=refreshed.state)
+                await self._ack_learning(mission_id, "STRATEGY_OUTCOME", expected_generation=learning_generations["STRATEGY_OUTCOME"])
+            except Exception as exc:
+                self.report_learning_unavailable(mission_id,"strategy_outcome",exc)
             # §12 — how the owner's decision actually turned out, which is the only thing
             # that can falsify what VAN inferred from it.
-            await self.learning.record_decision_outcome(refreshed, state=refreshed.state)
+            try:
+                await self.learning.record_decision_outcome(refreshed, state=refreshed.state)
+                await self._ack_learning(mission_id, "DECISION_OUTCOME", expected_generation=learning_generations["DECISION_OUTCOME"])
+            except Exception as exc:
+                self.report_learning_unavailable(mission_id,"decision_outcome",exc)
+        if refreshed.is_terminal:
+            await self.reconcile_terminal_projections(mission_id=mission_id)
         return refreshed
+
+    @staticmethod
+    async def _enqueue_learning(db, mission_id: str, stage: str, now: int) -> int:
+        await db.execute("INSERT INTO mission_learning_outbox(mission_id,stage,created_at_ms,queue_order) "
+            "VALUES(?,?,?,(SELECT COALESCE(MAX(queue_order),0)+1 FROM mission_learning_outbox)) "
+            "ON CONFLICT(mission_id,stage) DO UPDATE SET generation=generation+1,attempts=0,last_failure=NULL, "
+            "queue_order=excluded.queue_order,created_at_ms=excluded.created_at_ms", (mission_id,stage,now))
+        row = await (await db.execute("SELECT generation FROM mission_learning_outbox WHERE mission_id=? AND stage=?", (mission_id,stage))).fetchone()
+        return row["generation"]
+
+    async def _ack_learning(self, mission_id: str, stage: str, *, expected_generation: int) -> None:
+        if type(expected_generation) is not int or expected_generation < 1:
+            raise ValueError("learning_delivery_generation_invalid")
+        await self.store.execute("DELETE FROM mission_learning_outbox WHERE mission_id=? AND stage=? AND generation=?",
+            (mission_id,stage,expected_generation))
+
+    async def reconcile_learning_projections(self, *, limit: int = 32) -> int:
+        """Repair bounded original local projections, never rerun mission effects.
+
+        Queue order is native and moved to the tail after failure. A broken source
+        cannot starve other stages, and scheduling does not require clock ordering.
+        Each sink must be replay-safe before its delivery can be acknowledged.
+        """
+        if type(limit) is not int or not 1 <= limit <= 100:
+            raise ValueError("learning_repair_limit_invalid")
+        if self.learning is None:
+            return 0
+        rows = await self.store.fetchall("SELECT mission_id,stage,generation FROM mission_learning_outbox "
+            "ORDER BY queue_order,mission_id,stage LIMIT ?", (limit,))
+        completed = 0
+        for row in rows:
+            try:
+                mission = await self.get(row["mission_id"])
+                if mission is None:
+                    raise ValueError("LEARNING_NATIVE_SOURCE_MISSING")
+                await asyncio.wait_for(self._deliver_learning(mission, row["stage"]), timeout=2.0)
+                await self._ack_learning(mission.mission_id, row["stage"], expected_generation=row["generation"])
+            except Exception as exc:
+                self.report_learning_unavailable(row["mission_id"], row["stage"], exc)
+                await self.store.execute("UPDATE mission_learning_outbox SET attempts=attempts+1,last_failure=?, "
+                    "queue_order=(SELECT COALESCE(MAX(queue_order),0)+1 FROM mission_learning_outbox) "
+                    "WHERE mission_id=? AND stage=? AND generation=?", (type(exc).__name__,row["mission_id"],row["stage"],row["generation"]))
+                continue
+            completed += 1
+        return completed
+
+    async def _deliver_learning(self, mission: Mission, stage: str) -> None:
+        if stage == "OPENED":
+            await self.learning.record_mission_opened(mission, now_ms=mission.created_at_ms)
+            if mission.is_terminal:
+                # The decision stage may already have completed while owner-source
+                # publication was unavailable. Repair the newly created fingerprint
+                # from the same native terminal outcome before acknowledging OPENED.
+                await self.learning.record_decision_outcome(mission, state=mission.state, now_ms=mission.updated_at_ms)
+            return
+        if not mission.is_terminal:
+            raise ValueError("LEARNING_NATIVE_OUTCOME_CONFLICT")
+        if stage == "MISSION_OUTCOME":
+            verification = await self.verification_record(mission.mission_id)
+            await self.learning.record_mission_outcome(mission_id=mission.mission_id,
+                state=mission.state, goal=mission.goal,
+                verification_status=verification.status.value if verification else None,
+                evidence_refs=verification.evidence_refs if verification else [], now_ms=mission.updated_at_ms)
+        elif stage == "STRATEGY_OUTCOME":
+            await self.learning.record_strategy_outcome(mission, state=mission.state, now_ms=mission.updated_at_ms)
+        elif stage == "DECISION_OUTCOME":
+            await self.learning.record_decision_outcome(mission, state=mission.state, now_ms=mission.updated_at_ms)
+        else:
+            raise ValueError("learning_repair_stage_invalid")
+
+    async def reconcile_terminal_projections(self, *, mission_id: str | None = None, limit: int = 32) -> int:
+        """Retry local idempotent publication; never rerun an external effect."""
+        if self.terminal_projector is None:
+            return 0
+        rows = await self.store.fetchall(
+            "SELECT mission_id FROM mission_projection_outbox" +
+            (" WHERE mission_id=?" if mission_id else "") +
+            " ORDER BY created_at_ms LIMIT ?",
+            (mission_id, min(max(limit, 1), 100)) if mission_id else (min(max(limit, 1), 100),),
+        )
+        completed = 0
+        for row in rows:
+            mission = await self.get(row["mission_id"])
+            if mission is None or not mission.is_terminal:
+                continue
+            try:
+                await self.terminal_projector(mission)
+            except Exception as exc:
+                await self.store.execute(
+                    "UPDATE mission_projection_outbox SET attempts=attempts+1, last_failure=? WHERE mission_id=?",
+                    (type(exc).__name__, mission.mission_id),
+                )
+                continue
+            await self.store.execute("DELETE FROM mission_projection_outbox WHERE mission_id=?", (mission.mission_id,))
+            completed += 1
+        return completed
 
     async def for_hermes_run(self, hermes_run_id: str) -> Mission | None:
         """Resolve a Hermes run through the durable mission-event ledger.
@@ -324,9 +466,14 @@ class MissionService:
         run_id = hermes_run_id.strip()
         if not run_id:
             raise MissionError("HERMES_RUN_ID_REQUIRED")
+        binding = await self.store.fetchone(
+            "SELECT mission_id FROM hermes_run_bindings WHERE hermes_run_id = ?", (run_id,),
+        )
+        if binding is not None:
+            return await self.get(str(binding["mission_id"]))
         rows = await self.store.fetchall(
             "SELECT DISTINCT mission_id FROM mission_events "
-            "WHERE evidence_ref = ? ORDER BY mission_id LIMIT 2",
+            "WHERE evidence_ref = ? AND event_type = 'mission.started' ORDER BY mission_id LIMIT 2",
             (f"hermes-run:{run_id}",),
         )
         if not rows:
@@ -334,6 +481,17 @@ class MissionService:
         if len(rows) != 1:
             raise MissionError("HERMES_RUN_BINDING_AMBIGUOUS", run_id)
         return await self.get(str(rows[0]["mission_id"]))
+
+    async def ingest_hermes_result(self, **kwargs: Any) -> dict[str, Any]:
+        return await self.hermes_results.ingest(**kwargs)
+
+    async def bind_hermes_run(self, **kwargs: Any) -> Mission:
+        mission = await self.hermes_results.bind(**kwargs)
+        assert mission is not None
+        return mission
+
+    async def reconcile_hermes_results(self) -> int:
+        return await self.hermes_results.reconcile()
 
     async def apply_hermes_result(
         self,
@@ -412,15 +570,16 @@ class MissionService:
                 final_outcome=summary or "execution failed",
             )
 
-        if mission.state is not MissionState.RUNNING:
+        if mission.state not in {MissionState.RUNNING, MissionState.VERIFYING}:
             raise MissionError("HERMES_RESULT_STATE_INVALID", f"{mission.state.value}->COMPLETED")
-        mission = await self.transition(
-            mission.mission_id,
-            target=MissionState.VERIFYING,
-            expected=MissionState.RUNNING,
-            actor=PrincipalType.HERMES_AGENT,
-            summary=summary or "Hermes reported execution complete; verifying independently",
-        )
+        if mission.state is MissionState.RUNNING:
+            mission = await self.transition(
+                mission.mission_id,
+                target=MissionState.VERIFYING,
+                expected=MissionState.RUNNING,
+                actor=PrincipalType.HERMES_AGENT,
+                summary=summary or "Hermes reported execution complete; verifying independently",
+            )
 
         if not mission.success_contract.is_checkable:
             return await self.transition(
@@ -478,6 +637,9 @@ class MissionService:
         claiming to have done something.
         """
         now = int(time.time() * 1000) if now_ms is None else now_ms
+        # A restart or temporary verifier failure must not discard an already delivered
+        # callback or expire its mission before the durable inbox has been reconciled.
+        await self.reconcile_hermes_results()
         terminal = ",".join("?" for _ in TERMINAL_STATES)
         rows = await self.store.fetchall(
             f"SELECT mission_id, state FROM missions WHERE deadline_ms IS NOT NULL "
@@ -574,18 +736,37 @@ class MissionService:
             raise MissionError("MISSION_TERMINAL", mission.state.value)
         await self._assert_capability_permitted(mission, capability_id)
 
+        if dependency_activity_ids is not None and not isinstance(dependency_activity_ids, list):
+            raise MissionError("ACTIVITY_DEPENDENCY_INVALID")
+        dependencies = list(dependency_activity_ids or [])
+        if (len(dependencies) > 256 or any(not isinstance(d, str) or not d.strip() for d in dependencies)
+                or len(set(dependencies)) != len(dependencies)):
+            raise MissionError("ACTIVITY_DEPENDENCY_INVALID")
+
         activity = Activity(
             activity_id=f"act_{uuid.uuid4().hex}",
             mission_id=mission_id, activity_type=activity_type, capability_id=capability_id,
             executor=executor, executor_ref=executor_ref,
             input_contract=dict(input_contract or {}), authority_ref=authority_ref,
-            dependency_activity_ids=list(dependency_activity_ids or []),
+            dependency_activity_ids=dependencies,
             retry_policy=retry_policy,
             verification_contract=dict(verification_contract or {}),
             started_at_ms=now,
         )
-        await self.store.execute(
-            """
+        async with self.store.connection() as db:
+            await db.execute("BEGIN IMMEDIATE")
+            current = await (await db.execute("SELECT state FROM missions WHERE mission_id=?", (mission_id,))).fetchone()
+            if current is None:
+                raise MissionError("MISSION_UNKNOWN", mission_id)
+            if MissionState(current["state"]) in TERMINAL_STATES:
+                raise MissionError("MISSION_TERMINAL", current["state"])
+            for dependency in dependencies:
+                row = await (await db.execute("SELECT mission_id FROM mission_activities WHERE activity_id=?", (dependency,))).fetchone()
+                if row is None:
+                    raise MissionError("ACTIVITY_DEPENDENCY_UNKNOWN", dependency)
+                if row["mission_id"] != mission_id:
+                    raise MissionError("ACTIVITY_DEPENDENCY_SCOPE_MISMATCH", dependency)
+            await db.execute("""
             INSERT INTO mission_activities(
               activity_id, mission_id, activity_type, capability_id, executor, executor_ref,
               input_contract_json, authority_ref, state, attempt, started_at_ms, ended_at_ms,
@@ -599,8 +780,44 @@ class MissionService:
                 activity.state.value, now, Store.dumps(activity.dependency_activity_ids),
                 retry_policy, Store.dumps(activity.verification_contract),
             ),
-        )
+            )
+            await db.commit()
         return activity
+
+    async def dependency_graph(self, mission_id: str):
+        """Read one durable snapshot. Rendering never starts or completes work."""
+        from van_gateway.mission.graph import project_graph
+        async with self.store.connection() as db:
+            await db.execute("BEGIN")
+            mission = await (await db.execute("SELECT state FROM missions WHERE mission_id=?", (mission_id,))).fetchone()
+            if mission is None:
+                raise MissionError("MISSION_UNKNOWN", mission_id)
+            rows = await (await db.execute("SELECT * FROM mission_activities WHERE mission_id=? ORDER BY activity_id LIMIT 2001", (mission_id,))).fetchall()
+            if len(rows)>2000:
+                raise MissionError('MISSION_GRAPH_NODE_LIMIT')
+            evidence_rows = await (await db.execute("SELECT DISTINCT activity_id,evidence_ref FROM mission_events WHERE mission_id=? AND owner_visibility=1 AND evidence_ref IS NOT NULL LIMIT 10001", (mission_id,))).fetchall()
+            if len(evidence_rows)>10000:
+                raise MissionError('MISSION_GRAPH_EVIDENCE_LIMIT')
+            observations = {}
+            for executor, table, ref_column in (
+                ('BROWSER_FABRIC','browser_tasks','task_id'),
+                ('AUTOMATION_FABRIC','automation_runs','run_id'),
+            ):
+                observed = await (await db.execute(
+                    f"SELECT a.activity_id,s.status,s.evidence_pointer FROM mission_activities a JOIN {table} s ON s.{ref_column}=a.executor_ref WHERE a.mission_id=? AND a.executor=?",
+                    (mission_id,executor))).fetchall()
+                for row in observed:
+                    observations[row['activity_id']]={'state':row['status'],'evidence_ref':row['evidence_pointer']}
+            evidence = {}
+            for row in evidence_rows:
+                if row['activity_id'] is not None:
+                    evidence.setdefault(row['activity_id'],[]).append(row['evidence_ref'])
+            try:
+                return project_graph(mission_id, mission['state'], [self._row_to_activity(r) for r in rows], evidence=evidence,observations=observations)
+            except ValueError as exc:
+                if str(exc).startswith('MISSION_GRAPH_'):
+                    raise MissionError(str(exc)) from exc
+                raise MissionError('MISSION_GRAPH_SOURCE_INVALID') from exc
 
     async def set_activity_state(
         self,
@@ -679,43 +896,67 @@ class MissionService:
         owner_visibility: bool = True,
         evidence_ref: str | None = None,
         now_ms: int | None = None,
+        idempotency_key: str | None = None,
     ) -> MissionEvent:
         now = int(time.time() * 1000) if now_ms is None else now_ms
         event = MissionEvent(
-            event_id=f"mev_{uuid.uuid4().hex}", mission_id=mission_id, activity_id=activity_id,
+            event_id=(f"mev_{hashlib.sha256(Store.dumps([mission_id, idempotency_key]).encode()).hexdigest()}"
+                      if idempotency_key is not None else f"mev_{uuid.uuid4().hex}"),
+            mission_id=mission_id, activity_id=activity_id,
             event_type=event_type, actor=actor, occurred_at_ms=now, severity=severity,
             owner_visibility=owner_visibility, summary=summary, evidence_ref=evidence_ref,
         )
-        await self.store.execute(
+        async with self.store.connection() as db:
+            created = await self._persist_event(db, event)
+            await db.commit()
+        if not created:
+            row = await self.store.fetchone("SELECT * FROM mission_events WHERE event_id=?", (event.event_id,))
+            assert row is not None
+            if (row["mission_id"] != mission_id or row["activity_id"] != activity_id
+                or row["event_type"] != event_type.value or row["actor"] != actor.value
+                or row["severity"] != severity or bool(row["owner_visibility"]) != owner_visibility
+                or row["summary"] != summary or row["evidence_ref"] != evidence_ref):
+                raise MissionError("MISSION_EVENT_IDEMPOTENCY_CONFLICT")
+            return event.model_copy(update={"occurred_at_ms": int(row["occurred_at_ms"])})
+        await self._publish_event(event)
+        return event
+
+    @staticmethod
+    async def _persist_event(db: Any, event: MissionEvent) -> bool:
+        inserted = await db.execute(
             """
             INSERT INTO mission_events(
               event_id, mission_id, activity_id, event_type, actor, occurred_at_ms,
               severity, owner_visibility, summary, evidence_ref
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(event_id) DO NOTHING
             """,
             (
-                event.event_id, mission_id, activity_id, event_type.value, actor.value, now,
-                severity, 1 if owner_visibility else 0, summary, evidence_ref,
+                event.event_id, event.mission_id, event.activity_id, event.event_type.value,
+                event.actor.value, event.occurred_at_ms, event.severity,
+                1 if event.owner_visibility else 0, event.summary, event.evidence_ref,
             ),
         )
-        if self.bus is not None and owner_visibility:
+        return inserted.rowcount == 1
+
+    async def _publish_event(self, event: MissionEvent) -> None:
+        if self.bus is not None and event.owner_visibility:
             # Only owner-visible events reach the device stream: the bus is the owner's
             # feed, not an internal trace, and the distinction is already recorded per
             # event rather than decided here.
             await self.bus.publish(
-                event_type.value,
+                event.event_type.value,
                 {
                     "event_id": event.event_id,
-                    "mission_id": mission_id,
-                    "activity_id": activity_id,
-                    "actor": actor.value,
-                    "severity": severity,
-                    "summary": summary,
-                    "evidence_ref": evidence_ref,
-                    "occurred_at_ms": now,
+                    "mission_id": event.mission_id,
+                    "activity_id": event.activity_id,
+                    "actor": event.actor.value,
+                    "severity": event.severity,
+                    "summary": event.summary,
+                    "evidence_ref": event.evidence_ref,
+                    "occurred_at_ms": event.occurred_at_ms,
                 },
             )
-        return event
 
     # --------------------------------------------------------------- reading
 

@@ -1,0 +1,72 @@
+{
+  "schema": "van.new-account-observe-source/1",
+  "created_utc": "2026-11-03T09:03:33.152802+00:00",
+  "base": "71106689891a742ff76bb19efe400755b91c436a",
+  "qualification": "SOURCE_CANDIDATE_ONLY",
+  "canonical_basis": "Master line1803: new accounts always start OBSERVE. Demo/Live activation remains existing mandate control and BE009 obligation.",
+  "behavior": [
+    "Omitted initial mode is OBSERVE across Gateway catalog/approval, native creators and CLI, independent of provider demo/live and token trade scopes. Explicit non-OBSERVE initial mode refuses before provider/key work.",
+    "Existing admitted mode and omitted full account/native identity metadata remain unchanged on ordinary updates/key rotation; key rotation cannot change identity, mode or broker. Existing account migration requires its existing control.",
+    "Saved OAuth APPLIED/UNKNOWN outcomes and lifecycle restores retain their original paths; Android accepts strictly paired current OBSERVE/READ ONLY and legacy DEMO_TRADER/DEMO receipts with original identity checks."
+  ],
+  "caller_inventory": [
+    "Commander generic upsert; Deriv demo creation; Deriv OAuth; cTrader link; MT5 EA key factory; vati accounts add CLI; actual Gateway catalog DTO/OAuth fresh-link validation.",
+    "Registry DATA reader and lifecycle historical restores are not new-account producers and retain existing records. No global registry primitive or test-seeding mode rewrite."
+  ],
+  "local_evidence": {
+    "unique_cases_with_pass_evidence": 29,
+    "qualification": "Separate runs, not one clean full29 suite. Production Python and trading test file unchanged since safe25; backend test evolved for four additional cases and corrected fixture setup.",
+    "runs": [
+      {
+        "label": "observe-safe-root",
+        "result": "COLLECTION_ERROR exit2; duplicate new module basenames; retained"
+      },
+      {
+        "label": "observe-safe-root-r2",
+        "result": "25PASS0skip exit0"
+      },
+      {
+        "label": "observe-backend14-root",
+        "result": "12PASS2FAIL exit1; new MT5 fixtures lacked required credential metadata before authentication; retained"
+      },
+      {
+        "label": "observe-native-fixture-r3-root",
+        "result": "corrected two metadata-only fixtures 2PASS0skip exit0"
+      },
+      {
+        "label": "observe-backend-cwd2",
+        "result": "2 repeated enrolled PAPER/MT5 refusal cases PASS0skip exit0 from backend CWD"
+      }
+    ],
+    "safe_scope": "PAPER metadata, existing enrolled controlled authentication, pure policy and before-effect refusal; no provider or credential-file operations.",
+    "runner_sha256": "860336803885aa36cff080294bf1144a0009b4b09a72ee9454d875863142d7f4",
+    "last_allocation_bytes": 222702707,
+    "aggregate_cap_bytes": 268435456
+  },
+  "hosted_parent_ownership_closure": {
+    "head": "71106689891a742ff76bb19efe400755b91c436a",
+    "run": 41602207393,
+    "attempt": 1,
+    "job": 125803378352,
+    "trading_result": "5894PASS1declaredSKIP0failure/error",
+    "original_shared_reference": "PASS",
+    "original_pg_competing_actor": "PASS",
+    "declared_skip": "DIAL registry resolver: dial-new checkout not available (set DIAL_REPO)",
+    "artifact_id": 13214839931,
+    "artifact_sha256": "e5498aaf6379caa01ad7b81ed3c8daef953de7e6a18ccca6968cb908050e10ab",
+    "crc": "PASS",
+    "qualification": "Existing ordinary hosted source tests; no formal native acceptance or local credential execution."
+  },
+  "limits": {
+    "provider_positive_and_android_jvm": "NOT_RUN locally; ordinary exact hosted CI required",
+    "BE004": "OPEN eight verbs/11requirements/21acceptances/20contexts/6actions;0formalacceptance",
+    "BE009_activation": "OPEN; no new mandate authority/issuer or activation implementation",
+    "frozen_scope": "131units324requirements1610acceptances234contexts349actions93plannedfeatures; source42features105functions78surfaces retained",
+    "entry67": "Excluded; protected authority gate remains unwaived",
+    "blocked_probe": "No rerun/rephrasing/relocation/new CI insertion of active private-key-lock/credential-destruction ordering probe",
+    "historical_failures": "All old failed runs, snapshot loss/budget variances and R1 archive-before-apply violation/unknown peak retained separately."
+  },
+  "final_guards": "Actual owner/frontend/workmap normal generation and checks; frozen identity/dependency preservation; mutation registry consistency only (cases NOT_RUN); consolidation; final PRE003 build/check; genuine hooks; committed4fd; normal push/exact readback. Outcomes recorded externally, not preclaimed here.",
+  "model_usage": null,
+  "cost": null
+}

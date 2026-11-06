@@ -1,0 +1,81 @@
+{
+  "qualification": "Supplemental source assertion controls; not canonical374 or native acceptance",
+  "positive": {
+    "exit": 0,
+    "cases": 31,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "failure_messages": []
+  },
+  "faults": [
+    {
+      "name": "foreign-account",
+      "exit": 1,
+      "cases": 3,
+      "failures": 1,
+      "errors": 0,
+      "skips": 0,
+      "failure_messages": [
+        "AssertionError: assert ('OBSERVED_PAR..._NATIVE_DEPTH' == 'RECOVERY_REQUIRED'\n  \n  - RECOVERY_REQUIRED\n  + OBSERVED_PARTIAL_NATIVE_DEPTH)"
+      ]
+    },
+    {
+      "name": "book-capacity",
+      "exit": 1,
+      "cases": 17,
+      "failures": 1,
+      "errors": 0,
+      "skips": 0,
+      "failure_messages": [
+        "AssertionError: assert ('NATIVE_DEPTH...CLOCK_INVALID' == 'RECOVERY_REQUIRED'\n  \n  - RECOVERY_REQUIRED\n  + NATIVE_DEPTH_EVALUATION_CLOCK_INVALID)"
+      ]
+    },
+    {
+      "name": "rejuvenate-on-noop",
+      "exit": 1,
+      "cases": 16,
+      "failures": 1,
+      "errors": 0,
+      "skips": 0,
+      "failure_messages": [
+        "assert 0 == 10000"
+      ]
+    },
+    {
+      "name": "clear-error-on-next-delta",
+      "exit": 1,
+      "cases": 3,
+      "failures": 1,
+      "errors": 0,
+      "skips": 0,
+      "failure_messages": [
+        "AssertionError: assert 'NATIVE_DEPTH...CLOCK_INVALID' == 'RECOVERY_REQUIRED'\n  \n  - RECOVERY_REQUIRED\n  + NATIVE_DEPTH_EVALUATION_CLOCK_INVALID"
+      ]
+    },
+    {
+      "name": "retry-retired-control",
+      "exit": 1,
+      "cases": 21,
+      "failures": 1,
+      "errors": 0,
+      "skips": 0,
+      "failure_messages": [
+        "AssertionError: Regex pattern did not match.\n  Expected regex: 'fresh connection'\n  Actual message: 'cTrader native depth subscription acknowledgement mismatch'"
+      ]
+    }
+  ],
+  "all_restored": true,
+  "restored": {
+    "exit": 0,
+    "cases": 31,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "failure_messages": []
+  },
+  "original_sha256": {
+    "trading/vati/execution/ctrader/depth.py": "2d7229cc05eca6e81b8f5742767ba9fdb231adc02525f24f9048b28be8bbc35a",
+    "trading/vati/execution/ctrader/adapter.py": "646af5f020e0b4a4c8618e65d064d4aa976c4cd7392e0de75fea1b4e0915dcbe"
+  }
+}

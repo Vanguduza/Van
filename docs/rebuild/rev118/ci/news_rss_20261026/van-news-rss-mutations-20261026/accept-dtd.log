@@ -1,0 +1,40 @@
+...........FF...................                                         [100%]
+=================================== FAILURES ===================================
+_ test_rss_dtd_is_never_resolved_or_treated_as_feed_coverage[<!DOCTYPE rss [<!ENTITY x "replacement">]>] _
+
+setup = (<vati.core.ledger.Ledger object at 0x7f9335487a70>, PosixPath('/tmp/pytest-of-agent/pytest-286/test_rss_dtd_is_never_...t_rss_dtd_is_never_resolved0/feed.xml', 'input_format': 'rss2', 'source_id': 'transport', 'publisher_id': 'publisher'})
+prefix = b'<!DOCTYPE rss [<!ENTITY x "replacement">]>'
+
+    @pytest.mark.parametrize('prefix', [b'<!DOCTYPE rss [<!ENTITY x "replacement">]>',
+        b'<!DOCTYPE rss SYSTEM "file:///etc/passwd">'])
+    def test_rss_dtd_is_never_resolved_or_treated_as_feed_coverage(setup, prefix):
+        ledger, path, config = setup; path.write_bytes(prefix+rss().split(b'?>',1)[1])
+        news = build(ledger, config)
+>       assert news.source_health['state'] == 'UNREADABLE' and news.headlines() == []
+E       AssertionError: assert ('READY_DECLARED' == 'UNREADABLE'
+E         
+E         - UNREADABLE
+E         + READY_DECLARED)
+
+trading/tests/test_news_rss_feed.py:128: AssertionError
+_ test_rss_dtd_is_never_resolved_or_treated_as_feed_coverage[<!DOCTYPE rss SYSTEM "file:///etc/passwd">] _
+
+setup = (<vati.core.ledger.Ledger object at 0x7f9335487890>, PosixPath('/tmp/pytest-of-agent/pytest-286/test_rss_dtd_is_never_...t_rss_dtd_is_never_resolved1/feed.xml', 'input_format': 'rss2', 'source_id': 'transport', 'publisher_id': 'publisher'})
+prefix = b'<!DOCTYPE rss SYSTEM "file:///etc/passwd">'
+
+    @pytest.mark.parametrize('prefix', [b'<!DOCTYPE rss [<!ENTITY x "replacement">]>',
+        b'<!DOCTYPE rss SYSTEM "file:///etc/passwd">'])
+    def test_rss_dtd_is_never_resolved_or_treated_as_feed_coverage(setup, prefix):
+        ledger, path, config = setup; path.write_bytes(prefix+rss().split(b'?>',1)[1])
+        news = build(ledger, config)
+>       assert news.source_health['state'] == 'UNREADABLE' and news.headlines() == []
+E       AssertionError: assert ('READY_DECLARED' == 'UNREADABLE'
+E         
+E         - UNREADABLE
+E         + READY_DECLARED)
+
+trading/tests/test_news_rss_feed.py:128: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_news_rss_feed.py::test_rss_dtd_is_never_resolved_or_treated_as_feed_coverage[<!DOCTYPE rss [<!ENTITY x "replacement">]>]
+FAILED trading/tests/test_news_rss_feed.py::test_rss_dtd_is_never_resolved_or_treated_as_feed_coverage[<!DOCTYPE rss SYSTEM "file:///etc/passwd">]
+2 failed, 30 passed, 2 deselected in 1.06s

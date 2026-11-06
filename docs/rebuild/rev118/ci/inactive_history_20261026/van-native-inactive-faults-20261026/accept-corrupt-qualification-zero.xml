@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="12" time="1.049" timestamp="2026-10-26T10:30:18.233330+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_native_read_identity" name="test_read_identity_cannot_self_grant_or_corrupt_qualification_types[True-qualified_for_execution]" time="0.025" /><testcase classname="trading.tests.test_native_read_identity" name="test_read_identity_cannot_self_grant_or_corrupt_qualification_types[True-qualified_for_research]" time="0.004" /><testcase classname="trading.tests.test_native_read_identity" name="test_read_identity_cannot_self_grant_or_corrupt_qualification_types[True-provider_qualified]" time="0.003" /><testcase classname="trading.tests.test_native_read_identity" name="test_read_identity_cannot_self_grant_or_corrupt_qualification_types[0-qualified_for_execution]" time="0.007"><failure message="Failed: DID NOT RAISE ValueError">field = 'qualified_for_execution', value = 0
+
+    @pytest.mark.parametrize('field',['qualified_for_execution','qualified_for_research','provider_qualified'])
+    @pytest.mark.parametrize('value',[True,0,None,'false'])
+    def test_read_identity_cannot_self_grant_or_corrupt_qualification_types(field,value):
+        body=identity().body();body[field]=value
+&gt;       with pytest.raises(ValueError):NativeReadIdentity.from_body(body)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_native_read_identity.py:66: Failed</failure></testcase><testcase classname="trading.tests.test_native_read_identity" name="test_read_identity_cannot_self_grant_or_corrupt_qualification_types[0-qualified_for_research]" time="0.006"><failure message="Failed: DID NOT RAISE ValueError">field = 'qualified_for_research', value = 0
+
+    @pytest.mark.parametrize('field',['qualified_for_execution','qualified_for_research','provider_qualified'])
+    @pytest.mark.parametrize('value',[True,0,None,'false'])
+    def test_read_identity_cannot_self_grant_or_corrupt_qualification_types(field,value):
+        body=identity().body();body[field]=value
+&gt;       with pytest.raises(ValueError):NativeReadIdentity.from_body(body)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_native_read_identity.py:66: Failed</failure></testcase><testcase classname="trading.tests.test_native_read_identity" name="test_read_identity_cannot_self_grant_or_corrupt_qualification_types[0-provider_qualified]" time="0.003"><failure message="Failed: DID NOT RAISE ValueError">field = 'provider_qualified', value = 0
+
+    @pytest.mark.parametrize('field',['qualified_for_execution','qualified_for_research','provider_qualified'])
+    @pytest.mark.parametrize('value',[True,0,None,'false'])
+    def test_read_identity_cannot_self_grant_or_corrupt_qualification_types(field,value):
+        body=identity().body();body[field]=value
+&gt;       with pytest.raises(ValueError):NativeReadIdentity.from_body(body)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_native_read_identity.py:66: Failed</failure></testcase><testcase classname="trading.tests.test_native_read_identity" name="test_read_identity_cannot_self_grant_or_corrupt_qualification_types[None-qualified_for_execution]" time="0.003" /><testcase classname="trading.tests.test_native_read_identity" name="test_read_identity_cannot_self_grant_or_corrupt_qualification_types[None-qualified_for_research]" time="0.005" /><testcase classname="trading.tests.test_native_read_identity" name="test_read_identity_cannot_self_grant_or_corrupt_qualification_types[None-provider_qualified]" time="0.005" /><testcase classname="trading.tests.test_native_read_identity" name="test_read_identity_cannot_self_grant_or_corrupt_qualification_types[false-qualified_for_execution]" time="0.004" /><testcase classname="trading.tests.test_native_read_identity" name="test_read_identity_cannot_self_grant_or_corrupt_qualification_types[false-qualified_for_research]" time="0.006" /><testcase classname="trading.tests.test_native_read_identity" name="test_read_identity_cannot_self_grant_or_corrupt_qualification_types[false-provider_qualified]" time="0.004" /></testsuite></testsuites>

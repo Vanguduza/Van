@@ -1,0 +1,14 @@
+{
+  "archive": "/workspace/van-native-cancel-transport-wip1-20261030.zip",
+  "bytes": 9032,
+  "sha256": "f6b2a0cfc53f7a91ec8c5e31317d9dac8ce7f91e1b7b61fe28f419c490bb9d70",
+  "verified": true,
+  "manifest": {
+    "base_commit": "02e8e712da17a0c70b19e3e1a9dfbed394e58061",
+    "created_at_utc": "2026-10-30T10:41:48.561221+00:00",
+    "files": {
+      "trading/vati/execution/ctrader/transport.py": "a0bedce5225543e5b7f0ef65760ec5d7171a8700d8a5274bccec886bfed6fc60",
+      "trading/tests/test_ctrader_cancel_transport.py": "0c676677a6652c3f0510ad87e1027c96a2b4bb0da6e44c2a37551af042f3a320"
+    }
+  }
+}

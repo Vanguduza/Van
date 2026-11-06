@@ -1,0 +1,29 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_ test_preexisting_independent_routers_cannot_dispatch_the_same_original_twice _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-248/test_preexisting_independent_r0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_preexisting_independent_routers_cannot_dispatch_the_same_original_twice(tmp_path, eurusd):
+        mandate, trade, decision = approved_entry(eurusd)
+        path = tmp_path/'entry.sqlite'
+        first, second = Ledger(path), Ledger(path)
+        left, right = PaperAdapter(), PaperAdapter()
+        try:
+            a, b = sender(first, left), sender(second, right)
+            a.execute(trade, decision, mandate, now_ms=NOW*1000)
+            try:
+                b.execute(trade, decision, mandate, now_ms=NOW*1000+1)
+            except RouterError:
+                pass
+>           assert first.count(EventKind.ORDER_COMMAND) == 1
+E           AssertionError: assert 2 == 1
+E            +  where 2 = count(<EventKind.ORDER_COMMAND: 'ORDER_COMMAND'>)
+E            +    where count = <vati.core.ledger.Ledger object at 0x7f3589738620>.count
+E            +    and   <EventKind.ORDER_COMMAND: 'ORDER_COMMAND'> = EventKind.ORDER_COMMAND
+
+trading/tests/test_entry_dispatch_commit_fence.py:35: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_entry_dispatch_commit_fence.py::test_preexisting_independent_routers_cannot_dispatch_the_same_original_twice
+1 failed in 0.69s

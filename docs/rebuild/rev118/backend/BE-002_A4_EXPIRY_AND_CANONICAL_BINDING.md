@@ -1,0 +1,15 @@
+# Original A4 expiry and signed intent binding
+
+This repairs the existing owner approval service. It does not approve a funding draft or add payment dispatch.
+
+Actual SQL writer contention and a paused enrolled-device read each let the original verifier consume an expired signature. Four negative cases reproduced, with a valid-before-expiry control. The service now reads trusted time after acquiring the writer and again immediately before consumption. Expiry remains half-open. A queued or slow request cannot renew the original window or produce a recovery receipt after expiry.
+
+Seven further actual SQL cases showed that changing stored action, turn, original command, parameters, binding mode, expiry or challenge identity could repurpose a genuine test signature: the verifier checked the stored canonical text without rebuilding it. It now reconstructs the existing v2 envelope from exact fields and compares it before signature consumption. Parameters, current enrolment/revocation and atomic one-use consumption retain their existing owners.
+
+The legacy delimiter-based intent hash also allowed distinct project/text and text/parameter inputs to collide structurally. New challenges use schema-labelled structured JSON inside the opaque digest. The Android-facing `van-a4-approval-v2` envelope is unchanged. Benign signed legacy challenges retain their original digest; ambiguous legacy text requires a fresh command. Literal pipes in new command text remain supported. Unescaped envelope fields are refused, and the gateway records a durable private denial without issuing approval. Existing consumed recovery records are not rewritten. This source evidence is not a deployed cohort or rollback qualification.
+
+The stable final run passes514 actual SQLite/PostgreSQL/HTTP/privacy/authority cases with no skips or storage-audit violations. All1160 pinned source/test hashes match and the owned PostgreSQL fixture is independently absent. There are24 new tests,27 final focused checks and124 rebuild/workflow checks; counts overlap. The earlier495 and512 runs cover their earlier source snapshots only. Four expiry and seven canonical baseline failures remain recorded. The initial bad rebuild selection ran zero tests and is not a pass.
+
+Exact2a main CI retains sixteen public successes, its cancelled public backend job and two unwaived private-DDS-key/trusted-main-checker failures. Its actual gateway5807/seven declared skips, media198, coverage check and evidence upload succeeded before the configured45minute boundary. The identical live/template workflow now gives that same job60minutes for the unchanged assertions, evidence and cleanup. The old cancellation is not relabelled. Actual fresh hosted qualification of this workflow/source remains pending.
+
+See `../receipts/A4_BINDING_SOURCE_20261027.json` and raw `../ci/a4_binding_20261027/`. No whole unit, provider, native, production, economic or S24 acceptance is issued. All canonical backend features and Android prerequisites remain required; no frontend redesign precedes BG-001.

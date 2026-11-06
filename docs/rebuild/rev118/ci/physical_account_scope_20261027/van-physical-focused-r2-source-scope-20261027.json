@@ -1,0 +1,10 @@
+{
+  "passed": 78,
+  "runtime_and_selected_tests_unchanged": true,
+  "other_test_file_changed_after_start": [
+    "trading/tests/test_physical_account_lease.py"
+  ],
+  "change": "Three additional partial-state cases independently pass in current52pure checks; this is not a current full-source hash claim.",
+  "audit_violations": 0,
+  "owned_fixture_independently_absent": true
+}

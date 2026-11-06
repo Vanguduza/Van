@@ -1,0 +1,11 @@
+{
+  "directory": "/tmp/van-recovery-family-native-contract-r1-20261101",
+  "at_utc": "2026-11-01T03:00:53.101300+00:00",
+  "files": [
+    {
+      "path": "owner-authority0/owner_authority_keys.json",
+      "bytes": 212,
+      "sha256": "9c26faae9d4245852bf4de636148aaa081a30a29a4e097a4663e3bef6459a630"
+    }
+  ]
+}

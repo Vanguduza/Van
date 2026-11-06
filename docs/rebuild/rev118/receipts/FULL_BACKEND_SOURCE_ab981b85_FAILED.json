@@ -1,0 +1,48 @@
+{
+  "schema": "van.rebuild.full-backend-source-attempt/1",
+  "status": "FAILED",
+  "source_head": "ab981b8573b0a7784ada912dc4910fde30855d58",
+  "observed_at_utc": "2026-10-24T13:51:38.263124+00:00",
+  "result": {
+    "tests": 901,
+    "failures": 5,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 896
+  },
+  "failures": [
+    {
+      "id": "backend.tests.test_browser_canary_origin::test_the_armed_canary_lease_loads_its_page_from_the_overlay_address_through_the_proxy",
+      "message": "van_harness_canary_live.WorkerError: CHROMIUM_START_FAILED"
+    },
+    {
+      "id": "backend.tests.test_browser_canary_origin::test_a_normal_task_cannot_reach_the_canary_origin",
+      "message": "van_harness_canary_live.WorkerError: CHROMIUM_START_FAILED"
+    },
+    {
+      "id": "backend.tests.test_browser_canary_origin::test_guard_canary_passes_end_to_end_through_the_proxy_and_the_harness_handler",
+      "message": "van_harness_canary_live.WorkerError: CHROMIUM_START_FAILED"
+    },
+    {
+      "id": "backend.tests.test_browser_egress_proxy::test_chromium_is_launched_through_the_proxy_with_quic_disabled",
+      "message": "van_harness_egress.WorkerError: CHROMIUM_START_FAILED"
+    },
+    {
+      "id": "backend.tests.test_browser_egress_proxy::test_in_scope_get_passes_through_the_interception",
+      "message": "van_harness_egress.WorkerError: CHROMIUM_START_FAILED"
+    }
+  ],
+  "xml_sha256": "2c81378970706356c7c1bc97bb507235c53146b3d75584ed58c2b899d2e5db74",
+  "log_sha256": "b64b1928388aed885238db242c326124053e734298df8489548de27e0fb563f8",
+  "storage_audit_sha256": "0de909d408ee984d89f6869cb6bad0472c4d593f3e1a499ec20de1abeb23fdb8",
+  "source_storage_forbidden_events": 0,
+  "private_postgres_stopped_and_removed": true,
+  "chromium_startup_diagnostic": {
+    "chromium": "153.0.8010.12",
+    "state": "ABORTED_BEFORE_DEVTOOLS",
+    "returncode": -6,
+    "stderr_sha256": "f7f4232ba8b77467e7b59d5d535957d5765e202222de11e0d72e31cbd68c84b7",
+    "reason": "Zygote could not fork and pthread_create returned Resource temporarily unavailable(11). Diagnostic uses existing test-only no-sandbox flag and production launch flags on an empty local profile; no production security configuration was changed."
+  },
+  "qualification": "Failed exact-head run stopped at originalmaxfail5. These are not backend passes; remaining cases were not executed. Full source run without early stopping and fresh-worker browser qualification remain required; no whole-unit, financial, native host, release, F15/BG or device acceptance."
+}

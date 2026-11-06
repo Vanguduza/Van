@@ -1,0 +1,21 @@
+{
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "tools/rebuild/source_storage_audit.py",
+    "--report",
+    "/workspace/van-entry-resource-sqlite-lock-diagnostic-20261028-audit.json",
+    "trading/tests/test_provisional_resource_book.py::test_independent_sqlite_connections_serialize_distinct_entries_and_keep_the_first_hold",
+    "-o",
+    "faulthandler_timeout=5",
+    "-vv"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 648700,
+  "started_at_utc": "2026-10-28T18:59:50.354637+00:00",
+  "timeout_seconds": 40,
+  "state": "COMPLETED",
+  "command_pid": 648703,
+  "exit": 0,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-28T18:59:52.379833+00:00"
+}

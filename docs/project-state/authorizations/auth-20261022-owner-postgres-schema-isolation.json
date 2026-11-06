@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "authorization_id": "auth-20261022-owner-postgres-schema-isolation",
+  "project": "van",
+  "authority": "OWNER_DERIVED",
+  "owner_instruction_sha256": "b9853d8dea01c04101e6035d73d64faad6a3ecc6590b7def69465af23cf0a648",
+  "owner_instruction_excerpt": "Why did you stop? This is an autonomous build task",
+  "derivation": "Necessary bounded deployment-template consequence of confirmed PostgreSQL ledger isolation defects in the owner-directed autonomous build. Keep the fresh PostgreSQL events schema aligned with the corrected account/named-ledger source implementation. Legacy populated databases require an explicit separately reviewed migration; no deployment, credential change or production SQL execution is authorized by this record.",
+  "source": {
+    "kind": "owner_session_instruction",
+    "channel": "codex",
+    "owner_attested": true,
+    "device_signature_claimed": false,
+    "cryptographic_signature_claimed": false,
+    "signed_ingress_claimed": false
+  },
+  "issued_at_utc": "2026-10-22T07:56:20.347488+00:00",
+  "branch_scope": "ccr-9e07e1af-8mgz1p and owner build continuation branches",
+  "authorized_paths": [
+    "deploy/van-trading-core/supabase/init/01_vati_ledger.sql.tpl"
+  ],
+  "reusable": true,
+  "revoked": false,
+  "limitations": [
+    "Candidate source development and source testing only; no bypass of hooks, protected-main admission, security, financial protection, signing, native certification or release gates.",
+    "No independent certificate, scope-lock signature, amendment admission, native host effect, purchase, financial effect or production release is authorized by this record.",
+    "Frozen blueprint bytes, existing authorization records and ledger rows remain immutable. No new frontend design before BG-001; inherited-source repairs remain permitted.",
+    "Work performed before formal PRE-003 admission must remain labeled candidate evidence, with dependencies and unissued acceptances visible."
+  ]
+}

@@ -1,5 +1,7 @@
 # CURSOR PATCH PROMPT — VAN AURA SEMANTIC ENVELOPE / TRADE-STATE READY CORRECTION
 
+> **SUPERSEDED — provenance only. Do not implement from this document.** Visual implementation authority is `docs/VAN_PRODUCTION_VISUAL_FLOATING_UX_OWNER_ADMIN_REV_3_0.md` with `docs/VAN_CHARACTER_VISUAL_IDENTITY.md`; the aura is governed by owner decisions CF-D-06, CF-D-06-REV1 and CF-D-08 (`docs/character_forge/MANIFEST.yaml`) and `visual-authority/character-forge/aura/AURA_RUNTIME_CONTRACT.yaml` (flame envelope; no strands, branches, specks or orb link line). Identity is Candidate B (CF-D-05-REV2_1).
+
 You are not starting from scratch.
 You are patching the improved VAN implementation because the aura is still too tight to the body and still does not provide enough semantic bandwidth for future trade-state signalling.
 

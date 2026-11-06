@@ -1,0 +1,566 @@
+{
+  "source_root": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix",
+  "all_observed_product_imports_inside_exact_worktree": true,
+  "modules": {
+    "vati": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/__init__.py",
+      "sha256": "7c7d3dfb3b35d9431e222e8c6f7bf2169a6f1b486987f625e338cec2155e4556"
+    },
+    "vati.arbiter.horizon": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/arbiter/horizon.py",
+      "sha256": "e9321ce70443b81167931c3710a02fa06370e33d0967ebedb704e87a06a1445a"
+    },
+    "vati.core.canonical": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/core/canonical.py",
+      "sha256": "2b5bd78b575ce1092af9d44ec5f5b23e20bde1e3d489202bdd613032ec344bdb"
+    },
+    "vati.core.events": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/core/events.py",
+      "sha256": "5f46f070021eadc478784c816b8e3eb81479659c04f160be2a221487a0f6ff76"
+    },
+    "vati.core.ledger": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/core/ledger.py",
+      "sha256": "68e23c1867118036c2cc6f644c1eb4c7e69c8fc849854b05ca8843f05dc50517"
+    },
+    "vati.core.ledger_pg": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/core/ledger_pg.py",
+      "sha256": "81be80c128890718e34c99f4e98dd0b09df614f602986deaa482476195375707"
+    },
+    "vati.core": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/core/__init__.py",
+      "sha256": "38cb9fc0cba714b33b07f4ed7ba241d3ecb3c72c63b56f6131afd0ae8d9276a8"
+    },
+    "vati.market_data.calendars": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/market_data/calendars.py",
+      "sha256": "b496430f4f262f8727c58bfc96d97c22f43c6d6428b45d74a4fd3cd25bbc5b77"
+    },
+    "vati.authority": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/authority.py",
+      "sha256": "d70ec9008851b33430bb721361a4296d0085536805c225255f0ffbacdcb2219a"
+    },
+    "vati.risk.mandate": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/risk/mandate.py",
+      "sha256": "013a9b329f0478bc238f2927b9f1debe469956ae223b41782b63c7bcb5c118be"
+    },
+    "vati.risk.contracts": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/risk/contracts.py",
+      "sha256": "8154be0b2e96db9ee07a70799a060b3a3035490a3b8821f7bddd562ffc5b3903"
+    },
+    "vati.core.decimal_context": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/core/decimal_context.py",
+      "sha256": "15dc1aae40fe48525b0b1e4e753c925f7ee206b1865b0b36962349cc74319d8c"
+    },
+    "vati.core.units": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/core/units.py",
+      "sha256": "8f13776452739a1a1a7dc30fb1275725e7e4181388c545b8cb05027bf2148895"
+    },
+    "vati.risk.arithmetic": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/risk/arithmetic.py",
+      "sha256": "5e2d057aef8f2aa59b6f231b47a186b055c5c8ce8980697f2dbaa47f8f8bcff5"
+    },
+    "vati.risk.sizing": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/risk/sizing.py",
+      "sha256": "e0155eeb8bc663c967f248a1fff9fcfee85cac6968fa0183ca7cb071a47d31af"
+    },
+    "vati.risk.heat": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/risk/heat.py",
+      "sha256": "220d2193a9d9f6f77fb01329316966c7c63d868b1d37227f4cce8aea276d926c"
+    },
+    "vati.risk.governor": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/risk/governor.py",
+      "sha256": "23ebef031f74ed023bd1545ee9ce89bdbf482b834dd415d8fe966e6d7dbafe34"
+    },
+    "vati.risk.conformal": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/risk/conformal.py",
+      "sha256": "83b8c16ac7ab75fb8ae9e81caae73a3347456d613dff9ec9dd099137f3a0b7c5"
+    },
+    "vati.risk.history_scope": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/risk/history_scope.py",
+      "sha256": "07bf97bfef327459e8ba867553e963e50a5b6d459d56af086b29d33cabcad147"
+    },
+    "vati.risk.lockouts": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/risk/lockouts.py",
+      "sha256": "4cf011408219e4be78988fa7342277c93aa619e1894900280918d1c9814201c1"
+    },
+    "vati.risk.serde": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/risk/serde.py",
+      "sha256": "81f9d835278435ce4699a1207b23f42c60cd15c75916395f159492fc9c1eabb4"
+    },
+    "vati.risk.authority": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/risk/authority.py",
+      "sha256": "f45238ac548f423daa87a5d0b82ec865ed96ddf93817aa7041ebb229473b76dc"
+    },
+    "vati.risk": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/risk/__init__.py",
+      "sha256": "5cf32aa8bd0105335d01a35d062db9ad0f879625069ae967c2f6e94ea2d550da"
+    },
+    "vati.market_data.quality": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/market_data/quality.py",
+      "sha256": "3a8fde6c76bc3d48882cccf44de2491f7b52324f6139b13fd11efb6bfe7477da"
+    },
+    "vati.market_data.bars": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/market_data/bars.py",
+      "sha256": "35931986fad0a3a2bd0a824b9c7f5c85a985b8c624ec368203ace2ac4aac6c7d"
+    },
+    "vati.market_data.costs": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/market_data/costs.py",
+      "sha256": "094cacdd9bb5a6fc482d100be9bc31b1d0ed44cd991eed4621e43cd184b3460f"
+    },
+    "vati.market_data": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/market_data/__init__.py",
+      "sha256": "f74fc55f2bba2dbe2bcac546221fa970a89ecd3df91dc7b00ec630b12eb7d65e"
+    },
+    "vati.intelligence.features": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/intelligence/features.py",
+      "sha256": "0591924b3e7f736fb5fed20bc10a5dbcff9312e91933c93f4724d8b19dc4ecde"
+    },
+    "vati.intelligence.regimes": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/intelligence/regimes.py",
+      "sha256": "03fe83dcd122813f3e75acfc033718a245fd7dcdc30cddb479ca383746dae519"
+    },
+    "vati.intelligence.events": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/intelligence/events.py",
+      "sha256": "f675b8ae3fb8caec7b6628d7950532840d2cb667ca509595c3387a1ae0ad1ac6"
+    },
+    "vati.intelligence.market_state": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/intelligence/market_state.py",
+      "sha256": "45de1c11c52f6ed29a6e82db26408949c3bc781147c4fc4671a5c9158904c176"
+    },
+    "vati.intelligence": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/intelligence/__init__.py",
+      "sha256": "aac72fbf144abdeb7d06acedd3f5e3cee9d511f33f8f8211b5b67f7625855638"
+    },
+    "vati.validation.policy": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/validation/policy.py",
+      "sha256": "e5e994a057c3f4ad26622cd69d6edc68a3b179316b74dd1e3891b491b8d9b983"
+    },
+    "vati.validation": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/validation/__init__.py",
+      "sha256": "0adf3e78a319d0bbf1c39ccd15f2bc3199ec2920c0f8885e96e7965193d214d4"
+    },
+    "vati.validation.certificates": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/validation/certificates.py",
+      "sha256": "e90e5483316c5fbe9a9e008a5a007457dc237492a4f36c7e3756a4640118b1a3"
+    },
+    "vati.intelligence.feature_registry": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/intelligence/feature_registry.py",
+      "sha256": "7260f3260800bc9e6a74ca98379200077706209ab022c64db881d417806d2a86"
+    },
+    "vati.intelligence.feature_contract": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/intelligence/feature_contract.py",
+      "sha256": "83211cc1a9c750cd7d429d818acef8f17704eb194ccdb5136949fa7d6a7b2ace"
+    },
+    "vati.observability.metrics": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/observability/metrics.py",
+      "sha256": "f158b95a62a9e1db987ba5baff70e6693ce600e1aeeead0f9205897b9ce27be8"
+    },
+    "vati.observability": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/observability/__init__.py",
+      "sha256": "a11863bc94c236551aa43a7b16b02c64704187a1f883ba945c0e648300bc8693"
+    },
+    "vati.observability.enhancement_metrics": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/observability/enhancement_metrics.py",
+      "sha256": "57c4f3ad3388b31e9ffbd238114138e28239d9a6735cceb1cdfe715ec523f927"
+    },
+    "vati.zse.market": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/zse/market.py",
+      "sha256": "ecedba5a08b3503ff2b2ad59f644f8c4f2dd32201a7b0a665e2962adac60b460"
+    },
+    "vati.zse.costs": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/zse/costs.py",
+      "sha256": "9c8ac6abc488cdba2844b5f835913bc6c4fc00a60b191dac607c2dcb485c070a"
+    },
+    "vati.zse.currency": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/zse/currency.py",
+      "sha256": "c24d3775d02a90570d52f7e1597cb9e2de9bae3909670c86eb202b7ec577055e"
+    },
+    "vati.zse.liquidity": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/zse/liquidity.py",
+      "sha256": "165678ed7a5143e149091357b4eaee68c0b4eaf50e8a006fe0279103c4f7d4d3"
+    },
+    "vati.zse": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/zse/__init__.py",
+      "sha256": "d0ebd723bc069c3698b077159491ecc7c42cbbc856a1b4e97e1305b9ce650e31"
+    },
+    "vati.strategies.base": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/strategies/base.py",
+      "sha256": "d04556e5291482a66aa91f7debb139535642b1b78471e4fcb8b7a820ce600428"
+    },
+    "vati.contracts": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/contracts/__init__.py",
+      "sha256": "d8d8c39b8bd6b9855b432defa25e67400226837661e8cdb26e99e1df8bc724b6"
+    },
+    "vati.strategies.capsule": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/strategies/capsule.py",
+      "sha256": "ec37349851b6a0d30de568b85b31dd65165bf706cba9017d19a64d91a803827a"
+    },
+    "vati.strategies.fx_trend_pullback": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/strategies/fx_trend_pullback.py",
+      "sha256": "94f9946b2135412bbf09419b8c0efa825b52ab79a578003b3d86acdc3b59605d"
+    },
+    "vati.strategies.session_breakout": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/strategies/session_breakout.py",
+      "sha256": "ed745a07c08debd065537fb9d1a6f05665c84a34489adcbdb91388c862a7cf50"
+    },
+    "vati.strategies.event_drift": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/strategies/event_drift.py",
+      "sha256": "acff4be84b3742226d35a5ba7988944dce9c6c29b208082f102294cad0a09ddf"
+    },
+    "vati.strategies.zse_value_rotation": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/strategies/zse_value_rotation.py",
+      "sha256": "87f47f39235c46a47ad9546430e64e1c231d0a70add4a7d097d64fb2e47cff25"
+    },
+    "vati.strategies.zse_liquidity_provision": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/strategies/zse_liquidity_provision.py",
+      "sha256": "4e05addc8d52773df37fe1b55d79a1eeb33a4aaad1bb3bc47642a13af42fa8b9"
+    },
+    "vati.strategies": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/strategies/__init__.py",
+      "sha256": "e171443d33ce33c00e02488e87bebc97668d6fc5c8c3418b10e92bd5478a3dbb"
+    },
+    "vati.arbiter.strategy_arbiter": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/arbiter/strategy_arbiter.py",
+      "sha256": "6fd13705b4aaa8734593048ceb3372a12acb8b255f75dbf56d47bb593a2d27dc"
+    },
+    "vati.arbiter.meta_labeler": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/arbiter/meta_labeler.py",
+      "sha256": "a09d8e4a3e6b2de392a73a734bb48863373ea68b1dc42cff9891e7b18cc7c093"
+    },
+    "vati.arbiter.candidate": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/arbiter/candidate.py",
+      "sha256": "2dd1f9d42de232951aabf37444d80604198a33f22e8af3cb4e74ea058c541360"
+    },
+    "vati.arbiter.confidence": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/arbiter/confidence.py",
+      "sha256": "9217fc12f666600d69c0dce75d617581732605f2bf7ba7090f279805711152ea"
+    },
+    "vati.intelligence.mtf": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/intelligence/mtf.py",
+      "sha256": "23e6528ad38f029452b359d84193414fe9a34099bf88bb96e2d2c7931683bb75"
+    },
+    "vati.arbiter.opportunity": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/arbiter/opportunity.py",
+      "sha256": "8b3607dd4d38ebe3476a8e4cbf1ad6e88f4ab2c466e7335d57bd8847c51f873c"
+    },
+    "vati.arbiter": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/arbiter/__init__.py",
+      "sha256": "967d31a5ff710a9f59c4d450f109756029aaef31502626e04fa94555b4ef49ca"
+    },
+    "vati.execution.base": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/execution/base.py",
+      "sha256": "5d2ba5f4e5f4b8ec1400ef9fce5249b96672c2f9dc6aa6228b4eaa702b7c0e35"
+    },
+    "vati.execution.paper": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/execution/paper.py",
+      "sha256": "7bdc8544a8220c6edc0db0eef6a0afe55a671ca178c0a70d82c2246308f5b1a9"
+    },
+    "vati.execution.zse_ticket": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/execution/zse_ticket.py",
+      "sha256": "4f3a5883ac99f812cf11b33920b97dab79274d12c99dea71399c96bbb5b727c0"
+    },
+    "vati.execution.mt5_identity": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/execution/mt5_identity.py",
+      "sha256": "510fadd667de89c70f287d69f7788846930148badc7340207c27f9a9722a5e7d"
+    },
+    "vati.execution.mt5_charges": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/execution/mt5_charges.py",
+      "sha256": "b6fb732a7d5dd78c2ab6478d009310ff76e799d533b7964416acfb70c572c276"
+    },
+    "vati.execution.mt5_bridge": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/execution/mt5_bridge.py",
+      "sha256": "3d054edcdbd8e9876cfd17b3ccaaad37891ec9f5b753ff88fca8d2ac8d7d6512"
+    },
+    "vati.execution.deriv_identity": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/execution/deriv_identity.py",
+      "sha256": "1d55f7ea74f64eee8bd6a66f31d4bfe2ec4d2fdaa51cc6942ebacf3ec0148820"
+    },
+    "vati.execution.entry_deadline": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/execution/entry_deadline.py",
+      "sha256": "ad8a81298a364969a9ae29935f26f5044182b1e7199f6c356d0bc00499dfb2c7"
+    },
+    "vati.execution.deriv": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/execution/deriv.py",
+      "sha256": "6edc0cec416712dbb961495b4f64079afe6114397f58c03cbf434815ee5e24a6"
+    },
+    "vati.execution.exit_journal": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/execution/exit_journal.py",
+      "sha256": "c62660c55847b04d46d3b8f91d2179da9659307548fa6e0d7d50917a06863d38"
+    },
+    "vati.execution.protection": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/execution/protection.py",
+      "sha256": "ba15be2cf34538e8c0131158641edffa2a79f791d2ffdf78e8a100a742e1842f"
+    },
+    "vati.execution.policy_templates": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/execution/policy_templates.py",
+      "sha256": "7b416640452f23aeab75936131929f0ab60bbcf30ba03a49023d0b31f56de230"
+    },
+    "vati.execution.route_registry": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/execution/route_registry.py",
+      "sha256": "b1891c99e300ec1fd52e13f3d5705c22127ad001abe47078294033ac6b65eff5"
+    },
+    "vati.execution.pretrade": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/execution/pretrade.py",
+      "sha256": "1e9596c42c27842c2cff72351bb595207b6c1a180174cac1fff2fb2e0af70064"
+    },
+    "vati.execution.style_selector": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/execution/style_selector.py",
+      "sha256": "3e2d7f2379346db8ae2124703a1c1f6a5c88314bb6ef97af8ce56467fdc108a3"
+    },
+    "vati.execution.router": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/execution/router.py",
+      "sha256": "873d67e68bffd3dceec32455502526b73708ad895448c575e96aebf6bab19960"
+    },
+    "vati.execution.reconciliation": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/execution/reconciliation.py",
+      "sha256": "37bedd6ef6b2177d0033645689b5fbb327bdccaeccacd5e04d34bba069d6f2d4"
+    },
+    "vati.execution.tca": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/execution/tca.py",
+      "sha256": "fc5cb74afd701bc03f337f52cd550439ae1996a401c5ed3ac95b52241223916d"
+    },
+    "vati.execution.review": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/execution/review.py",
+      "sha256": "c60a5b074077199156cb1ca02900b701ca88f1b2bfa0acab7dd968b1567805a7"
+    },
+    "vati.execution": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/execution/__init__.py",
+      "sha256": "31d6728b4b299f7e4f736258b699b16420d2178b289d018ba8fc5a9c8be8b17d"
+    },
+    "vati.execution.policy": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/execution/policy.py",
+      "sha256": "6622bafc937e7361b3d480f818c5c8190401f95ecf33a64723af7dde061e63c2"
+    },
+    "vati.learning.episodes": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/learning/episodes.py",
+      "sha256": "d1136dca507ec05d7b99c8c2aa9d9142055628e000562193e53cb78cdb24d5b1"
+    },
+    "vati.learning.evidence": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/learning/evidence.py",
+      "sha256": "0c9d3ec1efca967bfb93c801b40e8c42744d1d5c9a7c8112b6c7f7208c720c06"
+    },
+    "vati.learning.boundary": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/learning/boundary.py",
+      "sha256": "b4966f40be0b79d4d5ca5030052cfc6e0219ef0aa68f66f76f946ce404ef775d"
+    },
+    "vati.learning.health": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/learning/health.py",
+      "sha256": "1f4c697030fb57bc30df042ab516d8f56f855c8c1cc7ffbe58a9720def26facc"
+    },
+    "vati.learning.broker": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/learning/broker.py",
+      "sha256": "37339b9426671ea490330a1f35737f7c65c8b6fc331108181078630aef6d0735"
+    },
+    "vati.learning.counterfactual": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/learning/counterfactual.py",
+      "sha256": "8ab72b7bf874e47c943921add820fc4470a8702987a3985b15526e0abc5753d7"
+    },
+    "vati.learning.missed": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/learning/missed.py",
+      "sha256": "95d4dbf186fbfd25da6136995dc09d9a0a4a67def3f63f02b127dafa91ecec22"
+    },
+    "vati.learning.priority": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/learning/priority.py",
+      "sha256": "1874e9cdaf4f5b2e8b584c4d1eb0d97d01f03c8c89b0a7e81a364d985e08fac1"
+    },
+    "vati.learning.evolution": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/learning/evolution.py",
+      "sha256": "586dd09aa2fc33c92436353bb9582e26627441e5c5e628014a523f48df8e335b"
+    },
+    "vati.learning.cycles": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/learning/cycles.py",
+      "sha256": "44de524a4cc3fbaace858a8fc377785960db41a1bfe60b11c867cd280cde7d00"
+    },
+    "vati.learning.memory_bridge": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/learning/memory_bridge.py",
+      "sha256": "cc2b97d838315da2a2aa6a5007d2045ea2089b7e3f265fa15f816ae27ba395fe"
+    },
+    "vati.learning.curriculum": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/learning/curriculum.py",
+      "sha256": "7f6c911db24049fe345c2e3c136d469603423437c328c7bd6ce8c7f972adeada"
+    },
+    "vati.learning.hooks": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/learning/hooks.py",
+      "sha256": "ed8a2aa1ce7429c39e05bcc70d54bfe044373a8b75a8c8c5c42e85ce0583bf62"
+    },
+    "vati.learning": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/learning/__init__.py",
+      "sha256": "149633a97fd0ee40b059b0c35cfeacc431b1f0cca1f6398f3e237b5d553d6617"
+    },
+    "vati.lifecycle": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/lifecycle/__init__.py",
+      "sha256": "75aee7cb2dbfc1c4e08b6ad041fb6d24fa6abaa5fd3ac037a8a85d1a7d5ee6e6"
+    },
+    "vati.lifecycle.trade_health": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/lifecycle/trade_health.py",
+      "sha256": "5fc828cb4e2dc76ce67ce6aa0e797b6b2af8114b0322f89c0b693bfe75b57654"
+    },
+    "vati.lifecycle.scale_policy": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/lifecycle/scale_policy.py",
+      "sha256": "f13ba7fc00f592029c7bf087ba52e15145df4f12922317a3fa3d1b88e6d1af11"
+    },
+    "vati.lifecycle.thesis": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/lifecycle/thesis.py",
+      "sha256": "1b0fff609ffa8727a23dea06116bf81eea740de3645a6e49a44dfbf3fe4690c4"
+    },
+    "vati.cognition.analogues": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/cognition/analogues.py",
+      "sha256": "2e5974c5ad6927648989ff5621de515a4dc0d3cc57797545b21071ae043f036c"
+    },
+    "vati.cognition.context": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/cognition/context.py",
+      "sha256": "d3c54f27eca7012b7b6a52533081449daced728e4c5a6aa20bf7eb504a01e080"
+    },
+    "vati.cognition.contracts": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/cognition/contracts.py",
+      "sha256": "fa9aba45af78ec5b8cade56f5bcc07e4183124de9b889c412fad6de0fcb47827"
+    },
+    "vati.cognition.blind_reviewer": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/cognition/blind_reviewer.py",
+      "sha256": "f1d6988476b48f6514454f77ded5dce8e1d5c9ea525e7502caf793ad111cef19"
+    },
+    "vati.cognition.budget": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/cognition/budget.py",
+      "sha256": "e50e809789c3d0a10fa36b391926a8755042b01764c58884e21111a15eda0ff6"
+    },
+    "vati.cognition.shadow_book": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/cognition/shadow_book.py",
+      "sha256": "ec1b6eebb156c587fdee8eb0dc0c346de890866e78fda0f73edd59efa9ef7075"
+    },
+    "vati.cognition.attribution": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/cognition/attribution.py",
+      "sha256": "0ad25718f68b8f692ed146fdfcaf991bb65ba42b55cf56635be692aa870119db"
+    },
+    "vati.cognition.exam": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/cognition/exam.py",
+      "sha256": "cac39153ec50dc1502c73c77914b1061ee64e48245133dfa2bc035bfcc057c54"
+    },
+    "vati.cognition.providers": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/cognition/providers.py",
+      "sha256": "979052a2ff2a3734281b548f7e30ba7ea1c3b7d1b2d8be632f1ed879c81f6f6e"
+    },
+    "vati.cognition.handoff": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/cognition/handoff.py",
+      "sha256": "ce4737b01d3fbf7e6bde95b3286d0bbdd881e5ac87a1eafafc6d35b845038799"
+    },
+    "vati.cognition.performance_ledger": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/cognition/performance_ledger.py",
+      "sha256": "8e5343bc7f3e354277359687b76d5fe51fa8a751f955107284a366a1c6a5afe3"
+    },
+    "vati.cognition.translator": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/cognition/translator.py",
+      "sha256": "3f8384c098bd79772ab13a2b7cb0199ccb5c2329db85028d6dedd25069f6aeae"
+    },
+    "vati.cognition.world_model": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/cognition/world_model.py",
+      "sha256": "93edd1795311650dfc7720d48fc1d1229931d3eaf0ed8376311f8f98923eced4"
+    },
+    "vati.cognition": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/cognition/__init__.py",
+      "sha256": "d43a5d216d1fc66df499e04560f3d73f383b0833dfbf18e07a17643049e666f9"
+    },
+    "vati.vtil.admission": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/vtil/admission.py",
+      "sha256": "c57accf63240ac085b82fa016a7f5d949b1763954dbb8bdfca2acc3e1beaf7b1"
+    },
+    "vati.vtil": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/vtil/__init__.py",
+      "sha256": "1e7fac1b6bc4ae401b081377f81c9d597aaa176ab77ddeb5b12dd8b7e0eb7272"
+    },
+    "vati.app.cycle": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/app/cycle.py",
+      "sha256": "fc31a0061e679e60c6059c25832fa37c8055baf9df3287a42ca3a0863b0c881d"
+    },
+    "vati.app.runner": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/app/runner.py",
+      "sha256": "c08dc2ba55335f72ed819fd5f999f3ae372c27bbc48bcf3ef6f2b4bbeae00958"
+    },
+    "vati.app.tradebook": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/app/tradebook.py",
+      "sha256": "5695dff5f166a27a1726c98eafc11b4362292caff6082ab3a7fcd73b1961cf94"
+    },
+    "vati.accounts.registry": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/accounts/registry.py",
+      "sha256": "081300e109e82049d5fc7a068df22dce4f854b8e4cae873afb1dc6e66553ca39"
+    },
+    "vati.accounts": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/accounts/__init__.py",
+      "sha256": "1c404daed37756c2bad196cc314b5d1a3e6898bc353d449f952eb97f4e46f0e2"
+    },
+    "vati.core.calendar_time": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/core/calendar_time.py",
+      "sha256": "595a99ef6df533f11f3d6cbd6459af3c59396f88908cced13ea4610911aea556"
+    },
+    "vati.calendar.recorder": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/calendar/recorder.py",
+      "sha256": "f1804cf7a61d6b942298fcaa7ad46b0bddf1fe7a007857829a15f5a03ca2bcc3"
+    },
+    "vati.calendar": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/calendar/__init__.py",
+      "sha256": "8c46ac19e6fc88ccf27dd1acd66e790c3a4184349289d6be9334d9a9e254f5e7"
+    },
+    "vati.intelligence.calendar_feed": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/intelligence/calendar_feed.py",
+      "sha256": "b4ca2bc92aaa4909a34dd52a6eaf4e2a4fdfa10da5068069748cbe0f3be89e25"
+    },
+    "vati.market_data.feeds.csv_source": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/market_data/feeds/csv_source.py",
+      "sha256": "c3fcaf9e21e313dbc75c9010fac84afc2f164d8f89dc89f0cf121a8865e76835"
+    },
+    "vati.market_data.feeds.dukascopy": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/market_data/feeds/dukascopy.py",
+      "sha256": "e23f257a52d936dd9c839e699d70390ed4b23947db7563ed0f6e55a53eadd0c1"
+    },
+    "vati.core.file_lock": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/core/file_lock.py",
+      "sha256": "8a4901f7c958850dd502d24c255bbb60eaa86271e351a4cbedfaa1a4449aa674"
+    },
+    "vati.market_data.feeds.lake": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/market_data/feeds/lake.py",
+      "sha256": "a7deb3f0aeb8508df01c47bdbac5ec34f13e1846f8f94f50f9024156809f6fba"
+    },
+    "vati.market_data.feeds": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/market_data/feeds/__init__.py",
+      "sha256": "e3645dcf2971879890489ea91022e6f9a4ca06bf460d4a021fdf17c7079d8f8c"
+    },
+    "vati.learning.replay": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/learning/replay.py",
+      "sha256": "f42e75048adf4cdc5e466bcc8992711fd7f3ed25251dd70acb4965d7ecc8a5f4"
+    },
+    "vati.learning.runtime_cohort": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/learning/runtime_cohort.py",
+      "sha256": "6c33805aa6e0b2827cf5410f59367b4f6a603cd3ce7c3a7cf3b5496209991a88"
+    },
+    "vati.learning.scope": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/learning/scope.py",
+      "sha256": "7cce8f9fc7ec9f63da8a3d14ec5476e1ec350f2e0bb2baf075d0db2d38e25738"
+    },
+    "vati.app.service": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/app/service.py",
+      "sha256": "17f3b4c4d271277cd5c6956d384ac5fd7c199b262aa675f7386a0f2cdb2e761d"
+    },
+    "vati.app.portfolio": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/app/portfolio.py",
+      "sha256": "4edeb4ea65a2f390311c3bc5bee17cf68f7319f4afaa9eb778a0f963df701188"
+    },
+    "vati.app": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/app/__init__.py",
+      "sha256": "efb3d734a03c2c172c425540fb71f56a5989d22cc919422dbf98ab947321e684"
+    },
+    "vati.app.runtime_control_protocol": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/app/runtime_control_protocol.py",
+      "sha256": "d6cdb1b952eb7c97f81ebaa40a62166f05ed64e9034891f524145fd794042f40"
+    },
+    "vati.authority_registry": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/authority_registry.py",
+      "sha256": "98f52094287444503a07085d29b34044c250f0b4372c92393a31fc4993a885d0"
+    },
+    "vati.accounts.access": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/accounts/access.py",
+      "sha256": "0f0de9b5112da1c24d214235dd5beef7fb597921ae328f9c545b34c31ba5393b"
+    },
+    "vati.app.runtime_control_journal": {
+      "path": "/workspace/van-lanes-20261101/d43-endpoint-ci-fix/trading/vati/app/runtime_control_journal.py",
+      "sha256": "76ad2a29c0c6c507bbfbcb86bafc9826f3b713e6e3be0cf6a7d06b5b64ab8060"
+    }
+  }
+}

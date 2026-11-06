@@ -20,6 +20,7 @@ CI run are evidence in exactly the way a provider receipt is, which is why
 from __future__ import annotations
 
 import time
+import math
 from typing import Any, Awaitable, Callable, Protocol
 
 from van_gateway.mission.models import (
@@ -72,11 +73,13 @@ def _compare(contract: SuccessContract, observed: dict[str, Any]) -> list[str]:
             continue
         actual = observed[key]
         if isinstance(expected, bool):
-            if bool(actual) != expected:
+            if type(actual) is not bool or actual != expected:
                 missing.append(key)
-        elif isinstance(expected, (int, float)) and isinstance(actual, (int, float)):
+        elif isinstance(expected, (int, float)):
             # A numeric postcondition is a floor: "minimum_sources: 5" is met by 7.
-            if actual < expected:
+            if (type(actual) not in (int, float)
+                or (type(expected) is float and not math.isfinite(expected))
+                or (type(actual) is float and not math.isfinite(actual)) or actual < expected):
                 missing.append(key)
         elif actual != expected:
             missing.append(key)

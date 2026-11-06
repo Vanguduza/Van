@@ -6,8 +6,44 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import kotlinx.coroutines.runBlocking
 
 class TradingModelsTest {
+    @Test
+    fun unavailableAccountLedgerDoesNotBecomeHealthyEmptyDirectory() = runBlocking {
+        val unavailable = loadTradingData(AccountCard::parseList) { """{"accounts":[],"ledger_available":false}""" }
+        assertTrue(unavailable is Loaded.Unavailable)
+        assertTrue((unavailable as Loaded.Unavailable).reason.contains("Native account ledger unavailable"))
+        val empty = loadTradingData(AccountCard::parseList) { """{"accounts":[],"ledger_available":true}""" }
+        assertEquals(Loaded.Ready(emptyList<AccountCard>()), empty)
+        assertEquals(emptyList<AccountCard>(), AccountCard.parseList("""{"accounts":[]}"""))
+    }
+
+    @Test
+    fun accountSnapshotReadbackPreservesOriginalRevisionAndNoncurrentClocks() {
+        val revision = "a".repeat(64)
+        val row = """{"alias":"paper_one","connection_state":"STALE","equity":"12345.67",
+            "snapshot_readback":{"state":"LAST_KNOWN","reason":"FUTURE_SOURCE_TIME",
+            "source_revision":"$revision","source_event_time_ms":9007199254740993,
+            "source_received_time_ms":9007199254740994,"read_at_ms":2000000000000,
+            "age_ms":-9005199254740993,"staleness_threshold_ms":900000,"execution_authority":false}}"""
+        val account = AccountCard.from(parseObject(row)!!)
+        val source = account.snapshotReadback!!
+        assertEquals(DataState.STALE, account.connection)
+        assertEquals("12345.67", account.equity.raw)
+        assertEquals(revision, source.sourceRevision)
+        assertEquals(9007199254740993L, source.sourceEventTimeMs)
+        assertEquals(9007199254740994L, source.sourceReceivedTimeMs)
+        assertEquals(-9005199254740993L, source.ageMs)
+        assertEquals("LAST_KNOWN", source.state)
+        assertFalse(source.executionAuthority)
+        val portfolio = PortfolioSummary.parse("""{"ledger_available":true,"accounts":[$row]}""")!!
+        assertEquals(source, portfolio.accounts.single().snapshotReadback)
+        assertEquals(DataState.STALE, portfolio.overallDataState)
+        assertNull(AccountCard.from(parseObject(row.replace("\"execution_authority\":false", "\"execution_authority\":true"))!!).snapshotReadback)
+        assertNull(AccountCard.from(parseObject("""{"alias":"legacy_one","connection_state":"LIVE"}""")!!).snapshotReadback)
+    }
+
 
     private val portfolio = """
     {"ledger_available":true,"reporting_currency":"USD",

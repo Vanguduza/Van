@@ -1,0 +1,1014 @@
+{
+ "schema": "van-next-state-machines/1.0",
+ "revision": "Rev 1.9 (15 October 2026)",
+ "source": "Extends the Rev 2 pack's development-pack/STATE_MACHINES.json (contracts/STATE_MACHINES.json) per independent audit AUD-03/04/05/10/19 and owner decisions OD-23..OD-25. Checked by check_state_machines.py.",
+ "guard_fields": [
+  "account_id",
+  "provider_ref",
+  "revision",
+  "event_id",
+  "idempotency_key",
+  "request_digest",
+  "source_observed_at",
+  "receipt_state",
+  "eligible_authority"
+ ],
+ "machines": [
+  {
+   "id": "VAN-SM-ACCOUNT_LIFECYCLE",
+   "extends": "VNX-SM-ACCOUNT_LIFECYCLE",
+   "initial": "UNLINKED",
+   "states": [
+    "UNLINKED",
+    "DISCOVERED",
+    "AUTH_PENDING",
+    "ABANDONED",
+    "LINKED_READ_ONLY",
+    "AUTH_FAILED",
+    "AUTH_OUTCOME_UNKNOWN",
+    "REMOTE_CLOSED",
+    "KYC_PENDING",
+    "ACTIVE_ELIGIBLE",
+    "RESTRICTED",
+    "REAUTH_PENDING",
+    "UNLINK_REQUESTED",
+    "UNLINK_BLOCKED",
+    "UNLINKED_LOCAL",
+    "RELINK_REQUIRED",
+    "REMOTE_CLOSURE_REQUESTED",
+    "REMOTE_CLOSURE_PENDING",
+    "REMOTE_CLOSURE_REFUSED",
+    "CLOSURE_OUTCOME_UNKNOWN"
+   ],
+   "terminal": [
+    "UNLINKED_LOCAL",
+    "REMOTE_CLOSED",
+    "ABANDONED"
+   ],
+   "receipt_states": [
+    "LINKED_READ_ONLY",
+    "ACTIVE_ELIGIBLE",
+    "UNLINKED_LOCAL",
+    "REMOTE_CLOSED",
+    "REMOTE_CLOSURE_REFUSED"
+   ],
+   "send_states": [],
+   "unknown_state": [
+    "AUTH_OUTCOME_UNKNOWN",
+    "CLOSURE_OUTCOME_UNKNOWN"
+   ],
+   "transitions": [
+    {
+     "from": "UNLINKED",
+     "to": "DISCOVERED"
+    },
+    {
+     "from": "DISCOVERED",
+     "to": "AUTH_PENDING"
+    },
+    {
+     "from": "DISCOVERED",
+     "to": "ABANDONED"
+    },
+    {
+     "from": "AUTH_PENDING",
+     "to": "LINKED_READ_ONLY",
+     "requires": "broker_readback"
+    },
+    {
+     "from": "AUTH_PENDING",
+     "to": "AUTH_FAILED"
+    },
+    {
+     "from": "AUTH_PENDING",
+     "to": "AUTH_OUTCOME_UNKNOWN"
+    },
+    {
+     "from": "AUTH_PENDING",
+     "to": "REMOTE_CLOSED",
+     "requires": "broker_readback_shows_closed"
+    },
+    {
+     "from": "AUTH_OUTCOME_UNKNOWN",
+     "to": "LINKED_READ_ONLY",
+     "requires": "broker_readback"
+    },
+    {
+     "from": "AUTH_OUTCOME_UNKNOWN",
+     "to": "AUTH_FAILED",
+     "requires": "provider_readback"
+    },
+    {
+     "from": "AUTH_FAILED",
+     "to": "AUTH_PENDING"
+    },
+    {
+     "from": "AUTH_FAILED",
+     "to": "ABANDONED"
+    },
+    {
+     "from": "LINKED_READ_ONLY",
+     "to": "KYC_PENDING"
+    },
+    {
+     "from": "LINKED_READ_ONLY",
+     "to": "ACTIVE_ELIGIBLE",
+     "requires": "broker_readback+signed_mandate"
+    },
+    {
+     "from": "KYC_PENDING",
+     "to": "ACTIVE_ELIGIBLE",
+     "requires": "broker_readback+signed_mandate"
+    },
+    {
+     "from": "KYC_PENDING",
+     "to": "RESTRICTED"
+    },
+    {
+     "from": "LINKED_READ_ONLY",
+     "to": "RESTRICTED"
+    },
+    {
+     "from": "ACTIVE_ELIGIBLE",
+     "to": "RESTRICTED"
+    },
+    {
+     "from": "ACTIVE_ELIGIBLE",
+     "to": "LINKED_READ_ONLY",
+     "kind": "disable_trading",
+     "requires": "fresh_broker_readback"
+    },
+    {
+     "from": "RESTRICTED",
+     "to": "REAUTH_PENDING"
+    },
+    {
+     "from": "REAUTH_PENDING",
+     "to": "LINKED_READ_ONLY",
+     "requires": "broker_readback"
+    },
+    {
+     "from": "REAUTH_PENDING",
+     "to": "RESTRICTED"
+    },
+    {
+     "from": "LINKED_READ_ONLY",
+     "to": "UNLINK_REQUESTED"
+    },
+    {
+     "from": "ACTIVE_ELIGIBLE",
+     "to": "UNLINK_REQUESTED"
+    },
+    {
+     "from": "RESTRICTED",
+     "to": "UNLINK_REQUESTED"
+    },
+    {
+     "from": "UNLINK_REQUESTED",
+     "to": "UNLINK_BLOCKED",
+     "requires": "fresh_exposure_check"
+    },
+    {
+     "from": "UNLINK_BLOCKED",
+     "to": "UNLINK_REQUESTED",
+     "kind": "exposure_cleared_recheck"
+    },
+    {
+     "from": "UNLINK_BLOCKED",
+     "to": "LINKED_READ_ONLY",
+     "kind": "owner_withdraws_request",
+     "requires": "fresh_broker_readback"
+    },
+    {
+     "from": "UNLINK_REQUESTED",
+     "to": "UNLINKED_LOCAL",
+     "requires": "exposure_clear_readback+grace_elapsed"
+    },
+    {
+     "from": "UNLINK_REQUESTED",
+     "to": "RELINK_REQUIRED",
+     "kind": "owner_cancels_in_grace"
+    },
+    {
+     "from": "RELINK_REQUIRED",
+     "to": "AUTH_PENDING"
+    },
+    {
+     "from": "RELINK_REQUIRED",
+     "to": "UNLINK_REQUESTED"
+    },
+    {
+     "from": "ACTIVE_ELIGIBLE",
+     "to": "REMOTE_CLOSURE_REQUESTED"
+    },
+    {
+     "from": "LINKED_READ_ONLY",
+     "to": "REMOTE_CLOSURE_REQUESTED"
+    },
+    {
+     "from": "REMOTE_CLOSURE_REQUESTED",
+     "to": "REMOTE_CLOSURE_PENDING",
+     "requires": "fresh_exposure_check+a4_approval"
+    },
+    {
+     "from": "REMOTE_CLOSURE_REQUESTED",
+     "to": "LINKED_READ_ONLY",
+     "kind": "owner_cancels_before_send",
+     "requires": "fresh_broker_readback"
+    },
+    {
+     "from": "REMOTE_CLOSURE_PENDING",
+     "to": "REMOTE_CLOSED",
+     "requires": "broker_readback"
+    },
+    {
+     "from": "REMOTE_CLOSURE_PENDING",
+     "to": "REMOTE_CLOSURE_REFUSED",
+     "requires": "provider_response"
+    },
+    {
+     "from": "REMOTE_CLOSURE_PENDING",
+     "to": "CLOSURE_OUTCOME_UNKNOWN"
+    },
+    {
+     "from": "CLOSURE_OUTCOME_UNKNOWN",
+     "to": "REMOTE_CLOSED",
+     "requires": "broker_readback"
+    },
+    {
+     "from": "CLOSURE_OUTCOME_UNKNOWN",
+     "to": "REMOTE_CLOSURE_REFUSED",
+     "requires": "broker_readback"
+    },
+    {
+     "from": "REMOTE_CLOSURE_REFUSED",
+     "to": "LINKED_READ_ONLY",
+     "requires": "broker_readback"
+    }
+   ],
+   "invariant": "REMOTE_CLOSED only from broker readback; UNLINKED_LOCAL is never REMOTE_CLOSED; a cancelled deletion (RELINK_REQUIRED) re-authenticates and never revives destroyed credentials"
+  },
+  {
+   "id": "VAN-SM-FUND_DEPOSIT",
+   "extends": "VNX-SM-FUND_DEPOSIT",
+   "initial": "DRAFT",
+   "states": [
+    "DRAFT",
+    "QUOTED",
+    "CANCELLED",
+    "AWAITING_OWNER",
+    "EXPIRED",
+    "AUTHORIZED",
+    "PROVIDER_PENDING",
+    "SENT",
+    "REJECTED",
+    "OUTCOME_UNKNOWN",
+    "PENDING_SETTLEMENT",
+    "FAILED",
+    "SETTLED",
+    "REVERSED"
+   ],
+   "terminal": [
+    "SETTLED",
+    "REJECTED",
+    "FAILED",
+    "REVERSED",
+    "EXPIRED",
+    "CANCELLED"
+   ],
+   "receipt_states": [
+    "SENT",
+    "PENDING_SETTLEMENT",
+    "SETTLED",
+    "REVERSED",
+    "REJECTED",
+    "FAILED"
+   ],
+   "send_states": [
+    "PROVIDER_PENDING",
+    "SENT"
+   ],
+   "unknown_state": "OUTCOME_UNKNOWN",
+   "transitions": [
+    {
+     "from": "DRAFT",
+     "to": "QUOTED",
+     "requires": "fresh_capability_check"
+    },
+    {
+     "from": "DRAFT",
+     "to": "CANCELLED"
+    },
+    {
+     "from": "QUOTED",
+     "to": "AWAITING_OWNER"
+    },
+    {
+     "from": "QUOTED",
+     "to": "EXPIRED"
+    },
+    {
+     "from": "QUOTED",
+     "to": "CANCELLED"
+    },
+    {
+     "from": "AWAITING_OWNER",
+     "to": "AUTHORIZED",
+     "requires": "a4_approval_bound_to_quote"
+    },
+    {
+     "from": "AWAITING_OWNER",
+     "to": "QUOTED",
+     "kind": "quote_changed_reapprove"
+    },
+    {
+     "from": "AWAITING_OWNER",
+     "to": "EXPIRED"
+    },
+    {
+     "from": "AWAITING_OWNER",
+     "to": "CANCELLED"
+    },
+    {
+     "from": "AUTHORIZED",
+     "to": "PROVIDER_PENDING",
+     "requires": "fresh_capability_check"
+    },
+    {
+     "from": "AUTHORIZED",
+     "to": "EXPIRED"
+    },
+    {
+     "from": "PROVIDER_PENDING",
+     "to": "SENT",
+     "requires": "provider_ack"
+    },
+    {
+     "from": "PROVIDER_PENDING",
+     "to": "REJECTED",
+     "requires": "provider_response"
+    },
+    {
+     "from": "PROVIDER_PENDING",
+     "to": "OUTCOME_UNKNOWN"
+    },
+    {
+     "from": "SENT",
+     "to": "PENDING_SETTLEMENT",
+     "requires": "provider_ack"
+    },
+    {
+     "from": "SENT",
+     "to": "FAILED",
+     "requires": "provider_response"
+    },
+    {
+     "from": "SENT",
+     "to": "OUTCOME_UNKNOWN"
+    },
+    {
+     "from": "OUTCOME_UNKNOWN",
+     "to": "PENDING_SETTLEMENT",
+     "requires": "reconciliation_readback"
+    },
+    {
+     "from": "OUTCOME_UNKNOWN",
+     "to": "FAILED",
+     "requires": "reconciliation_readback"
+    },
+    {
+     "from": "OUTCOME_UNKNOWN",
+     "to": "REJECTED",
+     "requires": "reconciliation_readback"
+    },
+    {
+     "from": "PENDING_SETTLEMENT",
+     "to": "SETTLED",
+     "requires": "broker_balance_readback"
+    },
+    {
+     "from": "PENDING_SETTLEMENT",
+     "to": "FAILED",
+     "requires": "provider_response"
+    },
+    {
+     "from": "PENDING_SETTLEMENT",
+     "to": "REVERSED",
+     "requires": "provider_reversal_id"
+    },
+    {
+     "from": "SETTLED",
+     "to": "REVERSED",
+     "requires": "provider_reversal_id",
+     "kind": "compensating_event"
+    }
+   ],
+   "invariant": "SETTLED only from broker balance reconciliation, never a redirect or HTTP 200; a reversal is a new compensating event; an unknown outcome is reconciled, never resent"
+  },
+  {
+   "id": "VAN-SM-FUND_WITHDRAWAL",
+   "extends": "VNX-SM-FUND_WITHDRAWAL",
+   "initial": "DRAFT",
+   "states": [
+    "DRAFT",
+    "BENEFICIARY_VERIFIED",
+    "CANCELLED",
+    "QUOTED",
+    "AWAITING_A4",
+    "REFUSED_MARGIN",
+    "EXPIRED",
+    "AUTHORIZED",
+    "SUBMITTED",
+    "PROVIDER_PENDING",
+    "REJECTED",
+    "OUTCOME_UNKNOWN",
+    "FAILED",
+    "PAID",
+    "REVERSED"
+   ],
+   "terminal": [
+    "PAID",
+    "REJECTED",
+    "FAILED",
+    "REVERSED",
+    "EXPIRED",
+    "CANCELLED",
+    "REFUSED_MARGIN"
+   ],
+   "receipt_states": [
+    "BENEFICIARY_VERIFIED",
+    "PROVIDER_PENDING",
+    "PAID",
+    "REVERSED",
+    "REJECTED",
+    "FAILED"
+   ],
+   "send_states": [
+    "SUBMITTED"
+   ],
+   "unknown_state": "OUTCOME_UNKNOWN",
+   "transitions": [
+    {
+     "from": "DRAFT",
+     "to": "BENEFICIARY_VERIFIED",
+     "requires": "beneficiary_verification"
+    },
+    {
+     "from": "DRAFT",
+     "to": "CANCELLED"
+    },
+    {
+     "from": "BENEFICIARY_VERIFIED",
+     "to": "QUOTED",
+     "requires": "fresh_capability_check"
+    },
+    {
+     "from": "BENEFICIARY_VERIFIED",
+     "to": "CANCELLED"
+    },
+    {
+     "from": "QUOTED",
+     "to": "AWAITING_A4",
+     "requires": "server_margin_check"
+    },
+    {
+     "from": "QUOTED",
+     "to": "REFUSED_MARGIN",
+     "requires": "server_margin_check"
+    },
+    {
+     "from": "QUOTED",
+     "to": "EXPIRED"
+    },
+    {
+     "from": "QUOTED",
+     "to": "CANCELLED"
+    },
+    {
+     "from": "AWAITING_A4",
+     "to": "AUTHORIZED",
+     "requires": "a4_approval_bound_to_quote_and_beneficiary"
+    },
+    {
+     "from": "AWAITING_A4",
+     "to": "QUOTED",
+     "kind": "quote_changed_reapprove"
+    },
+    {
+     "from": "AWAITING_A4",
+     "to": "EXPIRED"
+    },
+    {
+     "from": "AWAITING_A4",
+     "to": "CANCELLED"
+    },
+    {
+     "from": "AUTHORIZED",
+     "to": "SUBMITTED",
+     "requires": "server_margin_recheck"
+    },
+    {
+     "from": "AUTHORIZED",
+     "to": "REFUSED_MARGIN",
+     "requires": "server_margin_recheck"
+    },
+    {
+     "from": "AUTHORIZED",
+     "to": "EXPIRED"
+    },
+    {
+     "from": "SUBMITTED",
+     "to": "PROVIDER_PENDING",
+     "requires": "provider_ack"
+    },
+    {
+     "from": "SUBMITTED",
+     "to": "REJECTED",
+     "requires": "provider_response"
+    },
+    {
+     "from": "SUBMITTED",
+     "to": "OUTCOME_UNKNOWN"
+    },
+    {
+     "from": "OUTCOME_UNKNOWN",
+     "to": "PROVIDER_PENDING",
+     "requires": "reconciliation_readback"
+    },
+    {
+     "from": "OUTCOME_UNKNOWN",
+     "to": "REJECTED",
+     "requires": "reconciliation_readback"
+    },
+    {
+     "from": "OUTCOME_UNKNOWN",
+     "to": "FAILED",
+     "requires": "reconciliation_readback"
+    },
+    {
+     "from": "PROVIDER_PENDING",
+     "to": "PAID",
+     "requires": "provider_settlement_receipt"
+    },
+    {
+     "from": "PROVIDER_PENDING",
+     "to": "FAILED",
+     "requires": "provider_response"
+    },
+    {
+     "from": "PROVIDER_PENDING",
+     "to": "OUTCOME_UNKNOWN"
+    },
+    {
+     "from": "PAID",
+     "to": "REVERSED",
+     "requires": "provider_reversal_id",
+     "kind": "compensating_event"
+    }
+   ],
+   "invariant": "PAID only from an authoritative provider settlement receipt bound to the approved quote and beneficiary; an under-margin withdrawal is refused server-side; never resent on an unknown outcome"
+  },
+  {
+   "id": "VAN-SM-FUND_TRANSFER",
+   "extends": "none (pack has no transfer machine)",
+   "initial": "DRAFT",
+   "states": [
+    "DRAFT",
+    "QUOTED",
+    "CANCELLED",
+    "AWAITING_A4",
+    "EXPIRED",
+    "AUTHORIZED",
+    "SUBMITTED",
+    "DEBIT_CONFIRMED",
+    "REJECTED",
+    "FAILED",
+    "OUTCOME_UNKNOWN",
+    "SETTLED",
+    "INVESTIGATION_REQUIRED",
+    "REVERSED"
+   ],
+   "terminal": [
+    "SETTLED",
+    "REJECTED",
+    "FAILED",
+    "REVERSED",
+    "EXPIRED",
+    "CANCELLED"
+   ],
+   "receipt_states": [
+    "DEBIT_CONFIRMED",
+    "SETTLED",
+    "REVERSED",
+    "REJECTED",
+    "FAILED"
+   ],
+   "send_states": [
+    "SUBMITTED"
+   ],
+   "unknown_state": "OUTCOME_UNKNOWN",
+   "transitions": [
+    {
+     "from": "DRAFT",
+     "to": "QUOTED",
+     "requires": "fresh_capability_check"
+    },
+    {
+     "from": "DRAFT",
+     "to": "CANCELLED"
+    },
+    {
+     "from": "QUOTED",
+     "to": "AWAITING_A4"
+    },
+    {
+     "from": "QUOTED",
+     "to": "EXPIRED"
+    },
+    {
+     "from": "QUOTED",
+     "to": "CANCELLED"
+    },
+    {
+     "from": "AWAITING_A4",
+     "to": "AUTHORIZED",
+     "requires": "a4_approval_bound_to_quote"
+    },
+    {
+     "from": "AWAITING_A4",
+     "to": "QUOTED",
+     "kind": "quote_changed_reapprove"
+    },
+    {
+     "from": "AWAITING_A4",
+     "to": "EXPIRED"
+    },
+    {
+     "from": "AWAITING_A4",
+     "to": "CANCELLED"
+    },
+    {
+     "from": "AUTHORIZED",
+     "to": "SUBMITTED",
+     "requires": "server_margin_check"
+    },
+    {
+     "from": "AUTHORIZED",
+     "to": "EXPIRED"
+    },
+    {
+     "from": "SUBMITTED",
+     "to": "DEBIT_CONFIRMED",
+     "requires": "source_debit_readback"
+    },
+    {
+     "from": "SUBMITTED",
+     "to": "REJECTED",
+     "requires": "provider_response"
+    },
+    {
+     "from": "SUBMITTED",
+     "to": "FAILED",
+     "requires": "provider_response"
+    },
+    {
+     "from": "SUBMITTED",
+     "to": "OUTCOME_UNKNOWN"
+    },
+    {
+     "from": "OUTCOME_UNKNOWN",
+     "to": "DEBIT_CONFIRMED",
+     "requires": "reconciliation_readback"
+    },
+    {
+     "from": "OUTCOME_UNKNOWN",
+     "to": "REJECTED",
+     "requires": "reconciliation_readback"
+    },
+    {
+     "from": "DEBIT_CONFIRMED",
+     "to": "SETTLED",
+     "requires": "destination_credit_readback"
+    },
+    {
+     "from": "DEBIT_CONFIRMED",
+     "to": "INVESTIGATION_REQUIRED",
+     "kind": "credit_not_seen_in_window"
+    },
+    {
+     "from": "INVESTIGATION_REQUIRED",
+     "to": "SETTLED",
+     "requires": "destination_credit_readback"
+    },
+    {
+     "from": "INVESTIGATION_REQUIRED",
+     "to": "REVERSED",
+     "requires": "provider_reversal_id"
+    },
+    {
+     "from": "SETTLED",
+     "to": "REVERSED",
+     "requires": "provider_reversal_id",
+     "kind": "compensating_event"
+    }
+   ],
+   "invariant": "SETTLED needs both the source debit and the destination credit read back"
+  },
+  {
+   "id": "VAN-SM-TRADE_ORDER",
+   "extends": "VNX-SM-TRADE_ORDER",
+   "initial": "DRAFT",
+   "states": [
+    "DRAFT",
+    "RISK_REVIEW",
+    "ABANDONED",
+    "OWNER_REVIEW",
+    "RISK_REFUSED",
+    "AUTHORIZED",
+    "BROKER_PENDING",
+    "EXPIRED",
+    "PLACED",
+    "PARTIAL",
+    "FILLED",
+    "REJECTED",
+    "OUTCOME_UNKNOWN",
+    "CANCELLED",
+    "MODIFY_PENDING",
+    "CANCEL_PENDING"
+   ],
+   "terminal": [
+    "FILLED",
+    "CANCELLED",
+    "REJECTED",
+    "EXPIRED",
+    "RISK_REFUSED",
+    "ABANDONED"
+   ],
+   "receipt_states": [
+    "PLACED",
+    "PARTIAL",
+    "FILLED",
+    "CANCELLED",
+    "REJECTED",
+    "EXPIRED"
+   ],
+   "send_states": [
+    "BROKER_PENDING"
+   ],
+   "unknown_state": "OUTCOME_UNKNOWN",
+   "transitions": [
+    {
+     "from": "DRAFT",
+     "to": "RISK_REVIEW"
+    },
+    {
+     "from": "DRAFT",
+     "to": "ABANDONED"
+    },
+    {
+     "from": "RISK_REVIEW",
+     "to": "OWNER_REVIEW",
+     "requires": "risk_gate_pass"
+    },
+    {
+     "from": "RISK_REVIEW",
+     "to": "RISK_REFUSED",
+     "requires": "risk_gate_refusal"
+    },
+    {
+     "from": "OWNER_REVIEW",
+     "to": "AUTHORIZED",
+     "requires": "biometric_intent_token"
+    },
+    {
+     "from": "OWNER_REVIEW",
+     "to": "ABANDONED"
+    },
+    {
+     "from": "AUTHORIZED",
+     "to": "BROKER_PENDING",
+     "requires": "worst_case_risk_reserved"
+    },
+    {
+     "from": "AUTHORIZED",
+     "to": "EXPIRED",
+     "requires": "token_expired"
+    },
+    {
+     "from": "BROKER_PENDING",
+     "to": "PLACED",
+     "requires": "broker_ack"
+    },
+    {
+     "from": "BROKER_PENDING",
+     "to": "PARTIAL",
+     "requires": "broker_fill"
+    },
+    {
+     "from": "BROKER_PENDING",
+     "to": "FILLED",
+     "requires": "broker_fill"
+    },
+    {
+     "from": "BROKER_PENDING",
+     "to": "REJECTED",
+     "requires": "broker_response"
+    },
+    {
+     "from": "BROKER_PENDING",
+     "to": "EXPIRED",
+     "requires": "broker_response"
+    },
+    {
+     "from": "BROKER_PENDING",
+     "to": "OUTCOME_UNKNOWN"
+    },
+    {
+     "from": "OUTCOME_UNKNOWN",
+     "to": "PLACED",
+     "requires": "broker_readback"
+    },
+    {
+     "from": "OUTCOME_UNKNOWN",
+     "to": "PARTIAL",
+     "requires": "broker_readback"
+    },
+    {
+     "from": "OUTCOME_UNKNOWN",
+     "to": "FILLED",
+     "requires": "broker_readback"
+    },
+    {
+     "from": "OUTCOME_UNKNOWN",
+     "to": "REJECTED",
+     "requires": "broker_readback"
+    },
+    {
+     "from": "OUTCOME_UNKNOWN",
+     "to": "CANCELLED",
+     "requires": "broker_readback"
+    },
+    {
+     "from": "OUTCOME_UNKNOWN",
+     "to": "EXPIRED",
+     "requires": "broker_readback"
+    },
+    {
+     "from": "PLACED",
+     "to": "PARTIAL",
+     "requires": "broker_fill"
+    },
+    {
+     "from": "PLACED",
+     "to": "FILLED",
+     "requires": "broker_fill"
+    },
+    {
+     "from": "PLACED",
+     "to": "MODIFY_PENDING",
+     "requires": "risk_gate_pass"
+    },
+    {
+     "from": "PLACED",
+     "to": "CANCEL_PENDING"
+    },
+    {
+     "from": "PLACED",
+     "to": "EXPIRED",
+     "requires": "broker_response"
+    },
+    {
+     "from": "PARTIAL",
+     "to": "PARTIAL",
+     "requires": "broker_fill"
+    },
+    {
+     "from": "PARTIAL",
+     "to": "FILLED",
+     "requires": "broker_fill"
+    },
+    {
+     "from": "PARTIAL",
+     "to": "CANCEL_PENDING"
+    },
+    {
+     "from": "PARTIAL",
+     "to": "MODIFY_PENDING",
+     "requires": "risk_gate_pass"
+    },
+    {
+     "from": "PARTIAL",
+     "to": "EXPIRED",
+     "requires": "broker_response"
+    },
+    {
+     "from": "MODIFY_PENDING",
+     "to": "PLACED",
+     "requires": "broker_response"
+    },
+    {
+     "from": "MODIFY_PENDING",
+     "to": "PARTIAL",
+     "requires": "broker_fill"
+    },
+    {
+     "from": "MODIFY_PENDING",
+     "to": "FILLED",
+     "requires": "broker_fill"
+    },
+    {
+     "from": "MODIFY_PENDING",
+     "to": "OUTCOME_UNKNOWN"
+    },
+    {
+     "from": "CANCEL_PENDING",
+     "to": "CANCELLED",
+     "requires": "broker_ack"
+    },
+    {
+     "from": "CANCEL_PENDING",
+     "to": "PARTIAL",
+     "requires": "broker_fill"
+    },
+    {
+     "from": "CANCEL_PENDING",
+     "to": "FILLED",
+     "requires": "broker_fill"
+    },
+    {
+     "from": "CANCEL_PENDING",
+     "to": "EXPIRED",
+     "requires": "broker_response"
+    },
+    {
+     "from": "CANCEL_PENDING",
+     "to": "OUTCOME_UNKNOWN"
+    }
+   ],
+   "invariant": "Broker and protection readback precede any success state; PLACED is broker-confirmed resting (label 'Working'); a fill racing a cancel is real exposure; a partly filled then cancelled or expired order keeps its filled part as a position; never resent on an unknown outcome"
+  },
+  {
+   "id": "VAN-SM-NEWS_ARMED_TICKET",
+   "extends": "none (Rev 1.9, AUD-04)",
+   "initial": "DRAFT_UNAPPROVED",
+   "states": [
+    "DRAFT_UNAPPROVED",
+    "SIGNED",
+    "VOIDED",
+    "ARMED",
+    "EXPIRED",
+    "USED"
+   ],
+   "terminal": [
+    "USED",
+    "VOIDED",
+    "EXPIRED"
+   ],
+   "receipt_states": [
+    "SIGNED",
+    "USED"
+   ],
+   "send_states": [],
+   "unknown_state": null,
+   "transitions": [
+    {
+     "from": "DRAFT_UNAPPROVED",
+     "to": "SIGNED",
+     "requires": "owner_biometric_over_frozen_grant"
+    },
+    {
+     "from": "DRAFT_UNAPPROVED",
+     "to": "VOIDED"
+    },
+    {
+     "from": "SIGNED",
+     "to": "ARMED",
+     "kind": "window_opens"
+    },
+    {
+     "from": "SIGNED",
+     "to": "VOIDED"
+    },
+    {
+     "from": "SIGNED",
+     "to": "EXPIRED"
+    },
+    {
+     "from": "ARMED",
+     "to": "USED",
+     "requires": "two_source_agreement+mandate_and_risk_gate+unused_nonce"
+    },
+    {
+     "from": "ARMED",
+     "to": "VOIDED",
+     "kind": "policy_mandate_feed_or_quote_change"
+    },
+    {
+     "from": "ARMED",
+     "to": "EXPIRED"
+    }
+   ],
+   "invariant": "One use; the tap only chooses within the signed envelope; both sources must agree (OD-24)"
+  }
+ ]
+}

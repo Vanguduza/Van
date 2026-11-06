@@ -1,0 +1,24 @@
+{
+  "state": "WATCH_COMPLETED_ONLY_SOURCE_EVIDENCE_UNOBSERVED",
+  "head": "a5d63df4310ecda331aa5f6c6995ed46a42739f8",
+  "run_id": 41302444387,
+  "run_attempt": 1,
+  "started_at_utc": "2026-11-01T11:37:56.181979+00:00",
+  "controller_pid": 447491,
+  "command": [
+    "gh",
+    "run",
+    "watch",
+    "41302444387",
+    "--repo",
+    "Vanguduza/Van",
+    "--interval",
+    "60",
+    "--exit-status"
+  ],
+  "timeout_seconds": 5400,
+  "log": "/workspace/van-ci-shards-native-watch-20261101.log",
+  "limits": "Readonly native watch completion is not phase/collection/JUnit qualification; expected mandatory failures do not supply source results. No push/dispatch/cancel/workflow change.",
+  "exit": 1,
+  "completed_at_utc": "2026-11-01T12:01:33.855975+00:00"
+}

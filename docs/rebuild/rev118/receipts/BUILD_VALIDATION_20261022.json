@@ -1,0 +1,94 @@
+{
+  "schema": "van.build.continuation-validation/1",
+  "source_commit": "461186efbc7f8318468a81187eeb6e46c9a9dd41",
+  "scope": "existing Android baseline maintenance and documentary preparation; not PRE admission or handset qualification",
+  "jvm": {
+    "report_files": 157,
+    "tests": 1273,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "android_unit": {
+    "report_files": 34,
+    "tests": 195,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "android_tasks": [
+    ":app:testDebugUnitTest",
+    ":app:assembleDebug",
+    ":app:assembleDebugAndroidTest",
+    ":app:lintDebug"
+  ],
+  "android_build_exit": 0,
+  "lint": {
+    "Error": 0,
+    "Fatal": 0,
+    "Warning": 80
+  },
+  "artifacts": [
+    {
+      "path": "android/app/build/outputs/apk/debug/app-debug.apk",
+      "bytes": 317981300,
+      "sha256": "2d3b4b1be90c1d1d966399fe67ed5adad06a325ed845a1666d143b8bf9118a5e"
+    },
+    {
+      "path": "android/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk",
+      "bytes": 2300130,
+      "sha256": "9283b7c1b1e1e326e6522429664adf19004881570a8e480c0a8a81396afdf5af"
+    }
+  ],
+  "voice_bundle": {
+    "file_bytes": 224852871,
+    "file_count": 45,
+    "manifest_sha256": "7fa17db389349bd587c1f061c7162f9a4c419a552c9d57cd03e8e937bf935e30",
+    "owner_profile_included": false,
+    "status": "VERIFIED"
+  },
+  "ledger_verification": {
+    "command": "python3 tools/ci/project_truth_ledger.py verify --baseline 4fd466dec3910ed5de614bfbf95887ad619df5ca --committed",
+    "evaluated_head": "461186efbc7f8318468a81187eeb6e46c9a9dd41",
+    "commits": 5,
+    "exit": 0,
+    "scope": "branch-local verification; prior full-history receipt remains separate; not trusted-base PR admission"
+  },
+  "source_maintenance": {
+    "regex_commit": "6ba1fef7",
+    "rive_sampling_commit": "eba674ac",
+    "immutable_asr_commit": "461186ef",
+    "host_icu": {
+      "before": {
+        "passed": 1,
+        "failed": 1,
+        "rejected_patterns": 2
+      },
+      "after": {
+        "passed": 2,
+        "failed": 0
+      }
+    },
+    "ci_regressions": {
+      "passed": 14,
+      "failed": 0
+    },
+    "rebuild_regressions": {
+      "passed": 31,
+      "failed": 0
+    }
+  },
+  "log_sha256": {
+    "van-continuation-jvm.log": "127d26fef524b6f5faaa3d4ed8d734d46786efe0397fbe461ca0673c9a3d53cd",
+    "van-continuation-android-compile-fixed.log": "8f51af07974bb92a701472794d0f8b038bfc6e0df4dca6dabc15ae44feb70718",
+    "van-continuation-android-build.log": "0fad29b061d0e7ee3a4749cc6b1b59d62559fc24dfba15d619701dc95a2f5102",
+    "van-rebuild-tests.log": "f9df318bb3a7f5f31310c559023ff7bc217d665c8470d97d50fb050a2d3400e3",
+    "van-voice-immutable.log": "48ea7c307e64633da647b0f9aebbbd10e2f223b776d4618013d03a539abb29d5"
+  },
+  "limitations": [
+    "Local APKs use a development signer and are not owner release artifacts.",
+    "No emulator or /dev/kvm in this machine.",
+    "Instrumentation execution is owned by GitHub Actions run 39709119778; result pending at receipt creation.",
+    "No S24, native DIAL readback, F15 or production service/provider qualification occurred."
+  ]
+}

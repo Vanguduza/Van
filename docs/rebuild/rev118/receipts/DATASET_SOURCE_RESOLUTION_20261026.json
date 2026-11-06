@@ -1,0 +1,51 @@
+{
+  "schema": "van.rebuild.dataset-source-resolution/1",
+  "base_head": "4637de1bb67e311a4ba2cf75600d50dd77c62955",
+  "updated_at_utc": "2026-10-26T09:34:15.444273+00:00",
+  "status": "SOURCE_TESTED_COMPONENT_NOT_DATASET_OR_UNIT_ADMISSION",
+  "units": [
+    "VAN-ML-PKT-005",
+    "BE-008"
+  ],
+  "unit_status": "IN_PROGRESS",
+  "acceptance": "NOT_ISSUED",
+  "source_sha256": {
+    ".github/workflows/van-forecast-runtime-source.yml": "d45bb716bcb5c861e3db7feddd2b26a686c7f6d76bf37e7803d36fc91cdcc18e",
+    "trading/vati/__main__.py": "21a97174fff751972a8c05973a75a9790117f61ebe11c42d0db2b211655e822a",
+    "trading/vati/contracts/__init__.py": "d8d8c39b8bd6b9855b432defa25e67400226837661e8cdb26e99e1df8bc724b6",
+    "trading/vati/contracts/schemas/dataset_manifest.schema.json": "e89903af45916133f02286957a5ddceee6fae8007d17cac6b4cce2c09d412143",
+    "trading/vati/research/bar_partitions.py": "58fa910ea128761f9cf77ebe411703aac909feecb9267ce4e76d668be3b26554",
+    "trading/vati/research/workflow.py": "d280df6399fac76fb4835e8f9089b2123b144ce2ae892dd50121e35a39c9818a",
+    "trading/vati/research/dataset_manifest.py": "c451aa2cdf90237515b0865be499a9e98377dd6591f6657c947df22645c41d6e",
+    "trading/vati/research/dataset_sources.py": "036a96a1976385f3a0f6e8d0980c410354e0bdc856c79696d6fb764c701880de",
+    "trading/tests/test_dataset_manifest_candidates.py": "c23003908daeb58347153e8f089dcd9901c108d689e4f7de1898d54945f92bb6",
+    "trading/worker_tests/test_dataset_source_inspection.py": "dfe2ef910962ef63bd132bac8ca4dc5ae955c41264b21c86c7f6543e329016ac"
+  },
+  "tests": {
+    "candidate_initial": 109,
+    "source_initial": 159,
+    "source_after_duplicate_fix": 161,
+    "duplicate_before": "2 failed with corrected operation envelopes; first inspect envelope omitted expected_scope and is retained separately as a harness error. Strict nested duplicate handling fixed before any reference resolution.",
+    "ASCII_before": "2 actual expected-exception failures: Unicode fractional digits accepted by Python integer parsing. re.ASCII fixed wire parsing; exact fractional comparison preserved.",
+    "postgres_first": "373 passed/0skip/audit0/owned fixture independently absent; source before final ASCII fix, not final-source qualification",
+    "postgres_final": "375 passed/0skip/audit0/all final source and test hashes match/owned fixture independently absent",
+    "supplemental_first": "8 assertion-caught faults/161 positive and restored controls, source before ASCII fix",
+    "supplemental_final": "9 assertion-caught faults/163 positive and restored controls/0setup errors,skips,audit violations/exact restoration;not canonical374",
+    "rebuild": 108
+  },
+  "canonical_checks": {
+    "owner_frontend_drift": false,
+    "registry_cases": 374,
+    "registry_edits": 383,
+    "registry_findings": [],
+    "canonical_mutation_execution_for_this_source": "NOT_RUN",
+    "consolidation_findings": []
+  },
+  "remaining": [
+    "Complete immutable DatasetManifest publication and all actual scope/feature/target/calendar/universe references",
+    "Real entitlement/consent/current policy;licensed news and expectation joins;effective lifecycle/gap policy",
+    "Reconstructed and corrected-research paths;inactive-instrument read-only history identity with enabled execution guard preserved",
+    "Native/independent/unit/owner/economic/production/S24 admission"
+  ],
+  "evidence": "ci/dataset_source_resolution_20261026"
+}

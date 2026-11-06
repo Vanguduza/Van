@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="4" time="0.399" timestamp="2026-10-25T23:44:17.011827+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_news_durable_publication" name="test_a_distinct_relay_observation_is_durable_without_rewriting_the_original" time="0.111"><failure message="assert False&#10; +  where False = any(&lt;generator object test_a_distinct_relay_observation_is_durable_without_rewriting_the_original.&lt;locals&gt;.&lt;genexpr&gt; at 0x7f501d2759a0&gt;)">ledger = &lt;vati.core.ledger.Ledger object at 0x7f501d4134a0&gt;
+
+    def test_a_distinct_relay_observation_is_durable_without_rewriting_the_original(ledger):
+        news=NewsIngress(ledger=ledger);h=story();news.ingest(h,now_ms=NOW)
+        original=next(ledger.iter(EventKind.NEWS_HEADLINE))
+        relay=story(source_id='relay',observed_ms=NOW+1000);news.ingest(relay,now_ms=NOW+1000)
+        records=list(ledger.iter())
+&gt;       assert any(e.payload.get('full_claim',{}).get('source_id')=='relay' for e in records)
+E       assert False
+E        +  where False = any(&lt;generator object test_a_distinct_relay_observation_is_durable_without_rewriting_the_original.&lt;locals&gt;.&lt;genexpr&gt; at 0x7f501d2759a0&gt;)
+
+trading/tests/test_news_durable_publication.py:116: AssertionError</failure></testcase><testcase classname="trading.tests.test_news_durable_publication" name="test_cold_relay_replay_keeps_its_original_availability_instead_of_retry_time" time="0.006"><failure message="AssertionError: assert (1 == 1 and 'relay' in ('138bd873f2a6c652858d8f2f466ac369cd194fb68ff43f2a00a3d50a892ec36f', 'publisher'))&#10; +  where 1 = len([EventImpactAssessment(impact_id='bf97d87d2cb8345101a77f1e', headline_id='138bd873f2a6c652858d8f2f466ac369', subject_k...6ac369cd194fb68ff43f2a00a3d50a892ec36f', 'publisher'), assessed_ms=1800000001000, impact_version='event-impact/5.1.1')])&#10; +  and   ('138bd873f2a6c652858d8f2f466ac369cd194fb68ff43f2a00a3d50a892ec36f', 'publisher') = EventImpactAssessment(impact_id='bf97d87d2cb8345101a77f1e', headline_id='138bd873f2a6c652858d8f2f466ac369', subject_ki...66ac369cd194fb68ff43f2a00a3d50a892ec36f', 'publisher'), assessed_ms=1800000001000, impact_version='event-impact/5.1.1').evidence_refs">ledger = &lt;vati.core.ledger.Ledger object at 0x7f501d590230&gt;
+
+    def test_cold_relay_replay_keeps_its_original_availability_instead_of_retry_time(ledger):
+        news=NewsIngress(ledger=ledger);h=story();news.ingest(h,now_ms=NOW)
+        relay=story(source_id='relay',observed_ms=NOW+1000);news.ingest(relay,now_ms=NOW+1000)
+        head=ledger.head();cold=NewsIngress(ledger=ledger)
+        assert cold.ingest(relay,now_ms=NOW+2000) is None
+        impacts=cold.assess_subject(subject_kind='POSITION',subject_id='p',symbol='EURUSD',now_ms=NOW+1000,persist=False)
+&gt;       assert len(impacts)==1 and 'relay' in impacts[0].evidence_refs
+E       AssertionError: assert (1 == 1 and 'relay' in ('138bd873f2a6c652858d8f2f466ac369cd194fb68ff43f2a00a3d50a892ec36f', 'publisher'))
+E        +  where 1 = len([EventImpactAssessment(impact_id='bf97d87d2cb8345101a77f1e', headline_id='138bd873f2a6c652858d8f2f466ac369', subject_k...6ac369cd194fb68ff43f2a00a3d50a892ec36f', 'publisher'), assessed_ms=1800000001000, impact_version='event-impact/5.1.1')])
+E        +  and   ('138bd873f2a6c652858d8f2f466ac369cd194fb68ff43f2a00a3d50a892ec36f', 'publisher') = EventImpactAssessment(impact_id='bf97d87d2cb8345101a77f1e', headline_id='138bd873f2a6c652858d8f2f466ac369', subject_ki...66ac369cd194fb68ff43f2a00a3d50a892ec36f', 'publisher'), assessed_ms=1800000001000, impact_version='event-impact/5.1.1').evidence_refs
+
+trading/tests/test_news_durable_publication.py:127: AssertionError</failure></testcase><testcase classname="trading.tests.test_news_durable_publication" name="test_failed_relay_publication_cannot_become_remembered_provenance" time="0.005"><failure message="Failed: DID NOT RAISE OSError">ledger = &lt;vati.core.ledger.Ledger object at 0x7f501d592e10&gt;
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7f501d5900b0&gt;
+
+    def test_failed_relay_publication_cannot_become_remembered_provenance(ledger,monkeypatch):
+        news=NewsIngress(ledger=ledger);h=story();news.ingest(h);append=ledger.append
+        def unavailable(event):
+            if event.kind.value=='NEWS_OBSERVATION':raise OSError('fixture relay writer unavailable')
+            return append(event)
+        with monkeypatch.context() as patch:
+            patch.setattr(ledger,'append',unavailable)
+&gt;           with pytest.raises(OSError):news.ingest(story(source_id='relay'))
+                 ^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE OSError
+
+trading/tests/test_news_durable_publication.py:138: Failed</failure></testcase><testcase classname="trading.tests.test_news_durable_publication" name="test_missing_known_observation_receipt_cannot_be_recreated" time="0.005"><failure message="Failed: DID NOT RAISE NewsIngressError">ledger = &lt;vati.core.ledger.Ledger object at 0x7f501d5b5d60&gt;
+
+    def test_missing_known_observation_receipt_cannot_be_recreated(ledger):
+        news=NewsIngress(ledger=ledger);h=story();news.ingest(h)
+        relay=story(source_id='relay');news.ingest(relay)
+        ledger._conn.execute("DELETE FROM events WHERE kind='NEWS_OBSERVATION' AND json_extract(payload_json,'$.full_claim.source_id')='relay'")
+&gt;       with pytest.raises(NewsIngressError,match='missing'):news.ingest(relay)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE NewsIngressError
+
+trading/tests/test_news_durable_publication.py:146: Failed</failure></testcase></testsuite></testsuites>

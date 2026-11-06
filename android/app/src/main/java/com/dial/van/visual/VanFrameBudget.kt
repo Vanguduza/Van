@@ -26,17 +26,24 @@ class VanFrameBudgetSampler(
     val budgetMillis: Float = DEFAULT_BUDGET_MS,
     val windowSize: Int = DEFAULT_WINDOW,
 ) {
+    init {
+        require(budgetMillis.isFinite() && budgetMillis > 0f) {
+            "budgetMillis must be positive and finite"
+        }
+        require(windowSize > 0) { "windowSize must be positive" }
+    }
+
     private val durations = FloatArray(windowSize)
     private var count = 0
     private var cursor = 0
     private var missing = false
 
-    /** Frames recorded since construction. */
+    /** Accepted frames since construction or the most recent reset, not a lifetime total. */
     var frames: Long = 0L
         private set
 
     fun record(frameDurationMillis: Float) {
-        if (frameDurationMillis < 0f) return
+        if (!frameDurationMillis.isFinite() || frameDurationMillis < 0f) return
         durations[cursor] = frameDurationMillis
         cursor = (cursor + 1) % windowSize
         if (count < windowSize) count += 1
@@ -46,8 +53,11 @@ class VanFrameBudgetSampler(
 
     /** Convenience for a `withFrameNanos` driver that has two timestamps. */
     fun recordNanos(previousNanos: Long, frameNanos: Long) {
+        if (frameNanos <= previousNanos) return
+        // An increasing pair spanning more than Long.MAX_VALUE nanoseconds is a pause.
+        // Check before subtraction so an overflowing difference cannot become a sample.
+        if (previousNanos < 0L && frameNanos > Long.MAX_VALUE + previousNanos) return
         val delta = frameNanos - previousNanos
-        if (delta <= 0L) return
         // A pause (screen off, backgrounded) is not a missed frame. Counting it would
         // degrade the field of a device that was doing nothing wrong.
         if (delta > VanAnimationClock.MAX_FRAME_DELTA_NANOS) return
@@ -72,10 +82,12 @@ class VanFrameBudgetSampler(
         return sorted[index]
     }
 
+    /** Clears the rolling window, hysteresis state and accepted-frame counter. */
     fun reset() {
         count = 0
         cursor = 0
         missing = false
+        frames = 0L
     }
 
     private fun evaluate(): Boolean {
@@ -92,5 +104,54 @@ class VanFrameBudgetSampler(
         const val DEFAULT_WINDOW = 60
         const val MISS_RATIO = 0.20f
         const val RECOVER_RATIO = 0.08f
+    }
+}
+
+/**
+ * Bridges the existing active animation clock to the existing effect policy. This measures
+ * callback cadence, NOT GPU rendering duration, presentation latency or Android jank.
+ * Pause/resume and refresh-rate changes start a fresh window, never counting hidden time.
+ */
+class VanFrameCadenceFeedback(private val windowSize: Int = VanFrameBudgetSampler.DEFAULT_WINDOW) {
+    private var rate = DEFAULT_REFRESH_HZ
+    private var active = false
+    private var previousNanos: Long? = null
+    private var sampler = newSampler()
+    val missed: Boolean get() = sampler.budgetMissed()
+    val observedFrames: Long get() = sampler.frames
+    val budgetMillis: Float get() = sampler.budgetMillis
+
+    fun configure(refreshRateHz: Float, enabled: Boolean) {
+        val nextRate = validRefreshRate(refreshRateHz)
+        if (rate == nextRate && active == enabled) return
+        rate = nextRate
+        active = enabled
+        previousNanos = null
+        sampler = newSampler()
+    }
+
+    fun record(frameNanos: Long): Boolean {
+        if (!active) return false
+        val previous = previousNanos
+        // Do not move the anchor backward after an invalid timestamp.
+        if (previous != null && frameNanos <= previous) return missed
+        previousNanos = frameNanos
+        if (previous != null) sampler.recordNanos(previous, frameNanos)
+        return missed
+    }
+
+    fun pause() = configure(rate, false)
+
+    private fun newSampler() = VanFrameBudgetSampler(
+        // Small scheduling jitter is not a whole missed refresh interval.
+        budgetMillis = 1_000f / rate * CADENCE_TOLERANCE,
+        windowSize = windowSize,
+    )
+
+    companion object {
+        const val DEFAULT_REFRESH_HZ = 60f
+        const val CADENCE_TOLERANCE = 1.20f
+        fun validRefreshRate(value: Float): Float =
+            if (value.isFinite() && value in 1f..1_000f) value else DEFAULT_REFRESH_HZ
     }
 }

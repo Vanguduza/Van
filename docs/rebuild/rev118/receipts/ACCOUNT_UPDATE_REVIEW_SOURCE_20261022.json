@@ -1,0 +1,568 @@
+{
+  "schema": "van.rebuild.account-update-review-source/1",
+  "source_parent": "45ec06098542b8a3c1be58991141f049d806730d",
+  "source_sha256": {
+    "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt": "ea044bfe5967a695e04e4ca8b762b566faf515e2bb458c93ed3a6984953b1d21",
+    "android/app/src/main/java/com/dial/van/trading/AccountOnboarding.kt": "671696489fc1986fd3e1a984a6dc0cb52a0ff8e84c618f965f2a0508aa5b07d1",
+    "android/app/src/main/java/com/dial/van/trading/ui/AccountOnboardingScreen.kt": "e12449a66d8dc9202b703f7fbace9caafe8c8f766f960ccd954db4d0a9ab204a",
+    "android/app/src/test/java/com/dial/van/trading/AccountOnboardingTest.kt": "b5826607de442ef390b9328a6386e58baa13766255c3fb74caffe04ade426538",
+    "backend/tests/test_account_resource_binding.py": "fc3fc4b8a094cc49f9cb96736f08131deb80f4fcd762bb1342c51c08d19b06ee",
+    "backend/tests/test_account_update_review.py": "3011c269ee3ab22cdf8c17c1e4a21b1c186abdcb84d7ea776c8d6a3dbe84deff",
+    "backend/van_gateway/app.py": "2b3abd5a3bbc7198fe4fbaca6a65715d7589f656b5f564ee7de04992f14ffb4b",
+    "backend/van_gateway/trading/account_contracts.py": "6622995963319ea30c91730ad76d77bd67fcb6d2475d43cf96864ee15371bfc0",
+    "backend/van_gateway/trading/accounts.py": "7df9c5a1f67f0ecbf1e77492e3346af8909b3e5ebf124798ddf915c570d2dc10",
+    "trading/commander/account_config.py": "3c6bcdcd613de45ad36be2c71147d19257258a4018014311db4146b0a96faf6f",
+    "trading/commander/accounts.py": "943d08f6e77b728356e5525eced0050578f1b77d219f496a3a7ac18c3434551d",
+    "trading/commander/app.py": "8df8ee8590d8ee0de42bda6a67093d964624ad21f273f0a0f67a389989c86521",
+    "trading/tests/test_account_update_semantics.py": "394c88eea36d654d12be8feb157323f3fc36ecd04f79a73af0612540926ff253",
+    "trading/tests/test_commander.py": "fa4fabb23972723a46dcad0e313801e7f35b421a770f0bd299c8a2286d1e1489",
+    "trading/vati/app/service.py": "7bcd85a979fbe439b7c6076bc62dda981f0ae9cc730fb99baabe04f531548cb8",
+    "trading/vati/execution/deriv_identity.py": "1d55f7ea74f64eee8bd6a66f31d4bfe2ec4d2fdaa51cc6942ebacf3ec0148820"
+  },
+  "initial_counterexample_assertions": {
+    "tests": 20,
+    "failures": 20,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "9782b43723a71550beda0f32f3fa6abb9fb473d1d05ddf680b2de5fd120c9a5d"
+  },
+  "full_trading_real_private_postgresql": {
+    "tests": 1990,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "34ad3115911e6ffa7257308341179895f1636e23836f2f4148f5a4d5084662b7"
+  },
+  "focused_after_source_restoration": {
+    "tests": 51,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "afc2311135a438ecaf78435a776cc1d804d2b2440f0b45132e0ef28285f59f7a"
+  },
+  "owner_registry_contracts": {
+    "tests": 192,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "fd7abc5f4f81e3a9924c174db853c810e329e0a40db763f729a5fc7d66e87842"
+  },
+  "rebuild": {
+    "tests": 78,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "d67754d252c53c9f67ad54d86d56a17f2003f179a0bd39e6a94a0cfb43eee290"
+  },
+  "source_faults": {
+    "records": [
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "01adee7ec1603c18393ea734b1d1a5e3c4328130592774799ab2382d48ef47fb"
+      },
+      {
+        "phase": "mutation",
+        "why": "reset omitted native settings during a label edit",
+        "returncode": 1,
+        "log_sha256": "e2b4aef08712acaceb0b31676ae5890c8e3a9919b0a586a20eb182173a5bcb98"
+      },
+      {
+        "phase": "mutation",
+        "why": "silently ignore an explicit enable or disable control",
+        "returncode": 1,
+        "log_sha256": "a5083ca2da0efae6ecb115dcb9d98ab663fef93f56abccb1b9918f45b699ed9c"
+      },
+      {
+        "phase": "mutation",
+        "why": "replace an existing environment credential reference during a metadata edit",
+        "returncode": 1,
+        "log_sha256": "891f6e99295de5672daa63f96d4173a7f4a329790d3ca85edeb2ebaf9d866bd1"
+      },
+      {
+        "phase": "mutation",
+        "why": "admit an untrusted Deriv endpoint for future credential traffic",
+        "returncode": 1,
+        "log_sha256": "6569d8eabe2f312408664c9631e11279682c04f4145c041ccc55f326b44899a9"
+      },
+      {
+        "phase": "mutation",
+        "why": "remove the resolved native interpretation from both approval issuance and verification",
+        "returncode": 1,
+        "log_sha256": "6ef0687ecf8ba9b959cc2956c40d5c2f2858602bc95753c4e109f496e7c36768"
+      },
+      {
+        "phase": "mutation",
+        "why": "skip the actual writer check after gateway approval verification",
+        "returncode": 1,
+        "log_sha256": "db8d919f65b9a3ec8cae571390eeb61cba48d1b6669c8fdeb7ea87bc3997ae50"
+      },
+      {
+        "phase": "mutation",
+        "why": "remove both public-only review boundaries and expose a native credential locator",
+        "returncode": 1,
+        "log_sha256": "de28808a9e4b1094eba2e773176345c7f7e3cbca857c7eae7660e04eaf8810b4"
+      },
+      {
+        "phase": "mutation",
+        "why": "replace an existing account through the cTrader link path",
+        "returncode": 1,
+        "log_sha256": "fe106c1eefc7cec48e40ac7e917e2233ba1b3d594ba01d98055a4d122c122c72"
+      }
+    ],
+    "source_before_sha256": {
+      "trading/commander/account_config.py": "3c6bcdcd613de45ad36be2c71147d19257258a4018014311db4146b0a96faf6f",
+      "trading/commander/accounts.py": "943d08f6e77b728356e5525eced0050578f1b77d219f496a3a7ac18c3434551d",
+      "backend/van_gateway/app.py": "2b3abd5a3bbc7198fe4fbaca6a65715d7589f656b5f564ee7de04992f14ffb4b",
+      "backend/van_gateway/trading/accounts.py": "7df9c5a1f67f0ecbf1e77492e3346af8909b3e5ebf124798ddf915c570d2dc10"
+    },
+    "source_after_sha256": {
+      "trading/commander/account_config.py": "3c6bcdcd613de45ad36be2c71147d19257258a4018014311db4146b0a96faf6f",
+      "trading/commander/accounts.py": "943d08f6e77b728356e5525eced0050578f1b77d219f496a3a7ac18c3434551d",
+      "backend/van_gateway/app.py": "2b3abd5a3bbc7198fe4fbaca6a65715d7589f656b5f564ee7de04992f14ffb4b",
+      "backend/van_gateway/trading/accounts.py": "7df9c5a1f67f0ecbf1e77492e3346af8909b3e5ebf124798ddf915c570d2dc10"
+    },
+    "source_restored": true,
+    "journal_present": false,
+    "definitions": [
+      [
+        "trading/commander/account_config.py",
+        "candidate=current",
+        "candidate=replace(current,currency=\"USD\",mode=\"DEMO_TRADER\",demo=True)",
+        "reset omitted native settings during a label edit"
+      ],
+      [
+        "trading/commander/account_config.py",
+        "    for key in BOOL_FIELDS:\n        if key in args:",
+        "    for key in BOOL_FIELDS:\n        if False:",
+        "silently ignore an explicit enable or disable control"
+      ],
+      [
+        "trading/commander/account_config.py",
+        "candidate=current",
+        "candidate=replace(current,credential_ref=CredentialRef(secrets_file=str(secret_path)))",
+        "replace an existing environment credential reference during a metadata edit"
+      ],
+      [
+        "trading/commander/account_config.py",
+        "        validate_provider_endpoint(endpoint)",
+        "        pass",
+        "admit an untrusted Deriv endpoint for future credential traffic"
+      ],
+      [
+        [
+          [
+            "backend/van_gateway/app.py",
+            "parameters={'native_review':native_review} if native_review else None,",
+            "parameters=None,"
+          ],
+          [
+            "backend/van_gateway/app.py",
+            "parameters={'native_review':native_review} if native_review else None,",
+            "parameters=None,"
+          ]
+        ],
+        "remove the resolved native interpretation from both approval issuance and verification"
+      ],
+      [
+        "trading/commander/accounts.py",
+        "if review['review_digest']!=a['_expected_review_digest']:",
+        "if False:",
+        "skip the actual writer check after gateway approval verification"
+      ],
+      [
+        [
+          [
+            "backend/van_gateway/trading/accounts.py",
+            "            AccountResolvedReview.model_validate(review)",
+            "            pass"
+          ],
+          [
+            "backend/van_gateway/app.py",
+            "@app.post(\"/v1/trading/accounts/challenge\",response_model=AccountChallengeResponse)",
+            "@app.post(\"/v1/trading/accounts/challenge\")"
+          ]
+        ],
+        "remove both public-only review boundaries and expose a native credential locator"
+      ],
+      [
+        "trading/commander/accounts.py",
+        "    def cmd_ctrader_link(a: dict) -> dict:\n        alias = _alias(a)\n        require_new_alias(alias)",
+        "    def cmd_ctrader_link(a: dict) -> dict:\n        alias = _alias(a)",
+        "replace an existing account through the cTrader link path"
+      ]
+    ],
+    "command": [
+      "python",
+      "-m",
+      "pytest",
+      "trading/tests/test_account_update_semantics.py",
+      "backend/tests/test_account_update_review.py",
+      "-q"
+    ]
+  },
+  "retained_initial_fault_run": {
+    "record": {
+      "records": [
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "log_sha256": "7d94e9cf71b2be3a0d15248ef4fb429183ef8458aa8feaab19e918f9388ea470"
+        },
+        {
+          "phase": "mutation",
+          "why": "reset omitted native settings during a label edit",
+          "returncode": 1,
+          "log_sha256": "cd9db3e43d03ddaacb308a5e7d1b17339787d11812cfc316dcd65381cc5806bc"
+        },
+        {
+          "phase": "mutation",
+          "why": "silently ignore an explicit enable or disable control",
+          "returncode": 1,
+          "log_sha256": "1475c8278a137d95cb127a7288c2207ffe22374800feda8b96d1059dcf13dff6"
+        },
+        {
+          "phase": "mutation",
+          "why": "replace an existing environment credential reference during a metadata edit",
+          "returncode": 1,
+          "log_sha256": "ef91e392fd7c69abae1f666c00a4d02b27c51817121f0ded4131058d7aee3988"
+        },
+        {
+          "phase": "mutation",
+          "why": "admit an untrusted Deriv endpoint for future credential traffic",
+          "returncode": 1,
+          "log_sha256": "d7b83ab0f9a86273144ec33eaa204514b0dd82d614b2b735a97f6748fc78a8dc"
+        },
+        {
+          "phase": "mutation",
+          "why": "remove the resolved native interpretation from both approval issuance and verification",
+          "returncode": 1,
+          "log_sha256": "3cc4715fc18e7f45a4921b76a02621cb9364ac422ddafa43f6b6f1a23b177c81"
+        },
+        {
+          "phase": "mutation",
+          "why": "skip the actual writer check after gateway approval verification",
+          "returncode": 1,
+          "log_sha256": "70dd3a3e4c0396062cf640cff5173958d779e4388d1ac605f27d3b897f39ec83"
+        },
+        {
+          "phase": "mutation",
+          "why": "admit a private credential locator in the public approval review",
+          "returncode": 0,
+          "log_sha256": "3480a25f806c5d6efccef4f152b6c8360343640a572e2aea711e7a660b13dc31"
+        },
+        {
+          "phase": "mutation",
+          "why": "replace an existing account through the cTrader link path",
+          "returncode": 1,
+          "log_sha256": "2968af9f8cba41417b4d6867ea34858a6c9587ef9baca7739947712fc79f9847"
+        }
+      ],
+      "source_before_sha256": {
+        "trading/commander/account_config.py": "3c6bcdcd613de45ad36be2c71147d19257258a4018014311db4146b0a96faf6f",
+        "trading/commander/accounts.py": "943d08f6e77b728356e5525eced0050578f1b77d219f496a3a7ac18c3434551d",
+        "backend/van_gateway/app.py": "2b3abd5a3bbc7198fe4fbaca6a65715d7589f656b5f564ee7de04992f14ffb4b",
+        "backend/van_gateway/trading/accounts.py": "7df9c5a1f67f0ecbf1e77492e3346af8909b3e5ebf124798ddf915c570d2dc10"
+      },
+      "source_after_sha256": {
+        "trading/commander/account_config.py": "3c6bcdcd613de45ad36be2c71147d19257258a4018014311db4146b0a96faf6f",
+        "trading/commander/accounts.py": "943d08f6e77b728356e5525eced0050578f1b77d219f496a3a7ac18c3434551d",
+        "backend/van_gateway/app.py": "2b3abd5a3bbc7198fe4fbaca6a65715d7589f656b5f564ee7de04992f14ffb4b",
+        "backend/van_gateway/trading/accounts.py": "7df9c5a1f67f0ecbf1e77492e3346af8909b3e5ebf124798ddf915c570d2dc10"
+      },
+      "source_restored": true,
+      "journal_present": false
+    },
+    "explanation": "Seven caught, one neutral: changed-field validation independently refused an after-only private field. The test now supplies the same private field in both records; the compound final fault removes both actual public-only boundaries. No initial survivor counted as caught."
+  },
+  "android": {
+    "totals": {
+      "tests": 203,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "suites": {
+      "TEST-com.dial.van.degraded.DegradedModeStoreTest.xml": {
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "aa4ee2576e58f1951b7bd0a4154d8b3c152d6ea0b09f3defa1bde5e816ec6933"
+      },
+      "TEST-com.dial.van.design.DensityTierTest.xml": {
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "316c7cce6e14da010263e314638108de59366da38dc1d6b2a5fbccb1ff067f46"
+      },
+      "TEST-com.dial.van.design.LiveBadgeFormatTest.xml": {
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "93c85800cd21923f1d158e199b7e8b6defb16d0b2665610a9d3231e8fc4c761a"
+      },
+      "TEST-com.dial.van.design.MotionSpecTest.xml": {
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "43c56921b4431dfd72f603e5c7005725b6b10267632447098e58843db8427e62"
+      },
+      "TEST-com.dial.van.design.ScreenStateTest.xml": {
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "5705e39389b3408489ecac24257f0b4a3bac0489ee5651843105b6e89552382d"
+      },
+      "TEST-com.dial.van.design.StatusSemanticsTest.xml": {
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "824070577792d347cf3e8a3554237a52beadba0abd0381b0651d694c00c56787"
+      },
+      "TEST-com.dial.van.design.charts.ChartAxesTest.xml": {
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "8bbf571b0f2d20256e9289d728a0e8b8a9012580493b1d805f4d20c36b476e7e"
+      },
+      "TEST-com.dial.van.gateway.ReplayDispatchPolicyTest.xml": {
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "d748c7bbca1a6366538ed5fccda9b47ddd2aaba983d45315a8e1b9ba06c587ca"
+      },
+      "TEST-com.dial.van.memory.MemoryModelsTest.xml": {
+        "tests": 12,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "442c5588f60babd7a4af886cd079065da9f78c178f065afa4d126620143e6954"
+      },
+      "TEST-com.dial.van.mission.MissionSurfaceTest.xml": {
+        "tests": 11,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "44279b9040a5f2de071e9b39c1043f029d4cc8329b09e9875b0e706b0919d373"
+      },
+      "TEST-com.dial.van.overlay.VanOverlayChromeTest.xml": {
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "1d211655d1832cd5a6e1cc23fa99b419f54b0fa9439db372b963af17d1f413eb"
+      },
+      "TEST-com.dial.van.overlay.VanOverlayInteractionTest.xml": {
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "368495e8d50c4754fb0809c66c82b6915f91cc6b934050f252f28761771a9610"
+      },
+      "TEST-com.dial.van.projects.ProjectModelsTest.xml": {
+        "tests": 18,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "240d3c151fb657587196ceaaaece7b06dca6155b5c05b07dad86b895c50722f7"
+      },
+      "TEST-com.dial.van.queue.EncryptedCommandQueueLogicTest.xml": {
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "aa8f9cab17203a2b13c39f58b4e5fd33c686835ac3d2e7b2d90c3a5fa0ca65d6"
+      },
+      "TEST-com.dial.van.security.OwnerAuthorityTokenTest.xml": {
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "ad7226519c61ca9612108c921e8d53b7f59e9c74d079fb08f422de059ee2fb8c"
+      },
+      "TEST-com.dial.van.trading.AccountOnboardingTest.xml": {
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "c805d50ed66db477a81658010aeed541873d8d4030151f6ac8758e310c143fa3"
+      },
+      "TEST-com.dial.van.trading.AccountOperationRecoveryTest.xml": {
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "f8efbfa8dccc3e5329c62aa2baea082531e73545c3d45b0fc6f3fafeb2f662d1"
+      },
+      "TEST-com.dial.van.trading.ChartGeometryTest.xml": {
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "58d8fbdd56ab651f4a6c4f9a56ef81ff33ae52dcdac77e4073eff1e914529b77"
+      },
+      "TEST-com.dial.van.trading.CognitionSurfacesTest.xml": {
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "b24bdd661b348c132f460f24a3242279b88dcf29f88e9d0f21c6233be1cecf96"
+      },
+      "TEST-com.dial.van.trading.StrategyPromotionVerificationTest.xml": {
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "78c94a1284306af5e9fdebd8619e88020defc1889133de8cac6baeeccbf24988"
+      },
+      "TEST-com.dial.van.trading.TradeBookTest.xml": {
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "0169065ed377a1c5c0fdc545ca2c70ec032782a65715097bb9cc7bde72faa6eb"
+      },
+      "TEST-com.dial.van.trading.TradingModelsTest.xml": {
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "a102f6b37a94c0620b55107506fdc1b5fb32cb09f2cdeed0ea332a91ec141b2e"
+      },
+      "TEST-com.dial.van.visual.RiveContractTest.xml": {
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "4349427be94d3c37a7ec3ffe125a04ca63c5124f0d4662dab35c82338a9467bc"
+      },
+      "TEST-com.dial.van.visual.VanAuraEnvelopeTest.xml": {
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "86b97cf70ef3dd7688403995cf58eccfb8cf7a13e6dc8816bd5a0cf2d6e091c7"
+      },
+      "TEST-com.dial.van.visual.VanCharacterMotionTest.xml": {
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "e42a24efe25276491cf923a1407bd8d25249d19dc65258d2c5075e3832420307"
+      },
+      "TEST-com.dial.van.visual.VanCharacterOpacityTest.xml": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "34c48b3c29a34cae81375814ed1ae92db6695d44eb2cc991c3b0f3fdca51a9d4"
+      },
+      "TEST-com.dial.van.visual.VanEffectPolicyTest.xml": {
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "c4bbb345f773e8a169c556ec5de5448e2916a173f71ec9bb190109aafb176e7a"
+      },
+      "TEST-com.dial.van.visual.VanPresenceFrameTest.xml": {
+        "tests": 9,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "82cec36e30ca2ae02698159fc9d9d07d140c0724c57e962b5a116bd9462f5fd5"
+      },
+      "TEST-com.dial.van.visual.VanPresenceTest.xml": {
+        "tests": 10,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "dde71a316428a4268cb4f1d3715b9ffe2076938114423ba5127a39b7e2a984dd"
+      },
+      "TEST-com.dial.van.visual.VanSceneIdentityTest.xml": {
+        "tests": 13,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "8f6cbed9f115d2bafadd4cc2e932252115d1c707bd7c1e45ffa45ff072a32a91"
+      },
+      "TEST-com.dial.van.visual.VanVisualRuntimeTest.xml": {
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "df15a5c3071f485251a59e070da691adad2d7509fe662ec606f2746a496a0bd4"
+      },
+      "TEST-com.dial.van.visual.VanWindFieldMotionTest.xml": {
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "b892cd12f754d6dca32937727caf899c3f3ce72b240ab4f66bd58170cfd4ced0"
+      },
+      "TEST-com.dial.van.voice.VoiceRecognitionPolicyTest.xml": {
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "26b9df7ba41682d4edaec9a2cecb058f89273ea89c24bef92571bc071b5a34bf"
+      },
+      "TEST-com.dial.van.voice.VoiceSecondPassTest.xml": {
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "b27a7562d9433b19369cc5e8f96eaaedb5211de340251b3abe315c7b86721e02"
+      },
+      "TEST-com.dial.van.voice.WakeRuntimeTest.xml": {
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "bf9e85a11ab0430b251f74adec3c05fab8e5e3ca800d6ff48fe284fec7c19c28"
+      }
+    },
+    "lint": {
+      "Warning": 90,
+      "Hint": 22
+    },
+    "build_log_sha256": "163cd7c7a613601158530b9334d9751a88a09f16a7937e169d790de8493718ab",
+    "apk_sha256": "ba230c7b4b2a75cf437b402ff0c8389e7114f8ebebdb5638c3f004841c296016",
+    "instrumentation_apk_sha256": "b012b2c16b625caf0ee686cc17f9772c2f6bfada8e4179500da237abb7866fc1",
+    "tasks": [
+      ":app:testDebugUnitTest",
+      ":app:assembleDebug",
+      ":app:assembleDebugAndroidTest",
+      ":app:lintDebug"
+    ]
+  },
+  "registry": {
+    "endpoints": 439,
+    "schemas": 262,
+    "scope": "Derived public contracts only; original IDs, history and qualification state retained"
+  },
+  "private_fixture_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "native_host_actions_executed": 0,
+  "physical_s24_cases_executed": 0,
+  "unit_acceptance": "NOT_ISSUED",
+  "release_qualified": false,
+  "remaining": [
+    "verified native identity migration and physical-account uniqueness",
+    "exposure/orders/funds/lease/retention-safe retirement",
+    "native provider-operation finality and adjudication",
+    "current device epoch and cross-device recovery",
+    "original independent, production, provider, signing and handset gates"
+  ]
+}

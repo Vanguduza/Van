@@ -1,0 +1,487 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="18" skipped="0" tests="230" time="3.870" timestamp="2026-10-25T18:15:17.019758+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_ctrader" name="test_codec_matches_hand_verified_wire_bytes" time="0.012" /><testcase classname="trading.tests.test_ctrader" name="test_adapter_authenticates_reads_and_trades_with_stop_in_the_same_request" time="0.186" /><testcase classname="trading.tests.test_ctrader" name="test_bad_credentials_and_disconnect_fail_closed" time="0.015" /><testcase classname="trading.tests.test_ctrader" name="test_oauth_helpers_and_account_discovery" time="0.004" /><testcase classname="trading.tests.test_ctrader" name="test_registry_and_service_know_ctrader" time="0.006" /><testcase classname="trading.tests.test_ctrader_connection_auth" name="test_replacement_connection_reauthenticates_and_refreshes_contracts_before_use" time="0.001" /><testcase classname="trading.tests.test_ctrader_connection_auth" name="test_wrong_native_authentication_response_never_authenticates_or_admits_cached_contracts[application_type]" time="0.001" /><testcase classname="trading.tests.test_ctrader_connection_auth" name="test_wrong_native_authentication_response_never_authenticates_or_admits_cached_contracts[account_type]" time="0.002" /><testcase classname="trading.tests.test_ctrader_connection_auth" name="test_wrong_native_authentication_response_never_authenticates_or_admits_cached_contracts[other_account]" time="0.001" /><testcase classname="trading.tests.test_ctrader_connection_auth" name="test_wrong_native_authentication_response_never_authenticates_or_admits_cached_contracts[bool_account]" time="0.001" /><testcase classname="trading.tests.test_ctrader_connection_auth" name="test_connection_change_between_authentication_responses_refuses_the_mixed_handshake" time="0.001" /><testcase classname="trading.tests.test_ctrader_connection_auth" name="test_contract_refresh_across_connection_change_keeps_old_bytes_unavailable" time="0.001" /><testcase classname="trading.tests.test_ctrader_connection_auth" name="test_failed_reauthentication_fences_the_previous_contract_and_quote_cache" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_wrong_response_scope_or_missing_series_is_an_explicit_native_refusal[changes0]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_wrong_response_scope_or_missing_series_is_an_explicit_native_refusal[changes1]" time="0.002" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_wrong_response_scope_or_missing_series_is_an_explicit_native_refusal[changes2]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_wrong_response_scope_or_missing_series_is_an_explicit_native_refusal[changes3]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_wrong_response_scope_or_missing_series_is_an_explicit_native_refusal[changes4]" time="0.002" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_wrong_response_scope_or_missing_series_is_an_explicit_native_refusal[changes5]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_wrong_native_response_type_is_refused" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_absent_native_fields_never_become_zero_market_facts[volume]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_absent_native_fields_never_become_zero_market_facts[low]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_absent_native_fields_never_become_zero_market_facts[utcTimestampInMinutes]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_native_proto2_optional_zero_delta_is_valid_with_explicit_provenance[deltaOpen]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_native_proto2_optional_zero_delta_is_valid_with_explicit_provenance[deltaClose]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_native_proto2_optional_zero_delta_is_valid_with_explicit_provenance[deltaHigh]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_malformed_native_integers_and_incoherent_prices_are_refused[volume--1]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_malformed_native_integers_and_incoherent_prices_are_refused[volume-True]" time="0.002" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_malformed_native_integers_and_incoherent_prices_are_refused[low-1.2]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_malformed_native_integers_and_incoherent_prices_are_refused[deltaOpen--1]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_malformed_native_integers_and_incoherent_prices_are_refused[deltaHigh-4]" time="0.002" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_malformed_native_integers_and_incoherent_prices_are_refused[deltaClose-21]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_malformed_native_integers_and_incoherent_prices_are_refused[utcTimestampInMinutes-True]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_malformed_native_integers_and_incoherent_prices_are_refused[deltaOpen-18446744073709551616]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_malformed_native_integers_and_incoherent_prices_are_refused[low-9223372036854775808]" time="0.002" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_duplicate_and_outside_request_bars_do_not_enter_the_series[minutes0]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_duplicate_and_outside_request_bars_do_not_enter_the_series[minutes1]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_duplicate_and_outside_request_bars_do_not_enter_the_series[minutes2]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_only_closed_bars_are_returned_and_native_tick_volume_is_not_one" time="0.002" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_exact_native_price_conversion_does_not_depend_on_ambient_decimal_precision" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_future_request_end_does_not_make_an_open_bar_closed_before_actual_receipt" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_native_observation_exposes_original_scope_pagination_and_missing_spread" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_empty_native_series_and_unknown_pagination_remain_explicit" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_m30_keeps_actual_native_gap_without_interpolating_a_live_bar" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_invalid_request_refuses_before_native_io[kwargs0]" time="0.002" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_invalid_request_refuses_before_native_io[kwargs1]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_invalid_request_refuses_before_native_io[kwargs2]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_invalid_request_refuses_before_native_io[kwargs3]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_native_symbol_registry_never_publishes_wrong_scope_partial_or_default_contracts[list_account]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_native_symbol_registry_never_publishes_wrong_scope_partial_or_default_contracts[full_account]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_native_symbol_registry_never_publishes_wrong_scope_partial_or_default_contracts[wrong_type]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_native_symbol_registry_never_publishes_wrong_scope_partial_or_default_contracts[duplicate_id]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_native_symbol_registry_never_publishes_wrong_scope_partial_or_default_contracts[alias_collision]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_native_symbol_registry_never_publishes_wrong_scope_partial_or_default_contracts[missing_detail]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_native_symbol_registry_never_publishes_wrong_scope_partial_or_default_contracts[unsolicited_detail]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_native_symbol_registry_never_publishes_wrong_scope_partial_or_default_contracts[missing_lot]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_native_symbol_registry_never_publishes_wrong_scope_partial_or_default_contracts[zero_step]" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_native_symbol_registry_never_publishes_wrong_scope_partial_or_default_contracts[bool_precision]" time="0.002" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_symbol_refresh_failure_preserves_original_cache_but_refuses_its_use_until_recovery" time="0.001" /><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_missing_optional_native_visibility_never_grants_a_symbol_but_keeps_other_valid_products" time="0.001" /><testcase classname="trading.tests.test_ctrader_money_precision" name="test_native_sub_centilot_quantities_are_never_rounded[10000-0.001]" time="0.001" /><testcase classname="trading.tests.test_ctrader_money_precision" name="test_native_sub_centilot_quantities_are_never_rounded[150000-0.015]" time="0.001" /><testcase classname="trading.tests.test_ctrader_money_precision" name="test_native_sub_centilot_quantities_are_never_rounded[123456-0.0123456]" time="0.002" /><testcase classname="trading.tests.test_ctrader_money_precision" name="test_equity_uses_native_net_pnl_in_deposit_currency_without_quote_estimation[None]" time="0.001" /><testcase classname="trading.tests.test_ctrader_money_precision" name="test_equity_uses_native_net_pnl_in_deposit_currency_without_quote_estimation[cached_quote1]" time="0.002" /><testcase classname="trading.tests.test_ctrader_money_precision" name="test_incomplete_native_pnl_is_unavailable_not_zero_or_a_quote_estimate[unavailable]" time="0.002" /><testcase classname="trading.tests.test_ctrader_money_precision" name="test_incomplete_native_pnl_is_unavailable_not_zero_or_a_quote_estimate[foreign_account]" time="0.002" /><testcase classname="trading.tests.test_ctrader_money_precision" name="test_incomplete_native_pnl_is_unavailable_not_zero_or_a_quote_estimate[missing_position]" time="0.001" /><testcase classname="trading.tests.test_ctrader_money_precision" name="test_incomplete_native_pnl_is_unavailable_not_zero_or_a_quote_estimate[duplicate_position]" time="0.001" /><testcase classname="trading.tests.test_ctrader_money_precision" name="test_incomplete_native_pnl_is_unavailable_not_zero_or_a_quote_estimate[foreign_position]" time="0.002" /><testcase classname="trading.tests.test_ctrader_money_precision" name="test_incomplete_native_pnl_is_unavailable_not_zero_or_a_quote_estimate[missing_precision]" time="0.001" /><testcase classname="trading.tests.test_ctrader_money_precision" name="test_incomplete_native_pnl_is_unavailable_not_zero_or_a_quote_estimate[string_precision]" time="0.001" /><testcase classname="trading.tests.test_ctrader_money_precision" name="test_incomplete_native_pnl_is_unavailable_not_zero_or_a_quote_estimate[bool_money]" time="0.002" /><testcase classname="trading.tests.test_ctrader_money_precision" name="test_incomplete_native_pnl_is_unavailable_not_zero_or_a_quote_estimate[missing_net_money]" time="0.001" /><testcase classname="trading.tests.test_ctrader_money_precision" name="test_native_empty_position_pnl_is_an_observed_zero" time="0.001" /><testcase classname="trading.tests.test_ctrader_money_precision" name="test_funds_change_during_the_native_pnl_read_needs_a_fresh_account_observation[balance-1255309]" time="0.002" /><testcase classname="trading.tests.test_ctrader_money_precision" name="test_funds_change_during_the_native_pnl_read_needs_a_fresh_account_observation[moneyDigits-3]" time="0.001" /><testcase classname="trading.tests.test_ctrader_money_precision" name="test_funds_change_during_the_native_pnl_read_needs_a_fresh_account_observation[depositAssetId-1]" time="0.001" /><testcase classname="trading.tests.test_ctrader_money_precision" name="test_negative_native_pnl_round_trips_the_actual_framed_protocol" time="0.006" /><testcase classname="trading.tests.test_ctrader_original_outcomes" name="test_lost_native_reply_preserves_unknown_effect[entry-ProtoOANewOrderReq]" time="0.001" /><testcase classname="trading.tests.test_ctrader_original_outcomes" name="test_lost_native_reply_preserves_unknown_effect[close-ProtoOAClosePositionReq]" time="0.001" /><testcase classname="trading.tests.test_ctrader_original_outcomes" name="test_lost_native_reply_preserves_unknown_effect[stop-ProtoOAAmendPositionSLTPReq]" time="0.002" /><testcase classname="trading.tests.test_ctrader_original_outcomes" name="test_partial_close_is_not_reported_as_fully_closed" time="0.001" /><testcase classname="trading.tests.test_ctrader_original_outcomes" name="test_unbound_or_incomplete_close_facts_do_not_claim_flat[foreign_account]" time="0.001" /><testcase classname="trading.tests.test_ctrader_original_outcomes" name="test_unbound_or_incomplete_close_facts_do_not_claim_flat[entry_deal]" time="0.002" /><testcase classname="trading.tests.test_ctrader_original_outcomes" name="test_unbound_or_incomplete_close_facts_do_not_claim_flat[missing_filled_volume]" time="0.001" /><testcase classname="trading.tests.test_ctrader_original_outcomes" name="test_unbound_or_incomplete_close_facts_do_not_claim_flat[excess_fill]" time="0.001" /><testcase classname="trading.tests.test_ctrader_original_outcomes" name="test_unbound_or_incomplete_close_facts_do_not_claim_flat[missing_price]" time="0.002" /><testcase classname="trading.tests.test_ctrader_original_outcomes" name="test_known_native_full_close_retains_its_actual_quantity_and_price" time="0.002" /><testcase classname="trading.tests.test_ctrader_original_outcomes" name="test_explicit_native_order_refusal_stays_a_proven_refusal" time="0.002" /><testcase classname="trading.tests.test_ctrader_original_outcomes" name="test_malformed_or_old_close_deal_does_not_settle_this_original[other_order]" time="0.001" /><testcase classname="trading.tests.test_ctrader_original_outcomes" name="test_malformed_or_old_close_deal_does_not_settle_this_original[string_quantity]" time="0.002" /><testcase classname="trading.tests.test_ctrader_original_outcomes" name="test_malformed_or_old_close_deal_does_not_settle_this_original[bool_quantity]" time="0.001" /><testcase classname="trading.tests.test_ctrader_original_outcomes" name="test_malformed_or_old_close_deal_does_not_settle_this_original[nonfinite_price]" time="0.001" /><testcase classname="trading.tests.test_ctrader_original_outcomes" name="test_actual_partial_close_is_preserved_without_invented_remaining_protection[malformed_stop]" time="0.001" /><testcase classname="trading.tests.test_ctrader_original_outcomes" name="test_actual_partial_close_is_preserved_without_invented_remaining_protection[foreign_position]" time="0.001" /><testcase classname="trading.tests.test_ctrader_original_outcomes" name="test_incomplete_entry_execution_is_unknown_not_a_fabricated_fill[zero_quantity]" time="0.002" /><testcase classname="trading.tests.test_ctrader_original_outcomes" name="test_incomplete_entry_execution_is_unknown_not_a_fabricated_fill[string_quantity]" time="0.001" /><testcase classname="trading.tests.test_ctrader_original_outcomes" name="test_incomplete_entry_execution_is_unknown_not_a_fabricated_fill[bool_quantity]" time="0.001" /><testcase classname="trading.tests.test_ctrader_original_outcomes" name="test_incomplete_entry_execution_is_unknown_not_a_fabricated_fill[missing_price]" time="0.001" /><testcase classname="trading.tests.test_ctrader_original_outcomes" name="test_incomplete_entry_execution_is_unknown_not_a_fabricated_fill[foreign_position]" time="0.001" /><testcase classname="trading.tests.test_ctrader_original_outcomes" name="test_entry_above_native_maximum_is_refused_before_sending" time="0.002" /><testcase classname="trading.tests.test_ctrader_original_outcomes" name="test_accepted_stop_without_native_matching_readback_stays_unknown" time="0.002" /><testcase classname="trading.tests.test_ctrader_transport_lifecycle" name="test_close_shuts_down_and_joins_a_blocked_reader" time="0.005" /><testcase classname="trading.tests.test_ctrader_transport_lifecycle" name="test_close_wakes_an_original_pending_request_without_waiting_for_timeout" time="0.007" /><testcase classname="trading.tests.test_ctrader_transport_lifecycle" name="test_peer_disconnect_retires_and_closes_the_original_socket" time="0.003" /><testcase classname="trading.tests.test_ctrader_transport_lifecycle" name="test_concurrent_connects_create_one_socket_and_one_reader" time="0.155" /><testcase classname="trading.tests.test_ctrader_transport_lifecycle" name="test_old_reader_failure_cannot_disconnect_a_replacement_connection" time="0.004" /><testcase classname="trading.tests.test_ctrader_transport_lifecycle" name="test_old_request_failure_cannot_close_a_replacement_socket" time="0.004" /><testcase classname="trading.tests.test_ctrader_transport_lifecycle" name="test_tls_failure_closes_the_raw_socket_before_reporting_unavailable" time="0.001" /><testcase classname="trading.tests.test_ctrader_transport_lifecycle" name="test_response_correlation_and_unsolicited_events_survive_cleanup" time="0.002" /><testcase classname="trading.tests.test_native_cash_history" name="test_native_statement_preserves_row_precision_scope_and_native_valuation_without_copying_notes" time="0.001" /><testcase classname="trading.tests.test_native_cash_history" name="test_incomplete_or_foreign_native_rows_are_refused_as_a_whole_statement[balanceHistoryId-True]" time="0.001" /><testcase classname="trading.tests.test_native_cash_history" name="test_incomplete_or_foreign_native_rows_are_refused_as_a_whole_statement[balanceHistoryId-0]" time="0.001" /><testcase classname="trading.tests.test_native_cash_history" name="test_incomplete_or_foreign_native_rows_are_refused_as_a_whole_statement[moneyDigits-None]" time="0.002" /><testcase classname="trading.tests.test_native_cash_history" name="test_incomplete_or_foreign_native_rows_are_refused_as_a_whole_statement[moneyDigits-True]" time="0.001" /><testcase classname="trading.tests.test_native_cash_history" name="test_incomplete_or_foreign_native_rows_are_refused_as_a_whole_statement[moneyDigits-19]" time="0.001" /><testcase classname="trading.tests.test_native_cash_history" name="test_incomplete_or_foreign_native_rows_are_refused_as_a_whole_statement[delta-True]" time="0.002" /><testcase classname="trading.tests.test_native_cash_history" name="test_incomplete_or_foreign_native_rows_are_refused_as_a_whole_statement[delta-100]" time="0.001" /><testcase classname="trading.tests.test_native_cash_history" name="test_incomplete_or_foreign_native_rows_are_refused_as_a_whole_statement[balance-None]" time="0.001" /><testcase classname="trading.tests.test_native_cash_history" name="test_incomplete_or_foreign_native_rows_are_refused_as_a_whole_statement[equity-100]" time="0.001" /><testcase classname="trading.tests.test_native_cash_history" name="test_incomplete_or_foreign_native_rows_are_refused_as_a_whole_statement[balanceVersion-True]" time="0.003" /><testcase classname="trading.tests.test_native_cash_history" name="test_incomplete_or_foreign_native_rows_are_refused_as_a_whole_statement[changeBalanceTimestamp-999]" time="0.001" /><testcase classname="trading.tests.test_native_cash_history" name="test_incomplete_or_foreign_native_rows_are_refused_as_a_whole_statement[changeBalanceTimestamp-2001]" time="0.002" /><testcase classname="trading.tests.test_native_cash_history" name="test_incomplete_or_foreign_native_rows_are_refused_as_a_whole_statement[operationType-True]" time="0.001" /><testcase classname="trading.tests.test_native_cash_history" name="test_incomplete_or_foreign_native_rows_are_refused_as_a_whole_statement[operationType-guessed-deposit]" time="0.001" /><testcase classname="trading.tests.test_native_cash_history" name="test_invalid_native_window_is_refused_before_any_provider_io[True-2000]" time="0.002" /><testcase classname="trading.tests.test_native_cash_history" name="test_invalid_native_window_is_refused_before_any_provider_io[1000-True]" time="0.001" /><testcase classname="trading.tests.test_native_cash_history" name="test_invalid_native_window_is_refused_before_any_provider_io[-1-2000]" time="0.001" /><testcase classname="trading.tests.test_native_cash_history" name="test_invalid_native_window_is_refused_before_any_provider_io[2000-1000]" time="0.002" /><testcase classname="trading.tests.test_native_cash_history" name="test_invalid_native_window_is_refused_before_any_provider_io[0-604800001]" time="0.001" /><testcase classname="trading.tests.test_native_cash_history" name="test_invalid_native_window_is_refused_before_any_provider_io[0-2147483646001]" time="0.001" /><testcase classname="trading.tests.test_native_cash_history" name="test_unknown_history_never_becomes_a_silently_empty_or_partial_statement[foreign_account]" time="0.001" /><testcase classname="trading.tests.test_native_cash_history" name="test_unknown_history_never_becomes_a_silently_empty_or_partial_statement[bool_account]" time="0.001" /><testcase classname="trading.tests.test_native_cash_history" name="test_unknown_history_never_becomes_a_silently_empty_or_partial_statement[wrong_response]" time="0.001" /><testcase classname="trading.tests.test_native_cash_history" name="test_unknown_history_never_becomes_a_silently_empty_or_partial_statement[conflicting_duplicate]" time="0.001" /><testcase classname="trading.tests.test_native_cash_history" name="test_unknown_history_never_becomes_a_silently_empty_or_partial_statement[missing_precision]" time="0.001" /><testcase classname="trading.tests.test_native_cash_history" name="test_unknown_history_never_becomes_a_silently_empty_or_partial_statement[invalid_list]" time="0.001" /><testcase classname="trading.tests.test_native_cash_history" name="test_repeated_native_identity_is_one_fact_and_an_empty_native_window_is_observed" time="0.001" /><testcase classname="trading.tests.test_native_cash_history" name="test_unknown_operation_remains_explicit_and_optional_valuation_is_not_guessed" time="0.001" /><testcase classname="trading.tests.test_native_cash_history" name="test_native_money_precision_does_not_depend_on_decimal_context" time="0.001" /><testcase classname="trading.tests.test_native_cash_history" name="test_native_currency_change_during_statement_read_is_not_a_verified_currency_guess" time="0.001" /><testcase classname="trading.tests.test_native_cash_history" name="test_cash_statements_retain_negative_native_money_through_actual_framed_protocol" time="0.004" /><testcase classname="trading.tests.test_native_cash_history" name="test_unqualified_provider_environment_cannot_supply_account_scoped_funding_facts[None]" time="0.001" /><testcase classname="trading.tests.test_native_cash_history" name="test_unqualified_provider_environment_cannot_supply_account_scoped_funding_facts[unknown-provider.example]" time="0.001" /><testcase classname="trading.tests.test_native_cash_history" name="test_unqualified_provider_environment_cannot_supply_account_scoped_funding_facts[https://demo.ctraderapi.com]" time="0.001" /><testcase classname="trading.tests.test_native_cash_history" name="test_unqualified_provider_environment_cannot_supply_account_scoped_funding_facts[demo.ctraderapi.com.evil.example]" time="0.001" /><testcase classname="trading.tests.test_native_cash_history" name="test_history_observation_time_is_received_after_the_native_read_not_backdated_to_request_start" time="0.001" /><testcase classname="trading.tests.test_native_deal_history" name="test_native_deal_precision_is_row_owned_and_optional_finality_fields_stay_unknown" time="0.074" /><testcase classname="trading.tests.test_native_deal_history" name="test_timestamp_partitioning_collects_complete_native_pages_without_id_order_assumptions" time="0.002" /><testcase classname="trading.tests.test_native_deal_history" name="test_saturated_native_millisecond_never_drops_equal_time_deals_or_claims_a_complete_page" time="0.002" /><testcase classname="trading.tests.test_native_deal_history" name="test_partial_foreign_or_changing_native_history_is_refused_as_a_whole[foreign_account]" time="0.002" /><testcase classname="trading.tests.test_native_deal_history" name="test_partial_foreign_or_changing_native_history_is_refused_as_a_whole[wrong_type]" time="0.001" /><testcase classname="trading.tests.test_native_deal_history" name="test_partial_foreign_or_changing_native_history_is_refused_as_a_whole[bool_has_more]" time="0.002" /><testcase classname="trading.tests.test_native_deal_history" name="test_partial_foreign_or_changing_native_history_is_refused_as_a_whole[missing_has_more]" time="0.001" /><testcase classname="trading.tests.test_native_deal_history" name="test_partial_foreign_or_changing_native_history_is_refused_as_a_whole[lost_parent_fact]" time="0.002" /><testcase classname="trading.tests.test_native_deal_history" name="test_partial_foreign_or_changing_native_history_is_refused_as_a_whole[changed_parent_fact]" time="0.001" /><testcase classname="trading.tests.test_native_deal_history" name="test_invalid_native_money_fill_or_identity_is_not_normalized_into_a_fact[dealId-True]" time="0.001" /><testcase classname="trading.tests.test_native_deal_history" name="test_invalid_native_money_fill_or_identity_is_not_normalized_into_a_fact[orderId-0]" time="0.001" /><testcase classname="trading.tests.test_native_deal_history" name="test_invalid_native_money_fill_or_identity_is_not_normalized_into_a_fact[filledVolume-201]" time="0.001" /><testcase classname="trading.tests.test_native_deal_history" name="test_invalid_native_money_fill_or_identity_is_not_normalized_into_a_fact[filledVolume--1]" time="0.003" /><testcase classname="trading.tests.test_native_deal_history" name="test_invalid_native_money_fill_or_identity_is_not_normalized_into_a_fact[moneyDigits-None]" time="0.002" /><testcase classname="trading.tests.test_native_deal_history" name="test_invalid_native_money_fill_or_identity_is_not_normalized_into_a_fact[executionPrice-nan]" time="0.002" /><testcase classname="trading.tests.test_native_deal_history" name="test_invalid_native_money_fill_or_identity_is_not_normalized_into_a_fact[executionTimestamp-999]" time="0.001" /><testcase classname="trading.tests.test_native_deal_history" name="test_invalid_native_money_fill_or_identity_is_not_normalized_into_a_fact[commission-True]" time="0.002" /><testcase classname="trading.tests.test_native_deal_history" name="test_invalid_native_money_fill_or_identity_is_not_normalized_into_a_fact[dealStatus-True]" time="0.001" /><testcase classname="trading.tests.test_native_deal_history" name="test_native_deals_have_no_effect_and_no_provider_free_text" time="0.002" /><testcase classname="trading.tests.test_native_deal_history" name="test_native_closed_deal_money_survives_the_actual_framed_protobuf" time="0.007" /><testcase classname="trading.tests.test_funding_runtime" name="test_native_mark_excludes_separate_bonuses_and_never_guesses_missing_bonus_values" time="0.005" /><testcase classname="trading.tests.test_funding_runtime" name="test_first_runtime_history_window_respects_native_account_registration" time="0.007" /><testcase classname="trading.tests.test_funding_runtime" name="test_changed_native_version_or_bonus_during_mark_is_never_verified[balanceVersion]" time="0.002" /><testcase classname="trading.tests.test_funding_runtime" name="test_changed_native_version_or_bonus_during_mark_is_never_verified[managerBonus]" time="0.002" /><testcase classname="trading.tests.test_funding_runtime" name="test_changed_native_version_or_bonus_during_mark_is_never_verified[ibBonus]" time="0.002" /><testcase classname="trading.tests.test_funding_runtime" name="test_changed_native_version_or_bonus_during_mark_is_never_verified[nonWithdrawableBonus]" time="0.001" /><testcase classname="trading.tests.test_funding_runtime" name="test_runtime_repeat_restart_and_failed_read_reconcile_original_native_history" time="0.015" /><testcase classname="trading.tests.test_funding_runtime" name="test_runtime_never_skips_weekly_catchup_or_merges_a_changed_native_account" time="0.013" /><testcase classname="trading.tests.test_funding_runtime" name="test_deal_history_has_its_own_recovery_cursor_when_cash_collection_succeeded" time="0.007" /><testcase classname="trading.tests.test_funding_runtime" name="test_both_existing_runtime_snapshot_producers_ingest_native_facts[account]" time="0.021" /><testcase classname="trading.tests.test_funding_runtime" name="test_both_existing_runtime_snapshot_producers_ingest_native_facts[session]" time="0.011" /><testcase classname="trading.tests.test_funding_runtime" name="test_slow_cash_reader_does_not_block_snapshots_and_request_queue_is_bounded" time="0.011" /><testcase classname="trading.tests.test_funding_runtime" name="test_native_funding_reader_uses_a_separate_actual_protocol_connection" time="0.010" /><testcase classname="trading.tests.test_funding_runtime" name="test_failed_account_startup_stops_funding_admission_and_closes_its_native_reader" time="0.059" /><testcase classname="trading.tests.test_commander_accounts" name="test_upsert_credentials_verify_remove_never_echo_secrets" time="0.219" /><testcase classname="trading.tests.test_commander_accounts" name="test_deriv_demo_creation_and_oauth_link" time="0.081" /><testcase classname="trading.tests.test_commander_accounts" name="test_ctrader_discover_exchange_and_link" time="0.061" /><testcase classname="trading.tests.test_commander_accounts" name="test_mt5_ea_key_issue_and_verify" time="0.062" /><testcase classname="trading.tests.test_commander_accounts" name="test_account_mutations_refuse_ambiguous_environment_flags_before_writing[account_upsert-args0]" time="0.024" /><testcase classname="trading.tests.test_commander_accounts" name="test_account_mutations_refuse_ambiguous_environment_flags_before_writing[ctrader_link-args1]" time="0.024" /><testcase classname="trading.tests.test_commander_accounts" name="test_account_mutations_refuse_ambiguous_environment_flags_before_writing[mt5_ea_issue_key-args2]" time="0.018" /><testcase classname="trading.tests.test_provider_entry_deadline" name="test_ctrader_expiry_during_final_send_lock_prevents_any_native_write" time="0.002"><failure message="AssertionError: expired entry reached the actual native framed send&#10;assert ('REJECTED' == 'REJECTED'&#10;  &#10;    REJECTED and [('ProtoOAApp...: 'fixture'})] == []&#10;  &#10;  Left contains one more item: ('ProtoOAApplicationAuthReq', {'payloadType': 'PROTO_OA_APPLICATION_AUTH_REQ', 'clientId': 'fixture', 'clientSecret': 'fixture'})&#10;  Use -v to get more diff)">def test_ctrader_expiry_during_final_send_lock_prevents_any_native_write():
+        a,c,w,_=ctrader(late_lock=True);r=a.submit(c,now_ms=1000)
+&gt;       assert r.status=='REJECTED' and w.sent==[], 'expired entry reached the actual native framed send'
+E       AssertionError: expired entry reached the actual native framed send
+E       assert ('REJECTED' == 'REJECTED'
+E         
+E           REJECTED and [('ProtoOAApp...: 'fixture'})] == []
+E         
+E         Left contains one more item: ('ProtoOAApplicationAuthReq', {'payloadType': 'PROTO_OA_APPLICATION_AUTH_REQ', 'clientId': 'fixture', 'clientSecret': 'fixture'})
+E         Use -v to get more diff)
+
+trading/tests/test_provider_entry_deadline.py:41: AssertionError</failure></testcase><testcase classname="trading.tests.test_provider_entry_deadline" name="test_ctrader_current_bounded_entry_still_fills_exactly_once" time="0.002"><failure message="AssertionError: assert ('REJECTED' == 'FILLED'&#10;  &#10;  - FILLED&#10;  + REJECTED)">def test_ctrader_current_bounded_entry_still_fills_exactly_once():
+        a,c,w,_=ctrader();r=a.submit(c,now_ms=1000)
+&gt;       assert r.status=='FILLED' and len(w.sent)==1 and r.filled_qty==D('.1')
+E       AssertionError: assert ('REJECTED' == 'FILLED'
+E         
+E         - FILLED
+E         + REJECTED)
+
+trading/tests/test_provider_entry_deadline.py:45: AssertionError</failure></testcase><testcase classname="trading.tests.test_provider_entry_deadline" name="test_ctrader_expiry_after_native_write_cannot_rewrite_a_genuine_fill" time="0.001"><failure message="AssertionError: assert ('REJECTED' == 'FILLED'&#10;  &#10;  - FILLED&#10;  + REJECTED)">def test_ctrader_expiry_after_native_write_cannot_rewrite_a_genuine_fill():
+        a,c,w,_=ctrader(late_reply=True);r=a.submit(c,now_ms=1000)
+&gt;       assert r.status=='FILLED' and len(w.sent)==1
+E       AssertionError: assert ('REJECTED' == 'FILLED'
+E         
+E         - FILLED
+E         + REJECTED)
+
+trading/tests/test_provider_entry_deadline.py:49: AssertionError</failure></testcase><testcase classname="trading.tests.test_provider_entry_deadline" name="test_ctrader_lost_response_after_native_write_is_unknown_not_a_new_refusal" time="0.001"><failure message="AssertionError: assert ('REJECTED' == 'UNKNOWN'&#10;  &#10;  - UNKNOWN&#10;  + REJECTED)">def test_ctrader_lost_response_after_native_write_is_unknown_not_a_new_refusal():
+        a,c,w,_=ctrader(lost=True);r=a.submit(c,now_ms=1000)
+&gt;       assert r.status=='UNKNOWN' and len(w.sent)==1
+E       AssertionError: assert ('REJECTED' == 'UNKNOWN'
+E         
+E         - UNKNOWN
+E         + REJECTED)
+
+trading/tests/test_provider_entry_deadline.py:53: AssertionError</failure></testcase><testcase classname="trading.tests.test_provider_entry_deadline" name="test_deriv_expiry_during_native_preparation_never_sends_the_buy[authorize]" time="0.005" /><testcase classname="trading.tests.test_provider_entry_deadline" name="test_deriv_expiry_during_native_preparation_never_sends_the_buy[proposal]" time="0.004" /><testcase classname="trading.tests.test_provider_entry_deadline" name="test_deriv_current_bounded_entry_still_fills_once" time="0.004" /><testcase classname="trading.tests.test_provider_entry_deadline" name="test_deriv_expiry_after_actual_buy_keeps_genuine_fill" time="0.005" /><testcase classname="trading.tests.test_provider_entry_deadline" name="test_malformed_explicit_deadline_never_reaches_native_entry[ctrader-True]" time="0.003"><failure message="AssertionError: assert ('REJECTED' == 'REJECTED'&#10;  &#10;    REJECTED and [('ProtoOAApp...: 'fixture'})] == []&#10;  &#10;  Left contains one more item: ('ProtoOAApplicationAuthReq', {'payloadType': 'PROTO_OA_APPLICATION_AUTH_REQ', 'clientId': 'fixture', 'clientSecret': 'fixture'})&#10;  Use -v to get more diff)">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-52/test_malformed_explicit_deadli0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7fedf0155fd0&gt;
+bad = True, provider = 'ctrader'
+
+    @pytest.mark.parametrize('bad',[True,False,0,-1,2**63,'2000'])
+    @pytest.mark.parametrize('provider',['ctrader','deriv'])
+    def test_malformed_explicit_deadline_never_reaches_native_entry(tmp_path,monkeypatch,bad,provider):
+        if provider=='ctrader':
+            a,c,w,_=ctrader();c=replace(c,expires_at_ms=bad,command_hash='').sealed()
+            r=a.submit(c,now_ms=1000);sent=w.sent
+        else:
+            a,sockets,_=factory(tmp_path,monkeypatch,native());a.clock=lambda:1000
+            r=a.submit(replace(command(),expires_at_ms=bad,command_hash='').sealed(),now_ms=1000)
+            sent=[q for sock in sockets for q in sock.requests if 'buy'in q]
+&gt;       assert r.status=='REJECTED' and sent==[]
+E       AssertionError: assert ('REJECTED' == 'REJECTED'
+E         
+E           REJECTED and [('ProtoOAApp...: 'fixture'})] == []
+E         
+E         Left contains one more item: ('ProtoOAApplicationAuthReq', {'payloadType': 'PROTO_OA_APPLICATION_AUTH_REQ', 'clientId': 'fixture', 'clientSecret': 'fixture'})
+E         Use -v to get more diff)
+
+trading/tests/test_provider_entry_deadline.py:92: AssertionError</failure></testcase><testcase classname="trading.tests.test_provider_entry_deadline" name="test_malformed_explicit_deadline_never_reaches_native_entry[ctrader-False]" time="0.002"><failure message="AssertionError: assert ('REJECTED' == 'REJECTED'&#10;  &#10;    REJECTED and [('ProtoOAApp...: 'fixture'})] == []&#10;  &#10;  Left contains one more item: ('ProtoOAApplicationAuthReq', {'payloadType': 'PROTO_OA_APPLICATION_AUTH_REQ', 'clientId': 'fixture', 'clientSecret': 'fixture'})&#10;  Use -v to get more diff)">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-52/test_malformed_explicit_deadli1')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7fedf0156e10&gt;
+bad = False, provider = 'ctrader'
+
+    @pytest.mark.parametrize('bad',[True,False,0,-1,2**63,'2000'])
+    @pytest.mark.parametrize('provider',['ctrader','deriv'])
+    def test_malformed_explicit_deadline_never_reaches_native_entry(tmp_path,monkeypatch,bad,provider):
+        if provider=='ctrader':
+            a,c,w,_=ctrader();c=replace(c,expires_at_ms=bad,command_hash='').sealed()
+            r=a.submit(c,now_ms=1000);sent=w.sent
+        else:
+            a,sockets,_=factory(tmp_path,monkeypatch,native());a.clock=lambda:1000
+            r=a.submit(replace(command(),expires_at_ms=bad,command_hash='').sealed(),now_ms=1000)
+            sent=[q for sock in sockets for q in sock.requests if 'buy'in q]
+&gt;       assert r.status=='REJECTED' and sent==[]
+E       AssertionError: assert ('REJECTED' == 'REJECTED'
+E         
+E           REJECTED and [('ProtoOAApp...: 'fixture'})] == []
+E         
+E         Left contains one more item: ('ProtoOAApplicationAuthReq', {'payloadType': 'PROTO_OA_APPLICATION_AUTH_REQ', 'clientId': 'fixture', 'clientSecret': 'fixture'})
+E         Use -v to get more diff)
+
+trading/tests/test_provider_entry_deadline.py:92: AssertionError</failure></testcase><testcase classname="trading.tests.test_provider_entry_deadline" name="test_malformed_explicit_deadline_never_reaches_native_entry[ctrader-0]" time="0.002"><failure message="AssertionError: assert ('REJECTED' == 'REJECTED'&#10;  &#10;    REJECTED and [('ProtoOAApp...: 'fixture'})] == []&#10;  &#10;  Left contains one more item: ('ProtoOAApplicationAuthReq', {'payloadType': 'PROTO_OA_APPLICATION_AUTH_REQ', 'clientId': 'fixture', 'clientSecret': 'fixture'})&#10;  Use -v to get more diff)">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-52/test_malformed_explicit_deadli2')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7fedf0156660&gt;
+bad = 0, provider = 'ctrader'
+
+    @pytest.mark.parametrize('bad',[True,False,0,-1,2**63,'2000'])
+    @pytest.mark.parametrize('provider',['ctrader','deriv'])
+    def test_malformed_explicit_deadline_never_reaches_native_entry(tmp_path,monkeypatch,bad,provider):
+        if provider=='ctrader':
+            a,c,w,_=ctrader();c=replace(c,expires_at_ms=bad,command_hash='').sealed()
+            r=a.submit(c,now_ms=1000);sent=w.sent
+        else:
+            a,sockets,_=factory(tmp_path,monkeypatch,native());a.clock=lambda:1000
+            r=a.submit(replace(command(),expires_at_ms=bad,command_hash='').sealed(),now_ms=1000)
+            sent=[q for sock in sockets for q in sock.requests if 'buy'in q]
+&gt;       assert r.status=='REJECTED' and sent==[]
+E       AssertionError: assert ('REJECTED' == 'REJECTED'
+E         
+E           REJECTED and [('ProtoOAApp...: 'fixture'})] == []
+E         
+E         Left contains one more item: ('ProtoOAApplicationAuthReq', {'payloadType': 'PROTO_OA_APPLICATION_AUTH_REQ', 'clientId': 'fixture', 'clientSecret': 'fixture'})
+E         Use -v to get more diff)
+
+trading/tests/test_provider_entry_deadline.py:92: AssertionError</failure></testcase><testcase classname="trading.tests.test_provider_entry_deadline" name="test_malformed_explicit_deadline_never_reaches_native_entry[ctrader--1]" time="0.002"><failure message="AssertionError: assert ('REJECTED' == 'REJECTED'&#10;  &#10;    REJECTED and [('ProtoOAApp...: 'fixture'})] == []&#10;  &#10;  Left contains one more item: ('ProtoOAApplicationAuthReq', {'payloadType': 'PROTO_OA_APPLICATION_AUTH_REQ', 'clientId': 'fixture', 'clientSecret': 'fixture'})&#10;  Use -v to get more diff)">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-52/test_malformed_explicit_deadli3')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7fedf0157ad0&gt;
+bad = -1, provider = 'ctrader'
+
+    @pytest.mark.parametrize('bad',[True,False,0,-1,2**63,'2000'])
+    @pytest.mark.parametrize('provider',['ctrader','deriv'])
+    def test_malformed_explicit_deadline_never_reaches_native_entry(tmp_path,monkeypatch,bad,provider):
+        if provider=='ctrader':
+            a,c,w,_=ctrader();c=replace(c,expires_at_ms=bad,command_hash='').sealed()
+            r=a.submit(c,now_ms=1000);sent=w.sent
+        else:
+            a,sockets,_=factory(tmp_path,monkeypatch,native());a.clock=lambda:1000
+            r=a.submit(replace(command(),expires_at_ms=bad,command_hash='').sealed(),now_ms=1000)
+            sent=[q for sock in sockets for q in sock.requests if 'buy'in q]
+&gt;       assert r.status=='REJECTED' and sent==[]
+E       AssertionError: assert ('REJECTED' == 'REJECTED'
+E         
+E           REJECTED and [('ProtoOAApp...: 'fixture'})] == []
+E         
+E         Left contains one more item: ('ProtoOAApplicationAuthReq', {'payloadType': 'PROTO_OA_APPLICATION_AUTH_REQ', 'clientId': 'fixture', 'clientSecret': 'fixture'})
+E         Use -v to get more diff)
+
+trading/tests/test_provider_entry_deadline.py:92: AssertionError</failure></testcase><testcase classname="trading.tests.test_provider_entry_deadline" name="test_malformed_explicit_deadline_never_reaches_native_entry[ctrader-9223372036854775808]" time="0.002"><failure message="AssertionError: assert ('REJECTED' == 'REJECTED'&#10;  &#10;    REJECTED and [('ProtoOAApp...: 'fixture'})] == []&#10;  &#10;  Left contains one more item: ('ProtoOAApplicationAuthReq', {'payloadType': 'PROTO_OA_APPLICATION_AUTH_REQ', 'clientId': 'fixture', 'clientSecret': 'fixture'})&#10;  Use -v to get more diff)">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-52/test_malformed_explicit_deadli4')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7fedf0128440&gt;
+bad = 9223372036854775808, provider = 'ctrader'
+
+    @pytest.mark.parametrize('bad',[True,False,0,-1,2**63,'2000'])
+    @pytest.mark.parametrize('provider',['ctrader','deriv'])
+    def test_malformed_explicit_deadline_never_reaches_native_entry(tmp_path,monkeypatch,bad,provider):
+        if provider=='ctrader':
+            a,c,w,_=ctrader();c=replace(c,expires_at_ms=bad,command_hash='').sealed()
+            r=a.submit(c,now_ms=1000);sent=w.sent
+        else:
+            a,sockets,_=factory(tmp_path,monkeypatch,native());a.clock=lambda:1000
+            r=a.submit(replace(command(),expires_at_ms=bad,command_hash='').sealed(),now_ms=1000)
+            sent=[q for sock in sockets for q in sock.requests if 'buy'in q]
+&gt;       assert r.status=='REJECTED' and sent==[]
+E       AssertionError: assert ('REJECTED' == 'REJECTED'
+E         
+E           REJECTED and [('ProtoOAApp...: 'fixture'})] == []
+E         
+E         Left contains one more item: ('ProtoOAApplicationAuthReq', {'payloadType': 'PROTO_OA_APPLICATION_AUTH_REQ', 'clientId': 'fixture', 'clientSecret': 'fixture'})
+E         Use -v to get more diff)
+
+trading/tests/test_provider_entry_deadline.py:92: AssertionError</failure></testcase><testcase classname="trading.tests.test_provider_entry_deadline" name="test_malformed_explicit_deadline_never_reaches_native_entry[ctrader-2000]" time="0.002"><failure message="AssertionError: assert ('REJECTED' == 'REJECTED'&#10;  &#10;    REJECTED and [('ProtoOAApp...: 'fixture'})] == []&#10;  &#10;  Left contains one more item: ('ProtoOAApplicationAuthReq', {'payloadType': 'PROTO_OA_APPLICATION_AUTH_REQ', 'clientId': 'fixture', 'clientSecret': 'fixture'})&#10;  Use -v to get more diff)">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-52/test_malformed_explicit_deadli5')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7fedf00e17c0&gt;
+bad = '2000', provider = 'ctrader'
+
+    @pytest.mark.parametrize('bad',[True,False,0,-1,2**63,'2000'])
+    @pytest.mark.parametrize('provider',['ctrader','deriv'])
+    def test_malformed_explicit_deadline_never_reaches_native_entry(tmp_path,monkeypatch,bad,provider):
+        if provider=='ctrader':
+            a,c,w,_=ctrader();c=replace(c,expires_at_ms=bad,command_hash='').sealed()
+            r=a.submit(c,now_ms=1000);sent=w.sent
+        else:
+            a,sockets,_=factory(tmp_path,monkeypatch,native());a.clock=lambda:1000
+            r=a.submit(replace(command(),expires_at_ms=bad,command_hash='').sealed(),now_ms=1000)
+            sent=[q for sock in sockets for q in sock.requests if 'buy'in q]
+&gt;       assert r.status=='REJECTED' and sent==[]
+E       AssertionError: assert ('REJECTED' == 'REJECTED'
+E         
+E           REJECTED and [('ProtoOAApp...: 'fixture'})] == []
+E         
+E         Left contains one more item: ('ProtoOAApplicationAuthReq', {'payloadType': 'PROTO_OA_APPLICATION_AUTH_REQ', 'clientId': 'fixture', 'clientSecret': 'fixture'})
+E         Use -v to get more diff)
+
+trading/tests/test_provider_entry_deadline.py:92: AssertionError</failure></testcase><testcase classname="trading.tests.test_provider_entry_deadline" name="test_malformed_explicit_deadline_never_reaches_native_entry[deriv-True]" time="0.003" /><testcase classname="trading.tests.test_provider_entry_deadline" name="test_malformed_explicit_deadline_never_reaches_native_entry[deriv-False]" time="0.004" /><testcase classname="trading.tests.test_provider_entry_deadline" name="test_malformed_explicit_deadline_never_reaches_native_entry[deriv-0]" time="0.004" /><testcase classname="trading.tests.test_provider_entry_deadline" name="test_malformed_explicit_deadline_never_reaches_native_entry[deriv--1]" time="0.003" /><testcase classname="trading.tests.test_provider_entry_deadline" name="test_malformed_explicit_deadline_never_reaches_native_entry[deriv-9223372036854775808]" time="0.003" /><testcase classname="trading.tests.test_provider_entry_deadline" name="test_malformed_explicit_deadline_never_reaches_native_entry[deriv-2000]" time="0.003" /><testcase classname="trading.tests.test_provider_entry_deadline" name="test_unqualified_current_clock_cannot_authorize_native_entry[ctrader-True]" time="0.003"><failure message="AssertionError: assert ('REJECTED' == 'REJECTED'&#10;  &#10;    REJECTED and [('ProtoOAApp...: 'fixture'})] == []&#10;  &#10;  Left contains one more item: ('ProtoOAApplicationAuthReq', {'payloadType': 'PROTO_OA_APPLICATION_AUTH_REQ', 'clientId': 'fixture', 'clientSecret': 'fixture'})&#10;  Use -v to get more diff)">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-52/test_unqualified_current_clock0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7fedf00e1340&gt;
+bad = True, provider = 'ctrader'
+
+    @pytest.mark.parametrize('bad',[True,None,'1000',-1])
+    @pytest.mark.parametrize('provider',['ctrader','deriv'])
+    def test_unqualified_current_clock_cannot_authorize_native_entry(tmp_path,monkeypatch,bad,provider):
+        if provider=='ctrader':
+            a,c,w,_=ctrader();a.clock=lambda:bad;r=a.submit(c,now_ms=1000);sent=w.sent
+        else:
+            a,sockets,_=factory(tmp_path,monkeypatch,native());a.clock=lambda:bad
+            r=a.submit(replace(command(),expires_at_ms=2000,command_hash='').sealed(),now_ms=1000)
+            sent=[q for sock in sockets for q in sock.requests if 'buy'in q]
+&gt;       assert r.status=='REJECTED' and sent==[]
+E       AssertionError: assert ('REJECTED' == 'REJECTED'
+E         
+E           REJECTED and [('ProtoOAApp...: 'fixture'})] == []
+E         
+E         Left contains one more item: ('ProtoOAApplicationAuthReq', {'payloadType': 'PROTO_OA_APPLICATION_AUTH_REQ', 'clientId': 'fixture', 'clientSecret': 'fixture'})
+E         Use -v to get more diff)
+
+trading/tests/test_provider_entry_deadline.py:103: AssertionError</failure></testcase><testcase classname="trading.tests.test_provider_entry_deadline" name="test_unqualified_current_clock_cannot_authorize_native_entry[ctrader-None]" time="0.002"><failure message="AssertionError: assert ('REJECTED' == 'REJECTED'&#10;  &#10;    REJECTED and [('ProtoOAApp...: 'fixture'})] == []&#10;  &#10;  Left contains one more item: ('ProtoOAApplicationAuthReq', {'payloadType': 'PROTO_OA_APPLICATION_AUTH_REQ', 'clientId': 'fixture', 'clientSecret': 'fixture'})&#10;  Use -v to get more diff)">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-52/test_unqualified_current_clock1')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7fedf00e0d70&gt;
+bad = None, provider = 'ctrader'
+
+    @pytest.mark.parametrize('bad',[True,None,'1000',-1])
+    @pytest.mark.parametrize('provider',['ctrader','deriv'])
+    def test_unqualified_current_clock_cannot_authorize_native_entry(tmp_path,monkeypatch,bad,provider):
+        if provider=='ctrader':
+            a,c,w,_=ctrader();a.clock=lambda:bad;r=a.submit(c,now_ms=1000);sent=w.sent
+        else:
+            a,sockets,_=factory(tmp_path,monkeypatch,native());a.clock=lambda:bad
+            r=a.submit(replace(command(),expires_at_ms=2000,command_hash='').sealed(),now_ms=1000)
+            sent=[q for sock in sockets for q in sock.requests if 'buy'in q]
+&gt;       assert r.status=='REJECTED' and sent==[]
+E       AssertionError: assert ('REJECTED' == 'REJECTED'
+E         
+E           REJECTED and [('ProtoOAApp...: 'fixture'})] == []
+E         
+E         Left contains one more item: ('ProtoOAApplicationAuthReq', {'payloadType': 'PROTO_OA_APPLICATION_AUTH_REQ', 'clientId': 'fixture', 'clientSecret': 'fixture'})
+E         Use -v to get more diff)
+
+trading/tests/test_provider_entry_deadline.py:103: AssertionError</failure></testcase><testcase classname="trading.tests.test_provider_entry_deadline" name="test_unqualified_current_clock_cannot_authorize_native_entry[ctrader-1000]" time="0.003"><failure message="AssertionError: assert ('REJECTED' == 'REJECTED'&#10;  &#10;    REJECTED and [('ProtoOAApp...: 'fixture'})] == []&#10;  &#10;  Left contains one more item: ('ProtoOAApplicationAuthReq', {'payloadType': 'PROTO_OA_APPLICATION_AUTH_REQ', 'clientId': 'fixture', 'clientSecret': 'fixture'})&#10;  Use -v to get more diff)">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-52/test_unqualified_current_clock2')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7fedf00e0260&gt;
+bad = '1000', provider = 'ctrader'
+
+    @pytest.mark.parametrize('bad',[True,None,'1000',-1])
+    @pytest.mark.parametrize('provider',['ctrader','deriv'])
+    def test_unqualified_current_clock_cannot_authorize_native_entry(tmp_path,monkeypatch,bad,provider):
+        if provider=='ctrader':
+            a,c,w,_=ctrader();a.clock=lambda:bad;r=a.submit(c,now_ms=1000);sent=w.sent
+        else:
+            a,sockets,_=factory(tmp_path,monkeypatch,native());a.clock=lambda:bad
+            r=a.submit(replace(command(),expires_at_ms=2000,command_hash='').sealed(),now_ms=1000)
+            sent=[q for sock in sockets for q in sock.requests if 'buy'in q]
+&gt;       assert r.status=='REJECTED' and sent==[]
+E       AssertionError: assert ('REJECTED' == 'REJECTED'
+E         
+E           REJECTED and [('ProtoOAApp...: 'fixture'})] == []
+E         
+E         Left contains one more item: ('ProtoOAApplicationAuthReq', {'payloadType': 'PROTO_OA_APPLICATION_AUTH_REQ', 'clientId': 'fixture', 'clientSecret': 'fixture'})
+E         Use -v to get more diff)
+
+trading/tests/test_provider_entry_deadline.py:103: AssertionError</failure></testcase><testcase classname="trading.tests.test_provider_entry_deadline" name="test_unqualified_current_clock_cannot_authorize_native_entry[ctrader--1]" time="0.002"><failure message="AssertionError: assert ('REJECTED' == 'REJECTED'&#10;  &#10;    REJECTED and [('ProtoOAApp...: 'fixture'})] == []&#10;  &#10;  Left contains one more item: ('ProtoOAApplicationAuthReq', {'payloadType': 'PROTO_OA_APPLICATION_AUTH_REQ', 'clientId': 'fixture', 'clientSecret': 'fixture'})&#10;  Use -v to get more diff)">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-52/test_unqualified_current_clock3')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7fedf00e0230&gt;
+bad = -1, provider = 'ctrader'
+
+    @pytest.mark.parametrize('bad',[True,None,'1000',-1])
+    @pytest.mark.parametrize('provider',['ctrader','deriv'])
+    def test_unqualified_current_clock_cannot_authorize_native_entry(tmp_path,monkeypatch,bad,provider):
+        if provider=='ctrader':
+            a,c,w,_=ctrader();a.clock=lambda:bad;r=a.submit(c,now_ms=1000);sent=w.sent
+        else:
+            a,sockets,_=factory(tmp_path,monkeypatch,native());a.clock=lambda:bad
+            r=a.submit(replace(command(),expires_at_ms=2000,command_hash='').sealed(),now_ms=1000)
+            sent=[q for sock in sockets for q in sock.requests if 'buy'in q]
+&gt;       assert r.status=='REJECTED' and sent==[]
+E       AssertionError: assert ('REJECTED' == 'REJECTED'
+E         
+E           REJECTED and [('ProtoOAApp...: 'fixture'})] == []
+E         
+E         Left contains one more item: ('ProtoOAApplicationAuthReq', {'payloadType': 'PROTO_OA_APPLICATION_AUTH_REQ', 'clientId': 'fixture', 'clientSecret': 'fixture'})
+E         Use -v to get more diff)
+
+trading/tests/test_provider_entry_deadline.py:103: AssertionError</failure></testcase><testcase classname="trading.tests.test_provider_entry_deadline" name="test_unqualified_current_clock_cannot_authorize_native_entry[deriv-True]" time="0.003" /><testcase classname="trading.tests.test_provider_entry_deadline" name="test_unqualified_current_clock_cannot_authorize_native_entry[deriv-None]" time="0.003" /><testcase classname="trading.tests.test_provider_entry_deadline" name="test_unqualified_current_clock_cannot_authorize_native_entry[deriv-1000]" time="0.003" /><testcase classname="trading.tests.test_provider_entry_deadline" name="test_unqualified_current_clock_cannot_authorize_native_entry[deriv--1]" time="0.003" /><testcase classname="trading.tests.test_provider_entry_deadline" name="test_ctrader_expiry_during_native_transport_connect_is_also_checked" time="0.001"><failure message="AssertionError: assert ('REJECTED' == 'REJECTED'&#10;  &#10;    REJECTED and [('ProtoOAApp...: 'fixture'})] == []&#10;  &#10;  Left contains one more item: ('ProtoOAApplicationAuthReq', {'payloadType': 'PROTO_OA_APPLICATION_AUTH_REQ', 'clientId': 'fixture', 'clientSecret': 'fixture'})&#10;  Use -v to get more diff)">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7fedf0155f70&gt;
+
+    def test_ctrader_expiry_during_native_transport_connect_is_also_checked(monkeypatch):
+        a,c,w,clock=ctrader();original=a.transport.connect
+        def connect():original();clock['ms']=2000
+        monkeypatch.setattr(a.transport,'connect',connect)
+&gt;       assert a.submit(c,now_ms=1000).status=='REJECTED' and w.sent==[]
+E       AssertionError: assert ('REJECTED' == 'REJECTED'
+E         
+E           REJECTED and [('ProtoOAApp...: 'fixture'})] == []
+E         
+E         Left contains one more item: ('ProtoOAApplicationAuthReq', {'payloadType': 'PROTO_OA_APPLICATION_AUTH_REQ', 'clientId': 'fixture', 'clientSecret': 'fixture'})
+E         Use -v to get more diff)
+
+trading/tests/test_provider_entry_deadline.py:109: AssertionError</failure></testcase><testcase classname="trading.tests.test_provider_entry_deadline" name="test_deriv_lost_bounded_buy_reply_remains_uncertain_and_is_never_replayed" time="0.005" /><testcase classname="trading.tests.test_provider_entry_deadline" name="test_actual_router_binds_ctrader_mandate_and_original_quote_through_wire_dispatch[False]" time="0.012"><failure message="vati.execution.router.RouterError: venue heartbeat failed; kill switch tripped">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-52/test_actual_router_binds_ctrad0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+late = False
+
+    @pytest.mark.parametrize('late',[False,True])
+    def test_actual_router_binds_ctrader_mandate_and_original_quote_through_wire_dispatch(tmp_path,eurusd,late):
+        from conftest import NOW,mandate_dict,snapshot,intent
+        from vati.core import Ledger,EventKind
+        from vati.execution import ExecutionRouter,ProtectionManager
+        from vati.execution.risk_refresh import CurrentRiskFacts
+        from vati.execution.pretrade import MarketReference
+        from vati.risk import RiskAuthority,TradingMandate,KillSwitch,Decision
+        a,_,wire,clock=ctrader();clock['ms']=NOW*1000
+        m=TradingMandate.from_mapping(mandate_dict(venue='ctrader',account_alias=a.account_alias,expires_at_unix=NOW+1))
+        trade=intent(venue='ctrader',account_alias=a.account_alias)
+        facts=snapshot(replace(eurusd,venue='ctrader'),account_alias=a.account_alias)
+        authority=RiskAuthority(m);approved=authority.evaluate_safe(trade,facts)
+        assert approved.decision in {Decision.APPROVED,Decision.REDUCED}
+        ledger=Ledger();router=ExecutionRouter(ledger=ledger,adapters={'ctrader':a},kill_switch=KillSwitch(),protection=ProtectionManager(),clock=lambda:clock['ms'],current_risk_authority=authority,current_risk_facts_provider=lambda *args,**kwargs:CurrentRiskFacts(facts,clock['ms']))
+        if late:
+            class LastWriteLock:
+                def __enter__(self):clock['ms']=NOW*1000+101
+                def __exit__(self,*args):pass
+            a.transport._lock=LastWriteLock()
+&gt;       result=router.execute(trade,approved,m,now_ms=clock['ms'],entry_type='MARKET',market_reference=MarketReference(trade.entry,0,100))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_provider_entry_deadline.py:143: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;vati.execution.router.ExecutionRouter object at 0x7fedf0111550&gt;
+intent = TradeIntent(trade_intent_id='ti-1', idempotency_key='idem-1', account_alias='ct_native', venue='ctrader', symbol='EURU...cimal('1'), liquidity_multiplier=Decimal('1'), event_risk_multiplier=Decimal('1'), correlation_multiplier=Decimal('1'))
+decision = RiskDecision(trade_intent_id='ti-1', decision=&lt;Decision.APPROVED: 'APPROVED'&gt;, reason_code='OK', reason_detail='', app...78a79a192', mandate_hash='3ce447f9a8efe04700336023b692ed13903fad84b2a328fff761480c995c2afc', approval_schema_version=2)
+mandate = TradingMandate(mandate_id='mandate-fx-primary', version='1.0.0', account_alias='ct_native', venue='ctrader', mode=&lt;Aut...se)), strategy_risk_budgets={}, trading_temperament=None, strategy_temperaments={}, temperament_owner_signature_ref='')
+now_ms = 1800000000000, stop_mode = &lt;StopMode.VENUE: 'VENUE'&gt;, targets = ()
+time_in_force = 'DAY', entry_type = 'MARKET', max_slippage = None
+lease_epoch = None, execution_policy_decision = None
+market_reference = MarketReference(last_price=Decimal('1.10010'), mark_age_ms=0, max_mark_age_ms=100)
+liquidity = None, urgency = &lt;Urgency.NORMAL: 'NORMAL'&gt;
+setup_valid_until_ms = None
+
+    def execute(self, intent: TradeIntent, decision: RiskDecision, mandate: TradingMandate, *, now_ms: int, stop_mode: StopMode = StopMode.VENUE,
+                targets: tuple[Decimal, ...] = (), time_in_force: str = "DAY", entry_type: str = "LIMIT", max_slippage: Optional[Decimal] = None,
+                lease_epoch: Optional[int] = None, execution_policy_decision=None,
+                market_reference: Optional[MarketReference] = None,
+                liquidity: Optional[LiquidityView] = None,
+                urgency: Urgency = Urgency.NORMAL,
+                setup_valid_until_ms: Optional[int] = None) -&gt; ExecutionReceipt:
+        corr = intent.trade_intent_id
+        for pending in self.exit_journal.unresolved():
+            if pending.payload.get("state", "UNKNOWN") != "ACCEPTED":
+                self._uncertain_exit(pending.payload.get("position_id", pending.payload.get("broker_position_id")), now_ms=now_ms,
+                    request_ref=pending.payload.get("request_ref", pending.hash))
+        if not isinstance(urgency, Urgency):
+            raise RouterError("execution urgency must be a registered deterministic state")
+        if urgency is Urgency.IMMEDIATE:
+            raise RouterError("protective-exit urgency cannot authorize a new entry; use the protective reduction path")
+        # --- gate chain (fail closed, first failure names the reason) ---
+        if self.lease_fence is not None and not self.lease_fence(lease_epoch):
+            raise RouterError(f"account runtime lease fence refused epoch {lease_epoch!r}")
+        if self.kill.halted:
+            raise RouterError(f"kill switch active: {sorted(t.value for t in self.kill.active)}")
+        if decision.trade_intent_id != intent.trade_intent_id:
+            raise RouterError("decision does not belong to this intent")
+        if decision.decision not in (Decision.APPROVED, Decision.REDUCED):
+            raise RouterError(f"decision is {decision.decision.value}")
+        if recompute_decision_hash(decision) != decision.decision_hash:
+            raise RouterError("decision hash does not recompute; refusing")
+        if getattr(decision, "approval_schema_version", None) != RISK_APPROVAL_SCHEMA_VERSION or not getattr(decision, "intent_hash", None):
+            raise RouterError("risk approval lacks exact intent binding; re-evaluation required")
+        if decision.intent_hash != intent_binding_hash(intent):
+            raise RouterError("risk approval does not match the exact trade intent; re-evaluation required")
+        if decision.mandate_id != mandate.mandate_id or decision.mandate_version != mandate.version:
+            raise RouterError("decision was made under a different mandate")
+        if not mandate.sends_orders():
+            raise RouterError(f"mode {mandate.mode.value} does not send orders")
+        if getattr(decision, "mandate_hash", None) != mandate_binding_hash(mandate):
+            raise RouterError("risk approval does not match the current mandate; re-evaluation required")
+        if not mandate.authority_matches_policy():
+            raise RouterError("current mandate lacks its original policy-bound owner grant; re-admission required")
+        self._dispatch_time(mandate,now_ms=now_ms)
+        if intent.idempotency_key in self._seen:
+            raise RouterError("duplicate idempotency key")
+        adapter = self.adapters.get(intent.venue)
+        if adapter is None:
+            raise RouterError(f"no adapter for venue {intent.venue}")
+        from vati.execution.paper import PaperAdapter
+        # Legacy isolated simulation can represent a caller's chosen venue;
+        # native and owner-ticket targets must be bound before any provider I/O.
+        if not isinstance(adapter, PaperAdapter) and (
+            getattr(adapter, 'account_alias', None) != intent.account_alias
+            or getattr(adapter, 'venue', None) != intent.venue):
+            raise RouterError('execution adapter target differs from the intent account or venue')
+        hb = adapter.heartbeat(now_ms=now_ms)
+        if not hb.connected:
+            self.kill.trip(KillSwitchTrigger.VENUE_DISCONNECT, now_ms)
+            self._log(EventKind.KILL_SWITCH, {"trigger": "VENUE_DISCONNECT", "venue": intent.venue}, now_ms=now_ms, corr=corr)
+&gt;           raise RouterError("venue heartbeat failed; kill switch tripped")
+E           vati.execution.router.RouterError: venue heartbeat failed; kill switch tripped
+
+trading/vati/execution/router.py:370: RouterError</failure></testcase><testcase classname="trading.tests.test_provider_entry_deadline" name="test_actual_router_binds_ctrader_mandate_and_original_quote_through_wire_dispatch[True]" time="0.005"><failure message="vati.execution.router.RouterError: venue heartbeat failed; kill switch tripped">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-52/test_actual_router_binds_ctrad1')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+late = True
+
+    @pytest.mark.parametrize('late',[False,True])
+    def test_actual_router_binds_ctrader_mandate_and_original_quote_through_wire_dispatch(tmp_path,eurusd,late):
+        from conftest import NOW,mandate_dict,snapshot,intent
+        from vati.core import Ledger,EventKind
+        from vati.execution import ExecutionRouter,ProtectionManager
+        from vati.execution.risk_refresh import CurrentRiskFacts
+        from vati.execution.pretrade import MarketReference
+        from vati.risk import RiskAuthority,TradingMandate,KillSwitch,Decision
+        a,_,wire,clock=ctrader();clock['ms']=NOW*1000
+        m=TradingMandate.from_mapping(mandate_dict(venue='ctrader',account_alias=a.account_alias,expires_at_unix=NOW+1))
+        trade=intent(venue='ctrader',account_alias=a.account_alias)
+        facts=snapshot(replace(eurusd,venue='ctrader'),account_alias=a.account_alias)
+        authority=RiskAuthority(m);approved=authority.evaluate_safe(trade,facts)
+        assert approved.decision in {Decision.APPROVED,Decision.REDUCED}
+        ledger=Ledger();router=ExecutionRouter(ledger=ledger,adapters={'ctrader':a},kill_switch=KillSwitch(),protection=ProtectionManager(),clock=lambda:clock['ms'],current_risk_authority=authority,current_risk_facts_provider=lambda *args,**kwargs:CurrentRiskFacts(facts,clock['ms']))
+        if late:
+            class LastWriteLock:
+                def __enter__(self):clock['ms']=NOW*1000+101
+                def __exit__(self,*args):pass
+            a.transport._lock=LastWriteLock()
+&gt;       result=router.execute(trade,approved,m,now_ms=clock['ms'],entry_type='MARKET',market_reference=MarketReference(trade.entry,0,100))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_provider_entry_deadline.py:143: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;vati.execution.router.ExecutionRouter object at 0x7fedf012b9b0&gt;
+intent = TradeIntent(trade_intent_id='ti-1', idempotency_key='idem-1', account_alias='ct_native', venue='ctrader', symbol='EURU...cimal('1'), liquidity_multiplier=Decimal('1'), event_risk_multiplier=Decimal('1'), correlation_multiplier=Decimal('1'))
+decision = RiskDecision(trade_intent_id='ti-1', decision=&lt;Decision.APPROVED: 'APPROVED'&gt;, reason_code='OK', reason_detail='', app...78a79a192', mandate_hash='44cb02d1b29a328bbeaf4323b94e22ff7bc2446bf1f486cb3eebad42f890a5cf', approval_schema_version=2)
+mandate = TradingMandate(mandate_id='mandate-fx-primary', version='1.0.0', account_alias='ct_native', venue='ctrader', mode=&lt;Aut...se)), strategy_risk_budgets={}, trading_temperament=None, strategy_temperaments={}, temperament_owner_signature_ref='')
+now_ms = 1800000000000, stop_mode = &lt;StopMode.VENUE: 'VENUE'&gt;, targets = ()
+time_in_force = 'DAY', entry_type = 'MARKET', max_slippage = None
+lease_epoch = None, execution_policy_decision = None
+market_reference = MarketReference(last_price=Decimal('1.10010'), mark_age_ms=0, max_mark_age_ms=100)
+liquidity = None, urgency = &lt;Urgency.NORMAL: 'NORMAL'&gt;
+setup_valid_until_ms = None
+
+    def execute(self, intent: TradeIntent, decision: RiskDecision, mandate: TradingMandate, *, now_ms: int, stop_mode: StopMode = StopMode.VENUE,
+                targets: tuple[Decimal, ...] = (), time_in_force: str = "DAY", entry_type: str = "LIMIT", max_slippage: Optional[Decimal] = None,
+                lease_epoch: Optional[int] = None, execution_policy_decision=None,
+                market_reference: Optional[MarketReference] = None,
+                liquidity: Optional[LiquidityView] = None,
+                urgency: Urgency = Urgency.NORMAL,
+                setup_valid_until_ms: Optional[int] = None) -&gt; ExecutionReceipt:
+        corr = intent.trade_intent_id
+        for pending in self.exit_journal.unresolved():
+            if pending.payload.get("state", "UNKNOWN") != "ACCEPTED":
+                self._uncertain_exit(pending.payload.get("position_id", pending.payload.get("broker_position_id")), now_ms=now_ms,
+                    request_ref=pending.payload.get("request_ref", pending.hash))
+        if not isinstance(urgency, Urgency):
+            raise RouterError("execution urgency must be a registered deterministic state")
+        if urgency is Urgency.IMMEDIATE:
+            raise RouterError("protective-exit urgency cannot authorize a new entry; use the protective reduction path")
+        # --- gate chain (fail closed, first failure names the reason) ---
+        if self.lease_fence is not None and not self.lease_fence(lease_epoch):
+            raise RouterError(f"account runtime lease fence refused epoch {lease_epoch!r}")
+        if self.kill.halted:
+            raise RouterError(f"kill switch active: {sorted(t.value for t in self.kill.active)}")
+        if decision.trade_intent_id != intent.trade_intent_id:
+            raise RouterError("decision does not belong to this intent")
+        if decision.decision not in (Decision.APPROVED, Decision.REDUCED):
+            raise RouterError(f"decision is {decision.decision.value}")
+        if recompute_decision_hash(decision) != decision.decision_hash:
+            raise RouterError("decision hash does not recompute; refusing")
+        if getattr(decision, "approval_schema_version", None) != RISK_APPROVAL_SCHEMA_VERSION or not getattr(decision, "intent_hash", None):
+            raise RouterError("risk approval lacks exact intent binding; re-evaluation required")
+        if decision.intent_hash != intent_binding_hash(intent):
+            raise RouterError("risk approval does not match the exact trade intent; re-evaluation required")
+        if decision.mandate_id != mandate.mandate_id or decision.mandate_version != mandate.version:
+            raise RouterError("decision was made under a different mandate")
+        if not mandate.sends_orders():
+            raise RouterError(f"mode {mandate.mode.value} does not send orders")
+        if getattr(decision, "mandate_hash", None) != mandate_binding_hash(mandate):
+            raise RouterError("risk approval does not match the current mandate; re-evaluation required")
+        if not mandate.authority_matches_policy():
+            raise RouterError("current mandate lacks its original policy-bound owner grant; re-admission required")
+        self._dispatch_time(mandate,now_ms=now_ms)
+        if intent.idempotency_key in self._seen:
+            raise RouterError("duplicate idempotency key")
+        adapter = self.adapters.get(intent.venue)
+        if adapter is None:
+            raise RouterError(f"no adapter for venue {intent.venue}")
+        from vati.execution.paper import PaperAdapter
+        # Legacy isolated simulation can represent a caller's chosen venue;
+        # native and owner-ticket targets must be bound before any provider I/O.
+        if not isinstance(adapter, PaperAdapter) and (
+            getattr(adapter, 'account_alias', None) != intent.account_alias
+            or getattr(adapter, 'venue', None) != intent.venue):
+            raise RouterError('execution adapter target differs from the intent account or venue')
+        hb = adapter.heartbeat(now_ms=now_ms)
+        if not hb.connected:
+            self.kill.trip(KillSwitchTrigger.VENUE_DISCONNECT, now_ms)
+            self._log(EventKind.KILL_SWITCH, {"trigger": "VENUE_DISCONNECT", "venue": intent.venue}, now_ms=now_ms, corr=corr)
+&gt;           raise RouterError("venue heartbeat failed; kill switch tripped")
+E           vati.execution.router.RouterError: venue heartbeat failed; kill switch tripped
+
+trading/vati/execution/router.py:370: RouterError</failure></testcase><testcase classname="trading.tests.test_provider_entry_deadline" name="test_broken_clock_is_a_known_no_send_refusal[ctrader]" time="0.002"><failure message="AssertionError: assert ('REJECTED' == 'REJECTED'&#10;  &#10;    REJECTED and [('ProtoOAApp...: 'fixture'})] == []&#10;  &#10;  Left contains one more item: ('ProtoOAApplicationAuthReq', {'payloadType': 'PROTO_OA_APPLICATION_AUTH_REQ', 'clientId': 'fixture', 'clientSecret': 'fixture'})&#10;  Use -v to get more diff)">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-52/test_broken_clock_is_a_known_n0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7fedf0110410&gt;
+provider = 'ctrader'
+
+    @pytest.mark.parametrize('provider',['ctrader','deriv'])
+    def test_broken_clock_is_a_known_no_send_refusal(tmp_path,monkeypatch,provider):
+        def unavailable():raise RuntimeError('fixture clock unavailable')
+        if provider=='ctrader':
+            a,c,w,_=ctrader();a.clock=unavailable;r=a.submit(c,now_ms=1000);sent=w.sent
+        else:
+            a,sockets,_=factory(tmp_path,monkeypatch,native());a.clock=unavailable
+            r=a.submit(replace(command(),expires_at_ms=2000,command_hash='').sealed(),now_ms=1000)
+            sent=[q for sock in sockets for q in sock.requests if 'buy'in q]
+&gt;       assert r.status=='REJECTED' and sent==[]
+E       AssertionError: assert ('REJECTED' == 'REJECTED'
+E         
+E           REJECTED and [('ProtoOAApp...: 'fixture'})] == []
+E         
+E         Left contains one more item: ('ProtoOAApplicationAuthReq', {'payloadType': 'PROTO_OA_APPLICATION_AUTH_REQ', 'clientId': 'fixture', 'clientSecret': 'fixture'})
+E         Use -v to get more diff)
+
+trading/tests/test_provider_entry_deadline.py:157: AssertionError</failure></testcase><testcase classname="trading.tests.test_provider_entry_deadline" name="test_broken_clock_is_a_known_no_send_refusal[deriv]" time="0.004" /><testcase classname="trading.tests.test_provider_entry_deadline" name="test_legacy_transport_cannot_silently_drop_an_explicit_deadline[ctrader]" time="0.001" /><testcase classname="trading.tests.test_provider_entry_deadline" name="test_legacy_transport_cannot_silently_drop_an_explicit_deadline[deriv]" time="0.001" /><testcase classname="trading.tests.test_provider_entry_deadline" name="test_deriv_expiry_during_buy_reauthorization_is_checked_at_the_actual_financial_write" time="0.006" /><testcase classname="trading.tests.test_provider_entry_deadline" name="test_bounded_deriv_primitive_refuses_mixed_or_nonentry_operations_before_connection[msg0]" time="0.001" /><testcase classname="trading.tests.test_provider_entry_deadline" name="test_bounded_deriv_primitive_refuses_mixed_or_nonentry_operations_before_connection[msg1]" time="0.001" /><testcase classname="trading.tests.test_provider_entry_deadline" name="test_bounded_deriv_primitive_refuses_mixed_or_nonentry_operations_before_connection[msg2]" time="0.001" /><testcase classname="trading.tests.test_provider_entry_deadline" name="test_bounded_deriv_primitive_refuses_mixed_or_nonentry_operations_before_connection[None]" time="0.001" /></testsuite></testsuites>

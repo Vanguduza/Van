@@ -1,0 +1,313 @@
+{
+  "bindings": [
+    {
+      "acceptance_ids": [
+        "EL-AT-013-POS",
+        "EL-AT-013-NEG",
+        "EL-AT-013-REC"
+      ],
+      "authority_rule": "Read/navigation does not execute; contextual commands use current native grants and authoritative receipts.",
+      "backend_units": [
+        "BE-012",
+        "BE-022",
+        "BE-032"
+      ],
+      "context_id": "VNX-S-ORDERS-11",
+      "frontend_units": [
+        "FE-011"
+      ],
+      "operation_ids": [
+        "EL-OP-001",
+        "EL-OP-002"
+      ],
+      "presentation": "What happened, what was known, financial outcome versus decision quality and unresolved explanation.",
+      "requirement_ids": [
+        "VAN-EL-007"
+      ],
+      "states": [
+        "LOADING",
+        "CURRENT",
+        "PENDING_MATURITY",
+        "INCONCLUSIVE",
+        "UNSUPPORTED",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "SUSPENDED",
+        "OUTCOME_UNKNOWN"
+      ]
+    },
+    {
+      "acceptance_ids": [
+        "EL-AT-013-POS",
+        "EL-AT-013-NEG",
+        "EL-AT-013-REC"
+      ],
+      "authority_rule": "Read/navigation does not execute; contextual commands use current native grants and authoritative receipts.",
+      "backend_units": [
+        "BE-012",
+        "BE-022",
+        "BE-036",
+        "BE-032"
+      ],
+      "context_id": "VNX-S-ORDERS-12",
+      "frontend_units": [
+        "FE-011"
+      ],
+      "operation_ids": [
+        "EL-OP-001",
+        "EL-OP-002",
+        "EL-OP-004"
+      ],
+      "presentation": "Execution contribution, full costs, counterfactual limits and qualified method changes.",
+      "requirement_ids": [
+        "VAN-EL-007"
+      ],
+      "states": [
+        "LOADING",
+        "CURRENT",
+        "PENDING_MATURITY",
+        "INCONCLUSIVE",
+        "UNSUPPORTED",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "SUSPENDED",
+        "OUTCOME_UNKNOWN"
+      ]
+    },
+    {
+      "acceptance_ids": [
+        "EL-AT-013-POS",
+        "EL-AT-013-NEG",
+        "EL-AT-013-REC"
+      ],
+      "authority_rule": "Read/navigation does not execute; contextual commands use current native grants and authoritative receipts.",
+      "backend_units": [
+        "BE-022",
+        "BE-035",
+        "BE-036",
+        "BE-032"
+      ],
+      "context_id": "van.next.trading.pattern-candidates",
+      "frontend_units": [
+        "FE-014"
+      ],
+      "operation_ids": [
+        "EL-OP-002",
+        "EL-OP-003",
+        "EL-OP-005",
+        "EL-OP-008"
+      ],
+      "presentation": "Cohort similarity, proposed lesson, contradicting cases, uncertainty and bounded research request.",
+      "requirement_ids": [
+        "VAN-EL-007"
+      ],
+      "states": [
+        "LOADING",
+        "CURRENT",
+        "PENDING_MATURITY",
+        "INCONCLUSIVE",
+        "UNSUPPORTED",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "SUSPENDED",
+        "OUTCOME_UNKNOWN"
+      ]
+    },
+    {
+      "acceptance_ids": [
+        "EL-AT-013-POS",
+        "EL-AT-013-NEG",
+        "EL-AT-013-REC"
+      ],
+      "authority_rule": "Read/navigation does not execute; contextual commands use current native grants and authoritative receipts.",
+      "backend_units": [
+        "BE-035",
+        "BE-036",
+        "BE-032"
+      ],
+      "context_id": "VAN-S-CX-STRATEGY-DEVELOPMENT",
+      "frontend_units": [
+        "FE-023"
+      ],
+      "operation_ids": [
+        "EL-OP-003",
+        "EL-OP-004",
+        "EL-OP-005",
+        "EL-OP-008"
+      ],
+      "presentation": "Complete strategy loop, hypothesis refutation and qualified next-decision evidence.",
+      "requirement_ids": [
+        "VAN-EL-007"
+      ],
+      "states": [
+        "LOADING",
+        "CURRENT",
+        "PENDING_MATURITY",
+        "INCONCLUSIVE",
+        "UNSUPPORTED",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "SUSPENDED",
+        "OUTCOME_UNKNOWN"
+      ]
+    },
+    {
+      "acceptance_ids": [
+        "EL-AT-013-POS",
+        "EL-AT-013-NEG",
+        "EL-AT-013-REC"
+      ],
+      "authority_rule": "Read/navigation does not execute; contextual commands use current native grants and authoritative receipts.",
+      "backend_units": [
+        "BE-035",
+        "BE-036",
+        "BE-032"
+      ],
+      "context_id": "VAN-S-CX-CANDIDATE-COMPARISON",
+      "frontend_units": [
+        "FE-012"
+      ],
+      "operation_ids": [
+        "EL-OP-003",
+        "EL-OP-004"
+      ],
+      "presentation": "Net economic comparison, confidence limits, power/null controls and prospective support.",
+      "requirement_ids": [
+        "VAN-EL-007"
+      ],
+      "states": [
+        "LOADING",
+        "CURRENT",
+        "PENDING_MATURITY",
+        "INCONCLUSIVE",
+        "UNSUPPORTED",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "SUSPENDED",
+        "OUTCOME_UNKNOWN"
+      ]
+    },
+    {
+      "acceptance_ids": [
+        "EL-AT-013-POS",
+        "EL-AT-013-NEG",
+        "EL-AT-013-REC"
+      ],
+      "authority_rule": "Read/navigation does not execute; contextual commands use current native grants and authoritative receipts.",
+      "backend_units": [
+        "BE-035",
+        "BE-032"
+      ],
+      "context_id": "VAN-S-CX-EXPERIMENT-LEDGER",
+      "frontend_units": [
+        "FE-023"
+      ],
+      "operation_ids": [
+        "EL-OP-003"
+      ],
+      "presentation": "All trials including rejected/inconclusive/invalidated, holdout consumption and correction lineage.",
+      "requirement_ids": [
+        "VAN-EL-007"
+      ],
+      "states": [
+        "LOADING",
+        "CURRENT",
+        "PENDING_MATURITY",
+        "INCONCLUSIVE",
+        "UNSUPPORTED",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "SUSPENDED",
+        "OUTCOME_UNKNOWN"
+      ]
+    },
+    {
+      "acceptance_ids": [
+        "EL-AT-013-POS",
+        "EL-AT-013-NEG",
+        "EL-AT-013-REC"
+      ],
+      "authority_rule": "Read/navigation does not execute; contextual commands use current native grants and authoritative receipts.",
+      "backend_units": [
+        "BE-002",
+        "BE-036",
+        "BE-032"
+      ],
+      "context_id": "van.trading.strategies",
+      "frontend_units": [
+        "FE-012"
+      ],
+      "operation_ids": [
+        "EL-OP-004",
+        "EL-OP-007",
+        "EL-OP-008"
+      ],
+      "presentation": "Current strategy, evidence freshness, automatic state updates, suspension and fallback.",
+      "requirement_ids": [
+        "VAN-EL-007"
+      ],
+      "states": [
+        "LOADING",
+        "CURRENT",
+        "PENDING_MATURITY",
+        "INCONCLUSIVE",
+        "UNSUPPORTED",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "SUSPENDED",
+        "OUTCOME_UNKNOWN"
+      ]
+    },
+    {
+      "acceptance_ids": [
+        "EL-AT-013-POS",
+        "EL-AT-013-NEG",
+        "EL-AT-013-REC"
+      ],
+      "authority_rule": "Read/navigation does not execute; contextual commands use current native grants and authoritative receipts.",
+      "backend_units": [
+        "BE-002",
+        "BE-036",
+        "BE-032"
+      ],
+      "context_id": "VAN-S-CX-RISK-POLICY-ACTIVATION",
+      "frontend_units": [
+        "FE-012"
+      ],
+      "operation_ids": [
+        "EL-OP-004",
+        "EL-OP-006",
+        "EL-OP-007",
+        "EL-OP-008"
+      ],
+      "presentation": "Exact artifact, independent qualification, scoped promotion/revocation and authoritative readback.",
+      "requirement_ids": [
+        "VAN-EL-007"
+      ],
+      "states": [
+        "LOADING",
+        "CURRENT",
+        "PENDING_MATURITY",
+        "INCONCLUSIVE",
+        "UNSUPPORTED",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "SUSPENDED",
+        "OUTCOME_UNKNOWN"
+      ]
+    }
+  ],
+  "existing_contexts_only": true,
+  "operations_source": "contracts/self_optimization/EXPERIENCE_LEARNING_CONTRACT.json",
+  "schema": "van.experience-learning.context-bindings/1.0",
+  "status": "SPECIFIED_NOT_IMPLEMENTED",
+  "visual_assets_changed": false
+}

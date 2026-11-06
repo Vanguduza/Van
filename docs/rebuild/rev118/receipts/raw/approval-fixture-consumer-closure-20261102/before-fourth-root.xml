@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="5.571" timestamp="2026-11-02T05:54:06.825608+00:00" hostname="07611d75dea7"><testcase classname="backend.tests.test_stateful_link_binding" name="test_original_oauth_link_domain_cannot_retarget_another_native_state" time="1.720"><failure message="AssertionError: {&quot;detail&quot;:&quot;approval_signature_invalid&quot;}&#10;assert 403 == 200&#10; +  where 403 = &lt;Response [403 Forbidden]&gt;.status_code">client = (&lt;httpx.AsyncClient object at 0x7f025918e600&gt;, &lt;fastapi.applications.FastAPI object at 0x7f0258fb7260&gt;)
+tmp_path = PosixPath('/tmp/van-approval-fixture-proof-20261102/before-fourth-root/fixtures/test_original_oauth_link_domai0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7f025918ede0&gt;
+
+    @pytest.mark.asyncio
+    async def test_original_oauth_link_domain_cannot_retarget_another_native_state(client,tmp_path,monkeypatch):
+        ac,app=client;peer=FakeDeriv()
+        def control(name):return LocalAccountControl(str(tmp_path/(name+'-accounts.json')),str(tmp_path/(name+'-secrets')),
+            operation_ledger=str(tmp_path/(name+'-native.sqlite')),deriv_connector=peer.connector)
+        original=control('original');other=control('other')
+        app.state.onboarding.control=original
+        expected=original.domain();actual=other.domain();assert expected!=actual
+        started=await act(ac,'oauth_start',{'broker':'deriv','app_id':'1089'})
+&gt;       assert started.status_code==200,started.text
+E       AssertionError: {"detail":"approval_signature_invalid"}
+E       assert 403 == 200
+E        +  where 403 = &lt;Response [403 Forbidden]&gt;.status_code
+
+backend/tests/test_stateful_link_binding.py:32: AssertionError</failure></testcase><testcase classname="" name="test_actual_stateful_client_enrolls_the_key_used_by_its_act_helper" time="1.508"><failure message="AssertionError: {&quot;detail&quot;:&quot;approval_signature_invalid&quot;}&#10;assert 403 == 200&#10; +  where 403 = &lt;Response [403 Forbidden]&gt;.status_code">client = (&lt;httpx.AsyncClient object at 0x7f02595a3650&gt;, &lt;fastapi.applications.FastAPI object at 0x7f0251c8e300&gt;)
+tmp_path = PosixPath('/tmp/van-approval-fixture-proof-20261102/before-fourth-root/fixtures/test_actual_stateful_client_en0')
+
+    @pytest.mark.asyncio
+    async def test_actual_stateful_client_enrolls_the_key_used_by_its_act_helper(client,tmp_path):
+        ac,app=client
+        app.state.onboarding.control=LocalAccountControl(str(tmp_path/'accounts.json'),str(tmp_path/'secrets'),operation_ledger=str(tmp_path/'native.sqlite'))
+        bare=importlib.import_module('test_trading_api')
+        canonical=importlib.import_module('backend.tests.test_trading_api')
+        record=await app.state.store.fetchone('SELECT public_key_pem FROM devices WHERE device_id=?',('test-device',))
+        enrolled=hashlib.sha256(record['public_key_pem'].encode()).hexdigest()
+        response=await act(ac,'oauth_start',{'broker':'deriv'})
+        observation={'actual_fixture_owner':'backend.tests.test_stateful_link_binding.client',
+            'bare_module':bare.__name__,'canonical_module':canonical.__name__,'same_module':bare is canonical,
+            'bare_public_key_sha256':hashlib.sha256(bare.DEVICE_PEM.encode()).hexdigest(),
+            'canonical_public_key_sha256':hashlib.sha256(canonical.DEVICE_PEM.encode()).hexdigest(),
+            'enrolled_public_key_sha256':enrolled,'act_proof_module':act.__globals__['_approval_proof'].__module__,
+            'HTTP_status':response.status_code,'detail':response.json().get('detail')}
+        (tmp_path.parent/'STATEFUL_PUBLIC_KEY_OBSERVATION.json').write_text(json.dumps(observation,indent=2)+'\n')
+&gt;       assert response.status_code==200,response.text
+E       AssertionError: {"detail":"approval_signature_invalid"}
+E       assert 403 == 200
+E        +  where 403 = &lt;Response [403 Forbidden]&gt;.status_code
+
+/tmp/van-approval-fixture-stateful-probe-20261102.py:23: AssertionError</failure></testcase></testsuite></testsuites>

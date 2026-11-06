@@ -1,0 +1,49 @@
+{
+  "schema_version": 2,
+  "files": {
+    "SUMMARY.json": "0c97dbdfa9316494378c59f7fd31ebabab74bd9e88799dc7d7734bdb06d8d7e7",
+    "android-compile-native-attempt3.receipt.json": "da5c66dc04bcdca4fd8788b97926dd4f7da8b7aa56868487130a694a7e546230",
+    "android-compile-native-attempt4.receipt.json": "2891a568014a7b172cc537051522bc56dfec9df8b7f842860beb2d98b9e1682a",
+    "android-compile-native-attempt5.receipt.json": "d341544b74fdf0d1d40d98edc5e3323dfc78320d47918f4e13be996469fdff72",
+    "android-compile-native-attempt6.receipt.json": "c3e76287232a8e758f99be2cd85d9e44b7da8a9488976fa8d3bef59afa5a2703",
+    "continued-tests-receipt.json": "7812939e975ab41f3adc8f50ee464496e9de62f32aadc2cb042cb5617bb141a8",
+    "existing-overlay-contract-before-refactor.json": "c8b50f465454a6df890ede6753ddbc0aefe064ad8ece739de81bbbd22070db0a",
+    "existing-overlay-contract-final.json": "7c3728200cd02cf16f7038e14a2da22d2764b473f96742e8cb3c35c60901aead",
+    "junit/TEST-junit-jupiter.xml": "c5b7e40aba1167a351d3418249b4f1eb12e2da9efc6a69b7daa1a0a95439492e",
+    "junit/TEST-junit-platform-suite.xml": "392d1a12d04d38ab509ddebf3c597cae6dbd96467afe67f2a09a86d87aef2939",
+    "junit/TEST-junit-vintage.xml": "72e6e5cce7fcfa9220e83327a4ab73c57d52b263cb213d8618a8e419b46b19f7",
+    "pinned-android-source-compile-v1.receipt.json": "ea15b76dbaef0a6062f55bb32ec1195ab1227c1cceff846739aa7cad2d939f6c",
+    "pinned-android-source-compile-v2.receipt.json": "32d34da07b3279e876304222f8c17eff8292a77ce53bb5c69f616f1c152a32d7",
+    "pinned-native-visual-components-v1.receipt.json": "74bc06423a10f3c43522ac9f734faa1fcf9ac0e33de462a6bad1b5f37ef0192c",
+    "pinned-native-visual-components-v2.receipt.json": "f69c2b51448e87cbf283b7147443da210da86136659539ae55405cd44f1203e4",
+    "pinned-native-visual-components-v3.receipt.json": "dbedba8558c9e494622e81e7ed1ff0b650cc4e1fcf0a6dde88f4e7ec47c2c5a5",
+    "precommit-baseline-truth-hydrated-v2.exit": "ca2ebdf97d7469496b1f4b78958f9dc8447efdcb623953fee7b6996b762f6fff",
+    "precommit-baseline-truth-hydrated-v2.json": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "precommit-baseline-truth-hydrated-v2.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "precommit-baseline-truth-hydrated.exit": "ca2ebdf97d7469496b1f4b78958f9dc8447efdcb623953fee7b6996b762f6fff",
+    "precommit-whitespace-refusal.json": "34d503ce636278a346f1131f7f16a00629d08532185a44ad45fceab41a2c1663",
+    "RAW_LOGS.zip": "ddaf61b83448b5fb2e9b296b343b50ec8b0bde94af3c979e91cbc37a9d1c3728",
+    "RAW_LOGS_README.md": "bf3f860662d56fa40035fd7b90321e7cb58ba56c7dfa13fc43fb6c46565bc00f"
+  },
+  "archives": {
+    "RAW_LOGS.zip": {
+      "member_sha256": {
+        "android-compile-native-attempt3.log": "6d948795d05b4d5a38bd7e3eabe9b969398e7d9ad0e139296b09da3d5b47d59c",
+        "android-compile-native-attempt4.log": "6913f2dfd8cf2556b1595936de7608068e7d1e9c5409183774edf034cc1ff99a",
+        "android-compile-native-attempt5.log": "f76c92ca792b751823118a928f1dd8643b048482201cc907783c2c3825790999",
+        "android-compile-native-attempt6.log": "fdcaebe9c2b9b63687c94675130c6a8d591b8d6cc8e19b3b0cd4150442fa859a",
+        "continued-compile.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "continued-tests.log": "ff92fbe072e62a6d259a99a5243a76389b4eeff0a7288cf5609a69fdc257a33c",
+        "pinned-android-source-compile-v1.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "pinned-android-source-compile-v2.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "pinned-native-visual-components-v1.log": "16e4ef3d2b064e461a3a4f570209a163b5a9522d706cdaa1562215623b098039",
+        "pinned-native-visual-components-v2.log": "b4f87e540fa8ceea6549fc334b8a0a24030691172cd88ab4e55f5e09954d4616",
+        "pinned-native-visual-components-v3.log": "b4f87e540fa8ceea6549fc334b8a0a24030691172cd88ab4e55f5e09954d4616",
+        "precommit-baseline-truth-hydrated.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "precommit-baseline-truth.log": "4134be72d2ce667faac86e516fadf311274a9387909f9112a8fcf8571c7238a0"
+      },
+      "format": "zip",
+      "original_bytes_preserved": true
+    }
+  }
+}

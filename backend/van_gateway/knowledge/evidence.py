@@ -48,20 +48,32 @@ class KnowledgeEvidenceStore:
             retrieved_at_ms=retrieved_at_ms, content_digest=content_digest,
             snippet=snippet[:8000], metadata=metadata or {},
         )
-        await self.store.execute(
-            """INSERT INTO knowledge_evidence(
-              evidence_id, provider, query_id, source_ref, title, source_trust,
-              epistemic_state, scope, retrieved_at_unix_ms, content_digest,
-              snippet, metadata_json
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-            (
-                evidence.evidence_id, evidence.provider.value, evidence.query_id,
-                evidence.source_ref, evidence.title, evidence.source_trust.value,
-                evidence.epistemic_state.value, evidence.scope,
-                evidence.retrieved_at_ms, evidence.content_digest, evidence.snippet,
-                Store.dumps(evidence.metadata),
-            ),
-        )
+        async with self.store.connection() as db:
+            await db.execute("BEGIN IMMEDIATE")
+            try:
+                await db.execute(
+                    """INSERT INTO knowledge_evidence(
+                      evidence_id, provider, query_id, source_ref, title, source_trust,
+                      epistemic_state, scope, retrieved_at_unix_ms, content_digest,
+                      snippet, metadata_json
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                    (
+                        evidence.evidence_id, evidence.provider.value, evidence.query_id,
+                        evidence.source_ref, evidence.title, evidence.source_trust.value,
+                        evidence.epistemic_state.value, evidence.scope,
+                        evidence.retrieved_at_ms, evidence.content_digest, evidence.snippet,
+                        Store.dumps(evidence.metadata),
+                    ),
+                )
+                # Only actual structured provider content can feed comparison.
+                # Evidence and eligible projection commit atomically, so a failed
+                # observer cannot leave an unrecoverable missing learning event.
+                from van_gateway.learning.observations import record_external_claim
+                await record_external_claim(self.store, evidence_id=evidence.evidence_id, content=content, db=db)
+                await db.commit()
+            except BaseException:
+                await db.rollback()
+                raise
         return evidence
 
     async def certify(

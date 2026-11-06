@@ -1,0 +1,135 @@
+{
+  "schema": "van.rebuild.candidate-source-receipt/1",
+  "source_parent": "0a2971673417d585e444747c39afbd8bea5c1ee7",
+  "scope": "PARTIAL_BE029_EXISTING_ANDROID_REPAIR_NOT_FRONTEND_GATE_OR_UNIT_ACCEPTANCE",
+  "source_sha256": {
+    "android/app/src/main/java/com/dial/van/VanApplication.kt": "d633836305d2f08354f61b80d89b5c5f47f9609364333972cba64e8f64f9b4bb",
+    "android/app/src/main/java/com/dial/van/voice/SherpaLocalTtsRuntime.kt": "923b2efef4a092fdbe02915ba24f0ab99b4467166ef8357fcf9204f38e211a31",
+    "android/app/src/main/java/com/dial/van/voice/SpeechPlaybackEpoch.kt": "22e1a1d85fbeec5b61141dbd961ca6308854b48a70897f7a0c821317d213c93e",
+    "android/app/src/main/java/com/dial/van/voice/SpeechQueue.kt": "37e0b31a806496e08afeb7544b52c4716b16072a1de0e5daad01cf2503db774b",
+    "android/app/src/main/java/com/dial/van/voice/VoiceEdge.kt": "466b9e88688b0c3efe9fe463503610f223b2edc19b4de712fbbd92d3cd579b07",
+    "android/app/src/main/java/com/dial/van/voice/VoiceInterfaces.kt": "d3ef7b4ceefba2707aecad1d5b5d63163d61d9105ead525f9055c4734ea91242",
+    "android/app/src/androidTest/java/com/dial/van/instrumentation/VoicePlaybackRuntimeTest.kt": "db28ddb287012a8b191ecb71b41d179858c4e6ae6026abb6b78309386ca924c7",
+    "android/verification/src/test/kotlin/com/dial/van/voice/OfflineVoiceTest.kt": "9656cd438fed0106b22b5e5e65d5a8dd595ea77ad01036a7c256b1a8c9d7fde1",
+    "android/verification/src/test/kotlin/com/dial/van/voice/SpeechPlaybackStateTest.kt": "f0e4275472d0506753dfacebe3fe3212d582f0e5e1c46a5eb652483afb993444",
+    "android/verification/src/test/kotlin/com/dial/van/voice/SpeechQueueContinuityTest.kt": "73dc88991e2de9f592299b54041a882023e0394489b143f156b9f30387bb67c1",
+    "backend/van_gateway/voice/speech_stream.py": "b360b4d1e7c2618188710e200a57a0d2efea38b5bb2f8d56fe0b0675792798bc",
+    "backend/tests/test_voice_stream_continuity.py": "8c2815c6ffa4f62bda7587ff578305b3354ee5acf02aefa2bfe56bab946fc567",
+    "tools/audit/mutation_suite.py": "437751fb805b1aef298c675d6a8d56dd1ed4cda6539d8b4ae6a74890ec5640b5",
+    ".github/workflows/van-ci.yml": "a26c711b064bfdebbbd4faf615416fa48f6884bff625ae2ff0dd48dcb1576a51",
+    "tools/ci/github-actions-ci.yml": "a26c711b064bfdebbbd4faf615416fa48f6884bff625ae2ff0dd48dcb1576a51"
+  },
+  "JVM": {
+    "tests": 1290,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "app_units": {
+    "tests": 195,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "lint": {
+    "Error": 0,
+    "Fatal": 0,
+    "Warning": 89
+  },
+  "backend_voice_speaker_sync": {
+    "passed": 48,
+    "new_source_cases": 3
+  },
+  "new_JVM_cases": 17,
+  "native_instrumentation": {
+    "new_tests": 2,
+    "assembly": "PASS",
+    "runtime": "PENDING_HOSTED_SOURCE_RUN_NO_LOCAL_EMULATOR"
+  },
+  "initial_counterexamples": {
+    "JVM_queue": 6,
+    "gateway_stream": 3
+  },
+  "mutation_controls": {
+    "controls_and_mutants": [
+      {
+        "kind": "baseline",
+        "mutation": null,
+        "exit_code": 0,
+        "log": "/tmp/van-voice-mutant-0.txt",
+        "sha256": "ebc57143dfe6a6b22b05caaa952a001c1767aa10739b63841207f06d741986b5"
+      },
+      {
+        "kind": "mutation",
+        "mutation": "C30 a segment the owner already heard is re-queued and spoken again",
+        "exit_code": 1,
+        "log": "/tmp/van-voice-mutant-1.txt",
+        "sha256": "0c133e2159e4fc577994a263e31f674625bd2b9682650f271cc2646380697ea4"
+      },
+      {
+        "kind": "mutation",
+        "mutation": "C30 a duplicate after a failover is spoken twice",
+        "exit_code": 1,
+        "log": "/tmp/van-voice-mutant-2.txt",
+        "sha256": "f75e785819825c1ee6c418d32e4bbfb012b3f1d2bd4f6e653a6442c4e5ee5fa9"
+      },
+      {
+        "kind": "mutation",
+        "mutation": "C30 an answer counts as finished because its last segment arrived",
+        "exit_code": 1,
+        "log": "/tmp/van-voice-mutant-3.txt",
+        "sha256": "af5d500a9d89882925db01ec309f4569f2aa85ff09df67ca789c44056d88d98a"
+      }
+    ],
+    "detected": 3,
+    "survivors": 0,
+    "source_restored": true,
+    "journal_absent": true
+  },
+  "mutation_preflight": {
+    "schema": "van.rebuild.mutation-registry-preflight/1",
+    "registry_sha256": "437751fb805b1aef298c675d6a8d56dd1ed4cda6539d8b4ae6a74890ec5640b5",
+    "mutation_count": 374,
+    "edit_count": 383,
+    "findings": [],
+    "execution_state": "NOT_RUN",
+    "status": "ANCHORS_VALID_BASELINES_AND_MUTATIONS_NOT_EXECUTED"
+  },
+  "original_identities_preserved": 374,
+  "logs_sha256": {
+    "/tmp/van-voice-queue-before.txt": "038323aa93b6d74a3f2a496b40bc6e554af51d407cefab94bb53e4acf7ae7842",
+    "/tmp/van-voice-stream-before.txt": "ddcdec2c377d0ad78d93aff71d84be57297a29788af077e67b19cebfe5bd01a2",
+    "/tmp/van-voice-backend-focused.txt": "9bdd4cbad7898de04423b06c1971b20bfb4df41459e9f5aa429aae761c8d5b24",
+    "/tmp/van-voice-android-verified.txt": "201f5d44fad3e02462a9cae98795327019d832f8a72763955add6d5488adbad6",
+    "/tmp/van-voice-jvm-restored.txt": "989e5ce434b1a0208d1b7b9dd325240aaff6937e86eaebf3239c11cb0b92a5bf",
+    "/tmp/van-voice-mutants.txt": "ae9e3ba6bdcc0101d4fe62bbd2acd0b50b5b3e4bd0fc3e80cd8f99c4e35079fd",
+    "/tmp/van-voice-mutant-receipt.json": "15af11e9ca7a9ef22ca97c2ba9f2b7df1115516a7623048415d3843beb01bf56",
+    "/tmp/van-voice-preflight-restored.txt": "dbdbf842aea2da7fec95ad09f205f07e2cd7f176ae209656433b13f9bec10225",
+    "/tmp/van-voice-ci-contract-final.txt": "623a0e98a6f67837dce5f63253be59bae8eaaf24a6a05d6121e25706188b3145",
+    "/tmp/van-voice-public-selection.txt": "5803d76cbf7f6fc8ac08558ad88d7d83073308704abee10a3c873be70e7bfa3d",
+    "/tmp/van-voice-public-selection.xml": "57ee552ece981cd31b4de9c51f2e9f579d27e587fc72de4c24139d723db4d935",
+    "/tmp/van-voice-preflight-ci-final.txt": "dbdbf842aea2da7fec95ad09f205f07e2cd7f176ae209656433b13f9bec10225"
+  },
+  "local_debug_artifacts": {
+    "android/app/build/outputs/apk/debug/app-debug.apk": "34763cbe71cd1695bea14f0dc94a4f46d54c9efff9a4ab8fdb9d9e0835fb7413",
+    "android/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk": "9c5b8d5dac1b47e7f55120758890b817a04e27a84eabd6cbf9de2484b0362aa9"
+  },
+  "staging": "Owned core-mode/candidate debug fixtures verified then removed; no production signer/profile or artwork change.",
+  "voice_bundle_pin_unchanged": true,
+  "signing_or_native_acceptance_issued": false,
+  "remaining": [
+    "Real gateway speech producer/authenticated cursor consumer",
+    "Streaming finality/device/process/retention scope",
+    "Delayed owner context and call/audio-focus deferral",
+    "Hosted new native runtime controls",
+    "Full unit/release/S24 acceptance"
+  ],
+  "public_voice_ci": {
+    "exact_selection_passed": 48,
+    "minimum_required": 48,
+    "skips_allowed": 0,
+    "CI_contract_tests_passed": 16,
+    "hosted_execution": "PENDING_NEW_SOURCE_RUN",
+    "DDS_key_gate_unchanged": true
+  }
+}

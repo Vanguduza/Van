@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "historical_receipt": {
+    "path": "docs/audit/validation/android-owner-controls-final-receipt-2026-10-08.json",
+    "sha256": "6ddf85187a652233598aea237c0dd0b341bbcc239ee216b473fd62efa48aabf8"
+  },
+  "historical_apk": {
+    "path": "/workspace/van-audit/android-owner-controls-r1-debug-2026-10-08.apk",
+    "sha256": "17352b410cbb00e5b8ae67992337cdbb3f25a37a12d1dfada0dcd64eca3c2719",
+    "bytes": 121310631
+  },
+  "reason": "Frozen r1 validation remains historical; r2 separately validates encrypted browser recovery source. Existing r1 logs/XML/manifests/receipts remain unchanged.",
+  "production_release": false
+}

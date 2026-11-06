@@ -1,0 +1,35 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_ test_plausible_metadata_cannot_replace_actual_bytes_clocks_or_native_scope[row_identity] _
+
+source = (<vati.market_data.native_archive.NativeMarketArchive object at 0x7f7656adb770>, NativeSymbolContract(metadata_json='{...transport_host': 'demo.ctraderapi.com', 'native_account_id': 123, ...}, 'timeframe': 'M1', 'through_revision': 1, ...})
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-401/test_plausible_metadata_cannot0')
+damage = 'row_identity'
+
+    @pytest.mark.parametrize('damage',['missing','hash','size','media','rows','row_identity','source_digest',
+        'cutoff','availability','quality','corrected','scope'])
+    def test_plausible_metadata_cannot_replace_actual_bytes_clocks_or_native_scope(source,tmp_path,damage):
+        service,record,contract=binding(source,tmp_path)
+        scope=contract.native_scope
+        if damage=='missing':record['partitions'][0]['artifact_id']='f'*64
+        elif damage=='hash':record['partitions'][0]['sha256']='f'*64
+        elif damage=='size':record['partitions'][0]['size_bytes']+=1
+        elif damage=='media':record['partitions'][0]['media_type']='text/csv'
+        elif damage=='rows':record['row_count']=2
+        elif damage=='row_identity':record['row_identity_digest']='f'*64
+        elif damage=='source_digest':record['source_manifest_digest']='f'*64
+        elif damage=='cutoff':record['data_cutoff']=record['max_input_available_at']='1970-01-01T00:06:39.999999999Z'
+        elif damage=='availability':
+            record['max_input_available_at']='1970-01-01T00:06:40.000000001Z'
+            record['data_cutoff']='1970-01-01T00:06:41Z'
+        elif damage=='quality':record['availability_quality']='RECONSTRUCTED'
+        elif damage=='corrected':record['revision_policy']='CORRECTED_RESEARCH_ONLY'
+        elif damage=='scope':scope=dict(scope,native_account_id=999)
+>       with pytest.raises(ValueError):NativeDatasetSourceInspector(service).inspect(parse(record),expected_scope=scope)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/worker_tests/test_dataset_source_inspection.py:69: Failed
+=========================== short test summary info ============================
+FAILED trading/worker_tests/test_dataset_source_inspection.py::test_plausible_metadata_cannot_replace_actual_bytes_clocks_or_native_scope[row_identity]
+1 failed in 1.85s

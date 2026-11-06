@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0",
+  "record_id": "fixture:PredictionMarketStudySpec",
+  "environment": "FIXTURE",
+  "authority_effect": "NONE",
+  "evidence_refs": [
+    "fixture:synthetic-only-not-real-evidence"
+  ],
+  "source_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "study_id": "PM-STUDY-01-RISK",
+  "experiment": "RISK_FILTER",
+  "frozen_at": "2026-10-17T11:00:00Z",
+  "data_snapshot_ref": "fixture:point-in-time-dataset",
+  "protocol_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+  "group_split_key": "UNDERLYING_EVENT_AND_TIME_BLOCK",
+  "baseline_policies": [
+    "INCUMBENT",
+    "CALENDAR_ONLY",
+    "UNIFORM_EXPOSURE_MATCHED"
+  ],
+  "exposure_matched_control": true,
+  "full_account_replay": true,
+  "realistic_information_lag": true,
+  "negative_controls": [
+    "SHUFFLED_EVENT_ASSIGNMENT",
+    "ADDITIONAL_LAG"
+  ],
+  "effective_sample_unit": "INDEPENDENT_EVENT_OR_JUSTIFIED_TIME_BLOCK",
+  "utility_definition_ref": "fixture:net-utility-under-fixed-risk",
+  "minimum_material_effect": "FREEZE_BEFORE_HOLDOUT_BY_ACTUAL_USE",
+  "final_holdout_locked": true,
+  "all_trials_retained": true,
+  "source_eligibility_scope_ref": "fixture:no-remote-data",
+  "result": "NOT_RUN",
+  "live_promotion_authority": "NONE"
+}

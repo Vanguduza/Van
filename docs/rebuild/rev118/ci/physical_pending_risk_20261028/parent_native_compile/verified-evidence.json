@@ -1,0 +1,46 @@
+{
+  "schema": "van.native-mql-independent-artifact-readback/1",
+  "requested_head": "42d8b386e61f2ea26730d4232cab494b3173320e",
+  "actual_tested_merge_head": "a7cf677461ac6c79035e06b1b85e7191393c6865",
+  "source_sha256": "9a8ab7349deba1c1fd492b056457f808c0876bbd69ff7a0aaa5f783ddc64bc50",
+  "source_blob_oid": "7be8290af4f28792039680fe1eaf16cd937bdd5b",
+  "source_bytes_and_blob_match": true,
+  "artifact": {
+    "artifact_id": 12800160977,
+    "workflow_run": 40651126241,
+    "source_head": "42d8b386e61f2ea26730d4232cab494b3173320e",
+    "bytes": 77863,
+    "sha256": "e32bd568e32847b43e9e033c6607ca6512028a3b43be27009d6c50f958d5be04",
+    "size_GitHub_digest_CRC_paths_extracted_readback_verified": true
+  },
+  "native_phase": "SOURCE_COMPILED",
+  "valid_official_installer_and_compiler_signatures": true,
+  "compile_cases": [
+    {
+      "name": "VanCompilerRejectionProbe",
+      "expected_success": false,
+      "process_exit_code": 0,
+      "errors": 4,
+      "warnings": 0,
+      "fresh_binary": false,
+      "started_at_utc": "2026-10-28T07:37:09.1544401Z",
+      "finished_at_utc": "2026-10-28T07:37:10.1728062Z",
+      "log_sha256": "fdbcc0da5c717862d0332b1b672d3511bbe7925c21b5d8e0c6c1c199e9ec59a7"
+    },
+    {
+      "name": "VanBridgeEA",
+      "expected_success": true,
+      "process_exit_code": 1,
+      "errors": 0,
+      "warnings": 0,
+      "fresh_binary": true,
+      "started_at_utc": "2026-10-28T07:37:10.1763132Z",
+      "finished_at_utc": "2026-10-28T07:37:12.1651536Z",
+      "log_sha256": "35103a727a391192f7d526544103baa2e684cc69a7a2b93f45f72effea230964",
+      "binary_sha256": "856edb90f0aa2200ff1a774bb45e9521961fdf188ea2458bd28f87a55f3dff0b"
+    }
+  ],
+  "fresh_binary_sha256": "856edb90f0aa2200ff1a774bb45e9521961fdf188ea2458bd28f87a55f3dff0b",
+  "native_compiler_process_exit_retained": 1,
+  "interpretation": "Actual native MetaEditor produced fresh matching EA binary,0errors0warnings; deliberate invalid source refused. Native compiler process exit is1 as reported; job judged actual fresh log/binary. No live terminal/account/order/provider/device acceptance."
+}

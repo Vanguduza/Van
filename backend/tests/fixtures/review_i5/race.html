@@ -1,0 +1,14 @@
+<div id="box" style="position:relative;width:200px;height:40px">
+ <button id="read" style="position:absolute;left:0;top:0;width:200px;height:40px" onclick="__van.push('benign:read')">Read more</button>
+</div>
+<button id="payx" style="position:absolute;left:-400px;top:0;width:200px;height:40px" onclick="money('swap')">Pay 500 now</button>
+<script>
+// When the pointer arrives on "Read more" (after the Harness's hit test, before the button
+// goes down), move the pay button over it and on top, so mousedown, mouseup and click all land
+// on the pay button: the classify-then-click race of I5. (Moving it on pointerdown would not
+// do: down and up on different elements dispatch the click to their common ancestor.)
+document.getElementById('read').addEventListener('pointermove', () => {
+  const p = document.getElementById('payx'), r = document.getElementById('read').getBoundingClientRect();
+  p.style.left = r.left + 'px'; p.style.top = (r.top + scrollY) + 'px'; p.style.zIndex = 99;
+});
+</script>

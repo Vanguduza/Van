@@ -1,0 +1,34 @@
+.FF                                                                      [100%]
+=================================== FAILURES ===================================
+_ test_matching_display_names_do_not_allow_cross_currency_provider_or_realm_arithmetic[change1] _
+
+change = {'asset_ref': 'other-provider:asset:7'}
+
+    @pytest.mark.parametrize('change',[{'currency':'EUR'},{'asset_ref':'other-provider:asset:7'},
+        {'asset_ref':'same-provider:live:asset:7'}])
+    def test_matching_display_names_do_not_allow_cross_currency_provider_or_realm_arithmetic(change):
+        first=Money(100,2,'USD','provider:demo:asset:7')
+        other=Money(**({'minor_units':100,'scale':2,'currency':first.currency,'asset_ref':first.asset_ref}|change))
+>       with pytest.raises(UnitError,match='CONVERSION_REQUIRED'):first+other
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE UnitError
+
+trading/tests/test_exact_units.py:54: Failed
+_ test_matching_display_names_do_not_allow_cross_currency_provider_or_realm_arithmetic[change2] _
+
+change = {'asset_ref': 'same-provider:live:asset:7'}
+
+    @pytest.mark.parametrize('change',[{'currency':'EUR'},{'asset_ref':'other-provider:asset:7'},
+        {'asset_ref':'same-provider:live:asset:7'}])
+    def test_matching_display_names_do_not_allow_cross_currency_provider_or_realm_arithmetic(change):
+        first=Money(100,2,'USD','provider:demo:asset:7')
+        other=Money(**({'minor_units':100,'scale':2,'currency':first.currency,'asset_ref':first.asset_ref}|change))
+>       with pytest.raises(UnitError,match='CONVERSION_REQUIRED'):first+other
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE UnitError
+
+trading/tests/test_exact_units.py:54: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_exact_units.py::test_matching_display_names_do_not_allow_cross_currency_provider_or_realm_arithmetic[change1]
+FAILED trading/tests/test_exact_units.py::test_matching_display_names_do_not_allow_cross_currency_provider_or_realm_arithmetic[change2]
+2 failed, 1 passed in 0.66s

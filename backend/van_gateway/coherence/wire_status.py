@@ -29,6 +29,7 @@ COMMAND_RESULT: dict[str, OwnerWorkStatus] = {
     # The gateway took it and dispatched it. Not success — the audit's central confusion.
     "accepted": _W.WORKING,
     "in_flight": _W.WORKING,
+    "outcome_unknown": _W.UNKNOWN,
     # A4 needs a biometric proof before anything executes.
     "approval_required": _W.WAITING_ON_YOU,
     # A capability is down; the command did not run and the owner may want to retry.

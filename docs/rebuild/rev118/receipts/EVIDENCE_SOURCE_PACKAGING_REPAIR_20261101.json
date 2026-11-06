@@ -1,0 +1,98 @@
+{
+  "schema": "van.historical-evidence-packaging-repair/1",
+  "at_utc": "2026-11-01T06:24:25.026992+00:00",
+  "source_parent": "ca135eb7d8d3635d52b9e49d51eee8e9a870d3a1",
+  "authorization": "auth-20261022-owner-autonomous-candidate-build",
+  "scope": "Evidence naming/provenance and derived manifest only. No application, test/guard/assertion, protected-table owner, public action, native effect or installer edit.",
+  "actual_failed_ci": {
+    "run": 41279915954,
+    "job": 124769549315,
+    "head": "ca135eb7d8d3635d52b9e49d51eee8e9a870d3a1",
+    "tests": 258,
+    "passed": 257,
+    "failed": 1,
+    "errors": 0,
+    "skipped": 0,
+    "node": "tests/contracts/test_van_private_core_topology.py::test_only_private_core_modules_touch_the_protected_tables",
+    "cause": "Historical baseline_db_2728.py snapshot under raw evidence matched the unchanged active-source suffix/table guard. Failed hosted result retained; not relabelled green."
+  },
+  "actual_local_before": {
+    "failed": 1,
+    "passed": 0,
+    "exit": 1
+  },
+  "raw_source_discovery": {
+    "eligible_raw_source_artifacts": 6,
+    "protected_table_snapshot_candidates": [
+      "docs/rebuild/rev118/receipts/raw/native-family-reenrollment-20261101/van-reenrollment-recovery-evidence-20261101/baseline_db_2728.py"
+    ],
+    "only_that_snapshot_renamed": true,
+    "other_five_probe_or_instrumentation_sources_unchanged": true
+  },
+  "path_mapping": "docs/rebuild/rev118/receipts/EVIDENCE_SOURCE_PATH_MAPPING_20261101.json",
+  "mapping": [
+    {
+      "historical_recorded_path": "docs/rebuild/rev118/receipts/raw/native-family-reenrollment-20261101/van-reenrollment-recovery-evidence-20261101/baseline_db_2728.py",
+      "current_packaged_path": "docs/rebuild/rev118/receipts/raw/native-family-reenrollment-20261101/van-reenrollment-recovery-evidence-20261101/baseline_db_2728.py.txt",
+      "sha256_before": "7ba9ea1135da9068c388ae0901fb846854847f803a690bd82ce7c9ac83a61de5",
+      "sha256_after": "7ba9ea1135da9068c388ae0901fb846854847f803a690bd82ce7c9ac83a61de5",
+      "bytes": 132494,
+      "role": "HISTORICAL_2728_DATABASE_SOURCE_FOR_MIGRATION_SQL_IDENTITY",
+      "byte_changes": false
+    }
+  ],
+  "original_receipts_and_commands_rewritten": false,
+  "archive_integrity": {
+    "mapping": "docs/rebuild/rev118/receipts/EVIDENCE_SOURCE_PATH_MAPPING_20261101.json",
+    "old_path_absent": true,
+    "new_path_sha256": "7ba9ea1135da9068c388ae0901fb846854847f803a690bd82ce7c9ac83a61de5",
+    "original_raw_entries_verified": 356,
+    "application_and_test_source_pins_unchanged": 50,
+    "original_receipt_bytes_unchanged": true
+  },
+  "unchanged_topology_module": {
+    "passed": 57,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "guard_sha256": "b2e9c4a6160182db77b92f8bdaaf103549cb7385cbdb1f23abfa08185dd1f8fc",
+    "storage_audit_violations": 0
+  },
+  "application_test_evidence_reuse": "All50 reviewed application/test source pins and356 original raw entries remain byte-identical, resolved through explicit historical path map. No repeat of unaffected application suites.",
+  "current_ca135_ci_observation": "Five runs terminal/two running at capture. Main known failures: market-monitor packaging plus trusted-checker/DDS-key mandatory prerequisites. Backend-public/browser/Android/mutations still running; no success inferred. New exact-head CI required after genuine publication.",
+  "source_native_unit_acceptance": "NOT_ISSUED",
+  "raw_files": {
+    "docs/rebuild/rev118/receipts/raw/evidence-source-packaging-20261101/van-ca135-market-monitor-failure-luna-20261101.log": "ffcf8b29e1d1110c710ca87d373ffe4b459af3eb2f4814753f351c2485dcd018",
+    "docs/rebuild/rev118/receipts/raw/evidence-source-packaging-20261101/van-ca135-raw-source-discovery-inventory-20261101.json": "d1d43b10800290a19c4662e21ea8fa555cfe1d4464ee16acebc525349f8ff0f4",
+    "docs/rebuild/rev118/receipts/raw/evidence-source-packaging-20261101/van-ca135-evidence-packaging-integrity-20261101.json": "88ff2b643e820312ac627742a3ac020d5c946683d771ee68ca077f90f02b9df0",
+    "docs/rebuild/rev118/receipts/raw/evidence-source-packaging-20261101/van-ca135-packaging-repair-ci-observation-20261101.json": "16c9a43aa2221f9dd61be27269d798b6f50e45a49affc37832cfaa5f84a95ed1",
+    "docs/rebuild/rev118/receipts/raw/evidence-source-packaging-20261101/van-ca135-repair-observation-runs-20261101.jsons": "1b9890a28548a53911102235c21d5e239ced8acf56f990888f597b9a05831a6d",
+    "docs/rebuild/rev118/receipts/raw/evidence-source-packaging-20261101/van-ca135-repair-observation-jobs-20261101.jsons": "af66ab92a807b256e4a89fdc531fd78c8a0099ee1da7b73f3daa6d7a84aae5c5",
+    "docs/rebuild/rev118/receipts/raw/evidence-source-packaging-20261101/van-ca135-topology-before-r1-20261101/tests.xml": "ccdc497c7a5978aa4c690299737457faa2de21f4885734173c8631ade7225033",
+    "docs/rebuild/rev118/receipts/raw/evidence-source-packaging-20261101/van-ca135-topology-before-r1-20261101/storage-audit.json": "03b5b2afac2978cda8a845c9a6eec9e8d20b13abe2960e09fcc8f1fccbcc2cb7",
+    "docs/rebuild/rev118/receipts/raw/evidence-source-packaging-20261101/van-ca135-topology-before-r1-20261101/receipt.json": "ed089f56319179ad90a0b7da7e9ad727466b81a5fe9ff49cc29a3f213834e71c",
+    "docs/rebuild/rev118/receipts/raw/evidence-source-packaging-20261101/van-ca135-topology-before-r1-20261101/tests.log": "c83e6068ce4d482138a11195ab5ac04fe532e4f86f708a6d610bf5bbf6845e7d",
+    "docs/rebuild/rev118/receipts/raw/evidence-source-packaging-20261101/van-ca135-topology-after-r1-20261101/owned-temp-inventory.json": "a9731a94fd8a8cba04bcac1c1beadcb40e434b86ebd3748f502a287d06ac5e9f",
+    "docs/rebuild/rev118/receipts/raw/evidence-source-packaging-20261101/van-ca135-topology-after-r1-20261101/tests.xml": "1083befb0429f4f5d9fa9bfc140754efd2fd6d71e0f7a5c01e626f18a2118540",
+    "docs/rebuild/rev118/receipts/raw/evidence-source-packaging-20261101/van-ca135-topology-after-r1-20261101/storage-audit.json": "03b5b2afac2978cda8a845c9a6eec9e8d20b13abe2960e09fcc8f1fccbcc2cb7",
+    "docs/rebuild/rev118/receipts/raw/evidence-source-packaging-20261101/van-ca135-topology-after-r1-20261101/receipt.json": "ec58e9f4bd51d93f4f1f5de2666b33385d2e6360be07c4af3a03494228024bb7",
+    "docs/rebuild/rev118/receipts/raw/evidence-source-packaging-20261101/van-ca135-topology-after-r1-20261101/tests.log": "54468f1ebb85855cce924e6316f8796cea21cbc5c9e396e2815dc71fc1773071",
+    "docs/rebuild/rev118/receipts/raw/evidence-source-packaging-20261101/guards/workmap.log": "6e20f8f2172ee5c1d1fce0a0c754de3b77fe5a107aa568cdf51b6c0797a54037",
+    "docs/rebuild/rev118/receipts/raw/evidence-source-packaging-20261101/guards/consolidation.log": "d87b8fe5f7b2b4ca7312b9ba93c4e1aa24ae2301f775aa6f915d81572aec7870",
+    "docs/rebuild/rev118/receipts/raw/evidence-source-packaging-20261101/guards/mutation.log": "131959a4576e7b5a8ebd678f508cca5c1107c9e4cc15c27d3c22121e5ac1b299"
+  },
+  "canonical_guards": {
+    "workmap": {
+      "exit": 0,
+      "raw": "docs/rebuild/rev118/receipts/raw/evidence-source-packaging-20261101/guards/workmap.log"
+    },
+    "consolidation": {
+      "exit": 0,
+      "raw": "docs/rebuild/rev118/receipts/raw/evidence-source-packaging-20261101/guards/consolidation.log"
+    },
+    "mutation": {
+      "exit": 0,
+      "raw": "docs/rebuild/rev118/receipts/raw/evidence-source-packaging-20261101/guards/mutation.log"
+    }
+  }
+}

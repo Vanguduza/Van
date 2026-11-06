@@ -1,0 +1,71 @@
+{
+  "directory": "/tmp/van-recovery-auth-pg-20261101",
+  "at_utc": "2026-11-01T02:08:34.073579+00:00",
+  "files": [
+    {
+      "path": "test_recovery_and_its_domain_e0/native-owner-approval.sqlite",
+      "bytes": 1892352,
+      "sha256": "156455529291f350c9f6740c259529549807b0b54b27fb23c29f9a3cc7fef4f4"
+    },
+    {
+      "path": "test_original_control_cannot_c0/native-owner-approval.sqlite",
+      "bytes": 1892352,
+      "sha256": "306b121446dfade55d62cfabbd3ceeb3b6a68c400ac3752fde8173727664c5ec"
+    },
+    {
+      "path": "test_independent_native_connec0/native-owner-approval.sqlite",
+      "bytes": 1892352,
+      "sha256": "cd3236ad932cc3eddcb8a66f45fb83e8ac3900aca30044d857ec8d90616949c5"
+    },
+    {
+      "path": "test_exact_original_recovery_r0/native-owner-approval.sqlite",
+      "bytes": 1892352,
+      "sha256": "6cf2016a43113bd21f543b8fca3dc75cca85683bc8719d38aef6e22c3331cbcd"
+    },
+    {
+      "path": "test_control_does_not_become_a0/native-owner-approval.sqlite",
+      "bytes": 1892352,
+      "sha256": "5c9f1f4b2c91cf0848739d23debf64a75ee262fd7eb20603d26b01ad6ca3f197"
+    },
+    {
+      "path": "test_two_native_connections_at0/native-owner-approval.sqlite",
+      "bytes": 1892352,
+      "sha256": "3afead418dc0d4b03347e377d095598294e10398a77a521ad95976b41a9f5d96"
+    },
+    {
+      "path": "test_pending_original_wins_ove0/native-owner-approval.sqlite",
+      "bytes": 1892352,
+      "sha256": "b4878fef21e003f37f1f1a90e3dff265607f43bf257d50a17fbc76e06d8c2ebb"
+    },
+    {
+      "path": "test_nonexpired_but_not_yet_va0/native-owner-approval.sqlite",
+      "bytes": 1892352,
+      "sha256": "d4782e6cb18ffc66d28dc8c9b7a79589e85215a2586119e062c9eb1765780036"
+    },
+    {
+      "path": "test_expired_invalid_proof_can3/native-owner-approval.sqlite",
+      "bytes": 1892352,
+      "sha256": "c3690992d23f759e6c9a331751de04e84e8ebbb8da77f7b831c668ef4bb7b3cb"
+    },
+    {
+      "path": "test_expired_invalid_proof_can2/native-owner-approval.sqlite",
+      "bytes": 1892352,
+      "sha256": "42f96f5ca6dda37e4599426de4b6c6dc3aa341e86c05610dcb6451067bd727dc"
+    },
+    {
+      "path": "test_expired_invalid_proof_can1/native-owner-approval.sqlite",
+      "bytes": 1892352,
+      "sha256": "44c534cb52acbe5f5dd6f8a092643479b58f15bae95cf977cdbc2e240cfc9c36"
+    },
+    {
+      "path": "test_expired_invalid_proof_can0/native-owner-approval.sqlite",
+      "bytes": 1892352,
+      "sha256": "0205c9d784c4c7634a408d9c7dd261a01270c63dab7c8beb6035a29ec31185e3"
+    },
+    {
+      "path": "test_expired_first_delivery_is0/native-owner-approval.sqlite",
+      "bytes": 1892352,
+      "sha256": "28885b856dea302f11889bf02cc674d52d87a11e487f65c81d947fb5be62eeb6"
+    }
+  ]
+}

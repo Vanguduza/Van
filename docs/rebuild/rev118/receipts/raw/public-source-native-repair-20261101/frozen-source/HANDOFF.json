@@ -1,0 +1,108 @@
+{
+  "schema": "van.public-source-native-repair-review-handoff/1",
+  "at_utc": "2026-11-01T12:19:19.017310+00:00",
+  "state": "THREE_PATH_SOURCE_FROZEN_FOR_BOUNDED_INDEPENDENT_NATIVE_FAILURE_RECHECK_NOT_COMMITTED",
+  "base": "a5d63df4310ecda331aa5f6c6995ed46a42739f8",
+  "source_pins": {
+    "tools/rebuild/public_source_shards.py": "90e9e670940da327baace21335569a447f0d12e1b8aaed3061cd86fe55628837",
+    "tools/rebuild/backend_public_source.py": "f6cb4d2fdb4a661873c33fd10d0ab10e1fa59ef00be9ba3d82591a46bdbf72b5",
+    "tests/rebuild/test_public_source_shards.py": "ad15ef4db64ff1f3a06386af78b209e28bde8208d32632a6f41c5ac261f7db29"
+  },
+  "source_archive_sha256": "d2123b03dbe3f91c5e8a0ae9e63a1b811e1bf3a9d2dc3825827d37b5ce9c1d39",
+  "patch_sha256": "51c7b2298eea1934cbfd23a8899df58f607d020a777a4ccbe1594aba8219b0f0",
+  "archive_current_and_cached_applycheck": "PASS no index mutation",
+  "source_delta": [
+    "Capture original JSON serialization reference for every reporter write/fingerprint; do not alter application monkeypatches; true encode/write errors still raise",
+    "Strict pre-run bytecode refusal unchanged. Child reports cache candidates as UNVERIFIED; separate parent validates exact unchanged tracked source/header+full code graph, never executes/imports cache, records non-importable exact bytes and retires only hash-matching outputs absent at strict preflight",
+    "Full typed code graph/metadata comparison against fresh HEAD compilation accounts for legitimate frozenset marshal order/hash-seed differences; every code byte/constant/type/filename/position/exception-table field checked",
+    "Parent-generated cache artifact mandatory/hash-bound and independently reverified by aggregate; no source/config/data exception or test/child argv change",
+    "Freshness predicate includes new cache-evidence artifact so existing cache-only evidence cannot be overwritten"
+  ],
+  "completed_actual_proofs": {
+    "unchanged_real_case_baseline": {
+      "passed": 1,
+      "receipt": "/workspace/van-ci-shards-json-report-repair-20261101/before/receipt.json",
+      "source_test_sha256": "8c0caf3bc3c97cf48a43933b330714da030eb84c6362d21517539ad3e1ac3920"
+    },
+    "original_production_plugin_failure": "/workspace/van-ci-shards-json-report-repair-20261101/before/with-plugin.log",
+    "repaired_real_module": {
+      "assigned_passed": 18,
+      "phases": 54,
+      "exact_real_case": "setup/call/teardown allpassed",
+      "receipt": "/workspace/van-ci-shards-json-report-repair-20261101/permission-current/receipt.json"
+    },
+    "real_native_failure_named_module_caches": {
+      "modules": 11,
+      "assigned_fixture_cases": 2,
+      "phases": 6,
+      "receipt": "/workspace/van-ci-shards-json-report-repair-20261101/cache-current/receipt.json",
+      "actual_production_parent_artifact": "/workspace/van-ci-shards-json-report-repair-20261101/cache-current/production-plugin/generated-bytecode.json",
+      "notes": "Compiles exact named native failure modules using fresh child; parent independently validates/archives without importing/executing cached code."
+    },
+    "final_existing_and_new_instrument_guards": {
+      "passed": 89,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "receipt": "/workspace/van-ci-shards-json-report-repair-20261101/instrument-and-cache-regression-final/receipt.json",
+      "junit": "/workspace/van-ci-shards-json-report-repair-20261101/instrument-and-cache-regression-final/tests.xml",
+      "storage_audit": "/workspace/van-ci-shards-json-report-repair-20261101/instrument-and-cache-regression-final/storage-audit.json",
+      "source3_before_after_exact": true,
+      "scope": "Actual tiny subprocesses plus protocol negatives; no full native qualification."
+    },
+    "coverage_notes": "Real module/cache production receipts precede only the adjacent fresh-output existence predicate addition; callback/cache logic and helper pin unchanged. Final89 rerun explicitly covers that stronger freshness guard. Do not sum overlapping scopes."
+  },
+  "required_refusal_controls": [
+    "Any preexisting repository cache, even valid exact-source cache",
+    "Untracked-source/orphan cache; wrong interpreter/flags/magic/timestamp; unchanged valid header with forged code body; tracked source drift",
+    "Different hash seeds/frozenset representation preserve exact typed semantic code graph; checked/unchecked hash headers and optimization-level/source match",
+    "True reporter encoding/storage failures propagate; existing actual teardown and resealed badphase/collection/source/nodeID/skip/partial controls remain fail-closed",
+    "All original untracked/ignored config/plugin/data/bytecode injection refusals retained"
+  ],
+  "native_failed_run": {
+    "head": "a5d63df4310ecda331aa5f6c6995ed46a42739f8",
+    "main_run": 41302444387,
+    "state": "TERMINAL_FAILED_AND_UNQUALIFIED",
+    "worker_jobs": {
+      "0": 124836027095,
+      "1": 124836027051,
+      "2": 124836027077,
+      "3": 124836027117
+    },
+    "worker_conclusions": [
+      "success",
+      "failure",
+      "failure",
+      "failure"
+    ],
+    "failures": {
+      "1": "Source identity rejected generated backend private-core/source caches",
+      "2": "CALL reporter used monkeypatched json.dumps; nestedJSON RecursionError; not evidence of failed domain assertion",
+      "3": "Source identity rejected generated tools/runtime/preflight_owner_core cache"
+    },
+    "aggregate_job": 124839120800,
+    "aggregate": "FAILED; no summary/fullunion qualification",
+    "official_aggregate_artifact": {
+      "id": 13082129226,
+      "sha256": "8b4ed5ead0521a353c8d40dbf812642175c3e0d496feb8f128d4bb315a02754f",
+      "metadata": "/workspace/van-ci-shards-json-report-repair-20261101/ARTIFACT_METADATA.json",
+      "extracted_raw": "/workspace/van-ci-shards-json-report-repair-20261101/native-failed-aggregate"
+    },
+    "partial_evidence": "/workspace/van-ci-shards-json-report-repair-20261101/NATIVE_TERMINAL_PARTIAL_EVIDENCE.json",
+    "observed_partial": "Worker0 complete433 (429pass4skip),worker1 complete2028 (1skip),worker2 complete920 of1845 (925incomplete/unknown; JUnit1error),worker3 complete1684. No recorded badphase events; this does NOT qualify incomplete/unexecuted cases or failed source provenance. Separate media198 actual JUnit0fail/error/skip. All originals remain failed.",
+    "timing": "Exact job/step timestamps retained in terminal metadata; no performance/speed claim from failed run or worker0 alone.",
+    "watch": "Original55878 reaped once after terminal watch1; no duplicate/restart/signals. NATIVE_WATCH_REAP.json retained."
+  },
+  "transport_output_correction": "/workspace/van-ci-shards-json-report-repair-20261101/ARTIFACT_METADATA.json",
+  "limits": [
+    "No application/Android/old assertion/native authority/workflow/credential/selection/skip/corpus edits",
+    "Bounded independent SOURCE review only; no native/unit/provider/production/device/signing/BG001 acceptance",
+    "Genuine corrective commit/required4fd baseline/normal publication and fresh native exact-head4worker execution still required; original run failed."
+  ],
+  "remaining": [
+    "Bounded independent recheck of three native tooling counterexamples and allowed/refused cache output boundary",
+    "Final docs/manifest/genuinehook normalcommit/required committed4fd verify/normalpush/readback",
+    "Actual future4worker/control/media/JUnit union+timing qualification; all prior failures kept"
+  ],
+  "owned_jobs": "No local test/controller active. Original55878 terminal/reaped. No Gradle used by integration; peer queue lane owns its current cache tasks."
+}

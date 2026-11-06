@@ -1,0 +1,15 @@
+BAD  control: unbroken                                          fuzz CRASHED (MandateError: fail-closed by exception)
+BAD  break: multiplier clamp only (masked by sizing re-check)   fuzz CRASHED (MandateError: fail-closed by exception)
+OK   break: multiplier clamp + sizing re-check + final re-check fuzz CRASHED (MandateError: fail-closed by exception)
+BAD  break: mandate per-trade clamp only (masked by final re-check) fuzz CRASHED (MandateError: fail-closed by exception)
+OK   break: mandate per-trade clamp + final re-check            fuzz CRASHED (MandateError: fail-closed by exception)
+OK   break: portfolio heat check                                fuzz CRASHED (MandateError: fail-closed by exception)
+OK   break: currency-leg check                                  fuzz CRASHED (MandateError: fail-closed by exception)
+OK   break: duplicate-intent latch                              fuzz CRASHED (MandateError: fail-closed by exception)
+OK   break: kill-switch check                                   fuzz CRASHED (MandateError: fail-closed by exception)
+OK   break: stale-data check                                    fuzz CRASHED (MandateError: fail-closed by exception)
+OK   break: account-verified check                              fuzz CRASHED (MandateError: fail-closed by exception)
+OK   break: order-sending-mode check                            fuzz CRASHED (MandateError: fail-closed by exception)
+OK   break: stop-required check                                 fuzz CRASHED (MandateError: fail-closed by exception)
+
+10/13 probes behaved as expected

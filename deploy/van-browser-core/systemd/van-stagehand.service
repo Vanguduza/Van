@@ -1,0 +1,71 @@
+[Unit]
+Description=VAN Stagehand semantic browser worker (van-browser-core)
+Documentation=file:///opt/van-browser-core/README.md
+After=network-online.target van-browser-harness.service van-browser-core-firewall.service
+Wants=network-online.target
+Requires=van-browser-harness.service
+# Unit G12: the zone firewall applies to this user too (no direct egress).
+BindsTo=van-browser-core-firewall.service
+# Owner decision 2026-09-29 §1: production Stagehand runs only in van-browser-core.
+ConditionPathExists=/etc/van-browser-core/zone
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Type=simple
+# Review I8 MINOR-4: Stagehand has its own user. As van-browser it could read the lease-fence
+# key and reach the egress proxy's control socket, and so forge the gateway's MACs. It is in
+# group van-browser only to read the Harness's per-alias CDP endpoint files (0640); the fence
+# key is 0400 van-browser, the control socket belongs to group van-egress-ctl.
+User=van-stagehand
+Group=van-stagehand
+SupplementaryGroups=van-browser
+EnvironmentFile=/etc/van-browser-core/runtime.env
+# Its model-provider secret lives in its own secret root, not beside the fence key.
+Environment=VAN_BROWSER_SECRET_ROOT=/var/lib/van-stagehand/secrets
+# Unit G12: the firewall allows this user no direct TCP egress; its model-provider traffic
+# goes through the egress proxy's service tunnel (CONNECT to VAN_EGRESS_SERVICE_ALLOW only).
+# Whether Stagehand 4.1.0's HTTP client honours these variables is UNVERIFIED; Stagehand stays
+# PRODUCTION_DISABLED regardless.
+Environment=HTTPS_PROXY=http://127.0.0.1:9149 NODE_USE_ENV_PROXY=1
+WorkingDirectory=/opt/van-browser-core/runtime
+ExecStartPre=/usr/bin/grep -qx van-browser-core /etc/van-browser-core/zone
+ExecStart=/usr/bin/node /opt/van-browser-core/runtime/stagehand_service.mjs
+Restart=on-failure
+RestartSec=5
+TimeoutStartSec=45
+TimeoutStopSec=15
+
+# Stagehand may contact only the configured model provider (egress allowlist is a
+# provisioning gate), shares no shell, raw cookie or generic CDP HTTP surface with
+# Hermes/Gateway, and holds no credential of another trust zone
+# (deploy/van-browser-core/zone.json).
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictNamespaces=true
+LockPersonality=true
+MemoryDenyWriteExecute=false
+CapabilityBoundingSet=
+AmbientCapabilities=
+UMask=0077
+ReadWritePaths=/var/lib/van-stagehand
+ReadOnlyPaths=/opt/van-browser-core/runtime /etc/van-browser-core/runtime.env /run/van-browser-core
+InaccessiblePaths=-/var/lib/van-browser-core -/var/lib/van-browser-egress -/run/van-browser-egress
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+
+CPUWeight=20
+IOWeight=20
+MemoryAccounting=true
+CPUAccounting=true
+TasksAccounting=true
+MemoryMax=1536M
+TasksMax=384
+
+[Install]
+WantedBy=multi-user.target

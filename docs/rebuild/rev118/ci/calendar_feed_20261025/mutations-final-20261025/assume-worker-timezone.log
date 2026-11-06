@@ -1,0 +1,28 @@
+.FF.....................                                                 [100%]
+=================================== FAILURES ===================================
+_ test_naive_release_time_is_rejected_instead_of_using_the_worker_timezone[_parse_ms0] _
+
+parser = <function _parse_ms at 0x7f1ff15e2c00>
+
+    @pytest.mark.parametrize('parser',[_parse_ms,recorder._parse_ms])
+    def test_naive_release_time_is_rejected_instead_of_using_the_worker_timezone(parser):
+>       with pytest.raises(ValueError):parser('2026-10-14T12:30:00')
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_calendar_feed_boundaries.py:24: Failed
+_ test_naive_release_time_is_rejected_instead_of_using_the_worker_timezone[_parse_ms1] _
+
+parser = <function _parse_ms at 0x7f1ff1475300>
+
+    @pytest.mark.parametrize('parser',[_parse_ms,recorder._parse_ms])
+    def test_naive_release_time_is_rejected_instead_of_using_the_worker_timezone(parser):
+>       with pytest.raises(ValueError):parser('2026-10-14T12:30:00')
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_calendar_feed_boundaries.py:24: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_calendar_feed_boundaries.py::test_naive_release_time_is_rejected_instead_of_using_the_worker_timezone[_parse_ms0]
+FAILED trading/tests/test_calendar_feed_boundaries.py::test_naive_release_time_is_rejected_instead_of_using_the_worker_timezone[_parse_ms1]
+2 failed, 22 passed in 0.39s

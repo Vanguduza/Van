@@ -1,0 +1,367 @@
+{
+  "schema": "van.rebuild.provider-original-entry-deadline-source/1",
+  "source_preimage": "3444ca5b46acff617e4910d34c785febec169595",
+  "paths": {
+    "trading/vati/execution/ctrader/transport.py": {
+      "preimage_sha256": "68700d636673024de4d4aec67d9a1be226d241dbf4e46efdddbab68e6fc24a6f",
+      "source_sha256": "56adbac16a2a0f686b8bb20530212a4e1bb04ff3e4bc226679e2ce001aefe01c"
+    },
+    "trading/vati/execution/ctrader/adapter.py": {
+      "preimage_sha256": "55da5907f712125124d5eaaa8dd6b9c4757b10b44ed6b2b853cab72424a62cc1",
+      "source_sha256": "2b24f20ded09391dcaad66863648807069667f4fb4d67d2b0b51ce8e7b53ea97"
+    },
+    "trading/vati/execution/deriv.py": {
+      "preimage_sha256": "8e78bc67c660ad026fe00f5606b822694a0bf7be9352003f4e6122f8c9adc1e9",
+      "source_sha256": "6edc0cec416712dbb961495b4f64079afe6114397f58c03cbf434815ee5e24a6"
+    },
+    "trading/vati/execution/transports/deriv_ws.py": {
+      "preimage_sha256": "23853c3b511a11166bd73a2107817442b9d7fbd77a361f106c5223a5fd5fbafd",
+      "source_sha256": "d174a2201d2c5e963663dd11659326a0cfd3472c154c6a94c9476936b4bbf783"
+    },
+    "trading/vati/execution/router.py": {
+      "preimage_sha256": "e8ea100c8e14e7ed3dc2c28a994e1cf317ddcff3b37495cc37eecff72ddbc3f1",
+      "source_sha256": "a891d9034fe3da7dc0c09092f9f8d28672c4934696a9d8bdaa0c58ea014c7925"
+    },
+    "trading/vati/execution/entry_deadline.py": {
+      "preimage_sha256": null,
+      "source_sha256": "ad8a81298a364969a9ae29935f26f5044182b1e7199f6c356d0bc00499dfb2c7"
+    },
+    "trading/tests/test_provider_entry_deadline.py": {
+      "preimage_sha256": null,
+      "source_sha256": "d6ead115f342ce5a713b840bb9b679dced2282f40d91908a65996398af0b5d4e"
+    }
+  },
+  "original_reproduction": {
+    "path": "/tmp/van-provider-entry-deadline-before.xml",
+    "sha256": "ddc8d6b038d4537371d51fb8e2e1f89651d14166f542c9c704af48035fbdee27",
+    "tests": 8,
+    "passed": 5,
+    "failures": [
+      {
+        "name": "test_ctrader_expiry_during_final_send_lock_prevents_any_native_write",
+        "message": "AssertionError: expired entry reached the actual native framed send\nassert ('FILLED' == 'REJECTED'\n  \n  - REJECTED\n  + FILLED)"
+      },
+      {
+        "name": "test_deriv_expiry_during_native_preparation_never_sends_the_buy[authorize]",
+        "message": "AssertionError: expired grant reached native buy\nassert ('FILLED' == 'REJECTED'\n  \n  - REJECTED\n  + FILLED)"
+      },
+      {
+        "name": "test_deriv_expiry_during_native_preparation_never_sends_the_buy[proposal]",
+        "message": "AssertionError: expired grant reached native buy\nassert ('FILLED' == 'REJECTED'\n  \n  - REJECTED\n  + FILLED)"
+      }
+    ],
+    "errors": 0,
+    "skipped": 0
+  },
+  "reviewed_baseline": {
+    "path": "/tmp/van-provider-deadline-fault-results/reviewed-baseline.xml",
+    "sha256": "e067a7c4a9bf2c3ba0195cf63af54f740aff2a6882184e5ea932c6a087cafe6a",
+    "tests": 41,
+    "passed": 41,
+    "failures": [],
+    "errors": 0,
+    "skipped": 0
+  },
+  "broader_attempt": {
+    "path": "/tmp/van-provider-entry-deadline-r8.xml",
+    "sha256": "f0541b42727b2375d99c3f2338ea95c72b75a4acd2bc1856d53c0ceaa6b551f9",
+    "tests": 188,
+    "passed": 187,
+    "failures": [
+      {
+        "name": "test_account_mutation_cannot_overtake_checked_native_buy",
+        "message": "RuntimeError: can't start new thread"
+      }
+    ],
+    "errors": 0,
+    "skipped": 0
+  },
+  "broader_attempt_limitation": "187 pass; one original Deriv concurrency test could not start its second native thread. No product assertion failed. A distinct single-test retry could not start its first thread; no pass claimed.",
+  "concurrency_retry": {
+    "path": "/tmp/van-provider-entry-deadline-concurrency-retry.xml",
+    "sha256": "8e9edbecd98a72cd3fd0c008c3a156b6735d007afb2b0e5fcf11b85665de4774",
+    "tests": 1,
+    "passed": 0,
+    "failures": [
+      {
+        "name": "test_account_mutation_cannot_overtake_checked_native_buy",
+        "message": "RuntimeError: can't start new thread"
+      }
+    ],
+    "errors": 0,
+    "skipped": 0
+  },
+  "earlier_focused": {
+    "path": "/tmp/van-provider-entry-deadline-r6.xml",
+    "sha256": "14cbe72a44bb090a769e03845626e0bb2665da35e87ea4d6769e36d54ebe3bf5",
+    "tests": 137,
+    "passed": 137,
+    "failures": [],
+    "errors": 0,
+    "skipped": 0
+  },
+  "semantic_faults": [
+    {
+      "name": "bounded-deriv-mixed-operation-admitted-final",
+      "path": "trading/vati/execution/transports/deriv_ws.py",
+      "before": "if len(operations) != 1 or set(msg) - fields[next(iter(operations))]:",
+      "after": "if len(operations) != 1:",
+      "expected": "test_bounded_deriv_primitive_refuses_mixed_or_nonentry_operations_before_connection",
+      "source_sha256": "d174a2201d2c5e963663dd11659326a0cfd3472c154c6a94c9476936b4bbf783",
+      "fault": {
+        "tests": 41,
+        "failures": [
+          {
+            "name": "test_bounded_deriv_primitive_refuses_mixed_or_nonentry_operations_before_connection[msg0]",
+            "message": "vati.execution.transports.deriv_ws.DerivWsError: Deriv websocket connect failed"
+          }
+        ],
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "eb63dfe3bbf3ac0b60c0a01c9183ef647d260a9d14889a8f6b7364747810208c"
+      },
+      "restored": {
+        "tests": 41,
+        "failures": [],
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "18e96535e5eca50008de9756e72433343924602a1ff4001cff3e8b45f27a3917"
+      },
+      "caught": true,
+      "restored_pass": true
+    },
+    {
+      "name": "clock-bool-admitted-as-money-authority-final",
+      "path": "trading/vati/execution/entry_deadline.py",
+      "before": "type(now_ms) is not int",
+      "after": "not isinstance(now_ms,int)",
+      "expected": "test_unqualified_current_clock_cannot_authorize_native_entry",
+      "source_sha256": "ad8a81298a364969a9ae29935f26f5044182b1e7199f6c356d0bc00499dfb2c7",
+      "fault": {
+        "tests": 41,
+        "failures": [
+          {
+            "name": "test_unqualified_current_clock_cannot_authorize_native_entry[ctrader-True]",
+            "message": "AssertionError: assert ('FILLED' == 'REJECTED'\n  \n  - REJECTED\n  + FILLED)"
+          },
+          {
+            "name": "test_unqualified_current_clock_cannot_authorize_native_entry[deriv-True]",
+            "message": "AssertionError: assert ('FILLED' == 'REJECTED'\n  \n  - REJECTED\n  + FILLED)"
+          }
+        ],
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "06b231c0f132b58c3d0d470849433b3f3a77dae29fe641cab07e5257fcf9cd68"
+      },
+      "restored": {
+        "tests": 41,
+        "failures": [],
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "3cf9655cedd1774dda8958b1aec7eebaef0fec8058a0de49d51ba8bfb940fd72"
+      },
+      "caught": true,
+      "restored_pass": true
+    },
+    {
+      "name": "ctrader-lost-write-rewritten-as-refusal-final",
+      "path": "trading/vati/execution/ctrader/adapter.py",
+      "before": "return self._unknown(now_ms,\"native entry reply unavailable; reconcile original before retrying\",cmd=cmd)",
+      "after": "return rej(\"native entry reply unavailable\")",
+      "expected": "test_ctrader_lost_response_after_native_write",
+      "source_sha256": "2b24f20ded09391dcaad66863648807069667f4fb4d67d2b0b51ce8e7b53ea97",
+      "fault": {
+        "tests": 41,
+        "failures": [
+          {
+            "name": "test_ctrader_lost_response_after_native_write_is_unknown_not_a_new_refusal",
+            "message": "AssertionError: assert ('REJECTED' == 'UNKNOWN'\n  \n  - UNKNOWN\n  + REJECTED)"
+          }
+        ],
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "91dce3c270505de3cf56102f26a6ff508ed82be5367bcf6ea0b6574550526dae"
+      },
+      "restored": {
+        "tests": 41,
+        "failures": [],
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "5271ea8d7ccbe2f8457dc7fd885b666389fa4093fa724207beb84e59414944bf"
+      },
+      "caught": true,
+      "restored_pass": true
+    },
+    {
+      "name": "ctrader-removes-last-write-check-final",
+      "path": "trading/vati/execution/ctrader/transport.py",
+      "before": "                require_entry_deadline(expires_at_ms, clock)",
+      "after": "                pass",
+      "expected": "test_ctrader_expiry_during_final_send_lock",
+      "source_sha256": "56adbac16a2a0f686b8bb20530212a4e1bb04ff3e4bc226679e2ce001aefe01c",
+      "fault": {
+        "tests": 41,
+        "failures": [
+          {
+            "name": "test_ctrader_expiry_during_final_send_lock_prevents_any_native_write",
+            "message": "AssertionError: expired entry reached the actual native framed send\nassert ('FILLED' == 'REJECTED'\n  \n  - REJECTED\n  + FILLED)"
+          },
+          {
+            "name": "test_ctrader_expiry_during_native_transport_connect_is_also_checked",
+            "message": "AssertionError: assert ('FILLED' == 'REJECTED'\n  \n  - REJECTED\n  + FILLED)"
+          }
+        ],
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "09c434520328defc0fce7a405f4b1b20db3b27d89e35701482309873482dcfea"
+      },
+      "restored": {
+        "tests": 41,
+        "failures": [],
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "940b5bd05333d344d17803a14f91255efd16316549428aaf65c3835ecbba56ad"
+      },
+      "caught": true,
+      "restored_pass": true
+    },
+    {
+      "name": "deriv-native-buy-loss-rewritten-as-refusal-final",
+      "path": "trading/vati/execution/deriv.py",
+      "before": "        except EntryNotSent as exc:\n            return rej(str(exc))\n\n        b = buy.get(\"buy\")",
+      "after": "        except VenueUnavailable as exc:\n            return rej(str(exc))\n\n        b = buy.get(\"buy\")",
+      "expected": "test_deriv_lost_bounded_buy_reply",
+      "source_sha256": "6edc0cec416712dbb961495b4f64079afe6114397f58c03cbf434815ee5e24a6",
+      "fault": {
+        "tests": 41,
+        "failures": [
+          {
+            "name": "test_deriv_lost_bounded_buy_reply_remains_uncertain_and_is_never_replayed",
+            "message": "Failed: DID NOT RAISE VenueUnavailable"
+          }
+        ],
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "5ed15911784dd81b38f5bec6bcc1d2ec8c374fa675433c6b8a0536260d4fb699"
+      },
+      "restored": {
+        "tests": 41,
+        "failures": [],
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "280eed56d65ccfb75a19500aaf3592adbb623d6cb2d069adffb7e8b80059def7"
+      },
+      "caught": true,
+      "restored_pass": true
+    },
+    {
+      "name": "deriv-removes-post-auth-financial-check-v2-final",
+      "path": "trading/vati/execution/transports/deriv_ws.py",
+      "before": "            require_entry_deadline(expires_at_ms,clock)\n        try:\n            self._ws.send(wire)",
+      "after": "            pass\n        try:\n            self._ws.send(wire)",
+      "expected": "test_deriv_expiry_during_buy_reauthorization",
+      "source_sha256": "d174a2201d2c5e963663dd11659326a0cfd3472c154c6a94c9476936b4bbf783",
+      "fault": {
+        "tests": 41,
+        "failures": [
+          {
+            "name": "test_deriv_expiry_during_buy_reauthorization_is_checked_at_the_actual_financial_write",
+            "message": "AssertionError: assert ('FILLED' == 'REJECTED'\n  \n  - REJECTED\n  + FILLED)"
+          }
+        ],
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "1d9cfa970c5c737233ef445376caa60169dc41de95d7a87ff6e400a0bfca8d0f"
+      },
+      "restored": {
+        "tests": 41,
+        "failures": [],
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "531a17c3e6fd805852f33e34f541c5327204b7405b410af2b6740fe6c2bdf189"
+      },
+      "caught": true,
+      "restored_pass": true
+    },
+    {
+      "name": "router-drops-ctrader-original-lifetime-final",
+      "path": "trading/vati/execution/router.py",
+      "before": "(Mt5BridgeAdapter,Mt5PullAdapter,CtraderAdapter,DerivAdapter)",
+      "after": "(Mt5BridgeAdapter,Mt5PullAdapter,DerivAdapter)",
+      "expected": "test_actual_router_binds_ctrader_mandate",
+      "source_sha256": "a891d9034fe3da7dc0c09092f9f8d28672c4934696a9d8bdaa0c58ea014c7925",
+      "fault": {
+        "tests": 41,
+        "failures": [
+          {
+            "name": "test_actual_router_binds_ctrader_mandate_and_original_quote_through_wire_dispatch[False]",
+            "message": "assert None == ((1800000000 * 1000) + 101)"
+          },
+          {
+            "name": "test_actual_router_binds_ctrader_mandate_and_original_quote_through_wire_dispatch[True]",
+            "message": "assert None == ((1800000000 * 1000) + 101)"
+          }
+        ],
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "7ea77ec787dd3539aa26a23439791160c836c7781293ab7b685f59cdd7b23dbd"
+      },
+      "restored": {
+        "tests": 41,
+        "failures": [],
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "67bf822ea20e15b38de9213c0eb978c394060295136f98748bdb5a4087ca4419"
+      },
+      "caught": true,
+      "restored_pass": true
+    }
+  ],
+  "oracle_correction": {
+    "original_survivor": {
+      "name": "deriv-removes-post-auth-check",
+      "path": "trading/vati/execution/transports/deriv_ws.py",
+      "before": "            require_entry_deadline(expires_at_ms,clock)\n        try:\n            self._ws.send(wire)",
+      "after": "            pass\n        try:\n            self._ws.send(wire)",
+      "expected": "test_deriv_expiry_during_native_preparation_never_sends_the_buy[authorize]",
+      "source_sha256": "35b2685b8955fe5a4a1f840eb67e53750a37825a821697ab29d5531017c715f3",
+      "fault": {
+        "tests": 36,
+        "failures": [],
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "e74d79f0453326e930b48fb9f92b7634ab533ad7b3334e9c479778effe6c9e5b"
+      },
+      "restored": {
+        "tests": 36,
+        "failures": [],
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "bac127fc9377b73f6ee58b2bb828f0430aa2d4e830629cfee1306296c04ae19d"
+      },
+      "caught": false,
+      "restored_pass": true
+    },
+    "resolution": "Original auth-before-proposal test did not exercise reauthorization inside buy. Added actual token-fingerprint invalidation after proposal and a second native authorization, delayed that authorization, then proved no native buy. Final fault is caught. Original survivor retained, not counted as caught."
+  },
+  "other_attempts": [
+    "r1: original legacy lost-buy test correctly required VenueUnavailable; restored original exception behavior.",
+    "r3/r4: new controlled socket fixture omitted connected heartbeat metadata and supplied a partial quantity. Corrected the fixture; original assertions unchanged.",
+    "r7: nonexistent test file supplied; pytest collection aborted before any test."
+  ],
+  "limits": [
+    "Last local financial write only; no claim of server receipt before expiry or cancellation of an accepted effect.",
+    "No native broker, funding permission, deployment, F15, BG-001, profit or S24 acceptance.",
+    "Deriv native funding/economics remain unsupported; this change does not grant entry authority.",
+    "Fresh hosted full trading qualification pending."
+  ],
+  "integrated_root": {
+    "tests": 41,
+    "passed": 41,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "xml_sha256": "2c62ee4404f624752ea58a29225b9ca3ddfef06797abb0ede2a345cd0555571d"
+  },
+  "verification_resource_attempt": "First consolidation verifier invocation reported a changed package after its git diff process failed to start threaded lstat. This is a resource failure, not evidence of changed admitted bytes. Rerun with core.preloadIndex=false; preserve archive/tree equality checks."
+}

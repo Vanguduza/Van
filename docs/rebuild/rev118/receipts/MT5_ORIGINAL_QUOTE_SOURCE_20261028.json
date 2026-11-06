@@ -1,0 +1,86 @@
+{
+  "schema": "van.rev118.mt5-original-quote-source/1",
+  "source_parent": "28705ca89e767e7c6193401410d36b0988f5212b",
+  "observed_at_utc": "2026-10-28T10:57:02.653735+00:00",
+  "source_files_sha256": {
+    "deploy/van-trading-core/mql5/VanBridgeEA.mq5": "72865771fbfad856df5613057f88b8a5729bac219697a5ea4aa9271b2563e7f1",
+    "deploy/van-trading-core/windows/mt5_worker/README.md": "5e7e13e8f0d24bf755b4d490a39095ac29c0153f691a425f0b3fda0816efb31d",
+    "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py": "3490a2f177843addade16b1e4a71877c2d79ae2f587609b36f1d18a63bc4f699",
+    "trading/tests/test_mt5_quote_book.py": "0763d37060f4b6a5c06d8b833357d7377d1d57860ec3387943af5e4ab6d28563",
+    "trading/tests/test_mt5_quote_book_postgres.py": "ee267dcdff98aac34d003630b11da7e2c0a556b2064c10be0fdbe27a03d3353d",
+    "trading/tests/test_mt5_quote_worker.py": "dead0d67e887ecc813cd6029c94cf640fa03df9604fd28730c653e39f159d770",
+    "trading/tests/test_mt5_quotes.py": "4ce4bc8b4c5c0f57e7e6b1e1235bde849ea57d0f2bf313f667973b04ee704e59",
+    "trading/tests/test_mt5_quotes_pull.py": "f06dd45b62e82bb336569e044aafc87407ff33e1cdcabe53b5bb51f18d22e242",
+    "trading/vati/execution/mt5_bridge.py": "2fd503241040dadc5190deef3a98b2b1aecc728c0f74ba1811ec7e269a2052f9",
+    "trading/vati/execution/mt5_pull.py": "f755f57c70cbfec515f798e5dd651ab57af2d8eea91a6b48d2f58724d5aa0c90",
+    "trading/vati/execution/mt5_quotes.py": "c85b90b78e350675b97fc5b955844d218727f6c3f883c9eb13b7b3b72eee886d",
+    "trading/vati/market_data/mt5_quote_book.py": "f426445c5218e6c5fa9ae2fd96eadb120a9111bbff3f65eeefd17875b44897fc",
+    "trading/vati/market_data/mt5_symbol_book.py": "910c3eccf6fad3449e34b375809b87ba677917d4c1a29d35d40c48a9c8105ce9"
+  },
+  "implementation": "Original MT5 quote snapshots now flow through both signed SDK and authenticated EA/public adapters and the existing original-account-query SQL owner. Both native account and contract observations are retained around tick access. Original bid/ask/last, native full-tick time, subscription/delay facts and exact integer volume remain explicit; last-trade volume is not lots or genuine depth. Causal view distinguishes missing ticks/sides/time, inconsistent/future time, crossed prices, unverified subscription/entitlement, delayed and stale data. It never invents native time from local receipt time or refreshes history on replay. Original symbol receipt shape and data-kind isolation remain compatible through shared SQL ownership. Final full trading plus selected backend HTTP/schema/scope qualification:5069pass0skip/fail/audit,every call once,all1241 pinned input hashes match,ownedPostgreSQL independently absent.57focused source passes overlap. New modified-EA compilation PENDING exact-source hosted evidence; parent symbol EA compilation is retained separately.0formal/native/production/S24acceptance issued.",
+  "source_result": {
+    "actual_outer_exit": 0,
+    "actual_inner_exit": 0,
+    "passed": 5069,
+    "skipped": 0,
+    "audit_violations": 0,
+    "unique_call_identities_once": 5069,
+    "pinned_source_inputs_matched": 1241,
+    "owned_postgres_independently_absent": true,
+    "includes_actual_worker_EA_README": true,
+    "raw": "ci/mt5_quotes_20261028/sql_final"
+  },
+  "native_EA_compilation": "PENDING_EXACT_MODIFIED_SOURCE_HOSTED_JOB",
+  "parent_native_compilation": {
+    "schema": "van.native-mql-independent-artifact-readback/1",
+    "requested_head": "28705ca89e767e7c6193401410d36b0988f5212b",
+    "actual_tested_merge_head": "060ddd83d327f5870bf79eb628da7b60b293c1a7",
+    "source_sha256": "5e4410fbada91c9f7c0b0f65f7113635aa0dfdab751e166bedb6686980be84df",
+    "source_blob_oid": "468fa4713b9c5e967b702ac469b91d667590a09d",
+    "source_bytes_and_blob_match": true,
+    "artifact_id": 12808306375,
+    "workflow_run": 40670810371,
+    "original_archive_bytes": 85052,
+    "original_archive_sha256": "95304e0a4841c80f94cf99c49209475bc4a73f601bd68b408e863eb11cd12ec0",
+    "native_phase": "SOURCE_COMPILED",
+    "compile_cases": [
+      {
+        "name": "VanCompilerRejectionProbe",
+        "expected_success": false,
+        "process_exit_code": 0,
+        "errors": 4,
+        "warnings": 0,
+        "fresh_binary": false,
+        "started_at_utc": "2026-10-28T10:17:29.8814048Z",
+        "finished_at_utc": "2026-10-28T10:17:30.9532160Z",
+        "log_sha256": "a59f24b185d27906f0d2b4185624284516f2fe2a5beeb6fe9eedf47d7c63df53"
+      },
+      {
+        "name": "VanBridgeEA",
+        "expected_success": true,
+        "process_exit_code": 1,
+        "errors": 0,
+        "warnings": 0,
+        "fresh_binary": true,
+        "started_at_utc": "2026-10-28T10:17:30.9566856Z",
+        "finished_at_utc": "2026-10-28T10:17:33.1987267Z",
+        "log_sha256": "5b7f1df3dc202b705effae791c16e3c60b2d2e62d534096037b79200fc82f3b8",
+        "binary_sha256": "553aec1aeea6a57e397b2f7f6dcd0b793585eb3ea01034d1b873601451e3deb0"
+      }
+    ],
+    "financial_native_device_acceptance": "NOT_ISSUED"
+  },
+  "formal_acceptances_issued": 0,
+  "source_authorizations": [
+    "auth-20261022-owner-autonomous-candidate-build",
+    "auth-20261023-owner-native-worker-source"
+  ],
+  "limitations": [
+    "Native SDK and EA responses in Linux checks were explicit fixtures, not actual connected terminal/provider evidence.",
+    "Full native tick snapshot time is not a fabricated individual-side timestamp. The observed state remains unqualified and confers no risk/execution grant.",
+    "This is snapshot input and durable readback, not complete tick-stream delivery, gap recovery, native bar aggregation, genuine depth or qualified FX conversion.",
+    "All discovery/feed/entitlement, financial reservation/current-policy/native finality and remaining canonical backend/Android obligations remain in scope.",
+    "The parent native compile does not qualify the changed EA; Python storage audit is not an OS sandbox."
+  ],
+  "next": "Genuine hooks, required committed-baseline verify, normal push/exact remote, exact hosted source and changed-EA native compilation; then full feed/valuation/current-policy/shared transactional reservation workflows and complete remaining backend/Android programme."
+}

@@ -1,0 +1,508 @@
+{
+  "disposition": "NO_BLOCKING_FINDING_WHOLE_FIXTURE_CONSUMER4_IMPORT_REPAIR_SOURCE_REVIEW",
+  "base": "23a570cf3f4f6e67fee69a2f8d845c7a8f03d244",
+  "FROZEN_HANDOFF_sha256": "f16fa111feb5a4159b4c5fecb964727d0fd105ed1b73f77daa2969cfc182f4b8",
+  "patch_sha256": "5e399c2c2a0c13f2315a870de22f6f51c4c64e1fc81aff960310b3f1a7ef106d",
+  "ZIP8_before_after_sha256": "b3aa0f9fc48f2ccf96e4be7992d88ea409b237c4d94119ccf44d99764a90f7a3",
+  "source4_before_after": {
+    "backend/tests/test_account_resource_binding.py": {
+      "before_sha256": "fc3fc4b8a094cc49f9cb96736f08131deb80f4fcd762bb1342c51c08d19b06ee",
+      "after_sha256": "a4f3ee16f83ffea31a7d2cc2b0273022e00e49f7d892211c2c4a2dc09fa8ab19",
+      "import_changes": [
+        [
+          "test_trading_api",
+          "backend.tests.test_trading_api"
+        ],
+        [
+          "test_trading_oauth_scope",
+          "backend.tests.test_trading_oauth_scope"
+        ]
+      ],
+      "all_other_AST_exact": true,
+      "assertions": 30
+    },
+    "backend/tests/test_account_operation_recovery.py": {
+      "before_sha256": "dab4bb9906c89d682afdb04221c6c586192ee86aeaed032eeb36f1a0caf2aa7d",
+      "after_sha256": "f1046879664f961a43453e87e1abcb968029f1fd29dc7ca98f57d374c7cef3c8",
+      "import_changes": [
+        [
+          "test_trading_api",
+          "backend.tests.test_trading_api"
+        ],
+        [
+          "test_trading_oauth_scope",
+          "backend.tests.test_trading_oauth_scope"
+        ],
+        [
+          "test_account_resource_binding",
+          "backend.tests.test_account_resource_binding"
+        ],
+        [
+          "test_trading_api",
+          "backend.tests.test_trading_api"
+        ]
+      ],
+      "all_other_AST_exact": true,
+      "assertions": 52
+    },
+    "backend/tests/test_trading_oauth_effects.py": {
+      "before_sha256": "f032a701cea8f2a1b874b994451094f4d049e7a227f5387188b9ac6ccdd1ae14",
+      "after_sha256": "aeba2b7bf488983ca3090334c5581de7274de507cd936800bd29491f4e78a5dd",
+      "import_changes": [
+        [
+          "test_trading_api",
+          "backend.tests.test_trading_api"
+        ],
+        [
+          "test_trading_oauth_scope",
+          "backend.tests.test_trading_oauth_scope"
+        ]
+      ],
+      "all_other_AST_exact": true,
+      "assertions": 74
+    },
+    "backend/tests/test_stateful_link_binding.py": {
+      "before_sha256": "63720c50d1ee5bba47bd6307a47a651ae96a778d0b32426e72b3ac5c7016a657",
+      "after_sha256": "3318a8063954c01d4e582ce47585412606981b77d172c46e36939c017c1d3e79",
+      "import_changes": [
+        [
+          6,
+          "test_trading_api",
+          "backend.tests.test_trading_api"
+        ],
+        [
+          7,
+          "test_trading_oauth_scope",
+          "backend.tests.test_trading_oauth_scope"
+        ],
+        [
+          8,
+          "test_account_resource_binding",
+          "backend.tests.test_account_resource_binding"
+        ],
+        [
+          201,
+          "test_trading_api",
+          "backend.tests.test_trading_api"
+        ]
+      ],
+      "all_other_AST_exact": true,
+      "assertions": 93
+    }
+  },
+  "static_and_fullclosure": {
+    "assert_AST249_all_nonimport_AST_exact": true,
+    "ZIP8pre_post_members_CRC_SHA_verified": true,
+    "source4": {
+      "backend/tests/test_account_resource_binding.py": {
+        "before_sha256": "fc3fc4b8a094cc49f9cb96736f08131deb80f4fcd762bb1342c51c08d19b06ee",
+        "after_sha256": "a4f3ee16f83ffea31a7d2cc2b0273022e00e49f7d892211c2c4a2dc09fa8ab19",
+        "import_changes": [
+          [
+            "test_trading_api",
+            "backend.tests.test_trading_api"
+          ],
+          [
+            "test_trading_oauth_scope",
+            "backend.tests.test_trading_oauth_scope"
+          ]
+        ],
+        "all_other_AST_exact": true,
+        "assertions": 30
+      },
+      "backend/tests/test_account_operation_recovery.py": {
+        "before_sha256": "dab4bb9906c89d682afdb04221c6c586192ee86aeaed032eeb36f1a0caf2aa7d",
+        "after_sha256": "f1046879664f961a43453e87e1abcb968029f1fd29dc7ca98f57d374c7cef3c8",
+        "import_changes": [
+          [
+            "test_trading_api",
+            "backend.tests.test_trading_api"
+          ],
+          [
+            "test_trading_oauth_scope",
+            "backend.tests.test_trading_oauth_scope"
+          ],
+          [
+            "test_account_resource_binding",
+            "backend.tests.test_account_resource_binding"
+          ],
+          [
+            "test_trading_api",
+            "backend.tests.test_trading_api"
+          ]
+        ],
+        "all_other_AST_exact": true,
+        "assertions": 52
+      },
+      "backend/tests/test_trading_oauth_effects.py": {
+        "before_sha256": "f032a701cea8f2a1b874b994451094f4d049e7a227f5387188b9ac6ccdd1ae14",
+        "after_sha256": "aeba2b7bf488983ca3090334c5581de7274de507cd936800bd29491f4e78a5dd",
+        "import_changes": [
+          [
+            "test_trading_api",
+            "backend.tests.test_trading_api"
+          ],
+          [
+            "test_trading_oauth_scope",
+            "backend.tests.test_trading_oauth_scope"
+          ]
+        ],
+        "all_other_AST_exact": true,
+        "assertions": 74
+      },
+      "backend/tests/test_stateful_link_binding.py": {
+        "before_sha256": "63720c50d1ee5bba47bd6307a47a651ae96a778d0b32426e72b3ac5c7016a657",
+        "after_sha256": "3318a8063954c01d4e582ce47585412606981b77d172c46e36939c017c1d3e79",
+        "import_changes": [
+          [
+            6,
+            "test_trading_api",
+            "backend.tests.test_trading_api"
+          ],
+          [
+            7,
+            "test_trading_oauth_scope",
+            "backend.tests.test_trading_oauth_scope"
+          ],
+          [
+            8,
+            "test_account_resource_binding",
+            "backend.tests.test_account_resource_binding"
+          ],
+          [
+            201,
+            "test_trading_api",
+            "backend.tests.test_trading_api"
+          ]
+        ],
+        "all_other_AST_exact": true,
+        "assertions": 93
+      }
+    },
+    "closure21_independently_discovered_from_actual_AST": [
+      {
+        "file": "backend/tests/test_account_operation_recovery.py",
+        "client_key_module": "backend.tests.test_trading_api",
+        "proofs_coherent": true
+      },
+      {
+        "file": "backend/tests/test_account_resource_binding.py",
+        "client_key_module": "backend.tests.test_trading_api",
+        "proofs_coherent": true
+      },
+      {
+        "file": "backend/tests/test_account_runtime_recovery_gateway.py",
+        "client_key_module": "test_trading_api",
+        "proofs_coherent": true
+      },
+      {
+        "file": "trading/tests/test_account_unlink_currentness.py",
+        "client_key_module": "backend.tests.test_trading_api",
+        "proofs_coherent": true
+      },
+      {
+        "file": "backend/tests/test_account_unlink_review.py",
+        "client_key_module": "backend.tests.test_trading_api",
+        "proofs_coherent": true
+      },
+      {
+        "file": "backend/tests/test_account_update_review.py",
+        "client_key_module": "backend.tests.test_trading_api",
+        "proofs_coherent": true
+      },
+      {
+        "file": "backend/tests/test_accounts_freshness_api.py",
+        "client_key_module": "test_trading_api",
+        "proofs_coherent": true
+      },
+      {
+        "file": "backend/tests/test_funding_owner_api.py",
+        "client_key_module": "test_trading_api",
+        "proofs_coherent": true
+      },
+      {
+        "file": "backend/tests/test_native_account_observation_api.py",
+        "client_key_module": "test_trading_api",
+        "proofs_coherent": true
+      },
+      {
+        "file": "backend/tests/test_native_balance_owner_api.py",
+        "client_key_module": "test_trading_api",
+        "proofs_coherent": true
+      },
+      {
+        "file": "backend/tests/test_native_depth_history.py",
+        "client_key_module": "test_trading_api",
+        "proofs_coherent": true
+      },
+      {
+        "file": "backend/tests/test_native_instrument_catalog_http.py",
+        "client_key_module": "test_trading_api",
+        "proofs_coherent": true
+      },
+      {
+        "file": "backend/tests/test_native_owner_key_revocation.py",
+        "client_key_module": "test_trading_api",
+        "proofs_coherent": true
+      },
+      {
+        "file": "backend/tests/test_payment_draft_gateway.py",
+        "client_key_module": "test_trading_api",
+        "proofs_coherent": true
+      },
+      {
+        "file": "backend/tests/test_runtime_recovery_faults.py",
+        "client_key_module": "test_trading_api",
+        "proofs_coherent": true
+      },
+      {
+        "file": "backend/tests/test_runtime_recovery_gateway.py",
+        "client_key_module": "test_trading_api",
+        "proofs_coherent": true
+      },
+      {
+        "file": "backend/tests/test_runtime_recovery_outbox.py",
+        "client_key_module": "test_trading_api",
+        "proofs_coherent": true
+      },
+      {
+        "file": "backend/tests/test_stateful_link_binding.py",
+        "client_key_module": "backend.tests.test_trading_api",
+        "proofs_coherent": true
+      },
+      {
+        "file": "backend/tests/test_trading_api.py",
+        "client_key_module": "test_trading_api",
+        "proofs_coherent": true
+      },
+      {
+        "file": "backend/tests/test_trading_oauth_effects.py",
+        "client_key_module": "backend.tests.test_trading_api",
+        "proofs_coherent": true
+      },
+      {
+        "file": "backend/tests/test_trading_oauth_scope.py",
+        "client_key_module": "backend.tests.test_trading_api",
+        "proofs_coherent": true
+      }
+    ],
+    "actual80_eachcwd160executions_verified": true,
+    "all53_primary_failures_in_actual80": true,
+    "protected_entry67_notwaived": [
+      "tests/contracts/test_red_team_register.py::test_the_repositorys_register_passes_its_own_checker",
+      "tests/contracts/test_red_team_register.py::test_the_same_citation_with_its_class_is_accepted"
+    ],
+    "all7paired2case_raw_terminals_verified": true,
+    "source18_frozenpins": {
+      "backend/tests/test_account_resource_binding.py": "a4f3ee16f83ffea31a7d2cc2b0273022e00e49f7d892211c2c4a2dc09fa8ab19",
+      "backend/tests/test_account_operation_recovery.py": "f1046879664f961a43453e87e1abcb968029f1fd29dc7ca98f57d374c7cef3c8",
+      "backend/tests/test_trading_oauth_effects.py": "aeba2b7bf488983ca3090334c5581de7274de507cd936800bd29491f4e78a5dd",
+      "backend/tests/test_stateful_link_binding.py": "3318a8063954c01d4e582ce47585412606981b77d172c46e36939c017c1d3e79",
+      "trading/vati/funding/classification_journal.py": "59c7f1b9b8a1b1dd4fb416319655d43fcc938fdcb7df006aad9ffa4258d75beb",
+      "backend/van_gateway/trading/funding_classification_api.py": "b306abaacc9bf625333e50bc80487bd9d02e4801b8e3bab976e28b8908b62f7f",
+      "trading/tests/test_funding_classification_journal.py": "3b25920ce903b021923f7030995d649b258f6d5a71d00784aaff7e58a170943d",
+      "backend/tests/test_funding_classification_api.py": "70daa49eaee117c8342d546bef0e531ae612f6e00f490519b461530ef1c87f38",
+      "backend/tests/test_funding_classification_authority.py": "b4787821b263b04feabaf44cc50553dfda714ee4d056578c8b5d1b8185b55d77",
+      "trading/vati/funding/runtime.py": "f12a4ba303b40cc77415ce5a3d760690a3bef737f665ff6ef4cc6ce14aec5efc",
+      "trading/vati/core/events.py": "31480e73e4f067b0e980e592e5527a6a943aea6f634775914fe880c485bafd3a",
+      "backend/van_gateway/app.py": "53ddf7e582e30feff0dd823ec57a7d725d686deeb2a0626759a64abf9db08328",
+      "backend/van_gateway/context/forget.py": "73ab8c429419ce1c5aae4911a602586d0cdc3427b1a2b6fa17d4b81d9cae2784",
+      "trading/tests/test_account_unlink_currentness.py": "aae58de4d30a746c783fbb9d76b5675174501aff8ddb303829c4f6c52d585e0f",
+      "backend/tests/test_account_unlink_review.py": "8b0412a56980c1c5cbbc12af45217fb41e839ef698b06507837a067919d14fba",
+      "backend/tests/test_account_update_review.py": "eaa45b4b612213b74783d8e951fb02d42400f56037ae4b8c67bb2769a20c704f",
+      "backend/tests/test_trading_oauth_scope.py": "54267a0f3e82d51c10395defffeb579e4b094009449f42e3c0a3757b3d111920",
+      "tools/rebuild/refresh_owner_source_contracts.py": "0fbc3c6b8cec9526ec847451cf172a5c0102bea538004fba686c9e13a3dd0165"
+    },
+    "CI_23a_overall": "41terminal28success13fail; unchangedfailed/fullunionnotqualified"
+  },
+  "source_assessment": {
+    "scope": "Twelve ImportFrom module qualifications across exactly4 existing tests incl local HDR/DEVICE_PEM/proof/helper. All249assertAST/allnonimportAST/fixtures/childscript+exit73/asyncwaitdrain+30/5timeouts unchanged. No alias/sys.path/importmode/helpercopy/key/nonce/crypto/skip/production change.",
+    "cause": "Separate bare and canonical imports each legitimately create module-globalECkey. Previously selected client enrolled bare key but helper signed canonical key; actual A4 verification refused. Fix binds entire client/_env/proof/act/approved/header consumer closure to same concrete namespace, without collapsing different modules or weakening signature verification.",
+    "closure21": "Independently discovered reverse ImportFrom closure from module-loadkey owner; all21filehashes checked and key origins recursively resolved incl prepare helper. Remaining unchanged bare cohorts are coherent; no claim all module identities equal.",
+    "coverage80": "All four full affected modules plus actual producer/strictcrypto controls are in actual80collected/executed IDset. All53unique primary CI fixturefailures map into exact actual80; no3file-only microcoverage or waiver of2protectedentry67.32actual5-case subprocesses yield80PASS/cwd160executions, nofail/skip, not onefullsuite."
+  },
+  "independent_actual": {
+    "PASS_executions": 8,
+    "unique_case_ids": 6,
+    "failures": 0,
+    "errors": 0,
+    "skip": 0,
+    "child_phases": [
+      {
+        "tag": "root-mixed-child",
+        "outer_controller_exit": 1,
+        "actual_tests_exit": 0,
+        "cleanup_supplement": "/tmp/van-approval-identity-review-fm_q0t41/CLEANUP_SUPPLEMENT.json",
+        "cleanup_supplement_sha256": "76242da1d8a83c19852bd8020d6ff2f72331216eebc294559f883541bda994c5",
+        "raw_sha256": "2e13b3ef8d1ffc318d40a1ba693a4b85baefd192bf4384c1a7da4df286f877df",
+        "JUnit_sha256": "805143466ef4516d6d823fbe5d84ee3a069322694c0d00ee0957bf266f5d9c86",
+        "PID": "Not recorded; do not reconstruct",
+        "note": "Initial outerfailure was cleanup-only zombie classification, two bodytests PASS. No repeated test."
+      },
+      {
+        "tag": "backend-mixed-crypto",
+        "actual_tests_exit": 0,
+        "receipt": "/tmp/van-approval-identity-review-fh7ig7ou/backend-mixed-crypto/receipt.json",
+        "receipt_sha256": "c04b635a254907cce137cac23ed6ad863d6bd3197878391ca4bb6370a7147966",
+        "raw_sha256": "f502b4be1c4f7b65bd5af5dd463aa673cfd977bb6db1e431d77cd9c3ae52862f",
+        "JUnit_sha256": "4ecc70c51f8f87845502716bc73600f2b88066ca3741685040c49da557631ab5",
+        "seconds": 7.760550628998317,
+        "peak_allocated": 5861376,
+        "group_absent": true
+      },
+      {
+        "tag": "root-stateful-oauth",
+        "actual_tests_exit": 0,
+        "receipt": "/tmp/van-approval-identity-review-fh7ig7ou/root-stateful-oauth/receipt.json",
+        "receipt_sha256": "e9bec6c9101790845700d1f948ab8ad9a8824b106f3076e7f542b32bdb50930d",
+        "raw_sha256": "f79d0fa212a6a309960ec36f70303d1f4fd5d5cfff6b9c399cdeba68dddae192",
+        "JUnit_sha256": "8cfb46ba8cc436b65e19216f495c4a7d72ef3d3e79634c97ea6ab295b3f1880c",
+        "seconds": 8.603381577006076,
+        "peak_allocated": 5328896,
+        "group_absent": true
+      },
+      {
+        "tag": "backend-stateful-recovery",
+        "actual_tests_exit": 0,
+        "receipt": "/tmp/van-approval-identity-review-fh7ig7ou/backend-stateful-recovery/receipt.json",
+        "receipt_sha256": "543b05f3da0b59982b15786deef4c39182a73ce2bc38bb9d9e8e0d98c5da5037",
+        "raw_sha256": "7aea47fe4874fe7765402a6203b228ae00625caeb55f63322d45966b2826eb41",
+        "JUnit_sha256": "20b53b5afa8db2723daee9d2d47e497c51a7a46714ba35f4bd8248031a39e309",
+        "seconds": 9.384898824006086,
+        "peak_allocated": 5922816,
+        "group_absent": true
+      }
+    ],
+    "cases": [
+      [
+        "",
+        "test_paired_current_fixture_and_actual_act_share_one_approval_key"
+      ],
+      [
+        "backend.tests.test_stateful_link_binding",
+        "test_real_link_process_death_keeps_bound_original_unknown_without_native_resend"
+      ],
+      [
+        "",
+        "test_paired_current_fixture_and_actual_act_share_one_approval_key"
+      ],
+      [
+        "backend.tests.test_trading_api",
+        "test_strategy_promotion_requires_exact_device_signature_and_a4_proof"
+      ],
+      [
+        "",
+        "test_actual_stateful_client_enrolls_the_key_used_by_its_act_helper"
+      ],
+      [
+        "backend.tests.test_trading_oauth_effects",
+        "test_link_retry_after_a_lost_reply_returns_receipt_without_repeating_the_local_effect"
+      ],
+      [
+        "",
+        "test_actual_stateful_client_enrolls_the_key_used_by_its_act_helper"
+      ],
+      [
+        "backend.tests.test_account_operation_recovery",
+        "test_authenticated_namespace_is_bound_to_approval_native_intent_and_original_read"
+      ]
+    ],
+    "paired_public_observations": [
+      {
+        "phase": "root-mixed-child",
+        "evidence_sha256": "8fc0bdf34be002f3fc42e7d2e8ee8811593c71a38a22c926b5196a71cbf6eb28",
+        "public_only": {
+          "test": "actual paired fixture then unchanged scope.act real challenge/signature/action",
+          "bare_module": "test_trading_api",
+          "canonical_module": "backend.tests.test_trading_api",
+          "module_identity_equal": false,
+          "bare_public_key_sha256": "04174bbe2c254492c1938a83bf6b8957a66ca9641ca6066ad3866c32a8b9e02b",
+          "canonical_public_key_sha256": "1d97be14d027fb942f385cf0b16a82c491803d2da74a5c0570dfc4012bf8d9d8",
+          "enrolled_public_key_sha256": "1d97be14d027fb942f385cf0b16a82c491803d2da74a5c0570dfc4012bf8d9d8",
+          "client_fixture_module": "unknown",
+          "act_module": "backend.tests.test_trading_oauth_scope",
+          "act_proof_module": "backend.tests.test_trading_api",
+          "HTTP_status": 200,
+          "detail": null,
+          "native_account_exists": true
+        }
+      },
+      {
+        "phase": "backend-mixed-crypto",
+        "evidence_sha256": "0877fbc21fd33a96e2c988602048d4b95a720b1b03929a835e3fd399992c5548",
+        "public_only": {
+          "test": "actual paired fixture then unchanged scope.act real challenge/signature/action",
+          "bare_module": "test_trading_api",
+          "canonical_module": "backend.tests.test_trading_api",
+          "module_identity_equal": false,
+          "bare_public_key_sha256": "eb9b8e6ee5262701f279b4cc1530b90b236747d9f7c05b99376db48ab687024f",
+          "canonical_public_key_sha256": "a293a119006e3c7049e13a6dfc5a6c90c53e58410149cfb4bc7f8c9b3b4107b7",
+          "enrolled_public_key_sha256": "a293a119006e3c7049e13a6dfc5a6c90c53e58410149cfb4bc7f8c9b3b4107b7",
+          "client_fixture_module": "unknown",
+          "act_module": "backend.tests.test_trading_oauth_scope",
+          "act_proof_module": "backend.tests.test_trading_api",
+          "HTTP_status": 200,
+          "detail": null,
+          "native_account_exists": true
+        }
+      },
+      {
+        "phase": "root-stateful-oauth",
+        "evidence_sha256": "2fa350d406b15498ebc5bc39d60cc4ac56e2b053e2853585b136e3563b7c7ea4",
+        "public_only": {
+          "actual_fixture_owner": "backend.tests.test_stateful_link_binding.client",
+          "bare_module": "test_trading_api",
+          "canonical_module": "backend.tests.test_trading_api",
+          "same_module": false,
+          "bare_public_key_sha256": "31113c7f9a7959a00b2b34ed0680bb22369838c7d0396dd2370afd052f25037e",
+          "canonical_public_key_sha256": "356776caaa2afc8b523548249f8925cfdf90e4cf83bcec704b43e28c11d27f5a",
+          "enrolled_public_key_sha256": "356776caaa2afc8b523548249f8925cfdf90e4cf83bcec704b43e28c11d27f5a",
+          "act_proof_module": "backend.tests.test_trading_api",
+          "HTTP_status": 200,
+          "detail": null
+        }
+      },
+      {
+        "phase": "backend-stateful-recovery",
+        "evidence_sha256": "936630fdd7a076c2c4cd7fb377f1cd3a0466bf29cd953730ac6e5dd04d803e0a",
+        "public_only": {
+          "actual_fixture_owner": "backend.tests.test_stateful_link_binding.client",
+          "bare_module": "test_trading_api",
+          "canonical_module": "backend.tests.test_trading_api",
+          "same_module": false,
+          "bare_public_key_sha256": "b7dd8e07d60fea485eb1876ec318390f0731e9ab8042e643859e8c39ad2ebb91",
+          "canonical_public_key_sha256": "ca3104a31700ece27ce69733a5011bcec903dfbd0da879873fba82385417df41",
+          "enrolled_public_key_sha256": "ca3104a31700ece27ce69733a5011bcec903dfbd0da879873fba82385417df41",
+          "act_proof_module": "backend.tests.test_trading_api",
+          "HTTP_status": 200,
+          "detail": null
+        }
+      }
+    ],
+    "runtime_scope": "Actual pairedA4/SQLite/realcryptographic envelope; original stateful realchild exits73 and originalIN_FLIGHT/UNKNOWN/no resend assertions; strict invaliddevice/A4 proof through existing controlled promotion seam; original recovery/OAuthlostreply. SOURCE only, no native/provider certificate/effect authority.",
+    "root_backend": "Same actual mixed-fixture proof probes pass both cwd with no backend/tests PYTHONPATH fallback; R/backend:R/trading:R absolute equivalents. Other representative originals assigned bounded phases, not all160rerun.",
+    "shared_resource": "Existing0600nonsymlinkownerlock exclusively held. Per-file8MiB/aggregate16MiB/global2GiB/workspace64MiB admission; actual continued peak5,922,816B; no limit trigger.",
+    "retention": "Each completed positive phase archived exact memberSHA/CRC verified, no activeFDholders, exactownedfixture deleted only afterproof. Failedbeforeauthorcoldtrees untouched. Root first2PASS originaloutercleanup1 preserved separately. New raw/JUnit/archives/memberinventories retained at two owned roots.",
+    "first_root": "/tmp/van-approval-identity-review-fm_q0t41",
+    "continuation_root": "/tmp/van-approval-identity-review-fh7ig7ou",
+    "continuation_receipt": "/tmp/van-approval-identity-review-fh7ig7ou/terminal.json",
+    "continuation_receipt_sha256": "af3eab671841eea226bd29b975af12402e255de2f2d0adabf66708e183c7f1f8",
+    "cleanup_error_truth": "Initial controller stopped after2PASS because unreadable zombie FDs mistaken for activeholders. Supplement recorded0activeunreadable/0holders; zombies cannot holdFDs. No sourcefault or testcasefailure; no2testrepeat; initialouter1 NOT relabeled0. Continued three phase children0. Cosmetic continuedcontroller printed commands4 but actual runs array3 plus initialchild1 =4childcommands."
+  },
+  "counts_not_conflated": {
+    "author_full_current_unique": 80,
+    "author_full_exec": 160,
+    "paired_current_overlap_exec": 8,
+    "combined_author_current_unique": 82,
+    "combined_author_current_PASS_exec": 168,
+    "before_expected_failures": "Two each before-root/backend/fourth-root,6 executions; preserved dated inputs, not relabeled pass.",
+    "independent": "8newexec6unique, overlaps author; not added toauthor168 as independentunique/fullsuite."
+  },
+  "preservation": "Only four tracked files differ from23a. Frozen other14source/labels/generator and currentproduction/verifier matchHEAD; no protectedevidence/auth record mutation.",
+  "limits": [
+    "Original23a CI41388834052 remains41terminal28success13failure/overallFAILED; backend/root 53fixturefailures correctedonlyasSOURCEcandidate.2entry67/DDS/trustedmain/union/matrix/prerequisites remainunwaived.",
+    "No fullbackend/fulltrading runtime/PG/Androidhardware/native/provider/formal/S24 acceptance inferred; earlier source-only jobSUCCESS staysnative0.",
+    "Genuine hook/commit/required4fd/push/newhead actualCI/watch remain solewriter work after review; no reviewer writes or dispatch.",
+    "No source/main/Auth/hooks/canon/protected evidence/commit/push/CI/provider/nativefinancial/SDK/network effects or agents spawned."
+  ]
+}

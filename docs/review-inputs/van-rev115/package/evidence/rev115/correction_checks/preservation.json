@@ -1,0 +1,32 @@
+{
+  "scope": "DOCUMENT_PRESERVATION_AGAINST_PUBLISHED_REV115",
+  "base_commit": "b5f56ebbc056bbd8eb3e9f7a562a8cd5d5b74bdf",
+  "application_tests_executed": 0,
+  "byte_identical_files": [
+    {
+      "path": "verification/TEST_CONTRACTS.json",
+      "sha256": "3382469a377958806e4ae900a90a975f45f3fdd41fef4934a3d857144cbf1087"
+    },
+    {
+      "path": "traceability/REQUIREMENTS_AND_DU_MAPPING.json",
+      "sha256": "374a89b0d261d98292eb2d0900e1ccff959df33a751f19f5b9024b6a80ca18b2"
+    },
+    {
+      "path": "design/ALL_SURFACE_CONTRACTS.json",
+      "sha256": "ef001ae6643b85c1543cae481478e4eed39a9860bc31d18838824daddc1cda1e"
+    },
+    {
+      "path": "traceability/LEGACY_349_ACTIONS.json",
+      "sha256": "4fe9dd0b7050203e0cac8a479c0a21993b890082aed15b28ab85250410c7830d"
+    },
+    {
+      "path": "traceability/PRODUCT_TRUTH.json",
+      "sha256": "4d0bd6be109a8bcc563912f2c40739c68d7fedca8f2d09ca0f4a3a31741f03a3"
+    },
+    {
+      "path": "lineage/REV1_14_EXACT_PARENT.zip",
+      "sha256": "f12020bd852d2c3a6f8f8ee237f4cf7a3dba7665762d05f984f0eae271f4dc37"
+    }
+  ],
+  "plan_preserved_except_generated_bindings_and_summary": true
+}

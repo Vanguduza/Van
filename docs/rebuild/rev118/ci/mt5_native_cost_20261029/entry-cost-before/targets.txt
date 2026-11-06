@@ -1,0 +1,1 @@
+trading/tests/test_mt5_cost_availability_recovery.py::test_later_zero_effect_receipt_cannot_replace_original_entry_charge_knowledge

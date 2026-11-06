@@ -59,12 +59,32 @@ FORBIDDEN_IN_ANDROID = (
 )
 
 
+_COMMENTS_AND_LITERALS = re.compile(
+    r'"""[\s\S]*?"""|"(?:\\.|[^"\\])*"|'
+    r"'(?:\\.|[^'\\])*'|/\*[\s\S]*?\*/|//[^\r\n]*"
+)
+
+
+def _runtime_text(path, text: str) -> str:
+    """Keep executable strings intact, including URLs and raw strings.
+
+    Build documentation can name the placement roles. Such comments do not put
+    a DIAL address or credential in the phone. A URL's // must never be removed.
+    """
+    if Path(path).suffix not in {".kt", ".kts", ".java", ".gradle"}:
+        return text
+    return _COMMENTS_AND_LITERALS.sub(
+        lambda match: re.sub(r"[^\r\n]", " ", match.group())
+        if match.group().startswith(("/*", "//")) else match.group(), text,
+    )
+
+
 def _leaks(sources: dict) -> list[str]:
     return [
         f"{path}: {needle!r}"
         for path, text in sources.items()
         for needle in FORBIDDEN_IN_ANDROID
-        if needle in text
+        if needle in _runtime_text(path, text)
     ]
 
 
@@ -82,6 +102,17 @@ def test_the_scan_would_catch_a_leak():
     assert _leaks({"Clean.kt": 'const val DIAL_DEV = "/v1/dial-dev"'}) == []
 
 
+def test_comments_are_not_routes_and_comment_looking_strings_remain_scanned():
+    comments = "/* Hermes remains on dial-control. */\n// dial-control\nval local = 1"
+    assert _leaks({"build.gradle.kts": comments}) == []
+    url = 'const val URL = "https://dial-control:9136/v1/dev/projects" // explanation'
+    found = _leaks({"Unsafe.kt": url})
+    assert any("'dial-control'" in item for item in found)
+    assert any("'/v1/dev/'" in item for item in found)
+    raw = 'val endpoint = """/* dial-control */"""'
+    assert _leaks({"Raw.kt": raw}) == ["Raw.kt: 'dial-control'"]
+
+
 def _gateway_dial_dev_paths() -> set[str]:
     reads = {
         f"{PREFIX}/projects",
@@ -90,6 +121,7 @@ def _gateway_dial_dev_paths() -> set[str]:
         f"{PREFIX}/projects/{{}}/tasks",
         f"{PREFIX}/projects/{{}}/graph",
         f"{PREFIX}/tasks/{{}}",
+        f"{PREFIX}/actions/{{}}",
         f"{PREFIX}/agents",
         f"{PREFIX}/workspaces",
         f"{PREFIX}/workspaces/{{}}",
@@ -180,6 +212,8 @@ def test_the_route_scan_would_catch_a_renamed_route():
     assert _normalise_route("/v1/dial-dev/workspaces/${id}/terminal-tail?lines=200") in served
     assert _normalise_route("GET /v1/dial-dev/projects/{p}/tasks?view={view}".split(" ")[1]) in served
     assert _normalise_route("/v1/dial-dev/workspace/${id}") not in served
+    assert _normalise_route("/v1/dial-dev/actions/${encodeSegment(actionId)}") in served
+    assert _normalise_route("/v1/dial-dev/action/${encodeSegment(actionId)}") not in served
 
 
 def test_hub_sections_the_phone_names_are_hub_children_the_gateway_serves():
@@ -207,8 +241,18 @@ def test_the_phone_never_posts_a_dial_action_without_a_proof():
 
 
 def test_the_action_route_is_hardware_device_proofed_in_the_gateway():
-    app = (BACKEND / "app.py").read_text(encoding="utf-8")
-    assert "or path == DIAL_DEV_ACTIONS_PATH" in app
+    from inspect import getclosurevars
+
+    from van_gateway.app import app as gateway
+
+    ingress = next(
+        middleware.kwargs["dispatch"] for middleware in gateway.user_middleware
+        if getattr(middleware.kwargs.get("dispatch"), "__name__", "") == "require_ingress_auth"
+    )
+    requires_proof = getclosurevars(ingress).nonlocals["requires_device_proof"]
+    for method in ("POST", "PUT", "PATCH", "DELETE"):
+        assert requires_proof(method, ACTIONS_PATH)
+    assert not requires_proof("GET", ACTIONS_PATH)
     assert ACTIONS_PATH == "/v1/dial-dev/actions"
     api = (DIAL_DEV / "api.py").read_text(encoding="utf-8")
     assert 'getattr(request.state, "van_device_proved", False)' in api

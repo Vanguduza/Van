@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="0.578" timestamp="2026-10-26T09:26:01.944366+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_dataset_manifest_candidates" name="test_rfc3339_fraction_is_ascii_even_when_python_integer_parser_accepts_unicode_digits[\u0660\u0660\u0661]" time="0.172"><failure message="Failed: DID NOT RAISE DatasetContractError">digits = '٠٠١'
+
+    @pytest.mark.parametrize('digits',['٠٠١','００１'])
+    def test_rfc3339_fraction_is_ascii_even_when_python_integer_parser_accepts_unicode_digits(digits):
+        record=fixture()
+        for field in ('max_input_available_at','data_cutoff','created_at'):
+            record[field]='2020-01-01T00:00:00.'+digits+'Z'
+&gt;       with pytest.raises(DatasetContractError): parse(record)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE DatasetContractError
+
+trading/tests/test_dataset_manifest_candidates.py:102: Failed</failure></testcase><testcase classname="trading.tests.test_dataset_manifest_candidates" name="test_rfc3339_fraction_is_ascii_even_when_python_integer_parser_accepts_unicode_digits[\uff10\uff10\uff11]" time="0.003"><failure message="Failed: DID NOT RAISE DatasetContractError">digits = '００１'
+
+    @pytest.mark.parametrize('digits',['٠٠١','００１'])
+    def test_rfc3339_fraction_is_ascii_even_when_python_integer_parser_accepts_unicode_digits(digits):
+        record=fixture()
+        for field in ('max_input_available_at','data_cutoff','created_at'):
+            record[field]='2020-01-01T00:00:00.'+digits+'Z'
+&gt;       with pytest.raises(DatasetContractError): parse(record)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE DatasetContractError
+
+trading/tests/test_dataset_manifest_candidates.py:102: Failed</failure></testcase></testsuite></testsuites>

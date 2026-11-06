@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import ast
 import inspect
 from decimal import Decimal as D
@@ -55,7 +57,8 @@ from vati.research.trading_evidence import (
 )
 from vati.strategies.capsule import CapsuleRegistry
 
-REG = "trading/strategies/registry"
+ROOT = Path(__file__).resolve().parents[2]
+REG = str(ROOT / "trading/strategies/registry")
 
 
 # --- coverage -------------------------------------------------------------

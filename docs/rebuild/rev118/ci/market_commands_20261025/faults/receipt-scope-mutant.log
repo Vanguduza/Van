@@ -1,0 +1,25 @@
+F..                                                                      [100%]
+=================================== FAILURES ===================================
+_ test_corrupt_receipt_never_verifies[request_sha256-0000000000000000000000000000000000000000000000000000000000000000] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-16/test_corrupt_receipt_never_ver0')
+column = 'request_sha256'
+value = '0000000000000000000000000000000000000000000000000000000000000000'
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize('column,value', [
+        ('request_sha256','0'*64), ('result_json','{}'),
+        ('result_json',json.dumps({'request_id':'wrong','object_id':ALERT,'kind':'ALERT','revision':2,'status':'PAUSED','state_sha256':'a'*64})),
+    ])
+    async def test_corrupt_receipt_never_verifies(tmp_path,column,value):
+        s = await service(tmp_path); alert = await create_alert(s); ctx = await command(s,alert.object_id)
+        await AlertControlExecutor().execute(ctx)
+        await s.store.execute(f'UPDATE market_monitor_operations SET {column}=? WHERE request_id=?',(value,request_id(ctx.command_id)))
+>       with pytest.raises(ValueError):await control_readback(s.store,ctx.command_id)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+backend/tests/test_market_monitor_commands.py:153: Failed
+=========================== short test summary info ============================
+FAILED backend/tests/test_market_monitor_commands.py::test_corrupt_receipt_never_verifies[request_sha256-0000000000000000000000000000000000000000000000000000000000000000]
+1 failed, 2 passed in 3.07s

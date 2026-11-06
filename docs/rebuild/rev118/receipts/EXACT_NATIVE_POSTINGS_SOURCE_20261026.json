@@ -1,0 +1,56 @@
+{
+  "schema": "van.rebuild.exact-native-postings/1",
+  "base_head": "3205594c907665732e69dcac26852ff28078c48a",
+  "updated_at_utc": "2026-10-26T18:13:30.506993+00:00",
+  "status": "SOURCE_TESTED_COMPONENT_NOT_SETTLEMENT_RISK_OR_UNIT_ACCEPTANCE",
+  "units": [
+    "BE-006"
+  ],
+  "unit_status": "IN_PROGRESS",
+  "acceptance": "NOT_ISSUED",
+  "source_sha256": {
+    "trading/vati/core/events.py": "7c7e1ef93c5e9c24335511ab1f8d5c3024f53dd1baa6cdd1a8b150973ce505fe",
+    "trading/vati/core/units.py": "8f13776452739a1a1a7dc30fb1275725e7e4181388c545b8cb05027bf2148895",
+    "trading/vati/funding/postings.py": "0d628ee74404779507ce85423999ef98bd424062281d4843bab6d2b8dcf09089",
+    "trading/vati/funding/movement_journal.py": "ffb4997f427e72f936339110ed3b97c3dc83740c9e0cda2cc9a96166e868f4f9",
+    "trading/vati/funding/runtime.py": "7da7fcf415cf04ca6ba7a45f02c8dbc566e507ed26db0c0daacb8256e3b54113",
+    "trading/tests/test_exact_units.py": "f0392cd9c13f08577af152d1942a92fd04aab02f70dddb9bd8c8ec0d4c9059df",
+    "trading/tests/test_financial_movement_projection.py": "2ee8c75885469687fa204a6ec77c8b6fc9a7c3601ff7ba5f876bbb290b56c875",
+    "trading/tests/test_financial_movement_journal.py": "d5a4582279bf669923d1cdb2356dfdf9031d332ba3ff228ae46246a0e0df8179",
+    "trading/tests/test_financial_movement_runtime.py": "9290de71f9fd10a882a618a8b38afdb67a28e70d7722d7751ed436401a68bbbb",
+    "trading/tests/test_dataset_manifest_candidates.py": "7a03265960171cd2edb498efdcd1f8fe2a4bc7b8939093eb7dabc5619269ba78"
+  },
+  "wiring": "ExistingFundingBook/VATI SQLledger;actualFundingIngestWorker capture_funding and currentowneraccount/portfolio reads;no newstore orspendauthority",
+  "actual_tests": {
+    "journal_r1": "84passed0skip/audit0;ownedactualPGfixtureabsent;earlierbytesonly",
+    "runtime_sqlite_r1": "101passed18PGdeselected/audit0;before summary-only snapshot adjustment",
+    "runtime_pg_r1": "321passed0skip/audit0;earlierbytesbefore strictJSONtypecomparison",
+    "strict_JSON_before": "5assertionfailures/5PGdeselected/audit0;validlyresealed0-vsfalse andfloat-vsint acceptedunderPythondictequality;actualfailuresretained",
+    "final_pg": "331passed0skips/audit0/22.21seconds/all483runtime-testhashesmatch/ownedactualPGfixtureindependentlyabsent",
+    "new_financial_cases": 112,
+    "supplemental_faults_assertion_caught": 9,
+    "positive_and_restored_SQLite_controls": 36,
+    "supplemental_PG_parameters": "Explicitlydeselectedin supplementalcontrols;executedin actualfinalPGselection",
+    "rebuild_workflow": 112,
+    "counts_overlap": true
+  },
+  "CI_logging_repair": {
+    "original_hosted_line_characters": 1048755,
+    "source_before_nodeID_characters": 1048712,
+    "original_parameter_inputs_and_assertions_preserved": true,
+    "same_six_cases_after_passed": 6,
+    "maximum_after_verbose_result_line_characters": 167,
+    "fresh_hosted_result": "PENDING_PUBLICATION;doesnotrelabelparentcancelledjob"
+  },
+  "canonical_checks": {
+    "owner_frontend_drift": false,
+    "registry_cases": 374,
+    "registry_edits": 383,
+    "registry_findings": [],
+    "registry_execution_current_candidate": "NOT_RUN;parent3205actual374executionseparatelyverified",
+    "consolidation_findings": []
+  },
+  "qualification": "No settledcash/riskcapital/tradealpha/grant/native/provider/unit/owner/production/Android/S24acceptance",
+  "remaining": "Valuation/FlowAdjustedRisk/reversals/compensatingfill-fee facts/sharedreservations;BE007 nativequote/beneficiary/freshA4approval/unknownsend/reconcile/settle;fullcanonicalbackend/ML/assistantprogramme;Androidtypedpostingconsumption/nativeproductionprofile/acceptance",
+  "evidence": "ci/exact_native_postings_20261026"
+}

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.gateway.GatewayMutationRetryTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:11:46" hostname="052fefa249ff" time="0.003">
+  <properties/>
+  <testcase name="legacy one return pairing is not retryable and prepared bound pairing is()" classname="com.dial.van.gateway.GatewayMutationRetryTest" time="0.001"/>
+  <testcase name="lost create response does not automatically create a second unkeyed resource()" classname="com.dial.van.gateway.GatewayMutationRetryTest" time="0.001"/>
+  <testcase name="only documented stable operation identities permit mutation retries()" classname="com.dial.van.gateway.GatewayMutationRetryTest" time="0.0"/>
+  <testcase name="uncertain server response stays unknown and explicit refusals keep their response()" classname="com.dial.van.gateway.GatewayMutationRetryTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

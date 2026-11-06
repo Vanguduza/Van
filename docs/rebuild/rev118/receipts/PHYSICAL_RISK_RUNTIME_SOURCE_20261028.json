@@ -1,0 +1,131 @@
+{
+  "schema": "van.rev118.physical-risk-runtime-source/1",
+  "observed_at_utc": "2026-10-28T04:23:21.792540+00:00",
+  "source_parent": "f74aac3bf503478cd6800949b5541b4c17609d9c",
+  "source_files_sha256": {
+    "trading/tests/test_contract_schemas.py": "0ffefbe21574cc491df936bf41e30f8be67b0707fbcab981a590416304466efa",
+    "trading/tests/test_native_risk_account_context.py": "a36d2f1caf28e8e3e1194c7d02663a721956cf89be377d31dd0419ea141593b4",
+    "trading/vati/app/account_service.py": "07120c1266d78e4ffc09786a47748f0d991d2e6d114fbf682e5b9032dbb1754a",
+    "trading/vati/app/cycle.py": "3ebe9e800939fc73da547622e53d2645efa14fa47c19d2b5da287c4aceeea889",
+    "trading/vati/app/runtime_control_actor.py": "4154bd8cf235840ad74c89308e55f12cdecad1a789cea66b2231f3fe682794e3",
+    "trading/vati/contracts/schemas/risk_snapshot.schema.json": "24e77f1863a8df89d0b59677605324a03fe1b5a8f91116f4790d749e5e91bd55",
+    "trading/vati/core/ledger.py": "f428da91db42374403f51b61528365c69dc195a1e7fe01499aeab90076c698d7",
+    "trading/vati/core/ledger_pg.py": "9a9db1ffd9cafdca3a16a964fd93287788701282cd31ec0b763007c930f4efc8",
+    "trading/vati/risk/authority.py": "78e76d41d1bda642fb31b9c8b4fbb29d8d2edd394b1f68372362cb198ccee5a5",
+    "trading/vati/risk/contracts.py": "4f0f6ae871654a737a1f20784f531a1f09c1a24e4d6b43a6081b3d1e135d4577",
+    "trading/vati/risk/native_history.py": "40e0bd7e11d957b0eb4b9f50aef62a0ef832a55a38e9dcc34a807e0278492e99",
+    "trading/vati/risk/serde.py": "35c8f1c798b9dc78ede74afa5a8f0d59a890a1da025d6165d50bdf342c20810c",
+    "trading/tests/test_native_control_metadata.py": "910fa1ad11ab93758e137986296901b1afe3022743cdb2f423266be9526e610e",
+    "trading/tests/test_native_risk_history_current_context.py": "2953408c6cde69235d0da0813ff92297fd5320526ef899dda9c03a48e3a32d07",
+    "trading/tests/test_physical_baselines.py": "8eb46469ae68733d1ea76644b003b46e32435ee26a503765bc2d2fcbed183093",
+    "trading/tests/test_physical_control_history.py": "e6b1cedcbd457cc9cdd157335493b15809b691decbf46c1c389b0a5ce18d89f3",
+    "trading/tests/test_physical_control_history_postgres.py": "36b831f5f28aa8dfb526663fad3df089864366b6201c65a791d4bcda0ba8a5f2",
+    "trading/tests/test_physical_financial_history.py": "eef5da45d91022b0a893ed1fd693acb54880ff9a97432d14c7ed8a00e143e787",
+    "trading/tests/test_physical_lockouts.py": "cd2def16768c461c228bfe303e8b3fb8e97a463c143971f4e52cbb8845dc8875",
+    "trading/tests/test_physical_native_controls.py": "8678116261c401648d9217e4b3b23b8219259e89a5da3571c63256135f78fc4c",
+    "trading/tests/test_physical_recovery_actor.py": "7b14fe703f6d1aa6906ca57ea83c710a941f0d4004b5f48855c3510434660e50",
+    "trading/tests/test_physical_risk_runtime.py": "37cffeb3871f2bb2c715fc77a6a2d3d0181f174c420e8caa70281b64fd016fd0",
+    "trading/tests/test_physical_risk_runtime_postgres.py": "8d529146f96a6914ff42f7af8c9e5740450c7b4adfb227da9464aef799486d1d",
+    "trading/tests/test_physical_snapshot_producers.py": "c4678a689413246df1c4807420837912731c5b104d0dde5eee8b2e73cbcd1415",
+    "trading/vati/risk/control_archive.py": "99dd76fb153209cb4ca35256a449e5c549f3b13285d31fbb92d48783d374c1e0",
+    "trading/vati/risk/physical_baselines.py": "ba2f6d652f73e90f1fd269bc4064a91d97f8e2b5159b72a1e390ecec6f3dc426",
+    "trading/vati/risk/physical_history.py": "26897b02e373825cf4c495eb3f495deaa34e9b7f141b48d43387f23e4fcd5a97",
+    "trading/vati/risk/physical_lockouts.py": "9e6512e88a3e5e2556f7d8163e8dd0e3424a07156b8e9ff8ade152ca568db9be",
+    "trading/vati/risk/physical_runtime.py": "5976fdd81c06fa667096283abe49ab6ceaee418bb6e9a0134a797aa662359962"
+  },
+  "classification": "PARTIAL_CANDIDATE_SOURCE_TESTED",
+  "implementation": [
+    "Both existing native snapshot producers recover original same-physical-account baselines/streaks before a new alias first decision.",
+    "Append/readback immutable own-alias native basis; optional sealed reference prevents shared peak feedback and resurrection after independently scoped owner resets.",
+    "Incremental committed new-row API and source cache avoid full risk-history reload/rehash on ordinary decision ticks; actual close/control changes rebuild original financial joins.",
+    "Original trade ownership requires approving native input before close in ledger order and original availability; duplicate/conflicting/unknown closes remain unresolved.",
+    "Existing journal and direct owner APIs preserve original native source/signature evidence, scope, exact outcomes, duplicate/replay, issuer and writer-lock expiry checks; unavailable sources refuse without effect.",
+    "Legacy snapshot hashes/serialization and all27required fields remain; new optional original-basis reference has a strict closed source schema."
+  ],
+  "sql": {
+    "passed": 444,
+    "failed": 0,
+    "skipped": 0,
+    "cases": 444,
+    "unique_identities": 444,
+    "actual_outer_exit": 0,
+    "actual_inner_exit": 0,
+    "all_pinned_python_hashes_match": 1196,
+    "storage_audit_violations": 0,
+    "actual_call_identities_once": 444,
+    "owned_pg_independently_absent": true,
+    "raw": "ci/physical_risk_20261028/sql_final"
+  },
+  "rebuild_private_topology": {
+    "passed": 215,
+    "failed": 0,
+    "skipped": 0,
+    "cases": 215,
+    "unique_identities": 215,
+    "actual_exit": 0,
+    "storage_audit_violations": 0,
+    "source_note": "Executed before final two-file original-close chronology refinement; that refinement is covered by final444 SQLHTTP checks. Selections overlap."
+  },
+  "canonical_checks": {
+    "van-physical-owner-registry-20261028": {
+      "actual_exit": 0
+    },
+    "van-physical-frontend-registry-20261028": {
+      "actual_exit": 0
+    },
+    "van-physical-workmap-cli-20261028": {
+      "actual_exit": 0
+    },
+    "van-physical-consolidation-20261028": {
+      "actual_exit": 0
+    },
+    "van-physical-mutation-preflight-20261028": {
+      "actual_exit": 0
+    }
+  },
+  "mutation_registry_consistency": {
+    "cases": 374,
+    "edits": 383,
+    "findings": 0,
+    "execution": "NOT_RUN_ON_THIS_PACKET"
+  },
+  "retained_failures": {
+    "sql_r1": "438passes/1revocation-fixture timing failure, actualexit1/PGremoved; correction arms the fixture after metadata capture",
+    "sql_r2": "442passes0skip/actualexit0/audit0/1196hashmatch/PGremoved before chronology refinement",
+    "new_test_attempts": [
+      "van-physical-baselines-r1-20261028",
+      "van-physical-producers-controls-r2-20261028",
+      "van-physical-producers-controls-r3-20261028",
+      "van-native-recovery-actor-r1-20261028",
+      "van-native-close-chronology-baseline-20261028"
+    ],
+    "meaning": "Original failures remain failed. Schema optional-field inventory, strategy selection and actual fixture mandate times corrected without weakening positive/error/scope assertions.",
+    "chronology_baseline": "Two actual assertion failures exposed future approval borrowing; both retained and fixed with original-order/availability checks."
+  },
+  "source_scope_preserved": {
+    "units": 131,
+    "requirements": 324,
+    "acceptance_identities": 1610,
+    "contexts": 234,
+    "actions": 349,
+    "planned_features": 93,
+    "source_features": 42,
+    "source_functions": 105,
+    "source_surfaces": 78
+  },
+  "original_boundaries": {
+    "execution_authority": false,
+    "risk_capital_qualification": false,
+    "owner_or_device_keys": "isolated source fixtures only"
+  },
+  "open": [
+    "Flow-adjusted native financial baselines and exact collateral; actual native equity must bound capital.",
+    "Shared funding/order/manual reservations, pending/partial/uncertain exposure and owner-halt causes across all origins; qualified shared-ledger/cohort migration.",
+    "Original native settled-profit maturity, legacy unbound history reconciliation and original-close corrections/handover.",
+    "Every remaining canonical backend workflow, all12backend verification packets, independent admission, Android prerequisites, provisioning/signing and actual Artemis/S24 acceptance."
+  ],
+  "formal_acceptances_issued": 0,
+  "native_qualification_issued": false,
+  "production_qualification_issued": false,
+  "next": "Genuinehooks/requiredbaselinecommittedverify/normalpush/readback/exactCI; then native flow/collateral/all-origin reservations under unchanged BUILD_EXECUTION_PLAN.md."
+}

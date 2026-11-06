@@ -1,0 +1,18 @@
+{
+  "old_base": "ca135eb7d8d3635d52b9e49d51eee8e9a870d3a1",
+  "new_base": "32d519332ecd251d932e841db84ca0a25712b255",
+  "files": {
+    "android/app/src/main/java/com/dial/van/command/settings/OwnerPermissionGrantSection.kt": "6191efdfd21f1cbaa549a80c5f78bbae0fdc6157b0da2820ecfe28a4ec7ffe6a",
+    "android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt": "2a4b73d4feb3c3852ac06b81593ad3a596a60af2fd97814d96210c4efdc5910b",
+    "android/app/src/main/java/com/dial/van/gateway/PermissionRevocationOperations.kt": "6e3bf5b3d9b18697aa5f5e443bc50e56bc18062e039acd08e453ec0ccc8360e1",
+    "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt": "ea4307174abc18623de6d318d66a0f7fb357c098007685be7dfd0d9f2c097a4f",
+    "android/verification/build.gradle.kts": "398ab4b703fb52d71dd8db8faf7c939de7a86b781f0b26cc0199d2edf4745152",
+    "android/verification/src/test/kotlin/com/dial/van/gateway/PermissionRevocationOperationsTest.kt": "b20d789b4145ead0e504cb3cdd969069b7b1b710e7d1bf4e62feae5351c540a0",
+    "backend/tests/test_owner_permission_revocation_recovery.py": "8062cd68f3326ac5632be9e5e1f5daf0a1833b3d29af8666a860eb5f5c01c0fb",
+    "backend/van_gateway/capability/owner_permissions.py": "4333eee81b8ad4eac3d5c789a99def1c70c815a091da9d2b6f1e188fdfbb0657",
+    "backend/van_gateway/capability/permissions.py": "f4e97e617f9b0cb45d2e560384d7dbe119b515e7c5f475cc7f52c55957b21415",
+    "backend/van_gateway/understanding/api.py": "51fae82e6c114ff9f538a672dde9550bf0c7ee47d0679b212258e123dfe11d89"
+  },
+  "application_source_same_across_bases": true,
+  "preserved_stash": "f04566c2ba3ee699e0075be9522e78a541380b96"
+}

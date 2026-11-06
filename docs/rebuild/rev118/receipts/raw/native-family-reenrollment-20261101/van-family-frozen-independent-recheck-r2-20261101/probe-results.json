@@ -1,0 +1,75 @@
+{
+  "imports": {
+    "router": "/workspace/van-lanes-20261101/family-multiposition/trading/vati/execution/router.py",
+    "execution": "/workspace/van-lanes-20261101/family-multiposition/trading/vati/lifecycle/family_execution.py",
+    "membership": "/workspace/van-lanes-20261101/family-multiposition/trading/vati/lifecycle/family_membership.py"
+  },
+  "all37_source_pins_and_archive_verified_unchanged": true,
+  "results": [
+    {
+      "case": "FAM01 actual ProtectionManager unavailable portfolio preserves urgent close original journal and no resend",
+      "result": "PASS"
+    },
+    {
+      "case": "FAM02 preexisting UNKNOWN native effect happened",
+      "result": "PASS"
+    },
+    {
+      "case": "FAM02 preexisting UNKNOWN native effect not observed",
+      "result": "PASS"
+    },
+    {
+      "case": "FAM03 new otherleg UNKNOWN between planning and writer refuses any automatic partial",
+      "result": "PASS"
+    },
+    {
+      "case": "original independent FAM01 counterexample",
+      "result": "PASS",
+      "request_ref": "0113679ec55d85acdd74d59b63baeb1b7cac0c7a2c435b16a9b8910286a71d79",
+      "attribution": "EMPTY_ORIGINAL_REQUEST_NOT_GUESSED"
+    },
+    {
+      "case": "original independent FAM02 counterexample",
+      "result": "PASS",
+      "original_unknown_ref": "2ca1122c609cf7e6c5d1710c3153e86c4faa1f9a00ebf284ac832e5934f527c4",
+      "progress": {
+        "version": "family-action-journal/1",
+        "family_action_ref": "194f2367d93e347b6e491dc54f49894c4af3b6759c0abb35efd254ee76eca2b5",
+        "family_id": "family:ti-e2e-1",
+        "result_scope": "ORIGINAL_BOUND_FAMILY_ACTION",
+        "family_revision": "69b4af5659d8b6fa2025453a3ac5fa7124021a49d15971e956942355384e2f08",
+        "source_snapshot_ref": "28c8b4632ad1c155675bb062026f42c5b040d6d5dc9b229c716da06ea9372bb3",
+        "policy_hash": "8a67a9af7b8756f3f074030f905c10d6a6686f1140103a0ae3780b281e110219",
+        "requested_quantity": null,
+        "confirmed_quantity": "0.03",
+        "residual_quantity": null,
+        "unresolved_native_effect": true,
+        "state": "INCOMPLETE",
+        "targets": [
+          {
+            "position_id": "P1",
+            "trade_intent_id": "ti-e2e-1",
+            "target_ref": "07cb66f88c580f29c4047b68eb81dbf908255d1ffd50b1061406d1fe7cd22071",
+            "request_ref": null,
+            "outcome_ref": null,
+            "state": "ORIGINAL_NATIVE_QUANTITY_UNKNOWN",
+            "confirmed_quantity": "0",
+            "unmet_quantity": null
+          },
+          {
+            "position_id": "P2",
+            "trade_intent_id": "d772dfc3-0e2e-5324-a306-a802d6d13d6a",
+            "target_ref": "362fad7e29540c9bc387c99aec09f0ae82687e4c549737bc1c58934f81a75c42",
+            "request_ref": "1cd3ebf4b4e747682d23c72248be34e10988b30fa56fb4b57cdcb6e17bb22f12",
+            "outcome_ref": "91929ac5f2327ff91fb898582cd9f78730a03e47cfe0b30edc4d594f3f0c031c",
+            "state": "CONFIRMED",
+            "confirmed_quantity": "0.03",
+            "unmet_quantity": "0"
+          }
+        ],
+        "execution_authority": false
+      }
+    }
+  ],
+  "owned_tmp_cleanup": true
+}

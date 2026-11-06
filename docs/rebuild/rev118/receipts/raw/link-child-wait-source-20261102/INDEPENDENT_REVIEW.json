@@ -1,0 +1,141 @@
+{
+  "disposition": "NO_BLOCKING_FINDING_ONE_TEST_ASYNC_CHILD_WAIT_SOURCE_REVIEW",
+  "source_one_pin_before_after": {
+    "backend/tests/test_stateful_link_binding.py": "63720c50d1ee5bba47bd6307a47a651ae96a778d0b32426e72b3ac5c7016a657"
+  },
+  "patch_sha256": "2e31298e0c75909295944e7789d41e281773d88ba40a6cb77272efd2ef0457ee",
+  "archive_sha256": "f5e4feb7ca56240ef860e584c3d3b7d3126305cbd655397b75c6791891e77412",
+  "native_upsert6_before_after_exact": {
+    "trading/commander/accounts.py": "6b20d5ae1ee01f00672287bb0d9183f41083c57874b5c53afa1ea339f648082a",
+    "trading/commander/account_effects.py": "8a842f27aa24bce106371cfb454c1feb224a494665e69645f6979f0c476487a2",
+    "trading/commander/app.py": "aa353acaa9ac8d74a51e6f2e500cae7ecdbc382e64413da4ccfae75fdbd85540",
+    "trading/vati/accounts/registry.py": "e7925dc1cacb1ce84af601fbbfb870220f43e6bd423fa52855d4900ce96f0be9",
+    "backend/tests/test_account_update_review.py": "c4fa99375516fd0c52833ff4dc941c7e68dc1d6e185418e4093c489606b25d0b",
+    "trading/tests/test_account_registry_atomic_rea.py": "0f371d8d35d609d585fd615b6e0393298749b839608bea3ac66f85a858a53674"
+  },
+  "static_and_author_evidence": {
+    "assertions_preserved": 93,
+    "other_module_bytes_exact": true,
+    "childscript_exact": true,
+    "patch_zip_verified": true,
+    "source_pin": {
+      "backend/tests/test_stateful_link_binding.py": "63720c50d1ee5bba47bd6307a47a651ae96a778d0b32426e72b3ac5c7016a657"
+    },
+    "author_raw": [
+      {
+        "label": "BEFORE_SQL",
+        "tests": 1,
+        "failures": 1,
+        "exit": 1,
+        "scope_note": "Raw controller scope text is copied unrelated AGP wording; actual command/probe source/JUnit are the evidence, not this label.",
+        "receipt_sha256": "0a906e536dc146078a0e749bdfe19c9e055478bd0cab0d4f770e5fb8041e8fd6",
+        "JUnit_sha256": "e3b858e2d8f9654acc3485bd5b6667e894504c9cc141b8274c412e523c6f2e98",
+        "raw_sha256": "04faac267d317ed8edbf4109ed47afbcad17b8a9c6d4691d0adf534ec857a7b2",
+        "raw_after_diagnostics_retained": true
+      },
+      {
+        "label": "AFTER_SQL",
+        "tests": 1,
+        "failures": 0,
+        "exit": 0,
+        "scope_note": "Raw controller scope text is copied unrelated AGP wording; actual command/probe source/JUnit are the evidence, not this label.",
+        "receipt_sha256": "22b42cf8f74b471e387435c378ea89a8137af77d2798e9b2eff06eda88ee284d",
+        "JUnit_sha256": "b2d9014d99f86b0fea344e12184a0d563632c4e42ad7286772efb891225b9e7a",
+        "raw_sha256": "2db306126480ca632f5221e36ab59c77501fcb1f6f2d13436efd603a12cefca9",
+        "raw_after_diagnostics_retained": false
+      },
+      {
+        "label": "AFTER_LIFECYCLE",
+        "tests": 2,
+        "failures": 0,
+        "exit": 0,
+        "scope_note": "Raw controller scope text is copied unrelated AGP wording; actual command/probe source/JUnit are the evidence, not this label.",
+        "receipt_sha256": "0ca94f38a2085fcb899b568e92fb5980176a3e3749f40e3330ae802b99af4fe3",
+        "JUnit_sha256": "fc33fe5dc47fdb05b35c7dce83ea4146b8e564d0954541c0048b84341dce2302",
+        "raw_sha256": "d5c0d0e2b5f52236651c65fe41db27e08c9f7abff1088c5b691678f659ed2874",
+        "raw_after_diagnostics_retained": false
+      }
+    ]
+  },
+  "source_review": {
+    "scope": "Only target async test changes; all93 module assertASTs, entire unchanged childscript/arguments/env/start_new_session/exit73/outputcap65536/original30s timeout/5s wait preserved. All module bytes outside target function exact5c. No DB timeout/retry/scheduler/skip/production/gate change.",
+    "wait": "One communication task runs original communicate(timeout30) in thread; shield lets original coroutine cancellation reach finally without cancelling sole active communication task. Only owned session child killed if live, then waited5s/reaped. Existing task drained. Second communicate only after original thread has terminated with TimeoutExpired; no concurrent second pipe consumer. Timeout and cancellation propagate; test assertion failure is not replaced with success.",
+    "limits": "Single cancellation/source control and original timeout captured by author actual lifecycle probes. No blanket process cleanup or platform PID signals; owned Popen child only."
+  },
+  "independent_actual": {
+    "PASS": 3,
+    "skip": 0,
+    "exit": 0,
+    "seconds": 19.613118171691895,
+    "receipt": "/tmp/van-link-child-wait-review-ihje__bp/terminal.json",
+    "receipt_sha256": "f04cf3caf3c41d5628bd9d3d21ed711d647fae85bf9d2396d4f12ceade29e390",
+    "raw": "/tmp/van-link-child-wait-review-ihje__bp/raw.log",
+    "raw_sha256": "e89e7df314a716161982559dd72a1ced89915b2220df915183f31f6380caab3d",
+    "JUnit": "/tmp/van-link-child-wait-review-ihje__bp/junit.xml",
+    "JUnit_sha256": "9e431e526a4b1498d0f62de60efa637f2e8396919580b96709ecaca43296e3a6",
+    "test_ids": [
+      "::test_actual_original_process_death_with_parent_writer_release",
+      "tests.test_stateful_link_binding::test_real_link_process_death_keeps_bound_original_unknown_without_native_resend",
+      "::test_actual_owner_child_is_reaped_on_cancel_or_original_timeout[cancel]"
+    ],
+    "SQL_after_diagnostic": {
+      "events": [
+        {
+          "event": "parent_actual_sqlite_writer_held",
+          "at": 70563.390048431
+        },
+        {
+          "event": "parent_event_loop_release_ran",
+          "at": 70563.643218479
+        },
+        {
+          "event": "parent_actual_sqlite_writer_released",
+          "at": 70563.644058874
+        },
+        {
+          "event": "original_test_returned_or_raised",
+          "at": 70567.565560256
+        }
+      ],
+      "child_pid": 1276034,
+      "child_returncode": 73,
+      "child_already_reaped": true,
+      "scope": "Actual original test/real signedA4/client/ownedSQLite/realchild; hookonly holds an empty parent writer after realapproval and schedules .25s release. No timeout/assertion/authority/childscript changes."
+    },
+    "SQL_parent_release_delay_seconds": 0.25401044299360365,
+    "cancel_diagnostic": {
+      "ending": "cancel",
+      "actual_child_pid": 1277038,
+      "returncode": -9,
+      "reaped": true,
+      "owner_wait_tasks_remaining": [],
+      "parent_loop_ticks": 8,
+      "seconds": 0.44990636099828407,
+      "original_timeout_seconds": 30,
+      "scope": "Actual source owner test+actual unchanged childscript; external fixture SIGSTOP only its just-created ownsession child to exercisecancel/timeout. No platformsignals/DBtimeout/assertion/authoritychanges."
+    },
+    "scope": "Actual original owner node, real paired A4/SQLite/realchild73; same preserved external SQL probe; external actual owned-child cancellation SIGSTOP/SIGKILL/reap. No provider/native financial effect.",
+    "owned_bytes": 6233053,
+    "run_cap": 16777216,
+    "retention": "All new completed cold fixtures/diagnostics/raw/XML retained. Exact member SHA256/CRC32/UID/GID/mode/path inventory in terminal receipt; no prefix deletion.",
+    "child_reaped": true,
+    "process_group_absent": true,
+    "external_probe_sha256": {
+      "/tmp/van-link-child-wait-independent-review-20261102/test_forced_sqlite.py": "c796a16aa212796b41bea7db3b6ad77b3b4c70e5d00dcb3559cab1d179625bfb",
+      "/tmp/van-link-child-wait-independent-review-20261102/test_lifecycle.py": "dbedc94597a17fdbc15088e34962700d76051bd634b50324ad559193324b01c1",
+      "/tmp/van-link-child-wait-independent-review-20261102/run.py": "dfcda9196b9884c36d2a6dfa2b8b9f8bf39963b56601bd96ff67a4300ea9964c"
+    }
+  },
+  "before_after_preservation": {
+    "before": "Frozen original raw/JUnit proves child1/SQLitebusy under syncwait, parent .25 release runs only after ~18.7s original failure, reaped. Source36df. Preserved diagnostic read; not retested original source.",
+    "after_author": "Frozen afterSQL1PASS +cancel/original30s timeout2PASS/audit0, source6372. Passed diagnostics were cleaned with hashed inventory; exact old after PIDs/timestamps are unavailable and not reconstructed.",
+    "after_independent": "New actualSQL release/child73 and cancellationPIDs/timestamps retained separately as new reproduction, not restoration.",
+    "raw_wording_limit": "Three raw controller receipts contain copied unrelated AGP scope text. Actual bound command/source probes/JUnit counts used; this review makes no AGP or fullsuite claim."
+  },
+  "qualification_limits": [
+    "Published4c run41364081278 remains FAILED; two entry67/source prerequisites/aggregate/fullmatrix limitations unaffected. No full CI/native qualification.",
+    "No wholemodule/fullsuite/SDK/Gradle/network/provider/main/source edits/commits/push/CI or subagents by reviewer.",
+    "Unlink R1 blocker BE004-UNLINK-REVIEW01 remains unrepaired by this one-test packet. Unlink R2 evolving isolated source not consumed/reviewed here.",
+    "Future source integration/derived exacthead guards/genuine push and newhead hosted qualification remain owner work."
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "schema": "van.rebuild.calendar-causal-source/1",
+  "status": "SOURCE_TESTED_COMPONENT_NOT_UNIT_ACCEPTANCE",
+  "base_head": "047dacc6b006e16b382e6f510725af364dc2b0bb",
+  "isolated_base": "ad1d3941d6a0257ee9966fd66f02eddb76af04de",
+  "updated_at_utc": "2026-10-25T22:34:31.636665+00:00",
+  "source_sha256": {
+    "trading/vati/calendar/recorder.py": "d6c4ea9b4583e1b130fcfe771c79189b80d2fe7e1b53dbe26eac222b76040c64",
+    "trading/tests/test_calendar_causal_boundaries.py": "d77a2c8620d353b8f6ab4fd4ae227358302ffc8dc8786a5fde55a87e0c7c5754"
+  },
+  "executed": {
+    "before": "14 actual source assertions fail on isolated committed baseline, no setup errors",
+    "isolated": "71 initial focused passes;79 recovery passes;83 cold-journal recovery passes/audit0",
+    "applied": "Original base bytes compared before candidate copy; unrelated source untouched, isolated worktree retained",
+    "integrated_initial": "487 related calendar/event tests pass/audit0 after application",
+    "postgres_initial": "491pass/0skip/audit0; runner copied source_state text from quote phase, raw preserved; target list/base/hash identify actual calendar run",
+    "postgres_final": "498pass/0skip/audit0/exact source hashes on final code; corrected source_state identifies calendar candidate, actual pinned isolatedPostgreSQL, owned container removed, client children waited",
+    "final_controls": "35pass/0skip,2PostgreSQL cases explicitly deselected for local no-DSN control; actual finalPostgreSQL run executes them",
+    "supplemental_faults": "5/5 assertion-caught/no setup errors, original code restored exactly; separate from canonical374",
+    "rebuild": "108pass at applied calendar version; subsequent changes are test additions and unused-import cleanup; final PG/fault controls cover current production bytes",
+    "source_contracts": "No owner/frontend drift, consolidation0findings; original479endpoints/369schemas/42groups105functions78surfaces preserved",
+    "canonical_mutations": "374cases/383edits/preflight0findings; not full corpus execution on this component"
+  },
+  "behavior": [
+    "Cutoffs filter declared observations before supersession, aggregation and report counts",
+    "Revision must name latest same-event/source actual claim; exact numeric equality ignores decimal scale, no tolerance or majority fact",
+    "Nonfinite/malformed actual/forecast/previous values rejected/skipped with error; forecast-only rows do not fabricate first-actual latency",
+    "Bad-clock claims and negative latency remain visible but cannot establish actual agreement; raw source independence/qualification remain unverified",
+    "Publish before memory success; writer-serialized original lookup and independent readback reconcile lostACK/cold duplicate input; missing known originals not recreated",
+    "from_ledger checks chain/shape/scope/capacity without rewriting records; old envelope timestamps preserved and explicitly unqualified"
+  ],
+  "limits": [
+    "As-of respects declared observation time; actual native clocks, source independence, entitlements and schedule availability need separate qualification",
+    "Legacy schedule/event identity, host-timezone parsing and calendar-feed shape issues remain next source work; no full leakage-free dataset claim",
+    "Whole-ledger chain verification has no interruptible host-time bound; recovery capacity is not production sizing",
+    "No provider ingest service or native-source fact admission issued",
+    "No unit/native/owner/F15/BG001/provider/economic/production/S24 acceptance; source remains local-only while normal CLI credential refresh pending"
+  ],
+  "evidence": "ci/calendar_causal_20261025"
+}

@@ -8,8 +8,6 @@ import com.dial.van.visual.VanFlameAura
 import com.dial.van.visual.VanAuraPlanner
 import com.dial.van.visual.VanAuraSpec
 import com.dial.van.visual.VanEffectBudget
-import com.dial.van.visual.VanFieldGeometryEngine
-import com.dial.van.visual.VanFieldInk
 import com.dial.van.visual.VanGlassStyle
 import com.dial.van.visual.VanGlassTokens
 import com.dial.van.visual.VanPathSeg
@@ -20,7 +18,6 @@ import java.awt.Graphics2D
 import java.awt.RadialGradientPaint
 import java.awt.Rectangle
 import java.awt.Shape
-import java.awt.geom.Arc2D
 import java.awt.geom.Ellipse2D
 import java.awt.geom.Path2D
 import java.awt.geom.Point2D
@@ -33,9 +30,8 @@ import kotlin.math.sin
 /**
  * Java2D painter for DIAL Glass and VAN's living electrical field.
  *
- * Zone B/C geometry is produced by [VanFieldGeometryEngine], the exact same pure-Kotlin geometry
- * engine used by the shipping Compose overlay. [spec] owns local activity/Zone B while
- * [semanticSpec] independently owns Zone C, so evidence can certify orthogonal runtime states.
+ * [spec] owns local activity/Zone B while [semanticSpec] independently owns Zone C, so evidence can
+ * certify orthogonal runtime states.
  */
 object GlassPainter {
 
@@ -172,33 +168,14 @@ object GlassPainter {
         }
 
         if (style.specularAlpha > 0f) {
-            val inset = 3f * density
-            val arcBox = RoundRectangle2D.Float(
-                shape.x + inset,
-                shape.y + inset,
-                shape.width - inset * 2f,
-                shape.height - inset * 2f,
-                shape.arcwidth,
-                shape.archeight,
+            g.paint = java.awt.GradientPaint(
+                shape.x, shape.y, argb(VanGlassTokens.ICE_CYAN, style.specularAlpha * 0.55f),
+                shape.x, shape.y + (shape.height * 0.16f).coerceAtLeast(1f), Color(0, 0, 0, 0),
             )
-            g.color = argb(0xFFFFFFFF.toInt(), style.specularAlpha)
-            g.stroke = BasicStroke(
-                max(style.borderWidthDp * density * 1.6f, 1.4f),
-                BasicStroke.CAP_ROUND,
-                BasicStroke.JOIN_ROUND,
-            )
-            g.draw(Arc2D.Float(arcBox.x, arcBox.y, arcBox.width, arcBox.height, 110f, 78f, Arc2D.OPEN))
-            if (style.activeGlowAlpha > 0f) {
-                g.color = argb(style.borderColor, style.activeGlowAlpha)
-                g.stroke = BasicStroke(
-                    max(style.borderWidthDp * density * 2.0f, 1.6f),
-                    BasicStroke.CAP_ROUND,
-                    BasicStroke.JOIN_ROUND,
-                )
-                g.draw(Arc2D.Float(arcBox.x, arcBox.y, arcBox.width, arcBox.height, 118f, 52f, Arc2D.OPEN))
-            }
+            g.fill(shape)
         }
     }
+
 
     fun dropShadow(g: Graphics2D, shape: RoundRectangle2D.Float, style: VanGlassStyle, density: Float) {
         val spread = style.elevationDp * density
@@ -266,6 +243,9 @@ object GlassPainter {
 
     fun drawAuraOps(g: Graphics2D, ops: List<VanAuraOp>, depth: VanAuraDepth = VanAuraDepth.ALL) {
         for (op in ops) {
+            // Same defensive rejection as native Compose: these retired stroke ops
+            // cannot become a picture of the requested flame aura.
+            if (op is VanAuraOp.Rim || op is VanAuraOp.Polyline || op is VanAuraOp.Quad) continue
             if (!depth.accepts(op)) continue
             when (op) {
                 is VanAuraOp.Radial -> {

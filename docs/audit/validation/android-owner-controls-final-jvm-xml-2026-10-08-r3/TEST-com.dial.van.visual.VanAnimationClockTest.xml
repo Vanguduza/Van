@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.visual.VanAnimationClockTest" tests="13" skipped="0" failures="0" errors="0" timestamp="2026-10-08T06:47:29" hostname="052fefa249ff" time="0.01">
+  <properties/>
+  <testcase name="a long pause is clamped rather than spun through hundreds of cycles()" classname="com.dial.van.visual.VanAnimationClockTest" time="0.001"/>
+  <testcase name="the phase stays inside zero to one however long it runs()" classname="com.dial.van.visual.VanAnimationClockTest" time="0.004"/>
+  <testcase name="retargeting mid-blend continues from where the field actually is()" classname="com.dial.van.visual.VanAnimationClockTest" time="0.002"/>
+  <testcase name="a blend starts and ends with zero velocity()" classname="com.dial.van.visual.VanAnimationClockTest" time="0.0"/>
+  <testcase name="a spec blend moves the continuous fields and does not invent a colour()" classname="com.dial.van.visual.VanAnimationClockTest" time="0.001"/>
+  <testcase name="the old driver's failure is what this replaces()" classname="com.dial.van.visual.VanAnimationClockTest" time="0.0"/>
+  <testcase name="identical specs are not worth blending()" classname="com.dial.van.visual.VanAnimationClockTest" time="0.0"/>
+  <testcase name="a non-monotonic timestamp does not rewind the clock()" classname="com.dial.van.visual.VanAnimationClockTest" time="0.0"/>
+  <testcase name="arriving at something urgent is fast and settling down is slow()" classname="com.dial.van.visual.VanAnimationClockTest" time="0.0"/>
+  <testcase name="with no blend in flight the transition starts from what is on screen()" classname="com.dial.van.visual.VanAnimationClockTest" time="0.001"/>
+  <testcase name="a period change advances the phase differently and never restarts it()" classname="com.dial.van.visual.VanAnimationClockTest" time="0.0"/>
+  <testcase name="every blend duration is inside the 120 to 420 ms band()" classname="com.dial.van.visual.VanAnimationClockTest" time="0.001"/>
+  <testcase name="the first frame advances nothing()" classname="com.dial.van.visual.VanAnimationClockTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

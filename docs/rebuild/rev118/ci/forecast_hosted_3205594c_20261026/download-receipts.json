@@ -1,0 +1,32 @@
+[
+  {
+    "id": 12671790021,
+    "name": "van-native-source-parquet-report",
+    "bytes": 3172,
+    "sha256": "99a067d77abb8de926fac11b365870675ca945f022324c4b7b10b1f2f60d18f6",
+    "workflow_run": {
+      "id": 40367094028,
+      "repository_id": 1369211561,
+      "head_repository_id": 1369211561,
+      "head_branch": "ccr-9e07e1af-8mgz1p",
+      "head_sha": "3205594c907665732e69dcac26852ff28078c48a"
+    },
+    "root": "/workspace/van-forecast-3205594c-source",
+    "verified_zip_crc_paths_symlinks": true
+  },
+  {
+    "id": 12671545822,
+    "name": "van-forecast-runtime-source-report",
+    "bytes": 148662,
+    "sha256": "a5575d31ef3048960da5b7048dab73fe43c80e66861f51ff7f8d359f3924c479",
+    "workflow_run": {
+      "id": 40367094028,
+      "repository_id": 1369211561,
+      "head_repository_id": 1369211561,
+      "head_branch": "ccr-9e07e1af-8mgz1p",
+      "head_sha": "3205594c907665732e69dcac26852ff28078c48a"
+    },
+    "root": "/workspace/van-forecast-3205594c-source",
+    "verified_zip_crc_paths_symlinks": true
+  }
+]

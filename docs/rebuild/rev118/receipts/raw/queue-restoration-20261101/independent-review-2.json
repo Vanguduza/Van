@@ -1,0 +1,46 @@
+{
+  "schema": "van.independent-default-verifier-startup-review/1",
+  "at_utc": "2026-11-01T13:20:07.363040+00:00",
+  "disposition": "NO_BLOCKING_FINDING_WITHIN_MINIMAL_TWO_PATH_FIX",
+  "blockers": [],
+  "base": "c0063940a7573597934e62ada558d4dc942cfad0",
+  "source_before_after": {
+    "tools/rebuild/backend_public_source.py": "0069399c90a9b7d0f3773a95e3070aa9132c6378dad3d318785b3cc2d1425542",
+    "tests/rebuild/test_public_source_shards.py": "72ca5fe5b0fbc1726b89cb0b4d4dc4237ced0b5284b2d6e824e27d8b19c7b80f"
+  },
+  "zip_sha256": "81b81d9234b6f1ee9784a8be6ac10c4fd6a42bc96d52e6ad80aef460b4065b56",
+  "patch_sha256": "f821a7a9a5f50918649bd5275c9f4991afe0d26dbef65b6e1d9e88642e5e07a8",
+  "archive_current_verified": true,
+  "exact_production_delta": "Only sys.dont_write_bytecode=True with adjacent comment, before sourcehelper import in verify-shards; remainder byte-identical to c006",
+  "assertions": "Existing test source is exact prefix retained; only new default-env real CLI conformance test appended. Worker union, cache proof, source guards, all preexisting/foreign cache refusals, selections/skips, app assertions, workflows/mirror/deps unchanged.",
+  "independent_probe": {
+    "default_env_real_production_CLI_synthetic_union_positive": true,
+    "no_new_cache": true,
+    "deliberate_foreign_cache_refused_and_preserved": true,
+    "owned_tmp_cleanup": true,
+    "preflight_free_bytes": 4315357184,
+    "two_pins_before_after_match": true,
+    "queue41_reviewed_pins_match": true,
+    "native_qualification": false
+  },
+  "source_import": "Explicit candidate PYTHONPATH; reviewer host-B import; child productionCLI explicitly removes PYTHONDONTWRITEBYTECODE and uses no-B, matching default native aggregate startup.",
+  "provided_evidence_checked": {
+    "original_before_exit": 1,
+    "after_current_guard_cases": 3,
+    "after_failures_errors_skips": 0,
+    "original_native_log_contains_cache_refusal": true
+  },
+  "queue41_exact": true,
+  "artifacts": [
+    "probe.py",
+    "probe.log",
+    "before.json",
+    "after.json"
+  ],
+  "cleanup": "Owned tempfile fixture removed; tiny fixture-only git commit removed with fixture. No candidate edits/commits/Gradle/CI dispatch/native effects/subagents.",
+  "limits": [
+    "Synthetic protocol positive qualifies verifier conformance only; not native application/test or four-worker qualification.",
+    "Original c006 four workers succeeded but aggregate FAILED. Media198 observed pass is separate; no fullunion or performance/speed/native acceptance claim.",
+    "Reviewed queue41 is unchanged and not re-reviewed. Derived citation/catalog reconciliation and genuine final publication/exact-head CI remain integration gates."
+  ]
+}

@@ -19,6 +19,7 @@ data class OwnerReconfirmationRequest(
     val queuedAtMs: Long,
     val expiresAtMs: Long,
     val ownerReadableState: String,
+    val recoveryOnly: Boolean = false,
 )
 
 object OwnerReconfirmationSurface {

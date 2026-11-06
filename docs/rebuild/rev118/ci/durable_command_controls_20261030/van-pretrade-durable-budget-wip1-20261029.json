@@ -1,0 +1,15 @@
+{
+  "path": "/workspace/van-pretrade-durable-budget-wip1-20261029.zip",
+  "bytes": 22926,
+  "sha256": "4e9ab882809cf10dc094bd3eae13840a7d43b1fe6808c5570ed999b6c79b0033",
+  "manifest": {
+    "source_parent": "524e1ca2aadc076642b5e237e0b9765065610927",
+    "state": "WIP_FIRST_DURABLE_REPAIR73PASS_NEW_CONFIG_PROBES_PENDING_REPAIR",
+    "files": {
+      "trading/vati/execution/pretrade.py": "f4441fa1ea370fae06d2488c027cf858010603b7a5a9a12ce0db9573a4390ee8",
+      "trading/vati/execution/router.py": "168ec8fecdcf19224b2e33c0884260913816eeaa81a68b08a5ea5d8b5dfb861d",
+      "trading/vati/execution/command_history.py": "a43b8fe98e4db69121f215b51286db5d2fa852012e347c118fea53f01910c9e8",
+      "trading/tests/test_pretrade_durable_command_budget.py": "cfc5f6540426422ff1d1bfb5df6ed69bdeda93c65760b8c76ac3d583a95b433c"
+    }
+  }
+}

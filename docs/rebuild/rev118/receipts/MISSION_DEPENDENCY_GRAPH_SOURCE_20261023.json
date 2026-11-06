@@ -1,0 +1,709 @@
+{
+  "schema": "van.rebuild.mission-dependency-graph-source/1",
+  "observed_at_utc": "2026-10-23T11:33:49.516637+00:00",
+  "source_parent": "7abc72112b6494da29220695b2e48d30940fb518",
+  "source_sha256": {
+    "backend/van_gateway/mission/api.py": "120897429974855bd977c8d9d86e3222dad1e462c90a59b0dc1436e546829779",
+    "backend/van_gateway/mission/service.py": "da2fe31d08213dee383ffb475b7ab340a6d1b716173ec73f5a5d4c0e32193577",
+    "backend/van_gateway/mission/graph.py": "60a114fbe14da41b0cffa78b3c34e1cb745819d8cfb0f5fecbcf8c7dc5ed87fa",
+    "backend/tests/test_mission_dependency_graph.py": "ef23de8b3cabf977647a7ec5bd1234cf25d476d1117617594b47badb5ceea89b",
+    "tools/rebuild/refresh_owner_source_contracts.py": "73e877734b8c0f70edffd66b7df9d2d75f8fb185dcc2a2fcaa1463b75eb18eff",
+    "registries/owner_features.json": "f4b2133448708164426dc871c0cab80f26f0097c6dd167345ec6935886d4e851",
+    "registries/owner_screens.json": "50031295c19ddc09423cb4328a296e7e208a429b5bee7764033c5ab04f4c4096",
+    "registries/owner_endpoints.json": "8132c28ec7f7908c97b58ae349a66800a404d6c177370f6d06223b69e7557ee1",
+    "registries/owner_endpoint_schemas.json": "6cf352912c6768af3f182a3b798fe18881faefcce90041f1d0a4577ad0f0cb15"
+  },
+  "executions": {
+    "dependencies-before": {
+      "tests": 2,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.825,
+      "sha256": "21a8f8f08b24778c78f2da1373061cc3fbb0650f3fc392e580260776fb00ed95"
+    },
+    "graph-final-source": {
+      "tests": 157,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 34.758,
+      "sha256": "f774105ed80f3b984f3fdc39e9343765c895ffe8787aa2b5bc408d99280d585f"
+    },
+    "graph-combined": {
+      "tests": 166,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 41.232,
+      "sha256": "d5b29166c634e0ff495526861dc974b668a5fce44c9cc0e1ee39ede2d4a380ef"
+    },
+    "graph-rebuild": {
+      "tests": 78,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 29.259,
+      "sha256": "fa6a3734750bede9fcb210da3aecd35508e5d6446874f70c8f6ed55a67159c3b"
+    },
+    "graph-registry-checks": {
+      "tests": 35,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 3.713,
+      "sha256": "c7c79433e8a0eaa8aca79293e57b9a244c6336c5ff3c307ec15e55cb604ef886"
+    }
+  },
+  "faults": {
+    "definitions": [
+      [
+        "backend/van_gateway/mission/service.py",
+        "if row is None:\n                    raise MissionError(\"ACTIVITY_DEPENDENCY_UNKNOWN\", dependency)",
+        "if row is None:\n                    row={\"mission_id\":mission_id}",
+        "test_orphan_dependency_refused_without_creating_work"
+      ],
+      [
+        "backend/van_gateway/mission/service.py",
+        "if row[\"mission_id\"] != mission_id:",
+        "if False:",
+        "test_foreign_dependency_refused_and_does_not_attach_another_missions_work"
+      ],
+      [
+        "backend/van_gateway/mission/api.py",
+        "dependency_activity_ids=body.dependency_activity_ids,",
+        "dependency_activity_ids=[],",
+        "test_activity_http_producer_preserves_dependency_and_verification_contracts"
+      ],
+      [
+        "backend/van_gateway/mission/service.py",
+        "if MissionState(current[\"state\"]) in TERMINAL_STATES:",
+        "if False:",
+        "test_terminal_transition_during_admission_cannot_append_new_work"
+      ],
+      [
+        "backend/van_gateway/mission/graph.py",
+        "mission_state=mission_state,nodes=result,",
+        "mission_state='VERIFIED_SUCCESS',nodes=result,",
+        "test_executor_outcome_does_not_invent_verified_mission_success"
+      ],
+      [
+        "backend/van_gateway/mission/graph.py",
+        "if len(component)>1 or start in successors[start]:",
+        "if False:",
+        "test_actual_cycles_exclude_downstream_nodes_and_suppress_critical_path"
+      ],
+      [
+        "backend/van_gateway/mission/service.py",
+        "WHERE mission_id=? AND owner_visibility=1 AND evidence_ref IS NOT NULL LIMIT 10001",
+        "WHERE mission_id=? AND evidence_ref IS NOT NULL LIMIT 10001",
+        "test_graph_endpoint_reads_persisted_stages_evidence_and_cycles_without_mutating"
+      ],
+      [
+        "backend/van_gateway/mission/graph.py",
+        "executor_state=o['state'] if o else None,",
+        "executor_state='VERIFIED_SUCCESS' if o else None,",
+        "test_executor_outcome_does_not_invent_verified_mission_success"
+      ],
+      [
+        "backend/van_gateway/mission/service.py",
+        "await db.execute(\"BEGIN\")",
+        "await db.execute(\"SELECT 1\")",
+        "test_graph_observes_one_snapshot_while_another_connection_updates_work"
+      ],
+      [
+        "backend/van_gateway/mission/service.py",
+        "dependency_activity_ids=json.loads(str(row[\"dependency_activity_ids_json\"]))",
+        "dependency_activity_ids=[]",
+        "test_corrupt_historical_dependencies_are_unavailable_not_an_empty_plan"
+      ]
+    ],
+    "records": [
+      {
+        "case": 0,
+        "phase": "control",
+        "method": "test_orphan_dependency_refused_without_creating_work",
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "544188ec48b259ab271bbeadcb72faf8e0586f4f883c87b9ced0352328151bd4",
+        "log_sha256": "b336bfbb42d8a55315e2f7350d4a6528e0fd95453f81c1e21f96f9ae7c5d2932"
+      },
+      {
+        "case": 0,
+        "phase": "fault",
+        "method": "test_orphan_dependency_refused_without_creating_work",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "e663e69d7edbd46faea67ae1144609b6f36a4eb2a5942333661a4c1323b06582",
+        "log_sha256": "b716b07c060e74493430b1355a12488ca6d2b5822a00cda847e46befba1469f2"
+      },
+      {
+        "case": 1,
+        "phase": "control",
+        "method": "test_foreign_dependency_refused_and_does_not_attach_another_missions_work",
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "43d0ddacd883cb92a6468037044ab3b5a38695438c814a926a72e6d5f8b121c0",
+        "log_sha256": "7f20721722339faad833bedbd918bbce72ec5ee8917b82cf8b1a09bf4e47f2f3"
+      },
+      {
+        "case": 1,
+        "phase": "fault",
+        "method": "test_foreign_dependency_refused_and_does_not_attach_another_missions_work",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "b0143a94ee9f34c7e79395b3ebe770768e2a8f62db114d5e60e629e1d8eebac0",
+        "log_sha256": "04c11d09b6c63c6a6dd5290b27a7b699316717cdcc3669c2551300959de10151"
+      },
+      {
+        "case": 2,
+        "phase": "control",
+        "method": "test_activity_http_producer_preserves_dependency_and_verification_contracts",
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "5e2f9e907873dd94a25fbf92e4be7d296ee8c95ea88f9a522849df25eeb0da4d",
+        "log_sha256": "41c3b06b1f0237013bf2a2d9555cfc394501d11435eed1ea4fe0a018aef42c2e"
+      },
+      {
+        "case": 2,
+        "phase": "fault",
+        "method": "test_activity_http_producer_preserves_dependency_and_verification_contracts",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "fd964e5d49fbb42567845af5d85b253c11ba8ef18bd17b58f9a490195facfe49",
+        "log_sha256": "a9fdc24a1fc7f1232f486ff0d884a6932e1251ffcee9efbc16d64dd385b321c5"
+      },
+      {
+        "case": 3,
+        "phase": "control",
+        "method": "test_terminal_transition_during_admission_cannot_append_new_work",
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "0f5a24405d61450651f170cca017177a55bddcbd5eb2201b316f6273afabb33c",
+        "log_sha256": "41c3b06b1f0237013bf2a2d9555cfc394501d11435eed1ea4fe0a018aef42c2e"
+      },
+      {
+        "case": 3,
+        "phase": "fault",
+        "method": "test_terminal_transition_during_admission_cannot_append_new_work",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "ba2b0fe28c94a0e211dc9422f6f0b072c4925766a18a09103bd68916eeae9411",
+        "log_sha256": "f6995da20beccbf10dfa1c229acb9aa43aad2a8ccc2af64cbe612133e3006b92"
+      },
+      {
+        "case": 4,
+        "phase": "control",
+        "method": "test_executor_outcome_does_not_invent_verified_mission_success",
+        "returncode": 0,
+        "counts": {
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "c2e78947e92172cd1176479e0ce836e477851e11e718f4878725cbd75449659d",
+        "log_sha256": "d67af6276960c86f8235293a7fd7c89828928cae760895086fdc5286a51dbb55"
+      },
+      {
+        "case": 4,
+        "phase": "fault",
+        "method": "test_executor_outcome_does_not_invent_verified_mission_success",
+        "returncode": 1,
+        "counts": {
+          "tests": 3,
+          "failures": 3,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "0a9b2803b931c592a8a8501a2153d6f84c9996e49fc4345e8b3ee2c5c494652b",
+        "log_sha256": "687ce7d70c425bfaa9c269e79f2a7a59c5261d056905e4b96c66d2aa5d747b27"
+      },
+      {
+        "case": 5,
+        "phase": "control",
+        "method": "test_actual_cycles_exclude_downstream_nodes_and_suppress_critical_path",
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "48eacdc8e92ee6d2c1de3ff5b0cd13f059333f402af3c0856b26eed95baee680",
+        "log_sha256": "b4eb7be9000651a3e89c6a77e8b346d05d1d706d620aa6f8193e574a39b3ced1"
+      },
+      {
+        "case": 5,
+        "phase": "fault",
+        "method": "test_actual_cycles_exclude_downstream_nodes_and_suppress_critical_path",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "55475a21b428db212e17c03078f1a53a6cf6963e6eb022529a77a983286545a6",
+        "log_sha256": "93800dfd338122f5341b9814a953403d1088799c6980e318dfebffac78c1d04f"
+      },
+      {
+        "case": 6,
+        "phase": "control",
+        "method": "test_graph_endpoint_reads_persisted_stages_evidence_and_cycles_without_mutating",
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "960b218d2677b698c469a3c5df696618b05958ab798088448ba077c4a1759bd0",
+        "log_sha256": "3dd8a455f93386b2d78b9d5605f1c2f52fd55f0962f89b0bd7d602cae0ead952"
+      },
+      {
+        "case": 6,
+        "phase": "fault",
+        "method": "test_graph_endpoint_reads_persisted_stages_evidence_and_cycles_without_mutating",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "9b3a62431b3c6c955ce3a57bf2f730c43572f9c33d7dc195bd98dd5bc0e83c55",
+        "log_sha256": "30ab72060079ecf8aa4b5669204e428ba37cf1117714fc3059051f2939589616"
+      },
+      {
+        "case": 7,
+        "phase": "control",
+        "method": "test_executor_outcome_does_not_invent_verified_mission_success",
+        "returncode": 0,
+        "counts": {
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "774b7bd37abec368db060ccec049c3b49516d540bc592144ad4d718a7b76b09e",
+        "log_sha256": "6cfee6194c810d1d888f113801b7f4407dbd50164d7589796f47f1c7a716fcaf"
+      },
+      {
+        "case": 7,
+        "phase": "fault",
+        "method": "test_executor_outcome_does_not_invent_verified_mission_success",
+        "returncode": 1,
+        "counts": {
+          "tests": 3,
+          "failures": 3,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "bf324cec191897b7dfc432d46b6921649c8beac5b20324c67ad89e74ba04a50c",
+        "log_sha256": "ac161bd90960bddaabcca5f6b0b3ac085d06e7d37d8c2c7ed1da86116b002c5d"
+      },
+      {
+        "case": 8,
+        "phase": "control",
+        "method": "test_graph_observes_one_snapshot_while_another_connection_updates_work",
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "206847b8d5da31f625cecb72c11b04c7bbb8b681d56d8d1ea617680d2898b508",
+        "log_sha256": "3dd8a455f93386b2d78b9d5605f1c2f52fd55f0962f89b0bd7d602cae0ead952"
+      },
+      {
+        "case": 8,
+        "phase": "fault",
+        "method": "test_graph_observes_one_snapshot_while_another_connection_updates_work",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "0ef8fc8af62408f25f023dd14808c7689b4164ed5fed5c51ead3925ee03bc580",
+        "log_sha256": "9838ebd7d01063a016592d232247286edd4d5587f4d635ac6889238bc7dde852"
+      },
+      {
+        "case": 9,
+        "phase": "control",
+        "method": "test_corrupt_historical_dependencies_are_unavailable_not_an_empty_plan",
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "0065e811ff1baa3f58055862bf01e55908f1f030d01f0835dc9c7675faef6be7",
+        "log_sha256": "82c201bb904df7561785e93b567cf9f67336470fb20ba42c9846547bf1029aea"
+      },
+      {
+        "case": 9,
+        "phase": "fault",
+        "method": "test_corrupt_historical_dependencies_are_unavailable_not_an_empty_plan",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "a9ba5003b694ca8f33436147c9365a2a16e15cb3dabc2917cd13441afa1cf005",
+        "log_sha256": "242f3af9ebacc06be317e11fd3d0322ee52414a621686647498937e913a9cc55"
+      }
+    ],
+    "before": {
+      "backend/van_gateway/mission/graph.py": "60a114fbe14da41b0cffa78b3c34e1cb745819d8cfb0f5fecbcf8c7dc5ed87fa",
+      "backend/van_gateway/mission/api.py": "120897429974855bd977c8d9d86e3222dad1e462c90a59b0dc1436e546829779",
+      "backend/van_gateway/mission/service.py": "da2fe31d08213dee383ffb475b7ab340a6d1b716173ec73f5a5d4c0e32193577"
+    },
+    "after": {
+      "backend/van_gateway/mission/graph.py": "60a114fbe14da41b0cffa78b3c34e1cb745819d8cfb0f5fecbcf8c7dc5ed87fa",
+      "backend/van_gateway/mission/api.py": "120897429974855bd977c8d9d86e3222dad1e462c90a59b0dc1436e546829779",
+      "backend/van_gateway/mission/service.py": "da2fe31d08213dee383ffb475b7ab340a6d1b716173ec73f5a5d4c0e32193577"
+    },
+    "source_restored": true
+  },
+  "initial_fault_attempt": {
+    "definitions": [
+      [
+        "backend/van_gateway/mission/service.py",
+        "if row is None:\n                    raise MissionError(\"ACTIVITY_DEPENDENCY_UNKNOWN\", dependency)",
+        "if False:\n                    raise MissionError(\"ACTIVITY_DEPENDENCY_UNKNOWN\", dependency)",
+        "test_orphan_dependency_refused_without_creating_work"
+      ],
+      [
+        "backend/van_gateway/mission/service.py",
+        "if row[\"mission_id\"] != mission_id:",
+        "if False:",
+        "test_foreign_dependency_refused_and_does_not_attach_another_missions_work"
+      ],
+      [
+        "backend/van_gateway/mission/api.py",
+        "dependency_activity_ids=body.dependency_activity_ids,",
+        "dependency_activity_ids=[],",
+        "test_activity_http_producer_preserves_dependency_and_verification_contracts"
+      ],
+      [
+        "backend/van_gateway/mission/service.py",
+        "if MissionState(current[\"state\"]) in TERMINAL_STATES:",
+        "if False:",
+        "test_terminal_transition_during_admission_cannot_append_new_work"
+      ],
+      [
+        "backend/van_gateway/mission/graph.py",
+        "mission_state=mission_state,nodes=result,",
+        "mission_state='VERIFIED_SUCCESS',nodes=result,",
+        "test_executor_outcome_does_not_invent_verified_mission_success"
+      ],
+      [
+        "backend/van_gateway/mission/graph.py",
+        "if len(component)>1 or start in successors[start]:",
+        "if False:",
+        "test_actual_cycles_exclude_downstream_nodes_and_suppress_critical_path"
+      ],
+      [
+        "backend/van_gateway/mission/service.py",
+        "WHERE mission_id=? AND owner_visibility=1 AND evidence_ref IS NOT NULL LIMIT 10001",
+        "WHERE mission_id=? AND evidence_ref IS NOT NULL LIMIT 10001",
+        "test_graph_endpoint_reads_persisted_stages_evidence_and_cycles_without_mutating"
+      ],
+      [
+        "backend/van_gateway/mission/graph.py",
+        "executor_state=o['state'] if o else None,",
+        "executor_state='VERIFIED_SUCCESS' if o else None,",
+        "test_executor_outcome_does_not_invent_verified_mission_success"
+      ]
+    ],
+    "records": [
+      {
+        "case": 0,
+        "phase": "control",
+        "method": "test_orphan_dependency_refused_without_creating_work",
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "321d8aafd8119e2dee2c35265fdc84b978d68a3e1fb1e5f525c605cad3141952",
+        "log_sha256": "82c201bb904df7561785e93b567cf9f67336470fb20ba42c9846547bf1029aea"
+      },
+      {
+        "case": 0,
+        "phase": "fault",
+        "method": "test_orphan_dependency_refused_without_creating_work",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "c75e08cff1fe82f2a93386617bfa2852a14336369d738e3844e8acc60cecd0b3",
+        "log_sha256": "c778f2622c8b6a4e25a501c88bd620d71f2763761803aaa16f23fbc630d51623"
+      },
+      {
+        "case": 1,
+        "phase": "control",
+        "method": "test_foreign_dependency_refused_and_does_not_attach_another_missions_work",
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "9359d98d113317e50b8adc55cc1d1af99a9d4846b09d06f09f98a3e433936ccb",
+        "log_sha256": "0c33791aa03cbc8826ba04efd1b062adb3baa875c47625e4de7090bd753d7635"
+      },
+      {
+        "case": 1,
+        "phase": "fault",
+        "method": "test_foreign_dependency_refused_and_does_not_attach_another_missions_work",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "01b7839db9bb90c42181d00880c9a2bcab1c137b1d1c7e5ed430caade225a458",
+        "log_sha256": "de60a6f9bff25fd4fad51a0c7e2bf408ffc8fdf3a5cbb61e11486ee68c1ff182"
+      },
+      {
+        "case": 2,
+        "phase": "control",
+        "method": "test_activity_http_producer_preserves_dependency_and_verification_contracts",
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "175b6d6739833becf0af999ef4a0e72e5d6e34c4db3febacd9b9610db692fc53",
+        "log_sha256": "0234d51de03c8da96792f0ed8d0043697c9f1b2888dbf66e9cf6b5620819903b"
+      },
+      {
+        "case": 2,
+        "phase": "fault",
+        "method": "test_activity_http_producer_preserves_dependency_and_verification_contracts",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "9e5cfbec53cd29691772afb625ceb062c5ba948e1bb0c3eaaa33137e650a24b8",
+        "log_sha256": "7fc3ca018375ebd2878f88f213d6e3cb3a2751ad485a8ed68790fb9e1b9e458c"
+      },
+      {
+        "case": 3,
+        "phase": "control",
+        "method": "test_terminal_transition_during_admission_cannot_append_new_work",
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "64d4d5d41a6746c52c83001a99bd25b0edfbba87a69c55138dac0ef9360ca07a",
+        "log_sha256": "71cecd4a03d26fc192e472bf26020cdc2172e564ac64a719b16960d8dffd73a1"
+      },
+      {
+        "case": 3,
+        "phase": "fault",
+        "method": "test_terminal_transition_during_admission_cannot_append_new_work",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "ed8479eda4ec92914e8aa5b635cde8ea5a4e075164b3eb1781755d41b1d62676",
+        "log_sha256": "9441d9f4a959c6773f7c8583955d121a506aeeb83d28facb159d782dbfb61c8c"
+      },
+      {
+        "case": 4,
+        "phase": "control",
+        "method": "test_executor_outcome_does_not_invent_verified_mission_success",
+        "returncode": 0,
+        "counts": {
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "a4bb468c1b92b434859fb12d9cb9acdc0bc3da22e025c84a59f5a69a71f9bb6f",
+        "log_sha256": "12c13b571d8e8108a46c806d2eb1b853b9b760aa4925f151f6ea89c325c4e808"
+      },
+      {
+        "case": 4,
+        "phase": "fault",
+        "method": "test_executor_outcome_does_not_invent_verified_mission_success",
+        "returncode": 1,
+        "counts": {
+          "tests": 3,
+          "failures": 3,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "afd61dd4b509e6bc174af135537d69a11881a3e62e27d0bf62a0489199508bdf",
+        "log_sha256": "39e0fc15eafd6594263c1417b25a548e6f162041d70ed2a0a09cac54b3a225c1"
+      },
+      {
+        "case": 5,
+        "phase": "control",
+        "method": "test_actual_cycles_exclude_downstream_nodes_and_suppress_critical_path",
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "e4b8655e49bbbc4f1dad62fb64bd8b5d4211ecc599fa29f638d821410fb634e2",
+        "log_sha256": "036bb9390fb408c39eb19a61d865bc4044aa29eeea8139e62a988a5a83930a4d"
+      },
+      {
+        "case": 5,
+        "phase": "fault",
+        "method": "test_actual_cycles_exclude_downstream_nodes_and_suppress_critical_path",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "9c3c2ff306c7786e9ae96beb072032d96bc4a061461ef9ba445be7961cdda67e",
+        "log_sha256": "4a59c906cb34a8056bac5f21264c5e8f256f0263d9875b78dba8960952ae3ed4"
+      },
+      {
+        "case": 6,
+        "phase": "control",
+        "method": "test_graph_endpoint_reads_persisted_stages_evidence_and_cycles_without_mutating",
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "49cf5f728c4080b085be67aa22039bb77bea02f7bc5d4e2cff64f84cd708887e",
+        "log_sha256": "82c201bb904df7561785e93b567cf9f67336470fb20ba42c9846547bf1029aea"
+      },
+      {
+        "case": 6,
+        "phase": "fault",
+        "method": "test_graph_endpoint_reads_persisted_stages_evidence_and_cycles_without_mutating",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "324c55dba0081bc858ced263c8bce3860b701ae49b5b1a2f8e3da765fdfef73a",
+        "log_sha256": "b1b789b0e68fb9c6e657d2751815e140299888e733afd971174ee28616037d62"
+      },
+      {
+        "case": 7,
+        "phase": "control",
+        "method": "test_executor_outcome_does_not_invent_verified_mission_success",
+        "returncode": 0,
+        "counts": {
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "256adac392eb2c952dae84e7fe5d33eb11087fda4b835bbe54977a8e7a65bd32",
+        "log_sha256": "067947b41af67502f259a392086e1139ed163f09545488f2f4c27142bd17f819"
+      },
+      {
+        "case": 7,
+        "phase": "fault",
+        "method": "test_executor_outcome_does_not_invent_verified_mission_success",
+        "returncode": 1,
+        "counts": {
+          "tests": 3,
+          "failures": 3,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "eb67bdb46fe4df3e5fb9ae0b026aead39cb5a54c9b5c86e479e0fed0006fe462",
+        "log_sha256": "36104528c8abeea26514c563765c80da7c7ef5ba35611c4a74d803e22e7535ca"
+      }
+    ],
+    "before": {
+      "backend/van_gateway/mission/graph.py": "60a114fbe14da41b0cffa78b3c34e1cb745819d8cfb0f5fecbcf8c7dc5ed87fa",
+      "backend/van_gateway/mission/api.py": "7839cd172ce92986ef2e5f1420bcdf2b3695e870fe49cd69c4d55abee8965447",
+      "backend/van_gateway/mission/service.py": "ef7cb392d7c451b4abef66d1f2d00a9ae7a6de498997e6f0b21fda732f463341"
+    },
+    "after": {
+      "backend/van_gateway/mission/graph.py": "60a114fbe14da41b0cffa78b3c34e1cb745819d8cfb0f5fecbcf8c7dc5ed87fa",
+      "backend/van_gateway/mission/api.py": "7839cd172ce92986ef2e5f1420bcdf2b3695e870fe49cd69c4d55abee8965447",
+      "backend/van_gateway/mission/service.py": "ef7cb392d7c451b4abef66d1f2d00a9ae7a6de498997e6f0b21fda732f463341"
+    },
+    "source_restored": true
+  },
+  "instrument_corrections": [
+    "Initial HTTP test expected401; actual existing scoped-control refusal is403. No producer authority check changed.",
+    "Initial missing-dependency fault removed its check but then raisedTypeError at the next identity lookup. Replaced it with an actual unsafe orphan admission and caught the resulting DID NOT RAISE. Original attempt retained."
+  ],
+  "qualification": "Real SQLite persisted work, API producer/consumer, concurrent independent writer and actual mission/control service integration in isolated source tests. Longest path explicitly uses dependency count; no duration, project-wide CRUD, native provider, whole-unit, production or handset acceptance."
+}

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.session.VanHermesSessionManagerTest" tests="21" skipped="0" failures="0" errors="0" timestamp="2026-10-08T06:47:28" hostname="052fefa249ff" time="0.975">
+  <properties/>
+  <testcase name="a server without the open recovery contract cannot silently mint retry sessions()" classname="com.dial.van.session.VanHermesSessionManagerTest" time="0.186"/>
+  <testcase name="pending server result retains durable work and retries with its original identity()" classname="com.dial.van.session.VanHermesSessionManagerTest" time="0.039"/>
+  <testcase name="two WSS handshake failures promote HTTP carrier with the granted path and retained identity()" classname="com.dial.van.session.VanHermesSessionManagerTest" time="0.052"/>
+  <testcase name="failed resend retains every unvisited pending command for the next reconnect()" classname="com.dial.van.session.VanHermesSessionManagerTest" time="0.048"/>
+  <testcase name="live A3 requiring owner context is reconfirmed after process death and live A4 is never persisted()" classname="com.dial.van.session.VanHermesSessionManagerTest" time="0.003"/>
+  <testcase name="process death before acknowledgement restores the original durable message()" classname="com.dial.van.session.VanHermesSessionManagerTest" time="0.003"/>
+  <testcase name="an empty outbox restores persisted logical session instead of opening new authority()" classname="com.dial.van.session.VanHermesSessionManagerTest" time="0.002"/>
+  <testcase name="resume timeout keeps the session and durable outbox instead of abandoning owner work()" classname="com.dial.van.session.VanHermesSessionManagerTest" time="0.054"/>
+  <testcase name="a pending receipt for an unknown message cannot disrupt the live path()" classname="com.dial.van.session.VanHermesSessionManagerTest" time="0.087"/>
+  <testcase name="authoritative refusal holds pending work without creating replacement authority()" classname="com.dial.van.session.VanHermesSessionManagerTest" time="0.083"/>
+  <testcase name="eligible live send is persisted before the socket write and survives process death()" classname="com.dial.van.session.VanHermesSessionManagerTest" time="0.014"/>
+  <testcase name="queued write remains durable until gateway acknowledgement()" classname="com.dial.van.session.VanHermesSessionManagerTest" time="0.007"/>
+  <testcase name="stale socket callbacks cannot disconnect a recovered transport()" classname="com.dial.van.session.VanHermesSessionManagerTest" time="0.108"/>
+  <testcase name="initial open failure retries and explicit close cancels further recovery()" classname="com.dial.van.session.VanHermesSessionManagerTest" time="0.105"/>
+  <testcase name="A4 remains unstorable until resume confirms a live session epoch()" classname="com.dial.van.session.VanHermesSessionManagerTest" time="0.002"/>
+  <testcase name="resume reconciliation removes a durable in flight entry before process restart()" classname="com.dial.van.session.VanHermesSessionManagerTest" time="0.025"/>
+  <testcase name="repeated pending results recover on WSS without misclassifying server delay as a failed handshake()" classname="com.dial.van.session.VanHermesSessionManagerTest" time="0.062"/>
+  <testcase name="pairing after startup opens one session and concurrent starts share one socket()" classname="com.dial.van.session.VanHermesSessionManagerTest" time="0.003"/>
+  <testcase name="restored work for conflicting logical sessions is held without guessing new authority()" classname="com.dial.van.session.VanHermesSessionManagerTest" time="0.001"/>
+  <testcase name="explicit unknown session attaches a replacement socket and reports abandoned work()" classname="com.dial.van.session.VanHermesSessionManagerTest" time="0.049"/>
+  <testcase name="ordinary reconnect resends unknown commands with original message and idempotency identities()" classname="com.dial.van.session.VanHermesSessionManagerTest" time="0.034"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

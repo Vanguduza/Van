@@ -1,0 +1,24 @@
+{
+  "events": [
+    {
+      "event": "parent_actual_sqlite_writer_held",
+      "at": 69840.59282978
+    },
+    {
+      "event": "original_test_returned_or_raised",
+      "at": 69859.291587549
+    },
+    {
+      "event": "parent_event_loop_release_ran",
+      "at": 69859.542658094
+    },
+    {
+      "event": "parent_actual_sqlite_writer_released",
+      "at": 69859.542976184
+    }
+  ],
+  "child_pid": 1271078,
+  "child_returncode": 1,
+  "child_already_reaped": true,
+  "scope": "Actual original test/real signedA4/client/ownedSQLite/realchild; hookonly holds an empty parent writer after realapproval and schedules .25s release. No timeout/assertion/authority/childscript changes."
+}

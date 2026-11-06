@@ -1,0 +1,53 @@
+{
+  "schema": "van.rev118.mt5-original-symbol-source/1",
+  "source_parent": "d3ef2cdb75e5d9888438e62ce1566771d25c7cd4",
+  "observed_at_utc": "2026-10-28T10:04:22.125613+00:00",
+  "source_files_sha256": {
+    "deploy/van-trading-core/mql5/VanBridgeEA.mq5": "5e4410fbada91c9f7c0b0f65f7113635aa0dfdab751e166bedb6686980be84df",
+    "deploy/van-trading-core/windows/mt5_worker/README.md": "caa7436f668c8e619ba2c6180e756752998a362135e1dad54e755553e9466006",
+    "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py": "f7b463e14f267fffc2af178e6827abae546b8906018740bc067b6c65a4be3158",
+    "trading/tests/test_mt5_symbol_book.py": "34c485daecab1062109011832ac423c6d67e9ca735c621fa772f470d2d3e89f7",
+    "trading/tests/test_mt5_symbol_book_postgres.py": "25070e2c01d6916a0f990e06f6c7e3963d5ad5bb2e3ba6980f250eabcfd36306",
+    "trading/tests/test_mt5_symbol_contract.py": "79f7803f5747da1a4be9f4a0d11a2b0217bf395641808e265b2c5e3886e20b20",
+    "trading/tests/test_mt5_symbol_contract_pull.py": "96ee09e6823924d89abcbf9579f3e1f7088996d3f58716569babaa450f5585a4",
+    "trading/tests/test_mt5_symbol_contract_worker.py": "43c0d3502987e45ee9a3b04884176b38b01d1ec55b455be8eb7d563dd45d0062",
+    "trading/tests/test_mt5_symbol_read_identity.py": "777b097762bf19197cb586eefa62de8768a197c807f84cc382a78ced2cbe2c9e",
+    "trading/vati/execution/mt5_bridge.py": "d3b7bf0ab885fbf6bf406931406889ff4fb4be886ff6d1d60116a19dcca7df8c",
+    "trading/vati/execution/mt5_pull.py": "1529f0076f50aa3920bb3c21a59f8ff6a82f6c579875d8f60ecc9f7e81f6b0d0",
+    "trading/vati/execution/mt5_symbol_contract.py": "42d5d1e632b0c519787f01f5d9647608c43b60a02b8aec0f51087b9804243c01",
+    "trading/vati/market_data/mt5_symbol_book.py": "8225122f2d041ef94be8770b37de57406757d19769cd3ed24e54c55ac49aeb23"
+  },
+  "implementation": "MT5 signed SDK and authenticated EA source transports now expose original symbol terms with native loss/profit tick values, quantity/tick rules and base/profit/margin currencies. Both public adapters preserve original request/nonce or queue identity, exact deadline, account scope and original numeric/clock formats. Explicit zero loss value remains UNPRICED; no missing value becomes zero or LIVE. Two genuine legacy signed symbol reads accepted a switched login/currency while retaining the old label; post-SDK readback now fences login/server/currency/demo changes without changing stable legacy shape or requiring trading permission. EA adds separate SYMBOL_CONTRACT capability and18-field expiry frame outside entry claims. NativeSymbolBook independently binds the existing MT5 account-query journal before a risk decision exists, preserving SQL replay/reopen/namespace isolation, queued/writer expiry and lost-ACK recovery without native retry. Final full trading plus selected backend HTTP/schema/scope qualification:5026pass0skip/fail/audit,every call once,all1234 pinned input hashes match,ownedPostgreSQL independently absent.56focused checks overlap. Modified EA native compilation PENDING exact-source hosted evidence.0formal/native/production/S24acceptance issued.",
+  "source_result": {
+    "actual_outer_exit": 0,
+    "actual_inner_exit": 0,
+    "passed": 5026,
+    "skipped": 0,
+    "audit_violations": 0,
+    "unique_call_identities_once": 5026,
+    "pinned_source_inputs_matched": 1234,
+    "owned_postgres_independently_absent": true,
+    "includes_actual_worker_EA_and_README": true,
+    "raw": "ci/mt5_symbol_contract_20261028/sql_final"
+  },
+  "retained_failed_attempts": [
+    "2 actual signed legacy sync_symbols identity counterexamples failed DID_NOT_RAISE before the source fix.",
+    "Pull r1:68passes/1 new expiry-oracle shape mismatch. Existing queue durably returned REJECTED/deadline/no native handoff; oracle now asserts that exact refusal.",
+    "Book r1:50passes/1 lost-ACK fixture injected at nested append rather than real outer commit; outer-boundary injection corrected with original independent readback assertions retained.",
+    "Book r3:55passes/1 new regex mismatch. The existing committed-source guard already refused before native read; assertion now names its exact original error."
+  ],
+  "native_EA_compilation": "PENDING_EXACT_MODIFIED_SOURCE_HOSTED_JOB",
+  "formal_acceptances_issued": 0,
+  "source_authorizations": [
+    "auth-20261022-owner-autonomous-candidate-build",
+    "auth-20261023-owner-native-worker-source"
+  ],
+  "limitations": [
+    "Linux native SDK and EA responses were explicit source fixtures, not an actual connected terminal or provider.",
+    "Source terms have no separate authoritative FX timestamp or atomic account snapshot; risk/provider/execution qualification flags remain false.",
+    "This packet stores small original risk-input metadata, not a complete feed/catalog in the financial journal. Full discovery/feed/quote/depth/news/entitlement obligations remain in scope.",
+    "It does not admit financial risk terms, reserve collateral/cash/margin, arbitrate active mandates, qualify migration/native finality or complete any unit.",
+    "Parent native compilation cannot qualify the changed EA. Python storage audit is not an OS sandbox."
+  ],
+  "next": "Genuine hooks, required committed-baseline verify, normal push/exact remote readback, actual hosted source and modified-EA compilation; then native valuation/current-policy/shared transactional reservation workflows and remaining complete backend/Android programme."
+}

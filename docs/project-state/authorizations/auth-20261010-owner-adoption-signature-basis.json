@@ -1,0 +1,46 @@
+{
+ "schema_version": 1,
+ "authorization_id": "auth-20261010-owner-adoption-signature-basis",
+ "project": "van",
+ "authority": "OWNER_EXPLICIT",
+ "owner_instruction_sha256": "899e14562c0ecf43a67d78906d98f48a44be2a507da6cdc6bd5a75a38382bcde",
+ "owner_instruction_excerpt": "Conclude scrapling and crawlee adoption",
+ "source": {
+  "kind": "owner_session_instruction",
+  "channel": "claude_code",
+  "request_id": "claude-code-20261010-van-adoption-signature-basis",
+  "owner_attested": true,
+  "device_signature_claimed": false,
+  "cryptographic_signature_claimed": false,
+  "signed_ingress_claimed": false
+ },
+ "issued_at_utc": "2026-10-10T03:30:00Z",
+ "base_sha": "22cba0f33e325ee7e1ea326a176ab2fff7aa8043",
+ "branch_scope": "ccr-71397b02-lm6fid",
+ "commit_scope": {
+  "commits": [
+   "210e6124a12fb19481215bcc2ead05b71876b069"
+  ]
+ },
+ "authorized_paths": [
+  "docs/decisions/VAN-ADOPT-CRAWLEE-001.yaml",
+  "docs/decisions/VAN-ADOPT-SCRAPLING-001.yaml"
+ ],
+ "change_classes": [
+  "decision_signature_basis_statement"
+ ],
+ "material_scope_expansion": false,
+ "feature_removal": false,
+ "business_model_change": false,
+ "security_authority_change": false,
+ "owner_control_boundary_change": false,
+ "legal_position_change": false,
+ "money_or_custody_model_change": false,
+ "locked_provider_change": false,
+ "reusable": false,
+ "revoked": false,
+ "limitations": [
+  "States that the SIGNED adoption records rest on owner session intent, not device-signed ingress",
+  "No dependency, deployment or gate change"
+ ]
+}

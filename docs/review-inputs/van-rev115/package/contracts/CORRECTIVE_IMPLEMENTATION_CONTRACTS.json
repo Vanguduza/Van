@@ -1,0 +1,327 @@
+{
+  "application_changes_performed": false,
+  "contracts": [
+    {
+      "id": "VAN-CX-001",
+      "negative": "Select the old mixed plan, omit a backend producer, or reclassify a chart renderer as backend: reject.",
+      "positive": "The generated graph and its source-scope digest determine one reproducible sequence.",
+      "recovery": "A relevant source, policy or scope amendment invalidates affected receipts and BG-001 without erasing historical evidence.",
+      "required_change": "Only CANONICAL_AUTHORITY.json selects the active master and generated plan. Historical plans are immutable lineage, never runnable implementation authority. All backend and backend-verification units precede BG-001; every new UX/frontend unit depends on the same BG-001 scope.",
+      "root_cause": "Multiple valid-looking versioned plans can cause scope or sequence forks.",
+      "source": "Current owner directive; Rev1.10; Opus plan/generate_plan.py",
+      "title": "One canonical authority and backend-first completion graph",
+      "units": [
+        "PRE-002",
+        "PRE-003",
+        "BG-001"
+      ]
+    },
+    {
+      "id": "VAN-CX-002",
+      "negative": "Delete a PR-only action, discard a complete candidate branch without dispositions, or report an inferred effect as observed: reject.",
+      "positive": "Every changed implementation group and historical feature has a source-to-backend-to-screen-to-test chain.",
+      "recovery": "Cherry-pick or port bounded accepted changes onto the canonical implementation lineage only after F15 and source admission; keep rollback to exact source.",
+      "required_change": "Keep exact source paths, commit and content hashes, test evidence, feature obligations and ADOPT/ADAPT/REFERENCE dispositions. Retain all source candidates until their replacement or rejection is explicitly justified; never accept a reviewed module solely because its parent branch has passing CI.",
+      "root_cause": "A blanket branch merge or a main-only rebuild loses the distinction between valuable functions and unqualified changes.",
+      "source": "Opus a39f241 versus main 8eb1889; PR93/95/97/98/99 and quarantined spikes",
+      "title": "Source-preserving implementation admission",
+      "units": [
+        "PRE-001",
+        "PRE-002",
+        "BE-001"
+      ]
+    },
+    {
+      "id": "VAN-CX-003",
+      "negative": "Inject rejected/unknown protection at delayed or partial fill; a local rule alone must not yield CONFIRMED or permit additional risk.",
+      "positive": "A pending fill with a rejected venue stop triggers the same admitted recovery as an immediate fill and updates risk and Attention.",
+      "recovery": "Keep protective orders and reservation state through crash; reconcile original receipt/position before any compensating action, with no blind close retry.",
+      "required_change": "Route FILLED and PARTIAL receipts from all origins through one protection reconciler. Track REQUESTED, CONFIRMED, UNKNOWN and MISSING separately. Never register an intended local stop as proof of a venue stop. Apply the currently admitted immediate flatten/halt response unless an independently qualified owner-admitted bounded re-read/reattach policy replaces it; record timeout and unknown close outcomes.",
+      "root_cause": "Pending fill settlement bypasses the protection-confirmation response used for immediate fills.",
+      "source": "trading/vati/app/cycle.py::_settle_pending; trading/vati/execution/router.py immediate fill path",
+      "title": "Protection parity for immediate and pending fills",
+      "units": [
+        "BE-010",
+        "BE-012",
+        "BE-035"
+      ]
+    },
+    {
+      "id": "VAN-CX-004",
+      "negative": "The current 1.10000 limit with 0.00010 spread and 0.00002 slippage must never fill a BUY at 1.10007 or a SELL at 1.09993.",
+      "positive": "At-touch and gapped quote fixtures preserve the limit in both directions; explicit capped-market fixtures preserve their separate slippage envelope.",
+      "recovery": "After a gap, respect limit/stop/stop-limit distinctions; missed fills are not fabricated to preserve historical backtest counts.",
+      "required_change": "BUY LIMIT fills at or below its limit and SELL LIMIT at or above it, using the relevant executable quote and eligible event time. An at-touch order that is not executable within its limit rests or is refused. A capped-market order is a distinct intent/template with its own signed semantics; logging a LIMIT-to-MARKET substitution does not make it authorized. Unknown venue capabilities deny the operation.",
+      "root_cause": "The at-touch LIMIT path executes beyond its declared price and may substitute MARKET under the same authorization.",
+      "source": "trading/vati/execution/paper.py::submit/_work_pending; router.py LIMIT_AT_TOUCH substitution",
+      "title": "Limit-price invariants and explicit order semantics",
+      "units": [
+        "BE-008",
+        "BE-010",
+        "BE-019",
+        "BE-035"
+      ]
+    },
+    {
+      "id": "VAN-CX-005",
+      "negative": "Drop max_wait, substitute a later expiry, or fill an ineligible resting order without reconciliation/Attention: fail.",
+      "positive": "A four-hour STOP_ENTRY cannot remain eligible for 24 hours; PRE_BLACKOUT/POST_BLACKOUT moves eligible pending orders into cancellation workflow.",
+      "recovery": "Model cancel/fill and partial-fill races honestly. Reserve full remaining risk until authoritative cancellation/expiry/readback; reconcile a fill that wins the race.",
+      "required_change": "Bind policy digest, order expiry, mandate validity, market-session constraints and cancel-on-event rules into the immutable execution command and pending supervisor. Effective expiry is the earliest applicable allowed deadline; absent or stale policy is not a 24-hour default. Clock and source revisions remain explicit.",
+      "root_cause": "Policy time-to-live and cancel-on-event constraints disappear before the resting-order worker.",
+      "source": "ExecutionPolicyEngine/STOP_ENTRY.max_wait_ms; OrderCommand.expires_at_ms; PaperAdapter._rest",
+      "title": "Pending-order expiry and event-policy propagation",
+      "units": [
+        "BE-010",
+        "BE-014",
+        "BE-016",
+        "BE-019",
+        "BE-035"
+      ]
+    },
+    {
+      "id": "VAN-CX-006",
+      "negative": "A stale ACCEPTED receipt after terminal readback must not resurrect Working; duplicate fill/cancel events must not double-count.",
+      "positive": "EXPIRED, CANCELLED and REJECTED unfilled orders disappear from working-order totals but remain in historical records; partial positions retain actual exposure.",
+      "recovery": "Snapshot replay produces the same positions, orders, reservations and summaries after restart.",
+      "required_change": "Project orders from the complete canonical lifecycle, ordered and deduplicated by broker event/sequence and reconciliation revision. PLACED is the code state and Working the label. Separate unfilled terminal orders from residual exposure after partial fills. Conflicting events become reconciliation-required, not last-arrival optimism.",
+      "root_cause": "The first ACCEPTED/PENDING event is used when no later fill is found, even after a terminal event.",
+      "source": "trading/vati/app/tradebook.py::_entry_receipt/current_trades",
+      "title": "Terminal order read models and monotonic lifecycle reduction",
+      "units": [
+        "BE-003",
+        "BE-010",
+        "BE-012",
+        "BE-032"
+      ]
+    },
+    {
+      "id": "VAN-CX-007",
+      "negative": "Unknown digits, stale contract revision, a rounded stop beyond risk or below broker distance, or treating an old absolute cap as a new fraction: refuse.",
+      "positive": "FX, JPY, metals and alternative broker digit fixtures produce correct bounds from actual contract metadata and remain within the approved loss envelope.",
+      "recovery": "Quote or contract changes invalidate the preview; historical mandate/template versions replay with their original units.",
+      "required_change": "Use provider SymbolContract tick size, point size, digits, units, min/freeze stops and revision to build the executable preview first. Validate stop side and distance, risk in account currency and lot step on exact decimals. Risk and owner approval bind those executable values. Version relative-price versus absolute-price versus points units; recalculate and reapprove if changed. Preserve the no-widening invariant but do not hide a broker-invalid too-close stop.",
+      "root_cause": "Post-approval rounding changes financial meaning; instrument digit guesses leak into absolute bounds.",
+      "source": "RouteRegistry.quantise; policy_templates 1.1.0; mt5_pull.deviation_points",
+      "title": "Executable quantisation before authority and metadata-based slippage",
+      "units": [
+        "BE-008",
+        "BE-009",
+        "BE-010"
+      ]
+    },
+    {
+      "id": "VAN-CX-008",
+      "negative": "Tamper, truncate, fork, roll back, replace a ledger or supply a stale checkpoint: fail closed and force full verification. The research always-True monkeypatch is forbidden.",
+      "positive": "New-row work scales with appended records while honest replay matches full verification in SQLite and Postgres.",
+      "recovery": "Checkpoints are rebuilt or verified after restart; concurrency and interrupted checkpoint writes cannot leave risk operating on untrusted state.",
+      "required_change": "Retain verified incremental anchors and periodic full checks; bind ledger identity, row sequence/count, chain root, source epoch and checkpoint lifetime. Full verification is required on first use, detected change, failed incremental proof and the admitted maximum interval. Document the distinction between immediate detection of new-row/rechain/deletion faults and delayed detection of in-place historical edits; stronger write protection or integrity monitoring may reduce that window.",
+      "root_cause": "Per-decision full-ledger scans become unbounded, but a speed shortcut can weaken integrity detection.",
+      "source": "Ledger.verify_incremental / IncrementalChainVerifier; Opus SQLite and Postgres tests",
+      "title": "Incremental ledger verification with explicit integrity envelope",
+      "units": [
+        "BE-003",
+        "BE-009",
+        "BE-033"
+      ]
+    },
+    {
+      "id": "VAN-CX-009",
+      "negative": "A restart resets losses, a default silently changes a signed policy, a manual entry bypasses total-account drawdown, or an owner reset erases economic loss: reject.",
+      "positive": "Restart replays the same locks; independent manual/autonomous cooldown tests coexist with shared all-origin hard-limit tests.",
+      "recovery": "A signed reset changes a permission state or risk reference with an audit event, never the immutable economic performance history; unknown policy/collateral blocks new risk.",
+      "required_change": "Retain 24-hour cooldown, 0.5 probation and suspension after more than two cooldowns in seven days as the accepted values, not live authority. Bind all fields, scope rules and policy revision into the signed mandate before activating a changed production policy. Keep autonomous strategy/account and owner.manual cooldown scopes as recorded by OD-38; always apply economic all-origin account drawdown, margin, exposure and protection ceilings. Persist reset events, loss history, economic peaks and day/week baselines.",
+      "root_cause": "Accepted code defaults are consumed without reading the new fields from a signed mandate; separate cooldown scopes can be confused with global account limits.",
+      "source": "OD-38/39; risk/lockouts.py; AccountCoordinatorService.build and DecisionCycle",
+      "title": "Signed lockout policy activation and persistent all-origin risk",
+      "units": [
+        "BE-002",
+        "BE-006",
+        "BE-009",
+        "BE-011",
+        "BE-013"
+      ]
+    },
+    {
+      "id": "VAN-CX-010",
+      "negative": "Disabling controls, altering quote units or a permissive fill model without a distinct experiment identity invalidates promotion evidence.",
+      "positive": "Known-profit/loss fixtures match analytically specified results and the actual execution adapters' admitted semantics.",
+      "recovery": "An evaluator correction invalidates dependent candidate conclusions and schedules reproducible reevaluation; old results remain labeled historical.",
+      "required_change": "Establish one qualified evaluator version before candidate selection uses it. Separate isolation experiments from deployment-faithful evaluation; both declare code, data, controls, costs and random seeds. An independent fixture oracle checks event eligibility, bid/ask, limit/stop/expiry, partial fills, costs, cash flows and restart/risk controls.",
+      "root_cause": "A research loop can optimize simulator defects and report invalid validation as profitable edge.",
+      "source": "Opus research/strategy_backtest_20261017/harness.py/analyze.py; owner OD-37",
+      "title": "Qualified chronological evaluator before automated strategy development",
+      "units": [
+        "BE-019",
+        "BE-035",
+        "BE-036"
+      ]
+    },
+    {
+      "id": "VAN-CX-011",
+      "negative": "Future-only perturbation changes past decisions, a scaler sees the holdout, or window count is only the count of calendar years: fail.",
+      "positive": "Replay of each named chronological fold yields the same pre-cutoff decisions and verified split provenance.",
+      "recovery": "Tainted fold/candidate artifacts cannot be reused as independent promotion evidence; retain audit lineage.",
+      "required_change": "Persist train/validation/test intervals, strategy frozen-at time, embargo/purge rules, label horizons, warmup-only data and candidate selection cutoffs. Mutating only unavailable future data must leave prior features and decisions unchanged. A deliberately leaking implementation must fail. Yearly summaries remain descriptive, not walk-forward windows; a 2025 label does not by itself create untouched out-of-sample evidence.",
+      "root_cause": "Yearly grouping and sensitivity to deliberately supplied future bars are mistaken for leakage-free walk-forward proof.",
+      "source": "analyze.py wf_windows=len(years); harness peek=True; Rev1.10 research integrity contract",
+      "title": "Leakage-proof chronology and genuine walk-forward records",
+      "units": [
+        "BE-035",
+        "BE-036",
+        "VAN-ML-PKT-008",
+        "VAN-ML-PKT-021"
+      ]
+    },
+    {
+      "id": "VAN-CX-012",
+      "negative": "Bid is silently treated as midpoint, fixed EST becomes DST-local time, a bar is used before close or a mirror is unpinned: reject qualifying use.",
+      "positive": "From permitted raw inputs, a second run reproduces the same bars, sessions, costs and outcomes.",
+      "recovery": "Keep lawful metadata and reproducibility scripts without republishing restricted data; qualifying tests await admitted data while unrelated authorized engineering continues.",
+      "required_change": "Use a DatasetManifest with exact hashes, provider/mirror revision, permitted-use state, timezone/DST handling, bid/ask/mid semantics, bar timestamp conventions, missing/duplicate intervals and transformation code. Preserve full spread, commissions, financing, slippage, liquidity and FX assumptions per venue and period. A source access/usage gap is never hidden by calling fixtures live.",
+      "root_cause": "A mirror dataset's units/time conventions and research adjustments are not independently fixed.",
+      "source": "Opus public mirror research data; bid OHLC with symmetric quote construction",
+      "title": "Immutable dataset, quote, calendar and cost provenance",
+      "units": [
+        "BE-008",
+        "BE-019",
+        "BE-035",
+        "VAN-ML-PKT-006"
+      ]
+    },
+    {
+      "id": "VAN-CX-013",
+      "negative": "A pooled PBO is relabeled pair-specific, losers disappear from trial count, or repeated holdout tuning is called independent: fail promotion.",
+      "positive": "Each reported metric identifies the population, formula/version, trial set, uncertainty and selection scope.",
+      "recovery": "A no-qualified-candidate result is valid; do not search until a cherry-picked pass can be manufactured.",
+      "required_change": "Record every tried configuration, failure, search budget, selection rule, effective trial treatment, untouched holdout and actual cost model. Label DSR and PBO according to their statistical meaning and calculation cohort, not chance of skill or trade-win probability. Economic admission is per exact dataset/evaluator/model/policy scope, separate from software completion.",
+      "root_cause": "Selection-process statistics are described as personal skill probabilities and copied to individual instruments.",
+      "source": "DSR/PBO output labels and pooled candidate scoring in Opus analysis",
+      "title": "Complete trial ledger and honest statistical interpretation",
+      "units": [
+        "BE-035",
+        "BE-036",
+        "VAN-ML-PKT-020",
+        "VAN-ML-PKT-021"
+      ]
+    },
+    {
+      "id": "VAN-CX-014",
+      "negative": "A model edits protected execution/risk paths, repeated runs duplicate studies, a failed candidate becomes a promotion opportunity, or an unsigned candidate trades live: refuse.",
+      "positive": "A weekly run is idempotent by period/strategy/dataset/evaluator; results reproduce and a candidate reaches only permitted next states.",
+      "recovery": "Resume interrupted jobs from durable checkpoints; outdated evaluations are invalidated, not overwritten; current production champion remains unchanged.",
+      "required_change": "One standing, scoped research grant may schedule offline diagnostics, generate candidate versions and evaluate them; it cannot alter live policy. Loss clusters generate hypotheses evaluated against winners, exposure/opportunity frequency and market regimes. Separate distribution drift from predictive deterioration. Preserve parents and all trials. Passing candidates appear as promotion proposals; failures and system faults stay inspectable. Live promotion uses a fresh exact artifact/policy-bound owner decision and stage evidence; automatic demotion only within an admitted reduce-risk policy.",
+      "root_cause": "Unscheduled existing capabilities and ambiguous per-transition approval undermine a coherent automated research loop.",
+      "source": "OD-37; VAN-NX-072; existing learning/evolution/validation services",
+      "title": "Governed weekly strategy-development lifecycle",
+      "units": [
+        "BE-013",
+        "BE-022",
+        "BE-028",
+        "BE-035",
+        "BE-036"
+      ]
+    },
+    {
+      "id": "VAN-CX-015",
+      "negative": "Empty proof, arbitrary real proof label, proof for another account/event, re-signed weakened allowlist or concurrent duplicate use: reject.",
+      "positive": "A pre-signed ticket arms only in its declared readiness envelope and can claim the nonce once.",
+      "recovery": "Arming and consuming a grant are not a broker fill; unknown submission follows the order reconciler, never a second order.",
+      "required_change": "Keep duplicate rejection, exact transition allowlists and approval/submission/readback dominators. Extend proposed news SIGNED→ARMED with valid owner grant, pre-arm window, account/mandate/policy revisions, healthy required sources and unused nonce. Execution still needs the event's two-source agreement, current quote/risk and atomic nonce claim. Validate proof issuer, subject, digest, freshness and revocation at runtime; definitions do not execute checks.",
+      "root_cause": "A locked transition list can preserve an insufficient guard, while a proof label alone does not establish a live fact.",
+      "source": "Opus 159-transition guard list and 35 proof types; uncovered SIGNED to ARMED gap; Rev1.10 readiness amendment",
+      "title": "Typed proof sufficiency and news arming readiness",
+      "units": [
+        "PRE-002",
+        "BE-002",
+        "BE-017"
+      ]
+    },
+    {
+      "id": "VAN-CX-016",
+      "negative": "Redirect settles money, a timeout resubmits, deleting restores secrets, unclassified flow silently improves risk capital, or a withdrawal bypasses concurrent reservations: reject.",
+      "positive": "Deposit/withdrawal/credit/fee and pending-order interleavings reconcile exact money, positions and risk without false P&L.",
+      "recovery": "Rollback never erases financial events; credential cancellation returns RELINK_REQUIRED and broker closure remains independently verified.",
+      "required_change": "Separate local unlink, archive, credential rotation and remote closure. Use durable idempotent funding intents, beneficiary/quote-bound approval, reserved outgoing collateral, debit/credit leg reconciliation and compensating reversals. Cash-flow-adjusted returns use a versioned unitization or equivalent tested convention; preserve economic drawdown separately from authorized risk resets. Fresh atomic checks prevent unlink/deletion or withdrawal racing a fill/unknown transfer.",
+      "root_cause": "Local account actions, money settlement and trading collateral can be conflated or checked against inconsistent snapshots.",
+      "source": "OD-18/25; Accounts & Funds ownership planes; prior F-033; Opus local registry candidates",
+      "title": "Funding and account deletion concurrency with economic accounting",
+      "units": [
+        "BE-004",
+        "BE-005",
+        "BE-006",
+        "BE-007",
+        "BE-009"
+      ]
+    },
+    {
+      "id": "VAN-CX-017",
+      "negative": "A visually complete screen lacks its source or any backend is unfinished; BG-001 and frontend entry refuse.",
+      "positive": "Every mapped owner action and new capability has one traceable caller and appropriate screen/sheet/dialog outcome.",
+      "recovery": "A newly discovered missing backend capability reopens its backend unit and invalidates affected BG/UX proof before front-end compensation.",
+      "required_change": "Publish a revisioned capability/action/event/error/provenance catalogue for every admitted backend feature. Each operation declares read/write authority, availability, precision, stale semantics, approval, cancellation and receipt deep links. The full catalogue, not a fixed five-flow demo, drives information architecture and all-surface contracts after BG-001.",
+      "root_cause": "Screens designed around partial endpoints omit later functions or implement authority in Android.",
+      "source": "Latest owner backend-first instruction; whole-product B1 coverage",
+      "title": "Complete backend consumer catalogue before native UX",
+      "units": [
+        "BE-032",
+        "BG-001",
+        "UX-001",
+        "UX-003"
+      ]
+    },
+    {
+      "id": "VAN-CX-018",
+      "negative": "A child F15/BG independently opens UI, Qlib or Freqtrade sends a live order, or a unavailable provider is labeled healthy: reject.",
+      "positive": "Every one of the 90 forecast requirements maps to an active unit and test; all required child backend receipts reach BG-001.",
+      "recovery": "Data/model failure yields explicit abstention or unavailable state; no economically qualified model is a permissible result, not permission to omit software.",
+      "required_change": "Fold all 48 forecast-source packet obligations into the one parent graph, preserving their IDs through explicit aliases. Implement Qlib/LightGBM, NeuralForecast and admitted Freqtrade/FreqAI-derived lifecycle capabilities, prediction-market information and replay research labs. Retain VATI as the sole risk and order authority. No-procurement scope is preserved; live event-contract orders are not introduced.",
+      "root_cause": "A complete child plan left outside the parent creates parallel authorities or missing backend dependencies.",
+      "source": "VAN Forecast Adoption Rev1.1 parent delta and current owner full-feature requirement",
+      "title": "Single forecasting integration without a second trading engine",
+      "units": [
+        "BE-013",
+        "BE-021",
+        "BE-032",
+        "BG-001",
+        "VAN-ML-PKT-048"
+      ]
+    },
+    {
+      "id": "VAN-CX-019",
+      "negative": "Edit input and matching local hash, delete a receipt, swap source revision, self-declare signature_valid, or reuse device evidence across builds: block readiness.",
+      "positive": "The complete pack rebuilds identically and invalid evidence cannot change readiness.",
+      "recovery": "Record revoked/stale evidence; regenerate affected planning fingerprints and rerun relevant tests without erasing old records.",
+      "required_change": "Receipt eligibility binds exact source, configuration, test command, data, device/provider scope, issuer authority, freshness and failure evidence. Structural checks only validate the specification. F15, BG-001 and release gates require independently verified signed receipts through the qualified authority; no offline document tool can issue them. Guard proof, requirement locks and manifests remain PREPARED until owner approval.",
+      "root_cause": "A deterministic plan or local PASS field is mistaken for independent execution/production proof.",
+      "source": "DIAL PRD-DDP-R2 F13–F15 and Rev1.9b evidence builder",
+      "title": "Source-bound evidence promotion and non-self-issued certificates",
+      "units": [
+        "PRE-003",
+        "BQ-006",
+        "BQ-007",
+        "BG-001",
+        "QA-005"
+      ]
+    },
+    {
+      "id": "VAN-CX-020",
+      "negative": "Only showcase flows pass, legacy UI leaks into new modules, safety states are hidden for aesthetics, or unknown data looks live: reject final qualification.",
+      "positive": "Full-scope native dark/light goldens, action reachability and physical S24 cases match the same backend catalogue revision.",
+      "recovery": "Reduce motion/material cost gracefully without removing semantics; preserve signed identity and reversible cutover until every required feature is verified.",
+      "required_change": "After BG-001, customize the accepted tactile spatial material/lighting/typography to each screen purpose. Preserve every context and 349 historical action entries, add strategy/forecast/execution-state views where needed, and retain accessible alternatives. A graph, chart workstation, funding confirmation and small orb hub share design DNA, not one repeated generic card layout.",
+      "root_cause": "Backend completeness alone does not guarantee coherent native presentation or complete feature reachability.",
+      "source": "Locked dark/light references, 216 inherited contexts and consolidated research/account changes",
+      "title": "Full tactile design and feature preservation across every context",
+      "units": [
+        "UX-002",
+        "UX-003",
+        "FE-023",
+        "QA-001",
+        "QA-004"
+      ]
+    }
+  ],
+  "schema": "van.canonical.corrections/1.0",
+  "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d"
+}

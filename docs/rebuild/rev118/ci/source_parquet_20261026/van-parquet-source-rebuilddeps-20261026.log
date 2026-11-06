@@ -1,0 +1,31 @@
+Requirement already satisfied: pytest==9.1.1 in /workspace/van-parquet-source-venv-20261026/lib/python3.12/site-packages (from -r tools/rebuild/requirements.lock (line 2)) (9.1.1)
+Collecting pytest-asyncio==1.4.0 (from -r tools/rebuild/requirements.lock (line 3))
+  Using cached pytest_asyncio-1.4.0-py3-none-any.whl.metadata (4.1 kB)
+Collecting iniconfig==2.3.0 (from -r tools/rebuild/requirements.lock (line 4))
+  Using cached iniconfig-2.3.0-py3-none-any.whl.metadata (2.5 kB)
+Requirement already satisfied: packaging==26.3 in /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/site-packages (from -r tools/rebuild/requirements.lock (line 5)) (26.3)
+Collecting pluggy==1.6.0 (from -r tools/rebuild/requirements.lock (line 6))
+  Using cached pluggy-1.6.0-py3-none-any.whl.metadata (4.8 kB)
+Requirement already satisfied: Pygments==2.21.0 in /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/site-packages (from -r tools/rebuild/requirements.lock (line 7)) (2.21.0)
+Requirement already satisfied: jsonschema==4.26.0 in /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/site-packages (from -r tools/rebuild/requirements.lock (line 8)) (4.26.0)
+Requirement already satisfied: attrs==26.1.0 in /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/site-packages (from -r tools/rebuild/requirements.lock (line 9)) (26.1.0)
+Requirement already satisfied: jsonschema-specifications==2025.9.1 in /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/site-packages (from -r tools/rebuild/requirements.lock (line 10)) (2025.9.1)
+Requirement already satisfied: referencing==0.37.0 in /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/site-packages (from -r tools/rebuild/requirements.lock (line 11)) (0.37.0)
+Requirement already satisfied: rpds-py==2026.6.3 in /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/site-packages (from -r tools/rebuild/requirements.lock (line 12)) (2026.6.3)
+Requirement already satisfied: typing-extensions==4.16.0 in /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/site-packages (from -r tools/rebuild/requirements.lock (line 13)) (4.16.0)
+Using cached pytest_asyncio-1.4.0-py3-none-any.whl (16 kB)
+Using cached iniconfig-2.3.0-py3-none-any.whl (7.5 kB)
+Using cached pluggy-1.6.0-py3-none-any.whl (20 kB)
+Installing collected packages: pluggy, iniconfig, pytest-asyncio
+  Attempting uninstall: pluggy
+    Found existing installation: pluggy 1.7.0
+    Uninstalling pluggy-1.7.0:
+      Successfully uninstalled pluggy-1.7.0
+  Attempting uninstall: iniconfig
+    Found existing installation: iniconfig 2.3.1
+    Uninstalling iniconfig-2.3.1:
+      Successfully uninstalled iniconfig-2.3.1
+Successfully installed iniconfig-2.3.0 pluggy-1.6.0 pytest-asyncio-1.4.0
+
+[notice] A new release of pip is available: 25.0.1 -> 26.2.2
+[notice] To update, run: python -m pip install --upgrade pip

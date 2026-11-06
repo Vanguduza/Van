@@ -1,0 +1,15 @@
+{
+  "command": [
+    "python3",
+    "/workspace/van-native-risk-context-final-r1-20261027.py"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 1138192,
+  "started_at_utc": "2026-10-27T08:43:50.181215+00:00",
+  "timeout_seconds": 2100,
+  "state": "COMPLETED",
+  "command_pid": 1138193,
+  "exit": 2,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-27T08:53:54.020572+00:00"
+}

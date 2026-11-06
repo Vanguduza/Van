@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "status": "PROPOSED_NOT_APPLIED",
+  "repository": "Vanguduza/dial-development-system",
+  "source_commit": "64d6b7158c723b7700e5b53175ea8048d4e92d00",
+  "owner_direction_scope": "VAN backend on van-trading-core; wireless S24 Artemis acceptance",
+  "oracle_job_bound": false,
+  "authorization_record_issued": false,
+  "project_truth_changed": false,
+  "runtime_changed": false,
+  "capability_admitted": false,
+  "live_qualified": false,
+  "patch_sha256": "148878bc5aaa223f3392975eab1c4ee851bedda33ebbd35de86eff19bb75c093",
+  "files": [
+    {
+      "path": "deploy/oracle/oracle-admin/product-gateway/README.md",
+      "before_sha256": "82528171143057464121a85a04ded850f4c4bd63a74c76468f77cad500d8ff1c",
+      "proposed_after_sha256": "4a58a3454648ea415aa6e861dcd4326e03bf6419404b6e090a00be04328609e9"
+    },
+    {
+      "path": "docs/orchestration/DIAL_PRODUCT_GATEWAY_ORACLE_ADMIN.md",
+      "before_sha256": "0af7cce6ef037d55a59f13acda79bd607ab4c8fe590488285d33ac00c3a3439f",
+      "proposed_after_sha256": "856e91e8be2f40f0941cbcc633e003c45aa6dcee2612b37a7fa04a9b8b2849fa"
+    },
+    {
+      "path": "deploy/netcup/hermes-control/projection/README.md",
+      "before_sha256": "f1e8e280544ef39129ed4242ad28c3ae52adf83367c8823706465bff2ad2c29d",
+      "proposed_after_sha256": "7fe8ff5490f2a8df59e5b9222b989ff4bf1fe184973ff0f0846d919eeb499e4f"
+    },
+    {
+      "path": "deploy/oracle/resource-fabric/hosts.json",
+      "before_sha256": "8b4d80bfac1484e0fda3a85ee77d5963a6f50fafd36342e7fbfb41570fa97931",
+      "proposed_after_sha256": "b78600c59d9903c490b0164dd9de235427972deddf97865c23594d4f81f0b367"
+    }
+  ],
+  "provenance": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "edec0966e51c818395f5a381a764ff19947e1091ab655e352450b2a963e3ecc4"
+    },
+    {
+      "path": "CLAUDE.md",
+      "sha256": "f87de6cc0b20ce5af1629aa413b84343aca8b31d30456c352a4b2f7028cded53"
+    },
+    {
+      "path": "PROJECT_TRUTH_PROTOCOL.md",
+      "sha256": "84f6999ba8bacd0502432531cb23cc163c85f70e3637ed305d25cbb637637057"
+    },
+    {
+      "path": "PROJECT_CANONICAL_STATE.json",
+      "sha256": "3d17dee534c3b970598764f234fe7d9ac592b1c766f7d8d1f91d8a8d7752f848"
+    },
+    {
+      "path": "docs/project-state/OWNER_AUTHORITY_POLICY.json",
+      "sha256": "d64ac6d098eb0621833cfefae2717741f516af3663117cde98f54f00270f0b4b"
+    },
+    {
+      "path": "deploy/hybrid/estate-topology.json",
+      "sha256": "7833f7a6bf583b5bb1e713821bb1439cd6aa50021a6c0eafac151dcc0e0cd493"
+    },
+    {
+      "path": "agent-system/orchestration/development-projection/server.mjs",
+      "sha256": "109222cac66215d4be2a395c860af9d13242be447cc67c0b49740ad43dd3130c"
+    },
+    {
+      "path": "tests/development-projection-api.test.mjs",
+      "sha256": "fce9fc52e1a12d3ebe964e7476ed2edf69b90c230d75892bacfc97e1f350166e"
+    },
+    {
+      "path": "agent-system/orchestration/artemis-subordinate-client.mjs",
+      "sha256": "4235b16cbd1269ccf3ed616079b8b15acd815166ecd55038ff15dff01b7779ce"
+    },
+    {
+      "path": "deploy/netcup/hermes-control/artemis/dial_artemis_mcp_bridge.py",
+      "sha256": "bf1494d86f21cba40b1421c3b53d2f334a57e904d4aa311f87431849f33dd6d3"
+    },
+    {
+      "path": "agent-system/orchestration/android-testing-plane.mjs",
+      "sha256": "b10fe251f6d160256b466b68733ae1da38e9e561329d9c92e94aa173236ebfbc"
+    },
+    {
+      "path": "agent-system/orchestration/android-testing-mcp.mjs",
+      "sha256": "7d57d0bfeb29e776e661c331cbb98b48c57cc3c8a68a8916f231a92f0ed71862"
+    }
+  ],
+  "pending_governance": [
+    "existing_owner_originated_Oracle_job",
+    "append_only_authorization_including_exact_files",
+    "active_writer_safe_boundary",
+    "authorized_PR_branch",
+    "mandatory_DDS_verification"
+  ],
+  "new_ingress_capability": "VAN_OWNER_TLS_PASSTHROUGH_V1",
+  "new_ingress_admission_in_patch": false,
+  "verification": {
+    "patch_apply_check_passed": true,
+    "dds_checkout_unchanged": true,
+    "projection_existing_tests": {
+      "runner": "vitest",
+      "passed": 16,
+      "duration_seconds": 2.36,
+      "scope": "LOCAL_HTTP_FIXTURE_NOT_LIVE",
+      "log": "dds-projection-existing-tests.log"
+    }
+  }
+}

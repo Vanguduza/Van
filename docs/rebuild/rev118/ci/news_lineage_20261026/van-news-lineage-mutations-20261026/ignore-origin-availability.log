@@ -1,0 +1,18 @@
+.........F........................                                       [100%]
+=================================== FAILURES ===================================
+______ test_declared_origin_does_not_backdate_earlier_unknown_observation ______
+
+ledger = <vati.core.ledger.Ledger object at 0x7f798a1f9ac0>
+
+    def test_declared_origin_does_not_backdate_earlier_unknown_observation(ledger):
+        news = NewsIngress(ledger=ledger)
+        value = row(); value.pop('original_publisher')
+        news.ingest_rows([value], now_ms=NOW)
+        news.ingest_rows([row()], now_ms=NOW+10)
+>       assert lineage(news, NOW)['unknown_origin_observations'] == 1
+E       assert 0 == 1
+
+trading/tests/test_news_publisher_lineage.py:88: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_news_publisher_lineage.py::test_declared_origin_does_not_backdate_earlier_unknown_observation
+1 failed, 33 passed, 2 deselected in 0.92s

@@ -1,0 +1,22 @@
+{
+  "command": [
+    "env",
+    "PYTHONPATH=backend:backend/tests:trading:trading/tests:.",
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "tools/rebuild/source_storage_audit.py",
+    "--report",
+    "/workspace/van-exact-tca-before-20261028-audit.json",
+    "trading/tests/test_tca_exact_arithmetic.py",
+    "--junitxml=/workspace/van-exact-tca-before-20261028.xml",
+    "-q"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 753832,
+  "started_at_utc": "2026-10-28T21:05:44.660359+00:00",
+  "timeout_seconds": 120,
+  "state": "COMPLETED",
+  "command_pid": 753835,
+  "exit": 1,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-28T21:05:45.930159+00:00"
+}

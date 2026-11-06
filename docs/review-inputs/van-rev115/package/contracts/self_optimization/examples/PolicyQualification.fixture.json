@@ -1,0 +1,34 @@
+{
+  "baseline_ref": "FIXTURE_BASELINE_REF",
+  "candidate_artifact_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+  "candidate_ref": "FIXTURE_CANDIDATE_REF",
+  "dataset_manifest_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+  "environment": "FIXTURE",
+  "evaluator_artifact_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+  "evidence_refs": [
+    "FIXTURE_SOURCE_NOT_A_REAL_PROOF"
+  ],
+  "expires_at_ms": 2000,
+  "grants_financial_authority": false,
+  "independent_issuer_ref": "FIXTURE_INDEPENDENT_ISSUER_REF",
+  "issued_ms": 1000,
+  "materiality_policy_ref": "FIXTURE_MATERIALITY_POLICY_REF",
+  "record_id": "FIXTURE_PolicyQualification",
+  "record_type": "PolicyQualification",
+  "resource_measurement_ref": "FIXTURE_RESOURCE_MEASUREMENT_REF",
+  "result": "INCONCLUSIVE",
+  "safety_noninferiority_ref": "FIXTURE_SAFETY_NONINFERIORITY_REF",
+  "schema_version": 2,
+  "scope": {
+    "account_id": "FIXTURE_ACCOUNT",
+    "market_type": "CRYPTO_SPOT",
+    "ownership": "OWNER_MANUAL",
+    "product_id": "FIXTURE_PRODUCT_ID",
+    "scope_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+    "strategy_id": "FIXTURE_STRATEGY_ID",
+    "venue_id": "FIXTURE_VENUE"
+  },
+  "signature_artifact_ref": "FIXTURE_SIGNATURE_ARTIFACT_REF",
+  "study_protocol_ref": "FIXTURE_STUDY_PROTOCOL_REF",
+  "utility_definition_ref": "FIXTURE_UTILITY_DEFINITION_REF"
+}

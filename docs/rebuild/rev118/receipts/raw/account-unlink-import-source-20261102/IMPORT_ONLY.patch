@@ -1,0 +1,67 @@
+diff --git a/backend/tests/test_account_unlink_review.py b/backend/tests/test_account_unlink_review.py
+index eb2b2a90..ffe53bbd 100644
+--- a/backend/tests/test_account_unlink_review.py
++++ b/backend/tests/test_account_unlink_review.py
+@@ -4,9 +4,9 @@ from decimal import Decimal as D
+ from types import SimpleNamespace as NS
+ 
+ import pytest
+-from test_trading_api import client,_env
+-from test_account_update_review import isolate,challenge
+-from test_trading_oauth_scope import act
++from backend.tests.test_trading_api import client,_env
++from backend.tests.test_account_update_review import isolate,challenge
++from backend.tests.test_trading_oauth_scope import act
+ from vati.accounts import Account,AccountRegistry,CredentialRef
+ from vati.app.account_lease import AccountRuntimeLease
+ from vati.app.sqlite_lease import SQLiteLeaseStore
+diff --git a/backend/tests/test_account_update_review.py b/backend/tests/test_account_update_review.py
+index 75ac0886..a6b23941 100644
+--- a/backend/tests/test_account_update_review.py
++++ b/backend/tests/test_account_update_review.py
+@@ -7,8 +7,8 @@ from dataclasses import replace
+ 
+ import pytest
+ 
+-from test_trading_api import client,_env,_approval_proof
+-from test_trading_oauth_scope import act
++from backend.tests.test_trading_api import client,_env,_approval_proof
++from backend.tests.test_trading_oauth_scope import act
+ from van_gateway.trading.accounts import ACTIONS,canonical_action,requires_owner_approval
+ from vati.accounts import Account,AccountRegistry,CredentialRef
+ from vati.core.canonical import canonical_hash
+diff --git a/backend/tests/test_trading_oauth_scope.py b/backend/tests/test_trading_oauth_scope.py
+index a5c61bd1..1c0f51f2 100644
+--- a/backend/tests/test_trading_oauth_scope.py
++++ b/backend/tests/test_trading_oauth_scope.py
+@@ -3,7 +3,7 @@ import time
+ 
+ import pytest
+ 
+-from test_trading_api import client, _env, _approval_proof, DEVICE_PEM, HDR
++from backend.tests.test_trading_api import client, _env, _approval_proof, DEVICE_PEM, HDR
+ from van_gateway.trading.accounts import canonical_action, requires_owner_approval
+ 
+ 
+diff --git a/trading/tests/test_account_unlink_currentness.py b/trading/tests/test_account_unlink_currentness.py
+index 7c715f28..667af3b0 100644
+--- a/trading/tests/test_account_unlink_currentness.py
++++ b/trading/tests/test_account_unlink_currentness.py
+@@ -6,7 +6,7 @@ from types import SimpleNamespace as NS
+ from pathlib import Path
+ import pytest
+ from fastapi.testclient import TestClient
+-from test_account_unlink_review import client,_env,isolate,paper,challenge
++from backend.tests.test_account_unlink_review import client,_env,isolate,paper,challenge
+ from vati.accounts import AccountRegistry
+ 
+ 
+@@ -198,7 +198,7 @@ async def test_held_retirement_lease_cannot_expire_during_final_validation(clien
+ async def test_expiry_during_last_shred_identity_wait_preserves_credentials_as_partial_unknown(client,tmp_path,monkeypatch):
+     import commander.accounts as native
+     import commander.account_retirement as retirement
+-    from test_account_unlink_review import native_funds
++    from backend.tests.test_account_unlink_review import native_funds
+     ac,app=client;_,secret,account=native_funds(tmp_path,monkeypatch)
+     body,issued=await challenge(ac,'account_remove',{'alias':account.alias})
+     identity=body['approval_proof']['challenge_id'];before=secret.read_bytes();offset=[0];armed=[False];seen=[]

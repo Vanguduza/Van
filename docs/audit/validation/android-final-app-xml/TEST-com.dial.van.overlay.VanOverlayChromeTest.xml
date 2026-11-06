@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.overlay.VanOverlayChromeTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:16:26" hostname="052fefa249ff" time="0.003">
+  <properties/>
+  <testcase name="ownerAuthorityTakesOverWhileHealthRemainsSecondary" classname="com.dial.van.overlay.VanOverlayChromeTest" time="0.002"/>
+  <testcase name="googleDegradedListeningKeepsListeningAsPrimaryChrome" classname="com.dial.van.overlay.VanOverlayChromeTest" time="0.001"/>
+  <testcase name="offlineTakesOverPrimaryChrome" classname="com.dial.van.overlay.VanOverlayChromeTest" time="0.0"/>
+  <testcase name="nominalActivityHasNoSecondaryHealthLine" classname="com.dial.van.overlay.VanOverlayChromeTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

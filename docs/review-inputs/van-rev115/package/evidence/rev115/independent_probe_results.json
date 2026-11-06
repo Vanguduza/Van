@@ -1,0 +1,334 @@
+{
+  "scope": "DOCUMENT_CONFORMANCE_AND_STATIC_SOURCE_ARITHMETIC_ONLY",
+  "application_tests_executed": 0,
+  "venue_calls": 0,
+  "historical_backtests_executed": 0,
+  "profitability_claim": false,
+  "probes": [
+    {
+      "id": "DOC-DISPATCH-POLICY",
+      "observed": [],
+      "expected": [
+        "CRITICAL_EDGE_PROOF_MISSING:SO-CHILD-T002:POLICY_QUALIFIED"
+      ],
+      "classification": "DOCUMENT_VERIFIER_GAP",
+      "file_hash_checks": false
+    },
+    {
+      "id": "DOC-EDGE-OUTCOME_UNKNOWN-CANCELLED",
+      "observed": false,
+      "expected": true,
+      "classification": "MISSING_RECOVERY_CONTRACT"
+    },
+    {
+      "id": "DOC-EDGE-OUTCOME_UNKNOWN-EXPIRED",
+      "observed": false,
+      "expected": true,
+      "classification": "MISSING_RECOVERY_CONTRACT"
+    },
+    {
+      "id": "DOC-EDGE-CANCEL_REQUESTED-OUTCOME_UNKNOWN",
+      "observed": false,
+      "expected": true,
+      "classification": "MISSING_RECOVERY_CONTRACT"
+    },
+    {
+      "id": "DOC-ZERO-TICK",
+      "observed": true,
+      "expected": false,
+      "classification": "SCHEMA_SEMANTIC_GAP",
+      "input": {
+        "amend_semantics_ref": "FIXTURE_AMEND_SEMANTICS_REF",
+        "api_family": "FIXTURE_API_FAMILY",
+        "api_version": "FIXTURE_API_VERSION",
+        "base_asset": "FIXTURE_BASE_ASSET",
+        "base_step": "0",
+        "book_recovery_ref": "FIXTURE_BOOK_RECOVERY_REF",
+        "cancel_scope": "UNCONFIRMED",
+        "environment": "FIXTURE",
+        "fee_schedule_ref": "FIXTURE_FEE_SCHEDULE_REF",
+        "maximum_quantity_base": "1.0",
+        "minimum_notional_quote": "1.0",
+        "native_product_id": "FIXTURE_NATIVE_PRODUCT_ID",
+        "order_capabilities": [],
+        "price_tick": "0",
+        "private_recovery_ref": "FIXTURE_PRIVATE_RECOVERY_REF",
+        "product_revision": "FIXTURE_PRODUCT_REVISION",
+        "product_status": "UNKNOWN",
+        "protection_impact_ref": "FIXTURE_PROTECTION_IMPACT_REF",
+        "provider_access_state": "UNCONFIRMED",
+        "provider_test_kind": "LOCAL_SIMULATOR",
+        "qualified_adapter_ref": null,
+        "quote_asset": "FIXTURE_QUOTE_ASSET",
+        "record_id": "FIXTURE_CryptoVenueProfile",
+        "record_type": "CryptoVenueProfile",
+        "schema_version": 1,
+        "scope": {
+          "account_id": "FIXTURE_ACCOUNT",
+          "market_type": "CRYPTO_SPOT",
+          "ownership": "OWNER_MANUAL",
+          "product_id": "FIXTURE_PRODUCT_ID",
+          "scope_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+          "strategy_id": "FIXTURE_STRATEGY_ID",
+          "venue_id": "FIXTURE_VENUE"
+        },
+        "spot_only": true,
+        "trade_key_withdrawal_permission": false
+      }
+    },
+    {
+      "id": "DOC-MATURE-UNKNOWN-COST",
+      "observed": true,
+      "expected": false,
+      "classification": "SCHEMA_SEMANTIC_GAP",
+      "input": {
+        "actual_cash_ledger_ref": "FIXTURE_ACTUAL_CASH_LEDGER_REF",
+        "benchmark_ref": "FIXTURE_BENCHMARK_REF",
+        "environment": "FIXTURE",
+        "evaluation_horizon_ms": 1000,
+        "evidence_refs": [],
+        "explicit_nonembedded_cost_quote": null,
+        "fees_embedded_convention_ref": "FIXTURE_FEES_EMBEDDED_CONVENTION_REF",
+        "filled_cost_quote": null,
+        "markout_refs": [],
+        "measurement_state": "MATURE",
+        "objective_ref": "FIXTURE_OBJECTIVE_REF",
+        "record_id": "FIXTURE_ExecutionQualityMeasurement",
+        "record_type": "ExecutionQualityMeasurement",
+        "residual_opportunity_quote": null,
+        "schema_version": 1,
+        "scope": {
+          "account_id": "FIXTURE_ACCOUNT",
+          "market_type": "CRYPTO_SPOT",
+          "ownership": "OWNER_MANUAL",
+          "product_id": "FIXTURE_PRODUCT_ID",
+          "scope_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+          "strategy_id": "FIXTURE_STRATEGY_ID",
+          "venue_id": "FIXTURE_VENUE"
+        },
+        "total_benchmark_loss_quote": null,
+        "uncertainty_ref": null
+      }
+    },
+    {
+      "id": "DOC-DECIMAL-POSITIVE-CONTROL",
+      "observed": {
+        "0.001": true,
+        "12.50": true,
+        "12\\x50": false
+      },
+      "expected": {
+        "0.001": true,
+        "12.50": true,
+        "12\\x50": false
+      },
+      "classification": "NO_DEFECT"
+    },
+    {
+      "id": "DOC-STALE-REVISION",
+      "observed": {
+        "choices": {
+          "1": "A",
+          "2": "A",
+          "3": "A",
+          "4": "A",
+          "5": "B",
+          "6": "B",
+          "7": "A",
+          "8": "B"
+        },
+        "means": {
+          "A": "3.20",
+          "B": "0.65"
+        }
+      },
+      "expected": "revision 1 cannot replace revision 2 in RESTATED state",
+      "classification": "REFERENCE_MODEL_GAP",
+      "input": {
+        "events": [
+          {
+            "cursor": 1,
+            "environment": "FIXTURE",
+            "explicit_cost": "0.10",
+            "fill_price": "101.0",
+            "filled_base": "1",
+            "horizon_price": "101.5",
+            "id": "eA1",
+            "method": "A",
+            "parent": "pA1",
+            "status": "MATURE"
+          },
+          {
+            "cursor": 2,
+            "environment": "FIXTURE",
+            "explicit_cost": "0.10",
+            "fill_price": "101.2",
+            "filled_base": "1",
+            "horizon_price": "101.5",
+            "id": "eA2",
+            "method": "A",
+            "parent": "pA2",
+            "status": "MATURE"
+          },
+          {
+            "cursor": 3,
+            "environment": "FIXTURE",
+            "explicit_cost": "0.10",
+            "fill_price": "100.2",
+            "filled_base": "1",
+            "horizon_price": "101.0",
+            "id": "eB1",
+            "method": "B",
+            "parent": "pB1",
+            "status": "MATURE"
+          },
+          {
+            "cursor": 4,
+            "environment": "FIXTURE",
+            "explicit_cost": "0",
+            "fill_price": null,
+            "filled_base": "0",
+            "horizon_price": null,
+            "id": "eB2-pending",
+            "method": "B",
+            "parent": "pB2",
+            "status": "PENDING_MATURITY"
+          },
+          {
+            "cursor": 5,
+            "environment": "FIXTURE",
+            "explicit_cost": "0",
+            "fill_price": null,
+            "filled_base": "0",
+            "horizon_price": "101.0",
+            "id": "eB2-mature",
+            "method": "B",
+            "parent": "pB2",
+            "status": "MATURE"
+          },
+          {
+            "cursor": 6,
+            "delivery_duplicate_of": 5,
+            "environment": "FIXTURE",
+            "explicit_cost": "0",
+            "fill_price": null,
+            "filled_base": "0",
+            "horizon_price": "101.0",
+            "id": "eB2-mature",
+            "method": "B",
+            "parent": "pB2",
+            "status": "MATURE"
+          },
+          {
+            "cursor": 7,
+            "environment": "FIXTURE",
+            "explicit_cost": "0.10",
+            "fill_price": "99.0",
+            "filled_base": "1",
+            "horizon_price": "101.5",
+            "id": "pA1-correction-r2",
+            "method": "A",
+            "parent": "pA1",
+            "status": "MATURE",
+            "observation_revision": 2
+          },
+          {
+            "cursor": 8,
+            "environment": "FIXTURE",
+            "explicit_cost": "0.10",
+            "fill_price": "105.0",
+            "filled_base": "1",
+            "horizon_price": "101.5",
+            "id": "pA1-late-r1",
+            "method": "A",
+            "parent": "pA1",
+            "status": "MATURE",
+            "observation_revision": 1
+          }
+        ],
+        "evidence_grade": "SYNTHETIC_SPECIFICATION_MODEL_ONLY",
+        "expected": {
+          "after_cursor_2": "A",
+          "after_cursor_4": "A",
+          "after_cursor_5": "B",
+          "after_cursor_6": "B",
+          "cold_replay_selection": "B",
+          "distinct_mature_parent_count": 4,
+          "duplicate_delivery_effects": 0,
+          "method_A_cost": "1.20",
+          "method_B_cost": "0.65",
+          "unknown_horizon_is_not_zero": true
+        },
+        "not_real_market_or_learning_result": true,
+        "policy": {
+          "estimator": "arithmetic_mean_total_benchmark_loss",
+          "fallback": "A",
+          "id": "fixture-fixed-selector-v1",
+          "minimum_mature_distinct_parents_per_method": 2,
+          "qualification": "SYNTHETIC_FIXTURE_NOT_A_REAL_GRANT",
+          "stable_tie_break": [
+            "A",
+            "B"
+          ]
+        },
+        "purpose": "Positive closed-loop contract example: integrate the actual VAN owners to satisfy equivalent causal behavior during implementation. This reference reducer/selector is a verification aid, not VATI production code.",
+        "qualified_algorithms": [
+          "A",
+          "B"
+        ],
+        "required_application_expansion": [
+          "Use actual registered outcome/TCA/reducer/selector callers and actual qualified policy/grant resolver; a test-only second pipeline is not accepted.",
+          "Assert byte-stable logical snapshot and decisions after checkpoint/restart, including source correction and policy epoch cases.",
+          "Confirm the environment admission boundary prevents FIXTURE/BACKTEST observations becoming live broker evidence.",
+          "Inject sink/caller removal, immature outcomes, duplicates, reward-policy change, revoked binding and stale quote; assert correct refusal/fallback with protection untouched.",
+          "Use independent expected-outcome calculations, not the production function as its own oracle.",
+          "The fixture min sample of2 and numbers are demonstration data, not a calibrated production policy or evidence of profit."
+        ],
+        "schema": "van.self-optimization.positive-loop-conformance-fixture/1.0",
+        "subject": {
+          "account": "fixture-account",
+          "cohort": "fixture-same-compatible-context",
+          "decision_reference": "100",
+          "product": "fixture-venue:spot:UNIT/USD",
+          "quantity_base": "1",
+          "side": "BUY"
+        }
+      }
+    },
+    {
+      "id": "SRC-SLICE-CAP",
+      "observed": {
+        "slice_quantity": "25",
+        "cap": "2.50",
+        "ratio": "1E+1"
+      },
+      "expected": "all slices <= cap or explicit infeasible refusal",
+      "classification": "STATIC_SOURCE_ARITHMETIC_COUNTEREXAMPLE",
+      "source": "trading/vati/execution/style_selector.py:ExecutionStyleSelector._slice",
+      "source_sha": "a39f241b0135cf92cc5a6b9a28af226aa294603d"
+    },
+    {
+      "id": "SRC-TCA-DECOMPOSITION",
+      "observed": {
+        "source_formula": "1",
+        "fill_vs_decision": "-1"
+      },
+      "expected": "direct implementation shortfall -1; decomposition must sum to that value",
+      "classification": "STATIC_SOURCE_ARITHMETIC_COUNTEREXAMPLE",
+      "source": "trading/vati/execution/tca.py:compute_tca",
+      "source_sha": "a39f241b0135cf92cc5a6b9a28af226aa294603d"
+    },
+    {
+      "id": "SPEC-GROSS-FEE",
+      "observed": {
+        "gross_fill": "1",
+        "base_fee": "0.01",
+        "net_inventory": "0.99",
+        "incorrect_remaining": "0.01"
+      },
+      "expected": "gross execution budget exhausted; fee does not create a second buy allowance",
+      "classification": "SPECIFICATION_DISAMBIGUATION"
+    }
+  ],
+  "script_sha256": "69c3955cb057e4db96324bd93644b802cb919ca055d7040014f68953e0e4e1e7"
+}

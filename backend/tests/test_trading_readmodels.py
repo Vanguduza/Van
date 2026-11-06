@@ -70,7 +70,7 @@ def _mandate_mapping() -> dict:
 
     signed_at = NOW // 1000 - 3600
     expires_at = NOW // 1000 + 30 * 86400
-    return {
+    data = {
         "mandate_id": "mandate-readmodels", "version": "1.0.0",
         "account_alias": "fx_primary", "venue": "paper", "mode": "LIMITED_LIVE",
         "instruments": [SYMBOL], "allowed_strategies": [STRATEGY],
@@ -81,10 +81,11 @@ def _mandate_mapping() -> dict:
         "tier1_event_policy": "strategy_specific", "weekend_hold_allowed": False,
         "forbidden": sorted(HARD_FORBIDDEN_BEHAVIOURS),
         "signed_at_unix": signed_at, "expires_at_unix": expires_at,
-        "owner_signature_ref": OWNER.token(
-            act="mandate-admit", subject="mandate-readmodels:1.0.0",
-            issued_at_unix=signed_at, lifetime_seconds=expires_at - signed_at),
     }
+    from vati.risk.mandate import mandate_subject
+    data['owner_signature_ref']=OWNER.token(act='mandate-admit',subject=mandate_subject(data),
+        issued_at_unix=signed_at,lifetime_seconds=expires_at-signed_at)
+    return data
 
 
 def _market_state(now_ms: int):

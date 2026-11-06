@@ -70,7 +70,10 @@ object VanMotionMap {
         VanFiniteAction.CONFIRM -> 900L
         VanFiniteAction.SHRUG -> 1_100L
         VanFiniteAction.PRESENT_CARD -> 1_500L
-        VanFiniteAction.OPEN_PANEL, VanFiniteAction.CLOSE_PANEL -> VanMotionTokens.STANDARD_MS.toLong()
+        // Character gestures use the canonical 700ms clip; the panel chrome below
+        // retains its separate 240ms transition. Clearing at chrome speed cut the
+        // authored hand sweep short and desynchronized the gesture director.
+        VanFiniteAction.OPEN_PANEL, VanFiniteAction.CLOSE_PANEL -> 700L
     }
 
     /** Compact <-> expanded overlay resize (`animateContentSize`/`AnimatedContent`). */

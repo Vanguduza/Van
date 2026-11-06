@@ -1,0 +1,149 @@
+{
+  "guard_list_is_not_sufficient": true,
+  "invariants": [
+    {
+      "application_enforcement": "REQUIRED_NOT_IMPLEMENTED_BY_THIS_PACK",
+      "id": "INV-AUTH",
+      "owners": [
+        "BE-002",
+        "BE-009",
+        "BE-010"
+      ],
+      "predicate": "No new command without existing objective/risk/reservation/fence and qualified operational scope."
+    },
+    {
+      "application_enforcement": "REQUIRED_NOT_IMPLEMENTED_BY_THIS_PACK",
+      "id": "INV-FACT",
+      "owners": [
+        "BE-003",
+        "BE-012"
+      ],
+      "predicate": "Actual external fills/corrections must be recorded even after revocation; observation is not authorization."
+    },
+    {
+      "application_enforcement": "REQUIRED_NOT_IMPLEMENTED_BY_THIS_PACK",
+      "id": "INV-EXPOSURE",
+      "owners": [
+        "BE-009",
+        "BE-010"
+      ],
+      "predicate": "Cumulative gross executed base (net only of authenticated trade busts), plus maximum executable remaining children, never exceeds approved gross parent quantity. Fees, position exits and inventory netting do not reopen order budget. A correction is not new execution authority."
+    },
+    {
+      "application_enforcement": "REQUIRED_NOT_IMPLEMENTED_BY_THIS_PACK",
+      "id": "INV-LIMIT",
+      "owners": [
+        "BE-010",
+        "BE-035"
+      ],
+      "predicate": "Buy limit <= limit and sell limit >= limit; stop/conditional type must be retained."
+    },
+    {
+      "application_enforcement": "REQUIRED_NOT_IMPLEMENTED_BY_THIS_PACK",
+      "id": "INV-DEADLINE",
+      "owners": [
+        "BE-010"
+      ],
+      "predicate": "No adapter default, restart or child extends approved parent expiry."
+    },
+    {
+      "application_enforcement": "REQUIRED_NOT_IMPLEMENTED_BY_THIS_PACK",
+      "id": "INV-PROTECT",
+      "owners": [
+        "BE-010",
+        "BE-012"
+      ],
+      "predicate": "A fill is not protection; a requested close is not a flat position."
+    },
+    {
+      "application_enforcement": "REQUIRED_NOT_IMPLEMENTED_BY_THIS_PACK",
+      "id": "INV-REPLAY",
+      "owners": [
+        "BE-003",
+        "BE-036"
+      ],
+      "predicate": "Sealed inputs/cursor and pinned artifacts reproduce decision and learned-state hashes."
+    },
+    {
+      "application_enforcement": "REQUIRED_NOT_IMPLEMENTED_BY_THIS_PACK",
+      "id": "INV-PROMOTE",
+      "owners": [
+        "BE-002",
+        "BE-036"
+      ],
+      "predicate": "No research-stage candidate activates without independent qualifier and authorized binding."
+    },
+    {
+      "application_enforcement": "REQUIRED_NOT_IMPLEMENTED_BY_THIS_PACK",
+      "id": "INV-LEARN",
+      "owners": [
+        "BE-012",
+        "BE-036"
+      ],
+      "predicate": "Only mature valid revisions under qualified update formula contribute; duplicates never increase independent count."
+    },
+    {
+      "application_enforcement": "REQUIRED_NOT_IMPLEMENTED_BY_THIS_PACK",
+      "id": "INV-URGENCY",
+      "owners": [
+        "BE-010"
+      ],
+      "predicate": "An empty urgency-feasible set cannot revert to slow/ineligible candidates."
+    },
+    {
+      "application_enforcement": "REQUIRED_NOT_IMPLEMENTED_BY_THIS_PACK",
+      "id": "INV-SPOT",
+      "owners": [
+        "BE-006",
+        "BE-009",
+        "BE-010"
+      ],
+      "predicate": "Spot orders require owned base/quote/fee resources, not implicit leverage or withdrawal permission."
+    },
+    {
+      "application_enforcement": "REQUIRED_NOT_IMPLEMENTED_BY_THIS_PACK",
+      "id": "INV-PROVIDER",
+      "owners": [
+        "BQ-001",
+        "BQ-002"
+      ],
+      "predicate": "Mock/fixture success is not actual venue matching or financial settlement proof."
+    },
+    {
+      "application_enforcement": "REQUIRED_NOT_IMPLEMENTED_BY_THIS_PACK",
+      "id": "INV-SCOPE",
+      "owners": [
+        "PRE-002",
+        "BG-001"
+      ],
+      "predicate": "Every inherited and added feature/action retains a real owner and acceptance path before BG."
+    },
+    {
+      "application_enforcement": "REQUIRED_NOT_IMPLEMENTED_BY_THIS_PACK",
+      "id": "INV-FRONTEND",
+      "owners": [
+        "BG-001"
+      ],
+      "predicate": "All backend and BQ scopes precede sole BG; every UX/FE descendant of BG."
+    },
+    {
+      "application_enforcement": "REQUIRED_NOT_IMPLEMENTED_BY_THIS_PACK",
+      "id": "INV-COMPLEXITY",
+      "owners": [
+        "BE-001",
+        "BE-033"
+      ],
+      "predicate": "No new live bot, ledger, risk authority, credential plane or registry arises merely to implement learning."
+    },
+    {
+      "application_enforcement": "REQUIRED_NOT_IMPLEMENTED_BY_THIS_PACK",
+      "id": "INV-ECONOMICS",
+      "owners": [
+        "BE-035",
+        "BQ-009"
+      ],
+      "predicate": "Economic comparison includes costs/nonfill/resource and full-account feasibility; safety never becomes reward penalty alone."
+    }
+  ],
+  "schema": "van.so.invariants/1.0"
+}

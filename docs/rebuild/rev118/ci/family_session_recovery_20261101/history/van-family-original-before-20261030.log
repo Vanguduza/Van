@@ -1,0 +1,87 @@
+FFFF                                                                     [100%]
+=================================== FAILURES ===================================
+_ test_actual_remaining_family_basis_after_reduction_and_new_add[LONG-expected_average0-mark0] _
+
+direction = <Direction.LONG: 'LONG'>, expected_average = Decimal('110')
+mark = Decimal('130')
+
+    @pytest.mark.parametrize('direction,expected_average,mark',[
+        (Direction.LONG,D(110),D(130)),(Direction.SHORT,D(90),D(70))])
+    def test_actual_remaining_family_basis_after_reduction_and_new_add(direction,expected_average,mark):
+        family=after_partial(direction=direction)
+        assert family.net_quantity==D(10) and family.gross_added==D(15) and family.scale_ins==1
+        assert family.realised_money==D(50)
+>       assert family.average_entry==expected_average
+E       AssertionError: assert Decimal('106.6666666666666666666666667') == Decimal('110')
+E        +  where Decimal('106.6666666666666666666666667') = PositionFamily(family_id='original-family', account_alias='source-fixture', symbol='EURUSD', direction=<Direction.LONG...milyState.OPEN: 'OPEN'>, current_stop=Decimal('80'), original_stop=Decimal('80'), closed_ms=None, divergence_detail='').average_entry
+
+trading/tests/test_family_original_accounting.py:34: AssertionError
+_ test_actual_remaining_family_basis_after_reduction_and_new_add[SHORT-expected_average1-mark1] _
+
+direction = <Direction.SHORT: 'SHORT'>, expected_average = Decimal('90')
+mark = Decimal('70')
+
+    @pytest.mark.parametrize('direction,expected_average,mark',[
+        (Direction.LONG,D(110),D(130)),(Direction.SHORT,D(90),D(70))])
+    def test_actual_remaining_family_basis_after_reduction_and_new_add(direction,expected_average,mark):
+        family=after_partial(direction=direction)
+        assert family.net_quantity==D(10) and family.gross_added==D(15) and family.scale_ins==1
+        assert family.realised_money==D(50)
+>       assert family.average_entry==expected_average
+E       AssertionError: assert Decimal('93.33333333333333333333333333') == Decimal('90')
+E        +  where Decimal('93.33333333333333333333333333') = PositionFamily(family_id='original-family', account_alias='source-fixture', symbol='EURUSD', direction=<Direction.SHOR...lyState.OPEN: 'OPEN'>, current_stop=Decimal('120'), original_stop=Decimal('120'), closed_ms=None, divergence_detail='').average_entry
+
+trading/tests/test_family_original_accounting.py:34: AssertionError
+_ test_family_fold_does_not_take_precision_or_mutate_flags_from_ambient_decimal_context _
+
+    def test_family_fold_does_not_take_precision_or_mutate_flags_from_ambient_decimal_context():
+        family=after_partial()
+        with localcontext() as ctx:
+            ctx.prec=2;ctx.traps[Inexact]=ctx.traps[Rounded]=True;flags=dict(ctx.flags)
+            assert family.net_quantity==D(10) and family.gross_added==D(15)
+>           assert family.average_entry==D(110) and family.realised_money==D(50)
+                   ^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_family_original_accounting.py:46: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/lifecycle/family.py:133: in average_entry
+    cost = sum((m.quantity * m.price for m in self.members if m.adds), ZERO)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = <list_iterator object at 0x7f12094b01f0>
+
+>   cost = sum((m.quantity * m.price for m in self.members if m.adds), ZERO)
+                ^^^^^^^^^^^^^^^^^^^^
+E   decimal.Rounded: [<class 'decimal.Rounded'>]
+
+trading/vati/lifecycle/family.py:133: Rounded
+_ test_actual_cold_lifecycle_retains_original_gross_added_instead_of_reopening_exit_budget _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-46/test_actual_cold_lifecycle_ret0')
+
+    def test_actual_cold_lifecycle_retains_original_gross_added_instead_of_reopening_exit_budget(tmp_path):
+        from test_account_lifecycle import _lifecycle
+        ledger=Ledger(tmp_path/'family-restart.sqlite');cold=None
+        try:
+            life,adapter,command,entry=recorded_paper_partial(ledger)
+            cold=Ledger(ledger.path);count=ledger.count()
+            restarted=_lifecycle(cold,adapter)
+            restored,unresolved=restarted.recover_from_venue()
+            assert restored==(command.trade_intent_id,) and unresolved==()
+            original=life.families.for_intent(command.trade_intent_id)
+            recovered=restarted.families.for_intent(command.trade_intent_id)
+>           assert recovered.net_quantity==D('.06') and recovered.gross_added==D('.10')
+E           AssertionError: assert (Decimal('0.06') == Decimal('0.06') and Decimal('0.06') == Decimal('0.10'))
+E            +  where Decimal('0.06') = PositionFamily(family_id='family:original-family-restart', account_alias='acct', symbol='EURUSD', direction=<Direction...e.OPEN: 'OPEN'>, current_stop=Decimal('1.0900'), original_stop=Decimal('1.0900'), closed_ms=None, divergence_detail='').net_quantity
+E            +  and   Decimal('0.06') = D('.06')
+E            +  and   Decimal('0.06') = PositionFamily(family_id='family:original-family-restart', account_alias='acct', symbol='EURUSD', direction=<Direction...e.OPEN: 'OPEN'>, current_stop=Decimal('1.0900'), original_stop=Decimal('1.0900'), closed_ms=None, divergence_detail='').gross_added
+E            +  and   Decimal('0.10') = D('.10')
+
+trading/tests/test_family_original_accounting.py:92: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_family_original_accounting.py::test_actual_remaining_family_basis_after_reduction_and_new_add[LONG-expected_average0-mark0]
+FAILED trading/tests/test_family_original_accounting.py::test_actual_remaining_family_basis_after_reduction_and_new_add[SHORT-expected_average1-mark1]
+FAILED trading/tests/test_family_original_accounting.py::test_family_fold_does_not_take_precision_or_mutate_flags_from_ambient_decimal_context
+FAILED trading/tests/test_family_original_accounting.py::test_actual_cold_lifecycle_retains_original_gross_added_instead_of_reopening_exit_budget
+4 failed in 0.76s

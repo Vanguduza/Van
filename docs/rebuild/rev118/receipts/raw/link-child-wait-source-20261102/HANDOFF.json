@@ -1,0 +1,67 @@
+{
+  "state": "FROZEN_ONE_TEST_ASYNC_CHILD_WAIT_FOR_INDEPENDENT_REVIEW",
+  "local_base": "5c80526ddb6effe9f61c4761645f7377314260f5",
+  "local_base_verification": "GREEN231required4fdterminal0/localunpushed",
+  "published_base": "4c410418bf8f809b1df0e3eb3edfb85422c77f5c",
+  "source_pins": {
+    "backend/tests/test_stateful_link_binding.py": "63720c50d1ee5bba47bd6307a47a651ae96a778d0b32426e72b3ac5c7016a657"
+  },
+  "patch_sha256": "2e31298e0c75909295944e7789d41e281773d88ba40a6cb77272efd2ef0457ee",
+  "archive_sha256": "f5e4feb7ca56240ef860e584c3d3b7d3126305cbd655397b75c6791891e77412",
+  "source_delta": "Exactlyonerealprocessdeathtest:localasyncioimport,shieldedto_thread communicate withoriginal30stimeout,finallykill/wait5/drainonlyitsownsession child. EveryassertAST/childscript/args/env/exit73/cap65536 andallothermodulebytes preserved. No DBtimeout/retry/scheduler/production authority/schema/skipchange.",
+  "upsert6_preserved": {
+    "trading/commander/accounts.py": "6b20d5ae1ee01f00672287bb0d9183f41083c57874b5c53afa1ea339f648082a",
+    "trading/commander/account_effects.py": "8a842f27aa24bce106371cfb454c1feb224a494665e69645f6979f0c476487a2",
+    "trading/commander/app.py": "aa353acaa9ac8d74a51e6f2e500cae7ecdbc382e64413da4ccfae75fdbd85540",
+    "trading/vati/accounts/registry.py": "e7925dc1cacb1ce84af601fbbfb870220f43e6bd423fa52855d4900ce96f0be9",
+    "backend/tests/test_account_update_review.py": "c4fa99375516fd0c52833ff4dc941c7e68dc1d6e185418e4093c489606b25d0b",
+    "trading/tests/test_account_registry_atomic_rea.py": "0f371d8d35d609d585fd615b6e0393298749b839608bea3ac66f85a858a53674"
+  },
+  "confirmed_cause": "Originalsynccommunicate insideasynctest blocksparentloop; controlledemptyactualSQLite BEGINIMMEDIATE afterrealpairedA4 schedules .25s parentrelease, butreleasecannotrununtilchildstartupfailsSQLitebusy/exit1. Afterawaitsafewait releasesparentwriter whileactualchildstarts; sameoriginalsourcebody reaches73 andallIN_FLIGHT/UNKNOWN/noresend assertionspass.",
+  "actual_proof": {
+    "before": "OneexpectedFAIL0error0skip/audit0;actualchildexit1/databaseislocked, parentreleaseonlyaftertestraises at~18.7s, childreaped; originalsourcepinned andrawowncoldSQLfixture retained.",
+    "after": "SameunchangedexternalrealSQLprobe1PASS0skip/audit0; callsactualoriginaltestwithonlywaitfix/allassertions,child73/originalunknown/noresend;2.14MBpeak.",
+    "lifecycle": "2PASS0skip/audit0 externalactual-sourcecancel/ORIGINAL30stimeout cases; SIGSTOPonlyitsownjust-createdactualunchangedchild,sourcefinallySIGKILLgroup andwait/drain; assertchild-9/alreadyreaped/no ownerwaittasks andloopprogress.7.75MBpeak. No platformsignals.",
+    "evidence_scope": "Targeted actualexistingowner-test invocations,notfullmodule/suite. No repeatneeded;restmodulebyteidentical. No provider/nativecert/qualifiedowner/deployment claim.",
+    "positive_fixture_cleanup": "PassedafterSQL/lifecycle ownbasetemps cleaned byexistingverifiedcontroller; outputdiagnosticJSONbyteswerenotseparatelycopied beforecleanup, onlyinventoryhashes survive. Do notclaim recoveredexactaftertimestamps/PIDs; realJUnitPASS+unchangedprobeassertions arethepositiveoracles. Beforediagnostic/rawSQLitefailurefixture preserved."
+  },
+  "hosted_before": {
+    "run": 41364081278,
+    "head": "4c410418bf8f809b1df0e3eb3edfb85422c77f5c",
+    "status": "completed/failure41of41terminal",
+    "root2": "3FAIL1726PASS2SKIP (newprocessdeath+2entry67)",
+    "backendcwd2": "2entry67FAIL1727PASS2SKIP;processdeathpassed",
+    "aggregates": "Both publicaggregatesfailclosed allfourworkersmustsucceed; canonicalmatrixfailed, no fullunionclaim. Knownintake/trustedbase/privateDDSprereqgatesunwaived.",
+    "decoded_logs": {
+      "JOB_125028349188_DECODED.log": {
+        "path": "/tmp/van-recovery-4c-terminal-diagnosis-20261102/JOB_125028349188_DECODED.log",
+        "bytes": 86419,
+        "sha256": "8e28cdd9c970b47b0fdb8c444de5bb9a647758f09a03067b47d1142f6cca05fe"
+      },
+      "JOB_125027132444_DECODED.log": {
+        "path": "/tmp/van-recovery-4c-terminal-diagnosis-20261102/JOB_125027132444_DECODED.log",
+        "bytes": 1125057,
+        "sha256": "fcf440d58b60991a88f38312e110cce97decadae32debf0f17bca5b04cd26181"
+      },
+      "JOB_125026523473_DECODED.log": {
+        "path": "/tmp/van-recovery-4c-terminal-diagnosis-20261102/JOB_125026523473_DECODED.log",
+        "bytes": 1127004,
+        "sha256": "b6a461f7d8760bd67360a8f2d002a1fd74f07eae01e1330df3d5c3cf92102fb6"
+      },
+      "JOB_125020433298_DECODED.log": {
+        "path": "/tmp/van-recovery-4c-terminal-diagnosis-20261102/JOB_125020433298_DECODED.log",
+        "bytes": 100462,
+        "sha256": "bf5f386f07dd69c656f6d511470d8a789235a8984971192988d4a742ac48b168"
+      },
+      "JOB_125020433325_DECODED.log": {
+        "path": "/tmp/van-recovery-4c-terminal-diagnosis-20261102/JOB_125020433325_DECODED.log",
+        "bytes": 167901,
+        "sha256": "f1b8c73dd8acc28230028623931686fe2a2a78e6b6ea892d00e74c677454ab62"
+      }
+    }
+  },
+  "watch": "Original97092terminalreceiptCIexit1; root earlierUnknownhandle retained; implementeroriginalhandlelaterreapedonce/controller0. No restart/cancel/replacement.",
+  "remaining": "Rootindependentreview beforecommit. Rootplannedonecombinedfix+unlink7batchonlyifunlinkR2clearsindependentreview; unreviewed7 notapplied. Preservegenuine5c, final4fdverification/onepush/exactreadbacks/onenewheadwatch;no scope/gatewaiver. Androiddraftproducer/fullunit/native/provider/PG/intake/BG001/S24/fullmatrixgatesopen.",
+  "raw_volatile": "/tmp/van-recovery-link-child-wait-20261102",
+  "at": "2026-11-02T00:43:41.513533+00:00"
+}

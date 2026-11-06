@@ -1,0 +1,8 @@
+{
+  "kind": "DOCUMENTATION_WRITER_FAILURE_NOT_PRODUCT_TEST_FAILURE",
+  "failure": "KeyError BE-009 while preparing EXECUTION_LEDGER update",
+  "actual_structure": "The execution ledger has BE-003 and a combined ALL_BE_BQ_UX_FE_QA_REL entry; individual BE-009 source milestones are in CANDIDATE_SOURCE_PROGRESS.",
+  "partial_writes": "Raw evidence, source receipt, source document and both progress milestones existed. EXECUTION_LEDGER write and checkpoint had not completed.",
+  "recovery": "Resume the same verified inputs idempotently; retain one progress milestone per unit, append references to existing ledger owners, preserve grouped ledger and all acceptance states.",
+  "source_tests": "1213 actual passes, zero skips/audit violations, all1150 pinned hashes match and owned fixture independently absent; unchanged by documentation recovery."
+}

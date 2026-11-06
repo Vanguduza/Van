@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.projects.ProjectModelsTest" tests="18" skipped="0" failures="0" errors="0" timestamp="2026-10-08T04:57:38" hostname="052fefa249ff" time="0.006">
+  <properties/>
+  <testcase name="truth parsing reads ok, shas and updated_at()" classname="com.dial.van.projects.ProjectModelsTest" time="0.0"/>
+  <testcase name="health is BLOCKED from attention alone, with no blocked mission()" classname="com.dial.van.projects.ProjectModelsTest" time="0.001"/>
+  <testcase name="truth parsing without updated_at reads null rather than zero()" classname="com.dial.van.projects.ProjectModelsTest" time="0.0"/>
+  <testcase name="health is AT_RISK when a mission failed or was unverifiable()" classname="com.dial.van.projects.ProjectModelsTest" time="0.001"/>
+  <testcase name="missionsForProject filters by project id only()" classname="com.dial.van.projects.ProjectModelsTest" time="0.0"/>
+  <testcase name="health is STALE_TRUTH when truth loaded but not ok()" classname="com.dial.van.projects.ProjectModelsTest" time="0.0"/>
+  <testcase name="health is ACTIVE with running work and QUIET with none, otherwise()" classname="com.dial.van.projects.ProjectModelsTest" time="0.0"/>
+  <testcase name="decisionMentionsProject matches id or display name in title, body or source()" classname="com.dial.van.projects.ProjectModelsTest" time="0.001"/>
+  <testcase name="ProjectDetailBuilder scopes relevant facts to the project scope or subject()" classname="com.dial.van.projects.ProjectModelsTest" time="0.001"/>
+  <testcase name="health is UNKNOWN when truth was never loaded and nothing is blocked()" classname="com.dial.van.projects.ProjectModelsTest" time="0.0"/>
+  <testcase name="phase prefers a truth key over deriving from missions()" classname="com.dial.van.projects.ProjectModelsTest" time="0.0"/>
+  <testcase name="ProjectDetailBuilder sorts next actions by severity then recency and isolates blockers()" classname="com.dial.van.projects.ProjectModelsTest" time="0.001"/>
+  <testcase name="phase falls back to mission activity when truth has no phase-shaped key()" classname="com.dial.van.projects.ProjectModelsTest" time="0.0"/>
+  <testcase name="attentionMatchesProject prefers the explicit column over source text()" classname="com.dial.van.projects.ProjectModelsTest" time="0.0"/>
+  <testcase name="lastChangeAtMs is the newest of truth, missions and facts()" classname="com.dial.van.projects.ProjectModelsTest" time="0.0"/>
+  <testcase name="health is BLOCKED when a mission is blocked, even with current truth and no running work()" classname="com.dial.van.projects.ProjectModelsTest" time="0.0"/>
+  <testcase name="truth parsing flattens only scalar top-level keys()" classname="com.dial.van.projects.ProjectModelsTest" time="0.001"/>
+  <testcase name="ProjectSummaryBuilder integrates missions, attention and facts for one project()" classname="com.dial.van.projects.ProjectModelsTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

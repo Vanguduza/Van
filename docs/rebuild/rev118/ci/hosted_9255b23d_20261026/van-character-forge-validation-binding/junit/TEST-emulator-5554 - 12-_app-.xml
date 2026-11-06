@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<testsuite name="com.dial.van.instrumentation.CommandCentreLaunchTest" tests="22" failures="0" errors="0" skipped="4" time="261.908" timestamp="2026-10-26T22:29:33" hostname="localhost">
+  <properties>
+    <property name="device" value="emulator-5554 - 12" />
+    <property name="flavor" value="" />
+    <property name="project" value=":app" />
+  </properties>
+  <testcase name="deepLinkSelectsNamedDestination" classname="com.dial.van.instrumentation.CommandCentreLaunchTest" time="4.232" />
+  <testcase name="residentSingleTopActivityReceivesDeepLinksWithoutRelaunching" classname="com.dial.van.instrumentation.CommandCentreLaunchTest" time="4.707" />
+  <testcase name="everyPrimaryDestinationRendersOffline" classname="com.dial.van.instrumentation.CommandCentreLaunchTest" time="6.887" />
+  <testcase name="launchesOnHomeWithPrimaryDestinations" classname="com.dial.van.instrumentation.CommandCentreLaunchTest" time="2.297" />
+  <testcase name="startsAndStops" classname="com.dial.van.instrumentation.FloatingOverlayServiceTest" time="1.283" />
+  <testcase name="exportedDebugRigRequiresPrivilegedCaller" classname="com.dial.van.instrumentation.NetworkSecurityRuntimeTest" time="0.032" />
+  <testcase name="debugLoopbackHttpWorksButOtherCleartextIsRefused" classname="com.dial.van.instrumentation.NetworkSecurityRuntimeTest" time="0.206" />
+  <testcase name="repeatedFixedTimeCapturesStayBelowTheVisibilityFloor" classname="com.dial.van.instrumentation.RiveContractTest" time="29.242" />
+  <testcase name="mandatoryCombinations" classname="com.dial.van.instrumentation.RiveContractTest" time="0.34">
+    <skipped />
+  </testcase>
+  <testcase name="contractSurfaceMatches" classname="com.dial.van.instrumentation.RiveContractTest" time="0.002" />
+  <testcase name="identityColourFamilies" classname="com.dial.van.instrumentation.RiveContractTest" time="3.535" />
+  <testcase name="coreInputsDriveTheRig" classname="com.dial.van.instrumentation.RiveContractTest" time="143.91" />
+  <testcase name="idleSoakFrameStats" classname="com.dial.van.instrumentation.RiveContractTest" time="0.08">
+    <skipped />
+  </testcase>
+  <testcase name="productionAvatarPathKeepsRive" classname="com.dial.van.instrumentation.RiveContractTest" time="0.006">
+    <skipped />
+  </testcase>
+  <testcase name="artboardIsTransparentOnThreeBackgrounds" classname="com.dial.van.instrumentation.RiveContractTest" time="11.091" />
+  <testcase name="brokenAssetFallsBack" classname="com.dial.van.instrumentation.RiveContractTest" time="0.021" />
+  <testcase name="invalidInputsDegradeSafely" classname="com.dial.van.instrumentation.RiveContractTest" time="42.148" />
+  <testcase name="everyStateAndActionRenders" classname="com.dial.van.instrumentation.RiveContractTest" time="0.06">
+    <skipped />
+  </testcase>
+  <testcase name="concreteRoutesEncodeArgumentsAndRejectMissingValues" classname="com.dial.van.instrumentation.TemplateRuntimeTest" time="0.143" />
+  <testcase name="ownerCommandsRejectUnresolvedFieldsAndLineBreaks" classname="com.dial.van.instrumentation.TemplateRuntimeTest" time="0.004" />
+  <testcase name="realOfflineAnswerReachesTheApplicationQueueAsSpoken" classname="com.dial.van.instrumentation.VoicePlaybackRuntimeTest" time="2.317" />
+  <testcase name="cancellationBeforeNativeStartCannotCompleteOrDamageTheReplacementAnswer" classname="com.dial.van.instrumentation.VoicePlaybackRuntimeTest" time="3.387" />
+</testsuite>

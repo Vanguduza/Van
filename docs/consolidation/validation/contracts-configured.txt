@@ -1,0 +1,87 @@
+................................s....................................... [  4%]
+.....................s.................................................. [  8%]
+........................................................................ [ 13%]
+........................................................................ [ 17%]
+........................................................................ [ 22%]
+........................................................................ [ 26%]
+........................................................................ [ 31%]
+........................................................................ [ 35%]
+........................................................................ [ 40%]
+........................................................................ [ 44%]
+........................................................................ [ 49%]
+........................................................................ [ 53%]
+........................................................................ [ 58%]
+........................................................................ [ 62%]
+........................................................................ [ 67%]
+........................................................................ [ 71%]
+...F.................................................................... [ 76%]
+........................................................................ [ 80%]
+........................................................................ [ 84%]
+................................................................sssss... [ 89%]
+........................................................................ [ 93%]
+........................................................................ [ 98%]
+.............s............                                               [100%]
+=================================== FAILURES ===================================
+____________________ test_the_real_branch_verifies_at_head _____________________
+
+capsys = <_pytest.capture.CaptureFixture object at 0x7f02f74097c0>
+
+    @pytest.mark.skipif(not _history_available(), reason="shallow checkout: the project-truth-ledger CI job runs this with full history")
+    def test_the_real_branch_verifies_at_head(capsys):
+        rc = ptl.main(["--repo", str(ROOT), "verify", "--committed"])
+        out = capsys.readouterr().out
+>       assert rc == 0, out
+E       AssertionError: project-truth-ledger verify: BLOCKED — 516 commit(s) in a16f7cb80b01..f6aacd10f68d
+E           lineage: programme-b-jev-openmuse-convergence-r1
+E           baseline: a16f7cb80b0169f93471d71bf6adab6cf03f7bf5
+E           ledger_source: f6aacd10f68d:docs/project-state/LOCAL_CHANGE_LEDGER.jsonl
+E           trusted_records: f6aacd10f68d
+E           - MISSING_ROW 21a77dc6b71f14bc21970e556974dc5411054428: no ledger row binds to this commit (digest 47d5c0fa7a70ac030f627c695307a636bebee6177d7c763bd8e8de588d870c86)
+E           - MISSING_ROW ea21a2ea66243e2ba1c966500337911d18d9a053: no ledger row binds to this commit (digest 6db2e01de2f9d399d8778ad4164daddf5bd3ffe87dd89e3170fee135b6c761c2)
+E           - MISSING_ROW 5eca037613d46c5f27a246325b440a9a63604f20: no ledger row binds to this commit (digest c7fb7c18dccb966642254f028c881ecf60c807e4adabc33822956e4ba8f6c241)
+E           - MISSING_ROW 07fa24821e747c98ff728be459314870f503a678: no ledger row binds to this commit (digest 2ff2480e85b3eb32806f123772ea0107a6018d2b4407dfda8fb6cfdf8e598cee)
+E           - MISSING_ROW 05b4f1c4352bdfd0ad2ddb6d934988c60160c5ba: no ledger row binds to this commit (digest 21a576122e17207b97d9c63652da0b828cd52b0f130d54e90425a240e165078d)
+E           - MISSING_ROW 7f108d628a89bbfb95b80711298adc81fcae02e2: no ledger row binds to this commit (digest 323865b817d3c17268b12f01dc378623fcd2a19add2d779587069a41bbc24082)
+E           - MISSING_ROW 527aeda592b2e1fc80d9e5c4aa999a100003bb1c: no ledger row binds to this commit (digest 52b13474c50de6a2653ee956c3199411ea1e2656606f96869b1d50a5ced6f8b5)
+E           - MISSING_ROW 504edc040769c0d9dbcf64076788a950478b3b45: no ledger row binds to this commit (digest 9e88187625afbd9d96526c69928fe70254aa20089ee6e5ad151930672c64e2f9)
+E           - MISSING_ROW 4f8ea43499c547df553442e558b55445251ddb24: no ledger row binds to this commit (digest 2b06b56dfb1cc2bcdf491d20daf4218cfb7d802d215c5f43b9b92228dcb6d830)
+E           - MISSING_ROW 139c2a22d15d2b6ca2ae9a09e7f39e759d0d10ab: no ledger row binds to this commit (digest fe56b439ea75b25cfd7774e683053c0323717e500776ff5ad5156f42bea06eab)
+E           - MISSING_ROW 3b2c9e04df8736f0fbbccd16fcd3905cf1dbe240: no ledger row binds to this commit (digest 5ebf874a6ca24e09a183cabe3d5f2a2175c82f176ebe3f734eae79fbb1eddeae)
+E           - MISSING_ROW ef6ddf7b061eed403ef74728739678247efd7085: no ledger row binds to this commit (digest 1bee0a6d63a5829d8eb8870b7db13a2ac872de238b5a549c8c380ffa2b0b5e6a)
+E           - MISSING_ROW 30bc2d03d018b2592d2209aa674b6db0a69938c2: no ledger row binds to this commit (digest 857ee602cffe68414da34f85afb7d7a2d2eb7ce3298f5d5242227e2d78974ed6)
+E           - MISSING_ROW cf1d6332e9072c5816ae435ed2a842f8d6f1b83d: no ledger row binds to this commit (digest f66fa88815eeab551c1ddd4c705467ec8b3f1bcd124749f2af2e03e967566c8f)
+E           - MISSING_ROW 79636d0a519d03214ba1b67bf9792cd569df5bc4: no ledger row binds to this commit (digest 470c6903e4b45c4de839d2b4bbdc65042802bebff292028ad295230f0d04a56c)
+E           - MISSING_ROW 19d1549750aaaf4de680d6e5b9dd3c473cb87430: no ledger row binds to this commit (digest cd8b80733859af7e9da5f9a374dc1ce636c05a4b5885b393ac1b8b4a633f7a1b)
+E           - MISSING_ROW 2fd36900324d4d925f71f58d00f92d311b9ccf19: no ledger row binds to this commit (digest af13e8243c44ad97109695cce867ba017fca4e3beba200eb05a259e6772b1a81)
+E           - MISSING_ROW 467a31c10b180225c0d541d00902d7f9b73c82e0: no ledger row binds to this commit (digest 62544448c5dacc41d84530b5ff0f7f6b12bfbfde8c59b6a5167df192a6bd2f31)
+E           - MISSING_ROW 8ac899277c1bdf0d0452c6456bc2cc266841556f: no ledger row binds to this commit (digest 217e6c26235dc60f029239cfe76566fcb9a73cbfc738376a59ba0ddb3eb30321)
+E           - MISSING_ROW 34bc80dbe86e6094d29ac18c01300ef5b8a4acec: no ledger row binds to this commit (digest abfd4dc9298dcc1a4eefc0d220c6a87737842bfebf424275acc63afc76314aee)
+E           - MISSING_ROW 228ef7b670d3fc14c1fbceb2e3a0eac472fdb8c8: no ledger row binds to this commit (digest ff2f1bb21d9e68ae3aab4a1ea3489c1288e28de0dd7ce98aaf3af576e4b00b3d)
+E           - MISSING_ROW d8a207cb00b3c8e3104041390a861a78a00b7ff7: no ledger row binds to this commit (digest 1245cf2d971dd771dad80867ed00007d5aa04c2cde617e96dd36f2750a35d568)
+E           - MISSING_ROW a8fb5ff734a6f07b3daf0ce41003db3bd3fb39b7: no ledger row binds to this commit (digest e1fd25ff3e7fe51e0ea6ccc9c346aae67c730c3acb216af4ea5eade47ff0805f)
+E           - MISSING_ROW 60f255d596bd5592094da14266b19d9fbfc5bbb9: no ledger row binds to this commit (digest 5fc514caf1abe88521b59c288257429856f298c428b43ab6add5fac701be99cf)
+E           - MISSING_ROW 201c30fe43d3434e180cf5a5e6c2f7e3bbb1bd3c: no ledger row binds to this commit (digest c75a512655ac83c144d65f42f477a090edae74dcf21ba2ad3884a0bb1c4afaec)
+E           - MISSING_ROW fbf3a5f331cfeddc7bfded8b0fd4565504b83bb4: no ledger row binds to this commit (digest d8f452e4f374e062ef76c77427ed388b1c5f40df679c1e8f83c0968927afa846)
+E           - MISSING_ROW d9854349a2415b175670791bdae8ee781f16b8e5: no ledger row binds to this commit (digest f8283970ae44d6c27ef2fd2cacbf3f2e89f9152bf4f3d2ed7a8be9eee4975e26)
+E           - MISSING_ROW d6c5681ab7d311695287489dfc824a164edce567: no ledger row binds to this commit (digest cc3654bb8a40772d05222f656a2333aed8efed74f1d2914fd02b7f079c755410)
+E           - MISSING_ROW ef2d0051ae9884964e9da7178bffa505a5247491: no ledger row binds to this commit (digest 195b354034dac3919d0ee2cf4a983416af60b81303ddc500af5175da3ede3bb2)
+E           - MISSING_ROW 165dd70648305113f8095d5a29755132bda35198: no ledger row binds to this commit (digest 0f4525c61180f6bb202c519f172700294fe53e6ef5974c764d8bad27fef19739)
+E           - MISSING_ROW 6b0c51c69219e866828863194c0d57c80c195442: no ledger row binds to this commit (digest e07ae8fc0299418eb17511b07cd6cd49019b8124a8c9ef15a591ddf956eae282)
+E           - MISSING_ROW 7a4328a5dff414011b5a4eec67ef42819526e6e7: no ledger row binds to this commit (digest 4c3b072a07a5e3f12648f58e4dfc3d602a8a140b27491df57b3dc018419ba163)
+E           - MISSING_ROW c56b851e1bff2ca29f2beb236d1d745271a3b610: no ledger row binds to this commit (digest ba112ae5ea6d5be7fb430f3db8daa36954c23b3cb4b161de8754b4158e1ef1b0)
+E           - MISSING_ROW a39f241b0135cf92cc5a6b9a28af226aa294603d: no ledger row binds to this commit (digest 2c321184fc95e153677041b18c06e940a9f11f6846974ad84618d5e3f514e40e)
+E           - MISSING_ROW b5f56ebbc056bbd8eb3e9f7a562a8cd5d5b74bdf: no ledger row binds to this commit (digest b875636ebbb112f218f4f552d8c5ee845d1762d3733670cf4043da20c664e9b6)
+E           - MISSING_ROW 270d077b978d785b186b46b208a97ba188fad1a2: no ledger row binds to this commit (digest 286274916e8e09e2a6e2ae47c96e466927d7e1e3ed8e22464caf93790f2654c2)
+E           - MISSING_ROW 321af1601e4d21fe74630593997748cdeaf3c008: no ledger row binds to this commit (digest 490f3556000e7aff33ffca173e69000cc08c7ac3d732edb4f1e018621cbb19ef)
+E           - MISSING_ROW 874774d4ece98718f4d3e80002ec136320a84e13: no ledger row binds to this commit (digest 06a44ee0157f04bfdb59e6db30479e4cce7a46cdae1c378c7ad512b9e78698cd)
+E           - MISSING_ROW 8676bf0c07ece8e29b3ebf1ba90d1205fd92e94b: no ledger row binds to this commit (digest 128f62082f095586f80fe941d88e3013fe052961257d949dac56451ebb86df3b)
+E           - MISSING_ROW 172d2143d3e6d2ec4b401376f5ef5a4cf94c7429: no ledger row binds to this commit (digest 4eec4ffd895b0f51d1c117f659a26bfefbe87b43cf80365c69881d57f42919b5)
+E           - MISSING_ROW 673a1cc6fa2549a747bd0e2097202ebeceffb5d1: no ledger row binds to this commit (digest 7efb84383daf993bb9354aff8905191cac1d01842792a23de4cab27ca0ebc9ac)
+E           - MISSING_ROW 3c3379bd791f7bda7ab66c21bba550d6077ba853: no ledger row binds to this commit (digest b257e15ed7110f87df470d9c2391d9ca6cbbf82a6899eba471cd5ae60e0c9297)
+E         
+E       assert 1 == 0
+
+tests/contracts/test_project_truth_ledger.py:795: AssertionError
+=========================== short test summary info ============================
+FAILED tests/contracts/test_project_truth_ledger.py::test_the_real_branch_verifies_at_head
+1 failed, 1601 passed, 8 skipped in 597.98s (0:09:57)

@@ -1,0 +1,595 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:van:ml:1.0:ForecastPacket",
+  "title": "ForecastPacket",
+  "description": "Proposed VAN interchange contract. Shape validity is not permission, factual evidence or runtime qualification. Cross-record semantic validation and independent trusted receipts are required.",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "van-ml/1.0"
+    },
+    "record_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "authority_effect": {
+      "const": "NONE"
+    },
+    "scope": {
+      "type": "object",
+      "properties": {
+        "project_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "cohort_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "instrument_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "venue_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "environment": {
+          "enum": [
+            "FIXTURE",
+            "RESEARCH",
+            "SHADOW",
+            "LIVE_ADVISORY"
+          ]
+        }
+      },
+      "required": [
+        "project_id",
+        "cohort_id",
+        "instrument_id",
+        "venue_id",
+        "environment"
+      ],
+      "additionalProperties": false
+    },
+    "target_spec_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "target_spec_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "horizon": {
+      "type": "object",
+      "properties": {
+        "steps": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "unit": {
+          "enum": [
+            "BARS",
+            "SESSIONS",
+            "ELAPSED_SECONDS"
+          ]
+        },
+        "interval_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "calendar_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "steps",
+        "unit",
+        "interval_id",
+        "calendar_digest"
+      ],
+      "additionalProperties": false
+    },
+    "unit": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "cost_basis": {
+      "enum": [
+        "GROSS",
+        "NET_EXPLICIT",
+        "EMBEDDED_IN_FILLS",
+        "NOT_APPLICABLE"
+      ]
+    },
+    "input_snapshot_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "feature_manifest_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "model_artifact_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "transform_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "calibration_artifact_digest": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "train_label_available_cutoff": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "input_cutoff": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "max_input_available_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "binding_epoch": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "status": {
+      "enum": [
+        "READY",
+        "ABSTAINED"
+      ]
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 256
+      },
+      "minItems": 0
+    },
+    "calibration_state": {
+      "enum": [
+        "NOT_REQUIRED",
+        "UNCALIBRATED",
+        "CALIBRATED",
+        "STALE",
+        "INSUFFICIENT"
+      ]
+    },
+    "payload": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "mean": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "quantiles": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "alpha": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "exclusiveMaximum": 1
+                  },
+                  "value": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "alpha",
+                  "value"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 0
+            },
+            "event_probability": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "event_definition_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "rank_score": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "raw_event_probability": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "scenario_artifact": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "artifact_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 256
+                    },
+                    "sha256": {
+                      "type": "string",
+                      "pattern": "^[0-9a-f]{64}$"
+                    },
+                    "media_type": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 256
+                    },
+                    "size_bytes": {
+                      "type": "integer",
+                      "minimum": 1
+                    }
+                  },
+                  "required": [
+                    "artifact_id",
+                    "sha256",
+                    "media_type",
+                    "size_bytes"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "scenario_count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "dependency_scope": {
+              "enum": [
+                "MARGINAL",
+                "TEMPORAL_WITHIN_SERIES",
+                "JOINT_COHORT"
+              ]
+            },
+            "distribution_name": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "mean",
+            "quantiles",
+            "event_probability",
+            "event_definition_id",
+            "rank_score",
+            "raw_event_probability",
+            "scenario_artifact",
+            "scenario_count",
+            "dependency_scope",
+            "distribution_name"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 256
+      },
+      "minItems": 0
+    },
+    "sampling_policy_digest": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "schema_version",
+    "record_id",
+    "authority_effect",
+    "scope",
+    "target_spec_id",
+    "target_spec_digest",
+    "horizon",
+    "unit",
+    "cost_basis",
+    "input_snapshot_digest",
+    "feature_manifest_digest",
+    "model_artifact_digest",
+    "transform_digest",
+    "calibration_artifact_digest",
+    "train_label_available_cutoff",
+    "input_cutoff",
+    "max_input_available_at",
+    "generated_at",
+    "expires_at",
+    "binding_epoch",
+    "status",
+    "reason_codes",
+    "calibration_state",
+    "payload",
+    "evidence_refs",
+    "sampling_policy_digest"
+  ],
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "ABSTAINED"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "null"
+          },
+          "reason_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "READY"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "properties": {
+              "mean": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "quantiles": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "alpha": {
+                      "type": "number",
+                      "exclusiveMinimum": 0,
+                      "exclusiveMaximum": 1
+                    },
+                    "value": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "alpha",
+                    "value"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 0
+              },
+              "event_probability": {
+                "anyOf": [
+                  {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "event_definition_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "rank_score": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "raw_event_probability": {
+                "anyOf": [
+                  {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "scenario_artifact": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "artifact_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      },
+                      "sha256": {
+                        "type": "string",
+                        "pattern": "^[0-9a-f]{64}$"
+                      },
+                      "media_type": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      },
+                      "size_bytes": {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    },
+                    "required": [
+                      "artifact_id",
+                      "sha256",
+                      "media_type",
+                      "size_bytes"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "scenario_count": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "dependency_scope": {
+                "enum": [
+                  "MARGINAL",
+                  "TEMPORAL_WITHIN_SERIES",
+                  "JOINT_COHORT"
+                ]
+              },
+              "distribution_name": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "mean",
+              "quantiles",
+              "event_probability",
+              "event_definition_id",
+              "rank_score",
+              "raw_event_probability",
+              "scenario_artifact",
+              "scenario_count",
+              "dependency_scope",
+              "distribution_name"
+            ],
+            "additionalProperties": false
+          },
+          "reason_codes": {
+            "maxItems": 0
+          }
+        }
+      }
+    }
+  ]
+}

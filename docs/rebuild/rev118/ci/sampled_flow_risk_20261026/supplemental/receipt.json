@@ -1,0 +1,99 @@
+{
+  "scope": "SUPPLEMENTAL_SOURCE_ASSERTION_FAULTS_NOT_CANONICAL374",
+  "positive": {
+    "exit": 0,
+    "tests": 10,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "audit": []
+  },
+  "faults": [
+    {
+      "exit": 1,
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skips": 0,
+      "audit": [],
+      "name": "intermediate-loss",
+      "path": "trading/vati/funding/flow_risk.py",
+      "original_sha256": "97b212ec4a09bf05d05e8ffb00eb36bab6770ae9a010940979c9fadeffc2fa16"
+    },
+    {
+      "exit": 1,
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skips": 0,
+      "audit": [],
+      "name": "external-units",
+      "path": "trading/vati/funding/flow_risk.py",
+      "original_sha256": "97b212ec4a09bf05d05e8ffb00eb36bab6770ae9a010940979c9fadeffc2fa16"
+    },
+    {
+      "exit": 1,
+      "tests": 7,
+      "failures": 1,
+      "errors": 0,
+      "skips": 0,
+      "audit": [],
+      "name": "source-identity",
+      "path": "trading/vati/funding/flow_risk.py",
+      "original_sha256": "97b212ec4a09bf05d05e8ffb00eb36bab6770ae9a010940979c9fadeffc2fa16"
+    },
+    {
+      "exit": 1,
+      "tests": 7,
+      "failures": 1,
+      "errors": 0,
+      "skips": 0,
+      "audit": [],
+      "name": "point-capacity",
+      "path": "trading/vati/funding/flow_risk.py",
+      "original_sha256": "97b212ec4a09bf05d05e8ffb00eb36bab6770ae9a010940979c9fadeffc2fa16"
+    },
+    {
+      "exit": 1,
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skips": 0,
+      "audit": [],
+      "name": "float-normalization",
+      "path": "trading/vati/funding/flow_risk.py",
+      "original_sha256": "97b212ec4a09bf05d05e8ffb00eb36bab6770ae9a010940979c9fadeffc2fa16"
+    },
+    {
+      "exit": 1,
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skips": 0,
+      "audit": [],
+      "name": "native-qualification",
+      "path": "trading/vati/funding/flow_risk.py",
+      "original_sha256": "97b212ec4a09bf05d05e8ffb00eb36bab6770ae9a010940979c9fadeffc2fa16"
+    },
+    {
+      "exit": 1,
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skips": 0,
+      "audit": [],
+      "name": "runtime-samples",
+      "path": "trading/vati/funding/reconciliation.py",
+      "original_sha256": "f9caa80a9e42cbee06ea936a6664f95d2914af3a269fc6931f595157202835ce"
+    }
+  ],
+  "restored": {
+    "exit": 0,
+    "tests": 10,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "audit": []
+  },
+  "all_restored": true
+}

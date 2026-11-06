@@ -31,6 +31,7 @@ from typing import Any, Optional
 
 from vati.core.canonical import canonical_hash, dec
 from vati.core.events import EventKind, make_event
+from vati.core.decimal_context import native_decimal_context
 from vati.lifecycle.envelope import PositionRiskEnvelope
 from vati.lifecycle.family import FamilyState, PositionFamily
 from vati.lifecycle.preservation import ActionKind as PreservationKind
@@ -38,6 +39,7 @@ from vati.lifecycle.preservation import PreservationAction
 from vati.lifecycle.scale_policy import ScalePolicy
 from vati.lifecycle.trade_health import HealthState, TradeHealth
 from vati.risk.contracts import Direction
+from vati.risk.arithmetic import fraction as exact_fraction, decimal as exact_decimal
 
 PRODUCER = "vati-profit-expansion"
 EXPANSION_VERSION = "profit-expansion/5.1.0"
@@ -292,7 +294,7 @@ class ProfitExpansionEngine:
             reasons.append("STOP_NOT_AT_ENTRY")
 
         if envelope.risk_is_known and envelope.open_risk_pct is not None:
-            if envelope.open_risk_pct >= policy.max_family_risk_pct:
+            if exact_fraction(envelope.open_risk_money) >= exact_fraction(policy.max_family_risk_pct) * exact_fraction(envelope.equity):
                 reasons.append("FAMILY_RISK_AT_CEILING")
 
         if reasons:
@@ -304,11 +306,15 @@ class ProfitExpansionEngine:
                 decline_reasons=tuple(sorted(set(reasons))), detail="", decided_ms=now_ms))
 
         assert fraction is not None
-        quantity = dec(root_quantity) * fraction
+        quantity = exact_decimal(exact_fraction(dec(root_quantity)) * exact_fraction(fraction))
         # Headroom within the policy ceiling. The authority applies its own,
         # which is usually tighter; this never widens it.
-        headroom = policy.max_family_risk_pct - (envelope.open_risk_pct or ZERO)
-        requested = headroom if headroom > ZERO else ZERO
+        headroom = exact_fraction(policy.max_family_risk_pct) - (
+            exact_fraction(envelope.open_risk_money) / exact_fraction(envelope.equity)
+            if envelope.equity > ZERO else 0)
+        requested = exact_decimal(headroom) if headroom > 0 else ZERO
+        if exact_fraction(requested) > headroom > 0:
+            requested = requested.next_minus(context=native_decimal_context())
 
         return self._emit(ExpansionProposal(
             family_id=family.family_id, strategy_id=strategy_id, symbol=family.symbol,
@@ -323,10 +329,10 @@ class ProfitExpansionEngine:
     def _stop_secured(family: PositionFamily) -> bool:
         """Stop at or better than the average entry: the add cannot turn a
         paid-for position back into a losing one on the original risk."""
-        entry, stop = family.average_entry, family.current_stop
+        entry, stop = family.average_entry_exact, family.current_stop
         if entry is None or stop is None:
             return False
-        return stop >= entry if family.direction is Direction.LONG else stop <= entry
+        return exact_fraction(stop) >= entry if family.direction is Direction.LONG else exact_fraction(stop) <= entry
 
     def _emit(self, proposal: ExpansionProposal) -> ExpansionProposal:
         if self._ledger is not None:

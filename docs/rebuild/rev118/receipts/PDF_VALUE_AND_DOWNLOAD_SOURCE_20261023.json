@@ -1,0 +1,351 @@
+{
+  "schema": "van.rebuild.pdf-value-and-download-source/1",
+  "observed_at_utc": "2026-10-23T16:10:31.486091+00:00",
+  "source_parent": "20125954be25a13658a4c3f70beb8ee678cb011f",
+  "source_sha256": {
+    "backend/van_gateway/documents/pdf.py": "e511eec579ac44c93f319fccbc2dbfdbfc3e9d772dd5fc4150a65e28d6a36170",
+    "backend/van_gateway/documents/api.py": "e031bfa72f58b968d6e5d9036b63566ab48b2d0c9b2d4e06ef1b9d545d496806",
+    "backend/van_gateway/documents/models.py": "610f3e2381d2368021d11456e36adbbb2f1236dc6332b98685183059750f7418",
+    "backend/tests/test_document_value_integrity.py": "07b5b1d025bf7f05c44a319feee26c889c142f1dc709e47f02be9b128f5bf16a"
+  },
+  "executions": {
+    "initial_before": {
+      "tests": 5,
+      "failures": 5,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 3.357,
+      "xml_sha256": "92f032cbf02f23cfa616a3c9008b4cea8e2d8db7bc6deb0ca3a3ca19c163d997"
+    },
+    "corrupt_tree_before": {
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 1.172,
+      "xml_sha256": "103922b7c2a5feef6e6e2e1a42e70514462f782c1019c610eca6bba889856ad1"
+    },
+    "isolated_final": {
+      "tests": 23,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 6.183,
+      "xml_sha256": "ac6f9932d1e885d73a2bb53c86eebbf8641da54c68ae3f06aed89b07c50b810d"
+    },
+    "integrated_audited": {
+      "tests": 60,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 30.025,
+      "xml_sha256": "d0481ca18c87e3ee0115b8c11d6a776c31fee1cc0b1cb4f33914385165386228"
+    },
+    "owner_contracts": {
+      "tests": 29,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 4.024,
+      "xml_sha256": "285c272eb1d9ed1fe9bf1fa77caef645b5c75d199debe80a95adfe114ede6a41"
+    },
+    "rebuild": {
+      "tests": 79,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 33.859,
+      "xml_sha256": "98432e12635762ea376bf35b00695f00a6bc618525747fc2701ba73ac681aa08"
+    }
+  },
+  "fault_campaign": {
+    "definitions": [
+      [
+        "hide required text-field metadata",
+        "backend/van_gateway/documents/pdf.py",
+        "kind=DocumentFieldKind.TEXT, required=bool(flags & 2)",
+        "kind=DocumentFieldKind.TEXT, required=False",
+        "backend/tests/test_document_value_integrity.py::test_required_pdf_field_is_reported_as_required_to_the_owner"
+      ],
+      [
+        "normalize malformed field flags into default flags",
+        "backend/van_gateway/documents/pdf.py",
+        "        raise PdfDocumentError(\"PDF_FIELD_FLAGS_INVALID\")",
+        "        return 0",
+        "backend/tests/test_document_value_integrity.py::test_malformed_pdf_field_flags_are_not_silently_treated_as_unrestricted"
+      ],
+      [
+        "trust successful writer call without value readback",
+        "backend/van_gateway/documents/pdf.py",
+        "        if actual is None or actual.kind is not known[name].kind or actual.value != expected:",
+        "        if False:",
+        "backend/tests/test_document_value_integrity.py::test_pdf_writer_acknowledgement_is_not_proof_that_requested_values_were_written"
+      ],
+      [
+        "replace the owner Unicode filename with fallback metadata",
+        "backend/van_gateway/documents/api.py",
+        "quote(download_name, safe=\"\")",
+        "quote(fallback+\"-\"+suffix, safe=\"\")",
+        "backend/tests/test_document_value_integrity.py::test_paired_owner_can_download_a_pdf_with_a_unicode_filename"
+      ],
+      [
+        "advertise PDF bytes as JSON",
+        "backend/van_gateway/documents/api.py",
+        "\"application/pdf\": {\"schema\"",
+        "\"application/json\": {\"schema\"",
+        "backend/tests/test_document_value_integrity.py::test_document_binary_download_has_an_actual_binary_api_contract"
+      ],
+      [
+        "leak untyped corrupt-page parser exception",
+        "backend/van_gateway/documents/pdf.py",
+        "except (PdfReadError, ValueError, TypeError, AttributeError, KeyError, IndexError, RecursionError) as exc:",
+        "except (ValueError, TypeError, AttributeError, KeyError, IndexError, RecursionError) as exc:",
+        "backend/tests/test_document_value_integrity.py::test_syntactically_valid_pdf_with_a_bad_page_tree_is_a_typed_refusal"
+      ],
+      [
+        "remove supported download-variant schema",
+        "backend/van_gateway/documents/api.py",
+        "variant: Literal[\"source\", \"output\"]",
+        "variant: str",
+        "backend/tests/test_document_value_integrity.py::test_download_variant_contract_has_only_the_supported_owner_variants"
+      ]
+    ],
+    "records": [
+      {
+        "case": 0,
+        "phase": "control",
+        "reason": "hide required text-field metadata",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "7101c22ac5a089d91668fe0347e2765f4f881d361238033cfbffcf3feda6d21f"
+      },
+      {
+        "case": 0,
+        "phase": "fault",
+        "reason": "hide required text-field metadata",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "2d46bfe523862a1fb206b3f0b544bb8e1a695585772797e00b1ca7a15a2da3c4"
+      },
+      {
+        "case": 1,
+        "phase": "control",
+        "reason": "normalize malformed field flags into default flags",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "a39bd18fc9965c356bf6c0a029e0e0e417f31b65f00fa2547fb06d567fef54ba"
+      },
+      {
+        "case": 1,
+        "phase": "fault",
+        "reason": "normalize malformed field flags into default flags",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "620dbb71a4547076d5fd1a751411edfc1b74e6a3903819c5c6c086649462ccc4"
+      },
+      {
+        "case": 2,
+        "phase": "control",
+        "reason": "trust successful writer call without value readback",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "8c03494fcad3b088d60db4e17242fdb9f5536a14010ec9961503080fe2bdabc9"
+      },
+      {
+        "case": 2,
+        "phase": "fault",
+        "reason": "trust successful writer call without value readback",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "1cc0c25179a1f9033adf916bfac5713924f6ebaff17549d473b0a2b16e263cb2"
+      },
+      {
+        "case": 3,
+        "phase": "control",
+        "reason": "replace the owner Unicode filename with fallback metadata",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "f3c35d719f0a07cc8956638f9bf6a249a0d5cad822d87bab071217aff8b4ccda"
+      },
+      {
+        "case": 3,
+        "phase": "fault",
+        "reason": "replace the owner Unicode filename with fallback metadata",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "5156a4289a767f79755cdd92c0a1b29a45019c6ce3dd0d3c625ec87778435de6"
+      },
+      {
+        "case": 4,
+        "phase": "control",
+        "reason": "advertise PDF bytes as JSON",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "102faf35911799a88db8e83a0273c3bca2658cb5f14a35c8a9e0ab937f1e20cb"
+      },
+      {
+        "case": 4,
+        "phase": "fault",
+        "reason": "advertise PDF bytes as JSON",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "e52da90a927dc30983da56c36028b49aa665c614eb6e7d8c0f0e1bc1200e0526"
+      },
+      {
+        "case": 5,
+        "phase": "control",
+        "reason": "leak untyped corrupt-page parser exception",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "6bb6a665af995bc9fe46ff52e2710e47c23aa2aeaf277fe34b31dcf0f7eac3c8"
+      },
+      {
+        "case": 5,
+        "phase": "fault",
+        "reason": "leak untyped corrupt-page parser exception",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "8044374f69a89241c1f2272723a0514fe71a46bb0e73004fe3a9985bab6b3fde"
+      },
+      {
+        "case": 6,
+        "phase": "control",
+        "reason": "remove supported download-variant schema",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "b5b356ffd85bac0f19188d3d200da049b36f84c0dda434407e6af6b19377413f"
+      },
+      {
+        "case": 6,
+        "phase": "fault",
+        "reason": "remove supported download-variant schema",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "2f03458514676e2c2d626348185592c05ead6dc3a07f546b0a9a4cbc7b9a0e58"
+      }
+    ],
+    "before": {
+      "backend/van_gateway/documents/pdf.py": "e511eec579ac44c93f319fccbc2dbfdbfc3e9d772dd5fc4150a65e28d6a36170",
+      "backend/van_gateway/documents/api.py": "e031bfa72f58b968d6e5d9036b63566ab48b2d0c9b2d4e06ef1b9d545d496806"
+    },
+    "after": {
+      "backend/van_gateway/documents/pdf.py": "e511eec579ac44c93f319fccbc2dbfdbfc3e9d772dd5fc4150a65e28d6a36170",
+      "backend/van_gateway/documents/api.py": "e031bfa72f58b968d6e5d9036b63566ab48b2d0c9b2d4e06ef1b9d545d496806"
+    },
+    "source_restored": true
+  },
+  "storage_audit": {
+    "schema": "van.source-storage-audit/1",
+    "forbidden_events": [],
+    "source_sha256": "d4e270150fb0da6e8d79b449dd0de68fd1f97b3ccea3d282f31d91297edbd495",
+    "root": "/workspace/van-review-2026-10-18/publish",
+    "scope": "SQLite opens, path-based writable opens and directory/link/rename/delete events under data and backend/data",
+    "limits": "Python audit events only; existing fd writes, native-library raw I/O and external processes are not an OS sandbox. Git state is checked separately."
+  },
+  "legacy_mutation_preflight": {
+    "schema": "van.rebuild.mutation-registry-preflight/1",
+    "registry_sha256": "35d10c7b0f2b8319b7f7305828262c972b2a6451139d75b9e83c7d0062282955",
+    "mutation_count": 374,
+    "edit_count": 383,
+    "findings": [],
+    "execution_state": "NOT_RUN",
+    "status": "ANCHORS_VALID_BASELINES_AND_MUTATIONS_NOT_EXECUTED"
+  },
+  "retained_instrument_attempt": {
+    "description": "First fault campaign caught all seven variants and restored source, then its restoration-report generator failed due to tuple-unpacking typo. Corrected helper reran all controls/faults and verified hashes. No failed helper execution is counted as a passing campaign.",
+    "log_sha256": "0f8c896d31e975d085017e66df6a4ec3bd46a5b3ec0869c1ecce60948ff58172"
+  },
+  "next_independently_reproduced_publication_failures": {
+    "tests": 6,
+    "failures": 6,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 0.912,
+    "xml_sha256": "39378860aefd40e4be00d4d020323db51593f2158188578e4a4569f246ccff7d"
+  },
+  "qualification": "Candidate source only. Local output value readback is not physical PDF rendering, external upload/submission authority, new frontend, whole-unit, native/production/handset acceptance. Publication/operation recovery and immutable versions remain next, not silently removed."
+}

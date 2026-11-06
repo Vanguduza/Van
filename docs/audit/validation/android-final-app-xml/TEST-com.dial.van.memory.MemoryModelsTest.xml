@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.memory.MemoryModelsTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:16:26" hostname="052fefa249ff" time="0.014">
+  <properties/>
+  <testcase name="staleOrExpiringFacts surfaces shaken authorities and near-expiry facts still in force" classname="com.dial.van.memory.MemoryModelsTest" time="0.005"/>
+  <testcase name="preferences excludes both decision and generic statement predicates" classname="com.dial.van.memory.MemoryModelsTest" time="0.001"/>
+  <testcase name="missing stores block parses as no facts, not a crash" classname="com.dial.van.memory.MemoryModelsTest" time="0.0"/>
+  <testcase name="a row with no fact_id is dropped rather than crashing" classname="com.dial.van.memory.MemoryModelsTest" time="0.0"/>
+  <testcase name="factsByScope excludes decisions and expired facts, groups the rest by scope" classname="com.dial.van.memory.MemoryModelsTest" time="0.004"/>
+  <testcase name="parses fields off an owner_facts export row" classname="com.dial.van.memory.MemoryModelsTest" time="0.0"/>
+  <testcase name="freshness classifies no-expiry, current, expiring-soon and expired" classname="com.dial.van.memory.MemoryModelsTest" time="0.0"/>
+  <testcase name="numeric and boolean values stringify without a trailing decimal" classname="com.dial.van.memory.MemoryModelsTest" time="0.0"/>
+  <testcase name="recentChanges sorts newest first and respects the limit" classname="com.dial.van.memory.MemoryModelsTest" time="0.002"/>
+  <testcase name="parseConflicts pairs both sides of blocking and inferred_only conflicts" classname="com.dial.van.memory.MemoryModelsTest" time="0.001"/>
+  <testcase name="decisions returns only the predicate decision, newest first" classname="com.dial.van.memory.MemoryModelsTest" time="0.0"/>
+  <testcase name="provenance tiers map every authority to one of the four DNA chips" classname="com.dial.van.memory.MemoryModelsTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

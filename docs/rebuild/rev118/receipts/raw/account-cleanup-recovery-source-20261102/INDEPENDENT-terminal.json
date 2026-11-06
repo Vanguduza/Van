@@ -1,0 +1,303 @@
+{
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "-B",
+    "-m",
+    "pytest",
+    "backend/tests/test_account_cleanup.py::test_actual_http_distinct_reauth_data_then_substantive_a4_new_child_original_readback",
+    "backend/tests/test_account_cleanup.py::test_sealed_original_plan_holds_tamper_without_recreation_or_child[lost_key]",
+    "backend/tests/test_account_cleanup.py::test_admitted_original_actor_proof_and_current_owner_guards_after_native_sql_wait[key_replacement]",
+    "--rootdir=/tmp/van-be004-cleanup-lane-20261102",
+    "-c",
+    "/tmp/van-be004-cleanup-lane-20261102/pytest.ini",
+    "-p",
+    "pytest_asyncio.plugin",
+    "-p",
+    "anyio.pytest_plugin",
+    "-p",
+    "no:cacheprovider",
+    "-o",
+    "asyncio_mode=auto",
+    "-q",
+    "--basetemp=/dev/shm/van-cleanup-independent-review-20261102/fixtures",
+    "--junitxml=/dev/shm/van-cleanup-independent-review-20261102/junit.xml"
+  ],
+  "cwd": "/tmp/van-be004-cleanup-lane-20261102",
+  "environment": {
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",
+    "PYTHONPATH": "/tmp/van-be004-cleanup-lane-20261102/backend:/tmp/van-be004-cleanup-lane-20261102:/tmp/van-be004-cleanup-lane-20261102/trading:/tmp/van-be004-cleanup-lane-20261102/trading/tests",
+    "TMPDIR": "/dev/shm/van-cleanup-independent-review-20261102",
+    "XDG_CACHE_HOME": "/dev/shm/van-cleanup-independent-review-20261102/cache"
+  },
+  "before": {
+    "free": {
+      "/workspace": 72163328,
+      "/tmp": 2147995648,
+      "/dev/shm": 9266864128
+    },
+    "memory_headroom": 6161575936
+  },
+  "after": {
+    "free": {
+      "/workspace": 72163328,
+      "/tmp": 2147991552,
+      "/dev/shm": 9260412928
+    },
+    "memory_headroom": 6152945664
+  },
+  "exit": 0,
+  "limit": null,
+  "seconds": 18.339793816005113,
+  "peak_allocated": 7843840,
+  "child_wait_completed": true,
+  "group_absent": true,
+  "inventory": [
+    {
+      "path": "/dev/shm/van-cleanup-independent-review-20261102/pins-after.json",
+      "size": 1794,
+      "sha256": "9616fb770ba504e767e2009eb0d10faaa43fb2e7f665688ddb79ca0b0598a754",
+      "crc32": "e90b4344",
+      "uid": 1000
+    },
+    {
+      "path": "/dev/shm/van-cleanup-independent-review-20261102/junit.xml",
+      "size": 748,
+      "sha256": "f3ff070568ca60406cdfa0ec2b37dbf380657911965bb5b3c5fb47e38593d22a",
+      "crc32": "bea9eeb6",
+      "uid": 1000
+    },
+    {
+      "path": "/dev/shm/van-cleanup-independent-review-20261102/child.json",
+      "size": 80,
+      "sha256": "1bd731684098cb55a691528bf494fb03ce3aca3c3d94ab80fb8e8ec4bcd81206",
+      "crc32": "8e2156fb",
+      "uid": 1000
+    },
+    {
+      "path": "/dev/shm/van-cleanup-independent-review-20261102/raw.txt",
+      "size": 99,
+      "sha256": "1d4eb3a1994a971828be01631e9f085610b5f624380ce97358ea3d2162653702",
+      "crc32": "8223231f",
+      "uid": 1000
+    },
+    {
+      "path": "/dev/shm/van-cleanup-independent-review-20261102/pins-before.json",
+      "size": 1794,
+      "sha256": "9616fb770ba504e767e2009eb0d10faaa43fb2e7f665688ddb79ca0b0598a754",
+      "crc32": "e90b4344",
+      "uid": 1000
+    },
+    {
+      "path": "/dev/shm/van-cleanup-independent-review-20261102/run.py",
+      "size": 4323,
+      "sha256": "f608537d418f4470522d48bea41c2d77d74081cde492eaffaed022a8895859b7",
+      "crc32": "3e8f457d",
+      "uid": 1000
+    },
+    {
+      "path": "/dev/shm/van-cleanup-independent-review-20261102/fixtures/test_admitted_original_actor_p0/accounts.json",
+      "size": 96,
+      "sha256": "ff292d2ac04956cc8dd7be94163bbe0eb6be43968c02e8733335ed1772564a72",
+      "crc32": "bb293b8c",
+      "uid": 1000
+    },
+    {
+      "path": "/dev/shm/van-cleanup-independent-review-20261102/fixtures/test_admitted_original_actor_p0/vati.sqlite.runtime-lease.paper_owner.lock",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "crc32": "00000000",
+      "uid": 1000
+    },
+    {
+      "path": "/dev/shm/van-cleanup-independent-review-20261102/fixtures/test_admitted_original_actor_p0/accounts.json.lock",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "crc32": "00000000",
+      "uid": 1000
+    },
+    {
+      "path": "/dev/shm/van-cleanup-independent-review-20261102/fixtures/test_admitted_original_actor_p0/vati.sqlite",
+      "size": 86016,
+      "sha256": "45dade63b5b5e2f6ec6877c5fce23650492d36b2847dbc820311dd6536825a39",
+      "crc32": "59255c55",
+      "uid": 1000
+    },
+    {
+      "path": "/dev/shm/van-cleanup-independent-review-20261102/fixtures/test_admitted_original_actor_p0/accounts.json.operation.paper_owner.lock",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "crc32": "00000000",
+      "uid": 1000
+    },
+    {
+      "path": "/dev/shm/van-cleanup-independent-review-20261102/fixtures/test_admitted_original_actor_p0/gw.sqlite3",
+      "size": 2052096,
+      "sha256": "247b2bb67bd97ec5e3cdc20e6628956c3c2c1e773d64f91494ff8f6144f6338e",
+      "crc32": "6371cecb",
+      "uid": 1000
+    },
+    {
+      "path": "/dev/shm/van-cleanup-independent-review-20261102/fixtures/test_sealed_original_plan_hold0/accounts.json",
+      "size": 96,
+      "sha256": "ff292d2ac04956cc8dd7be94163bbe0eb6be43968c02e8733335ed1772564a72",
+      "crc32": "bb293b8c",
+      "uid": 1000
+    },
+    {
+      "path": "/dev/shm/van-cleanup-independent-review-20261102/fixtures/test_sealed_original_plan_hold0/vati.sqlite.runtime-lease.paper_owner.lock",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "crc32": "00000000",
+      "uid": 1000
+    },
+    {
+      "path": "/dev/shm/van-cleanup-independent-review-20261102/fixtures/test_sealed_original_plan_hold0/accounts.json.lock",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "crc32": "00000000",
+      "uid": 1000
+    },
+    {
+      "path": "/dev/shm/van-cleanup-independent-review-20261102/fixtures/test_sealed_original_plan_hold0/vati.sqlite",
+      "size": 73728,
+      "sha256": "a564b78d8c07d6ba93724d0f3881b0a2298a6b87f5a490ca9f6af1d50322779a",
+      "crc32": "0d594864",
+      "uid": 1000
+    },
+    {
+      "path": "/dev/shm/van-cleanup-independent-review-20261102/fixtures/test_sealed_original_plan_hold0/accounts.json.operation.paper_owner.lock",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "crc32": "00000000",
+      "uid": 1000
+    },
+    {
+      "path": "/dev/shm/van-cleanup-independent-review-20261102/fixtures/test_sealed_original_plan_hold0/gw.sqlite3",
+      "size": 2052096,
+      "sha256": "cf4431d21a7fc76069ed47199ed5ced52bbaf98844b3739fab4456cc6a8c50f0",
+      "crc32": "31667936",
+      "uid": 1000
+    },
+    {
+      "path": "/dev/shm/van-cleanup-independent-review-20261102/fixtures/test_actual_http_distinct_reau0/accounts.json",
+      "size": 96,
+      "sha256": "ff292d2ac04956cc8dd7be94163bbe0eb6be43968c02e8733335ed1772564a72",
+      "crc32": "bb293b8c",
+      "uid": 1000
+    },
+    {
+      "path": "/dev/shm/van-cleanup-independent-review-20261102/fixtures/test_actual_http_distinct_reau0/vati.sqlite.runtime-lease.paper_owner.lock",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "crc32": "00000000",
+      "uid": 1000
+    },
+    {
+      "path": "/dev/shm/van-cleanup-independent-review-20261102/fixtures/test_actual_http_distinct_reau0/accounts.json.lock",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "crc32": "00000000",
+      "uid": 1000
+    },
+    {
+      "path": "/dev/shm/van-cleanup-independent-review-20261102/fixtures/test_actual_http_distinct_reau0/vati.sqlite",
+      "size": 86016,
+      "sha256": "4007ed59eda1b64ad811a0cbc0219a221404846a61b192d64d2590172ae8fb18",
+      "crc32": "42b689e6",
+      "uid": 1000
+    },
+    {
+      "path": "/dev/shm/van-cleanup-independent-review-20261102/fixtures/test_actual_http_distinct_reau0/accounts.json.operation.paper_owner.lock",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "crc32": "00000000",
+      "uid": 1000
+    },
+    {
+      "path": "/dev/shm/van-cleanup-independent-review-20261102/fixtures/test_actual_http_distinct_reau0/gw.sqlite3",
+      "size": 2052096,
+      "sha256": "6a91b38985c9e4c652031fdc9d06ef93898f66c232ddd33257232b7741a09fc9",
+      "crc32": "6e01f95a",
+      "uid": 1000
+    },
+    {
+      "path": "/dev/shm/van-cleanup-independent-review-20261102/fixtures/test_admitted_original_actor_p0/secrets/private.unlink-plan-integrity.env",
+      "size": 91,
+      "sha256": "90919c8f6f1775dce6141fd2250ed0268533d88d846a1233a557b8369314a844",
+      "crc32": "653d60ab",
+      "uid": 1000
+    },
+    {
+      "path": "/dev/shm/van-cleanup-independent-review-20261102/fixtures/test_admitted_original_actor_p0/secrets/private.unlink-plan-integrity.env.lock",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "crc32": "00000000",
+      "uid": 1000
+    },
+    {
+      "path": "/dev/shm/van-cleanup-independent-review-20261102/fixtures/test_admitted_original_actor_p0/secrets/.account-control-domain.env",
+      "size": 88,
+      "sha256": "2017001bb602396a74559b09f1f6f799cd9a029709491de782621f3298f1a95a",
+      "crc32": "8ff1fc36",
+      "uid": 1000
+    },
+    {
+      "path": "/dev/shm/van-cleanup-independent-review-20261102/fixtures/test_admitted_original_actor_p0/secrets/.account-control-domain.env.lock",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "crc32": "00000000",
+      "uid": 1000
+    },
+    {
+      "path": "/dev/shm/van-cleanup-independent-review-20261102/fixtures/test_sealed_original_plan_hold0/secrets/private.unlink-plan-integrity.env.lock",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "crc32": "00000000",
+      "uid": 1000
+    },
+    {
+      "path": "/dev/shm/van-cleanup-independent-review-20261102/fixtures/test_sealed_original_plan_hold0/secrets/.account-control-domain.env",
+      "size": 88,
+      "sha256": "10e23fdb7d10eb5f0de420ad65b8de3b90bcbffe3dc1b39591e9fcf2c6e4b6a1",
+      "crc32": "3a5761a0",
+      "uid": 1000
+    },
+    {
+      "path": "/dev/shm/van-cleanup-independent-review-20261102/fixtures/test_sealed_original_plan_hold0/secrets/.account-control-domain.env.lock",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "crc32": "00000000",
+      "uid": 1000
+    },
+    {
+      "path": "/dev/shm/van-cleanup-independent-review-20261102/fixtures/test_actual_http_distinct_reau0/secrets/private.unlink-plan-integrity.env",
+      "size": 91,
+      "sha256": "8193e350f50f4aa3a9fbaa555e37a8dd7613b8b9e12f95cb5618d691f04e65c5",
+      "crc32": "2a252df0",
+      "uid": 1000
+    },
+    {
+      "path": "/dev/shm/van-cleanup-independent-review-20261102/fixtures/test_actual_http_distinct_reau0/secrets/private.unlink-plan-integrity.env.lock",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "crc32": "00000000",
+      "uid": 1000
+    },
+    {
+      "path": "/dev/shm/van-cleanup-independent-review-20261102/fixtures/test_actual_http_distinct_reau0/secrets/.account-control-domain.env",
+      "size": 88,
+      "sha256": "210b5925e4baee6dd08ab3d4d114b4d213262f122848350391fa23838928a61d",
+      "crc32": "f4acf036",
+      "uid": 1000
+    },
+    {
+      "path": "/dev/shm/van-cleanup-independent-review-20261102/fixtures/test_actual_http_distinct_reau0/secrets/.account-control-domain.env.lock",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "crc32": "00000000",
+      "uid": 1000
+    }
+  ],
+  "source_unchanged": true
+}

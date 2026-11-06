@@ -1,0 +1,60 @@
+{
+  "head": "b876fc27f35765244fb169dbde1030f2b79b836e",
+  "artifact_id": 12834702607,
+  "http_status": 200,
+  "advertised_bytes": 108391,
+  "advertised_sha256": "4a594f0aea6e7dd3657b657d735415f7fb950018e745af1ae208e7ddb013fc24",
+  "actual_bytes": 108391,
+  "actual_sha256": "4a594f0aea6e7dd3657b657d735415f7fb950018e745af1ae208e7ddb013fc24",
+  "zip_magic": true,
+  "original_archive_independently_verified": true,
+  "state": "ORIGINAL_ARCHIVE_SOURCE_BOUND_NATIVE_COMPILATION_INDEPENDENTLY_VERIFIED",
+  "entries": [
+    "receipt.json",
+    "VanBridgeEA.ex5",
+    "setup-diagnostic.json",
+    "VanBridgeEA.log",
+    "VanCompilerRejectionProbe.log"
+  ],
+  "tested_merge": "4c3bddce8a2de3c998387bcfd504588fb76e0855",
+  "source_blob_oid": "3829ede25dc63ff2ed0115888a8532cf15c02046",
+  "source_sha256": "a7a4f9ed47012d07e5f284654d625cbb149015c4bd25e555e2a523ff086afead",
+  "actual_git_and_api_source_bytes_match": true,
+  "positive": {
+    "name": "VanBridgeEA",
+    "expected_success": true,
+    "process_exit_code": 1,
+    "errors": 0,
+    "warnings": 0,
+    "fresh_binary": true,
+    "started_at_utc": "2026-10-28T16:50:58.7108704Z",
+    "finished_at_utc": "2026-10-28T16:51:01.0107716Z",
+    "log_sha256": "c027427766e61d75b7d6f56c1a7d4578726b4d468daee3cbc6cc8f6b308cc401",
+    "binary_sha256": "3b7e69607fe5b553f75c88b839664b3ab77609ae16ba031f2d18dbf6a468cc73"
+  },
+  "negative": {
+    "name": "VanCompilerRejectionProbe",
+    "expected_success": false,
+    "process_exit_code": 0,
+    "errors": 4,
+    "warnings": 0,
+    "fresh_binary": false,
+    "started_at_utc": "2026-10-28T16:50:57.7386801Z",
+    "finished_at_utc": "2026-10-28T16:50:58.7076935Z",
+    "log_sha256": "e8ba6f65932d150f2b96d0a0e0cc90441606de101fa250a2dd1c8091e6833caf"
+  },
+  "installer_signature": {
+    "status": "Valid",
+    "subject": "CN=MetaQuotes Ltd., O=MetaQuotes Ltd., S=Lemesos, C=CY",
+    "thumbprint": "5A64A7AED24C33DED342D01D01FA5286F06DA6DC"
+  },
+  "compiler_signature": {
+    "status": "Valid",
+    "subject": "CN=MetaQuotes Ltd., O=MetaQuotes Ltd., S=Lemesos, C=CY",
+    "thumbprint": "5A64A7AED24C33DED342D01D01FA5286F06DA6DC"
+  },
+  "compiler_file_version": "5.0.0.6292",
+  "binary_bytes": 100384,
+  "source_fetch_normalization": "GitHub contents tool returned raw UTF8 text; bytes and Git blob identity independently compared",
+  "qualification": "SOURCE_COMPILED_ONLY_NO_NATIVE_TERMINAL_ACCOUNT_PROVIDER_FINANCIAL_OR_HANDSET_ACCEPTANCE"
+}

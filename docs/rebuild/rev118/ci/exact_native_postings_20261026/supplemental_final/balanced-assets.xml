@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="3" time="1.298" timestamp="2026-10-26T18:11:20.634297+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_exact_units" name="test_offsetting_labels_cannot_conceal_an_unbalanced_or_foreign_asset[counter0]" time="0.450"><failure message="Failed: DID NOT RAISE UnitError">counter = Money(minor_units=-122, scale=2, currency='USD', asset_ref='asset:USD')
+
+    @pytest.mark.parametrize('counter',[
+        Money(-122,2,'USD','asset:USD'),Money(-123,2,'EUR','asset:USD'),
+        Money(-123,2,'USD','other-provider:USD')])
+    def test_offsetting_labels_cannot_conceal_an_unbalanced_or_foreign_asset(counter):
+&gt;       with pytest.raises(UnitError,match='UNBALANCED'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE UnitError
+
+trading/tests/test_exact_units.py:111: Failed</failure></testcase><testcase classname="trading.tests.test_exact_units" name="test_offsetting_labels_cannot_conceal_an_unbalanced_or_foreign_asset[counter1]" time="0.004"><failure message="Failed: DID NOT RAISE UnitError">counter = Money(minor_units=-123, scale=2, currency='EUR', asset_ref='asset:USD')
+
+    @pytest.mark.parametrize('counter',[
+        Money(-122,2,'USD','asset:USD'),Money(-123,2,'EUR','asset:USD'),
+        Money(-123,2,'USD','other-provider:USD')])
+    def test_offsetting_labels_cannot_conceal_an_unbalanced_or_foreign_asset(counter):
+&gt;       with pytest.raises(UnitError,match='UNBALANCED'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE UnitError
+
+trading/tests/test_exact_units.py:111: Failed</failure></testcase><testcase classname="trading.tests.test_exact_units" name="test_offsetting_labels_cannot_conceal_an_unbalanced_or_foreign_asset[counter2]" time="0.006"><failure message="Failed: DID NOT RAISE UnitError">counter = Money(minor_units=-123, scale=2, currency='USD', asset_ref='other-provider:USD')
+
+    @pytest.mark.parametrize('counter',[
+        Money(-122,2,'USD','asset:USD'),Money(-123,2,'EUR','asset:USD'),
+        Money(-123,2,'USD','other-provider:USD')])
+    def test_offsetting_labels_cannot_conceal_an_unbalanced_or_foreign_asset(counter):
+&gt;       with pytest.raises(UnitError,match='UNBALANCED'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE UnitError
+
+trading/tests/test_exact_units.py:111: Failed</failure></testcase></testsuite></testsuites>

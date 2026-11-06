@@ -1,0 +1,753 @@
+{
+  "schema": "van.rebuild.dial-original-control-source/1",
+  "observed_at_utc": "2026-10-23T13:14:20.838346+00:00",
+  "source_parent": "59d5777e95cbd9d6141f5f49ac04d22e0b8d37c3",
+  "source_sha256": {
+    "android/app/src/main/java/com/dial/van/command/dev/DevActions.kt": "7eef6adbdc721149b68c1c92d24494a2b3e01485f88c36dd1513eec9232edcfd",
+    "android/app/src/main/java/com/dial/van/dialdev/DialDevActions.kt": "63a600d734cf8207282c4a1b95de66e6b0ec9bd5d81e53e87e1223f66ad5bf5b",
+    "android/app/src/main/java/com/dial/van/dialdev/DialDevOriginalOperations.kt": "0fb58bb14bea4f0952dcc660ce66284314145e2118f2537117cb0391b91cccf8",
+    "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt": "9f2ed6841f7eb790515abcf52db838f8be96416e134140e01f53109ff1a8c06a",
+    "android/verification/src/test/kotlin/com/dial/van/dialdev/DialDevOriginalOperationsTest.kt": "d80ea697b7df97561b6af9f7325bfaebae1e2c44694eeed9a9ea15d5378d4e3e",
+    "android/verification/src/test/kotlin/com/dial/van/dialdev/DialDevOutcomeRecoveryTest.kt": "eed68726d975692b6996beaf9b072a38c552b5fd16795b9a62ee9583fc892aaa",
+    "backend/van_gateway/dial_dev/api.py": "06995f6b1f82f6cc38991521081548e02642ab42d4b48f0ae95cee525e030c8e",
+    "backend/tests/test_dial_dev_original_outcome.py": "9ebba38dc783ff39eb9300c1fe6538220a293532ea20a2a9f0860da165a20026",
+    "backend/tests/test_trading_api.py": "7a7dbb352243a5059973a96ea63045ee4aae44fdda092a3ead56138c7379973f",
+    "trading/tests/test_account_retirement_pg.py": "418d41b11a7c19ae2c35182cb262330cc9beef0529321176ebb053e8158561e4",
+    "tools/rebuild/refresh_owner_source_contracts.py": "de11661cd840cbc2832f887f56a666f07eea2128f29d3ab42aba261dbf49fa9f"
+  },
+  "executions": {
+    "backend_original_gap": {
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 1.837,
+      "sha256": "59de4c574ef3e01baf588869f6b7e023d9a03fd34ba667928733ffca3fc1e623"
+    },
+    "kotlin_original_gap": {
+      "tests": 3,
+      "failures": 3,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.059,
+      "sha256": "44dd57867d514f7bc48c01bd1afa10eaa3ac587ea7c02de75458724286ce092d"
+    },
+    "native_age_gap": {
+      "tests": 11,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.33,
+      "sha256": "23fd70acbe96d9989f89f680918aa6286ace2a2a8cac04deff399c6118f14bb4"
+    },
+    "protective_control_gap": {
+      "tests": 12,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.301,
+      "sha256": "e2b5fb35371715c67c9fb54626c35542b1babe1a89286399662e3038948e670a"
+    },
+    "native_ack_gap": {
+      "tests": 14,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.327,
+      "sha256": "b054e8f4309a1ed817f87a7a08b3adce1a3e8da205c077abdeef896a6aaae486"
+    },
+    "affected_backend": {
+      "tests": 163,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 99.172,
+      "sha256": "62a4f26ecc5b0bde1d971d91ee55c4a569ab605e62d46f026505495325cce191"
+    },
+    "typed_native_read": {
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 9.096,
+      "sha256": "ac282a13f76eca3e738866e4a5e498b7167b156453448f6acf59d866a34edb40"
+    },
+    "onboarding_correction": {
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 11.35,
+      "sha256": "63c533970dd564d01e5346f814c7adeeb9537fcc17f0fa68874b6aaffce17ea2"
+    },
+    "actual_postgres_lease": {
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 5.633,
+      "sha256": "4e3dc2a1ce7cff43b918783dcdee88083eee13d3e795de43617fa1d0af19076f"
+    },
+    "rebuild": {
+      "tests": 78,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 39.023,
+      "sha256": "d06297af8f90d7cd7a4bf62e8f6916ff92817abbb6d1b7b4d0a0bc7bfdda235d"
+    },
+    "owner_registry": {
+      "tests": 29,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 4.866,
+      "sha256": "ea9d1fdae0ea3b239cf32dac6f62ffb803aa5295cd2fc3cfebcb7a04d8f42d5b"
+    }
+  },
+  "android_verification": {
+    "tests": 1326,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "xml_files": 163,
+    "xml_digest_sha256": "034ff154e67d8073a98e71828f3af1cf1b26fc76f498cd45347c8e6363414dc3"
+  },
+  "android_app_unit": {
+    "tests": 222,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "xml_files": 38,
+    "xml_digest_sha256": "da0ba509f50fb4533030ac37f5d368e4ac7cd9dc28cc93d7e67c75b54cb72187"
+  },
+  "android_lint": {
+    "severities": {
+      "Warning": 92,
+      "Hint": 22
+    },
+    "xml_sha256": "13c61f99dcf9c25919ad3f045e7138daa0939c63d55e70636874bdb1a4f65f58"
+  },
+  "android_apks": {
+    "android/app/build/outputs/apk/debug/app-debug.apk": {
+      "sha256": "53afd3218ad4646cf1c43dc2bba4a876a4c3737c2db0d8ec01f425d066095245",
+      "bytes": 320674903
+    },
+    "android/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk": {
+      "sha256": "4f61d771f079d48905dde14339fdbeb9ee137be7522f6b8d3613e5a37238ef0c",
+      "bytes": 2394031
+    }
+  },
+  "fault_campaign": {
+    "definitions": [
+      [
+        "permit send without durable request",
+        "android/app/src/main/java/com/dial/van/dialdev/DialDevOriginalOperations.kt",
+        "check(store.save(body))",
+        "check(true)",
+        "com.dial.van.dialdev.DialDevOriginalOperationsTest"
+      ],
+      [
+        "replace original key and revision on retry",
+        "android/app/src/main/java/com/dial/van/dialdev/DialDevOriginalOperations.kt",
+        "return original // Original revision, parameters and key survive every retry and restart.",
+        "return PendingDialDevOperation(device,snapshot.toJson().toString(),original.actionId)",
+        "com.dial.van.dialdev.DialDevOriginalOperationsTest"
+      ],
+      [
+        "accept a changed instruction instead of refusing it",
+        "android/app/src/main/java/com/dial/van/dialdev/DialDevOriginalOperations.kt",
+        "check(prior.kind == snapshot.kind && prior.target.copy(workspaceId=null) == snapshot.target.copy(workspaceId=null) && prior.params == snapshot.params)",
+        "check(true)",
+        "com.dial.van.dialdev.DialDevOriginalOperationsTest"
+      ],
+      [
+        "accept a foreign native target",
+        "android/app/src/main/java/com/dial/van/dialdev/DialDevOriginalOperations.kt",
+        "if (actual != expected) return null",
+        "if (false) return null",
+        "com.dial.van.dialdev.DialDevOriginalOperationsTest"
+      ],
+      [
+        "accept another original native action ID",
+        "android/app/src/main/java/com/dial/van/dialdev/DialDevOriginalOperations.kt",
+        "if (original.actionId == null || id != original.actionId) return null",
+        "if (original.actionId == null) return null",
+        "com.dial.van.dialdev.DialDevOriginalOperationsTest"
+      ],
+      [
+        "use stale native readback as terminal proof",
+        "android/app/src/main/java/com/dial/van/dialdev/DialDevOriginalOperations.kt",
+        "if (envelope.freshnessMs !in 0..30000) return null",
+        "if (false) return null",
+        "com.dial.van.dialdev.DialDevOriginalOperationsTest"
+      ],
+      [
+        "clear a native control with uncertain effect",
+        "android/app/src/main/java/com/dial/van/dialdev/DialDevOriginalOperations.kt",
+        "if (DialDevActionReducer.uncertainNativeReason(reason))",
+        "if (false)",
+        "com.dial.van.dialdev.DialDevOriginalOperationsTest"
+      ],
+      [
+        "let independent clients race original identity",
+        "android/app/src/main/java/com/dial/van/dialdev/DialDevOriginalOperations.kt",
+        "private val lock = Any()",
+        "private val lock get() = Any()",
+        "com.dial.van.dialdev.DialDevOriginalOperationsTest"
+      ],
+      [
+        "call ambiguous server unavailability not sent",
+        "android/app/src/main/java/com/dial/van/dialdev/DialDevActions.kt",
+        "httpStatus >= 500 -> DialDevActionStatus.Unconfirmed(\"DIAL's original outcome is unavailable.\")",
+        "httpStatus >= 500 -> DialDevActionStatus.NotSent(\"not sent\")",
+        "com.dial.van.dialdev.DialDevOutcomeRecoveryTest"
+      ],
+      [
+        "treat key conflict as fresh stale-view decision",
+        "android/app/src/main/java/com/dial/van/dialdev/DialDevActions.kt",
+        "httpStatus == 409 && error == \"STALE_VIEW\"",
+        "httpStatus == 409",
+        "com.dial.van.dialdev.DialDevOutcomeRecoveryTest"
+      ],
+      [
+        "coerce a string age into native freshness",
+        "android/app/src/main/java/com/dial/van/dialdev/DialDevOriginalOperations.kt",
+        "if (age !is Int && age !is Long) return null",
+        "if (false) return null",
+        "com.dial.van.dialdev.DialDevOriginalOperationsTest"
+      ],
+      [
+        "settle a control with no native acknowledgement",
+        "android/app/src/main/java/com/dial/van/dialdev/DialDevOriginalOperations.kt",
+        "if (!acknowledged(request,row)) return null",
+        "if (false) return null",
+        "com.dial.van.dialdev.DialDevOriginalOperationsTest"
+      ],
+      [
+        "block a distinct protective control",
+        "android/app/src/main/java/com/dial/van/dialdev/DialDevOriginalOperations.kt",
+        "it.request().kind == snapshot.kind && ",
+        "",
+        "com.dial.van.dialdev.DialDevOriginalOperationsTest"
+      ],
+      [
+        "allow recent metadata to bypass original proof",
+        "android/app/src/main/java/com/dial/van/dialdev/DialDevActions.kt",
+        "current is DialDevActionStatus.Accepted && current.actionId in pendingIds",
+        "false",
+        "com.dial.van.dialdev.DialDevOutcomeRecoveryTest"
+      ],
+      [
+        "apply an old result to a newer control",
+        "android/app/src/main/java/com/dial/van/dialdev/DialDevActions.kt",
+        "pendingKey == null || pendingKey == originalKey",
+        "true",
+        "com.dial.van.dialdev.DialDevOutcomeRecoveryTest"
+      ]
+    ],
+    "records": [
+      {
+        "case": 0,
+        "reason": "permit send without durable request",
+        "phase": "control",
+        "returncode": 0,
+        "counts": {
+          "tests": 14,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "a2cd91ed5a38b9a68b384883c02151cf4f3a351e24cd1dae8ea69da4e6afbedd",
+        "log_sha256": "912cee071afc0ddd69ee1be6a150eeea1d111b60cb80197bbb0504529533756e"
+      },
+      {
+        "case": 0,
+        "reason": "permit send without durable request",
+        "phase": "fault",
+        "returncode": 1,
+        "counts": {
+          "tests": 14,
+          "failures": 13,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 7,
+        "xml_sha256": "55872d23fa6d6df1caec9a8805f161f0778c0e5eaf9093bc0768dca4fbfb40d6",
+        "log_sha256": "8a58cd2b603cfe98d9c38ab1f9aa47e7a83a8b71192ad0ea43c476733b447afd"
+      },
+      {
+        "case": 1,
+        "reason": "replace original key and revision on retry",
+        "phase": "control",
+        "returncode": 0,
+        "counts": {
+          "tests": 14,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "907bac788887256bedd6cf2f9ded4b3020ad1e8bc63090e4bd8620dc5f1c8d73",
+        "log_sha256": "dce6a247ef5c911ae3ed2f447aff6c30ef945bf561808b4496fd31e0190823a8"
+      },
+      {
+        "case": 1,
+        "reason": "replace original key and revision on retry",
+        "phase": "fault",
+        "returncode": 1,
+        "counts": {
+          "tests": 14,
+          "failures": 2,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 2,
+        "xml_sha256": "eb0a8ecb7dfba853da6f52bbdd53be72593c55beba5c5d234a0b0cb2fee87d53",
+        "log_sha256": "ec333b836293f83bc7f03b6d43bab8a58fff7b2f46f2cee9d3d6104cc312eaca"
+      },
+      {
+        "case": 2,
+        "reason": "accept a changed instruction instead of refusing it",
+        "phase": "control",
+        "returncode": 0,
+        "counts": {
+          "tests": 14,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "d6b716fe1bcb0f1b3a5c76c83b53ff3367900d1fbbb71e5f15b9eb746f412ce4",
+        "log_sha256": "8d44d4cc0a841cb7927471c8a5d958f3f0fd86e4896e223c0f46a87b859487e7"
+      },
+      {
+        "case": 2,
+        "reason": "accept a changed instruction instead of refusing it",
+        "phase": "fault",
+        "returncode": 1,
+        "counts": {
+          "tests": 14,
+          "failures": 2,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 2,
+        "xml_sha256": "efe6c491ef3f20354108f8a54aef5dd7bd9ef7e2364abc52527c2a0eef57177f",
+        "log_sha256": "dafea38799306e66080988ba636bc2a0c1b211492edbcc49229bc60a6c313a64"
+      },
+      {
+        "case": 3,
+        "reason": "accept a foreign native target",
+        "phase": "control",
+        "returncode": 0,
+        "counts": {
+          "tests": 14,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "0c7adee7e5fd5cfaf1fd09eb5dec7eb27b956a1761d3b7d04993f9b1a96e99ce",
+        "log_sha256": "a8d849d0d899422ddd3213000748aec9e760e9e50448949e3c9720be53ee63c8"
+      },
+      {
+        "case": 3,
+        "reason": "accept a foreign native target",
+        "phase": "fault",
+        "returncode": 1,
+        "counts": {
+          "tests": 14,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 1,
+        "xml_sha256": "e77e8c542aaa44b5e68cc1608400e1aae24b0c2d29b74ca3330f1ec0009aec6d",
+        "log_sha256": "81c8ddcb064ad2bbe21c15989112d4fdce8b919694d176354ba8ee3649b44235"
+      },
+      {
+        "case": 4,
+        "reason": "accept another original native action ID",
+        "phase": "control",
+        "returncode": 0,
+        "counts": {
+          "tests": 14,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "eb7573e814ef8b0baf55df4b6a932ba24b771d88b397aadc4f154b5d3bd8ec54",
+        "log_sha256": "ef1149f4072b3ff4c269b09e5aebc757c97d2c9b5742035290e7b0f5193d22f8"
+      },
+      {
+        "case": 4,
+        "reason": "accept another original native action ID",
+        "phase": "fault",
+        "returncode": 1,
+        "counts": {
+          "tests": 14,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 1,
+        "xml_sha256": "a74a308e77b301626d78d557f484497c4055cac1db5b2d4e1b3c0258c44210c9",
+        "log_sha256": "01f6863e9cb942a381fd9200235eb3ea96494e328559ef44b12d7467f9d96d67"
+      },
+      {
+        "case": 5,
+        "reason": "use stale native readback as terminal proof",
+        "phase": "control",
+        "returncode": 0,
+        "counts": {
+          "tests": 14,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "da43920cb49459a0b2cedcba9ce87d2a6eca7fef3b9356c173e9d8b1a33b6fac",
+        "log_sha256": "dce6a247ef5c911ae3ed2f447aff6c30ef945bf561808b4496fd31e0190823a8"
+      },
+      {
+        "case": 5,
+        "reason": "use stale native readback as terminal proof",
+        "phase": "fault",
+        "returncode": 1,
+        "counts": {
+          "tests": 14,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 1,
+        "xml_sha256": "0471eaf9c1db4838c6024c95178e707e6c24f0dd95f7af359f91660bcd273cf8",
+        "log_sha256": "05ca0424761d08506b07553d0516189ec1fa39eecc8522f5bd9357961799a7c7"
+      },
+      {
+        "case": 6,
+        "reason": "clear a native control with uncertain effect",
+        "phase": "control",
+        "returncode": 0,
+        "counts": {
+          "tests": 14,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "b569e0110e5383a0acaddbd420b3948a2184f337247a3a64598612f93c170c25",
+        "log_sha256": "1cd1d2c058e65c5c4312d0d86d363287e7d92e2cc9d28e0dd64222b7fa5a2467"
+      },
+      {
+        "case": 6,
+        "reason": "clear a native control with uncertain effect",
+        "phase": "fault",
+        "returncode": 1,
+        "counts": {
+          "tests": 14,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 1,
+        "xml_sha256": "38c7c5a1e7a0e8e0d1cde6ef3cb16953e679075b8d9d4ec2e92cc9318ad3b2fb",
+        "log_sha256": "efd3a96384a63fbf2da120007b941cdf347c22086636ab7f09be70b669593c34"
+      },
+      {
+        "case": 7,
+        "reason": "let independent clients race original identity",
+        "phase": "control",
+        "returncode": 0,
+        "counts": {
+          "tests": 14,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "b4953d04f0f2b03ae97ca2c41bc7182939d55e50a00a0b0b7412515cc852b475",
+        "log_sha256": "42f3a8a5aad929ec831579c9ef4f7c43862c2606a03abaf184d6a171bdcc11d7"
+      },
+      {
+        "case": 7,
+        "reason": "let independent clients race original identity",
+        "phase": "fault",
+        "returncode": 1,
+        "counts": {
+          "tests": 14,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 1,
+        "xml_sha256": "612d65ebba71ab0d7b1aece649633b8cf128bb4fa4bb91abb4d315222612d27a",
+        "log_sha256": "95597a5b1d23c4bb19baaf4d9734c2be1d4385bf55850091226738c3883c9b56"
+      },
+      {
+        "case": 8,
+        "reason": "call ambiguous server unavailability not sent",
+        "phase": "control",
+        "returncode": 0,
+        "counts": {
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "db5f51bb35497ad4a44c2a06c4e9f6b4566d95d9cbe8cbfb1c2468f0a35ff4f0",
+        "log_sha256": "9d82c940ad5bc4b218c6e9495c68a59f39d64a95ee7c1787714514682da48c69"
+      },
+      {
+        "case": 8,
+        "reason": "call ambiguous server unavailability not sent",
+        "phase": "fault",
+        "returncode": 1,
+        "counts": {
+          "tests": 6,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 1,
+        "xml_sha256": "0b81b10157efb560a68eb3b7fdc328ea5d026ccf77913aba7e015603763339d1",
+        "log_sha256": "efbab5542f478d428d5ea0a3a90bb7861c1734e11813c4f2d2a07ee1d0f47851"
+      },
+      {
+        "case": 9,
+        "reason": "treat key conflict as fresh stale-view decision",
+        "phase": "control",
+        "returncode": 0,
+        "counts": {
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "8b14640a80f0a2f8249232907e26ba4fa2a21be695c648d76c053a730f5a75d4",
+        "log_sha256": "7a117c61f22aefce3295522a59ce05eb2ad014021bc4aa7d05003be30488dd7a"
+      },
+      {
+        "case": 9,
+        "reason": "treat key conflict as fresh stale-view decision",
+        "phase": "fault",
+        "returncode": 1,
+        "counts": {
+          "tests": 6,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 1,
+        "xml_sha256": "e780d733425135aefb474c535689abf59ebdb9a7974d11367af824b4934f944d",
+        "log_sha256": "245a3a0362ff056047ab0751fe2dd5cb912882b09b2636f6e27dbefd6e620c5c"
+      },
+      {
+        "case": 10,
+        "reason": "coerce a string age into native freshness",
+        "phase": "control",
+        "returncode": 0,
+        "counts": {
+          "tests": 14,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "02cc718c547a7576db3086ad4a80e3a32a8ef4739286e1c311736742a52d01ea",
+        "log_sha256": "c23a17c0bb32a51cbdd265084fc7dfa92a5791e61f3d3fac2f091220843fe10b"
+      },
+      {
+        "case": 10,
+        "reason": "coerce a string age into native freshness",
+        "phase": "fault",
+        "returncode": 1,
+        "counts": {
+          "tests": 14,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 1,
+        "xml_sha256": "a98f464b2bf89027ba98f68020012c6c0267282620b7419b1a48cc1df2450b32",
+        "log_sha256": "535355f2548bd7c885f4379be74810c6e75a73feb90d593ff2207c2e4a4fd782"
+      },
+      {
+        "case": 11,
+        "reason": "settle a control with no native acknowledgement",
+        "phase": "control",
+        "returncode": 0,
+        "counts": {
+          "tests": 14,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "9feff237be62e1afb92a9e6f415a29e997faec56d026d9648b25e9585dcf0e7c",
+        "log_sha256": "9bb082cc9f315ab3a80903398f9bab81fb9fd27af2a9f56efc34bd71536aa8d1"
+      },
+      {
+        "case": 11,
+        "reason": "settle a control with no native acknowledgement",
+        "phase": "fault",
+        "returncode": 1,
+        "counts": {
+          "tests": 14,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 1,
+        "xml_sha256": "aba923d4a042bb33fb86043786ec280b64368a91d012df4bb67bd7fc166a9044",
+        "log_sha256": "ab669c11f51baf6fb286736fa657023376122d0c4c600b05367927256af7be1a"
+      },
+      {
+        "case": 12,
+        "reason": "block a distinct protective control",
+        "phase": "control",
+        "returncode": 0,
+        "counts": {
+          "tests": 14,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "1447ca06cfc9fd6d54621dc15f0c914c80e6a62acba5d83388f837e9f2a6c2f6",
+        "log_sha256": "9bb082cc9f315ab3a80903398f9bab81fb9fd27af2a9f56efc34bd71536aa8d1"
+      },
+      {
+        "case": 12,
+        "reason": "block a distinct protective control",
+        "phase": "fault",
+        "returncode": 1,
+        "counts": {
+          "tests": 14,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 1,
+        "xml_sha256": "cd045791f5333c2e16498a368ca5f09840b7d2e27e741f1da01443711fb7e5c5",
+        "log_sha256": "4a93e258eb4ffa77d2d27dbe80fac93c9f938bc3c2d74730998494ab627bb585"
+      },
+      {
+        "case": 13,
+        "reason": "allow recent metadata to bypass original proof",
+        "phase": "control",
+        "returncode": 0,
+        "counts": {
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "b942479f61e2768a725725b74e3e5c5ecc7f309cbf08c24aff7d1ca00056b743",
+        "log_sha256": "7b540ea8d419a82eea9b94d96b30fb330711837721c03bc09b43dc751091e9b3"
+      },
+      {
+        "case": 13,
+        "reason": "allow recent metadata to bypass original proof",
+        "phase": "fault",
+        "returncode": 1,
+        "counts": {
+          "tests": 6,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 1,
+        "xml_sha256": "81b8d6cef70919802663630fbc8ce8d8e13a7fe381a01973fb5f5eab7ef3cac3",
+        "log_sha256": "ddf2e2f2a0ead1e14f597b0f3ae6faaa25d65bf313188ce83cfa147c984fc592"
+      },
+      {
+        "case": 14,
+        "reason": "apply an old result to a newer control",
+        "phase": "control",
+        "returncode": 0,
+        "counts": {
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "e99cfbf4a04e4540dc8a619ae6caa3d05c989581019b0117cb8a3a74dc884401",
+        "log_sha256": "24174893cec6d4841c074ef7eca8dfd52b9bc10849c306436287a063dbd3d02f"
+      },
+      {
+        "case": 14,
+        "reason": "apply an old result to a newer control",
+        "phase": "fault",
+        "returncode": 1,
+        "counts": {
+          "tests": 6,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 1,
+        "xml_sha256": "de7e32b13f5ad359f9145ea528b60fe69edd08609b26c3ce2425e46fa7ce0f16",
+        "log_sha256": "7550299c760a18b067d5b7a0f7f0f691301a18a71f511eef9367b437b5f285ee"
+      }
+    ],
+    "before": {
+      "android/app/src/main/java/com/dial/van/dialdev/DialDevOriginalOperations.kt": "0fb58bb14bea4f0952dcc660ce66284314145e2118f2537117cb0391b91cccf8",
+      "android/app/src/main/java/com/dial/van/dialdev/DialDevActions.kt": "63a600d734cf8207282c4a1b95de66e6b0ec9bd5d81e53e87e1223f66ad5bf5b"
+    },
+    "after": {
+      "android/app/src/main/java/com/dial/van/dialdev/DialDevOriginalOperations.kt": "0fb58bb14bea4f0952dcc660ce66284314145e2118f2537117cb0391b91cccf8",
+      "android/app/src/main/java/com/dial/van/dialdev/DialDevActions.kt": "63a600d734cf8207282c4a1b95de66e6b0ec9bd5d81e53e87e1223f66ad5bf5b"
+    },
+    "source_restored": true
+  },
+  "native_empty_ack_probe": {
+    "schema": "van.rebuild.native-dial-empty-ack-probe/1",
+    "source_commit": "64d6b7158c723b7700e5b53175ea8048d4e92d00",
+    "source_path": "/workspace/dial-development-system/agent-system/orchestration/development-projection/actions.mjs",
+    "source_sha256": "028ed7e316688219b8af1e4867661e1450e4bdf4271ccfd9a2b576f6d0d83f14",
+    "controlled_fetch_response": {},
+    "observed_result": {
+      "ok": true,
+      "result": null
+    },
+    "network_calls": 0,
+    "scope": "Actual pinned callBridge with injected fetch returning HTTP200 empty JSON. No native host, gate or owner work invoked."
+  },
+  "private_pg_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "retained_instrument_attempts": [
+    {
+      "attempt": "Initial Kotlin test used JUnit4 import unavailable to verification module. Corrected kotlin.test import before valid before-failure run.",
+      "qualification": "Compilation failure, not assertion-detected product behavior."
+    },
+    {
+      "attempt": "Fault case8 incremental compiler/daemon terminated; source restored; remaining cases re-executed with fresh nonincremental compilation.",
+      "receipt_sha256": "a74aa80989622d8675c4d40a8cde9071947fc2644d73ca50c57e4de0ad93462e",
+      "qualification": "Invalid compiler attempt retained; final 15 fault assertions separately verified."
+    },
+    {
+      "attempt": "Initial full-build task used :verification:test although verification is a separate Gradle build; corrected to separate invocation.",
+      "qualification": "Setup failure; no tests credited."
+    },
+    {
+      "attempt": "First PG regression named nonexistent test_account_runtime_lease.py; corrected to actual test_single_session_lease.py.",
+      "qualification": "Collection failure; no tests credited."
+    }
+  ],
+  "constraints": [
+    "Candidate source only; no whole-unit, live-native, provider, production or S24/Artemis acceptance.",
+    "Native control APPLIED is not task success; uncertain forwarder rejection retains original operation and requires native adjudication.",
+    "No endpoint configuration added to Android; existing provisioned profile, authenticated transport and proof are used.",
+    "Frozen canonical package and all 131 programme units / 93 planned features retained; no frontend redesign before BG-001."
+  ]
+}

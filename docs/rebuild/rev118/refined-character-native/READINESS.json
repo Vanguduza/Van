@@ -1,0 +1,107 @@
+{
+  "schema": "van.refined-character-integration-readiness/1",
+  "status": "OWNER_APPROVED_ISOLATED_DEBUG_REVIEW_SEQUENCE_IMPLEMENTING",
+  "source_head": "dd3573aca5e5a49becea2c064bad6d11c7096729",
+  "pinned_runtime": {
+    "actual_app": "9.13.10",
+    "legacy_forge_record": "9.6.5",
+    "mismatch_is_not_a_native_import_failure": true
+  },
+  "existing_owner_identity": {
+    "decision_id": "CF-D-05-REV2_1",
+    "candidate_master_path": "visual-authority/character-forge/01-master-candidates/van_master_source_candidate_b.png",
+    "sha256": "cf7f51793692bfe8ea2e5f58f1a12e64d3a76468a85cb19d76d0db64ccef374c",
+    "matches_existing_owner_decision": true
+  },
+  "source_intake": {
+    "currently_admitted_files": 0,
+    "current_original_inventory_count": 8,
+    "owner_confirmed_complete": false,
+    "adopted_candidate_master_in_current_original_inventory": false,
+    "finding": "The original source inventory does not include the adopted Candidate B master path. Source intake requires reconciliation before an honest complete-source confirmation, not an inferred owner approval."
+  },
+  "candidate": {
+    "binary_sha256": "a5b848a02887de309d2ee4db2dbc167efaeb123ca0078278155c8b7b4bb8f5dc",
+    "rml_sha256": "af23eec96fc24300f598c050ac9a35a1d610588cb441257a4d23021e1b48f42b",
+    "context_metadata_sha256": "39a5d1947c9dd057e6616eb2656042945fbe098bc1ec13339d9f3bc74c5342ed"
+  },
+  "current_original_gates": [
+    {
+      "gate": "m0",
+      "passed": false,
+      "reasons": [
+        "owner source confirmation pending",
+        "source set not admitted",
+        "rive-android pin mismatch: tools='9.6.5' gradle='9.13.10'"
+      ]
+    },
+    {
+      "gate": "m1",
+      "passed": false,
+      "reasons": [
+        "owner source confirmation pending",
+        "source set not admitted",
+        "rive-android pin mismatch: tools='9.6.5' gradle='9.13.10'",
+        "Inkscape version unpinned",
+        "no admitted layer_svg",
+        "layer SVG independent/owner review not PASS"
+      ]
+    },
+    {
+      "gate": "m2",
+      "passed": false,
+      "reasons": [
+        "owner source confirmation pending",
+        "source set not admitted",
+        "rive-android pin mismatch: tools='9.6.5' gradle='9.13.10'",
+        "Inkscape version unpinned",
+        "no admitted layer_svg",
+        "layer SVG independent/owner review not PASS",
+        "Rive CLI authoring version is not pinned",
+        "core emulator validation not PASS",
+        "core owner verdict not PASS",
+        "core CI run missing",
+        "core candidate not recorded"
+      ]
+    },
+    {
+      "gate": "m3",
+      "passed": false,
+      "reasons": [
+        "owner source confirmation pending",
+        "source set not admitted",
+        "rive-android pin mismatch: tools='9.6.5' gradle='9.13.10'",
+        "Inkscape version unpinned",
+        "no admitted layer_svg",
+        "layer SVG independent/owner review not PASS",
+        "Rive CLI authoring version is not pinned",
+        "core emulator validation not PASS",
+        "core owner verdict not PASS",
+        "core CI run missing",
+        "core candidate not recorded",
+        "full emulator validation not PASS",
+        "full independent review not PASS",
+        "full CI run missing",
+        "full candidate not recorded"
+      ]
+    }
+  ],
+  "protected_gate_files_unchanged_from_published_head": {
+    "docs/character_forge/MANIFEST.yaml": "f8d7dd719eddf9f216cf84dc9ef1d7a7dbdc5f6cd7b8c3d77c8250298af8cfe6",
+    "docs/character_forge/STATUS.json": "913c9bb198bf6665e7a8c3ac5ae7f243c4c6258bd17cf5bef54ed4eaf73b7e79",
+    "docs/character_forge/TOOLS.yaml": "4e9abf12b47e1b0bc2d859765642ab35f0c4223f2a7207c2e1927e5dc9ddb64f",
+    "docs/character_forge/ACCEPTANCE.yaml": "da43d06b6382bb1c83ec50730ab4573b039191f3784251ea127703d8d1da5310",
+    "docs/character_forge/DEVICE_CHECKLIST.yaml": "fab14e2d8cfc8d5d7851e1ab944be4db3bdc948481b293839bc94e2b5a7c9aad"
+  },
+  "software_only_result": "Exact C++ core import and122behavior checks pass; not the Android/JNI/Skia/PLS backend or emulator CI evidence.",
+  "sequencing_conflict": {
+    "owner_instruction": "Physical testing last; close implementation and software checks first.",
+    "existing_flow": "Full-rig staging requires M2. Existing core-validation handoff requests the owner to view the core on S24 and records its owner verdict before advancing to full rig.",
+    "amendment_status": "APPROVED_BY_SUBSEQUENT_OWNER_PROCEED_FOR_UNACCEPTED_DEBUG_REVIEW_ONLY",
+    "approval_record": "docs/rebuild/rev118/character-review/OWNER_INSTRUCTION.json"
+  },
+  "physical_testing": "DEFERRED_FINAL_STAGE",
+  "production_asset_staged": false,
+  "application_renderer": "Existing admitted fallback, unchanged",
+  "candidate_review_reconciliation": "docs/rebuild/rev118/character-review/SOURCE_INVENTORY.json"
+}

@@ -1,0 +1,61 @@
+{
+  "scope": "Document checks, fixture checks and expected readiness refusals. Not application tests or certificates.",
+  "checks": [
+    {
+      "name": "structure",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "stdout_sha256": "c5057e29da7c1882cfdbbe3a476e333ac387abacfd851f37453a92e610c763e4",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "mutations",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "stdout_sha256": "54144bb7a42c5bc1a2b1b03fe6092382fa717b8da53ecc3039af58f500a971b3",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "render_plan",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "stdout_sha256": "0ec4f6bf704d3e7909f93ce436b19036a7174eae77a85b4a9d5bb9f39b10e92b",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "graph",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "stdout_sha256": "1a0b53549b87e0bf1de4d3c7401c9db7a35d35a9ce647c630030905eab41b13c",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "news",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "stdout_sha256": "6703ac7be53a613d04b1447769a006b08d1c133ae5b79cca35a539078a08266a",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "forecast",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "stdout_sha256": "e8873fc9604715833c7671d1385c99b764d848c0c4939acb868868f5fe48cf99",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "F15",
+      "exit_code": 2,
+      "expected_exit_code": 2,
+      "stdout_sha256": "2f79e158f0e9dea801eae2fb361cc2c9d20fda01fbc3660631b2e8d247e5a857",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "BG",
+      "exit_code": 2,
+      "expected_exit_code": 2,
+      "stdout_sha256": "83bdd01d820e2cdfd9f2acdf8906b0869e073de791ba0aa9f9bcd94b8e3417d6",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

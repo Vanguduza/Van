@@ -1,0 +1,24 @@
+..F                                                                      [100%]
+=================================== FAILURES ===================================
+____ test_withdrawal_readiness_failure_rolls_back_credential_and_generation ____
+
+client = (<httpx.AsyncClient object at 0x7f8d0ba4da60>, <fastapi.applications.FastAPI object at 0x7f8d0ae7d0d0>)
+
+    @pytest.mark.asyncio
+    async def test_withdrawal_readiness_failure_rolls_back_credential_and_generation(client):
+        _, app = client
+        google = app.state.google
+        await google.store_refresh_token('owner', 'SOURCE-before', [SCOPE])
+        before = await google.connection_detail()
+        async with app.state.store.connection() as db:
+            await db.execute("CREATE TRIGGER source_readiness_failure BEFORE UPDATE ON google_capability_connections BEGIN SELECT RAISE(ABORT,'SOURCE-interrupted'); END")
+            await db.execute("INSERT OR IGNORE INTO google_capability_connections(capability_id,credential_plane,state,updated_at_unix) VALUES('workspace_api','workspace_oauth','READY',1)")
+            await db.commit()
+>       with pytest.raises(Exception, match='SOURCE-interrupted'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE Exception
+
+backend/tests/test_google_owner_withdrawal_recovery.py:65: Failed
+=========================== short test summary info ============================
+FAILED backend/tests/test_google_owner_withdrawal_recovery.py::test_withdrawal_readiness_failure_rolls_back_credential_and_generation
+1 failed, 2 passed, 1 deselected in 5.36s

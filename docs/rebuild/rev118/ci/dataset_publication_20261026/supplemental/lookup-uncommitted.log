@@ -1,0 +1,18 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+___ test_lookup_cannot_report_an_uncommitted_candidate_as_published[sqlite] ____
+
+publication = (<vati.core.ledger.Ledger object at 0x7f6273153860>, <vati.research.dataset_archive.DatasetCandidateArchive object at ...tive_account_id":123,"schema":"vati.ctrader-symbol/1","transport_host":"demo.ctraderapi.com"}', received_at_ms=100000))
+
+    def test_lookup_cannot_report_an_uncommitted_candidate_as_published(publication):
+        ledger,archive,record,c=publication
+        archive.publish('committed',parse(record),expected_scope=c.native_scope)
+        with ledger.atomic():
+>           with pytest.raises(DatasetContractError,match='OWN_TRANSACTION'):archive.lookup('committed')
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE DatasetContractError
+
+trading/worker_tests/test_dataset_candidate_archive.py:108: Failed
+=========================== short test summary info ============================
+FAILED trading/worker_tests/test_dataset_candidate_archive.py::test_lookup_cannot_report_an_uncommitted_candidate_as_published[sqlite]
+1 failed, 1 deselected in 1.65s

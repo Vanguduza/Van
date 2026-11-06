@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="6" skipped="0" tests="6" time="1.259" timestamp="2026-10-25T23:48:44.763133+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_news_durable_publication" name="test_read_only_cold_recovery_restores_full_claims_and_relay_clocks" time="0.218"><failure message="AttributeError: type object 'NewsIngress' has no attribute 'from_ledger'">ledger = &lt;vati.core.ledger.Ledger object at 0x7fd9135f8050&gt;
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7fd913772330&gt;
+
+    def test_read_only_cold_recovery_restores_full_claims_and_relay_clocks(ledger,monkeypatch):
+        news=NewsIngress(ledger=ledger);h=story(title='A'*700,body_excerpt='B'*2000,url='https://example.invalid/'+'c'*700)
+        news.ingest(h,now_ms=NOW+100)
+        relay=story(source_id='relay',title=h.title,body_excerpt=h.body_excerpt,url=h.url,observed_ms=NOW+1000)
+        news.ingest(relay,now_ms=NOW+1500);head=ledger.head()
+        def forbidden(_event):raise AssertionError('recovery must not publish')
+        with monkeypatch.context() as patch:
+            patch.setattr(ledger,'append',forbidden)
+&gt;           cold=NewsIngress.from_ledger(ledger)
+                 ^^^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: type object 'NewsIngress' has no attribute 'from_ledger'
+
+trading/tests/test_news_durable_publication.py:158: AttributeError</failure></testcase><testcase classname="trading.tests.test_news_durable_publication" name="test_legacy_original_and_untimed_relay_labels_are_preserved_without_inventing_clocks" time="0.004"><failure message="AttributeError: type object 'NewsIngress' has no attribute 'from_ledger'">ledger = &lt;vati.core.ledger.Ledger object at 0x7fd91342e540&gt;
+
+    def test_legacy_original_and_untimed_relay_labels_are_preserved_without_inventing_clocks(ledger):
+        h=story();payload=h.body()|{'ingress_version':'news-ingress/5.1.0','relayed_by':['publisher','untimed']}
+        original=make_event(EventKind.NEWS_HEADLINE,'vati-news-ingress',payload,event_time_ms=NOW,received_time_ms=NOW+100,correlation_id=h.headline_id)
+&gt;       ledger.append(original);head=ledger.head();cold=NewsIngress.from_ledger(ledger)
+                                                        ^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: type object 'NewsIngress' has no attribute 'from_ledger'
+
+trading/tests/test_news_durable_publication.py:169: AttributeError</failure></testcase><testcase classname="trading.tests.test_news_durable_publication" name="test_invalid_or_incomplete_recovery_refuses_partial_success_without_rewriting[corruption]" time="0.004"><failure message="AttributeError: type object 'NewsIngress' has no attribute 'from_ledger'">ledger = &lt;vati.core.ledger.Ledger object at 0x7fd91342e8a0&gt;
+fault = 'corruption'
+
+    @pytest.mark.parametrize('fault',['corruption','missing-observation','capacity'])
+    def test_invalid_or_incomplete_recovery_refuses_partial_success_without_rewriting(ledger,fault):
+        news=NewsIngress(ledger=ledger);h=story();news.ingest(h)
+        if fault=='corruption':ledger._conn.execute("UPDATE events SET payload_json='{}' WHERE kind='NEWS_HEADLINE'")
+        elif fault=='missing-observation':ledger._conn.execute("DELETE FROM events WHERE kind='NEWS_OBSERVATION'")
+        head=ledger.head();count=ledger.count()
+&gt;       with pytest.raises(NewsIngressError):NewsIngress.from_ledger(ledger,max_events=1 if fault=='capacity' else 100)
+                                             ^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: type object 'NewsIngress' has no attribute 'from_ledger'
+
+trading/tests/test_news_durable_publication.py:182: AttributeError</failure></testcase><testcase classname="trading.tests.test_news_durable_publication" name="test_invalid_or_incomplete_recovery_refuses_partial_success_without_rewriting[missing-observation]" time="0.004"><failure message="AttributeError: type object 'NewsIngress' has no attribute 'from_ledger'">ledger = &lt;vati.core.ledger.Ledger object at 0x7fd91342f4d0&gt;
+fault = 'missing-observation'
+
+    @pytest.mark.parametrize('fault',['corruption','missing-observation','capacity'])
+    def test_invalid_or_incomplete_recovery_refuses_partial_success_without_rewriting(ledger,fault):
+        news=NewsIngress(ledger=ledger);h=story();news.ingest(h)
+        if fault=='corruption':ledger._conn.execute("UPDATE events SET payload_json='{}' WHERE kind='NEWS_HEADLINE'")
+        elif fault=='missing-observation':ledger._conn.execute("DELETE FROM events WHERE kind='NEWS_OBSERVATION'")
+        head=ledger.head();count=ledger.count()
+&gt;       with pytest.raises(NewsIngressError):NewsIngress.from_ledger(ledger,max_events=1 if fault=='capacity' else 100)
+                                             ^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: type object 'NewsIngress' has no attribute 'from_ledger'
+
+trading/tests/test_news_durable_publication.py:182: AttributeError</failure></testcase><testcase classname="trading.tests.test_news_durable_publication" name="test_invalid_or_incomplete_recovery_refuses_partial_success_without_rewriting[capacity]" time="0.004"><failure message="AttributeError: type object 'NewsIngress' has no attribute 'from_ledger'">ledger = &lt;vati.core.ledger.Ledger object at 0x7fd9133bf350&gt;, fault = 'capacity'
+
+    @pytest.mark.parametrize('fault',['corruption','missing-observation','capacity'])
+    def test_invalid_or_incomplete_recovery_refuses_partial_success_without_rewriting(ledger,fault):
+        news=NewsIngress(ledger=ledger);h=story();news.ingest(h)
+        if fault=='corruption':ledger._conn.execute("UPDATE events SET payload_json='{}' WHERE kind='NEWS_HEADLINE'")
+        elif fault=='missing-observation':ledger._conn.execute("DELETE FROM events WHERE kind='NEWS_OBSERVATION'")
+        head=ledger.head();count=ledger.count()
+&gt;       with pytest.raises(NewsIngressError):NewsIngress.from_ledger(ledger,max_events=1 if fault=='capacity' else 100)
+                                             ^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: type object 'NewsIngress' has no attribute 'from_ledger'
+
+trading/tests/test_news_durable_publication.py:182: AttributeError</failure></testcase><testcase classname="trading.tests.test_news_durable_publication" name="test_two_actual_sql_writers_keep_one_original_and_one_observation" time="0.017"><failure message="AttributeError: type object 'NewsIngress' has no attribute 'from_ledger'">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-200/test_two_actual_sql_writers_ke0')
+
+    def test_two_actual_sql_writers_keep_one_original_and_one_observation(tmp_path):
+        from concurrent.futures import ThreadPoolExecutor
+        import threading
+        path=tmp_path/'shared.sqlite';seed=Ledger(path);seed.close();barrier=threading.Barrier(2)
+        def publish(offset):
+            value=Ledger(path)
+            try:
+                news=NewsIngress(ledger=value);barrier.wait(timeout=10)
+                return news.ingest(story(),now_ms=NOW+offset)
+            finally:value.close()
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            futures=[pool.submit(publish,offset) for offset in (100,200)]
+            results=[f.result(timeout=30) for f in futures]
+        value=Ledger(path)
+        try:
+            assert sum(result is not None for result in results)==1
+            assert value.count(EventKind.NEWS_HEADLINE)==value.count(EventKind.NEWS_OBSERVATION)==1
+            assert value.verify_chain()[0]
+&gt;           cold=NewsIngress.from_ledger(value)
+                 ^^^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: type object 'NewsIngress' has no attribute 'from_ledger'
+
+trading/tests/test_news_durable_publication.py:204: AttributeError</failure></testcase></testsuite></testsuites>

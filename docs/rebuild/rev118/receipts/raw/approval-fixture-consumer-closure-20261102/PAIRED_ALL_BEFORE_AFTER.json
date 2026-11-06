@@ -1,0 +1,189 @@
+[
+  {
+    "tag": "before-root",
+    "exit": 1,
+    "counts": {
+      "passed": 0,
+      "failed": 2,
+      "error": 0,
+      "skipped": 0
+    },
+    "observation": [
+      {
+        "test": "actual paired fixture then unchanged scope.act real challenge/signature/action",
+        "bare_module": "test_trading_api",
+        "canonical_module": "backend.tests.test_trading_api",
+        "module_identity_equal": false,
+        "bare_public_key_sha256": "eb3247ca1d589a2249135ef22c3645360bd87175cec11b034bcb9bbc74cc7275",
+        "canonical_public_key_sha256": "726666fe4630b5905d82aef6dd5029e2fa3d6b1c000d99a870cb9cc5b4ee855a",
+        "enrolled_public_key_sha256": "eb3247ca1d589a2249135ef22c3645360bd87175cec11b034bcb9bbc74cc7275",
+        "client_fixture_module": "unknown",
+        "act_module": "backend.tests.test_trading_oauth_scope",
+        "act_proof_module": "backend.tests.test_trading_api",
+        "HTTP_status": 403,
+        "detail": "approval_signature_invalid",
+        "native_account_exists": false
+      }
+    ],
+    "receipt": "/tmp/van-approval-fixture-proof-20261102/before-root/receipt.json"
+  },
+  {
+    "tag": "before-backend",
+    "exit": 1,
+    "counts": {
+      "passed": 0,
+      "failed": 2,
+      "error": 0,
+      "skipped": 0
+    },
+    "observation": [
+      {
+        "test": "actual paired fixture then unchanged scope.act real challenge/signature/action",
+        "bare_module": "test_trading_api",
+        "canonical_module": "backend.tests.test_trading_api",
+        "module_identity_equal": false,
+        "bare_public_key_sha256": "84d92880f4c75520ab4ccd541a747b752e2c01b7da71582941dc23b7bbd6aace",
+        "canonical_public_key_sha256": "d4e37af3c83619b0d9a8fd952f88f5cb37f22bf241c86b7bd2e6a591d4e3a488",
+        "enrolled_public_key_sha256": "84d92880f4c75520ab4ccd541a747b752e2c01b7da71582941dc23b7bbd6aace",
+        "client_fixture_module": "unknown",
+        "act_module": "backend.tests.test_trading_oauth_scope",
+        "act_proof_module": "backend.tests.test_trading_api",
+        "HTTP_status": 403,
+        "detail": "approval_signature_invalid",
+        "native_account_exists": false
+      }
+    ],
+    "receipt": "/tmp/van-approval-fixture-proof-20261102/before-backend/receipt.json"
+  },
+  {
+    "tag": "after-root",
+    "exit": 0,
+    "counts": {
+      "passed": 2,
+      "failed": 0,
+      "error": 0,
+      "skipped": 0
+    },
+    "observation": [
+      {
+        "test": "actual paired fixture then unchanged scope.act real challenge/signature/action",
+        "bare_module": "test_trading_api",
+        "canonical_module": "backend.tests.test_trading_api",
+        "module_identity_equal": false,
+        "bare_public_key_sha256": "abbeaf0b9b0b3ef294912d314d760e7c043e9db2f9aaf53e4162d377919b809f",
+        "canonical_public_key_sha256": "17454602db63583ba9cd7bd20423625606d89269aef846f07d7bfa181014f257",
+        "enrolled_public_key_sha256": "17454602db63583ba9cd7bd20423625606d89269aef846f07d7bfa181014f257",
+        "client_fixture_module": "unknown",
+        "act_module": "backend.tests.test_trading_oauth_scope",
+        "act_proof_module": "backend.tests.test_trading_api",
+        "HTTP_status": 200,
+        "detail": null,
+        "native_account_exists": true
+      }
+    ],
+    "receipt": "/tmp/van-approval-fixture-proof-20261102/after-root/receipt.json"
+  },
+  {
+    "tag": "after-backend",
+    "exit": 0,
+    "counts": {
+      "passed": 2,
+      "failed": 0,
+      "error": 0,
+      "skipped": 0
+    },
+    "observation": [
+      {
+        "test": "actual paired fixture then unchanged scope.act real challenge/signature/action",
+        "bare_module": "test_trading_api",
+        "canonical_module": "backend.tests.test_trading_api",
+        "module_identity_equal": false,
+        "bare_public_key_sha256": "27952c1a8c02fdba2923844c351f2eef7569d51e2d03aa370f8cfc5c8e6f8f9d",
+        "canonical_public_key_sha256": "06b8af27889de1522164eaa58f79973842b07fe6d148cf51e6b43b4ada7e007b",
+        "enrolled_public_key_sha256": "06b8af27889de1522164eaa58f79973842b07fe6d148cf51e6b43b4ada7e007b",
+        "client_fixture_module": "unknown",
+        "act_module": "backend.tests.test_trading_oauth_scope",
+        "act_proof_module": "backend.tests.test_trading_api",
+        "HTTP_status": 200,
+        "detail": null,
+        "native_account_exists": true
+      }
+    ],
+    "receipt": "/tmp/van-approval-fixture-proof-20261102/after-backend/receipt.json"
+  },
+  {
+    "tag": "before-fourth-root",
+    "exit": 1,
+    "counts": {
+      "passed": 0,
+      "failed": 2,
+      "error": 0,
+      "skipped": 0
+    },
+    "observation": [
+      {
+        "actual_fixture_owner": "backend.tests.test_stateful_link_binding.client",
+        "bare_module": "test_trading_api",
+        "canonical_module": "backend.tests.test_trading_api",
+        "same_module": false,
+        "bare_public_key_sha256": "adc506f1bb8c580017af6f815bea19965e17176c3763cf4aea733f159744e11b",
+        "canonical_public_key_sha256": "4dc8f471d9f795d4968354151b2f29dc09d350d7f97e6343a50ea9f4300b3032",
+        "enrolled_public_key_sha256": "adc506f1bb8c580017af6f815bea19965e17176c3763cf4aea733f159744e11b",
+        "act_proof_module": "backend.tests.test_trading_api",
+        "HTTP_status": 403,
+        "detail": "approval_signature_invalid"
+      }
+    ],
+    "receipt": "/tmp/van-approval-fixture-proof-20261102/before-fourth-root/receipt.json"
+  },
+  {
+    "tag": "after-fourth-root",
+    "exit": 0,
+    "counts": {
+      "passed": 2,
+      "failed": 0,
+      "error": 0,
+      "skipped": 0
+    },
+    "observation": [
+      {
+        "actual_fixture_owner": "backend.tests.test_stateful_link_binding.client",
+        "bare_module": "test_trading_api",
+        "canonical_module": "backend.tests.test_trading_api",
+        "same_module": false,
+        "bare_public_key_sha256": "9820742efd739ca5abc3ed0c6f2d67830bb44cfd5b5802b3bc100595189efec8",
+        "canonical_public_key_sha256": "e9693c950c2c4c25771a01ce32620ec91145e8c368ed2628aeba57e3f31f6afc",
+        "enrolled_public_key_sha256": "e9693c950c2c4c25771a01ce32620ec91145e8c368ed2628aeba57e3f31f6afc",
+        "act_proof_module": "backend.tests.test_trading_api",
+        "HTTP_status": 200,
+        "detail": null
+      }
+    ],
+    "receipt": "/tmp/van-approval-fixture-proof-20261102/after-fourth-root/receipt.json"
+  },
+  {
+    "tag": "after-fourth-backend",
+    "exit": 0,
+    "counts": {
+      "passed": 2,
+      "failed": 0,
+      "error": 0,
+      "skipped": 0
+    },
+    "observation": [
+      {
+        "actual_fixture_owner": "backend.tests.test_stateful_link_binding.client",
+        "bare_module": "test_trading_api",
+        "canonical_module": "backend.tests.test_trading_api",
+        "same_module": false,
+        "bare_public_key_sha256": "5e840e0f6254f3a62b936b190fc8cd0ef847df60c3213e56fbd3a65bee9a264d",
+        "canonical_public_key_sha256": "7c85daecade2b9351c45633e1058c5febb844563ec2dfce244d8c89ede98ea7c",
+        "enrolled_public_key_sha256": "7c85daecade2b9351c45633e1058c5febb844563ec2dfce244d8c89ede98ea7c",
+        "act_proof_module": "backend.tests.test_trading_api",
+        "HTTP_status": 200,
+        "detail": null
+      }
+    ],
+    "receipt": "/tmp/van-approval-fixture-proof-20261102/after-fourth-backend/receipt.json"
+  }
+]

@@ -1,0 +1,90 @@
+{
+  "state": "TERMINAL",
+  "source_before": {
+    "tools/rebuild/canonical_source_audit.py": "a4ae760343de72e5f4b1147c2a76a83970ff5584605affc8725ef0bf71e84551",
+    "tests/rebuild/test_canonical_source_audit.py": "14e200c2aa91e4db0b1735a51f7ea4a39f47c67452e54a42524fa6920d7330ac",
+    ".github/workflows/van-ci.yml": "c2522db0b7889fcab76d190c9236604596cbc323aed61605ebc3302cbc72eece",
+    "tools/ci/github-actions-ci.yml": "c2522db0b7889fcab76d190c9236604596cbc323aed61605ebc3302cbc72eece",
+    "tests/contracts/test_android_instrumentation_abi.py": "00cebc810c199a29184436b0989637600f9350fa65506167e57651a84358ddef",
+    "tests/contracts/test_android_production_target.py": "abdb4ac40fbf90334d075f81ea626ace6803a392cdadc94d231a65c3db00b95c"
+  },
+  "scope": "Actual completecanonical/workflowcontrols oncombined6sourcepaths; exactownedAGPoutputinit setup/argv/coreASTcontrol +allVTIL controls retained. Controlledfixturemodels only; no newAGP/SDK/platformNode/hosted/privatequalification. Earlier136VTIL4 run retainedonitsoriginalinputpins, not silentlyreusedastestfileunchanged.",
+  "outer_node_inputs_shape": {
+    "NODE_OPTIONS": {
+      "present": false,
+      "nonempty": false,
+      "sha256": null
+    },
+    "NODE_PATH": {
+      "present": true,
+      "nonempty": true,
+      "sha256": "dbc7bc884f72c70bb3d320e868da710a56a621286fba48b3c6b610776b41b4fd"
+    },
+    "NODE_COMPILE_CACHE": {
+      "present": false,
+      "nonempty": false,
+      "sha256": null
+    },
+    "NODE_DISABLE_COMPILE_CACHE": {
+      "present": false,
+      "nonempty": false,
+      "sha256": null
+    }
+  },
+  "tmp_reserve": 2147483648,
+  "owned_run_budget": 134217728,
+  "file_cap": 8388608,
+  "started": "2026-11-01T21:06:34.397424+00:00",
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "-B",
+    "/workspace/van-review-2026-10-18/publish/tools/rebuild/source_storage_audit.py",
+    "--checkout-root",
+    "/workspace/van-review-2026-10-18/publish",
+    "--report",
+    "/tmp/van-recovery-vtil-agp-output-integrated-controls-20261101/audit.json",
+    "tests/rebuild/test_canonical_source_audit.py",
+    "tests/contracts/test_ci_public_source_shards.py",
+    "tests/contracts/test_ci_workflow_is_what_it_claims.py",
+    "--rootdir=/workspace/van-review-2026-10-18/publish",
+    "-c",
+    "/workspace/van-review-2026-10-18/publish/pytest.ini",
+    "-p",
+    "pytest_asyncio.plugin",
+    "-p",
+    "anyio.pytest_plugin",
+    "--basetemp=/tmp/van-recovery-pytest-vtil-agp-output-integrated-20261101",
+    "--junitxml=/tmp/van-recovery-vtil-agp-output-integrated-controls-20261101/tests.xml",
+    "-q"
+  ],
+  "exit": 0,
+  "child_pid": 927724,
+  "child_waited": true,
+  "peak_owned_bytes": 5682604,
+  "seconds": 31.90045667999948,
+  "children_remaining": [],
+  "tests": 136,
+  "failures": 0,
+  "errors": 0,
+  "skips": 0,
+  "cleanup": {
+    "path": "/tmp/van-recovery-pytest-vtil-agp-output-integrated-20261101",
+    "files": 2786,
+    "inventory": "/tmp/van-recovery-vtil-agp-output-integrated-controls-20261101/owned-temp-inventory.json",
+    "inventory_sha256": "a73e1000e25b434c643b44597bea758b8fcfa0dc030df1292700f78b5dc699d6",
+    "free_bytes_before_cleanup": 3874607104,
+    "free_bytes_after_cleanup": 3890057216,
+    "free_inodes_after": 2213285,
+    "independently_absent": true
+  },
+  "source_after": {
+    "tools/rebuild/canonical_source_audit.py": "a4ae760343de72e5f4b1147c2a76a83970ff5584605affc8725ef0bf71e84551",
+    "tests/rebuild/test_canonical_source_audit.py": "14e200c2aa91e4db0b1735a51f7ea4a39f47c67452e54a42524fa6920d7330ac",
+    ".github/workflows/van-ci.yml": "c2522db0b7889fcab76d190c9236604596cbc323aed61605ebc3302cbc72eece",
+    "tools/ci/github-actions-ci.yml": "c2522db0b7889fcab76d190c9236604596cbc323aed61605ebc3302cbc72eece",
+    "tests/contracts/test_android_instrumentation_abi.py": "00cebc810c199a29184436b0989637600f9350fa65506167e57651a84358ddef",
+    "tests/contracts/test_android_production_target.py": "abdb4ac40fbf90334d075f81ea626ace6803a392cdadc94d231a65c3db00b95c"
+  },
+  "outer_node_environment_unchanged": true,
+  "completed": "2026-11-01T21:07:06.661408+00:00"
+}

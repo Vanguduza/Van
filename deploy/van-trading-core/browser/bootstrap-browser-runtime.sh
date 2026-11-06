@@ -2,7 +2,24 @@
 set -Eeuo pipefail
 [[ "$(id -u)" == 0 ]] || { echo 'run as root' >&2; exit 40; }
 
+# HISTORICAL DEV-ONLY PLACEMENT (owner decision 2026-09-29 §1).
+# deploy/van-trading-core/browser/** is historical packaging, not the production placement.
+# Production Stagehand and the Harness-owned Chromium live in the dedicated van-browser-core
+# trust zone: deploy/van-browser-core/bootstrap.sh. Stagehand must never be provisioned on
+# van-trading-core in production, not even temporarily while van-browser-core is not ready
+# (then STAGEHAND = PRODUCTION_DISABLED). This script therefore refuses unless the operator
+# states explicitly that this is a development host.
+if [[ "${VAN_BROWSER_HISTORICAL_DEV_ONLY:-}" != 1 ]]; then
+  echo 'refused: deploy/van-trading-core/browser is historical dev-only packaging.' >&2
+  echo 'Production browser/Stagehand placement is deploy/van-browser-core (van-browser-core zone).' >&2
+  echo 'Set VAN_BROWSER_HISTORICAL_DEV_ONLY=1 only on a development host.' >&2
+  exit 48
+fi
+[[ "${VAN_ENV:-development}" != production ]] || { echo 'refused: VAN_ENV=production on the historical dev-only browser placement' >&2; exit 49; }
+
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Worker sources and the pinned lockfile moved to the van-browser-core package.
+SRC="$(cd "$HERE/../../van-browser-core/browser" && pwd)"
 BASE=/opt/van-browser-runtime
 CONFIG=/opt/van-trading/config/browser-runtime.env
 VEKL_WORKER_HOST="${VAN_VEKL_WORKER_HOST:-}"
@@ -49,8 +66,8 @@ do
   setfacl -m u:van-browser:--x "$parent"
 done
 
-install -o van-browser -g van-browser -m 0644 "$HERE/package.json" "$BASE/package.json"
-install -o van-browser -g van-browser -m 0644 "$HERE/package-lock.json" "$BASE/package-lock.json"
+install -o van-browser -g van-browser -m 0644 "$SRC/package.json" "$BASE/package.json"
+install -o van-browser -g van-browser -m 0644 "$SRC/package-lock.json" "$BASE/package-lock.json"
 install -o root -g root -m 0644 "$HERE/runtime.env.example" "$CONFIG"
 python3 - "$CONFIG" "$VEKL_WORKER_HOST" <<'PY'
 import re, sys
@@ -134,8 +151,8 @@ PY
 harness_freeze_sha="$(sha256sum "$BASE/harness-freeze.txt" | awk '{print $1}')"
 harness_ver="$("$BASE/harness-venv/bin/python" -c 'import importlib.metadata as m; print(m.version("browser-harness"))')"
 
-install -o root -g root -m 0755 "$HERE/harness_service.py" "$BASE/harness_service.py"
-install -o root -g root -m 0755 "$HERE/stagehand_service.mjs" "$BASE/stagehand_service.mjs"
+install -o root -g root -m 0755 "$SRC/harness_service.py" "$BASE/harness_service.py"
+install -o root -g root -m 0755 "$SRC/stagehand_service.mjs" "$BASE/stagehand_service.mjs"
 install -o root -g root -m 0644 "$HERE/../systemd/vati-browser-harness.service" /etc/systemd/system/vati-browser-harness.service
 install -o root -g root -m 0644 "$HERE/../systemd/vati-stagehand.service" /etc/systemd/system/vati-stagehand.service
 
@@ -226,7 +243,8 @@ cat > /var/lib/van-trading/evidence/browser/runtime-manifest.json <<JSON
   "stagehand_bind": "127.0.0.1:9140",
   "harness_bind": "127.0.0.1:9141",
   "vekl_worker": "$VEKL_WORKER_HOST",
-  "service_state": "HARNESS_AND_STAGEHAND_IMPLEMENTED_PENDING_LIVE_QUALIFICATION",
+  "service_state": "HISTORICAL_DEV_ONLY_NOT_PRODUCTION",
+  "trust_zone": "van-trading-core",
   "generated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 }
 JSON

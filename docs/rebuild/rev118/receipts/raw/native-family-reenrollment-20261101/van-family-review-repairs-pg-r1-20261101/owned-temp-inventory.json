@@ -1,0 +1,171 @@
+{
+  "directory": "/tmp/van-recovery-family-review-repairs-pg-r1-20261101",
+  "at_utc": "2026-11-01T05:48:45.571485+00:00",
+  "files": [
+    {
+      "path": "test_internal_control_uses_ori0/private-grant.sqlite",
+      "bytes": 24576,
+      "sha256": "6ab19870b39078f6b401742a6f6abd2521cd786d874b5a2a1cf26b026d408263"
+    },
+    {
+      "path": "test_actual_book_factory_uses_0/accounts.json",
+      "bytes": 496,
+      "sha256": "fecfa8badb050c508a4cb876e63191a30465e4c668febf341ca7c9222b5c76fa"
+    },
+    {
+      "path": "test_actual_book_factory_uses_0/accounts.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_actual_book_factory_uses_0/accounts.json.operation.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_invalid_contract_money_un3/accounts.json",
+      "bytes": 496,
+      "sha256": "fecfa8badb050c508a4cb876e63191a30465e4c668febf341ca7c9222b5c76fa"
+    },
+    {
+      "path": "test_invalid_contract_money_un3/accounts.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_invalid_contract_money_un3/accounts.json.operation.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_invalid_contract_money_un2/accounts.json",
+      "bytes": 496,
+      "sha256": "fecfa8badb050c508a4cb876e63191a30465e4c668febf341ca7c9222b5c76fa"
+    },
+    {
+      "path": "test_invalid_contract_money_un2/accounts.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_invalid_contract_money_un2/accounts.json.operation.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_invalid_contract_money_un1/accounts.json",
+      "bytes": 496,
+      "sha256": "fecfa8badb050c508a4cb876e63191a30465e4c668febf341ca7c9222b5c76fa"
+    },
+    {
+      "path": "test_invalid_contract_money_un1/accounts.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_invalid_contract_money_un1/accounts.json.operation.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_invalid_contract_money_un0/accounts.json",
+      "bytes": 496,
+      "sha256": "fecfa8badb050c508a4cb876e63191a30465e4c668febf341ca7c9222b5c76fa"
+    },
+    {
+      "path": "test_invalid_contract_money_un0/accounts.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_invalid_contract_money_un0/accounts.json.operation.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_runtime_does_not_label_fo0/accounts.json",
+      "bytes": 496,
+      "sha256": "fecfa8badb050c508a4cb876e63191a30465e4c668febf341ca7c9222b5c76fa"
+    },
+    {
+      "path": "test_runtime_does_not_label_fo0/accounts.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_runtime_does_not_label_fo0/accounts.json.operation.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_real_runtime_refuses_an_u0/native.sqlite",
+      "bytes": 49152,
+      "sha256": "63e01516b0b47d2b59b737e3e19676297afe05c51fe1d08ed3d3dc8d6de56612"
+    },
+    {
+      "path": "test_real_runtime_refuses_an_u0/accounts.json",
+      "bytes": 496,
+      "sha256": "fecfa8badb050c508a4cb876e63191a30465e4c668febf341ca7c9222b5c76fa"
+    },
+    {
+      "path": "test_real_runtime_refuses_an_u0/accounts.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_real_runtime_refuses_an_u0/accounts.json.operation.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_actual_single_runtime_mar1/native.sqlite",
+      "bytes": 49152,
+      "sha256": "cdf2626e84e1d578032a277ca20900808335f77102342c573e0475c5d18e9897"
+    },
+    {
+      "path": "test_actual_single_runtime_mar1/accounts.json",
+      "bytes": 496,
+      "sha256": "fecfa8badb050c508a4cb876e63191a30465e4c668febf341ca7c9222b5c76fa"
+    },
+    {
+      "path": "test_actual_single_runtime_mar1/accounts.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_actual_single_runtime_mar1/accounts.json.operation.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_actual_single_runtime_mar0/native.sqlite",
+      "bytes": 49152,
+      "sha256": "cdf2626e84e1d578032a277ca20900808335f77102342c573e0475c5d18e9897"
+    },
+    {
+      "path": "test_actual_single_runtime_mar0/accounts.json",
+      "bytes": 496,
+      "sha256": "fecfa8badb050c508a4cb876e63191a30465e4c668febf341ca7c9222b5c76fa"
+    },
+    {
+      "path": "test_actual_single_runtime_mar0/accounts.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_actual_single_runtime_mar0/accounts.json.operation.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "owner-authority0/owner_authority_keys.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "owner-authority0/owner_authority_keys.json",
+      "bytes": 212,
+      "sha256": "c2b9e7ae06e77809f6b9e8fb3b3f14ea9cfd14e5fa2d0e0fa4909d4312ba4cc7"
+    }
+  ]
+}

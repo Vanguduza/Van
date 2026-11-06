@@ -1,0 +1,11 @@
+# PDF values, input refusals and downloadable contracts
+
+The existing PDF adapter now reports required-field flags instead of always presenting fields as optional. Malformed flag types and out-of-range values are refused. Corrupt page trees and field structures produce a typed invalid-PDF refusal rather than leaking parser exceptions through the owner API.
+
+A successful writer call is insufficient to publish a filled result. The adapter parses the output and compares every requested field's kind and normalized value with the requested value. Missing, unchanged or incorrect output is refused. A failed postcondition cannot publish a filled document, output artifact or file. Actual text fields, custom checkbox on-values, checked and unchecked states are exercised independently.
+
+Document downloads use an ASCII fallback filename and an RFC 5987 UTF-8 filename, preserving Unicode owner filenames without breaking HTTP headers. Existing no-store and nosniff behavior remains. The download OpenAPI response declares PDF bytes; its variant parameter enumerates source and output. Existing document, field and proposal routes publish typed response models for future consumers. No new UI or host configuration is introduced.
+
+Evidence: `receipts/PDF_VALUE_AND_DOWNLOAD_SOURCE_20261023.json`. Five initial failures and an additional corrupt-page-tree failure were reproduced. Sixty integrated cases include actual paired gateway requests and artifact-provider paths; seven deliberate source faults are rejected. The first fault-run cleanup-report helper had a tuple-unpacking error after restoring source; that attempt is retained, and the corrected complete campaign verifies restored hashes.
+
+This packet does not complete BE-025 or claim a new Android consumer, physical PDF rendering, production or handset acceptance. It changes neither browser upload grants nor financial or external-effect authority. Six independently reproduced publication defects remain the immediate next source packet: import/fill orphan cleanup, duplicate canonical output cards, preservation of partial and concurrent edits, and immutable references for old versions. Local fill success must remain separate from uploading or submitting the document elsewhere.

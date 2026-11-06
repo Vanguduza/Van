@@ -1,0 +1,134 @@
+{
+  "schema": "van.rebuild.hosted-source/1",
+  "run_id": 39764242607,
+  "source_head": "9573b3204ad2a5087e935269d3e5522c85b6ab2d",
+  "tested_merge": "af296eb734d4a77870a77f74e5d3c91459082963",
+  "identical_source_tree": "e6cb72a3e88c58523512e76dd5efd21e3fb4fa7a",
+  "jobs": [
+    {
+      "id": 119775621768,
+      "name": "backend",
+      "conclusion": "failure"
+    },
+    {
+      "id": 119775622075,
+      "name": "project-truth-ledger",
+      "conclusion": "failure"
+    },
+    {
+      "id": 119775622128,
+      "name": "rebuild-documentary",
+      "conclusion": "success"
+    },
+    {
+      "id": 119775622190,
+      "name": "postgres-ledger",
+      "conclusion": "success"
+    },
+    {
+      "id": 119775622217,
+      "name": "mutation (python-2, python, 2/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119775622240,
+      "name": "mutation (kotlin-3, kotlin, 3/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119775622251,
+      "name": "android-and-visual-evidence",
+      "conclusion": "success"
+    },
+    {
+      "id": 119775622280,
+      "name": "android-instrumentation",
+      "conclusion": "failure"
+    },
+    {
+      "id": 119775622304,
+      "name": "mutation (kotlin-0, kotlin, 0/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119775622377,
+      "name": "mutation (kotlin-2, kotlin, 2/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119775622395,
+      "name": "mutation (browser-agent, browser-agent, 0/1)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119775622462,
+      "name": "mutation (python-3, python, 3/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119775622556,
+      "name": "mutation (python-0, python, 0/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119775622648,
+      "name": "mutation (python-1, python, 1/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119775622703,
+      "name": "mutation (kotlin-1, kotlin, 1/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119782593434,
+      "name": "character-forge-gate",
+      "conclusion": "success"
+    }
+  ],
+  "public_source": {
+    "voice-source-report.xml": {
+      "tests": 102,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "856773021b54309924a394f3282780db1261888cdb5fcf8b80f67ab10c2b597a"
+    },
+    "trading-source-report.xml": {
+      "tests": 1741,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "sha256": "ce64e6686cff6bde808b3cec065faae3db6571bde02a7188911303187fd8e249"
+    },
+    "postgres-ledger-report.xml": {
+      "tests": 26,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "40e53212866d8e727edac2666a6b4892adcc95cfcb14ac9580a83c9c3e458ff7"
+    }
+  },
+  "legacy_mutations": {
+    "caught": 374,
+    "survived": 0,
+    "receipt": "docs/rebuild/rev118/ci/MUTATION_CORPUS_9573b320.json"
+  },
+  "instrumentation": {
+    "collected": 22,
+    "passed": 16,
+    "failed": 2,
+    "skipped": 4,
+    "failure_stage": "BOTH_VOICE_CASES_WAITING_FOR_STARTUP_READINESS_60000_MS",
+    "native_synthesis_or_audio_not_observed": true,
+    "report_sha256": "86a27cef3835d61060fe22502258368d5769dca21af66dc9a7a1a9d034a31ef4",
+    "job_log_sha256": "37313007b5beb2227367b4b4622472efe0ee28dd3159957e90310b5f3cf920dd"
+  },
+  "remaining_job_failures": {
+    "backend": "Private DDS credential absent; no private code or weak fallback substituted",
+    "project-truth-ledger": "Trusted main bootstrap/admission still pending",
+    "android-instrumentation": "Native voice startup readiness timed out; never counted as a runtime pass"
+  },
+  "release_qualified": false,
+  "handset_accepted": false
+}

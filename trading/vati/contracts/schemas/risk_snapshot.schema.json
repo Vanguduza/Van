@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://van.dial/vati/risk_snapshot.schema.json",
   "title": "RiskSnapshot",
-  "description": "Everything the Risk Authority consults, captured atomically at decision time and hashed into the RiskDecision (Rev 2 §27). Any unprovable field is supplied at its fail-closed value.",
+  "description": "Everything the Risk Authority consults, captured atomically at decision time and hashed into the RiskDecision (Rev 2 \u00a727). Any unprovable field is supplied at its fail-closed value.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -29,7 +29,10 @@
     "margin_level_pct",
     "free_margin",
     "preservation_blocks_new_risk",
-    "preservation_reason"
+    "preservation_reason",
+    "loss_streak_lock",
+    "loss_streak_multiplier",
+    "drawdown_top_state"
   ],
   "properties": {
     "now_unix": {
@@ -123,13 +126,23 @@
           },
           "liquidity_haircut_per_unit": {
             "type": "string",
-            "description": "ILLIQUID_EQUITY: price × liquidity haircut per share."
+            "description": "ILLIQUID_EQUITY: price \u00d7 liquidity haircut per share."
+          },
+          "stop_terms": {
+            "anyOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/$defs/original_stop_terms"
+              }
+            ]
           }
         }
       }
     },
     "symbol_contract": {
-      "$ref": "symbol_contract.schema.json"
+      "$ref": "#/$defs/risk_symbol_terms"
     },
     "quote_age_ms": {
       "type": "integer"
@@ -189,6 +202,390 @@
     "preservation_reason": {
       "type": "string",
       "description": "Owner/replay-visible deterministic reason for a preservation block. Empty when preservation_blocks_new_risk is false."
+    },
+    "loss_streak_lock": {
+      "type": "string",
+      "description": "P1-TRADE-RISK-005. Non-empty while this strategy or the account is in a losing-streak cooldown or an owner-reset suspension; the Risk Authority refuses new risk with CONSECUTIVE_LOSSES and this text. Rebuilt from the ledger, never reset by a restart."
+    },
+    "loss_streak_multiplier": {
+      "type": "string",
+      "description": "P1-TRADE-RISK-005. Decimal \u2264 1. Probation size after a cooldown, until the scope records a win."
+    },
+    "drawdown_top_state": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "P1-TRADE-RISK-005. Highest promotion state among the mandate's strategies. At a top-tier-only drawdown tier only strategies at or above it trade. null keeps the legacy CERTIFIED_LIVE floor."
+    },
+    "used_margin": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Observed committed margin; omitted in immutable legacy snapshot identities when unavailable."
+    },
+    "native_risk_basis_ref": {
+      "description": "Original own-alias baseline event; shared display values are projections, never new own-alias capital.",
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "native_account_context": {
+      "description": "Optional original source identity. Omitted when absent so immutable legacy snapshot bytes/hashes remain unchanged. Never an execution or capital grant.",
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "#/$defs/native_account_context"
+        }
+      ]
+    },
+    "pending_risk_commitments": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/pending_risk_commitment"
+      }
+    }
+  },
+  "$defs": {
+    "risk_symbol_terms": {
+      "type": "object",
+      "description": "Serialized risk-calculation values, including immutable legacy observations. These terms alone do not attest to native freshness or grant execution. Native sync observations retain the separate symbol_contract.schema.json provenance requirements.",
+      "additionalProperties": false,
+      "required": [
+        "symbol",
+        "venue",
+        "base_currency",
+        "quote_currency",
+        "account_currency",
+        "contract_size",
+        "tick_size",
+        "tick_value",
+        "volume_min",
+        "volume_step",
+        "volume_max",
+        "min_stop_distance",
+        "trade_mode",
+        "loss_model",
+        "max_stake",
+        "is_synthetic",
+        "board_lot",
+        "adv_20d",
+        "max_adv_participation",
+        "liquidity_haircut",
+        "round_trip_cost_pct"
+      ],
+      "properties": {
+        "symbol": {
+          "type": "string"
+        },
+        "venue": {
+          "type": "string",
+          "enum": [
+            "mt5",
+            "deriv",
+            "ctrader",
+            "zse",
+            "vfex",
+            "paper"
+          ]
+        },
+        "base_currency": {
+          "type": "string"
+        },
+        "quote_currency": {
+          "type": "string"
+        },
+        "account_currency": {
+          "type": "string"
+        },
+        "contract_size": {
+          "type": "string"
+        },
+        "tick_size": {
+          "type": "string"
+        },
+        "tick_value": {
+          "type": "string",
+          "description": "Account currency per lot per tick, at sync time."
+        },
+        "volume_min": {
+          "type": "string"
+        },
+        "volume_step": {
+          "type": "string"
+        },
+        "volume_max": {
+          "type": "string"
+        },
+        "min_stop_distance": {
+          "type": "string",
+          "description": "Price units; adapter folds stops_level, freeze_level and current spread into this."
+        },
+        "trade_mode": {
+          "type": "string",
+          "enum": [
+            "FULL",
+            "LONG_ONLY",
+            "SHORT_ONLY",
+            "CLOSE_ONLY",
+            "DISABLED"
+          ]
+        },
+        "loss_model": {
+          "type": "string",
+          "enum": [
+            "STOP_DISTANCE",
+            "FULL_STAKE",
+            "ILLIQUID_EQUITY"
+          ]
+        },
+        "max_stake": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "is_synthetic": {
+          "type": "boolean"
+        },
+        "board_lot": {
+          "type": "string",
+          "description": "ILLIQUID_EQUITY: shares per board lot (ZSE: 100)."
+        },
+        "adv_20d": {
+          "type": "string",
+          "description": "ILLIQUID_EQUITY: trailing 20-session average daily volume in shares; 0 = unknown = NO_TRADE."
+        },
+        "max_adv_participation": {
+          "type": "string",
+          "description": "ILLIQUID_EQUITY: max fraction of ADV one order may take (default 0.10)."
+        },
+        "liquidity_haircut": {
+          "type": "string",
+          "description": "ILLIQUID_EQUITY: fraction of price added to the stop distance for gap/impact (vati.zse.liquidity)."
+        },
+        "round_trip_cost_pct": {
+          "type": "string",
+          "description": "All-in buy+sell cost as a fraction of notional (vati.zse.costs for ZSE/VFEX; spread+commission+swap model for FX)."
+        }
+      }
+    },
+    "native_account_context": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Original native source identity only. Runtime validates account/time/valuation and durable receipt joins. This object grants no capital qualification or execution authority.",
+      "required": [
+        "provider",
+        "physical_account_key",
+        "monetary_scope_hash",
+        "account_alias",
+        "observation_ref",
+        "source_query_ref",
+        "source_mark_json",
+        "risk_capital_qualified",
+        "execution_authority"
+      ],
+      "properties": {
+        "provider": {
+          "type": "string",
+          "enum": [
+            "MT5",
+            "CTRADER"
+          ]
+        },
+        "physical_account_key": {
+          "type": "string",
+          "pattern": "^native-account:v1:[0-9a-f]{64}$"
+        },
+        "monetary_scope_hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "account_alias": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "observation_ref": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "source_query_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "source_mark_json": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 16384,
+          "description": "Canonical JSON of the original native mark; semantic source verification remains a runtime requirement."
+        },
+        "risk_capital_qualified": {
+          "type": "boolean",
+          "const": false
+        },
+        "execution_authority": {
+          "type": "boolean",
+          "const": false
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "provider": {
+                "const": "MT5"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "source_query_ref": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "source_query_ref": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "original_stop_terms": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Optional original stop/tick inputs; runtime checks them against the position and loss model. Legacy positions omit absent terms.",
+      "required": [
+        "entry",
+        "stop",
+        "tick_size",
+        "tick_value"
+      ],
+      "properties": {
+        "entry": {
+          "type": "string"
+        },
+        "stop": {
+          "type": "string"
+        },
+        "tick_size": {
+          "type": "string"
+        },
+        "tick_value": {
+          "type": "string"
+        }
+      }
+    },
+    "pending_risk_commitment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "command_ref",
+        "original_input_ref",
+        "monetary_scope_hash",
+        "origin_alias",
+        "physical_account_key",
+        "state",
+        "direction",
+        "quantity",
+        "entry",
+        "stop",
+        "contract",
+        "new_position_slots",
+        "protection_confirmed",
+        "execution_authority"
+      ],
+      "properties": {
+        "command_ref": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "original_input_ref": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "monetary_scope_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "origin_alias": {
+          "type": "string",
+          "minLength": 1
+        },
+        "physical_account_key": {
+          "type": "string",
+          "pattern": "^native-account:v1:[a-f0-9]{64}$"
+        },
+        "state": {
+          "enum": [
+            "UNCONFIRMED",
+            "PENDING",
+            "PARTIAL",
+            "OPEN",
+            "UNCERTAIN"
+          ]
+        },
+        "direction": {
+          "enum": [
+            "LONG",
+            "SHORT"
+          ]
+        },
+        "quantity": {
+          "type": "string"
+        },
+        "entry": {
+          "type": "string"
+        },
+        "stop": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "contract": {
+          "$ref": "#/$defs/risk_symbol_terms"
+        },
+        "new_position_slots": {
+          "type": "integer",
+          "enum": [
+            0,
+            1
+          ]
+        },
+        "protection_confirmed": {
+          "type": "boolean",
+          "const": false
+        },
+        "execution_authority": {
+          "type": "boolean",
+          "const": false
+        },
+        "valuation_contract": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/risk_symbol_terms"
+            }
+          ],
+          "description": "Current risk-owner supplied terms, separate from the original contract. Absence is historical data, not sufficient current valuation."
+        }
+      }
     }
   }
 }

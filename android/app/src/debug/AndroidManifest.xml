@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Debug-only transport for the intentional 127.0.0.1/localhost fallback in
-         VanGatewayClient. Release builds remain HTTPS-only and never merge this manifest. -->
-    <application android:usesCleartextTraffic="true">
+    <!-- The debug resource overlay permits loopback HTTP only. The main manifest's
+         cleartext-off default remains explicit; release never includes this activity. -->
+    <application>
         <activity
             android:name=".visual.RiveCandidateHostActivity"
-            android:exported="false"
-            android:label="VAN Rive candidate"
-            android:theme="@style/Theme.Van" />
+            android:exported="true"
+            android:permission="android.permission.DUMP"
+            android:label="VAN Character Rig Lab"
+            android:theme="@style/Theme.Van">
+        </activity>
     </application>
 </manifest>

@@ -1,0 +1,4 @@
+$ cd docs/design/van-next && python3 contracts/check_state_machines.py
+exit=0
+
+0 findings in VAN_STATE_MACHINES_REV1_9.json

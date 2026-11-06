@@ -1,0 +1,129 @@
+{
+  "schema": "van.rebuild.hosted-source/1",
+  "run_id": 39768283467,
+  "source_head": "9599d695956adbe929ba4496065aa3baaa96b147",
+  "tested_merge": "51ff284eb8e9c35d13ce2b0d612be1d20f8ab5c7",
+  "identical_source_tree": "04ccdb8d16197f403358c5fc2a217cd4bfab4555",
+  "jobs": [
+    {
+      "id": 119789111067,
+      "name": "postgres-ledger",
+      "conclusion": "success"
+    },
+    {
+      "id": 119789111445,
+      "name": "backend",
+      "conclusion": "failure"
+    },
+    {
+      "id": 119789111462,
+      "name": "android-instrumentation",
+      "conclusion": "failure"
+    },
+    {
+      "id": 119789111470,
+      "name": "mutation (browser-agent, browser-agent, 0/1)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119789111480,
+      "name": "mutation (python-0, python, 0/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119789111524,
+      "name": "project-truth-ledger",
+      "conclusion": "failure"
+    },
+    {
+      "id": 119789111565,
+      "name": "mutation (kotlin-3, kotlin, 3/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119789111589,
+      "name": "mutation (python-1, python, 1/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119789111595,
+      "name": "mutation (kotlin-1, kotlin, 1/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119789111617,
+      "name": "android-and-visual-evidence",
+      "conclusion": "success"
+    },
+    {
+      "id": 119789111632,
+      "name": "rebuild-documentary",
+      "conclusion": "success"
+    },
+    {
+      "id": 119789111634,
+      "name": "mutation (kotlin-2, kotlin, 2/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119789111689,
+      "name": "mutation (python-3, python, 3/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119789111723,
+      "name": "mutation (python-2, python, 2/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119789111739,
+      "name": "mutation (kotlin-0, kotlin, 0/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119794823973,
+      "name": "character-forge-gate",
+      "conclusion": "success"
+    }
+  ],
+  "public_source": {
+    "voice-source-report.xml": {
+      "tests": 117,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "b3d1339265e0a94f9c1c94026c3746a23391dfcf39cd62d9fbef14e6d94c584a"
+    },
+    "postgres-ledger-report.xml": {
+      "tests": 26,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "037ef0b12ac64c5140fe27572c8c5ee16145093320cea7521ed0045352dbb0d9"
+    },
+    "trading-source-report.xml": {
+      "tests": 1741,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "sha256": "512d223536feee58e41e46bf948cc6542d986569a89e4e09dc996ccfd811bbe1"
+    }
+  },
+  "legacy_mutations": {
+    "caught": 374,
+    "survived": 0,
+    "receipt": "ci/MUTATION_CORPUS_9599d695.json"
+  },
+  "instrumentation": {
+    "collected": 22,
+    "passed": 16,
+    "failed": 2,
+    "skipped": 4,
+    "failure_stage": "ACTUAL_NATIVE_TTS_PREPARATION",
+    "observed_error": "sherpa_tts_invalid_voice",
+    "synthesis_and_playback_not_reached": true,
+    "diagnostics_sha256": "79e636eaed2ee083d23d1ab462688404416789f6d0c1ac750f14295db04efed9",
+    "voice_report_sha256": "27ca5736b08ac88edfacee5cbb3a99a5b0a4894a7cfc29af8b64f4876f70f9b1"
+  },
+  "qualification": "Actual prior source outcomes. Current native fix needs a new run; no release or handset acceptance."
+}

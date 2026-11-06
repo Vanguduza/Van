@@ -1,0 +1,36 @@
+..........FF                                                             [100%]
+=================================== FAILURES ===================================
+_ test_automatic_materialization_exposes_original_close_on_the_existing_read_model _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-197/test_automatic_materialization0')
+
+    def test_automatic_materialization_exposes_original_close_on_the_existing_read_model(tmp_path):
+        from vati.funding.movement_journal import FinancialMovementBook
+        ledger=Ledger(tmp_path/'facts.sqlite')
+        try:
+            before,event,scope=originals(ledger);book=FinancialMovementBook(ledger,clock=lambda:7000)
+            result=book.materialize(scope)
+>           assert result['posted_count']==result['original_movement_count']==1
+E           assert 0 == 1
+
+trading/tests/test_native_close_movement.py:124: AssertionError
+_ test_bounded_native_close_catch_up_uses_prior_original_close_without_reposting _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-197/test_bounded_native_close_catc0')
+
+    def test_bounded_native_close_catch_up_uses_prior_original_close_without_reposting(tmp_path):
+        from vati.funding.movement_journal import FinancialMovementBook
+        ledger=Ledger(tmp_path/'facts.sqlite')
+        try:
+            before=snapshot(ledger,mark(1000))
+            second=replace(closed(balance='115',version=3,at=2500),native_id=2)
+            scope=observe(ledger,deals=(closed(),second));book=FinancialMovementBook(ledger,clock=lambda:7000)
+            first=book.materialize(scope,max_batch=1)
+>           assert first['posted_count']==1 and first['pending_count']==1
+E           assert (0 == 1)
+
+trading/tests/test_native_close_movement.py:141: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_native_close_movement.py::test_automatic_materialization_exposes_original_close_on_the_existing_read_model
+FAILED trading/tests/test_native_close_movement.py::test_bounded_native_close_catch_up_uses_prior_original_close_without_reposting
+2 failed, 10 passed in 0.96s

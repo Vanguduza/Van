@@ -1,0 +1,658 @@
+﻿2026-10-28T21:29:00.5728469Z Current runner version: '2.338.0'
+2026-10-28T21:29:00.5760640Z ##[group]Runner Image Provisioner
+2026-10-28T21:29:00.5761879Z Hosted Compute Agent
+2026-10-28T21:29:00.5762890Z Version: 20261021.618
+2026-10-28T21:29:00.5763842Z Commit: 21505ad2541d5be6135ed84fc33697146cf75b8e
+2026-10-28T21:29:00.5765412Z Build Date: 2026-10-21T00:45:21Z
+2026-10-28T21:29:00.5766481Z Worker ID: {57809afd-9060-4dba-bcbb-ec9eb3570965}
+2026-10-28T21:29:00.5767674Z Region: eastus
+2026-10-28T21:29:00.5768521Z Cloud: Azure
+2026-10-28T21:29:00.5769333Z ##[endgroup]
+2026-10-28T21:29:00.5771801Z ##[group]Operating System
+2026-10-28T21:29:00.5772796Z Ubuntu
+2026-10-28T21:29:00.5773714Z 24.04.5
+2026-10-28T21:29:00.5774784Z LTS
+2026-10-28T21:29:00.5775575Z ##[endgroup]
+2026-10-28T21:29:00.5776531Z ##[group]Runner Image
+2026-10-28T21:29:00.5777435Z Image: ubuntu-24.04
+2026-10-28T21:29:00.5778379Z Version: 20261025.353.1
+2026-10-28T21:29:00.5780426Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261025.353/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-28T21:29:00.5783098Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261025.353
+2026-10-28T21:29:00.5784943Z ##[endgroup]
+2026-10-28T21:29:00.5786893Z ##[group]GITHUB_TOKEN Permissions
+2026-10-28T21:29:00.5789485Z Contents: read
+2026-10-28T21:29:00.5790495Z Metadata: read
+2026-10-28T21:29:00.5791563Z Packages: read
+2026-10-28T21:29:00.5792490Z ##[endgroup]
+2026-10-28T21:29:00.5795457Z Secret source: Actions
+2026-10-28T21:29:00.5796975Z Cache mode: write
+2026-10-28T21:29:00.5798022Z Prepare workflow directory
+2026-10-28T21:29:00.6225480Z Prepare all required actions
+2026-10-28T21:29:00.6289685Z Getting action download info
+2026-10-28T21:29:00.9906321Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-28T21:29:01.1006538Z Download action repository 'actions/setup-java@v4' (SHA:cf277c60eb25467037889841efdb72551f06f6c3)
+2026-10-28T21:29:01.3729565Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+2026-10-28T21:29:01.4861676Z Download action repository 'reactivecircus/android-emulator-runner@v2' (SHA:a421e43855164a8197daf9d8d40fe71c6996bb0d)
+2026-10-28T21:29:01.6287692Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-10-28T21:29:01.9138971Z Complete job name: android-instrumentation
+2026-10-28T21:29:02.0538610Z ##[group]Run actions/checkout@v4
+2026-10-28T21:29:02.0539956Z with:
+2026-10-28T21:29:02.0540759Z   repository: Vanguduza/Van
+2026-10-28T21:29:02.0549038Z   token: ***
+2026-10-28T21:29:02.0549868Z   ssh-strict: true
+2026-10-28T21:29:02.0550704Z   ssh-user: git
+2026-10-28T21:29:02.0551548Z   persist-credentials: true
+2026-10-28T21:29:02.0552467Z   clean: true
+2026-10-28T21:29:02.0553320Z   sparse-checkout-cone-mode: true
+2026-10-28T21:29:02.0554501Z   fetch-depth: 1
+2026-10-28T21:29:02.0555322Z   fetch-tags: false
+2026-10-28T21:29:02.0556155Z   show-progress: true
+2026-10-28T21:29:02.0557034Z   lfs: false
+2026-10-28T21:29:02.0557825Z   submodules: false
+2026-10-28T21:29:02.0558668Z   set-safe-directory: true
+2026-10-28T21:29:02.0559635Z   allow-unsafe-pr-checkout: false
+2026-10-28T21:29:02.0561284Z ##[endgroup]
+2026-10-28T21:29:02.4012338Z Syncing repository: Vanguduza/Van
+2026-10-28T21:29:02.4015659Z ##[group]Getting Git version info
+2026-10-28T21:29:02.4018075Z Working directory is '/home/runner/work/Van/Van'
+2026-10-28T21:29:02.4019828Z [command]/usr/bin/git version
+2026-10-28T21:29:02.4120833Z git version 2.56.0
+2026-10-28T21:29:02.4146847Z ##[endgroup]
+2026-10-28T21:29:02.4160960Z Temporarily overriding HOME='/home/runner/work/_temp/bdc02cf6-5703-4676-b719-2fc7b11e64fc' before making global git config changes
+2026-10-28T21:29:02.4166226Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-28T21:29:02.4175094Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Van/Van
+2026-10-28T21:29:02.4225662Z Deleting the contents of '/home/runner/work/Van/Van'
+2026-10-28T21:29:02.4237171Z ##[group]Initializing the repository
+2026-10-28T21:29:02.4240639Z [command]/usr/bin/git init /home/runner/work/Van/Van
+2026-10-28T21:29:02.4384644Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-28T21:29:02.4387868Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-28T21:29:02.4390986Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-28T21:29:02.4393433Z hint: call:
+2026-10-28T21:29:02.4394911Z hint:
+2026-10-28T21:29:02.4396490Z hint: 	git config --global init.defaultBranch <name>
+2026-10-28T21:29:02.4398474Z hint:
+2026-10-28T21:29:02.4400304Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-28T21:29:02.4403340Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-28T21:29:02.4407536Z hint:
+2026-10-28T21:29:02.4408977Z hint: 	git branch -m <name>
+2026-10-28T21:29:02.4410526Z hint:
+2026-10-28T21:29:02.4412700Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-28T21:29:02.4416859Z Initialized empty Git repository in /home/runner/work/Van/Van/.git/
+2026-10-28T21:29:02.4430480Z [command]/usr/bin/git remote add origin https://github.com/Vanguduza/Van
+2026-10-28T21:29:02.4488729Z ##[endgroup]
+2026-10-28T21:29:02.4491201Z ##[group]Disabling automatic garbage collection
+2026-10-28T21:29:02.4493385Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-28T21:29:02.4530670Z ##[endgroup]
+2026-10-28T21:29:02.4532897Z ##[group]Setting up auth
+2026-10-28T21:29:02.4537861Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-28T21:29:02.4580982Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-28T21:29:02.5041063Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-28T21:29:02.5085814Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-28T21:29:02.5343303Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-28T21:29:02.5388198Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-28T21:29:02.5643815Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-28T21:29:02.5700263Z ##[endgroup]
+2026-10-28T21:29:02.5701995Z ##[group]Fetching the repository
+2026-10-28T21:29:02.5719127Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +20469295adf78c0c9bf0e4f6533f47a23ba806c2:refs/remotes/pull/105/merge
+2026-10-28T21:29:12.4518091Z From https://github.com/Vanguduza/Van
+2026-10-28T21:29:12.4518734Z  * [new ref]         20469295adf78c0c9bf0e4f6533f47a23ba806c2 -> pull/105/merge
+2026-10-28T21:29:12.4523394Z ##[endgroup]
+2026-10-28T21:29:12.4524478Z ##[group]Determining the checkout info
+2026-10-28T21:29:12.4526219Z ##[endgroup]
+2026-10-28T21:29:12.4532307Z [command]/usr/bin/git sparse-checkout disable
+2026-10-28T21:29:12.4603462Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-28T21:29:12.4641851Z ##[group]Checking out the ref
+2026-10-28T21:29:12.4646004Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/105/merge
+2026-10-28T21:29:13.4963386Z Updating files:  64% (10611/16553)
+2026-10-28T21:29:13.5109391Z Updating files:  65% (10760/16553)
+2026-10-28T21:29:13.5396262Z Updating files:  66% (10925/16553)
+2026-10-28T21:29:13.5537872Z Updating files:  67% (11091/16553)
+2026-10-28T21:29:13.5765322Z Updating files:  68% (11257/16553)
+2026-10-28T21:29:13.6076644Z Updating files:  69% (11422/16553)
+2026-10-28T21:29:13.6357703Z Updating files:  70% (11588/16553)
+2026-10-28T21:29:13.6557824Z Updating files:  71% (11753/16553)
+2026-10-28T21:29:13.6708878Z Updating files:  72% (11919/16553)
+2026-10-28T21:29:13.6868624Z Updating files:  73% (12084/16553)
+2026-10-28T21:29:13.7159346Z Updating files:  74% (12250/16553)
+2026-10-28T21:29:13.7239697Z Updating files:  75% (12415/16553)
+2026-10-28T21:29:13.7369421Z Updating files:  76% (12581/16553)
+2026-10-28T21:29:13.7473653Z Updating files:  77% (12746/16553)
+2026-10-28T21:29:13.7603677Z Updating files:  78% (12912/16553)
+2026-10-28T21:29:13.7722440Z Updating files:  79% (13077/16553)
+2026-10-28T21:29:13.8045913Z Updating files:  80% (13243/16553)
+2026-10-28T21:29:13.8359632Z Updating files:  81% (13408/16553)
+2026-10-28T21:29:13.8550455Z Updating files:  82% (13574/16553)
+2026-10-28T21:29:13.8677921Z Updating files:  83% (13739/16553)
+2026-10-28T21:29:13.8913907Z Updating files:  84% (13905/16553)
+2026-10-28T21:29:13.9090000Z Updating files:  85% (14071/16553)
+2026-10-28T21:29:13.9220903Z Updating files:  86% (14236/16553)
+2026-10-28T21:29:14.0052260Z Updating files:  87% (14402/16553)
+2026-10-28T21:29:14.0223147Z Updating files:  88% (14567/16553)
+2026-10-28T21:29:14.0364253Z Updating files:  89% (14733/16553)
+2026-10-28T21:29:14.0475570Z Updating files:  90% (14898/16553)
+2026-10-28T21:29:14.1069305Z Updating files:  91% (15064/16553)
+2026-10-28T21:29:14.1429807Z Updating files:  92% (15229/16553)
+2026-10-28T21:29:14.1688517Z Updating files:  93% (15395/16553)
+2026-10-28T21:29:14.1817885Z Updating files:  94% (15560/16553)
+2026-10-28T21:29:14.1931433Z Updating files:  95% (15726/16553)
+2026-10-28T21:29:14.2045131Z Updating files:  96% (15891/16553)
+2026-10-28T21:29:14.2159604Z Updating files:  97% (16057/16553)
+2026-10-28T21:29:14.2261561Z Updating files:  98% (16222/16553)
+2026-10-28T21:29:14.4154500Z Updating files:  99% (16388/16553)
+2026-10-28T21:29:14.4155036Z Updating files: 100% (16553/16553)
+2026-10-28T21:29:14.4155492Z Updating files: 100% (16553/16553), done.
+2026-10-28T21:29:14.4344677Z Note: switching to 'refs/remotes/pull/105/merge'.
+2026-10-28T21:29:14.4345274Z 
+2026-10-28T21:29:14.4345582Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-10-28T21:29:14.4346341Z changes and commit them, and you can discard any commits you make in this
+2026-10-28T21:29:14.4347455Z state without impacting any branches by switching back to a branch.
+2026-10-28T21:29:14.4348000Z 
+2026-10-28T21:29:14.4348380Z If you want to create a new branch to retain commits you create, you may
+2026-10-28T21:29:14.4349192Z do so (now or later) by using -c with the switch command. Example:
+2026-10-28T21:29:14.4349653Z 
+2026-10-28T21:29:14.4349852Z   git switch -c <new-branch-name>
+2026-10-28T21:29:14.4350162Z 
+2026-10-28T21:29:14.4350323Z Or undo this operation with:
+2026-10-28T21:29:14.4350590Z 
+2026-10-28T21:29:14.4350733Z   git switch -
+2026-10-28T21:29:14.4350935Z 
+2026-10-28T21:29:14.4351292Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-10-28T21:29:14.4351834Z 
+2026-10-28T21:29:14.4352486Z HEAD is now at 2046929 Merge 3bec9a18e7b51f73a19c872c13e642138d27d41e into 8eb1889822fc8a83f219977c15340172e16acd91
+2026-10-28T21:29:14.4487727Z ##[endgroup]
+2026-10-28T21:29:14.4545924Z [command]/usr/bin/git log -1 --format=%H
+2026-10-28T21:29:14.4582778Z 20469295adf78c0c9bf0e4f6533f47a23ba806c2
+2026-10-28T21:29:14.4893009Z ##[group]Run actions/setup-java@v4
+2026-10-28T21:29:14.4893315Z with:
+2026-10-28T21:29:14.4893529Z   distribution: temurin
+2026-10-28T21:29:14.4893766Z   java-version: 17
+2026-10-28T21:29:14.4893983Z   java-package: jdk
+2026-10-28T21:29:14.4894394Z   check-latest: false
+2026-10-28T21:29:14.4894617Z   server-id: github
+2026-10-28T21:29:14.4894839Z   server-username: GITHUB_ACTOR
+2026-10-28T21:29:14.4895102Z   server-password: GITHUB_TOKEN
+2026-10-28T21:29:14.4895361Z   overwrite-settings: true
+2026-10-28T21:29:14.4895606Z   job-status: success
+2026-10-28T21:29:14.4897989Z   token: ***
+2026-10-28T21:29:14.4898399Z ##[endgroup]
+2026-10-28T21:29:14.6686197Z ##[warning]setup-java v4 is deprecated and will no longer receive updates. Please migrate to actions/setup-java@v5.
+2026-10-28T21:29:14.6693115Z ##[group]Installed distributions
+2026-10-28T21:29:14.6858655Z Resolved Java 17.0.21+9 from tool-cache
+2026-10-28T21:29:14.6859241Z Setting Java 17.0.21+9 as the default
+2026-10-28T21:29:14.6870306Z (node:2323) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-28T21:29:14.6871473Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-28T21:29:14.6874004Z Creating toolchains.xml for JDK version 17 from temurin
+2026-10-28T21:29:14.6952865Z Writing to /home/runner/.m2/toolchains.xml
+2026-10-28T21:29:14.6953384Z 
+2026-10-28T21:29:14.6953626Z Java configuration:
+2026-10-28T21:29:14.6954092Z   Distribution: temurin
+2026-10-28T21:29:14.6954784Z   Version: 17.0.21+9
+2026-10-28T21:29:14.6955385Z   Path: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-10-28T21:29:14.6955932Z 
+2026-10-28T21:29:14.6956464Z ##[endgroup]
+2026-10-28T21:29:14.6973886Z Creating settings.xml with server-id: github
+2026-10-28T21:29:14.7016369Z Writing to /home/runner/.m2/settings.xml
+2026-10-28T21:29:14.7234680Z ##[group]Run actions/setup-python@v5
+2026-10-28T21:29:14.7235095Z with:
+2026-10-28T21:29:14.7235544Z   python-version: 3.12
+2026-10-28T21:29:14.7236047Z   check-latest: false
+2026-10-28T21:29:14.7241885Z   token: ***
+2026-10-28T21:29:14.7242355Z   update-environment: true
+2026-10-28T21:29:14.7242780Z   allow-prereleases: false
+2026-10-28T21:29:14.7243171Z   freethreaded: false
+2026-10-28T21:29:14.7243517Z env:
+2026-10-28T21:29:14.7244012Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-10-28T21:29:14.7245122Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-10-28T21:29:14.7245769Z ##[endgroup]
+2026-10-28T21:29:14.8722056Z ##[group]Installed versions
+2026-10-28T21:29:14.8814080Z (node:2336) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-28T21:29:14.8815269Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-28T21:29:14.8816004Z Successfully set up CPython (3.12.15)
+2026-10-28T21:29:14.8816839Z ##[endgroup]
+2026-10-28T21:29:14.9007308Z ##[group]Run echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+2026-10-28T21:29:14.9008770Z [36;1mecho 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules[0m
+2026-10-28T21:29:14.9009723Z [36;1msudo udevadm control --reload-rules[0m
+2026-10-28T21:29:14.9010252Z [36;1msudo udevadm trigger --name-match=kvm[0m
+2026-10-28T21:29:14.9053674Z shell: /usr/bin/bash -e {0}
+2026-10-28T21:29:14.9054084Z env:
+2026-10-28T21:29:14.9054871Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-10-28T21:29:14.9055742Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-10-28T21:29:14.9056512Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:29:14.9057267Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-28T21:29:14.9058034Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:29:14.9058696Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:29:14.9059379Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:29:14.9060055Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-28T21:29:14.9060600Z ##[endgroup]
+2026-10-28T21:29:14.9235887Z KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"
+2026-10-28T21:29:14.9648738Z ##[group]Run python -m pip install --disable-pip-version-check "Pillow==12.3.0" "vtracer==0.6.15" "PyYAML==6.0.2"
+2026-10-28T21:29:14.9649596Z [36;1mpython -m pip install --disable-pip-version-check "Pillow==12.3.0" "vtracer==0.6.15" "PyYAML==6.0.2"[0m
+2026-10-28T21:29:14.9650359Z [36;1mpython tools/rebuild/ci_ubuntu_libraries.py[0m
+2026-10-28T21:29:14.9650681Z [36;1mtmp="$(mktemp -d)"[0m
+2026-10-28T21:29:14.9651165Z [36;1mcurl -fsSL https://releases.rive.app/cli/v1.1.1/rive-linux-x64.tar.gz -o "$tmp/rive.tar.gz"[0m
+2026-10-28T21:29:14.9651996Z [36;1mecho "41684e9d99fea98e01c2c155e07ec985130b95b640410dc0fbe4ca30c271a7d5  $tmp/rive.tar.gz" | sha256sum -c -[0m
+2026-10-28T21:29:14.9652571Z [36;1mtar -xzf "$tmp/rive.tar.gz" -C "$tmp"[0m
+2026-10-28T21:29:14.9653008Z [36;1mrive_bin="$(find "$tmp" -type f -name rive -perm -u+x -print -quit)"[0m
+2026-10-28T21:29:14.9653406Z [36;1mtest -n "$rive_bin"[0m
+2026-10-28T21:29:14.9653741Z [36;1mmkdir -p "$RUNNER_TEMP/van-character-forge-bin"[0m
+2026-10-28T21:29:14.9654744Z [36;1minstall -m 0755 "$rive_bin" "$RUNNER_TEMP/van-character-forge-bin/rive"[0m
+2026-10-28T21:29:14.9655331Z [36;1mexport PATH="$RUNNER_TEMP/van-character-forge-bin:$PATH"[0m
+2026-10-28T21:29:14.9655810Z [36;1mpython -m tools.character_forge.build_candidate_b_rive_prototype[0m
+2026-10-28T21:29:14.9656514Z [36;1mtest -s visual-authority/character-forge/08-prototypes/candidate-b-mechanics/build/van_candidate_b_mechanics_proto.riv[0m
+2026-10-28T21:29:14.9679379Z shell: /usr/bin/bash -e {0}
+2026-10-28T21:29:14.9679639Z env:
+2026-10-28T21:29:14.9679958Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-10-28T21:29:14.9680468Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-10-28T21:29:14.9680920Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:29:14.9681344Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-28T21:29:14.9681790Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:29:14.9682203Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:29:14.9682594Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:29:14.9682994Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-28T21:29:14.9683328Z ##[endgroup]
+2026-10-28T21:29:16.0041530Z Collecting Pillow==12.3.0
+2026-10-28T21:29:16.0891596Z   Downloading pillow-12.3.0-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (9.1 kB)
+2026-10-28T21:29:16.1357784Z Collecting vtracer==0.6.15
+2026-10-28T21:29:16.1525818Z   Downloading vtracer-0.6.15-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (4.3 kB)
+2026-10-28T21:29:16.1994724Z Collecting PyYAML==6.0.2
+2026-10-28T21:29:16.2157574Z   Downloading PyYAML-6.0.2-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (2.1 kB)
+2026-10-28T21:29:16.2358700Z Downloading pillow-12.3.0-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (6.9 MB)
+2026-10-28T21:29:16.3481972Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 6.9/6.9 MB 92.9 MB/s  0:00:00
+2026-10-28T21:29:16.3693958Z Downloading vtracer-0.6.15-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (1.1 MB)
+2026-10-28T21:29:16.3763089Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.1/1.1 MB 205.1 MB/s  0:00:00
+2026-10-28T21:29:16.3925995Z Downloading PyYAML-6.0.2-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (767 kB)
+2026-10-28T21:29:16.3978661Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 767.5/767.5 kB 156.8 MB/s  0:00:00
+2026-10-28T21:29:16.4513606Z Installing collected packages: vtracer, PyYAML, Pillow
+2026-10-28T21:29:16.8489537Z 
+2026-10-28T21:29:16.8502334Z Successfully installed Pillow-12.3.0 PyYAML-6.0.2 vtracer-0.6.15
+2026-10-28T21:29:16.9800686Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+2026-10-28T21:29:17.0139669Z Hit:2 http://azure.archive.ubuntu.com/ubuntu noble InRelease
+2026-10-28T21:29:17.0175020Z Get:3 http://azure.archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+2026-10-28T21:29:17.0219756Z Get:4 http://azure.archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]
+2026-10-28T21:29:17.0256834Z Get:5 http://azure.archive.ubuntu.com/ubuntu noble-security InRelease [126 kB]
+2026-10-28T21:29:17.1522639Z Get:6 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [1406 kB]
+2026-10-28T21:29:17.1697144Z Get:7 http://azure.archive.ubuntu.com/ubuntu noble-updates/main Translation-en [310 kB]
+2026-10-28T21:29:17.1706247Z Get:8 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [1707 kB]
+2026-10-28T21:29:17.1793153Z Get:9 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe Translation-en [343 kB]
+2026-10-28T21:29:17.1820723Z Get:10 http://azure.archive.ubuntu.com/ubuntu noble-updates/restricted amd64 Packages [1809 kB]
+2026-10-28T21:29:17.1910734Z Get:11 http://azure.archive.ubuntu.com/ubuntu noble-updates/restricted Translation-en [411 kB]
+2026-10-28T21:29:17.1939127Z Get:12 http://azure.archive.ubuntu.com/ubuntu noble-updates/multiverse Translation-en [14.3 kB]
+2026-10-28T21:29:17.2629975Z Get:13 http://azure.archive.ubuntu.com/ubuntu noble-security/main amd64 Packages [1146 kB]
+2026-10-28T21:29:17.2705570Z Get:14 http://azure.archive.ubuntu.com/ubuntu noble-security/main Translation-en [231 kB]
+2026-10-28T21:29:17.2719384Z Get:15 http://azure.archive.ubuntu.com/ubuntu noble-security/universe amd64 Packages [1223 kB]
+2026-10-28T21:29:17.3232027Z Get:16 http://azure.archive.ubuntu.com/ubuntu noble-security/universe Translation-en [246 kB]
+2026-10-28T21:29:19.7932653Z Fetched 9225 kB in 1s (9079 kB/s)
+2026-10-28T21:29:20.5140550Z Reading package lists...
+2026-10-28T21:29:20.5510014Z Reading package lists...
+2026-10-28T21:29:20.6981636Z Building dependency tree...
+2026-10-28T21:29:20.6988795Z Reading state information...
+2026-10-28T21:29:20.8319704Z libgl1 is already the newest version (1.7.0-1build1).
+2026-10-28T21:29:20.8320615Z libgl1 set to manually installed.
+2026-10-28T21:29:20.8321477Z libx11-6 is already the newest version (2:1.8.7-1ubuntu0.1).
+2026-10-28T21:29:20.8322364Z libx11-6 set to manually installed.
+2026-10-28T21:29:20.8323141Z libxkbcommon0 is already the newest version (1.6.0-1build1).
+2026-10-28T21:29:20.8323884Z libxkbcommon0 set to manually installed.
+2026-10-28T21:29:20.8324852Z libfontconfig1 is already the newest version (2.15.0-1.1ubuntu2).
+2026-10-28T21:29:20.8325649Z libfontconfig1 set to manually installed.
+2026-10-28T21:29:20.8326420Z libfreetype6 is already the newest version (2.13.2+dfsg-1ubuntu0.2).
+2026-10-28T21:29:20.8327223Z libfreetype6 set to manually installed.
+2026-10-28T21:29:20.8327840Z libxcb1 is already the newest version (1.15-1ubuntu2).
+2026-10-28T21:29:20.8328275Z libxcb1 set to manually installed.
+2026-10-28T21:29:20.8328683Z The following additional packages will be installed:
+2026-10-28T21:29:20.8329094Z   libegl-mesa0
+2026-10-28T21:29:20.8509790Z The following NEW packages will be installed:
+2026-10-28T21:29:20.8514450Z   libegl-mesa0 libegl1 libgles2
+2026-10-28T21:29:20.8705354Z 0 upgraded, 3 newly installed, 0 to remove and 5 not upgraded.
+2026-10-28T21:29:20.8706005Z Need to get 163 kB of archives.
+2026-10-28T21:29:20.8706604Z After this operation, 609 kB of additional disk space will be used.
+2026-10-28T21:29:20.8707322Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+2026-10-28T21:29:20.9164077Z Get:2 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 libegl-mesa0 amd64 25.2.8-0ubuntu0.24.04.4 [117 kB]
+2026-10-28T21:29:20.9763010Z Get:3 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 libegl1 amd64 1.7.0-1build1 [28.7 kB]
+2026-10-28T21:29:20.9927804Z Get:4 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 libgles2 amd64 1.7.0-1build1 [17.1 kB]
+2026-10-28T21:29:22.0285005Z Fetched 163 kB in 0s (1205 kB/s)
+2026-10-28T21:29:22.0536363Z Selecting previously unselected package libegl-mesa0:amd64.
+2026-10-28T21:29:22.0875285Z (Reading database ... 
+2026-10-28T21:29:22.0876245Z (Reading database ... 5%
+2026-10-28T21:29:22.0876782Z (Reading database ... 10%
+2026-10-28T21:29:22.0877283Z (Reading database ... 15%
+2026-10-28T21:29:22.0877605Z (Reading database ... 20%
+2026-10-28T21:29:22.0877919Z (Reading database ... 25%
+2026-10-28T21:29:22.0878566Z (Reading database ... 30%
+2026-10-28T21:29:22.0878868Z (Reading database ... 35%
+2026-10-28T21:29:22.0879164Z (Reading database ... 40%
+2026-10-28T21:29:22.0879469Z (Reading database ... 45%
+2026-10-28T21:29:22.0879766Z (Reading database ... 50%
+2026-10-28T21:29:22.0928654Z (Reading database ... 55%
+2026-10-28T21:29:22.2328933Z (Reading database ... 60%
+2026-10-28T21:29:22.4351254Z (Reading database ... 65%
+2026-10-28T21:29:22.6414531Z (Reading database ... 70%
+2026-10-28T21:29:22.8360744Z (Reading database ... 75%
+2026-10-28T21:29:23.0293597Z (Reading database ... 80%
+2026-10-28T21:29:23.1826636Z (Reading database ... 85%
+2026-10-28T21:29:23.2896267Z (Reading database ... 90%
+2026-10-28T21:29:23.4835945Z (Reading database ... 95%
+2026-10-28T21:29:23.4836434Z (Reading database ... 100%
+2026-10-28T21:29:23.4837006Z (Reading database ... 215504 files and directories currently installed.)
+2026-10-28T21:29:23.4881152Z Preparing to unpack .../libegl-mesa0_25.2.8-0ubuntu0.24.04.4_amd64.deb ...
+2026-10-28T21:29:23.4926948Z Unpacking libegl-mesa0:amd64 (25.2.8-0ubuntu0.24.04.4) ...
+2026-10-28T21:29:23.5230327Z Selecting previously unselected package libegl1:amd64.
+2026-10-28T21:29:23.5371385Z Preparing to unpack .../libegl1_1.7.0-1build1_amd64.deb ...
+2026-10-28T21:29:23.5380529Z Unpacking libegl1:amd64 (1.7.0-1build1) ...
+2026-10-28T21:29:23.5637057Z Selecting previously unselected package libgles2:amd64.
+2026-10-28T21:29:23.5779359Z Preparing to unpack .../libgles2_1.7.0-1build1_amd64.deb ...
+2026-10-28T21:29:23.5788323Z Unpacking libgles2:amd64 (1.7.0-1build1) ...
+2026-10-28T21:29:23.6209247Z Setting up libegl-mesa0:amd64 (25.2.8-0ubuntu0.24.04.4) ...
+2026-10-28T21:29:23.6230920Z Setting up libgles2:amd64 (1.7.0-1build1) ...
+2026-10-28T21:29:23.6254674Z Setting up libegl1:amd64 (1.7.0-1build1) ...
+2026-10-28T21:29:23.6277580Z Processing triggers for libc-bin (2.39-0ubuntu8.9) ...
+2026-10-28T21:29:25.0009660Z 
+2026-10-28T21:29:25.0010468Z Running kernel seems to be up-to-date.
+2026-10-28T21:29:25.0010931Z 
+2026-10-28T21:29:25.0011218Z No services need to be restarted.
+2026-10-28T21:29:25.0011623Z 
+2026-10-28T21:29:25.0011833Z No containers need to be restarted.
+2026-10-28T21:29:25.0012229Z 
+2026-10-28T21:29:25.0012507Z No user sessions are running outdated binaries.
+2026-10-28T21:29:25.0012979Z 
+2026-10-28T21:29:25.0013390Z No VM guests are running outdated hypervisor (qemu) binaries on this host.
+2026-10-28T21:29:27.8042045Z /tmp/tmp.C2z71SQUf2/rive.tar.gz: OK
+2026-10-28T21:29:33.3694320Z {
+2026-10-28T21:29:33.3694893Z   "schema_version": 1,
+2026-10-28T21:29:33.3695361Z   "status": "NON_CANONICAL_MECHANICS_PROTOTYPE",
+2026-10-28T21:29:33.3696124Z   "candidate_b_sha256": "cf7f51793692bfe8ea2e5f58f1a12e64d3a76468a85cb19d76d0db64ccef374c",
+2026-10-28T21:29:33.3697084Z   "scene_sha256": "164e6ad0cf38db6a9d3ab5192037d529bd6324c2f06d84cff790084e61c53efe",
+2026-10-28T21:29:33.3697982Z   "rive_sha256": "772f517720f3e39b76b1a93291673d5dabf44c63d0349b2e57259df6d7635457",
+2026-10-28T21:29:33.3698625Z   "rive_version": "rive 1.1.1",
+2026-10-28T21:29:33.3699013Z   "artboard": "Van",
+2026-10-28T21:29:33.3699347Z   "state_machine": "VanRuntime",
+2026-10-28T21:29:33.3699714Z   "durable_states": 18,
+2026-10-28T21:29:33.3700057Z   "finite_actions": 14,
+2026-10-28T21:29:33.3700383Z   "visemes": 5,
+2026-10-28T21:29:33.3700682Z   "trace_paths": 183,
+2026-10-28T21:29:33.3701013Z   "vector_trace_sha256": {
+2026-10-28T21:29:33.3701565Z     "body": "7a9e81c4f912159412221098106ff7f6dc501f22041a103a95ba91f307165023",
+2026-10-28T21:29:33.3702352Z     "head": "d3f47113f344b8c225e267c39f29c87e911544014645fcf79583a21b697738f7",
+2026-10-28T21:29:33.3703145Z     "forearm_l": "2b3d9f8143cdd088d6c958ead2e80686aaf865676a5739037a11475b5c49a8bf",
+2026-10-28T21:29:33.3704457Z     "forearm_r": "90518ba5f6f962f7b1a3edab8c838840bc35f9e66ab8fc6173511d6018d5d142",
+2026-10-28T21:29:33.3705317Z     "orb": "7d1ab93f40568e062b56ff1a643a080645d0d4ebfe0d879704b0ddf8b6cde606"
+2026-10-28T21:29:33.3705888Z   },
+2026-10-28T21:29:33.3706182Z   "aura_embedded": false,
+2026-10-28T21:29:33.3706757Z   "production_admissible": false,
+2026-10-28T21:29:33.3707684Z   "note": "Candidate-B cut-out traced to non-canonical vectors for mechanics proof; M1 reviewed semantic vectors and M2 owner pass remain mandatory."
+2026-10-28T21:29:33.3708606Z }
+2026-10-28T21:29:33.3883776Z ##[group]Run prototype="visual-authority/character-forge/08-prototypes/candidate-b-mechanics/build/van_candidate_b_mechanics_proto.riv"
+2026-10-28T21:29:33.3885163Z [36;1mprototype="visual-authority/character-forge/08-prototypes/candidate-b-mechanics/build/van_candidate_b_mechanics_proto.riv"[0m
+2026-10-28T21:29:33.3885923Z [36;1mtest_candidate="android/app/src/androidTest/assets/van_candidate.riv"[0m
+2026-10-28T21:29:33.3886433Z [36;1mdebug_candidate="android/app/src/debug/assets/van_candidate.riv"[0m
+2026-10-28T21:29:33.3886849Z [36;1mif [[ -f "$prototype" ]]; then[0m
+2026-10-28T21:29:33.3887251Z [36;1m  mkdir -p "$(dirname "$test_candidate")" "$(dirname "$debug_candidate")"[0m
+2026-10-28T21:29:33.3887673Z [36;1m  cp "$prototype" "$test_candidate"[0m
+2026-10-28T21:29:33.3888002Z [36;1m  cp "$prototype" "$debug_candidate"[0m
+2026-10-28T21:29:33.3888407Z [36;1m  printf '%s\n' core > android/app/src/androidTest/assets/forge_mode.txt[0m
+2026-10-28T21:29:33.3888922Z [36;1m  printf '%s\n' core > android/app/src/debug/assets/forge_mode.txt[0m
+2026-10-28T21:29:33.3889525Z [36;1m  echo "Bound Candidate B mechanics prototype to androidTest and the debug host used by RiveContractTest."[0m
+2026-10-28T21:29:33.3890025Z [36;1mfi[0m
+2026-10-28T21:29:33.3910902Z shell: /usr/bin/bash -e {0}
+2026-10-28T21:29:33.3911164Z env:
+2026-10-28T21:29:33.3911480Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-10-28T21:29:33.3911975Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-10-28T21:29:33.3912427Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:29:33.3912853Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-28T21:29:33.3913282Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:29:33.3913666Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:29:33.3914054Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:29:33.3914804Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-28T21:29:33.3915139Z ##[endgroup]
+2026-10-28T21:29:33.4035304Z Bound Candidate B mechanics prototype to androidTest and the debug host used by RiveContractTest.
+2026-10-28T21:29:33.4066163Z ##[group]Run mkdir -p artifacts/character-forge
+2026-10-28T21:29:33.4066585Z [36;1mmkdir -p artifacts/character-forge[0m
+2026-10-28T21:29:33.4067012Z [36;1mcandidate="android/app/src/androidTest/assets/van_candidate.riv"[0m
+2026-10-28T21:29:33.4067483Z [36;1mproduction="android/app/src/main/assets/van.riv"[0m
+2026-10-28T21:29:33.4067848Z [36;1mif [[ -f "$candidate" ]]; then[0m
+2026-10-28T21:29:33.4068313Z [36;1m  sha256sum "$candidate" | awk '{print $1}' > artifacts/character-forge/van_candidate.sha256[0m
+2026-10-28T21:29:33.4068776Z [36;1melse[0m
+2026-10-28T21:29:33.4069117Z [36;1m  printf '%s\n' NO_RIVE_ASSET > artifacts/character-forge/van_candidate.sha256[0m
+2026-10-28T21:29:33.4069527Z [36;1mfi[0m
+2026-10-28T21:29:33.4069738Z [36;1mif [[ -f "$production" ]]; then[0m
+2026-10-28T21:29:33.4070198Z [36;1m  sha256sum "$production" | awk '{print $1}' > artifacts/character-forge/van_production.sha256[0m
+2026-10-28T21:29:33.4070676Z [36;1melse[0m
+2026-10-28T21:29:33.4071051Z [36;1m  printf '%s\n' NO_RIVE_ASSET > artifacts/character-forge/van_production.sha256[0m
+2026-10-28T21:29:33.4071463Z [36;1mfi[0m
+2026-10-28T21:29:33.4090476Z shell: /usr/bin/bash -e {0}
+2026-10-28T21:29:33.4090736Z env:
+2026-10-28T21:29:33.4091054Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-10-28T21:29:33.4091648Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-10-28T21:29:33.4092146Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:29:33.4092750Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-28T21:29:33.4093183Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:29:33.4093568Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:29:33.4093956Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:29:33.4094724Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-28T21:29:33.4095286Z ##[endgroup]
+2026-10-28T21:29:33.4204611Z ##[group]Run python3 android/tools/package_voice_assets.py --acquire
+2026-10-28T21:29:33.4205159Z [36;1mpython3 android/tools/package_voice_assets.py --acquire[0m
+2026-10-28T21:29:33.4223618Z shell: /usr/bin/bash -e {0}
+2026-10-28T21:29:33.4223875Z env:
+2026-10-28T21:29:33.4224447Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-10-28T21:29:33.4224968Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-10-28T21:29:33.4225431Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:29:33.4225860Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-28T21:29:33.4238170Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:29:33.4238649Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:29:33.4239049Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:29:33.4239487Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-28T21:29:33.4239818Z ##[endgroup]
+2026-10-28T21:29:45.5327624Z {"file_bytes": 224852871, "file_count": 45, "manifest_sha256": "7fa17db389349bd587c1f061c7162f9a4c419a552c9d57cd03e8e937bf935e30", "owner_profile_included": false, "status": "VERIFIED"}
+2026-10-28T21:29:45.5329707Z {"file_bytes": 224852871, "file_count": 45, "manifest_sha256": "7fa17db389349bd587c1f061c7162f9a4c419a552c9d57cd03e8e937bf935e30", "owner_profile_included": false, "status": "VERIFIED"}
+2026-10-28T21:29:45.5540752Z ##[group]Run reactivecircus/android-emulator-runner@v2
+2026-10-28T21:29:45.5541126Z with:
+2026-10-28T21:29:45.5541327Z   api-level: 31
+2026-10-28T21:29:45.5541534Z   arch: x86_64
+2026-10-28T21:29:45.5541745Z   target: google_apis
+2026-10-28T21:29:45.5541967Z   profile: pixel_6
+2026-10-28T21:29:45.5542413Z   emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+2026-10-28T21:29:45.5542893Z   disable-animations: true
+2026-10-28T21:29:45.5543146Z   working-directory: android
+2026-10-28T21:29:45.5544968Z   script: chmod +x gradlew
+bash -c 'set +e; ./gradlew :app:connectedDebugAndroidTest -PVAN_TEST_ABI=x86_64 --console=plain; result=$?; mkdir -p app/build/reports/voice-runtime; adb logcat -d -v threadtime VanVoiceRuntime:I AndroidRuntime:E "*:S" > app/build/reports/voice-runtime/logcat.txt; exit "$result"'
+find app/build/outputs/connected_android_test_additional_output -type f -print || echo "no screenshots captured"
+
+2026-10-28T21:29:45.5546546Z   cores: 2
+2026-10-28T21:29:45.5546740Z   avd-name: test
+2026-10-28T21:29:45.5546953Z   force-avd-creation: true
+2026-10-28T21:29:45.5547199Z   emulator-boot-timeout: 600
+2026-10-28T21:29:45.5547443Z   emulator-port: 5554
+2026-10-28T21:29:45.5547678Z   disable-spellchecker: false
+2026-10-28T21:29:45.5547936Z   disable-linux-hw-accel: auto
+2026-10-28T21:29:45.5548193Z   enable-hw-keyboard: false
+2026-10-28T21:29:45.5548426Z   channel: stable
+2026-10-28T21:29:45.5548628Z env:
+2026-10-28T21:29:45.5548930Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-10-28T21:29:45.5549418Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-10-28T21:29:45.5549871Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:29:45.5550292Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-28T21:29:45.5550731Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:29:45.5551126Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:29:45.5551718Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:29:45.5552103Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-28T21:29:45.5552435Z ##[endgroup]
+2026-10-28T21:29:45.6196278Z ##[group]Configure emulator
+2026-10-28T21:29:45.6198784Z API level: 31
+2026-10-28T21:29:45.6199543Z System image API level: 31
+2026-10-28T21:29:45.6200047Z target: google_apis
+2026-10-28T21:29:45.6200507Z CPU architecture: x86_64
+2026-10-28T21:29:45.6200993Z Hardware profile: pixel_6
+2026-10-28T21:29:45.6205043Z Cores: 2
+2026-10-28T21:29:45.6214123Z RAM size: 
+2026-10-28T21:29:45.6214613Z Heap size: 
+2026-10-28T21:29:45.6214840Z SD card path or size: 
+2026-10-28T21:29:45.6215077Z Disk size: 
+2026-10-28T21:29:45.6215274Z AVD name: test
+2026-10-28T21:29:45.6215496Z force avd creation: true
+2026-10-28T21:29:45.6215893Z Emulator boot timeout: 600
+2026-10-28T21:29:45.6216248Z emulator port: 5554
+2026-10-28T21:29:45.6216726Z emulator options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+2026-10-28T21:29:45.6217219Z disable animations: true
+2026-10-28T21:29:45.6217467Z disable spellchecker: false
+2026-10-28T21:29:45.6217737Z disable Linux hardware acceleration: false
+2026-10-28T21:29:45.6218033Z enable hardware keyboard: false
+2026-10-28T21:29:45.6218299Z custom working directory: android
+2026-10-28T21:29:45.6218548Z Channel: 0 (stable)
+2026-10-28T21:29:45.6218748Z Script:
+2026-10-28T21:29:45.6218944Z chmod +x gradlew
+2026-10-28T21:29:45.6220185Z bash -c 'set +e; ./gradlew :app:connectedDebugAndroidTest -PVAN_TEST_ABI=x86_64 --console=plain; result=$?; mkdir -p app/build/reports/voice-runtime; adb logcat -d -v threadtime VanVoiceRuntime:I AndroidRuntime:E "*:S" > app/build/reports/voice-runtime/logcat.txt; exit "$result"'
+2026-10-28T21:29:45.6221528Z find app/build/outputs/connected_android_test_additional_output -type f -print || echo "no screenshots captured"
+2026-10-28T21:29:45.6222480Z Pre emulator launch script:
+2026-10-28T21:29:45.6223309Z ##[endgroup]
+2026-10-28T21:29:45.6223977Z ##[group]Install Android SDK
+2026-10-28T21:29:45.6297844Z [command]/usr/bin/sh -c \yes | sdkmanager --licenses > /dev/null
+2026-10-28T21:29:51.9502454Z Installing latest build tools, platform tools, and platform.
+2026-10-28T21:29:51.9519439Z [command]/usr/bin/sh -c \sdkmanager --install 'build-tools;37.0.0' platform-tools 'platforms;android-31'> /dev/null
+2026-10-28T21:30:00.2130428Z Installing latest emulator.
+2026-10-28T21:30:00.2146704Z [command]/usr/bin/sh -c \sdkmanager --install emulator --channel=0 > /dev/null
+2026-10-28T21:30:07.0893497Z Warning: An error occurred while preparing SDK package Android Emulator: Error on ZipFile unknown archive.
+2026-10-28T21:30:07.1249053Z ##[endgroup]
+2026-10-28T21:30:07.1251635Z ##[group]Terminate Emulator
+2026-10-28T21:30:07.1272834Z [command]/usr/local/lib/android/sdk/platform-tools/adb -s emulator-5554 emu kill
+2026-10-28T21:30:07.1457870Z error: could not connect to TCP port 5554: Connection refused
+2026-10-28T21:30:07.1470636Z The process '/usr/local/lib/android/sdk/platform-tools/adb' failed with exit code 1
+2026-10-28T21:30:07.1471864Z ##[endgroup]
+2026-10-28T21:30:07.1478155Z ##[error]The process '/usr/bin/sh' failed with exit code 1
+2026-10-28T21:30:07.1577571Z ##[group]Run python3 -m tools.character_forge.ci_binding summarise \
+2026-10-28T21:30:07.1578089Z [36;1mpython3 -m tools.character_forge.ci_binding summarise \[0m
+2026-10-28T21:30:07.1578547Z [36;1m  --results android/app/build/outputs/androidTest-results \[0m
+2026-10-28T21:30:07.1578981Z [36;1m  --out artifacts/character-forge/van_validation.json[0m
+2026-10-28T21:30:07.1579355Z [36;1mmkdir -p artifacts/character-forge/junit[0m
+2026-10-28T21:30:07.1579994Z [36;1mfind android/app/build/outputs/androidTest-results -name '*.xml' -exec cp {} artifacts/character-forge/junit/ \; 2>/dev/null || true[0m
+2026-10-28T21:30:07.1601155Z shell: /usr/bin/bash -e {0}
+2026-10-28T21:30:07.1601413Z env:
+2026-10-28T21:30:07.1601916Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-10-28T21:30:07.1602432Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-10-28T21:30:07.1602956Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:30:07.1603398Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-28T21:30:07.1603850Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:30:07.1604561Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:30:07.1604972Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:30:07.1605371Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-28T21:30:07.1605735Z   ANDROID_AVD_HOME: /home/runner/.android/avd
+2026-10-28T21:30:07.1606021Z ##[endgroup]
+2026-10-28T21:30:07.2052516Z {"mode": "core", "result": "NOT_RUN", "reasons": ["no RiveContractTest results were produced"]}
+2026-10-28T21:30:07.2190485Z ##[group]Run actions/upload-artifact@v4
+2026-10-28T21:30:07.2190820Z with:
+2026-10-28T21:30:07.2191041Z   name: van-instrumentation-report
+2026-10-28T21:30:07.2191385Z   path: android/app/build/reports/androidTests/connected
+2026-10-28T21:30:07.2191726Z   if-no-files-found: warn
+2026-10-28T21:30:07.2191965Z   compression-level: 6
+2026-10-28T21:30:07.2192187Z   overwrite: false
+2026-10-28T21:30:07.2192408Z   include-hidden-files: false
+2026-10-28T21:30:07.2192644Z env:
+2026-10-28T21:30:07.2192942Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-10-28T21:30:07.2193435Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-10-28T21:30:07.2193892Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:30:07.2194629Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-28T21:30:07.2195053Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:30:07.2195494Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:30:07.2195889Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:30:07.2196275Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-28T21:30:07.2196637Z   ANDROID_AVD_HOME: /home/runner/.android/avd
+2026-10-28T21:30:07.2196922Z ##[endgroup]
+2026-10-28T21:30:07.4003493Z (node:3046) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-28T21:30:07.4004762Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-28T21:30:07.4022849Z ##[warning]No files were found with the provided path: android/app/build/reports/androidTests/connected. No artifacts will be uploaded.
+2026-10-28T21:30:07.4247652Z ##[group]Run actions/upload-artifact@v4
+2026-10-28T21:30:07.4248119Z with:
+2026-10-28T21:30:07.4248439Z   name: van-voice-runtime
+2026-10-28T21:30:07.4248870Z   path: android/app/build/reports/voice-runtime
+2026-10-28T21:30:07.4249359Z   if-no-files-found: warn
+2026-10-28T21:30:07.4249755Z   compression-level: 6
+2026-10-28T21:30:07.4250105Z   overwrite: false
+2026-10-28T21:30:07.4250461Z   include-hidden-files: false
+2026-10-28T21:30:07.4250838Z env:
+2026-10-28T21:30:07.4251304Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-10-28T21:30:07.4252105Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-10-28T21:30:07.4252839Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:30:07.4253527Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-28T21:30:07.4254420Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:30:07.4255103Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:30:07.4255734Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:30:07.4256366Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-28T21:30:07.4256945Z   ANDROID_AVD_HOME: /home/runner/.android/avd
+2026-10-28T21:30:07.4257603Z ##[endgroup]
+2026-10-28T21:30:07.6098507Z (node:3058) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-28T21:30:07.6099556Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-28T21:30:07.6119022Z ##[warning]No files were found with the provided path: android/app/build/reports/voice-runtime. No artifacts will be uploaded.
+2026-10-28T21:30:07.6341500Z ##[group]Run actions/upload-artifact@v4
+2026-10-28T21:30:07.6342023Z with:
+2026-10-28T21:30:07.6342434Z   name: van-character-forge-validation-binding
+2026-10-28T21:30:07.6342986Z   path: artifacts/character-forge
+2026-10-28T21:30:07.6343405Z   if-no-files-found: error
+2026-10-28T21:30:07.6343684Z   compression-level: 6
+2026-10-28T21:30:07.6343926Z   overwrite: false
+2026-10-28T21:30:07.6344448Z   include-hidden-files: false
+2026-10-28T21:30:07.6344883Z env:
+2026-10-28T21:30:07.6345400Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-10-28T21:30:07.6346284Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-10-28T21:30:07.6347070Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:30:07.6347806Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-28T21:30:07.6348539Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:30:07.6349235Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:30:07.6349887Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:30:07.6350502Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-28T21:30:07.6351095Z   ANDROID_AVD_HOME: /home/runner/.android/avd
+2026-10-28T21:30:07.6351567Z ##[endgroup]
+2026-10-28T21:30:07.8173015Z (node:3070) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-28T21:30:07.8173747Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-28T21:30:07.8238073Z With the provided path, there will be 3 files uploaded
+2026-10-28T21:30:07.8244605Z Artifact name is valid!
+2026-10-28T21:30:07.8245391Z Root directory input is valid!
+2026-10-28T21:30:08.0490738Z Beginning upload of artifact content to blob storage
+2026-10-28T21:30:08.0792663Z (node:3070) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-28T21:30:08.1323199Z Uploaded bytes 962
+2026-10-28T21:30:08.1550296Z Finished uploading artifact content to blob storage!
+2026-10-28T21:30:08.1551915Z SHA256 digest of uploaded artifact zip is 17a7692ad2bcb02850c0ebb34623672e2d1173f1698e4d77cb4086cefd923388
+2026-10-28T21:30:08.1553153Z Finalizing artifact upload
+2026-10-28T21:30:08.5626320Z Artifact van-character-forge-validation-binding.zip successfully finalized. Artifact ID 12852697776
+2026-10-28T21:30:08.5627929Z Artifact van-character-forge-validation-binding has been successfully uploaded! Final size is 962 bytes. Artifact ID is 12852697776
+2026-10-28T21:30:08.5633767Z Artifact download URL: https://github.com/Vanguduza/Van/actions/runs/40772084829/artifacts/12852697776
+2026-10-28T21:30:08.5802858Z ##[group]Run actions/upload-artifact@v4
+2026-10-28T21:30:08.5803165Z with:
+2026-10-28T21:30:08.5803393Z   name: van-instrumentation-screenshots
+2026-10-28T21:30:08.5803799Z   path: android/app/build/outputs/connected_android_test_additional_output
+2026-10-28T21:30:08.5804506Z   if-no-files-found: warn
+2026-10-28T21:30:08.5804831Z   compression-level: 6
+2026-10-28T21:30:08.5805061Z   overwrite: false
+2026-10-28T21:30:08.5805283Z   include-hidden-files: false
+2026-10-28T21:30:08.5805529Z env:
+2026-10-28T21:30:08.5805828Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-10-28T21:30:08.5806321Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-10-28T21:30:08.5807002Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:30:08.5807438Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-28T21:30:08.5807866Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:30:08.5808305Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:30:08.5808706Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:30:08.5809096Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-28T21:30:08.5809467Z   ANDROID_AVD_HOME: /home/runner/.android/avd
+2026-10-28T21:30:08.5809752Z ##[endgroup]
+2026-10-28T21:30:08.7524906Z (node:3082) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-28T21:30:08.7526212Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-28T21:30:08.7545748Z ##[warning]No files were found with the provided path: android/app/build/outputs/connected_android_test_additional_output. No artifacts will be uploaded.
+2026-10-28T21:30:08.7798468Z Post job cleanup.
+2026-10-28T21:30:08.9262477Z (node:3095) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-28T21:30:08.9263767Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-28T21:30:08.9461591Z Post job cleanup.
+2026-10-28T21:30:09.0461400Z [command]/usr/bin/git version
+2026-10-28T21:30:09.0509964Z git version 2.56.0
+2026-10-28T21:30:09.0553498Z Temporarily overriding HOME='/home/runner/work/_temp/b1691309-939c-454b-8ecb-ce527a0b6c26' before making global git config changes
+2026-10-28T21:30:09.0557427Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-28T21:30:09.0560606Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Van/Van
+2026-10-28T21:30:09.0648998Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-28T21:30:09.0693821Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-28T21:30:09.1012760Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-28T21:30:09.1060746Z http.https://github.com/.extraheader
+2026-10-28T21:30:09.1073145Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-28T21:30:09.1141044Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-28T21:30:09.1494856Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-28T21:30:09.1542682Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-28T21:30:09.1967311Z Cleaning up orphan processes
+2026-10-28T21:30:09.2359022Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-java@v4, actions/setup-python@v5, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+

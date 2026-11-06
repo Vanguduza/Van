@@ -5,23 +5,29 @@ trade closes. Each hook only *observes*; the only things it may push back into
 the live path are the three LearningBoundary targets: a capsule-health
 multiplier (≤ 1) with an optional demotion, and a per-symbol broker liquidity
 multiplier (≤ 1). Every episode is written to the ledger as a
-TRADE_EXPERIENCE_ARTIFACT so the evidence chain is replayable."""
+TRADE_EXPERIENCE_ARTIFACT so the evidence chain is replayable.
+
+Evidence (C5): a hook learns only from an authoritative ledger event — the
+TCA_RECORD or TRADE_REVIEW the runtime has just appended for that intent —
+resolved through a LedgerEvidenceResolver bound to this runtime's environment.
+No event, no learning: there is no fallback to an intent id or free text."""
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from decimal import Decimal
 from enum import Enum
 from typing import Any, Optional
 
-from vati.core.ledger import Ledger
+from vati.core.events import Event, EventKind
+from vati.core.ledger import Ledger, history_through
 from vati.learning.boundary import LearningBoundary, LiveAdjustment, LiveTarget
-from vati.learning.broker import BrokerLearner
+from vati.learning.broker import EVENT_WINDOWS, BrokerLearner
 from vati.learning.episodes import Environment, ExperienceEpisode, episode_from_ledger
+from vati.learning.evidence import EvidenceClass, EvidenceError, LedgerEvidenceResolver, make_evidence_ref
 from vati.learning.health import HealthObservation, StrategyHealthTracker
 
 ONE, ZERO = Decimal(1), Decimal(0)
-EVENT_WINDOWS = {"QUIET", "DRIFT", "PRE_BLACKOUT", "POST_BLACKOUT"}
 
 
 def to_payload(obj: Any) -> Any:
@@ -43,31 +49,119 @@ def to_payload(obj: Any) -> Any:
 class LearningHooks:
     environment: Environment
     broker: str = "paper"
+    account_alias: str | None = field(default=None, kw_only=True)
     health: StrategyHealthTracker = field(default_factory=StrategyHealthTracker)
     brokers: BrokerLearner = field(default_factory=BrokerLearner)
     episodes: list[ExperienceEpisode] = field(default_factory=list)
     adjustments: list[LiveAdjustment] = field(default_factory=list)
     demotions: list[tuple[str, str]] = field(default_factory=list)
+    # Observations the evidence refused (A-VATI M3): a value the ledger does not
+    # record, or a caller value that disagrees with it. Refused means no learning
+    # from that trade; the close/fill path itself is never interrupted.
+    refusals: list[str] = field(default_factory=list)
+
+    _resolvers: dict[tuple[int, bool], LedgerEvidenceResolver] = field(default_factory=dict, repr=False)
+    _projections: dict[int, Any] = field(default_factory=dict, init=False, repr=False)
+    projection_error: str = field(default="", init=False)
+    projection_summary: dict = field(default_factory=lambda: {"status": "NOT_CONSTRUCTED", "selection_authority": False}, init=False)
+
+    def update_projection(self, ledger):
+        if self.account_alias is None:
+            return {"status": "UNSCOPED_RESEARCH_ONLY", "selection_authority": False}
+        try:
+            from vati.learning.restatement import RestatedTradeProjection
+            projection = self._projections.get(id(ledger))
+            if projection is None or projection.ledger is not ledger:
+                projection = RestatedTradeProjection(ledger, self.resolver(ledger, replay=True).scope)
+                self._projections[id(ledger)] = projection
+            self.projection_summary = projection.catch_up()
+            self.projection_error = ""
+        except Exception as exc:
+            # A projection fault cannot stop protection or erase previous source facts.
+            self.projection_error = "restated learning projection unavailable: " + type(exc).__name__
+            self.projection_summary = {"status": "UNAVAILABLE", "selection_authority": False,
+                                       "reason": self.projection_error}
+        return self.projection_summary
+
+
+    def resolver(self, ledger: Ledger, *, replay: bool = False) -> LedgerEvidenceResolver:
+        key = (id(ledger), replay)
+        r = self._resolvers.get(key)
+        if r is None or r.ledger is not ledger:
+            r = self._resolvers[key] = LedgerEvidenceResolver(ledger,
+                session_environment=None if replay else self.environment,
+                environment_ceiling=self.environment if replay else None,
+                account_alias=self.account_alias)
+        return r
+
+    @property
+    def recovery_issue(self) -> str:
+        issues = sorted({r.scope.issue for r in self._resolvers.values() if r.scope is not None and r.scope.issue})
+        if self.projection_error:
+            issues.append(self.projection_error)
+        return "; ".join(issues)
+
+    @staticmethod
+    def _latest(ledger: Ledger, kind: EventKind, trade_intent_id: str, match: dict[str, str], *, available_through: str | None = None) -> Optional[Event]:
+        hit = None
+        rows = (history_through(ledger,trade_intent_id,available_through) if available_through is not None
+                else ledger.iter(kind,correlation_id=trade_intent_id))
+        for ev in rows:
+            if ev.kind is kind and all(str(ev.payload.get(k)) == v for k, v in match.items()):
+                hit = ev
+        return hit
 
     # ------------------------------------------------------------ observe
-    def on_tca(self, *, symbol: str, session: str, event_window: str, cost_ratio: Decimal, slippage: Decimal, rejected: bool = False) -> Optional[LiveAdjustment]:
+    def on_tca(self, ledger: Ledger, *, trade_intent_id: str, symbol: str, session: str, event_window: str, cost_ratio: Decimal, slippage: Decimal, rejected: bool = False) -> Optional[LiveAdjustment]:
+        """Learn from the TCA_RECORD the runtime appended for `trade_intent_id`."""
+        ev = self._latest(ledger, EventKind.TCA_RECORD, trade_intent_id, {"broker": self.broker, "symbol": symbol, "session": session})
+        if ev is None:
+            return None   # no authoritative execution fact, nothing to learn
         if cost_ratio.is_infinite():
             cost_ratio = Decimal("10")
-        self.brokers.observe(broker=self.broker, symbol=symbol, session=session, environment=self.environment, cost_ratio=cost_ratio, slippage_pips=slippage,
-                             rejected=rejected, in_event_window=event_window in EVENT_WINDOWS)
+        try:
+            self.brokers.observe(broker=self.broker, symbol=symbol, session=session, environment=self.environment, cost_ratio=cost_ratio, slippage_pips=slippage,
+                                 rejected=rejected, in_event_window=event_window in EVENT_WINDOWS,
+                                 evidence_ref=make_evidence_ref(EvidenceClass.TCA_RECORD, ev.hash), resolver=self.resolver(ledger), correlation_hint=trade_intent_id)
+        except EvidenceError as e:
+            self.refusals.append(f"tca {trade_intent_id}: {e}")
+            return None
         adj = self.brokers.live_adjustment(self.broker, symbol, session)
         if adj is not None:
             self.adjustments.append(adj)
         return adj
 
     def on_review(self, ledger: Ledger, *, trade_intent_id: str, strategy_id: str, r_multiple: Decimal, process_ok: bool, cost_ratio: Decimal, regime_fit: bool = True) -> tuple[Optional[ExperienceEpisode], Optional[LiveAdjustment]]:
-        ep = episode_from_ledger(ledger, trade_intent_id, environment=self.environment)
+        if type(regime_fit) is not bool:
+            self.refusals.append(f"review {trade_intent_id}: regime_fit must be a recorded boolean")
+            return None, None
+        history = list(ledger.iter(correlation_id=trade_intent_id))
+        cutoff = history[-1].hash if history else None
+        resolver = self.resolver(ledger)
+        if resolver.scope is not None and (not history or not resolver.scope.admit(history[-1])):
+            self.refusals.append(f"review {trade_intent_id}: native account/cohort unresolved or excluded")
+            self.update_projection(ledger)
+            return None, None
+        ep = episode_from_ledger(ledger, trade_intent_id, environment=self.environment, available_through=cutoff)
         if ep is not None:
+            ep = replace(ep, review={**ep.review, "regime_fit":regime_fit}, artifact_hash="").sealed()
             self.episodes.append(ep)
-        self.health.observe(HealthObservation(strategy_id, self.environment, r_multiple, process_ok, min(cost_ratio, Decimal("10")), regime_fit, ep.artifact_hash if ep else trade_intent_id))
+        review = self._latest(ledger, EventKind.TRADE_REVIEW, trade_intent_id, {"strategy_id": strategy_id}, available_through=cutoff)
+        if review is None:
+            self.update_projection(ledger)
+            return ep, None   # no TRADE_REVIEW on the ledger: no health evidence (never the intent id)
+        try:
+            self.health.observe(HealthObservation(strategy_id, self.environment, r_multiple, process_ok, min(cost_ratio, Decimal("10")), regime_fit,
+                                                  make_evidence_ref(EvidenceClass.TRADE_REVIEW, review.hash), cutoff),
+                                resolver=self.resolver(ledger), correlation_hint=trade_intent_id)
+        except EvidenceError as e:
+            self.refusals.append(f"review {trade_intent_id}: {e}")
+            self.update_projection(ledger)
+            return ep, None
         adj = self.health.live_adjustment(strategy_id)
         if adj is not None:
             self.adjustments.append(adj)
+        self.update_projection(ledger)
         return ep, adj
 
     # ---------------------------------------------------------- read-only

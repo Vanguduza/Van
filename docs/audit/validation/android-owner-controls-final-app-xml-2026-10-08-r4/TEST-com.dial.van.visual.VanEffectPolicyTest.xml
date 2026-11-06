@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.visual.VanEffectPolicyTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-08T06:57:30" hostname="052fefa249ff" time="0.002">
+  <properties/>
+  <testcase name="workingAuraNeverDrawsAFullRing" classname="com.dial.van.visual.VanEffectPolicyTest" time="0.0"/>
+  <testcase name="reducedMotionIsDesignedStillnessNotStaticFloor" classname="com.dial.van.visual.VanEffectPolicyTest" time="0.0"/>
+  <testcase name="thermalSevereUsesStaticFloor" classname="com.dial.van.visual.VanEffectPolicyTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

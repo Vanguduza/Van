@@ -1,0 +1,26 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_______ test_original_measured_cost_remains_in_reconstructed_owner_entry _______
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-231/test_original_measured_cost_re0')
+
+    def test_original_measured_cost_remains_in_reconstructed_owner_entry(tmp_path):
+        ledger = Ledger(tmp_path/'owner-cost.sqlite3')
+        try:
+            life = _lifecycle(ledger, OwnerTicketAdapter(equity=D('1000000'), csd_verified=True))
+            receipt = replace(_owner_receipt(price='24.90'), fees=D('1.25'), receipt_hash='').sealed()
+            _durable_receipt(ledger, receipt)
+            order = {'symbol':'DELTA','direction':'LONG','strategy_id':'ZSE-VALUE-ROTATION-01',
+                'entry_price':'25.00','protective_stop':'22.50','targets':['30.00']}
+            life.adopt_owner_buy_confirmation(receipt, order_payload=order)
+            original = life.entries['intent-1']['cost_ratio']
+            life.adopt_owner_buy_confirmation(receipt, order_payload=order)
+>           assert life.entries['intent-1'].get('cost_ratio') == original
+E           AssertionError: assert None == Decimal('-0.05543884220354808590102707750')
+E            +  where None = <built-in method get of dict object at 0x7f9081ecac80>('cost_ratio')
+E            +    where <built-in method get of dict object at 0x7f9081ecac80> = {'symbol': 'DELTA', 'entry': Decimal('24.90'), 'stop': Decimal('22.50'), 'direction': <Direction.LONG: 'LONG'>, ...}.get
+
+../../test_van_owner_cost_replay_20261028.py:20: AssertionError
+=========================== short test summary info ============================
+FAILED ../../test_van_owner_cost_replay_20261028.py::test_original_measured_cost_remains_in_reconstructed_owner_entry
+1 failed in 0.90s

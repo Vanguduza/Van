@@ -1,0 +1,32 @@
+diff --git a/tools/rebuild/refresh_owner_source_contracts.py b/tools/rebuild/refresh_owner_source_contracts.py
+index 368ddb09..8ed7cdaf 100644
+--- a/tools/rebuild/refresh_owner_source_contracts.py
++++ b/tools/rebuild/refresh_owner_source_contracts.py
+@@ -569,6 +569,27 @@ def build(read=None):
+         }
+         for row in cleanup_rows:
+             row.setdefault('backend_contract_extensions', []).append(copy.deepcopy(extension))
++    lifecycle_routes = {('POST', '/v1/trading/accounts/lifecycle/prepare'),
++                        ('POST', '/v1/trading/accounts/lifecycle/reauth/challenge'),
++                        ('POST', '/v1/trading/accounts/lifecycle/reauth/verify'),
++                        ('GET', '/v1/trading/accounts/lifecycle/records/{alias}'),
++                        ('GET', '/v1/trading/accounts/lifecycle/operations/{operation_id}')}
++    for endpoint in endpoint_doc['endpoints']:
++        if (endpoint['method'], endpoint['path']) not in lifecycle_routes:
++            continue
++        extension = {
++            'method': endpoint['method'], 'path': endpoint['path'], 'endpoint_id': endpoint['endpoint_id'],
++            'source_ref': endpoint['source'], 'authentication': endpoint['authentication'],
++            'device_proof_required_when_bound': endpoint['device_proof_required_when_bound'],
++            'source_status': 'SOURCE_IMPLEMENTED_WITH_BOUNDED_STATIC_IN_MEMORY_VALIDATION_ANDROID_PENDING',
++            'authority': 'SOURCE_DATA_ONLY_SEPARATE_CURRENT_PERMISSION_REQUIRED_NO_NEW_ISSUER',
++            'canonical_units': ['BE-004'],
++            'scope': 'Owner-selected explicit grace duration, local deletion/cancellation lifecycle and original readback DATA under the existing account owner. Fresh purpose-bound reauthentication and substantive A4 permission remain separate. R5 validation is bounded static/in-memory only; post-R5 feature/native/provider/integration qualification remains unexecuted. Historical UNKNOWN/null remains immutable; no default duration, remote closure, financial power, native admission or frontend completion is implied.',
++            'specification': 'docs/rebuild/rev118/receipts/ACCOUNT_GRACE_LIFECYCLE_SOURCE_20261102.json',
++            'new_ui_implemented': False, 'live_qualified': False,
++        }
++        for row in cleanup_rows:
++            row.setdefault('backend_contract_extensions', []).append(copy.deepcopy(extension))
+     for endpoint in endpoint_doc["endpoints"]:
+         if not endpoint["path"].startswith("/v1/trading/charts/"):
+             continue

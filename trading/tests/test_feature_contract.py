@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
 from vati.intelligence.feature_contract import (
@@ -14,6 +16,7 @@ from vati.intelligence.feature_contract import (
     requirements_from_capsule,
 )
 
+ROOT = Path(__file__).resolve().parents[2]
 V = FeatureContractValidator()
 
 
@@ -115,7 +118,7 @@ def test_zse_context_features_are_available(zse_snapshot=None):
 
 def test_requirements_read_the_key_nothing_read():
     import json
-    with open("trading/strategies/registry/FX-TREND-PULLBACK-01.json") as fh:
+    with open(ROOT / "trading/strategies/registry/FX-TREND-PULLBACK-01.json") as fh:
         doc = json.load(fh)
     reqs = requirements_from_capsule(doc)
     assert {r.feature_id for r in reqs} == set(doc["required_features"])

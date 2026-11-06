@@ -35,7 +35,6 @@ import com.dial.van.visual.VanEmbodimentReducer
 import com.dial.van.visual.VanLiveVisualState
 import com.dial.van.voice.PersonalSpeechModel
 import com.dial.van.voice.SherpaLocalSecondPassAsr
-import com.dial.van.voice.SherpaSpeakerSimilarityScorer
 import com.dial.van.voice.SpeechContext
 import com.dial.van.voice.SpeechSyncFrame
 import com.dial.van.voice.TtsOutputCallback
@@ -50,12 +49,24 @@ import com.dial.van.voice.VoiceAudioArbiter
 import com.dial.van.voice.WakeAcknowledgementManager
 import com.dial.van.voice.WakeCoordinator
 import com.dial.van.voice.WakeModelLoader
+import com.dial.van.voice.VoiceAssetInstaller
+import com.dial.van.voice.VoiceCapability
+import com.dial.van.voice.SpeakerEnrollmentManager
+import com.dial.van.voice.SpeakerProfileBinding
+import com.dial.van.voice.SpeakerLocalIdentity
+import com.dial.van.voice.WakeCoordinatorState
+import com.dial.van.voice.WakeListenerService
+import com.dial.van.security.OwnerDeviceIdentity
+import com.dial.van.security.OwnerApprovalKeyManager
+import java.security.KeyStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.first
 import org.json.JSONObject
 
 class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
@@ -66,6 +77,7 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
      * this device paired and unbound — §0D.3's failure state exactly.
      */
     internal val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private val voiceScope = CoroutineScope(appScope.coroutineContext + Dispatchers.Main.immediate)
 
     lateinit var commandQueue: EncryptedCommandQueue
         private set
@@ -85,6 +97,9 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
         private set
     lateinit var voiceUi: VanVoiceUiStore
         private set
+    lateinit var speakerEnrollment: SpeakerEnrollmentManager
+        private set
+    private var resumeWakeAfterEnrollment = false
 
     /**
      * P1-VOICE-001 — the wake path is constructed on boot, whether or not it can run.
@@ -197,6 +212,9 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
 
     /** ADR-RB-026 — the installer's payload intake. Read by the onboarding status. */
     lateinit var provisioning: ProvisioningIntake
+    private val automaticStartupMutex = kotlinx.coroutines.sync.Mutex()
+    private val signedConnectivityRefreshMutex = kotlinx.coroutines.sync.Mutex()
+    private var provisioningRetryJob: kotlinx.coroutines.Job? = null
 
     /**
      * Rev 1.5 §20 — the durable logical session the owner's conversation binds to.
@@ -226,13 +244,16 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
      * screen, and because the asset classification is read once at start rather than each
      * time something asks.
      */
+    private lateinit var speechDelivery: com.dial.van.voice.GatewaySpeechDelivery
     lateinit var voiceEdge: VoiceEdge
         private set
 
     override fun onCreate() {
         super.onCreate()
         instance = this
-        commandQueue = EncryptedCommandQueue(this)
+        commandQueue = EncryptedCommandQueue(this) {
+            if (::gatewayClient.isInitialized) gatewayClient.currentQueueOwner() else null
+        }
         notificationPolicyStore = NotificationPolicyStore(this)
         degradedModeStore = DegradedModeStore()
         // GAP-F-010 — the gateway's `/health.degraded[]` reaches the device's degraded
@@ -240,7 +261,9 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
         // + gateway-declared capability loss) instead of two that disagree.
         DegradedBridge.bindGatewayHealth { json -> degradedModeStore.applyGatewayHealth(json) }
         personalSpeechModel = PersonalSpeechModel(this)
-        wakeAcknowledgement = WakeAcknowledgementManager(this)
+        wakeAcknowledgement = WakeAcknowledgementManager(this) {
+            if (::voiceEdge.isInitialized) refreshVoiceAssetReadiness()
+        }
         voiceUi = VanVoiceUiStore()
         gatewayClient = VanGatewayClient(this)
         eventStream = VanEventStreamStore(PreferencesEventCursorStore(this))
@@ -257,23 +280,23 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
         commandController = VanCommandController(
             gatewayClient, appScope, speak = { text -> VanSpokenAnswer.speak(voiceEdge, text) },
         )
-        val secondPassCoordinator = SherpaLocalSecondPassAsr.fromFiles(this)
-            ?.let(::VoiceSecondPassCoordinator)
-        val speakerSimilarityScorer = SherpaSpeakerSimilarityScorer.fromFiles(this)
+        // Wake and recognition share one AudioRecord owner and its PCM pre-roll.
+        // Model installation/native construction runs after startup on the IO dispatcher.
+        voiceArbiter = VoiceAudioArbiter(this)
         voiceInput = VoiceInputManager(
             context = this,
             callback = this,
+            audioArbiter = voiceArbiter,
             biasingStringsProvider = { personalSpeechModel.biasingStrings(activeSpeechContexts()) },
-            secondPassCoordinator = secondPassCoordinator,
             personalConfusionProvider = { transcript ->
                 personalSpeechModel.correctionFor(transcript, activeSpeechContexts()) != null
             },
-            speakerSimilarityScorer = speakerSimilarityScorer,
         )
         voiceSession = VoiceSessionCoordinator(voiceInput, ttsOutput)
         queueReplayer = QueueReplayer(commandQueue, gatewayClient, degradedModeStore, appScope)
         telemetry = DeviceTelemetryReporter(this, gatewayClient, appScope)
         connectivity = ConnectivityRegistry(this)
+        runCatching { gatewayClient.applyConnectivity(connectivity) }
         // ADR-RB-026 — the installer's way in, and the only one. Built before the
         // session so the onboarding screen can say whether this build can ever be
         // provisioned rather than telling the owner to wait for something that will
@@ -289,20 +312,66 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
             // which is the surface they are already looking at. Without a reader here the
             // work is dropped in silence, which is the half of the failure that is worse.
             onUndelivered = { commandController.reportUndelivered(it) },
+            onRecoveredOriginal = commandController::reportRecoveredOriginal,
             // §20.1's SHALL. Durable downstream pages go into the reducer the REST floor
             // already uses, so the owner has one history rather than two that disagree.
             onDownstreamPage = { eventStream.apply(it) },
         )
-        voiceEdge = VoiceEdge(this, ttsOutput, appScope)
-        voiceEdge.loadAssets()
+        voiceEdge = VoiceEdge(this, ttsOutput, voiceScope)
+        speechDelivery = com.dial.van.voice.GatewaySpeechDelivery(
+            scope = voiceScope, current = commandController::isSpeechContextCurrent,
+            open = gatewayClient::openSpokenResult, read = gatewayClient::speechStream,
+            report = gatewayClient::reportSpeechCursors, interrupt = gatewayClient::interruptSpeech,
+            play = voiceEdge::acceptResponse, stop = { voiceEdge.bargeIn() },
+            cursors = { voiceEdge.queue().cursors() },
+        )
+        commandController.speakResult = { request -> appScope.launch(Dispatchers.Main.immediate) {
+            speechDelivery.deliver(request)
+        } }
+        commandController.onOwnerInput = { appScope.launch(Dispatchers.Main.immediate) { speechDelivery.cancel() } }
+        voiceEdge.onSpeechFailure = speechDelivery::playbackFailed
+        voiceEdge.onSpeechProgress = speechDelivery::progress
+        voiceEdge.mayContinueSpeech = speechDelivery::mayContinue
+        appScope.launch {
+            speechDelivery.failure.collect { failure ->
+                if (failure != null) degradedModeStore.markBroken("voice", failure,
+                    com.dial.van.degraded.RestoreAction.RETRY_CONNECTION)
+            }
+        }
+        vanSession.onSpeechResume = { appScope.launch(Dispatchers.Main.immediate) { speechDelivery.reconnect() } }
+
+        refreshVoiceAssetReadiness()
         wakeModel = WakeModelLoader(this)
-        voiceArbiter = VoiceAudioArbiter(this)
         wakeCoordinator = WakeCoordinator(
             arbiter = voiceArbiter,
             pipeline = wakeModel.pipelineOrNull(),
             acknowledgementReady = { wakeAcknowledgement.isReady() },
             playAcknowledgement = { wakeAcknowledgement.play() },
             beginRecognition = { turnId -> voiceSession.beginOwnerTurn(turnId) },
+            kwsReady = { !voiceInput.isSpeakerEnrollmentCaptureActive() && wakeModel.status().ready },
+        )
+        speakerEnrollment = SpeakerEnrollmentManager(
+            context = this, audioArbiter = voiceArbiter, scope = appScope,
+            bindingProvider = ::freshSpeakerBinding,
+            localBindingProvider = ::localSpeakerIdentity,
+            onCaptureStarted = {
+                if (!voiceInput.beginSpeakerEnrollmentCapture()) false else {
+                    resumeWakeAfterEnrollment = WakeListenerService.isRunning() &&
+                        wakeCoordinator.status().state == WakeCoordinatorState.ARMED
+                    wakeCoordinator.disarm(stopCapture = false)
+                    ttsOutput.onBargeInRequested()
+                    true
+                }
+            },
+            onCaptureFinished = {
+                voiceInput.endSpeakerEnrollmentCapture()
+                if (resumeWakeAfterEnrollment && WakeListenerService.isRunning()) wakeCoordinator.arm()
+                resumeWakeAfterEnrollment = false
+            },
+            onProfileChanged = { scorer ->
+                voiceInput.updateSpeakerEvidence(scorer)
+                refreshVoiceAssetReadiness()
+            },
         )
         publishWakeModelState()
         // P3-AND-004 — the five subsystems that reported WORKING because nothing wrote
@@ -319,6 +388,7 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
         startInteractionWatch()
         startConnectivityMonitor()
         startGatewayHealthMonitor()
+        startCommandResultMonitor()
         startSignedConnectivityRefresh()
         // GAP-F-012 — the embodiment producers DNA §6 names that nothing wired: mission and
         // attention events off the durable stream, the first session of the day, and quiet
@@ -339,6 +409,83 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
                 "producer registry incomplete — states=$missingStates actions=$missingActions",
             )
         }
+        startVoiceRuntimePreparation()
+    }
+
+    /** Read existing local keys only; this helper never creates an approval or hardware identity. */
+    private fun localSpeakerIdentity(): SpeakerLocalIdentity? = runCatching {
+        val device = gatewayClient.deviceId?.takeIf { it.isNotBlank() } ?: return null
+        val hardware = OwnerDeviceIdentity().publicKeyFingerprint() ?: return null
+        val keyStore = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
+        val approval = keyStore.getCertificate(OwnerApprovalKeyManager.KEY_ALIAS)?.publicKey ?: return null
+        SpeakerLocalIdentity(device, hardware, com.dial.van.voice.EmbeddedVoiceAssetInstaller.sha256(approval.encoded))
+    }.getOrNull()
+
+    /** No cached remote authority: every enrollment/score observes the current exact binding. */
+    private suspend fun freshSpeakerBinding(): SpeakerProfileBinding? {
+        val local = localSpeakerIdentity() ?: return null
+        if (!gatewayClient.isPaired()) return null
+        val record = gatewayClient.deviceBindingStatus()
+        if (record.opt("configured") != true || record.opt("bound") != true ||
+            record.opt("attestation_chain_verified") != true || record.opt("status") != "ACTIVE" ||
+            record.opt("device_id") != local.deviceId || record.opt("device_key_fingerprint") != local.deviceFingerprint ||
+            record.opt("owner_approval_key_fingerprint") != local.approvalFingerprint) return null
+        if (localSpeakerIdentity() != local) return null
+        val bindingId = record.opt("binding_id") as? String ?: return null
+        val principal = record.opt("owner_principal_id") as? String ?: return null
+        return SpeakerProfileBinding(local.deviceId, local.deviceFingerprint, local.approvalFingerprint, bindingId, principal)
+            .takeIf { com.dial.van.voice.SpeakerEnrollmentPolicy.parseBinding(it.toJson()) != null }
+    }
+
+    private fun refreshVoiceAssetReadiness() {
+        voiceEdge.loadAssets {
+            mapOf(
+                VoiceCapability.LOCAL_WAKE to (::wakeModel.isInitialized && wakeModel.status().ready),
+                VoiceCapability.LOCAL_ASR to (::voiceInput.isInitialized && voiceInput.capability.backend != com.dial.van.voice.VoiceRecognitionBackend.UNAVAILABLE &&
+                    voiceInput.capability.backend != com.dial.van.voice.VoiceRecognitionBackend.SHERPA_PRIMARY_REQUIRED),
+                VoiceCapability.LOCAL_VAD to (::voiceInput.isInitialized && voiceInput.localVadReady()),
+                VoiceCapability.CRITICAL_PHRASES to wakeAcknowledgement.isReady(),
+                VoiceCapability.LOCAL_SPEAKER to (::speakerEnrollment.isInitialized && speakerEnrollment.state.value.modelReady),
+            )
+        }
+    }
+
+    private fun startVoiceRuntimePreparation() {
+        appScope.launch(Dispatchers.IO) {
+            val installed = VoiceAssetInstaller.prepare(this@VanApplication)
+            if (installed == null) {
+                refreshVoiceAssetReadiness()
+                return@launch
+            }
+            // Speaking does not depend on microphone permission, an ASR turn ending,
+            // or wake-model construction. Prepare its native engine independently.
+            refreshVoiceAssetReadiness()
+            val recognizer = SherpaLocalSecondPassAsr.fromFiles(this@VanApplication)
+            val secondPass = recognizer?.let(::VoiceSecondPassCoordinator)
+            val loadedWake = WakeModelLoader(this@VanApplication)
+            val pipeline = loadedWake.pipelineOrNull()
+            withContext(Dispatchers.Main) {
+                // An asset becoming ready cannot change the provenance of a turn
+                // already being recognized. Publish only between owner turns.
+                voiceInput.ownerTurnActive.first { !it }
+                if (!voiceInput.bindLocalModels(secondPass, null)) return@withContext
+                wakeCoordinator.disarm(stopCapture = false)
+                wakeModel = loadedWake
+                wakeCoordinator = WakeCoordinator(
+                    arbiter = voiceArbiter, pipeline = pipeline,
+                    acknowledgementReady = { wakeAcknowledgement.isReady() },
+                    playAcknowledgement = { wakeAcknowledgement.play() },
+                    beginRecognition = { turnId -> voiceSession.beginOwnerTurn(turnId) },
+                    kwsReady = { pipeline != null && !voiceInput.isSpeakerEnrollmentCaptureActive() },
+                )
+                wakeAcknowledgement.prepare()
+                publishWakeModelState()
+                refreshVoiceAssetReadiness()
+                DeviceSignals.publish(this@VanApplication)
+            }
+            speakerEnrollment.refresh()
+            refreshVoiceAssetReadiness()
+        }
     }
 
     /**
@@ -355,19 +502,49 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
      * already re-checks enrolment, and a later `start()` is a resume rather than a new
      * session, which is §20.3's whole point.
      */
-    private fun startVanSession() {
-        commandController.storeForLater = ::storeCommandForLater
+    internal fun startVanSession() {
+        commandController.storeOriginalForLater = ::storeCommandForLater
         // `Dispatchers.IO`, not the scope's default. `start()` restores the outbox, which
         // reads and decrypts every stored record, and `Dispatchers.Default` is sized to
         // the CPU count: a blocking read there stalls work that has nothing to do with
         // this. Not a UI-thread bug — `appScope` has never been the main thread — but the
         // wrong pool for a call that waits on a disk.
         appScope.launch(Dispatchers.IO) {
-            if (!gatewayClient.isEnrolled()) return@launch
+            automaticStartupMutex.lock()
+            try {
+                val pending = provisioning.pending()
+                if (pending != null) {
+                    try {
+                        gatewayClient.provisionThisDevice(pending)
+                        provisioning.consume(pending.provisioningId)
+                        startSignedConnectivityRefresh()
+                        android.util.Log.i("VanProvisioning", "provisioned ${pending.loggableFields}")
+                    } catch (cancelled: kotlinx.coroutines.CancellationException) {
+                        throw cancelled
+                    } catch (_: Exception) {
+                        scheduleProvisioningRetry()
+                        return@launch
+                    }
+                }
+            } finally { automaticStartupMutex.unlock() }
+            if (!gatewayClient.isPaired()) return@launch
+            try { gatewayClient.ensureDeviceIdentityReady() }
+            catch (cancelled: kotlinx.coroutines.CancellationException) { throw cancelled }
+            catch (_: Exception) { scheduleProvisioningRetry(); return@launch }
             // GAP-F-012 — CONNECTING's producer (DNA §6: "session handshake").
             applyEmbodimentEffect(VanEmbodimentReducer.forSessionHandshake(connecting = true))
             runCatching { vanSession.start() }
             VanLiveVisualState.settleToIdle()
+        }
+    }
+
+    @Synchronized
+    private fun scheduleProvisioningRetry() {
+        if (provisioningRetryJob?.isActive == true) return
+        provisioningRetryJob = appScope.launch(Dispatchers.IO) {
+            kotlinx.coroutines.delay(5_000)
+            synchronized(this@VanApplication) { provisioningRetryJob = null }
+            startVanSession()
         }
     }
 
@@ -383,6 +560,8 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
     private fun storeCommandForLater(
         body: JSONObject,
         requiresLiveOwnerContext: Boolean,
+        originalProfile: String,
+        priorHttpAttempt: Boolean,
     ): Boolean {
         val outcome = runCatching {
             vanSession.submit(
@@ -391,6 +570,11 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
                 // less is refused as `command_payload_invalid` when the outbox flushes,
                 // hours after the owner was told it was saved.
                 payload = body,
+                originalProfile = originalProfile,
+                priorTransportAttempt = priorHttpAttempt,
+                // This callback now owns recovery before direct HTTP. Prepared is
+                // provenance only; a crash still leaves dispatch uncertain.
+                httpPreparation = priorHttpAttempt,
                 actionClass = body.optString("action_class", "A1"),
                 requiresLiveOwnerContext = requiresLiveOwnerContext,
             )
@@ -407,12 +591,24 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
      * design is the other one, where a refused manifest leaves the device with nothing.
      */
     private fun startSignedConnectivityRefresh() {
-        if (!connectivity.configured) return
+        if (!connectivity.configured || !gatewayClient.isPaired()) return
         appScope.launch {
-            runCatching {
+            if (!signedConnectivityRefreshMutex.tryLock()) return@launch
+            try {
                 connectivity.refresh { knownVersion ->
                     gatewayClient.connectivityManifest(knownVersion)
                 }
+                if (gatewayClient.applyConnectivity(connectivity)) {
+                    vanSession.close()
+                    startVanSession()
+                }
+            } catch (cancelled: kotlinx.coroutines.CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                // A failed update retains the last verified routes; network/health
+                // recovery will try again using the same signed-manifest verifier.
+            } finally {
+                signedConnectivityRefreshMutex.unlock()
             }
         }
     }
@@ -436,6 +632,8 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
                 object : ConnectivityManager.NetworkCallback() {
                     override fun onAvailable(network: Network) {
                         queueReplayer.onNetworkChanged(true)
+                        startVanSession()
+                        startSignedConnectivityRefresh()
                         // A Wi-Fi to mobile handover changes what a warm standby costs,
                         // and §20.9's answer is different on either side of it.
                         refreshStandbyConditions()
@@ -469,7 +667,10 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
     }
 
     /** The owner pressing "Try again" on a degraded subsystem (P3-AND-005). */
-    fun requestReplay() = queueReplayer.replayAsync(ReplayReason.OWNER_REQUESTED)
+    fun requestReplay() {
+        queueReplayer.replayAsync(ReplayReason.OWNER_REQUESTED)
+        vanSession.requestRecovery()
+    }
 
     /** Re-read what the device actually reports. Called when a screen resumes. */
     fun refreshSubsystemHealth() {
@@ -581,6 +782,20 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
      */
     private fun startEmbodimentEventWatch() {
         appScope.launch {
+            var previous: com.dial.van.visual.VanHealthState? = null
+            var observation = 0L
+            degradedModeStore.state.collect { mode ->
+                val current = com.dial.van.visual.VanPresence.cue(mode).health
+                if (com.dial.van.visual.VanContextEventPolicy.recovered(previous, current)) {
+                    com.dial.van.visual.VanLiveVisualState.observedContext(
+                        com.dial.van.visual.VanContextGesture.RECOVERY_READY, "observed-health-edge", "health:${++observation}",
+                        evidence = com.dial.van.visual.VanCueEvidence.VERIFIED_SOURCE,
+                    )
+                }
+                previous = current
+            }
+        }
+        appScope.launch {
             eventStream.newRecords.collect { record ->
                 applyEmbodimentEffect(VanEmbodimentReducer.forMissionEvent(record.type, record.payloadJson))
                 applyEmbodimentEffect(VanEmbodimentReducer.forAttentionEventJson(record.type, record.payloadJson))
@@ -594,7 +809,16 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
             is VanEmbodimentReducer.Effect.ToState ->
                 VanLiveVisualState.transition(state = effect.state, urgency = effect.urgency)
             is VanEmbodimentReducer.Effect.ToAction ->
-                VanLiveVisualState.action(effect.action)
+                VanLiveVisualState.action(
+                    effect.action,
+                    // CELEBRATE is emitted only by the reducer's exact verified
+                    // GOOD_DECISION_GOOD_OUTCOME quadrant, never from P&L alone.
+                    evidence = if (effect.action == com.dial.van.visual.VanFiniteAction.CELEBRATE) {
+                        com.dial.van.visual.VanCueEvidence.VERIFIED_SOURCE
+                    } else {
+                        com.dial.van.visual.VanCueEvidence.LOCAL_UI
+                    },
+                )
             is VanEmbodimentReducer.Effect.Both ->
                 VanLiveVisualState.transition(
                     state = effect.state,
@@ -654,6 +878,16 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
         }
     }
 
+    /** Keep voice and the floating assistant informed when the Work screen is closed. */
+    private fun startCommandResultMonitor() {
+        appScope.launch {
+            while (isActive) {
+                if (gatewayClient.isPaired()) commandController.pollUnfinishedCommands()
+                delay(COMMAND_RESULT_INTERVAL_MS)
+            }
+        }
+    }
+
     private suspend fun refreshGatewayHealth() {
         try {
             val health = gatewayClient.health()
@@ -666,6 +900,8 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
             // a working network and an unreachable gateway is the normal condition of a
             // self-hosted service on a home connection.
             queueReplayer.onGatewayReachable(true)
+            startVanSession()
+            startSignedConnectivityRefresh()
 
             if (health.optBoolean("ok", false)) {
                 degradedModeStore.markWorking("hermes")
@@ -737,31 +973,74 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
         wakeCoordinator.commandTurnFinished()
     }
 
+    override fun onCancelled(turnId: String) {
+        voiceUi.cancelled()
+        VanLiveVisualState.settleToIdle()
+        wakeCoordinator.commandTurnFinished(turnId = turnId)
+    }
+
     override fun onListeningChanged(listening: Boolean) {
         voiceUi.listening(listening)
-        if (listening) VanLiveVisualState.listeningStarted() else VanLiveVisualState.listeningEnded()
+        if (listening) {
+            commandController.invalidateVoiceContext()
+            VanLiveVisualState.listeningStarted()
+        } else VanLiveVisualState.listeningEnded()
     }
 
     override fun onSpeakingChanged(speaking: Boolean) {
-        if (speaking) {
-            VanLiveVisualState.speakingStarted()
-        } else {
-            VanLiveVisualState.speakingEnded()
-            VanLiveVisualState.settleToIdle()
+        appScope.launch(Dispatchers.Main.immediate) {
+            if (ttsOutput.isSpeaking()) {
+                VanLiveVisualState.speakingStarted()
+            } else {
+                VanLiveVisualState.speakingEnded()
+                VanLiveVisualState.settleToIdle()
+            }
         }
     }
 
     override fun onSpeechFrame(frame: SpeechSyncFrame) {
+        // A late frame from a cancelled utterance must not reopen the mouth.
+        if (!ttsOutput.isSpeaking()) return
         VanLiveVisualState.speechFrame(mouthOpen = frame.mouthOpen, viseme = frame.viseme)
     }
 
     override fun onUtteranceDone(utteranceId: String) {
-        VanLiveVisualState.speakingEnded()
-        VanLiveVisualState.settleToIdle()
+        appScope.launch(Dispatchers.Main.immediate) {
+            if (!ttsOutput.isSpeaking()) {
+                VanLiveVisualState.speakingEnded()
+                VanLiveVisualState.settleToIdle()
+            }
+            if (::voiceEdge.isInitialized) voiceEdge.onUtteranceDone(utteranceId)
+        }
+    }
+
+    override fun onUtteranceStarted(utteranceId: String) {
+        appScope.launch(Dispatchers.Main.immediate) {
+            if (::voiceEdge.isInitialized) voiceEdge.onUtteranceStarted(utteranceId)
+        }
+    }
+
+    override fun onUtteranceFailed(utteranceId: String) {
+        appScope.launch(Dispatchers.Main.immediate) {
+            if (::voiceEdge.isInitialized) voiceEdge.onUtteranceFailed(utteranceId)
+        }
+    }
+
+    override fun onUtteranceInterrupted(utteranceId: String) {
+        appScope.launch(Dispatchers.Main.immediate) {
+            // Do not clear a newer utterance that already replaced the interrupted one.
+            if (!ttsOutput.isSpeaking()) {
+                VanLiveVisualState.speakingEnded()
+                VanLiveVisualState.clearAction()
+                VanLiveVisualState.contextual(com.dial.van.visual.VanContextGesture.YIELD_TO_INTERRUPTION)
+            }
+            if (::voiceEdge.isInitialized) voiceEdge.onUtteranceInterrupted(utteranceId)
+        }
     }
 
     companion object {
         private const val GATEWAY_HEALTH_INTERVAL_MS = 60_000L
+        private const val COMMAND_RESULT_INTERVAL_MS = 4_000L
 
         // GAP-F-012 — the first-session-of-the-day marker and the quiet-hours poll cadence.
         private const val EMBODIMENT_PREFS_NAME = "van_embodiment"

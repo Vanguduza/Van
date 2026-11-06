@@ -1,0 +1,22 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+____ test_orphaned_lineage_cannot_recreate_missing_headline_and_observation ____
+
+ledger = <vati.core.ledger.Ledger object at 0x7f0ae90b8bf0>
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-263/test_orphaned_lineage_cannot_r0')
+
+    def test_orphaned_lineage_cannot_recreate_missing_headline_and_observation(ledger, tmp_path):
+        NewsIngress(ledger=ledger).ingest_rows([row()], now_ms=NOW)
+        value = Ledger(tmp_path/'orphan.sqlite')
+        try:
+            value.append(records(ledger)[0]); head = value.head()
+            with pytest.raises(ValueError, match='lineage.*orphaned'):
+                NewsIngress.from_ledger(value)
+>           with pytest.raises(ValueError, match='original.*missing'):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE ValueError
+
+trading/tests/test_news_publisher_lineage.py:370: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_news_publisher_lineage.py::test_orphaned_lineage_cannot_recreate_missing_headline_and_observation
+1 failed, 35 deselected in 0.80s

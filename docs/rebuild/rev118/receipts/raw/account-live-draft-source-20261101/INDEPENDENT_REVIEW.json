@@ -1,0 +1,114 @@
+{
+  "disposition": "NO_BLOCKING_FINDING_IN_BOUNDED_LAC135_R2_SOURCE_RECHECK",
+  "closed": "LAC135-REVIEW01 unsupported null revision/new-generation admission",
+  "source4_before_after": {
+    "backend/van_gateway/trading/account_application_drafts.py": "4ba0fd716762156346180fa327b7373bad4a470cddb12e2946355efa15ae5ccd",
+    "backend/tests/test_account_application_drafts.py": "a9a01817ddab26970e8f8eed54249e213091e28209a503b2549acc5bfdd06ff2",
+    "backend/van_gateway/app.py": "5dd80495c8a2627bfa2ddc7cf3477b3f5e129a0113e18b2370a23e99e0438140",
+    "backend/van_gateway/context/forget.py": "6fed25f2f105938d6e5be3ebbd98f3ac1bb8b36aee3fbf1b1dc19cbeb87a2625"
+  },
+  "patch": {
+    "path": "/tmp/van-account-live-drafts-20261101/R2/FINAL_FULL.patch",
+    "sha256": "abd9a35fb1ccfcda7b295e3d742331472feffcf238bf0c5f40caa306672bbb26",
+    "bytes": 75857
+  },
+  "R2_delta": {
+    "path": "/tmp/van-account-live-drafts-20261101/R2/R2_DELTA.patch",
+    "sha256": "eed4b8da644c68674b64c4616cbede36473216f0acfcf3cb485d81d336483fc7",
+    "bytes": 21326
+  },
+  "archive": {
+    "path": "/tmp/van-account-live-drafts-20261101/R2/FINAL_SOURCE.zip",
+    "sha256": "05ad969943cc3d21a4b21b6ae47cb253162c66107cfd1e2543a42197b0093695",
+    "bytes": 69572
+  },
+  "export": "Exact4 members/hash verified; full patch independently baseline-applied to b15 and resulting4hashes matched. Temporary export fixture removed only after all4source hashes verified.",
+  "current_published_head_at_final": "6a0196a951dfb62413f76d3d91ceb855b16f6030",
+  "current_app_forget_preimages_match_b15": {
+    "backend/van_gateway/app.py": "2949bcc8e076b0599c6e8ab40eefa2b49e93d6a86c19807d662b96dfffa4da16",
+    "backend/van_gateway/context/forget.py": "d55ce53f5234a0d4239d763136fed974c3324c336d6e88cc8ed2d85017bad44d"
+  },
+  "unchanged_R1": "App/auth/forget-description bytes exact; entire original35workflow test file retained as prefix; only service and additive tests change.",
+  "source_review": {
+    "head_validation": "Existing head must equal contiguous original publication/proven-current erase lifecycle from same owner/key/canonical body+artifact or validated minimal original tombstone. Null counter alone proves nothing; missing/gap/wrong scope/false empty/stale evidence does not reconstruct or repair head.",
+    "history": "Independently verified original body/receipt remains readable with UNKNOWN selection, ineligible for any effect. Old erased receipts lacking lineage remain historical only and cannot prove virgin/current state; conservative refusal, no guessed adoption.",
+    "erase": "Exact current-owner/digest delete still atomically removes own body/projection when head corrupt. Tombstone stores opaque family/draft/body identity and publication revision/checksum; erase revision only when current selection proved. Corrupt head untouched; no laundering into valid empty. Valid selected erase/empty/new generation and noncurrent/unrelated deletions remain supported.",
+    "privacy_authority": "No original body/device/config/broker/clear family ID retained in lineage witness; no new authority/store/migration/provider/native/effect action. Existing strict/legacy proof/current owner policies and memory-only forget categories unchanged."
+  },
+  "independent_actual": {
+    "PASS": 7,
+    "skips": 0,
+    "exit": 0,
+    "seconds": 27.893866539001465,
+    "receipt": "/tmp/van-lac135-r2-probe-629c7ll4/terminal.json",
+    "receipt_sha256": "ed7876e2bb6c800b0b78c811ad1d2f3e6c57de90e09bc17f6b44d982fb14c59f",
+    "raw": "/tmp/van-lac135-r2-probe-629c7ll4/raw.log",
+    "raw_sha256": "18dd973c2c7e8e64f7bb2338cb5ffaebea03a815efe2a0d796d1d5c6a2cf2c48",
+    "junit": "/tmp/van-lac135-r2-probe-629c7ll4/junit.xml",
+    "junit_sha256": "32933546550a1f30941608d78b262562607fb9eec9afa0d3bf2361c60c92e417",
+    "critical_observation": {
+      "original_read_status": 200,
+      "original_selection_state": "UNKNOWN",
+      "new_request_status": 503,
+      "new_selection_revision": null,
+      "artifacts": 1
+    },
+    "test_ids": [
+      "::test_corrupt_null_selection_cannot_admit_unproven_revision",
+      "backend.tests.test_account_application_drafts::test_proven_erase_empty_family_and_later_generations_preserve_original_history",
+      "backend.tests.test_account_application_drafts::test_explicit_privacy_erase_does_not_launder_corrupt_selection_into_valid_empty",
+      "backend.tests.test_account_application_drafts::test_erase_exact_old_selection_preserves_newer_and_unrelated_drafts",
+      "backend.tests.test_account_application_drafts::test_empty_family_requires_its_exact_original_erase_witness[missing-witness]",
+      "backend.tests.test_account_application_drafts::test_empty_family_requires_its_exact_original_erase_witness[gap-rehashed]",
+      "backend.tests.test_account_application_drafts::test_empty_family_requires_its_exact_original_erase_witness[wrong-scope]"
+    ],
+    "scope": "Actual paired HTTP/SQLite/source only; no native/provider/financial effect. Source candidate and four pins unchanged.",
+    "capacity": "No fixture/test launched before root capacity release. Actual controller enforced64MiB workspace admission,2GiB tmp reserve,128MiB fixture cap,8MiB per-file output cap and140s timeout. No limit trigger.",
+    "retention": "All7 completed fixture trees/raw/XML/observation/source retained; terminal receipt has per-member exact paths/UID/GID/mode/SHA256/CRC32; no cleanup or prefix deletion.",
+    "reaped": true,
+    "process_group_absent": true,
+    "external_probe_sources": {
+      "/tmp/van-lac135-r2-independent-review-20261101/test_selection_null.py": "931d6b62bbec12afce34ec5bcb2f178834ee5e180b1263105ceda42741f2f109",
+      "/tmp/van-lac135-r2-independent-review-20261101/run.py": "d92b1584b32958f2362dfca78b80cafdf55a429de96a26440300da3f3ac83126"
+    }
+  },
+  "author_evidence": {
+    "actual_fresh_pass_executions": 54,
+    "distinct_classname_name_ids": 54,
+    "groups": [
+      {
+        "label": "R2_FINAL",
+        "PASS": 53,
+        "receipt_sha256": "2bf7ee4c58147f54a25fab219daaf952db13a593471375cec2751931cb14a20e",
+        "xml_sha256": "4f9ce4538f84595c1efe8b548c770f7a12cd2c7d91267568492f686d3ff26cab",
+        "stdout_sha256": "af94ec12942b46ea31c5e42b2207864af0d8860ab609083e3d3cc26a91544e22",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "owned_bytes": 101621519,
+        "source_pins_match": true,
+        "children_remaining": []
+      },
+      {
+        "label": "R2_COLD_PROCESS",
+        "PASS": 1,
+        "receipt_sha256": "62759b8aa98584413d726fb302dfda234b60f1103d04ae85b0183314f7315f17",
+        "xml_sha256": "7db7db23828398e68c50848091a22f21989e02a7c11814cd158f0745594a873b",
+        "stdout_sha256": "1fd9e784f5b91ffa364a1816ad6b96ba3fe5a5a8718fae196a80430ea3961a5c",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "owned_bytes": 1918193,
+        "source_pins_match": true,
+        "children_remaining": []
+      }
+    ],
+    "fresh_process_condition": "Source actually spawns fresh Python app/HTTP reader, proves erased emptyrev2, explicitly createsrev3, old remainsERASED; separate distinct case. Not Android process/provider/native acceptance.",
+    "R1_reuse": "Original71 and independent3PASS/1FAIL evidence remain original-source historical proof; not relabeled R2 execution.13auth/artifact+22retention implementations unchanged, while all35 owner/SQL/HTTP tests reexecuted in53.",
+    "failures_preserved": true
+  },
+  "original_review_unchanged_sha256": "6f1454219299abe7daa4d564832a47b9b19a73144b9242f5862abba4bdfdb0a9",
+  "original_failed_fixture_retained": "/tmp/van-lac135-probe-y5s9tv98",
+  "limits": [
+    "Backend preview SOURCE only. Android persisted producer/wiring remains OPEN.",
+    "LAC137 real provider contract/submission/API/KYC/native result, fullLAC135/BE004/formal/native acceptance remain OPEN.",
+    "Six expected owner registry drifts unapplied; sole integrator generated reconciliation and exact combined app/private-core/auth/source CI required.",
+    "No mutation374 execution claim; consistency/anchors only. No SDK/CI/provider/network/native effects or source/main writes/commits/subagents."
+  ]
+}

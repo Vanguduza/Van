@@ -1,0 +1,75 @@
+{
+  "schema": "van.rebuild.candidate-source-receipt/1",
+  "source_parent": "7626a20f1063f71dd7cb7e590450911cba7e3ed5",
+  "scope": "PARTIAL_BE002_BE029_DEVICE_RESULT_AND_VOICE_BINDING_NOT_UNIT_ACCEPTANCE",
+  "source_sha256": {
+    "tools/audit/mutation_suite.py": "174fae42025e1dbdff981e60996b9129d1584c1fed5aff6dedf18748071180b9",
+    "backend/van_gateway/app.py": "a0d50f9afbc88e19f7e2871df50e1589c8e6d928dd6fbbd32941ca37988beb46",
+    "backend/tests/test_command_execution_result.py": "2dc967f0f7d5836d3f0182f64efdba8a4b66557f2f0369834b8cb3029995c84e",
+    "backend/van_gateway/voice/speech_stream.py": "3c31e8a187d9a0bba7b9d4dc3abd53c946d9e8150fb3491bd69cde267256e3b2",
+    "backend/tests/test_voice_stream_binding.py": "c8980f467317d29d8f249ef14099c883755ebcbdaeaf40536e40c544ef6e5fd0",
+    "android/app/src/androidTest/java/com/dial/van/instrumentation/VoicePlaybackRuntimeTest.kt": "1ab22035c1384f327f2b89a588492188d32ed977b3326e6d54b5a88853db6d71",
+    "tools/rebuild/refresh_owner_source_contracts.py": "d0c3d25e65c1340f2f5d52dc941a111eb24d66323e6c0b552d4b9ad4ab1e50b7",
+    "tests/rebuild/test_owner_registry_refresh.py": "a9a6140d3d1d29c9f47a6ba2051ec4a673a522fc105bb89e8652b04601b06f42",
+    ".github/workflows/van-ci.yml": "68162f14952cb45ce2b9d12b0a3bdfb0b332d105fdfd46b59ac14ee193aca3a3",
+    "tools/ci/github-actions-ci.yml": "68162f14952cb45ce2b9d12b0a3bdfb0b332d105fdfd46b59ac14ee193aca3a3"
+  },
+  "backend": {
+    "tests": 102,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "d82cc4bb8a2093e6ce8f454003785138f5debce01479dd8d86c91a36f0258595"
+  },
+  "new_cases": {
+    "command_scope": 4,
+    "stream_binding": 15
+  },
+  "initial_counterexamples": {
+    "HTTP_result_ownership": 3,
+    "stream_binding": 12
+  },
+  "owner_contracts_passed": 154,
+  "registry_preimage_controls_passed": 7,
+  "native_test_fixture_signature": "BOTH_PUBLIC_VOID_VERIFIED",
+  "native_voice_runtime": "PENDING_NEW_HOSTED_EXECUTION",
+  "logs_sha256": {
+    "/tmp/van-bound-speech-mutant.txt": "6a28a6cba7aa6c896c30dec2114a218b76a2addd9cfa43b045c2e8d9f929df63",
+    "/tmp/van-bound-speech-mutant.json": "53a95ce75e09133b0fcbfaa29ba281015334f04b579c8cde17d756048346d393",
+    "/tmp/van-command-refusal-scope-before.txt": "d31d070ad0c23c4797989a4f2c53bd1cf799866a4a201b7530a7f60f4996e5ef",
+    "/tmp/van-command-speech-scope-confirmed.txt": "46ce0e9022df96e84b2507f9c6801725a0039a01000802cb9b98828609bc164b",
+    "/tmp/van-command-speech-scope-fixed.txt": "d64538d0896aba12f28b8f9646740b4e08101942bc18c45874f48278d129f50a",
+    "/tmp/van-voice-stream-binding-before.txt": "5b3f3b413d632920391d76718b306fe81d75c5ed796fd00e5e2286ca4bdd465a",
+    "/tmp/van-voice-bound-source-verified.txt": "eacbf1d2d758db8b84f47edcf7c23a47b2582bd484703c53f03176afc20c4565",
+    "/tmp/van-voice-bound-source-verified.xml": "d82cc4bb8a2093e6ce8f454003785138f5debce01479dd8d86c91a36f0258595",
+    "/tmp/van-registry-repeat-refresh-tests.txt": "48c5696fc05812f4fa3fb6a8c8b8374820243316710b456ba8d038effb5655cf",
+    "/tmp/van-bound-speech-owner-contracts-final.txt": "a5d79c7fbaa27ea68480d9785c4d89e84d6f8783baf2693e9d4d3b993d70fde6",
+    "/tmp/van-voice-junit-compile.txt": "a18329e3eb5012d18a522a1d42671bf805c282ea3d8b6ad9465123c0abeb8f8b",
+    "/tmp/van-voice-junit-signatures-before.txt": "16324bdf68a0266bd7ef6fa5740d7719d0c344eb3be5e25943d90ac780fe8129",
+    "/tmp/van-voice-junit-signatures-after.txt": "e421be4f2b3af2b6a8315bf3da1be12f03f3fbe5a1f238a461e630e2f56487e6"
+  },
+  "policy_thresholds_changed": false,
+  "new_frontend_design": false,
+  "native_release_gates_issued": false,
+  "retargeted_cache_mutation": {
+    "rows": [
+      {
+        "kind": "baseline",
+        "mutation": null,
+        "exit_code": 0,
+        "log": "/tmp/van-bound-speech-mutant-0.txt",
+        "sha256": "8790b75fd03a709bff986a3efe94902069d5cb503d0ff5d7465715169473b733"
+      },
+      {
+        "kind": "mutation",
+        "mutation": "C30 two streams for one answer, so de-duplication by segment id stops working",
+        "exit_code": 1,
+        "log": "/tmp/van-bound-speech-mutant-1.txt",
+        "sha256": "ffad602c8385e68903e09d608b80097d42a6e1ce3540f865f3f1fd1f6b817a20"
+      }
+    ],
+    "detected": 1,
+    "survived": 0,
+    "source_restored": true
+  }
+}

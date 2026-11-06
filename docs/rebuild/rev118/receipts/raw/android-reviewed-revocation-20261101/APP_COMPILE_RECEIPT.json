@@ -1,0 +1,29 @@
+{
+  "exit": 0,
+  "at_utc": "2026-11-01T07:53:01.348941+00:00",
+  "command": "JAVA_HOME=/tmp/van-permission-revocation-jdk/jdk-21.0.13+9 GRADLE_USER_HOME=/tmp/van-permission-revocation-gradle ANDROID_HOME=/tmp/van-android-sdk-20261101/sdk ANDROID_USER_HOME=/tmp/van-android-sdk-20261101/user ./gradlew :app:compileDebugKotlin --no-daemon --max-workers=2 -I /tmp/van-android-sdk-20261101/build-dir.init.gradle -Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts -Dhttps.proxyHost=proxy -Dhttps.proxyPort=8080 -Dhttp.proxyHost=proxy -Dhttp.proxyPort=8080",
+  "cwd": "/workspace/van-review-2026-10-18/publish/android",
+  "result": "BUILD SUCCESSFUL in6m41s;18tasks executed",
+  "source_pins": {
+    "android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt": "3b6b161210b9c49703d8f23335d2c44a73fe25d940c656a1299122c05e725639",
+    "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
+    "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt": "04f333a5d8312831f31c04546e14277106da44622e8eec4293673de42de1778e",
+    "android/app/src/main/java/com/dial/van/command/work/MissionControls.kt": "9ad358ba7e3c645edf9a93ca329d5117cfa18595cc46d0cedc3d17d15b426eff",
+    "android/app/src/main/java/com/dial/van/command/work/WorkRoute.kt": "75ded073f196a66529467ffc52acb5f7b82c50ce69e4d7fe1493c29edffb3609"
+  },
+  "actual_output_classes": {
+    "MissionRepository.class": {
+      "path": "/tmp/van-android-sdk-20261101/app-build/_app/tmp/kotlin-classes/debug/com/dial/van/mission/MissionRepository.class",
+      "sha256": "7555028464217fef012a2025bf8f5c35983137f35e3355b7a9427dda28163d82"
+    },
+    "PermissionsRouteKt.class": {
+      "path": "/tmp/van-android-sdk-20261101/app-build/_app/tmp/kotlin-classes/debug/com/dial/van/command/settings/PermissionsRouteKt.class",
+      "sha256": "cb35fe8608f356c80d39ace80775634fa27aab290969370c86e66e7b457ce8f0"
+    },
+    "VanGatewayClient.class": {
+      "path": "/tmp/van-android-sdk-20261101/app-build/_app/tmp/kotlin-classes/debug/com/dial/van/gateway/VanGatewayClient.class",
+      "sha256": "4ab8d3e2acdd22a97e793f6c4b90ce629bf3116dbcd4ea716f68ade06d29ab15"
+    }
+  },
+  "not_claimed": "No unit/lint/instrumentation/SDKhandset/native acceptance."
+}

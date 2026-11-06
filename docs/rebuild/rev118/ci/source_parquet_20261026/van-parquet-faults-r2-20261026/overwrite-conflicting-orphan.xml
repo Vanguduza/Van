@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="1.460" timestamp="2026-10-26T08:47:25.954627+00:00" hostname="2c5a245e39f1"><testcase classname="trading.worker_tests.test_native_source_parquet" name="test_missing_manifest_recovers_only_exact_original_orphan" time="0.873"><failure message="AssertionError: Regex pattern did not match.&#10;  Expected regex: 'ORPHAN_CONFLICT'&#10;  Actual message: 'PARTITION_PUBLICATION_INVALID:PARTITION_PARQUET_INVALID'">source = (&lt;vati.market_data.native_archive.NativeMarketArchive object at 0x7f030dd3dfd0&gt;, NativeSymbolContract(metadata_json='{...transport_host': 'demo.ctraderapi.com', 'native_account_id': 123, ...}, 'timeframe': 'M1', 'through_revision': 1, ...})
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-370/test_missing_manifest_recovers0')
+arrow = &lt;module 'pyarrow' from '/workspace/van-parquet-source-venv-20261026/lib/python3.12/site-packages/pyarrow/__init__.py'&gt;
+
+    def test_missing_manifest_recovers_only_exact_original_orphan(source, tmp_path, arrow):
+        book, contract, sample, window = source
+        service = NativeBarPartitionService(NativeBarWindowReader(book), tmp_path/'derived')
+        result = service.publish(window, expected_scope=contract.native_scope)
+        service._file(window['window_sha256']+'.json').unlink()
+        assert service.get(window['window_sha256'], expected_scope=contract.native_scope) is None
+        assert service.publish(window, expected_scope=contract.native_scope) == result
+        service._file(window['window_sha256']+'.json').unlink()
+        service._file(window['window_sha256']+'.parquet').write_bytes(b'conflicting orphan')
+&gt;       with pytest.raises(SourcePartitionError, match='ORPHAN_CONFLICT'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'ORPHAN_CONFLICT'
+E         Actual message: 'PARTITION_PUBLICATION_INVALID:PARTITION_PARQUET_INVALID'
+
+trading/worker_tests/test_native_source_parquet.py:142: AssertionError</failure></testcase></testsuite></testsuites>

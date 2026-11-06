@@ -1,0 +1,15 @@
+# MT5 native result parity and netting admission
+
+The separate Windows Python worker inherited the EA's order-as-position and unobserved-stop defects. Non-null timeout replies were treated as proven refusals even after the SDK fixture performed the effect. A zero sell stop could remove protection, pending orders invented stop confirmation, and their null arrival price crashed the Linux receipt parser.
+
+The worker now resolves the exact returned deal from the Python SDK's order-ticket history filter, then matches its stable position identifier, symbol and side to one current native position ticket. Unavailable or ambiguous observations preserve the accepted fill with no invented position ID or protection. Explicit native refusals remain distinct from timeouts, connection failures and uncertain outcomes. Stop changes need confirming readback; pending orders need an observed native stop. The Linux consumer retains missing IDs as absent and handles a pending null price without crashing.
+
+Native entry quantity, stop, price, target, slippage, side and supported type are checked before any SDK effect. Both EA and Python worker refuse a new entry over existing or unknown same-symbol netting positions or pending orders. Otherwise a new order could reduce another position or replace its protective stop. First entries on known-empty netting accounts remain available. This guard does not implement aggregate multi-intent netting allocation: that original obligation remains; no feature or acceptance identity is retired.
+
+Executed evidence: 12 original worker/consumer counterexamples, five additional netting failures with two positive controls, and six invalid-parameter failures. Final affected tests pass **81/81**. Full trading and selected gateway recovery pass **2,635 cases, zero skips**, using real isolated PostgreSQL, subsequently stopped and removed. Rebuild checks pass **78/78**. Eleven meaningful faults were caught with passing controls and restored source hashes. An initial initializer-only fault survived because readback recomputed it; its replacement bypassed readback at the actual return and was caught. The original result is retained in the receipt.
+
+The preceding EA revision at `6255c6c4` independently compiled in signed MetaEditor with zero errors/warnings and a fresh EX5, while invalid source generated four errors/no EX5. Its earlier local full suite passed 2,610 cases without skips. Receipts retain these exact versions. The subsequent netting guard needs its own native run after publication.
+
+SDK effects above are controlled source-test fixtures, and EA function execution uses its unchanged bodies in a C++ terminal model. No Python MetaTrader SDK, broker account, production host or handset is exercised. Native financial finality, original pending/late/corrected facts, worker deadline/epoch/risk envelopes, netting allocation and the original unit/provider/release/S24 gates remain unissued.
+
+Evidence: `receipts/MT5_NATIVE_RESULT_SOURCE_20261023.json`, `receipts/MQL_RESULT_INTEGRITY_SOURCE_20261023.json`, `receipts/NATIVE_METAEDITOR_6255c6c4.json` and `receipts/HOSTED_SOURCE_6255c6c4.json`.

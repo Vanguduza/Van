@@ -1,0 +1,650 @@
+diff --git a/backend/tests/test_account_unlink_review.py b/backend/tests/test_account_unlink_review.py
+index 81642da6..eb2b2a90 100644
+--- a/backend/tests/test_account_unlink_review.py
++++ b/backend/tests/test_account_unlink_review.py
+@@ -153,3 +153,118 @@ async def test_incomplete_or_broker_closing_native_review_is_refused_before_sign
+     monkeypatch.setattr(app.state.onboarding.control,'review',broken)
+     response=await act(ac,'account_remove',{'alias':'fx_primary'},expected_challenge_status=409)
+     assert response.status_code==409
++
++
++@pytest.mark.asyncio
++@pytest.mark.parametrize('fault',['resolution','fsync','namespace','version','readback_age','future_clock','lease'])
++async def test_final_unlink_writer_rechecks_original_scope_and_fresh_native_facts(client,tmp_path,monkeypatch,fault):
++    import os
++    from dataclasses import replace
++    import commander.accounts as native
++    import commander.account_effects as effects
++    import commander.account_retirement as retirement
++    import vati.accounts.registry as storage
++    ac,app=client;view,secret,account=native_funds(tmp_path,monkeypatch)
++    body,issued=await challenge(ac,'account_remove',{'alias':account.alias})
++    identity=body['approval_proof']['challenge_id'];expiry=issued['approval_expires_at_unix']
++    path=tmp_path/'accounts.json';before=path.read_bytes();secret_before=secret.read_bytes();version=app.state.onboarding.control.resource_version(account.alias)['resource_version']
++    clock=[int(time.time())];offset=[0];seen=[]
++    monkeypatch.setattr(effects,'time',NS(time=lambda:clock[0]))
++    monkeypatch.setattr(retirement,'time',NS(time=lambda:time.time()+offset[0]))
++    if fault=='readback_age':
++        adapter=NS(sync_account=lambda:AccountState(account.alias,view['balance'],view['balance'],'USD',True,server_time_unix_ms=int(time.time()*1000)),
++            positions=lambda:[],orders=lambda:[],heartbeat=lambda **kw:Health(True,0,kw['now_ms']-29999))
++        monkeypatch.setattr('vati.app.service.build_adapter',lambda *a,**k:adapter)
++    if fault=='resolution':
++        inspect=retirement.inspect_retirement
++        def delayed(*a,**kw):
++            value=inspect(*a,**kw)
++            if effects._effect_started.get() is not None:clock[0]=expiry;seen.append(True)
++            return value
++        monkeypatch.setattr(retirement,'inspect_retirement',delayed)
++    fsync=storage.os.fsync
++    def delayed_fsync(fd):
++        fsync(fd);marker=effects._effect_started.get()
++        if marker is None or marker[1].command!='account_remove' or '.accounts.json.' not in os.readlink('/proc/self/fd/'+str(fd)):return
++        if seen:return
++        seen.append(True);assert marker[0] is False
++        if fault=='fsync':clock[0]=expiry
++        elif fault=='namespace':(tmp_path/'secrets/.account-control-domain.env').write_text('owned-current-namespace-malformed')
++        elif fault=='version':
++            writer=AccountRegistry(path);writer.replace(replace(writer.get(account.alias),label='Concurrent owner edit'))
++        elif fault=='readback_age':offset[0]=.01
++        elif fault=='future_clock':offset[0]=-60
++        elif fault=='lease':
++            store=SQLiteLeaseStore(tmp_path/'vati.sqlite')
++            try:
++                held=store.read(account.alias);assert held is not None
++                assert store.write_if(held,replace(held,expires_at_ms=int(time.time()*1000)-1))
++            finally:store.close()
++    monkeypatch.setattr(storage.os,'fsync',delayed_fsync)
++    result=await ac.post('/v1/trading/accounts/action',json=body)
++    assert seen and result.status_code==(403 if fault in {'resolution','fsync'} else 409),result.text
++    assert secret.read_bytes()==secret_before
++    if fault=='version':assert AccountRegistry(path).get(account.alias).label=='Concurrent owner edit'
++    else:
++        assert path.read_bytes()==before
++        # Corrupt namespace is a deliberate test fault; the registry generation
++        # itself is unchanged and must not be inferred through that bad scope.
++        if fault!='namespace':assert app.state.onboarding.control.resource_version(account.alias)['resource_version']==version
++    ledger=Ledger(tmp_path/'vati.sqlite')
++    from commander.account_effects import AccountEffectJournal
++    try:state=AccountEffectJournal(ledger).status(identity,'test-device')
++    finally:ledger.close()
++    assert state.phase=='REFUSED'
++    if fault!='namespace':
++        original=await ac.get('/v1/trading/accounts/operations/'+identity)
++        assert original.json()['effect_state']=='REFUSED' and not original.json()['reconciliation_required']
++    assert list(tmp_path.glob('.accounts.json.*.tmp'))==[]
++
++
++@pytest.mark.asyncio
++@pytest.mark.parametrize('fault',['before_shred','before_shred_missing','after_overwrite_expiry','after_overwrite_io'])
++async def test_partial_unlink_stays_original_unknown_without_cleanup_or_resend_authority(client,tmp_path,monkeypatch,fault):
++    import os
++    import commander.accounts as native
++    import commander.account_effects as effects
++    ac,app=client;_,secret,account=native_funds(tmp_path,monkeypatch)
++    body,issued=await challenge(ac,'account_remove',{'alias':account.alias});identity=body['approval_proof']['challenge_id']
++    before=secret.read_bytes();clock=[int(time.time())];calls=[];shred=native._shred
++    monkeypatch.setattr(effects,'time',NS(time=lambda:clock[0]))
++    def observed(path,**kw):
++        calls.append(True)
++        if fault=='before_shred':clock[0]=issued['approval_expires_at_unix']
++        elif fault=='before_shred_missing':path.unlink()
++        return shred(path,**kw)
++    monkeypatch.setattr(native,'_shred',observed);fsync=os.fsync
++    def delayed(fd):
++        fsync(fd);marker=effects._effect_started.get()
++        if marker is not None and marker[1].command=='account_remove' and os.readlink('/proc/self/fd/'+str(fd))==str(secret):
++            if fault=='after_overwrite_expiry':clock[0]=issued['approval_expires_at_unix']
++            elif fault=='after_overwrite_io':raise OSError('owned interrupted credential flush')
++    monkeypatch.setattr(native.os,'fsync',delayed)
++    result=await ac.post('/v1/trading/accounts/action',json=body)
++    assert result.status_code==409 and result.json()['effect_state']=='UNKNOWN',result.text
++    assert len(calls)==1 and account.alias not in AccountRegistry(tmp_path/'accounts.json').accounts
++    if fault=='before_shred_missing':assert not secret.exists()
++    else:
++        assert secret.exists()
++        assert (secret.read_bytes()==before)==(fault=='before_shred')
++    for _ in range(2):
++        original=await ac.get('/v1/trading/accounts/operations/'+identity)
++        assert original.status_code==200 and original.json()['effect_state']=='UNKNOWN'
++        assert original.json()['operation_id']==identity and original.json()['result'] is None
++    assert len(calls)==1
++    clock[0]=int(time.time())
++    blocked=await act(ac,'account_upsert',{'alias':account.alias,'broker':'MT5','server':'Broker-Demo','login':'12345678'})
++    assert blocked.status_code==409 and len(calls)==1
++    assert (await act(ac,'account_upsert',{'alias':'disjoint_owner','broker':'PAPER'})).status_code==200
++    # SOURCE observations are separate from the original UNKNOWN receipt and
++    # confer no authority to finish the still-pending shred after restart.
++    from pathlib import Path
++    import json
++    Path('/tmp/van-be004-unlink-r1-partial-'+fault+'-'+tmp_path.parent.name+'-observation-20261101.json').write_text(json.dumps({
++        'kind':'CURRENT_SOURCE_OBSERVATION_NOT_ORIGINAL_COMPLETION_OR_AUTHORITY','observed_at_unix':int(time.time()),
++        'operation_id':identity,'registry_alias_absent':True,'managed_file_present':secret.exists(),
++        'file_unchanged':secret.read_bytes()==before if secret.exists() else None,'original_phase':'UNKNOWN','original_result':None,
++        'cleanup_authority_or_resend':False,'cold_fixture':str(tmp_path)},indent=2))
+diff --git a/trading/commander/account_retirement.py b/trading/commander/account_retirement.py
+index 096ee05c..c9ed98a7 100644
+--- a/trading/commander/account_retirement.py
++++ b/trading/commander/account_retirement.py
+@@ -82,7 +82,19 @@ def retirement_scope(settings,alias):
+             raise HTTPException(409,'Account runtime is active; stop and reconcile before local unlink')
+         with lease.submission_guard(lease.epoch) as held:
+             if not held:raise HTTPException(409,'Native runtime fence changed; local link retained')
+-            yield
++            epoch=lease.epoch
++            def require_lease_time():
++                held=lease.held
++                if held is None or held.lease_epoch!=epoch or not held.live_at(int(time.time()*1000)):
++                    raise HTTPException(409,'Native retirement lease expired before local effect')
++            def require_current_lease():
++                if not lease.fence(epoch,now_ms=int(time.time()*1000),min_validity_ms=0):
++                    raise HTTPException(409,'Native retirement lease expired or changed before local write')
++                # The store read may have waited. Never carry its early clock
++                # through to a later protected write.
++                require_lease_time()
++            require_current_lease.check_time=require_lease_time
++            yield require_current_lease
+     finally:
+         if lease is not None:lease.release()
+         if store is not None:store.close()
+@@ -126,7 +138,7 @@ def _history(ledger,account):
+     return sorted(set(refs))
+ 
+ 
+-def inspect_retirement(settings,registry,account,*,inside_removal=False,operation_id=None,native_ledger=None):
++def inspect_retirement(settings,registry,account,*,inside_removal=False,operation_id=None,native_ledger=None,readback_guards=None):
+     """Fresh readonly facts, with no inferred zero for unsupported observation."""
+     ledger=native_ledger if native_ledger is not None else open_ledger(authority_path(settings));adapter=None;store=None
+     try:
+@@ -139,7 +151,9 @@ def inspect_retirement(settings,registry,account,*,inside_removal=False,operatio
+             if ('account:'+account.alias in state.intent.targets and state.phase in {'IN_FLIGHT','UNKNOWN'}
+                 and state.intent.operation_id!=operation_id):
+                 raise HTTPException(409,'Original account operation is unresolved; local link retained')
++        observed_started=int(time.time()*1000)
+         refs=_history(ledger,account)
++        oldest=observed_started
+         if account.broker=='PAPER':
+             # This has no broker funds. Simulated history is retained; never
+             # construct a fresh PaperAdapter and mistake it for runtime state.
+@@ -163,7 +177,22 @@ def inspect_retirement(settings,registry,account,*,inside_removal=False,operatio
+                 or not isinstance(state.balance,Decimal) or not state.balance.is_finite()
+                 or not isinstance(state.equity,Decimal) or not state.equity.is_finite()):
+                 raise HTTPException(409,'Native funds, identity or freshness is unknown; local link retained')
++            oldest=min(started,heartbeat.last_heartbeat_ms,*([state.server_time_unix_ms] if account.broker!='DERIV' else []))
+             funds={'balance':str(state.balance),'equity':str(state.equity),'currency':state.currency}
++        observed_completed=int(time.time()*1000)
++        if readback_guards is not None:
++            expected_history=canonical_hash(refs)
++            def require_readback_time():
++                now=int(time.time()*1000)
++                if not observed_completed<=now<=oldest+30000:
++                    raise HTTPException(409,'Native retirement readback expired or clock changed before local write')
++            def require_current_readback():
++                if canonical_hash(_history(ledger,account))!=expected_history:
++                    raise HTTPException(409,'Native retirement history changed before local write')
++                # History validation can block; source age is checked AFTER it.
++                require_readback_time()
++            require_current_readback.check_time=require_readback_time
++            readback_guards.append(require_current_readback)
+         cleanup,_=credential_cleanup(settings,registry,account)
+         return {'schema':'vati.local-unlink-review/1','remote_account_closed':False,
+                 'historical_data_retained':True,'retained_remote_funds':funds,
+diff --git a/trading/commander/accounts.py b/trading/commander/accounts.py
+index ba6d43e7..14780107 100644
+--- a/trading/commander/accounts.py
++++ b/trading/commander/accounts.py
+@@ -104,20 +104,41 @@ def _write_secrets(path: Path, values: dict[str, str], *, merge: bool = True, be
+                 os.unlink(temporary)
+ 
+ 
+-def _shred(path: Path) -> None:
++def _file_generation(stat):
++    return (stat.st_dev,stat.st_ino,stat.st_mode,stat.st_size,stat.st_mtime_ns,stat.st_ctime_ns)
++
++
++def _shred(path: Path, *, before_write=None, before_unlink=None, expected_generation=None, before_effect=None) -> None:
+     from vati.core.file_lock import exclusive_state_lock
+     with exclusive_state_lock(path):
+         if path.is_symlink():
+             raise ValueError("credential destination must not be a symbolic link")
++        if expected_generation is not None and not path.is_file():
++            raise HTTPException(409,'Original managed credential is missing; cleanup unconfirmed')
+         if path.is_file():
+-            size = path.stat().st_size
+             with open(path, "r+b") as stream:
+-                stream.write(os.urandom(size))
++                before=_file_generation(os.fstat(stream.fileno()))
++                if (expected_generation is not None and before!=expected_generation
++                    or _file_generation(path.stat())!=before):
++                    raise HTTPException(409,'Managed credential generation changed before destruction')
++                if before_write is not None:before_write()
++                if path.is_symlink() or _file_generation(path.stat())!=before:
++                    raise HTTPException(409,'Managed credential changed at original overwrite boundary')
++                if before_effect is not None:before_effect()
++                stream.write(os.urandom(before[3]))
+                 stream.flush()
+                 os.fsync(stream.fileno())
++                own_overwrite=_file_generation(os.fstat(stream.fileno()))
++            if path.is_symlink() or _file_generation(path.stat())!=own_overwrite:
++                raise HTTPException(409,'Managed credential changed after original overwrite; cleanup unconfirmed')
++            if before_unlink is not None:before_unlink()
++            if path.is_symlink() or _file_generation(path.stat())!=own_overwrite:
++                raise HTTPException(409,'Managed credential changed at original unlink boundary')
++            if before_effect is not None:before_effect()
+             path.unlink()
+ 
+ 
++
+ def _alias(a: dict) -> str:
+     alias = str(a.get("alias", "")).strip().lower()
+     if not ALIAS_RE.match(alias):
+@@ -295,7 +316,7 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
+         snapshot=resource_snapshot(reg(), _alias(a))
+         return {**snapshot,'account_control_domain':domain}
+ 
+-    def retirement_review(values,*,inside_removal=False,native_ledger=None):
++    def retirement_review(values,*,inside_removal=False,native_ledger=None,readback_guards=None):
+         from commander.account_retirement import inspect_retirement,require_idle_runtime,authority_path
+         from vati.core.ledger_pg import open_ledger
+         from vati.core.canonical import canonical_hash
+@@ -312,7 +333,8 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
+                 try:current=registry.get(alias)
+                 except Exception:raise HTTPException(404,'Unknown native account alias') from None
+                 facts=inspect_retirement(st,registry,current,inside_removal=True,native_ledger=ledger,
+-                    operation_id=(values.get('_native_operation') or {}).get('operation_id'))
++                    operation_id=(values.get('_native_operation') or {}).get('operation_id'),
++                    **({'readback_guards':readback_guards} if readback_guards is not None else {}))
+                 body={'schema':'vati.account-review/1','action':'account_remove','alias':alias,
+                     'request_digest':canonical_hash({k:v for k,v in values.items() if not k.startswith('_')}),
+                     'resource_version':current_resource_version(alias),
+@@ -423,7 +445,9 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
+         r = reg()
+         if alias not in r.accounts:
+             raise HTTPException(404, f"unknown alias {alias}")
+-        review=retirement_review(a,inside_removal=True,native_ledger=native_ledger)
++        readback_guards=[]
++        review=retirement_review(a,inside_removal=True,native_ledger=native_ledger,readback_guards=readback_guards)
++        if len(readback_guards)!=1:raise HTTPException(409,'Current native retirement observation is unavailable')
+         if ('_native_operation' in a or '_expected_review_digest' in a) and a.get('_expected_review_digest')!=review['review_digest']:
+             raise HTTPException(409,'Native unlink facts changed or owner review missing; local connection retained')
+         # Freeze all credential-reference writers through the final plan check
+@@ -435,9 +459,37 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
+             with exclusive_state_lock(target) if target is not None else nullcontext():
+                 if current_resource_version(alias)!=review['resource_version']:
+                     raise HTTPException(409,'Native credential generation changed; local connection retained')
+-                mark_account_effect()
+-                current.remove(alias)
+-                if target is not None:_shred(target)
++                def require_final_times():
++                    for check in readback_guards:check.check_time()
++                    a['_retirement_time_guard']()
++                a['_retirement_clock_register'](require_final_times)
++                def current_scope():
++                    for check in readback_guards:check()
++                    guard=a.get('_retirement_guard')
++                    if callable(guard):guard()
++                    if '_native_operation' in a:require_current_account_effect()
++                    require_final_times()
++                def mark_final_effect():
++                    # No blocking callback follows the final file-identity
++                    # check. These predicates only sample current clocks from
++                    # the already verified, continuously held native scope.
++                    require_final_times()
++                    a['_retirement_authority_time_guard']()
++                    mark_account_effect()
++                def before_remove():
++                    if current_resource_version(alias)!=review['resource_version']:
++                        raise HTTPException(409,'Native account changed before local unlink replacement')
++                    current_scope()
++                    mark_final_effect()
++                generation=_file_generation(target.stat()) if target is not None else None
++                current.remove(alias,before_replace=before_remove)
++                own_removal_version=current_resource_version(alias)
++                def before_credential_effect():
++                    if current_resource_version(alias)!=own_removal_version:
++                        raise HTTPException(409,'Native account changed after original unlink; credential cleanup unconfirmed')
++                    current_scope()
++                if target is not None:_shred(target,before_write=before_credential_effect,
++                    before_unlink=before_credential_effect,expected_generation=generation,before_effect=mark_final_effect)
+         return {"alias": alias, "removed": True,**{k:review['retirement'][k] for k in (
+             'remote_account_closed','historical_data_retained','retained_remote_funds','credential_cleanup')}}
+ 
+@@ -740,20 +792,45 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
+                 ledger.close()
+                 raise
+             args={**args,'_expected_account_control_domain':domain}
++            final_clock_checks=[]
++            def register_final_clock(check):
++                final_clock_checks[:]=[check]
++            def require_authority_time():
++                if '_native_operation' in args:
++                    from commander import account_effects as effect_context
++                    # intent is the immutable validated original used by the
++                    # actual journal claim, never caller timing labels.
++                    if int(effect_context.time.time())>=intent.expires_at_unix:
++                        raise HTTPException(403,'Original owner authority expired before native local effect')
++            def current_scope():
++                guard=args.get('_account_dispatch_guard')
++                if callable(guard):guard()
++                if args['_expected_account_control_domain']!=control_domain(ledger):
++                    raise AccountOperationBlocked('Account-control namespace changed before local unlink write')
++                if callable(guard):guard()
++                # Pure clock predicates run after all potentially blocking
++                # owner/key/domain checks, immediately before the effect mark.
++                for check in final_clock_checks:check()
+             def retire():
+                 # The unique original journal claim is durable before taking
+                 # lease -> alias locks. No ledger transaction spans venue IO.
+-                with retirement_scope(st,alias),reg().operation_lock(alias):
++                with retirement_scope(st,alias) as require_lease,reg().operation_lock(alias):
++                    def writer_scope():
++                        require_lease()
++                        current_scope()
+                     if '_expected_resource_version' in args:
+                         if args['_expected_account_control_domain']!=control_domain(ledger):
+                             raise AccountOperationBlocked('Account-control namespace changed before local unlink')
+                         if args['_expected_resource_version']!=current_resource_version(alias):
+                             raise HTTPException(409,'Account changed since owner approval; local connection retained')
+-                    return handler(args,native_ledger=ledger)
++                    return handler({**args,'_retirement_guard':writer_scope,
++                        '_retirement_time_guard':require_lease.check_time,
++                        '_retirement_clock_register':register_final_clock,
++                        '_retirement_authority_time_guard':require_authority_time},native_ledger=ledger)
+             try:
+                 if '_native_operation' not in args:return retire()
+                 intent=operation_intent('account_remove',args)
+-                return invoke_account_effect(AccountEffectJournal(ledger),intent,retire)
++                return invoke_account_effect(AccountEffectJournal(ledger),intent,retire,dispatch_guard=current_scope)
+             except AccountEffectError:
+                 raise AccountOperationUnconfirmed(args.get('_native_operation',{}).get('operation_id')) from None
+             finally:ledger.close()
+diff --git a/trading/commander/app.py b/trading/commander/app.py
+index d64df1d2..baa3a5c4 100644
+--- a/trading/commander/app.py
++++ b/trading/commander/app.py
+@@ -505,7 +505,7 @@ def create_app(settings: Optional[CommanderSettings] = None) -> FastAPI:
+                 # at actual dispatch without trying to consume that nonce again.
+                 current_account_authority()
+                 values = parsed.args
+-                if name in {'account_upsert','deriv_create_demo','deriv_oauth_link','ctrader_link'}:
++                if name in {'account_upsert','account_remove','deriv_create_demo','deriv_oauth_link','ctrader_link'}:
+                     values = {**values, '_account_dispatch_guard': current_account_authority}
+                     if legacy_demo:
+                         def admit_legacy_demo():
+diff --git a/trading/tests/test_account_registry_atomic_rea.py b/trading/tests/test_account_registry_atomic_rea.py
+index 082c3c56..d9d1d81e 100644
+--- a/trading/tests/test_account_registry_atomic_rea.py
++++ b/trading/tests/test_account_registry_atomic_rea.py
+@@ -74,10 +74,10 @@ def test_upsert_alternative_is_explicit_replace_only(tmp_path):
+     assert registry.get("paper_demo").label == "Paper demo"
+ 
+ 
+-@pytest.mark.parametrize('operation',['add','replace'])
++@pytest.mark.parametrize('operation',['add','replace','remove'])
+ def test_optional_trusted_guard_runs_after_fsync_and_refusal_preserves_bytes_revision_and_memory(tmp_path,monkeypatch,operation):
+     registry=AccountRegistry(tmp_path/'accounts.json')
+-    if operation=='replace':registry.add(paper())
++    if operation in {'replace','remove'}:registry.add(paper())
+     before=registry.path.read_bytes() if registry.path.exists() else None
+     revisions=dict(registry._resource_revisions);events=[];fsync=os.fsync;swap=os.replace
+     def synced(fd):fsync(fd);events.append('fsync')
+@@ -87,11 +87,13 @@ def test_optional_trusted_guard_runs_after_fsync_and_refusal_preserves_bytes_rev
+     def refuse():
+         assert events==['fsync'];events.append('guard');raise RuntimeError('owned guard refusal')
+     with pytest.raises(RuntimeError,match='guard refusal'):
+-        getattr(registry,operation)(paper(label='Cannot write'),before_replace=refuse)
++        getattr(registry,operation)('paper_demo' if operation=='remove' else paper(label='Cannot write'),before_replace=refuse)
+     assert events==['fsync','guard'] and registry._resource_revisions==revisions
+     assert (registry.path.read_bytes() if registry.path.exists() else None)==before
+     assert list(tmp_path.glob('.accounts.json.*.tmp'))==[]
+     assert registry.accounts==registry._loaded_accounts
+     events.clear()
+-    getattr(registry,operation)(paper(label='Allowed'),before_replace=lambda:events.append('guard'))
+-    assert events==['fsync','guard','replace'] and AccountRegistry(registry.path).get('paper_demo').label=='Allowed'
++    getattr(registry,operation)('paper_demo' if operation=='remove' else paper(label='Allowed'),before_replace=lambda:events.append('guard'))
++    assert events==['fsync','guard','replace']
++    if operation=='remove':assert 'paper_demo' not in AccountRegistry(registry.path).accounts
++    else:assert AccountRegistry(registry.path).get('paper_demo').label=='Allowed'
+diff --git a/trading/vati/accounts/registry.py b/trading/vati/accounts/registry.py
+index 40ab9f8d..24f42f0b 100644
+--- a/trading/vati/accounts/registry.py
++++ b/trading/vati/accounts/registry.py
+@@ -215,9 +215,9 @@ class AccountRegistry:
+         """Replace one unchanged local record; stale exact-account edits refuse."""
+         return self._mutate("replace", a.alias, a, before_replace=before_replace)
+ 
+-    def remove(self, alias: str) -> None:
++    def remove(self, alias: str, *, before_replace=None) -> None:
+         """Unlink an unchanged local record; broker/exposure authority belongs to its caller."""
+-        self._mutate("remove", alias)
++        self._mutate("remove", alias, before_replace=before_replace)
+ 
+     def touch(self, alias: str) -> None:
+         """Advance a native credential/resource generation without changing metadata."""
+diff --git a/trading/tests/test_account_unlink_currentness.py b/trading/tests/test_account_unlink_currentness.py
+new file mode 100644
+--- /dev/null
++++ b/trading/tests/test_account_unlink_currentness.py
+@@ -0,0 +1,223 @@
++"""Actual paired owner/A4 -> signed native route and protected unlink writers."""
++import io,json,os,time,subprocess,sys
++from urllib.error import HTTPError
++from urllib.parse import urlsplit
++from types import SimpleNamespace as NS
++from pathlib import Path
++import pytest
++from fastapi.testclient import TestClient
++from test_account_unlink_review import client,_env,isolate,paper,challenge
++from vati.accounts import AccountRegistry
++
++
++@pytest.mark.asyncio
++@pytest.mark.parametrize('fault',['key','transport_time','healthy_cached'])
++async def test_actual_registered_unlink_rechecks_current_envelope_at_writer_and_retains_original_history(client,tmp_path,monkeypatch,fault):
++    import commander.auth as auth_module
++    import commander.account_effects as effects
++    import vati.accounts.registry as storage
++    from commander.app import CommanderSettings,create_app
++    from commander.accounts import AccountControlSettings
++    from commander.auth import sign_headers,SKEW_S
++    from van_gateway.trading.accounts import CommanderAccountControl
++    from van_gateway.config import get_settings
++    ac,app=client;await paper(ac)
++    token='owned-native-unlink-current-key-'*3;replacement='owned-replacement-unlink-current-key-'*3
++    token_file=tmp_path/'native-current-token';token_file.write_text(token);token_file.chmod(0o600)
++    settings=CommanderSettings(tokens={'van-gateway':token},ledger=get_settings().vati_ledger_path,
++        log_dir=str(tmp_path/'native-log'),units=(),account_control=AccountControlSettings(str(tmp_path/'accounts.json'),str(tmp_path/'secrets')))
++    native=TestClient(create_app(settings));calls=[]
++    class Reply:
++        def __init__(self,data):self.data=data
++        def __enter__(self):return self
++        def __exit__(self,*a):pass
++        def read(self):return self.data
++    def controlled_http(request,**kw):
++        path=urlsplit(request.full_url).path
++        if path.endswith('/account_remove'):calls.append(json.loads(request.data)['args'])
++        reply=native.post(path,content=request.data,headers=dict(request.header_items()))
++        if reply.status_code>=400:raise HTTPError(request.full_url,reply.status_code,'owned native refusal',{},io.BytesIO(reply.content))
++        return Reply(reply.content)
++    monkeypatch.setattr('van_gateway.trading.accounts.urlopen',controlled_http)
++    app.state.onboarding.control=CommanderAccountControl('https://native.fixture',str(token_file))
++    with native:
++        body,issued=await challenge(ac,'account_remove',{'alias':'paper_owner'});identity=body['approval_proof']['challenge_id']
++        before=(tmp_path/'accounts.json').read_bytes();fsync=storage.os.fsync;reached=[]
++        def delayed(fd):
++            fsync(fd);marker=effects._effect_started.get()
++            if marker is not None and marker[1].command=='account_remove' and '.accounts.json.' in os.readlink('/proc/self/fd/'+str(fd)):
++                reached.append(True);assert marker[0] is False
++                if fault=='key':settings.tokens['van-gateway']=replacement
++                elif fault=='transport_time':monkeypatch.setattr(auth_module,'time',NS(time=lambda:time.time()+SKEW_S+1))
++        monkeypatch.setattr(storage.os,'fsync',delayed)
++        result=await ac.post('/v1/trading/accounts/action',json=body)
++        assert reached
++        if fault!='healthy_cached':
++            assert result.status_code==401,result.text
++            assert (tmp_path/'accounts.json').read_bytes()==before
++            from commander.account_effects import AccountEffectJournal
++            from vati.core import Ledger
++            ledger=Ledger(get_settings().vati_ledger_path)
++            try:assert AccountEffectJournal(ledger).status(identity,'test-device').phase=='REFUSED'
++            finally:ledger.close()
++        else:
++            assert result.status_code==200 and result.json()['effect_state']=='APPLIED',result.text
++            assert result.json()['remote_account_closed'] is False
++            marker_clock=issued['approval_expires_at_unix']+1
++            monkeypatch.setattr(effects,'time',NS(time=lambda:marker_clock))
++            path='/v1/cmd/account_remove';raw=json.dumps({'args':calls[0]}).encode()
++            replay=native.post(path,content=raw,headers={**sign_headers(token,'POST',path,raw),'content-type':'application/json'})
++            assert replay.status_code==200 and replay.json()['result']['removed'] is True,replay.text
++            assert len(reached)==1
++            read=await ac.get('/v1/trading/accounts/operations/'+identity)
++            assert read.status_code==200 and read.json()['effect_state']=='APPLIED' and read.json()['operation_id']==identity
++            assert 'paper_owner' not in AccountRegistry(tmp_path/'accounts.json').accounts
++
++
++@pytest.mark.asyncio
++async def test_real_queued_unlink_writer_refuses_expiry_without_original_mutation(client,tmp_path,monkeypatch):
++    from contextlib import contextmanager
++    from threading import Thread,Event
++    import commander.account_effects as effects
++    from vati.accounts.registry import AccountRegistry as Registry
++    ac,app=client;await paper(ac);body,issued=await challenge(ac,'account_remove',{'alias':'paper_owner'})
++    before=(tmp_path/'accounts.json').read_bytes();clock=[int(time.time())]
++    monkeypatch.setattr(effects,'time',NS(time=lambda:clock[0]))
++    lock=Registry._mutation_lock;acquired=Event();attempt=Event();threads=[];errors=[]
++    def holder():
++        try:
++            with lock(Registry(tmp_path/'accounts.json')):
++                acquired.set();assert attempt.wait(5)
++                # Keep the real lock held while the caller enters its wait.
++                Event().wait(.03);clock[0]=issued['approval_expires_at_unix']
++        except BaseException as error:errors.append(error)
++    # cmd_account_remove already owns the global writer lock around remove;
++    # therefore queue at its first protected global-lock acquisition instead.
++    @contextmanager
++    def first_global(self):
++        marker=effects._effect_started.get()
++        if marker is not None and marker[1].command=='account_remove' and not threads:
++            worker=Thread(target=holder,name='owned-unlink-writer-holder');threads.append(worker);worker.start();assert acquired.wait(5)
++        if marker is not None and threads:attempt.set()
++        with lock(self):yield
++    monkeypatch.setattr(Registry,'_mutation_lock',first_global)
++    try:result=await ac.post('/v1/trading/accounts/action',json=body)
++    finally:
++        attempt.set()
++        for worker in threads:worker.join(timeout=6)
++    assert threads and all(not t.is_alive() for t in threads) and not errors
++    assert result.status_code==403 and (tmp_path/'accounts.json').read_bytes()==before,result.text
++    read=await ac.get('/v1/trading/accounts/operations/'+body['approval_proof']['challenge_id'])
++    assert read.json()['effect_state']=='REFUSED'
++
++
++@pytest.mark.asyncio
++async def test_real_child_death_after_unlink_cannot_reopen_original_or_grant_cleanup(client,tmp_path,monkeypatch):
++    from van_gateway.trading.accounts import LocalAccountControl
++    ac,app=client;await paper(ac);body,_=await challenge(ac,'account_remove',{'alias':'paper_owner'})
++    identity=body['approval_proof']['challenge_id'];original=app.state.onboarding.control.run;children=[]
++    source='''import json,os,sys
++from commander.accounts import AccountControlSettings,build_account_handlers
++from commander.account_effects import AccountEffectJournal
++root=sys.argv[1]
++def die(*a,**kw):os._exit(74)
++AccountEffectJournal.complete=die
++h=build_account_handlers(AccountControlSettings(root+'/accounts.json',root+'/secrets',operation_ledger=root+'/vati.sqlite'))
++h['account_remove'](json.loads(sys.argv[2]))
++'''
++    def killed(command,args):
++        if command!='account_remove':return original(command,args)
++        child=subprocess.run([sys.executable,'-c',source,str(tmp_path),json.dumps(args)],capture_output=True,timeout=12)
++        children.append(child.returncode);assert child.returncode==74,child.stderr.decode()[:400]
++        raise ConnectionError('owned original process died before completion receipt')
++    monkeypatch.setattr(app.state.onboarding.control,'run',killed)
++    result=await ac.post('/v1/trading/accounts/action',json=body)
++    assert result.status_code==409 and result.json()['effect_state']=='UNKNOWN' and children==[74]
++    assert 'paper_owner' not in AccountRegistry(tmp_path/'accounts.json').accounts
++    app.state.onboarding.control=LocalAccountControl(str(tmp_path/'accounts.json'),str(tmp_path/'secrets'),operation_ledger=str(tmp_path/'vati.sqlite'))
++    for _ in range(2):
++        read=await ac.get('/v1/trading/accounts/operations/'+identity)
++        assert read.status_code==200 and read.json()['effect_state']=='UNKNOWN' and read.json()['result'] is None
++    assert children==[74]
++
++
++@pytest.mark.asyncio
++@pytest.mark.parametrize('wait_point',['history','lease_read','final_domain'])
++async def test_held_retirement_lease_cannot_expire_during_final_validation(client,tmp_path,monkeypatch,wait_point):
++    import commander.account_effects as effects
++    import commander.account_retirement as retirement
++    import vati.accounts.registry as storage
++    from vati.app.account_lease import AccountRuntimeLease as ActualLease
++    from vati.app.sqlite_lease import SQLiteLeaseStore
++    ac,app=client;await paper(ac);body,issued=await challenge(ac,'account_remove',{'alias':'paper_owner'})
++    identity=body['approval_proof']['challenge_id'];before=(tmp_path/'accounts.json').read_bytes()
++    offset=[0];armed=[False];history_seen=[False];advanced=[]
++    # An actually persisted short SOURCE-fixture lease makes lease expiry
++    # independent of the unchanged30s readback bound. Production TTL is untouched.
++    monkeypatch.setattr(retirement,'AccountRuntimeLease',lambda *a,**kw:ActualLease(*a,ttl_ms=5000,**kw))
++    monkeypatch.setattr(retirement,'time',NS(time=lambda:time.time()+offset[0]))
++    def advance():
++        marker=effects._effect_started.get()
++        assert marker is not None and marker[1].operation_id==identity and marker[0] is False
++        assert int(time.time())<marker[1].expires_at_unix
++        offset[0]=6;advanced.append(True)
++    history=retirement._history
++    def delayed_history(*a,**kw):
++        value=history(*a,**kw)
++        if armed[0]:
++            history_seen[0]=True
++            if wait_point=='history' and not advanced:advance()
++        return value
++    monkeypatch.setattr(retirement,'_history',delayed_history)
++    read=SQLiteLeaseStore.read
++    def delayed_lease(self,*a,**kw):
++        value=read(self,*a,**kw)
++        if wait_point=='lease_read' and armed[0] and history_seen[0] and not advanced:advance()
++        return value
++    monkeypatch.setattr(SQLiteLeaseStore,'read',delayed_lease)
++    load=storage.load_secret_file
++    def delayed_domain(path):
++        value=load(path)
++        if wait_point=='final_domain' and armed[0] and history_seen[0] and not advanced and str(path).endswith('/.account-control-domain.env'):advance()
++        return value
++    monkeypatch.setattr(storage,'load_secret_file',delayed_domain)
++    fsync=storage.os.fsync
++    def stage(fd):
++        fsync(fd);marker=effects._effect_started.get()
++        if marker is not None and marker[1].command=='account_remove' and '.accounts.json.' in os.readlink('/proc/self/fd/'+str(fd)):armed[0]=True
++    monkeypatch.setattr(storage.os,'fsync',stage)
++    result=await ac.post('/v1/trading/accounts/action',json=body)
++    assert advanced and offset[0]==6 and int(time.time())<issued['approval_expires_at_unix']
++    assert result.status_code==409 and (tmp_path/'accounts.json').read_bytes()==before,result.text
++    original=await ac.get('/v1/trading/accounts/operations/'+identity)
++    assert original.status_code==200 and original.json()['effect_state']=='REFUSED' and not original.json()['reconciliation_required']
++    assert 'paper_owner' in AccountRegistry(tmp_path/'accounts.json').accounts
++
++
++@pytest.mark.asyncio
++async def test_expiry_during_last_shred_identity_wait_preserves_credentials_as_partial_unknown(client,tmp_path,monkeypatch):
++    import commander.accounts as native
++    import commander.account_retirement as retirement
++    from test_account_unlink_review import native_funds
++    ac,app=client;_,secret,account=native_funds(tmp_path,monkeypatch)
++    body,issued=await challenge(ac,'account_remove',{'alias':account.alias})
++    identity=body['approval_proof']['challenge_id'];before=secret.read_bytes();offset=[0];armed=[False];seen=[]
++    monkeypatch.setattr(retirement,'time',NS(time=lambda:time.time()+offset[0]))
++    shred=native._shred
++    def guarded(path,**kw):
++        guard=kw['before_write']
++        def after_guard():guard();armed[0]=True
++        return shred(path,**{**kw,'before_write':after_guard})
++    monkeypatch.setattr(native,'_shred',guarded);generation=native._file_generation
++    def delayed_identity(stat):
++        value=generation(stat)
++        if armed[0] and not seen:
++            assert int(time.time())<issued['approval_expires_at_unix']
++            offset[0]=31;seen.append(True)
++        return value
++    monkeypatch.setattr(native,'_file_generation',delayed_identity)
++    result=await ac.post('/v1/trading/accounts/action',json=body)
++    assert seen and result.status_code==409 and result.json()['effect_state']=='UNKNOWN',result.text
++    assert secret.read_bytes()==before and account.alias not in AccountRegistry(tmp_path/'accounts.json').accounts
++    original=await ac.get('/v1/trading/accounts/operations/'+identity)
++    assert original.status_code==200 and original.json()['effect_state']=='UNKNOWN' and original.json()['result'] is None

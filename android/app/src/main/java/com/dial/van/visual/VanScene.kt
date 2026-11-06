@@ -28,6 +28,8 @@ data class VanSceneFrame(
     /** 0f open, 1f fully closed. */
     val blink: Float = 0f,
     val reducedMotion: Boolean = false,
+    /** Independent companion motion, taken from the slow active-time clock. */
+    val orbPhase: Float = 0f,
 )
 
 /**
@@ -121,16 +123,23 @@ object VanScene {
             addAll(hair(pen))
         }.translated(0f, bodyBob + headBob + actionHeadDrop(state) * pen.framing.zoom)
 
-        val orbDrift = sin(frame.phase * tau + 1.9f) * 0.012f * motion * pen.framing.zoom
-        val orb = orb(pen, palette, state, frame)
-            .translated(state.attentionX * pen.l(18f), orbDrift + state.attentionY * pen.l(12f))
-
+        // Orb travels independently of the character's body and attention inputs.
+        // The slow active-time clock is unrelated to the state-dependent body phase.
+        val companion = VanCompanionOrbMotion.sample(
+            phase = frame.orbPhase,
+            homeX = pen.x(ORB_X),
+            homeY = pen.y(ORB_Y),
+            radius = pen.l(ORB_R),
+            reducedMotion = frame.reducedMotion,
+        )
+        val orbDrawing = orb(pen, palette, state, frame, companion.spinDegrees)
+            .translated(companion.centerX - pen.x(ORB_X), companion.centerY - pen.y(ORB_Y))
         val muted = (character + head).muted(palette.desaturation, palette.dim)
-
-        return muted +
-            statusMarks(pen, palette, state, frame) +
-            hologramGlyph(pen, palette, state) +
-            orb
+        val marks = statusMarks(pen, palette, state, frame) + hologramGlyph(pen, palette, state)
+        // On a side-transfer, put the companion behind VAN so it does not pass
+        // in front of his eyes, visor, mouth or the owner's result card.
+        return if (companion.behindVan) orbDrawing + muted + marks
+            else muted + marks + orbDrawing
     }
 
     /**
@@ -488,6 +497,7 @@ object VanScene {
         palette: VanStatusPalette,
         state: VanVisualState,
         frame: VanSceneFrame,
+        spinDegrees: Float,
     ): List<VanDrawOp> {
         val offline = state.durableState == VanDurableState.OFFLINE ||
             state.durableState == VanDurableState.SLEEPING
@@ -502,9 +512,26 @@ object VanScene {
         }
         ops += VanDrawOp.Circle(cx, cy, r, VanColors.of(ORB_BODY))
         ops += VanDrawOp.Circle(cx, cy, r * 0.94f, VanColors.scaleAlpha(eye, 0.70f * alive + 0.15f), strokeWidth = r * 0.06f)
+        // Independent rotating rim catches (not a body/aura ring) visibly express
+        // the companion turning even while VAN is completely idle.
+        if (!frame.reducedMotion && !offline) {
+            ops += VanDrawOp.Arc(
+                cx, cy, r * 0.84f, spinDegrees, 62f,
+                VanColors.scaleAlpha(eye, 0.82f), r * 0.09f,
+            )
+        }
         ops += VanDrawOp.Circle(cx + r * 0.18f, cy - r * 0.04f, r * 0.64f, VanColors.of(ORB_FACE))
-        // Bar eyes squash into a blink with VAN's own blink.
-        val squash = (1f - frame.blink.coerceIn(0f, 1f) * 0.85f)
+        // Companion eyelids blink on a separate slow cadence, not VAN's blink.
+        val independentBlink = if (frame.reducedMotion) 0f else {
+            // Three independent eye cycles per slow orbit (~4 seconds between blinks).
+            val p = if (frame.orbPhase.isFinite()) {
+                (((frame.orbPhase * 3f) % 1f) + 1f) % 1f
+            } else 0f
+            val blinkA = (1f - kotlin.math.abs(p - 0.14f) / 0.012f).coerceIn(0f, 1f)
+            val blinkB = (1f - kotlin.math.abs(p - 0.64f) / 0.012f).coerceIn(0f, 1f)
+            maxOf(blinkA, blinkB)
+        }
+        val squash = 1f - independentBlink * 0.85f
         for (dx in listOf(0.02f, 0.40f)) {
             ops += VanDrawOp.RoundRect(
                 cx = cx + r * dx,
@@ -519,59 +546,11 @@ object VanScene {
         return ops
     }
 
-    /**
-     * State marks are broken arcs and hologram fragments — never a full ring (Gate A).
-     * Distinct shapes carry warning/error/success/urgent/approval in grayscale (Gate E).
-     */
-    private fun statusMarks(
-        pen: Pen,
-        palette: VanStatusPalette,
-        @Suppress("UNUSED_PARAMETER") state: VanVisualState,
-        frame: VanSceneFrame,
-    ): List<VanDrawOp> {
-        val cx = 0.5f
-        val cy = 0.48f
-        val r = 0.47f - 0.012f * (pen.framing.zoom - 1f)
-        val motion = if (frame.reducedMotion) 0f else 1f
-        val spin = frame.phase * 40f * motion
-        val width = 0.018f
-        val ops = mutableListOf<VanDrawOp>()
-        val ink = VanColors.scaleAlpha(palette.accent, 0.88f)
-
-        when (palette.ringStyle) {
-            VanRingStyle.NONE -> Unit
-            VanRingStyle.PROGRESS -> {
-                ops += VanDrawOp.Arc(cx, cy, r, -48f + spin, 86f, ink, width)
-                ops += VanDrawOp.Arc(cx, cy, r * 1.06f, 122f - spin * 0.4f, 54f, VanColors.scaleAlpha(palette.accent, 0.45f), width * 0.8f)
-            }
-            VanRingStyle.DOTS -> {
-                repeat(3) { i ->
-                    val a = Math.toRadians((spin + i * 48f + 18f).toDouble()).toFloat()
-                    ops += VanDrawOp.Circle(
-                        cx + cos(a) * r * 0.92f,
-                        cy + sin(a) * r * 0.78f,
-                        0.016f,
-                        VanColors.scaleAlpha(palette.accent, 0.55f + 0.12f * i),
-                    )
-                }
-            }
-            VanRingStyle.DASHED -> {
-                repeat(5) { i ->
-                    val start = -70f + i * 52f
-                    ops += VanDrawOp.Arc(cx, cy, r, start, 22f, VanColors.scaleAlpha(palette.accent, if (i % 2 == 0) 0.8f else 0.28f), width)
-                }
-            }
-            VanRingStyle.PULSE -> {
-                ops += VanDrawOp.Arc(cx, cy, r, -30f, 72f, ink, width)
-                ops += VanDrawOp.Arc(cx, cy, r * 0.90f, 150f, 64f, VanColors.scaleAlpha(palette.accent, 0.4f), width * 0.8f)
-            }
-            VanRingStyle.DOUBLE -> {
-                ops += VanDrawOp.Arc(cx, cy, r, -150f, 96f, ink, width)
-                ops += VanDrawOp.Arc(cx, cy, r, 28f, 88f, ink, width)
-            }
-        }
-        return ops
-    }
+    /** Owner correction: never surround the fallback character with field arcs.
+     * Critical non-colour semantics remain in hologramGlyph and caption/chrome. */
+    @Suppress("UNUSED_PARAMETER")
+    private fun statusMarks(pen: Pen, palette: VanStatusPalette, state: VanVisualState,
+                            frame: VanSceneFrame): List<VanDrawOp> = emptyList()
 
     private fun hologramGlyph(
         pen: Pen,

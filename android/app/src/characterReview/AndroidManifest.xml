@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <application>
+        <!-- Separate app identity and no production van:// intent capture. -->
+        <activity android:name=".command.CommandCentreActivity"
+            android:exported="true" android:launchMode="singleTop"
+            android:theme="@style/Theme.Van" tools:node="replace">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <!-- Same bounded debug host and DUMP protection as the ordinary debug build. -->
+        <activity android:name=".visual.RiveCandidateHostActivity"
+            android:exported="true" android:permission="android.permission.DUMP"
+            android:label="VAN Character Review — Unaccepted" android:theme="@style/Theme.Van" />
+    </application>
+</manifest>

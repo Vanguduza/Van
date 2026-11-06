@@ -1,0 +1,33 @@
+{
+  "schema": "van.ml005.source-investigation/1",
+  "status": "READ_ONLY_INVESTIGATION_NOT_IMPLEMENTATION",
+  "canonical_unit": "VAN-ML-PKT-005",
+  "dependencies": [
+    "BE-001",
+    "BE-008",
+    "BE-010",
+    "PRE-003",
+    "VAN-ML-PKT-004"
+  ],
+  "canonical_package_unchanged": true,
+  "existing_data_owners": {
+    "native_bars": "trading/vati/market_data/native_archive.py;NativeMarketArchive.record/lookup/reconcile/snapshot;immutable per-record revisions/full native scope/checksums/contract and first local recorded/received clocks;provider_qualified false",
+    "native_quotes": "trading/vati/market_data/native_quotes.py separate quote semantics",
+    "bar_lake": "trading/vati/market_data/feeds/lake.py;current manifest supersedes matching window entries but original content-addressed blobs remain;no historical availability/entitlement qualification",
+    "news": "trading/vati/events/news_ingress.py checked durable observations/lineage/as-of source availability;RSS original bytes innews_feed.py",
+    "calendar": "trading/vati/calendar andintelligence/calendar_feed.py;separate scheduled andactual/revision clocks;native/entitlement gaps remain"
+  },
+  "canonical_schema": "contracts/forecast/DatasetManifest.schema.json;strict actual references/permissions,scope/cohort/instrument/venue/clock/universe/calendar/source/row/feature/target/partition identity;shape/hash not authority",
+  "findings": [
+    "Reuse original data owners rather than a second raw lake",
+    "Freeze both captured source revision boundary and as-of time;equal-millisecond later captures can otherwise change a naive as-of selection",
+    "Resolve every original source reference independently;do not treat client metadata/checksums as factual receipts",
+    "Do not map symbol aliases across native accounts/environments/products;preserve exact native scope",
+    "Native source scopeDEMO/LIVE differs from dataset FIXTURE/RESEARCH/SHADOW/LIVE_ADVISORY;no automatic relabeling",
+    "Unknown-use entitlements cannot be made valid by choosingFIXTURE or copying a reference string",
+    "No complete point-in-time universe/calendar/entitlement resolver found in reviewed trading data owners;native validity and licensed-use gates remain mandatory",
+    "Existing dataowner reader can first expose bounded pinned bar-vintage windows with explicit unqualified/read-only status;this would remain a precursor,notDatasetManifest admission",
+    "Parquet serialization belongs outside T0 and needs actual newisolatedworker qualification"
+  ],
+  "source_changes": []
+}

@@ -52,6 +52,44 @@ class AuditService:
         failure_reason: str | None = None,
         evidence_pointer: str | None = None,
     ) -> str:
+        # Keep the existing standalone writer and seal shape unchanged.
+        async with self.store.connection() as db:
+            await db.execute("BEGIN IMMEDIATE")
+            try:
+                audit_id = await self.record_in_transaction(db, result=result,
+                    command_id=command_id, device_id=device_id, project_id=project_id,
+                    capability=capability, approval=approval, model_delegate=model_delegate,
+                    tool=tool, before=before, after=after, failure_reason=failure_reason,
+                    evidence_pointer=evidence_pointer)
+            except BaseException:
+                await db.rollback()
+                raise
+            await db.commit()
+        return audit_id
+
+    async def record_in_transaction(
+        self, db,
+        *,
+        result: str,
+        command_id: str | None = None,
+        device_id: str | None = None,
+        project_id: str | None = None,
+        capability: str | None = None,
+        approval: str | None = None,
+        model_delegate: str | None = None,
+        tool: str | None = None,
+        before: dict[str, Any] | None = None,
+        after: dict[str, Any] | None = None,
+        failure_reason: str | None = None,
+        evidence_pointer: str | None = None,
+    ) -> str:
+        """Append through this audit owner inside an existing immediate writer.
+
+        The caller owns commit/rollback, so the original operation and its audit
+        either both commit or neither does. No second audit chain or authority.
+        """
+        if not db.in_transaction:
+            raise ValueError("audit append requires the caller's transaction")
         audit_id = str(uuid.uuid4())
         normalized_before = self._normalize_evidence(before)
         normalized_after = self._normalize_evidence(after)
@@ -59,51 +97,39 @@ class AuditService:
         before_json = Store.dumps(normalized_before) if normalized_before is not None else None
         after_json = Store.dumps(normalized_after) if normalized_after is not None else None
 
-        # P1-SEC-006: the owner-authority audit log was a flat table with a random UUID,
-        # no ordering and no linkage, so rows could be inserted, altered or deleted
-        # undetectably. The VATI trading ledger already had a verifiable chain. Sequence
-        # allocation and hashing happen inside one immediate transaction so concurrent
-        # writers cannot fork the chain.
-        async with self.store.connection() as db:
-            await db.execute("BEGIN IMMEDIATE")
-            try:
-                cur = await db.execute(
-                    "SELECT chain_seq, entry_hash FROM audit "
-                    "WHERE chain_seq IS NOT NULL ORDER BY chain_seq DESC LIMIT 1"
-                )
-                tip = await cur.fetchone()
-                seq = (int(tip["chain_seq"]) + 1) if tip else 1
-                prev_hash = str(tip["entry_hash"]) if tip else GENESIS_HASH
-                entry_hash = self.entry_digest(
-                    seq=seq,
-                    prev_hash=prev_hash,
-                    audit_id=audit_id,
-                    command_id=command_id,
-                    device_id=device_id,
-                    result=result,
-                    failure_reason=failure_reason,
-                    before_json=before_json,
-                    after_json=after_json,
-                    created_at_unix=created,
-                )
-                await db.execute(
-                    """
-                    INSERT INTO audit(
-                      id, command_id, device_id, project_id, capability, approval, model_delegate, tool,
-                      before_json, after_json, result, failure_reason, evidence_pointer, created_at_unix,
-                      chain_seq, prev_hash, entry_hash
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    """,
-                    (
-                        audit_id, command_id, device_id, project_id, capability, approval,
-                        model_delegate, tool, before_json, after_json, result, failure_reason,
-                        evidence_pointer, created, seq, prev_hash, entry_hash,
-                    ),
-                )
-            except BaseException:
-                await db.rollback()
-                raise
-            await db.commit()
+        cur = await db.execute(
+            "SELECT chain_seq, entry_hash FROM audit "
+            "WHERE chain_seq IS NOT NULL ORDER BY chain_seq DESC LIMIT 1"
+        )
+        tip = await cur.fetchone()
+        seq = (int(tip["chain_seq"]) + 1) if tip else 1
+        prev_hash = str(tip["entry_hash"]) if tip else GENESIS_HASH
+        entry_hash = self.entry_digest(
+            seq=seq,
+            prev_hash=prev_hash,
+            audit_id=audit_id,
+            command_id=command_id,
+            device_id=device_id,
+            result=result,
+            failure_reason=failure_reason,
+            before_json=before_json,
+            after_json=after_json,
+            created_at_unix=created,
+        )
+        await db.execute(
+            """
+            INSERT INTO audit(
+              id, command_id, device_id, project_id, capability, approval, model_delegate, tool,
+              before_json, after_json, result, failure_reason, evidence_pointer, created_at_unix,
+              chain_seq, prev_hash, entry_hash
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                audit_id, command_id, device_id, project_id, capability, approval,
+                model_delegate, tool, before_json, after_json, result, failure_reason,
+                evidence_pointer, created, seq, prev_hash, entry_hash,
+            ),
+        )
         return audit_id
 
     @staticmethod

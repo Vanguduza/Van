@@ -1,0 +1,105 @@
+{
+  "scope": "DOCUMENTARY_ONLY_NO_APPLICATION_OR_NATIVE_ACCEPTANCE",
+  "checks": [
+    {
+      "name": "whole_product",
+      "command": [
+        "python3",
+        "-B",
+        "verification/verify_whole_product.py"
+      ],
+      "exit_code": 0,
+      "entrypoint_sha256": "98935fb3da2495858f24619b2ab09286b0f9d484a7116dd95eb1effa38f80aa4",
+      "stdout_sha256": "0f30986212e6bf92a6b1750e69257d50a2524b7bf0126c9391b66b0d6955e37c",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "core",
+      "command": [
+        "python3",
+        "-B",
+        "verification/verify_rev117.py",
+        "--json"
+      ],
+      "exit_code": 0,
+      "entrypoint_sha256": "4b9d6da3c516897927bc211d286296a9f07e838429f2a6c22bb6d4ce4eec6c1d",
+      "stdout_sha256": "718d60ada485c59bb45c5bcc76a7ffe999ed214b72ee35631ed542b0f7647257",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "mutations",
+      "command": [
+        "python3",
+        "-B",
+        "verification/verify_rev117.py",
+        "--selftest",
+        "--json"
+      ],
+      "exit_code": 0,
+      "entrypoint_sha256": "4b9d6da3c516897927bc211d286296a9f07e838429f2a6c22bb6d4ce4eec6c1d",
+      "stdout_sha256": "4736441eb9155c1a61084ef46fa49d336eaa132a0ebbeb5e4a2052272ec31396",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "independent",
+      "command": [
+        "python3",
+        "-B",
+        "verification/verify_review_contracts.py"
+      ],
+      "exit_code": 0,
+      "entrypoint_sha256": "8b99966ee0fc8ba4d06adcc217290ea38c87159ceed89fe80ea341cb5d2cd732",
+      "stdout_sha256": "c79f8fecad87a5be1c278db9f346fde263ee1c1dd389baffaf7602541533343a",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "learning",
+      "command": [
+        "python3",
+        "-B",
+        "verification/verify_experience_learning.py"
+      ],
+      "exit_code": 0,
+      "entrypoint_sha256": "8a057939b660974a76b2fcc6f4906d756a3c91f9657920412c5bf67470ed98ba",
+      "stdout_sha256": "3d54e705c1c434a735a82ce7a92a258a4553f8cf95df3dbec37608597b8f6387",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "models",
+      "command": [
+        "python3",
+        "-B",
+        "verification/verify_model_hardening.py"
+      ],
+      "exit_code": 0,
+      "entrypoint_sha256": "112f2a72c6216a4982039350f1a143487f70a3ccdeeef43dc28779f600eb53f7",
+      "stdout_sha256": "49d6896ed78be05c2241e99980eee2ac65beb3f1ea9f36b10e8051f4f5212358",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "theme",
+      "command": [
+        "python3",
+        "-B",
+        "verification/verify_theme_readability.py"
+      ],
+      "exit_code": 0,
+      "entrypoint_sha256": "4e5e970eba833dc51d12b7335cd1fb7b93995332ea083d7b1601ff4a5105e911",
+      "stdout_sha256": "d75bf939d42d649428cc21ca1cf37808a77dfb7bb9aafa15347a545f7c8fab4f",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "render",
+      "command": [
+        "python3",
+        "-B",
+        "plan/render_plan.py",
+        "--check"
+      ],
+      "exit_code": 0,
+      "entrypoint_sha256": "8d8be22d8f7ca41dcb6f161437a9b357254aa7360f01d79cdf463566e26060ff",
+      "stdout_sha256": "0ec4f6bf704d3e7909f93ce436b19036a7174eae77a85b4a9d5bb9f39b10e92b",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

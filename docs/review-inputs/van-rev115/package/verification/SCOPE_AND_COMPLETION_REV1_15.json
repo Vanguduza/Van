@@ -1,0 +1,21 @@
+{
+  "revision": "1.15",
+  "scope": "DOCUMENT_PROPOSAL_ONLY",
+  "requirements": 309,
+  "planned_application_tests": 1544,
+  "application_tests_executed": 0,
+  "units": 131,
+  "backend_units": 82,
+  "backend_verification_units": 12,
+  "contexts": 234,
+  "actions": 349,
+  "lifecycle_machines": 5,
+  "transition_contracts": 93,
+  "proof_predicates": 36,
+  "F15": "NOT_ISSUED",
+  "BG": "NOT_ISSUED",
+  "economic_experiments": 0,
+  "new_mandatory_daemons": 0,
+  "native_dial_authorized": true,
+  "native_dial_callable": false
+}

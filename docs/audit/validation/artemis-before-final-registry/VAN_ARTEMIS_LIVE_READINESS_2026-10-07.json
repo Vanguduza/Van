@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "kind": "VAN_GOVERNED_ARTEMIS_LIVE_READINESS",
+  "observed_at": "2026-10-07T11:26:34.777308+00:00",
+  "outcome": "BLOCKED",
+  "plan_sha256": "63fb15f4c112a143fa1c8a3538c78d221590a9a8aad8fb1ef4d52e5393ff7ff8",
+  "planned_coverage": {
+    "features": 42,
+    "functions": 58,
+    "surfaces": 68,
+    "cases": 684
+  },
+  "executed_device_cases": 0,
+  "live_qualified": false,
+  "handset": {
+    "model": "Samsung S24 Ultra",
+    "wireless_debugging_enabled": "OWNER_REPORTED_TRUE",
+    "paired": "OWNER_REPORTED_FALSE",
+    "connected_verified": false,
+    "admission_verified": false
+  },
+  "target": {
+    "backend": "van-trading-core",
+    "hermes_and_artemis": "dial-control",
+    "handset": "Samsung S24 Ultra",
+    "phone_connection": "wireless_adb_via_governed_artemis",
+    "product_ingress": "DEDICATED_PINNED_TLS_INGRESS_REQUIRED"
+  },
+  "available_governed_android_tools": [],
+  "checks": [
+    {
+      "id": "connector",
+      "outcome": "BLOCKED",
+      "reason": "Current callable-tool inventory contains no Global DIAL or governed Artemis Android tools"
+    },
+    {
+      "id": "wireless_pairing",
+      "outcome": "BLOCKED",
+      "reason": "S24 is unpaired; current DDS Android tool schemas expose no pairing/admission mutation recipe"
+    },
+    {
+      "id": "wireless_pairing_secret",
+      "outcome": "BLOCKED",
+      "reason": "Pairing endpoint/code needs one-use secure ephemeral binding through an authorized typed recipe; none bound here"
+    },
+    {
+      "id": "device_admission",
+      "outcome": "BLOCKED",
+      "reason": "No current admitted_devices and connected_admitted_devices observation for exact S24 serial"
+    },
+    {
+      "id": "deployment_and_apk",
+      "outcome": "BLOCKED",
+      "reason": "No governed exact-revision core deployment or owner-signed APK installation/readback receipt"
+    },
+    {
+      "id": "isolated_fixtures",
+      "outcome": "BLOCKED",
+      "reason": "No admitted disposable-owner/demo-trading/fault-fixture execution receipts"
+    },
+    {
+      "id": "step_trace_export",
+      "outcome": "BLOCKED",
+      "reason": "Synchronous run_id is not an async owned trace_id; authorized step-artifact export/reconciliation still required"
+    }
+  ],
+  "known_missing_frontend_surfaces": [],
+  "known_partial_features": [
+    "OF-HOME-001",
+    "OF-COMMAND-001",
+    "OF-MISSION-001",
+    "OF-ATTENTION-001",
+    "OF-DECISION-001",
+    "OF-APPROVAL-001",
+    "OF-MEMORY-002",
+    "OF-LEARNING-003",
+    "OF-PROJECT-001",
+    "OF-GOOGLE-001",
+    "OF-GOOGLE-002",
+    "OF-KNOWLEDGE-001",
+    "OF-AUTOMATION-001",
+    "OF-BROWSER-001",
+    "OF-BROWSER-002",
+    "OF-BROWSER-003",
+    "OF-BROWSER-004",
+    "OF-VOICE-001",
+    "OF-VOICE-002",
+    "OF-OVERLAY-001",
+    "OF-NOTIFICATION-001",
+    "OF-SHARE-001",
+    "OF-PROVISION-001",
+    "OF-SETTINGS-001",
+    "OF-DIAGNOSTICS-001",
+    "OF-TRADING-001",
+    "OF-TRADING-002",
+    "OF-TRADING-003",
+    "OF-TRADING-004",
+    "OF-TRADING-005",
+    "OF-DEV-001",
+    "OF-DEV-002"
+  ],
+  "scope": "Preparation and live prerequisite assessment only; no phone, host, provider or trading action performed",
+  "cloud_readiness_observation": {
+    "observed_at_utc": "2026-10-07T11:06:20.562Z",
+    "observations_current": true,
+    "available_governed_connector_or_discovery_tools": [],
+    "connector_enable_supported": false,
+    "executed_device_cases": 0
+  }
+}

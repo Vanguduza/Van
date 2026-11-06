@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.903" timestamp="2026-10-28T20:02:38.635612+00:00" hostname="6e9feff21467"><testcase classname="trading.tests.test_native_close_movement" name="test_actual_native_adapter_and_funding_capture_publish_the_new_close_in_the_same_sweep" time="0.547"><failure message="assert 0 == 1">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-200/test_actual_native_adapter_and0')
+
+    def test_actual_native_adapter_and_funding_capture_publish_the_new_close_in_the_same_sweep(tmp_path):
+        from test_native_deal_history import NativeDeals
+        from test_retirement_venue_observations import ctrader
+        from vati.funding.runtime import capture_funding
+        from vati.funding.movement_journal import FinancialMovementBook
+        ledger=Ledger(tmp_path/'facts.sqlite');transport=NativeDeals();transport.rows=[]
+        transport.trader.update(balance=11000,moneyDigits=2,balanceVersion=2)
+        detail=transport.deals[0]['closePositionDetail']
+        detail.update(grossProfit=1200,swap=-100,commission=-100,balance=11000,
+            moneyDigits=2,pnlConversionFee=0,balanceVersion=2)
+        adapter=ctrader(transport);adapter.clock=lambda:3000
+        try:
+            snapshot(ledger,mark(1000))
+            account=adapter.sync_account()
+            result=capture_funding(ledger,adapter,account,now_ms=3000)
+            assert result['deal_observation']['state']=='OBSERVED'
+&gt;           assert result['financial_movements']['posted_count']==1
+E           assert 0 == 1
+
+trading/tests/test_native_close_movement.py:214: AssertionError</failure></testcase></testsuite></testsuites>

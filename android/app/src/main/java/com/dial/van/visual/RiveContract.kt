@@ -109,6 +109,8 @@ data class VanVisualState(
     val urgency: Float = 0f,
     val viseme: Int = 0,
     val actionCode: Int = 0,
+    /** Optional extension remains separate from original action_code fallback. */
+    val contextCode: Int = 0,
     /**
      * Aura Rev 2 — the live trade the outer field should show, already resolved against
      * authority, health and offline truth by [VanPresenceFrame]. Renderer-only: never sent to Rive.
@@ -119,15 +121,18 @@ data class VanVisualState(
 ) {
     val resolvedSemanticState: VanDurableState get() = semanticState ?: durableState
 
+    private fun finite(value: Float, low: Float, high: Float): Float = if (value.isFinite()) value.coerceIn(low, high) else 0f
+    private fun Int?.orZero(): Int = this ?: 0
+
     fun toRiveInputs(): Map<VanInput, Any> = mapOf(
         VanInput.STATE to durableState.code,
         VanInput.SPEAKING to speaking,
         VanInput.LISTENING to listening,
-        VanInput.ATTENTION_X to attentionX.coerceIn(-1f, 1f),
-        VanInput.ATTENTION_Y to attentionY.coerceIn(-1f, 1f),
-        VanInput.MOUTH_OPEN to mouthOpen.coerceIn(0f, 1f),
-        VanInput.URGENCY to urgency.coerceIn(0f, 1f),
-        VanInput.VISEME to viseme,
-        VanInput.ACTION_CODE to actionCode,
+        VanInput.ATTENTION_X to finite(attentionX, -1f, 1f),
+        VanInput.ATTENTION_Y to finite(attentionY, -1f, 1f),
+        VanInput.MOUTH_OPEN to finite(mouthOpen, 0f, 1f),
+        VanInput.URGENCY to finite(urgency, 0f, 1f),
+        VanInput.VISEME to when { viseme < 0 -> 0; viseme > 4 -> 1; else -> viseme },
+        VanInput.ACTION_CODE to actionCode.takeIf { it in 0..14 }.orZero(),
     )
 }

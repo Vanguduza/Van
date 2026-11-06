@@ -1,0 +1,22 @@
+.......................F.................                                [100%]
+=================================== FAILURES ===================================
+_ test_file_capacity_refusal_does_not_fake_empty_coverage_or_ingest_partial_data[limits1] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-249/test_file_capacity_refusal_doe1')
+ledger = <vati.core.ledger.Ledger object at 0x7fd601036a80>
+limits = {'max_rows': 1}
+
+    @pytest.mark.parametrize('limits',[{'max_file_bytes':10},{'max_rows':1}])
+    def test_file_capacity_refusal_does_not_fake_empty_coverage_or_ingest_partial_data(tmp_path,ledger,limits):
+        path=tmp_path/'news.json';path.write_text(json.dumps([row('First'),row('Second')]))
+        value=service('account',ledger,configured(path)|limits);news=build(value,'account')
+>       assert news.source_health['state']=='CAPACITY_EXCEEDED' and news.source_health['coverage']=='UNKNOWN'
+E       AssertionError: assert ('READY_DECLARED' == 'CAPACITY_EXCEEDED'
+E         
+E         - CAPACITY_EXCEEDED
+E         + READY_DECLARED)
+
+trading/tests/test_news_runtime_health.py:187: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_news_runtime_health.py::test_file_capacity_refusal_does_not_fake_empty_coverage_or_ingest_partial_data[limits1]
+1 failed, 40 passed, 2 deselected in 1.13s

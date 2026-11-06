@@ -1,0 +1,17 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_ test_unknown_and_caller_owned_transactions_cannot_claim_committed_projection[sqlite] _
+
+book = (<vati.core.ledger.Ledger object at 0x7fe5e79ec350>, <vati.funding.movement_journal.FinancialMovementBook object at 0x...version=9, occurred_at_ms=1500, money_digits=8),)), 'becc530bc24b7acd785ad72793add5a1d0c2418a4b5148c93c3e97d5ab89c68b')
+
+    def test_unknown_and_caller_owned_transactions_cannot_claim_committed_projection(book):
+        ledger,journal,native,ref=book
+        with ledger.atomic():
+>           with pytest.raises(UnitError,match='OWN_WRITER'):publish(book)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE UnitError
+
+trading/tests/test_financial_movement_journal.py:65: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_financial_movement_journal.py::test_unknown_and_caller_owned_transactions_cannot_claim_committed_projection[sqlite]
+1 failed, 1 deselected in 2.44s

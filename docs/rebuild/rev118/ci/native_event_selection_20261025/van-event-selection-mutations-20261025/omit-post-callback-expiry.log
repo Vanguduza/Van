@@ -1,0 +1,20 @@
+......F........                                                          [100%]
+=================================== FAILURES ===================================
+_ test_selector_that_returns_after_timeout_leaves_the_original_for_reconciliation _
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7f283e8291f0>
+
+    def test_selector_that_returns_after_timeout_leaves_the_original_for_reconciliation(harness):
+        transport=seeded(harness,count=1);before=originals(transport)
+        def late(name,body):
+            threading.Event().wait(.03)
+            return True
+>       assert transport.wait_event(late,timeout_s=.01) is None
+E       AssertionError: assert ('ProtoOAExecutionEvent', {'payloadType': 'PROTO_OA_EXECUTION_EVENT', 'ctidTraderAccountId': 12345, 'executionType': '...ymbolId': 1, 'volume': 100000, 'tradeSide': 'BUY'}, 'orderType': 'MARKET', 'orderStatus': 'ORDER_STATUS_FILLED', ...}}) is None
+E        +  where ('ProtoOAExecutionEvent', {'payloadType': 'PROTO_OA_EXECUTION_EVENT', 'ctidTraderAccountId': 12345, 'executionType': '...ymbolId': 1, 'volume': 100000, 'tradeSide': 'BUY'}, 'orderType': 'MARKET', 'orderStatus': 'ORDER_STATUS_FILLED', ...}}) = wait_event(<function test_selector_that_returns_after_timeout_leaves_the_original_for_reconciliation.<locals>.late at 0x7f283e8382c0>, timeout_s=0.01)
+E        +    where wait_event = <vati.execution.ctrader.transport.CtraderTransport object at 0x7f283e8281d0>.wait_event
+
+trading/tests/test_ctrader_event_selection.py:101: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_ctrader_event_selection.py::test_selector_that_returns_after_timeout_leaves_the_original_for_reconciliation
+1 failed, 14 passed in 0.69s

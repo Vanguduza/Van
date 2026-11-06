@@ -1,0 +1,418 @@
+{
+  "schema": "van.rebuild.mt5-original-entry-deadline-source/1",
+  "source_preimage": "14fdda6f3ea1a8a7923fe4d887bd21f988079795",
+  "paths": {
+    "deploy/van-trading-core/mql5/VanBridgeEA.mq5": {
+      "preimage_sha256": "20748f2e452506da28cff64eb07713eb8cd2d844b884295a11a065f6ba54ae1a",
+      "source_sha256": "88d45cefd1ef766370cce39817317585b993af607123d89efec301ef0bf05189"
+    },
+    "trading/tests/mql_terminal_fixture.cpp": {
+      "preimage_sha256": "7fb853edd8bf7d1897dda96cfbb2785512a0cd11c5d154b8c1cdc69607125062",
+      "source_sha256": "b69dc3e382201b2b1b6581ec61c4d50d78f704dc4045918f623b581b44450c05"
+    },
+    "trading/tests/test_mql_native_function_bodies.py": {
+      "preimage_sha256": "95a017974d10ebdfae00b698b55b767fa8addb875e8d6e5a17e4d617c4c9999c",
+      "source_sha256": "83d8c99aee8c564ddb56f72932dcbf3f4be1778bc0bb0e5fb41ab63513436b93"
+    },
+    "trading/tests/test_single_session_unknown_entry.py": {
+      "preimage_sha256": "86de240f9bda008bf10660b6ffd007c98c86a018aa4caa1914590d9b1d1aef61",
+      "source_sha256": "fa9daba619e466ed9162b96834d2df28695f0bdfa2e1c4660a37a60af2ca76d4"
+    },
+    "trading/vati/execution/mt5_pull.py": {
+      "preimage_sha256": "93eda3ea9da79effceff1526ebc6ee76c2fcfd126c09828b544772cee9bc0f59",
+      "source_sha256": "767a3e6aa0555f13cf97c3af0683439ab7449460b7e873f7108d9c3ff1a39c5f"
+    },
+    "trading/vati/execution/router.py": {
+      "preimage_sha256": "8eb206ba7acdbc993ce4eea3db6abfbfe438ad3045fe6787925dd14274b68471",
+      "source_sha256": "e8ea100c8e14e7ed3dc2c28a994e1cf317ddcff3b37495cc37eecff72ddbc3f1"
+    },
+    "trading/tests/test_mt5_pull_entry_deadline.py": {
+      "preimage_sha256": null,
+      "source_sha256": "491a1a4ba1ccb740077b1986f2c7441b7338712b8f90525f419386c59982f22d"
+    },
+    "trading/tests/test_router_native_entry_deadline.py": {
+      "preimage_sha256": null,
+      "source_sha256": "4a9b1cc6a52aa448c47352ca49dba01f0af9845afdc46705d93fe2bde95cac47"
+    }
+  },
+  "original_reproductions": [
+    {
+      "path": "/tmp/van-router-native-deadline-before.xml",
+      "sha256": "1b5f32ef3b1a6f12333292b3664dde8deec99d0d04f650da5f111e707066b7ef",
+      "tests": 2,
+      "passed": 0,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "/tmp/van-ea-deadline-before.xml",
+      "sha256": "69f2c2e1fdf2a6840f1c2b86968457c0b0c9ec994955f6e5f85e9a210fce9d5b",
+      "tests": 12,
+      "passed": 0,
+      "failures": 12,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "focused_final": {
+    "path": "/tmp/van-native-deadline-r6.xml",
+    "sha256": "781f81fc65714f2bd4d7c76151c2163395574dc92d01fc38c3be1cbdb3c32a80",
+    "tests": 178,
+    "passed": 178,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "original_test_function_preservation": [
+    {
+      "path": "trading/tests/test_single_session_unknown_entry.py",
+      "original_test_functions": 19,
+      "unchanged": true,
+      "changed": []
+    },
+    {
+      "path": "trading/tests/test_mql_native_function_bodies.py",
+      "original_test_functions": 27,
+      "unchanged": true,
+      "changed": []
+    }
+  ],
+  "semantic_faults": {
+    "controls": {
+      "python": {
+        "exit_code": 0,
+        "tests": 20,
+        "failures": [],
+        "errors": 0,
+        "skipped": 0,
+        "xml_sha256": "2fbbbce271b2ff250bbc8721080252f4769a70ad6adf922a61a13977941f6dc5",
+        "log_sha256": "b145732a0719e9c6d381cd626baa5377c2af0c87cad4b85bb1f6d8566e9f65a3"
+      },
+      "native": {
+        "exit_code": 0,
+        "tests": 8,
+        "failures": [],
+        "errors": 0,
+        "skipped": 0,
+        "xml_sha256": "d5dc87fb4152640021d72089be87b5613ae1327e10ecd1600a24a53a9c69f381",
+        "log_sha256": "5849c7b330cf506dcf2b4df6c139e970b15f6615c24dcff586f8c0c051837c30"
+      }
+    },
+    "cases": [
+      {
+        "case": "router-drops-bound-native-expiry",
+        "group": "python",
+        "path": "trading/vati/execution/router.py",
+        "source_sha256": "e8ea100c8e14e7ed3dc2c28a994e1cf317ddcff3b37495cc37eecff72ddbc3f1",
+        "expected_failure": "test_native_quote_after_router_preflight",
+        "fault": {
+          "exit_code": 1,
+          "tests": 20,
+          "failures": [
+            {
+              "name": "test_original_router_mandate_deadline_is_in_the_actual_signed_native_request",
+              "message": "AssertionError: assert (1 == 1 and 'order_send' == 'order_send_expiring'\n +  where 1 = len([BridgeRequest(op='order_send', nonce=26553996824640182858247669411347431429, issued_ms=1800000000000, body={'alias': ...emo', 'currency': 'USD', 'demo': True}}, signature='992ef64abf24f4b99615de2386098ad3ed11c576ddbef4812f06edd48fa2ba66')])\n  \n  - order_send_expiring\n  + order_send)"
+            },
+            {
+              "name": "test_native_quote_after_router_preflight_cannot_outlive_the_original_mandate",
+              "message": "AssertionError: native adapter preparation renewed an expired mandate\nassert ('FILLED' == 'REJECTED'\n  \n  - REJECTED\n  + FILLED)"
+            },
+            {
+              "name": "test_original_quote_lifetime_is_not_renewed_inside_native_adapter_io[False]",
+              "message": "StopIteration"
+            },
+            {
+              "name": "test_original_quote_lifetime_is_not_renewed_inside_native_adapter_io[True]",
+              "message": "StopIteration"
+            }
+          ],
+          "errors": 0,
+          "skipped": 0,
+          "xml_sha256": "6afade60a5594c614cd90a1111754f919f8e2a42754a370f34d5afaf13a92056",
+          "log_sha256": "8c9a38c66e0a9445a1c052c0a64120711bbcf0fb04cdf5384daf2d295bebb817"
+        },
+        "restored": {
+          "exit_code": 0,
+          "tests": 20,
+          "failures": [],
+          "errors": 0,
+          "skipped": 0,
+          "xml_sha256": "89d9caf8e90008eb6e1261feb530dc2e5f02ec03699e75810c90db24607e81fb",
+          "log_sha256": "2370cd9cfb625167b5608d0928e596ef375eda699d09a0b6a7be38b575a356b4"
+        },
+        "caught": true
+      },
+      {
+        "case": "router-renews-original-quote-lifetime",
+        "group": "python",
+        "path": "trading/vati/execution/router.py",
+        "source_sha256": "e8ea100c8e14e7ed3dc2c28a994e1cf317ddcff3b37495cc37eecff72ddbc3f1",
+        "expected_failure": "test_original_quote_lifetime",
+        "fault": {
+          "exit_code": 1,
+          "tests": 20,
+          "failures": [
+            {
+              "name": "test_original_quote_lifetime_is_not_renewed_inside_native_adapter_io[False]",
+              "message": "assert 1800000001000 == (1800000000000 + 101)"
+            },
+            {
+              "name": "test_original_quote_lifetime_is_not_renewed_inside_native_adapter_io[True]",
+              "message": "assert 1800000001000 == (1800000000000 + 101)"
+            }
+          ],
+          "errors": 0,
+          "skipped": 0,
+          "xml_sha256": "86080aed9222816aee5f6fa163c2df9c101048dccd142daf244856589aea060e",
+          "log_sha256": "70f8928d9a9357d7a7813de2963c5f50e3d730d46f90b9590db7b657cf63a583"
+        },
+        "restored": {
+          "exit_code": 0,
+          "tests": 20,
+          "failures": [],
+          "errors": 0,
+          "skipped": 0,
+          "xml_sha256": "751c55b3a31f3aae2c89d377a5aba4fe1d7937f180dd7b527ac2ad9648b477ee",
+          "log_sha256": "04203b8ff2d2cd277cdf28af34117905d8347a5a3a88cf631d31cba832957705"
+        },
+        "caught": true
+      },
+      {
+        "case": "queue-rewrites-taken-unknown",
+        "group": "python",
+        "path": "trading/vati/execution/mt5_pull.py",
+        "source_sha256": "767a3e6aa0555f13cf97c3af0683439ab7449460b7e873f7108d9c3ff1a39c5f",
+        "expected_failure": "test_expired_queued_entry",
+        "fault": {
+          "exit_code": 1,
+          "tests": 20,
+          "failures": [
+            {
+              "name": "test_expired_queued_entry_is_refused_but_an_original_taken_claim_stays_uncertain",
+              "message": "AssertionError: a taken native effect was rewritten as a fresh expiry refusal\nassert {'reason': 'native entry deadline invalid or expired before dispatch', 'status': 'REJECTED', 'volume': '0'} is None\n +  where {'reason': 'native entry deadline invalid or expired before dispatch', 'status': 'REJECTED', 'volume': '0'} = result(2)\n +    where result = <vati.execution.mt5_pull.BridgeQueue object at 0x7f3055936780>.result"
+            }
+          ],
+          "errors": 0,
+          "skipped": 0,
+          "xml_sha256": "ff439c1d1f6ef61435c8c12e0da0e5725b1560e5fdcb5c5246cae0a030965bd8",
+          "log_sha256": "559739f50c11308aaaa75db9f43873cf6ec2e4e015eb266480ca73370833afce"
+        },
+        "restored": {
+          "exit_code": 0,
+          "tests": 20,
+          "failures": [],
+          "errors": 0,
+          "skipped": 0,
+          "xml_sha256": "d3a2146059fdffa7037d3a8a185ebe015193c759af87361d0cfc43ce5e3b2655",
+          "log_sha256": "2370cd9cfb625167b5608d0928e596ef375eda699d09a0b6a7be38b575a356b4"
+        },
+        "caught": true
+      },
+      {
+        "case": "queue-no-mixed-version-unique-index",
+        "group": "python",
+        "path": "trading/vati/execution/mt5_pull.py",
+        "source_sha256": "767a3e6aa0555f13cf97c3af0683439ab7449460b7e873f7108d9c3ff1a39c5f",
+        "expected_failure": "test_expiring_and_legacy_claims",
+        "fault": {
+          "exit_code": 1,
+          "tests": 20,
+          "failures": [
+            {
+              "name": "test_expiring_and_legacy_claims_share_a_native_uniqueness_fence",
+              "message": "Failed: DID NOT RAISE IntegrityError"
+            }
+          ],
+          "errors": 0,
+          "skipped": 0,
+          "xml_sha256": "d0cd4f9f6804ceb1f9e3a8387fd1a46a6abe9a2eeb94e4b56d6908086a315021",
+          "log_sha256": "9ab0c503ef63e178abc6e71f5099dc5cec565c3d946fa0bf97208c24da742ea5"
+        },
+        "restored": {
+          "exit_code": 0,
+          "tests": 20,
+          "failures": [],
+          "errors": 0,
+          "skipped": 0,
+          "xml_sha256": "b58b89fb893ef4dad5399e2366c8970d0620c2a1bd0670dd455bb2388d6d63f7",
+          "log_sha256": "19976e338ab82c9e538dc9016437aea5340953876553fb93952e24e9007bd1c3"
+        },
+        "caught": true
+      },
+      {
+        "case": "bounded-op-ignores-entry-disable",
+        "group": "python",
+        "path": "trading/vati/execution/mt5_pull.py",
+        "source_sha256": "767a3e6aa0555f13cf97c3af0683439ab7449460b7e873f7108d9c3ff1a39c5f",
+        "expected_failure": "test_new_bounded_opcode",
+        "fault": {
+          "exit_code": 1,
+          "tests": 20,
+          "failures": [
+            {
+              "name": "test_new_bounded_opcode_cannot_bypass_native_entry_disable[False]",
+              "message": "AssertionError: assert [{'id': 1, 'o...': '20', ...}] == []\n  \n  Left contains one more item: {'id': 1, 'op': 'ORDER_SEND_EXPIRING', 'comment': 'vati:deadline-original', 'deviation': '20', ...}\n  Use -v to get more diff"
+            },
+            {
+              "name": "test_new_bounded_opcode_cannot_bypass_native_entry_disable[false]",
+              "message": "AssertionError: assert [{'id': 1, 'o...': '20', ...}] == []\n  \n  Left contains one more item: {'id': 1, 'op': 'ORDER_SEND_EXPIRING', 'comment': 'vati:deadline-original', 'deviation': '20', ...}\n  Use -v to get more diff"
+            },
+            {
+              "name": "test_new_bounded_opcode_cannot_bypass_native_entry_disable[1]",
+              "message": "AssertionError: assert [{'id': 1, 'o...': '20', ...}] == []\n  \n  Left contains one more item: {'id': 1, 'op': 'ORDER_SEND_EXPIRING', 'comment': 'vati:deadline-original', 'deviation': '20', ...}\n  Use -v to get more diff"
+            }
+          ],
+          "errors": 0,
+          "skipped": 0,
+          "xml_sha256": "676ab27749465ec763d7e76ec8d6ff3539bfd2963bfe5c4275fb9210074de950",
+          "log_sha256": "56a8d008b73df47090c0c9af9488e42f584d486ef5bca79d1a7bcf4daccf4ede"
+        },
+        "restored": {
+          "exit_code": 0,
+          "tests": 20,
+          "failures": [],
+          "errors": 0,
+          "skipped": 0,
+          "xml_sha256": "623dff767eefa221ebe4173ab31875cdb0610c4c3f9a67275e6fd6cf1573e23b",
+          "log_sha256": "19976e338ab82c9e538dc9016437aea5340953876553fb93952e24e9007bd1c3"
+        },
+        "caught": true
+      },
+      {
+        "case": "ea-no-last-deadline-guard",
+        "group": "native",
+        "path": "deploy/van-trading-core/mql5/VanBridgeEA.mq5",
+        "source_sha256": "88d45cefd1ef766370cce39817317585b993af607123d89efec301ef0bf05189",
+        "expected_failure": "test_actual_ea_entry_binding_and_deadline_survive_native_preparation",
+        "fault": {
+          "exit_code": 1,
+          "tests": 8,
+          "failures": [
+            {
+              "name": "test_actual_ea_entry_binding_and_deadline_survive_native_preparation[entry-deadline-delayed]",
+              "message": "assert (1 == 0)"
+            }
+          ],
+          "errors": 0,
+          "skipped": 0,
+          "xml_sha256": "6b15fc2d398ce300e5a69db1abb2c891fc0272a590b9c9acb90eb94975305243",
+          "log_sha256": "7570fb0db0246be2cec87981c6614c080b60539a4d23bf240be3233cd5211e7b"
+        },
+        "restored": {
+          "exit_code": 0,
+          "tests": 8,
+          "failures": [],
+          "errors": 0,
+          "skipped": 0,
+          "xml_sha256": "828e7af86a31eb9dead183a712b56e81ce0ef0a697b7e299ba83e38e87946e26",
+          "log_sha256": "e7e62901907a93421e077bd3e7382f3e586a4440ea4db73dc4d7a0adf422f60b"
+        },
+        "caught": true
+      },
+      {
+        "case": "ea-no-last-physical-binding-guard",
+        "group": "native",
+        "path": "deploy/van-trading-core/mql5/VanBridgeEA.mq5",
+        "source_sha256": "88d45cefd1ef766370cce39817317585b993af607123d89efec301ef0bf05189",
+        "expected_failure": "test_actual_ea_entry_binding_and_deadline_survive_native_preparation",
+        "fault": {
+          "exit_code": 1,
+          "tests": 8,
+          "failures": [
+            {
+              "name": "test_actual_ea_entry_binding_and_deadline_survive_native_preparation[entry-identity-delayed]",
+              "message": "assert (1 == 0)"
+            }
+          ],
+          "errors": 0,
+          "skipped": 0,
+          "xml_sha256": "93b2955bd0990abee0c2f62a055e54c0556d49dca567e38b2ae424cfcd7ec992",
+          "log_sha256": "caa759aff897493f6f68e597c8376ed74685898ff0b848aa8d390c248ec1a937"
+        },
+        "restored": {
+          "exit_code": 0,
+          "tests": 8,
+          "failures": [],
+          "errors": 0,
+          "skipped": 0,
+          "xml_sha256": "8be39d77f3d1cab141dff36674af984fa792fe1314e889cf3c3adcf6e024d1a2",
+          "log_sha256": "b70d4c75b0cb4d751388db2d1c2fb9fb51e54e873dc10949a12ca1f5cde378da"
+        },
+        "caught": true
+      },
+      {
+        "case": "ea-rounds-away-uncertain-milliseconds",
+        "group": "native",
+        "path": "deploy/van-trading-core/mql5/VanBridgeEA.mq5",
+        "source_sha256": "88d45cefd1ef766370cce39817317585b993af607123d89efec301ef0bf05189",
+        "expected_failure": "test_actual_ea_entry_binding_and_deadline_survive_native_preparation",
+        "fault": {
+          "exit_code": 1,
+          "tests": 8,
+          "failures": [
+            {
+              "name": "test_actual_ea_entry_binding_and_deadline_survive_native_preparation[entry-deadline-subsecond]",
+              "message": "assert (1 == 0)"
+            }
+          ],
+          "errors": 0,
+          "skipped": 0,
+          "xml_sha256": "9c911364405138df25c0f3a25444299cdefa799987d3ba32e267e34abd8f15b8",
+          "log_sha256": "c12994c3eea25a4dd6a383619aeff5b8d1e29de25c86627a497d1fce14972deb"
+        },
+        "restored": {
+          "exit_code": 0,
+          "tests": 8,
+          "failures": [],
+          "errors": 0,
+          "skipped": 0,
+          "xml_sha256": "59d2d6f130225e941ff133140ed0ed3ff2afaccad60f89a4baab8e17e10bdc64",
+          "log_sha256": "b70d4c75b0cb4d751388db2d1c2fb9fb51e54e873dc10949a12ca1f5cde378da"
+        },
+        "caught": true
+      }
+    ],
+    "limits": "Actual router/queue/signed SDK fixture and unchanged EA bodies through C++ terminal interface; no broker or MetaTrader acceptance."
+  },
+  "postgresql": {
+    "broad_failed_attempt": {
+      "path": "/tmp/van-native-deadline-recovery-pg.xml",
+      "sha256": "8173e9b2289caf572abfbf7b21fc66dc1a11b42564a08e19071d27db2d63c8ef",
+      "tests": 211,
+      "passed": 114,
+      "failures": 31,
+      "errors": 66,
+      "skipped": 0
+    },
+    "broad_failure_classification": "26 thread creation failures, 4 lease-store connection fork failures, 1 psycopg fork failure; 60 compiler setup spawn errors, 6 TestClient thread setup errors. No application assertion identified; incomplete combined qualification.",
+    "minimal_original_unknown_scenario": {
+      "path": "/tmp/van-native-deadline-minimal-pg.xml",
+      "sha256": "88dee682961eb1c631e9a699f9c23ecb653686648410d976edd3e5868b7ff2eb",
+      "tests": 1,
+      "passed": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "full_unknown_retry": "initdb/postgres -V could not fork; no tests executed",
+    "servers_stopped_and_removed": true
+  },
+  "remaining": [
+    "Fresh MetaEditor compile of this EA revision",
+    "Fresh complete trading/recovery hosted run",
+    "CTrader and Deriv last-write deadlines are separate unfinished work",
+    "Receipt availability timestamps and original setup lifetime remain under review",
+    "No broker, native-host, production, financial, F15, BG-001 or S24 acceptance"
+  ],
+  "integrated_root_attempt": {
+    "tests": 80,
+    "passed": 20,
+    "failures": 0,
+    "setup_errors": 60,
+    "skipped": 0,
+    "reason": "Actual EA compilation setup could not posix_spawn cc1plus (resource temporarily unavailable). None of the 60 EA cases executed in this retry.",
+    "xml_sha256": "af8f03361fcbb7199d185b07ccdab117ad7161446f6b9b46824849c4e6ac2a1b",
+    "retained_path": "/tmp/van-native-deadline-root-final.xml"
+  }
+}

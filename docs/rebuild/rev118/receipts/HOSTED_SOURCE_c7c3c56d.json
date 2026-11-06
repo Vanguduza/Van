@@ -1,0 +1,32 @@
+{
+  "schema": "van.rebuild.hosted-source/1",
+  "source_head": "c7c3c56d5703c27621c11df2f2d90863fa4f8deb",
+  "run_id": 40157818214,
+  "conclusion": "failure",
+  "reports": {
+    "media-report.xml": {
+      "tests": 198,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 198,
+      "failing_cases": []
+    },
+    "gateway-report.xml": {
+      "tests": 5705,
+      "failures": 4,
+      "errors": 0,
+      "skipped": 7,
+      "passed": 5694,
+      "failing_cases": [
+        "backend.tests.test_learning_recovery::test_failed_schema_version_marker_rolls_back_new_learning_tables_and_can_retry",
+        "backend.tests.test_learning_recovery::test_process_death_before_schema_marker_leaves_a_retryable_original_database",
+        "backend.tests.test_reminder_delivery_gateway::test_gateway_sweep_recovers_lost_delivery_ack_without_refiring",
+        "tests.contracts.test_van_private_core_topology::test_private_core_app_import_closure_excludes_forbidden_code"
+      ]
+    }
+  },
+  "evidence_directory": "docs/rebuild/rev118/ci/market_commands_20261025/hosted-c7c3c56d",
+  "scope": "Historical exact source; does not validate reconstructed alert commands. Original failures retained.",
+  "artifact_sha256": "e90f2ea9359c06acc9106851bd2bd4d2c23858fb93085bf746da476df489bf1f"
+}

@@ -1,0 +1,22 @@
+{
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "tools/rebuild/source_storage_audit.py",
+    "--report",
+    "/workspace/van-workmap-native-history-focused-r2-20261027-audit.json",
+    "trading/tests/test_native_risk_history_inputs.py",
+    "trading/tests/test_native_risk_history_index.py",
+    "tests/rebuild/test_source_workmap.py",
+    "--junitxml=/workspace/van-workmap-native-history-focused-r2-20261027.xml",
+    "-q"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 1223090,
+  "started_at_utc": "2026-10-27T12:58:33.572741+00:00",
+  "timeout_seconds": 300,
+  "state": "COMPLETED",
+  "command_pid": 1223093,
+  "exit": 1,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-27T12:59:06.038160+00:00"
+}

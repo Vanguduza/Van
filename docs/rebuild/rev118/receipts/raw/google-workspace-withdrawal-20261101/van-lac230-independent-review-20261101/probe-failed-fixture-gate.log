@@ -1,0 +1,22 @@
+Traceback (most recent call last):
+  File "/workspace/van-lac230-independent-review-20261101/probe-http.py", line 51, in <module>
+    results=asyncio.run(main());after=pins();assert after==before;(OUT/'after.json').write_text(json.dumps(after,indent=2));record={'imports':{'service':source.__file__,'mesh':mesh.__file__},'results':results,'all12source_archive_patchpins_verified_unchanged':True,'owned_tmp_cleanup':True};(OUT/'probe-results.json').write_text(json.dumps(record,indent=2));print(json.dumps(record))
+            ^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/runners.py", line 195, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/base_events.py", line 691, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/workspace/van-lac230-independent-review-20261101/probe-http.py", line 44, in main
+    extra=await fn(world,mp) if mp_needed else await fn(world);results.append({'case':name,'result':'OBSERVED' if extra else 'PASS','extra':extra})
+                                               ^^^^^^^^^^^^^^^
+  File "/workspace/van-lanes-20261101/google-withdrawal/backend/tests/test_google_owner_withdrawal_recovery.py", line 245, in test_workspace_canary_binds_original_probe_and_live_generation_without_status_argument
+    google.transport = FakeGoogleTransport()
+                       ^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/van-lanes-20261101/google-withdrawal/backend/van_gateway/google/transport.py", line 548, in __init__
+    raise RuntimeError("fake_google_transport_disabled")
+RuntimeError: fake_google_transport_disabled

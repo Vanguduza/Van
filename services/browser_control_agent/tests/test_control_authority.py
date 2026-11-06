@@ -265,6 +265,12 @@ class TestTheAgentIsNarrow:
             scope = next(s for s, allowed in SCOPE_ALLOWS.items() if operation in allowed)
             authority, _ = _authority(scope=scope)
             agent = BrowserControlAgent(authority=authority, cdp=cdp)
+            if operation in {Operation.CLICK_ELEMENT, Operation.FILL_ELEMENT, Operation.OBSERVE_EFFECT}:
+                with pytest.raises(ValueError, match='requires_durable_broker'):
+                    asyncio.run(agent.invoke(caller_common_name=HARNESS, call=Call(operation=operation,
+                        session_id="ibs_1", target_id="target-1", lease_id="bctl_1", lease_generation=3,
+                        task_id="task-1", params={})))
+                continue
             asyncio.run(
                 agent.invoke(
                     caller_common_name=HARNESS,

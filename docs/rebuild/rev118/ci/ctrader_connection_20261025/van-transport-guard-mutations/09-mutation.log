@@ -1,0 +1,47 @@
+.........F..........                                                     [100%]
+=================================== FAILURES ===================================
+___ test_reconnect_discards_old_quotes_and_keeps_original_execution_evidence ___
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7fe3c9da9df0>
+
+    def test_reconnect_discards_old_quotes_and_keeps_original_execution_evidence(harness):
+        client, server = harness.pair()
+        replacement, _ = harness.pair()
+        sockets = iter([client, replacement])
+        transport = harness.transport(lambda *_: next(sockets))
+        transport.connect()
+        first_id = transport.connection_id
+        for name, values in [
+            ('ProtoOASpotEvent', {'ctidTraderAccountId': 12345, 'symbolId': 1, 'bid': 110000}),
+            ('ProtoOAExecutionEvent', {'ctidTraderAccountId': 12345, 'executionType': 'ORDER_ACCEPTED'}),
+        ]:
+            payload = SCHEMA.wrap(name, values)
+            server.sendall(struct.pack('>I', len(payload)) + payload)
+        # Consume the original execution through the public matcher, which stashes
+        # the preceding quote. Its original connection identity must survive stashing.
+        result = transport.wait_event(lambda name, _: name == 'ProtoOAExecutionEvent', timeout_s=1)
+        assert result[1]['executionType'] == 'ORDER_ACCEPTED'
+        # A second execution remains queued across reconnect for reconciliation.
+        payload = SCHEMA.wrap('ProtoOAExecutionEvent', {'ctidTraderAccountId': 12345, 'executionType': 'ORDER_FILLED'})
+        server.sendall(struct.pack('>I', len(payload)) + payload)
+        # A correlated response is the barrier proving the preceding event arrived.
+        caller, response = harness.worker(lambda: transport.call('ProtoHeartbeatEvent', {}))
+        _, _, cid = receive_frame(server)
+        payload = SCHEMA.wrap('ProtoHeartbeatEvent', {}, cid)
+        server.sendall(struct.pack('>I', len(payload)) + payload)
+        caller.join(1)
+        assert response.get_nowait()[0] == 'ProtoHeartbeatEvent'
+        transport.close()
+        transport.connect()
+        assert transport.connection_id > first_id
+>       assert transport.drain_events() == [('ProtoOAExecutionEvent', {'payloadType': 'PROTO_OA_EXECUTION_EVENT', 'ctidTraderAccountId': 12345, 'executionType': 'ORDER_FILLED'})]
+E       AssertionError: assert [('ProtoOASpo...DER_FILLED'})] == [('ProtoOAExe...DER_FILLED'})]
+E         
+E         At index 0 diff: ('ProtoOASpotEvent', {'payloadType': 'PROTO_OA_SPOT_EVENT', 'ctidTraderAccountId': 12345, 'symbolId': 1, 'bid': 110000}) != ('ProtoOAExecutionEvent', {'payloadType': 'PROTO_OA_EXECUTION_EVENT', 'ctidTraderAccountId': 12345, 'executionType': 'ORDER_FILLED'})
+E         Left contains one more item: ('ProtoOAExecutionEvent', {'payloadType': 'PROTO_OA_EXECUTION_EVENT', 'ctidTraderAccountId': 12345, 'executionType': 'ORDER_FILLED'})
+E         Use -v to get more diff
+
+trading/tests/test_ctrader_transport_lifecycle.py:284: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_ctrader_transport_lifecycle.py::test_reconnect_discards_old_quotes_and_keeps_original_execution_evidence
+1 failed, 19 passed in 1.01s

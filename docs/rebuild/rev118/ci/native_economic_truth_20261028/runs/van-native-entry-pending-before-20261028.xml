@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="7" time="1.920" timestamp="2026-10-28T21:51:41.674983+00:00" hostname="6e9feff21467"><testcase classname="trading.tests.test_native_entry_volume" name="test_actual_original_entry_receipts_and_native_deals_retain_exact_gross_volume" time="0.881" /><testcase classname="trading.tests.test_native_entry_volume" name="test_duplicate_native_statements_and_other_orders_never_reduce_or_repeat_gross_entries" time="0.040" /><testcase classname="trading.tests.test_native_entry_volume" name="test_missing_deals_are_not_zero_outstanding_and_late_conflicts_refuse_current_use" time="0.052" /><testcase classname="trading.tests.test_native_entry_volume" name="test_symbol_conflict_cannot_attribute_a_native_order_to_another_instrument" time="0.045" /><testcase classname="trading.tests.test_native_entry_volume" name="test_native_gross_overfill_is_visible_without_a_negative_or_reopened_allowance" time="0.055" /><testcase classname="trading.tests.test_native_entry_volume" name="test_native_future_deal_is_not_borrowed_before_its_original_publication" time="0.050" /><testcase classname="trading.tests.test_native_entry_volume" name="test_actual_pending_owner_cannot_release_on_rejection_contradicted_by_original_native_fill" time="0.062"><failure message="AssertionError: actual native fill must invalidate a no-effect release&#10;assert (() == ()&#10;  &#10;  Use -v to get more diff and False)&#10; +  where False = &lt;built-in method startswith of str object at 0x154dcc0&gt;('NATIVE_PENDING_RISK_UNAVAILABLE:')&#10; +    where &lt;built-in method startswith of str object at 0x154dcc0&gt; = ''.startswith">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-220/test_actual_pending_owner_cann0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_actual_pending_owner_cannot_release_on_rejection_contradicted_by_original_native_fill(tmp_path,eurusd):
+        from vati.risk.physical_pending import project_pending_risk
+        from vati.risk.contracts import NativeAccountRiskContext
+        ledger,adapter,book,clock,command,binding=dispatched(tmp_path,eurusd,
+            receipt_changes={'status':'REJECTED','filled_qty':D('0'),'average_fill':None})
+        try:
+            q=book.lookup_entry(command.command_hash,binding['source_ref'])['observation']
+            context=NativeAccountRiskContext(**q['native_account_context']);owner=SimpleNamespace()
+            pending,issue=project_pending_risk(owner,ledger,context,(),now_ms=clock['ms'],contracts={})
+            assert pending==() and issue==''
+            observe(ledger,clock,[(1,2,7,200000,None)])
+            result=book.lookup_entry_volume(command.command_hash,binding['source_ref'],available_at_ms=clock['ms'])
+            assert result['state']=='NATIVE_DEALS_CONTRADICT_NO_EFFECT_RECEIPT'
+            pending,issue=project_pending_risk(owner,ledger,context,(),now_ms=clock['ms'],contracts={})
+&gt;           assert pending==() and issue.startswith('NATIVE_PENDING_RISK_UNAVAILABLE:'), 'actual native fill must invalidate a no-effect release'
+E           AssertionError: actual native fill must invalidate a no-effect release
+E           assert (() == ()
+E             
+E             Use -v to get more diff and False)
+E            +  where False = &lt;built-in method startswith of str object at 0x154dcc0&gt;('NATIVE_PENDING_RISK_UNAVAILABLE:')
+E            +    where &lt;built-in method startswith of str object at 0x154dcc0&gt; = ''.startswith
+
+trading/tests/test_native_entry_volume.py:138: AssertionError</failure></testcase></testsuite></testsuites>

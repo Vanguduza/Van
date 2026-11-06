@@ -1,0 +1,94 @@
+{
+  "schema": "van.lac230-frozen-handoff/1",
+  "prepared_at_utc": "2026-11-01T07:49:35.569719+00:00",
+  "state": "FROZEN_REVIEWABLE_BACKEND_TESTED_FINAL_JVM_CANCELLATION_CASE_PENDING",
+  "base": "25a48fd705825f5eec1264696e91536694cfb82f",
+  "worktree": "/workspace/van-lanes-20261101/google-withdrawal",
+  "source_files": {
+    "android/app/src/main/java/com/dial/van/command/connected/ConnectedReadback.kt": "358bbb7fa78b24ca33805892a0bf4c7d23147c989156cc26267a14445411b0e1",
+    "android/app/src/main/java/com/dial/van/command/connected/ConnectedRoute.kt": "6e89096f6773455dfca27ef29ca2a79b9a23e4c76184d017cc06e53b380c213d",
+    "android/app/src/main/java/com/dial/van/gateway/GoogleWithdrawalOperations.kt": "3718aea7c293fa376100aa712660513bd3f904ab4ccd149d02cbac67c8ffbce6",
+    "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt": "26cdf2e26203594b2113a5b661dda2ea33770cfba1f9aafbc1c22302c048c3ad",
+    "android/verification/build.gradle.kts": "b1342705f7e5fbf4eba602b8efb81fecafb758966b7537a07a9106e6af2dcf0c",
+    "android/verification/src/test/kotlin/com/dial/van/gateway/GoogleWithdrawalOperationsTest.kt": "a8deed3c0eb4f407d3a46ace4298e88644f4dc474d3e7dfcf2a89034e211a006",
+    "backend/tests/test_gateway.py": "02d99600efd79bb926a9e242d8bc688ca4c3141230ecd199194b4d8d113f816b",
+    "backend/tests/test_google_owner_withdrawal_recovery.py": "90f09b6c732406336de69aea379288ee39d7a10814651bc47eea09f4602edfe9",
+    "backend/tests/test_google_readiness_revocation.py": "43ef8e6eefdbcb6a244b295d831591e7a8c0977832837b8a19d91f5e50a8ce42",
+    "backend/van_gateway/app.py": "0cd6c5024d5f73e1049f0bdef10c803c959cde4eeeb5976264ca1122c55c3470",
+    "backend/van_gateway/google/mesh.py": "c71799762b72636c15d0d4667bb08b860c260306994e3b8fba8cbc89dde514be",
+    "backend/van_gateway/google/service.py": "e63d2d1ca14793d7c3542efa15bc8e65190e8e007aff7ee3e5311c2527730912"
+  },
+  "patch": "LAC230_FROZEN.patch",
+  "patch_sha256": "bcd75129273e25424cabfd53e89d1c75862414f98411e8ec623990adb13b84e0",
+  "archive": "LAC230_FROZEN_SOURCE.zip",
+  "archive_sha256": "15ce19b344d2f30d242cc1d246507ed4d85d15e3977fc0dd865a8d486f802882",
+  "readback": "git apply --check --cached PASS against clean baseline index; no staging/commit/push",
+  "canonical": {
+    "unit": "BE-002",
+    "co_owner": "BE-031",
+    "packet": "VAN-PKT-005",
+    "sequence": 5,
+    "action": "LAC-230",
+    "operation": "WP-ACT-LAC-230",
+    "test": "T-LAC-230",
+    "context": "van.connected",
+    "scope": "Existing local gateway-held Workspace credential withdrawal. No new action/authority/store/migration or frozen package amendment. Full original unit dependencies and native gates remain pending."
+  },
+  "behavior": [
+    "Explicit connect/reconnect owns a new logical generation even when owner/token bytes repeat; routine OAuthaccess refresh preserves it. Existing runtime_meta holds protected generation and original withdrawal journal, not a second credential/authority store.",
+    "Inert stateless GET proposal binds original currentcaller/context, exact owner/connectiongeneration/source revision and immutable10minute serverdeadline. GET creates no durable mutation. Current auth/token/binding state rechecked under actual writer; current lawful newdevice may select connection anew but cannot recover anothercaller operation.",
+    "Credential withdrawal, exact related Workspace readiness invalidation, generation update and encrypted original receipt commit together in one SQLite writer. Crash injection at readiness/result inserts rolls back all local state. Other credential planes and independent identities preserved; registry owns inheritedalias mapping.",
+    "Explicit original replay recovers original result after reconnect/restart/originaldeadline without changing replacement. Legacy first unambiguous operation captured atomically; ambiguity after reconnect refuses409 explicitoperationrequired without guessing current replacement.",
+    "Slow OAuth exchange cannot cross withdrawal/reconnect at local effectadmission. Already submitted existing effects remain reconcilable; next admission blocked. Current HTTP/internaladmin callers preserved with their actual authority, no fabricated internaldevice.",
+    "Canary producer captures original generation BEFORE fixture/native observation; Workspace READY writer validates that exact generation under writer. Consumer without optionalliveStatus still requires live current credential plus originalcanary lineage. Missing/stale/invalidlineage is CONFIGURED/AUTH_REQUIRED with explicitreason. No production/native canary caller discovered across active backend/hermes/services/trading/Android: qualifiednative canary wiring remains unproved.",
+    "Actual Android production helper persists exact original request in existing EncryptedSharedPreferences beforePOST; scopedprofile/caller/generation originals retained across restart/lostreply/unknown; explicitnewgeneration neverretargets oldUNKNOWN. OriginalGET then independent currentstatus required beforeclear. Read-only startuprefresh recovery does not POST. Originalwithdrawal receipt can complete while laterhostreconnect currentstatusisactive. Cancellation propagation finalsourcechange awaits queued JVMcheck."
+  ],
+  "evidence": {
+    "backend": "121passed0skips exactselection AFFECTED_02.log and COVERAGE.json/BACKEND_CASE_IDS.log",
+    "original_counterexample": "COUNTEREXAMPLE_03.log actual lostreply/reconnect/emptyretry removesreplacement beforefix; originalcase included final121",
+    "failures_retained": [
+      "COUNTEREXAMPLE_01/02 sparse dependencysetup errors",
+      "GENERATION_01 fixture omitted requiredcolumns; GENERATION_02 and JOURNAL_01 naive readinessowner equality regression, fixed via actualregistry alias mapping",
+      "AFFECTED_01:118passed2failed outdated READYproducers; final fixtures capture originalgeneration beforeactualSOURCEtransport observation, all original assertions retained",
+      "JVM_01 sparse omitted pure dependency compilefailure; JVM_02 successful after legitimate dependency materialization",
+      "OWNER_CHECK_01 wronginterpreter dependencyerror; OWNER_CHECK_02 expected changedcitation blocker",
+      "MUTATION_PREFLIGHT_01 sparsemissing guardtargets; MUTATION_PREFLIGHT_02 all374/383valid"
+    ],
+    "guards": {
+      "diff": "PASS",
+      "workmap": "PASS unchanged131/324/1610/234/349/93 and42/105/78",
+      "mutation": "PASS374mutations383edits anchorsvalid, executionNOT_RUN",
+      "frontend": "--checkPASS existingcommittedregistries only",
+      "owner": "EXPECTED_BLOCKED changed ConnectedRoute.kt:160 citation; reviewedexactcaller and newreceipt endpoint need integrationowner refresh, no generatedwrites"
+    },
+    "jvm": "JVM_02 prior11pass, final12case selectionNOT_RUN; exactlimits inCOVERAGE.json"
+  },
+  "queued_final_jvm": {
+    "status": "FINAL_JVM_CANCELLATION_CASE_PENDING",
+    "owner": "implementation_sol after ownSDK/appcompile releases sharedGradlecache",
+    "cwd": "/workspace/van-lanes-20261101/google-withdrawal",
+    "command": "JAVA_HOME=/tmp/van-permission-revocation-jdk/jdk-21.0.13+9 GRADLE_USER_HOME=/tmp/van-permission-revocation-gradle timeout 180 android/gradlew -p android/verification test --offline --no-daemon --max-workers=2 -Dorg.gradle.jvmargs=-Xmx512m -Pkotlin.compiler.execution.strategy=in-process --tests com.dial.van.gateway.GoogleWithdrawalOperationsTest --tests com.dial.van.command.connected.ConnectedReadbackTest > /workspace/van-google-withdrawal-20261101/JVM_FINAL.log 2>&1",
+    "jdk": "/tmp/van-permission-revocation-jdk/jdk-21.0.13+9",
+    "gradle_home": "/tmp/van-permission-revocation-gradle",
+    "constraints": "No concurrent Gradle in sharedcache; preserve rawexit/XML and confirm frozenpins unchanged. Pure JVM pass cannot claim fullapp/native compile."
+  },
+  "integration_required": [
+    "Independent review of all12paths; source stays frozen.",
+    "Reconcile guardedly to actual forthcoming Androidrepair publishedhead with fullWIP/hash backup. PermissionsRoute/MissionRepository repair is separate; Google-onlyVanGatewayClient hunks preserved.",
+    "Review citation replacement ConnectedRoute old empty-request ConnectedReadback.revoke caller\u2192reviewedWorkspace/profile exactgoogleOwnerRevoke plus ConnectedReadback.withdrawal; VanGatewayClient oldgoogleOwnerRevoke()\u2192googleOwnerRevoke(reviewed,reviewedProfile). Existing OF-GOOGLE-001 / van.connected / LAC-230 mapping retained.",
+    "Map readonly GET /v1/google/owner-revocations/{operation_id} as original LAC-230 receipt/readback contract, not a new publicaction. Sole integrationwriter refreshes owner/frontend registries and confirms actual endpoint/schema counts.",
+    "Run queued final12case pureJVM check aftercachefree, preserve failures honestly; actualfullapp Kotlin SDK36 compile/CI still required separately.",
+    "Final combined source guards/genuinehooks/required baseline verification/normalpush/readback/exactheadCI belong solepublisher. No schema/db.py/migration changed. runtime_meta originalcanonstate has existing_OWNER retention.",
+    "No installer path edits or scopeauthorization change. No native Googleeffects, authority issuance, sourceacceptance, BG orrelease claims."
+  ],
+  "current_jobs": "No local backend/Gradle job active in this lane; integrationSol owns sharedcache SDK/appcompile; no queued work claimed running.",
+  "source_authorization": "Existing owner autonomous candidate source authorization only; native/formalacceptance deps preserved",
+  "cleanup": "TERMINAL_CLEANUP.json:587825424bytes owned terminal pytestfixtures removed after rawpreservation/processcheck; originalfailureSQLitefixtures zipped; sharedJDK/Gradle untouched",
+  "all_active_caller_audit": {
+    "raw": "ALL_ACTIVE_CALLER_REFS.log",
+    "scope": "ALL active canonical android/backend/hermes/services/trading roots; changed method names plus GoogleStatus and ConnectedReadback operation refs, not only screen",
+    "result": "Exactly one production googleOwnerRevoke caller: ConnectedRoute passes reviewedWorkspace snapshot and captured reviewedProfile. No MissionRepository or other repository forwarding Google revoke. googleStatus signature unchanged/additive fields; all existing consumers retained. New recoverGoogleWithdrawals used by ConnectedRoute refresh; originalGoogleWithdrawal private GET adapter only; verification helper tests separate.",
+    "raw_sha256": "07654252c4c54c11887754a0c81df10fdb2ae66c824ff26f5516d7116b8812c5",
+    "compile_limit": "Static complete caller inventory, not full Android typecheck. Integration SDK/fullapp compile remains required."
+  }
+}

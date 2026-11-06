@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="0.756" timestamp="2026-10-26T09:22:31.752685+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_dataset_manifest_candidates" name="test_temporal_order_compares_exact_nanoseconds[max_input_available_at]" time="0.187"><failure message="Failed: DID NOT RAISE DatasetContractError">field = 'max_input_available_at'
+
+    @pytest.mark.parametrize('field', ['max_input_available_at','data_cutoff'])
+    def test_temporal_order_compares_exact_nanoseconds(field):
+        record=fixture()
+        record['max_input_available_at']=record['data_cutoff']=record['created_at']='2020-01-01T00:00:00.000000001Z'
+        record[field]='2020-01-01T00:00:00.000000002Z'
+&gt;       with pytest.raises(DatasetContractError,match='TEMPORAL_ORDER'): parse(record)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE DatasetContractError
+
+trading/tests/test_dataset_manifest_candidates.py:87: Failed</failure></testcase><testcase classname="trading.tests.test_dataset_manifest_candidates" name="test_temporal_order_compares_exact_nanoseconds[data_cutoff]" time="0.016"><failure message="Failed: DID NOT RAISE DatasetContractError">field = 'data_cutoff'
+
+    @pytest.mark.parametrize('field', ['max_input_available_at','data_cutoff'])
+    def test_temporal_order_compares_exact_nanoseconds(field):
+        record=fixture()
+        record['max_input_available_at']=record['data_cutoff']=record['created_at']='2020-01-01T00:00:00.000000001Z'
+        record[field]='2020-01-01T00:00:00.000000002Z'
+&gt;       with pytest.raises(DatasetContractError,match='TEMPORAL_ORDER'): parse(record)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE DatasetContractError
+
+trading/tests/test_dataset_manifest_candidates.py:87: Failed</failure></testcase></testsuite></testsuites>

@@ -1,0 +1,5 @@
+trading/tests/test_single_session_unknown_entry.py
+trading/tests/test_mt5_recorded_entry_charges.py
+trading/tests/test_mt5_owner_cost_knowledge.py
+trading/tests/test_mt5_owner_cost_knowledge_postgres.py
+trading/tests/test_mql_native_function_bodies.py

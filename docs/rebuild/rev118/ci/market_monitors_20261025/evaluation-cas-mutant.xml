@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.306" timestamp="2026-10-25T02:24:10.133404+00:00" hostname="56ae90b2c83c"><testcase classname="tests.test_market_monitor_runtime" name="test_competing_evaluators_cannot_overwrite_a_newer_baseline_or_emit_from_a_stale_view" time="0.081"><failure message="AssertionError: assert ('11' == '9'&#10;  &#10;  - 9&#10;  + 11)">backend/tests/test_market_monitor_runtime.py:92: in test_competing_evaluators_cannot_overwrite_a_newer_baseline_or_emit_from_a_stale_view
+    assert observed.evaluation.value == '9' and observed.evaluation.event_time_ms == 960000
+E   AssertionError: assert ('11' == '9'
+E     
+E     - 9
+E     + 11)</failure></testcase></testsuite></testsuites>

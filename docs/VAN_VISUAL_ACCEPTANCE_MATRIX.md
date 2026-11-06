@@ -2,6 +2,11 @@
 
 Canonical implementation authority: `docs/VAN_PRODUCTION_VISUAL_FLOATING_UX_OWNER_ADMIN_REV_3_0.md`.
 
+Aura authority: owner decisions CF-D-06, CF-D-06-REV1 and CF-D-08 (`docs/character_forge/MANIFEST.yaml`) and
+`visual-authority/character-forge/aura/AURA_RUNTIME_CONTRACT.yaml`. The aura is a flame envelope wrapping VAN's
+silhouette with embers; wind strands, electrical branches, ion specks, the orb link line and the detached-field
+rule are removed. The aura criteria below follow that authority; the former living-electrical-field rows are retired.
+
 ## Current owner status
 
 **NOT ACCEPTED — corrective implementation in progress.**
@@ -28,23 +33,20 @@ Only the owner may change this status to accepted after another physical-device 
 | Character motion | Smooth continuous hover/breath/gaze/blink/state motion while visible |
 | Board independence | Opening/expanding/maximizing workboard never freezes or replaces character activity |
 
-## Living electrical field criteria
+## Flame aura criteria (CF-D-06 / CF-D-06-REV1 / CF-D-08)
 
 | Check | Pass criteria | Enforced by |
 |---|---|---|
-| No halo reconstruction | Frozen frame cannot be read as a complete/broken concentric ring | `VanFieldGeometryEngine` |
-| Silhouette detachment | Main Zone B/C/electrical samples remain outside inflated head/torso/shoulder exclusion | `VanBodyExclusionProfile` + tests |
-| Visible air gap | Floating build shows a clear gap between body and primary field | Rev 3 geometry + device check |
-| Identity ownership | Zone A/B identity energy remains cyan | `VanAuraSpecs` + ink ownership |
-| Semantic ownership | warning/error/success/degraded colour lives in Zone C | `semanticState` |
-| State topology | waiting/warning/error/urgent/success differ geometrically, not only by colour | semantic topology |
-| Continuous field | Wind/waves/curl/advection are procedural and continue while board is open | `VanWindFieldMotion` |
-| Wavy field | At least one active stream carries visible low-frequency S-curve deformation | `VanFieldGeometryEngine` |
-| Electrical life | Short-lived bright-core branches appear/propagate/fork/fade without tracing VAN | `VanElectricalBranch` |
-| Particle life | Ion fragments advect and fade rather than remain static points | geometry engine |
-| Residual field with board | Workboard never replaces the aura; field remains visibly alive around VAN/panel | overlay composition |
-| Reduced motion | Autonomous geometry reduces/freezes while essential state remains readable | `VanEffectBudget.REDUCED_MOTION` |
-| Power / thermal | Expensive effects reduce before core character/state truth is removed | `VanEffectBudget` |
+| Flame envelope | The aura wraps VAN's silhouette and rises off it as layered flame tongues with a core rim and rising embers | `VanFlameAura` + `VanFlameAuraTest` |
+| No line geometry | No wind strands, electrical branches, ion specks or orb link line are drawn in any state | `AURA_RUNTIME_CONTRACT.yaml` `line_geometry: forbidden` + `test_aura_runtime_contract.py` |
+| Silhouette source | The envelope follows what is on screen: Rive alpha once the rig loads, Candidate B alpha today, measured layout for the Canvas fallback | `VanSilhouette` |
+| Front depth | Front wisps stay faint and never rise over the face | contract `FRONT_ALPHA_MAX`, `FRONT_TOP_FRACTION` |
+| Identity / state colour | Identity flame is cyan; THINKING cyan-violet and SLEEPING faint blue per the contract palette | `VanAuraSpec` + contract `state_palette` |
+| Trade energy | Calm in a trade, turbulent under risk, highest on a stop; a closed position fires one white pulse | `VanTradeSemantic` + `VanTradeSemanticTest` |
+| Continuous motion | Flame motion continues while the board is open and never visibly repeats (slow second clock) | `VanAnimationClock` + contract `motion` |
+| Residual aura with board | Workboard never replaces the aura; the flame remains visibly alive around VAN/panel | overlay composition |
+| Reduced motion | Autonomous motion freezes while essential state remains readable | `VanEffectBudget.REDUCED_MOTION` |
+| Power / thermal | Expensive layers reduce before core character/state truth is removed | `VanEffectBudget` + contract `performance_tiers` |
 
 ## Presence/state criteria
 
@@ -115,16 +117,17 @@ The canonical CI must pass:
 :visual-preview:renderVanPreviews
 ```
 
-Rev 3 evidence should move to `artifacts/release/preview/rev30/` and include multi-frame motion/electrical evidence rather than relying only on still sheets.
+Rev 3 evidence should move to `artifacts/release/preview/rev30/` and include multi-frame flame-motion evidence (CF-D-08 8-second motion clips) rather than relying only on still sheets.
 
 ## Physical Samsung re-verification checklist
 
 - [ ] Character solid/opaque over light background
 - [ ] Character solid/opaque over dark background
 - [ ] Character solid/opaque over busy/photo background
-- [ ] Aura visibly detached from VAN
-- [ ] Aura visibly wavy and continuously advecting for 30+ seconds
-- [ ] Electrical life visible without strobing
+- [ ] Flame aura wraps VAN's silhouette and rises off it (CF-D-06)
+- [ ] No strands, lightning branches, specks or orb link line visible (CF-D-06-REV1)
+- [ ] Flame motion continuous for 30+ seconds without visible repetition or strobing
+- [ ] Front wisps never cover the face
 - [ ] Baby-cyan workboard glass readable
 - [ ] Single tap opens board
 - [ ] Single tap on VAN closes board

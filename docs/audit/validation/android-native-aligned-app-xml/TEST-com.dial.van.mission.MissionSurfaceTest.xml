@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.mission.MissionSurfaceTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:35:26" hostname="052fefa249ff" time="0.004">
+  <properties/>
+  <testcase name="homeAnswersTheFiveSecondQuestions" classname="com.dial.van.mission.MissionSurfaceTest" time="0.001"/>
+  <testcase name="anAdaptationAwaitingTheOwnerIsSurfacedNotBuried" classname="com.dial.van.mission.MissionSurfaceTest" time="0.0"/>
+  <testcase name="aMissionWaitingOnTheOwnerIsNotCountedAsActive" classname="com.dial.van.mission.MissionSurfaceTest" time="0.0"/>
+  <testcase name="ownerReadableStatusDescribesTheOwnersSituationNotTheStateMachine" classname="com.dial.van.mission.MissionSurfaceTest" time="0.001"/>
+  <testcase name="aMissionMarkedDoneWithoutAReceiptSaysSoOnTheScreen" classname="com.dial.van.mission.MissionSurfaceTest" time="0.0"/>
+  <testcase name="aVerifiedMissionReportsHowMuchEvidenceBackedIt" classname="com.dial.van.mission.MissionSurfaceTest" time="0.0"/>
+  <testcase name="anAutonomyBearingInferenceReadsAsAQuestionNotAFinding" classname="com.dial.van.mission.MissionSurfaceTest" time="0.001"/>
+  <testcase name="partialSuccessIsNotPresentedAsDone" classname="com.dial.van.mission.MissionSurfaceTest" time="0.0"/>
+  <testcase name="aConfirmedTraitIsDistinguishedFromOneVanConfirmedItself" classname="com.dial.van.mission.MissionSurfaceTest" time="0.0"/>
+  <testcase name="absentFieldsStayNullRatherThanBecomingFriendlyDefaults" classname="com.dial.van.mission.MissionSurfaceTest" time="0.0"/>
+  <testcase name="unverifiableNeverReadsAsSuccess" classname="com.dial.van.mission.MissionSurfaceTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

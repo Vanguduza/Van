@@ -1,0 +1,142 @@
+--- a/trading/vati/core/ledger_pg.py
++++ b/trading/vati/core/ledger_pg.py
+@@ -66,7 +66,8 @@
+         self.path = dsn
+         self.name = ledger_name
+         self._atomic_depth = 0
+-        self._conn = (connect or psycopg.connect)(dsn)
++        self._connect = connect or psycopg.connect
++        self._conn = self._connect(dsn)
+         self._conn.autocommit = False
+         try:
+             with self._conn.cursor() as cur:
+@@ -83,6 +84,32 @@
+             self._conn.rollback()
+             self._conn.close()
+             raise
++
++    @contextmanager
++    def committed_reader(self):
++        """Read original commits without touching this owner's transaction.
++
++        Recovery can hold the writer lock while examining previously committed
++        native facts. A normal constructor performs initialization writes and
++        would contend with that lock, so this owner only opens and validates
++        the existing namespace inside a database-enforced read-only snapshot.
++        """
++        reader = PostgresLedger.__new__(PostgresLedger)
++        reader.path, reader.name = self.path, self.name
++        reader._atomic_depth = 0
++        reader._connect = self._connect
++        reader._conn = reader._connect(reader.path)
++        try:
++            reader._conn.autocommit = False
++            with reader.read_snapshot():
++                with reader._conn.cursor() as cursor:
++                    require_scoped_schema(cursor)
++                    cursor.execute('SELECT 1 FROM vati.chain_head WHERE ledger = %s', (reader.name,))
++                    if cursor.fetchone() is None:
++                        raise LedgerError('committed reader ledger namespace is unavailable')
++                yield reader
++        finally:
++            reader.close()
+ 
+     # ------------------------------------------------------------------ write
+     @contextmanager
+--- a/trading/vati/execution/recovery_scope.py
++++ b/trading/vati/execution/recovery_scope.py
+@@ -1,4 +1,5 @@
+ """Native account/command provenance for restart recovery; never an order path."""
++from contextlib import nullcontext
+ from dataclasses import fields
+ from decimal import Decimal,InvalidOperation
+ 
+@@ -34,10 +35,17 @@
+     def __init__(self,ledger,*,account_alias,venue):
+         if not isinstance(account_alias,str) or not account_alias or not isinstance(venue,str) or not venue:
+             raise PositionRecoveryError('native account/venue binding is unavailable')
+-        with committed_source_snapshot(ledger):
+-            if not ledger.verify_chain()[0]:
++        # Recovery review may run while the owner holds the writer lock for
++        # its eventual effect/outcome commit. Its staged rows are not original
++        # evidence: use a separate, scoped read-only owner in that case.
++        independent = getattr(ledger, 'committed_reader', None)
++        owns_writer = (getattr(ledger, '_atomic_depth', 0) > 0
++                       and not getattr(ledger, '_read_snapshot_depth', 0))
++        source_context = independent() if owns_writer and callable(independent) else nullcontext(ledger)
++        with source_context as source, committed_source_snapshot(source):
++            if not source.verify_chain()[0]:
+                 raise PositionRecoveryError('native recovery ledger chain is invalid')
+-            self.rows=tuple(ledger.iter())
++            self.rows=tuple(source.iter())
+         self.account_alias=account_alias;self.venue=venue
+         self.commands={};self.command_refs={};self.conflicts=set()
+         candidates={};identities={};refs={}
+--- /dev/null
++++ b/trading/tests/test_family_committed_recovery_postgres.py
+@@ -0,0 +1,65 @@
++"""Native recovery inside an owner transaction reads only original commits."""
++from contextlib import closing
++
++import pytest
++
++from test_postgres_ledger_isolation import pg_dsn, event
++from test_account_lifecycle import _command, _append_command
++from vati.core.ledger import LedgerError, committed_source_snapshot
++from vati.core.ledger_pg import PostgresLedger
++from vati.execution.recovery_scope import NativePositionHistory
++
++
++def test_native_recovery_inside_writer_excludes_staged_original_commands(pg_dsn):
++    with closing(PostgresLedger(pg_dsn, ledger_name='native-book')) as writer, closing(
++        PostgresLedger(pg_dsn, ledger_name='foreign-book')
++    ) as foreign:
++        original = _command('original-committed')
++        staged = _command('original-not-committed')
++        unrelated = _command('foreign-committed')
++        _append_command(writer, original)
++        _append_command(foreign, unrelated)
++        head = writer.head()
++        with pytest.raises(RuntimeError, match='rollback original writer'):
++            with writer.atomic():
++                _append_command(writer, staged)
++                with pytest.raises(LedgerError, match='requires_idle_or_readonly'):
++                    with committed_source_snapshot(writer):
++                        pytest.fail('writer must not become committed source')
++                history = NativePositionHistory(writer, account_alias='acct', venue='paper')
++                assert set(history.commands) == {original.trade_intent_id}
++                assert writer._atomic_depth == 1
++                assert writer.count() == 2  # the reader did not roll back the caller
++                assert writer.head() != head
++                raise RuntimeError('rollback original writer')
++        assert writer.head() == head and writer.count() == 1
++        assert writer.verify_chain() == (True, 1)
++        _append_command(writer, staged)
++        assert set(NativePositionHistory(writer, account_alias='acct', venue='paper').commands) == {
++            original.trade_intent_id, staged.trade_intent_id,
++        }
++
++
++def test_independent_committed_reader_is_repeatable_read_only_and_closes(pg_dsn):
++    with closing(PostgresLedger(pg_dsn, ledger_name='native-book')) as writer:
++        writer.append(event(1))
++        with pytest.raises(RuntimeError, match='consumer failure'):
++            with writer.committed_reader() as reader:
++                connection = reader._conn
++                with connection.cursor() as cursor:
++                    cursor.execute('SHOW transaction_read_only')
++                    assert cursor.fetchone() == ('on',)
++                    cursor.execute('SHOW transaction_isolation')
++                    assert cursor.fetchone() == ('repeatable read',)
++                with committed_source_snapshot(reader):
++                    assert reader.verify_chain() == (True, 1)
++                    assert [row.hash for row in reader.iter()] == [event(1).hash]
++                    writer.append(event(2))
++                    assert reader.verify_chain() == (True, 1)
++                    assert [row.hash for row in reader.iter()] == [event(1).hash]
++                    with pytest.raises(LedgerError, match='cannot append'):
++                        reader.append(event(3))
++                    raise RuntimeError('consumer failure')
++        assert connection.closed
++        assert writer.verify_chain() == (True, 2)
++        assert [row.hash for row in writer.iter()] == [event(1).hash, event(2).hash]

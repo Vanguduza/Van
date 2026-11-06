@@ -1,0 +1,1117 @@
+{
+  "schema": "van.rebuild.native-balance-reconciliation-source/1",
+  "observed_at_utc": "2026-10-24T10:44:33.997742+00:00",
+  "source_parent": "12e2a20e6ac9fe91b0ae182667d32637cc80072e",
+  "source_sha256": {
+    "android/app/src/main/java/com/dial/van/trading/FundingObservation.kt": "ab37a5993e054d57dd2618c1a4e9fac4b032aaf088c2a099f0df6b064b712a36",
+    "android/app/src/main/java/com/dial/van/trading/NativeBalancePeriod.kt": "f82881e4167cafb280b213983d9e33cfe9fe6f04eb57cb553afde4dd4e294fa9",
+    "android/app/src/test/java/com/dial/van/trading/NativeBalancePeriodTest.kt": "e14ebaded6a0c51cbab383171fd0baa9c27587f213f27a01e12807bd441c4b5f",
+    "android/verification/build.gradle.kts": "57caaf8026d4a0a3e679a04df47861167c851af117d0763320aa6477469430a4",
+    "android/verification/src/test/kotlin/com/dial/van/trading/NativeBalanceSourceContractTest.kt": "2243ee0374cd9e196362d931a76885d91fc96714439c1ee25c3d4f51457f7656",
+    "backend/tests/test_native_balance_owner_api.py": "87a951195e4f096e5268a7c1ceea320ae6855be5cedc1083e2bc4e65c53647ca",
+    "trading/tests/test_funding_runtime.py": "d498b3b2915d63eb1bbf4199def7f4de6d792deb671e4400005955050ae9b22d",
+    "trading/tests/test_ledger_read_snapshot.py": "1adb70216bc4e754c031db728f0b9e56d83fd68aabe8bc419fd04d160ca4ae87",
+    "trading/tests/test_native_balance_postgres.py": "145d3805659fc9d6aa3576a27a2fdd3f06e587bf6270a2d2a97b4e811949fcc2",
+    "trading/tests/test_native_balance_reconciliation.py": "0083cbe383dd5cb90b70381bc77189dc8064dfbb0b39927f0694520e74ce21c6",
+    "trading/tests/test_native_balance_runtime.py": "6c0d3b0d10f86d3fc4c768e622336328bbaf7a3217ac1dfd2c84011dedfa47e5",
+    "trading/tests/test_native_cash_history.py": "eff72d44e329687f771936f4032a030298a59711529608181fae3949bb03845b",
+    "trading/tests/test_native_deal_history.py": "a0422979d2753562e147d9e9ddf7deaa0049bd209dbfdffd73201f416ff252a1",
+    "trading/tests/test_native_deal_journal.py": "9fc757f80c78d83094a04a03555e504deb2abc59d4a4f2798056c15c13609531",
+    "trading/vati/app/account_service.py": "52a93052341881a72a7dc6fccc0eef7420e114ebcf011d48917805f18706c410",
+    "trading/vati/app/portfolio.py": "f9e4c3328c19ef42274ace2c5c5b77292d433c7234fe77fb7a2db5e3f05fb4ac",
+    "trading/vati/app/service.py": "c033fb747294cbe099e62dd9b5048abceec3d03d84c12ae2c271dd473780bc5c",
+    "trading/vati/core/events.py": "600d8dbe221664637ac8a2177ef31f019f5e4b2b6e715698050e022bc0844dda",
+    "trading/vati/core/ledger.py": "5fe859a396253393feae6a998a2490fc90c2fb6f05cb96ab593cfa1c1614d45a",
+    "trading/vati/core/ledger_pg.py": "32ba0112e242266d7fb8917a2323851aafe0099f5bbd6bf92015f4dc98d7b6e6",
+    "trading/vati/execution/ctrader/adapter.py": "e53cb2419de13c6c45d7e21376de22d48ef648449f762e36c7ca390ec774ef36",
+    "trading/vati/funding/deal_journal.py": "e6404ce9f7722d94e46a9bd785b57a90f580d571f53bd056ae9aa1e470cc25d5",
+    "trading/vati/funding/deals.py": "47a0473feee0cbc5421e17e2e90845dc8848991dad58b43d836eb83567f4ec40",
+    "trading/vati/funding/journal.py": "685b858931b41e2d86bc3cf820cb1b9004f9256930ca677518218f2336044b8e",
+    "trading/vati/funding/native.py": "94043c1efb64d04af2bd22f82932d81d3e9fd0e3b2276a23d13776347ad7ffb0",
+    "trading/vati/funding/reconciliation.py": "8304170ea51dc335c3333609b4a3f24d016b2c8c0f5e1c76dd296ac8e3b5b9b0",
+    "trading/vati/funding/runtime.py": "2778c000d3ca9f09f829318d9d06ea9178990e4404cd8177e4d75539d901da61"
+  },
+  "integration_preimages": {
+    "parent": "12e2a20e6ac9fe91b0ae182667d32637cc80072e",
+    "files": {
+      "android/app/src/main/java/com/dial/van/trading/FundingObservation.kt": {
+        "preimage_sha256": "973647099ee6574ce42a95cdc6d50206272a588226792fb9b0fbfda151873eef",
+        "candidate_sha256": "ab37a5993e054d57dd2618c1a4e9fac4b032aaf088c2a099f0df6b064b712a36"
+      },
+      "android/app/src/main/java/com/dial/van/trading/NativeBalancePeriod.kt": {
+        "preimage_sha256": null,
+        "candidate_sha256": "f82881e4167cafb280b213983d9e33cfe9fe6f04eb57cb553afde4dd4e294fa9"
+      },
+      "android/app/src/test/java/com/dial/van/trading/NativeBalancePeriodTest.kt": {
+        "preimage_sha256": null,
+        "candidate_sha256": "e14ebaded6a0c51cbab383171fd0baa9c27587f213f27a01e12807bd441c4b5f"
+      },
+      "android/verification/build.gradle.kts": {
+        "preimage_sha256": "aca688b8c3870458834b5022b3223be24063a35942fda158f7704f573fa3a280",
+        "candidate_sha256": "57caaf8026d4a0a3e679a04df47861167c851af117d0763320aa6477469430a4"
+      },
+      "android/verification/src/test/kotlin/com/dial/van/trading/NativeBalanceSourceContractTest.kt": {
+        "preimage_sha256": null,
+        "candidate_sha256": "2243ee0374cd9e196362d931a76885d91fc96714439c1ee25c3d4f51457f7656"
+      },
+      "backend/tests/test_native_balance_owner_api.py": {
+        "preimage_sha256": null,
+        "candidate_sha256": "87a951195e4f096e5268a7c1ceea320ae6855be5cedc1083e2bc4e65c53647ca"
+      },
+      "trading/tests/test_funding_runtime.py": {
+        "preimage_sha256": "f5a525f37e2b82195ca1ce550a248a937e506195c1a5761b8dc6a09a4a5a22d8",
+        "candidate_sha256": "d498b3b2915d63eb1bbf4199def7f4de6d792deb671e4400005955050ae9b22d"
+      },
+      "trading/tests/test_ledger_read_snapshot.py": {
+        "preimage_sha256": null,
+        "candidate_sha256": "1adb70216bc4e754c031db728f0b9e56d83fd68aabe8bc419fd04d160ca4ae87"
+      },
+      "trading/tests/test_native_balance_postgres.py": {
+        "preimage_sha256": null,
+        "candidate_sha256": "145d3805659fc9d6aa3576a27a2fdd3f06e587bf6270a2d2a97b4e811949fcc2"
+      },
+      "trading/tests/test_native_balance_reconciliation.py": {
+        "preimage_sha256": null,
+        "candidate_sha256": "0083cbe383dd5cb90b70381bc77189dc8064dfbb0b39927f0694520e74ce21c6"
+      },
+      "trading/tests/test_native_balance_runtime.py": {
+        "preimage_sha256": null,
+        "candidate_sha256": "6c0d3b0d10f86d3fc4c768e622336328bbaf7a3217ac1dfd2c84011dedfa47e5"
+      },
+      "trading/tests/test_native_cash_history.py": {
+        "preimage_sha256": "7ba27ac68cf502c5ba8aa2add870fdcc3b8709c5e421e40d9300e979c67e6ea2",
+        "candidate_sha256": "eff72d44e329687f771936f4032a030298a59711529608181fae3949bb03845b"
+      },
+      "trading/tests/test_native_deal_history.py": {
+        "preimage_sha256": null,
+        "candidate_sha256": "a0422979d2753562e147d9e9ddf7deaa0049bd209dbfdffd73201f416ff252a1"
+      },
+      "trading/tests/test_native_deal_journal.py": {
+        "preimage_sha256": null,
+        "candidate_sha256": "9fc757f80c78d83094a04a03555e504deb2abc59d4a4f2798056c15c13609531"
+      },
+      "trading/vati/app/account_service.py": {
+        "preimage_sha256": "8a5035229f789d5a0e327aa7936ea5f8cb837f1d7959f9551ab44ee5e0b2b8b3",
+        "candidate_sha256": "52a93052341881a72a7dc6fccc0eef7420e114ebcf011d48917805f18706c410"
+      },
+      "trading/vati/app/portfolio.py": {
+        "preimage_sha256": "11e34334dd721c58a919fb6ab667572145e8ab8b805512a1cc010733c1d5bf55",
+        "candidate_sha256": "f9e4c3328c19ef42274ace2c5c5b77292d433c7234fe77fb7a2db5e3f05fb4ac"
+      },
+      "trading/vati/app/service.py": {
+        "preimage_sha256": "50fe47463f05803d85dcbcd0be15778f2f8b27092264c27aa75e87cb46d4736d",
+        "candidate_sha256": "c033fb747294cbe099e62dd9b5048abceec3d03d84c12ae2c271dd473780bc5c"
+      },
+      "trading/vati/core/events.py": {
+        "preimage_sha256": "015c37d7642502de5c7249e07ef743c5070f1bf114513e22b725e16ea3a3e2e1",
+        "candidate_sha256": "600d8dbe221664637ac8a2177ef31f019f5e4b2b6e715698050e022bc0844dda"
+      },
+      "trading/vati/core/ledger.py": {
+        "preimage_sha256": "d5f0d32b03be5f1bacf833042fbe0c5a2097cc5f197a4f6cd6e1155ee6df33ef",
+        "candidate_sha256": "5fe859a396253393feae6a998a2490fc90c2fb6f05cb96ab593cfa1c1614d45a"
+      },
+      "trading/vati/core/ledger_pg.py": {
+        "preimage_sha256": "e24b0a7024e84448bc9c1fdcde58327b0010c26f4337fcd8ed3fecb71c7be735",
+        "candidate_sha256": "32ba0112e242266d7fb8917a2323851aafe0099f5bbd6bf92015f4dc98d7b6e6"
+      },
+      "trading/vati/execution/ctrader/adapter.py": {
+        "preimage_sha256": "4a1b82b48699b2d57df590a6d66afd947373419a2e2bde5449c77a54a98110f5",
+        "candidate_sha256": "e53cb2419de13c6c45d7e21376de22d48ef648449f762e36c7ca390ec774ef36"
+      },
+      "trading/vati/funding/deal_journal.py": {
+        "preimage_sha256": null,
+        "candidate_sha256": "e6404ce9f7722d94e46a9bd785b57a90f580d571f53bd056ae9aa1e470cc25d5"
+      },
+      "trading/vati/funding/deals.py": {
+        "preimage_sha256": null,
+        "candidate_sha256": "47a0473feee0cbc5421e17e2e90845dc8848991dad58b43d836eb83567f4ec40"
+      },
+      "trading/vati/funding/journal.py": {
+        "preimage_sha256": "e7f457e0644f04dda93fc8227ee341acc013ea700b987cf5dd238c0eb2e3c0d7",
+        "candidate_sha256": "685b858931b41e2d86bc3cf820cb1b9004f9256930ca677518218f2336044b8e"
+      },
+      "trading/vati/funding/native.py": {
+        "preimage_sha256": "d99dd6d70cff595d9bcad4b6b37edd90895ed0f2fcdd3cb4a8bff71ca7fb4ec2",
+        "candidate_sha256": "94043c1efb64d04af2bd22f82932d81d3e9fd0e3b2276a23d13776347ad7ffb0"
+      },
+      "trading/vati/funding/reconciliation.py": {
+        "preimage_sha256": null,
+        "candidate_sha256": "8304170ea51dc335c3333609b4a3f24d016b2c8c0f5e1c76dd296ac8e3b5b9b0"
+      },
+      "trading/vati/funding/runtime.py": {
+        "preimage_sha256": "737083c69cf35f58843c2f0a3fb9ca41e6f4f8c9300bb4415516a80bb9a3b3ba",
+        "candidate_sha256": "2778c000d3ca9f09f829318d9d06ea9178990e4404cd8177e4d75539d901da61"
+      }
+    }
+  },
+  "executions": {
+    "focused_native_runtime_and_original_ledger": {
+      "tests": 102,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 102,
+      "seconds": 0.675,
+      "xml_sha256": "464224c7af0ca4a2b7d5e680eb513a67a5ce09c5d27be15156c14fb0ebb97aa4"
+    },
+    "real_postgresql_read_and_write_semantics": {
+      "tests": 59,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 59,
+      "seconds": 1.124,
+      "xml_sha256": "f9b3d419a2dfb47cfa47e68098331d9baae404106cd7ec9a54f02dfb21b2fd50"
+    },
+    "gateway_storage_backup_and_private_import_integration": {
+      "tests": 183,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 183,
+      "seconds": 38.161,
+      "xml_sha256": "76885c81439acef0ce5409529db7409361bd40329a30ceba55d1a71824ecc036"
+    },
+    "owner_registry_and_runtime_contracts": {
+      "tests": 35,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 35,
+      "seconds": 3.804,
+      "xml_sha256": "cb739492a9990309d656b4896a0539a3330cb7ad464f39f993b9bc5a88ef82d0"
+    },
+    "rebuild": {
+      "tests": 80,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 80,
+      "seconds": 30.731,
+      "xml_sha256": "01f489899438fa3a1e1f24c0bbf7d00fd0e0437fa0627206edeba54777839199"
+    },
+    "standalone_full_kotlin_junit5_harness": {
+      "tests": 1330,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 1330,
+      "seconds": 3.365,
+      "xml_sha256": "7ed6347c27959c4477a58a7b30dc987c01b7c66e303f45ff44e2796124b52a97"
+    },
+    "android_app_FundingObservationTest": {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 2,
+      "seconds": 0.044,
+      "xml_sha256": "6c8b34447cfe643dfbe0825c147ba86eae09d6030958628a8a68e789c3244b24"
+    },
+    "android_app_TradingModelsTest": {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 3,
+      "seconds": 0.05,
+      "xml_sha256": "d45690360813225485f9f65994534eec89e3fa9faf51b5d8987dd13aff15b3c3"
+    },
+    "android_app_NativeBalancePeriodTest": {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 2,
+      "seconds": 0.002,
+      "xml_sha256": "f10f7aea8163094bbfddd859e8d3cba17f42e1a630030a5b7eab2e037ac68bda"
+    }
+  },
+  "executions_overlap": true,
+  "storage_audit": {
+    "schema": "van.source-storage-audit/1",
+    "forbidden_events": [],
+    "source_sha256": "d4e270150fb0da6e8d79b449dd0de68fd1f97b3ccea3d282f31d91297edbd495",
+    "root": "/workspace/van-review-2026-10-18/publish",
+    "scope": "SQLite opens, path-based writable opens and directory/link/rename/delete events under data and backend/data",
+    "limits": "Python audit events only; existing fd writes, native-library raw I/O and external processes are not an OS sandbox. Git state is checked separately."
+  },
+  "private_pg_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "fault_campaign": {
+    "definitions": [
+      [
+        "treat a native partial page as complete",
+        [
+          [
+            "trading/vati/funding/deals.py",
+            "if response['hasMore']:",
+            "if False:"
+          ]
+        ],
+        "trading/tests/test_native_deal_history.py::test_timestamp_partitioning_collects_complete_native_pages_without_id_order_assumptions"
+      ],
+      [
+        "drop native deals at a saturated millisecond",
+        [
+          [
+            "trading/vati/funding/deals.py",
+            "if lo==hi:raise ValueError('native_same_millisecond_page_saturated')",
+            "if lo==hi:leaves.update((row.native_id,row) for row in rows);continue"
+          ]
+        ],
+        "trading/tests/test_native_deal_history.py::test_saturated_native_millisecond_never_drops_equal_time_deals_or_claims_a_complete_page"
+      ],
+      [
+        "accept changing native facts across page reads",
+        [
+          [
+            "trading/vati/funding/deals.py",
+            "if row.native_id in seen and seen[row.native_id]!=row:raise ValueError('native_deal_history_changed_during_read')",
+            "if False:raise ValueError()"
+          ]
+        ],
+        "trading/tests/test_native_deal_history.py::test_partial_foreign_or_changing_native_history_is_refused_as_a_whole"
+      ],
+      [
+        "read foreign native identity from a valid hashed deal event",
+        [
+          [
+            "trading/vati/funding/journal.py",
+            "statement.scope_hash!=scope_hash or self._key(statement)!=event.payload['content_key']",
+            "False"
+          ]
+        ],
+        "trading/tests/test_native_deal_journal.py::test_valid_hash_does_not_admit_a_foreign_native_deal_scope"
+      ],
+      [
+        "count a deposit as account PnL",
+        [
+          [
+            "trading/vati/funding/reconciliation.py",
+            "external_total=sum((Fraction(Decimal(row['delta'])) for row in external),Fraction(0))",
+            "external_total=Fraction(0)"
+          ]
+        ],
+        "trading/tests/test_native_balance_reconciliation.py::test_external_deposit_reconciles_capital_without_guessing_historical_net_equity"
+      ],
+      [
+        "publish an invented percentage return across external cash",
+        [
+          [
+            "trading/vati/funding/reconciliation.py",
+            "if external:return result|{'reason':'NORMALIZED_HISTORICAL_FLOW_EQUITY_UNAVAILABLE'}",
+            "if False:return result|{'reason':'NORMALIZED_HISTORICAL_FLOW_EQUITY_UNAVAILABLE'}"
+          ]
+        ],
+        "trading/tests/test_native_balance_reconciliation.py::test_external_deposit_reconciles_capital_without_guessing_historical_net_equity"
+      ],
+      [
+        "count separate IB income as trading account PnL",
+        [
+          [
+            "trading/vati/funding/reconciliation.py",
+            "if category=='OTHER_BUSINESS_INCOME_OR_EXPENSE':business+=Fraction(Decimal(row['delta']))",
+            "if category=='OTHER_BUSINESS_INCOME_OR_EXPENSE':business+=Fraction(0)"
+          ]
+        ],
+        "trading/tests/test_native_balance_reconciliation.py::test_bank_capital_and_ib_business_income_cannot_be_counted_as_trading_profit"
+      ],
+      [
+        "invent a closing change to fill a missing native balance version",
+        [
+          [
+            "trading/vati/funding/reconciliation.py",
+            "if version not in changes:return result|{'reason':'NATIVE_BALANCE_VERSION_GAP','missing_version':version}",
+            "if version not in changes:changes[version]=(Fraction(c.balance),last.hash,'NATIVE_CLOSE',None)"
+          ]
+        ],
+        "trading/tests/test_native_balance_reconciliation.py::test_unreconciled_history_never_looks_like_zero_profit_or_a_qualified_return"
+      ],
+      [
+        "use an old collector mark as current account evidence",
+        [
+          [
+            "trading/vati/app/account_service.py",
+            "\"native_account_mark\": mark,",
+            "\"native_account_mark\": funding.get(\"native_mark\"),"
+          ]
+        ],
+        "trading/tests/test_funding_runtime.py::test_both_existing_runtime_snapshot_producers_ingest_native_facts[account]"
+      ],
+      [
+        "use an old collector mark as current session evidence",
+        [
+          [
+            "trading/vati/app/service.py",
+            "\"native_account_mark\": mark,",
+            "\"native_account_mark\": funding.get(\"native_mark\"),"
+          ]
+        ],
+        "trading/tests/test_funding_runtime.py::test_both_existing_runtime_snapshot_producers_ingest_native_facts[session]"
+      ],
+      [
+        "backdate account evidence before native I/O completed",
+        [
+          [
+            "trading/vati/app/account_service.py",
+            "event_time_ms=now_ms, received_time_ms=received_ms,",
+            "event_time_ms=now_ms, received_time_ms=now_ms,"
+          ]
+        ],
+        "trading/tests/test_funding_runtime.py::test_both_existing_runtime_snapshot_producers_ingest_native_facts[account]"
+      ],
+      [
+        "backdate session evidence before native I/O completed",
+        [
+          [
+            "trading/vati/app/service.py",
+            "event_time_ms=now_ms, received_time_ms=received_ms,",
+            "event_time_ms=now_ms, received_time_ms=now_ms,"
+          ]
+        ],
+        "trading/tests/test_funding_runtime.py::test_both_existing_runtime_snapshot_producers_ingest_native_facts[session]"
+      ],
+      [
+        "reserve the financial writer while an owner reads",
+        [
+          [
+            "trading/vati/core/ledger.py",
+            "self._conn.execute('PRAGMA query_only=ON')",
+            "self._conn.execute('PRAGMA query_only=OFF')"
+          ],
+          [
+            "trading/vati/core/ledger.py",
+            "self._conn.execute('BEGIN')",
+            "self._conn.execute('BEGIN IMMEDIATE')"
+          ]
+        ],
+        "trading/tests/test_ledger_read_snapshot.py::test_read_snapshot_is_repeatable_while_an_independent_writer_can_commit"
+      ],
+      [
+        "erase an observed drawdown after recovery",
+        [
+          [
+            "trading/vati/funding/reconciliation.py",
+            "peak=Fraction(b.net_equity);worst=Fraction(0)\n            for source,mark in samples:",
+            "peak=Fraction(b.net_equity);worst=Fraction(0)\n            for source,mark in (samples[0],samples[-1]):"
+          ]
+        ],
+        "trading/tests/test_native_balance_reconciliation.py::test_all_observed_native_marks_contribute_to_drawdown_even_after_a_recovery"
+      ],
+      [
+        "accept native data as known before its receipt",
+        [
+          [
+            "trading/vati/funding/reconciliation.py",
+            "or event.received_time_ms<mark.observed_at_ms",
+            "or False"
+          ]
+        ],
+        "trading/tests/test_native_balance_reconciliation.py::test_backdated_native_availability_is_never_used_as_known_at_the_original_time"
+      ],
+      [
+        "accept advisor content as native account evidence",
+        [
+          [
+            "trading/vati/funding/reconciliation.py",
+            "event.producer not in {'vati-account-service','vati-service'}",
+            "False"
+          ]
+        ],
+        "trading/tests/test_native_balance_reconciliation.py::test_an_advisor_cannot_supply_native_mark_evidence_by_copying_an_account_body"
+      ],
+      [
+        "ignore the native cash amount versus its balance change",
+        [
+          [
+            "trading/vati/funding/reconciliation.py",
+            "if after!=expected:return result|{'reason':'NATIVE_CASH_BALANCE_MISMATCH','balance_version':version}",
+            "if False:return result|{'reason':'NATIVE_CASH_BALANCE_MISMATCH','balance_version':version}"
+          ]
+        ],
+        "trading/tests/test_native_balance_reconciliation.py::test_unreconciled_history_never_looks_like_zero_profit_or_a_qualified_return"
+      ],
+      [
+        "calculate without complete cash and deal source coverage",
+        [
+          [
+            "trading/vati/funding/reconciliation.py",
+            "and covers(cash['coverage_windows'],b.observed_at_ms,row[1].observed_at_ms)\n            and covers(deals['coverage_windows'],b.observed_at_ms,row[1].observed_at_ms)",
+            "and True\n            and True"
+          ]
+        ],
+        "trading/tests/test_native_balance_reconciliation.py::test_source_coverage_and_original_marks_are_required_instead_of_empty_history_assumptions"
+      ],
+      [
+        "guess closing money precision from another object",
+        [
+          [
+            "trading/vati/funding/deals.py",
+            "exponent=native_int(detail['moneyDigits'],minimum=0,maximum=18)",
+            "exponent=2"
+          ]
+        ],
+        "trading/tests/test_native_deal_history.py::test_native_deal_precision_is_row_owned_and_optional_finality_fields_stay_unknown"
+      ]
+    ],
+    "records": [
+      {
+        "case": 0,
+        "phase": "control",
+        "reason": "treat a native partial page as complete",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "def7e6192cfd1d5f313e5f529d351fbdd510ac7588e492d8f7e947f32038bf13"
+      },
+      {
+        "case": 0,
+        "phase": "fault",
+        "reason": "treat a native partial page as complete",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "31d78eaae5715ab4c7a9431861637d070bf00bb9cfd4d13e2d72c9ea07060d4b"
+      },
+      {
+        "case": 1,
+        "phase": "control",
+        "reason": "drop native deals at a saturated millisecond",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "52334588c5d4a15a1be5e7c5362f435a3bce62b92dc00a6728dbd05c47d1aa97"
+      },
+      {
+        "case": 1,
+        "phase": "fault",
+        "reason": "drop native deals at a saturated millisecond",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "5b0fa6860b92daf96df7ddbd727cda90c55c0a333d1a2c741143625242e1cda8"
+      },
+      {
+        "case": 2,
+        "phase": "control",
+        "reason": "accept changing native facts across page reads",
+        "exit_code": 0,
+        "counts": {
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "02671ed5b5a112599fd1613b7642b23fb5762656329fc2674bfbccd36d3540ed"
+      },
+      {
+        "case": 2,
+        "phase": "fault",
+        "reason": "accept changing native facts across page reads",
+        "exit_code": 1,
+        "counts": {
+          "tests": 6,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "e65529afba98a5aa08fd3f7a8a2b628ae37b0f55dcaf2cba0595e8887daa10e5"
+      },
+      {
+        "case": 3,
+        "phase": "control",
+        "reason": "read foreign native identity from a valid hashed deal event",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "dcc635e8fe3b1530da753966de7eccb39078b19445d77cb6512a601a55a2164e"
+      },
+      {
+        "case": 3,
+        "phase": "fault",
+        "reason": "read foreign native identity from a valid hashed deal event",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "e93df73fbcc1fbd10b3abe5b34f2f2ea9ae4e2b726c869ee9325f54488248e2e"
+      },
+      {
+        "case": 4,
+        "phase": "control",
+        "reason": "count a deposit as account PnL",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "c053870f2d4d5da2a9395dc11d166fa839e87d38a2e66f7347716cf3b4b9c480"
+      },
+      {
+        "case": 4,
+        "phase": "fault",
+        "reason": "count a deposit as account PnL",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "5dfc7d8b5536eb9d7913aa840844b0c8aeea5f015d330be30c7c99d9e0d5c122"
+      },
+      {
+        "case": 5,
+        "phase": "control",
+        "reason": "publish an invented percentage return across external cash",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "9a10246c74d5749f3e044e871cfa51a79017b96d7f202341897a9489b5e70f08"
+      },
+      {
+        "case": 5,
+        "phase": "fault",
+        "reason": "publish an invented percentage return across external cash",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "1f54511e692f4ac9265da847d95be9614bbca4140948c84f5dc3904740e8fc83"
+      },
+      {
+        "case": 6,
+        "phase": "control",
+        "reason": "count separate IB income as trading account PnL",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "c1ee161eda1b346cf654168279fd098a82f4cdd4ec6418f263a4f9fa415cc1f4"
+      },
+      {
+        "case": 6,
+        "phase": "fault",
+        "reason": "count separate IB income as trading account PnL",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "09528979e6e5cf3badce698978e358c048e5d46160aac915e9f469dfc75f3012"
+      },
+      {
+        "case": 7,
+        "phase": "control",
+        "reason": "invent a closing change to fill a missing native balance version",
+        "exit_code": 0,
+        "counts": {
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "01afac54c6d059dae57ca60dac7d572e8f5e54a0039d458e56e2381b025ece18"
+      },
+      {
+        "case": 7,
+        "phase": "fault",
+        "reason": "invent a closing change to fill a missing native balance version",
+        "exit_code": 1,
+        "counts": {
+          "tests": 6,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "a72e3e23b77cfe1c45afd723fb62ca3706dd043a22069001d68d635be50a8eeb"
+      },
+      {
+        "case": 8,
+        "phase": "control",
+        "reason": "use an old collector mark as current account evidence",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "ffac92ed4a76d75479b23c936fcad5cfb624f2cb568ed9b27031c0bdd840ac68"
+      },
+      {
+        "case": 8,
+        "phase": "fault",
+        "reason": "use an old collector mark as current account evidence",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "0ff102992d0ce9ae59681efe06bf2a71f8e288825b2c183f193e02cb9c1b3152"
+      },
+      {
+        "case": 9,
+        "phase": "control",
+        "reason": "use an old collector mark as current session evidence",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "017c2cf875863eb3110fc43a761b64a4d144ad37d06e27f66236f50438d81843"
+      },
+      {
+        "case": 9,
+        "phase": "fault",
+        "reason": "use an old collector mark as current session evidence",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "faaf4b24840dc8ba35d6d04499c46fbc653eb1552081d989ce2812eb91e454c3"
+      },
+      {
+        "case": 10,
+        "phase": "control",
+        "reason": "backdate account evidence before native I/O completed",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "19c0bd5669fc4795e927a96fddaf7682b2b0de188c6c828ec60790cfc2a5e263"
+      },
+      {
+        "case": 10,
+        "phase": "fault",
+        "reason": "backdate account evidence before native I/O completed",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "21f97b745243bad46b6a59ac2cfd3bb10d5670cf873ccca5f15fb95e5c06daa7"
+      },
+      {
+        "case": 11,
+        "phase": "control",
+        "reason": "backdate session evidence before native I/O completed",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "7c5427582fcae3a44a1826a695da34d51b106625026933637eabd0a2fa322e94"
+      },
+      {
+        "case": 11,
+        "phase": "fault",
+        "reason": "backdate session evidence before native I/O completed",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "e1235f994d247ab91a250a1a8247e9129a06674316185502b638e2e8b1a8d653"
+      },
+      {
+        "case": 12,
+        "phase": "control",
+        "reason": "reserve the financial writer while an owner reads",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "eac617a48f5d79d5288b2ef6958d3c11728ed1b7645f14ee7cc49c3d6388496a"
+      },
+      {
+        "case": 12,
+        "phase": "fault",
+        "reason": "reserve the financial writer while an owner reads",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "f927a8d4e6794c78c0c43cd1534f8c6e86392a92dc788c996d39795d48ef41b9"
+      },
+      {
+        "case": 13,
+        "phase": "control",
+        "reason": "erase an observed drawdown after recovery",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "6f818257bdcd09446795f96051f1c745cfbd0909d480fb2a87db66b87ebadfe0"
+      },
+      {
+        "case": 13,
+        "phase": "fault",
+        "reason": "erase an observed drawdown after recovery",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "bfd39d817a9f7ac9a5f2978096dd3815693bc7870cb6e6882520f99fa12ce217"
+      },
+      {
+        "case": 14,
+        "phase": "control",
+        "reason": "accept native data as known before its receipt",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "a77f82335231dca86f9277bad04b6be3dad258621a03110e714a74d045b4c8b0"
+      },
+      {
+        "case": 14,
+        "phase": "fault",
+        "reason": "accept native data as known before its receipt",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "eaf6fb3f35d427d25c488ecb11207bc508428eb4142514f7518a51f7e675f083"
+      },
+      {
+        "case": 15,
+        "phase": "control",
+        "reason": "accept advisor content as native account evidence",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "453371976de85c985d12b73400b6d4e77488fd605de820a4bb4533e3c0958340"
+      },
+      {
+        "case": 15,
+        "phase": "fault",
+        "reason": "accept advisor content as native account evidence",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "fb5a80c417cf1e17711c6966dba5039111f2786bf4fc777fb141eaed752daa80"
+      },
+      {
+        "case": 16,
+        "phase": "control",
+        "reason": "ignore the native cash amount versus its balance change",
+        "exit_code": 0,
+        "counts": {
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "d192b944ea1de649f43c215fa2dc286d2e997a8872bfc08d15614171ba418a25"
+      },
+      {
+        "case": 16,
+        "phase": "fault",
+        "reason": "ignore the native cash amount versus its balance change",
+        "exit_code": 1,
+        "counts": {
+          "tests": 6,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "82cbfdc6ba1edd219f7500d8c57dfb37d38bf4f9dd37138d072e90626a453f1a"
+      },
+      {
+        "case": 17,
+        "phase": "control",
+        "reason": "calculate without complete cash and deal source coverage",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "445efb1f8d8138211f047daafa487a3898e16c403744ce03c1070e95e9e089c4"
+      },
+      {
+        "case": 17,
+        "phase": "fault",
+        "reason": "calculate without complete cash and deal source coverage",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "98f91181b529ea04dc3931b4e5c44d3e3dbc9f96d1e11de79ae05f7b2b81f511"
+      },
+      {
+        "case": 18,
+        "phase": "control",
+        "reason": "guess closing money precision from another object",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "61442e4cdab5604cee46a6de82359e07dd82081dadf474e37c36e8f98805effe"
+      },
+      {
+        "case": 18,
+        "phase": "fault",
+        "reason": "guess closing money precision from another object",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "13f932d88ae9cb365a211c4c45cae0db71a6f75b89a8ebb74355dd1897d28436"
+      }
+    ],
+    "before": {
+      "trading/vati/funding/deals.py": "47a0473feee0cbc5421e17e2e90845dc8848991dad58b43d836eb83567f4ec40",
+      "trading/vati/funding/journal.py": "685b858931b41e2d86bc3cf820cb1b9004f9256930ca677518218f2336044b8e",
+      "trading/vati/funding/reconciliation.py": "8304170ea51dc335c3333609b4a3f24d016b2c8c0f5e1c76dd296ac8e3b5b9b0",
+      "trading/vati/app/account_service.py": "52a93052341881a72a7dc6fccc0eef7420e114ebcf011d48917805f18706c410",
+      "trading/vati/app/service.py": "c033fb747294cbe099e62dd9b5048abceec3d03d84c12ae2c271dd473780bc5c",
+      "trading/vati/core/ledger.py": "5fe859a396253393feae6a998a2490fc90c2fb6f05cb96ab593cfa1c1614d45a"
+    },
+    "after": {
+      "trading/vati/funding/deals.py": "47a0473feee0cbc5421e17e2e90845dc8848991dad58b43d836eb83567f4ec40",
+      "trading/vati/funding/journal.py": "685b858931b41e2d86bc3cf820cb1b9004f9256930ca677518218f2336044b8e",
+      "trading/vati/funding/reconciliation.py": "8304170ea51dc335c3333609b4a3f24d016b2c8c0f5e1c76dd296ac8e3b5b9b0",
+      "trading/vati/app/account_service.py": "52a93052341881a72a7dc6fccc0eef7420e114ebcf011d48917805f18706c410",
+      "trading/vati/app/service.py": "c033fb747294cbe099e62dd9b5048abceec3d03d84c12ae2c271dd473780bc5c",
+      "trading/vati/core/ledger.py": "5fe859a396253393feae6a998a2490fc90c2fb6f05cb96ab593cfa1c1614d45a"
+    },
+    "source_restored": true
+  },
+  "standalone_execution": {
+    "method": "All compiled Gradle test classes discovered by the unchanged JUnit5 runtime engines, directly in one JVM; same verification working directory. Gradle worker runs below failed from native thread exhaustion. No test filter or assertion was weakened.",
+    "runtime": {
+      "exit_code": 0,
+      "classpath_sha256": "f33f05f4dd761fba964fae0d5ee945705eb0952d9555b2b6cd6fa5e051b59b46",
+      "runtime_files_sha256": {
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-test-junit5/2.0.21/9eff871dcc7b7cbc6050945b906dfdd6d5b76f02/kotlin-test-junit5-2.0.21.jar": "ac47de619b7d87e2bfdf7f6eec6a62a61d1bdc0c325740df52186b141936713d",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-test/2.0.21/c6ea143e356327ddfda57e53e829c553e3b45b64/kotlin-test-2.0.21.jar": "a897b28c6a3ea8ec8f00ed766941a0c0df993d7f65908875879868e08ceb8985",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-serialization-core-jvm/1.7.3/1f226780b845ff9206474c05159245d861556249/kotlinx-serialization-core-jvm-1.7.3.jar": "f0adde45864144475385cf4aa7e0b7feb27f61fcf9472665ed98cc971b06b1eb",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-serialization-json-jvm/1.7.3/6701e8c68d9e82387ce72ee96e8ddf058208d58f/kotlinx-serialization-json-jvm-1.7.3.jar": "b1e9138499ed8d20375edda3f2b1c95f3103a258eff6af9edc5ea07100f2b29c",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-coroutines-core-jvm/1.8.1/bb0e192bd7c2b6b8217440d36e9758e377e450/kotlinx-coroutines-core-jvm-1.8.1.jar": "f3d4f5de1c391bbcc20f3b3435ccbac013521e76b6902d7d59635ec15c1f797e",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/com.squareup.okhttp3/okhttp/4.12.0/2f4525d4a200e97e1b87449c2cd9bd2e25b7e8cd/okhttp-4.12.0.jar": "b1050081b14bb7a3a7e55a4d3ef01b5dcfabc453b4573a4fc019767191d5f4e0",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/com.squareup.okio/okio-jvm/3.6.0/5600569133b7bdefe1daf9ec7f4abeb6d13e1786/okio-jvm-3.6.0.jar": "67543f0736fc422ae927ed0e504b98bc5e269fda0d3500579337cb713da28412",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-jdk8/1.9.10/c7510d64a83411a649c76f2778304ddf71d7437b/kotlin-stdlib-jdk8-1.9.10.jar": "a4c74d94d64ce1abe53760fe0389dd941f6fc558d0dab35e47c085a11ec80f28",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-jdk7/1.9.10/bc5bfc2690338defd5195b05c57562f2194eeb10/kotlin-stdlib-jdk7-1.9.10.jar": "ac6361bf9ad1ed382c2103d9712c47cdec166232b4903ed596e8876b0681c9b7",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.0.21/618b539767b4899b4660a83006e052b63f1db551/kotlin-stdlib-2.0.21.jar": "f31cc53f105a7e48c093683bbd5437561d1233920513774b470805641bedbc09",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.json/json/20240303/ebb88e8fb5122b7506d5cf1d69f1ccdb790d22a/json-20240303.jar": "3cf6cd6892e32e2b4c1c39e0f52f5248a2f5b37646fdfbb79a66b46b618414ed",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/23.0.0/8cc20c07506ec18e0834947b84a864bfc094484e/annotations-23.0.0.jar": "7b0f19724082cbfcbc66e5abea2b9bc92cf08a1ea11e191933ed43801eb3cd05",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.junit.platform/junit-platform-launcher/1.10.1/ce85bf5e38bee0989ded9bd468dd4ff78dc0cfa8/junit-platform-launcher-1.10.1.jar": "ded414c504e88d02270331071969084e1b2fd9bcf8443f35d44da2c6e3301bc2",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.junit.platform/junit-platform-engine/1.10.1/f32ae4af74fde68414b8a3d2b7cf1fb43824a83a/junit-platform-engine-1.10.1.jar": "baa48e470d6dee7369a0a8820c51da89c1463279eda6e13a304d11f45922c760",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.junit.jupiter/junit-jupiter-api/5.10.1/eb90c7d8bfaae8fdc97b225733fcb595ddd72843/junit-jupiter-api-5.10.1.jar": "60d5c398c32dc7039b99282514ad6064061d8417cf959a1f6bd2038cc907c913",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.junit.platform/junit-platform-commons/1.10.1/2bfcd4a4e38b10c671b6916d7e543c20afe25579/junit-platform-commons-1.10.1.jar": "7d9855ee3f3f71f015eb1479559bf923783243c24fbfbd8b29bed8e8099b5672",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.junit.jupiter/junit-jupiter-engine/5.10.1/6c9ff773f9aa842b91d1f2fe4658973252ce2428/junit-jupiter-engine-5.10.1.jar": "02930dfe495f93fe70b26550ace3a28f7e1b900c84426c2e4626ce020c7282d6",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.opentest4j/opentest4j/1.3.0/152ea56b3a72f655d4fd677fc0ef2596c3dd5e6e/opentest4j-1.3.0.jar": "48e2df636cab6563ced64dcdff8abb2355627cb236ef0bf37598682ddf742f1b"
+      },
+      "launcher_sha256": "5fe6226afce432d5b464d03a92e8ae132c2ac9c1c034ced8b64008192854c0e1",
+      "working_directory": "/tmp/van-funding-normalization-work-20261024/android/verification"
+    },
+    "launcher_source_sha256": "5fe6226afce432d5b464d03a92e8ae132c2ac9c1c034ced8b64008192854c0e1",
+    "launcher_source": "import java.io.*;\nimport java.nio.file.*;\nimport java.util.*;\nimport javax.xml.stream.*;\nimport org.junit.platform.engine.TestExecutionResult;\nimport org.junit.platform.engine.discovery.DiscoverySelectors;\nimport org.junit.platform.launcher.*;\nimport org.junit.platform.launcher.core.*;\nimport org.junit.platform.launcher.listeners.*;\n\n/** Uses the unchanged JUnit 5 engines and compiled Gradle runtime classpath. */\npublic final class VanQualifiedTestLauncher {\n  record Case(String id, String name, String state, String message, double seconds) {}\n  public static void main(String[] args) throws Exception {\n    var records = new ArrayList<Case>();\n    var starts = new HashMap<String,Long>();\n    var summary = new SummaryGeneratingListener();\n    var recorder = new TestExecutionListener() {\n      public void executionStarted(TestIdentifier t) { if(t.isTest()) starts.put(t.getUniqueId(),System.nanoTime()); }\n      public void executionSkipped(TestIdentifier t, String why) { if(t.isTest()) records.add(new Case(t.getUniqueId(),t.getDisplayName(),\"SKIPPED\",why,0)); }\n      public void executionFinished(TestIdentifier t, TestExecutionResult r) {\n        if(t.isTest()) records.add(new Case(t.getUniqueId(),t.getDisplayName(),r.getStatus().name(),r.getThrowable().map(Throwable::toString).orElse(\"\"),(System.nanoTime()-starts.getOrDefault(t.getUniqueId(),System.nanoTime()))/1e9));\n      }\n    };\n    var request = LauncherDiscoveryRequestBuilder.request().selectors(DiscoverySelectors.selectClasspathRoots(Set.of(Path.of(args[0]).toAbsolutePath()))).build();\n    var launcher=LauncherFactory.create();\n    launcher.registerTestExecutionListeners(summary,recorder);\n    launcher.execute(request);\n    var s=summary.getSummary();\n    s.printTo(new PrintWriter(System.out,true)); s.printFailuresTo(new PrintWriter(System.out,true));\n    try(var out=Files.newOutputStream(Path.of(args[1]))) {\n      var x=XMLOutputFactory.newFactory().createXMLStreamWriter(out,\"UTF-8\");\n      x.writeStartDocument(\"UTF-8\",\"1.0\");x.writeStartElement(\"testsuites\");x.writeStartElement(\"testsuite\");\n      x.writeAttribute(\"name\",\"unchanged-full-Kotlin-JUnit5-harness\");x.writeAttribute(\"tests\",Long.toString(s.getTestsFoundCount()));\n      x.writeAttribute(\"failures\",Long.toString(s.getTestsFailedCount()));x.writeAttribute(\"errors\",Long.toString(s.getContainersFailedCount()));\n      x.writeAttribute(\"skipped\",Long.toString(s.getTestsSkippedCount()+s.getTestsAbortedCount()));\n      x.writeAttribute(\"time\",Double.toString((s.getTimeFinished()-s.getTimeStarted())/1000.0));\n      for(var c:records) {\n        x.writeStartElement(\"testcase\");x.writeAttribute(\"name\",c.name);x.writeAttribute(\"classname\",c.id);x.writeAttribute(\"time\",Double.toString(c.seconds));\n        if(!c.state.equals(\"SUCCESSFUL\")) {x.writeStartElement(c.state.equals(\"SKIPPED\")||c.state.equals(\"ABORTED\")?\"skipped\":\"failure\");x.writeAttribute(\"message\",c.message);x.writeEndElement();}\n        x.writeEndElement();\n      }\n      x.writeEndElement();x.writeEndElement();x.writeEndDocument();x.close();\n    }\n    if(records.size()!=s.getTestsFoundCount() || s.getTestsFoundCount()!=1330 || s.getTestsSucceededCount()!=1330 || s.getContainersFailedCount()!=0 || s.getTestsAbortedCount()!=0 || s.getTestsSkippedCount()!=0) System.exit(1);\n  }\n}\n"
+  },
+  "retained_nonpasses": {
+    "first_final_standalone": {
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 0,
+      "seconds": 0.559,
+      "xml_sha256": "af770d512f923d7e9508ab327f9bdfd56af4b9480f7d45c480cea427256562ed"
+    },
+    "second_final_standalone": {
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 0,
+      "seconds": 0.611,
+      "xml_sha256": "13791fea37a4c5c035531f7d118f84a7c2cb8d3b92f9ef394fe32ddbe47b46af"
+    },
+    "wrong_direct_launcher_working_directory": {
+      "tests": 1330,
+      "failures": 13,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 1317,
+      "seconds": 3.191,
+      "xml_sha256": "86bb20592ad2ae121d1337fcdc046360b00aa12def32a0f9f3b211d9f88a27ab"
+    },
+    "app_first_native_thread_failure_log_sha256": "485984fba2ff69e6d24d7fd7a42afa2d4088acc5b7d360f7a3b7277dd1a26ca3",
+    "notes": [
+      "The first app attempt had no staged generated voice bundle; the pinned existing bundle was then staged. App compilation and seven parser tests subsequently passed.",
+      "Standalone Gradle test-worker creation failed with OutOfMemoryError unable to create native thread; no product behavioral failure was hidden. Direct JUnit uses the same compiled classes/runtime and found/executed all1330 tests.",
+      "The first direct launcher used the repository directory instead of the verification directory; file-based vectors/resources failed. Its result is retained; the final unchanged suite uses its actual Gradle working directory.",
+      "Earlier native history tests overlapped an active browser run and had thread errors; earlier runtime fixtures lacked the new empty DealList response; an API assertion initially compared Decimal string formatting rather than its amount. Final source guards/oracles were retained."
+    ]
+  },
+  "provider_contract_sha256": {
+    "trading/vati/execution/ctrader/proto/OpenApiMessages.proto": "a84df9b528e69a494e197d48e21d6291b3d76db31396663a8188721eef9fcf35",
+    "trading/vati/execution/ctrader/proto/OpenApiModelMessages.proto": "56338dcac45a149227678b7c23637d64f4e2b607f6649af82394ce5c0957fedf"
+  },
+  "semantics": [
+    "Complete native deal windows, independent cash/deal cursors, row precision, signed commission, native scope, original statement identity/availability and changed-history conflicts are preserved.",
+    "Both original runtime producers store a current native mark separately from earlier background results; native I/O cannot be backdated into original availability.",
+    "Repeatable read snapshots do not acquire a financial writer reservation; actual independent SQLite/PostgreSQL writers can commit while the original owner read stays coherent.",
+    "Complete original query coverage and native balance versions/post-balances are required. Native closing costs are preserved but fee-allocation/settlement semantics are not inferred.",
+    "External capital and separate IB/management business income are removed/labeled in native dollar PnL. Percentage returns across missing historical normalized credit/equity remain unmeasured.",
+    "Marked account returns and sampled drawdowns do not establish strategy alpha, settled trade profitability or historical causal learning. Knowledge watermark is latest-observed, not as-known-at-trade-time.",
+    "The two existing paired-owner read routes and Android account SDK carry exact native IDs/money, period bases and unknown qualification. No frontend redesign or financial-effect endpoint is added."
+  ],
+  "original_mutation_preflight": {
+    "schema": "van.rebuild.mutation-registry-preflight/1",
+    "registry_sha256": "35d10c7b0f2b8319b7f7305828262c972b2a6451139d75b9e83c7d0062282955",
+    "mutation_count": 374,
+    "edit_count": 383,
+    "findings": [],
+    "execution_state": "NOT_RUN",
+    "status": "ANCHORS_VALID_BASELINES_AND_MUTATIONS_NOT_EXECUTED"
+  },
+  "historical_hosted_source": "receipts/HOSTED_SOURCE_12e2a20e.json; ci/MUTATION_CORPUS_12e2a20e.json; receipts/NATIVE_METAEDITOR_12e2a20e.json apply to that earlier exact head only.",
+  "remaining": [
+    "Source-bound normalized historical flow valuations/credit, corrections/reversals, other provider rails, consolidated transfers, risk-capital/reservation integration and full BE-007 quote/beneficiary/approval/reserve/submit/reconcile/settle/compensate/hosted-handoff wiring.",
+    "Complete current source backend/browser qualification, missing DDS CI read credential, trusted-main intake, native F15/BG admission and signed policy; real service/provider deployment/security/recovery/provisioning and S24 acceptance."
+  ],
+  "qualifications": {
+    "whole_unit_acceptance": "NOT_ISSUED",
+    "return_qualification": "NOT_ISSUED",
+    "trade_cost_settlement_qualification": "NOT_ISSUED",
+    "execution_authority": false,
+    "financial_effects_submitted": false,
+    "production_deployed": false,
+    "handset_tested": false,
+    "profitability_claimed": false,
+    "backend_complete": false
+  }
+}

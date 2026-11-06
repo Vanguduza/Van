@@ -1,0 +1,346 @@
+{
+  "schema": "van.rebuild.learning-monetary-maturity-source/1",
+  "observed_at_utc": "2026-10-23T04:02:16.719996+00:00",
+  "source_parent": "9ff513229ec7c79fa05a70db1d08ba1cca2e57f0",
+  "source_sha256": {
+    "trading/vati/learning/health.py": "1f4c697030fb57bc30df042ab516d8f56f855c8c1cc7ffbe58a9720def26facc",
+    "trading/vati/learning/episodes.py": "c92811760e7db6803df4da4bc9b70c1a2638fb616f7a04e6f4e44aa3567f9f3b",
+    "trading/tests/test_learning_monetary_maturity.py": "6e91a24781f747896b229ec00cd481a69ef6e61b6cfb24d4316671fd089d2ced",
+    "trading/tests/test_learning_evidence.py": "def76009ed270ac19e4a5fe537e3f880f05087dfc291c9d9c8b167677ef5a4d5",
+    "trading/tests/test_learning_as_decided.py": "156ec807eabb863e710efd97a881401ec80adaea505c36a9acb43f54696763ec",
+    "trading/tests/test_learning.py": "50136ce2fccb8a669cf2daf17b85af71bd7497a6f3185591e1844cbb7ff4769a",
+    "trading/tests/test_active_trade_e2e.py": "1af083490604c932e8da0a5d7ae3b48b4ba2e2193c6cbb2b9067efe928b1cfc9"
+  },
+  "executions": {
+    "before": {
+      "tests": 4,
+      "failures": 3,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.405,
+      "sha256": "fae776641afb83e0352722af2d227288239ec33c03b327ed662dee68301edecd"
+    },
+    "first": {
+      "tests": 68,
+      "failures": 12,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.889,
+      "sha256": "f2a9a2d47e5bd0a89529d272cda360b1d1c50f8f8b467aaab3579c24070b652c"
+    },
+    "second": {
+      "tests": 96,
+      "failures": 12,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 6.867,
+      "sha256": "638bb54e2a43ec3e513756eeb7ef5360497d2ccb82145dd7e536ba7bcdf42442"
+    },
+    "third": {
+      "tests": 96,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 6.65,
+      "sha256": "2c394a3f9f4ab83ff90dd3f3205e0c5467298e28a2526acd76442edf4571a4bc"
+    },
+    "controls": {
+      "tests": 122,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 6.714,
+      "sha256": "6079afb29884ca000e2de7484d11b7022ad8b531680f155ad30de24d5e40f247"
+    },
+    "final-focused": {
+      "tests": 122,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 6.171,
+      "sha256": "ecdbd6998af815e3496a207954b3f635118a6e0cf898c2de08f6732de3176dbf"
+    },
+    "updated-focused": {
+      "tests": 125,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 6.686,
+      "sha256": "6ab8278d36b01a9d2dbaf7e77d97c834e42c43316fa427723199fca817e4eb94"
+    },
+    "restored": {
+      "tests": 121,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 8.38,
+      "sha256": "0f2d7670792e6859c40594b7e75a9e4ee3f21bc8db8e2d9965a5c998722587d9"
+    },
+    "rebuild": {
+      "tests": 78,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 30.961,
+      "sha256": "d150fc2ce31a6402790760aaebafd49ee38a7dc1a8f3b60445e898279eae5ee1"
+    },
+    "full-full-pg": {
+      "tests": 2213,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 459.125,
+      "sha256": "fb45326e33034666c93ff764b45c74e421b18b5a9f41e1501a2dee3fb940b7dd"
+    },
+    "final-full-pg": {
+      "tests": 2213,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 459.21,
+      "sha256": "02ce383e286a4a52fc8ebdcba57e4b927c38d81288d393bc78d2d7b75582ec4a"
+    }
+  },
+  "final_private_fixture_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "source_faults": {
+    "definitions": [
+      [
+        [
+          "trading/vati/learning/health.py",
+          "    require_economic_readiness(rec)\n",
+          "",
+          "admit an unsettled native financial review as strategy health"
+        ],
+        [
+          "trading/tests/test_learning_monetary_maturity.py::test_an_explicitly_unsettled_native_review_is_not_a_demonstrated_health_sample"
+        ]
+      ],
+      [
+        [
+          "trading/vati/learning/health.py",
+          "if rec.environment in STUDY_ENVIRONMENTS:",
+          "if True:",
+          "let an unsettled episode bypass the native outcome boundary"
+        ],
+        [
+          "trading/tests/test_learning_monetary_maturity.py::test_an_unsettled_episode_cannot_reenter_health_through_cold_artifact_replay"
+        ]
+      ],
+      [
+        [
+          "trading/vati/learning/health.py",
+          "any(maturity.get(flag) is not True for flag in ('parent_final','fees_final','cash_reconciled'))",
+          "any(not maturity.get(flag) for flag in ('parent_final','fees_final','cash_reconciled'))",
+          "admit truthy financial-finality strings"
+        ],
+        [
+          "trading/tests/test_learning_monetary_maturity.py::test_unproven_monetary_labels_never_count_as_live_health[truthy-review]"
+        ]
+      ],
+      [
+        [
+          "trading/vati/learning/health.py",
+          "maturity.get('source_environment') != rec.environment.value",
+          "False",
+          "pool financial evidence from a different native cohort"
+        ],
+        [
+          "trading/tests/test_learning_monetary_maturity.py::test_unproven_monetary_labels_never_count_as_live_health[environment-artifact]"
+        ]
+      ],
+      [
+        [
+          "trading/vati/learning/episodes.py",
+          "deepcopy(rev.payload.get(\"maturity\")) if rev else None",
+          "None",
+          "discard actual native monetary readiness when freezing the episode"
+        ],
+        [
+          "trading/tests/test_learning_monetary_maturity.py::test_actual_settled_native_review_keeps_its_economic_readiness_in_the_episode"
+        ]
+      ],
+      [
+        [
+          "trading/vati/learning/health.py",
+          "if rec.environment in STUDY_ENVIRONMENTS:",
+          "if False:",
+          "erase explicit backtest/replay/counterfactual study functionality"
+        ],
+        [
+          "trading/tests/test_learning_monetary_maturity.py::test_explicit_historical_study_retains_its_modelled_outcome_and_cohort_weight[BACKTEST]"
+        ]
+      ],
+      [
+        [
+          "trading/vati/learning/health.py",
+          "values.get('broker_ok') is not True",
+          "False",
+          "treat a truthy broker claim as a native fact"
+        ],
+        [
+          "trading/tests/test_learning_monetary_maturity.py::test_unproven_monetary_labels_never_count_as_live_health[broker-review]"
+        ]
+      ],
+      [
+        [
+          "trading/vati/learning/health.py",
+          "values['pnl_basis'] not in {'REPORTED_GROSS_NET_RECORDED_CHARGES',\n            'PRICE_DERIVED_NET_RECORDED_CHARGES','REPORTED_NET_CONFIRMED'}",
+          "False",
+          "reinforce a legacy unknown net-money convention"
+        ],
+        [
+          "trading/tests/test_learning_monetary_maturity.py::test_unproven_monetary_labels_never_count_as_live_health[basis-review]"
+        ]
+      ],
+      [
+        [
+          "trading/vati/learning/episodes.py",
+          "\"thesis_evidence_basis\": rev.payload.get(\"thesis_evidence_basis\")",
+          "\"thesis_evidence_basis\": None",
+          "lose the recorded distinction between PnL sign and validated setup evidence"
+        ],
+        [
+          "trading/tests/test_learning_monetary_maturity.py::test_actual_settled_native_review_keeps_its_economic_readiness_in_the_episode"
+        ]
+      ]
+    ],
+    "records": [
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "63203b4ec2b29e7ab8c45616e4d500960794bb60488784fb13fb7fe05b0386bf"
+      },
+      {
+        "phase": "mutation",
+        "why": "admit an unsettled native financial review as strategy health",
+        "returncode": 1,
+        "log_sha256": "ad9c62b80c6143c98e76cebc9a3c5b2cb24e327d02f671093a4e7ebec90adb59"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "91ac28e87543203edb8fac4612b815f59bf36ac9a72ab315b86b2e36637fba30"
+      },
+      {
+        "phase": "mutation",
+        "why": "let an unsettled episode bypass the native outcome boundary",
+        "returncode": 1,
+        "log_sha256": "e5c21c807191f41daf60e44ae9b04b9c681ba1dc2908fc7876fbdf05e78f7ac6"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "0cddb2f9522c5fc98e9503738cea759bed811b3ad3b391083a46a5d5f403e174"
+      },
+      {
+        "phase": "mutation",
+        "why": "admit truthy financial-finality strings",
+        "returncode": 1,
+        "log_sha256": "18604aa6ce35b2bd2e46b53ef1c23cd2f473ab73f13732a8893919d5d1ea9737"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "06254aecdf245cc6f8784e134e36703bcc595ac0578b8c5f7f3591bcb399781b"
+      },
+      {
+        "phase": "mutation",
+        "why": "pool financial evidence from a different native cohort",
+        "returncode": 1,
+        "log_sha256": "9827901676ffa88ba1472c69fcc202225b655679eee86b351781e9fd017bfd2a"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "3dd8a455f93386b2d78b9d5605f1c2f52fd55f0962f89b0bd7d602cae0ead952"
+      },
+      {
+        "phase": "mutation",
+        "why": "discard actual native monetary readiness when freezing the episode",
+        "returncode": 1,
+        "log_sha256": "746a1c9690e032eea5e1f8245952e9e70ab0c955cf4941451ed19bf47e024b43"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "acb50bc88917f57929611d63c707e0ccd387dae970fefba6e9100a81f12eba7b"
+      },
+      {
+        "phase": "mutation",
+        "why": "erase explicit backtest/replay/counterfactual study functionality",
+        "returncode": 1,
+        "log_sha256": "1430fa9ab90b4e00e8bee3ad019a842fceddb63ec2ddd6915667d8eb8b895207"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "91ac28e87543203edb8fac4612b815f59bf36ac9a72ab315b86b2e36637fba30"
+      },
+      {
+        "phase": "mutation",
+        "why": "treat a truthy broker claim as a native fact",
+        "returncode": 1,
+        "log_sha256": "04da6d16a74f23bf4a7aade640feea513d93eab6a401fe7034927d889eb4f861"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "91ac28e87543203edb8fac4612b815f59bf36ac9a72ab315b86b2e36637fba30"
+      },
+      {
+        "phase": "mutation",
+        "why": "reinforce a legacy unknown net-money convention",
+        "returncode": 1,
+        "log_sha256": "fba3edea2157e6c2246297f57170b317e5df9bd00b8b8722c97dc13ff4cc3d69"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "7f20721722339faad833bedbd918bbce72ec5ee8917b82cf8b1a09bf4e47f2f3"
+      },
+      {
+        "phase": "mutation",
+        "why": "lose the recorded distinction between PnL sign and validated setup evidence",
+        "returncode": 1,
+        "log_sha256": "62c7705da42eba5087ca44ec041ae6037ef36db5ed5f3e886738fa0203d1d62a"
+      }
+    ],
+    "source_before_sha256": {
+      "trading/vati/learning/episodes.py": "c92811760e7db6803df4da4bc9b70c1a2638fb616f7a04e6f4e44aa3567f9f3b",
+      "trading/vati/learning/health.py": "1f4c697030fb57bc30df042ab516d8f56f855c8c1cc7ffbe58a9720def26facc"
+    },
+    "source_after_sha256": {
+      "trading/vati/learning/episodes.py": "c92811760e7db6803df4da4bc9b70c1a2638fb616f7a04e6f4e44aa3567f9f3b",
+      "trading/vati/learning/health.py": "1f4c697030fb57bc30df042ab516d8f56f855c8c1cc7ffbe58a9720def26facc"
+    },
+    "source_restored": true,
+    "journal_present": false
+  },
+  "owner_export": {
+    "changed": [],
+    "applied": false,
+    "scope": "SOURCE_CONTRACTS_ONLY"
+  },
+  "legacy_anchor_preflight": {
+    "schema": "van.rebuild.mutation-registry-preflight/1",
+    "registry_sha256": "35d10c7b0f2b8319b7f7305828262c972b2a6451139d75b9e83c7d0062282955",
+    "mutation_count": 374,
+    "edit_count": 383,
+    "findings": [],
+    "execution_state": "NOT_RUN",
+    "status": "ANCHORS_VALID_BASELINES_AND_MUTATIONS_NOT_EXECUTED"
+  },
+  "qualification": "Source only. Study cohorts retained. No external-provider settlement, causal setup validation, unit admission, production, profitability or S24 claim."
+}

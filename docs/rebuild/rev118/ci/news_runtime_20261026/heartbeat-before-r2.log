@@ -1,0 +1,82 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_ test_full_paper_session_builder_survives_bad_news_and_keeps_the_same_cycle_binding _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-240/test_full_paper_session_builde0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_full_paper_session_builder_survives_bad_news_and_keeps_the_same_cycle_binding(tmp_path,eurusd):
+        from conftest import mandate_dict
+        from test_backtest_runner_cli import synthetic_bars
+        from vati.accounts import Account,AccountRegistry
+        from vati.app.service import ServiceConfig,lake_bar_source
+        from vati.market_data.feeds import BarLake
+        from vati.risk.serde import contract_to_dict
+        AccountRegistry(tmp_path/'accounts.json').add(Account(alias='paper_lab',broker='PAPER',mode='DEMO_TRADER',currency='USD'))
+        lake=BarLake(tmp_path/'lake');bars=synthetic_bars();lake.write(bars,symbol='EURUSD',timeframe='H1',source='fixture',provenance='SYNTHETIC')
+        path=tmp_path/'news.json';path.write_text('{');at=bars[100].end_ms
+        cfg=ServiceConfig(account_alias='paper_lab',symbol='EURUSD',base='EUR',quote='USD',timeframe='H1',
+            contract=contract_to_dict(eurusd),mandate=mandate_dict(venue='paper',mode='DEMO_TRADER',account_alias='paper_lab',allowed_strategies=['FX-TREND-PULLBACK-01']),
+            capsules=['FX-TREND-PULLBACK-01'],registry_path=str(tmp_path/'accounts.json'),ledger=str(tmp_path/'session.sqlite'),
+            lake_root=str(tmp_path/'lake'),heartbeat_path=str(tmp_path/'heartbeat.json'),news=configured(path))
+        value=SessionService(cfg,lake_bar_source(lake,'EURUSD','H1'),clock=lambda:at)
+        try:
+            value.build()
+            assert value.news.source_health['state']=='UNREADABLE' and value.runner.cycle.news is value.news
+            value._heartbeat('BUILT')
+            heartbeat=json.loads(Path(cfg.heartbeat_path).read_text())
+>           assert heartbeat.get('news',{}).get('source_health',{}).get('state')=='UNREADABLE'
+E           AssertionError: assert None == 'UNREADABLE'
+E            +  where None = <built-in method get of dict object at 0x7fa55b036280>('state')
+E            +    where <built-in method get of dict object at 0x7fa55b036280> = {}.get
+E            +      where {} = <built-in method get of dict object at 0x7fa55b050900>('source_health', {})
+E            +        where <built-in method get of dict object at 0x7fa55b050900> = {}.get
+E            +          where {} = <built-in method get of dict object at 0x7fa55cdcad40>('news', {})
+E            +            where <built-in method get of dict object at 0x7fa55cdcad40> = {'account_alias': 'paper_lab', 'symbol': 'EURUSD', 'session_id': 'paper_lab:EURUSD:1758344400000', 'status': 'BUILT', ...}.get
+
+trading/tests/test_news_runtime_health.py:340: AssertionError
+_ test_account_owner_heartbeat_reports_news_state_before_the_first_bar[False] __
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-240/test_account_owner_heartbeat_r0')
+ledger = <vati.core.ledger.Ledger object at 0x7fa55b079280>, enabled = False
+
+    @pytest.mark.parametrize('enabled',[False,True])
+    def test_account_owner_heartbeat_reports_news_state_before_the_first_bar(tmp_path,ledger,enabled):
+        value=service('account',ledger,configured(tmp_path/'missing.json') if enabled else {})
+        value.cfg.heartbeat_path=str(tmp_path/'heartbeat.json');build(value,'account')
+        value._heartbeat('BUILT');heartbeat=json.loads(Path(value.cfg.heartbeat_path).read_text())
+>       assert heartbeat.get('news',{}).get('source_health',{}).get('state')==('MISSING' if enabled else 'DISABLED')
+E       AssertionError: assert None == 'DISABLED'
+E        +  where None = <built-in method get of dict object at 0x7fa55adc8180>('state')
+E        +    where <built-in method get of dict object at 0x7fa55adc8180> = {}.get
+E        +      where {} = <built-in method get of dict object at 0x7fa55adc8500>('source_health', {})
+E        +        where <built-in method get of dict object at 0x7fa55adc8500> = {}.get
+E        +          where {} = <built-in method get of dict object at 0x7fa55adc81c0>('news', {})
+E        +            where <built-in method get of dict object at 0x7fa55adc81c0> = {'owner_policy_current': False, 'account_alias': 'acct', 'symbols': [], 'status': 'BUILT', ...}.get
+
+trading/tests/test_news_runtime_health.py:357: AssertionError
+__ test_account_owner_heartbeat_reports_news_state_before_the_first_bar[True] __
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-240/test_account_owner_heartbeat_r1')
+ledger = <vati.core.ledger.Ledger object at 0x7fa55b07b620>, enabled = True
+
+    @pytest.mark.parametrize('enabled',[False,True])
+    def test_account_owner_heartbeat_reports_news_state_before_the_first_bar(tmp_path,ledger,enabled):
+        value=service('account',ledger,configured(tmp_path/'missing.json') if enabled else {})
+        value.cfg.heartbeat_path=str(tmp_path/'heartbeat.json');build(value,'account')
+        value._heartbeat('BUILT');heartbeat=json.loads(Path(value.cfg.heartbeat_path).read_text())
+>       assert heartbeat.get('news',{}).get('source_health',{}).get('state')==('MISSING' if enabled else 'DISABLED')
+E       AssertionError: assert None == 'MISSING'
+E        +  where None = <built-in method get of dict object at 0x7fa55af2aac0>('state')
+E        +    where <built-in method get of dict object at 0x7fa55af2aac0> = {}.get
+E        +      where {} = <built-in method get of dict object at 0x7fa55af2a900>('source_health', {})
+E        +        where <built-in method get of dict object at 0x7fa55af2a900> = {}.get
+E        +          where {} = <built-in method get of dict object at 0x7fa55af2a740>('news', {})
+E        +            where <built-in method get of dict object at 0x7fa55af2a740> = {'owner_policy_current': False, 'account_alias': 'acct', 'symbols': [], 'status': 'BUILT', ...}.get
+
+trading/tests/test_news_runtime_health.py:357: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_news_runtime_health.py::test_full_paper_session_builder_survives_bad_news_and_keeps_the_same_cycle_binding
+FAILED trading/tests/test_news_runtime_health.py::test_account_owner_heartbeat_reports_news_state_before_the_first_bar[False]
+FAILED trading/tests/test_news_runtime_health.py::test_account_owner_heartbeat_reports_news_state_before_the_first_bar[True]
+3 failed, 40 deselected in 2.80s

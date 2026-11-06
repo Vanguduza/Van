@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="9" skipped="0" tests="9" time="9.209" timestamp="2026-10-26T02:57:22.202042+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_ml_runtime_boundary" name="test_actual_serve_entrypoint_refuses_model_import_before_model_code_executes[qlib]" time="1.589"><failure message="assert False is True">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-293/test_actual_serve_entrypoint_r0')
+module = 'qlib'
+
+    @pytest.mark.parametrize('module',['qlib','lightgbm','neuralforecast','xgboost','optuna','feast','mlflow','torch'])
+    def test_actual_serve_entrypoint_refuses_model_import_before_model_code_executes(tmp_path,module):
+        marker=tmp_path/'model-executed'
+        fake=tmp_path/'packages';package=fake/module;package.mkdir(parents=True)
+        (package/'__init__.py').write_text('from pathlib import Path\nPath('+repr(str(marker))+').write_text("executed")\n')
+        code='''
+    from argparse import Namespace
+    import importlib,json,sys
+    from vati.__main__ import cmd_serve
+    try:cmd_serve(Namespace(config=sys.argv[1],once=True))
+    except FileNotFoundError:pass
+    try:
+     importlib.import_module(sys.argv[2]);blocked=False
+    except ImportError:blocked=True
+    print(json.dumps({'blocked':blocked}))
+    '''
+        env=dict(os.environ,PYTHONPATH=os.pathsep.join([str(fake),str(Path(__file__).resolve().parents[1])]))
+        child=subprocess.run([sys.executable,'-c',code,str(tmp_path/'absent-profile.json'),module],
+            env=env,capture_output=True,text=True,timeout=30)
+        assert child.returncode==0,child.stderr
+&gt;       assert json.loads(child.stdout.splitlines()[-1])['blocked'] is True
+E       assert False is True
+
+trading/tests/test_ml_runtime_boundary.py:31: AssertionError</failure></testcase><testcase classname="trading.tests.test_ml_runtime_boundary" name="test_actual_serve_entrypoint_refuses_model_import_before_model_code_executes[lightgbm]" time="0.528"><failure message="assert False is True">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-293/test_actual_serve_entrypoint_r1')
+module = 'lightgbm'
+
+    @pytest.mark.parametrize('module',['qlib','lightgbm','neuralforecast','xgboost','optuna','feast','mlflow','torch'])
+    def test_actual_serve_entrypoint_refuses_model_import_before_model_code_executes(tmp_path,module):
+        marker=tmp_path/'model-executed'
+        fake=tmp_path/'packages';package=fake/module;package.mkdir(parents=True)
+        (package/'__init__.py').write_text('from pathlib import Path\nPath('+repr(str(marker))+').write_text("executed")\n')
+        code='''
+    from argparse import Namespace
+    import importlib,json,sys
+    from vati.__main__ import cmd_serve
+    try:cmd_serve(Namespace(config=sys.argv[1],once=True))
+    except FileNotFoundError:pass
+    try:
+     importlib.import_module(sys.argv[2]);blocked=False
+    except ImportError:blocked=True
+    print(json.dumps({'blocked':blocked}))
+    '''
+        env=dict(os.environ,PYTHONPATH=os.pathsep.join([str(fake),str(Path(__file__).resolve().parents[1])]))
+        child=subprocess.run([sys.executable,'-c',code,str(tmp_path/'absent-profile.json'),module],
+            env=env,capture_output=True,text=True,timeout=30)
+        assert child.returncode==0,child.stderr
+&gt;       assert json.loads(child.stdout.splitlines()[-1])['blocked'] is True
+E       assert False is True
+
+trading/tests/test_ml_runtime_boundary.py:31: AssertionError</failure></testcase><testcase classname="trading.tests.test_ml_runtime_boundary" name="test_actual_serve_entrypoint_refuses_model_import_before_model_code_executes[neuralforecast]" time="0.423"><failure message="assert False is True">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-293/test_actual_serve_entrypoint_r2')
+module = 'neuralforecast'
+
+    @pytest.mark.parametrize('module',['qlib','lightgbm','neuralforecast','xgboost','optuna','feast','mlflow','torch'])
+    def test_actual_serve_entrypoint_refuses_model_import_before_model_code_executes(tmp_path,module):
+        marker=tmp_path/'model-executed'
+        fake=tmp_path/'packages';package=fake/module;package.mkdir(parents=True)
+        (package/'__init__.py').write_text('from pathlib import Path\nPath('+repr(str(marker))+').write_text("executed")\n')
+        code='''
+    from argparse import Namespace
+    import importlib,json,sys
+    from vati.__main__ import cmd_serve
+    try:cmd_serve(Namespace(config=sys.argv[1],once=True))
+    except FileNotFoundError:pass
+    try:
+     importlib.import_module(sys.argv[2]);blocked=False
+    except ImportError:blocked=True
+    print(json.dumps({'blocked':blocked}))
+    '''
+        env=dict(os.environ,PYTHONPATH=os.pathsep.join([str(fake),str(Path(__file__).resolve().parents[1])]))
+        child=subprocess.run([sys.executable,'-c',code,str(tmp_path/'absent-profile.json'),module],
+            env=env,capture_output=True,text=True,timeout=30)
+        assert child.returncode==0,child.stderr
+&gt;       assert json.loads(child.stdout.splitlines()[-1])['blocked'] is True
+E       assert False is True
+
+trading/tests/test_ml_runtime_boundary.py:31: AssertionError</failure></testcase><testcase classname="trading.tests.test_ml_runtime_boundary" name="test_actual_serve_entrypoint_refuses_model_import_before_model_code_executes[xgboost]" time="1.092"><failure message="assert False is True">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-293/test_actual_serve_entrypoint_r3')
+module = 'xgboost'
+
+    @pytest.mark.parametrize('module',['qlib','lightgbm','neuralforecast','xgboost','optuna','feast','mlflow','torch'])
+    def test_actual_serve_entrypoint_refuses_model_import_before_model_code_executes(tmp_path,module):
+        marker=tmp_path/'model-executed'
+        fake=tmp_path/'packages';package=fake/module;package.mkdir(parents=True)
+        (package/'__init__.py').write_text('from pathlib import Path\nPath('+repr(str(marker))+').write_text("executed")\n')
+        code='''
+    from argparse import Namespace
+    import importlib,json,sys
+    from vati.__main__ import cmd_serve
+    try:cmd_serve(Namespace(config=sys.argv[1],once=True))
+    except FileNotFoundError:pass
+    try:
+     importlib.import_module(sys.argv[2]);blocked=False
+    except ImportError:blocked=True
+    print(json.dumps({'blocked':blocked}))
+    '''
+        env=dict(os.environ,PYTHONPATH=os.pathsep.join([str(fake),str(Path(__file__).resolve().parents[1])]))
+        child=subprocess.run([sys.executable,'-c',code,str(tmp_path/'absent-profile.json'),module],
+            env=env,capture_output=True,text=True,timeout=30)
+        assert child.returncode==0,child.stderr
+&gt;       assert json.loads(child.stdout.splitlines()[-1])['blocked'] is True
+E       assert False is True
+
+trading/tests/test_ml_runtime_boundary.py:31: AssertionError</failure></testcase><testcase classname="trading.tests.test_ml_runtime_boundary" name="test_actual_serve_entrypoint_refuses_model_import_before_model_code_executes[optuna]" time="1.177"><failure message="assert False is True">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-293/test_actual_serve_entrypoint_r4')
+module = 'optuna'
+
+    @pytest.mark.parametrize('module',['qlib','lightgbm','neuralforecast','xgboost','optuna','feast','mlflow','torch'])
+    def test_actual_serve_entrypoint_refuses_model_import_before_model_code_executes(tmp_path,module):
+        marker=tmp_path/'model-executed'
+        fake=tmp_path/'packages';package=fake/module;package.mkdir(parents=True)
+        (package/'__init__.py').write_text('from pathlib import Path\nPath('+repr(str(marker))+').write_text("executed")\n')
+        code='''
+    from argparse import Namespace
+    import importlib,json,sys
+    from vati.__main__ import cmd_serve
+    try:cmd_serve(Namespace(config=sys.argv[1],once=True))
+    except FileNotFoundError:pass
+    try:
+     importlib.import_module(sys.argv[2]);blocked=False
+    except ImportError:blocked=True
+    print(json.dumps({'blocked':blocked}))
+    '''
+        env=dict(os.environ,PYTHONPATH=os.pathsep.join([str(fake),str(Path(__file__).resolve().parents[1])]))
+        child=subprocess.run([sys.executable,'-c',code,str(tmp_path/'absent-profile.json'),module],
+            env=env,capture_output=True,text=True,timeout=30)
+        assert child.returncode==0,child.stderr
+&gt;       assert json.loads(child.stdout.splitlines()[-1])['blocked'] is True
+E       assert False is True
+
+trading/tests/test_ml_runtime_boundary.py:31: AssertionError</failure></testcase><testcase classname="trading.tests.test_ml_runtime_boundary" name="test_actual_serve_entrypoint_refuses_model_import_before_model_code_executes[feast]" time="1.242"><failure message="assert False is True">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-293/test_actual_serve_entrypoint_r5')
+module = 'feast'
+
+    @pytest.mark.parametrize('module',['qlib','lightgbm','neuralforecast','xgboost','optuna','feast','mlflow','torch'])
+    def test_actual_serve_entrypoint_refuses_model_import_before_model_code_executes(tmp_path,module):
+        marker=tmp_path/'model-executed'
+        fake=tmp_path/'packages';package=fake/module;package.mkdir(parents=True)
+        (package/'__init__.py').write_text('from pathlib import Path\nPath('+repr(str(marker))+').write_text("executed")\n')
+        code='''
+    from argparse import Namespace
+    import importlib,json,sys
+    from vati.__main__ import cmd_serve
+    try:cmd_serve(Namespace(config=sys.argv[1],once=True))
+    except FileNotFoundError:pass
+    try:
+     importlib.import_module(sys.argv[2]);blocked=False
+    except ImportError:blocked=True
+    print(json.dumps({'blocked':blocked}))
+    '''
+        env=dict(os.environ,PYTHONPATH=os.pathsep.join([str(fake),str(Path(__file__).resolve().parents[1])]))
+        child=subprocess.run([sys.executable,'-c',code,str(tmp_path/'absent-profile.json'),module],
+            env=env,capture_output=True,text=True,timeout=30)
+        assert child.returncode==0,child.stderr
+&gt;       assert json.loads(child.stdout.splitlines()[-1])['blocked'] is True
+E       assert False is True
+
+trading/tests/test_ml_runtime_boundary.py:31: AssertionError</failure></testcase><testcase classname="trading.tests.test_ml_runtime_boundary" name="test_actual_serve_entrypoint_refuses_model_import_before_model_code_executes[mlflow]" time="0.515"><failure message="assert False is True">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-293/test_actual_serve_entrypoint_r6')
+module = 'mlflow'
+
+    @pytest.mark.parametrize('module',['qlib','lightgbm','neuralforecast','xgboost','optuna','feast','mlflow','torch'])
+    def test_actual_serve_entrypoint_refuses_model_import_before_model_code_executes(tmp_path,module):
+        marker=tmp_path/'model-executed'
+        fake=tmp_path/'packages';package=fake/module;package.mkdir(parents=True)
+        (package/'__init__.py').write_text('from pathlib import Path\nPath('+repr(str(marker))+').write_text("executed")\n')
+        code='''
+    from argparse import Namespace
+    import importlib,json,sys
+    from vati.__main__ import cmd_serve
+    try:cmd_serve(Namespace(config=sys.argv[1],once=True))
+    except FileNotFoundError:pass
+    try:
+     importlib.import_module(sys.argv[2]);blocked=False
+    except ImportError:blocked=True
+    print(json.dumps({'blocked':blocked}))
+    '''
+        env=dict(os.environ,PYTHONPATH=os.pathsep.join([str(fake),str(Path(__file__).resolve().parents[1])]))
+        child=subprocess.run([sys.executable,'-c',code,str(tmp_path/'absent-profile.json'),module],
+            env=env,capture_output=True,text=True,timeout=30)
+        assert child.returncode==0,child.stderr
+&gt;       assert json.loads(child.stdout.splitlines()[-1])['blocked'] is True
+E       assert False is True
+
+trading/tests/test_ml_runtime_boundary.py:31: AssertionError</failure></testcase><testcase classname="trading.tests.test_ml_runtime_boundary" name="test_actual_serve_entrypoint_refuses_model_import_before_model_code_executes[torch]" time="1.358"><failure message="assert False is True">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-293/test_actual_serve_entrypoint_r7')
+module = 'torch'
+
+    @pytest.mark.parametrize('module',['qlib','lightgbm','neuralforecast','xgboost','optuna','feast','mlflow','torch'])
+    def test_actual_serve_entrypoint_refuses_model_import_before_model_code_executes(tmp_path,module):
+        marker=tmp_path/'model-executed'
+        fake=tmp_path/'packages';package=fake/module;package.mkdir(parents=True)
+        (package/'__init__.py').write_text('from pathlib import Path\nPath('+repr(str(marker))+').write_text("executed")\n')
+        code='''
+    from argparse import Namespace
+    import importlib,json,sys
+    from vati.__main__ import cmd_serve
+    try:cmd_serve(Namespace(config=sys.argv[1],once=True))
+    except FileNotFoundError:pass
+    try:
+     importlib.import_module(sys.argv[2]);blocked=False
+    except ImportError:blocked=True
+    print(json.dumps({'blocked':blocked}))
+    '''
+        env=dict(os.environ,PYTHONPATH=os.pathsep.join([str(fake),str(Path(__file__).resolve().parents[1])]))
+        child=subprocess.run([sys.executable,'-c',code,str(tmp_path/'absent-profile.json'),module],
+            env=env,capture_output=True,text=True,timeout=30)
+        assert child.returncode==0,child.stderr
+&gt;       assert json.loads(child.stdout.splitlines()[-1])['blocked'] is True
+E       assert False is True
+
+trading/tests/test_ml_runtime_boundary.py:31: AssertionError</failure></testcase><testcase classname="trading.tests.test_ml_runtime_boundary" name="test_serve_refuses_a_preloaded_model_before_loading_account_configuration" time="1.055"><failure message="AssertionError: assert 'CONFIGURATION_WAS_READ' == 2">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-293/test_serve_refuses_a_preloaded0')
+
+    def test_serve_refuses_a_preloaded_model_before_loading_account_configuration(tmp_path):
+        code='''
+    from argparse import Namespace
+    import json,sys,types
+    sys.modules['torch']=types.ModuleType('torch')
+    from vati.__main__ import cmd_serve
+    try:result=cmd_serve(Namespace(config=sys.argv[1],once=True))
+    except FileNotFoundError:result='CONFIGURATION_WAS_READ'
+    print(json.dumps({'result':result}))
+    '''
+        child=subprocess.run([sys.executable,'-c',code,str(tmp_path/'absent-profile.json')],
+            env=dict(os.environ,PYTHONPATH=str(Path(__file__).resolve().parents[1])),
+            capture_output=True,text=True,timeout=30)
+        assert child.returncode==0,child.stderr
+&gt;       assert json.loads(child.stdout.splitlines()[-1])['result']==2
+E       AssertionError: assert 'CONFIGURATION_WAS_READ' == 2
+
+trading/tests/test_ml_runtime_boundary.py:49: AssertionError</failure></testcase></testsuite></testsuites>

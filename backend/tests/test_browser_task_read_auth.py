@@ -13,6 +13,7 @@ from httpx import ASGITransport, AsyncClient
 
 from van_gateway.app import create_app
 from van_gateway.browser.worker import AdapterBackedWorker
+from van_gateway.browser.interaction_router import IndependentPostconditionVerifier
 from van_gateway.config import get_settings
 
 INGRESS = "browser-read-ingress-0123456789abcdef012345"
@@ -28,6 +29,9 @@ COMMAND_ID = "browser-read-auth-command"
 class _Harness:
     async def navigate(self, task, url):
         self.url = url
+
+    async def release_page(self, **kwargs):
+        return {}
 
     async def page_info(self, task):
         return {
@@ -52,7 +56,10 @@ async def client(tmp_path, monkeypatch):
     get_settings.cache_clear()
     try:
         app = create_app()
-        app.state.browser.worker = AdapterBackedWorker(_Harness())
+        harness = _Harness()
+        app.state.browser.worker = AdapterBackedWorker(harness)
+        app.state.browser.verifier = IndependentPostconditionVerifier(harness)
+        app.state.browser.broker.page_release_hook = harness.release_page
         async with app.router.lifespan_context(app):
             async with AsyncClient(
                 transport=ASGITransport(app=app), base_url="http://test"
@@ -94,6 +101,7 @@ def _read_paths(task):
 async def test_browser_scope_reaches_assignment_preflight_and_sealed_readback(client):
     ac, _app = client
     task = await _create_task(ac)
+    await _app.state.browser.broker.ensure_registered_profile(profile_alias="public_research")
     status_path, evidence_path = _read_paths(task)
 
     # These are the exact fields Global DIAL binds before it dispatches an
@@ -121,6 +129,7 @@ async def test_browser_scope_reaches_assignment_preflight_and_sealed_readback(cl
         "action_class_ceiling": projection["action_class"],
         "autonomy_tier": projection["autonomy_tier"],
         "max_steps": 4,
+        "postcondition": {"kind": "READ_BACK", "field": "title", "expected": "Public notes"},
         "max_steps_without_progress": 2,
         "plan": {"steps": [
             {"kind": "navigate", "domain": DOMAIN, "url": f"https://{DOMAIN}/notes"},
@@ -129,7 +138,7 @@ async def test_browser_scope_reaches_assignment_preflight_and_sealed_readback(cl
     })
     assert assigned.status_code == 200, assigned.text
     result = assigned.json()
-    assert result["succeeded"] is True
+    assert result["succeeded"] is True, result
     assert result["stop_reason"] == "GOAL_ACHIEVED"
     assert result["session_lease_released"] is True
     evidence_id = result["evidence"]["evidence_id"]
@@ -140,8 +149,8 @@ async def test_browser_scope_reaches_assignment_preflight_and_sealed_readback(cl
     assert completed.json()["task"]["evidence_pointer"] == f"browser-evidence://{evidence_id}"
     evidence = await ac.get(evidence_path, headers=HEADERS)
     assert evidence.status_code == 200, evidence.text
-    assert [row["evidence_id"] for row in evidence.json()] == [evidence_id]
-    assert evidence.json()[0]["extraction_digest"] == result["evidence"]["extraction_digest"]
+    assert [row["evidence_id"] for row in evidence.json() if row["kind"] == "ASSIGNMENT_COMPLETION"] == [evidence_id]
+    assert next(row for row in evidence.json() if row["kind"] == "ASSIGNMENT_COMPLETION")["extraction_digest"] == result["evidence"]["extraction_digest"]
 
 
 @pytest.mark.asyncio

@@ -99,7 +99,6 @@ class RiveContractTest {
             val decision = VanVisualRuntime.decide(
                 assetBytes = rig.bytes.size.toLong(),
                 riveRuntimeAvailable = true,
-                ownerArtAvailable = true,
             )
             assertEquals("production asset must select the Rive renderer", VanRenderer.RIVE, decision.renderer)
         }
@@ -108,7 +107,7 @@ class RiveContractTest {
     /**
      * The shipped asset must load and bind through the composable production renders
      * (`VanAvatar` -> `VanRiveAvatar`), not only through the debug frame host: a load or bind
-     * failure there flips the decision to OWNER_ART/CANVAS with LOAD_FAILED.
+     * failure there flips the decision to CANDIDATE_B/CANVAS with LOAD_FAILED.
      */
     @Test
     fun productionAvatarPathKeepsRive() {
@@ -135,10 +134,16 @@ class RiveContractTest {
         val rig = rigOrSkip()
         val gazeA = capture(rig, "gaze-neg", state = 4, attentionX = -1f, attentionY = -1f)
         val gazeB = capture(rig, "gaze-pos", state = 4, attentionX = 1f, attentionY = 1f)
-        assertTrue("gaze extremes are pixel-identical", meanAbsRgb(gazeA, gazeB) > 0.001)
+        // Gaze moves the visor eyes, not the entire silhouette. At fixed animation time
+        // the unchanged body no longer contributes breathing noise to this measurement.
+        // Use the locked rig's eye region and retain the absolute visibility floor.
+        val gazeDiff = meanAbsRgbRegion(gazeA, gazeB, 0.38, 0.18, 0.60, 0.31)
+        assertTrue("gaze extremes do not visibly move the eye region ($gazeDiff)",
+            gazeDiff > MIN_DISTINCT_RGB)
         val mouth0 = capture(rig, "mouth-0", state = 9, speaking = true, mouthOpen = 0f, viseme = 2)
         val mouth1 = capture(rig, "mouth-1", state = 9, speaking = true, mouthOpen = 1f, viseme = 2)
-        assertTrue("mouth_open 0 and 1 are pixel-identical", meanAbsRgb(mouth0, mouth1) > 0.001)
+        val mouthDiff = meanAbsRgbRegion(mouth0, mouth1, 0.38, 0.20, 0.58, 0.36)
+        assertTrue("mouth_open 0 and 1 are visually identical in the mouth region ($mouthDiff)", mouthDiff > 0.004)
 
         for (state in listOf(2, 4, 5, 9)) capture(rig, "core-state-$state", state = state)
         for ((action, trigger) in listOf(1 to "wave", 2 to "ack", 7 to "point")) {
@@ -167,6 +172,22 @@ class RiveContractTest {
         capture(rig, "speaking-on", state = 9, speaking = true)
         capture(rig, "speaking-off", state = 9, speaking = false)
         if (rig.mode != Mode.CORE) assertCoreBaselines(rig)
+    }
+
+    @Test
+    fun repeatedFixedTimeCapturesStayBelowTheVisibilityFloor() {
+        val rig = rigOrSkip()
+        for ((action, trigger) in listOf(0 to null, 2 to "ack")) {
+            val reference = capture(rig, "repeat-$action-0", state = 2, action = action,
+                trigger = trigger, settleMs = ACTION_PEAK_MS)
+            repeat(3) { index ->
+                val again = capture(rig, "repeat-$action-${index + 1}", state = 2,
+                    action = action, trigger = trigger, settleMs = ACTION_PEAK_MS)
+                val noise = meanAbsRgb(reference, again)
+                assertTrue("fixed-time action $action is not repeatable: $noise",
+                    noise <= threshold("min_distinct_rgb", MIN_DISTINCT_RGB))
+            }
+        }
     }
 
     @Test
@@ -304,10 +325,10 @@ class RiveContractTest {
 
     @Test
     fun brokenAssetFallsBack() {
-        val unusable = VanVisualRuntime.decide(assetBytes = 512L, riveRuntimeAvailable = true, ownerArtAvailable = true)
+        val unusable = VanVisualRuntime.decide(assetBytes = 512L, riveRuntimeAvailable = true)
         assertEquals(VanRenderer.CANVAS, unusable.renderer)
         assertEquals(VanCanvasReason.ASSET_UNUSABLE, unusable.reason)
-        val failed = VanVisualRuntime.decide(assetBytes = 4096L, riveRuntimeAvailable = true, ownerArtAvailable = true, loadFailed = true)
+        val failed = VanVisualRuntime.decide(assetBytes = 4096L, riveRuntimeAvailable = true, loadFailed = true)
         assertEquals(VanRenderer.CANVAS, failed.renderer)
         assertEquals(VanCanvasReason.LOAD_FAILED, failed.reason)
     }
@@ -364,7 +385,7 @@ class RiveContractTest {
         rig: Rig, background: String = "dark", state: Int = 2, speaking: Boolean = false,
         listening: Boolean = false, attentionX: Float = 0f, attentionY: Float = 0f,
         mouthOpen: Float = 0f, urgency: Float = 0f, viseme: Int = 0, action: Int = 0,
-        trigger: String? = null, sizeDp: Int = 320,
+        trigger: String? = null, sizeDp: Int = 320, sampleMs: Long = 850L,
     ): ActivityScenario<RiveCandidateHostActivity> {
         val intent = Intent(targetContext, RiveCandidateHostActivity::class.java)
             .putExtra(RiveCandidateHostActivity.EXTRA_TEST_MODE, true)
@@ -380,6 +401,7 @@ class RiveContractTest {
             .putExtra(RiveCandidateHostActivity.EXTRA_URGENCY, urgency)
             .putExtra(RiveCandidateHostActivity.EXTRA_VISEME, viseme)
             .putExtra(RiveCandidateHostActivity.EXTRA_ACTION, action)
+            .putExtra(RiveCandidateHostActivity.EXTRA_SAMPLE_TIME_MS, sampleMs)
         if (trigger != null) intent.putExtra(RiveCandidateHostActivity.EXTRA_TRIGGER, trigger)
         return ActivityScenario.launch(intent)
     }
@@ -391,15 +413,29 @@ class RiveContractTest {
         viseme: Int = 0, action: Int = 0, trigger: String? = null, sizeDp: Int = 320,
         settleMs: Long = 850L,
     ): Bitmap {
-        launchScenario(rig, background, state, speaking, listening, attentionX, attentionY, mouthOpen, urgency, viseme, action, trigger, sizeDp).use {
+        launchScenario(rig, background, state, speaking, listening, attentionX, attentionY, mouthOpen, urgency, viseme, action, trigger, sizeDp, settleMs).use {
             instrumentation.waitForIdleSync()
-            SystemClock.sleep(settleMs)
-            val screen = instrumentation.uiAutomation.takeScreenshot()
-            val density = targetContext.resources.displayMetrics.density
-            val size = min((sizeDp * density).toInt(), min(screen.width, screen.height))
-            val x = ((screen.width - size) / 2).coerceAtLeast(0)
-            val y = ((screen.height - size) / 2).coerceAtLeast(0)
-            val crop = Bitmap.createBitmap(screen, x, y, size, size)
+            val deadline = SystemClock.uptimeMillis() + 10_000L
+            while (RiveCandidateHostActivity.lastSampleTimeMs != settleMs && SystemClock.uptimeMillis() < deadline) {
+                SystemClock.sleep(20L)
+            }
+            assertEquals("debug renderer did not draw the requested animation time", settleMs,
+                RiveCandidateHostActivity.lastSampleTimeMs)
+            fun takeCrop(): Bitmap {
+                val screen = instrumentation.uiAutomation.takeScreenshot()
+                val density = targetContext.resources.displayMetrics.density
+                val size = min((sizeDp * density).toInt(), min(screen.width, screen.height))
+                val x = ((screen.width - size) / 2).coerceAtLeast(0)
+                val y = ((screen.height - size) / 2).coerceAtLeast(0)
+                return Bitmap.createBitmap(screen, x, y, size, size)
+            }
+            var crop = takeCrop()
+            repeat(2) {
+                if (looksBlank(crop)) {
+                    SystemClock.sleep(400L)
+                    crop = takeCrop()
+                }
+            }
             val out = outputDir(rig).resolve("$name.png")
             out.parentFile?.mkdirs()
             FileOutputStream(out).use { crop.compress(Bitmap.CompressFormat.PNG, 100, it) }
@@ -419,8 +455,8 @@ class RiveContractTest {
     }
 
     /**
-     * Two IDLE captures differ by breathing/blink phase alone. A state or action only counts as
-     * "different" when it clears that measured noise with margin, never a fixed 0.1 %.
+     * Two IDLE captures at the same animation time measure rendering repeatability. The
+     * absolute visibility floor and the 3x measured-noise margin remain unchanged.
      */
     private fun distinctThreshold(rig: Rig): Double {
         val a = capture(rig, "noise-idle-a", state = 2)
@@ -439,6 +475,33 @@ class RiveContractTest {
         abs(Color.green(a) - Color.green(b)),
         abs(Color.blue(a) - Color.blue(b)),
     )
+
+    private fun meanAbsRgbRegion(
+        a: Bitmap,
+        b: Bitmap,
+        x0f: Double,
+        y0f: Double,
+        x1f: Double,
+        y1f: Double,
+    ): Double {
+        val w = min(a.width, b.width)
+        val h = min(a.height, b.height)
+        val x0 = (w * x0f).toInt().coerceIn(0, w - 1)
+        val y0 = (h * y0f).toInt().coerceIn(0, h - 1)
+        val x1 = (w * x1f).toInt().coerceIn(x0 + 1, w)
+        val y1 = (h * y1f).toInt().coerceIn(y0 + 1, h)
+        var total = 0.0
+        var count = 0L
+        for (y in y0 until y1 step 2) for (x in x0 until x1 step 2) {
+            val ca = a.getPixel(x, y)
+            val cb = b.getPixel(x, y)
+            total += abs(Color.red(ca) - Color.red(cb))
+            total += abs(Color.green(ca) - Color.green(cb))
+            total += abs(Color.blue(ca) - Color.blue(cb))
+            count += 3
+        }
+        return if (count == 0L) 0.0 else total / (count * 255.0)
+    }
 
     private fun meanAbsRgb(a: Bitmap, b: Bitmap): Double {
         val w = min(a.width, b.width); val h = min(a.height, b.height)

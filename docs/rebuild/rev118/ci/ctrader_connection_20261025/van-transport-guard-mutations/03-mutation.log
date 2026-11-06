@@ -1,0 +1,23 @@
+.F..................                                                     [100%]
+=================================== FAILURES ===================================
+___ test_close_wakes_an_original_pending_request_without_waiting_for_timeout ___
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7fe44d83e750>
+
+    def test_close_wakes_an_original_pending_request_without_waiting_for_timeout(harness):
+        client, server = harness.pair()
+        transport = harness.transport(lambda *_: client)
+        worker, result = harness.worker(lambda: transport.call("ProtoOATraderReq", {"ctidTraderAccountId": 12345}))
+        assert receive_frame(server)[0] == "ProtoOATraderReq"
+        transport.close()
+        worker.join(.5)
+>       assert not worker.is_alive(), "closed native request waited for its original response timeout"
+E       AssertionError: closed native request waited for its original response timeout
+E       assert not True
+E        +  where True = is_alive()
+E        +    where is_alive = <Thread(Thread-2 (run), started 140618523702976)>.is_alive
+
+trading/tests/test_ctrader_transport_lifecycle.py:103: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_ctrader_transport_lifecycle.py::test_close_wakes_an_original_pending_request_without_waiting_for_timeout
+1 failed, 19 passed in 2.83s

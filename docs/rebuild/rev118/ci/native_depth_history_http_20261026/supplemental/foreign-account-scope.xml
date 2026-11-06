@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="2" time="11.954" timestamp="2026-10-26T22:27:31.182979+00:00" hostname="2c5a245e39f1"><testcase classname="tests.test_native_depth_history" name="test_another_native_scope_cannot_reuse_a_saved_ladder[changed0]" time="3.589" /><testcase classname="tests.test_native_depth_history" name="test_another_native_scope_cannot_reuse_a_saved_ladder[changed1]" time="3.121"><failure message="AssertionError: assert (200 == 200 and 'HISTORICAL_P...E_UNQUALIFIED' == 'NO_CAPTURE'&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code&#10;  &#10;  - NO_CAPTURE&#10;  + HISTORICAL_PARTIAL_DEPTH_CAPTURE_UNQUALIFIED)">client = (&lt;httpx.AsyncClient object at 0x7fcc42a6c380&gt;, &lt;fastapi.applications.FastAPI object at 0x7fcc404c0110&gt;)
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-575/test_another_native_scope_cann1')
+changed = {'native_account_id': '124'}
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize('changed',[{'environment':'LIVE'},{'native_account_id':'124'},{'native_symbol_id':'13'}])
+    async def test_another_native_scope_cannot_reuse_a_saved_ladder(client,tmp_path,changed):
+        ac,app=client;root,c,first=seed(tmp_path);app.state.trading.native_source_root=str(root)
+        result=await ac.get(PATH,params={**QUERY,**changed})
+&gt;       assert result.status_code==200 and result.json()['state']=='NO_CAPTURE' and result.json()['snapshot'] is None
+E       AssertionError: assert (200 == 200 and 'HISTORICAL_P...E_UNQUALIFIED' == 'NO_CAPTURE'
+E        +  where 200 = &lt;Response [200 OK]&gt;.status_code
+E         
+E         - NO_CAPTURE
+E         + HISTORICAL_PARTIAL_DEPTH_CAPTURE_UNQUALIFIED)
+
+backend/tests/test_native_depth_history.py:63: AssertionError</failure></testcase></testsuite></testsuites>

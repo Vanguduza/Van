@@ -1,0 +1,393 @@
+{
+  "items": [
+    {
+      "first_gate": "PRE-003",
+      "id": "GAP-VAN-CX-001",
+      "owner_units": [
+        "PRE-002",
+        "PRE-003",
+        "BG-001"
+      ],
+      "required_evidence": [
+        "The generated graph and its source-scope digest determine one reproducible sequence.",
+        "Select the old mixed plan, omit a backend producer, or reclassify a chart renderer as backend: reject.",
+        "A relevant source, policy or scope amendment invalidates affected receipts and BG-001 without erasing historical evidence."
+      ],
+      "requirement": "VAN-CX-001",
+      "state": "SPECIFIED_CLOSURE_NOT_IMPLEMENTED",
+      "waiver_allowed": false
+    },
+    {
+      "first_gate": "PRE-003",
+      "id": "GAP-VAN-CX-002",
+      "owner_units": [
+        "PRE-001",
+        "PRE-002",
+        "BE-001"
+      ],
+      "required_evidence": [
+        "Every changed implementation group and historical feature has a source-to-backend-to-screen-to-test chain.",
+        "Delete a PR-only action, discard a complete candidate branch without dispositions, or report an inferred effect as observed: reject.",
+        "Cherry-pick or port bounded accepted changes onto the canonical implementation lineage only after F15 and source admission; keep rollback to exact source."
+      ],
+      "requirement": "VAN-CX-002",
+      "state": "SPECIFIED_CLOSURE_NOT_IMPLEMENTED",
+      "waiver_allowed": false
+    },
+    {
+      "first_gate": "BG-001",
+      "id": "GAP-VAN-CX-003",
+      "owner_units": [
+        "BE-010",
+        "BE-012",
+        "BE-035"
+      ],
+      "required_evidence": [
+        "A pending fill with a rejected venue stop triggers the same admitted recovery as an immediate fill and updates risk and Attention.",
+        "Inject rejected/unknown protection at delayed or partial fill; a local rule alone must not yield CONFIRMED or permit additional risk.",
+        "Keep protective orders and reservation state through crash; reconcile original receipt/position before any compensating action, with no blind close retry."
+      ],
+      "requirement": "VAN-CX-003",
+      "state": "SPECIFIED_CLOSURE_NOT_IMPLEMENTED",
+      "waiver_allowed": false
+    },
+    {
+      "first_gate": "BG-001",
+      "id": "GAP-VAN-CX-004",
+      "owner_units": [
+        "BE-008",
+        "BE-010",
+        "BE-019",
+        "BE-035"
+      ],
+      "required_evidence": [
+        "At-touch and gapped quote fixtures preserve the limit in both directions; explicit capped-market fixtures preserve their separate slippage envelope.",
+        "The current 1.10000 limit with 0.00010 spread and 0.00002 slippage must never fill a BUY at 1.10007 or a SELL at 1.09993.",
+        "After a gap, respect limit/stop/stop-limit distinctions; missed fills are not fabricated to preserve historical backtest counts."
+      ],
+      "requirement": "VAN-CX-004",
+      "state": "SPECIFIED_CLOSURE_NOT_IMPLEMENTED",
+      "waiver_allowed": false
+    },
+    {
+      "first_gate": "BG-001",
+      "id": "GAP-VAN-CX-005",
+      "owner_units": [
+        "BE-010",
+        "BE-014",
+        "BE-016",
+        "BE-019",
+        "BE-035"
+      ],
+      "required_evidence": [
+        "A four-hour STOP_ENTRY cannot remain eligible for 24 hours; PRE_BLACKOUT/POST_BLACKOUT moves eligible pending orders into cancellation workflow.",
+        "Drop max_wait, substitute a later expiry, or fill an ineligible resting order without reconciliation/Attention: fail.",
+        "Model cancel/fill and partial-fill races honestly. Reserve full remaining risk until authoritative cancellation/expiry/readback; reconcile a fill that wins the race."
+      ],
+      "requirement": "VAN-CX-005",
+      "state": "SPECIFIED_CLOSURE_NOT_IMPLEMENTED",
+      "waiver_allowed": false
+    },
+    {
+      "first_gate": "BG-001",
+      "id": "GAP-VAN-CX-006",
+      "owner_units": [
+        "BE-003",
+        "BE-010",
+        "BE-012",
+        "BE-032"
+      ],
+      "required_evidence": [
+        "EXPIRED, CANCELLED and REJECTED unfilled orders disappear from working-order totals but remain in historical records; partial positions retain actual exposure.",
+        "A stale ACCEPTED receipt after terminal readback must not resurrect Working; duplicate fill/cancel events must not double-count.",
+        "Snapshot replay produces the same positions, orders, reservations and summaries after restart."
+      ],
+      "requirement": "VAN-CX-006",
+      "state": "SPECIFIED_CLOSURE_NOT_IMPLEMENTED",
+      "waiver_allowed": false
+    },
+    {
+      "first_gate": "BG-001",
+      "id": "GAP-VAN-CX-007",
+      "owner_units": [
+        "BE-008",
+        "BE-009",
+        "BE-010"
+      ],
+      "required_evidence": [
+        "FX, JPY, metals and alternative broker digit fixtures produce correct bounds from actual contract metadata and remain within the approved loss envelope.",
+        "Unknown digits, stale contract revision, a rounded stop beyond risk or below broker distance, or treating an old absolute cap as a new fraction: refuse.",
+        "Quote or contract changes invalidate the preview; historical mandate/template versions replay with their original units."
+      ],
+      "requirement": "VAN-CX-007",
+      "state": "SPECIFIED_CLOSURE_NOT_IMPLEMENTED",
+      "waiver_allowed": false
+    },
+    {
+      "first_gate": "BG-001",
+      "id": "GAP-VAN-CX-008",
+      "owner_units": [
+        "BE-003",
+        "BE-009",
+        "BE-033"
+      ],
+      "required_evidence": [
+        "New-row work scales with appended records while honest replay matches full verification in SQLite and Postgres.",
+        "Tamper, truncate, fork, roll back, replace a ledger or supply a stale checkpoint: fail closed and force full verification. The research always-True monkeypatch is forbidden.",
+        "Checkpoints are rebuilt or verified after restart; concurrency and interrupted checkpoint writes cannot leave risk operating on untrusted state."
+      ],
+      "requirement": "VAN-CX-008",
+      "state": "SPECIFIED_CLOSURE_NOT_IMPLEMENTED",
+      "waiver_allowed": false
+    },
+    {
+      "first_gate": "BG-001",
+      "id": "GAP-VAN-CX-009",
+      "owner_units": [
+        "BE-002",
+        "BE-006",
+        "BE-009",
+        "BE-011",
+        "BE-013"
+      ],
+      "required_evidence": [
+        "Restart replays the same locks; independent manual/autonomous cooldown tests coexist with shared all-origin hard-limit tests.",
+        "A restart resets losses, a default silently changes a signed policy, a manual entry bypasses total-account drawdown, or an owner reset erases economic loss: reject.",
+        "A signed reset changes a permission state or risk reference with an audit event, never the immutable economic performance history; unknown policy/collateral blocks new risk."
+      ],
+      "requirement": "VAN-CX-009",
+      "state": "SPECIFIED_CLOSURE_NOT_IMPLEMENTED",
+      "waiver_allowed": false
+    },
+    {
+      "first_gate": "BG-001",
+      "id": "GAP-VAN-CX-010",
+      "owner_units": [
+        "BE-019",
+        "BE-035",
+        "BE-036"
+      ],
+      "required_evidence": [
+        "Known-profit/loss fixtures match analytically specified results and the actual execution adapters' admitted semantics.",
+        "Disabling controls, altering quote units or a permissive fill model without a distinct experiment identity invalidates promotion evidence.",
+        "An evaluator correction invalidates dependent candidate conclusions and schedules reproducible reevaluation; old results remain labeled historical."
+      ],
+      "requirement": "VAN-CX-010",
+      "state": "SPECIFIED_CLOSURE_NOT_IMPLEMENTED",
+      "waiver_allowed": false
+    },
+    {
+      "first_gate": "BG-001",
+      "id": "GAP-VAN-CX-011",
+      "owner_units": [
+        "BE-035",
+        "BE-036",
+        "VAN-ML-PKT-008",
+        "VAN-ML-PKT-021"
+      ],
+      "required_evidence": [
+        "Replay of each named chronological fold yields the same pre-cutoff decisions and verified split provenance.",
+        "Future-only perturbation changes past decisions, a scaler sees the holdout, or window count is only the count of calendar years: fail.",
+        "Tainted fold/candidate artifacts cannot be reused as independent promotion evidence; retain audit lineage."
+      ],
+      "requirement": "VAN-CX-011",
+      "state": "SPECIFIED_CLOSURE_NOT_IMPLEMENTED",
+      "waiver_allowed": false
+    },
+    {
+      "first_gate": "BG-001",
+      "id": "GAP-VAN-CX-012",
+      "owner_units": [
+        "BE-008",
+        "BE-019",
+        "BE-035",
+        "VAN-ML-PKT-006"
+      ],
+      "required_evidence": [
+        "From permitted raw inputs, a second run reproduces the same bars, sessions, costs and outcomes.",
+        "Bid is silently treated as midpoint, fixed EST becomes DST-local time, a bar is used before close or a mirror is unpinned: reject qualifying use.",
+        "Keep lawful metadata and reproducibility scripts without republishing restricted data; qualifying tests await admitted data while unrelated authorized engineering continues."
+      ],
+      "requirement": "VAN-CX-012",
+      "state": "SPECIFIED_CLOSURE_NOT_IMPLEMENTED",
+      "waiver_allowed": false
+    },
+    {
+      "first_gate": "BG-001",
+      "id": "GAP-VAN-CX-013",
+      "owner_units": [
+        "BE-035",
+        "BE-036",
+        "VAN-ML-PKT-020",
+        "VAN-ML-PKT-021"
+      ],
+      "required_evidence": [
+        "Each reported metric identifies the population, formula/version, trial set, uncertainty and selection scope.",
+        "A pooled PBO is relabeled pair-specific, losers disappear from trial count, or repeated holdout tuning is called independent: fail promotion.",
+        "A no-qualified-candidate result is valid; do not search until a cherry-picked pass can be manufactured."
+      ],
+      "requirement": "VAN-CX-013",
+      "state": "SPECIFIED_CLOSURE_NOT_IMPLEMENTED",
+      "waiver_allowed": false
+    },
+    {
+      "first_gate": "BG-001",
+      "id": "GAP-VAN-CX-014",
+      "owner_units": [
+        "BE-013",
+        "BE-022",
+        "BE-028",
+        "BE-035",
+        "BE-036"
+      ],
+      "required_evidence": [
+        "A weekly run is idempotent by period/strategy/dataset/evaluator; results reproduce and a candidate reaches only permitted next states.",
+        "A model edits protected execution/risk paths, repeated runs duplicate studies, a failed candidate becomes a promotion opportunity, or an unsigned candidate trades live: refuse.",
+        "Resume interrupted jobs from durable checkpoints; outdated evaluations are invalidated, not overwritten; current production champion remains unchanged."
+      ],
+      "requirement": "VAN-CX-014",
+      "state": "SPECIFIED_CLOSURE_NOT_IMPLEMENTED",
+      "waiver_allowed": false
+    },
+    {
+      "first_gate": "BG-001",
+      "id": "GAP-VAN-CX-015",
+      "owner_units": [
+        "PRE-002",
+        "BE-002",
+        "BE-017"
+      ],
+      "required_evidence": [
+        "A pre-signed ticket arms only in its declared readiness envelope and can claim the nonce once.",
+        "Empty proof, arbitrary real proof label, proof for another account/event, re-signed weakened allowlist or concurrent duplicate use: reject.",
+        "Arming and consuming a grant are not a broker fill; unknown submission follows the order reconciler, never a second order."
+      ],
+      "requirement": "VAN-CX-015",
+      "state": "SPECIFIED_CLOSURE_NOT_IMPLEMENTED",
+      "waiver_allowed": false
+    },
+    {
+      "first_gate": "BG-001",
+      "id": "GAP-VAN-CX-016",
+      "owner_units": [
+        "BE-004",
+        "BE-005",
+        "BE-006",
+        "BE-007",
+        "BE-009"
+      ],
+      "required_evidence": [
+        "Deposit/withdrawal/credit/fee and pending-order interleavings reconcile exact money, positions and risk without false P&L.",
+        "Redirect settles money, a timeout resubmits, deleting restores secrets, unclassified flow silently improves risk capital, or a withdrawal bypasses concurrent reservations: reject.",
+        "Rollback never erases financial events; credential cancellation returns RELINK_REQUIRED and broker closure remains independently verified."
+      ],
+      "requirement": "VAN-CX-016",
+      "state": "SPECIFIED_CLOSURE_NOT_IMPLEMENTED",
+      "waiver_allowed": false
+    },
+    {
+      "first_gate": "BG-001",
+      "id": "GAP-VAN-CX-017",
+      "owner_units": [
+        "BE-032",
+        "BG-001",
+        "UX-001",
+        "UX-003"
+      ],
+      "required_evidence": [
+        "Every mapped owner action and new capability has one traceable caller and appropriate screen/sheet/dialog outcome.",
+        "A visually complete screen lacks its source or any backend is unfinished; BG-001 and frontend entry refuse.",
+        "A newly discovered missing backend capability reopens its backend unit and invalidates affected BG/UX proof before front-end compensation."
+      ],
+      "requirement": "VAN-CX-017",
+      "state": "SPECIFIED_CLOSURE_NOT_IMPLEMENTED",
+      "waiver_allowed": false
+    },
+    {
+      "first_gate": "BG-001",
+      "id": "GAP-VAN-CX-018",
+      "owner_units": [
+        "BE-013",
+        "BE-021",
+        "BE-032",
+        "BG-001",
+        "VAN-ML-PKT-048"
+      ],
+      "required_evidence": [
+        "Every one of the 90 forecast requirements maps to an active unit and test; all required child backend receipts reach BG-001.",
+        "A child F15/BG independently opens UI, Qlib or Freqtrade sends a live order, or a unavailable provider is labeled healthy: reject.",
+        "Data/model failure yields explicit abstention or unavailable state; no economically qualified model is a permissible result, not permission to omit software."
+      ],
+      "requirement": "VAN-CX-018",
+      "state": "SPECIFIED_CLOSURE_NOT_IMPLEMENTED",
+      "waiver_allowed": false
+    },
+    {
+      "first_gate": "PRE-003",
+      "id": "GAP-VAN-CX-019",
+      "owner_units": [
+        "PRE-003",
+        "BQ-006",
+        "BQ-007",
+        "BG-001",
+        "QA-005"
+      ],
+      "required_evidence": [
+        "The complete pack rebuilds identically and invalid evidence cannot change readiness.",
+        "Edit input and matching local hash, delete a receipt, swap source revision, self-declare signature_valid, or reuse device evidence across builds: block readiness.",
+        "Record revoked/stale evidence; regenerate affected planning fingerprints and rerun relevant tests without erasing old records."
+      ],
+      "requirement": "VAN-CX-019",
+      "state": "SPECIFIED_CLOSURE_NOT_IMPLEMENTED",
+      "waiver_allowed": false
+    },
+    {
+      "first_gate": "QA-005",
+      "id": "GAP-VAN-CX-020",
+      "owner_units": [
+        "UX-002",
+        "UX-003",
+        "FE-023",
+        "QA-001",
+        "QA-004"
+      ],
+      "required_evidence": [
+        "Full-scope native dark/light goldens, action reachability and physical S24 cases match the same backend catalogue revision.",
+        "Only showcase flows pass, legacy UI leaks into new modules, safety states are hidden for aesthetics, or unknown data looks live: reject final qualification.",
+        "Reduce motion/material cost gracefully without removing semantics; preserve signed identity and reversible cutover until every required feature is verified."
+      ],
+      "requirement": "VAN-CX-020",
+      "state": "SPECIFIED_CLOSURE_NOT_IMPLEMENTED",
+      "waiver_allowed": false
+    },
+    {
+      "first_gate": "PRE-003",
+      "id": "GAP-SEMANTIC",
+      "state": "NOT_QUALIFIED",
+      "title": "Independent semantic admission of 171 atoms/115 contexts and all branch functions",
+      "waiver_allowed": false
+    },
+    {
+      "first_gate": "PRE-003",
+      "id": "GAP-SIGNATURE",
+      "state": "NOT_QUALIFIED",
+      "title": "Exact owner scope/decision signature",
+      "waiver_allowed": false
+    },
+    {
+      "first_gate": "BG-001",
+      "id": "GAP-PROVIDER",
+      "state": "NOT_QUALIFIED",
+      "title": "Actual admitted provider sandbox/capabilities, especially required funds and orders",
+      "waiver_allowed": false
+    },
+    {
+      "first_gate": "QA-005",
+      "id": "GAP-DEVICE",
+      "state": "NOT_QUALIFIED",
+      "title": "New signed APK and physical S24 native interactions/performance",
+      "waiver_allowed": false
+    }
+  ],
+  "status": "ENGINEERING_CLOSURE_NO_ACCEPT_LIMITATIONS"
+}

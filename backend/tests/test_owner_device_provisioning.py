@@ -77,6 +77,7 @@ def _settings(tmp_path, monkeypatch, signing_key):
     monkeypatch.setenv("VAN_CONNECTIVITY_SIGNING_KEY_FILE", str(key_path))
     monkeypatch.setenv("VAN_CONNECTIVITY_SIGNING_KID", SIGNING_KID)
     monkeypatch.setenv("VAN_OWNER_DEVICE_SIGNING_CERT_SHA256", "a" * 64)
+    monkeypatch.setenv("VAN_OWNER_DEVICE_ATTESTATION_ROOTS", "b" * 64)
     get_settings.cache_clear()
     yield
     get_settings.cache_clear()
@@ -106,6 +107,19 @@ async def _issue(ac, gateway_url="https://van.example", **extra):
 
 @pytest.mark.asyncio
 class TestTheInstallerAsksForAlmostNothing:
+
+    @pytest.mark.parametrize("gateway", ["https://user:secret@van.example", "https://van.example?token=x",
+                                         "https://van.example#other", "https://", "https://van.example/prefix",
+                                         "https://van.example?", "https://van.example#", "https://van.example////",
+                                         "https://van.example:", "https://van.example:0", "https://999.1.1.1"])
+    async def test_invalid_gateway_is_refused_before_any_credential_is_minted(self, client, gateway):
+        ac, app = client
+        before = await app.state.store.fetchall("SELECT token_id FROM owner_device_bootstrap_tokens")
+        before_tickets = await app.state.store.fetchall("SELECT ticket_hash FROM pairing_tickets")
+        refused = await _issue(ac, gateway_url=gateway)
+        assert refused.status_code == 400, refused.text
+        assert await app.state.store.fetchall("SELECT token_id FROM owner_device_bootstrap_tokens") == before
+        assert await app.state.store.fetchall("SELECT ticket_hash FROM pairing_tickets") == before_tickets
 
     async def test_one_call_returns_a_verifiable_signed_envelope(self, client, signing_key):
         _, public_pem, _ = signing_key
@@ -157,11 +171,17 @@ class TestTheInstallerAsksForAlmostNothing:
         assert first["pairing_token"] != second["pairing_token"]
 
     async def test_the_window_is_minutes_not_hours(self, client):
-        ac, _ = client
+        import hashlib
+        ac, app = client
         payload = (await _issue(ac)).json()["payload"]
         window = payload["expires_at_ms"] - payload["issued_at_ms"]
         assert window == PROVISIONING_TTL_MS
         assert window <= 15 * 60_000, "the ADB channel does not survive a long window"
+        token = await app.state.store.fetchone(
+            "SELECT created_at_ms,expires_at_ms FROM owner_device_bootstrap_tokens WHERE token_sha256 = ?",
+            (hashlib.sha256(payload["bootstrap_token"].encode()).hexdigest(),),
+        )
+        assert token["expires_at_ms"] - token["created_at_ms"] == PROVISIONING_TTL_MS
 
     async def test_a_plain_http_gateway_is_refused(self, client):
         ac, _ = client

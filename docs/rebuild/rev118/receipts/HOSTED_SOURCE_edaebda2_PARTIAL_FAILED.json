@@ -1,0 +1,149 @@
+{
+  "schema": "van.rebuild.hosted-source-partial/1",
+  "status": "PARTIAL_FAILED",
+  "run_id": 40087510048,
+  "source_head": "edaebda2fc47aebb02cf2286a88f60b2068024aa",
+  "tested_merge": "4ac02fd1ed9bac8cc7e45ccb1b3bc989f0c150f9",
+  "identical_source_tree": "72994503cc3f805454eb0c0b71164090b437d82e",
+  "jobs": [
+    {
+      "id": 120853629808,
+      "name": "browser-guard-source",
+      "conclusion": "success"
+    },
+    {
+      "id": 120853629907,
+      "name": "project-truth-ledger",
+      "conclusion": "failure"
+    },
+    {
+      "id": 120853629920,
+      "name": "mutation (python-0, python, 0/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120853629935,
+      "name": "android-instrumentation",
+      "conclusion": "success"
+    },
+    {
+      "id": 120853629943,
+      "name": "android-and-visual-evidence",
+      "conclusion": "success"
+    },
+    {
+      "id": 120853629944,
+      "name": "mutation (python-2, python, 2/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120853629945,
+      "name": "rebuild-documentary",
+      "conclusion": "success"
+    },
+    {
+      "id": 120853629947,
+      "name": "mutation (browser-agent, browser-agent, 0/1)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120853629950,
+      "name": "backend",
+      "conclusion": "failure"
+    },
+    {
+      "id": 120853629965,
+      "name": "postgres-ledger",
+      "conclusion": "success"
+    },
+    {
+      "id": 120853629969,
+      "name": "mutation (kotlin-2, kotlin, 2/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120853629973,
+      "name": "mutation (kotlin-1, kotlin, 1/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120853629999,
+      "name": "mutation (kotlin-0, kotlin, 0/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120853630035,
+      "name": "mutation (python-1, python, 1/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120853630091,
+      "name": "mutation (python-3, python, 3/4)",
+      "conclusion": "failure"
+    },
+    {
+      "id": 120853630194,
+      "name": "mutation (kotlin-3, kotlin, 3/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120856084387,
+      "name": "character-forge-gate",
+      "conclusion": "success"
+    }
+  ],
+  "public_source": {
+    "voice-source-report.xml": {
+      "tests": 117,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "e29eb1c96d67bb4b4424ecd3f0611f8d69d6a21c07203ed133589ba634cbfe83"
+    },
+    "postgres-ledger-report.xml": {
+      "tests": 26,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "ddc43f517d7306f1ba10eefb1047bd7bcbb70bca8bc12e68a11bb0b5087c1922"
+    },
+    "trading-source-report.xml": {
+      "tests": 2676,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "sha256": "b4e538472b9c70f926bab22a001e0fd2d83141cd0bb181219fde420fd44f7402"
+    }
+  },
+  "legacy_mutations": {
+    "caught": 368,
+    "survived": 0,
+    "not_executed": 6,
+    "receipt": "ci/MUTATION_CORPUS_edaebda2_PARTIAL.json"
+  },
+  "instrumentation": {
+    "collected": 22,
+    "passed": 18,
+    "failed": 0,
+    "skipped": 4,
+    "skip_reason": "existing core-artwork mode",
+    "voice_methods": {
+      "cancellationBeforeNativeStartCannotCompleteOrDamageTheReplacementAnswer": "2.535s",
+      "realOfflineAnswerReachesTheApplicationQueueAsSpoken": "2.341s"
+    },
+    "index_sha256": "861d4d3f8bd1552bcf441ee324bbb3424b0bcc6286fc0aeb6c76a0f4227b24a4",
+    "voice_report_sha256": "39705d4c17304b52cc08adf3c68e3b42cffe7ee8641c2340627715d3ae8a4bc1",
+    "diagnostics_sha256": "bbb192f57967f6bb91c3e767fbec93ebbd1c9c527d0ce2f0bfdcc02270e3109a"
+  },
+  "fresh_browser_regressions": "receipts/HOSTED_BROWSER_SOURCE_edaebda2.json records all11 actually executed passes0skip on this same tree.",
+  "retained_failures": {
+    "backend": "DDS_CONTRACT_READ_DEPLOY_KEY is not provisioned",
+    "project-truth-ledger": "trusted main bootstrap checker absent",
+    "python-3": "The live workflow and installer template drifted; original control correctly refused the final C12 group.",
+    "logs": {
+      "backend-job.log": "1c0710e84e7a5015faa7723b1e4f832a2db44a5336b96e2407c7d8ad9299d502",
+      "project-truth-ledger-job.log": "62e5ef0676c0056549a195d4461bba900742e8915175ab3fbc4b4957a9321a22"
+    }
+  },
+  "qualification": "Actual source/emulator evidence on this exact earlier head only. No whole374 corpus, full backend, deployed host/provider/security/S24 or whole-unit acceptance."
+}

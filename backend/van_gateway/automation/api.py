@@ -44,6 +44,13 @@ from van_gateway.automation.cold import (
     TemplateBackedProposer,
 )
 from van_gateway.automation.compiler import AutomationCompiler
+from van_gateway.automation.provisioner import N8nProvisioner, ProvisioningError, graph_matches, verify_runtime_dependencies
+from van_gateway.automation.runtime_bindings import RuntimeBindingStore
+from van_gateway.automation.n8n_client import N8nClientError
+from van_gateway.automation.source_credentials import SourceCredentialStore
+from van_gateway.automation.standing_runner import StandingRunProducer, cron_due
+from van_gateway.action.models import ActionDefinition, VerifierType
+from van_gateway.action.service import ActionRuntime
 from van_gateway.automation.dispatch import AutomationDispatcher, DispatchError
 from van_gateway.automation.models import (
     AutomationWorkflowArtifact,
@@ -51,6 +58,8 @@ from van_gateway.automation.models import (
     WorkflowCapability,
     WorkflowEngine,
     WorkflowLifecycle,
+    WorkflowIR,
+    LIFECYCLE_TRANSITIONS,
 )
 from van_gateway.automation.payments import PaymentBoundaryError
 from van_gateway.automation.policy import AutomationPolicy, PolicyError, load_automation_policy
@@ -86,6 +95,7 @@ class CredentialResolveBody(BaseModel):
     alias: str = Field(min_length=1)
     credential_class: CredentialClass
     admitted: bool = False
+    n8n_credential_id: str | None = None
 
 
 class RouteBody(BaseModel):
@@ -108,6 +118,7 @@ class CompileBody(BaseModel):
     #: Resolved by the caller through CredentialResolver; aliases map to n8n ids.
     credential_ids: dict[str, str] = Field(default_factory=dict)
     capability_id: str | None = None
+    workflow_ir: WorkflowIR | None = None
 
 
 class AdmitBody(BaseModel):
@@ -175,6 +186,10 @@ class StandingIntentBody(BaseModel):
     expires_at_ms: int | None = None
 
 
+class StandingRunBody(BaseModel):
+    inputs: dict[str, Any] = Field(default_factory=dict)
+
+
 class AutomationApi:
     """`/v1/automation/*` — compile, admit, publish, route, and standing intents."""
 
@@ -200,7 +215,12 @@ class AutomationApi:
         self.policy = policy or load_automation_policy()
         self.templates = TemplateLibrary()
         self.validator = WorkflowValidator(self.policy)
-        self.compiler = AutomationCompiler(self.policy)
+        self.source_credentials = SourceCredentialStore(getattr(settings, "automation_source_credentials_file", ""))
+        self.compiler = AutomationCompiler(self.policy, self.source_credentials)
+        self.runtime_bindings = RuntimeBindingStore(store)
+        self.provisioner = N8nProvisioner(store, settings=settings, client=dispatcher.client,
+            registry=registry, compiler=self.compiler) if dispatcher else None
+        self.standing_runner = StandingRunProducer(store, standing=standing, registry=registry, dispatcher=dispatcher)
         self.planner = ColdGenerationPlanner(
             policy=self.policy, templates=self.templates, validator=self.validator
         )
@@ -238,6 +258,24 @@ class AutomationApi:
     def _require_enabled(self) -> None:
         if not self.settings.automation_enabled:
             raise HTTPException(status_code=503, detail="AUTOMATION_FABRIC_DISABLED")
+
+    async def _ensure_credential_bindings(self) -> None:
+        await self.store.execute("""CREATE TABLE IF NOT EXISTS automation_credential_bindings(
+            alias TEXT PRIMARY KEY, credential_class TEXT NOT NULL, admitted INTEGER NOT NULL,
+            n8n_credential_id TEXT, gateway_capability TEXT)""")
+
+    async def _load_credential_bindings(self) -> None:
+        await self._ensure_credential_bindings()
+        for row in await self.store.fetchall("SELECT * FROM automation_credential_bindings"):
+            self.credentials.register(CredentialAlias(alias=row["alias"], credential_class=CredentialClass(row["credential_class"]),
+                admitted=bool(row["admitted"]), n8n_credential_id=row["n8n_credential_id"], gateway_capability=row["gateway_capability"]))
+
+    async def _persist_credential_binding(self, alias: CredentialAlias) -> None:
+        await self._ensure_credential_bindings()
+        await self.store.execute("""INSERT INTO automation_credential_bindings(alias,credential_class,admitted,n8n_credential_id,gateway_capability)
+            VALUES (?,?,?,?,?) ON CONFLICT(alias) DO UPDATE SET credential_class=excluded.credential_class,
+            admitted=excluded.admitted,n8n_credential_id=excluded.n8n_credential_id,gateway_capability=excluded.gateway_capability""",
+            (alias.alias, alias.credential_class.value, int(alias.admitted), alias.n8n_credential_id, alias.gateway_capability))
 
     # ------------------------------------------------------------- routes
 
@@ -279,100 +317,20 @@ class AutomationApi:
             self._require_internal(x_van_internal_token)
             self._require_enabled()
 
-            try:
-                ir = self._build_ir(body)
-            except (TemplateError, PolicyError, PaymentBoundaryError) as exc:
-                raise HTTPException(status_code=422, detail=str(exc)) from exc
+            return await self.compile_candidate(body)
 
-            report = self.validator.validate(ir)
-            if not report.ok:
-                raise HTTPException(
-                    status_code=422,
-                    detail={"error": "WORKFLOW_VALIDATION_FAILED", "errors": sorted(report.errors)},
-                )
-
-            try:
-                compiled = self.compiler.compile(ir, credential_ids=body.credential_ids)
-            except PolicyError as exc:
-                raise HTTPException(status_code=422, detail=str(exc)) from exc
-
-            now = int(time.time() * 1000)
-            capability_id = body.capability_id or new_id("capability")
-            version = await self.registry.next_version(capability_id)
-
-            await self.registry.upsert_capability(
-                WorkflowCapability(
-                    capability_id=capability_id,
-                    semantic_name=body.semantic_name,
-                    engine=WorkflowEngine.N8N,
-                    action_class=ir.action_class,
-                    mutates_state=any(step.mutates for step in ir.steps),
-                    input_schema=ir.inputs_schema,
-                    output_schema=ir.outputs_schema,
-                    allowed_principals=["OWNER_DEVICE", "HERMES_AGENT", "AUTOMATION"],
-                    allowed_origin_channels=["VOICE", "TEXT", "UI", "AUTOMATION"],
-                    latency_class=ir.latency_class,
-                    duration_class="SECONDS",
-                    required_context=[],
-                    required_credentials=list(ir.credential_requirements),
-                    verifier_type=str(ir.verifier.get("kind", "NONE")),
-                    idempotency_policy="IDEMPOTENT_WITH_KEY",
-                    evidence_policy="SEAL",
-                    lifecycle_state=WorkflowLifecycle.PROPOSED,
-                    workflow_ir_digest=digest(ir.semantic_payload()),
-                    policy_version=self.policy.policy_version,
-                    compiler_version=compiled.compiler_version,
-                    created_at_ms=now, updated_at_ms=now,
-                )
-            )
-            artifact = await self.registry.record_artifact(
-                AutomationWorkflowArtifact(
-                    artifact_id=new_id("artifact"),
-                    capability_id=capability_id,
-                    version=version,
-                    workflow_ir_digest=digest(ir.semantic_payload()),
-                    compiled_semantic_digest=compiled.semantic_digest,
-                    compiled_full_digest=compiled.full_digest,
-                    n8n_workflow_id=None,
-                    compiler_version=compiled.compiler_version,
-                    node_catalog_version=compiled.node_catalog_version,
-                    policy_version=self.policy.policy_version,
-                    source_refs=list(ir.generated_from),
-                    validation_report_digest=report.report_digest,
-                    lifecycle_state=WorkflowLifecycle.PROPOSED,
-                    created_at_ms=now,
-                )
-            )
-            return {
-                "capability_id": capability_id,
-                "artifact_id": artifact.artifact_id,
-                "version": version,
-                "action_class": ir.action_class.value,
-                "lifecycle_state": WorkflowLifecycle.PROPOSED.value,
-                "semantic_digest": compiled.semantic_digest,
-                "validation_report_digest": report.report_digest,
-                "auto_admissible": self.policy.may_auto_admit(ir.action_class.value),
-            }
+        @router.post("/workflows/{artifact_id}/provision")
+        async def provision_workflow(artifact_id: str, x_van_internal_token: str | None = Header(default=None)):
+            self._require_internal(x_van_internal_token)
+            self._require_enabled()
+            return await self.provision_candidate(artifact_id)
 
         @router.post("/admit")
         async def admit(body: AdmitBody, x_van_internal_token: str | None = Header(default=None)):
             """§221 — one guarded transition. §154: no partial admission."""
             self._require_internal(x_van_internal_token)
             self._require_enabled()
-            try:
-                artifact = await self.registry.transition(
-                    body.artifact_id, expected=body.expected, target=body.target,
-                    n8n_workflow_id=body.n8n_workflow_id,
-                )
-            except RegistryError as exc:
-                raise HTTPException(status_code=409, detail=str(exc)) from exc
-            return {
-                "artifact_id": artifact.artifact_id,
-                "capability_id": artifact.capability_id,
-                "version": artifact.version,
-                "lifecycle_state": artifact.lifecycle_state.value,
-                "admitted_at_ms": artifact.admitted_at_ms,
-            }
+            return await self.transition_candidate(body)
 
         @router.post("/generate")
         async def generate(
@@ -452,6 +410,7 @@ class AutomationApi:
                     inputs=body.inputs, turn_id=body.turn_id,
                     postcondition=postcondition,
                     standing_authority_id=body.standing_authority_id,
+                    mission_id=body.mission_id,
                 )
             except DispatchError as exc:
                 status = {
@@ -595,6 +554,27 @@ class AutomationApi:
                 "source_device_is_revocation_root": True,
             }
 
+        @router.post("/standing-authorities/{authority_id}/run")
+        async def run_due_standing(authority_id: str, body: StandingRunBody,
+                                   x_van_internal_token: str | None = Header(default=None)):
+            self._require_internal(x_van_internal_token)
+            self._require_enabled()
+            source = await self.standing.get(authority_id)
+            if source is None:
+                raise HTTPException(status_code=404, detail="STANDING_AUTHORITY_NOT_FOUND")
+            intent = await self.store.fetchone("SELECT trigger_json FROM automation_standing_intents WHERE intent_id=?", (source.standing_intent_id,))
+            trigger = json.loads(intent["trigger_json"]) if intent else {}
+            now = int(time.time() * 1000)
+            try:
+                if (str(trigger.get("kind", "")).upper() != "SCHEDULE" or trigger.get("timezone", "UTC") != "UTC"
+                        or not cron_due(str(trigger.get("cron", "")), now)):
+                    raise StandingAuthorityError("STANDING_TRIGGER_NOT_DUE")
+                result = await self.standing_runner.run(authority_id, inputs=body.inputs,
+                                                       trigger_key=f"schedule:{now // 60000}", now_ms=now)
+            except (StandingAuthorityError, DispatchError) as exc:
+                raise HTTPException(status_code=409, detail=str(exc)) from exc
+            return result.model_dump(mode="json")
+
         @router.post("/standing-intents/{intent_id}/disable")
         async def disable_standing_intent(
             intent_id: str, x_van_internal_token: str | None = Header(default=None)
@@ -717,8 +697,10 @@ class AutomationApi:
                         alias=body.alias,
                         credential_class=body.credential_class,
                         admitted=body.admitted,
+                        n8n_credential_id=body.n8n_credential_id,
                     )
                 )
+                await self._persist_credential_binding(alias)
             except PolicyError as exc:
                 raise HTTPException(status_code=422, detail=str(exc)) from exc
             return {"alias": alias.alias, "credential_class": alias.credential_class.value,
@@ -787,7 +769,175 @@ class AutomationApi:
 
     # ------------------------------------------------------------ helpers
 
+    async def provision_candidate(self, artifact_id: str):
+        self._require_enabled()
+        endpoint = getattr(self.settings, "automation_worker_endpoint", "")
+        if self.provisioner is None or not endpoint:
+            raise HTTPException(status_code=503, detail="AUTOMATION_WORKER_PROVISIONING_UNCONFIGURED")
+        try:
+            binding = await self.provisioner.provision(artifact_id, endpoint)
+        except (ProvisioningError, N8nClientError, PolicyError, ValueError) as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
+        return {"artifact_id": artifact_id, "binding_state": binding["binding_state"],
+                "n8n_workflow_id": binding["n8n_workflow_id"], "full_digest": binding["full_digest"]}
+
+    async def transition_candidate(self, body: AdmitBody):
+        self._require_enabled()
+        try:
+            if body.target not in LIFECYCLE_TRANSITIONS[body.expected]:
+                raise RegistryError(f"illegal_transition:{body.expected.value}->{body.target.value}")
+            binding = await self.runtime_bindings.get(body.artifact_id)
+            if body.n8n_workflow_id and (binding is None or binding["binding_state"] != "DEPLOYED" or body.n8n_workflow_id != binding["n8n_workflow_id"]):
+                raise RegistryError("WORKFLOW_RUNTIME_BINDING_MISMATCH")
+            if body.target in {WorkflowLifecycle.ADMITTED, WorkflowLifecycle.HOT}:
+                if binding is None or binding["binding_state"] != "DEPLOYED" or binding["readiness_errors"]:
+                    raise RegistryError("WORKFLOW_RUNTIME_NOT_DEPLOYED")
+                if body.n8n_workflow_id and body.n8n_workflow_id != binding["n8n_workflow_id"]:
+                    raise RegistryError("WORKFLOW_RUNTIME_BINDING_MISMATCH")
+                if self.dispatcher is None:
+                    raise RegistryError("AUTOMATION_DISPATCH_UNCONFIGURED")
+                current = await self.registry.get_artifact(body.artifact_id)
+                if current is None or current.lifecycle_state != body.expected:
+                    raise RegistryError("transition_precondition_failed")
+                ir = WorkflowIR.model_validate(binding["ir"])
+                if (digest(ir.semantic_payload()) != current.workflow_ir_digest or
+                        digest(binding["semantic_graph"]) != current.compiled_semantic_digest or
+                        RuntimeBindingStore.compute_full_digest(binding["runtime_graph"], binding["dependencies"]) != current.compiled_full_digest or
+                        binding["n8n_workflow_id"] != current.n8n_workflow_id):
+                    raise RegistryError("WORKFLOW_RUNTIME_MANIFEST_MISMATCH")
+                running = await self.store.fetchone("SELECT run_id FROM automation_runs WHERE capability_id=? AND status IN ('PENDING','DISPATCHED','SUBMITTED') LIMIT 1",
+                                                     (current.capability_id,))
+                if running:
+                    raise RegistryError("WORKFLOW_REPLACEMENT_HAS_ACTIVE_RUNS")
+                if body.target is WorkflowLifecycle.ADMITTED:
+                    await verify_runtime_dependencies(self.dispatcher.client, binding)
+                    await self.dispatcher.client.activate(binding["n8n_workflow_id"])
+                else:
+                    await verify_runtime_dependencies(self.dispatcher.client, binding)
+                observed = await self.dispatcher.client.get_workflow(binding["n8n_workflow_id"])
+                if observed.get("active") is not True or not graph_matches(binding["runtime_graph"], observed):
+                    raise RegistryError("WORKFLOW_ACTIVATION_READBACK_MISMATCH")
+            artifact = await self.registry.transition(
+                body.artifact_id, expected=body.expected, target=body.target,
+                n8n_workflow_id=binding["n8n_workflow_id"] if body.target is WorkflowLifecycle.ADMITTED else body.n8n_workflow_id,
+                runtime_ir=ir if body.target is WorkflowLifecycle.ADMITTED else None,
+            )
+        except (RegistryError, N8nClientError, ProvisioningError) as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
+        return {
+            "artifact_id": artifact.artifact_id,
+            "capability_id": artifact.capability_id,
+            "version": artifact.version,
+            "lifecycle_state": artifact.lifecycle_state.value,
+            "admitted_at_ms": artifact.admitted_at_ms,
+        }
+
+    async def compile_candidate(self, body: CompileBody):
+        """Persist a validated immutable proposal; this grants no execution authority."""
+        self._require_enabled()
+        try:
+            ir = self._build_ir(body)
+        except (TemplateError, PolicyError, PaymentBoundaryError) as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+        report = self.validator.validate(ir)
+        if not report.ok:
+            raise HTTPException(
+                status_code=422,
+                detail={"error": "WORKFLOW_VALIDATION_FAILED", "errors": sorted(report.errors)},
+            )
+
+        try:
+            await self._load_credential_bindings()
+            required = [step.credential_alias for step in ir.steps if step.credential_alias]
+            admitted_credentials = (self.source_credentials.admitted_handles(required) if self.source_credentials.configured
+                                    else self.credentials.resolve_for_compilation(required))
+            if body.credential_ids and body.credential_ids != admitted_credentials:
+                raise PolicyError("caller_credential_binding_mismatch")
+            compiled = self.compiler.compile(ir, credential_ids=admitted_credentials)
+        except PolicyError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+        now = int(time.time() * 1000)
+        capability_id = body.capability_id or new_id("capability")
+        version = await self.registry.next_version(capability_id)
+        active = await self.registry.get_capability(capability_id)
+        if active and active.lifecycle_state in {WorkflowLifecycle.ADMITTED, WorkflowLifecycle.HOT} and active.semantic_name != body.semantic_name:
+            raise HTTPException(status_code=409, detail="CAPABILITY_SEMANTIC_IDENTITY_CONFLICT")
+        proposed = (
+            WorkflowCapability(
+                capability_id=capability_id,
+                semantic_name=body.semantic_name,
+                engine=WorkflowEngine.N8N,
+                action_class=ir.action_class,
+                mutates_state=any(step.mutates for step in ir.steps),
+                input_schema=ir.inputs_schema,
+                output_schema=ir.outputs_schema,
+                allowed_principals=["OWNER_DEVICE", "AUTOMATION"],
+                allowed_origin_channels=["VOICE", "TEXT", "UI", "AUTOMATION"],
+                latency_class=ir.latency_class,
+                duration_class="SECONDS",
+                required_context=[],
+                required_credentials=list(ir.credential_requirements),
+                verifier_type=str(ir.verifier.get("kind", "NONE")),
+                idempotency_policy="IDEMPOTENT_WITH_KEY",
+                evidence_policy="SEAL",
+                lifecycle_state=WorkflowLifecycle.PROPOSED,
+                workflow_ir_digest=digest(ir.semantic_payload()),
+                policy_version=self.policy.policy_version,
+                compiler_version=compiled.compiler_version,
+                created_at_ms=now, updated_at_ms=now,
+            )
+        )
+        if active is None or active.lifecycle_state not in {WorkflowLifecycle.ADMITTED, WorkflowLifecycle.HOT}:
+            await self.registry.upsert_capability(proposed)
+        artifact = await self.registry.record_artifact(
+            AutomationWorkflowArtifact(
+                artifact_id=new_id("artifact"),
+                capability_id=capability_id,
+                version=version,
+                workflow_ir_digest=digest(ir.semantic_payload()),
+                compiled_semantic_digest=compiled.semantic_digest,
+                compiled_full_digest=compiled.full_digest,
+                n8n_workflow_id=None,
+                compiler_version=compiled.compiler_version,
+                node_catalog_version=compiled.node_catalog_version,
+                policy_version=self.policy.policy_version,
+                source_refs=list(ir.generated_from),
+                validation_report_digest=report.report_digest,
+                lifecycle_state=WorkflowLifecycle.PROPOSED,
+                created_at_ms=now,
+            )
+        )
+        await self.runtime_bindings.record(artifact_id=artifact.artifact_id, ir=ir.model_dump(mode="json"),
+            semantic_graph=compiled.semantic_graph, runtime_graph=compiled.n8n_graph if compiled.deployable else None,
+            readiness_errors=list(compiled.readiness_errors))
+        actions = self.dispatcher.actions if self.dispatcher else ActionRuntime(self.store)
+        if active is None or active.lifecycle_state not in {WorkflowLifecycle.ADMITTED, WorkflowLifecycle.HOT}:
+            await actions.register(ActionDefinition(action_id=f"automation.workflow.{capability_id}",
+                action_class=ir.action_class, mutates_state=any(step.mutates for step in ir.steps),
+                allowed_principals={PrincipalType.OWNER_DEVICE, PrincipalType.AUTOMATION},
+                verifier_type=VerifierType.READ_BACK, parameter_schema=ir.inputs_schema,
+                no_stale_replay=ir.action_class is ActionClass.A4, max_age_seconds=5 if ir.action_class is ActionClass.A4 else 300))
+        return {
+            "capability_id": capability_id,
+            "artifact_id": artifact.artifact_id,
+            "version": version,
+            "action_class": ir.action_class.value,
+            "lifecycle_state": WorkflowLifecycle.PROPOSED.value,
+            "semantic_digest": compiled.semantic_digest,
+            "validation_report_digest": report.report_digest,
+            "auto_admissible": compiled.deployable and self.policy.may_auto_admit(ir.action_class.value),
+            "deployable": compiled.deployable,
+            "runtime_readiness_errors": list(compiled.readiness_errors),
+            "action_id": f"automation.workflow.{capability_id}",
+        }
+
     def _build_ir(self, body: CompileBody):
+        if body.workflow_ir is not None:
+            if body.template_id is not None or body.bindings:
+                raise TemplateError("compile_ir_and_template_are_exclusive")
+            return body.workflow_ir
         if body.template_id is None:
             raise TemplateError("compile_requires_template_id")
         return self.templates.specialise(

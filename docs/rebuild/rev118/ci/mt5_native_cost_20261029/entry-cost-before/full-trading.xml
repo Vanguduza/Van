@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="8.956" timestamp="2026-10-29T00:54:47.801763+00:00" hostname="6e9feff21467"><testcase classname="trading.tests.test_mt5_cost_availability_recovery" name="test_later_zero_effect_receipt_cannot_replace_original_entry_charge_knowledge[CANCELLED]" time="4.369"><failure message="AssertionError: assert ('0' is None)">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-245/test_later_zero_effect_receipt0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+later_status = 'CANCELLED'
+
+    @pytest.mark.parametrize('later_status', ['CANCELLED','REJECTED'])
+    def test_later_zero_effect_receipt_cannot_replace_original_entry_charge_knowledge(tmp_path, eurusd, later_status):
+        with delayed_native_session(tmp_path,eurusd,recorded_costs=False) as (service,bars,index,clock,poll,orders,result,queue,delivered):
+            original, native, ack = fill_original(clock,poll,orders,delivered)
+            poll(results=[ack],positions=[native]);service.step_once()
+            entry = next(e for e in service._ledger.iter(EventKind.EXECUTION_RECEIPT,correlation_id=original)
+                if e.payload.get('status') == 'FILLED')
+            receipt = AccountTradeLifecycle._receipt_from_payload(entry.payload)
+            later = replace(receipt,status=later_status,filled_qty=D('0'),average_fill=None,fees=D('0'),receipt_hash='').sealed()
+            clock['ms'] += 1
+            service._ledger.append(make_event(EventKind.EXECUTION_RECEIPT,'vati-cycle',asdict(later),
+                event_time_ms=clock['ms'],received_time_ms=clock['ms'],correlation_id=original))
+            recover_session(service.runner.cycle,service.adapter.positions())
+            row = service.runner.cycle._entries[original]
+&gt;           assert row['fees'] is None and row['quantity'] &gt; 0
+E           AssertionError: assert ('0' is None)
+
+trading/tests/test_mt5_cost_availability_recovery.py:101: AssertionError</failure></testcase><testcase classname="trading.tests.test_mt5_cost_availability_recovery" name="test_later_zero_effect_receipt_cannot_replace_original_entry_charge_knowledge[REJECTED]" time="3.727"><failure message="AssertionError: assert ('0' is None)">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-245/test_later_zero_effect_receipt1')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+later_status = 'REJECTED'
+
+    @pytest.mark.parametrize('later_status', ['CANCELLED','REJECTED'])
+    def test_later_zero_effect_receipt_cannot_replace_original_entry_charge_knowledge(tmp_path, eurusd, later_status):
+        with delayed_native_session(tmp_path,eurusd,recorded_costs=False) as (service,bars,index,clock,poll,orders,result,queue,delivered):
+            original, native, ack = fill_original(clock,poll,orders,delivered)
+            poll(results=[ack],positions=[native]);service.step_once()
+            entry = next(e for e in service._ledger.iter(EventKind.EXECUTION_RECEIPT,correlation_id=original)
+                if e.payload.get('status') == 'FILLED')
+            receipt = AccountTradeLifecycle._receipt_from_payload(entry.payload)
+            later = replace(receipt,status=later_status,filled_qty=D('0'),average_fill=None,fees=D('0'),receipt_hash='').sealed()
+            clock['ms'] += 1
+            service._ledger.append(make_event(EventKind.EXECUTION_RECEIPT,'vati-cycle',asdict(later),
+                event_time_ms=clock['ms'],received_time_ms=clock['ms'],correlation_id=original))
+            recover_session(service.runner.cycle,service.adapter.positions())
+            row = service.runner.cycle._entries[original]
+&gt;           assert row['fees'] is None and row['quantity'] &gt; 0
+E           AssertionError: assert ('0' is None)
+
+trading/tests/test_mt5_cost_availability_recovery.py:101: AssertionError</failure></testcase></testsuite></testsuites>

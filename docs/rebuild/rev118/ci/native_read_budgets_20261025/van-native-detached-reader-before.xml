@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.256" timestamp="2026-10-25T19:18:19.186844+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_ctrader_read_budget" name="test_close_joins_an_already_detached_reader_still_releasing_its_socket" time="0.012"><failure message="AssertionError: close forgot an original reader after it detached itself&#10;assert False&#10; +  where False = is_alive()&#10; +    where is_alive = &lt;Thread(Thread-2 (run), stopped 139699242456768)&gt;.is_alive">harness = &lt;test_ctrader_transport_lifecycle.Harness object at 0x7f0e443a3770&gt;
+
+    def test_close_joins_an_already_detached_reader_still_releasing_its_socket(harness):
+        client,server=harness.pair();entered=threading.Event();release=threading.Event()
+        harness.release.append(release)
+        class SlowClose:
+            def recv(self,size):return client.recv(size)
+            def sendall(self,value):return client.sendall(value)
+            def shutdown(self,how):return client.shutdown(how)
+            def close(self):
+                entered.set();assert release.wait(2);client.close()
+        transport=harness.transport(lambda *_:SlowClose());transport.connect();original=transport._reader
+        server.shutdown(socket.SHUT_RDWR);server.close()
+        assert entered.wait(1) and not transport.connected
+        closer,result=harness.worker(transport.close)
+        try:
+            closer.join(.1)
+&gt;           assert closer.is_alive(),'close forgot an original reader after it detached itself'
+E           AssertionError: close forgot an original reader after it detached itself
+E           assert False
+E            +  where False = is_alive()
+E            +    where is_alive = &lt;Thread(Thread-2 (run), stopped 139699242456768)&gt;.is_alive
+
+trading/tests/test_ctrader_read_budget.py:47: AssertionError</failure></testcase></testsuite></testsuites>

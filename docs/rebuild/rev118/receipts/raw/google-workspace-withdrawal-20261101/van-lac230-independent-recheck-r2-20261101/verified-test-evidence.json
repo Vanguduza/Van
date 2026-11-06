@@ -1,0 +1,28 @@
+{
+  "jvm_receipt": "/workspace/van-google-withdrawal-20261101/JVM_FINAL_RECEIPT.json",
+  "jvm_terminal_exit": 0,
+  "jvm_xml": [
+    {
+      "file": "TEST-com.dial.van.command.connected.ConnectedReadbackTest.xml",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "file": "TEST-com.dial.van.gateway.GoogleWithdrawalOperationsTest.xml",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "all_current_own_android_pins_match": true,
+  "jvm_backend_pin_reuse_boundary": "R2 changed only2Python paths, irrelevant to unchanged pureJVMinputs; no all12oldreceipt==R2 claim.",
+  "app_compile_receipt": "/workspace/van-google-app-compile-20261101/receipt.json",
+  "app_compile_terminal_exit": 0,
+  "sdk": "SDK36 :app:compileDebugKotlin",
+  "app_input_count": 638,
+  "app_all638_before_after_current_match": true,
+  "scope": "Actual compilation evidence read/verified, no independent Gradle run; not unit/lint/instrumentation/device/provider/native/release acceptance."
+}

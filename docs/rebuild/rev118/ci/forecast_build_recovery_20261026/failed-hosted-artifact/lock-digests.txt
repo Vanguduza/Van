@@ -1,0 +1,4 @@
+0496f2e6a919f0b7391a91009453b77d9a641b5b8045593d7fa22762e6765a52  trading/vati_forecast_worker/locks/build-cp312-linux-x86_64.lock
+16e8f762d29ddac81b4b7024f9e5c675a988815c45b62fbbc97032bccd1db0c5  trading/vati_forecast_worker/locks/research-cp312-linux-x86_64.source.lock
+cb7658179c9fc4b2f27b48af512f3e74f282b34187a63c095a610cb2fbef1b1e  trading/vati_forecast_worker/locks/research-cp312-linux-x86_64.wheel.lock
+bce548621103b5f7239c5de61d44e51b65dbbb7f4e20468f9d0ac2226ee1e04e  trading/vati_forecast_worker/locks/wheel-manifest-cp312-linux-x86_64.json

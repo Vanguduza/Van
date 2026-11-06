@@ -1,0 +1,39 @@
+{
+  "schema": "van.native-mql-independent-artifact-readback/1",
+  "requested_head": "3732798104c476680cac8e22f833f2ed764d77e2",
+  "actual_tested_merge_head": "ca1f8fab8e120b2ec380ec8406998d35d58f1735",
+  "source_sha256": "40d15b43f2cba20a5c8dadec6db245cecc105c17a70e216ac98adb39e166bb1f",
+  "source_blob_oid": "868f93504d53519fd0b8bfe4f33d2b7b1e7219c8",
+  "source_bytes_and_blob_match": true,
+  "artifact_id": 12817329530,
+  "workflow_run": 40692934889,
+  "original_archive_bytes": 104990,
+  "original_archive_sha256": "46b9bef9941e7d456a5f12d0ad439c0611c2e8e8660ed1ae3e955c63f80c6ab3",
+  "native_phase": "SOURCE_COMPILED",
+  "compile_cases": [
+    {
+      "name": "VanCompilerRejectionProbe",
+      "expected_success": false,
+      "process_exit_code": 0,
+      "errors": 4,
+      "warnings": 0,
+      "fresh_binary": false,
+      "started_at_utc": "2026-10-28T13:04:03.3344786Z",
+      "finished_at_utc": "2026-10-28T13:04:04.2027310Z",
+      "log_sha256": "569031a398c3d2d3734eb12a9571288b3f46867344689d3852c1103de9e48026"
+    },
+    {
+      "name": "VanBridgeEA",
+      "expected_success": true,
+      "process_exit_code": 1,
+      "errors": 0,
+      "warnings": 0,
+      "fresh_binary": true,
+      "started_at_utc": "2026-10-28T13:04:04.2076279Z",
+      "finished_at_utc": "2026-10-28T13:04:06.6732649Z",
+      "log_sha256": "e9ef7f68f056a12e77c460297d18355f7578d4380b380c051d004d36cef56c2f",
+      "binary_sha256": "03aecc118da44ee054317f91dc571dfc532dcd0488d95c1e7c217812f027da48"
+    }
+  ],
+  "financial_native_device_acceptance": "NOT_ISSUED"
+}

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="3" time="0.590" timestamp="2026-10-28T20:10:30.042356+00:00" hostname="6e9feff21467"><testcase classname="trading.tests.test_native_close_movement" name="test_current_native_version_ambiguity_blocks_new_close_postings[two_closes]" time="0.201"><failure message="AssertionError: conflicting original versions are not missing balance anchors&#10;assert 'unresolved_closes' not in {'schema': 'vati.financial-movement-projection/1', 'state': 'CONFLICT', 'scope_hash': '9416990f89cc231045967018d529f8f2a4f42488499c86fb9f71bedc2f9c7f3b', 'source_state': 'CONFLICT', ...}">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-203/test_current_native_version_am0')
+collision = 'two_closes'
+
+    @pytest.mark.parametrize('collision',['two_closes','cash_and_close','contradictory_mark'])
+    def test_current_native_version_ambiguity_blocks_new_close_postings(tmp_path,collision):
+        from vati.funding.movement_journal import FinancialMovementBook
+        from test_native_balance_reconciliation import cash
+        ledger=Ledger(tmp_path/'facts.sqlite')
+        try:
+            before=snapshot(ledger,mark(1000));deals=(closed(),);cash_rows=()
+            if collision=='two_closes':deals+=(replace(closed(),native_id=2),)
+            elif collision=='cash_and_close':cash_rows=(cash(delta='10',balance='110',version=2),)
+            else:snapshot(ledger,mark(1100,balance='101',equity='101',version=1))
+            scope=observe(ledger,cash=cash_rows,deals=deals)
+            event=next(ledger.iter(EventKind.FUNDING_DEAL_STATEMENT));count=ledger.count()
+            with pytest.raises(ValueError,match='NATIVE_BALANCE_VERSION_CONFLICT'):
+                FinancialMovementBook(ledger,clock=lambda:7000).publish_close('ambiguous-close',scope_hash=scope,
+                    native_id=1,statement_ref=event.hash,balance_anchor_ref=before.hash)
+            assert ledger.count()==count and ledger.count(EventKind.FINANCIAL_MOVEMENT)==0
+            view=FinancialMovementBook(ledger).projection(scope)
+            assert view['state']=='CONFLICT' and view['reason']=='FINANCIAL_NATIVE_BALANCE_VERSION_CONFLICT'
+&gt;           assert 'unresolved_closes' not in view,'conflicting original versions are not missing balance anchors'
+E           AssertionError: conflicting original versions are not missing balance anchors
+E           assert 'unresolved_closes' not in {'schema': 'vati.financial-movement-projection/1', 'state': 'CONFLICT', 'scope_hash': '9416990f89cc231045967018d529f8f2a4f42488499c86fb9f71bedc2f9c7f3b', 'source_state': 'CONFLICT', ...}
+
+trading/tests/test_native_close_movement.py:117: AssertionError</failure></testcase><testcase classname="trading.tests.test_native_close_movement" name="test_current_native_version_ambiguity_blocks_new_close_postings[cash_and_close]" time="0.019"><failure message="AssertionError: conflicting original versions are not missing balance anchors&#10;assert 'unresolved_closes' not in {'schema': 'vati.financial-movement-projection/1', 'state': 'CONFLICT', 'scope_hash': '9416990f89cc231045967018d529f8f2a4f42488499c86fb9f71bedc2f9c7f3b', 'source_state': 'CONFLICT', ...}">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-203/test_current_native_version_am1')
+collision = 'cash_and_close'
+
+    @pytest.mark.parametrize('collision',['two_closes','cash_and_close','contradictory_mark'])
+    def test_current_native_version_ambiguity_blocks_new_close_postings(tmp_path,collision):
+        from vati.funding.movement_journal import FinancialMovementBook
+        from test_native_balance_reconciliation import cash
+        ledger=Ledger(tmp_path/'facts.sqlite')
+        try:
+            before=snapshot(ledger,mark(1000));deals=(closed(),);cash_rows=()
+            if collision=='two_closes':deals+=(replace(closed(),native_id=2),)
+            elif collision=='cash_and_close':cash_rows=(cash(delta='10',balance='110',version=2),)
+            else:snapshot(ledger,mark(1100,balance='101',equity='101',version=1))
+            scope=observe(ledger,cash=cash_rows,deals=deals)
+            event=next(ledger.iter(EventKind.FUNDING_DEAL_STATEMENT));count=ledger.count()
+            with pytest.raises(ValueError,match='NATIVE_BALANCE_VERSION_CONFLICT'):
+                FinancialMovementBook(ledger,clock=lambda:7000).publish_close('ambiguous-close',scope_hash=scope,
+                    native_id=1,statement_ref=event.hash,balance_anchor_ref=before.hash)
+            assert ledger.count()==count and ledger.count(EventKind.FINANCIAL_MOVEMENT)==0
+            view=FinancialMovementBook(ledger).projection(scope)
+            assert view['state']=='CONFLICT' and view['reason']=='FINANCIAL_NATIVE_BALANCE_VERSION_CONFLICT'
+&gt;           assert 'unresolved_closes' not in view,'conflicting original versions are not missing balance anchors'
+E           AssertionError: conflicting original versions are not missing balance anchors
+E           assert 'unresolved_closes' not in {'schema': 'vati.financial-movement-projection/1', 'state': 'CONFLICT', 'scope_hash': '9416990f89cc231045967018d529f8f2a4f42488499c86fb9f71bedc2f9c7f3b', 'source_state': 'CONFLICT', ...}
+
+trading/tests/test_native_close_movement.py:117: AssertionError</failure></testcase><testcase classname="trading.tests.test_native_close_movement" name="test_current_native_version_ambiguity_blocks_new_close_postings[contradictory_mark]" time="0.015"><failure message="AssertionError: conflicting original versions are not missing balance anchors&#10;assert 'unresolved_closes' not in {'schema': 'vati.financial-movement-projection/1', 'state': 'CONFLICT', 'scope_hash': '9416990f89cc231045967018d529f8f2a4f42488499c86fb9f71bedc2f9c7f3b', 'source_state': 'CONFLICT', ...}">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-203/test_current_native_version_am2')
+collision = 'contradictory_mark'
+
+    @pytest.mark.parametrize('collision',['two_closes','cash_and_close','contradictory_mark'])
+    def test_current_native_version_ambiguity_blocks_new_close_postings(tmp_path,collision):
+        from vati.funding.movement_journal import FinancialMovementBook
+        from test_native_balance_reconciliation import cash
+        ledger=Ledger(tmp_path/'facts.sqlite')
+        try:
+            before=snapshot(ledger,mark(1000));deals=(closed(),);cash_rows=()
+            if collision=='two_closes':deals+=(replace(closed(),native_id=2),)
+            elif collision=='cash_and_close':cash_rows=(cash(delta='10',balance='110',version=2),)
+            else:snapshot(ledger,mark(1100,balance='101',equity='101',version=1))
+            scope=observe(ledger,cash=cash_rows,deals=deals)
+            event=next(ledger.iter(EventKind.FUNDING_DEAL_STATEMENT));count=ledger.count()
+            with pytest.raises(ValueError,match='NATIVE_BALANCE_VERSION_CONFLICT'):
+                FinancialMovementBook(ledger,clock=lambda:7000).publish_close('ambiguous-close',scope_hash=scope,
+                    native_id=1,statement_ref=event.hash,balance_anchor_ref=before.hash)
+            assert ledger.count()==count and ledger.count(EventKind.FINANCIAL_MOVEMENT)==0
+            view=FinancialMovementBook(ledger).projection(scope)
+            assert view['state']=='CONFLICT' and view['reason']=='FINANCIAL_NATIVE_BALANCE_VERSION_CONFLICT'
+&gt;           assert 'unresolved_closes' not in view,'conflicting original versions are not missing balance anchors'
+E           AssertionError: conflicting original versions are not missing balance anchors
+E           assert 'unresolved_closes' not in {'schema': 'vati.financial-movement-projection/1', 'state': 'CONFLICT', 'scope_hash': '9416990f89cc231045967018d529f8f2a4f42488499c86fb9f71bedc2f9c7f3b', 'source_state': 'CONFLICT', ...}
+
+trading/tests/test_native_close_movement.py:117: AssertionError</failure></testcase></testsuite></testsuites>

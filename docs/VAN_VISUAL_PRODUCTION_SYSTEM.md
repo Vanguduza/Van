@@ -4,7 +4,7 @@ Status: CANONICAL — APPROVED CHARACTER AUTHORITY CONSOLIDATED 2026-09-24
 
 ## Pipeline
 
-1. Canonical owner board: `visual-authority/assets/pack/owner_board_visual_authority.png`
+1. Primary character image (CF-D-05-REV2_1): `visual-authority/character-forge/01-master-candidates/van_master_source_candidate_b.png`
 2. Machine identity lock: `visual-authority/character-forge/00-source/asset-pack/APPROVED_IDENTITY_LOCK.yaml`
 3. Rive wire contract: `visual-authority/rive_contract.json`
 4. Deterministic Character Forge injection pack under `visual-authority/character-forge/00-source/asset-pack/`
@@ -16,7 +16,9 @@ Status: CANONICAL — APPROVED CHARACTER AUTHORITY CONSOLIDATED 2026-09-24
 
 | Role | Path |
 |---|---|
-| Sole primary character image authority | `visual-authority/assets/pack/owner_board_visual_authority.png` |
+| Sole primary character image authority (CF-D-05-REV2_1) | `visual-authority/character-forge/01-master-candidates/van_master_source_candidate_b.png` |
+| Historical owner board (no longer defines identity) | `visual-authority/assets/pack/owner_board_visual_authority.png` |
+| Aura runtime contract (CF-D-06 / CF-D-06-REV1 / CF-D-08) | `visual-authority/character-forge/aura/AURA_RUNTIME_CONTRACT.yaml` |
 | Identity / palette / geometry lock | `visual-authority/character-forge/00-source/asset-pack/APPROVED_IDENTITY_LOCK.yaml` |
 | Layers | `visual-authority/character-forge/00-source/asset-pack/LAYER_SPEC.yaml` |
 | Rig | `visual-authority/character-forge/00-source/asset-pack/RIG_SPEC.yaml` |
@@ -31,5 +33,5 @@ Status: CANONICAL — APPROVED CHARACTER AUTHORITY CONSOLIDATED 2026-09-24
 The former top-level PNG reference sheets, light-skinned/headband lock sheet and their derived Android
 bitmap poses are deleted. They are not historical fallback authority and must not be regenerated.
 
-Until the accepted `.riv` exists, the product fails closed to the canonical Canvas VAN; the retired
-OWNER_ART bitmap rung is never selected.
+Until the accepted `.riv` exists, the product shows the Candidate B art (CF-D-07) and falls back to the
+canonical Canvas VAN only when that art is unavailable; the retired OWNER_ART bitmap rung is never selected.

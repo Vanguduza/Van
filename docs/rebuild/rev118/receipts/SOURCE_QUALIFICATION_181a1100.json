@@ -1,0 +1,35 @@
+{
+  "schema": "van.rebuild.source-qualification/1",
+  "source_head": "181a11007591c53417cbb1fd902a340c4ab0548d",
+  "scope": "backend/tests and tests/contracts; actual pinned DDS source; isolated frozen worktree",
+  "result": "PASS_WITH_EXPLICIT_SKIPS",
+  "counts": {
+    "tests": 6802,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 166
+  },
+  "passed": 6636,
+  "duration_seconds": 1580.131,
+  "skips_by_reason": {
+    "needs the pinned Chromium, openssl and a local non-loopback address": 6,
+    "needs the pinned Chromium and openssl": 31,
+    "needs root and setpriv": 1,
+    "no Chromium/Playwright available": 49,
+    "no Chromium for the network-effect guard": 62,
+    "no Chromium/Playwright available for the real-browser element test": 6,
+    "DDS checkout not present; blob hashes pinned above": 1,
+    "member of the B1 closed set by definition": 3,
+    "opt-in actual AGP release guard check": 1,
+    "opt-in actual AGP signing guard check": 1,
+    "needs root, unshare -n, nft and setpriv": 5
+  },
+  "xml_sha256": "194b26033f11ced485aaeabf8bff3ca5cb57222c167d96ef3685da9dc57e8b2b",
+  "log_sha256": "8c4143dda56474a8d34649e05a814eebbbc725724fdd9a28161d8441fa34ce4c",
+  "storage_audit": {
+    "forbidden_events": [],
+    "scope": "backend/tests plus tests/contracts; repo-root invocation; writes and SQLite opens under root/data or backend/data refused"
+  },
+  "worktree_clean": true,
+  "qualification": "Source evidence only. Actual audited process completed exit0. Explicit skipped cases are not passed. No whole-unit, provider, production, independent or physical handset acceptance."
+}

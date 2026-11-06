@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0",
+  "record_id": "fixture:EventPositionProposal",
+  "environment": "FIXTURE",
+  "authority_effect": "NONE",
+  "evidence_refs": [
+    "fixture:synthetic-only-not-real-evidence"
+  ],
+  "source_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "canonical_event_id": "fixture:CPI-2026-10",
+  "response_ref": "fixture:independent-event-estimator",
+  "use_scope": "BINARY_CONTRACT_RESEARCH",
+  "live_enabled": false,
+  "risk_authority": "VATI.RiskAuthority",
+  "order_sender": "VATI.ExecutionRouter",
+  "news_path": "NONE",
+  "news_multiplier": "1.00",
+  "risk_request_fraction": "0.001",
+  "currency": "USD",
+  "valuation_basis": "SETTLEMENT",
+  "analysis_contract_count": "100",
+  "analysis_success_probability": 0.65,
+  "entry_cost_total": "60.00",
+  "fees_total": "1.68",
+  "other_costs_total": "0.00",
+  "expected_payout_total": "65.00",
+  "expected_net_value": "3.32",
+  "maximum_loss_bound": "61.68",
+  "policy_ref": "fixture:full-outlay-risk",
+  "independent_calibration_ref": "fixture:synthetic-probability-not-market-proof"
+}

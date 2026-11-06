@@ -95,7 +95,8 @@
       "type": "integer"
     },
     "fees": {
-      "type": "string"
+      "type": ["string", "null"],
+      "description": "Recorded charges only; null means unmeasured native commission or precision. Preserves fill and protection truth, and is ineligible for numeric TCA. Neither a numeric fee nor a legacy default establishes complete native fees or settlement."
     },
     "protective_stop_confirmed": {
       "type": "boolean",
@@ -111,7 +112,12 @@
       "type": "integer"
     },
     "received_time_unix_ms": {
-      "type": "integer"
+      "type": [
+        "integer",
+        "null"
+      ],
+      "description": "Local result availability, independent of dispatch and broker clocks. Null retains a known native effect while withholding unmeasured availability; it is ineligible for causal learning until qualified readback.",
+      "minimum": 0
     },
     "receipt_hash": {
       "type": "string",

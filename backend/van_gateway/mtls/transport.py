@@ -8,6 +8,8 @@ scope extension ``van.mtls``. The gate then decides per route:
 * no client certificate: only the routes a phone must reach *before* it holds one (pairing,
   hardware-bound bootstrap, TLS certificate enrolment) and the two browser surfaces that carry
   their own credential (the ARTEMIS console launch/cookie paths, the broker OAuth callback);
+* exact HTTPS machine callback routes: admit to their dedicated credential and
+  capability checks without claiming the machine is an owner device;
 * a client certificate: admitted only if this CA issued it to that device and has not revoked
   it. The device id it names is put on the scope so the gateway can require the device token
   to belong to the same device.
@@ -31,12 +33,13 @@ from van_gateway.mtls.pki import CA_CERT, SERVER_CERT, SERVER_KEY, DeviceCA, pee
 
 EXTENSION = "van.mtls"
 STATE_DEVICE_ID = "van_mtls_device_id"
+STATE_CERT_SERIAL = "van_mtls_certificate_serial"
 WS_CLOSE_CERT_REQUIRED = 4403
 
 ASGIApp = Callable[[dict, Callable[[], Awaitable[dict]], Callable[[dict], Awaitable[None]]], Awaitable[None]]
 
 
-def build_ssl_context(directory: str | Path) -> ssl.SSLContext:
+def build_ssl_context(directory: str | Path, *, machine_client_ca_file: str = "") -> ssl.SSLContext:
     """TLS 1.3 only. The client certificate is requested and, when presented, verified
     against the device CA in the handshake; whether one is *required* is the gate's call,
     because pairing has to work before the phone holds one."""
@@ -45,6 +48,8 @@ def build_ssl_context(directory: str | Path) -> ssl.SSLContext:
     ctx.minimum_version = ssl.TLSVersion.TLSv1_3
     ctx.load_cert_chain(str(d / SERVER_CERT), str(d / SERVER_KEY))
     ctx.load_verify_locations(cafile=str(d / CA_CERT))
+    if machine_client_ca_file:
+        ctx.load_verify_locations(cafile=machine_client_ca_file)
     ctx.verify_mode = ssl.CERT_OPTIONAL
     ctx.set_alpn_protocols(["http/1.1"])
     return ctx
@@ -97,8 +102,38 @@ _NO_CERT_POSTS = {
     "/v1/devices/pair",
     "/v1/devices/bootstrap/challenge",
     "/v1/devices/bootstrap/attest",
+    "/v1/devices/bootstrap/recover",
+    "/v1/device-binding/certify",
     "/v1/devices/tls-certificate",
 }
+_MACHINE_POSTS = {
+    "/v1/automation/worker/step",
+    "/v1/browser/stream-producer/redeem",
+    "/v1/browser/control-producer/grants",
+    "/v1/browser/control-producer/validate-call",
+    "/v1/browser/control-producer/authorize-call",
+    "/v1/browser/control-producer/validate-result",
+}
+_MACHINE_PRODUCER_POST = re.compile(
+    r"^/v1/browser/stream-producer/[A-Za-z0-9_-]{16,128}/"
+    r"(?:authority|authorize-input|observe|chooser|downloads|consume-transfer-grant)$"
+)
+
+
+def is_https_machine_route(scope: dict) -> bool:
+    """Fixed service routes keep machine credentials separate from device identity.
+
+    This is only a TLS admission lane. Each handler and the gateway middleware
+    still enforce the dedicated machine scope and the current capability binding.
+    A prefix, a method change or a caller-supplied forwarding header cannot widen it.
+    """
+    from van_gateway.auth.provider_transport import is_https_artifact_provider_route
+    if is_https_artifact_provider_route(scope):
+        return True
+    return (scope.get("type") == "http" and scope.get("scheme") == "https"
+            and scope.get("method") == "POST"
+            and (scope.get("path") in _MACHINE_POSTS
+                 or _MACHINE_PRODUCER_POST.fullmatch(scope.get("path", "")) is not None))
 
 
 def allowed_without_certificate(scope_type: str, method: str, path: str) -> bool:
@@ -128,6 +163,12 @@ class MutualTLSGate:
             # Not from the public listener (loopback). Unchanged behaviour.
             return await self.app(scope, receive, send)
 
+        if is_https_machine_route(scope):
+            # TLS has already verified any presented certificate chain. Neither
+            # an optional service certificate nor its scoped header credential
+            # represents a paired phone, so no device identity is assigned here.
+            return await self.app(scope, receive, send)
+
         identity = peer_identity(info.get("client_cert_der"))
         if identity is None:
             if allowed_without_certificate(scope["type"], scope.get("method", "GET"), scope["path"]):
@@ -140,6 +181,7 @@ class MutualTLSGate:
             return await self._refuse(scope, send, "client_certificate_not_admitted")
         state = scope.setdefault("state", {})
         state[STATE_DEVICE_ID] = device_id
+        state[STATE_CERT_SERIAL] = serial_hex
         return await self.app(scope, receive, send)
 
     @staticmethod
@@ -160,3 +202,10 @@ def mtls_device_id(scope: dict) -> str | None:
         value = state.get(STATE_DEVICE_ID)
         return value if isinstance(value, str) else None
     return None
+
+
+def mtls_certificate_serial(scope: dict) -> str | None:
+    """Non-secret identity of the certificate actually admitted by the public gate."""
+    state = scope.get("state")
+    value = state.get(STATE_CERT_SERIAL) if isinstance(state, dict) else None
+    return value if isinstance(value, str) else None

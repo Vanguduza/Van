@@ -1,0 +1,43 @@
+{
+  "format": "van.fixed-fixture-model-bundle/1",
+  "data_environment": "FIXTURE",
+  "execution_authority": false,
+  "economic_admission": false,
+  "fixture_definition": "van.stack-fixture/1",
+  "file_sha256": {
+    "neuralforecast/NHITS_0.safetensors": "1135654173ebdc0550ff8ed648b20a617eb52b50a6583992862eced3890f10a8",
+    "neuralforecast/configuration.json": "7bab4328fe11f4f261fd45e68db45954788dcea15d01eda160843ab19c5cab25",
+    "qlib-lightgbm.txt": "58ab9809acac5cd3e345b7a46c86f42bab563323023ea44eb25a86a0c0558e24",
+    "xgboost.json": "e63bf713e2fd45ae9d0a24790fef9dee6b872a4fe49ca543097cc402dd1e0bec"
+  },
+  "expected_predictions": {
+    "qlib_lightgbm": [
+      -0.5133726175998647,
+      -0.5133726175998647,
+      -0.5133726175998647,
+      -0.5133726175998647,
+      -0.5133726175998647,
+      -0.5133726175998647,
+      -0.5133726175998647,
+      -0.5133726175998647,
+      -0.5133726175998647,
+      -0.5133726175998647
+    ],
+    "xgboost": [
+      -0.1655731499195099,
+      -0.1655731499195099,
+      -0.1655731499195099,
+      -0.1655731499195099,
+      -0.1655731499195099,
+      -0.1655731499195099,
+      -0.1655731499195099,
+      -0.1655731499195099,
+      -0.1655731499195099,
+      -0.1655731499195099
+    ],
+    "neuralforecast": [
+      2.1280131340026855,
+      1.719799280166626
+    ]
+  }
+}

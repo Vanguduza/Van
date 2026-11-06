@@ -1,0 +1,121 @@
+{
+  "directory": "/tmp/van-recovery-family-governed-owner-r2-20261101",
+  "at_utc": "2026-11-01T03:29:56.707282+00:00",
+  "files": [
+    {
+      "path": "test_current_effect_context_ca9/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "be6d663018e4a8a4c76f04e2a4655ae91c9f7da25b139bd16a0c6c90449b91b3"
+    },
+    {
+      "path": "test_current_effect_context_ca8/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "558702d2badf62eb33ddeffd7d1c3df83edb2c2791b3cd80958c80222f39b627"
+    },
+    {
+      "path": "test_current_effect_context_ca7/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "051795068323ac1e7134e7e9b6bb786564e8ecc329812ff248e759e0089928f4"
+    },
+    {
+      "path": "test_current_effect_context_ca6/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "ecbc53c60afaf30f4f807ab6c2e9e99c29b6ab5f76ebd02707de90492d56d03d"
+    },
+    {
+      "path": "test_current_effect_context_ca5/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "611acd427f5f889d4cd170285db4351ac78643dabc5f6ef0782f2b22f1170851"
+    },
+    {
+      "path": "test_current_effect_context_ca4/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "e506c3b1a33254282619aa7ee324e5cace8fbeccbc1eab16c3560a791be775db"
+    },
+    {
+      "path": "test_current_effect_context_ca3/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "f4d947dd6ba68b2b510e2792dcb8100ddfcc640d921a82772806f1758aebe485"
+    },
+    {
+      "path": "test_current_effect_context_ca2/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "f5a7952068f81ceddc3924f4cb2bab99f6e0b8daa34d758ff106fc29efde3ec3"
+    },
+    {
+      "path": "test_current_effect_context_ca1/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "3506a42590fca1cc370e2f2307ad0025e23f49d226f5f0a88ac254181802d6c9"
+    },
+    {
+      "path": "test_current_effect_context_ca0/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "5c4767a46c60c2f0cd8f7c19780f275f17401c095b802a82185a850ea1b64eb5"
+    },
+    {
+      "path": "test_real_current_mandate_orig0/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "ac22a0413b7f6f42b96c2f65fead763c38a5fb9b84706556bd07d39e7134dc28"
+    },
+    {
+      "path": "test_last_fence_read_expiry_an0/grant.sqlite",
+      "bytes": 24576,
+      "sha256": "5ae6c3f08831132562361bec7d556b55040651ae570ebc400075fc368cbb8abd"
+    },
+    {
+      "path": "test_revoke_is_current_owner_s0/grant.sqlite",
+      "bytes": 24576,
+      "sha256": "b1e6955bb5519b4785a1ff23126872406fcc103c718a0b863373d159c89fb3b8"
+    },
+    {
+      "path": "test_no_boolean_or_self_signed6/grant.sqlite",
+      "bytes": 24576,
+      "sha256": "47d387291b833bf3a1d30e8be6b0978f1002105cf03ef77b44b316053d81df92"
+    },
+    {
+      "path": "test_no_boolean_or_self_signed5/grant.sqlite",
+      "bytes": 24576,
+      "sha256": "47d387291b833bf3a1d30e8be6b0978f1002105cf03ef77b44b316053d81df92"
+    },
+    {
+      "path": "test_no_boolean_or_self_signed4/grant.sqlite",
+      "bytes": 24576,
+      "sha256": "47d387291b833bf3a1d30e8be6b0978f1002105cf03ef77b44b316053d81df92"
+    },
+    {
+      "path": "test_no_boolean_or_self_signed3/grant.sqlite",
+      "bytes": 24576,
+      "sha256": "47d387291b833bf3a1d30e8be6b0978f1002105cf03ef77b44b316053d81df92"
+    },
+    {
+      "path": "test_no_boolean_or_self_signed2/grant.sqlite",
+      "bytes": 24576,
+      "sha256": "47d387291b833bf3a1d30e8be6b0978f1002105cf03ef77b44b316053d81df92"
+    },
+    {
+      "path": "test_no_boolean_or_self_signed1/grant.sqlite",
+      "bytes": 24576,
+      "sha256": "47d387291b833bf3a1d30e8be6b0978f1002105cf03ef77b44b316053d81df92"
+    },
+    {
+      "path": "test_no_boolean_or_self_signed0/grant.sqlite",
+      "bytes": 24576,
+      "sha256": "47d387291b833bf3a1d30e8be6b0978f1002105cf03ef77b44b316053d81df92"
+    },
+    {
+      "path": "test_synthetic_source_admissio0/grant.sqlite",
+      "bytes": 24576,
+      "sha256": "dc8152f2e292183364ef0236f33f3e735871469cf1c47c6dcf7fbcaf2ebcfdf1"
+    },
+    {
+      "path": "owner-authority0/owner_authority_keys.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "owner-authority0/owner_authority_keys.json",
+      "bytes": 212,
+      "sha256": "b740bdecbad372881fa6d4e8a105dab4bbc176e728e6081f5818b39740ad8e6e"
+    }
+  ]
+}

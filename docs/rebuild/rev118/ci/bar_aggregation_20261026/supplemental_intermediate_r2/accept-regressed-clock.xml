@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.377" timestamp="2026-10-26T22:45:03.063999+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_bar_aggregation_boundaries" name="test_out_of_order_tick_refuses_before_publishing_or_changing_a_bar[1]" time="0.178"><failure message="Failed: DID NOT RAISE ValueError">late = 1
+
+    @pytest.mark.parametrize('late',[1,60000])
+    def test_out_of_order_tick_refuses_before_publishing_or_changing_a_bar(late):
+        agg=BarAggregator('EURUSD',60000);agg.push(Tick(60001,Decimal('1'),Decimal('2')))
+&gt;       with pytest.raises(ValueError,match='order'):agg.push(Tick(late,Decimal('3'),Decimal('4')))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_bar_aggregation_boundaries.py:38: Failed</failure></testcase></testsuite></testsuites>

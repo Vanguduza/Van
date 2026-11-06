@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="7" time="4.925" timestamp="2026-10-26T19:03:15.133015+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_flow_adjusted_risk" name="test_wrong_scope_identity_dimensions_and_capacity_cannot_be_computed[scope]" time="2.732" /><testcase classname="trading.tests.test_flow_adjusted_risk" name="test_wrong_scope_identity_dimensions_and_capacity_cannot_be_computed[reused-ref]" time="0.008" /><testcase classname="trading.tests.test_flow_adjusted_risk" name="test_wrong_scope_identity_dimensions_and_capacity_cannot_be_computed[float-time]" time="0.008" /><testcase classname="trading.tests.test_flow_adjusted_risk" name="test_wrong_scope_identity_dimensions_and_capacity_cannot_be_computed[bool-order]" time="0.007" /><testcase classname="trading.tests.test_flow_adjusted_risk" name="test_wrong_scope_identity_dimensions_and_capacity_cannot_be_computed[wrong-dimension]" time="0.006" /><testcase classname="trading.tests.test_flow_adjusted_risk" name="test_wrong_scope_identity_dimensions_and_capacity_cannot_be_computed[bad-ref]" time="0.005" /><testcase classname="trading.tests.test_flow_adjusted_risk" name="test_wrong_scope_identity_dimensions_and_capacity_cannot_be_computed[capacity]" time="1.364"><failure message="Failed: DID NOT RAISE UnitError">damage = 'capacity'
+
+    @pytest.mark.parametrize('damage',['scope','reused-ref','float-time','bool-order','wrong-dimension','bad-ref','capacity'])
+    def test_wrong_scope_identity_dimensions_and_capacity_cannot_be_computed(damage):
+        first=value(1,'100','start');last=value(3,'110','end');samples=[value(2,'90','sample')]
+        if damage=='scope':samples=[replace(samples[0],scope_hash='f'*64)]
+        elif damage=='reused-ref':samples=[replace(samples[0],source_ref=first.source_ref)]
+        elif damage=='float-time':samples=[replace(samples[0],at_ms=2.0)]
+        elif damage=='bool-order':samples=[replace(samples[0],native_order=True)]
+        elif damage=='wrong-dimension':samples=[flow(2,'0','90','flow-not-valuation')]
+        elif damage=='bad-ref':samples=[replace(samples[0],source_ref='alias-only')]
+        else:samples=[value(2,'90','unique-capacity-sample-'+str(i),i) for i in range(MAX_POINTS+1)]
+&gt;       with pytest.raises(UnitError,match='POINT_CAPACITY' if damage=='capacity' else None):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE UnitError
+
+trading/tests/test_flow_adjusted_risk.py:81: Failed</failure></testcase></testsuite></testsuites>

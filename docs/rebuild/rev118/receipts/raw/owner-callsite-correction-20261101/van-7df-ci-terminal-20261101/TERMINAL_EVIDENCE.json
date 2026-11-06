@@ -1,0 +1,65 @@
+{
+  "artifact_id": 13076598634,
+  "archive_sha256": "0e45d1f3c5d00440d5e8d15e2ad2fc41fbe305253249565b0add12db73721881",
+  "exact_tested_commit": "7df732de4c0a4f84bafadda658654a0ab8788553",
+  "runtimes": {
+    "media-report.xml": {
+      "tests": 198,
+      "failed": 0,
+      "errors": 0,
+      "skips": [],
+      "passed": 198
+    },
+    "gateway-report.xml": {
+      "tests": 5953,
+      "failed": 1,
+      "errors": 0,
+      "skips": [
+        {
+          "class": "backend.tests.test_jev_browser_eligibility",
+          "name": "test_vendored_dds_files_are_the_audited_blobs",
+          "reason": "DDS checkout not present; blob hashes pinned above"
+        },
+        {
+          "class": "backend.tests.test_jev_no_generic_executor",
+          "name": "test_no_fabric_or_generic_operation_survives_the_b1_validator[click]",
+          "reason": "member of the B1 closed set by definition"
+        },
+        {
+          "class": "backend.tests.test_jev_no_generic_executor",
+          "name": "test_no_fabric_or_generic_operation_survives_the_b1_validator[scroll]",
+          "reason": "member of the B1 closed set by definition"
+        },
+        {
+          "class": "backend.tests.test_jev_no_generic_executor",
+          "name": "test_no_fabric_or_generic_operation_survives_the_b1_validator[select]",
+          "reason": "member of the B1 closed set by definition"
+        },
+        {
+          "class": "tests.contracts.test_android_instrumentation_abi",
+          "name": "test_actual_agp_direct_package_release_refuses_missing_core_deployment_profile",
+          "reason": "opt-in actual AGP release guard check"
+        },
+        {
+          "class": "tests.contracts.test_android_production_target",
+          "name": "test_actual_agp_valid_target_still_refuses_missing_production_signing",
+          "reason": "opt-in actual AGP signing guard check"
+        },
+        {
+          "class": "tests.contracts.test_ci_dds_contract_pin",
+          "name": "test_recorded_blobs_are_the_pinned_dds_blobs_when_dds_is_present",
+          "reason": "no DDS git clone beside this checkout; the CI step verifies the same table itself"
+        }
+      ],
+      "passed": 5945
+    }
+  },
+  "phase": "TerminalFailed_NOT_TIMEOUT",
+  "primary_elapsed_seconds": 2784.21,
+  "coverage": "FAILED source cases missing, failed or errored",
+  "exact_failure": "tests/contracts/test_owner_redesign_registry.py::test_current_function_citations_and_callsites_are_exact_production_source",
+  "separate_media_count_correction": "198followup are separate media SOURCE runtime cases, not extra gatewaycontract cases",
+  "application_failure_log_sha256": "342e88e80eb25589e12d5d309cda1cf8773c982f436093e8be093eb6925457dd",
+  "transport": "CLI403 error was redacted for temporary redirect; sanitized log explicitly not original raw transport. Supportedconnector archive matches officialSHA; applicationlog/JUnitbytesexact.",
+  "original_watch": "Session36262 reaped terminal0 wrapper; actualnativewatchreceipt exit1 at08:46:54.060217; not restarted/signalled."
+}

@@ -1,0 +1,32 @@
+{
+  "schema": "van.rebuild.native-event-selection-source/1",
+  "status": "SOURCE_TESTED_COMPONENT_NOT_UNIT_ACCEPTANCE",
+  "base_head": "a921d0f23365951861d0521c92156b85f167a24c",
+  "updated_at_utc": "2026-10-25T20:55:24.803079+00:00",
+  "source_sha256": {
+    "trading/vati/execution/ctrader/transport.py": "d0ffd88c0a9c60a526baf4eb8ba658e511b53b1db504052cc61e38d94e5e1e6a",
+    "trading/tests/test_ctrader_event_selection.py": "b6cc3aab0a0a6c0b8cf04fa0ded28d31dbd1b8baac0a4aedbeb182bfc6f4f34b"
+  },
+  "executed": {
+    "before": "3 actual framed-native failures: relative order, predicate exception loss, competing consumer invisibility",
+    "intermediate": "512 passes/6 declared PostgreSQL opt-in skips; glob collected the three initial new tests twice, not 512 unique cases",
+    "final_postgres": "958 passed,0 skips,0 source-audit violations; actual pinned isolated PostgreSQL, owned container removed",
+    "final_controls": "15 passed/0 skips/0 source-audit violations after six supplemental mutation variants and exact production source restoration",
+    "rebuild": "108 passed/0 skips",
+    "supplemental_faults": "6/6 assertion-caught, no setup errors, original source restored byte-for-byte",
+    "source_contracts": "No changes, frontend registry no drift, consolidation0 findings",
+    "canonical_mutation_registry": "374cases/383edits/0findings, NOT_EXECUTED_ON_THIS_PACKET"
+  },
+  "evidence_correction": {
+    "postgres_test_hash": "Receipt captured the new test file before its unused import time was removed while the job started. Production source hashes match exactly; test assertions are unchanged. The final15-case control records the final test file. Raw receipt is preserved unchanged.",
+    "not_relabelled": "No claim that the full initial receipt pins every final test-file byte."
+  },
+  "limits": [
+    "Volatile SDK selection, not a durable delivery journal or full tick/live-bar fanout",
+    "No total queue/process capacity, provider health/entitlement or production service isolation qualification",
+    "Arbitrary predicate execution is not interruptible; expiry is rechecked on return",
+    "No unit/native/provider/economic/production/S24 acceptance",
+    "Local-only source; normal push blocked by invalid injected CLI credential"
+  ],
+  "evidence": "ci/native_event_selection_20261025"
+}

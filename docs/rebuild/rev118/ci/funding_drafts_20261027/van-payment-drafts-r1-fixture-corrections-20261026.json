@@ -1,0 +1,11 @@
+{
+  "attempt": "van-payment-drafts-pg-r1-20261026",
+  "actual": {"passed":123,"failed":3,"skipped":0,"audit_violations":0,"owned_fixture_independently_absent":true},
+  "status": "FAILED_RETAINED",
+  "corrections": [
+    "Lost-ACK fixture must raise after the original outer transaction commits; SQLite append nests atomic(), so raising on every context caused rollback before commit.",
+    "Queued-expiry fixture must create the SQLite connection in its worker thread, before the independent blocker takes the writer lock; the original fixture handed a main-thread connection to a worker.",
+    "Import PaymentContractError so the PostgreSQL expiry assertion can check the actual raised exception."
+  ],
+  "preserved": "The original durable independent-readback, original-request replay, real SQL writer wait and exact expiry-boundary assertions remain unchanged. No product source changed for these fixture repairs."
+}

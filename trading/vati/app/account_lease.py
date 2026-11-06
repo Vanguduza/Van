@@ -20,9 +20,10 @@ from __future__ import annotations
 
 import threading
 import time
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext
 from dataclasses import dataclass
 from enum import Enum
+from functools import wraps
 from typing import Iterator, Optional, Protocol
 
 
@@ -120,6 +121,14 @@ class InMemoryLeaseStore:
             yield self._rows.get(account_alias)
 
 
+def _locked_lease_operation(method):
+    @wraps(method)
+    def locked(self, *args, **kwargs):
+        with self._lock:
+            return method(self, *args, **kwargs)
+    return locked
+
+
 class PostgresLeaseStore:
     """Transactional lease store on the VATI PostgreSQL authority database.
 
@@ -129,6 +138,8 @@ class PostgresLeaseStore:
     """
 
     def __init__(self, dsn: str, *, connect=None) -> None:
+        self._lock = threading.RLock()
+        self._guard_depth = 0
         try:
             if connect is None:
                 import psycopg
@@ -149,23 +160,36 @@ class PostgresLeaseStore:
             software_version=str(row[6] or ""), git_sha=str(row[7] or ""),
         )
 
+    @_locked_lease_operation
     def read(self, account_alias: str) -> Optional[AccountLease]:
         try:
-            with self._conn.cursor() as cur:
-                cur.execute(
-                    "SELECT account_alias, holder_instance_id, lease_epoch, acquired_at_ms, "
-                    "heartbeat_at_ms, expires_at_ms, software_version, git_sha "
-                    "FROM vati.account_runtime_leases WHERE account_alias = %s",
-                    (account_alias,),
-                )
-                row = cur.fetchone()
-            self._conn.rollback()
-            return self._from_row(row)
+            # A server-side error aborts its transaction even without a client
+            # rollback. Isolate a borrowed query in a native savepoint so that
+            # its failure cannot discard the outer submission row locks.
+            with self._conn.transaction() if self._guard_depth else nullcontext():
+                with self._conn.cursor() as cur:
+                    cur.execute(
+                        "SELECT account_alias, holder_instance_id, lease_epoch, acquired_at_ms, "
+                        "heartbeat_at_ms, expires_at_ms, software_version, git_sha "
+                        "FROM vati.account_runtime_leases WHERE account_alias = %s",
+                        (account_alias,),
+                    )
+                    row = cur.fetchone()
+                current = self._from_row(row)
+            # A nested fence borrows the active submission transaction. Its
+            # rollback would release the outer FOR UPDATE row lock too.
+            if not self._guard_depth:
+                self._conn.rollback()
+            return current
         except Exception as exc:  # noqa: BLE001
-            self._conn.rollback()
+            if not self._guard_depth:
+                self._conn.rollback()
             raise LeaseStoreUnavailable(str(exc)) from exc
 
+    @_locked_lease_operation
     def write_if(self, expected: Optional[AccountLease], new: AccountLease) -> bool:
+        if self._guard_depth:
+            raise LeaseStoreUnavailable("lease mutation is unavailable inside a submission guard")
         try:
             with self._conn.cursor() as cur:
                 cur.execute(
@@ -183,11 +207,18 @@ class PostgresLeaseStore:
                         "INSERT INTO vati.account_runtime_leases("
                         "account_alias, holder_instance_id, lease_epoch, acquired_at_ms, "
                         "heartbeat_at_ms, expires_at_ms, software_version, git_sha"
-                        ") VALUES (%s,%s,%s,%s,%s,%s,%s,%s)",
+                        ") VALUES (%s,%s,%s,%s,%s,%s,%s,%s) "
+                        "ON CONFLICT (account_alias) DO NOTHING RETURNING account_alias",
                         (new.account_alias, new.holder_instance_id, new.lease_epoch,
                          new.acquired_at_ms, new.heartbeat_at_ms, new.expires_at_ms,
                          new.software_version, new.git_sha),
                     )
+                    if cur.fetchone() is None:
+                        # SELECT FOR UPDATE cannot lock an absent row. A
+                        # simultaneous first insert is a healthy CAS loss,
+                        # not evidence that shared storage is unreachable.
+                        self._conn.rollback()
+                        return False
                 else:
                     cur.execute(
                         "UPDATE vati.account_runtime_leases SET holder_instance_id=%s, "
@@ -213,32 +244,46 @@ class PostgresLeaseStore:
         ORDER_COMMAND and the end of immediate execution/protection handling.
         PostgreSQL releases the row lock if this connection dies.
         """
-        try:
-            cur = self._conn.cursor()
-            cur.execute(
-                "SELECT account_alias, holder_instance_id, lease_epoch, acquired_at_ms, "
-                "heartbeat_at_ms, expires_at_ms, software_version, git_sha "
-                "FROM vati.account_runtime_leases WHERE account_alias = %s FOR UPDATE",
-                (account_alias,),
-            )
-            current = self._from_row(cur.fetchone())
-        except Exception as exc:  # noqa: BLE001
+        # This private connection has one transaction owner. Other threads wait
+        # until that owner's outer guard exits; same-thread reads/inner guards
+        # borrow it without committing or rolling back its locked authority.
+        with self._lock:
+            cur = None
             try:
-                self._conn.rollback()
-            except Exception:
-                pass
-            raise LeaseStoreUnavailable(str(exc)) from exc
-        try:
-            yield current
-        finally:
+                with self._conn.transaction() if self._guard_depth else nullcontext():
+                    cur = self._conn.cursor()
+                    cur.execute(
+                        "SELECT account_alias, holder_instance_id, lease_epoch, acquired_at_ms, "
+                        "heartbeat_at_ms, expires_at_ms, software_version, git_sha "
+                        "FROM vati.account_runtime_leases WHERE account_alias = %s FOR UPDATE",
+                        (account_alias,),
+                    )
+                    current = self._from_row(cur.fetchone())
+            except Exception as exc:  # noqa: BLE001
+                if cur is not None:
+                    cur.close()
+                if not self._guard_depth:
+                    try:
+                        self._conn.rollback()
+                    except Exception:
+                        pass
+                raise LeaseStoreUnavailable(str(exc)) from exc
+            self._guard_depth += 1
             try:
-                cur.close()
+                yield current
             finally:
-                # The guard is read-only. Rollback releases the row lock without
-                # mutating the lease that was validated under it.
-                self._conn.rollback()
+                self._guard_depth -= 1
+                try:
+                    cur.close()
+                finally:
+                    if not self._guard_depth:
+                        # Only the outer owner releases all submission locks.
+                        self._conn.rollback()
 
+    @_locked_lease_operation
     def close(self) -> None:
+        if self._guard_depth:
+            raise LeaseStoreUnavailable("lease close is unavailable inside a submission guard")
         self._conn.close()
 
 

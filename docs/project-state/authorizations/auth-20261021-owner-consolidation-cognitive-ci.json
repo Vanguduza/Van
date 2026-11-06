@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "authorization_id": "auth-20261021-owner-consolidation-cognitive-ci",
+  "project": "van",
+  "authority": "OWNER_DERIVED",
+  "owner_instruction_sha256": "d508284fb40d041695230949a04dcc0ba03f30c942519cbf1cc4d24ef9c57d84",
+  "owner_instruction_excerpt": "Perform repository consolidation with all branches evaluated so opus 5.5 will start on a a clean unpolluted repository",
+  "derivation": "Wire the existing mandatory sealed voice-asset preparation into the inherited cognitive Android CI job before app build; GitHub failed the job because generated assets were absent.",
+  "source": {
+    "kind": "owner_session_instruction",
+    "channel": "codex",
+    "owner_attested": true,
+    "device_signature_claimed": false,
+    "cryptographic_signature_claimed": false,
+    "signed_ingress_claimed": false
+  },
+  "issued_at_utc": "2026-10-21T11:13:42.847412+00:00",
+  "branch_scope": "consolidation/opus-clean-rev118-20261021",
+  "authorized_paths": [
+    ".github/workflows/cognitive-fabric-r161-van.yml"
+  ],
+  "reusable": true,
+  "revoked": false,
+  "limitations": [
+    "Only add Python setup and exact-pinned asset acquisition/verification before the existing Android build.",
+    "Keep every existing test, build, lint and asset-seal assertion enabled.",
+    "No deployment, release signing, live provider operation or native gate approval."
+  ]
+}

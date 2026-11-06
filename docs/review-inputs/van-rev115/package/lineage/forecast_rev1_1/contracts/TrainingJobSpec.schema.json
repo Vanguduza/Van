@@ -1,0 +1,176 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:van:ml:1.0:TrainingJobSpec",
+  "title": "TrainingJobSpec",
+  "description": "Proposed VAN interchange contract. Shape validity is not permission, factual evidence or runtime qualification. Cross-record semantic validation and independent trusted receipts are required.",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "van-ml/1.0"
+    },
+    "record_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "authority_effect": {
+      "const": "NONE"
+    },
+    "scope": {
+      "type": "object",
+      "properties": {
+        "project_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "cohort_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "instrument_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "venue_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "environment": {
+          "enum": [
+            "FIXTURE",
+            "RESEARCH",
+            "SHADOW",
+            "LIVE_ADVISORY"
+          ]
+        }
+      },
+      "required": [
+        "project_id",
+        "cohort_id",
+        "instrument_id",
+        "venue_id",
+        "environment"
+      ],
+      "additionalProperties": false
+    },
+    "provider": {
+      "enum": [
+        "QLIB_LIGHTGBM",
+        "LIGHTGBM_NATIVE",
+        "NEURALFORECAST",
+        "XGBOOST",
+        "BASELINE"
+      ]
+    },
+    "model_plugin": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "dataset_manifest_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "feature_manifest_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "target_spec_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "fold_plan_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "study_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "trial_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "parameter_artifact_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "environment_lock_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "resource_admission_ref": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "authorization_ref": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "random_seeds": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "minItems": 1
+    },
+    "max_wall_seconds": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "max_memory_mb": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "max_threads": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "output_byte_limit": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "automatic_live_promotion": {
+      "const": false
+    }
+  },
+  "required": [
+    "schema_version",
+    "record_id",
+    "authority_effect",
+    "scope",
+    "provider",
+    "model_plugin",
+    "dataset_manifest_digest",
+    "feature_manifest_digest",
+    "target_spec_digest",
+    "fold_plan_digest",
+    "study_id",
+    "trial_id",
+    "parameter_artifact_digest",
+    "environment_lock_digest",
+    "resource_admission_ref",
+    "authorization_ref",
+    "random_seeds",
+    "max_wall_seconds",
+    "max_memory_mb",
+    "max_threads",
+    "output_byte_limit",
+    "created_at",
+    "automatic_live_promotion"
+  ],
+  "additionalProperties": false
+}

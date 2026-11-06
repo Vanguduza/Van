@@ -1,0 +1,10 @@
+{
+  "actual_positive_exit": 0,
+  "actual_failure_preserved": 1,
+  "actual_timeout_exit": 124,
+  "actual_owned_child_cleanup": {
+    "owned_child_reaped": true,
+    "exit": -15
+  },
+  "scope": "Synthetic shell/timeout cleanup control, not product-test acceptance"
+}

@@ -1,0 +1,66 @@
+{
+  "revision": "1.1",
+  "state": "REPOSITORY_IMPLEMENTATION_COMPLETE_PENDING_EXTERNAL_QUALIFICATION",
+  "waves": [
+    {
+      "wave": 0,
+      "packages": [
+        "OMV-009"
+      ],
+      "state": "COMPLETE",
+      "exit": "provenance and regression lock green"
+    },
+    {
+      "wave": 1,
+      "packages": [
+        "OMV-005"
+      ],
+      "state": "COMPLETE",
+      "exit": "artifact contract and owner projection green"
+    },
+    {
+      "wave": 2,
+      "packages": [
+        "OMV-001",
+        "OMV-002"
+      ],
+      "state": "COMPLETE_REPOSITORY",
+      "exit": "document path and qualified-by-evidence computer worker implemented; host qualification remains external"
+    },
+    {
+      "wave": 3,
+      "packages": [
+        "OMV-008",
+        "OMV-007"
+      ],
+      "state": "COMPLETE_REPOSITORY",
+      "exit": "browser runtime hardening and Google depth contracts implemented; live providers/hosts remain external"
+    },
+    {
+      "wave": 4,
+      "packages": [
+        "OMV-003",
+        "OMV-004"
+      ],
+      "state": "COMPLETE_REPOSITORY",
+      "exit": "goals/watches/suggestions owner surfaces and scheduler integration implemented"
+    },
+    {
+      "wave": 5,
+      "packages": [
+        "OMV-006"
+      ],
+      "state": "COMPLETE_REPOSITORY",
+      "exit": "self-hosted threads, drafts and queued follow-ups replay-safe and owner reachable"
+    },
+    {
+      "wave": 6,
+      "packages": [
+        "OMV-010"
+      ],
+      "state": "OPTIONAL_NOT_IMPLEMENTED",
+      "optional": true
+    }
+  ],
+  "next": "Run exact-head van-ci + convergence certification harness, then perform only the external qualification rows named by the matrix."
+}

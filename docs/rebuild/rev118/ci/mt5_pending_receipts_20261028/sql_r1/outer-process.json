@@ -1,0 +1,15 @@
+{
+  "command": [
+    "python3",
+    "/workspace/van-mt5-pending-receipt-sql-r1-20261028.py"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 491926,
+  "started_at_utc": "2026-10-28T13:31:24.755658+00:00",
+  "timeout_seconds": 1900,
+  "state": "COMPLETED",
+  "command_pid": 491960,
+  "exit": 0,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-28T13:46:20.760908+00:00"
+}

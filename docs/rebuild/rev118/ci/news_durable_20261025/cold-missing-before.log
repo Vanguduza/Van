@@ -1,0 +1,36 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+_ test_cold_retry_cannot_recreate_a_missing_required_original_receipt[NEWS_HEADLINE] _
+
+ledger = <vati.core.ledger.Ledger object at 0x7fe3425277d0>
+missing = <EventKind.NEWS_HEADLINE: 'NEWS_HEADLINE'>
+
+    @pytest.mark.parametrize('missing',[EventKind.NEWS_HEADLINE,EventKind.NEWS_OBSERVATION])
+    def test_cold_retry_cannot_recreate_a_missing_required_original_receipt(ledger,missing):
+        h=story();NewsIngress(ledger=ledger).ingest(h,now_ms=NOW)
+        ledger._conn.execute('DELETE FROM events WHERE kind=?',(missing.value,))
+        head=ledger.head();count=ledger.count()
+>       with pytest.raises(NewsIngressError,match='missing'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE NewsIngressError
+
+trading/tests/test_news_durable_publication.py:155: Failed
+_ test_cold_retry_cannot_recreate_a_missing_required_original_receipt[NEWS_OBSERVATION] _
+
+ledger = <vati.core.ledger.Ledger object at 0x7fe34232e2a0>
+missing = <EventKind.NEWS_OBSERVATION: 'NEWS_OBSERVATION'>
+
+    @pytest.mark.parametrize('missing',[EventKind.NEWS_HEADLINE,EventKind.NEWS_OBSERVATION])
+    def test_cold_retry_cannot_recreate_a_missing_required_original_receipt(ledger,missing):
+        h=story();NewsIngress(ledger=ledger).ingest(h,now_ms=NOW)
+        ledger._conn.execute('DELETE FROM events WHERE kind=?',(missing.value,))
+        head=ledger.head();count=ledger.count()
+>       with pytest.raises(NewsIngressError,match='missing'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE NewsIngressError
+
+trading/tests/test_news_durable_publication.py:155: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_news_durable_publication.py::test_cold_retry_cannot_recreate_a_missing_required_original_receipt[NEWS_HEADLINE]
+FAILED trading/tests/test_news_durable_publication.py::test_cold_retry_cannot_recreate_a_missing_required_original_receipt[NEWS_OBSERVATION]
+2 failed, 27 deselected in 0.33s

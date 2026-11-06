@@ -1,0 +1,152 @@
+{
+  "schema": "van.rebuild.rev118.obligations/1",
+  "prepared_by": "lead (author-prepared, not independently reviewed)",
+  "date_utc": "2026-10-21",
+  "source_commit": "Frozen obligation baseline b02075f3; current maintenance evidence is separately bound in each current_review and receipts.",
+  "status_meaning": "Author-prepared obligations; source maintenance evidence does not admit or pass a Rev1.18 unit. The canonical PRE-003 and independent/release gates remain distinct.",
+  "obligations": [
+    {
+      "id": "OBL-001",
+      "from": "OBS-001",
+      "owner_unit": "BE-002",
+      "also_gates": [
+        "REL-001 (T-NX-054 signed APK)"
+      ],
+      "carried_by_identities": [
+        "T-BE-002-SEC",
+        "T-NX-054"
+      ],
+      "finding": "android/app/src/debug/AndroidManifest.xml sets android:usesCleartextTraffic=\"true\" on <application>, i.e. for every host. Its comment and the only consumer (VanGatewayClient.defaultGatewayBaseUrl, which returns http://127.0.0.1:8787 only when BuildConfig.DEBUG and no VAN_GATEWAY_BASE_URL) need loopback only. The main manifest sets no networkSecurityConfig, so with targetSdk 36 release is cleartext-off by platform default, not by an explicit declaration. The same debug manifest exports RiveCandidateHostActivity with no permission.",
+      "proves": "Cleartext is admitted only to loopback in debug and nowhere in release, and that holds in the merged manifests actually packaged.",
+      "preconditions": "Built debug and release variants of com.dial.van from the admitted source; aapt2/apkanalyzer available.",
+      "stimulus": "Inspect merged manifests and the packaged network-security config; on a debug build, attempt HTTP to 127.0.0.1 and to a non-loopback test host.",
+      "observable": "Debug: loopback HTTP succeeds; non-loopback HTTP fails with CLEARTEXT_NOT_PERMITTED. Release: merged manifest has no usesCleartextTraffic=true; base-config cleartextTrafficPermitted=false (explicit); no exported debug-only activity.",
+      "negative": "A non-loopback cleartext request in debug succeeding fails the obligation; any exported activity present only for development in release fails it.",
+      "recovery": "Not applicable (static configuration); regression guard is the merged-manifest check in CI.",
+      "environment": "JVM/host for manifest inspection; emulator for the debug request check. Not handset acceptance.",
+      "pass_evidence": "Merged-manifest dump for both variants, the network-security XML, and the two request outcomes, bound to the APK SHA-256.",
+      "proposed_change_for_owner": "Replace app-wide usesCleartextTraffic in the debug overlay with a debug network_security_config permitting cleartext only for 127.0.0.1/localhost; declare an explicit release config with cleartext off; restrict or drop export of RiveCandidateHostActivity. Application change under android/: needs unit admission and a ledger authorization.",
+      "status": "DEBUG_NETWORK_POLICY_RUNTIME_VERIFIED_RELEASE_PROFILE_AND_UNIT_ACCEPTANCE_PENDING",
+      "current_review": {
+        "fix": "Explicit cleartext-off main policy; debug exceptions restricted to exact localhost/127.0.0.1/::1; exported debug rig requires android.permission.DUMP. Existing owner continuation authorization covers this confirmed baseline maintenance; no new frontend design or unit acceptance is asserted.",
+        "evidence": "receipts/android-cleartext/LOCAL_VALIDATION.json, DEBUG_PACKAGED_MANIFEST.txt, DEBUG_PACKAGED_POLICY.txt, RELEASE_MANIFEST_REFUSAL.txt",
+        "tests": "3 host checks, 195 app units, debug and instrumentation assembly and lint pass. New Android framework/real HTTP and rig-permission tests await hosted execution.",
+        "release_limit": "Actual release manifest processing refuses without VAN_DEPLOYMENT_PROFILE_FILE; no fake profile or signer was supplied.",
+        "runtime_evidence": "Run 39723196572, NetworkSecurityRuntimeTest: both tests pass (actual loopback HTTP, blocked non-loopback HTTP, exact framework policy, privileged debug rig). Instrumentation overall failed a separate legacy deep-link timing assertion; full release/handset and unit acceptance remain pending."
+      }
+    },
+    {
+      "id": "OBL-002",
+      "from": "OBS-002",
+      "owner_unit": "BE-003",
+      "carried_by_identities": [
+        "T-BE-003-NEG",
+        "T-BE-003-REC"
+      ],
+      "finding": "IdempotencyService.begin (backend/van_gateway/idempotency/service.py:96-113) lets a same-hash IN_FLIGHT claim be retaken after STALE_CLAIM_SECONDS (900 s) and the caller re-executes, relying on CommandMissionLink.open -> existing_for_command (command/mission_link.py:107-133) to return the existing mission. That is check-then-act. The database does carry a guard: storage/db.py:162 creates UNIQUE INDEX idx_missions_source_command on json_extract(authority_envelope_json,'$.source_command_id') (confirmed in the schema snapshot, read with immutable=1). No code path catches the resulting IntegrityError, and no test exercises stale retake or concurrent open for the same command_id.",
+      "proves": "A retaken or concurrent execution of one command yields exactly one mission and one downstream effect, and the losing path returns that mission rather than an error or a second effect.",
+      "preconditions": "Isolated store in tmp_path; a command whose execution opens a mission.",
+      "stimulus": "(a) claim, age updated_at_unix past 900 s, re-begin with the same hash, re-execute; (b) two concurrent opens for the same command_id racing past existing_for_command; (c) crash after mission insert but before idempotency complete, then retry.",
+      "observable": "One missions row for the source_command_id; claim_count incremented once per retake; every caller receives the same mission_id; no unhandled IntegrityError.",
+      "negative": "A different-hash attempt under the same key still raises IdempotencyConflict and leaves the original row unchanged (existing test_a_conflicting_attempt_does_not_poison_the_original_claim). A retake before 900 s is refused.",
+      "recovery": "Case (c) resumes onto the existing mission without duplicating its effect.",
+      "environment": "Backend source test (pytest), SQLite; Postgres too if the store is admitted for it (T-VAN-CX-008-POS).",
+      "pass_evidence": "Test ids and output on the frozen baseline SHA, plus a mutation showing that removing the unique index or the existing_for_command check makes a case fail.",
+      "status": "CONCURRENT_MISSION_CREATION_SOURCE_FIXED_DOWNSTREAM_EFFECT_PROOF_PENDING",
+      "current_review": {
+        "correction": "test_recovery_matrix.py already covers stale claim retake returning the existing mission; the earlier finding overstated that test absence.",
+        "reproduced_defect": "Two separate Store/CommandMissionLink instances both read no mission; one then raises idx_missions_source_command IntegrityError.",
+        "fix": "On an integrity error, return the committed winning mission only if one exists for this command; otherwise propagate the original error. Preserve the unique index.",
+        "evidence": "receipts/MISSION_RACE_BEFORE.txt; receipts/MISSION_RACE_VALIDATION.json; ci/MUTATION_FOLLOWUP_C11.json",
+        "tests": "53 focused recovery/contract tests and 46 command API integration tests pass. Forced two-writer race returns one mission and one created event; unrelated primary-key failure still raises.",
+        "remaining": "Whole-orchestrator downstream-effect deduplication, crash/recovery and admitted-store variants remain BE-003 acceptance work.",
+        "post_insert_guard": "A further negative control showed a broad integrity handler could swallow a failed post-insert learning write. Recovery now requires the exact source-command uniqueness constraint; 100 related backend tests pass, including the real post-insert NOT NULL failure. Evidence: receipts/MISSION_POST_INSERT_BEFORE.txt and MISSION_RACE_VALIDATION.json."
+      }
+    },
+    {
+      "id": "OBL-003",
+      "from": "OBS-003",
+      "owner_unit": "BE-025",
+      "owner_unit_correction": "PRE-001 recorded OBS-003 under BE-028 (Automation, reminders and schedules). The browser approval flow belongs to BE-025 (Browser, remote interaction, artifact and share intake). Corrected here and in DISPOSITIONS.json.",
+      "carried_by_identities": [
+        "T-BE-025-POS",
+        "T-BE-025-SEC",
+        "T-BE-025-REC"
+      ],
+      "finding": "Removal in 652ef3f3 of test_owner_approval_resumes_same_browser_task left only refusal tests (cannot widen domain, cannot exceed class, advisory answer cannot resume). BrowserAPI.consume_resume_authorization (backend/van_gateway/browser/api.py:808) implements the positive path: single-use ACTIVE browser_scope_authorizations row, domains and class checked, conditional UPDATE to CONSUMED. Transition tests (test_browser_review_i3) cover WAITING_FOR_OWNER -> RESUME_AUTHORIZED but not an end-to-end continuation of the same task.",
+      "proves": "A genuine, exact owner approval continues the same task_id within the approved scope exactly once.",
+      "preconditions": "A browser task in WAITING_FOR_OWNER with a pending scope request; an enrolled owner device.",
+      "stimulus": "Owner issues the exact approval through the production route; worker requests /assignments for that task within approved domains and class; then a second resume attempt.",
+      "observable": "Same task_id moves RESUME_AUTHORIZED -> RUNNING; authorization row CONSUMED with consumed_at_ms; the continued step executes inside the approved domains; second attempt gets 409 BROWSER_RESUME_AUTHORIZATION_MISSING.",
+      "negative": "Existing refusal tests stay green; concurrent double resume spends the authorization once.",
+      "recovery": "Restart between approval and assignment keeps the authorization ACTIVE and resumable once; expiry yields refusal, not continuation.",
+      "environment": "Backend source test with the real BrowserAPI and store; provider browser stubbed only below the assignment boundary.",
+      "pass_evidence": "Test output on the frozen baseline SHA with readback of the task and authorization rows.",
+      "status": "SEALED_SAME_TASK_CONTINUATION_SOURCE_TESTED_NATIVE_ACCEPTANCE_PENDING",
+      "current_review": {
+        "implementation": "New browser.task.resume producer and strict production consumer bind exact canonical owner A4, original task/escalation/scope, device, expiry, action execution and parent controls. Grant/witness/status commit atomically. Original task/decision preserved; advisory answers never grant authority.",
+        "evidence": "backend/BE-025_BROWSER_CONTINUATION.md; backend/tests/test_browser_sealed_resume.py; 128 final focused tests pass. Real HTTP approval, app recreation, same-task assignment and single consumption are exercised with controlled provider transport.",
+        "remaining": "Full BE-025 unit/native acceptance, independent review, S24 UI/Artemis evidence and reconciliation of externally uncertain effects."
+      }
+    },
+    {
+      "id": "OBL-004",
+      "from": "OBS-004",
+      "owner_unit": "BE-003",
+      "carried_by_identities": [
+        "T-BE-003-REC"
+      ],
+      "finding": "Root cause reproduced with a sqlite3.connect/os.mkdir audit hook: backend/van_gateway/app.py:3856 executes app = create_app() at import, and Settings.database_path defaults to the relative 'data/van_gateway.sqlite3' (config.py:51). Importing van_gateway.app with cwd at the repo root makes Store.__init__ (storage/db.py:2551) create data/ and DocumentService (documents/service.py:32) create data/documents (mode 0700) next to the tracked schema snapshot. Observed trigger: tests/contracts/test_artemis_console_boundary.py::test_console_session_is_hardware_device_proofed_and_proxy_is_hermes_governed (imports the module-level app). The tracked file stayed byte-identical (sha256 2599f07d...f95e). The WAL/shm side files seen earlier are not explained by this; see probe_result.",
+      "proves": "No test, tool or import writes beside or into the tracked data/van_gateway.sqlite3, and runtime never uses a cwd-relative database path.",
+      "preconditions": "Clean checkout; tracked snapshot hash recorded.",
+      "stimulus": "Run every canonical suite root from the repo root and from backend/ with an audit hook on sqlite3.connect and os.mkdir; import van_gateway.app with no VAN_DATABASE_PATH.",
+      "observable": "Zero opens of the tracked path and zero new entries under data/; snapshot hash unchanged; importing the module does not create directories.",
+      "negative": "Starting the gateway without an explicit absolute VAN_DATABASE_PATH in a non-test deployment refuses rather than writing a relative path.",
+      "recovery": "Not applicable; regression guard is the audit-hook check.",
+      "environment": "Host source tests.",
+      "pass_evidence": "Audit-hook log (empty) and before/after snapshot hash on the frozen baseline SHA. Also an owner decision on whether the snapshot remains a tracked fixture.",
+      "proposed_change_for_owner": "Make the app factory lazy (no create_app() at import) or have tests use a tmp database; give Settings no relative default in production. Application change: needs unit admission and a ledger authorization.",
+      "status": "IMPORT_AND_STARTUP_STORAGE_SOURCE_FIXED_BROAD_SUITE_AUDIT_PENDING",
+      "probe_result": "Audit hook (sqlite3.connect + os.mkdir) over trading/tests/test_oci_trading_topology_bootstrap.py + tests/hermes/test_profile_layout.py: 48 passed, no events. Over all of tests/contracts: 1,525 passed, 4 skipped, exactly two events (mkdir data, mkdir data/documents, both from test_artemis_console_boundary importing the module-level app) and zero sqlite3.connect to the tracked path. Snapshot sha256 unchanged (2599f07d79e698115dddf647deef263efb927d8de6c8bafc7a08e935fa29f95e). The WAL/shm side files observed earlier are therefore NOT explained by tests/contracts or the two suites above; their source remains unidentified (candidates not yet probed: backend suite run with cwd at the repo root, tools/ops/backup.py defaults). The obligation's audit-hook stimulus over every canonical root is what closes it.",
+      "current_review": {
+        "change": "LazyGateway preserves ASGI app import compatibility, constructs once on use and leaves storage initialization to startup/actual document writes. Settings uses an absolute user-state development default and requires explicit absolute production database path. Store and DocumentService constructors no longer create directories.",
+        "evidence": "backend/tests/test_gateway_startup_storage.py; 122 related gateway, production config, mTLS, document, backup, storage and endpoint boundary source tests pass. Both fresh-interpreter import probes failed before the fix, then passed.",
+        "remaining": "Audit all canonical suites and confirm tracked snapshot unchanged; independent unit and release acceptance not issued.",
+        "broad_source_audit": "Frozen c36d6a21 backend/tests + tests/contracts:6535 passed/166skip, zero forbidden writes or SQLite opens under root/data or backend/data. Whole other-suite/cwd matrix remains distinct. receipts/SOURCE_QUALIFICATION_c36d6a21.json."
+      }
+    },
+    {
+      "id": "OBL-005",
+      "from": "Android evidence gap",
+      "owner_unit": "QA-002 / REL-001 (device), BE units (JVM)",
+      "carried_by_identities": [
+        "T-NX-054"
+      ],
+      "finding": "Android JVM verification harness rerun in this session: android/verification, 157 classes, 1,273 tests, 0 failures/errors/skips (pre001/TEST_EVIDENCE.json). This closes the JVM-rerun gap only. The PR #104 instrumentation failure (RiveContractTest.coreInputsDriveTheRig) is unexplained.",
+      "proves": "Android behaviour cited by PRE-001 holds on device, not only on the JVM.",
+      "preconditions": "Signed APK of the frozen baseline; emulator for instrumentation; the S24 Ultra through the authorized Artemis workflow for handset acceptance.",
+      "stimulus": "connectedAndroidTest on the frozen baseline; read the PR #104 test-report artifact; Artemis handset run.",
+      "observable": "Instrumentation green on the exact head, or the Rive failure root-caused and assigned; handset results bound to APK SHA-256 and device identity.",
+      "negative": "A JVM pass or an emulator pass is never reported as handset acceptance.",
+      "recovery": "One rerun at most for a suspected flake; a second failure is real.",
+      "environment": "GitHub-hosted Android emulator core evidence at 637eaf96: 14 passed, 0 failed, 4 explicit core-mode skips. S24 Ultra via Artemis and full/production rig qualification remain pending.",
+      "pass_evidence": "Instrumentation report and Artemis receipts for the exact APK.",
+      "status": "OPEN_HANDSET_AND_FULL_RIG_QUALIFICATION (core emulator source evidence complete)",
+      "current_runtime": "c2a27848 / run39725953372: 20 collected, 16 passed / 0 failed / 4 explicit core-mode skips. Both new network tests, resident singleTop Intent checks and all applicable Rive tests pass. Full/production rig and S24 Artemis acceptance remain pending."
+    },
+    {
+      "id": "OBL-006",
+      "from": "OBS-005",
+      "owner_unit": "BQ-006 / QA-003",
+      "status": "SOURCE_CORPUS_VERIFIED_PENDING_ADMITTED_UNIT_REVIEW",
+      "finding": "The 374-case legacy mutation corpus has 36 preflight findings. Its former CI success was an aborted run masked by tee and step continuation.",
+      "proves": "Every retained mutation is bound to the current equivalent implementation and valid test target; each unmutated control passes before a mutation can count as caught.",
+      "stimulus": "Reconcile each recorded stale/missing target preserving the invariant, run preflight, then execute controls and mutants in an isolated source checkout with the actual component dependencies.",
+      "observable": "No invalid registry input, no collection/setup error counted as caught, no silent case omission; complete per-case outcomes and restoration proof.",
+      "evidence": "ci/MUTATION_VERIFICATION_FINDING.md; ci/MUTATION_REGISTRY_CURRENT.json; ci/MUTATION_RECONCILIATION.md; ci/MUTATION_RECONCILIATION_MAPPING.json and per-component execution receipts",
+      "completed_correction": "All original 36 preflight findings resolved; all 374 case identities preserved (380 edits). All 32 retargeted cases pass controls and fail their intended assertions; invalid initial controls/compiler failures retained. Shared harness and CI reject misleading successes. 35 focused regressions and 52 isolated rebuild tests pass. Follow-up C35 replacement now qualifies the queue constant; C11 now jointly removes the optimistic lookup and unique fence, reflecting the actual combined invariant. Both induced failures detected. Current corpus: 374 identities, 381 edits, nine disjoint CI shards.",
+      "remaining": "Eligible independent semantic/admission review through the canonical unit programme; no source-corpus execution gap remains.",
+      "full_corpus_evidence": "ci/MUTATION_CORPUS_c2a27848.json: all 374 original identities exactly once, 374 detected/0 survived, 382 edits, valid controls. Earlier failed corpus/invalid executions remain preserved."
+    }
+  ]
+}

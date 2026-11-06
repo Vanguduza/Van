@@ -1,0 +1,7 @@
+{
+  "pid": 936705,
+  "controller": "/workspace/van-owner-recovery-final-r3-20261027.py",
+  "timeout_seconds": 900,
+  "finally_cleanup": "exact labeled PostgreSQL fixture plus adopted-child reaping",
+  "status": "STARTED_NOT_COMPLETE"
+}

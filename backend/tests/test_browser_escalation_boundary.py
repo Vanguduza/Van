@@ -201,7 +201,7 @@ async def test_an_unparseable_domain_is_not_rendered_into_a_prompt(tmp_path):
 # ------------------------------------------- one question per distinct ask
 
 
-async def test_two_different_overruns_are_two_separate_questions(tmp_path):
+async def test_advisory_answer_cannot_run_a_second_scope_overrun(tmp_path):
     """The defect this closes: a second overrun keyed only on the stop reason
     collided with the first, and the owner was never asked about it."""
     worker = _ScriptedWorker(
@@ -226,20 +226,11 @@ async def test_two_different_overruns_are_two_separate_questions(tmp_path):
             "/v1/browser/assignments", headers=HEADERS,
             json=_assignment(task["task_id"], allowed_domains=[DOMAIN, "first.example.net"]),
         )
-        assert second.json()["escalation"]["escalated"] is True
-        assert second.json()["escalation"]["requested_scope_delta"] == {
-            "allowed_domain": "second.example.net"
-        }
-
-        deltas = await store.fetchall(
-            "SELECT requested_scope_delta_json, status FROM browser_escalations "
-            "WHERE task_id = ? ORDER BY created_at_ms", (task["task_id"],)
-        )
-        assert len(deltas) == 2
-        titles = await store.fetchall("SELECT title, status FROM decisions ORDER BY title")
-        assert len(titles) == 2
-        # The owner is told which domain, not just that "scope" is needed.
-        assert any("second.example.net" in str(t["title"]) for t in titles)
+        assert second.status_code == 409
+        assert "WAITING_FOR_OWNER" in second.json()["detail"]
+        assert await store.fetchall("SELECT * FROM browser_scope_authorizations") == []
+        assert len(await store.fetchall("SELECT * FROM browser_escalations")) == 1
+        assert len(await store.fetchall("SELECT * FROM decisions")) == 1
 
 
 async def test_a_task_waiting_on_the_owner_cannot_be_re_run(tmp_path):
@@ -274,17 +265,13 @@ async def test_an_answered_question_is_not_asked_again(tmp_path):
         )
         await store.execute("UPDATE decisions SET status='APPROVED' WHERE id = ?",
                             (row["decision_id"],))
-        # The widening is granted, but the resumed assignment is re-issued at the
-        # original scope, so the worker walks into the very same wall again.
-        worker.actions = [ProposedAction(kind="navigate", domain="first.example.net")]
-        again = await ac.post(
-            "/v1/browser/assignments", headers=HEADERS,
-            json=_assignment(task["task_id"]),
-        )
-        escalation = again.json()["escalation"]
-        assert escalation["escalated"] is False
-        assert escalation["reason_code"] == "BROWSER_ESCALATION_ALREADY_SATISFIED"
-        assert escalation["status"] == BrowserTaskStatus.FAILED.value
+        # A resolved advisory answer remains informational and does not rerun
+        # the stopped task or repeat its owner question.
+        again = await ac.post("/v1/browser/assignments", headers=HEADERS,
+            json=_assignment(task["task_id"]))
+        assert again.status_code == 409
+        assert "WAITING_FOR_OWNER" in again.json()["detail"]
+        assert await store.fetchall("SELECT * FROM browser_scope_authorizations") == []
         assert len(await store.fetchall("SELECT * FROM decisions")) == 1
 
 

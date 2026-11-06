@@ -1,0 +1,1267 @@
+{
+  "schema": "van.rebuild.conversation-state-source/1",
+  "observed_at_utc": "2026-10-23T17:18:37.054679+00:00",
+  "source_parent": "f124741f2d176f005ab19578f104c446de8a0bc8",
+  "source_sha256": {
+    "backend/van_gateway/conversations/service.py": "e2825d403aaee0a5df135c4d640203f4bd3181969188eb449ae9e7789ad110e8",
+    "backend/van_gateway/conversations/api.py": "8963d60e01f72e3491956a456f0e5285396d143e702ce10dac72823893d4160f",
+    "backend/van_gateway/conversations/models.py": "a8d4a5fea530c9907786e14d2e7ce87b55f881c106c41b3e325cd0bb844327ba",
+    "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt": "8ec4b7a971938d69a84e5b766b8b90b55ce2b86271d622cbb8d4b88ee795177f",
+    "backend/tests/test_conversation_state_integrity.py": "e59861b0efc316f65dad0edf5edad2a5e67741fbfdbe170da9691c34b5f6df86",
+    "backend/tests/test_conversation_gateway_history.py": "7302a2295aa1976323ae5bbb4292b59fad37c612b566c2e35e554b7ad797271e",
+    "tools/rebuild/refresh_owner_source_contracts.py": "d676a141078ddf9eeeeca485ef169afdaa4b3dd5d8e2c90052d69499df370909"
+  },
+  "executions": {
+    "initial_before": {
+      "tests": 8,
+      "failures": 8,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 1.005,
+      "xml_sha256": "8ffc028cc798cf080d27c7a79d282a639d573f1c1d092fef8cccaf8cf41006c3"
+    },
+    "isolated_final": {
+      "tests": 26,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 5.938,
+      "xml_sha256": "dd1a93c1f0ecc23d2881feebfa78976f6db7097239b9963cd8bf9319adaf925a"
+    },
+    "integrated_audited": {
+      "tests": 169,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 99.972,
+      "xml_sha256": "47feea6f5f978f605f9ad4ea15e5256bc240a56d169649bf5825f01ace6d78aa"
+    },
+    "owner_contracts": {
+      "tests": 29,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 7.759,
+      "xml_sha256": "5dbdc75c033b908027ab5e957044502ed92ea88c5292159485be6695513eedb9"
+    },
+    "rebuild": {
+      "tests": 79,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 67.273,
+      "xml_sha256": "f5fce334aca01cde0b401a28534af4804f1a6d0dfe726ee5586b78cf650a3967"
+    }
+  },
+  "fault_campaign": {
+    "definitions": [
+      [
+        "let concurrent main initialization fail on uniqueness",
+        [
+          [
+            "backend/van_gateway/conversations/service.py",
+            "INSERT OR IGNORE INTO conversation_threads",
+            "INSERT INTO conversation_threads",
+            1
+          ]
+        ],
+        "backend/tests/test_conversation_state_integrity.py::test_two_fresh_main_reads_are_safe_at_a_controlled_creation_race"
+      ],
+      [
+        "restore oldest messages instead of current history",
+        [
+          [
+            "backend/van_gateway/conversations/service.py",
+            "ORDER BY created_at_ms DESC,rowid DESC LIMIT ?",
+            "ORDER BY created_at_ms ASC,rowid ASC LIMIT ?",
+            1
+          ]
+        ],
+        "backend/tests/test_conversation_state_integrity.py::test_bounded_thread_restore_contains_the_latest_messages"
+      ],
+      [
+        "read a history cursor from a different thread",
+        [
+          [
+            "backend/van_gateway/conversations/service.py",
+            "WHERE message_id=? AND thread_id=?",
+            "WHERE message_id=?",
+            1
+          ],
+          [
+            "backend/van_gateway/conversations/service.py",
+            "(before_message_id,thread_id),",
+            "(before_message_id,),",
+            1
+          ]
+        ],
+        "backend/tests/test_conversation_state_integrity.py::test_unknown_deleted_or_foreign_history_cursor_is_refused"
+      ],
+      [
+        "repeat cursor anchor rows on each history page",
+        [
+          [
+            "backend/van_gateway/conversations/service.py",
+            "created_at_ms<? OR (created_at_ms=? AND rowid<?)",
+            "created_at_ms<=? OR (created_at_ms=? AND rowid<?)",
+            1
+          ]
+        ],
+        "backend/tests/test_conversation_state_integrity.py::test_pagination_returns_all_history_once_including_same_timestamp_messages"
+      ],
+      [
+        "commit owner message before its parent update",
+        [
+          [
+            "backend/van_gateway/conversations/service.py",
+            "(mid,thread_id,role,body,command_id,mission_id,Store.dumps(artifact_refs or []),int(terminal),now))\n            await db.execute",
+            "(mid,thread_id,role,body,command_id,mission_id,Store.dumps(artifact_refs or []),int(terminal),now))\n            await db.commit()\n            await db.execute",
+            1
+          ]
+        ],
+        "backend/tests/test_conversation_state_integrity.py::test_failed_thread_touch_does_not_leave_an_unacknowledged_message"
+      ],
+      [
+        "mix thread metadata and draft snapshots",
+        [
+          [
+            "backend/van_gateway/conversations/service.py",
+            "await db.execute(\"BEGIN\")\n            row = await (await db.execute(\"SELECT * FROM conversation_threads",
+            "pass\n            row = await (await db.execute(\"SELECT * FROM conversation_threads",
+            1
+          ]
+        ],
+        "backend/tests/test_conversation_state_integrity.py::test_thread_fields_and_draft_share_one_actual_read_snapshot"
+      ],
+      [
+        "defer competing followup decisions beyond their state read",
+        [
+          [
+            "backend/van_gateway/conversations/service.py",
+            "await db.execute(\"BEGIN IMMEDIATE\")\n            row = await (await db.execute(\"SELECT * FROM conversation_followups",
+            "await db.execute(\"BEGIN\")\n            row = await (await db.execute(\"SELECT * FROM conversation_followups",
+            1
+          ]
+        ],
+        "backend/tests/test_conversation_state_integrity.py::test_followup_decision_observes_an_actual_competing_owner_decision"
+      ],
+      [
+        "rebind existing projection identity to another thread",
+        [
+          [
+            "backend/van_gateway/conversations/service.py",
+            "if (existing[\"thread_id\"],existing[\"role\"],existing[\"command_id\"],existing[\"mission_id\"]) != (thread_id,role,command_id,mission_id):",
+            "if False:",
+            1
+          ]
+        ],
+        "backend/tests/test_conversation_state_integrity.py::test_original_projection_key_cannot_be_rebound_to_another_thread"
+      ],
+      [
+        "leave canonical replies invisible to thread ordering",
+        [
+          [
+            "backend/van_gateway/conversations/service.py",
+            "(mid,thread_id,role,body.strip(),command_id,mission_id,Store.dumps(artifact_refs or []),int(terminal),now))\n            await db.execute(\"UPDATE conversation_threads SET updated_at_ms=? WHERE thread_id=?\",(now,thread_id))",
+            "(mid,thread_id,role,body.strip(),command_id,mission_id,Store.dumps(artifact_refs or []),int(terminal),now))\n            pass",
+            1
+          ]
+        ],
+        "backend/tests/test_conversation_state_integrity.py::test_thread_change_time_includes_its_draft_and_result_updates"
+      ],
+      [
+        "commit draft before failed parent update",
+        [
+          [
+            "backend/van_gateway/conversations/service.py",
+            "(thread_id,text,now))\n            await db.execute",
+            "(thread_id,text,now))\n            await db.commit()\n            await db.execute",
+            1
+          ]
+        ],
+        "backend/tests/test_conversation_state_integrity.py::test_failed_parent_touch_rolls_back_each_conversation_child_mutation"
+      ],
+      [
+        "allow new owner messages in an archived thread",
+        [
+          [
+            "backend/van_gateway/conversations/service.py",
+            "if row[\"status\"] == ThreadStatus.ARCHIVED.value:",
+            "if False:",
+            1
+          ]
+        ],
+        "backend/tests/test_conversation_state_integrity.py::test_archived_thread_refuses_new_owner_work_but_preserves_history"
+      ],
+      [
+        "report current page size as entire history count",
+        [
+          [
+            "backend/van_gateway/conversations/service.py",
+            "total_count=int(count[\"n\"]),has_more=more",
+            "total_count=len(visible),has_more=more",
+            1
+          ]
+        ],
+        "backend/tests/test_conversation_state_integrity.py::test_pagination_returns_all_history_once_including_same_timestamp_messages"
+      ]
+    ],
+    "records": [
+      {
+        "case": 0,
+        "phase": "control",
+        "reason": "let concurrent main initialization fail on uniqueness",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "98ef45ad97a6d75ef445a34b4943450b651ec2250c57e1e764bd2c6b893c0ee0"
+      },
+      {
+        "case": 0,
+        "phase": "fault",
+        "reason": "let concurrent main initialization fail on uniqueness",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "b927e2dee72e26b3b40c4a843ec3c174f4938fec0479246f3ed24db5ac17eeb8"
+      },
+      {
+        "case": 1,
+        "phase": "control",
+        "reason": "restore oldest messages instead of current history",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "00aa708a311fe3c1ea6c7f39ecbe8317b35c24329ce0736f7bb35e811a8c4687"
+      },
+      {
+        "case": 1,
+        "phase": "fault",
+        "reason": "restore oldest messages instead of current history",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "0e7394182384181433ea632b8b12333cc34f8fcd510f847d2ae9e76b96a72a11"
+      },
+      {
+        "case": 2,
+        "phase": "control",
+        "reason": "read a history cursor from a different thread",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "f3d9fe4fc3e2bb8dab9d3e0f8dac193bac906271ca1bc598ca79ccc36505dff3"
+      },
+      {
+        "case": 2,
+        "phase": "fault",
+        "reason": "read a history cursor from a different thread",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "3de651556700588c88f3e54fcdcbbb620c2861f979f1ff61641f9ca84f2b97bc"
+      },
+      {
+        "case": 3,
+        "phase": "control",
+        "reason": "repeat cursor anchor rows on each history page",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "b87a13f0da51b28b016737099e1669defa0a03c09e10c51adc97f2c244de1e27"
+      },
+      {
+        "case": 3,
+        "phase": "fault",
+        "reason": "repeat cursor anchor rows on each history page",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "7da7d114fc36af708cea8355706afebab28bef9c2758bab905ce7239b817f6f4"
+      },
+      {
+        "case": 4,
+        "phase": "control",
+        "reason": "commit owner message before its parent update",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "6e567aa6897558b9b0f6579911d9917fdd19e59d7d794c441d0b68ab79d5c9b5"
+      },
+      {
+        "case": 4,
+        "phase": "fault",
+        "reason": "commit owner message before its parent update",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "dfcf9368a135ef9f3534d01f274fdb261e93b57b8671d86ad415b1959eaed537"
+      },
+      {
+        "case": 5,
+        "phase": "control",
+        "reason": "mix thread metadata and draft snapshots",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "75953584a53e8aaaf9d165552a0ce3d38b91c3b4c30be67daedb04fd496a3fa5"
+      },
+      {
+        "case": 5,
+        "phase": "fault",
+        "reason": "mix thread metadata and draft snapshots",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "717b3ecd47d3b7309cb0d73bfff3498d81fbe683d7f3f9ccfaa27afab130012b"
+      },
+      {
+        "case": 6,
+        "phase": "control",
+        "reason": "defer competing followup decisions beyond their state read",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "2c374c89c5e2988aa73b1bdc977431cf774599f069bde02c3efa4c12465acb01"
+      },
+      {
+        "case": 6,
+        "phase": "fault",
+        "reason": "defer competing followup decisions beyond their state read",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "ff1564bfe4f0b32340a255be523bd195edbdba8381dbbc3cd0b0c88c32ab9e45"
+      },
+      {
+        "case": 7,
+        "phase": "control",
+        "reason": "rebind existing projection identity to another thread",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "ae482be78f56f13962bfc790a2fd2d1eccbefecf573b37df41139b81df7765ec"
+      },
+      {
+        "case": 7,
+        "phase": "fault",
+        "reason": "rebind existing projection identity to another thread",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "de1656c92a2382f05e3b0df7d358078f542030aa384d02b8cb266b49be6c1c6e"
+      },
+      {
+        "case": 8,
+        "phase": "control",
+        "reason": "leave canonical replies invisible to thread ordering",
+        "exit_code": 0,
+        "counts": {
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "f8a5bb6d8d079ee87d85b493011a4080ea9f0fdc09ff689a4e8084450646ad62"
+      },
+      {
+        "case": 8,
+        "phase": "fault",
+        "reason": "leave canonical replies invisible to thread ordering",
+        "exit_code": 1,
+        "counts": {
+          "tests": 2,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "a95b31aec506cfa3d44ed67cef0f7a45a5a2bc9b54c319d10857ba075d5ce5dd"
+      },
+      {
+        "case": 9,
+        "phase": "control",
+        "reason": "commit draft before failed parent update",
+        "exit_code": 0,
+        "counts": {
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "b13d372604758949500a4831a6eb15200cbda094b5738c60032715d415bad411"
+      },
+      {
+        "case": 9,
+        "phase": "fault",
+        "reason": "commit draft before failed parent update",
+        "exit_code": 1,
+        "counts": {
+          "tests": 4,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "ad7c673654d61e890568141fe59ef00d7bd96929a98d3755439958a763fec017"
+      },
+      {
+        "case": 10,
+        "phase": "control",
+        "reason": "allow new owner messages in an archived thread",
+        "exit_code": 0,
+        "counts": {
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "9cca83c3ab81bd5d95faed94dfc89e9242257297a2247024a4940b5b28b78b7b"
+      },
+      {
+        "case": 10,
+        "phase": "fault",
+        "reason": "allow new owner messages in an archived thread",
+        "exit_code": 1,
+        "counts": {
+          "tests": 2,
+          "failures": 2,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 2,
+        "xml_sha256": "30214e2a004d4cc7058cd3d8e4f8ef970bfa2a0e822f190f645c379ed8d179d6"
+      },
+      {
+        "case": 11,
+        "phase": "control",
+        "reason": "report current page size as entire history count",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "28f48468d60a9df7f3b5e5c146d70158574abf99ef2fbc224bce4815fc4f692e"
+      },
+      {
+        "case": 11,
+        "phase": "fault",
+        "reason": "report current page size as entire history count",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "ef1261c8b5d6521c248e135b7ffd14aaf59a45469b8f96a52853ef2069a9cf8b"
+      }
+    ],
+    "before": {
+      "backend/van_gateway/conversations/service.py": "e2825d403aaee0a5df135c4d640203f4bd3181969188eb449ae9e7789ad110e8"
+    },
+    "after": {
+      "backend/van_gateway/conversations/service.py": "e2825d403aaee0a5df135c4d640203f4bd3181969188eb449ae9e7789ad110e8"
+    },
+    "source_restored": true
+  },
+  "initial_fault_survivor": {
+    "definitions": [
+      [
+        "let concurrent main initialization fail on uniqueness",
+        [
+          [
+            "backend/van_gateway/conversations/service.py",
+            "INSERT OR IGNORE INTO conversation_threads",
+            "INSERT INTO conversation_threads",
+            1
+          ]
+        ],
+        "backend/tests/test_conversation_state_integrity.py::test_two_fresh_main_reads_are_safe_at_a_controlled_creation_race"
+      ],
+      [
+        "restore oldest messages instead of current history",
+        [
+          [
+            "backend/van_gateway/conversations/service.py",
+            "ORDER BY created_at_ms DESC,rowid DESC LIMIT ?",
+            "ORDER BY created_at_ms ASC,rowid ASC LIMIT ?",
+            1
+          ]
+        ],
+        "backend/tests/test_conversation_state_integrity.py::test_bounded_thread_restore_contains_the_latest_messages"
+      ],
+      [
+        "read a history cursor from a different thread",
+        [
+          [
+            "backend/van_gateway/conversations/service.py",
+            "WHERE message_id=? AND thread_id=?",
+            "WHERE message_id=?",
+            1
+          ],
+          [
+            "backend/van_gateway/conversations/service.py",
+            "(before_message_id,thread_id),",
+            "(before_message_id,),",
+            1
+          ]
+        ],
+        "backend/tests/test_conversation_state_integrity.py::test_unknown_deleted_or_foreign_history_cursor_is_refused"
+      ],
+      [
+        "repeat cursor anchor rows on each history page",
+        [
+          [
+            "backend/van_gateway/conversations/service.py",
+            "created_at_ms<? OR (created_at_ms=? AND rowid<?)",
+            "created_at_ms<=? OR (created_at_ms=? AND rowid<?)",
+            1
+          ]
+        ],
+        "backend/tests/test_conversation_state_integrity.py::test_pagination_returns_all_history_once_including_same_timestamp_messages"
+      ],
+      [
+        "commit owner message before its parent update",
+        [
+          [
+            "backend/van_gateway/conversations/service.py",
+            "(mid,thread_id,role,body,command_id,mission_id,Store.dumps(artifact_refs or []),int(terminal),now))\n            await db.execute",
+            "(mid,thread_id,role,body,command_id,mission_id,Store.dumps(artifact_refs or []),int(terminal),now))\n            await db.commit()\n            await db.execute",
+            1
+          ]
+        ],
+        "backend/tests/test_conversation_state_integrity.py::test_failed_thread_touch_does_not_leave_an_unacknowledged_message"
+      ],
+      [
+        "mix thread metadata and draft snapshots",
+        [
+          [
+            "backend/van_gateway/conversations/service.py",
+            "await db.execute(\"BEGIN\")\n            row = await (await db.execute(\"SELECT * FROM conversation_threads",
+            "pass\n            row = await (await db.execute(\"SELECT * FROM conversation_threads",
+            1
+          ]
+        ],
+        "backend/tests/test_conversation_state_integrity.py::test_thread_fields_and_draft_share_one_actual_read_snapshot"
+      ],
+      [
+        "defer competing followup decisions beyond their state read",
+        [
+          [
+            "backend/van_gateway/conversations/service.py",
+            "await db.execute(\"BEGIN IMMEDIATE\")\n            row = await (await db.execute(\"SELECT * FROM conversation_followups",
+            "await db.execute(\"BEGIN\")\n            row = await (await db.execute(\"SELECT * FROM conversation_followups",
+            1
+          ]
+        ],
+        "backend/tests/test_conversation_state_integrity.py::test_racing_followup_decisions_do_not_both_report_success"
+      ],
+      [
+        "rebind existing projection identity to another thread",
+        [
+          [
+            "backend/van_gateway/conversations/service.py",
+            "if (existing[\"thread_id\"],existing[\"role\"],existing[\"command_id\"],existing[\"mission_id\"]) != (thread_id,role,command_id,mission_id):",
+            "if False:",
+            1
+          ]
+        ],
+        "backend/tests/test_conversation_state_integrity.py::test_original_projection_key_cannot_be_rebound_to_another_thread"
+      ],
+      [
+        "leave canonical replies invisible to thread ordering",
+        [
+          [
+            "backend/van_gateway/conversations/service.py",
+            "(mid,thread_id,role,body.strip(),command_id,mission_id,Store.dumps(artifact_refs or []),int(terminal),now))\n            await db.execute(\"UPDATE conversation_threads SET updated_at_ms=? WHERE thread_id=?\",(now,thread_id))",
+            "(mid,thread_id,role,body.strip(),command_id,mission_id,Store.dumps(artifact_refs or []),int(terminal),now))\n            pass",
+            1
+          ]
+        ],
+        "backend/tests/test_conversation_state_integrity.py::test_thread_change_time_includes_its_draft_and_result_updates"
+      ],
+      [
+        "commit draft before failed parent update",
+        [
+          [
+            "backend/van_gateway/conversations/service.py",
+            "(thread_id,text,now))\n            await db.execute",
+            "(thread_id,text,now))\n            await db.commit()\n            await db.execute",
+            1
+          ]
+        ],
+        "backend/tests/test_conversation_state_integrity.py::test_failed_parent_touch_rolls_back_each_conversation_child_mutation"
+      ],
+      [
+        "allow new owner messages in an archived thread",
+        [
+          [
+            "backend/van_gateway/conversations/service.py",
+            "if row[\"status\"] == ThreadStatus.ARCHIVED.value:",
+            "if False:",
+            1
+          ]
+        ],
+        "backend/tests/test_conversation_state_integrity.py::test_archived_thread_refuses_new_owner_work_but_preserves_history"
+      ],
+      [
+        "report current page size as entire history count",
+        [
+          [
+            "backend/van_gateway/conversations/service.py",
+            "total_count=int(count[\"n\"]),has_more=more",
+            "total_count=len(visible),has_more=more",
+            1
+          ]
+        ],
+        "backend/tests/test_conversation_state_integrity.py::test_pagination_returns_all_history_once_including_same_timestamp_messages"
+      ]
+    ],
+    "records": [
+      {
+        "case": 0,
+        "phase": "control",
+        "reason": "let concurrent main initialization fail on uniqueness",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "5b736d292749c8f5ce8fe1b4316866e54f67db14a4b5daef50ed090353ba453a"
+      },
+      {
+        "case": 0,
+        "phase": "fault",
+        "reason": "let concurrent main initialization fail on uniqueness",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "c01ec3e022acd9fb993ffdf856abbe019ebb498ce8257081a093f9085a2fa872"
+      },
+      {
+        "case": 1,
+        "phase": "control",
+        "reason": "restore oldest messages instead of current history",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "151f99fb9b3cd0ce1352b55acca9578ee7f88549617e78aca7ae6df24ecb2036"
+      },
+      {
+        "case": 1,
+        "phase": "fault",
+        "reason": "restore oldest messages instead of current history",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "ddfe24a88cfeaa8fc46aebb3262649d4f7b9e3a8b45b6d45f95b1993042e595e"
+      },
+      {
+        "case": 2,
+        "phase": "control",
+        "reason": "read a history cursor from a different thread",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "17ea2e95838f12a5919ca12224f9e4f4c1d88ac65ec34f63315f82232906a6e9"
+      },
+      {
+        "case": 2,
+        "phase": "fault",
+        "reason": "read a history cursor from a different thread",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "8ceb9250fa13cfbe1585ec3c20abe0672084c9e677f0e2d8e6b3749e532e50ed"
+      },
+      {
+        "case": 3,
+        "phase": "control",
+        "reason": "repeat cursor anchor rows on each history page",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "c4918c6c28d4b852fe636d38e1d8bdc7d846349c2c8076a7006f7cf1b0f53f27"
+      },
+      {
+        "case": 3,
+        "phase": "fault",
+        "reason": "repeat cursor anchor rows on each history page",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "0607bce087ef91bf6436d7a79bfc4988fdb8ba13bb057cc584cd75b0806b2b55"
+      },
+      {
+        "case": 4,
+        "phase": "control",
+        "reason": "commit owner message before its parent update",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "ed211f77bf782e519c1dc5cd2739396d6c5541cadb37be916984bd74631b4e5e"
+      },
+      {
+        "case": 4,
+        "phase": "fault",
+        "reason": "commit owner message before its parent update",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "fe5aaac8756c66eecfd1a65055fd0bc397cb2f1122b639d172439d52f0928f2b"
+      },
+      {
+        "case": 5,
+        "phase": "control",
+        "reason": "mix thread metadata and draft snapshots",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "61c2ca829b094708e106c46860732984e82062ad39c9bb105d7e53622e7c4dba"
+      },
+      {
+        "case": 5,
+        "phase": "fault",
+        "reason": "mix thread metadata and draft snapshots",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "1a1f54fc441190c6788d6f8f73b9360d498c4cb6edfa697b3ead40a05d541bc9"
+      },
+      {
+        "case": 6,
+        "phase": "control",
+        "reason": "defer competing followup decisions beyond their state read",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "4df3e431a93edfbd46cfc99e4062362fe015ed5dc623048ee878c1fb4b6d4ca1"
+      },
+      {
+        "case": 6,
+        "phase": "fault",
+        "reason": "defer competing followup decisions beyond their state read",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "6bbf228c28386ce3da71a3634871e4e3fc6c540981f0e55d110883b034d6952f"
+      }
+    ],
+    "before": {
+      "backend/van_gateway/conversations/service.py": "e2825d403aaee0a5df135c4d640203f4bd3181969188eb449ae9e7789ad110e8"
+    },
+    "after": {
+      "backend/van_gateway/conversations/service.py": "e2825d403aaee0a5df135c4d640203f4bd3181969188eb449ae9e7789ad110e8"
+    },
+    "source_restored": true
+  },
+  "storage_audit": {
+    "schema": "van.source-storage-audit/1",
+    "forbidden_events": [],
+    "source_sha256": "d4e270150fb0da6e8d79b449dd0de68fd1f97b3ccea3d282f31d91297edbd495",
+    "root": "/workspace/van-review-2026-10-18/publish",
+    "scope": "SQLite opens, path-based writable opens and directory/link/rename/delete events under data and backend/data",
+    "limits": "Python audit events only; existing fd writes, native-library raw I/O and external processes are not an OS sandbox. Git state is checked separately."
+  },
+  "legacy_mutation_preflight": {
+    "schema": "van.rebuild.mutation-registry-preflight/1",
+    "registry_sha256": "35d10c7b0f2b8319b7f7305828262c972b2a6451139d75b9e83c7d0062282955",
+    "mutation_count": 374,
+    "edit_count": 383,
+    "findings": [],
+    "execution_state": "NOT_RUN",
+    "status": "ANCHORS_VALID_BASELINES_AND_MUTATIONS_NOT_EXECUTED"
+  },
+  "android": {
+    "checkout_base": "39807eff",
+    "comparison": "All tracked Android source at the isolated base equals root parent Android source; exactly one SDK method added and its bytes match the integrated source. Debug build provenance remains the isolated base plus a dirty SDK patch; not a release artifact for the root commit.",
+    "source_sdk_sha256": "8ec4b7a971938d69a84e5b766b8b90b55ce2b86271d622cbb8d4b88ee795177f",
+    "jvm": {
+      "tests": 222,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "jvm_reports": {
+      "TEST-com.dial.van.degraded.DegradedModeStoreTest.xml": {
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.119,
+        "xml_sha256": "f4fc3f8e16067033cc572034893435e9d1804883e51a23f1335308dfec3e75bf"
+      },
+      "TEST-com.dial.van.design.DensityTierTest.xml": {
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.001,
+        "xml_sha256": "46bf49dc3f0d8686a02fd8f06065369084ab5a23025243fb6ecf63554ad69eb3"
+      },
+      "TEST-com.dial.van.design.LiveBadgeFormatTest.xml": {
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.007,
+        "xml_sha256": "5f5a2ab1b4c29f36e021d1312f97cf08a4480aaba909fbf5d0a52792e94fb9d2"
+      },
+      "TEST-com.dial.van.design.MotionSpecTest.xml": {
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.004,
+        "xml_sha256": "244a51cc7cfdf24939d0074e5abbfc2223da12012bd7d0251d7575ad89910ff4"
+      },
+      "TEST-com.dial.van.design.ScreenStateTest.xml": {
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.031,
+        "xml_sha256": "2996c6c24b64b4c29300dddd4ec4edfd1caddff4098cdd8ff66039432cb579a1"
+      },
+      "TEST-com.dial.van.design.StatusSemanticsTest.xml": {
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.016,
+        "xml_sha256": "86091e25b350e66d976e65b18b4188eb0abe8e0ed021832e66082f69d0f441ee"
+      },
+      "TEST-com.dial.van.design.charts.ChartAxesTest.xml": {
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.025,
+        "xml_sha256": "25ebc94e0dbd481b01bccd21d6fda92317b29477ece9b019519dc5d363961487"
+      },
+      "TEST-com.dial.van.gateway.ReplayDispatchPolicyTest.xml": {
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.006,
+        "xml_sha256": "4c8c31d55b33d6229b7578f691c96d64f73bc0a461b7974981d0bdc313d725f4"
+      },
+      "TEST-com.dial.van.memory.MemoryModelsTest.xml": {
+        "tests": 12,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.024,
+        "xml_sha256": "a544d93bab0edc38b80592fce5c3a9b1c72058f9e822d26d4deaeaf926f3f89a"
+      },
+      "TEST-com.dial.van.mission.MissionSurfaceTest.xml": {
+        "tests": 11,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.006,
+        "xml_sha256": "0dae02ed92030b806db909b8d1748b4e773c652f9c046bd66f3251ae1369e980"
+      },
+      "TEST-com.dial.van.overlay.VanOverlayChromeTest.xml": {
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.006,
+        "xml_sha256": "815f2ea5c4b9d35d21b631b473ad941f89e8df88cd9ee384960f7eafd3b4ca92"
+      },
+      "TEST-com.dial.van.overlay.VanOverlayInteractionTest.xml": {
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.004,
+        "xml_sha256": "f6dee4fdbaf36a8baabff5e66ca441edd3e757d55a54c2e28c002fc80b140476"
+      },
+      "TEST-com.dial.van.projects.ProjectModelsTest.xml": {
+        "tests": 18,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.014,
+        "xml_sha256": "7f26184b5bb59622945759f6e6fa6c268d492bd02a303e8a2b635482d3436c4f"
+      },
+      "TEST-com.dial.van.queue.EncryptedCommandQueueLogicTest.xml": {
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.007,
+        "xml_sha256": "587684135615af736ed8554a1f1c70b324a2dfd24d4c159d4f3661c864bec93d"
+      },
+      "TEST-com.dial.van.security.OwnerAuthorityTokenTest.xml": {
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.033,
+        "xml_sha256": "9916379c5cd7dc336db457d60c8f79810db3adff2423c0c57c277e23e5bb8018"
+      },
+      "TEST-com.dial.van.trading.AccountOnboardingTest.xml": {
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.077,
+        "xml_sha256": "3177705c8eaac5d0ec2d4e9816c8bcdc44ab978eec30c89ed3b34df8d78049e5"
+      },
+      "TEST-com.dial.van.trading.AccountOperationRecoveryTest.xml": {
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.017,
+        "xml_sha256": "518df7f5480ae5c53cbfc34458de2d22c568b32f30ec18d0d0097ef5b2df17f0"
+      },
+      "TEST-com.dial.van.trading.AccountUnlinkReviewTest.xml": {
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.008,
+        "xml_sha256": "6948725b233a5aae8a60c507d2821a94fc63726d16c6756c2699db362da3bb17"
+      },
+      "TEST-com.dial.van.trading.ChartGeometryTest.xml": {
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.013,
+        "xml_sha256": "4f156aa2e3fd66c8b882df561c1a3974d49624fb9a68b3f0657e3975b57d730d"
+      },
+      "TEST-com.dial.van.trading.CognitionSurfacesTest.xml": {
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.003,
+        "xml_sha256": "cba1a6ad51963777b17a2541435d42766671c28e4adb686da09b127bd1e0101d"
+      },
+      "TEST-com.dial.van.trading.RuntimeRecoveryOperationsTest.xml": {
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.366,
+        "xml_sha256": "768342168a30ea48189438ff9c813b96f1ea1104a310a86a7d7cdef4bf7f61a2"
+      },
+      "TEST-com.dial.van.trading.RuntimeRecoveryProtocolTest.xml": {
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.025,
+        "xml_sha256": "2b9bf125fc22f0ab1b2cadd088ec039196c315e3869bed432cdff170d7b94540"
+      },
+      "TEST-com.dial.van.trading.StrategyPromotionVerificationTest.xml": {
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.006,
+        "xml_sha256": "8d25e7ebfc174973185661d53299549986034c0cc06ffa04dc02dd622c7b0302"
+      },
+      "TEST-com.dial.van.trading.TradeBookTest.xml": {
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.007,
+        "xml_sha256": "f751116974a01da4ff053994a4fac29fc0bbeb996f0fbad67517bd2dc4d2c4b9"
+      },
+      "TEST-com.dial.van.trading.TradingModelsTest.xml": {
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.043,
+        "xml_sha256": "c8b43f9ac61514af59c220539014c52f16801d41be45d3d8e098341dbce4d1bb"
+      },
+      "TEST-com.dial.van.visual.RiveContractTest.xml": {
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.005,
+        "xml_sha256": "daaf58fad706b8ca34d66795959f920b4681bbcedf201fc99288d0b5a2f51571"
+      },
+      "TEST-com.dial.van.visual.VanAuraEnvelopeTest.xml": {
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.009,
+        "xml_sha256": "f09787d4c583318710021c1138fe4acb7d5409f988a8f9dcc90d9bbdccbfec98"
+      },
+      "TEST-com.dial.van.visual.VanCharacterMotionTest.xml": {
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.042,
+        "xml_sha256": "3791bab6067955b9b97c9ffa1e7392a7e73973025e20d5a5e77bcdd516925dcf"
+      },
+      "TEST-com.dial.van.visual.VanCharacterOpacityTest.xml": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.001,
+        "xml_sha256": "9fa8a7c5b1355874b5d4a0bf3e92d48951553775a2c69f292b4185b1c5079554"
+      },
+      "TEST-com.dial.van.visual.VanEffectPolicyTest.xml": {
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.001,
+        "xml_sha256": "048235b9871750ed387ea9625cad123fb1b8b811d10f806d3df3a16d185b12a7"
+      },
+      "TEST-com.dial.van.visual.VanPresenceFrameTest.xml": {
+        "tests": 9,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.002,
+        "xml_sha256": "1cc2eb40a8e906aeb42dc473d4239995eb8a61aa7c34ebfaba8fdf0e76acb37c"
+      },
+      "TEST-com.dial.van.visual.VanPresenceTest.xml": {
+        "tests": 10,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.003,
+        "xml_sha256": "3199395d91f361654c39a38de0930ea049efd6a9d3155c3223200a44e4702ef0"
+      },
+      "TEST-com.dial.van.visual.VanSceneIdentityTest.xml": {
+        "tests": 13,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.094,
+        "xml_sha256": "923c5f0ce9c9e266369a9e9a3154a8c5ea6aca027a9d0d9af5e5f6419ab0de89"
+      },
+      "TEST-com.dial.van.visual.VanVisualRuntimeTest.xml": {
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.003,
+        "xml_sha256": "d5a20f23b253568d629cd6bfae351c891dbd06c058a2cc3dcaf2b070961f8068"
+      },
+      "TEST-com.dial.van.visual.VanWindFieldMotionTest.xml": {
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.001,
+        "xml_sha256": "9d29e0a56b653c5cdfc2c7218bfc8afb944353a9f401839dda97fa49ec3eea07"
+      },
+      "TEST-com.dial.van.voice.VoiceRecognitionPolicyTest.xml": {
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.002,
+        "xml_sha256": "13f3ddcb1aa3fe32b97e7993f57bbf9fa64492eadc41833910f6fbe7960086c4"
+      },
+      "TEST-com.dial.van.voice.VoiceSecondPassTest.xml": {
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.006,
+        "xml_sha256": "001885661269b2992914454f26ab8f8b61f4cef5e17305c02d41627335cb9a26"
+      },
+      "TEST-com.dial.van.voice.WakeRuntimeTest.xml": {
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.008,
+        "xml_sha256": "917c5bf68c04144670f0ae167ca5a5e3c0ba18834bc8b02c6730ef6e208ea3d9"
+      }
+    },
+    "tasks": [
+      ":app:testDebugUnitTest",
+      ":app:assembleDebug",
+      ":app:lintDebug"
+    ],
+    "build_log_sha256": "16ca2b221a678f8e65c010a78c6f035199215ab02b231df17df1c4fdaaf8a9c1",
+    "lint_issue_counts": {
+      "Warning": 92,
+      "Hint": 22
+    },
+    "lint_xml_sha256": "ce3a96d44cb7b28fbd9af84e5e3b158bad45deaab8af5ff532a354a47b8d2aeb",
+    "apk_sha256": "3d51e62007d938572ced39e4ff2247e91e532f552e5701c6cc9cdffef39ec02c",
+    "apk_bytes": 318178477,
+    "asset_manifest_sha256": "7fa17db389349bd587c1f061c7162f9a4c419a552c9d57cd03e8e937bf935e30",
+    "assets": "45 pinned generic files verified; no owner enrollment, guard disable or artwork replacement.",
+    "initial_build": "Missing generated bundle refused by guard; existing pinned local staging supplied and all tasks rerun successfully.",
+    "initial_build_log_sha256": "162302732dbd0015ed1d4945e1e403f19e91983ac37f6768d6e093d3b9b07dac"
+  },
+  "provenance": "8 initial failures reproduced in the unchanged conversation source. One deferred-decision fault survived ordinary scheduling; an actual independent SQLite owner write now tests that interleaving. A first integrated selection named absent files and collected no tests; corrected selection is the recorded169-pass run.",
+  "qualification": "Candidate backend/client source only. History/context is not execution truth. Existing UI paging consumer remains pending. No new frontend, S24, complete unit, native admission, release signing/provisioning or production qualification."
+}

@@ -1,0 +1,23 @@
+{
+  "command": [
+    "/workspace/van-backend-ci-lite-20261029/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "trading/tests",
+    "backend/tests/test_cognitive_fabric.py",
+    "backend/tests/test_cognitive_twin.py",
+    "backend/tests/test_context_admission_api.py",
+    "backend/tests/test_context_lifecycle_governance.py",
+    "--collect-only"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 566,
+  "started_at_utc": "2026-10-30T09:08:40.295041+00:00",
+  "timeout_seconds": 180,
+  "state": "COMPLETED",
+  "command_pid": 569,
+  "exit": 0,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-30T09:08:46.223603+00:00"
+}

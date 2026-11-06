@@ -1,0 +1,11 @@
+# Correct single-speaker VITS identity
+
+Hosted run 39768283467 at source 9599d695 collected 22 instrumentation cases: 16 passed, four explicit core-artwork cases skipped, and both new voice tests failed before synthesis with `sherpa_tts_invalid_voice`. The added diagnostics show successful generic bundle installation and a failed native TTS preparation. This is a real application failure, not an absent test or a passed audio path.
+
+The original guard required `speakerId < numSpeakers()`. Sherpa's pinned v1.13.8 implementation explicitly uses zero speakers to identify a single-speaker VITS model and supports speaker ID zero. Read-only protobuf inspection of VAN's exact pinned `vits-ljs.onnx` confirms `model_type=vits`, `sample_rate=22050`, `n_speakers=0`, and model SHA-256 `5bbd273797a9ecf8d94bd6ec02ad16cb41cbb85f055ad98d528ced3e44c9b31a`.
+
+`VitsSpeakerIdentity` now interprets that API correctly. A positive sample rate and ID zero are required for the zero-count single-speaker case. Multi-speaker models retain their native index bounds, and negative counts, negative IDs and invalid rates are refused. The actual model generation self-test still requires nonempty finite audio; actual AudioTrack drain and application callback/queue assertions are unchanged. No asset, bundle hash, timeout, assertion, release gate or model version is weakened or substituted.
+
+Primary source: [Sherpa v1.13.8 VITS implementation](https://github.com/k2-fsa/sherpa-onnx/blob/11afbd009a7f8c08f4bcf2fc1b265d0df4670fbf/sherpa-onnx/csrc/offline-tts-vits-impl.h#L170). `NumSpeakers()` returns the metadata count; lines 172–183 explicitly call the zero-count model single-speaker, supporting only SID zero. The corresponding model implementation reads `sample_rate` and `n_speakers` from ONNX metadata.
+
+Validation: all 1,306 Android JVM cases pass, including four new identity/bounds controls. The 195 app unit tests, both APK assemblies and lint pass, retaining 89 warnings and no Error/Fatal findings. Actual native synthesis/playback remains pending the next hosted run. See `receipts/NATIVE_VITS_SPEAKER_ID_SOURCE_20261022.json`; the preceding failing run is preserved in `receipts/HOSTED_SOURCE_9599d695.json`.

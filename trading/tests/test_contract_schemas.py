@@ -9,7 +9,8 @@ import json
 import pytest
 
 from vati.contracts import SCHEMA_DIR, SCHEMA_NAMES, load_schema, required_keys
-from vati.risk import RiskDecision, RiskSnapshot, TradeIntent
+from vati.risk import RiskDecision, RiskSnapshot, TradeIntent, SymbolContract
+from vati.risk.contracts import NativeAccountRiskContext, OpenPosition, StopRiskTerms
 
 
 @pytest.mark.parametrize("name", SCHEMA_NAMES)
@@ -27,12 +28,48 @@ def test_no_unregistered_schema_files():
 
 def test_risk_decision_schema_matches_dataclass():
     fields = {f.name for f in dataclasses.fields(RiskDecision)}
-    assert fields == required_keys("risk_decision")
+    schema = load_schema("risk_decision")
+    assert fields == set(schema["properties"])
+    # Historical v1 records omit these fields. V2 requires the complete binding
+    # as a group; promoting them to unconditional requirements would invalidate
+    # the immutable historical evidence rather than version it.
+    binding = {"intent_hash", "mandate_hash", "approval_schema_version"}
+    assert required_keys("risk_decision") == fields - binding
+    assert schema["properties"]["approval_schema_version"]["const"] == 2
 
 
 def test_risk_snapshot_schema_matches_dataclass():
     fields = {f.name for f in dataclasses.fields(RiskSnapshot)}
-    assert fields == required_keys("risk_snapshot")
+    schema = load_schema("risk_snapshot")
+    assert fields == set(schema["properties"])
+    # Optional source observations do not retroactively become mandatory in
+    # immutable legacy bodies. Every original required field stays mandatory.
+    assert fields - {"used_margin", "native_account_context", "native_risk_basis_ref", "pending_risk_commitments"} == required_keys("risk_snapshot")
+    terms = schema["$defs"]["risk_symbol_terms"]
+    assert {f.name for f in dataclasses.fields(SymbolContract)} == set(terms["properties"]) == set(terms["required"])
+    assert {"synced_at_unix", "spec_hash"} <= required_keys("symbol_contract")
+
+
+def test_native_source_schema_is_closed_and_cannot_issue_authority():
+    schema = load_schema("risk_snapshot")["$defs"]["native_account_context"]
+    fields = {f.name for f in dataclasses.fields(NativeAccountRiskContext)}
+    assert fields == set(schema["properties"]) == set(schema["required"])
+    assert schema["additionalProperties"] is False
+    for flag in ("risk_capital_qualified", "execution_authority"):
+        assert schema["properties"][flag] == {"type": "boolean", "const": False}
+
+
+def test_position_schema_preserves_original_optional_stop_inputs():
+    schema = load_schema("risk_snapshot")
+    position = schema["properties"]["open_positions"]["items"]
+    fields = {f.name for f in dataclasses.fields(OpenPosition)}
+    assert fields <= set(position["properties"])
+    # Keep the inherited optional broker identifier extension intact.
+    assert set(position["properties"]) == fields
+    assert "broker_position_id" not in position["required"]
+    terms = schema["$defs"]["original_stop_terms"]
+    assert {f.name for f in dataclasses.fields(StopRiskTerms)} == set(terms["properties"]) == set(terms["required"])
+    assert terms["additionalProperties"] is False
 
 
 def test_trade_intent_dataclass_fields_exist_in_schema():
@@ -60,10 +97,11 @@ def test_mandate_fractions_are_decimal_strings_not_floats():
         TradingMandate.from_mapping(example)
 
     from conftest import owner_authority
+    from vati.risk.mandate import mandate_subject
 
     example["owner_signature_ref"] = owner_authority().token(
         act="mandate-admit",
-        subject=f"{example['mandate_id']}:{example['version']}",
+        subject=mandate_subject(example),
         issued_at_unix=int(example["signed_at_unix"]),
         lifetime_seconds=int(example["expires_at_unix"]) - int(example["signed_at_unix"]),
     )

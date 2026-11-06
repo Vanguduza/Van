@@ -1,0 +1,41 @@
+{
+  "state": "TERMINAL",
+  "exit": 0,
+  "elapsed_seconds": 92.79844440700253,
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "-B",
+    "-m",
+    "pytest",
+    "tests/rebuild/test_canonical_source_audit.py",
+    "tests/rebuild/test_public_source_shards.py",
+    "tests/rebuild/test_backend_public_source.py",
+    "tests/rebuild/test_source_storage_audit.py",
+    "backend/tests/test_gateway_startup_storage.py",
+    "tests/contracts/test_ci_public_source_shards.py",
+    "tests/contracts/test_ci_workflow_is_what_it_claims.py",
+    "-q",
+    "--basetemp=/tmp/van-obl004-hosted-final04",
+    "--junitxml=/workspace/van-obl004-hosted-matrix-20261101/FINAL04.xml"
+  ],
+  "source_pins": {
+    ".github/workflows/van-ci.yml": "11aeb9f4e9cdb046d270867fb344e1dc868b323024b64aad68d1482c38df8230",
+    "tools/ci/github-actions-ci.yml": "11aeb9f4e9cdb046d270867fb344e1dc868b323024b64aad68d1482c38df8230",
+    "tools/rebuild/backend_public_source.py": "ff70d356dc7c6e4ea148a478f15399bea0aa8cc7dceaa72b76407f4480b4cbb3",
+    "tools/rebuild/public_source_shards.py": "edabed3737ec4ddd641687c7c3ca7b743c5655367089e2063a3628627211128b",
+    "tools/rebuild/canonical_source_audit.py": "88f7b3efe0791b6a366a0d08e7f3eb6ea7eef0e5c8ec53a145c2771e442cc768",
+    "tests/rebuild/test_public_source_shards.py": "d7bce1c24d8a47062a659c440878b8e78d7c7212a5fb5664eaa59c39affe6bdd",
+    "tests/rebuild/test_canonical_source_audit.py": "a20d46a9122fb966572c0433d6250e8c0dd1b9f33b42168b8bb0fa85e75cc92d",
+    "tests/contracts/test_ci_public_source_shards.py": "2aca040e89603fca18f2418900bd1d9a4790faf578f2847fa83832865992d9e0",
+    "backend/tests/test_gateway_startup_storage.py": "797e7f4a54eab7a1b9a51eb96b720f959a3db4dd1de11afb8d60fe2fc37f174a"
+  },
+  "source_pins_unchanged": true,
+  "children_remaining": [],
+  "junit": {
+    "cases": 175,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "141e2bca05d1fb589b072dcccf66df9b25fd7b40b92d2a6c230a57bffb5caed5"
+  }
+}

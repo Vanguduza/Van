@@ -141,6 +141,8 @@ class StreamGrantVerifier:
             raise StreamGrantError("stream_grant_malformed") from exc
 
         header = json.loads(_b64u_decode(header_b64))
+        if not isinstance(header, dict):
+            raise StreamGrantError("stream_grant_malformed")
         if header.get("alg") != "ES256":
             # "alg" is attacker-controlled input until it has been checked against what this
             # verifier will actually accept. Accepting whatever it says is the classic JWS
@@ -166,6 +168,8 @@ class StreamGrantVerifier:
             raise StreamGrantError("stream_grant_signature_invalid") from exc
 
         claims = json.loads(_b64u_decode(claims_b64))
+        if not isinstance(claims, dict):
+            raise StreamGrantError("stream_grant_malformed")
         if claims.get("version") != GRANT_VERSION:
             raise StreamGrantError("stream_grant_version_unsupported")
         if claims.get("aud") != GRANT_AUDIENCE:

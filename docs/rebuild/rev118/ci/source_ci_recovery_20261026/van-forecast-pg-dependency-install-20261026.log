@@ -1,0 +1,11 @@
+Collecting psycopg==3.2.9
+  Using cached psycopg-3.2.9-py3-none-any.whl.metadata (4.5 kB)
+Collecting psycopg-binary==3.2.9
+  Using cached psycopg_binary-3.2.9-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (2.9 kB)
+Using cached psycopg-3.2.9-py3-none-any.whl (202 kB)
+Using cached psycopg_binary-3.2.9-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (4.4 MB)
+Installing collected packages: psycopg-binary, psycopg
+Successfully installed psycopg-3.2.9 psycopg-binary-3.2.9
+
+[notice] A new release of pip is available: 25.0.1 -> 26.2.2
+[notice] To update, run: python -m pip install --upgrade pip

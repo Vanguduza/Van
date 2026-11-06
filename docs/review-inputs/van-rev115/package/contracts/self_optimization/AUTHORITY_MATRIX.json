@@ -1,0 +1,67 @@
+{
+  "actions": [
+    {
+      "action": "SELECT_QUALIFIED_METHOD",
+      "level": "AUTOMATIC_OPERATIONAL_OPTIMIZATION",
+      "owner": "Existing execution selector",
+      "required_authority": "CURRENT_OPERATIONAL_GRANT"
+    },
+    {
+      "action": "ADJUST_QUALIFIED_PROFILE",
+      "level": "AUTOMATIC_OPERATIONAL_OPTIMIZATION",
+      "owner": "Existing execution selector",
+      "required_authority": "CURRENT_OPERATIONAL_GRANT"
+    },
+    {
+      "action": "UPDATE_MATURE_EVIDENCE",
+      "level": "DETERMINISTIC_STATE_UPDATE",
+      "owner": "Existing evidence reducer",
+      "required_authority": "QUALIFIED_UPDATE_RULE"
+    },
+    {
+      "action": "QUALIFIED_FALLBACK",
+      "level": "AUTOMATIC_OPERATIONAL_OPTIMIZATION",
+      "owner": "Existing execution/protection owner",
+      "required_authority": "CURRENT_COMPATIBLE_BINDING"
+    },
+    {
+      "action": "RESEARCH_NEW_POLICY",
+      "level": "GOVERNED_POLICY_EVOLUTION",
+      "owner": "Existing research jobs",
+      "required_authority": "BOUNDED_RESEARCH_GRANT"
+    },
+    {
+      "action": "ACTIVATE_NEW_POLICY",
+      "level": "GOVERNED_POLICY_EVOLUTION",
+      "owner": "Existing policy binding owner",
+      "required_authority": "INDEPENDENT_QUALIFICATION_AND_AUTHORIZED_PROMOTION"
+    },
+    {
+      "action": "CHANGE_RISK_CEILING",
+      "level": "NOT_OPTIMIZER_AUTHORITY",
+      "owner": "RiskAuthority",
+      "required_authority": "EXISTING_OWNER_RISK_MANDATE_PROCESS"
+    },
+    {
+      "action": "WITHDRAW_FUNDS",
+      "level": "NOT_OPTIMIZER_AUTHORITY",
+      "owner": "Accounts & Funds",
+      "required_authority": "EXISTING_ACCOUNT_FUNDS_AUTHORITY"
+    },
+    {
+      "action": "SUBMIT_VENUE_ORDER",
+      "level": "EXISTING_FINANCIAL_EXECUTION",
+      "owner": "ExecutionRouter",
+      "required_authority": "RISK_RESERVATION_FENCE_AND_ROUTER"
+    }
+  ],
+  "autonomy_levels": [
+    "AUTOMATIC_OPERATIONAL_OPTIMIZATION",
+    "GOVERNED_POLICY_EVOLUTION"
+  ],
+  "changing_reward_or_update_formula_is_policy_evolution": true,
+  "live_exploration_enabled_by_default": false,
+  "new_financial_authority_created": false,
+  "schema": "van.so.authority/1.0",
+  "withdrawal_credentials_for_optimizer": false
+}

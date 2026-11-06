@@ -1,0 +1,1844 @@
+{
+  "schema": "van.backend-first.plan/1.0",
+  "revision": "1.10",
+  "status": "SPECIFICATION_CANDIDATE_NOT_F15",
+  "source_commit": "d8a207cb00b3c8e3104041390a861a78a00b7ff7",
+  "required_backend_ids": [
+    "BE-001",
+    "BE-002",
+    "BE-003",
+    "BE-004",
+    "BE-005",
+    "BE-006",
+    "BE-007",
+    "BE-008",
+    "BE-009",
+    "BE-010",
+    "BE-011",
+    "BE-012",
+    "BE-013",
+    "BE-014",
+    "BE-015",
+    "BE-016",
+    "BE-017",
+    "BE-018",
+    "BE-019",
+    "BE-020",
+    "BE-021",
+    "BE-022",
+    "BE-023",
+    "BE-024",
+    "BE-025",
+    "BE-026",
+    "BE-027",
+    "BE-028",
+    "BE-029",
+    "BE-030",
+    "BE-031",
+    "BE-032",
+    "BE-033",
+    "BE-034"
+  ],
+  "backend_gate": "BG-001",
+  "f15_gate": "PRE-003",
+  "frontend_start": "UX-001",
+  "units": [
+    {
+      "id": "PRE-001",
+      "title": "Read-only complete evidence and feature inventory",
+      "kind": "PREDEVELOPMENT",
+      "stage": 0,
+      "dependencies": [],
+      "completion": "FULL",
+      "exit_contract": "Frozen source hashes, complete function/branch ledger, classification and provenance. Current instruction permits document/evidence preparation, not a claim that formal packet approval or signature has occurred.",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-001",
+      "sequence": 1
+    },
+    {
+      "id": "PRE-002",
+      "title": "Whole-product semantic reconciliation and packet contracts",
+      "kind": "PREDEVELOPMENT",
+      "stage": 0,
+      "dependencies": [
+        "PRE-001"
+      ],
+      "completion": "FULL",
+      "exit_contract": "171 atoms,115 contexts,78 surfaces,349 actions,71 inherited requirements and new backend-first clauses all author-reviewed and independently challenged; exact owner decisions and schema/authority contracts resolved where prerequisite.",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-002",
+      "sequence": 2
+    },
+    {
+      "id": "PRE-003",
+      "title": "Independent DIAL F0–F15 build-ready certification",
+      "kind": "PREDEVELOPMENT_GATE",
+      "stage": 0,
+      "dependencies": [
+        "PRE-002"
+      ],
+      "completion": "FULL",
+      "exit_contract": "Independent verifier issues current project-scoped F15; all preparation blockers closed; owner signature valid. No Android or production readiness claim.",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-003",
+      "sequence": 3
+    },
+    {
+      "id": "BE-001",
+      "title": "Source consolidation and preservation oracle",
+      "kind": "BACKEND",
+      "stage": 1,
+      "dependencies": [
+        "PRE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "admit exact feature-bearing diffs; retain old app unchanged; register every provider caller; construct and falsify parity oracle. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Remove a PR-only action: parity fails; unreviewed duplicate implementation cannot merge",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-004",
+      "sequence": 4
+    },
+    {
+      "id": "BE-002",
+      "title": "Device identity, bounded authority and intent fencing",
+      "kind": "BACKEND",
+      "stage": 1,
+      "dependencies": [
+        "BE-001",
+        "PRE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "pair/provision/revoke; validate signed exact intents; issue challenges; expire and fence sessions; protect account and task scopes. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Replayed nonce, cross-device signature, stale mandate or changed arguments refuse before effect",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-005",
+      "sequence": 5
+    },
+    {
+      "id": "BE-003",
+      "title": "Durable event, readback and projection infrastructure",
+      "kind": "BACKEND",
+      "stage": 1,
+      "dependencies": [
+        "BE-002",
+        "PRE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "append events; deduplicate; process outbox; serve cursor snapshots; reconcile uncertain outcomes; redact evidence. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Crash after external submission, duplicate delivery, source-epoch change and out-of-order readback never duplicate an effect",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-006",
+      "sequence": 6
+    },
+    {
+      "id": "BE-004",
+      "title": "Accounts, broker directory and operation capabilities",
+      "kind": "BACKEND",
+      "stage": 1,
+      "dependencies": [
+        "BE-002",
+        "BE-003",
+        "PRE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "discover; create demo; request live application; link; edit local/profile where entitled; restrict; unlink; request remote closure. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Local unlink never reports remote closure; active exposure, unknown funds or stale readback blocks deletion",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-007",
+      "sequence": 7
+    },
+    {
+      "id": "BE-005",
+      "title": "Broker authentication, credential rotation and health",
+      "kind": "BACKEND",
+      "stage": 1,
+      "dependencies": [
+        "BE-004",
+        "PRE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "OAuth start/callback/cancel/recover; discover accounts; rotate and verify secrets; renew; detect migration; QR bridge pairing. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Process death, callback collision, expired token, investor read-only credential and failed swap remain fail closed",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-008",
+      "sequence": 8
+    },
+    {
+      "id": "BE-006",
+      "title": "Exact funding ledger and flow-adjusted accounting",
+      "kind": "BACKEND",
+      "stage": 1,
+      "dependencies": [
+        "BE-003",
+        "BE-004",
+        "PRE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "ingest provider cash movements; classify and reconcile; post reversals; calculate flow-adjusted returns/drawdown; expose statement lineage. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Withdrawals are not losses; deposits do not erase losses; unknown or non-withdrawable credit is not risk capital",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-009",
+      "sequence": 9
+    },
+    {
+      "id": "BE-007",
+      "title": "Deposits, withdrawals, transfers and provider rails",
+      "kind": "BACKEND",
+      "stage": 1,
+      "dependencies": [
+        "BE-005",
+        "BE-006",
+        "PRE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "quote; verify beneficiary; approve; reserve; submit; reconcile; settle; compensate; expose hosted handoff with verified origin. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Changed fees need new approval; redirect is not settlement; unknown send never blindly retries; simultaneous withdrawal/order reservations cannot overdraw margin",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-010",
+      "sequence": 10
+    },
+    {
+      "id": "BE-008",
+      "title": "Instrument identity, market feeds, bars and depth",
+      "kind": "BACKEND",
+      "stage": 1,
+      "dependencies": [
+        "BE-003",
+        "BE-005",
+        "PRE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "resolve aliases; discover tradable instruments; subscribe once; aggregate bars; revision snapshots; recover gaps; publish genuine depth. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Identical ticker with different contracts cannot collide; stale feed never returns synthetic LIVE; bad sequence triggers snapshot recovery",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-011",
+      "sequence": 11
+    },
+    {
+      "id": "BE-009",
+      "title": "Mandates, risk, sizing and portfolio reservations",
+      "kind": "BACKEND",
+      "stage": 1,
+      "dependencies": [
+        "BE-002",
+        "BE-006",
+        "BE-008",
+        "PRE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "verify mandate; calculate stop/size; reserve worst-case pending risk; enforce drawdown, concentration, correlation and margin; deny new entries while allow risk reduction. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. No float monetary sizing; rounding down; competing intents cannot exceed family/account limits; flow adjustment cannot increase absolute available collateral",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-012",
+      "sequence": 12
+    },
+    {
+      "id": "BE-010",
+      "title": "Venue execution, canonical orders and reconciliation",
+      "kind": "BACKEND",
+      "stage": 1,
+      "dependencies": [
+        "BE-005",
+        "BE-008",
+        "BE-009",
+        "PRE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "submit market/limit/stop/stop-limit where available; modify; cancel; read fills; map provider states; reconcile unknowns. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Cancel/fill race keeps broker truth; partial fill retains exposure; atomic request includes stop but protection requires independent readback",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-013",
+      "sequence": 13
+    },
+    {
+      "id": "BE-011",
+      "title": "Manual trading, adds and management handover",
+      "kind": "BACKEND",
+      "stage": 1,
+      "dependencies": [
+        "BE-009",
+        "BE-010",
+        "PRE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "preview/submit manual entry; winning-only add; close/partial; tighten; TP changes; hand to VAN; take back with management epoch. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Winning at approval AND submission; never widen stop; take-back fences future commands and reconciles already-sent commands instead of claiming instant cancellation",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-014",
+      "sequence": 14
+    },
+    {
+      "id": "BE-012",
+      "title": "Positions, protection, portfolio, history and TCA",
+      "kind": "BACKEND",
+      "stage": 1,
+      "dependencies": [
+        "BE-006",
+        "BE-010",
+        "BE-011",
+        "PRE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "serve canonical positions; protect; build history/statement projections; compute sourced execution cost; report risk current/limit/remaining. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Unconfirmed stop never shown protected; every TCA value has units and benchmark timestamp; demo/live totals never mix",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-015",
+      "sequence": 15
+    },
+    {
+      "id": "BE-013",
+      "title": "Strategies, trading modes and independent edge evidence",
+      "kind": "BACKEND",
+      "stage": 1,
+      "dependencies": [
+        "BE-009",
+        "BE-010",
+        "PRE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "list/inspect/promote qualified strategies; produce edge admission evidence; apply Normal/Risky/Aggressive requests; reconcile restart; attribution. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Aggressive without admitted edge refuses; mode never raises signed ceilings; both evidence producer and refusal path must be implemented",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-016",
+      "sequence": 16
+    },
+    {
+      "id": "BE-014",
+      "title": "News, calendar and source-health ingestion",
+      "kind": "BACKEND",
+      "stage": 1,
+      "dependencies": [
+        "BE-003",
+        "BE-008",
+        "PRE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "admit feeds; collect scheduled values and headlines; canonicalize identities; track original publisher, entitlements, clocks and source failures. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Syndicated copies count once; preliminary/forecast/revised previous is not actual; unsupported licence or failed feed does not fake coverage",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-017",
+      "sequence": 17
+    },
+    {
+      "id": "BE-015",
+      "title": "Event analysis, history, analogues and expectations",
+      "kind": "BACKEND",
+      "stage": 1,
+      "dependencies": [
+        "BE-014",
+        "PRE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "cluster/correct/retract; classify; measure reactions; build history; retrieve analogues; join prediction-market expectations only when admitted. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. No look-ahead; missing market marks stay missing; thin sample cannot become calibrated probability; source corrections invalidate descendants",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-018",
+      "sequence": 18
+    },
+    {
+      "id": "BE-016",
+      "title": "Governed news effects D1–D7 and news strategy lifecycle",
+      "kind": "BACKEND",
+      "stage": 1,
+      "dependencies": [
+        "BE-009",
+        "BE-012",
+        "BE-013",
+        "BE-015",
+        "PRE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "compute shadow decisions; reduce size/timing/rank; preserve VAN-managed positions; validate event strategies; admit per-path promotions. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. D1–D6 cannot increase risk; owner-managed trades get proposals not silent exits; D7 requires strategy evidence; news corrections retract pending eligibility",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-019",
+      "sequence": 19
+    },
+    {
+      "id": "BE-017",
+      "title": "Armed news tickets, readiness and single-use execution",
+      "kind": "BACKEND",
+      "stage": 1,
+      "dependencies": [
+        "BE-002",
+        "BE-010",
+        "BE-016",
+        "PRE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "prepare/sign/arm/revalidate/disarm/use; persist nonce; record latency; enforce two-source agreement at execution; reconcile submission. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. SIGNED is not readiness; expired/changed policy/account/health disarms; a future release can be armed before actual values arrive, but use cannot precede required agreement",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-020",
+      "sequence": 20
+    },
+    {
+      "id": "BE-018",
+      "title": "Chart data contracts, indicators, drawings and workspaces",
+      "kind": "BACKEND",
+      "stage": 1,
+      "dependencies": [
+        "BE-003",
+        "BE-008",
+        "PRE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "serve chart capability contract; persist indicator instances/drawing anchors/layouts; revise settings; calculate certified server indicators; sync conflicts. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. No rendered pixels as canonical geometry; parameter versions and price/time anchors round-trip; cross-device edit conflict explicit; no server dependency on a new renderer",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-021",
+      "sequence": 21
+    },
+    {
+      "id": "BE-019",
+      "title": "Historical replay, simulation and isolated practice data",
+      "kind": "BACKEND",
+      "stage": 1,
+      "dependencies": [
+        "BE-008",
+        "BE-018",
+        "PRE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "create deterministic replay sessions; step/seek; store paper actions separately; return outcomes and provenance. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Replay cannot resolve an execution route or grant; future bars invisible; reset/seek reproducible; practice never enters live P&L or strategy promotion statistics",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-022",
+      "sequence": 22
+    },
+    {
+      "id": "BE-020",
+      "title": "Watchlists, persistent alerts and typed screening",
+      "kind": "BACKEND",
+      "stage": 1,
+      "dependencies": [
+        "BE-003",
+        "BE-008",
+        "BE-014",
+        "BE-018",
+        "PRE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "CRUD lists; evaluate price/indicator/drawing/news alerts on server; pause/restart/delete; scan instruments; emit canonical notifications. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. One trigger identity across devices/restart; stale data cannot trigger a live market fact; alert never trades; scan quotas enforced",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-023",
+      "sequence": 23
+    },
+    {
+      "id": "BE-021",
+      "title": "Analyst, chart observations and cross-signal intelligence",
+      "kind": "BACKEND",
+      "stage": 1,
+      "dependencies": [
+        "BE-012",
+        "BE-015",
+        "BE-018",
+        "BE-019",
+        "PRE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "ingest consented chart observations and notes; join news/portfolio; generate fact-bound explanations; track contradiction; provide evidence artifacts. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Chart payload injection and model-added numbers rejected; retention/erasure honoured; all contributing revisions recorded; headless producer proves intake before UI exists",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-024",
+      "sequence": 24
+    },
+    {
+      "id": "BE-022",
+      "title": "Owner diagnostics, pattern discovery and learning review",
+      "kind": "BACKEND",
+      "stage": 1,
+      "dependencies": [
+        "BE-011",
+        "BE-013",
+        "BE-019",
+        "BE-021",
+        "PRE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "analyse all manual trades; display soft behaviour findings; extract entry-time features; validate new candidates; track counterfactuals. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Post-entry holding duration is outcome metadata, not an entry feature; losing trades retained; insufficient sample no assertion; candidate never automatically promoted",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-025",
+      "sequence": 25
+    },
+    {
+      "id": "BE-023",
+      "title": "Projects, tasks, missions and truthful workflow graphs",
+      "kind": "BACKEND",
+      "stage": 1,
+      "dependencies": [
+        "BE-002",
+        "BE-003",
+        "PRE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "create/read/update permitted tasks; stream mission progress; join stage evidence; compute dependency graph/critical path; expose stable node/edge IDs. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Cycles/orphans/conflicting actors visible; no completion from agent RUNNING; graph drag has no authority; observed task state not fabricated by layout",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-026",
+      "sequence": 26
+    },
+    {
+      "id": "BE-024",
+      "title": "Agents, Hermes, Muse and provider-bound interventions",
+      "kind": "BACKEND",
+      "stage": 1,
+      "dependencies": [
+        "BE-002",
+        "BE-003",
+        "BE-023",
+        "PRE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "assign/steer/cancel under lease; native conversation protocol; provider-bound allow/deny; reconcile job/task/artifact outcomes. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Expired lease, duplicate allow, late callback and task scope mismatch refuse; GUI click is not success; integration must be real, not an unbound client stub",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-027",
+      "sequence": 27
+    },
+    {
+      "id": "BE-025",
+      "title": "Browser, remote interaction, artifact and share intake",
+      "kind": "BACKEND",
+      "stage": 1,
+      "dependencies": [
+        "BE-002",
+        "BE-003",
+        "BE-024",
+        "PRE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "lease session; observe viewport; submit exact plan; upload/download with admission; report action outcome; revoke; bind file destination. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. No broad host command from UI; before/after target changes invalidate intent; file destination substitution denied; retained source content is untrusted data",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-028",
+      "sequence": 28
+    },
+    {
+      "id": "BE-026",
+      "title": "ARTEMIS device tests and independent evidence services",
+      "kind": "BACKEND",
+      "stage": 1,
+      "dependencies": [
+        "BE-002",
+        "BE-003",
+        "BE-023",
+        "BE-025",
+        "PRE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "enumerate qualified devices; version plans; queue/observe/cancel tests; preserve captures; publish pass/fail/unknown and build IDs. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. An emulator cannot issue S24 acceptance; missing capture means unknown; old APK test cannot certify new build; server protocol testable with existing authorised clients",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-029",
+      "sequence": 29
+    },
+    {
+      "id": "BE-027",
+      "title": "Memory, knowledge, goals, privacy and erasure",
+      "kind": "BACKEND",
+      "stage": 1,
+      "dependencies": [
+        "BE-002",
+        "BE-003",
+        "PRE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "search/correct/retract facts; retain provenance; inspect history; edit goals; review/rollback adaptation; erase scoped records and derivatives. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Deleting source is not model unlearning; revoked context excluded from research; erasure includes caches/derived artifacts or declares verified retention exception",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-030",
+      "sequence": 30
+    },
+    {
+      "id": "BE-028",
+      "title": "Automation, reminders and schedules",
+      "kind": "BACKEND",
+      "stage": 1,
+      "dependencies": [
+        "BE-002",
+        "BE-003",
+        "BE-023",
+        "BE-027",
+        "PRE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "candidate/admit/version workflows; bind standing authority; schedule; report next/last run; execute through domain adapters; retry safely. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Failed run never silently success; timezone/DST/misfire specified; schedules never mint grants; unknown effect reconciled before retry",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-031",
+      "sequence": 31
+    },
+    {
+      "id": "BE-029",
+      "title": "Conversation, voice and speaker-profile services",
+      "kind": "BACKEND",
+      "stage": 1,
+      "dependencies": [
+        "BE-002",
+        "BE-003",
+        "BE-027",
+        "PRE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "create turns; stream transcript/audio; interrupt; retain history; manage speaker consent/erase; expose speech and task context. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Mic permission denial propagates; interrupted response not completion; no speaker identity assertion without enrollment; obsolete consent cannot reopen microphone",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-032",
+      "sequence": 32
+    },
+    {
+      "id": "BE-030",
+      "title": "Attention, notifications, presence and compact summaries",
+      "kind": "BACKEND",
+      "stage": 1,
+      "dependencies": [
+        "BE-003",
+        "BE-012",
+        "BE-020",
+        "BE-023",
+        "BE-024",
+        "BE-028",
+        "BE-029",
+        "PRE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "aggregate typed events; arbitrate severity/freshness; dedupe delivery; persist acknowledgement; project orb semantics and compact hub summaries. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Risk preempts celebration; snooze never clears incident; no state legend or route action executes; stale health never healthy idle; one event per channel identity",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-033",
+      "sequence": 33
+    },
+    {
+      "id": "BE-031",
+      "title": "Connected providers, settings, devices and diagnostics",
+      "kind": "BACKEND",
+      "stage": 1,
+      "dependencies": [
+        "BE-002",
+        "BE-003",
+        "BE-005",
+        "BE-024",
+        "BE-025",
+        "BE-029",
+        "PRE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "serve provider readiness and scopes; version settings; manage device inventory/provisioning; expose connection correlations; privacy defaults. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Connection health is not action authority; no manual raw host/token forms; no leaked secrets in telemetry; native permission completion deferred to actual OS readback",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-034",
+      "sequence": 34
+    },
+    {
+      "id": "BE-034",
+      "title": "Development studio, CI/security and evidence-workspace adapters",
+      "kind": "BACKEND",
+      "stage": 1,
+      "dependencies": [
+        "BE-023",
+        "BE-024",
+        "BE-025",
+        "BE-026",
+        "PRE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "project/read stage plans; expose design/research/security/CI evidence; admit cinematic/studio workspace candidate APIs and native-control bindings. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. PR98/99 and later candidates are evaluated, not assumed; UI workspace cannot mint build/deploy authority; external partial services block required backend integration",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-035",
+      "sequence": 35
+    },
+    {
+      "id": "BE-032",
+      "title": "Whole-product capability, action and UI-consumption catalog",
+      "kind": "BACKEND",
+      "stage": 1,
+      "dependencies": [
+        "BE-004",
+        "BE-007",
+        "BE-012",
+        "BE-013",
+        "BE-017",
+        "BE-018",
+        "BE-019",
+        "BE-020",
+        "BE-021",
+        "BE-022",
+        "BE-023",
+        "BE-024",
+        "BE-025",
+        "BE-026",
+        "BE-027",
+        "BE-028",
+        "BE-029",
+        "BE-030",
+        "BE-031",
+        "BE-034",
+        "PRE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "publish complete versioned capability inventory; bind every action to input/state/error/authority/readback; expose display projections and navigable subjects. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. No required feature missing or hidden by unsupported label; every read/write contract has a genuine caller harness and known error set; catalog cannot send arbitrary frontend code",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-036",
+      "sequence": 36
+    },
+    {
+      "id": "BE-033",
+      "title": "Backend deployment, recovery, capacity and observability",
+      "kind": "BACKEND",
+      "stage": 1,
+      "dependencies": [
+        "BE-032",
+        "PRE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "build reproducible service artifacts; configure staging; restore backups; migrate schema; prove rollback; quotas; bounded queues; alert health. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. No production credentials in preparation; restart does not replay effects; resource pressure backpressure not data loss; rollback retains newer financial ledger safely",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-037",
+      "sequence": 37
+    },
+    {
+      "id": "BQ-001",
+      "title": "Trade/account/market/risk/execution headless end-to-end",
+      "kind": "BACKEND_VERIFICATION",
+      "stage": 2,
+      "dependencies": [
+        "BE-001",
+        "BE-002",
+        "BE-003",
+        "BE-004",
+        "BE-005",
+        "BE-006",
+        "BE-007",
+        "BE-008",
+        "BE-009",
+        "BE-010",
+        "BE-011",
+        "BE-012",
+        "BE-013",
+        "BE-014",
+        "BE-015",
+        "BE-016",
+        "BE-017",
+        "BE-018",
+        "BE-019",
+        "BE-020",
+        "BE-021",
+        "BE-022",
+        "BE-023",
+        "BE-024",
+        "BE-025",
+        "BE-026",
+        "BE-027",
+        "BE-028",
+        "BE-029",
+        "BE-030",
+        "BE-031",
+        "BE-032",
+        "BE-033",
+        "BE-034"
+      ],
+      "completion": "FULL",
+      "exit_contract": "No required backend feature partial; verified provider or service outcomes, ledger state and fault-injection receipts; exact source/artifact/config identity. Headless harness is not new UI. No synthetic success.",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-038",
+      "sequence": 38
+    },
+    {
+      "id": "BQ-002",
+      "title": "Provider accounts/funds/settlement and concurrent risk qualification",
+      "kind": "BACKEND_VERIFICATION",
+      "stage": 2,
+      "dependencies": [
+        "BE-001",
+        "BE-002",
+        "BE-003",
+        "BE-004",
+        "BE-005",
+        "BE-006",
+        "BE-007",
+        "BE-008",
+        "BE-009",
+        "BE-010",
+        "BE-011",
+        "BE-012",
+        "BE-013",
+        "BE-014",
+        "BE-015",
+        "BE-016",
+        "BE-017",
+        "BE-018",
+        "BE-019",
+        "BE-020",
+        "BE-021",
+        "BE-022",
+        "BE-023",
+        "BE-024",
+        "BE-025",
+        "BE-026",
+        "BE-027",
+        "BE-028",
+        "BE-029",
+        "BE-030",
+        "BE-031",
+        "BE-032",
+        "BE-033",
+        "BE-034"
+      ],
+      "completion": "FULL",
+      "exit_contract": "No required backend feature partial; verified provider or service outcomes, ledger state and fault-injection receipts; exact source/artifact/config identity. Headless harness is not new UI. No synthetic success.",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-039",
+      "sequence": 39
+    },
+    {
+      "id": "BQ-003",
+      "title": "News/history/armed grants/chart-observation headless intelligence",
+      "kind": "BACKEND_VERIFICATION",
+      "stage": 2,
+      "dependencies": [
+        "BE-001",
+        "BE-002",
+        "BE-003",
+        "BE-004",
+        "BE-005",
+        "BE-006",
+        "BE-007",
+        "BE-008",
+        "BE-009",
+        "BE-010",
+        "BE-011",
+        "BE-012",
+        "BE-013",
+        "BE-014",
+        "BE-015",
+        "BE-016",
+        "BE-017",
+        "BE-018",
+        "BE-019",
+        "BE-020",
+        "BE-021",
+        "BE-022",
+        "BE-023",
+        "BE-024",
+        "BE-025",
+        "BE-026",
+        "BE-027",
+        "BE-028",
+        "BE-029",
+        "BE-030",
+        "BE-031",
+        "BE-032",
+        "BE-033",
+        "BE-034"
+      ],
+      "completion": "FULL",
+      "exit_contract": "No required backend feature partial; verified provider or service outcomes, ledger state and fault-injection receipts; exact source/artifact/config identity. Headless harness is not new UI. No synthetic success.",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-040",
+      "sequence": 40
+    },
+    {
+      "id": "BQ-004",
+      "title": "Work/agents/Muse/browser/voice/memory/automation service integration",
+      "kind": "BACKEND_VERIFICATION",
+      "stage": 2,
+      "dependencies": [
+        "BE-001",
+        "BE-002",
+        "BE-003",
+        "BE-004",
+        "BE-005",
+        "BE-006",
+        "BE-007",
+        "BE-008",
+        "BE-009",
+        "BE-010",
+        "BE-011",
+        "BE-012",
+        "BE-013",
+        "BE-014",
+        "BE-015",
+        "BE-016",
+        "BE-017",
+        "BE-018",
+        "BE-019",
+        "BE-020",
+        "BE-021",
+        "BE-022",
+        "BE-023",
+        "BE-024",
+        "BE-025",
+        "BE-026",
+        "BE-027",
+        "BE-028",
+        "BE-029",
+        "BE-030",
+        "BE-031",
+        "BE-032",
+        "BE-033",
+        "BE-034"
+      ],
+      "completion": "FULL",
+      "exit_contract": "No required backend feature partial; verified provider or service outcomes, ledger state and fault-injection receipts; exact source/artifact/config identity. Headless harness is not new UI. No synthetic success.",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-041",
+      "sequence": 41
+    },
+    {
+      "id": "BQ-005",
+      "title": "Backend privacy, recovery, capacity, restart and source fault injection",
+      "kind": "BACKEND_VERIFICATION",
+      "stage": 2,
+      "dependencies": [
+        "BE-001",
+        "BE-002",
+        "BE-003",
+        "BE-004",
+        "BE-005",
+        "BE-006",
+        "BE-007",
+        "BE-008",
+        "BE-009",
+        "BE-010",
+        "BE-011",
+        "BE-012",
+        "BE-013",
+        "BE-014",
+        "BE-015",
+        "BE-016",
+        "BE-017",
+        "BE-018",
+        "BE-019",
+        "BE-020",
+        "BE-021",
+        "BE-022",
+        "BE-023",
+        "BE-024",
+        "BE-025",
+        "BE-026",
+        "BE-027",
+        "BE-028",
+        "BE-029",
+        "BE-030",
+        "BE-031",
+        "BE-032",
+        "BE-033",
+        "BE-034"
+      ],
+      "completion": "FULL",
+      "exit_contract": "No required backend feature partial; verified provider or service outcomes, ledger state and fault-injection receipts; exact source/artifact/config identity. Headless harness is not new UI. No synthetic success.",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-042",
+      "sequence": 42
+    },
+    {
+      "id": "BQ-006",
+      "title": "Whole-product backend feature/action/caller and independent Zuul audit",
+      "kind": "BACKEND_VERIFICATION",
+      "stage": 2,
+      "dependencies": [
+        "BQ-001",
+        "BQ-002",
+        "BQ-003",
+        "BQ-004",
+        "BQ-005"
+      ],
+      "completion": "FULL",
+      "exit_contract": "No required backend feature partial; verified provider or service outcomes, ledger state and fault-injection receipts; exact source/artifact/config identity. Headless harness is not new UI. No synthetic success.",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-043",
+      "sequence": 43
+    },
+    {
+      "id": "BG-001",
+      "title": "Global Backend Complete / Frontend Entry Certificate",
+      "kind": "BACKEND_GATE",
+      "stage": 3,
+      "dependencies": [
+        "BE-001",
+        "BE-002",
+        "BE-003",
+        "BE-004",
+        "BE-005",
+        "BE-006",
+        "BE-007",
+        "BE-008",
+        "BE-009",
+        "BE-010",
+        "BE-011",
+        "BE-012",
+        "BE-013",
+        "BE-014",
+        "BE-015",
+        "BE-016",
+        "BE-017",
+        "BE-018",
+        "BE-019",
+        "BE-020",
+        "BE-021",
+        "BE-022",
+        "BE-023",
+        "BE-024",
+        "BE-025",
+        "BE-026",
+        "BE-027",
+        "BE-028",
+        "BE-029",
+        "BE-030",
+        "BE-031",
+        "BE-032",
+        "BE-033",
+        "BE-034",
+        "BQ-001",
+        "BQ-002",
+        "BQ-003",
+        "BQ-004",
+        "BQ-005",
+        "BQ-006"
+      ],
+      "completion": "FULL",
+      "exit_contract": "Independent BACKEND_COMPLETE certificate binds every mandatory capability and service receipt, closed backend gaps, published consumer contract bundle and compatibility baseline; no partial or unverified required backend accepted.",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-044",
+      "sequence": 44
+    },
+    {
+      "id": "UX-001",
+      "title": "Full-product information architecture from the complete backend",
+      "kind": "FRONTEND_DESIGN",
+      "stage": 4,
+      "dependencies": [
+        "BG-001"
+      ],
+      "completion": "FULL",
+      "exit_contract": "Consume complete capability catalog and every context/action; review whole-app route and progressive disclosure, no five-flow scope ceiling.",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-045",
+      "sequence": 45
+    },
+    {
+      "id": "UX-002",
+      "title": "Locked dark/light native material and component goldens",
+      "kind": "FRONTEND_DESIGN",
+      "stage": 4,
+      "dependencies": [
+        "BG-001",
+        "UX-001"
+      ],
+      "completion": "FULL",
+      "exit_contract": "Owner reviews native prototypes in both themes; approved tokens/geometry/material/motion/accessibility; no old UI import or regenerated replacement of locked images.",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-046",
+      "sequence": 46
+    },
+    {
+      "id": "UX-003",
+      "title": "Every-screen and action design contract acceptance",
+      "kind": "FRONTEND_DESIGN",
+      "stage": 4,
+      "dependencies": [
+        "BG-001",
+        "UX-001",
+        "UX-002"
+      ],
+      "completion": "FULL",
+      "exit_contract": "Each retained/additive surface has complete backend fields/actions/states, matching design family, dark/light acceptance and physical test plan; no action omitted for visual simplicity.",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-047",
+      "sequence": 47
+    },
+    {
+      "id": "FE-001",
+      "title": "Native typed ports, reactive client store, offline cache and device plumbing",
+      "kind": "FRONTEND",
+      "stage": 5,
+      "dependencies": [
+        "BG-001",
+        "UX-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-048",
+      "sequence": 48
+    },
+    {
+      "id": "FE-002",
+      "title": "Tactile Spatial components, tokens, isolation and accessibility semantics",
+      "kind": "FRONTEND",
+      "stage": 5,
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001"
+      ],
+      "completion": "FULL",
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-049",
+      "sequence": 49
+    },
+    {
+      "id": "FE-003",
+      "title": "Adaptive shell, deep links, shared intakes and full navigation",
+      "kind": "FRONTEND",
+      "stage": 5,
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002"
+      ],
+      "completion": "FULL",
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-050",
+      "sequence": 50
+    },
+    {
+      "id": "FE-004",
+      "title": "Home, metallic orb, compact Quick Hub and Attention",
+      "kind": "FRONTEND",
+      "stage": 5,
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-051",
+      "sequence": 51
+    },
+    {
+      "id": "FE-005",
+      "title": "Floating VAN, gestures, dock/workboards and lifecycle",
+      "kind": "FRONTEND",
+      "stage": 5,
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-052",
+      "sequence": 52
+    },
+    {
+      "id": "FE-006",
+      "title": "Trading Home, Markets, Watchlists, screener and Alerts",
+      "kind": "FRONTEND",
+      "stage": 5,
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-053",
+      "sequence": 53
+    },
+    {
+      "id": "FE-007",
+      "title": "Native previews and professional chart renderer/bridge",
+      "kind": "FRONTEND",
+      "stage": 5,
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-054",
+      "sequence": 54
+    },
+    {
+      "id": "FE-008",
+      "title": "Indicators, drawings, workspaces, depth and replay controls",
+      "kind": "FRONTEND",
+      "stage": 5,
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003",
+        "FE-007"
+      ],
+      "completion": "FULL",
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-055",
+      "sequence": 55
+    },
+    {
+      "id": "FE-009",
+      "title": "Orders, manual review, positions, protection and handover",
+      "kind": "FRONTEND",
+      "stage": 5,
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-056",
+      "sequence": 56
+    },
+    {
+      "id": "FE-010",
+      "title": "Accounts and Funds, provider-hosted flows and receipts",
+      "kind": "FRONTEND",
+      "stage": 5,
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-057",
+      "sequence": 57
+    },
+    {
+      "id": "FE-011",
+      "title": "Portfolio, history, statements, TCA and Risk Command Centre",
+      "kind": "FRONTEND",
+      "stage": 5,
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-058",
+      "sequence": 58
+    },
+    {
+      "id": "FE-012",
+      "title": "Strategies, trading modes and evidence/promotion views",
+      "kind": "FRONTEND",
+      "stage": 5,
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-059",
+      "sequence": 59
+    },
+    {
+      "id": "FE-013",
+      "title": "News, calendar, history profiles and armed news ticket views",
+      "kind": "FRONTEND",
+      "stage": 5,
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-060",
+      "sequence": 60
+    },
+    {
+      "id": "FE-014",
+      "title": "Analyst, chart observations, behaviour diagnostics and research",
+      "kind": "FRONTEND",
+      "stage": 5,
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-061",
+      "sequence": 61
+    },
+    {
+      "id": "FE-015",
+      "title": "Work, Projects, tasks and live dependency diagrams",
+      "kind": "FRONTEND",
+      "stage": 5,
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-062",
+      "sequence": 62
+    },
+    {
+      "id": "FE-016",
+      "title": "Agents, Muse/Hermes interactions and handoff maps",
+      "kind": "FRONTEND",
+      "stage": 5,
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-063",
+      "sequence": 63
+    },
+    {
+      "id": "FE-017",
+      "title": "Browser/remote sessions, files, share and provider outcome views",
+      "kind": "FRONTEND",
+      "stage": 5,
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-064",
+      "sequence": 64
+    },
+    {
+      "id": "FE-018",
+      "title": "ARTEMIS, development/studio, CI/security and evidence workspaces",
+      "kind": "FRONTEND",
+      "stage": 5,
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-065",
+      "sequence": 65
+    },
+    {
+      "id": "FE-019",
+      "title": "Memory, citations, privacy/erasure, learning goals and adaptations",
+      "kind": "FRONTEND",
+      "stage": 5,
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-066",
+      "sequence": 66
+    },
+    {
+      "id": "FE-020",
+      "title": "Automation, reminders, standing permissions and schedules",
+      "kind": "FRONTEND",
+      "stage": 5,
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-067",
+      "sequence": 67
+    },
+    {
+      "id": "FE-021",
+      "title": "Conversation, voice and speaker consent workflows",
+      "kind": "FRONTEND",
+      "stage": 5,
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-068",
+      "sequence": 68
+    },
+    {
+      "id": "FE-022",
+      "title": "Connected, settings, device provisioning, notifications and diagnostics",
+      "kind": "FRONTEND",
+      "stage": 5,
+      "dependencies": [
+        "BG-001",
+        "UX-003",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "completion": "FULL",
+      "exit_contract": "Complete all mapped actions and states against qualified backend, source-bound contract and UI tests, no fake data, both-theme golden capture, accessibility and restoration. Final physical certificate issued only in QA.",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-069",
+      "sequence": 69
+    },
+    {
+      "id": "QA-001",
+      "title": "All-feature/surface/action parity and no-loss reverse coverage",
+      "kind": "FINAL_QUALIFICATION",
+      "stage": 6,
+      "dependencies": [
+        "FE-001",
+        "FE-002",
+        "FE-003",
+        "FE-004",
+        "FE-005",
+        "FE-006",
+        "FE-007",
+        "FE-008",
+        "FE-009",
+        "FE-010",
+        "FE-011",
+        "FE-012",
+        "FE-013",
+        "FE-014",
+        "FE-015",
+        "FE-016",
+        "FE-017",
+        "FE-018",
+        "FE-019",
+        "FE-020",
+        "FE-021",
+        "FE-022"
+      ],
+      "completion": "FULL",
+      "exit_contract": "Every applicable acceptance receipt current and exact-source; independently reviewed; actual S24 where required. No feature removed or shortened to make tests pass.",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-070",
+      "sequence": 70
+    },
+    {
+      "id": "QA-002",
+      "title": "Real gateway/provider integration through the new signed app",
+      "kind": "FINAL_QUALIFICATION",
+      "stage": 6,
+      "dependencies": [
+        "FE-001",
+        "FE-002",
+        "FE-003",
+        "FE-004",
+        "FE-005",
+        "FE-006",
+        "FE-007",
+        "FE-008",
+        "FE-009",
+        "FE-010",
+        "FE-011",
+        "FE-012",
+        "FE-013",
+        "FE-014",
+        "FE-015",
+        "FE-016",
+        "FE-017",
+        "FE-018",
+        "FE-019",
+        "FE-020",
+        "FE-021",
+        "FE-022"
+      ],
+      "completion": "FULL",
+      "exit_contract": "Every applicable acceptance receipt current and exact-source; independently reviewed; actual S24 where required. No feature removed or shortened to make tests pass.",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-071",
+      "sequence": 71
+    },
+    {
+      "id": "QA-003",
+      "title": "Cross-domain adversarial security, authority and recovery",
+      "kind": "FINAL_QUALIFICATION",
+      "stage": 6,
+      "dependencies": [
+        "FE-001",
+        "FE-002",
+        "FE-003",
+        "FE-004",
+        "FE-005",
+        "FE-006",
+        "FE-007",
+        "FE-008",
+        "FE-009",
+        "FE-010",
+        "FE-011",
+        "FE-012",
+        "FE-013",
+        "FE-014",
+        "FE-015",
+        "FE-016",
+        "FE-017",
+        "FE-018",
+        "FE-019",
+        "FE-020",
+        "FE-021",
+        "FE-022"
+      ],
+      "completion": "FULL",
+      "exit_contract": "Every applicable acceptance receipt current and exact-source; independently reviewed; actual S24 where required. No feature removed or shortened to make tests pass.",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-072",
+      "sequence": 72
+    },
+    {
+      "id": "QA-004",
+      "title": "Physical S24 performance, thermal, accessibility and both-theme visual acceptance",
+      "kind": "FINAL_QUALIFICATION",
+      "stage": 6,
+      "dependencies": [
+        "FE-001",
+        "FE-002",
+        "FE-003",
+        "FE-004",
+        "FE-005",
+        "FE-006",
+        "FE-007",
+        "FE-008",
+        "FE-009",
+        "FE-010",
+        "FE-011",
+        "FE-012",
+        "FE-013",
+        "FE-014",
+        "FE-015",
+        "FE-016",
+        "FE-017",
+        "FE-018",
+        "FE-019",
+        "FE-020",
+        "FE-021",
+        "FE-022"
+      ],
+      "completion": "FULL",
+      "exit_contract": "Every applicable acceptance receipt current and exact-source; independently reviewed; actual S24 where required. No feature removed or shortened to make tests pass.",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-073",
+      "sequence": 73
+    },
+    {
+      "id": "QA-005",
+      "title": "Independent Zuul, exact APK and whole-product owner acceptance",
+      "kind": "FINAL_QUALIFICATION",
+      "stage": 6,
+      "dependencies": [
+        "QA-001",
+        "QA-002",
+        "QA-003",
+        "QA-004"
+      ],
+      "completion": "FULL",
+      "exit_contract": "Every applicable acceptance receipt current and exact-source; independently reviewed; actual S24 where required. No feature removed or shortened to make tests pass.",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-074",
+      "sequence": 74
+    },
+    {
+      "id": "REL-001",
+      "title": "Controlled signed release and proven rollback",
+      "kind": "RELEASE",
+      "stage": 7,
+      "dependencies": [
+        "QA-005"
+      ],
+      "completion": "FULL",
+      "exit_contract": "Owner release authorization; same admitted app identity; staged safe rollout; rollback preserves stores and outstanding intents; no implicit network/provider mutation.",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-075",
+      "sequence": 75
+    },
+    {
+      "id": "REL-002",
+      "title": "Legacy presentation retirement after full parity",
+      "kind": "RETIREMENT",
+      "stage": 8,
+      "dependencies": [
+        "REL-001"
+      ],
+      "completion": "FULL",
+      "exit_contract": "Separate owner-approved retirement review; all retained behaviours reached in new app; remove only old presentation, retain functional services and evidence.",
+      "status": "NOT_STARTED",
+      "receipt_required": true,
+      "packet_id": "BF-PKT-076",
+      "sequence": 76
+    }
+  ],
+  "owner_questions": [
+    {
+      "id": "OQ-01",
+      "text": "Manual per-strategy budget",
+      "gate": "LIVE",
+      "units": [
+        "BE-011"
+      ],
+      "status": "PENDING_EXPLICIT_RESOLUTION"
+    },
+    {
+      "id": "OQ-02",
+      "text": "ATR stop policy per instrument class",
+      "gate": "START",
+      "units": [
+        "BE-009",
+        "BE-011"
+      ],
+      "status": "PENDING_EXPLICIT_RESOLUTION"
+    },
+    {
+      "id": "OQ-03",
+      "text": "Manual demo acceptance period",
+      "gate": "LIVE",
+      "units": [
+        "BE-011"
+      ],
+      "status": "PENDING_EXPLICIT_RESOLUTION"
+    },
+    {
+      "id": "OQ-05",
+      "text": "Exact product/lock signature for formal predevelopment",
+      "gate": "F15",
+      "units": [
+        "PRE-003"
+      ],
+      "status": "PENDING_EXPLICIT_RESOLUTION"
+    },
+    {
+      "id": "OQ-06",
+      "text": "Licensed news/calendar provider selection",
+      "gate": "START",
+      "units": [
+        "BE-014"
+      ],
+      "status": "PENDING_EXPLICIT_RESOLUTION"
+    },
+    {
+      "id": "OQ-07",
+      "text": "Automated missing-stop reattach versus immediate flatten policy",
+      "gate": "START",
+      "units": [
+        "BE-010",
+        "BE-011"
+      ],
+      "status": "PENDING_EXPLICIT_RESOLUTION"
+    },
+    {
+      "id": "OQ-08",
+      "text": "Promote each news path from shadow",
+      "gate": "LIVE",
+      "units": [
+        "BE-016"
+      ],
+      "status": "PENDING_EXPLICIT_RESOLUTION"
+    },
+    {
+      "id": "OQ-09",
+      "text": "No direct news risk increase; resolve signed final policy",
+      "gate": "START",
+      "units": [
+        "BE-016"
+      ],
+      "status": "PENDING_EXPLICIT_RESOLUTION"
+    },
+    {
+      "id": "OQ-11",
+      "text": "Feed bundle and authorized budget",
+      "gate": "START",
+      "units": [
+        "BE-014"
+      ],
+      "status": "PENDING_EXPLICIT_RESOLUTION"
+    },
+    {
+      "id": "OQ-12",
+      "text": "Event strategies, budget, daily cap and first classes",
+      "gate": "START",
+      "units": [
+        "BE-017"
+      ],
+      "status": "PENDING_EXPLICIT_RESOLUTION"
+    },
+    {
+      "id": "OQ-13",
+      "text": "Behaviour notice wording and calibration",
+      "gate": "START",
+      "units": [
+        "BE-022"
+      ],
+      "status": "PENDING_EXPLICIT_RESOLUTION"
+    },
+    {
+      "id": "OQ-14",
+      "text": "Renderer chosen by S24 measurements, after backend completion",
+      "gate": "START",
+      "units": [
+        "UX-002",
+        "FE-007"
+      ],
+      "status": "PENDING_EXPLICIT_RESOLUTION"
+    },
+    {
+      "id": "OQ-15",
+      "text": "Account deletion grace/retention contradictions resolved explicitly",
+      "gate": "START",
+      "units": [
+        "BE-004"
+      ],
+      "status": "PENDING_EXPLICIT_RESOLUTION"
+    },
+    {
+      "id": "OQ-16",
+      "text": "Portfolio reporting currency",
+      "gate": "START",
+      "units": [
+        "BE-006",
+        "BE-012"
+      ],
+      "status": "PENDING_EXPLICIT_RESOLUTION"
+    },
+    {
+      "id": "OQ-17",
+      "text": "Simulated replay practice actions scope",
+      "gate": "START",
+      "units": [
+        "BE-019"
+      ],
+      "status": "PENDING_EXPLICIT_RESOLUTION"
+    },
+    {
+      "id": "OQ-18",
+      "text": "Premature accounts branch disposition",
+      "gate": "START",
+      "units": [
+        "BE-001",
+        "BE-004"
+      ],
+      "status": "PENDING_EXPLICIT_RESOLUTION"
+    },
+    {
+      "id": "OQ-19",
+      "text": "First admitted funding provider rail and sandbox authority",
+      "gate": "START",
+      "units": [
+        "BE-007"
+      ],
+      "status": "PENDING_EXPLICIT_RESOLUTION"
+    },
+    {
+      "id": "OQ-20",
+      "text": "Temperament percentages and evidence thresholds for live",
+      "gate": "LIVE",
+      "units": [
+        "BE-013"
+      ],
+      "status": "PENDING_EXPLICIT_RESOLUTION"
+    }
+  ]
+}

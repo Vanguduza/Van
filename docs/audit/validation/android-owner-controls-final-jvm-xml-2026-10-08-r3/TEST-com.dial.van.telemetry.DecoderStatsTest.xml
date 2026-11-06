@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.telemetry.DecoderStatsTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-08T06:47:29" hostname="052fefa249ff" time="0.001">
+  <properties/>
+  <testcase name="a counter handed back as a string is still a number()" classname="com.dial.van.telemetry.DecoderStatsTest" time="0.0"/>
+  <testcase name="a report without the counter yields null rather than zero()" classname="com.dial.van.telemetry.DecoderStatsTest" time="0.0"/>
+  <testcase name="an outbound entry is not an inbound one()" classname="com.dial.van.telemetry.DecoderStatsTest" time="0.0"/>
+  <testcase name="the video decoder's drops are read and the audio decoder's are not()" classname="com.dial.van.telemetry.DecoderStatsTest" time="0.0"/>
+  <testcase name="mediaType is accepted as well as kind()" classname="com.dial.van.telemetry.DecoderStatsTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

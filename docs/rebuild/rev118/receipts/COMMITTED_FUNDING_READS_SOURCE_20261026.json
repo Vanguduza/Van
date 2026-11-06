@@ -1,0 +1,51 @@
+{
+  "schema": "van.rebuild.committed-funding-reads/1",
+  "base_head": "d844aa437e83623d2ff5975927bff4f12849d10e",
+  "updated_at_utc": "2026-10-26T20:09:20.126908+00:00",
+  "status": "SOURCE_TESTED_COMPONENT_NOT_UNIT_NATIVE_OR_PRODUCTION_ACCEPTANCE",
+  "units": [
+    "BE-003",
+    "BE-006"
+  ],
+  "acceptance": "NOT_ISSUED",
+  "source_sha256": {
+    "trading/vati/core/ledger.py": "1d706f4004afeafdb7f8350b4f11ffddf32e2b34ab6efa31378d6aa4c2955d4d",
+    "trading/vati/core/ledger_pg.py": "bb4d4db88fce57eda298842bcf4992017200da4868c7e7bf74da98f47ee1829f",
+    "trading/vati/funding/reconciliation.py": "d325b0931443a4b8721ab740c4cf86d95dbc07461b5a336f0116ab241678b382",
+    "trading/vati/funding/runtime.py": "61c08aae62d191b2eace6072942e2ce9351a9b423f2a57b9c8cdd1f9cbdd16ce",
+    "trading/vati/funding/risk_fence.py": "8aa5eef7feccb1a299207bca8440e568294df3acd7976b24570c7b68b14f14e0",
+    "trading/tests/test_funding_committed_reads.py": "ee6dbb77badf2b3cb6b551891284a0096859022f7b31f2dd7375b6fb483e28dd"
+  },
+  "confirmed_failure": "Actualunmodifiedcommittedd844baselinewithreceiptclock6000->6500->7000 reportedMEASURED0.1andnativefundingprerequisiteavailablefromstagedclosingref;rollbackremovedthatref;sameconnectionfirstreadfalselyreportednative_period_journal_invalidwhilefreshconnectionconfirmedvaliddurablechain/no coveredlatermark",
+  "fix": "ExistingLedgerownercommitted_source_snapshotchecksidle/ownedreadonlystatebeforeandafteracquisition;period/owner/nativefundingriskconsumersuseit;cTraderandMT5refusecallerwriterfacts;SQLite/Postgresownedwriterabortinvalidatesonlyownedincrementalcacheandnextcheckfullyverifiesdurablehistory",
+  "actual_tests": {
+    "before_SQLite": "4actualfailures/1healthycontrol/5PGdeselected/audit0;no nativefinancialeffect",
+    "clean_baseline_probe": "d844aa43clean detachedworktree,exactsourcehashes,chronologicalreceipts,actualrollback/freshconnectionproof;notreconstruction",
+    "initial_after_SQLite": "51passed5PGdeselected/audit0",
+    "actual_pg_r1": "440passed0skip/audit0;beforeextraMT5boundarycases",
+    "additional_MT5_SQLite": "7passed7PGdeselected/audit0",
+    "final_pg": "444passed0skip/audit0/62.61seconds/all488runtime-testhashesmatch/ownedactualPGfixtureindependentlyabsent",
+    "new_boundary_cases": 14,
+    "supplemental_faults_assertion_caught": 6,
+    "positive_and_restored_actual_SQLite_Postgres_controls": 14,
+    "actual_PG_faults": [
+      "postgres-rollback-cache",
+      "committed-source-guard"
+    ],
+    "supplemental_skips_errors_audit": 0,
+    "rebuild_workflow_T0_boundary": 122,
+    "existing_integrity_controls": "Incrementalcost/newrowchecks,old/newtampering,deletions,recomputedanchors,periodicfullverification,read-snapshotconcurrency,transactionsandPostgresisolationincluded",
+    "counts_overlap": true
+  },
+  "canonical_checks": {
+    "owner_frontend_drift": false,
+    "registry_cases": 374,
+    "registry_edits": 383,
+    "registry_findings": [],
+    "current_candidate_registry_execution": "NOT_RUN;published6c71full374executionseparatelyevidenced",
+    "consolidation_findings": []
+  },
+  "qualification": "Confirmedsourceboundary/cachefixonly;no unit/native/provider/financialeffect/production/Android/S24acceptance",
+  "remaining": "Fullcanonicalbackend/ML/assistantprogramme,nativeflowqualification,multiassetaccounting/sharedreservations/reversals/BE007rails,provisionedproductionprofile/signing/deployment/Androiddeviceacceptance",
+  "evidence": "ci/committed_funding_reads_20261026"
+}

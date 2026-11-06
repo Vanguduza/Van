@@ -1,0 +1,9 @@
+{"duration": 0.7831461289897561, "nodeid": "trading/tests/test_coordinator_instance_arbitration.py::test_same_process_coordinator_peer_cannot_displace_its_live_owner", "outcome": "passed", "phase": "setup"}
+{"duration": 0.01909989200066775, "nodeid": "trading/tests/test_coordinator_instance_arbitration.py::test_same_process_coordinator_peer_cannot_displace_its_live_owner", "outcome": "passed", "phase": "call"}
+{"duration": 0.04150296600710135, "nodeid": "trading/tests/test_coordinator_instance_arbitration.py::test_same_process_coordinator_peer_cannot_displace_its_live_owner", "outcome": "passed", "phase": "teardown"}
+{"duration": 0.37985691700305324, "nodeid": "trading/tests/test_coordinator_instance_arbitration.py::test_same_process_peer_shutdown_cannot_release_another_coordinators_authority", "outcome": "passed", "phase": "setup"}
+{"duration": 0.011166815005708486, "nodeid": "trading/tests/test_coordinator_instance_arbitration.py::test_same_process_peer_shutdown_cannot_release_another_coordinators_authority", "outcome": "passed", "phase": "call"}
+{"duration": 0.03041546199528966, "nodeid": "trading/tests/test_coordinator_instance_arbitration.py::test_same_process_peer_shutdown_cannot_release_another_coordinators_authority", "outcome": "passed", "phase": "teardown"}
+{"duration": 0.3902841149974847, "nodeid": "trading/tests/test_coordinator_instance_arbitration.py::test_expired_owner_stays_fenced_after_real_peer_takeover_and_late_shutdown", "outcome": "passed", "phase": "setup"}
+{"duration": 0.028898364995256998, "nodeid": "trading/tests/test_coordinator_instance_arbitration.py::test_expired_owner_stays_fenced_after_real_peer_takeover_and_late_shutdown", "outcome": "passed", "phase": "call"}
+{"duration": 0.027795878995675594, "nodeid": "trading/tests/test_coordinator_instance_arbitration.py::test_expired_owner_stays_fenced_after_real_peer_takeover_and_late_shutdown", "outcome": "passed", "phase": "teardown"}

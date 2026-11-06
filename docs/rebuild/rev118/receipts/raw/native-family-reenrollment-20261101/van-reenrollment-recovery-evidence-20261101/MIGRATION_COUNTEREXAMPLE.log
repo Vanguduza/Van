@@ -1,0 +1,55 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_ test_interrupted_migration_ddl_restarts_without_losing_original_replacement __
+
+tmp_path = PosixPath('/tmp/van-reenrollment-migration-counterexample-01/test_interrupted_migration_ddl0')
+
+    async def test_interrupted_migration_ddl_restarts_without_losing_original_replacement(tmp_path):
+        f=await setup(tmp_path)
+        pending=await f.service.start(**f.request)
+        original=dict(await f.store.fetchone("SELECT * FROM owner_device_reenrollments"))
+        # Store.migrate executes DDL before its version marker. Simulate death between
+        # those boundaries, retaining the actual installed schema and original data.
+        await f.store.execute("DELETE FROM schema_migrations WHERE version=60")
+        reopened=Store(f.store.path)
+>       await reopened.migrate()
+
+backend/tests/test_owner_device_reenrollment_recovery.py:339: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+backend/van_gateway/storage/db.py:2686: in migrate
+    await db.executescript(script)
+../../van-backend-venv-20261025/lib/python3.12/site-packages/aiosqlite/core.py:255: in executescript
+    cursor = await self._execute(self._conn.executescript, sql_script)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../van-backend-venv-20261025/lib/python3.12/site-packages/aiosqlite/core.py:160: in _execute
+    return await future
+           ^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tx = <_queue.SimpleQueue object at 0x7f023d0531a0>
+
+    def _connection_worker_thread(tx: _TxQueue):
+        """
+        Execute function calls on a separate thread.
+    
+        :meta private:
+        """
+        while True:
+            # Continues running until all queue items are processed,
+            # even after connection is closed (so we can finalize all
+            # futures)
+    
+            future, function = tx.get()
+    
+            try:
+                LOG.debug("executing %s", function)
+>               result = function()
+                         ^^^^^^^^^^
+E               sqlite3.OperationalError: table owner_device_reenrollments already exists
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/aiosqlite/core.py:63: OperationalError
+------------------------------ Captured log call -------------------------------
+WARNING  van_gateway.auth.native_revocation:native_revocation.py:137 native owner-key revocation remains pending
+=========================== short test summary info ============================
+FAILED backend/tests/test_owner_device_reenrollment_recovery.py::test_interrupted_migration_ddl_restarts_without_losing_original_replacement
+1 failed in 0.93s

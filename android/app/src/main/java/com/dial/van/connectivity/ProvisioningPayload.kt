@@ -1,6 +1,32 @@
 package com.dial.van.connectivity
 
 import org.json.JSONObject
+import java.net.URI
+
+/** A gateway base cannot smuggle credentials, query targets or a different resource path. */
+object GatewayBaseUrl {
+    fun accepts(value: String, allowInsecureLoopback: Boolean = false): Boolean {
+        val uri = runCatching { URI(value).parseServerAuthority() }.getOrNull() ?: return false
+        val host = uri.host?.lowercase()?.removeSurrounding("[", "]") ?: return false
+        if (uri.rawUserInfo != null || uri.rawQuery != null || uri.rawFragment != null ||
+            uri.rawPath !in listOf("", "/") || uri.rawAuthority.endsWith(':') ||
+            (uri.port != -1 && uri.port !in 1..65535)) return false
+        if (':' !in host) {
+            val dns = host.removeSuffix(".")
+            if (dns.length !in 1..253 || dns.split('.').any { label ->
+                    label.length !in 1..63 || !label.first().isLetterOrDigit() ||
+                        !label.last().isLetterOrDigit() || label.any { !it.isLetterOrDigit() && it != '-' }
+                }) return false
+            if (host.all { it.isDigit() || it == '.' } &&
+                (host.split('.').size != 4 || host.split('.').any { it.toIntOrNull() !in 0..255 })) return false
+        }
+        return when (uri.scheme?.lowercase()) {
+            "https" -> true
+            "http" -> allowInsecureLoopback && host in setOf("localhost", "127.0.0.1", "::1")
+            else -> false
+        }
+    }
+}
 
 /**
  * Rev 1.5 ADR-RB-026 and §0D.2 — what the installer hands this phone, and why it is the
@@ -149,8 +175,8 @@ object ProvisioningVerifier {
             return ProvisioningVerdict.Refused("provisioning_payload_expired")
         }
 
-        val gatewayUrl = parsed.optString("gateway_url", "").trim().trimEnd('/')
-        if (!isAcceptableUrl(gatewayUrl, allowInsecureLoopback)) {
+        val gatewayUrl = parsed.optString("gateway_url", "").trim()
+        if (!GatewayBaseUrl.accepts(gatewayUrl, allowInsecureLoopback)) {
             return ProvisioningVerdict.Refused("provisioning_url_must_use_https")
         }
 
@@ -180,7 +206,7 @@ object ProvisioningVerifier {
         return ProvisioningVerdict.Accepted(
             ProvisioningPayload(
                 provisioningId = provisioningId,
-                gatewayUrl = gatewayUrl,
+                gatewayUrl = gatewayUrl.trimEnd('/'),
                 pairingToken = pairingToken,
                 bootstrapToken = bootstrapToken,
                 attestationChallenge = challenge,
@@ -191,10 +217,4 @@ object ProvisioningVerifier {
         )
     }
 
-    private fun isAcceptableUrl(url: String, allowInsecureLoopback: Boolean): Boolean {
-        if (url.startsWith("https://", ignoreCase = true)) return true
-        if (!allowInsecureLoopback) return false
-        return url.startsWith("http://127.0.0.1", ignoreCase = true) ||
-            url.startsWith("http://localhost", ignoreCase = true)
-    }
 }

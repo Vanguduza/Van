@@ -1,0 +1,229 @@
+{
+  "captured_at_utc": "2026-11-01T07:42:11.546434+00:00",
+  "repository": "Vanguduza/Van",
+  "head": "25a48fd705825f5eec1264696e91536694cfb82f",
+  "paginated_all_events": true,
+  "main_run_id": 41285417143,
+  "commands": [
+    "gh api --paginate repos/Vanguduza/Van/actions/runs?head_sha=25a48fd705825f5eec1264696e91536694cfb82f&per_page=100",
+    "gh api repos/Vanguduza/Van/actions/runs/<run-id>/jobs?per_page=100",
+    "GitHub connector github_fetch_workflow_job_logs(repo_full_name=Vanguduza/Van, job_id=<terminal job>)"
+  ],
+  "runs": [
+    {
+      "id": 41285417069,
+      "name": "van-mql-native-source",
+      "event": "pull_request",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 41285417206,
+      "name": "van-kernel-source",
+      "event": "pull_request",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 41285417199,
+      "name": "van-forecast-runtime-source",
+      "event": "pull_request",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 41285417115,
+      "name": "cognitive-fabric-r161-van",
+      "event": "pull_request",
+      "status": "completed",
+      "conclusion": "failure",
+      "jobs": [
+        {
+          "id": 124785597543,
+          "name": "python",
+          "conclusion": "success"
+        },
+        {
+          "id": 124785597713,
+          "name": "android",
+          "conclusion": "failure",
+          "failed_step": "Android package, unit-test and lint gate"
+        }
+      ]
+    },
+    {
+      "id": 41285417143,
+      "name": "van-ci",
+      "event": "pull_request",
+      "status": "in_progress",
+      "conclusion": null,
+      "jobs": [
+        {
+          "id": 124785597861,
+          "name": "postgres-ledger",
+          "status": "in_progress"
+        },
+        {
+          "id": 124785597932,
+          "name": "rebuild-documentary",
+          "conclusion": "success"
+        },
+        {
+          "id": 124785597949,
+          "name": "mutation kotlin-3",
+          "status": "in_progress"
+        },
+        {
+          "id": 124785597957,
+          "name": "browser-guard-source",
+          "status": "in_progress"
+        },
+        {
+          "id": 124785597961,
+          "name": "backend",
+          "conclusion": "failure",
+          "failed_step": "Require the DDS contract read key"
+        },
+        {
+          "id": 124785598002,
+          "name": "backend-public-source",
+          "status": "in_progress"
+        },
+        {
+          "id": 124785598020,
+          "name": "mutation kotlin-0",
+          "status": "in_progress"
+        },
+        {
+          "id": 124785598022,
+          "name": "android-and-visual-evidence",
+          "status": "in_progress"
+        },
+        {
+          "id": 124785598037,
+          "name": "android-instrumentation",
+          "conclusion": "failure",
+          "failed_step": "Instrumentation tests (owner surface, Floating VAN)"
+        },
+        {
+          "id": 124785598044,
+          "name": "project-truth-ledger",
+          "conclusion": "failure",
+          "failed_step": "Project Truth ledger (trusted checker, every new commit has an authorized row)"
+        },
+        {
+          "id": 124785598054,
+          "name": "market-monitor-source",
+          "conclusion": "success"
+        },
+        {
+          "id": 124785598065,
+          "name": "mutation python-0",
+          "status": "in_progress"
+        },
+        {
+          "id": 124785598080,
+          "name": "mutation browser-agent",
+          "conclusion": "success"
+        },
+        {
+          "id": 124785598092,
+          "name": "mutation python-3",
+          "status": "in_progress"
+        },
+        {
+          "id": 124785598104,
+          "name": "mutation kotlin-2",
+          "status": "in_progress"
+        },
+        {
+          "id": 124785598106,
+          "name": "mutation python-2",
+          "status": "in_progress"
+        },
+        {
+          "id": 124785598125,
+          "name": "mutation kotlin-1",
+          "status": "in_progress"
+        },
+        {
+          "id": 124785598146,
+          "name": "mutation python-1",
+          "status": "in_progress"
+        },
+        {
+          "id": 124786753943,
+          "name": "character-forge-gate",
+          "conclusion": "failure",
+          "failed_step": "Rive asset present means RiveContractTest must have passed"
+        }
+      ]
+    },
+    {
+      "id": 41285412877,
+      "name": "canonical-tree-guard",
+      "event": "pull_request_target",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 41285407172,
+      "name": "cognitive-fabric-r161-van",
+      "event": "push",
+      "status": "in_progress",
+      "jobs": [
+        {
+          "id": 124785569442,
+          "name": "android",
+          "status": "in_progress"
+        },
+        {
+          "id": 124785569650,
+          "name": "python",
+          "conclusion": "success"
+        }
+      ]
+    }
+  ],
+  "expected_mandatory_gate_failures_preserved": {
+    "DDS_key_job": 124785597961,
+    "trusted_checker_job": 124785598044
+  },
+  "new_android_failure_evidence": {
+    "source": "decoded GitHub workflow job logs via supported connector",
+    "jobs": [
+      124785597713,
+      124785598037
+    ],
+    "common_terminal_failure": "Gradle :app:compileDebugKotlin failed",
+    "compiler_errors": [
+      "android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt:76:77 Unresolved reference: dp",
+      "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt:136:77 No value passed for parameter reviewed",
+      "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt:136:77 No value passed for parameter reviewedProfile"
+    ],
+    "distinction": "Both failures share the Kotlin compile root cause; instrumentation log reports adb device offline during emulator boot, but no distinct test assertion failure was observed because compilation failed first. Test execution/counts unknown."
+  },
+  "backend_public_source": "job 124785598002 in progress; test counts/skips unknown",
+  "mutation_jobs": {
+    "terminal_success": [
+      124785598080
+    ],
+    "running": [
+      124785597949,
+      124785598020,
+      124785598065,
+      124785598092,
+      124785598104,
+      124785598106,
+      124785598125,
+      124785598146
+    ],
+    "failed": [],
+    "executed_caught_survivor_baseline_counts": "unknown; no inference from registry"
+  },
+  "historical_heads": {
+    "32d519": "failed history remains unchanged",
+    "ca135": "failed history remains unchanged"
+  },
+  "read_only": true
+}

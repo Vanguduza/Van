@@ -64,6 +64,20 @@ def test_the_installer_ships_a_runtime_that_starts(tmp_path):
     assert (runtime / "trading/commander/accounts.py").is_file()
     assert not (runtime / "trading/tests").exists()
     assert (runtime / "backend/van_gateway/mtls/serve.py").is_file()
+    import hashlib
+    import json
+    receipt = json.loads((runtime / "DEPLOYED_SOURCE.json").read_text())
+    digest = hashlib.sha256((runtime / "backend/van_gateway/app.py").read_bytes()).hexdigest()
+    assert receipt["runtime_sha256"]["backend/van_gateway/app.py"] == digest
+    assert receipt["live_qualified"] is False
+    for name in ("config/browser/profiles.yaml", "config/browser/domains.yaml",
+                 "docs/decisions/VAN-ADOPT-BROWSER-HARNESS-001.yaml",
+                 "docs/decisions/VAN-ADOPT-STAGEHAND-001.yaml",
+                 "docs/decisions/VAN-ADOPT-N8N-001.yaml",
+                 "docs/decisions/VAN-AMEND-SECURITY-POLICY-001.md"):
+        assert (runtime / name).is_file()
+        assert receipt["runtime_sha256"][name] == hashlib.sha256((runtime / name).read_bytes()).hexdigest()
+
 
 
 def _committed_gateway() -> dict:
@@ -76,8 +90,8 @@ def _committed_gateway() -> dict:
     return props
 
 
-def test_the_app_ships_configured_for_the_direct_link():
-    """android/van-gateway.properties is what every build pins unless overridden."""
+def test_debug_keeps_the_historical_direct_link_without_qualifying_release():
+    """The historical address/CA pair remains a debug fixture, never a release profile."""
     import base64
     from datetime import datetime, timezone
     from urllib.parse import urlsplit
@@ -86,6 +100,9 @@ def test_the_app_ships_configured_for_the_direct_link():
     from cryptography.hazmat.primitives.asymmetric import ec
 
     props = _committed_gateway()
+    assert props["VAN_DEPLOYMENT_PROFILE_VERSION"] == "0"
+    assert props["VAN_DEPLOYMENT_PROFILE_ID"] == "historical-dial-control-debug"
+    assert props["VAN_BACKEND_HOST"] == "dial-control"
     url = urlsplit(props["VAN_GATEWAY_BASE_URL"])
     assert url.scheme == "https" and url.hostname and url.port, props["VAN_GATEWAY_BASE_URL"]
     assert url.path in ("", "/")
@@ -96,6 +113,7 @@ def test_the_app_ships_configured_for_the_direct_link():
     assert "PRIVATE KEY" not in (ROOT / "android/van-gateway.properties").read_text(encoding="utf-8")
     gradle = (ROOT / "android/app/build.gradle.kts").read_text(encoding="utf-8")
     assert 'rootProject.file("van-gateway.properties")' in gradle
+    assert "VanProductionTarget.requireReleaseProfile(" in gradle
 
 
 def test_the_phone_and_the_gateway_agree_on_the_routes_that_need_no_certificate():

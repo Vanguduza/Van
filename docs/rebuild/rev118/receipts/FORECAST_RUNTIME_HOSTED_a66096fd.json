@@ -1,0 +1,35 @@
+{
+  "status": "EXACT_A660_HOSTED_SOURCE_FIXTURE_PASS_NOT_UNIT_ACCEPTANCE",
+  "source_head": "a66096fdabc8eef1ecbcf7140dc071d8f65f1d16",
+  "tested_merge": "dd89d0f05f67af01d37366410af4358903fb5944",
+  "run": 40276672824,
+  "artifact_id": 12630218006,
+  "artifact_bytes": 145109,
+  "artifact_sha256": "56dd8702b783f4c22a29f0ac234c575d1827e33fe560c9dd75706da04921dd4c",
+  "image_id": "sha256:ed9799a9171e50dea3907a3258c1d6d0e7471423e75c693d833b166c0b315cc8",
+  "controller_sha256": "29814dafdab92a1e05c983d7164ba8b98300198e9173338c9229b1910d1f1f2d",
+  "source_hashes_match_current": true,
+  "research_cases": 6,
+  "unexecuted": 0,
+  "cold_model_rows": {
+    "qlib_lightgbm": 10,
+    "xgboost": 10,
+    "neuralforecast": 2
+  },
+  "cold_max_error": 0,
+  "training_in_cold_process": false,
+  "distinct_workers_removed": true,
+  "actual_kernel_limits": {
+    "cpu.max": "200000 100000",
+    "memory.max": "6442450944",
+    "pids.max": "256"
+  },
+  "economic_evidence": false,
+  "execution_authority": false,
+  "original_failed_156_run_preserved": 40272681283,
+  "new_main_CI_still_pending": 40276672885,
+  "schema": "van.hosted-forecast-runtime-source/1",
+  "evidence": "ci/forecast_hosted_a66096fd_20261026",
+  "whole_unit_acceptance": false,
+  "architecture_scope": "Linux-x86_64-CPython3.12.15-CPU only;other architectures unexecuted"
+}

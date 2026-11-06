@@ -102,47 +102,64 @@ class LearningFeed:
     ) -> dict[str, str | None]:
         """P2-MEM-001 — §§65, 77. What the owner asked for, and what they decided.
 
-        A mission is a stated owner goal, which is what `IntentContinuityGraph` is a graph
-        of. Observing it here means the graph is built from instructions VAN actually
-        received rather than from a separate act of curation nobody performs. The node is
-        keyed on the goal text, so asking for the same thing again refreshes a standing
-        intent instead of creating a second one — which is what makes STALE mean
-        "unmentioned for ninety days" rather than "recorded once".
-
-        A decision fingerprint is recorded only where there was a decision: a mission
-        whose authority envelope required the owner's presence is one they could have
-        declined and did not. A command that needed no approval is not a choice, and
-        recording one would fill §65's store with the owner's ordinary use of VAN.
+        Both projections require a matching native mission, exact sealed direct owner
+        command and its original context snapshot. An origin label alone is not evidence
+        that the owner stated the goal. Automatic work is not repeated owner intent.
+        Approval additionally requires an approved effective A4/A5 choice; a presence
+        requirement alone does not establish approval. Capture may precede sealing, so
+        the command join observes the same original source after the real seal.
         """
         intent = await self.intents.observe(
             owner_goal=mission.goal,
             project_id=mission.project_id,
             constraints=mission.constraints,
             now_ms=now_ms,
+            mission_id=mission.mission_id,
         )
-        await self.intents.link_mission(intent.intent_id, mission.mission_id, now_ms=now_ms)
 
-        decision_id = None
-        if mission.authority_envelope.requires_owner_presence:
-            decision_id = await self.fingerprints.record(
-                owner_choice=f"approved: {mission.goal[:200]}",
-                mission_id=mission.mission_id,
-                context={
-                    "mission_class": mission.mission_class,
-                    "action_class": mission.authority_envelope.max_action_class.value,
-                    "origin_channel": mission.origin_channel.value,
-                    "sensitivity": mission.sensitivity.value,
-                },
-                options_considered=["approve", "decline"],
-                # §12 — deliberately absent. VAN does not infer why the owner approved,
-                # and writing a plausible reason here is how a fingerprint store becomes
-                # a machine for justifying whatever the owner did last. `falsified()`
-                # therefore returns nothing, and the understanding surface says that this
-                # is because nothing was inferred rather than because nothing was wrong.
-                inferred_reason=None,
-                now_ms=now_ms,
-            )
-        return {"intent_id": intent.intent_id, "decision_id": decision_id}
+        decision_id = await self.record_owner_approval(mission,now_ms=now_ms)
+        return {"intent_id": None if intent is None else intent.intent_id, "decision_id": decision_id}
+
+    async def record_owner_approval(self, mission: Mission, *, now_ms: int | None = None) -> str | None:
+        """Observe a sealed owner approval; this method creates no authority.
+
+        At initial capture there may be no sealed record yet. The command join calls
+        again after seal, and original source identity makes that observation idempotent.
+        History may be recorded after a grant expires; it can never execute that grant.
+        """
+        from van_gateway.models import ActionClass,OriginChannel
+        from van_gateway.understanding.owner_source import owner_mission_source
+        async with self.store.connection() as db:
+            await db.execute("BEGIN IMMEDIATE")
+            evidence=await owner_mission_source(db,mission.mission_id)
+            if evidence is None:return None
+            native,envelope,record,snapshot=evidence.mission,evidence.envelope,evidence.authority,evidence.snapshot
+            source=record.command_id
+            if record.effective_action_class not in {ActionClass.A4,ActionClass.A5}:return None
+            # The authoritative mission is reread in this transaction. A caller's stale
+            # object cannot supply either approval, scope or presentation context.
+            mission=mission.model_copy(update={"goal":native["goal"],"mission_class":native["mission_class"],
+                "origin_channel":OriginChannel(native["origin_channel"]),"authority_envelope":envelope})
+            from van_gateway.context.memory_erasure import source_memory_was_erased
+            projection_key="owner-approval:"+source
+            identity=self.fingerprints.projection_id(mission.mission_id,projection_key)
+            if await source_memory_was_erased(db,table="decision_fingerprints",record_key={"decision_id":identity},
+                    source_kernel_revision=snapshot["kernel_revision"]):return None
+            decision_id = None
+            if mission.authority_envelope.requires_owner_presence:
+                decision_id = await self.fingerprints.record(
+                    owner_choice=f"approved: {mission.goal[:200]}",
+                    mission_id=mission.mission_id,
+                    context={"mission_class":native["mission_class"],"action_class":record.effective_action_class.value,"signed_action_class":record.signed_action_class.value,
+                        "origin_channel":native["origin_channel"],"sensitivity":native["sensitivity"],
+                        "approval_source_ref":"command-authority:"+source},
+                    options_considered=["approve","decline"],
+                    evidence_used=["command-authority:"+source],
+                    inferred_reason=None,
+                    now_ms=now_ms,projection_key=projection_key,_db=db,
+                )
+            await db.commit()
+            return decision_id
 
     async def record_decision_outcome(
         self, mission: Mission, *, state: MissionState, now_ms: int | None = None
@@ -156,14 +173,16 @@ class LearningFeed:
         kind = OUTCOME_KIND.get(state)
         if kind is None:
             return
-        rows = await self.store.fetchall(
-            "SELECT decision_id FROM decision_fingerprints WHERE mission_id = ?",
-            (mission.mission_id,),
-        )
-        for row in rows:
-            await self.fingerprints.record_outcome(
-                str(row["decision_id"]), outcome=kind, now_ms=now_ms,
-            )
+        async with self.store.connection() as db:
+            await db.execute("BEGIN IMMEDIATE")
+            native = await (await db.execute("SELECT state,updated_at_ms FROM missions WHERE mission_id=?", (mission.mission_id,))).fetchone()
+            if native is None or native["state"] != state.value:
+                raise ValueError("LEARNING_NATIVE_OUTCOME_CONFLICT")
+            # Only the native outcome is projected. An exact retry preserves a later
+            # owner reassessment and never recreates a deliberately erased record.
+            await db.execute("UPDATE decision_fingerprints SET outcome=?,updated_at_ms=? "
+                "WHERE mission_id=? AND outcome IS NOT ?", (kind,native["updated_at_ms"],mission.mission_id,kind))
+            await db.commit()
 
     #: P1-LEARN-005 — what each terminal state says about the *approach*, which is a
     #: different question from what it says about the mission.
@@ -212,6 +231,17 @@ class LearningFeed:
             # Not a terminal state, so there is no outcome to record. Defaulting to any of
             # the three would be inventing evidence.
             return None
+        async with self.store.connection() as db:
+            await db.execute("BEGIN IMMEDIATE")
+            return await self._project_strategy_outcome(db, mission, state, outcome, now_ms)
+
+    async def _project_strategy_outcome(self, db, mission, state, outcome, now_ms):
+        row = await (await db.execute("SELECT * FROM missions WHERE mission_id=?", (mission.mission_id,))).fetchone()
+        if row is None or row["state"] != state.value:
+            raise ValueError("LEARNING_NATIVE_OUTCOME_CONFLICT")
+        from van_gateway.mission.service import MissionService
+        mission = MissionService._row_to_mission(row)
+        # BEGIN IMMEDIATE holds the native writer fence throughout these reads.
         rows = await self.store.fetchall(
             "SELECT capability_id FROM mission_activities WHERE mission_id = ? "
             "ORDER BY started_at_ms, activity_id",
@@ -220,15 +250,31 @@ class LearningFeed:
         sequence = [str(r["capability_id"]) for r in rows]
         if not sequence:
             return None
-        strategy_id = await self.strategies.find_or_register(
-            mission_class=mission.mission_class,
-            capability_sequence=sequence,
-            # P1-LEARN-002 — the envelope this sequence was actually exercised under, so
-            # a strategy can never be offered to a mission the owner authorised for less.
-            max_action_class=mission.authority_envelope.max_action_class,
-            now_ms=now_ms,
+        native_rows = await (await db.execute("SELECT activity_id,capability_id,started_at_ms FROM mission_activities "
+            "WHERE mission_id=? ORDER BY started_at_ms,activity_id", (mission.mission_id,))).fetchall()
+        sequence = [str(item["capability_id"]) for item in native_rows]
+        scope = hashlib.sha256(Store.dumps({"mission_class": mission.mission_class,
+            "authority_envelope": mission.authority_envelope.model_dump(mode="json"),
+            "state": mission.state.value, "verification_state": mission.verification_state.value,
+            "verification_record": row["verification_record_json"],
+            "activities": [dict(item) for item in native_rows]}).encode()).hexdigest()
+        previous = await (await db.execute("SELECT * FROM mission_strategy_observations WHERE mission_id=?", (mission.mission_id,))).fetchone()
+        if previous is not None:
+            if previous["state"] == "LEGACY_UNRECONCILED":
+                return None
+            if previous["state"] != "OBSERVED" or previous["scope_sha256"] != scope or previous["outcome"] != outcome.value:
+                raise ValueError("LEARNING_NATIVE_SOURCE_CONFLICT")
+            return previous["strategy_id"]
+        strategies = StrategyLearning(self.store, _db=db)
+        strategy_id = await strategies.find_or_register(
+            mission_class=mission.mission_class, capability_sequence=sequence,
+            max_action_class=mission.authority_envelope.max_action_class, now_ms=now_ms,
         )
-        await self.strategies.record_outcome(strategy_id, outcome=outcome, now_ms=now_ms)
+        stamp = mission.updated_at_ms
+        await strategies.record_outcome(strategy_id, outcome=outcome, now_ms=stamp)
+        await db.execute("INSERT INTO mission_strategy_observations(mission_id,state,strategy_id,scope_sha256,outcome,recorded_at_ms) "
+            "VALUES(?,'OBSERVED',?,?,?,?)", (mission.mission_id,strategy_id,scope,outcome.value,stamp))
+        await db.commit()
         return strategy_id
 
     #: GAP-F-008 — promotion states that mean a strategy has cleared VanEval, not merely

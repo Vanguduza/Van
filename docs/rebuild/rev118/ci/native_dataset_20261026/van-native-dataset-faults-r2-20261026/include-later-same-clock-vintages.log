@@ -1,0 +1,47 @@
+.F....F...................                                               [100%]
+=================================== FAILURES ===================================
+_ test_same_millisecond_future_correction_cannot_change_pinned_original_window _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-345/test_same_millisecond_future_c0')
+
+    def test_same_millisecond_future_correction_cannot_change_pinned_original_window(tmp_path):
+        book,c,sample,first=original(tmp_path);before=capture(book,c,first)
+        changed=replace(sample,bars=(replace(sample.bars[0],close=sample.bars[0].low),))
+        second=book.record('correction-at-same-clock',c,changed)
+        assert second['available_at_ms']==first['available_at_ms']
+>       assert capture(book,c,first)==before
+E       AssertionError: assert {'schema': 'v...sion': 1, ...} == {'schema': 'v...sion': 1, ...}
+E         
+E         Omitting 15 identical items, use -vv to show
+E         Differing items:
+E         {'window_sha256': '7d1a7ce590788f24ca6a39ca917a3e4b5e7e7a3eca2c63d135ee6736cdbaf03c'} != {'window_sha256': '98ca36ef8c9b32148b1d1dde96df76ebc3e78710fa0e7c46e40a2384609f8211'}
+E         {'source_records': [{'receipt': {'record_ref': '2901fe8c69a6ade16c9f1853e9c24ff378984c7572d7ee27fb2f9251421c003d', 're... 'provider_qualified': False, ...}, 'requested_window': {'from_ms': 120000, 'to_ms': 300000}, 'has_more': False, ...}]} != {'source_records': [{'receipt': {'record_ref': '2901fe8c69a6ade16c9f1853e9c24ff378984c7572d7ee27fb...
+E         
+E         ...Full output truncated (3 lines hidden), use '-vv' to show
+
+trading/tests/test_native_bar_windows.py:41: AssertionError
+___ test_contract_metadata_revision_remains_exact_in_past_source_membership ____
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-345/test_contract_metadata_revisio0')
+
+    def test_contract_metadata_revision_remains_exact_in_past_source_membership(tmp_path):
+        book,c,sample,first=original(tmp_path);past=capture(book,c,first)
+        revised=contract(detail=dict(c.metadata['detail'],minVolume=2000),received_at_ms=200000)
+        second=book.record('metadata-vintage',revised,replace(observation(revised),has_more=False))
+        current=capture(book,revised,second)
+        assert current['source_records'][-1]['contract']['metadata']['detail']['minVolume']==2000
+>       assert capture(book,c,first)==past and past['source_records'][0]['contract']['metadata']['detail']['minVolume']==1000
+E       AssertionError: assert ({'schema': 'v...sion': 1, ...} == {'schema': 'v...sion': 1, ...}
+E         
+E         Omitting 15 identical items, use -vv to show
+E         Differing items:
+E         {'window_sha256': '8e9943a317f4037847bfa5bf96f308d05da57afa8a175b66b913df7c3b42d1d6'} != {'window_sha256': '98ca36ef8c9b32148b1d1dde96df76ebc3e78710fa0e7c46e40a2384609f8211'}
+E         {'source_records': [{'receipt': {'record_ref': '2901fe8c69a6ade16c9f1853e9c24ff378984c7572d7ee27fb2f9251421c003d', 're... 'provider_qualified': False, ...}, 'requested_window': {'from_ms': 120000, 'to_ms': 300000}, 'has_more': False, ...}]} != {'source_records': [{'receipt': {'record_ref': '2901fe8c69a6ade16c9f1853e9c24ff378984c7572d7ee27fb...
+E         
+E         ...Full output truncated (3 lines hidden), use '-vv' to show)
+
+trading/tests/test_native_bar_windows.py:76: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_native_bar_windows.py::test_same_millisecond_future_correction_cannot_change_pinned_original_window
+FAILED trading/tests/test_native_bar_windows.py::test_contract_metadata_revision_remains_exact_in_past_source_membership
+2 failed, 24 passed in 0.61s

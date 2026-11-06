@@ -1,0 +1,9 @@
+{
+  "artifact_id": 12794822760,
+  "source_head": "d156d943df32329c14c1abf147edebe7d6425820",
+  "main_run": 40638560229,
+  "bytes": 179927,
+  "sha256": "734d84dfbf6a6866e9d48f03f85e7b9ac6ca052bc87f5226a82e4dc5133acc08",
+  "GitHub_digest_and_size_match": true,
+  "zip_CRC_paths_and_extracted_readback_verified": true
+}

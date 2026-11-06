@@ -1,0 +1,10 @@
+{
+  "state": "ACTUAL_UNCHANGED_NONCE_TEST_FUNCTION_CHILD_IMPORT_REFUSED",
+  "cwd": "/workspace/van-review-2026-10-18/publish/backend",
+  "exit": 1,
+  "stdout": "",
+  "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 4, in <module>\nModuleNotFoundError: No module named 'test_mt5_worker'\n",
+  "effect_file_exists": false,
+  "source_pins_unchanged": true,
+  "scope": "Actual unchanged original callable/controlledFakeMT5 fixture, not pytestcasepass or realnativeSDK."
+}

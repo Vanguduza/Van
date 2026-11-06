@@ -1,0 +1,7 @@
+{
+  "original_source_sha256": "5bd2908d267fcd7f9eb0d6978d0b7e7a58ccabf32b53e30e78d5625aca867c35",
+  "updated_source_sha256": "40b596964983b1ff35455623acac9a0839ecf915b680f962503c0207c4f66d8b",
+  "only_AST_delta": "Two explicit readonly members in the strict expected public-method set; every other assertion and all banned capability substrings unchanged",
+  "full_run_actual_exit": 1,
+  "full_owned_pg_independently_absent": true
+}

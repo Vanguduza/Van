@@ -1,0 +1,19 @@
+{
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "trading/tests/test_ctrader_cancel_transport.py",
+    "--junitxml=/workspace/van-native-cancel-transport-before-r2-20261030.xml"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 81971,
+  "started_at_utc": "2026-10-30T10:38:31.323666+00:00",
+  "timeout_seconds": 120,
+  "state": "COMPLETED",
+  "command_pid": 81977,
+  "exit": 1,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-30T10:38:32.652786+00:00"
+}

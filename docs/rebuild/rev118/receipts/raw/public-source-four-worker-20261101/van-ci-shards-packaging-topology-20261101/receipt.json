@@ -1,0 +1,27 @@
+{
+  "started_at_utc": "2026-11-01T11:08:25.727730+00:00",
+  "preflight": {
+    "path": "/tmp/van-recovery-ci-shards-packaging-topology-20261101",
+    "free_bytes_before": 4718383104,
+    "free_inodes_before": 2245484,
+    "minimum_free_bytes": 4294967296,
+    "no_preexisting_directory": true
+  },
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "tools/rebuild/source_storage_audit.py",
+    "--report",
+    "/workspace/van-ci-shards-packaging-topology-20261101/storage-audit.json",
+    "tests/contracts/test_van_private_core_topology.py::test_only_private_core_modules_touch_the_protected_tables",
+    "--basetemp=/tmp/van-recovery-ci-shards-packaging-topology-20261101",
+    "--junitxml=/workspace/van-ci-shards-packaging-topology-20261101/tests.xml",
+    "-q"
+  ],
+  "exit": 0,
+  "cleanup": {
+    "path": "/tmp/van-recovery-ci-shards-packaging-topology-20261101",
+    "created": false,
+    "independently_absent": true
+  },
+  "completed_at_utc": "2026-11-01T11:08:58.563436+00:00"
+}

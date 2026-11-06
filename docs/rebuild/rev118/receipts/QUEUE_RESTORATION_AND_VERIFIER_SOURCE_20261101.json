@@ -1,0 +1,23 @@
+{
+  "schema": "van.queue-restoration-source/1",
+  "at_utc": "2026-11-01T13:47:03.210509+00:00",
+  "base": "c0063940a7573597934e62ada558d4dc942cfad0",
+  "reviewed_unique_paths": 53,
+  "pins": "raw/queue-restoration-20261101/FROZEN_SOURCE_PINS.json",
+  "behavior": "Existing BE002/LAC234 selected eligible unsent command clearing preserves session/context/unknown originals and concurrent enqueues. Direct HTTP durably retains the exact prepared original before uncertainty; current lawful signed original-reference session readback does not dispatch again.",
+  "source_evidence": {
+    "SDK": "43 actual unit cases and main/unit compilation;644 inputs unchanged",
+    "JVM": "73 cases zero skips",
+    "HTTP": "63 cases actual terminal0 HTTP04; historical03 missing supervisor exit retained",
+    "registry": "220 cases across all8 artifact-derived modules zero skips",
+    "verifier": "Actual default-env production CLI positive/no-own-cache and foreign-cache refusal;3 focused cases pass"
+  },
+  "independent_reviews": [
+    "/workspace/van-queue-independent-recheck-r2-20261101/review.json",
+    "/workspace/van-verifier-startup-independent-review-20261101/review.json",
+    "/workspace/van-queue-derivative-independent-review-20261101/review.json"
+  ],
+  "derived": "487 endpoint identities preserved; optional OriginalCommandReference/ResumeBody addition gives380 schemas.42features105functions78surfaces349actions unchanged. Five existing edit retargets preserve374 case IDs/order/targets/tests and383 edits; four missing text anchors plus one wrong generic commit match. Source-bound captured C36/C39 controls and intended kills are separate from future full corpus execution.",
+  "retained_failure": "Original R1 cancellation loss remains failed; original metadata refusals and a5d native failure retained. Exactc006 four workers succeeded but aggregate124856084035 FAILED from verifier-parent bytecode;198 separate media cases passed4.31s. No complete union or speed qualification. Fix suppresses verifier own bytecode before helper import; strict foreign/preexisting-input refusal unchanged.",
+  "limits": "Overlapping SOURCE suites are not summed. No native Keystore/device/provider/production/unit/BG001/release acceptance; trusted-checker/DDS-key prerequisites unwaived. No application assertions, workflow scope, frozen package or installer changes."
+}

@@ -1,0 +1,92 @@
+.............F...............                                            [100%]
+=================================== FAILURES ===================================
+___ test_real_add_then_proportional_residual_then_all_native_legs_close_once ___
+
+tmp_path = PosixPath('/tmp/van-recovery-family-two-leg-workflow-r2-20261101/test_real_add_then_proportiona0')
+
+    def test_real_add_then_proportional_residual_then_all_native_legs_close_once(tmp_path):
+        from vati.lifecycle.family_outcome import publish_family_outcome
+        from vati.lifecycle.family_action_journal import FamilyActionJournal
+        w,store,time,admitted,plan,history=admitted_source_world(tmp_path,
+            actual_runtime_lease=True,add_child=True,max_quantity='.20')
+        try:
+            family=w.lifecycle.families.get(plan.snapshot.family_id)
+            before={p.position_id:p.quantity for p in w.adapter.positions()}
+>           partial=w.lifecycle.request_family_reduction(family.family_id,action_key='two-leg-partial',
+                action='PARTIAL_CLOSE',requested_quantity=D('.04'),now_ms=time[0])
+
+trading/tests/test_family_governed_workflow.py:196: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/app/trade_lifecycle.py:1313: in request_family_reduction
+    explicit_ref = grants.authorize_plan(current,plan,history=history,mandate=self.mandate,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.risk.operational_grant.OperationalOptimizationGrants object at 0x7f6ce3c74ad0>
+event = Event(kind=<EventKind.SESSION: 'SESSION'>, producer='vati-lifecycle-policy-admission', event_time_ms=1800000060000, re... correlation_id='synthetic-source-only-grant', hash='42040707b90d307855ff73ff536f3f1c62e61b9716cd49074964fb02a792c6e6')
+plan = FamilyActionPlan(snapshot=FamilySnapshot(family_id='family:ti-e2e-1', family_revision='cc4968ddbae740416df41f237232fcd...6'), ('lease_ref', '1'), ('original_mandate_ref', '2603af2202a02dd15b7f195848013c2ea1f0bf75fa59f79e4e7becb313107531')))
+history = <vati.execution.recovery_scope.NativePositionHistory object at 0x7f6ce3b021b0>
+mandate = TradingMandate(mandate_id='mandate-fx-primary', version='1.0.0', account_alias='fx_primary', venue='paper', mode=<Auth...se)), strategy_risk_budgets={}, trading_temperament=None, strategy_temperaments={}, temperament_owner_signature_ref='')
+authority = <vati.risk.authority.RiskAuthority object at 0x7f6ce3accec0>
+adapter = PaperAdapter(venue='paper', account_alias='fx_primary', equity=Decimal('10000'), currency='USD', spread=Decimal('0.000...ecimal('0.01'), partial_min=Decimal('0'), partial_max=None, minimum_remaining=Decimal('0'), revision='paper-close/1')})
+family_risk_pct = Decimal('0.004'), lease_epoch = 1
+fence_ref = 'fb25bb0a6933ab12f054f14d65b9d5662ca401a44816aa7609048b850b8391e5'
+explicit_signature = None, family_action = None, active_target = None
+
+    def authorize_plan(self, event, plan, *, history, mandate, authority, adapter,
+                       family_risk_pct, lease_epoch, fence_ref, explicit_signature=None, family_action=None, active_target=None):
+        """Join real current owners; a planner flag/reference cannot admit effects."""
+        from vati.risk.mandate import TradingMandate
+        from vati.risk.authority import RiskAuthority, _canonical_hash
+        from vati.risk.serde import mandate_binding_hash
+        from vati.risk.mandate_source import validate_mandate_source
+        from vati.execution.paper import PaperAdapter
+        from vati.lifecycle.family_actions import EXPLICIT_LEGS_V1, policy_implementation_hash
+        now=self.clock()
+        event=self.current(event.payload['grant_id'],expected_ref=event.hash)
+        grant=event.payload['grant'];scope=grant['scope'];binding=dict(plan.authority_refs)
+        owner_verified=self.owner.verify(event.payload['owner_signature'],act='lifecycle-policy-grant',
+            subject=subject(grant),now_unix=now//1000,single_use=False,
+            max_lifetime_seconds=MAX_STANDING_LIFETIME_SECONDS)
+        mandate_keys=getattr(mandate,'_verified_owner_key_bindings',())
+        if (not mandate_keys or mandate_keys[0] is None
+                or mandate_keys[0].public_key_sha256 != owner_verified._verified_key_binding.public_key_sha256
+                or not mandate_keys[0].is_current()):
+            raise PolicyAdmissionError('lifecycle grant owner is not the current mandate owner')
+        if (type(mandate) is not TradingMandate or not isinstance(authority,RiskAuthority)
+                or not mandate.authority_matches_policy() or not mandate.owner_keys_current()
+                or not mandate.signed_at_unix*1000 <= now < mandate.expires_at_unix*1000
+                or mandate_binding_hash(authority.mandate) != mandate_binding_hash(mandate)
+                or plan.policy.mode != 'ADMITTED' or plan.policy.qualification_ref != grant['qualification_hash']
+                or plan.policy.policy_id != grant['policy_id'] or plan.policy.version != grant['policy_version']
+                or plan.policy.artifact_hash != grant['policy_hash']
+                or plan.policy.implementation_hash != grant['source_hash']
+                or policy_implementation_hash() != grant['source_hash']
+                or binding['grant_ref'] != event.hash or binding['current_mandate_ref'] != mandate_binding_hash(mandate)
+                or binding['fence_ref'] != fence_ref or binding['lease_ref'] != str(lease_epoch)
+                or plan.snapshot.account_alias != scope['account_alias']
+                or adapter.account_alias != scope['account_alias'] or mandate.account_alias != scope['account_alias']
+                or plan.snapshot.venue != scope['venue'] or adapter.venue != scope['venue']
+                or mandate.venue != scope['venue'] or plan.action not in grant['operations']
+                or plan.requested_quantity > quantity(grant['max_requested_quantity'])
+                or amount(family_risk_pct) > amount(quantity(grant['max_family_risk_pct']))
+                or not plan.snapshot.known):
+            raise PolicyAdmissionError('lifecycle plan lacks exact current policy/mandate/risk/native authority')
+        if scope['environment']=='PAPER' and type(adapter) is not PaperAdapter:
+            raise PolicyAdmissionError('SOURCE paper qualification cannot authorize another native provider')
+        refs=set();caps=set();risk_after=Fraction(0)
+        native_positions={p.position_id:p for p in adapter.positions()}
+        native_account=adapter.sync_account()
+        for leg in plan.snapshot.legs:
+            if leg.remaining == 0:
+                continue
+            command=history.commands.get(leg.trade_intent_id)
+            if (command is None or command[0].get('strategy_id') != scope['strategy_id']
+                    or command[0].get('strategy_version') != scope['strategy_version']
+                    or leg.close_rules is None):
+>               raise PolicyAdmissionError('original native command/cohort differs from lifecycle grant')
+E               vati.risk.operational_grant.PolicyAdmissionError: original native command/cohort differs from lifecycle grant
+
+trading/vati/risk/operational_grant.py:295: PolicyAdmissionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_family_governed_workflow.py::test_real_add_then_proportional_residual_then_all_native_legs_close_once
+1 failed, 28 passed in 2.91s

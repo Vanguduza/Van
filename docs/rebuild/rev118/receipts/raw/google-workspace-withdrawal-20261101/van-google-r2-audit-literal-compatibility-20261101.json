@@ -1,0 +1,23 @@
+{
+  "at_utc": "2026-11-01T08:14:42.479332+00:00",
+  "path": "backend/van_gateway/app.py",
+  "reviewed_sha256": "0cd6c5024d5f73e1049f0bdef10c803c959cde4eeeb5976264ca1122c55c3470",
+  "integrated_sha256": "72bea491c87333a3fe3142543eefee645a3bd5141d56d1520d6afd9ce519de53",
+  "whole_file_ast_equal": true,
+  "diff": [
+    "--- reviewed_R2",
+    "+++ integrated_quote_compatibility",
+    "@@ -3237,7 +3237,7 @@",
+    "         except GoogleAuthError as exc:",
+    "             raise google_withdrawal_error(exc) from exc",
+    "         await audit.record(result='ok' if result['state']=='APPLIED' else 'refused',",
+    "-            device_id=device_id, capability='google.owner_revoke',",
+    "+            device_id=device_id, capability=\"google.owner_revoke\",",
+    "             after={'status':'revoked' if result['state']=='APPLIED' else 'unchanged',",
+    "                    'operation_id':result['operation_id'], 'connection_generation':result['connection_generation']})",
+    "         status = (await google.status()).model_dump(mode='json')"
+  ],
+  "reason": "Preserve original canonical double-quoted audit-label vocabulary guard; no assertion/regex change or runtime semantic change.",
+  "failed_run": "/workspace/van-google-r2-crossowner-guards-20261101/receipt.json",
+  "frozen_review_lane_unchanged": true
+}

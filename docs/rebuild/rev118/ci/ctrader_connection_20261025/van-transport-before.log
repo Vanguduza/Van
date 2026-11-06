@@ -1,0 +1,165 @@
+FFFFFFF.                                                                 [100%]
+=================================== FAILURES ===================================
+_______________ test_close_shuts_down_and_joins_a_blocked_reader _______________
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7fc0f15b9e80>
+
+    def test_close_shuts_down_and_joins_a_blocked_reader(harness):
+        client, _ = harness.pair()
+        transport = harness.transport(lambda *_: client)
+        transport.connect()
+        reader = transport._reader
+        transport.close()
+>       assert not reader.is_alive(), "close returned with its socket reader still blocked"
+E       AssertionError: close returned with its socket reader still blocked
+E       assert not True
+E        +  where True = is_alive()
+E        +    where is_alive = <Thread(Thread-1 (_read_loop), started daemon 140466658993856)>.is_alive
+
+trading/tests/test_ctrader_transport_lifecycle.py:92: AssertionError
+___ test_close_wakes_an_original_pending_request_without_waiting_for_timeout ___
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7fc0f15b9970>
+
+    def test_close_wakes_an_original_pending_request_without_waiting_for_timeout(harness):
+        client, server = harness.pair()
+        transport = harness.transport(lambda *_: client)
+        worker, result = harness.worker(lambda: transport.call("ProtoOATraderReq", {"ctidTraderAccountId": 12345}))
+        assert receive_frame(server)[0] == "ProtoOATraderReq"
+        transport.close()
+        worker.join(.5)
+>       assert not worker.is_alive(), "closed native request waited for its original response timeout"
+E       AssertionError: closed native request waited for its original response timeout
+E       assert not True
+E        +  where True = is_alive()
+E        +    where is_alive = <Thread(Thread-2 (run), started 140466658993856)>.is_alive
+
+trading/tests/test_ctrader_transport_lifecycle.py:104: AssertionError
+_________ test_peer_disconnect_retires_and_closes_the_original_socket __________
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7fc0f16a90d0>
+
+    def test_peer_disconnect_retires_and_closes_the_original_socket(harness):
+        client, server = harness.pair()
+        transport = harness.transport(lambda *_: client)
+        transport.connect()
+        reader = transport._reader
+        server.shutdown(socket.SHUT_RDWR)
+        server.close()
+        reader.join(1)
+        assert not reader.is_alive() and not transport.connected
+>       assert client.fileno() == -1, "reader failure retained an open disconnected socket"
+E       AssertionError: reader failure retained an open disconnected socket
+E       assert 11 == -1
+E        +  where 11 = <built-in method fileno of socket object at 0x7fc0f1611940>()
+E        +    where <built-in method fileno of socket object at 0x7fc0f1611940> = <socket.socket fd=11, family=1, type=1, proto=0>.fileno
+
+trading/tests/test_ctrader_transport_lifecycle.py:118: AssertionError
+__________ test_concurrent_connects_create_one_socket_and_one_reader ___________
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7fc0f16a9df0>
+
+    def test_concurrent_connects_create_one_socket_and_one_reader(harness):
+        entered, release, duplicate = threading.Event(), threading.Event(), threading.Event()
+        harness.release.append(release)
+        calls = []
+        def connector(*_):
+            calls.append(None)
+            if len(calls) > 1:
+                duplicate.set()
+            entered.set()
+            assert release.wait(2)
+            return harness.pair()[0]
+        transport = harness.transport(connector)
+        first, first_result = harness.worker(transport.connect)
+        assert entered.wait(1)
+        second, second_result = harness.worker(transport.connect)
+        duplicated = duplicate.wait(.15)
+        release.set()
+        first.join(1); second.join(1)
+        assert first_result.get_nowait() is None and second_result.get_nowait() is None
+>       assert not duplicated, "concurrent connect opened another native connection"
+E       AssertionError: concurrent connect opened another native connection
+E       assert not True
+
+trading/tests/test_ctrader_transport_lifecycle.py:141: AssertionError
+______ test_old_reader_failure_cannot_disconnect_a_replacement_connection ______
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7fc0f16aa810>
+
+    def test_old_reader_failure_cannot_disconnect_a_replacement_connection(harness):
+        original = DelayedSocket(harness.pair()[0], read=True)
+        replacement = harness.pair()[0]
+        harness.release.append(original.release)
+        sockets = iter([original, replacement])
+        transport = harness.transport(lambda *_: next(sockets))
+        transport.connect()
+        reader = transport._reader
+        assert original.entered.wait(1)
+        closer, close_result = harness.worker(transport.close)
+        assert original.closed.wait(1)
+        transport.connect()
+        original.release.set()
+        reader.join(1); closer.join(1)
+        assert close_result.get_nowait() is None
+>       assert transport.connected and transport._sock is replacement, "retired reader poisoned the new connection"
+E       AssertionError: retired reader poisoned the new connection
+E       assert (False)
+E        +  where False = <vati.execution.ctrader.transport.CtraderTransport object at 0x7fc0f16ab500>.connected
+
+trading/tests/test_ctrader_transport_lifecycle.py:187: AssertionError
+__________ test_old_request_failure_cannot_close_a_replacement_socket __________
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7fc0f0c08380>
+
+    def test_old_request_failure_cannot_close_a_replacement_socket(harness):
+        original = DelayedSocket(harness.pair()[0], write=True)
+        replacement = harness.pair()[0]
+        harness.release.append(original.release)
+        sockets = iter([original, replacement])
+        transport = harness.transport(lambda *_: next(sockets))
+        caller, result = harness.worker(lambda: transport.call("ProtoOATraderReq", {"ctidTraderAccountId": 12345}))
+        assert original.entered.wait(1)
+        transport.close()
+        transport.connect()
+        original.release.set()
+        caller.join(1)
+        assert isinstance(result.get_nowait(), CtraderError)
+>       assert transport.connected and replacement.fileno() >= 0, "old request closed the new native connection"
+E       AssertionError: old request closed the new native connection
+E       assert (False)
+E        +  where False = <vati.execution.ctrader.transport.CtraderTransport object at 0x7fc0f0c08590>.connected
+
+trading/tests/test_ctrader_transport_lifecycle.py:203: AssertionError
+_____ test_tls_failure_closes_the_raw_socket_before_reporting_unavailable ______
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7fc0f0c08aa0>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc0f0c095e0>
+
+    def test_tls_failure_closes_the_raw_socket_before_reporting_unavailable(harness, monkeypatch):
+        raw, _ = harness.pair()
+        class FailedTLS:
+            def wrap_socket(self, *_args, **_kwargs):
+                raise ssl.SSLError("fixture TLS refusal")
+        monkeypatch.setattr(transport_module.socket, "create_connection", lambda *_args, **_kwargs: raw)
+        monkeypatch.setattr(transport_module.ssl, "create_default_context", FailedTLS)
+        transport = CtraderTransport()
+        harness.transports.append(transport)
+        with pytest.raises(CtraderError, match="connect failed"):
+            transport.connect()
+>       assert raw.fileno() == -1, "TLS failure leaked the original TCP socket"
+E       AssertionError: TLS failure leaked the original TCP socket
+E       assert 11 == -1
+E        +  where 11 = <built-in method fileno of socket object at 0x7fc0f16133f0>()
+E        +    where <built-in method fileno of socket object at 0x7fc0f16133f0> = <socket.socket fd=11, family=1, type=1, proto=0>.fileno
+
+trading/tests/test_ctrader_transport_lifecycle.py:217: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_ctrader_transport_lifecycle.py::test_close_shuts_down_and_joins_a_blocked_reader
+FAILED trading/tests/test_ctrader_transport_lifecycle.py::test_close_wakes_an_original_pending_request_without_waiting_for_timeout
+FAILED trading/tests/test_ctrader_transport_lifecycle.py::test_peer_disconnect_retires_and_closes_the_original_socket
+FAILED trading/tests/test_ctrader_transport_lifecycle.py::test_concurrent_connects_create_one_socket_and_one_reader
+FAILED trading/tests/test_ctrader_transport_lifecycle.py::test_old_reader_failure_cannot_disconnect_a_replacement_connection
+FAILED trading/tests/test_ctrader_transport_lifecycle.py::test_old_request_failure_cannot_close_a_replacement_socket
+FAILED trading/tests/test_ctrader_transport_lifecycle.py::test_tls_failure_closes_the_raw_socket_before_reporting_unavailable
+7 failed, 1 passed in 0.90s

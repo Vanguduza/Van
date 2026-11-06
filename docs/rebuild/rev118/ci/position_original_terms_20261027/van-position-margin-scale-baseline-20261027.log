@@ -1,0 +1,56 @@
+.....FF.........................                                         [100%]
+=================================== FAILURES ===================================
+_ test_actual_snapshot_producers_supply_bound_account_and_margin_during_cash_outage[single] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-675/test_actual_snapshot_producers0')
+producer = 'single'
+
+    @pytest.mark.parametrize('producer', ['single', 'account'])
+    def test_actual_snapshot_producers_supply_bound_account_and_margin_during_cash_outage(tmp_path, producer):
+        from test_mt5_funding_runtime import profile
+        from vati.app.portfolio import account_states
+        from vati.funding.risk_fence import funding_risk_fence
+        sdk, adapter, ledger, event = observed_owner(tmp_path, producer)
+        before = ledger.count(); row = account_states(ledger, [profile()])[0]
+        value = row['native_account_observation']
+        assert value['state']=='OBSERVED' and value['snapshot_ref']==event.hash
+        assert value['reported_equity']=='10250.5' and value['risk_equity']=='10000.0'
+        assert value['valuation_state']=='CREDIT_EXCLUDED' and value['execution_authority'] is False
+        assert row['equity']=='10000.0' and row['floating_pnl']=='0.0' and row['margin']['state']=='OBSERVED'
+>       assert row['margin']['risk_free_margin_bound']=='9000.0' and row['day_pnl'] is None
+E       AssertionError: assert ('9000' == '9000.0'
+E         
+E         - 9000.0
+E         ?     --
+E         + 9000)
+
+trading/tests/test_native_account_observation.py:83: AssertionError
+_ test_actual_snapshot_producers_supply_bound_account_and_margin_during_cash_outage[account] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-675/test_actual_snapshot_producers1')
+producer = 'account'
+
+    @pytest.mark.parametrize('producer', ['single', 'account'])
+    def test_actual_snapshot_producers_supply_bound_account_and_margin_during_cash_outage(tmp_path, producer):
+        from test_mt5_funding_runtime import profile
+        from vati.app.portfolio import account_states
+        from vati.funding.risk_fence import funding_risk_fence
+        sdk, adapter, ledger, event = observed_owner(tmp_path, producer)
+        before = ledger.count(); row = account_states(ledger, [profile()])[0]
+        value = row['native_account_observation']
+        assert value['state']=='OBSERVED' and value['snapshot_ref']==event.hash
+        assert value['reported_equity']=='10250.5' and value['risk_equity']=='10000.0'
+        assert value['valuation_state']=='CREDIT_EXCLUDED' and value['execution_authority'] is False
+        assert row['equity']=='10000.0' and row['floating_pnl']=='0.0' and row['margin']['state']=='OBSERVED'
+>       assert row['margin']['risk_free_margin_bound']=='9000.0' and row['day_pnl'] is None
+E       AssertionError: assert ('9000' == '9000.0'
+E         
+E         - 9000.0
+E         ?     --
+E         + 9000)
+
+trading/tests/test_native_account_observation.py:83: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_native_account_observation.py::test_actual_snapshot_producers_supply_bound_account_and_margin_during_cash_outage[single]
+FAILED trading/tests/test_native_account_observation.py::test_actual_snapshot_producers_supply_bound_account_and_margin_during_cash_outage[account]
+2 failed, 30 passed in 5.69s

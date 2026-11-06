@@ -1,0 +1,53 @@
+{
+  "started_at_utc": "2026-11-01T04:04:37.732620+00:00",
+  "source_parent": "2728a83ce203fec867dc536c8d4341c2ce4415cb",
+  "owned_temp_preflight": {
+    "path": "/tmp/van-recovery-family-native-protection-r2-20261101",
+    "free_bytes_before": 8923205632,
+    "free_inodes_before": 2304130,
+    "minimum_free_bytes": 4294967296,
+    "no_preexisting_directory": true
+  },
+  "source_pins": {
+    "trading/vati/execution/paper.py": "f7a84387195d4259f9658893d96167d02fd33a9acf2a3162bcd1b4324d00ce7e",
+    "trading/vati/lifecycle/family_actions.py": "c83a0e9f453492f4207a7f0ddf2e0cd9b6f5863ce8db47d0958bdf9f9c43e406",
+    "trading/vati/lifecycle/family.py": "c4fa5f46ed64ab0707c7aadfd72a5193e4ddfb637342b642c0cf73dd6e1ea1e3",
+    "trading/vati/lifecycle/family_membership.py": "a230aa315c35ea891c3166c26c78a68a0a765d522cdee60fb80ee41af8cd75ca",
+    "trading/vati/lifecycle/family_action_journal.py": "28df2cc05b358fa00f1f2a674f676b004fc92fcb000eb179272e29c53d24558e",
+    "trading/vati/execution/exit_journal.py": "669c71707d6d43bcbe02ed3f643a51650ca5778e937836fb5730bf90f3fb691b",
+    "trading/vati/execution/router.py": "64425fe610638670afd889387561c2095cfaef3ca36fcd0de0e05a9b4cfa5815",
+    "trading/vati/app/trade_lifecycle.py": "21579267c23465161d2015ac04ade47a94bfe7e52fddbc09e88203f3687b929e",
+    "trading/vati/risk/operational_grant.py": "c3a47e5ba2610394e775e3d727163ed1bb4867a07e4e26c4080f15209930acbf",
+    "trading/vati/lifecycle/family_execution.py": "054dd20611b0956301dbb17839fb24536bef205cff8bc8dd4ae03beb56a03479",
+    "trading/vati/lifecycle/family_runtime.py": "529b2ed081d3109b03beb8533caadc0a80c103c71a5ebe8726db12a2f5ca4500",
+    "trading/vati/execution/native_protection.py": "bd10c159fa08ead865fb6b61d4056d6311461cdd81a44c43ac2ef627a9079009",
+    "trading/vati/lifecycle/family_outcome.py": "961afa0882672110555414284362ba3300fadf26df17c033f66d48f6abe9ff33",
+    "trading/tests/test_family_native_protection.py": "b800d6d7b4bf1a3628b9dec0b86d7cd3e9ca078742ac477b13ca82c2b45f3b23",
+    "trading/tests/test_family_native_membership.py": "eca9b823505576cf547b51ae12dc8ae792993c3ecd1b3f5727879cdf46eff6c5",
+    "trading/tests/test_family_durable_projection.py": "4b3b897e3ef77d4f2ae256ab0b0ac48406fcb54aafddeb61b2ba6fd0b6d73c8e"
+  },
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "tools/rebuild/source_storage_audit.py",
+    "--report",
+    "/workspace/van-family-native-protection-r2-20261101/storage-audit.json",
+    "trading/tests/test_family_native_protection.py",
+    "trading/tests/test_family_native_membership.py",
+    "trading/tests/test_family_durable_projection.py",
+    "--basetemp=/tmp/van-recovery-family-native-protection-r2-20261101",
+    "--junitxml=/workspace/van-family-native-protection-r2-20261101/tests.xml",
+    "-q"
+  ],
+  "exit": 0,
+  "owned_temp_cleanup": {
+    "path": "/tmp/van-recovery-family-native-protection-r2-20261101",
+    "files": 30,
+    "inventory": "/workspace/van-family-native-protection-r2-20261101/owned-temp-inventory.json",
+    "inventory_sha256": "45964f53ef134f3effacad8271bb96670665a6045efaa8cc869207882e5aabb4",
+    "free_bytes_before_cleanup": 8922124288,
+    "free_bytes_after_cleanup": 8923205632,
+    "free_inodes_after": 2304130,
+    "independently_absent": true
+  },
+  "completed_at_utc": "2026-11-01T04:04:39.462749+00:00"
+}

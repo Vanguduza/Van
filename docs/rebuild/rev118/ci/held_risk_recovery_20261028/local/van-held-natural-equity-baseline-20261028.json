@@ -1,0 +1,22 @@
+{
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "tools/rebuild/source_storage_audit.py",
+    "--report",
+    "/workspace/van-held-natural-equity-baseline-20261028-audit.json",
+    "trading/tests/test_physical_snapshot_producers.py",
+    "-k",
+    "held_projection",
+    "--junitxml=/workspace/van-held-natural-equity-baseline-20261028.xml",
+    "-q"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 100849,
+  "started_at_utc": "2026-10-28T05:10:00.378725+00:00",
+  "timeout_seconds": 300,
+  "state": "COMPLETED",
+  "command_pid": 100850,
+  "exit": 1,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-28T05:10:02.349322+00:00"
+}

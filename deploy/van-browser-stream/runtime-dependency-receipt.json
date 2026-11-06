@@ -1,0 +1,176 @@
+{
+  "schema_version": 1,
+  "platform": "CPython 3.12 Linux x86_64",
+  "verification": "SHA256 computed from exact downloaded wheels through configured proxy",
+  "live_host_installed": false,
+  "dependencies": [
+    {
+      "name": "aiohappyeyeballs",
+      "version": "2.7.1",
+      "artifact": "aiohappyeyeballs-2.7.1-py3-none-any.whl",
+      "sha256": "9243213661e29250eb41368e5daa826fc017156c3b8a11440826b2e3ed376472",
+      "bytes": 15038
+    },
+    {
+      "name": "aiohttp",
+      "version": "3.13.5",
+      "artifact": "aiohttp-3.13.5-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+      "sha256": "b18f31b80d5a33661e08c89e202edabf1986e9b49c42b4504371daeaa11b47c1",
+      "bytes": 1767934
+    },
+    {
+      "name": "aioice",
+      "version": "0.10.2",
+      "artifact": "aioice-0.10.2-py3-none-any.whl",
+      "sha256": "14911c15ab12d096dd14d372ebb4aecbb7420b52c9b76fdfcf54375dec17fcbf",
+      "bytes": 24875
+    },
+    {
+      "name": "aiortc",
+      "version": "1.14.0",
+      "artifact": "aiortc-1.14.0-py3-none-any.whl",
+      "sha256": "4b244d7e482f4e1f67e685b3468269628eca1ec91fa5b329ab517738cfca086e",
+      "bytes": 93183
+    },
+    {
+      "name": "aiosignal",
+      "version": "1.4.0",
+      "artifact": "aiosignal-1.4.0-py3-none-any.whl",
+      "sha256": "053243f8b92b990551949e63930a839ff0cf0b0ebbe0597b0f3fb19e1a0fe82e",
+      "bytes": 7490
+    },
+    {
+      "name": "aiosqlite",
+      "version": "0.22.1",
+      "artifact": "aiosqlite-0.22.1-py3-none-any.whl",
+      "sha256": "21c002eb13823fad740196c5a2e9d8e62f6243bd9e7e4a1f87fb5e44ecb4fceb",
+      "bytes": 17405
+    },
+    {
+      "name": "attrs",
+      "version": "26.1.0",
+      "artifact": "attrs-26.1.0-py3-none-any.whl",
+      "sha256": "c647aa4a12dfbad9333ca4e71fe62ddc36f4e63b2d260a37a8b83d2f043ac309",
+      "bytes": 67548
+    },
+    {
+      "name": "av",
+      "version": "16.1.0",
+      "artifact": "av-16.1.0-cp312-cp312-manylinux_2_28_x86_64.whl",
+      "sha256": "7ae547f6d5fa31763f73900d43901e8c5fa6367bb9a9840978d57b5a7ae14ed2",
+      "bytes": 41174337
+    },
+    {
+      "name": "cffi",
+      "version": "2.1.1",
+      "artifact": "cffi-2.1.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+      "sha256": "c1453022f490d2459a11819d83ad1d586e9ff65a12ac3e705ffebd46d3685dcf",
+      "bytes": 221822
+    },
+    {
+      "name": "cryptography",
+      "version": "50.0.0",
+      "artifact": "cryptography-50.0.0-cp311-abi3-manylinux_2_34_x86_64.whl",
+      "sha256": "82148ec5bddac30b51a5b3c1945075f896fa022cb93f8e4a01e9f6ee95292c5f",
+      "bytes": 4734462
+    },
+    {
+      "name": "dnspython",
+      "version": "2.8.0",
+      "artifact": "dnspython-2.8.0-py3-none-any.whl",
+      "sha256": "01d9bbc4a2d76bf0db7c1f729812ded6d912bd318d3b1cf81d30c0f845dbf3af",
+      "bytes": 331094
+    },
+    {
+      "name": "frozenlist",
+      "version": "1.8.0",
+      "artifact": "frozenlist-1.8.0-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl",
+      "sha256": "494a5952b1c597ba44e0e78113a7266e656b9794eec897b19ead706bd7074383",
+      "bytes": 242411
+    },
+    {
+      "name": "google-crc32c",
+      "version": "1.9.0",
+      "artifact": "google_crc32c-1.9.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+      "sha256": "3abb18297d9ef0ab120531838be0e6d68c9fa876570e11c229c48f2edac23ce7",
+      "bytes": 36347
+    },
+    {
+      "name": "idna",
+      "version": "3.20",
+      "artifact": "idna-3.20-py3-none-any.whl",
+      "sha256": "ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c",
+      "bytes": 69583
+    },
+    {
+      "name": "ifaddr",
+      "version": "0.2.0",
+      "artifact": "ifaddr-0.2.0-py3-none-any.whl",
+      "sha256": "085e0305cfe6f16ab12d72e2024030f5d52674afad6911bb1eee207177b8a748",
+      "bytes": 12314
+    },
+    {
+      "name": "multidict",
+      "version": "6.9.1",
+      "artifact": "multidict-6.9.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+      "sha256": "976fd7689d69ec78d67d31d38d396d8adb562f7e8368279f76aed4aa451fa06d",
+      "bytes": 336881
+    },
+    {
+      "name": "pillow",
+      "version": "12.3.0",
+      "artifact": "pillow-12.3.0-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl",
+      "sha256": "78cb2c6865a35ab8ff8b75fd122f6033b92a62c82801110e48ddd6c936a45d91",
+      "bytes": 6940830
+    },
+    {
+      "name": "propcache",
+      "version": "0.5.4",
+      "artifact": "propcache-0.5.4-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+      "sha256": "2814ecd8e818f487bee4b0f921bc4d1c176cc5fc71ac0f072d0fa67eda4ac14b",
+      "bytes": 250424
+    },
+    {
+      "name": "pycparser",
+      "version": "3.0",
+      "artifact": "pycparser-3.0-py3-none-any.whl",
+      "sha256": "b727414169a36b7d524c1c3e31839a521725078d7b2ff038656844266160a992",
+      "bytes": 48172
+    },
+    {
+      "name": "pyee",
+      "version": "14.0.0",
+      "artifact": "pyee-14.0.0-py3-none-any.whl",
+      "sha256": "3ac2d3229a9677f7de2c33d7f52fe25b638a46b19c413fea2edc8c6d0a644e4d",
+      "bytes": 15553
+    },
+    {
+      "name": "pylibsrtp",
+      "version": "1.0.0",
+      "artifact": "pylibsrtp-1.0.0-cp310-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl",
+      "sha256": "293c9f2ac21a2bd689c477603a1aa235d85cf252160e6715f0101e42a43cbedc",
+      "bytes": 2434534
+    },
+    {
+      "name": "pyOpenSSL",
+      "version": "26.4.0",
+      "artifact": "pyopenssl-26.4.0-py3-none-any.whl",
+      "sha256": "f0eb0cb2d581d3ad2b9c489468485e7f2ab6727d08401bcf9d824c3caddf3c1c",
+      "bytes": 56026
+    },
+    {
+      "name": "typing_extensions",
+      "version": "4.16.0",
+      "artifact": "typing_extensions-4.16.0-py3-none-any.whl",
+      "sha256": "481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8",
+      "bytes": 45571
+    },
+    {
+      "name": "yarl",
+      "version": "1.25.1",
+      "artifact": "yarl-1.25.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+      "sha256": "c6f117789d22dce188e5754e8bc65b7e6ebf8cb73963b9fa761f672a5883769d",
+      "bytes": 117050
+    }
+  ]
+}

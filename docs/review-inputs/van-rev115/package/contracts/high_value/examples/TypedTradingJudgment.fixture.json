@@ -1,0 +1,30 @@
+{
+  "answers": [
+    {
+      "answer": "UNKNOWN",
+      "answer_quality": 0.5,
+      "question_id": "identity-supported"
+    }
+  ],
+  "available_at": "2026-10-17T10:00:00Z",
+  "confidence_semantics": "ANSWER_QUALITY_NOT_TRADE_PROBABILITY",
+  "decision_cutoff": "2026-10-17T10:01:00Z",
+  "expires_at": "2026-10-17T10:05:00Z",
+  "hard_filter_override": false,
+  "implementation_evidence_level": "SPEC_ONLY",
+  "input_snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "mandatory_exit_veto": false,
+  "model_id": "fixture:judge:1",
+  "question_set_id": "fixture:trading-evidence-questions",
+  "question_set_version": "1",
+  "reality": "SYNTHETIC",
+  "record_id": "fixture:TypedTradingJudgment:1",
+  "research_source_class": "SYNTHETIC",
+  "schema_version": "1.0",
+  "service_owner": "dial-jev",
+  "source_refs": [
+    "fixture:controlled-input-only"
+  ],
+  "trade_authorized": false,
+  "use": "RESEARCH"
+}

@@ -1,0 +1,38 @@
+..F
+=================================== FAILURES ===================================
+____ test_bad_native_change_latches_recovery_until_a_fresh_context[account] ____
+
+bad = 'account'
+
+    @pytest.mark.parametrize('bad',['account','symbol','bool_id','bool_size','price_zero','both_sides','no_side',
+                                  'duplicate','unknown_delete','overlap','event_capacity','backward_clock','bad_list'])
+    def test_bad_native_change_latches_recovery_until_a_fresh_context(bad):
+        c=contract();book=DepthBook(max_quotes=2);book.observe(c,1,change(),200000)
+        event=change();now=200000
+        if bad=='account':event['ctidTraderAccountId']=999
+        elif bad=='symbol':event['symbolId']=99
+        elif bad=='bool_id':event['newQuotes'][0]['id']=True
+        elif bad=='bool_size':event['newQuotes'][0]['size']=False
+        elif bad=='price_zero':event['newQuotes'][0]['bid']=0
+        elif bad=='both_sides':event['newQuotes'][0]['ask']=110109
+        elif bad=='no_side':event['newQuotes'][0].pop('bid')
+        elif bad=='duplicate':event['newQuotes'][1]=dict(event['newQuotes'][0])
+        elif bad=='unknown_delete':event.update(newQuotes=[],deletedQuotes=[99])
+        elif bad=='overlap':event.update(newQuotes=[event['newQuotes'][0]],deletedQuotes=[9007199254740993])
+        elif bad=='event_capacity':event['newQuotes']+= [{'id':3,'size':1,'ask':110109}]
+        elif bad=='backward_clock':now-=1
+        else:event['newQuotes']=None
+        book.observe(c,1,event,now)
+        body=snapshot(book,limit=2);assert body['state']=='RECOVERY_REQUIRED' and body['bids']==body['asks']==[]
+>       book.observe(c,1,change(),200001);assert snapshot(book,limit=2)['state']=='RECOVERY_REQUIRED'
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert 'NATIVE_DEPTH...CLOCK_INVALID' == 'RECOVERY_REQUIRED'
+E         
+E         - RECOVERY_REQUIRED
+E         + NATIVE_DEPTH_EVALUATION_CLOCK_INVALID
+
+trading/tests/test_ctrader_native_depth.py:75: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_ctrader_native_depth.py::test_bad_native_change_latches_recovery_until_a_fresh_context[account]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 2 passed in 0.61s

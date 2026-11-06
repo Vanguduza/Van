@@ -1,0 +1,48 @@
+{
+  "all_other_inherited_contexts_preserved": true,
+  "bindings": {
+    "VNX-S-ACCOUNTS-01": [
+      "linked exchange inventory",
+      "trade vs funds credentials",
+      "stablecoin/fiat valuation and pending settlement"
+    ],
+    "VNX-S-ACCOUNTS-06": [
+      "exchange/product capability",
+      "unknown order readback",
+      "key permission scope",
+      "cancel pending versus authenticated cancelled/expired",
+      "gross execution, net inventory and fee reconciliation"
+    ],
+    "VNX-S-CHART-02": [
+      "crypto base/quote/tick and fee semantics",
+      "execution parent/current method details via contextual sheet"
+    ],
+    "VNX-S-CHART-14": [
+      "evaluator identity and uncertainty",
+      "strategy-isolation vs deployment-faithful comparison",
+      "evaluator qualification and immutable dataset identity",
+      "unknown cost and inconclusive comparison distinct from zero"
+    ],
+    "VNX-S-HOME-01": [
+      "compact fallback/incident or candidate-ready attention; no new legend"
+    ],
+    "VNX-S-TRADE-01": [
+      "spot crypto market context",
+      "execution learning status summary; no diagnostic dashboard on Home"
+    ],
+    "VNX-S-TRADE-03": [
+      "crypto spot category with true venue/product identity",
+      "admission and data freshness"
+    ],
+    "van.work.dev.research": [
+      "execution-policy candidate lifecycle",
+      "rejected/inconclusive trials",
+      "qualification/promotion evidence",
+      "revision/correction lineage, excluded evidence and all attempts",
+      "expiry/revocation without fallback revival"
+    ]
+  },
+  "existing_contexts_only": true,
+  "schema": "van.rev115.context-binding/1.0",
+  "visual_assets_changed": false
+}

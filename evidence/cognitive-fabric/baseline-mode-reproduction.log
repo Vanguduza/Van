@@ -1,0 +1,25 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+___________ test_update_core_env_preserves_mode_and_encodes_password ___________
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-11/test_update_core_env_preserves0')
+
+    def test_update_core_env_preserves_mode_and_encodes_password(tmp_path):
+        module = load_module()
+        target = tmp_path / "core.env"
+        target.write_text("OTHER=1\nVAN_COMMANDER_LEDGER=old\n")
+        target.chmod(0o640)
+        module.update_core_env(target, "a/b:c@d")
+        text = target.read_text()
+        assert "OTHER=1" in text
+        assert "VAN_COMMANDER_LEDGER=postgres://vati:a%2Fb%3Ac%40d@127.0.0.1:5432/postgres" in text
+>       assert (target.stat().st_mode & 0o777) == 0o640
+E       AssertionError: assert (33152 & 511) == 416
+E        +  where 33152 = os.stat_result(st_mode=33152, st_ino=95323, st_dev=33, st_nlink=1, st_uid=1000, st_gid=1000, st_size=83, st_atime=1791283316, st_mtime=1791283316, st_ctime=1791283316).st_mode
+E        +    where os.stat_result(st_mode=33152, st_ino=95323, st_dev=33, st_nlink=1, st_uid=1000, st_gid=1000, st_size=83, st_atime=1791283316, st_mtime=1791283316, st_ctime=1791283316) = stat()
+E        +      where stat = PosixPath('/tmp/pytest-of-agent/pytest-11/test_update_core_env_preserves0/core.env').stat
+
+trading/tests/test_vati_ledger_reconcile.py:41: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_vati_ledger_reconcile.py::test_update_core_env_preserves_mode_and_encodes_password
+1 failed in 0.05s

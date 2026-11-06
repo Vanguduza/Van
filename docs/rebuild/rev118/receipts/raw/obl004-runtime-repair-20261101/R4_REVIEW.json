@@ -1,0 +1,91 @@
+{
+  "disposition": "NO_BLOCKING_FINDING_IN_R4_RECHECK",
+  "resolved": "OBL004-RUNNER-R3-REVIEW01",
+  "pins_before": {
+    ".github/workflows/van-ci.yml": "3ab3df781f9bb1444bd853f1b5035fb3a57db51a422aed9c7708738b7ac5d407",
+    "tools/ci/github-actions-ci.yml": "3ab3df781f9bb1444bd853f1b5035fb3a57db51a422aed9c7708738b7ac5d407",
+    "tests/rebuild/test_canonical_source_audit.py": "cad9b6f6f69cfda849ed4fbef4b2e2b2919ce28360c1a8b01fb524a3c71eda35",
+    "tools/rebuild/canonical_source_audit.py": "7f977e794725fd529736f822ba183a3e2d2348c57826fcaf1e588bc9f1dd056c"
+  },
+  "pins_after": {
+    ".github/workflows/van-ci.yml": "3ab3df781f9bb1444bd853f1b5035fb3a57db51a422aed9c7708738b7ac5d407",
+    "tools/ci/github-actions-ci.yml": "3ab3df781f9bb1444bd853f1b5035fb3a57db51a422aed9c7708738b7ac5d407",
+    "tests/rebuild/test_canonical_source_audit.py": "cad9b6f6f69cfda849ed4fbef4b2e2b2919ce28360c1a8b01fb524a3c71eda35",
+    "tools/rebuild/canonical_source_audit.py": "7f977e794725fd529736f822ba183a3e2d2348c57826fcaf1e588bc9f1dd056c"
+  },
+  "archive_sha256": "ad8d173a245230ace2109deb6733de0c1c515b6b6e4e6459c7e6acaf11ab76ec",
+  "patch_sha256": "8060182a443bdfeed13679a8544da6ab1ec624f02fb3d4836bd1a61e5d853207",
+  "r4_delta_sha256": "530fe827d9ef5570bf2c37640846258d3953262b39d2fb3bcb187b19a383ecc6",
+  "actual_production_controls": [
+    {
+      "case": "production_verify_profile_current_reader_and_modeled_inverse",
+      "actual_reader_uid": 1000,
+      "modeled_producer_uid": 0,
+      "accepted_then_environment_drift_refused": true
+    },
+    {
+      "case": "production_verify_profile_current_reader_and_modeled_inverse",
+      "actual_reader_uid": 1000,
+      "modeled_producer_uid": 1000,
+      "accepted_then_environment_drift_refused": true
+    },
+    {
+      "case": "malformed_or_mismatched_producer",
+      "value": null,
+      "refused": true
+    },
+    {
+      "case": "malformed_or_mismatched_producer",
+      "value": true,
+      "refused": true
+    },
+    {
+      "case": "malformed_or_mismatched_producer",
+      "value": -1,
+      "refused": true
+    },
+    {
+      "case": "malformed_or_mismatched_producer",
+      "value": 4294967295,
+      "refused": true
+    },
+    {
+      "case": "malformed_or_mismatched_producer",
+      "value": "0",
+      "refused": true
+    },
+    {
+      "case": "malformed_or_mismatched_producer",
+      "value": 1.5,
+      "refused": true
+    },
+    {
+      "case": "malformed_or_mismatched_producer",
+      "value": "mismatched-integer",
+      "refused": true
+    },
+    {
+      "case": "foreign_live_uid_refuses_root_profile_only_uid0",
+      "passed": true
+    }
+  ],
+  "import_source": "/workspace/van-review-2026-10-18/publish/tools/rebuild/canonical_source_audit.py",
+  "proof_scope": "Tiny real CLI/phase/JUnit fixture uses copied exact source and committed testroot. Production full verify_profile readback then models root/nonroot producer environmentUID and reseals evidence. Actual reader process is UID1000. Root/native/browser runtime execution is not claimed.",
+  "logic_review": "verify_profile first joins all producer environment observations and applies unchanged profile validation, then passes joined producerUID to archived temp validation. Root-profile UID0 requirement remains. Live current-process ownership/lstatUID/device/inode0700/marker and cleanup remain strict. Invalid owner types/ranges refused.",
+  "author_terminal_verified": {
+    "cases": 95,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "exit": 0,
+    "audit_events": 0,
+    "initial94pass1fixturefailure_retained": true
+  },
+  "preservation": "Workflow/mirror exact R2/R3 hashes. Additive strictAGP6.0.3 and original owner6.0.2 unchanged; R3shortsocket/pytest-marker, lifecycle, actualargs/receipt controls retained in current95. Original85 and11runs remain separate prior proof, not relabeled current native results.",
+  "owned_fixture_removed": true,
+  "limits": [
+    "No full hosted matrix, root/browser/PG/native/install/network/Gradle/CI effects or candidate edits/commits.",
+    "Original4084 hosted matrix remainsFAILED/BLOCKED/unqualified. Ten fullroot/cwd cells and formal/unit/native/backup/snapshot-owner gaps remain separate/open.",
+    "Accounts packet and PR106 untouched."
+  ]
+}

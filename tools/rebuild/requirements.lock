@@ -1,0 +1,18 @@
+# Documentary verification only; isolated from backend and media runtime locks.
+pytest==9.1.1
+pytest-asyncio==1.4.0
+iniconfig==2.3.0
+packaging==26.3
+pluggy==1.6.0
+Pygments==2.21.0
+jsonschema==4.26.0
+attrs==26.1.0
+jsonschema-specifications==2025.9.1
+referencing==0.37.0
+rpds-py==2026.6.3
+typing-extensions==4.16.0
+# Native gateway-plugin parity for real source-instrument subprocess fixtures.
+anyio==4.15.1
+idna==3.20
+# Workflow semantic controls use the same exact parser as the backend-locked profiles.
+PyYAML==6.0.3

@@ -1,0 +1,18 @@
+F
+=================================== FAILURES ===================================
+____ test_out_of_order_tick_refuses_before_publishing_or_changing_a_bar[1] _____
+
+late = 1
+
+    @pytest.mark.parametrize('late',[1,60000])
+    def test_out_of_order_tick_refuses_before_publishing_or_changing_a_bar(late):
+        agg=BarAggregator('EURUSD',60000);agg.push(Tick(60001,Decimal('1'),Decimal('2')))
+>       with pytest.raises(ValueError,match='order'):agg.push(Tick(late,Decimal('3'),Decimal('4')))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_bar_aggregation_boundaries.py:38: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_bar_aggregation_boundaries.py::test_out_of_order_tick_refuses_before_publishing_or_changing_a_bar[1]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed in 0.36s

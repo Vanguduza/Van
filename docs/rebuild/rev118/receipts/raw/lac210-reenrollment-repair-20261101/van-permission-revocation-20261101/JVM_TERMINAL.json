@@ -1,0 +1,16 @@
+[
+  {
+    "file": "TEST-com.dial.van.gateway.PermissionRevocationOperationsTest.xml",
+    "tests": 10,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  {
+    "file": "TEST-com.dial.van.gateway.GatewayMutationRetryTest.xml",
+    "tests": 4,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  }
+]

@@ -12,6 +12,8 @@ import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.isSelectable
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -22,6 +24,8 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.dial.van.command.CommandCentreActivity
 import org.junit.Rule
 import org.junit.Test
+import org.junit.Assert.assertSame
+import org.junit.Assert.assertEquals
 import org.junit.runner.RunWith
 import java.io.File
 
@@ -93,8 +97,64 @@ class CommandCentreLaunchTest {
         }
     }
 
+    @Test
+    fun residentSingleTopActivityReceivesDeepLinksWithoutRelaunching() {
+        ActivityScenario.launch(CommandCentreActivity::class.java).use { scenario ->
+            compose.waitForIdle()
+            lateinit var resident: CommandCentreActivity
+            lateinit var launchIntent: Intent
+            scenario.onActivity { activity ->
+                resident = activity
+                launchIntent = Intent(activity.intent)
+            }
+            try {
+                scenario.onActivity { activity ->
+                    activity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("van://attention"))
+                        .setClass(activity, CommandCentreActivity::class.java)
+                        .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP))
+                }
+                waitForDestination("Attention")
+                scenario.onActivity {
+                    assertSame(resident, it)
+                    assertEquals(Uri.parse("van://attention"), it.intent.data)
+                }
+                // A subsequent request must still steer the same resident Activity,
+                // including when the first destination has already been consumed.
+                scenario.onActivity { activity ->
+                    activity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("van://work"))
+                        .setClass(activity, CommandCentreActivity::class.java)
+                        .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP))
+                }
+                waitForDestination("Work")
+                scenario.onActivity {
+                    assertSame(resident, it)
+                    assertEquals(Uri.parse("van://work"), it.intent.data)
+                }
+                capture("resident-deeplink-work")
+            } finally {
+                // ActivityScenario 1.6.1 filters lifecycle callbacks by launch Intent
+                // action/data. Production correctly calls setIntent on deep-link delivery;
+                // restore the harness identity only after verifying both real deliveries,
+                // so Scenario can observe STOPPED/DESTROYED during close().
+                scenario.onActivity { it.intent = launchIntent }
+            }
+        }
+    }
+
     /** The navigation item, not a screen header that happens to carry the same word. */
     private fun navItem(label: String) = compose.onNode(hasText(label) and isSelectable())
+
+    private fun waitForDestination(label: String) {
+        // startActivity queues onNewIntent outside Compose's idling resources.
+        // An idle composition can still be the old destination. Await the exact
+        // selected tab, retaining a bounded failure for a missing delivery.
+        val selected = hasText(label) and isSelectable() and
+            SemanticsMatcher.expectValue(SemanticsProperties.Selected, true)
+        compose.waitUntil(10_000) {
+            compose.onAllNodes(selected).fetchSemanticsNodes().size == 1
+        }
+        navItem(label).assertIsSelected()
+    }
 
     private fun capture(name: String) {
         // AGP's additional-test-output channel: the runner argument names a directory the

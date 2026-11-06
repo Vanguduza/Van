@@ -1,0 +1,25 @@
+{
+  "adapter_wait_ms": 86400000,
+  "limit_probes": [
+    {
+      "fill": "1.10007",
+      "limit": "1.10000",
+      "side": "LONG",
+      "status": "FILLED",
+      "worse_than_limit": true
+    },
+    {
+      "fill": "1.09993",
+      "limit": "1.10000",
+      "side": "SHORT",
+      "status": "FILLED",
+      "worse_than_limit": true
+    }
+  ],
+  "policy_max_wait_ms": 14400000,
+  "receipt_transcription": "Exact successful paper diagnostic output, metadata reformatted for portable pack.",
+  "scope": "PAPER_DIAGNOSTIC_ONLY_NO_REAL_ORDER_NO_CODE_FIX",
+  "source_sha": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+  "tracked_clean": true,
+  "vm_receipt": "/home/ubuntu/work/van-canonical-reconciliation-20261017/OPUS_LIMIT_EXPIRY_COUNTEREXAMPLES.json"
+}

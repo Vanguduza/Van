@@ -1,0 +1,153 @@
+{
+  "scope": "DOCUMENT_LINK_SCHEMA_AND_MUTATION_CHECKS_ONLY",
+  "passed": 36,
+  "total": 36,
+  "findings": [],
+  "application_tests_executed": 0,
+  "cases": [
+    {
+      "id": "INTEGRATION",
+      "passed": true
+    },
+    {
+      "id": "DROP_REQUIREMENT",
+      "passed": true
+    },
+    {
+      "id": "DROP_TEST",
+      "passed": true
+    },
+    {
+      "id": "STALE_COUNT",
+      "passed": true
+    },
+    {
+      "id": "DROP_STRATEGY_LOOP",
+      "passed": true
+    },
+    {
+      "id": "DROP_OBSERVER_TEST",
+      "passed": true
+    },
+    {
+      "id": "FALSE_EDGE_FROM_ONE_TRADE",
+      "passed": true
+    },
+    {
+      "id": "ORPHAN_CONTEXT",
+      "passed": true
+    },
+    {
+      "id": "DELETE_INCONCLUSIVE",
+      "passed": true
+    },
+    {
+      "id": "FORGED_TEST_RESULT",
+      "passed": true
+    },
+    {
+      "id": "CHANGE_PARENT_TEST",
+      "passed": true
+    },
+    {
+      "id": "UNPROTECTED_CONFIRMATION",
+      "passed": true
+    },
+    {
+      "id": "APPLICATION_AT_PRE",
+      "passed": true
+    },
+    {
+      "id": "DROP_SERVICE_BINDING",
+      "passed": true
+    },
+    {
+      "id": "VALID_TradeExperience",
+      "passed": true
+    },
+    {
+      "id": "VALID_TradeDiagnosis",
+      "passed": true
+    },
+    {
+      "id": "VALID_LearningHypothesis",
+      "passed": true
+    },
+    {
+      "id": "VALID_EvidenceAssessment",
+      "passed": true
+    },
+    {
+      "id": "VALID_LearningChange",
+      "passed": true
+    },
+    {
+      "id": "VALID_LearningCommand",
+      "passed": true
+    },
+    {
+      "id": "VALID_LearningCommandReceipt",
+      "passed": true
+    },
+    {
+      "id": "REJECT_TradeExperience_reconciled_economics_ref",
+      "passed": true
+    },
+    {
+      "id": "REJECT_TradeDiagnosis_causal_identification_ref",
+      "passed": true
+    },
+    {
+      "id": "REJECT_EvidenceAssessment_null_control_results_ref",
+      "passed": true
+    },
+    {
+      "id": "REJECT_EvidenceAssessment_power_control_results_ref",
+      "passed": true
+    },
+    {
+      "id": "REJECT_EvidenceAssessment_selection_adjustment_ref",
+      "passed": true
+    },
+    {
+      "id": "REJECT_EvidenceAssessment_independent_review_ref",
+      "passed": true
+    },
+    {
+      "id": "REJECT_LearningChange_promotion_authority_ref",
+      "passed": true
+    },
+    {
+      "id": "REJECT_LearningChange_consumer_receipt_ref",
+      "passed": true
+    },
+    {
+      "id": "REJECT_LearningCommand_idempotency_key",
+      "passed": true
+    },
+    {
+      "id": "REJECT_LearningCommandReceipt_readback_ref",
+      "passed": true
+    },
+    {
+      "id": "PRESERVE_INCONCLUSIVE_WITH_MISSING_EVIDENCE",
+      "passed": true
+    },
+    {
+      "id": "NORMATIVE_SECTION_EMBEDDED",
+      "passed": true
+    },
+    {
+      "id": "ACTIVE_COUNTS_IN_BLUEPRINT",
+      "passed": true
+    },
+    {
+      "id": "ALL_SCENARIOS_OUTLINED",
+      "passed": true
+    },
+    {
+      "id": "INTEGRATED_PLAN_TEXT",
+      "passed": true
+    }
+  ]
+}

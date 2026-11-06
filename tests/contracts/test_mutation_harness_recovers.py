@@ -41,7 +41,12 @@ def test_a_killed_run_restores_what_it_mutated(tmp_path):
     victim = tmp_path / "victim.py"
     victim.write_text("GUARD = True\n")
     slow = tmp_path / "slow.py"
-    slow.write_text("import time\ntime.sleep(60)\n")
+    # The unmutated control exits normally; only the mutated run blocks long enough
+    # to exercise signal recovery.
+    slow.write_text(
+        "import time\nfrom pathlib import Path\n"
+        f"if 'GUARD = False' in Path({str(victim)!r}).read_text(): time.sleep(60)\n"
+    )
 
     script = textwrap.dedent(
         f"""

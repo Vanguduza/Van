@@ -1,0 +1,35 @@
+{
+  "status": "IMPORT_EXIT_ZERO_PENDING_CGROUP_RECONCILIATION",
+  "container": "van-ml004-import-r3-20261026",
+  "image_id": "sha256:07722805aed602c59b8250b8b08d6da005211ac72385964b9d78813329cab5da",
+  "created": true,
+  "removed": true,
+  "exit": 0,
+  "state": {
+    "Status": "exited",
+    "Running": false,
+    "Paused": false,
+    "Restarting": false,
+    "OOMKilled": false,
+    "Dead": false,
+    "Pid": 0,
+    "ExitCode": 0,
+    "Error": "",
+    "StartedAt": "2026-10-26T03:33:35.710157665Z",
+    "FinishedAt": "2026-10-26T03:34:13.417330583Z"
+  },
+  "enforced_configuration": {
+    "Memory": 6442450944,
+    "NanoCpus": 2000000000,
+    "PidsLimit": 256,
+    "ReadonlyRootfs": true,
+    "NetworkMode": "none",
+    "CapDrop": [
+      "ALL"
+    ],
+    "SecurityOpt": [
+      "no-new-privileges"
+    ]
+  },
+  "owned_adopted_children_reaped": []
+}

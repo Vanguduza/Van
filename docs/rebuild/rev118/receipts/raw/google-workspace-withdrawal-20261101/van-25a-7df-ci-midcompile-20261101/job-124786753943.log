@@ -1,0 +1,193 @@
+﻿2026-11-01T07:41:47.7623981Z Current runner version: '2.338.2'
+2026-11-01T07:41:47.7641567Z ##[group]Runner Image Provisioner
+2026-11-01T07:41:47.7642158Z Hosted Compute Agent
+2026-11-01T07:41:47.7642535Z Version: 20261021.618
+2026-11-01T07:41:47.7642920Z Commit: 21505ad2541d5be6135ed84fc33697146cf75b8e
+2026-11-01T07:41:47.7643343Z Build Date: 2026-10-21T00:45:21Z
+2026-11-01T07:41:47.7643743Z Worker ID: {6b8a9e66-319a-420c-a2f7-3bc986c41218}
+2026-11-01T07:41:47.7644184Z Region: westus3
+2026-11-01T07:41:47.7644532Z Cloud: Azure
+2026-11-01T07:41:47.7644867Z ##[endgroup]
+2026-11-01T07:41:47.7645673Z ##[group]Operating System
+2026-11-01T07:41:47.7646020Z Ubuntu
+2026-11-01T07:41:47.7646360Z 26.04.1
+2026-11-01T07:41:47.7646689Z LTS
+2026-11-01T07:41:47.7646975Z ##[endgroup]
+2026-11-01T07:41:47.7647495Z ##[group]Runner Image
+2026-11-01T07:41:47.7647868Z Image: ubuntu-26.04
+2026-11-01T07:41:47.7648224Z Version: 20261025.179.1
+2026-11-01T07:41:47.7648984Z Included Software: https://github.com/actions/runner-images/blob/ubuntu26/20261025.179/images/ubuntu/Ubuntu2604-Readme.md
+2026-11-01T07:41:47.7649826Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu26%2F20261025.179
+2026-11-01T07:41:47.7650378Z ##[endgroup]
+2026-11-01T07:41:47.7651075Z ##[group]GITHUB_TOKEN Permissions
+2026-11-01T07:41:47.7652286Z Contents: read
+2026-11-01T07:41:47.7652661Z Metadata: read
+2026-11-01T07:41:47.7652982Z Packages: read
+2026-11-01T07:41:47.7653291Z ##[endgroup]
+2026-11-01T07:41:47.7654663Z Secret source: Actions
+2026-11-01T07:41:47.7655183Z Cache mode: write
+2026-11-01T07:41:47.7655651Z Prepare workflow directory
+2026-11-01T07:41:47.7861760Z Prepare all required actions
+2026-11-01T07:41:47.7893329Z Getting action download info
+2026-11-01T07:41:48.0620630Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-11-01T07:41:48.1428962Z Download action repository 'actions/download-artifact@v4' (SHA:d3f86a106a0bac45b974a628896c90dbdf5c8093)
+2026-11-01T07:41:48.8356867Z Complete job name: character-forge-gate
+2026-11-01T07:41:48.8945115Z ##[group]Run actions/checkout@v4
+2026-11-01T07:41:48.8945593Z with:
+2026-11-01T07:41:48.8945898Z   repository: Vanguduza/Van
+2026-11-01T07:41:48.8948111Z   token: ***
+2026-11-01T07:41:48.8948360Z   ssh-strict: true
+2026-11-01T07:41:48.8948617Z   ssh-user: git
+2026-11-01T07:41:48.8948899Z   persist-credentials: true
+2026-11-01T07:41:48.8949192Z   clean: true
+2026-11-01T07:41:48.8949459Z   sparse-checkout-cone-mode: true
+2026-11-01T07:41:48.8949770Z   fetch-depth: 1
+2026-11-01T07:41:48.8950031Z   fetch-tags: false
+2026-11-01T07:41:48.8950297Z   show-progress: true
+2026-11-01T07:41:48.8950565Z   lfs: false
+2026-11-01T07:41:48.8950831Z   submodules: false
+2026-11-01T07:41:48.8951109Z   set-safe-directory: true
+2026-11-01T07:41:48.8951415Z   allow-unsafe-pr-checkout: false
+2026-11-01T07:41:48.8951799Z ##[endgroup]
+2026-11-01T07:41:49.0779130Z Syncing repository: Vanguduza/Van
+2026-11-01T07:41:49.0780978Z ##[group]Getting Git version info
+2026-11-01T07:41:49.0781556Z Working directory is '/home/runner/work/Van/Van'
+2026-11-01T07:41:49.0782138Z [command]/usr/bin/git version
+2026-11-01T07:41:49.0793782Z git version 2.56.0
+2026-11-01T07:41:49.0806055Z ##[endgroup]
+2026-11-01T07:41:49.0818351Z Temporarily overriding HOME='/home/runner/work/_temp/992f6754-8ee5-4cb6-8ed5-26803ae584b4' before making global git config changes
+2026-11-01T07:41:49.0820064Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-01T07:41:49.0821320Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Van/Van
+2026-11-01T07:41:49.0877409Z Deleting the contents of '/home/runner/work/Van/Van'
+2026-11-01T07:41:49.0880968Z ##[group]Initializing the repository
+2026-11-01T07:41:49.0884636Z [command]/usr/bin/git init /home/runner/work/Van/Van
+2026-11-01T07:41:49.0965508Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-11-01T07:41:49.0966274Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-11-01T07:41:49.0967181Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-11-01T07:41:49.0967839Z hint: call:
+2026-11-01T07:41:49.0968075Z hint:
+2026-11-01T07:41:49.0968418Z hint: 	git config --global init.defaultBranch <name>
+2026-11-01T07:41:49.0968911Z hint:
+2026-11-01T07:41:49.0969249Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-11-01T07:41:49.0969783Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-11-01T07:41:49.0970303Z hint:
+2026-11-01T07:41:49.0970550Z hint: 	git branch -m <name>
+2026-11-01T07:41:49.0970842Z hint:
+2026-11-01T07:41:49.0971209Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-11-01T07:41:49.0973653Z Initialized empty Git repository in /home/runner/work/Van/Van/.git/
+2026-11-01T07:41:49.0984148Z [command]/usr/bin/git remote add origin https://github.com/Vanguduza/Van
+2026-11-01T07:41:49.1026494Z ##[endgroup]
+2026-11-01T07:41:49.1027060Z ##[group]Disabling automatic garbage collection
+2026-11-01T07:41:49.1030111Z [command]/usr/bin/git config --local gc.auto 0
+2026-11-01T07:41:49.1060607Z ##[endgroup]
+2026-11-01T07:41:49.1061073Z ##[group]Setting up auth
+2026-11-01T07:41:49.1066270Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-01T07:41:49.1096260Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-01T07:41:49.1454587Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-01T07:41:49.1483365Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-01T07:41:49.1699845Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-01T07:41:49.1729152Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-01T07:41:49.1942991Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-11-01T07:41:49.1976088Z ##[endgroup]
+2026-11-01T07:41:49.1976689Z ##[group]Fetching the repository
+2026-11-01T07:41:49.1982168Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +721e4179b52312c21c7b5a50a6dfa0759dd30ce7:refs/remotes/pull/105/merge
+2026-11-01T07:41:55.0804711Z From https://github.com/Vanguduza/Van
+2026-11-01T07:41:55.0805381Z  * [new ref]         721e4179b52312c21c7b5a50a6dfa0759dd30ce7 -> pull/105/merge
+2026-11-01T07:41:55.0808338Z ##[endgroup]
+2026-11-01T07:41:55.0808846Z ##[group]Determining the checkout info
+2026-11-01T07:41:55.0810816Z ##[endgroup]
+2026-11-01T07:41:55.0815088Z [command]/usr/bin/git sparse-checkout disable
+2026-11-01T07:41:55.1475077Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-11-01T07:41:55.2072957Z ##[group]Checking out the ref
+2026-11-01T07:41:55.2078108Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/105/merge
+2026-11-01T07:41:56.2281855Z Updating files:  75% (13594/18055)
+2026-11-01T07:41:56.2350198Z Updating files:  76% (13722/18055)
+2026-11-01T07:41:56.2439951Z Updating files:  77% (13903/18055)
+2026-11-01T07:41:56.2674970Z Updating files:  78% (14083/18055)
+2026-11-01T07:41:56.2857398Z Updating files:  79% (14264/18055)
+2026-11-01T07:41:56.3019545Z Updating files:  80% (14444/18055)
+2026-11-01T07:41:56.3128562Z Updating files:  81% (14625/18055)
+2026-11-01T07:41:56.3296353Z Updating files:  82% (14806/18055)
+2026-11-01T07:41:56.3484411Z Updating files:  83% (14986/18055)
+2026-11-01T07:41:56.3584990Z Updating files:  84% (15167/18055)
+2026-11-01T07:41:56.3721604Z Updating files:  85% (15347/18055)
+2026-11-01T07:41:56.3798411Z Updating files:  86% (15528/18055)
+2026-11-01T07:41:56.3873781Z Updating files:  87% (15708/18055)
+2026-11-01T07:41:56.4533051Z Updating files:  88% (15889/18055)
+2026-11-01T07:41:56.4612696Z Updating files:  89% (16069/18055)
+2026-11-01T07:41:56.4713467Z Updating files:  90% (16250/18055)
+2026-11-01T07:41:56.5034624Z Updating files:  91% (16431/18055)
+2026-11-01T07:41:56.5380360Z Updating files:  92% (16611/18055)
+2026-11-01T07:41:56.5599224Z Updating files:  93% (16792/18055)
+2026-11-01T07:41:56.5702297Z Updating files:  94% (16972/18055)
+2026-11-01T07:41:56.5796359Z Updating files:  95% (17153/18055)
+2026-11-01T07:41:56.5884677Z Updating files:  96% (17333/18055)
+2026-11-01T07:41:56.5979723Z Updating files:  97% (17514/18055)
+2026-11-01T07:41:56.6065135Z Updating files:  98% (17694/18055)
+2026-11-01T07:41:56.7421281Z Updating files:  99% (17875/18055)
+2026-11-01T07:41:56.7421580Z Updating files: 100% (18055/18055)
+2026-11-01T07:41:56.7421796Z Updating files: 100% (18055/18055), done.
+2026-11-01T07:41:56.7546874Z Note: switching to 'refs/remotes/pull/105/merge'.
+2026-11-01T07:41:56.7547517Z 
+2026-11-01T07:41:56.7547674Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-11-01T07:41:56.7547948Z changes and commit them, and you can discard any commits you make in this
+2026-11-01T07:41:56.7548202Z state without impacting any branches by switching back to a branch.
+2026-11-01T07:41:56.7548348Z 
+2026-11-01T07:41:56.7548453Z If you want to create a new branch to retain commits you create, you may
+2026-11-01T07:41:56.7548699Z do so (now or later) by using -c with the switch command. Example:
+2026-11-01T07:41:56.7548839Z 
+2026-11-01T07:41:56.7548903Z   git switch -c <new-branch-name>
+2026-11-01T07:41:56.7548999Z 
+2026-11-01T07:41:56.7549055Z Or undo this operation with:
+2026-11-01T07:41:56.7549146Z 
+2026-11-01T07:41:56.7549194Z   git switch -
+2026-11-01T07:41:56.7549263Z 
+2026-11-01T07:41:56.7549383Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-11-01T07:41:56.7549547Z 
+2026-11-01T07:41:56.7549967Z HEAD is now at 721e417 Merge 25a48fd705825f5eec1264696e91536694cfb82f into 8eb1889822fc8a83f219977c15340172e16acd91
+2026-11-01T07:41:56.7658891Z ##[endgroup]
+2026-11-01T07:41:56.7699214Z [command]/usr/bin/git log -1 --format=%H
+2026-11-01T07:41:56.7720137Z 721e4179b52312c21c7b5a50a6dfa0759dd30ce7
+2026-11-01T07:41:56.7970034Z ##[group]Run actions/download-artifact@v4
+2026-11-01T07:41:56.7970240Z with:
+2026-11-01T07:41:56.7970391Z   name: van-character-forge-validation-binding
+2026-11-01T07:41:56.7970575Z   path: artifacts/character-forge
+2026-11-01T07:41:56.7970721Z   merge-multiple: false
+2026-11-01T07:41:56.7970866Z   repository: Vanguduza/Van
+2026-11-01T07:41:56.7970996Z   run-id: 41285417143
+2026-11-01T07:41:56.7971119Z ##[endgroup]
+2026-11-01T07:41:56.8944828Z Downloading single artifact
+2026-11-01T07:41:56.9080555Z (node:2149) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-01T07:41:56.9081158Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-01T07:41:57.1394252Z Preparing to download the following artifacts:
+2026-11-01T07:41:57.1395107Z - van-character-forge-validation-binding (ID: 13074897423, Size: 961, Expected Digest: sha256:0596f8cc9dc5624e8d034cb02a052d1cbc216443d0a1d2bbf39ae18057351853)
+2026-11-01T07:41:57.3620588Z Redirecting to blob download url: https://productionresultssa7.blob.core.windows.net/actions-results/82d7117a-1708-882c-885c-a722b9ee690c/workflow-job-run-2a0a3020-2f66-5d20-91a7-f61716cbc4e2/artifacts/8fe014857f808b5f57bafd1bce8fb27eb711889f423959324aa6b8512e91a6e1.zip
+2026-11-01T07:41:57.3621411Z Starting download of artifact to: /home/runner/work/Van/Van/artifacts/character-forge
+2026-11-01T07:41:57.5686828Z (node:2149) [DEP0005] DeprecationWarning: Buffer() is deprecated due to security and usability issues. Please use the Buffer.alloc(), Buffer.allocUnsafe(), or Buffer.from() methods instead.
+2026-11-01T07:41:57.5717841Z SHA256 digest of downloaded artifact is 0596f8cc9dc5624e8d034cb02a052d1cbc216443d0a1d2bbf39ae18057351853
+2026-11-01T07:41:57.5718350Z Artifact download completed successfully.
+2026-11-01T07:41:57.5718520Z Total of 1 artifact(s) downloaded
+2026-11-01T07:41:57.5722020Z Download artifact has finished successfully
+2026-11-01T07:41:57.5848945Z ##[group]Run python3 -m tools.character_forge.ci_binding gate --binding artifacts/character-forge/van_validation.json
+2026-11-01T07:41:57.5849434Z [36;1mpython3 -m tools.character_forge.ci_binding gate --binding artifacts/character-forge/van_validation.json[0m
+2026-11-01T07:41:57.5876848Z shell: /usr/bin/bash -e {0}
+2026-11-01T07:41:57.5877008Z ##[endgroup]
+2026-11-01T07:41:57.6221376Z character-forge gate: core asset present but validation is NOT_RUN
+2026-11-01T07:41:57.6221702Z - no RiveContractTest results were produced
+2026-11-01T07:41:57.6279659Z ##[error]Process completed with exit code 1.
+2026-11-01T07:41:57.6364104Z Post job cleanup.
+2026-11-01T07:41:57.6898516Z [command]/usr/bin/git version
+2026-11-01T07:41:57.6932316Z git version 2.56.0
+2026-11-01T07:41:57.6954993Z Temporarily overriding HOME='/home/runner/work/_temp/ed6426b6-20a0-4037-b7c6-dfb88de63788' before making global git config changes
+2026-11-01T07:41:57.6955726Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-01T07:41:57.6958708Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Van/Van
+2026-11-01T07:41:57.6995261Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-01T07:41:57.7036516Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-01T07:41:57.7311221Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-01T07:41:57.7337087Z http.https://github.com/.extraheader
+2026-11-01T07:41:57.7345749Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-11-01T07:41:57.7389775Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-01T07:41:57.7654505Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-01T07:41:57.7684287Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-01T07:41:57.8034925Z Cleaning up orphan processes
+2026-11-01T07:41:57.8281220Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/download-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

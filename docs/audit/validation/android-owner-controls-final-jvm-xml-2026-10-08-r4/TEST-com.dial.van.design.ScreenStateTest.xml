@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.design.ScreenStateTest" tests="17" skipped="0" failures="0" errors="0" timestamp="2026-10-08T06:59:31" hostname="052fefa249ff" time="0.009">
+  <properties/>
+  <testcase name="no content and queued offline work is Offline, ahead of a stale error message()" classname="com.dial.van.design.ScreenStateTest" time="0.001"/>
+  <testcase name="blank subsystem keys are dropped()" classname="com.dial.van.design.ScreenStateTest" time="0.001"/>
+  <testcase name="non-string entries in the health array are ignored()" classname="com.dial.van.design.ScreenStateTest" time="0.001"/>
+  <testcase name="stale overrides degraded too — merge rule is stale first()" classname="com.dial.van.design.ScreenStateTest" time="0.001"/>
+  <testcase name="unknown subsystem keys still get a sentence, not dropped()" classname="com.dial.van.design.ScreenStateTest" time="0.001"/>
+  <testcase name="content with no staleness or degradation is plain Content()" classname="com.dial.van.design.ScreenStateTest" time="0.0"/>
+  <testcase name="age below the stale threshold does not trigger staleness()" classname="com.dial.van.design.ScreenStateTest" time="0.0"/>
+  <testcase name="no content, not loading, with an error is Error()" classname="com.dial.van.design.ScreenStateTest" time="0.0"/>
+  <testcase name="malformed health json yields no rows rather than throwing()" classname="com.dial.van.design.ScreenStateTest" time="0.0"/>
+  <testcase name="known subsystem keys get their owner sentence()" classname="com.dial.van.design.ScreenStateTest" time="0.001"/>
+  <testcase name="no content, no loading, no error is Empty with the given sentence()" classname="com.dial.van.design.ScreenStateTest" time="0.0"/>
+  <testcase name="stale overrides content()" classname="com.dial.van.design.ScreenStateTest" time="0.0"/>
+  <testcase name="a custom stale threshold is honoured()" classname="com.dial.van.design.ScreenStateTest" time="0.0"/>
+  <testcase name="health json array parses into rows()" classname="com.dial.van.design.ScreenStateTest" time="0.0"/>
+  <testcase name="content with degraded subsystems and no staleness is Degraded, carrying the content()" classname="com.dial.van.design.ScreenStateTest" time="0.001"/>
+  <testcase name="age at exactly the threshold is stale()" classname="com.dial.van.design.ScreenStateTest" time="0.0"/>
+  <testcase name="no content and loading is Loading()" classname="com.dial.van.design.ScreenStateTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

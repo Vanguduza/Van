@@ -1,0 +1,75 @@
+{
+  "disposition": "NO_BLOCKING_FINDING_IN_R2_RECHECK",
+  "blockers_closed": [
+    "OBL004-HOSTED-REVIEW01",
+    "OBL004-HOSTED-REVIEW02"
+  ],
+  "nine_paths_archive_before_after": {
+    ".github/workflows/van-ci.yml": "da6069dbe578341aacf4f86585c9e531f7bdb95358658a200e2a184149a993f3",
+    "tools/ci/github-actions-ci.yml": "da6069dbe578341aacf4f86585c9e531f7bdb95358658a200e2a184149a993f3",
+    "tools/rebuild/backend_public_source.py": "ff70d356dc7c6e4ea148a478f15399bea0aa8cc7dceaa72b76407f4480b4cbb3",
+    "tools/rebuild/public_source_shards.py": "edabed3737ec4ddd641687c7c3ca7b743c5655367089e2063a3628627211128b",
+    "tools/rebuild/canonical_source_audit.py": "88f7b3efe0791b6a366a0d08e7f3eb6ea7eef0e5c8ec53a145c2771e442cc768",
+    "tests/rebuild/test_public_source_shards.py": "d7bce1c24d8a47062a659c440878b8e78d7c7212a5fb5664eaa59c39affe6bdd",
+    "tests/rebuild/test_canonical_source_audit.py": "a20d46a9122fb966572c0433d6250e8c0dd1b9f33b42168b8bb0fa85e75cc92d",
+    "tests/contracts/test_ci_public_source_shards.py": "c47fc2f7627122dba81805a17c772311a79e68e63b1008da074f32c1304219bd",
+    "backend/tests/test_gateway_startup_storage.py": "797e7f4a54eab7a1b9a51eb96b720f959a3db4dd1de11afb8d60fe2fc37f174a"
+  },
+  "r2_delta_paths": [
+    ".github/workflows/van-ci.yml",
+    "tools/ci/github-actions-ci.yml",
+    "tests/contracts/test_ci_public_source_shards.py"
+  ],
+  "archive_sha256": "595f6235990733e6855073d19d36d7a29dfd92c10d35e5b49397bc8f5dec7768",
+  "delta_patch_sha256": "8c0965803d0c1afecf2d5335c5e82e96f53c9787e794121fc498388335c97024",
+  "full_patch_sha256": "3ea0ef84179324cb908d6e09e5939431d4ad6423d12ca5d0ef27dae8e06662c7",
+  "independent_checks": {
+    "all_original12_job_objects_nonjob_fields_exact": true,
+    "mirror_equal": true,
+    "all_expanded_check_contexts_unique": 41,
+    "artifact_path_contract": "9profiles \u00d7 bothcwd; exact producer collect/execute output root matches upload runner.temp expression, basetemp exclusion, download pattern, normalization prefix and join reports root",
+    "six_regression_controls": [
+      "literal-shell-path",
+      "lost-exclusion",
+      "worker-name",
+      "aggregate-name",
+      "matrix-name",
+      "final-upload"
+    ],
+    "original_r1_frozen_workflow_refused": "AssertionError: displayed check contexts collide",
+    "original_artifact_pattern_isolated": "van-backend-public-source-gateway-*",
+    "artifact_names_unchanged": true,
+    "aggregate_upload_unchanged_and_correct": true,
+    "production_import": "/workspace/van-lanes-20261101/obl004-hosted-matrix/tests/contracts/test_ci_public_source_shards.py",
+    "candidate_source_unchanged": true
+  },
+  "author_terminal_verified": {
+    "cases": 18,
+    "failed": 0,
+    "error": 0,
+    "skipped": 0,
+    "exit": 0,
+    "source_pins_unchanged": true
+  },
+  "reused_evidence": {
+    "exact_unchanged_paths": [
+      "tools/rebuild/backend_public_source.py",
+      "tools/rebuild/public_source_shards.py",
+      "tools/rebuild/canonical_source_audit.py",
+      "tests/rebuild/test_public_source_shards.py",
+      "tests/rebuild/test_canonical_source_audit.py",
+      "backend/tests/test_gateway_startup_storage.py"
+    ],
+    "r1_175": "Original FINAL04 actual terminal175pass remains R1 evidence, not a new R2 run",
+    "independent_actual_cli_and_phase": "Original independent review3 actual CLI positives+5 contamination refusals+8 phase-damage controls remain valid for source-identical helpers/tests"
+  },
+  "limits": [
+    "Static workflow/input/control recheck, not actual hosted upload/download execution.",
+    "All10 full canonical-root/cwd hosted cells UNEXECUTED; missing private/runtime prerequisites remain BLOCKED.",
+    "No broad suites, Gradle, CI, native or provider effects, source edits, commits, new authority or formal/native admission.",
+    "Historical WAL/SHM/backup/snapshot-owner gates remain open. Original failed watch/PR106 untouched."
+  ],
+  "before_failure_preserved": true,
+  "original_r1_review_untouched": true,
+  "tmp_free_after": 4467904512
+}

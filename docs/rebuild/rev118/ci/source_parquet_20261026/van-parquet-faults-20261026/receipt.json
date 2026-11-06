@@ -1,0 +1,71 @@
+{
+  "schema": "van.supplemental-source-faults/1",
+  "not_canonical_374": true,
+  "positive_control": {
+    "exit": 0,
+    "cases": 48,
+    "failures": 0,
+    "assertions": 0,
+    "errors": 0,
+    "skips": 0,
+    "storage_audit_violations": 0
+  },
+  "restored_control": null,
+  "cases": [
+    {
+      "case": "ignore-original-source",
+      "path": "trading/vati/research/bar_partitions.py",
+      "mutant_sha256": "9a5452bcaf3301fb3b5ecc06e23d047ecf7cb246e5a7d4d924ebea13fed20d36",
+      "exit": 1,
+      "cases": 1,
+      "failures": 1,
+      "assertions": 1,
+      "errors": 0,
+      "skips": 0,
+      "storage_audit_violations": 0
+    },
+    {
+      "case": "ignore-parquet-row-content",
+      "path": "trading/vati_forecast_worker/source_partitions.py",
+      "mutant_sha256": "43ed1a0ad6d66e59a1bf3b7f7b8c5cee5725eb0b45ee7a0b2def8cdd6f5d44a7",
+      "exit": 1,
+      "cases": 1,
+      "failures": 1,
+      "assertions": 1,
+      "errors": 0,
+      "skips": 0,
+      "storage_audit_violations": 0
+    },
+    {
+      "case": "allow-compressed-partition",
+      "path": "trading/vati_forecast_worker/source_partitions.py",
+      "mutant_sha256": "09e7c47ecbd9b5d5006007fedbdb801670e9c8279b8c48edf740b8b11a074b8f",
+      "exit": 1,
+      "cases": 1,
+      "failures": 1,
+      "assertions": 1,
+      "errors": 0,
+      "skips": 0,
+      "storage_audit_violations": 0
+    },
+    {
+      "case": "self-qualify-derived-data",
+      "path": "trading/vati_forecast_worker/source_partitions.py",
+      "mutant_sha256": "00df0772fa01e79ae0675739fc0aec186549a0bb8daf420a6841142857cb8974",
+      "exit": 1,
+      "cases": 1,
+      "failures": 1,
+      "assertions": 0,
+      "errors": 0,
+      "skips": 0,
+      "storage_audit_violations": 0
+    }
+  ],
+  "restored": true,
+  "source_sha256": {
+    "trading/vati/research/bar_partitions.py": "830201365b7917b42466ef108a52ee006143eece411bbb4e8187564dad4170ae",
+    "trading/vati_forecast_worker/source_partitions.py": "6afc0f9c010e0e6e8cdeaae0c8ea974027a74a5d01a9e9a4d4b333639cda2870",
+    "trading/vati/core/model_boundary.py": "d941a58c4ccbfc5a41ecff8c21e2eaa1b3e1659a8b0b7c12564d99c475163abc",
+    "trading/vati/__main__.py": "1d8ce4d899a0bef1a221b861c75713dfd113074454821655625254f1119b4d7d"
+  }
+}

@@ -1,0 +1,128 @@
+{
+  "schema": "van.rebuild.mutation-reconciliation/1",
+  "part": "kotlin",
+  "reference": "e56a38c8d5b51b7c64d3d4ac04e2d8a59f6c9b36",
+  "preserved_case_count": 374,
+  "selected_case_count": 7,
+  "registry_sha256": "50c76ffc7e76f68cc7b7453bf6b89829e60845f3405d078a937b8eca8bcd9e0a",
+  "results": [
+    {
+      "kind": "baseline",
+      "mutation": null,
+      "exit": 0,
+      "verdict": "PASS",
+      "log_sha256": "52d7ad29212f0da7399abc07ce67fa6ecd4a556bb284c8a57c1139e88dd0ff7c",
+      "failed_oracles": [],
+      "summary": "d device missing its recognizer is not told to install Sherpa() PASSED\n\nVoiceSecondPassPolicyTest > an easy turn does not pay for a second pass() PASSED\n\nVoiceSecondPassPolicyTest > low confidence is a reason() PASSED\n\nVoiceSecondPassPolicyTest > a correction the owner has made before is a reason() PASSED\n\nVoiceSecondPassPolicyTest > nothing heard is a reason to try again() PASSED\n\nVoiceSecondPassPolicyTest > a confidence outside the valid range is ignored rather than treated as low() PASSED\n\nVoiceTurnLifecycleTest > cancelled turn cannot admit late final or processed transcript() PASSED\n\nVoiceTurnLifecycleTest > replacement rejects old callbacks even with same owner turn id() PASSED\n\nVoiceTurnLifecycleTest > finishing audio permits one final transcript while duplicate finals are rejected() PASSED\n\nVoiceTurnTest > only a completed answer counts as heard() PASSED\n\nVoiceTurnTest > a failover keeps the turn and the command() PASSED\n\nVoiceTurnTest > speaking survives a transport failover() PASSED\n\nWakeModelAssetTest > a plausible model with no pinned digest is accepted() PASSED\n\nWakeModelAssetTest > no model at all is absent, and says so() PASSED\n\nWakeModelAssetTest > a matching digest is accepted whatever its case() PASSED\n\nWakeModelAssetTest > a placeholder is not a model() PASSED\n\nWakeModelAssetTest > only READY reports ready() PASSED\n\nWakeModelAssetTest > a model that is not the one the release pinned is refused() PASSED\n\nWakeModelAssetTest > every state has a sentence and none of them names an enum or a path() PASSED\n\nBUILD SUCCESSFUL in 16s\n5 actionable tasks: 5 executed\n"
+    },
+    {
+      "kind": "mutation",
+      "mutation": "C40 nothing is ever taken out of flight, so a resume resends everything",
+      "exit": 1,
+      "verdict": "ASSERTION_DETECTED",
+      "log_sha256": "fc49b22efcaa805fdc40a1a245e33afa42ab7edecaf2bc13909a5bfdca66b3a9",
+      "failed_oracles": [
+        "HttpSessionCarrierTest > HTTP admission event pages and POST acknowledgement use existing frame identities() FAILED",
+        "SessionDownstreamTest > an acknowledgement is recognised by message id rather than by kind() FAILED",
+        "SessionDownstreamTest > a pending result is distinguished from a final refusal() FAILED",
+        "SessionDownstreamTest > a refusal is an answer, and carries its reason() FAILED",
+        "VanHermesSessionManagerTest > pending server result retains durable work and retries with its original identity() FAILED",
+        "VanHermesSessionManagerTest > queued write remains durable until gateway acknowledgement() FAILED",
+        "VanHermesSessionManagerTest > repeated pending results recover on WSS without misclassifying server delay as a failed handshake() FAILED"
+      ],
+      "summary": "ard is a reason to try again() PASSED\n\nVoiceSecondPassPolicyTest > a confidence outside the valid range is ignored rather than treated as low() PASSED\n\nVoiceTurnLifecycleTest > cancelled turn cannot admit late final or processed transcript() PASSED\n\nVoiceTurnLifecycleTest > replacement rejects old callbacks even with same owner turn id() PASSED\n\nVoiceTurnLifecycleTest > finishing audio permits one final transcript while duplicate finals are rejected() PASSED\n\nVoiceTurnTest > only a completed answer counts as heard() PASSED\n\nVoiceTurnTest > a failover keeps the turn and the command() PASSED\n\nVoiceTurnTest > speaking survives a transport failover() PASSED\n\nWakeModelAssetTest > a plausible model with no pinned digest is accepted() PASSED\n\nWakeModelAssetTest > no model at all is absent, and says so() PASSED\n\nWakeModelAssetTest > a matching digest is accepted whatever its case() PASSED\n\nWakeModelAssetTest > a placeholder is not a model() PASSED\n\nWakeModelAssetTest > only READY reports ready() PASSED\n\nWakeModelAssetTest > a model that is not the one the release pinned is refused() PASSED\n\nWakeModelAssetTest > every state has a sentence and none of them names an enum or a path() PASSED\n\n> Task :test FAILED\n5 actionable tasks: 5 executed\n\n1273 tests completed, 7 failed\n\nFAILURE: Build failed with an exception.\n\n* What went wrong:\nExecution failed for task ':test'.\n> There were failing tests. See the report at: file:///workspace/van-review-2026-10-18/publish/android/verification/build/reports/tests/test/index.html\n\n* Try:\n> Run with --scan to get full insights.\n\nBUILD FAILED in 22s\n"
+    },
+    {
+      "kind": "mutation",
+      "mutation": "C40 a socket page replaces the history instead of merging with it",
+      "exit": 1,
+      "verdict": "ASSERTION_DETECTED",
+      "log_sha256": "771fa6525dfc976648bcbdde6a499e46d005cdb18583580a2b4fa875dbc3d47a",
+      "failed_oracles": [
+        "VanEventStreamStoreTest > the cursor is saved from the merged state rather than from the page() FAILED",
+        "VanEventStreamStoreTest > a recovery clears the failure() FAILED",
+        "VanEventStreamStoreTest > a page from the socket and a page from the poll do not double an event() FAILED"
+      ],
+      "summary": "ard is a reason to try again() PASSED\n\nVoiceSecondPassPolicyTest > a confidence outside the valid range is ignored rather than treated as low() PASSED\n\nVoiceTurnLifecycleTest > cancelled turn cannot admit late final or processed transcript() PASSED\n\nVoiceTurnLifecycleTest > replacement rejects old callbacks even with same owner turn id() PASSED\n\nVoiceTurnLifecycleTest > finishing audio permits one final transcript while duplicate finals are rejected() PASSED\n\nVoiceTurnTest > only a completed answer counts as heard() PASSED\n\nVoiceTurnTest > a failover keeps the turn and the command() PASSED\n\nVoiceTurnTest > speaking survives a transport failover() PASSED\n\nWakeModelAssetTest > a plausible model with no pinned digest is accepted() PASSED\n\nWakeModelAssetTest > no model at all is absent, and says so() PASSED\n\nWakeModelAssetTest > a matching digest is accepted whatever its case() PASSED\n\nWakeModelAssetTest > a placeholder is not a model() PASSED\n\nWakeModelAssetTest > only READY reports ready() PASSED\n\nWakeModelAssetTest > a model that is not the one the release pinned is refused() PASSED\n\nWakeModelAssetTest > every state has a sentence and none of them names an enum or a path() PASSED\n\n> Task :test FAILED\n5 actionable tasks: 5 executed\n\n1273 tests completed, 3 failed\n\nFAILURE: Build failed with an exception.\n\n* What went wrong:\nExecution failed for task ':test'.\n> There were failing tests. See the report at: file:///workspace/van-review-2026-10-18/publish/android/verification/build/reports/tests/test/index.html\n\n* Try:\n> Run with --scan to get full insights.\n\nBUILD FAILED in 14s\n"
+    },
+    {
+      "kind": "mutation",
+      "mutation": "C37 an A4 that will never be sent is described as queued",
+      "exit": 1,
+      "verdict": "ASSERTION_DETECTED",
+      "log_sha256": "3bd9d76d1d140e44197efe33bde67087bb408adde52e07a7977c0684490bea66",
+      "failed_oracles": [
+        "VanCommandControllerTest > gateway upgraded A4 approval cannot be stored after its receipt is lost() FAILED",
+        "OfflineSubmissionTest > an irreversible command is not told it will be retried() FAILED",
+        "OfflineSubmissionTest > an irreversible command is never stored, whatever the network did() FAILED",
+        "OfflineSubmissionTest > the three outcomes do not share a sentence() FAILED"
+      ],
+      "summary": "ard is a reason to try again() PASSED\n\nVoiceSecondPassPolicyTest > a confidence outside the valid range is ignored rather than treated as low() PASSED\n\nVoiceTurnLifecycleTest > cancelled turn cannot admit late final or processed transcript() PASSED\n\nVoiceTurnLifecycleTest > replacement rejects old callbacks even with same owner turn id() PASSED\n\nVoiceTurnLifecycleTest > finishing audio permits one final transcript while duplicate finals are rejected() PASSED\n\nVoiceTurnTest > only a completed answer counts as heard() PASSED\n\nVoiceTurnTest > a failover keeps the turn and the command() PASSED\n\nVoiceTurnTest > speaking survives a transport failover() PASSED\n\nWakeModelAssetTest > a plausible model with no pinned digest is accepted() PASSED\n\nWakeModelAssetTest > no model at all is absent, and says so() PASSED\n\nWakeModelAssetTest > a matching digest is accepted whatever its case() PASSED\n\nWakeModelAssetTest > a placeholder is not a model() PASSED\n\nWakeModelAssetTest > only READY reports ready() PASSED\n\nWakeModelAssetTest > a model that is not the one the release pinned is refused() PASSED\n\nWakeModelAssetTest > every state has a sentence and none of them names an enum or a path() PASSED\n\n> Task :test FAILED\n5 actionable tasks: 5 executed\n\n1273 tests completed, 4 failed\n\nFAILURE: Build failed with an exception.\n\n* What went wrong:\nExecution failed for task ':test'.\n> There were failing tests. See the report at: file:///workspace/van-review-2026-10-18/publish/android/verification/build/reports/tests/test/index.html\n\n* Try:\n> Run with --scan to get full insights.\n\nBUILD FAILED in 15s\n"
+    },
+    {
+      "kind": "mutation",
+      "mutation": "C36 a command the Gateway has never heard of is treated as delivered",
+      "exit": 1,
+      "verdict": "ASSERTION_DETECTED",
+      "log_sha256": "153f2072d2df4bd2adb23f75c1d96a7a0db82069e8412d93164315f1481f7ff6",
+      "failed_oracles": [
+        "CommandLifecycleKillSweepTest > no kill point leaves a command silently absent() FAILED",
+        "CommandLifecycleKillSweepTest > a command that never reached the Gateway is still held after a restart() FAILED",
+        "SessionOutboxDurabilityTest > persist then process death then restore then exactly-once delivery() FAILED",
+        "SessionReconciliationTest > a command with no command id is asked about by message id and still resends() FAILED",
+        "SessionReconciliationTest > a command the Gateway has never heard of is sent again() FAILED",
+        "SessionReconciliationTest > a mixed answer splits rather than settling or resending everything() FAILED",
+        "SessionReconciliationTest > order is preserved, because the owner issued these in an order() FAILED"
+      ],
+      "summary": "ard is a reason to try again() PASSED\n\nVoiceSecondPassPolicyTest > a confidence outside the valid range is ignored rather than treated as low() PASSED\n\nVoiceTurnLifecycleTest > cancelled turn cannot admit late final or processed transcript() PASSED\n\nVoiceTurnLifecycleTest > replacement rejects old callbacks even with same owner turn id() PASSED\n\nVoiceTurnLifecycleTest > finishing audio permits one final transcript while duplicate finals are rejected() PASSED\n\nVoiceTurnTest > only a completed answer counts as heard() PASSED\n\nVoiceTurnTest > a failover keeps the turn and the command() PASSED\n\nVoiceTurnTest > speaking survives a transport failover() PASSED\n\nWakeModelAssetTest > a plausible model with no pinned digest is accepted() PASSED\n\nWakeModelAssetTest > no model at all is absent, and says so() PASSED\n\nWakeModelAssetTest > a matching digest is accepted whatever its case() PASSED\n\nWakeModelAssetTest > a placeholder is not a model() PASSED\n\nWakeModelAssetTest > only READY reports ready() PASSED\n\nWakeModelAssetTest > a model that is not the one the release pinned is refused() PASSED\n\nWakeModelAssetTest > every state has a sentence and none of them names an enum or a path() PASSED\n\n> Task :test FAILED\n5 actionable tasks: 5 executed\n\n1273 tests completed, 7 failed\n\nFAILURE: Build failed with an exception.\n\n* What went wrong:\nExecution failed for task ':test'.\n> There were failing tests. See the report at: file:///workspace/van-review-2026-10-18/publish/android/verification/build/reports/tests/test/index.html\n\n* Try:\n> Run with --scan to get full insights.\n\nBUILD FAILED in 15s\n"
+    },
+    {
+      "kind": "mutation",
+      "mutation": "C36 a command the Gateway is already running is sent a second time",
+      "exit": 1,
+      "verdict": "ASSERTION_DETECTED",
+      "log_sha256": "cbe9426ebd1b14fca4b4817b27c87ce97cef767db0e1df813eba62d1cf0c6d91",
+      "failed_oracles": [
+        "CommandLifecycleKillSweepTest > no kill point leaves a command silently absent() FAILED",
+        "CommandLifecycleKillSweepTest > a kill between the send and the forget is recovered by the Gateway's answer() FAILED",
+        "SessionOutboxDurabilityTest > a command killed between the send and the forget is not delivered twice() FAILED",
+        "SessionOutboxDurabilityTest > a kill while forgetting leaves the record, and the next restart settles it() FAILED",
+        "SessionReconciliationTest > a terminal mission settles rather than being asked about forever() FAILED",
+        "SessionReconciliationTest > a command the Gateway is running is not sent a second time() FAILED",
+        "SessionReconciliationTest > a mixed answer splits rather than settling or resending everything() FAILED",
+        "SessionReconciliationTest > a command the Gateway admitted without opening a mission is settled() FAILED",
+        "VanHermesSessionManagerTest > resume reconciliation removes a durable in flight entry before process restart() FAILED"
+      ],
+      "summary": "ard is a reason to try again() PASSED\n\nVoiceSecondPassPolicyTest > a confidence outside the valid range is ignored rather than treated as low() PASSED\n\nVoiceTurnLifecycleTest > cancelled turn cannot admit late final or processed transcript() PASSED\n\nVoiceTurnLifecycleTest > replacement rejects old callbacks even with same owner turn id() PASSED\n\nVoiceTurnLifecycleTest > finishing audio permits one final transcript while duplicate finals are rejected() PASSED\n\nVoiceTurnTest > only a completed answer counts as heard() PASSED\n\nVoiceTurnTest > a failover keeps the turn and the command() PASSED\n\nVoiceTurnTest > speaking survives a transport failover() PASSED\n\nWakeModelAssetTest > a plausible model with no pinned digest is accepted() PASSED\n\nWakeModelAssetTest > no model at all is absent, and says so() PASSED\n\nWakeModelAssetTest > a matching digest is accepted whatever its case() PASSED\n\nWakeModelAssetTest > a placeholder is not a model() PASSED\n\nWakeModelAssetTest > only READY reports ready() PASSED\n\nWakeModelAssetTest > a model that is not the one the release pinned is refused() PASSED\n\nWakeModelAssetTest > every state has a sentence and none of them names an enum or a path() PASSED\n\n> Task :test FAILED\n5 actionable tasks: 5 executed\n\n1273 tests completed, 9 failed\n\nFAILURE: Build failed with an exception.\n\n* What went wrong:\nExecution failed for task ':test'.\n> There were failing tests. See the report at: file:///workspace/van-review-2026-10-18/publish/android/verification/build/reports/tests/test/index.html\n\n* Try:\n> Run with --scan to get full insights.\n\nBUILD FAILED in 15s\n"
+    },
+    {
+      "kind": "mutation",
+      "mutation": "C34 a release build is pointed at a plain-http gateway",
+      "exit": 1,
+      "verdict": "ASSERTION_DETECTED",
+      "log_sha256": "d96152dc120b9c13af15a3f612c38cc16ad0f8bf465855a0d63512c58e952548",
+      "failed_oracles": [
+        "ProvisioningPayloadTest > gateway base rejects credentials query fragments resource paths and invalid authorities() FAILED",
+        "ProvisioningPayloadTest > loopback over http is accepted only when the build says so() FAILED",
+        "ProvisioningPayloadTest > a plain http gateway is refused in a release build() FAILED",
+        "ProvisioningPayloadTest > debug HTTP permits exact IPv4 IPv6 and localhost but rejects lookalikes() FAILED"
+      ],
+      "summary": "ard is a reason to try again() PASSED\n\nVoiceSecondPassPolicyTest > a confidence outside the valid range is ignored rather than treated as low() PASSED\n\nVoiceTurnLifecycleTest > cancelled turn cannot admit late final or processed transcript() PASSED\n\nVoiceTurnLifecycleTest > replacement rejects old callbacks even with same owner turn id() PASSED\n\nVoiceTurnLifecycleTest > finishing audio permits one final transcript while duplicate finals are rejected() PASSED\n\nVoiceTurnTest > only a completed answer counts as heard() PASSED\n\nVoiceTurnTest > a failover keeps the turn and the command() PASSED\n\nVoiceTurnTest > speaking survives a transport failover() PASSED\n\nWakeModelAssetTest > a plausible model with no pinned digest is accepted() PASSED\n\nWakeModelAssetTest > no model at all is absent, and says so() PASSED\n\nWakeModelAssetTest > a matching digest is accepted whatever its case() PASSED\n\nWakeModelAssetTest > a placeholder is not a model() PASSED\n\nWakeModelAssetTest > only READY reports ready() PASSED\n\nWakeModelAssetTest > a model that is not the one the release pinned is refused() PASSED\n\nWakeModelAssetTest > every state has a sentence and none of them names an enum or a path() PASSED\n\n> Task :test FAILED\n5 actionable tasks: 5 executed\n\n1273 tests completed, 4 failed\n\nFAILURE: Build failed with an exception.\n\n* What went wrong:\nExecution failed for task ':test'.\n> There were failing tests. See the report at: file:///workspace/van-review-2026-10-18/publish/android/verification/build/reports/tests/test/index.html\n\n* Try:\n> Run with --scan to get full insights.\n\nBUILD FAILED in 14s\n"
+    },
+    {
+      "kind": "mutation",
+      "mutation": "C34 every build treats loopback http as acceptable, not only a debug one",
+      "exit": 1,
+      "verdict": "ASSERTION_DETECTED",
+      "log_sha256": "ebd8183b4a2a96d104a9eca38d90120e785e4bd08689598f37afb1f0e27b93b9",
+      "failed_oracles": [
+        "ProvisioningPayloadTest > loopback over http is accepted only when the build says so() FAILED",
+        "ProvisioningPayloadTest > debug HTTP permits exact IPv4 IPv6 and localhost but rejects lookalikes() FAILED"
+      ],
+      "summary": "ard is a reason to try again() PASSED\n\nVoiceSecondPassPolicyTest > a confidence outside the valid range is ignored rather than treated as low() PASSED\n\nVoiceTurnLifecycleTest > cancelled turn cannot admit late final or processed transcript() PASSED\n\nVoiceTurnLifecycleTest > replacement rejects old callbacks even with same owner turn id() PASSED\n\nVoiceTurnLifecycleTest > finishing audio permits one final transcript while duplicate finals are rejected() PASSED\n\nVoiceTurnTest > only a completed answer counts as heard() PASSED\n\nVoiceTurnTest > a failover keeps the turn and the command() PASSED\n\nVoiceTurnTest > speaking survives a transport failover() PASSED\n\nWakeModelAssetTest > a plausible model with no pinned digest is accepted() PASSED\n\nWakeModelAssetTest > no model at all is absent, and says so() PASSED\n\nWakeModelAssetTest > a matching digest is accepted whatever its case() PASSED\n\nWakeModelAssetTest > a placeholder is not a model() PASSED\n\nWakeModelAssetTest > only READY reports ready() PASSED\n\nWakeModelAssetTest > a model that is not the one the release pinned is refused() PASSED\n\nWakeModelAssetTest > every state has a sentence and none of them names an enum or a path() PASSED\n\n> Task :test FAILED\n5 actionable tasks: 5 executed\n\n1273 tests completed, 2 failed\n\nFAILURE: Build failed with an exception.\n\n* What went wrong:\nExecution failed for task ':test'.\n> There were failing tests. See the report at: file:///workspace/van-review-2026-10-18/publish/android/verification/build/reports/tests/test/index.html\n\n* Try:\n> Run with --scan to get full insights.\n\nBUILD FAILED in 15s\n"
+    }
+  ],
+  "status": "PASS",
+  "duration_seconds": 131.611,
+  "source_commit": "5d6372fdea20b31b300c32b66bb164904211bb0f"
+}

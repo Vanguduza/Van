@@ -1,0 +1,501 @@
+﻿2026-10-26T22:16:30.3592824Z Current runner version: '2.338.0'
+2026-10-26T22:16:30.3617180Z ##[group]Runner Image Provisioner
+2026-10-26T22:16:30.3618121Z Hosted Compute Agent
+2026-10-26T22:16:30.3618728Z Version: 20261021.618
+2026-10-26T22:16:30.3619356Z Commit: 21505ad2541d5be6135ed84fc33697146cf75b8e
+2026-10-26T22:16:30.3620137Z Build Date: 2026-10-21T00:45:21Z
+2026-10-26T22:16:30.3620831Z Worker ID: {746be825-e2b9-4b39-861f-33038d4f2249}
+2026-10-26T22:16:30.3621552Z Region: westus3
+2026-10-26T22:16:30.3622212Z Cloud: Azure
+2026-10-26T22:16:30.3622794Z ##[endgroup]
+2026-10-26T22:16:30.3624749Z ##[group]Operating System
+2026-10-26T22:16:30.3625445Z Ubuntu
+2026-10-26T22:16:30.3625957Z 24.04.5
+2026-10-26T22:16:30.3626533Z LTS
+2026-10-26T22:16:30.3627040Z ##[endgroup]
+2026-10-26T22:16:30.3627641Z ##[group]Runner Image
+2026-10-26T22:16:30.3628264Z Image: ubuntu-24.04
+2026-10-26T22:16:30.3628868Z Version: 20261012.334.1
+2026-10-26T22:16:30.3630194Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261012.334/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-26T22:16:30.3631808Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261012.334
+2026-10-26T22:16:30.3632888Z ##[endgroup]
+2026-10-26T22:16:30.3634506Z ##[group]GITHUB_TOKEN Permissions
+2026-10-26T22:16:30.3636685Z Contents: read
+2026-10-26T22:16:30.3637293Z Metadata: read
+2026-10-26T22:16:30.3637953Z Packages: read
+2026-10-26T22:16:30.3638539Z ##[endgroup]
+2026-10-26T22:16:30.3640601Z Secret source: Actions
+2026-10-26T22:16:30.3641580Z Cache mode: write
+2026-10-26T22:16:30.3642911Z Prepare workflow directory
+2026-10-26T22:16:30.4193782Z Prepare all required actions
+2026-10-26T22:16:30.4240317Z Getting action download info
+2026-10-26T22:16:30.7400636Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-26T22:16:30.8395903Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+2026-10-26T22:16:31.0099885Z Complete job name: project-truth-ledger
+2026-10-26T22:16:31.0924448Z ##[group]Run actions/checkout@v4
+2026-10-26T22:16:31.0925383Z with:
+2026-10-26T22:16:31.0925903Z   ref: 9255b23d07ce976fa48c2f2e452b70113e6e6458
+2026-10-26T22:16:31.0926534Z   path: head
+2026-10-26T22:16:31.0926970Z   fetch-depth: 0
+2026-10-26T22:16:31.0927444Z   repository: Vanguduza/Van
+2026-10-26T22:16:31.0931115Z   token: ***
+2026-10-26T22:16:31.0931554Z   ssh-strict: true
+2026-10-26T22:16:31.0932001Z   ssh-user: git
+2026-10-26T22:16:31.0932454Z   persist-credentials: true
+2026-10-26T22:16:31.0932956Z   clean: true
+2026-10-26T22:16:31.0933417Z   sparse-checkout-cone-mode: true
+2026-10-26T22:16:31.0934141Z   fetch-tags: false
+2026-10-26T22:16:31.0934604Z   show-progress: true
+2026-10-26T22:16:31.0935058Z   lfs: false
+2026-10-26T22:16:31.0935484Z   submodules: false
+2026-10-26T22:16:31.0935941Z   set-safe-directory: true
+2026-10-26T22:16:31.0936461Z   allow-unsafe-pr-checkout: false
+2026-10-26T22:16:31.0937260Z env:
+2026-10-26T22:16:31.0937799Z   HEAD_SHA: 9255b23d07ce976fa48c2f2e452b70113e6e6458
+2026-10-26T22:16:31.0938494Z   PR_BASE_SHA: 8eb1889822fc8a83f219977c15340172e16acd91
+2026-10-26T22:16:31.0939108Z   PUSHED_REF: 105/merge
+2026-10-26T22:16:31.0939675Z   PUSHED_BEFORE: 0c1344f5f0b3c6cfb5cf437f80234d36812fd94e
+2026-10-26T22:16:31.0940303Z   DEFAULT_BRANCH: main
+2026-10-26T22:16:31.0940751Z ##[endgroup]
+2026-10-26T22:16:31.1956303Z Syncing repository: Vanguduza/Van
+2026-10-26T22:16:31.1958916Z ##[group]Getting Git version info
+2026-10-26T22:16:31.1959995Z Working directory is '/home/runner/work/Van/Van/head'
+2026-10-26T22:16:31.1961527Z [command]/usr/bin/git version
+2026-10-26T22:16:31.2038529Z git version 2.55.0
+2026-10-26T22:16:31.2088537Z ##[endgroup]
+2026-10-26T22:16:31.2113421Z Temporarily overriding HOME='/home/runner/work/_temp/f093ea51-6ac9-4cb8-84a8-b3eedd59955d' before making global git config changes
+2026-10-26T22:16:31.2115162Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-26T22:16:31.2116329Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Van/Van/head
+2026-10-26T22:16:31.2171946Z ##[group]Initializing the repository
+2026-10-26T22:16:31.2177274Z [command]/usr/bin/git init /home/runner/work/Van/Van/head
+2026-10-26T22:16:31.2317995Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-26T22:16:31.2319894Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-26T22:16:31.2321396Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-26T22:16:31.2322615Z hint: call:
+2026-10-26T22:16:31.2323238Z hint:
+2026-10-26T22:16:31.2324249Z hint: 	git config --global init.defaultBranch <name>
+2026-10-26T22:16:31.2325219Z hint:
+2026-10-26T22:16:31.2326123Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-26T22:16:31.2327662Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-26T22:16:31.2328850Z hint:
+2026-10-26T22:16:31.2329539Z hint: 	git branch -m <name>
+2026-10-26T22:16:31.2330299Z hint:
+2026-10-26T22:16:31.2331284Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-26T22:16:31.2332855Z Initialized empty Git repository in /home/runner/work/Van/Van/head/.git/
+2026-10-26T22:16:31.2341721Z [command]/usr/bin/git remote add origin https://github.com/Vanguduza/Van
+2026-10-26T22:16:31.2401389Z ##[endgroup]
+2026-10-26T22:16:31.2402895Z ##[group]Disabling automatic garbage collection
+2026-10-26T22:16:31.2404613Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-26T22:16:31.2432658Z ##[endgroup]
+2026-10-26T22:16:31.2434456Z ##[group]Setting up auth
+2026-10-26T22:16:31.2442395Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-26T22:16:31.2518038Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-26T22:16:31.2935141Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-26T22:16:31.2972423Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-26T22:16:31.3196776Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-26T22:16:31.3234359Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-26T22:16:31.3474212Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-26T22:16:31.3514940Z ##[endgroup]
+2026-10-26T22:16:31.3515927Z ##[group]Fetching the repository
+2026-10-26T22:16:31.3525312Z [command]/usr/bin/git -c protocol.version=2 fetch --prune --no-recurse-submodules origin +refs/heads/*:refs/remotes/origin/* +refs/tags/*:refs/tags/*
+2026-10-26T22:16:41.2180810Z From https://github.com/Vanguduza/Van
+2026-10-26T22:16:41.2182802Z  * [new branch]        ccr-71397b02-lm6fid       -> origin/ccr-71397b02-lm6fid
+2026-10-26T22:16:41.2185238Z  * [new branch]        ccr-8f1201e9-w1xm0r       -> origin/ccr-8f1201e9-w1xm0r
+2026-10-26T22:16:41.2186607Z  * [new branch]        ccr-9e07e1af-8mgz1p       -> origin/ccr-9e07e1af-8mgz1p
+2026-10-26T22:16:41.2188607Z  * [new branch]        chatgpt/allow-sandboxed-playwright-userns-20261008 -> origin/chatgpt/allow-sandboxed-playwright-userns-20261008
+2026-10-26T22:16:41.2191550Z  * [new branch]        chatgpt/better-remote-commander-oci-20261021 -> origin/chatgpt/better-remote-commander-oci-20261021
+2026-10-26T22:16:41.2195519Z  * [new branch]        chatgpt/fix-browser-harness-pillow-pin-20261008 -> origin/chatgpt/fix-browser-harness-pillow-pin-20261008
+2026-10-26T22:16:41.2199315Z  * [new branch]        chatgpt/fix-browser-runtime-ancestor-acl-20261008 -> origin/chatgpt/fix-browser-runtime-ancestor-acl-20261008
+2026-10-26T22:16:41.2203313Z  * [new branch]        chatgpt/fix-browser-runtime-path-access-20261008 -> origin/chatgpt/fix-browser-runtime-path-access-20261008
+2026-10-26T22:16:41.2207814Z  * [new branch]        chatgpt/fix-browser-runtime-path-perms-20261008 -> origin/chatgpt/fix-browser-runtime-path-perms-20261008
+2026-10-26T22:16:41.2211609Z  * [new branch]        chatgpt/fix-browser-systemd-retry-20261008 -> origin/chatgpt/fix-browser-systemd-retry-20261008
+2026-10-26T22:16:41.2215839Z  * [new branch]        chatgpt/fix-browser-systemd-retry2-20261008 -> origin/chatgpt/fix-browser-systemd-retry2-20261008
+2026-10-26T22:16:41.2219786Z  * [new branch]        chatgpt/fix-browser-systemd-startlimit-20261008 -> origin/chatgpt/fix-browser-systemd-startlimit-20261008
+2026-10-26T22:16:41.2224489Z  * [new branch]        chatgpt/fix-gateway-browser-runtime-staging-20261008 -> origin/chatgpt/fix-gateway-browser-runtime-staging-20261008
+2026-10-26T22:16:41.2230398Z  * [new branch]        chatgpt/fix-stagehand-listen-syntax-20261008 -> origin/chatgpt/fix-stagehand-listen-syntax-20261008
+2026-10-26T22:16:41.2235630Z  * [new branch]        chatgpt/fix-stagehand-listen-syntax-v2-20261008 -> origin/chatgpt/fix-stagehand-listen-syntax-v2-20261008
+2026-10-26T22:16:41.2240136Z  * [new branch]        chatgpt/fix-stagehand-readiness-window-20261008 -> origin/chatgpt/fix-stagehand-readiness-window-20261008
+2026-10-26T22:16:41.2244930Z  * [new branch]        chatgpt/harden-playwright-chromium-ownership-20261008 -> origin/chatgpt/harden-playwright-chromium-ownership-20261008
+2026-10-26T22:16:41.2249796Z  * [new branch]        chatgpt/stage-browser-governance-certification-20261008 -> origin/chatgpt/stage-browser-governance-certification-20261008
+2026-10-26T22:16:41.2254193Z  * [new branch]        chatgpt/van-browser-assignment-proof-20261008 -> origin/chatgpt/van-browser-assignment-proof-20261008
+2026-10-26T22:16:41.2258276Z  * [new branch]        chatgpt/van-browser-sandbox-launch-20261008 -> origin/chatgpt/van-browser-sandbox-launch-20261008
+2026-10-26T22:16:41.2261820Z  * [new branch]        chatgpt/van-browser-task-read-auth-20261008 -> origin/chatgpt/van-browser-task-read-auth-20261008
+2026-10-26T22:16:41.2265644Z  * [new branch]        chatgpt/van-browser-tested-source-20261008 -> origin/chatgpt/van-browser-tested-source-20261008
+2026-10-26T22:16:41.2269444Z  * [new branch]        chatgpt/van-overlay-firewall-persistence-20261007 -> origin/chatgpt/van-overlay-firewall-persistence-20261007
+2026-10-26T22:16:41.2273250Z  * [new branch]        chatgpt/van-web-acquisition-fabric-20261004 -> origin/chatgpt/van-web-acquisition-fabric-20261004
+2026-10-26T22:16:41.2277138Z  * [new branch]        chatgpt/vati-opportunity-modes-20261008 -> origin/chatgpt/vati-opportunity-modes-20261008
+2026-10-26T22:16:41.2280097Z  * [new branch]        claude/busy-bardeen-sbfo2u -> origin/claude/busy-bardeen-sbfo2u
+2026-10-26T22:16:41.2282994Z  * [new branch]        claude/van-fable-forensic-audit-ds8g0o -> origin/claude/van-fable-forensic-audit-ds8g0o
+2026-10-26T22:16:41.2286455Z  * [new branch]        claude/van-forge-audit-11n4wh -> origin/claude/van-forge-audit-11n4wh
+2026-10-26T22:16:41.2289783Z  * [new branch]        codex/cognitive-fabric-r161-20261006 -> origin/codex/cognitive-fabric-r161-20261006
+2026-10-26T22:16:41.2293089Z  * [new branch]        codex/van-canon-ci-import-path-2026-10-08 -> origin/codex/van-canon-ci-import-path-2026-10-08
+2026-10-26T22:16:41.2298586Z  * [new branch]        codex/van-canon-consolidation-2026-10-08 -> origin/codex/van-canon-consolidation-2026-10-08
+2026-10-26T22:16:41.2303890Z  * [new branch]        codex/van-canon-runtime-closure-2026-10-09 -> origin/codex/van-canon-runtime-closure-2026-10-09
+2026-10-26T22:16:41.2307755Z  * [new branch]        codex/van-canon-runtime-evidence-2026-10-09 -> origin/codex/van-canon-runtime-evidence-2026-10-09
+2026-10-26T22:16:41.2311501Z  * [new branch]        codex/van-dfc1557a-direct-acceptance-2026-10-09 -> origin/codex/van-dfc1557a-direct-acceptance-2026-10-09
+2026-10-26T22:16:41.2387034Z  * [new branch]        codex/van-direct-artemis-2026-10-08 -> origin/codex/van-direct-artemis-2026-10-08
+2026-10-26T22:16:41.2391055Z  * [new branch]        codex/van-owner-core-only-2026-10-08 -> origin/codex/van-owner-core-only-2026-10-08
+2026-10-26T22:16:41.2394160Z  * [new branch]        codex/van-owner-wiring-2026-10-08 -> origin/codex/van-owner-wiring-2026-10-08
+2026-10-26T22:16:41.2397657Z  * [new branch]        codex/van-project-truth-bootstrap-review-2026-10-09 -> origin/codex/van-project-truth-bootstrap-review-2026-10-09
+2026-10-26T22:16:41.2401419Z  * [new branch]        consolidation/opus-clean-rev118-20261021 -> origin/consolidation/opus-clean-rev118-20261021
+2026-10-26T22:16:41.2405197Z  * [new branch]        feat/supabase-one-install-multiproject-20261020 -> origin/feat/supabase-one-install-multiproject-20261020
+2026-10-26T22:16:41.2408837Z  * [new branch]        feature/muse-dual-surface-control-20261012 -> origin/feature/muse-dual-surface-control-20261012
+2026-10-26T22:16:41.2412377Z  * [new branch]        feature/rea-trading-accounts-tactile-20261015 -> origin/feature/rea-trading-accounts-tactile-20261015
+2026-10-26T22:16:41.2415914Z  * [new branch]        fix/muse-zram-host-resilience-20261012 -> origin/fix/muse-zram-host-resilience-20261012
+2026-10-26T22:16:41.2419199Z  * [new branch]        forge/candidate-b-rive-mechanics-20260925 -> origin/forge/candidate-b-rive-mechanics-20260925
+2026-10-26T22:16:41.2422750Z  * [new branch]        gpt/character-forge-netcup-env-hotfix-20260923 -> origin/gpt/character-forge-netcup-env-hotfix-20260923
+2026-10-26T22:16:41.2427083Z  * [new branch]        gpt/character-forge-netcup-qualification-fix-20260923 -> origin/gpt/character-forge-netcup-qualification-fix-20260923
+2026-10-26T22:16:41.2431194Z  * [new branch]        gpt/character-forge-production-closure-20260924 -> origin/gpt/character-forge-production-closure-20260924
+2026-10-26T22:16:41.2434656Z  * [new branch]        gpt/jev-control-centre-20260925 -> origin/gpt/jev-control-centre-20260925
+2026-10-26T22:16:41.2437945Z  * [new branch]        gpt/jev-openmuse-convergence-r1-van-20260929 -> origin/gpt/jev-openmuse-convergence-r1-van-20260929
+2026-10-26T22:16:41.2442352Z  * [new branch]        gpt/jev-openmuse-convergence-r1-van-20260929-parent-ccr-integration -> origin/gpt/jev-openmuse-convergence-r1-van-20260929-parent-ccr-integration
+2026-10-26T22:16:41.2446605Z  * [new branch]        gpt/memory-fabric-rev1-2-van-20260929 -> origin/gpt/memory-fabric-rev1-2-van-20260929
+2026-10-26T22:16:41.2449689Z  * [new branch]        gpt/meta-muse-access-live-green-20261002 -> origin/gpt/meta-muse-access-live-green-20261002
+2026-10-26T22:16:41.2452749Z  * [new branch]        gpt/meta-muse-secure-access-20261002 -> origin/gpt/meta-muse-secure-access-20261002
+2026-10-26T22:16:41.2455867Z  * [new branch]        gpt/muse-egress-hardening-20260930 -> origin/gpt/muse-egress-hardening-20260930
+2026-10-26T22:16:41.2458607Z  * [new branch]        gpt/openmuse-van-convergence-r1 -> origin/gpt/openmuse-van-convergence-r1
+2026-10-26T22:16:41.2461285Z  * [new branch]        gpt/van-artemis-console-20260923 -> origin/gpt/van-artemis-console-20260923
+2026-10-26T22:16:41.2464927Z  * [new branch]        gpt/van-character-forge-authority-closure-20260924 -> origin/gpt/van-character-forge-authority-closure-20260924
+2026-10-26T22:16:41.2468705Z  * [new branch]        gpt/van-character-forge-engineering-20260922 -> origin/gpt/van-character-forge-engineering-20260922
+2026-10-26T22:16:41.2472275Z  * [new branch]        gpt/van-character-forge-production-v3-20260924 -> origin/gpt/van-character-forge-production-v3-20260924
+2026-10-26T22:16:41.2476069Z  * [new branch]        gpt/van-post-fable-product-closure-20260922 -> origin/gpt/van-post-fable-product-closure-20260922
+2026-10-26T22:16:41.2479310Z  * [new branch]        gpt/van-rive-build-input-pack-20260924 -> origin/gpt/van-rive-build-input-pack-20260924
+2026-10-26T22:16:41.2481807Z  * [new branch]        main                      -> origin/main
+2026-10-26T22:16:41.2484357Z  * [new branch]        muse/vati-opportunity-modes-20261008 -> origin/muse/vati-opportunity-modes-20261008
+2026-10-26T22:16:41.2487414Z  * [new branch]        ops/dial-control-recovery-20260930 -> origin/ops/dial-control-recovery-20260930
+2026-10-26T22:16:41.2490568Z  * [new branch]        owner/dial-universe-whatsapp-browser-20261008 -> origin/owner/dial-universe-whatsapp-browser-20261008
+2026-10-26T22:16:41.2494016Z  * [new branch]        platform/rev3-cinematic-studio-20261016 -> origin/platform/rev3-cinematic-studio-20261016
+2026-10-26T22:16:41.2497554Z  * [new branch]        platform/rev3-interaction-pr93-contribution-20261014 -> origin/platform/rev3-interaction-pr93-contribution-20261014
+2026-10-26T22:16:41.2501035Z  * [new branch]        platform/rev3-owner-controls-20261015 -> origin/platform/rev3-owner-controls-20261015
+2026-10-26T22:16:41.2504323Z  * [new branch]        review/muse-vati-rev114-inputs-20261018 -> origin/review/muse-vati-rev114-inputs-20261018
+2026-10-26T22:16:41.2507966Z  * [new branch]        review/van-next-universal-coverage-b4-closure-20261016 -> origin/review/van-next-universal-coverage-b4-closure-20261016
+2026-10-26T22:16:41.2511081Z  * [new branch]        review/van-rev115-20261018 -> origin/review/van-rev115-20261018
+2026-10-26T22:16:41.2513703Z  * [new branch]        spike/van-next-chart-engine-20261015 -> origin/spike/van-next-chart-engine-20261015
+2026-10-26T22:16:41.2516577Z  * [new tag]           archive/van-20261021/ccr-71397b02-lm6fid -> archive/van-20261021/ccr-71397b02-lm6fid
+2026-10-26T22:16:41.2519231Z  * [new tag]           archive/van-20261021/ccr-8f1201e9-w1xm0r -> archive/van-20261021/ccr-8f1201e9-w1xm0r
+2026-10-26T22:16:41.2522910Z  * [new tag]           archive/van-20261021/chatgpt/allow-sandboxed-playwright-userns-20261008 -> archive/van-20261021/chatgpt/allow-sandboxed-playwright-userns-20261008
+2026-10-26T22:16:41.2527501Z  * [new tag]           archive/van-20261021/chatgpt/better-remote-commander-oci-20261021 -> archive/van-20261021/chatgpt/better-remote-commander-oci-20261021
+2026-10-26T22:16:41.2532041Z  * [new tag]           archive/van-20261021/chatgpt/fix-browser-harness-pillow-pin-20261008 -> archive/van-20261021/chatgpt/fix-browser-harness-pillow-pin-20261008
+2026-10-26T22:16:41.2536847Z  * [new tag]           archive/van-20261021/chatgpt/fix-browser-runtime-ancestor-acl-20261008 -> archive/van-20261021/chatgpt/fix-browser-runtime-ancestor-acl-20261008
+2026-10-26T22:16:41.2541420Z  * [new tag]           archive/van-20261021/chatgpt/fix-browser-runtime-path-access-20261008 -> archive/van-20261021/chatgpt/fix-browser-runtime-path-access-20261008
+2026-10-26T22:16:41.2546259Z  * [new tag]           archive/van-20261021/chatgpt/fix-browser-runtime-path-perms-20261008 -> archive/van-20261021/chatgpt/fix-browser-runtime-path-perms-20261008
+2026-10-26T22:16:41.2550513Z  * [new tag]           archive/van-20261021/chatgpt/fix-browser-systemd-retry-20261008 -> archive/van-20261021/chatgpt/fix-browser-systemd-retry-20261008
+2026-10-26T22:16:41.2554864Z  * [new tag]           archive/van-20261021/chatgpt/fix-browser-systemd-retry2-20261008 -> archive/van-20261021/chatgpt/fix-browser-systemd-retry2-20261008
+2026-10-26T22:16:41.2559169Z  * [new tag]           archive/van-20261021/chatgpt/fix-browser-systemd-startlimit-20261008 -> archive/van-20261021/chatgpt/fix-browser-systemd-startlimit-20261008
+2026-10-26T22:16:41.2563845Z  * [new tag]           archive/van-20261021/chatgpt/fix-gateway-browser-runtime-staging-20261008 -> archive/van-20261021/chatgpt/fix-gateway-browser-runtime-staging-20261008
+2026-10-26T22:16:41.2568315Z  * [new tag]           archive/van-20261021/chatgpt/fix-stagehand-listen-syntax-20261008 -> archive/van-20261021/chatgpt/fix-stagehand-listen-syntax-20261008
+2026-10-26T22:16:41.2572554Z  * [new tag]           archive/van-20261021/chatgpt/fix-stagehand-listen-syntax-v2-20261008 -> archive/van-20261021/chatgpt/fix-stagehand-listen-syntax-v2-20261008
+2026-10-26T22:16:41.2577013Z  * [new tag]           archive/van-20261021/chatgpt/fix-stagehand-readiness-window-20261008 -> archive/van-20261021/chatgpt/fix-stagehand-readiness-window-20261008
+2026-10-26T22:16:41.2581771Z  * [new tag]           archive/van-20261021/chatgpt/harden-playwright-chromium-ownership-20261008 -> archive/van-20261021/chatgpt/harden-playwright-chromium-ownership-20261008
+2026-10-26T22:16:41.2586953Z  * [new tag]           archive/van-20261021/chatgpt/stage-browser-governance-certification-20261008 -> archive/van-20261021/chatgpt/stage-browser-governance-certification-20261008
+2026-10-26T22:16:41.2591497Z  * [new tag]           archive/van-20261021/chatgpt/van-browser-assignment-proof-20261008 -> archive/van-20261021/chatgpt/van-browser-assignment-proof-20261008
+2026-10-26T22:16:41.2595806Z  * [new tag]           archive/van-20261021/chatgpt/van-browser-sandbox-launch-20261008 -> archive/van-20261021/chatgpt/van-browser-sandbox-launch-20261008
+2026-10-26T22:16:41.2599863Z  * [new tag]           archive/van-20261021/chatgpt/van-browser-task-read-auth-20261008 -> archive/van-20261021/chatgpt/van-browser-task-read-auth-20261008
+2026-10-26T22:16:41.2603956Z  * [new tag]           archive/van-20261021/chatgpt/van-browser-tested-source-20261008 -> archive/van-20261021/chatgpt/van-browser-tested-source-20261008
+2026-10-26T22:16:41.2608185Z  * [new tag]           archive/van-20261021/chatgpt/van-overlay-firewall-persistence-20261007 -> archive/van-20261021/chatgpt/van-overlay-firewall-persistence-20261007
+2026-10-26T22:16:41.2612385Z  * [new tag]           archive/van-20261021/chatgpt/van-web-acquisition-fabric-20261004 -> archive/van-20261021/chatgpt/van-web-acquisition-fabric-20261004
+2026-10-26T22:16:41.2616471Z  * [new tag]           archive/van-20261021/chatgpt/vati-opportunity-modes-20261008 -> archive/van-20261021/chatgpt/vati-opportunity-modes-20261008
+2026-10-26T22:16:41.2619791Z  * [new tag]           archive/van-20261021/claude/busy-bardeen-sbfo2u -> archive/van-20261021/claude/busy-bardeen-sbfo2u
+2026-10-26T22:16:41.2623243Z  * [new tag]           archive/van-20261021/claude/van-fable-forensic-audit-ds8g0o -> archive/van-20261021/claude/van-fable-forensic-audit-ds8g0o
+2026-10-26T22:16:41.2626953Z  * [new tag]           archive/van-20261021/claude/van-forge-audit-11n4wh -> archive/van-20261021/claude/van-forge-audit-11n4wh
+2026-10-26T22:16:41.2630246Z  * [new tag]           archive/van-20261021/codex/cognitive-fabric-r161-20261006 -> archive/van-20261021/codex/cognitive-fabric-r161-20261006
+2026-10-26T22:16:41.2634045Z  * [new tag]           archive/van-20261021/codex/van-canon-ci-import-path-2026-10-08 -> archive/van-20261021/codex/van-canon-ci-import-path-2026-10-08
+2026-10-26T22:16:41.2637789Z  * [new tag]           archive/van-20261021/codex/van-canon-consolidation-2026-10-08 -> archive/van-20261021/codex/van-canon-consolidation-2026-10-08
+2026-10-26T22:16:41.2641541Z  * [new tag]           archive/van-20261021/codex/van-canon-runtime-closure-2026-10-09 -> archive/van-20261021/codex/van-canon-runtime-closure-2026-10-09
+2026-10-26T22:16:41.2645487Z  * [new tag]           archive/van-20261021/codex/van-canon-runtime-evidence-2026-10-09 -> archive/van-20261021/codex/van-canon-runtime-evidence-2026-10-09
+2026-10-26T22:16:41.2649473Z  * [new tag]           archive/van-20261021/codex/van-dfc1557a-direct-acceptance-2026-10-09 -> archive/van-20261021/codex/van-dfc1557a-direct-acceptance-2026-10-09
+2026-10-26T22:16:41.2653155Z  * [new tag]           archive/van-20261021/codex/van-direct-artemis-2026-10-08 -> archive/van-20261021/codex/van-direct-artemis-2026-10-08
+2026-10-26T22:16:41.2656620Z  * [new tag]           archive/van-20261021/codex/van-owner-core-only-2026-10-08 -> archive/van-20261021/codex/van-owner-core-only-2026-10-08
+2026-10-26T22:16:41.2659906Z  * [new tag]           archive/van-20261021/codex/van-owner-wiring-2026-10-08 -> archive/van-20261021/codex/van-owner-wiring-2026-10-08
+2026-10-26T22:16:41.2663778Z  * [new tag]           archive/van-20261021/codex/van-project-truth-bootstrap-review-2026-10-09 -> archive/van-20261021/codex/van-project-truth-bootstrap-review-2026-10-09
+2026-10-26T22:16:41.2668221Z  * [new tag]           archive/van-20261021/feat/supabase-one-install-multiproject-20261020 -> archive/van-20261021/feat/supabase-one-install-multiproject-20261020
+2026-10-26T22:16:41.2672423Z  * [new tag]           archive/van-20261021/feature/muse-dual-surface-control-20261012 -> archive/van-20261021/feature/muse-dual-surface-control-20261012
+2026-10-26T22:16:41.2676529Z  * [new tag]           archive/van-20261021/feature/rea-trading-accounts-tactile-20261015 -> archive/van-20261021/feature/rea-trading-accounts-tactile-20261015
+2026-10-26T22:16:41.2680273Z  * [new tag]           archive/van-20261021/fix/muse-zram-host-resilience-20261012 -> archive/van-20261021/fix/muse-zram-host-resilience-20261012
+2026-10-26T22:16:41.2684023Z  * [new tag]           archive/van-20261021/forge/candidate-b-rive-mechanics-20260925 -> archive/van-20261021/forge/candidate-b-rive-mechanics-20260925
+2026-10-26T22:16:41.2687935Z  * [new tag]           archive/van-20261021/gpt/character-forge-netcup-env-hotfix-20260923 -> archive/van-20261021/gpt/character-forge-netcup-env-hotfix-20260923
+2026-10-26T22:16:41.2692250Z  * [new tag]           archive/van-20261021/gpt/character-forge-netcup-qualification-fix-20260923 -> archive/van-20261021/gpt/character-forge-netcup-qualification-fix-20260923
+2026-10-26T22:16:41.2696866Z  * [new tag]           archive/van-20261021/gpt/character-forge-production-closure-20260924 -> archive/van-20261021/gpt/character-forge-production-closure-20260924
+2026-10-26T22:16:41.2700521Z  * [new tag]           archive/van-20261021/gpt/jev-control-centre-20260925 -> archive/van-20261021/gpt/jev-control-centre-20260925
+2026-10-26T22:16:41.2704361Z  * [new tag]           archive/van-20261021/gpt/jev-openmuse-convergence-r1-van-20260929 -> archive/van-20261021/gpt/jev-openmuse-convergence-r1-van-20260929
+2026-10-26T22:16:41.2709259Z  * [new tag]           archive/van-20261021/gpt/jev-openmuse-convergence-r1-van-20260929-parent-ccr-integration -> archive/van-20261021/gpt/jev-openmuse-convergence-r1-van-20260929-parent-ccr-integration
+2026-10-26T22:16:41.2713960Z  * [new tag]           archive/van-20261021/gpt/memory-fabric-rev1-2-van-20260929 -> archive/van-20261021/gpt/memory-fabric-rev1-2-van-20260929
+2026-10-26T22:16:41.2717571Z  * [new tag]           archive/van-20261021/gpt/meta-muse-access-live-green-20261002 -> archive/van-20261021/gpt/meta-muse-access-live-green-20261002
+2026-10-26T22:16:41.2721125Z  * [new tag]           archive/van-20261021/gpt/meta-muse-secure-access-20261002 -> archive/van-20261021/gpt/meta-muse-secure-access-20261002
+2026-10-26T22:16:41.2724565Z  * [new tag]           archive/van-20261021/gpt/muse-egress-hardening-20260930 -> archive/van-20261021/gpt/muse-egress-hardening-20260930
+2026-10-26T22:16:41.2727767Z  * [new tag]           archive/van-20261021/gpt/openmuse-van-convergence-r1 -> archive/van-20261021/gpt/openmuse-van-convergence-r1
+2026-10-26T22:16:41.2730902Z  * [new tag]           archive/van-20261021/gpt/van-artemis-console-20260923 -> archive/van-20261021/gpt/van-artemis-console-20260923
+2026-10-26T22:16:41.2734725Z  * [new tag]           archive/van-20261021/gpt/van-character-forge-authority-closure-20260924 -> archive/van-20261021/gpt/van-character-forge-authority-closure-20260924
+2026-10-26T22:16:41.2738802Z  * [new tag]           archive/van-20261021/gpt/van-character-forge-engineering-20260922 -> archive/van-20261021/gpt/van-character-forge-engineering-20260922
+2026-10-26T22:16:41.2742719Z  * [new tag]           archive/van-20261021/gpt/van-character-forge-production-v3-20260924 -> archive/van-20261021/gpt/van-character-forge-production-v3-20260924
+2026-10-26T22:16:41.2746922Z  * [new tag]           archive/van-20261021/gpt/van-post-fable-product-closure-20260922 -> archive/van-20261021/gpt/van-post-fable-product-closure-20260922
+2026-10-26T22:16:41.2750610Z  * [new tag]           archive/van-20261021/gpt/van-rive-build-input-pack-20260924 -> archive/van-20261021/gpt/van-rive-build-input-pack-20260924
+2026-10-26T22:16:41.2753209Z  * [new tag]           archive/van-20261021/main -> archive/van-20261021/main
+2026-10-26T22:16:41.2756194Z  * [new tag]           archive/van-20261021/muse/vati-opportunity-modes-20261008 -> archive/van-20261021/muse/vati-opportunity-modes-20261008
+2026-10-26T22:16:41.2759522Z  * [new tag]           archive/van-20261021/ops/dial-control-recovery-20260930 -> archive/van-20261021/ops/dial-control-recovery-20260930
+2026-10-26T22:16:41.2763122Z  * [new tag]           archive/van-20261021/owner/dial-universe-whatsapp-browser-20261008 -> archive/van-20261021/owner/dial-universe-whatsapp-browser-20261008
+2026-10-26T22:16:41.2766967Z  * [new tag]           archive/van-20261021/platform/rev3-cinematic-studio-20261016 -> archive/van-20261021/platform/rev3-cinematic-studio-20261016
+2026-10-26T22:16:41.2770926Z  * [new tag]           archive/van-20261021/platform/rev3-interaction-pr93-contribution-20261014 -> archive/van-20261021/platform/rev3-interaction-pr93-contribution-20261014
+2026-10-26T22:16:41.2775001Z  * [new tag]           archive/van-20261021/platform/rev3-owner-controls-20261015 -> archive/van-20261021/platform/rev3-owner-controls-20261015
+2026-10-26T22:16:41.2778508Z  * [new tag]           archive/van-20261021/review/muse-vati-rev114-inputs-20261018 -> archive/van-20261021/review/muse-vati-rev114-inputs-20261018
+2026-10-26T22:16:41.2782498Z  * [new tag]           archive/van-20261021/review/van-next-universal-coverage-b4-closure-20261016 -> archive/van-20261021/review/van-next-universal-coverage-b4-closure-20261016
+2026-10-26T22:16:41.2786569Z  * [new tag]           archive/van-20261021/review/van-rev115-20261018 -> archive/van-20261021/review/van-rev115-20261018
+2026-10-26T22:16:41.2789619Z  * [new tag]           archive/van-20261021/spike/van-next-chart-engine-20261015 -> archive/van-20261021/spike/van-next-chart-engine-20261015
+2026-10-26T22:16:41.2791980Z  * [new tag]           v0.5.0-dev                -> v0.5.0-dev
+2026-10-26T22:16:41.2795412Z [command]/usr/bin/git rev-parse --verify --quiet 9255b23d07ce976fa48c2f2e452b70113e6e6458^{object}
+2026-10-26T22:16:41.2797405Z 9255b23d07ce976fa48c2f2e452b70113e6e6458
+2026-10-26T22:16:41.2800076Z ##[endgroup]
+2026-10-26T22:16:41.2801450Z ##[group]Determining the checkout info
+2026-10-26T22:16:41.2803033Z ##[endgroup]
+2026-10-26T22:16:41.2804230Z [command]/usr/bin/git sparse-checkout disable
+2026-10-26T22:16:41.2806964Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-26T22:16:41.2810044Z ##[group]Checking out the ref
+2026-10-26T22:16:41.2811582Z [command]/usr/bin/git checkout --progress --force 9255b23d07ce976fa48c2f2e452b70113e6e6458
+2026-10-26T22:16:42.2487751Z Updating files:  87% (9252/10514)
+2026-10-26T22:16:42.2833438Z Updating files:  88% (9253/10514)
+2026-10-26T22:16:42.2946140Z Updating files:  89% (9358/10514)
+2026-10-26T22:16:42.3209626Z Updating files:  90% (9463/10514)
+2026-10-26T22:16:42.3284345Z Updating files:  91% (9568/10514)
+2026-10-26T22:16:42.3377382Z Updating files:  92% (9673/10514)
+2026-10-26T22:16:42.3456456Z Updating files:  93% (9779/10514)
+2026-10-26T22:16:42.3529614Z Updating files:  94% (9884/10514)
+2026-10-26T22:16:42.3611729Z Updating files:  95% (9989/10514)
+2026-10-26T22:16:42.3692660Z Updating files:  96% (10094/10514)
+2026-10-26T22:16:42.3764993Z Updating files:  97% (10199/10514)
+2026-10-26T22:16:42.4013655Z Updating files:  98% (10304/10514)
+2026-10-26T22:16:42.5644403Z Updating files:  99% (10409/10514)
+2026-10-26T22:16:42.5645243Z Updating files: 100% (10514/10514)
+2026-10-26T22:16:42.5646071Z Updating files: 100% (10514/10514), done.
+2026-10-26T22:16:42.5770225Z Note: switching to '9255b23d07ce976fa48c2f2e452b70113e6e6458'.
+2026-10-26T22:16:42.5771175Z 
+2026-10-26T22:16:42.5771931Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-10-26T22:16:42.5772885Z changes and commit them, and you can discard any commits you make in this
+2026-10-26T22:16:42.5773973Z state without impacting any branches by switching back to a branch.
+2026-10-26T22:16:42.5774485Z 
+2026-10-26T22:16:42.5774892Z If you want to create a new branch to retain commits you create, you may
+2026-10-26T22:16:42.5776073Z do so (now or later) by using -c with the switch command. Example:
+2026-10-26T22:16:42.5776548Z 
+2026-10-26T22:16:42.5776734Z   git switch -c <new-branch-name>
+2026-10-26T22:16:42.5777038Z 
+2026-10-26T22:16:42.5777213Z Or undo this operation with:
+2026-10-26T22:16:42.5777499Z 
+2026-10-26T22:16:42.5777659Z   git switch -
+2026-10-26T22:16:42.5777990Z 
+2026-10-26T22:16:42.5778323Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-10-26T22:16:42.5778677Z 
+2026-10-26T22:16:42.5778976Z HEAD is now at 9255b23d Bound native archive verification and refuse byte limits before publication
+2026-10-26T22:16:42.5882961Z ##[endgroup]
+2026-10-26T22:16:42.5928639Z [command]/usr/bin/git log -1 --format=%H
+2026-10-26T22:16:42.5954879Z 9255b23d07ce976fa48c2f2e452b70113e6e6458
+2026-10-26T22:16:42.6217857Z ##[group]Run set -euo pipefail
+2026-10-26T22:16:42.6218292Z [36;1mset -euo pipefail[0m
+2026-10-26T22:16:42.6218630Z [36;1mif [[ "$GITHUB_EVENT_NAME" == pull_request ]]; then[0m
+2026-10-26T22:16:42.6218999Z [36;1m  trusted="$PR_BASE_SHA"[0m
+2026-10-26T22:16:42.6219251Z [36;1melse[0m
+2026-10-26T22:16:42.6219684Z [36;1m  git fetch --no-tags --quiet origin "+refs/heads/$DEFAULT_BRANCH:refs/protected/$DEFAULT_BRANCH" \[0m
+2026-10-26T22:16:42.6220222Z [36;1m    '+refs/heads/gpt/*:refs/protected/gpt/*'[0m
+2026-10-26T22:16:42.6220533Z [36;1m  case "$PUSHED_REF" in[0m
+2026-10-26T22:16:42.6220800Z [36;1m    "$DEFAULT_BRANCH"|gpt/*)[0m
+2026-10-26T22:16:42.6221220Z [36;1m      # A protected branch moves only by a reviewed merge: its previous head is its[0m
+2026-10-26T22:16:42.6221825Z [36;1m      # protected upstream. A force-push (previous head not an ancestor) is refused.[0m
+2026-10-26T22:16:42.6222293Z [36;1m      trusted="$PUSHED_BEFORE"[0m
+2026-10-26T22:16:42.6222742Z [36;1m      if [[ "$trusted" =~ ^0+$ ]] || ! git merge-base --is-ancestor "$trusted" HEAD; then[0m
+2026-10-26T22:16:42.6223328Z [36;1m        echo "push to protected $PUSHED_REF: previous head missing or rewritten; refusing" >&2[0m
+2026-10-26T22:16:42.6224173Z [36;1m        exit 1[0m
+2026-10-26T22:16:42.6224401Z [36;1m      fi[0m
+2026-10-26T22:16:42.6224596Z [36;1m      ;;[0m
+2026-10-26T22:16:42.6224789Z [36;1m    *)[0m
+2026-10-26T22:16:42.6225175Z [36;1m      # Unprotected: the newest commit this history shares with a protected branch.[0m
+2026-10-26T22:16:42.6225610Z [36;1m      trusted=""[0m
+2026-10-26T22:16:42.6225992Z [36;1m      for ref in $(git for-each-ref --format='%(refname)' refs/protected/); do[0m
+2026-10-26T22:16:42.6226462Z [36;1m        base="$(git merge-base HEAD "$ref" || true)"[0m
+2026-10-26T22:16:42.6226801Z [36;1m        [[ -n "$base" ]] || continue[0m
+2026-10-26T22:16:42.6227230Z [36;1m        if [[ -z "$trusted" ]] || git merge-base --is-ancestor "$trusted" "$base"; then[0m
+2026-10-26T22:16:42.6227641Z [36;1m          trusted="$base"[0m
+2026-10-26T22:16:42.6227888Z [36;1m        fi[0m
+2026-10-26T22:16:42.6228091Z [36;1m      done[0m
+2026-10-26T22:16:42.6228337Z [36;1m      if [[ -z "$trusted" ]]; then[0m
+2026-10-26T22:16:42.6228806Z [36;1m        echo "no protected branch shares history with $PUSHED_REF; open a pull request" >&2[0m
+2026-10-26T22:16:42.6229252Z [36;1m        exit 1[0m
+2026-10-26T22:16:42.6229464Z [36;1m      fi[0m
+2026-10-26T22:16:42.6229657Z [36;1m      ;;[0m
+2026-10-26T22:16:42.6229846Z [36;1m  esac[0m
+2026-10-26T22:16:42.6230033Z [36;1mfi[0m
+2026-10-26T22:16:42.6230239Z [36;1mecho "trusted ref: $trusted"[0m
+2026-10-26T22:16:42.6230546Z [36;1mecho "TRUSTED_SHA=$trusted" >> "$GITHUB_ENV"[0m
+2026-10-26T22:16:42.6526462Z shell: /usr/bin/bash -e {0}
+2026-10-26T22:16:42.6526744Z env:
+2026-10-26T22:16:42.6527001Z   HEAD_SHA: 9255b23d07ce976fa48c2f2e452b70113e6e6458
+2026-10-26T22:16:42.6527381Z   PR_BASE_SHA: 8eb1889822fc8a83f219977c15340172e16acd91
+2026-10-26T22:16:42.6527701Z   PUSHED_REF: 105/merge
+2026-10-26T22:16:42.6527983Z   PUSHED_BEFORE: 0c1344f5f0b3c6cfb5cf437f80234d36812fd94e
+2026-10-26T22:16:42.6528507Z   DEFAULT_BRANCH: main
+2026-10-26T22:16:42.6528735Z ##[endgroup]
+2026-10-26T22:16:42.6630894Z trusted ref: 8eb1889822fc8a83f219977c15340172e16acd91
+2026-10-26T22:16:42.6741293Z ##[group]Run actions/checkout@v4
+2026-10-26T22:16:42.6741593Z with:
+2026-10-26T22:16:42.6741824Z   ref: 8eb1889822fc8a83f219977c15340172e16acd91
+2026-10-26T22:16:42.6742116Z   path: trusted
+2026-10-26T22:16:42.6742322Z   fetch-depth: 1
+2026-10-26T22:16:42.6742538Z   repository: Vanguduza/Van
+2026-10-26T22:16:42.6745199Z   token: ***
+2026-10-26T22:16:42.6745443Z   ssh-strict: true
+2026-10-26T22:16:42.6745657Z   ssh-user: git
+2026-10-26T22:16:42.6745879Z   persist-credentials: true
+2026-10-26T22:16:42.6746127Z   clean: true
+2026-10-26T22:16:42.6746354Z   sparse-checkout-cone-mode: true
+2026-10-26T22:16:42.6746621Z   fetch-tags: false
+2026-10-26T22:16:42.6746840Z   show-progress: true
+2026-10-26T22:16:42.6747052Z   lfs: false
+2026-10-26T22:16:42.6747248Z   submodules: false
+2026-10-26T22:16:42.6747464Z   set-safe-directory: true
+2026-10-26T22:16:42.6747742Z   allow-unsafe-pr-checkout: false
+2026-10-26T22:16:42.6748000Z env:
+2026-10-26T22:16:42.6748249Z   HEAD_SHA: 9255b23d07ce976fa48c2f2e452b70113e6e6458
+2026-10-26T22:16:42.6748619Z   PR_BASE_SHA: 8eb1889822fc8a83f219977c15340172e16acd91
+2026-10-26T22:16:42.6748927Z   PUSHED_REF: 105/merge
+2026-10-26T22:16:42.6749200Z   PUSHED_BEFORE: 0c1344f5f0b3c6cfb5cf437f80234d36812fd94e
+2026-10-26T22:16:42.6749512Z   DEFAULT_BRANCH: main
+2026-10-26T22:16:42.6749766Z   TRUSTED_SHA: 8eb1889822fc8a83f219977c15340172e16acd91
+2026-10-26T22:16:42.6750062Z ##[endgroup]
+2026-10-26T22:16:42.7563409Z Syncing repository: Vanguduza/Van
+2026-10-26T22:16:42.7582726Z ##[group]Getting Git version info
+2026-10-26T22:16:42.7584136Z Working directory is '/home/runner/work/Van/Van/trusted'
+2026-10-26T22:16:42.7623315Z [command]/usr/bin/git version
+2026-10-26T22:16:42.7667919Z git version 2.55.0
+2026-10-26T22:16:42.7691097Z ##[endgroup]
+2026-10-26T22:16:42.7707287Z Temporarily overriding HOME='/home/runner/work/_temp/b2b26384-8b1e-41aa-9c14-0f4edac105a6' before making global git config changes
+2026-10-26T22:16:42.7708131Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-26T22:16:42.7714410Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Van/Van/trusted
+2026-10-26T22:16:42.7747068Z ##[group]Initializing the repository
+2026-10-26T22:16:42.7751700Z [command]/usr/bin/git init /home/runner/work/Van/Van/trusted
+2026-10-26T22:16:42.7794934Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-26T22:16:42.7796222Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-26T22:16:42.7798522Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-26T22:16:42.7800255Z hint: call:
+2026-10-26T22:16:42.7801669Z hint:
+2026-10-26T22:16:42.7802347Z hint: 	git config --global init.defaultBranch <name>
+2026-10-26T22:16:42.7802940Z hint:
+2026-10-26T22:16:42.7803457Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-26T22:16:42.7804346Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-26T22:16:42.7804757Z hint:
+2026-10-26T22:16:42.7804962Z hint: 	git branch -m <name>
+2026-10-26T22:16:42.7805195Z hint:
+2026-10-26T22:16:42.7805535Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-26T22:16:42.7806079Z Initialized empty Git repository in /home/runner/work/Van/Van/trusted/.git/
+2026-10-26T22:16:42.7809393Z [command]/usr/bin/git remote add origin https://github.com/Vanguduza/Van
+2026-10-26T22:16:42.7847379Z ##[endgroup]
+2026-10-26T22:16:42.7848130Z ##[group]Disabling automatic garbage collection
+2026-10-26T22:16:42.7851770Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-26T22:16:42.7885460Z ##[endgroup]
+2026-10-26T22:16:42.7886088Z ##[group]Setting up auth
+2026-10-26T22:16:42.7893133Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-26T22:16:42.7928429Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-26T22:16:42.8204727Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-26T22:16:42.8223349Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-26T22:16:42.8478297Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-26T22:16:42.8521051Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-26T22:16:42.8743869Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-26T22:16:42.8804976Z ##[endgroup]
+2026-10-26T22:16:42.8806179Z ##[group]Fetching the repository
+2026-10-26T22:16:42.8817012Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin 8eb1889822fc8a83f219977c15340172e16acd91
+2026-10-26T22:16:45.4441352Z From https://github.com/Vanguduza/Van
+2026-10-26T22:16:45.4442136Z  * branch            8eb1889822fc8a83f219977c15340172e16acd91 -> FETCH_HEAD
+2026-10-26T22:16:45.4446360Z ##[endgroup]
+2026-10-26T22:16:45.4447062Z ##[group]Determining the checkout info
+2026-10-26T22:16:45.4449498Z ##[endgroup]
+2026-10-26T22:16:45.4457438Z [command]/usr/bin/git sparse-checkout disable
+2026-10-26T22:16:45.4504375Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-26T22:16:45.4537904Z ##[group]Checking out the ref
+2026-10-26T22:16:45.4541609Z [command]/usr/bin/git checkout --progress --force 8eb1889822fc8a83f219977c15340172e16acd91
+2026-10-26T22:16:45.8161614Z Note: switching to '8eb1889822fc8a83f219977c15340172e16acd91'.
+2026-10-26T22:16:45.8162135Z 
+2026-10-26T22:16:45.8162477Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-10-26T22:16:45.8163322Z changes and commit them, and you can discard any commits you make in this
+2026-10-26T22:16:45.8164335Z state without impacting any branches by switching back to a branch.
+2026-10-26T22:16:45.8164837Z 
+2026-10-26T22:16:45.8165050Z If you want to create a new branch to retain commits you create, you may
+2026-10-26T22:16:45.8165512Z do so (now or later) by using -c with the switch command. Example:
+2026-10-26T22:16:45.8165774Z 
+2026-10-26T22:16:45.8165878Z   git switch -c <new-branch-name>
+2026-10-26T22:16:45.8166056Z 
+2026-10-26T22:16:45.8166160Z Or undo this operation with:
+2026-10-26T22:16:45.8166317Z 
+2026-10-26T22:16:45.8166404Z   git switch -
+2026-10-26T22:16:45.8166525Z 
+2026-10-26T22:16:45.8166744Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-10-26T22:16:45.8167052Z 
+2026-10-26T22:16:45.8167360Z HEAD is now at 8eb1889 Merge pull request #91 from Vanguduza/owner/dial-universe-whatsapp-browser-20261008
+2026-10-26T22:16:45.8183770Z ##[endgroup]
+2026-10-26T22:16:45.8229681Z [command]/usr/bin/git log -1 --format=%H
+2026-10-26T22:16:45.8257101Z 8eb1889822fc8a83f219977c15340172e16acd91
+2026-10-26T22:16:45.8457154Z ##[group]Run actions/setup-python@v5
+2026-10-26T22:16:45.8457447Z with:
+2026-10-26T22:16:45.8457648Z   python-version: 3.12
+2026-10-26T22:16:45.8457869Z   check-latest: false
+2026-10-26T22:16:45.8460161Z   token: ***
+2026-10-26T22:16:45.8460377Z   update-environment: true
+2026-10-26T22:16:45.8460622Z   allow-prereleases: false
+2026-10-26T22:16:45.8460848Z   freethreaded: false
+2026-10-26T22:16:45.8461054Z env:
+2026-10-26T22:16:45.8461275Z   HEAD_SHA: 9255b23d07ce976fa48c2f2e452b70113e6e6458
+2026-10-26T22:16:45.8461630Z   PR_BASE_SHA: 8eb1889822fc8a83f219977c15340172e16acd91
+2026-10-26T22:16:45.8461927Z   PUSHED_REF: 105/merge
+2026-10-26T22:16:45.8462192Z   PUSHED_BEFORE: 0c1344f5f0b3c6cfb5cf437f80234d36812fd94e
+2026-10-26T22:16:45.8462666Z   DEFAULT_BRANCH: main
+2026-10-26T22:16:45.8462917Z   TRUSTED_SHA: 8eb1889822fc8a83f219977c15340172e16acd91
+2026-10-26T22:16:45.8463216Z ##[endgroup]
+2026-10-26T22:16:45.9893253Z ##[group]Installed versions
+2026-10-26T22:16:45.9992356Z (node:2393) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-26T22:16:45.9993195Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-26T22:16:45.9994432Z Successfully set up CPython (3.12.15)
+2026-10-26T22:16:45.9995196Z ##[endgroup]
+2026-10-26T22:16:46.0135847Z ##[group]Run python trusted/tools/ci/project_truth_ledger.py --repo head verify-pr --base "$TRUSTED_SHA" --head "$HEAD_SHA"
+2026-10-26T22:16:46.0136745Z [36;1mpython trusted/tools/ci/project_truth_ledger.py --repo head verify-pr --base "$TRUSTED_SHA" --head "$HEAD_SHA"[0m
+2026-10-26T22:16:46.0217815Z shell: /usr/bin/bash -e {0}
+2026-10-26T22:16:46.0218082Z env:
+2026-10-26T22:16:46.0218328Z   HEAD_SHA: 9255b23d07ce976fa48c2f2e452b70113e6e6458
+2026-10-26T22:16:46.0218722Z   PR_BASE_SHA: 8eb1889822fc8a83f219977c15340172e16acd91
+2026-10-26T22:16:46.0219041Z   PUSHED_REF: 105/merge
+2026-10-26T22:16:46.0219332Z   PUSHED_BEFORE: 0c1344f5f0b3c6cfb5cf437f80234d36812fd94e
+2026-10-26T22:16:46.0219654Z   DEFAULT_BRANCH: main
+2026-10-26T22:16:46.0219912Z   TRUSTED_SHA: 8eb1889822fc8a83f219977c15340172e16acd91
+2026-10-26T22:16:46.0220272Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-26T22:16:46.0220761Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-26T22:16:46.0221209Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-26T22:16:46.0221595Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-26T22:16:46.0221977Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-26T22:16:46.0222392Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-26T22:16:46.0222844Z ##[endgroup]
+2026-10-26T22:16:46.0744753Z python: can't open file '/home/runner/work/Van/Van/trusted/tools/ci/project_truth_ledger.py': [Errno 2] No such file or directory
+2026-10-26T22:16:46.0784682Z ##[error]Process completed with exit code 2.
+2026-10-26T22:16:46.0940857Z Post job cleanup.
+2026-10-26T22:16:46.1794519Z [command]/usr/bin/git version
+2026-10-26T22:16:46.1862175Z git version 2.55.0
+2026-10-26T22:16:46.1894941Z Temporarily overriding HOME='/home/runner/work/_temp/cf60fc2c-cfa6-4da8-bc72-056c4e84943e' before making global git config changes
+2026-10-26T22:16:46.1915376Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-26T22:16:46.1924685Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Van/Van/trusted
+2026-10-26T22:16:46.1945461Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-26T22:16:46.1962904Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-26T22:16:46.2217721Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-26T22:16:46.2247134Z http.https://github.com/.extraheader
+2026-10-26T22:16:46.2258978Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-26T22:16:46.2325501Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-26T22:16:46.2654155Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-26T22:16:46.2705224Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-26T22:16:46.3135652Z Post job cleanup.
+2026-10-26T22:16:46.3979440Z [command]/usr/bin/git version
+2026-10-26T22:16:46.4022460Z git version 2.55.0
+2026-10-26T22:16:46.4062690Z Temporarily overriding HOME='/home/runner/work/_temp/b78c024f-47c7-4d77-b196-267002c36d3e' before making global git config changes
+2026-10-26T22:16:46.4064412Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-26T22:16:46.4070424Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Van/Van/head
+2026-10-26T22:16:46.4110684Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-26T22:16:46.4144733Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-26T22:16:46.4415354Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-26T22:16:46.4451112Z http.https://github.com/.extraheader
+2026-10-26T22:16:46.4463101Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-26T22:16:46.4499567Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-26T22:16:46.4767597Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-26T22:16:46.4814636Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-26T22:16:46.5214178Z Cleaning up orphan processes
+2026-10-26T22:16:46.5654255Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-python@v5. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

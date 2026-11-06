@@ -1,0 +1,708 @@
+{
+  "count": 24,
+  "state": "NOT_RUN",
+  "tests": [
+    {
+      "action": "Lose cancel reply; authenticated lookup proves cancelled with partial fills; record fills once, retain protection and release only proven unused reservation.",
+      "additional_units": [
+        "BE-012",
+        "BQ-002",
+        "BG-001"
+      ],
+      "category": "POS",
+      "environment": "ADMITTED_DIAL_ISOLATED_TOPOLOGY; real provider where specified",
+      "execution_state": "NOT_RUN",
+      "expectation": "Lose cancel reply; authenticated lookup proves cancelled with partial fills; record fills once, retain protection and release only proven unused reservation.",
+      "id": "T-VAN-RV-001-POS",
+      "non_claim": "Proposed application acceptance, not an executed result.",
+      "preconditions": "Exact admitted source/configuration/fixture or named provider with correct authority; earlier unit acceptance satisfied.",
+      "receipt_binding": [
+        "source",
+        "config",
+        "input_manifest",
+        "actual_result",
+        "independent_reviewer",
+        "environment",
+        "causal_trace"
+      ],
+      "receipt_required": true,
+      "requirement_id": "VAN-RV-001",
+      "scope_revision": "1.15",
+      "unit": "BE-010"
+    },
+    {
+      "action": "A timeout, absent REST result or expired local timer never proves cancellation or flat exposure.",
+      "additional_units": [
+        "BE-012",
+        "BQ-002",
+        "BG-001"
+      ],
+      "category": "NEG",
+      "environment": "ADMITTED_DIAL_ISOLATED_TOPOLOGY; real provider where specified",
+      "execution_state": "NOT_RUN",
+      "expectation": "A timeout, absent REST result or expired local timer never proves cancellation or flat exposure.",
+      "id": "T-VAN-RV-001-NEG",
+      "non_claim": "Proposed application acceptance, not an executed result.",
+      "preconditions": "Exact admitted source/configuration/fixture or named provider with correct authority; earlier unit acceptance satisfied.",
+      "receipt_binding": [
+        "source",
+        "config",
+        "input_manifest",
+        "actual_result",
+        "independent_reviewer",
+        "environment",
+        "causal_trace"
+      ],
+      "receipt_required": true,
+      "requirement_id": "VAN-RV-001",
+      "scope_revision": "1.15",
+      "unit": "BE-010"
+    },
+    {
+      "action": "Restart at cancel-send and query boundaries, then accept late fill/correction without resubmission.",
+      "additional_units": [
+        "BE-012",
+        "BQ-002",
+        "BG-001"
+      ],
+      "category": "REC",
+      "environment": "ADMITTED_DIAL_ISOLATED_TOPOLOGY; real provider where specified",
+      "execution_state": "NOT_RUN",
+      "expectation": "Restart at cancel-send and query boundaries, then accept late fill/correction without resubmission.",
+      "id": "T-VAN-RV-001-REC",
+      "non_claim": "Proposed application acceptance, not an executed result.",
+      "preconditions": "Exact admitted source/configuration/fixture or named provider with correct authority; earlier unit acceptance satisfied.",
+      "receipt_binding": [
+        "source",
+        "config",
+        "input_manifest",
+        "actual_result",
+        "independent_reviewer",
+        "environment",
+        "causal_trace"
+      ],
+      "receipt_required": true,
+      "requirement_id": "VAN-RV-001",
+      "scope_revision": "1.15",
+      "unit": "BE-010"
+    },
+    {
+      "action": "Dispatch resolves current qualified policy, mandate, reservation, epoch and objective; positive decimal venue increments and complete mature costs validate.",
+      "additional_units": [
+        "BE-010",
+        "BQ-001",
+        "BG-001"
+      ],
+      "category": "POS",
+      "environment": "ADMITTED_DIAL_ISOLATED_TOPOLOGY; real provider where specified",
+      "execution_state": "NOT_RUN",
+      "expectation": "Dispatch resolves current qualified policy, mandate, reservation, epoch and objective; positive decimal venue increments and complete mature costs validate.",
+      "id": "T-VAN-RV-002-POS",
+      "non_claim": "Proposed application acceptance, not an executed result.",
+      "preconditions": "Exact admitted source/configuration/fixture or named provider with correct authority; earlier unit acceptance satisfied.",
+      "receipt_binding": [
+        "source",
+        "config",
+        "input_manifest",
+        "actual_result",
+        "independent_reviewer",
+        "environment",
+        "causal_trace"
+      ],
+      "receipt_required": true,
+      "requirement_id": "VAN-RV-002",
+      "scope_revision": "1.15",
+      "unit": "BE-002"
+    },
+    {
+      "action": "Remove only POLICY_QUALIFIED at dispatch and reseal unsigned locks; named semantic check still fails. Reject zero tick and mature unknown costs.",
+      "additional_units": [
+        "BE-010",
+        "BQ-001",
+        "BG-001"
+      ],
+      "category": "NEG",
+      "environment": "ADMITTED_DIAL_ISOLATED_TOPOLOGY; real provider where specified",
+      "execution_state": "NOT_RUN",
+      "expectation": "Remove only POLICY_QUALIFIED at dispatch and reseal unsigned locks; named semantic check still fails. Reject zero tick and mature unknown costs.",
+      "id": "T-VAN-RV-002-NEG",
+      "non_claim": "Proposed application acceptance, not an executed result.",
+      "preconditions": "Exact admitted source/configuration/fixture or named provider with correct authority; earlier unit acceptance satisfied.",
+      "receipt_binding": [
+        "source",
+        "config",
+        "input_manifest",
+        "actual_result",
+        "independent_reviewer",
+        "environment",
+        "causal_trace"
+      ],
+      "receipt_required": true,
+      "requirement_id": "VAN-RV-002",
+      "scope_revision": "1.15",
+      "unit": "BE-002"
+    },
+    {
+      "action": "Expiry/revocation at any preactivation or drain stage blocks new risk, reconciles in-flight effects and cannot reactivate revoked fallback.",
+      "additional_units": [
+        "BE-010",
+        "BQ-001",
+        "BG-001"
+      ],
+      "category": "REC",
+      "environment": "ADMITTED_DIAL_ISOLATED_TOPOLOGY; real provider where specified",
+      "execution_state": "NOT_RUN",
+      "expectation": "Expiry/revocation at any preactivation or drain stage blocks new risk, reconciles in-flight effects and cannot reactivate revoked fallback.",
+      "id": "T-VAN-RV-002-REC",
+      "non_claim": "Proposed application acceptance, not an executed result.",
+      "preconditions": "Exact admitted source/configuration/fixture or named provider with correct authority; earlier unit acceptance satisfied.",
+      "receipt_binding": [
+        "source",
+        "config",
+        "input_manifest",
+        "actual_result",
+        "independent_reviewer",
+        "environment",
+        "causal_trace"
+      ],
+      "receipt_required": true,
+      "requirement_id": "VAN-RV-002",
+      "scope_revision": "1.15",
+      "unit": "BE-002"
+    },
+    {
+      "action": "Real registered consumer applies newer observation revision once, persists cursor/contribution/snapshot atomically, and later eligible selector consumes its fingerprint.",
+      "additional_units": [
+        "BE-012",
+        "BE-036",
+        "BQ-007",
+        "BG-001"
+      ],
+      "category": "POS",
+      "environment": "ADMITTED_DIAL_ISOLATED_TOPOLOGY; real provider where specified",
+      "execution_state": "NOT_RUN",
+      "expectation": "Real registered consumer applies newer observation revision once, persists cursor/contribution/snapshot atomically, and later eligible selector consumes its fingerprint.",
+      "id": "T-VAN-RV-003-POS",
+      "non_claim": "Proposed application acceptance, not an executed result.",
+      "preconditions": "Exact admitted source/configuration/fixture or named provider with correct authority; earlier unit acceptance satisfied.",
+      "receipt_binding": [
+        "source",
+        "config",
+        "input_manifest",
+        "actual_result",
+        "independent_reviewer",
+        "environment",
+        "causal_trace"
+      ],
+      "receipt_required": true,
+      "requirement_id": "VAN-RV-003",
+      "scope_revision": "1.15",
+      "unit": "BE-003"
+    },
+    {
+      "action": "Deliver older revision after correction and conflicting equal revision; older evidence cannot overwrite current contribution and conflict is quarantined.",
+      "additional_units": [
+        "BE-012",
+        "BE-036",
+        "BQ-007",
+        "BG-001"
+      ],
+      "category": "NEG",
+      "environment": "ADMITTED_DIAL_ISOLATED_TOPOLOGY; real provider where specified",
+      "execution_state": "NOT_RUN",
+      "expectation": "Deliver older revision after correction and conflicting equal revision; older evidence cannot overwrite current contribution and conflict is quarantined.",
+      "id": "T-VAN-RV-003-NEG",
+      "non_claim": "Proposed application acceptance, not an executed result.",
+      "preconditions": "Exact admitted source/configuration/fixture or named provider with correct authority; earlier unit acceptance satisfied.",
+      "receipt_binding": [
+        "source",
+        "config",
+        "input_manifest",
+        "actual_result",
+        "independent_reviewer",
+        "environment",
+        "causal_trace"
+      ],
+      "receipt_required": true,
+      "requirement_id": "VAN-RV-003",
+      "scope_revision": "1.15",
+      "unit": "BE-003"
+    },
+    {
+      "action": "Kill actual process before/after commit, replay bounded journal and verify identical logical snapshot/selection with AS_DECIDED unchanged.",
+      "additional_units": [
+        "BE-012",
+        "BE-036",
+        "BQ-007",
+        "BG-001"
+      ],
+      "category": "REC",
+      "environment": "ADMITTED_DIAL_ISOLATED_TOPOLOGY; real provider where specified",
+      "execution_state": "NOT_RUN",
+      "expectation": "Kill actual process before/after commit, replay bounded journal and verify identical logical snapshot/selection with AS_DECIDED unchanged.",
+      "id": "T-VAN-RV-003-REC",
+      "non_claim": "Proposed application acceptance, not an executed result.",
+      "preconditions": "Exact admitted source/configuration/fixture or named provider with correct authority; earlier unit acceptance satisfied.",
+      "receipt_binding": [
+        "source",
+        "config",
+        "input_manifest",
+        "actual_result",
+        "independent_reviewer",
+        "environment",
+        "causal_trace"
+      ],
+      "receipt_required": true,
+      "requirement_id": "VAN-RV-003",
+      "scope_revision": "1.15",
+      "unit": "BE-003"
+    },
+    {
+      "action": "One gross base unit filled with 0.01 base fee consumes the entire one-unit execution budget; cash/base/fee-asset postings balance under explicit valuation.",
+      "additional_units": [
+        "BE-009",
+        "BE-010",
+        "BE-012",
+        "BE-035",
+        "BQ-009",
+        "BG-001"
+      ],
+      "category": "POS",
+      "environment": "ADMITTED_DIAL_ISOLATED_TOPOLOGY; real provider where specified",
+      "execution_state": "NOT_RUN",
+      "expectation": "One gross base unit filled with 0.01 base fee consumes the entire one-unit execution budget; cash/base/fee-asset postings balance under explicit valuation.",
+      "id": "T-VAN-RV-004-POS",
+      "non_claim": "Proposed application acceptance, not an executed result.",
+      "preconditions": "Exact admitted source/configuration/fixture or named provider with correct authority; earlier unit acceptance satisfied.",
+      "receipt_binding": [
+        "source",
+        "config",
+        "input_manifest",
+        "actual_result",
+        "independent_reviewer",
+        "environment",
+        "causal_trace"
+      ],
+      "receipt_required": true,
+      "requirement_id": "VAN-RV-004",
+      "scope_revision": "1.15",
+      "unit": "BE-006"
+    },
+    {
+      "action": "Fees, exits or netting cannot reopen entry allowance; TCA decomposition must equal direct signed fill-versus-reference cost plus nonembedded charges.",
+      "additional_units": [
+        "BE-009",
+        "BE-010",
+        "BE-012",
+        "BE-035",
+        "BQ-009",
+        "BG-001"
+      ],
+      "category": "NEG",
+      "environment": "ADMITTED_DIAL_ISOLATED_TOPOLOGY; real provider where specified",
+      "execution_state": "NOT_RUN",
+      "expectation": "Fees, exits or netting cannot reopen entry allowance; TCA decomposition must equal direct signed fill-versus-reference cost plus nonembedded charges.",
+      "id": "T-VAN-RV-004-NEG",
+      "non_claim": "Proposed application acceptance, not an executed result.",
+      "preconditions": "Exact admitted source/configuration/fixture or named provider with correct authority; earlier unit acceptance satisfied.",
+      "receipt_binding": [
+        "source",
+        "config",
+        "input_manifest",
+        "actual_result",
+        "independent_reviewer",
+        "environment",
+        "causal_trace"
+      ],
+      "receipt_required": true,
+      "requirement_id": "VAN-RV-004",
+      "scope_revision": "1.15",
+      "unit": "BE-006"
+    },
+    {
+      "action": "Late fee and fill bust append compensating facts, preserve old decision snapshots and reconcile reservations without automatic re-entry.",
+      "additional_units": [
+        "BE-009",
+        "BE-010",
+        "BE-012",
+        "BE-035",
+        "BQ-009",
+        "BG-001"
+      ],
+      "category": "REC",
+      "environment": "ADMITTED_DIAL_ISOLATED_TOPOLOGY; real provider where specified",
+      "execution_state": "NOT_RUN",
+      "expectation": "Late fee and fill bust append compensating facts, preserve old decision snapshots and reconcile reservations without automatic re-entry.",
+      "id": "T-VAN-RV-004-REC",
+      "non_claim": "Proposed application acceptance, not an executed result.",
+      "preconditions": "Exact admitted source/configuration/fixture or named provider with correct authority; earlier unit acceptance satisfied.",
+      "receipt_binding": [
+        "source",
+        "config",
+        "input_manifest",
+        "actual_result",
+        "independent_reviewer",
+        "environment",
+        "causal_trace"
+      ],
+      "receipt_required": true,
+      "requirement_id": "VAN-RV-004",
+      "scope_revision": "1.15",
+      "unit": "BE-006"
+    },
+    {
+      "action": "Quantized slices jointly satisfy parent quantity, fresh depth participation, minimum lot/notional, maximum slices, deadline and command budget.",
+      "additional_units": [
+        "BE-010",
+        "BE-035",
+        "BQ-002",
+        "BG-001"
+      ],
+      "category": "POS",
+      "environment": "ADMITTED_DIAL_ISOLATED_TOPOLOGY; real provider where specified",
+      "execution_state": "NOT_RUN",
+      "expectation": "Quantized slices jointly satisfy parent quantity, fresh depth participation, minimum lot/notional, maximum slices, deadline and command budget.",
+      "id": "T-VAN-RV-005-POS",
+      "non_claim": "Proposed application acceptance, not an executed result.",
+      "preconditions": "Exact admitted source/configuration/fixture or named provider with correct authority; earlier unit acceptance satisfied.",
+      "receipt_binding": [
+        "source",
+        "config",
+        "input_manifest",
+        "actual_result",
+        "independent_reviewer",
+        "environment",
+        "causal_trace"
+      ],
+      "receipt_required": true,
+      "requirement_id": "VAN-RV-005",
+      "scope_revision": "1.15",
+      "unit": "BE-009"
+    },
+    {
+      "action": "Quantity 200, depth 10, participation 0.25 and max 8 slices is infeasible for a one-snapshot plan; never issue eight slices of 25 claiming a cap of 2.5.",
+      "additional_units": [
+        "BE-010",
+        "BE-035",
+        "BQ-002",
+        "BG-001"
+      ],
+      "category": "NEG",
+      "environment": "ADMITTED_DIAL_ISOLATED_TOPOLOGY; real provider where specified",
+      "execution_state": "NOT_RUN",
+      "expectation": "Quantity 200, depth 10, participation 0.25 and max 8 slices is infeasible for a one-snapshot plan; never issue eight slices of 25 claiming a cap of 2.5.",
+      "id": "T-VAN-RV-005-NEG",
+      "non_claim": "Proposed application acceptance, not an executed result.",
+      "preconditions": "Exact admitted source/configuration/fixture or named provider with correct authority; earlier unit acceptance satisfied.",
+      "receipt_binding": [
+        "source",
+        "config",
+        "input_manifest",
+        "actual_result",
+        "independent_reviewer",
+        "environment",
+        "causal_trace"
+      ],
+      "receipt_required": true,
+      "requirement_id": "VAN-RV-005",
+      "scope_revision": "1.15",
+      "unit": "BE-009"
+    },
+    {
+      "action": "Replanning uses newly observed depth/time under same grant; restart retains lifetime counters and does not repeat unconfirmed slices.",
+      "additional_units": [
+        "BE-010",
+        "BE-035",
+        "BQ-002",
+        "BG-001"
+      ],
+      "category": "REC",
+      "environment": "ADMITTED_DIAL_ISOLATED_TOPOLOGY; real provider where specified",
+      "execution_state": "NOT_RUN",
+      "expectation": "Replanning uses newly observed depth/time under same grant; restart retains lifetime counters and does not repeat unconfirmed slices.",
+      "id": "T-VAN-RV-005-REC",
+      "non_claim": "Proposed application acceptance, not an executed result.",
+      "preconditions": "Exact admitted source/configuration/fixture or named provider with correct authority; earlier unit acceptance satisfied.",
+      "receipt_binding": [
+        "source",
+        "config",
+        "input_manifest",
+        "actual_result",
+        "independent_reviewer",
+        "environment",
+        "causal_trace"
+      ],
+      "receipt_required": true,
+      "requirement_id": "VAN-RV-005",
+      "scope_revision": "1.15",
+      "unit": "BE-009"
+    },
+    {
+      "action": "Reconcile Opus lockout/execution/ledger fixes with canon Jev/temperament/evidence, PR-only Muse/owner controls and their callers; full parity holds.",
+      "additional_units": [
+        "BE-003",
+        "BE-010",
+        "BE-036",
+        "BQ-007",
+        "BG-001"
+      ],
+      "category": "POS",
+      "environment": "ADMITTED_DIAL_ISOLATED_TOPOLOGY; real provider where specified",
+      "execution_state": "NOT_RUN",
+      "expectation": "Reconcile Opus lockout/execution/ledger fixes with canon Jev/temperament/evidence, PR-only Muse/owner controls and their callers; full parity holds.",
+      "id": "T-VAN-RV-006-POS",
+      "non_claim": "Proposed application acceptance, not an executed result.",
+      "preconditions": "Exact admitted source/configuration/fixture or named provider with correct authority; earlier unit acceptance satisfied.",
+      "receipt_binding": [
+        "source",
+        "config",
+        "input_manifest",
+        "actual_result",
+        "independent_reviewer",
+        "environment",
+        "causal_trace"
+      ],
+      "receipt_required": true,
+      "requirement_id": "VAN-RV-006",
+      "scope_revision": "1.15",
+      "unit": "BE-001"
+    },
+    {
+      "action": "Selecting newer review-input source or main alone must fail retained-feature/caller tests; deleting actual outcome subscription fails later-selection acceptance.",
+      "additional_units": [
+        "BE-003",
+        "BE-010",
+        "BE-036",
+        "BQ-007",
+        "BG-001"
+      ],
+      "category": "NEG",
+      "environment": "ADMITTED_DIAL_ISOLATED_TOPOLOGY; real provider where specified",
+      "execution_state": "NOT_RUN",
+      "expectation": "Selecting newer review-input source or main alone must fail retained-feature/caller tests; deleting actual outcome subscription fails later-selection acceptance.",
+      "id": "T-VAN-RV-006-NEG",
+      "non_claim": "Proposed application acceptance, not an executed result.",
+      "preconditions": "Exact admitted source/configuration/fixture or named provider with correct authority; earlier unit acceptance satisfied.",
+      "receipt_binding": [
+        "source",
+        "config",
+        "input_manifest",
+        "actual_result",
+        "independent_reviewer",
+        "environment",
+        "causal_trace"
+      ],
+      "receipt_required": true,
+      "requirement_id": "VAN-RV-006",
+      "scope_revision": "1.15",
+      "unit": "BE-001"
+    },
+    {
+      "action": "Shared-store migrations restore learned state, lockout clocks and account owners; asynchronous Jev outage cannot delay protection.",
+      "additional_units": [
+        "BE-003",
+        "BE-010",
+        "BE-036",
+        "BQ-007",
+        "BG-001"
+      ],
+      "category": "REC",
+      "environment": "ADMITTED_DIAL_ISOLATED_TOPOLOGY; real provider where specified",
+      "execution_state": "NOT_RUN",
+      "expectation": "Shared-store migrations restore learned state, lockout clocks and account owners; asynchronous Jev outage cannot delay protection.",
+      "id": "T-VAN-RV-006-REC",
+      "non_claim": "Proposed application acceptance, not an executed result.",
+      "preconditions": "Exact admitted source/configuration/fixture or named provider with correct authority; earlier unit acceptance satisfied.",
+      "receipt_binding": [
+        "source",
+        "config",
+        "input_manifest",
+        "actual_result",
+        "independent_reviewer",
+        "environment",
+        "causal_trace"
+      ],
+      "receipt_required": true,
+      "requirement_id": "VAN-RV-006",
+      "scope_revision": "1.15",
+      "unit": "BE-001"
+    },
+    {
+      "action": "Qualified event oracle, immutable licensed inputs, full trial census and availability-time features support matched objective and whole-account arms with predeclared costs and uncertainty.",
+      "additional_units": [
+        "BE-036",
+        "BQ-009",
+        "BG-001"
+      ],
+      "category": "POS",
+      "environment": "ADMITTED_DIAL_ISOLATED_TOPOLOGY; real provider where specified",
+      "execution_state": "NOT_RUN",
+      "expectation": "Qualified event oracle, immutable licensed inputs, full trial census and availability-time features support matched objective and whole-account arms with predeclared costs and uncertainty.",
+      "id": "T-VAN-RV-007-POS",
+      "non_claim": "Proposed application acceptance, not an executed result.",
+      "preconditions": "Exact admitted source/configuration/fixture or named provider with correct authority; earlier unit acceptance satisfied.",
+      "receipt_binding": [
+        "source",
+        "config",
+        "input_manifest",
+        "actual_result",
+        "independent_reviewer",
+        "environment",
+        "causal_trace"
+      ],
+      "receipt_required": true,
+      "requirement_id": "VAN-RV-007",
+      "scope_revision": "1.15",
+      "unit": "BE-035"
+    },
+    {
+      "action": "Calendar years alone are not walk-forward; bid data cannot silently become mid; poisoned-future changes to earlier decisions fail; fixed JPY conversion is not current USD P&L.",
+      "additional_units": [
+        "BE-036",
+        "BQ-009",
+        "BG-001"
+      ],
+      "category": "NEG",
+      "environment": "ADMITTED_DIAL_ISOLATED_TOPOLOGY; real provider where specified",
+      "execution_state": "NOT_RUN",
+      "expectation": "Calendar years alone are not walk-forward; bid data cannot silently become mid; poisoned-future changes to earlier decisions fail; fixed JPY conversion is not current USD P&L.",
+      "id": "T-VAN-RV-007-NEG",
+      "non_claim": "Proposed application acceptance, not an executed result.",
+      "preconditions": "Exact admitted source/configuration/fixture or named provider with correct authority; earlier unit acceptance satisfied.",
+      "receipt_binding": [
+        "source",
+        "config",
+        "input_manifest",
+        "actual_result",
+        "independent_reviewer",
+        "environment",
+        "causal_trace"
+      ],
+      "receipt_required": true,
+      "requirement_id": "VAN-RV-007",
+      "scope_revision": "1.15",
+      "unit": "BE-035"
+    },
+    {
+      "action": "Failed/pruned runs and corrections remain in census; evaluator changes invalidate dependent claims and rerun only affected studies.",
+      "additional_units": [
+        "BE-036",
+        "BQ-009",
+        "BG-001"
+      ],
+      "category": "REC",
+      "environment": "ADMITTED_DIAL_ISOLATED_TOPOLOGY; real provider where specified",
+      "execution_state": "NOT_RUN",
+      "expectation": "Failed/pruned runs and corrections remain in census; evaluator changes invalidate dependent claims and rerun only affected studies.",
+      "id": "T-VAN-RV-007-REC",
+      "non_claim": "Proposed application acceptance, not an executed result.",
+      "preconditions": "Exact admitted source/configuration/fixture or named provider with correct authority; earlier unit acceptance satisfied.",
+      "receipt_binding": [
+        "source",
+        "config",
+        "input_manifest",
+        "actual_result",
+        "independent_reviewer",
+        "environment",
+        "causal_trace"
+      ],
+      "receipt_required": true,
+      "requirement_id": "VAN-RV-007",
+      "scope_revision": "1.15",
+      "unit": "BE-035"
+    },
+    {
+      "action": "Selected eligible CEX spot adapter demonstrates genuine matching, recovery and settlement/protection for its admitted scope; contextual app contracts expose exact state and receipts.",
+      "additional_units": [
+        "BE-005",
+        "BE-010",
+        "BE-032",
+        "BQ-001",
+        "BQ-002",
+        "BG-001"
+      ],
+      "category": "POS",
+      "environment": "ADMITTED_DIAL_ISOLATED_TOPOLOGY; real provider where specified",
+      "execution_state": "NOT_RUN",
+      "expectation": "Selected eligible CEX spot adapter demonstrates genuine matching, recovery and settlement/protection for its admitted scope; contextual app contracts expose exact state and receipts.",
+      "id": "T-VAN-RV-008-POS",
+      "non_claim": "Proposed application acceptance, not an executed result.",
+      "preconditions": "Exact admitted source/configuration/fixture or named provider with correct authority; earlier unit acceptance satisfied.",
+      "receipt_binding": [
+        "source",
+        "config",
+        "input_manifest",
+        "actual_result",
+        "independent_reviewer",
+        "environment",
+        "causal_trace"
+      ],
+      "receipt_required": true,
+      "requirement_id": "VAN-RV-008",
+      "scope_revision": "1.15",
+      "unit": "BE-004"
+    },
+    {
+      "action": "Mock, read-only HTTP response, chain research or unsupported required attached protection cannot close actual trading integration.",
+      "additional_units": [
+        "BE-005",
+        "BE-010",
+        "BE-032",
+        "BQ-001",
+        "BQ-002",
+        "BG-001"
+      ],
+      "category": "NEG",
+      "environment": "ADMITTED_DIAL_ISOLATED_TOPOLOGY; real provider where specified",
+      "execution_state": "NOT_RUN",
+      "expectation": "Mock, read-only HTTP response, chain research or unsupported required attached protection cannot close actual trading integration.",
+      "id": "T-VAN-RV-008-NEG",
+      "non_claim": "Proposed application acceptance, not an executed result.",
+      "preconditions": "Exact admitted source/configuration/fixture or named provider with correct authority; earlier unit acceptance satisfied.",
+      "receipt_binding": [
+        "source",
+        "config",
+        "input_manifest",
+        "actual_result",
+        "independent_reviewer",
+        "environment",
+        "causal_trace"
+      ],
+      "receipt_required": true,
+      "requirement_id": "VAN-RV-008",
+      "scope_revision": "1.15",
+      "unit": "BE-004"
+    },
+    {
+      "action": "Private-stream gaps, API clock/rate-limit stress and account-wide cancellation recover without cancelling manual/protective orders outside scope; unavailable provider remains an explicit gate.",
+      "additional_units": [
+        "BE-005",
+        "BE-010",
+        "BE-032",
+        "BQ-001",
+        "BQ-002",
+        "BG-001"
+      ],
+      "category": "REC",
+      "environment": "ADMITTED_DIAL_ISOLATED_TOPOLOGY; real provider where specified",
+      "execution_state": "NOT_RUN",
+      "expectation": "Private-stream gaps, API clock/rate-limit stress and account-wide cancellation recover without cancelling manual/protective orders outside scope; unavailable provider remains an explicit gate.",
+      "id": "T-VAN-RV-008-REC",
+      "non_claim": "Proposed application acceptance, not an executed result.",
+      "preconditions": "Exact admitted source/configuration/fixture or named provider with correct authority; earlier unit acceptance satisfied.",
+      "receipt_binding": [
+        "source",
+        "config",
+        "input_manifest",
+        "actual_result",
+        "independent_reviewer",
+        "environment",
+        "causal_trace"
+      ],
+      "receipt_required": true,
+      "requirement_id": "VAN-RV-008",
+      "scope_revision": "1.15",
+      "unit": "BE-004"
+    }
+  ]
+}

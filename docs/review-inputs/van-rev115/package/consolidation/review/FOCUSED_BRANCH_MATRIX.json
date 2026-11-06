@@ -1,0 +1,76 @@
+{
+  "scope": "Selected decision-relevant branch rows from a 66-head audit; this file is not the complete head inventory.",
+  "complete_inventory_vm_path": "/home/ubuntu/work/van-high-value-review-20261017-005_3oh7/BRANCH_REVIEW_INVENTORY.json",
+  "branches": [
+    {
+      "branch": "main",
+      "sha": "8eb1889822fc8a83f219977c15340172e16acd91",
+      "finding": "Merged baseline; does not contain all relevant branch work"
+    },
+    {
+      "branch": "muse/vati-opportunity-modes-20261008",
+      "sha": "8eb1889822fc8a83f219977c15340172e16acd91",
+      "finding": "Identical head to main; no independent published mode implementation in this snapshot"
+    },
+    {
+      "branch": "ccr-8f1201e9-w1xm0r",
+      "sha": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "finding": "PR101: execution, ledger and recoverable-lockout changes; remaining paper defects"
+    },
+    {
+      "branch": "ccr-71397b02-lm6fid",
+      "sha": "bdd63a40174d36ccdd0ceb8f3fb258c612df8bbe",
+      "finding": "Broad canon-derived source candidate, including Jev/cognition/temperaments; not automatically canonical"
+    },
+    {
+      "branch": "codex/van-canon-consolidation-2026-10-08",
+      "sha": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6",
+      "finding": "PR93: broad integration candidate; 4,015 tracked blobs"
+    },
+    {
+      "branch": "codex/van-canon-runtime-closure-2026-10-09",
+      "sha": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6",
+      "finding": "Same head as PR93 branch"
+    },
+    {
+      "branch": "chatgpt/vati-opportunity-modes-20261008",
+      "sha": "923ecf9bbb81a2b3b485a3730071279851596b06",
+      "finding": "PR92: signed temperament proposals and source tests; not itself economic admission"
+    },
+    {
+      "branch": "codex/cognitive-fabric-r161-20261006",
+      "sha": "c091d22ce21728de33b5c8318385a147809dc207",
+      "finding": "PR77: cognitive advisory producer and consumer changes"
+    },
+    {
+      "branch": "gpt/jev-control-centre-20260925",
+      "sha": "f3df7a10e12fc76d25f958e9f19cb0b25c798168",
+      "finding": "Jev gateway/client/advisor/native control integration"
+    },
+    {
+      "branch": "gpt/jev-openmuse-convergence-r1-van-20260929",
+      "sha": "5138ae9a5e647e3e1700d64fc84bc9a21ca2cbb4",
+      "finding": "Further shared-Jev integration; compare later canon variants"
+    },
+    {
+      "branch": "chatgpt/van-web-acquisition-fabric-20261004",
+      "sha": "01e7d84a1edd6e902619b284fac1a1e560a2d38d",
+      "finding": "PR76: reusable bounded acquisition infrastructure, not token-security logic"
+    },
+    {
+      "branch": "feature/rea-trading-accounts-tactile-20261015",
+      "sha": "3b2c9e04df8736f0fbbccd16fcd3905cf1dbe240",
+      "finding": "Canon-based source and trading-account surface contribution"
+    },
+    {
+      "branch": "platform/rev3-cinematic-studio-20261016",
+      "sha": "4ad12183d9f65a23a2b4de51ed8ba6d1b6ca48c2",
+      "finding": "Owner/navigation work; no trading-path delta detected by the audit path filter"
+    },
+    {
+      "branch": "review/van-next-universal-coverage-b4-closure-20261016",
+      "sha": "0a694a998cfed119e116c68d3248de1cb84f120f",
+      "finding": "PR100: whole-product/no-waiver design corrections"
+    }
+  ]
+}

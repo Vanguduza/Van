@@ -15,10 +15,12 @@ Rules that Rev 1 left implicit and Rev 2 makes law:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from decimal import ROUND_DOWN, Decimal
+from decimal import Decimal
 from typing import Any
 
 from vati.risk.contracts import Direction, LossModel, SymbolContract
+from vati.risk.arithmetic import fraction, decimal, round_down, multiplier_product
+from vati.core.decimal_context import native_financial_arithmetic
 
 ZERO = Decimal("0")
 ONE = Decimal("1")
@@ -68,9 +70,7 @@ class Multipliers:
         )
 
     def product(self) -> Decimal:
-        c = self.clamped()
-        p = c.regime * c.confidence * c.volatility * c.liquidity * c.event_risk * c.correlation * c.drawdown
-        return clamp_multiplier(p)
+        return clamp_multiplier(decimal(multiplier_product(self)))
 
 
 @dataclass(frozen=True)
@@ -86,9 +86,10 @@ class SizingResult:
 def _round_down(value: Decimal, step: Decimal) -> Decimal:
     if step <= ZERO:
         raise SizingRejected("VENUE_STEP_INVALID", f"volume_step must be > 0, got {step}")
-    return (value / step).to_integral_value(rounding=ROUND_DOWN) * step
+    return round_down(value, step)
 
 
+@native_financial_arithmetic
 def size_stop_contract(
     *,
     equity: Decimal,
@@ -111,21 +112,21 @@ def size_stop_contract(
     if direction is Direction.SHORT and not stop > entry:
         raise SizingRejected("STOP_WRONG_SIDE", "SHORT stop must be above entry")
 
-    stop_distance = abs(entry - stop)
+    stop_distance = abs(fraction(entry) - fraction(stop))
     if stop_distance < contract.min_stop_distance:
         raise SizingRejected(
             "STOP_TOO_TIGHT",
             f"stop distance {stop_distance} < venue minimum {contract.min_stop_distance}",
         )
 
-    vppu = contract.value_per_price_unit_per_lot
+    vppu = fraction(contract.tick_value) / fraction(contract.tick_size)
     if vppu <= ZERO:
         raise SizingRejected("VENUE_VALUE_INVALID", "value per price unit per lot must be > 0")
 
-    risk_capital = equity * allowed_risk_pct
+    risk_capital = fraction(equity) * fraction(allowed_risk_pct)
     raw_size = risk_capital / (stop_distance * vppu)
     product = multipliers.product()
-    adjusted = raw_size * product
+    adjusted = raw_size * fraction(product)
     rounded = _round_down(adjusted, contract.volume_step)
 
     if rounded > contract.volume_max:
@@ -136,14 +137,15 @@ def size_stop_contract(
             f"rounded size {rounded} < volume_min {contract.volume_min}; NO_TRADE rather than round up",
         )
 
-    risk_amount = rounded * stop_distance * vppu
-    risk_pct = risk_amount / equity
+    risk_amount = fraction(rounded) * stop_distance * vppu
+    risk_pct = risk_amount / fraction(equity)
     if risk_amount > risk_capital:
         # Cannot happen with round-down, but the check is the contract, not the arithmetic.
         raise SizingRejected("RISK_EXCEEDS_ALLOWED", f"{risk_amount} > {risk_capital}")
-    return SizingResult(rounded, risk_amount, risk_pct, raw_size, product, LossModel.STOP_DISTANCE)
+    return SizingResult(rounded, decimal(risk_amount), decimal(risk_pct), decimal(raw_size), product, LossModel.STOP_DISTANCE)
 
 
+@native_financial_arithmetic
 def size_stake_contract(
     *,
     equity: Decimal,
@@ -160,10 +162,10 @@ def size_stake_contract(
     if allowed_risk_pct <= ZERO:
         raise SizingRejected("RISK_NON_POSITIVE", f"allowed_risk_pct={allowed_risk_pct}")
 
-    risk_capital = equity * allowed_risk_pct
+    risk_capital = fraction(equity) * fraction(allowed_risk_pct)
     product = multipliers.product()
-    raw_stake = risk_capital * product
-    cap = raw_stake if requested_stake is None else min(raw_stake, requested_stake)
+    raw_stake = risk_capital * fraction(product)
+    cap = raw_stake if requested_stake is None else min(raw_stake, fraction(requested_stake))
     if contract.max_stake is not None:
         cap = min(cap, contract.max_stake)
     stake = _round_down(cap, contract.volume_step)
@@ -171,9 +173,10 @@ def size_stake_contract(
         raise SizingRejected("STAKE_BELOW_VENUE_MIN", f"stake {stake} < min {contract.volume_min}")
     if stake > risk_capital:
         raise SizingRejected("RISK_EXCEEDS_ALLOWED", f"{stake} > {risk_capital}")
-    return SizingResult(stake, stake, stake / equity, raw_stake, product, LossModel.FULL_STAKE)
+    return SizingResult(stake, stake, decimal(fraction(stake) / fraction(equity)), decimal(raw_stake), product, LossModel.FULL_STAKE)
 
 
+@native_financial_arithmetic
 def size_illiquid_equity(
     *,
     equity: Decimal,
@@ -205,20 +208,20 @@ def size_illiquid_equity(
     if contract.liquidity_haircut < ZERO or contract.max_adv_participation <= ZERO:
         raise SizingRejected("VENUE_VALUE_INVALID", "haircut/participation invalid")
 
-    stop_fraction = (entry - stop) / entry
-    if stop_fraction < contract.min_stop_distance / entry if contract.min_stop_distance > ZERO else False:
+    stop_fraction = (fraction(entry) - fraction(stop)) / fraction(entry)
+    if stop_fraction < fraction(contract.min_stop_distance) / fraction(entry) if contract.min_stop_distance > ZERO else False:
         raise SizingRejected("STOP_TOO_TIGHT", "stop inside venue minimum")
-    per_share_risk = entry * (stop_fraction + contract.liquidity_haircut)
-    risk_capital = equity * allowed_risk_pct
+    per_share_risk = fraction(entry) * (stop_fraction + fraction(contract.liquidity_haircut))
+    risk_capital = fraction(equity) * fraction(allowed_risk_pct)
     raw_shares = risk_capital / per_share_risk
     product = multipliers.product()
-    shares = _round_down(raw_shares * product, contract.board_lot)
-    adv_cap = _round_down(contract.adv_20d * contract.max_adv_participation, contract.board_lot)
+    shares = _round_down(raw_shares * fraction(product), contract.board_lot)
+    adv_cap = _round_down(fraction(contract.adv_20d) * fraction(contract.max_adv_participation), contract.board_lot)
     if shares > adv_cap:
         shares = adv_cap
     if shares < contract.board_lot or shares <= ZERO:
         raise SizingRejected("SIZE_BELOW_VENUE_MIN", f"{shares} shares < one board lot ({contract.board_lot}) or ADV cap {adv_cap}")
-    risk_amount = shares * per_share_risk
+    risk_amount = fraction(shares) * per_share_risk
     if risk_amount > risk_capital:
         raise SizingRejected("RISK_EXCEEDS_ALLOWED", f"{risk_amount} > {risk_capital}")
-    return SizingResult(shares, risk_amount, risk_amount / equity, raw_shares, product, LossModel.ILLIQUID_EQUITY)
+    return SizingResult(shares, decimal(risk_amount), decimal(risk_amount / fraction(equity)), decimal(raw_shares), product, LossModel.ILLIQUID_EQUITY)

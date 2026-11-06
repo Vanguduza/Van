@@ -1,0 +1,72 @@
+{
+  "revision": "1.16",
+  "recorded_at_utc": "2026-10-18T19:30:51.143487+00:00",
+  "scope": "DOCUMENT_ONLY",
+  "application_tests_executed": 0,
+  "checks": [
+    {
+      "name": "render",
+      "command": [
+        "python3",
+        "-B",
+        "plan/render_plan.py",
+        "--check"
+      ],
+      "exit_code": 0,
+      "entrypoint_sha256": "e418d2e0c0c6c3662d8b1d425e22510581f8281142b3ab66ed6094212b491204",
+      "stdout_sha256": "0ec4f6bf704d3e7909f93ce436b19036a7174eae77a85b4a9d5bb9f39b10e92b",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "core",
+      "command": [
+        "python3",
+        "-B",
+        "verification/verify_rev116.py",
+        "--json"
+      ],
+      "exit_code": 0,
+      "entrypoint_sha256": "22a21499506b39147ea340dc1343f559207f6c7ba7b9bd4db159b9830282fb11",
+      "stdout_sha256": "a4562559aeb6bc768278b8994ff2f820c05b92c47cc7a4f353df5e831af121a2",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "mutations",
+      "command": [
+        "python3",
+        "-B",
+        "verification/verify_rev116.py",
+        "--selftest",
+        "--json"
+      ],
+      "exit_code": 0,
+      "entrypoint_sha256": "22a21499506b39147ea340dc1343f559207f6c7ba7b9bd4db159b9830282fb11",
+      "stdout_sha256": "fa8d5e51400c0a488803f11c1266b71ea4fb72f82900a7eac55781212943bfe4",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "review",
+      "command": [
+        "python3",
+        "-B",
+        "verification/verify_review_contracts.py"
+      ],
+      "exit_code": 0,
+      "entrypoint_sha256": "02d7cc4c2df23c061785dcfe7faf4ef955237a1b344e29442f473190d73280f2",
+      "stdout_sha256": "b0f83975c454cb91160b1fc43d0164f0012132423cd46dc03da30426a19df4af",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "learning",
+      "command": [
+        "python3",
+        "-B",
+        "verification/verify_experience_learning.py"
+      ],
+      "exit_code": 0,
+      "entrypoint_sha256": "8325f3b5e1ffb88a8cebf1e8e471b4f83afb77a81c53ec63d4210ed73fb6f94c",
+      "stdout_sha256": "3d54e705c1c434a735a82ce7a92a258a4553f8cf95df3dbec37608597b8f6387",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

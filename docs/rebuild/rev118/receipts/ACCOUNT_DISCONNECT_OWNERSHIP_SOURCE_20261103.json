@@ -1,0 +1,56 @@
+{
+  "schema": "van.account-disconnect-fresh-ownership-source/1",
+  "created_utc": "2026-11-03T07:58:41.789263+00:00",
+  "base": "9cfd7ddae9524230c1b45191710cb41c04dcd538",
+  "qualification": "SOURCE_CANDIDATE_ONLY",
+  "production_change": "Under the existing held global registry and original target locks, read the fresh account/full registry and reclassify credential ownership before lifecycle reservation, recoverable plan or credential work. Require original account equality and exact approved NONE/DELETE_MANAGED disposition plus coherent normalized target. Changed/shared/external/unproven/unavailable ownership refuses; do not adapt the approved plan. Existing locks remain held throughout cleanup.",
+  "preserved": [
+    "Earlier fresh unlink-facts digest refusal remains unchanged.",
+    "All existing primary resource/session/current actor/expiry/history/lease/epoch/mark guards remain. Actual selected-source predicate follows blocking callbacks and only existing pure time/effect predicates follow it.",
+    "No new lock, 2PC, authority, issuer, signing mechanism, provider action or secret export."
+  ],
+  "source_reason": "Static independent review confirmed that the old prelock registry snapshot could miss a same-path reference added by another alias before global lock acquisition. Primary resource version and physical nlink do not encode another alias reference. Fresh classification under the already-held global lock closes that source window. No active credential or private-key-lock/destruction probe was run.",
+  "fixture_correction": "The original genuine two-proof request and late reference still hit exact earlier Native unlink facts changed refusal, native REFUSED409, no reconciliation and original operation readback. A separate current signed readonly prepare then proves the named credential-destruction HOLD. Both accounts/other reference and original secret assertions remain; no guard is disabled or forced to a later stage.",
+  "actual_source_evidence": {
+    "local_final": {
+      "cases": 8,
+      "passed": 8,
+      "skipped": 0,
+      "exit": 0,
+      "scope": "One real enrolled two-proof PAPER absent-target metadata sequence; actual ownership predicate with no-file shared/external metadata; six metadata callback cases including changed target/disposition/unproven/missing target/OSError/normalized same. No credential file/content/private-key-lock/destruction/provider effects. Callbacks confer no Owner authority.",
+      "receipt": "shared-ownership-safe-r2/receipt.json",
+      "prior_safe7": "PASS7 retained at prior source pins; current proof is actual final8, not merged input-hash claim"
+    },
+    "hosted_parent": {
+      "head": "9cfd7ddae9524230c1b45191710cb41c04dcd538",
+      "run": 41595985529,
+      "attempt": 1,
+      "job": 125783630970,
+      "whole_trading_scope": "1failed5885passed1skip",
+      "original_pg_positive": "ACTUAL_PASS 2026-11-03T07:25:41.1850819Z test_actual_pg_row_guard_fences_a_competing_actor_even_beyond_lease_ttl",
+      "namespace_predicates": "both actualhostedPASS",
+      "remaining_original_failure": "shared reference old later-spy oracle failed; credential-backed revised fixture remains NOT_RUN locally/pending new exact hosted result"
+    }
+  },
+  "limits": {
+    "source_behavior": "Bounded source/helper/PAPER qualification, not global race or credential-destruction proof.",
+    "banned_probe": "No execution/rephrasing/relocation/new CI insertion of prior blocked active private-key-lock/credential-destruction ordering probe.",
+    "formal_native_acceptance": false,
+    "full_BE004": "OPEN eight verbs/11requirements/21acceptances/20contexts/6actions",
+    "frozen_scope": "131units324requirements1610acceptances234contexts349actions93plannedfeatures; source42/105/78 retained",
+    "entry67": "KNOWN_UNRESOLVED scope excluded; PR106 protected apply authority not admitted",
+    "OBSERVE": "8 source/test files preserved separately, exclusive phase2 ZIPeb0a183.../parked observe-wip-9cfd; not folded",
+    "previous_failures": "6933/e172/9cfd full failing source jobs and capkill/frontend guard failures remain failed; actual qualified case closures are separate"
+  },
+  "resources": {
+    "cap": 268435456,
+    "filecap": 8388608,
+    "reserve_each": 2147483648,
+    "memory_headroom": 4294967296,
+    "terminal_allocation": 162814504,
+    "runner_sha256": "860336803885aa36cff080294bf1144a0009b4b09a72ee9454d875863142d7f4"
+  },
+  "final_guards": "Actual owner/frontend/workmap/mutation consistency NOT_RUN/consolidation/PRE003 manifest CLI required on final packet; full outcomes kept in external finalization receipts, scope JSON is not canonical manifest CLI.",
+  "model_usage": null,
+  "cost": null
+}

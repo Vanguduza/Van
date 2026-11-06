@@ -1,0 +1,78 @@
+--- a/deploy/oracle/oracle-admin/product-gateway/README.md
++++ b/deploy/oracle/oracle-admin/product-gateway/README.md
+@@ -35,8 +35,7 @@
+ | Never | No shell, no SSH forwarding (sshd drop-in), no raw MCP, no Orca, no Zuul, no worker execution, no Hermes runtime, no second control plane. |
+ 
+ Endpoints and semantics come from `docs/dial/final-audit/06_DEVELOPMENT_SYSTEM/VAN_DEVELOPMENT_CONTROL_CENTRE_DESIGN_REV_1.md` §3.
+-The upstream port `9136` is the manager-specified projection API port; the projection API itself is not yet
+-implemented in this repository, so the gateway serves 502 until it exists (the probe reports AMBER).
++The upstream port `9136` is the manager-specified projection API port. The API, service installer and HTTP-boundary tests are implemented in `agent-system/orchestration/development-projection/` and `deploy/netcup/hermes-control/projection/`. This establishes source availability, not a current deployment: the gateway reports AMBER while its authenticated upstream is unavailable or unqualified.
+ 
+ ## Files
+ 
+@@ -61,8 +60,7 @@
+ 4. **Spoke-to-spoke forwarding** — today every spoke allows only `10.77.0.1/32` and the hub does not forward,
+    so VAN backend (`10.77.0.4`) cannot reach `10.77.0.2`. Required, owner-approved and outside this directory:
+    hub forward limited to `10.77.0.4 → 10.77.0.2:8443/tcp` (and replies), `AllowedIPs = 10.77.0.1/32, 10.77.0.4/32`
+-   on oracle-admin's hub peer, and `10.77.0.2/32` added on van-trading-core's hub peer. van-trading-core is not yet
+-   an overlay peer at all (open owner gate `OG-VAN-TRADING-CORE-OVERLAY-ENROLMENT`).
++   on oracle-admin's hub peer, and `10.77.0.2/32` added on van-trading-core's hub peer. `deploy/hybrid/estate-topology.json` records core enrollment at `10.77.0.4` on 2026-09-25 (DEC-060); obtain a fresh host-identity/handshake observation before deployment. Enrollment alone does not prove this spoke-to-spoke lane.
+ 5. **Upstream** — the DIAL Development Projection API listening on `10.77.0.1:9136`, accepting only `10.77.0.2`.
+ 
+ ## Install
+--- a/docs/orchestration/DIAL_PRODUCT_GATEWAY_ORACLE_ADMIN.md
++++ b/docs/orchestration/DIAL_PRODUCT_GATEWAY_ORACLE_ADMIN.md
+@@ -70,5 +70,5 @@
+ - Overlay forwarding: spokes allow only `10.77.0.1/32` and the hub does not forward, so `10.77.0.4 → 10.77.0.2`
+   needs an owner-approved, port-scoped hub forward and matching `AllowedIPs` (files under `deploy/netcup/` and
+   `deploy/oracle/resource-fabric/zero-touch-enroll-peer.sh`, outside this change).
+-- `OG-VAN-TRADING-CORE-OVERLAY-ENROLMENT`: van-trading-core is not yet an overlay peer (observed 2026-09-24).
+-- The DIAL Development Projection API on `10.77.0.1:9136` is not yet implemented in this repository.
++- `OG-VAN-TRADING-CORE-OVERLAY-ENROLMENT`: topology records enrollment at `10.77.0.4` on 2026-09-25 (DEC-060). Recheck current retained-instance identity, handshakes and routes; the earlier 2026-09-24 non-enrollment observation is superseded as repository evidence.
++- The DIAL Development Projection API on `10.77.0.1:9136` is implemented with a service installer and HTTP-boundary tests. Current authenticated deployment readiness remains a live gate; never infer it from source availability.
+--- a/deploy/netcup/hermes-control/projection/README.md
++++ b/deploy/netcup/hermes-control/projection/README.md
+@@ -12,7 +12,7 @@
+ | Entrypoint | `node agent-system/bin/development-projection-api.mjs serve` |
+ | Bind | `10.77.0.1:9136` — the WireGuard overlay address only (`wg-quick@wg-dial`) |
+ | Credential | `$DIAL_CONTROL_HOME/secrets/development-projection.token`, mode `0600`, 64 hex characters |
+-| Client | VAN backend only (`backend/van_gateway/dial_dev/`, on `van-trading-core`, `10.77.0.4`) |
++| Client | oracle-admin product gateway (`10.77.0.2`) on behalf of VAN backend (`backend/van_gateway/dial_dev/`, on `van-trading-core`, `10.77.0.4`); no direct product bypass |
+ | Forwards owner actions to | `dial-chat-control.service` JSON-RPC on `127.0.0.1:9130/mcp` (typed `dial_*` tools) |
+ | Reads CI from | zuul-web on `127.0.0.1:9000` (tenant `dial`) |
+ | Writes | `events/projection-access.jsonl`, `events/development.jsonl`, `projection/actions/` under `$DIAL_CONTROL_HOME`; nothing else |
+@@ -59,8 +59,7 @@
+ 3. On the VAN backend host, place it at the path VAN reads as `VAN_DIAL_DEV_TOKEN_FILE`, owned
+    by the gateway's service user, mode `0600`, and delete the transfer copy:
+    `install -m 0600 /tmp/dial-dev.token "$VAN_DIAL_DEV_TOKEN_FILE" && shred -u /tmp/dial-dev.token`
+-4. Set `VAN_DIAL_DEV_BASE_URL=http://10.77.0.1:9136` and `VAN_DIAL_DEV_ENABLED=1` in the VAN
+-   gateway configuration and restart the gateway.
++4. After the DEC-056 product gateway is admitted and live-qualified, bind the gateway CA and product client certificate/key on the VAN backend through a private credential channel. Set `VAN_DIAL_DEV_BASE_URL=https://10.77.0.2:8443`, `VAN_DIAL_DEV_TLS_CA_FILE`, `VAN_DIAL_DEV_TLS_CLIENT_CERT_FILE`, `VAN_DIAL_DEV_TLS_CLIENT_KEY_FILE` and `VAN_DIAL_DEV_ENABLED=1`, then restart the VAN gateway. The product client CN must be `van`. The gateway validates mTLS; the projection API remains the only bearer authority. Do not configure a direct control-host fallback.
+ 5. Confirm from the VAN backend host that the fingerprints match and that
+    `GET /v1/dev/projects` answers 200 (a 401/403 means the file differs).
+ 
+@@ -78,11 +77,10 @@
+ 
+ ## Network exposure
+ 
+-Only the VAN backend should reach `10.77.0.1:9136`. If `ufw` is active on `dial-control`, the
+-owner allows exactly that peer on the WireGuard interface:
++Only oracle-admin's fixed product gateway should reach `10.77.0.1:9136`. If `ufw` is active on `dial-control`, the owner allows exactly `10.77.0.2/32` on the WireGuard interface. Remove any historical direct VAN backend allowance through the governed firewall recipe; retain all unrelated control/recovery rules:
+ 
+ ```bash
+-sudo ufw allow in on wg-dial from 10.77.0.4 to 10.77.0.1 port 9136 proto tcp
++sudo ufw allow in on wg-dial from 10.77.0.2 to 10.77.0.1 port 9136 proto tcp
+ ```
+ 
+ This is not done by the installer: it changes host firewall policy and needs the owner's sudo.
+--- a/deploy/oracle/resource-fabric/hosts.json
++++ b/deploy/oracle/resource-fabric/hosts.json
+@@ -335,7 +335,7 @@
+       "id": "OG-PRODUCT-GATEWAY-PINS-CERTS",
+       "subject": "oracle-admin product gateway",
+       "state": "OPEN",
+-      "observed": "nginx is not pinned in ops/development-bootstrap/supply-chain/PINS.json; gateway client CA/certificates and per-product bearer tokens are not issued; the DIAL projection API upstream and spoke-to-spoke overlay forwarding do not exist yet.",
++      "observed": "Repository gate snapshot: nginx pin, gateway client CA/certificates and per-product bearer tokens require current qualification; the DIAL projection API is implemented with installer/tests, but its current authenticated deployment and spoke-to-spoke forwarding remain unverified. Source implementation does not close the live gateway gate.",
+       "effect": "install-product-gateway.sh refuses with OWNER_PIN_REQUIRED / OWNER_CREDENTIAL_REQUIRED until provided.",
+       "closes_when": "owner records the nginx apt pin, issues gateway credentials and approves the overlay forwarding rule"
+     }

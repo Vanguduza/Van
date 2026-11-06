@@ -1,0 +1,29 @@
+{
+  "artifact_id": 12971225934,
+  "run_id": 41041627661,
+  "source_head": "02e8e712da17a0c70b19e3e1a9dfbed394e58061",
+  "bytes": 112314,
+  "sha256": "f01788c3fd6153a5d380ef509cd19a5da299bc233347fa47091c82f08aaad801",
+  "members": {
+    "cognitive-broad.xml": {
+      "bytes": 957353,
+      "sha256": "cdd80da17ad2baf1d9999d6963d6cb0d43fc772db65358642b1457d69f7a3c52",
+      "junit": {
+        "passed": 5176,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 316
+      }
+    },
+    "cognitive-focused.xml": {
+      "bytes": 16841,
+      "sha256": "7763e15842ec6b7c268d3a51f683d93fd340c24ec5a807f6b39a5743471796ac",
+      "junit": {
+        "passed": 79,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    }
+  }
+}

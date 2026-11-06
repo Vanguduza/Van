@@ -1,0 +1,20 @@
+{
+  "schema": "van.rebuild.frozen-trading-source/1",
+  "observed_at_utc": "2026-10-23T04:27:47.190075+00:00",
+  "source_head": "d6fa7eee9c449cd182bfd0514cb6b4cb6bf7cb13",
+  "source_tree": "b45524351c787ff668351d72e0b3fc17f65ebf94",
+  "tests": {
+    "tests": 2229,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "duration_seconds": 483.381,
+  "junit_sha256": "57067ad29fddca42661c264d330a1b0ff0d8a838b4dca14c86afefc6b3921463",
+  "log_sha256": "9cf68e4f451ee4c326c3f725cde720e405f358a8384e7c853ac968c85d7b0abf",
+  "environment": "Real isolated PostgreSQL17, both pinned DDS provenance inputs, exact committed checkout. Source only.",
+  "driver_observed_trading_exit": 0,
+  "broader_audit": "BACKEND_CONTRACTS_RUNNING; no overall completion or cleanup claimed yet",
+  "prior_failure": "Confirms the corrected fixture cleanup with a clean complete run after retained2228pass1fixturefailure.",
+  "qualification": "No native host, physical provider, owner/unit acceptance, profitability or S24 claim."
+}

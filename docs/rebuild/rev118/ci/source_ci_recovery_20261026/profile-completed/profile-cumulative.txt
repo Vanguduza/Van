@@ -1,0 +1,52 @@
+Mon Oct 26 11:54:06 2026    /workspace/van-trading-single-session-profile-r2-20261026/profile.pstats
+
+         31454175 function calls (31321473 primitive calls) in 176.699 seconds
+
+   Ordered by: cumulative time
+   List reduced from 7503 to 42 due to restriction <42>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        2    0.001    0.000  180.768   90.384 __main__.py:1(<module>)
+   2531/1    0.766    0.000  180.592  180.592 {built-in method builtins.exec}
+        1    0.000    0.000  180.592  180.592 <string>:1(<module>)
+        1    0.000    0.000  180.592  180.592 <frozen runpy>:201(run_module)
+        1    0.000    0.000  180.029  180.029 <frozen runpy>:65(_run_code)
+        1    0.000    0.000  180.029  180.029 __init__.py:246(_console_main)
+        1    0.000    0.000  180.029  180.029 __init__.py:204(_main)
+   999/70    0.006    0.000  179.771    2.568 _manager.py:111(_hookexec)
+   999/70    0.022    0.000  179.771    2.568 _callers.py:76(_multicall)
+    807/2    0.012    0.000  179.755   89.877 _hooks.py:497(__call__)
+        1    0.000    0.000  179.040  179.040 main.py:376(pytest_cmdline_main)
+        1    0.000    0.000  179.040  179.040 main.py:317(wrap_session)
+        1    0.000    0.000  178.643  178.643 main.py:380(_main)
+      8/4    0.000    0.000  178.626   44.657 runner.py:340(from_call)
+        1    0.000    0.000  174.948  174.948 main.py:397(pytest_runtestloop)
+        1    0.000    0.000  174.948  174.948 runner.py:115(pytest_runtest_protocol)
+        1    0.000    0.000  174.947  174.947 runner.py:123(runtestprotocol)
+        3    0.000    0.000  174.947   58.316 runner.py:236(call_and_report)
+        3    0.000    0.000  174.934   58.311 runner.py:250(<lambda>)
+        1    0.000    0.000  174.861  174.861 runner.py:173(pytest_runtest_call)
+        1    0.000    0.000  174.861  174.861 python.py:1705(runtest)
+        1    0.000    0.000  174.861  174.861 python.py:160(pytest_pyfunc_call)
+        1    0.068    0.068  174.861  174.861 test_single_session_unknown_entry.py:137(test_current_empty_positions_do_not_release_original_unresolved_entry_risk)
+      219    0.101    0.000  167.005    0.763 service.py:425(step_once)
+      662    0.663    0.001   80.172    0.121 ledger_pg.py:200(verify_chain)
+      967    3.245    0.003   75.980    0.079 ledger_pg.py:220(_verify_from)
+      441    0.057    0.000   70.834    0.161 hooks.py:68(update_projection)
+      441    0.058    0.000   70.762    0.160 restatement.py:194(catch_up)
+      220    0.101    0.000   68.356    0.311 service.py:306(_account_snapshot)
+    21351   46.315    0.002   61.475    0.003 connection.py:406(wait)
+    15125    0.188    0.000   53.380    0.004 cursor.py:80(execute)
+   380148    4.151    0.000   52.961    0.000 ledger.py:63(_check_row)
+      220    0.071    0.000   42.518    0.193 service.py:285(_heartbeat)
+   821205    2.509    0.000   40.671    0.000 canonical.py:45(canonical_hash)
+   823226    1.265    0.000   33.785    0.000 canonical.py:41(canonical_json)
+      248    0.018    0.000   33.377    0.135 mt5_runtime.py:10(capture_cached_mt5)
+      248    0.320    0.001   33.279    0.134 mt5_journal.py:29(capture)
+   824173    3.192    0.000   32.658    0.000 __init__.py:183(dumps)
+      220    0.005    0.000   29.036    0.132 worker.py:72(snapshot_funding)
+   824173    3.266    0.000   28.766    0.000 encoder.py:183(encode)
+      219    0.007    0.000   27.802    0.127 runtime_control_actor.py:128(process_recovery_requests)
+      219    0.026    0.000   27.794    0.127 runtime_control_journal.py:180(pending_account)
+
+

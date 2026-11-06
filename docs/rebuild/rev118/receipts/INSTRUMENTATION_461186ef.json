@@ -1,0 +1,58 @@
+{
+  "schema": "van.build.hosted-instrumentation/1",
+  "source_commit": "461186efbc7f8318468a81187eeb6e46c9a9dd41",
+  "run_id": 39709119778,
+  "job_id": 119595962704,
+  "device": "hosted Android API 31 x86_64 emulator (not S24)",
+  "tests": 18,
+  "passed": 12,
+  "failed": 2,
+  "skipped": 4,
+  "failures": [
+    {
+      "test": "CommandCentreLaunchTest.residentSingleTopActivityReceivesDeepLinksWithoutRelaunching",
+      "phase": "ActivityScenario.close after both navigation assertions and same-instance checks completed",
+      "reason": "AndroidX core 1.6.1 ActivityScenario filters lifecycle callbacks by the original Intent action/data. Production onNewIntent correctly calls setIntent; subsequent callbacks no longer match the harness launch identity.",
+      "prepared_correction": "Keep real delivery and same-instance/route checks, add Intent readbacks, then restore only the original harness Intent in finally before close. No lifecycle failure is swallowed.",
+      "androidx_source_sha256": "8bda0ed4cb0815dfbd3f391f423d0fd9d65dccec6e8b0912a028e0752c34aec1"
+    },
+    {
+      "test": "RiveContractTest.coreInputsDriveTheRig",
+      "phase": "gaze visibility assertion",
+      "reason": "Gaze images are not pixel-identical. Changed pixels are confined to the visor eyes. Whole-image averaging diluted the localized signal; prior breathing/timing noise had contributed to this measurement.",
+      "whole_image_mean_rgb": 0.0006590284261852889,
+      "eye_region": [
+        0.38,
+        0.18,
+        0.6,
+        0.31
+      ],
+      "eye_region_mean_rgb": 0.02306027560209967,
+      "prepared_correction": "Measure the expected eye region and retain the existing absolute 0.004 visibility floor. No artwork or action/noise threshold changes."
+    }
+  ],
+  "successful_evidence": {
+    "TemplateRuntimeTest": "2/2 passed on Android ICU",
+    "repeatedFixedTimeCapturesStayBelowTheVisibilityFloor": "passed; repeated idle/action-2 samples pixel-identical in captured artifacts",
+    "idle_vs_ack_mean_rgb": 0.01074475716212411,
+    "android_build_lint_job": {
+      "job_id": 119595963121,
+      "conclusion": "success"
+    }
+  },
+  "artifacts": [
+    {
+      "name": "screenshots",
+      "id": 12396921433,
+      "sha256": "76c13694a4e410bf4ba4112980530403751af2036209692a2e45b8ee3957045f"
+    },
+    {
+      "name": "report",
+      "id": 12396946307,
+      "sha256": "5803b126e31ccb76f7797a3c50b10691fe8ee044ea3c5d4a3f38d0ab853cd7fe"
+    }
+  ],
+  "log_sha256": "b1fc78ea1bd54c3837d99ca0690074986e1a04605d2086c8279a3a870ccb1a76",
+  "scope": "Runtime evidence for baseline maintenance only. Four full/production-only Rive tests skipped in core candidate mode. No whole-product or handset qualification.",
+  "next": "Execute corrected test instrumentation through PR #105; no success is inferred from local compilation."
+}

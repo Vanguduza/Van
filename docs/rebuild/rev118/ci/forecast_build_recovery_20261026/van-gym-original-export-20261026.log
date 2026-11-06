@@ -1,0 +1,22 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile.original
+#1 transferring dockerfile: 176B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/van-ml004-research-probe:20261026
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 FROM docker.io/library/van-ml004-research-probe:20261026
+#4 CACHED
+
+#5 [stage-0 1/1] COPY --from=van-ml004-research-probe:20261026 /wheelhouse/gym-0.26.2-py3-none-any.whl /gym-0.26.2-py3-none-any.whl
+#5 DONE 106.5s
+
+#6 exporting to client directory
+#6 copying files 827.93kB 0.1s done
+#6 DONE 0.1s

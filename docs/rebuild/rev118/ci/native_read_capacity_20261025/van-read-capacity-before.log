@@ -1,0 +1,527 @@
+FFFFFFFFFFFFFFFFFFFF.                                                    [100%]
+=================================== FAILURES ===================================
+_ test_invalid_cumulative_capacity_is_refused_before_connecting[True-max_read_frames] _
+
+option = 'max_read_frames', bad = True
+
+    @pytest.mark.parametrize('option',['max_read_frames','max_read_bytes'])
+    @pytest.mark.parametrize('bad',[True,False,0,-1,1.5,'1',2**32])
+    def test_invalid_cumulative_capacity_is_refused_before_connecting(option,bad):
+>       with pytest.raises(ValueError):CtraderReadTransport(**{option:bad})
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_ctrader_read_capacity.py:26: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.ctrader.transport.CtraderReadTransport object at 0x7f7ed127d640>
+operation_timeout_s = 30.0, monotonic = None, kwargs = {'max_read_frames': True}
+
+    def __init__(self, *, operation_timeout_s=30.0, monotonic=None, **kwargs):
+        if (type(operation_timeout_s) not in (int, float) or not math.isfinite(operation_timeout_s)
+                or not 0 < operation_timeout_s <= 300):
+            raise ValueError("native read budget must be finite and positive, at most300seconds")
+>       super().__init__(**kwargs)
+E       TypeError: CtraderTransport.__init__() got an unexpected keyword argument 'max_read_frames'
+
+trading/vati/execution/ctrader/transport.py:391: TypeError
+_ test_invalid_cumulative_capacity_is_refused_before_connecting[True-max_read_bytes] _
+
+option = 'max_read_bytes', bad = True
+
+    @pytest.mark.parametrize('option',['max_read_frames','max_read_bytes'])
+    @pytest.mark.parametrize('bad',[True,False,0,-1,1.5,'1',2**32])
+    def test_invalid_cumulative_capacity_is_refused_before_connecting(option,bad):
+>       with pytest.raises(ValueError):CtraderReadTransport(**{option:bad})
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_ctrader_read_capacity.py:26: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.ctrader.transport.CtraderReadTransport object at 0x7f7ed1289ee0>
+operation_timeout_s = 30.0, monotonic = None, kwargs = {'max_read_bytes': True}
+
+    def __init__(self, *, operation_timeout_s=30.0, monotonic=None, **kwargs):
+        if (type(operation_timeout_s) not in (int, float) or not math.isfinite(operation_timeout_s)
+                or not 0 < operation_timeout_s <= 300):
+            raise ValueError("native read budget must be finite and positive, at most300seconds")
+>       super().__init__(**kwargs)
+E       TypeError: CtraderTransport.__init__() got an unexpected keyword argument 'max_read_bytes'
+
+trading/vati/execution/ctrader/transport.py:391: TypeError
+_ test_invalid_cumulative_capacity_is_refused_before_connecting[False-max_read_frames] _
+
+option = 'max_read_frames', bad = False
+
+    @pytest.mark.parametrize('option',['max_read_frames','max_read_bytes'])
+    @pytest.mark.parametrize('bad',[True,False,0,-1,1.5,'1',2**32])
+    def test_invalid_cumulative_capacity_is_refused_before_connecting(option,bad):
+>       with pytest.raises(ValueError):CtraderReadTransport(**{option:bad})
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_ctrader_read_capacity.py:26: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.ctrader.transport.CtraderReadTransport object at 0x7f7ed128a9f0>
+operation_timeout_s = 30.0, monotonic = None
+kwargs = {'max_read_frames': False}
+
+    def __init__(self, *, operation_timeout_s=30.0, monotonic=None, **kwargs):
+        if (type(operation_timeout_s) not in (int, float) or not math.isfinite(operation_timeout_s)
+                or not 0 < operation_timeout_s <= 300):
+            raise ValueError("native read budget must be finite and positive, at most300seconds")
+>       super().__init__(**kwargs)
+E       TypeError: CtraderTransport.__init__() got an unexpected keyword argument 'max_read_frames'
+
+trading/vati/execution/ctrader/transport.py:391: TypeError
+_ test_invalid_cumulative_capacity_is_refused_before_connecting[False-max_read_bytes] _
+
+option = 'max_read_bytes', bad = False
+
+    @pytest.mark.parametrize('option',['max_read_frames','max_read_bytes'])
+    @pytest.mark.parametrize('bad',[True,False,0,-1,1.5,'1',2**32])
+    def test_invalid_cumulative_capacity_is_refused_before_connecting(option,bad):
+>       with pytest.raises(ValueError):CtraderReadTransport(**{option:bad})
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_ctrader_read_capacity.py:26: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.ctrader.transport.CtraderReadTransport object at 0x7f7ed128b5f0>
+operation_timeout_s = 30.0, monotonic = None, kwargs = {'max_read_bytes': False}
+
+    def __init__(self, *, operation_timeout_s=30.0, monotonic=None, **kwargs):
+        if (type(operation_timeout_s) not in (int, float) or not math.isfinite(operation_timeout_s)
+                or not 0 < operation_timeout_s <= 300):
+            raise ValueError("native read budget must be finite and positive, at most300seconds")
+>       super().__init__(**kwargs)
+E       TypeError: CtraderTransport.__init__() got an unexpected keyword argument 'max_read_bytes'
+
+trading/vati/execution/ctrader/transport.py:391: TypeError
+_ test_invalid_cumulative_capacity_is_refused_before_connecting[0-max_read_frames] _
+
+option = 'max_read_frames', bad = 0
+
+    @pytest.mark.parametrize('option',['max_read_frames','max_read_bytes'])
+    @pytest.mark.parametrize('bad',[True,False,0,-1,1.5,'1',2**32])
+    def test_invalid_cumulative_capacity_is_refused_before_connecting(option,bad):
+>       with pytest.raises(ValueError):CtraderReadTransport(**{option:bad})
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_ctrader_read_capacity.py:26: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.ctrader.transport.CtraderReadTransport object at 0x7f7ed147a9f0>
+operation_timeout_s = 30.0, monotonic = None, kwargs = {'max_read_frames': 0}
+
+    def __init__(self, *, operation_timeout_s=30.0, monotonic=None, **kwargs):
+        if (type(operation_timeout_s) not in (int, float) or not math.isfinite(operation_timeout_s)
+                or not 0 < operation_timeout_s <= 300):
+            raise ValueError("native read budget must be finite and positive, at most300seconds")
+>       super().__init__(**kwargs)
+E       TypeError: CtraderTransport.__init__() got an unexpected keyword argument 'max_read_frames'
+
+trading/vati/execution/ctrader/transport.py:391: TypeError
+_ test_invalid_cumulative_capacity_is_refused_before_connecting[0-max_read_bytes] _
+
+option = 'max_read_bytes', bad = 0
+
+    @pytest.mark.parametrize('option',['max_read_frames','max_read_bytes'])
+    @pytest.mark.parametrize('bad',[True,False,0,-1,1.5,'1',2**32])
+    def test_invalid_cumulative_capacity_is_refused_before_connecting(option,bad):
+>       with pytest.raises(ValueError):CtraderReadTransport(**{option:bad})
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_ctrader_read_capacity.py:26: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.ctrader.transport.CtraderReadTransport object at 0x7f7ed128b920>
+operation_timeout_s = 30.0, monotonic = None, kwargs = {'max_read_bytes': 0}
+
+    def __init__(self, *, operation_timeout_s=30.0, monotonic=None, **kwargs):
+        if (type(operation_timeout_s) not in (int, float) or not math.isfinite(operation_timeout_s)
+                or not 0 < operation_timeout_s <= 300):
+            raise ValueError("native read budget must be finite and positive, at most300seconds")
+>       super().__init__(**kwargs)
+E       TypeError: CtraderTransport.__init__() got an unexpected keyword argument 'max_read_bytes'
+
+trading/vati/execution/ctrader/transport.py:391: TypeError
+_ test_invalid_cumulative_capacity_is_refused_before_connecting[-1-max_read_frames] _
+
+option = 'max_read_frames', bad = -1
+
+    @pytest.mark.parametrize('option',['max_read_frames','max_read_bytes'])
+    @pytest.mark.parametrize('bad',[True,False,0,-1,1.5,'1',2**32])
+    def test_invalid_cumulative_capacity_is_refused_before_connecting(option,bad):
+>       with pytest.raises(ValueError):CtraderReadTransport(**{option:bad})
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_ctrader_read_capacity.py:26: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.ctrader.transport.CtraderReadTransport object at 0x7f7ed15f5d30>
+operation_timeout_s = 30.0, monotonic = None, kwargs = {'max_read_frames': -1}
+
+    def __init__(self, *, operation_timeout_s=30.0, monotonic=None, **kwargs):
+        if (type(operation_timeout_s) not in (int, float) or not math.isfinite(operation_timeout_s)
+                or not 0 < operation_timeout_s <= 300):
+            raise ValueError("native read budget must be finite and positive, at most300seconds")
+>       super().__init__(**kwargs)
+E       TypeError: CtraderTransport.__init__() got an unexpected keyword argument 'max_read_frames'
+
+trading/vati/execution/ctrader/transport.py:391: TypeError
+_ test_invalid_cumulative_capacity_is_refused_before_connecting[-1-max_read_bytes] _
+
+option = 'max_read_bytes', bad = -1
+
+    @pytest.mark.parametrize('option',['max_read_frames','max_read_bytes'])
+    @pytest.mark.parametrize('bad',[True,False,0,-1,1.5,'1',2**32])
+    def test_invalid_cumulative_capacity_is_refused_before_connecting(option,bad):
+>       with pytest.raises(ValueError):CtraderReadTransport(**{option:bad})
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_ctrader_read_capacity.py:26: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.ctrader.transport.CtraderReadTransport object at 0x7f7ed1619eb0>
+operation_timeout_s = 30.0, monotonic = None, kwargs = {'max_read_bytes': -1}
+
+    def __init__(self, *, operation_timeout_s=30.0, monotonic=None, **kwargs):
+        if (type(operation_timeout_s) not in (int, float) or not math.isfinite(operation_timeout_s)
+                or not 0 < operation_timeout_s <= 300):
+            raise ValueError("native read budget must be finite and positive, at most300seconds")
+>       super().__init__(**kwargs)
+E       TypeError: CtraderTransport.__init__() got an unexpected keyword argument 'max_read_bytes'
+
+trading/vati/execution/ctrader/transport.py:391: TypeError
+_ test_invalid_cumulative_capacity_is_refused_before_connecting[1.5-max_read_frames] _
+
+option = 'max_read_frames', bad = 1.5
+
+    @pytest.mark.parametrize('option',['max_read_frames','max_read_bytes'])
+    @pytest.mark.parametrize('bad',[True,False,0,-1,1.5,'1',2**32])
+    def test_invalid_cumulative_capacity_is_refused_before_connecting(option,bad):
+>       with pytest.raises(ValueError):CtraderReadTransport(**{option:bad})
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_ctrader_read_capacity.py:26: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.ctrader.transport.CtraderReadTransport object at 0x7f7ed161a240>
+operation_timeout_s = 30.0, monotonic = None, kwargs = {'max_read_frames': 1.5}
+
+    def __init__(self, *, operation_timeout_s=30.0, monotonic=None, **kwargs):
+        if (type(operation_timeout_s) not in (int, float) or not math.isfinite(operation_timeout_s)
+                or not 0 < operation_timeout_s <= 300):
+            raise ValueError("native read budget must be finite and positive, at most300seconds")
+>       super().__init__(**kwargs)
+E       TypeError: CtraderTransport.__init__() got an unexpected keyword argument 'max_read_frames'
+
+trading/vati/execution/ctrader/transport.py:391: TypeError
+_ test_invalid_cumulative_capacity_is_refused_before_connecting[1.5-max_read_bytes] _
+
+option = 'max_read_bytes', bad = 1.5
+
+    @pytest.mark.parametrize('option',['max_read_frames','max_read_bytes'])
+    @pytest.mark.parametrize('bad',[True,False,0,-1,1.5,'1',2**32])
+    def test_invalid_cumulative_capacity_is_refused_before_connecting(option,bad):
+>       with pytest.raises(ValueError):CtraderReadTransport(**{option:bad})
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_ctrader_read_capacity.py:26: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.ctrader.transport.CtraderReadTransport object at 0x7f7ed161c2f0>
+operation_timeout_s = 30.0, monotonic = None, kwargs = {'max_read_bytes': 1.5}
+
+    def __init__(self, *, operation_timeout_s=30.0, monotonic=None, **kwargs):
+        if (type(operation_timeout_s) not in (int, float) or not math.isfinite(operation_timeout_s)
+                or not 0 < operation_timeout_s <= 300):
+            raise ValueError("native read budget must be finite and positive, at most300seconds")
+>       super().__init__(**kwargs)
+E       TypeError: CtraderTransport.__init__() got an unexpected keyword argument 'max_read_bytes'
+
+trading/vati/execution/ctrader/transport.py:391: TypeError
+_ test_invalid_cumulative_capacity_is_refused_before_connecting[1-max_read_frames] _
+
+option = 'max_read_frames', bad = '1'
+
+    @pytest.mark.parametrize('option',['max_read_frames','max_read_bytes'])
+    @pytest.mark.parametrize('bad',[True,False,0,-1,1.5,'1',2**32])
+    def test_invalid_cumulative_capacity_is_refused_before_connecting(option,bad):
+>       with pytest.raises(ValueError):CtraderReadTransport(**{option:bad})
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_ctrader_read_capacity.py:26: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.ctrader.transport.CtraderReadTransport object at 0x7f7ed15d4d70>
+operation_timeout_s = 30.0, monotonic = None, kwargs = {'max_read_frames': '1'}
+
+    def __init__(self, *, operation_timeout_s=30.0, monotonic=None, **kwargs):
+        if (type(operation_timeout_s) not in (int, float) or not math.isfinite(operation_timeout_s)
+                or not 0 < operation_timeout_s <= 300):
+            raise ValueError("native read budget must be finite and positive, at most300seconds")
+>       super().__init__(**kwargs)
+E       TypeError: CtraderTransport.__init__() got an unexpected keyword argument 'max_read_frames'
+
+trading/vati/execution/ctrader/transport.py:391: TypeError
+_ test_invalid_cumulative_capacity_is_refused_before_connecting[1-max_read_bytes] _
+
+option = 'max_read_bytes', bad = '1'
+
+    @pytest.mark.parametrize('option',['max_read_frames','max_read_bytes'])
+    @pytest.mark.parametrize('bad',[True,False,0,-1,1.5,'1',2**32])
+    def test_invalid_cumulative_capacity_is_refused_before_connecting(option,bad):
+>       with pytest.raises(ValueError):CtraderReadTransport(**{option:bad})
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_ctrader_read_capacity.py:26: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.ctrader.transport.CtraderReadTransport object at 0x7f7ed15d4230>
+operation_timeout_s = 30.0, monotonic = None, kwargs = {'max_read_bytes': '1'}
+
+    def __init__(self, *, operation_timeout_s=30.0, monotonic=None, **kwargs):
+        if (type(operation_timeout_s) not in (int, float) or not math.isfinite(operation_timeout_s)
+                or not 0 < operation_timeout_s <= 300):
+            raise ValueError("native read budget must be finite and positive, at most300seconds")
+>       super().__init__(**kwargs)
+E       TypeError: CtraderTransport.__init__() got an unexpected keyword argument 'max_read_bytes'
+
+trading/vati/execution/ctrader/transport.py:391: TypeError
+_ test_invalid_cumulative_capacity_is_refused_before_connecting[4294967296-max_read_frames] _
+
+option = 'max_read_frames', bad = 4294967296
+
+    @pytest.mark.parametrize('option',['max_read_frames','max_read_bytes'])
+    @pytest.mark.parametrize('bad',[True,False,0,-1,1.5,'1',2**32])
+    def test_invalid_cumulative_capacity_is_refused_before_connecting(option,bad):
+>       with pytest.raises(ValueError):CtraderReadTransport(**{option:bad})
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_ctrader_read_capacity.py:26: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.ctrader.transport.CtraderReadTransport object at 0x7f7ed161c7a0>
+operation_timeout_s = 30.0, monotonic = None
+kwargs = {'max_read_frames': 4294967296}
+
+    def __init__(self, *, operation_timeout_s=30.0, monotonic=None, **kwargs):
+        if (type(operation_timeout_s) not in (int, float) or not math.isfinite(operation_timeout_s)
+                or not 0 < operation_timeout_s <= 300):
+            raise ValueError("native read budget must be finite and positive, at most300seconds")
+>       super().__init__(**kwargs)
+E       TypeError: CtraderTransport.__init__() got an unexpected keyword argument 'max_read_frames'
+
+trading/vati/execution/ctrader/transport.py:391: TypeError
+_ test_invalid_cumulative_capacity_is_refused_before_connecting[4294967296-max_read_bytes] _
+
+option = 'max_read_bytes', bad = 4294967296
+
+    @pytest.mark.parametrize('option',['max_read_frames','max_read_bytes'])
+    @pytest.mark.parametrize('bad',[True,False,0,-1,1.5,'1',2**32])
+    def test_invalid_cumulative_capacity_is_refused_before_connecting(option,bad):
+>       with pytest.raises(ValueError):CtraderReadTransport(**{option:bad})
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_ctrader_read_capacity.py:26: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.ctrader.transport.CtraderReadTransport object at 0x7f7ed1619eb0>
+operation_timeout_s = 30.0, monotonic = None
+kwargs = {'max_read_bytes': 4294967296}
+
+    def __init__(self, *, operation_timeout_s=30.0, monotonic=None, **kwargs):
+        if (type(operation_timeout_s) not in (int, float) or not math.isfinite(operation_timeout_s)
+                or not 0 < operation_timeout_s <= 300):
+            raise ValueError("native read budget must be finite and positive, at most300seconds")
+>       super().__init__(**kwargs)
+E       TypeError: CtraderTransport.__init__() got an unexpected keyword argument 'max_read_bytes'
+
+trading/vati/execution/ctrader/transport.py:391: TypeError
+__________ test_frame_limit_retires_before_waiting_for_the_next_body ___________
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7f7ed15f7a70>
+
+    def test_frame_limit_retires_before_waiting_for_the_next_body(harness):
+>       transport,server=source(harness,max_read_frames=1)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_ctrader_read_capacity.py:30: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_ctrader_read_capacity.py:12: in source
+    transport=CtraderReadTransport(connector=lambda *_:client,timeout_s=2,**options)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.ctrader.transport.CtraderReadTransport object at 0x7f7ed15f5490>
+operation_timeout_s = 30.0, monotonic = None
+kwargs = {'connector': <function source.<locals>.<lambda> at 0x7f7ed129bce0>, 'timeout_s': 2, 'max_read_frames': 1}
+
+    def __init__(self, *, operation_timeout_s=30.0, monotonic=None, **kwargs):
+        if (type(operation_timeout_s) not in (int, float) or not math.isfinite(operation_timeout_s)
+                or not 0 < operation_timeout_s <= 300):
+            raise ValueError("native read budget must be finite and positive, at most300seconds")
+>       super().__init__(**kwargs)
+E       TypeError: CtraderTransport.__init__() got an unexpected keyword argument 'max_read_frames'
+
+trading/vati/execution/ctrader/transport.py:391: TypeError
+________ test_encoded_byte_limit_refuses_the_payload_before_reading_it _________
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7f7ed128a8d0>
+
+    def test_encoded_byte_limit_refuses_the_payload_before_reading_it(harness):
+>       transport,server=source(harness,max_read_bytes=1)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_ctrader_read_capacity.py:47: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_ctrader_read_capacity.py:12: in source
+    transport=CtraderReadTransport(connector=lambda *_:client,timeout_s=2,**options)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.ctrader.transport.CtraderReadTransport object at 0x7f7ed128bda0>
+operation_timeout_s = 30.0, monotonic = None
+kwargs = {'connector': <function source.<locals>.<lambda> at 0x7f7ed129bba0>, 'timeout_s': 2, 'max_read_bytes': 1}
+
+    def __init__(self, *, operation_timeout_s=30.0, monotonic=None, **kwargs):
+        if (type(operation_timeout_s) not in (int, float) or not math.isfinite(operation_timeout_s)
+                or not 0 < operation_timeout_s <= 300):
+            raise ValueError("native read budget must be finite and positive, at most300seconds")
+>       super().__init__(**kwargs)
+E       TypeError: CtraderTransport.__init__() got an unexpected keyword argument 'max_read_bytes'
+
+trading/vati/execution/ctrader/transport.py:391: TypeError
+_________ test_exact_encoded_limit_and_correlated_reply_are_preserved __________
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7f7ed1289a90>
+
+    def test_exact_encoded_limit_and_correlated_reply_are_preserved(harness):
+        body={'ctidTraderAccountId':12345,'symbol':[]}
+        size=len(SCHEMA.wrap('ProtoOASymbolsListRes',body,'a'*16))
+>       transport,server=source(harness,max_read_frames=1,max_read_bytes=size)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_ctrader_read_capacity.py:60: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_ctrader_read_capacity.py:12: in source
+    transport=CtraderReadTransport(connector=lambda *_:client,timeout_s=2,**options)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.ctrader.transport.CtraderReadTransport object at 0x7f7ed12899d0>
+operation_timeout_s = 30.0, monotonic = None
+kwargs = {'connector': <function source.<locals>.<lambda> at 0x7f7ed129bf60>, 'timeout_s': 2, 'max_read_frames': 1, 'max_read_bytes': 29}
+
+    def __init__(self, *, operation_timeout_s=30.0, monotonic=None, **kwargs):
+        if (type(operation_timeout_s) not in (int, float) or not math.isfinite(operation_timeout_s)
+                or not 0 < operation_timeout_s <= 300):
+            raise ValueError("native read budget must be finite and positive, at most300seconds")
+>       super().__init__(**kwargs)
+E       TypeError: CtraderTransport.__init__() got an unexpected keyword argument 'max_read_frames'
+
+trading/vati/execution/ctrader/transport.py:391: TypeError
+__ test_draining_native_events_does_not_refund_the_original_operation_budget ___
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7f7ed12a89b0>
+
+    def test_draining_native_events_does_not_refund_the_original_operation_budget(harness):
+>       transport,server=source(harness,max_read_frames=1)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_ctrader_read_capacity.py:72: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_ctrader_read_capacity.py:12: in source
+    transport=CtraderReadTransport(connector=lambda *_:client,timeout_s=2,**options)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.ctrader.transport.CtraderReadTransport object at 0x7f7ed12a8380>
+operation_timeout_s = 30.0, monotonic = None
+kwargs = {'connector': <function source.<locals>.<lambda> at 0x7f7ed129b920>, 'timeout_s': 2, 'max_read_frames': 1}
+
+    def __init__(self, *, operation_timeout_s=30.0, monotonic=None, **kwargs):
+        if (type(operation_timeout_s) not in (int, float) or not math.isfinite(operation_timeout_s)
+                or not 0 < operation_timeout_s <= 300):
+            raise ValueError("native read budget must be finite and positive, at most300seconds")
+>       super().__init__(**kwargs)
+E       TypeError: CtraderTransport.__init__() got an unexpected keyword argument 'max_read_frames'
+
+trading/vati/execution/ctrader/transport.py:391: TypeError
+_ test_incoming_heartbeats_count_even_though_they_do_not_enter_the_event_queue _
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7f7ed1289a60>
+
+    def test_incoming_heartbeats_count_even_though_they_do_not_enter_the_event_queue(harness):
+>       transport,server=source(harness,max_read_frames=1)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_ctrader_read_capacity.py:83: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_ctrader_read_capacity.py:12: in source
+    transport=CtraderReadTransport(connector=lambda *_:client,timeout_s=2,**options)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.ctrader.transport.CtraderReadTransport object at 0x7f7ed128b800>
+operation_timeout_s = 30.0, monotonic = None
+kwargs = {'connector': <function source.<locals>.<lambda> at 0x7f7ed129a700>, 'timeout_s': 2, 'max_read_frames': 1}
+
+    def __init__(self, *, operation_timeout_s=30.0, monotonic=None, **kwargs):
+        if (type(operation_timeout_s) not in (int, float) or not math.isfinite(operation_timeout_s)
+                or not 0 < operation_timeout_s <= 300):
+            raise ValueError("native read budget must be finite and positive, at most300seconds")
+>       super().__init__(**kwargs)
+E       TypeError: CtraderTransport.__init__() got an unexpected keyword argument 'max_read_frames'
+
+trading/vati/execution/ctrader/transport.py:391: TypeError
+_ test_overflow_wakes_the_original_pending_request_and_cannot_renew_on_reconnect _
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7f7ed147ab70>
+
+    def test_overflow_wakes_the_original_pending_request_and_cannot_renew_on_reconnect(harness):
+>       transport,server=source(harness,max_read_frames=1)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_ctrader_read_capacity.py:93: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_ctrader_read_capacity.py:12: in source
+    transport=CtraderReadTransport(connector=lambda *_:client,timeout_s=2,**options)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.ctrader.transport.CtraderReadTransport object at 0x7f7ed15f6390>
+operation_timeout_s = 30.0, monotonic = None
+kwargs = {'connector': <function source.<locals>.<lambda> at 0x7f7ed1310180>, 'timeout_s': 2, 'max_read_frames': 1}
+
+    def __init__(self, *, operation_timeout_s=30.0, monotonic=None, **kwargs):
+        if (type(operation_timeout_s) not in (int, float) or not math.isfinite(operation_timeout_s)
+                or not 0 < operation_timeout_s <= 300):
+            raise ValueError("native read budget must be finite and positive, at most300seconds")
+>       super().__init__(**kwargs)
+E       TypeError: CtraderTransport.__init__() got an unexpected keyword argument 'max_read_frames'
+
+trading/vati/execution/ctrader/transport.py:391: TypeError
+=========================== short test summary info ============================
+FAILED trading/tests/test_ctrader_read_capacity.py::test_invalid_cumulative_capacity_is_refused_before_connecting[True-max_read_frames]
+FAILED trading/tests/test_ctrader_read_capacity.py::test_invalid_cumulative_capacity_is_refused_before_connecting[True-max_read_bytes]
+FAILED trading/tests/test_ctrader_read_capacity.py::test_invalid_cumulative_capacity_is_refused_before_connecting[False-max_read_frames]
+FAILED trading/tests/test_ctrader_read_capacity.py::test_invalid_cumulative_capacity_is_refused_before_connecting[False-max_read_bytes]
+FAILED trading/tests/test_ctrader_read_capacity.py::test_invalid_cumulative_capacity_is_refused_before_connecting[0-max_read_frames]
+FAILED trading/tests/test_ctrader_read_capacity.py::test_invalid_cumulative_capacity_is_refused_before_connecting[0-max_read_bytes]
+FAILED trading/tests/test_ctrader_read_capacity.py::test_invalid_cumulative_capacity_is_refused_before_connecting[-1-max_read_frames]
+FAILED trading/tests/test_ctrader_read_capacity.py::test_invalid_cumulative_capacity_is_refused_before_connecting[-1-max_read_bytes]
+FAILED trading/tests/test_ctrader_read_capacity.py::test_invalid_cumulative_capacity_is_refused_before_connecting[1.5-max_read_frames]
+FAILED trading/tests/test_ctrader_read_capacity.py::test_invalid_cumulative_capacity_is_refused_before_connecting[1.5-max_read_bytes]
+FAILED trading/tests/test_ctrader_read_capacity.py::test_invalid_cumulative_capacity_is_refused_before_connecting[1-max_read_frames]
+FAILED trading/tests/test_ctrader_read_capacity.py::test_invalid_cumulative_capacity_is_refused_before_connecting[1-max_read_bytes]
+FAILED trading/tests/test_ctrader_read_capacity.py::test_invalid_cumulative_capacity_is_refused_before_connecting[4294967296-max_read_frames]
+FAILED trading/tests/test_ctrader_read_capacity.py::test_invalid_cumulative_capacity_is_refused_before_connecting[4294967296-max_read_bytes]
+FAILED trading/tests/test_ctrader_read_capacity.py::test_frame_limit_retires_before_waiting_for_the_next_body
+FAILED trading/tests/test_ctrader_read_capacity.py::test_encoded_byte_limit_refuses_the_payload_before_reading_it
+FAILED trading/tests/test_ctrader_read_capacity.py::test_exact_encoded_limit_and_correlated_reply_are_preserved
+FAILED trading/tests/test_ctrader_read_capacity.py::test_draining_native_events_does_not_refund_the_original_operation_budget
+FAILED trading/tests/test_ctrader_read_capacity.py::test_incoming_heartbeats_count_even_though_they_do_not_enter_the_event_queue
+FAILED trading/tests/test_ctrader_read_capacity.py::test_overflow_wakes_the_original_pending_request_and_cannot_renew_on_reconnect
+20 failed, 1 passed in 1.11s

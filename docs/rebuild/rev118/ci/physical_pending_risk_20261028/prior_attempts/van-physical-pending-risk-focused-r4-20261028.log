@@ -1,0 +1,93 @@
+...............FF.F..................................................... [ 55%]
+..........................................................               [100%]
+=================================== FAILURES ===================================
+_ test_existing_authority_applies_pending_limits_with_a_permitted_positive_case[limit0-OK] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-68/test_existing_authority_applie0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+limit = {'max_open_stop_risk': '0.02'}, expected = 'OK'
+
+    @pytest.mark.parametrize('limit,expected',[
+        ({'max_open_stop_risk':'0.02'},'OK'),
+        ({'max_total_positions':1},'MAX_TOTAL_POSITIONS'),
+        ({'max_positions_per_instrument':1},'MAX_POSITIONS_PER_INSTRUMENT'),
+        ({'max_currency_leg_exposure':'0.005'},'CURRENCY_LEG_EXPOSURE'),
+    ])
+    def test_existing_authority_applies_pending_limits_with_a_permitted_positive_case(tmp_path,eurusd,limit,expected):
+        ledger,_,_,_,facts=native_facts(tmp_path,eurusd);command(ledger,facts,'limits')
+        facts=replace(facts,pending_risk_commitments=pending(ledger,facts),
+            used_margin=D(0),free_margin=facts.equity,margin_level_pct=None)
+        grant=TradingMandate.from_mapping(mandate_dict(account_alias=facts.account_alias,
+            max_open_stop_risk='0.05',**{k:v for k,v in limit.items() if k!='max_open_stop_risk'})
+            if 'max_open_stop_risk' not in limit else mandate_dict(account_alias=facts.account_alias,**limit))
+        result=RiskAuthority(grant).evaluate_safe(intent(account_alias=facts.account_alias),facts)
+>       assert result.reason_code==expected,result
+E       AssertionError: RiskDecision(trade_intent_id='ti-1', decision=<Decision.REJECTED: 'REJECTED'>, reason_code='MAX_POSITIONS_PER_INSTRUME...8cbd4c74c', mandate_hash='c7d17c5343ed4fd95d71095c089793266c5111e3c19ef509b05be7542b8b6161', approval_schema_version=2)
+E       assert 'MAX_POSITIONS_PER_INSTRUMENT' == 'OK'
+E         
+E         - OK
+E         + MAX_POSITIONS_PER_INSTRUMENT
+
+trading/tests/test_physical_pending_risk.py:142: AssertionError
+_ test_existing_authority_applies_pending_limits_with_a_permitted_positive_case[limit1-MAX_TOTAL_POSITIONS] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-68/test_existing_authority_applie1')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+limit = {'max_total_positions': 1}, expected = 'MAX_TOTAL_POSITIONS'
+
+    @pytest.mark.parametrize('limit,expected',[
+        ({'max_open_stop_risk':'0.02'},'OK'),
+        ({'max_total_positions':1},'MAX_TOTAL_POSITIONS'),
+        ({'max_positions_per_instrument':1},'MAX_POSITIONS_PER_INSTRUMENT'),
+        ({'max_currency_leg_exposure':'0.005'},'CURRENCY_LEG_EXPOSURE'),
+    ])
+    def test_existing_authority_applies_pending_limits_with_a_permitted_positive_case(tmp_path,eurusd,limit,expected):
+        ledger,_,_,_,facts=native_facts(tmp_path,eurusd);command(ledger,facts,'limits')
+        facts=replace(facts,pending_risk_commitments=pending(ledger,facts),
+            used_margin=D(0),free_margin=facts.equity,margin_level_pct=None)
+        grant=TradingMandate.from_mapping(mandate_dict(account_alias=facts.account_alias,
+            max_open_stop_risk='0.05',**{k:v for k,v in limit.items() if k!='max_open_stop_risk'})
+            if 'max_open_stop_risk' not in limit else mandate_dict(account_alias=facts.account_alias,**limit))
+        result=RiskAuthority(grant).evaluate_safe(intent(account_alias=facts.account_alias),facts)
+>       assert result.reason_code==expected,result
+E       AssertionError: RiskDecision(trade_intent_id='ti-1', decision=<Decision.REJECTED: 'REJECTED'>, reason_code='MAX_POSITIONS_PER_INSTRUME...8cbd4c74c', mandate_hash='e98c5ba6a4136a69cf21557baa9b9cb43ba01b11884f8b63b019fab833826668', approval_schema_version=2)
+E       assert 'MAX_POSITIONS_PER_INSTRUMENT' == 'MAX_TOTAL_POSITIONS'
+E         
+E         - MAX_TOTAL_POSITIONS
+E         + MAX_POSITIONS_PER_INSTRUMENT
+
+trading/tests/test_physical_pending_risk.py:142: AssertionError
+_ test_existing_authority_applies_pending_limits_with_a_permitted_positive_case[limit3-CURRENCY_LEG_EXPOSURE] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-68/test_existing_authority_applie3')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+limit = {'max_currency_leg_exposure': '0.005'}
+expected = 'CURRENCY_LEG_EXPOSURE'
+
+    @pytest.mark.parametrize('limit,expected',[
+        ({'max_open_stop_risk':'0.02'},'OK'),
+        ({'max_total_positions':1},'MAX_TOTAL_POSITIONS'),
+        ({'max_positions_per_instrument':1},'MAX_POSITIONS_PER_INSTRUMENT'),
+        ({'max_currency_leg_exposure':'0.005'},'CURRENCY_LEG_EXPOSURE'),
+    ])
+    def test_existing_authority_applies_pending_limits_with_a_permitted_positive_case(tmp_path,eurusd,limit,expected):
+        ledger,_,_,_,facts=native_facts(tmp_path,eurusd);command(ledger,facts,'limits')
+        facts=replace(facts,pending_risk_commitments=pending(ledger,facts),
+            used_margin=D(0),free_margin=facts.equity,margin_level_pct=None)
+        grant=TradingMandate.from_mapping(mandate_dict(account_alias=facts.account_alias,
+            max_open_stop_risk='0.05',**{k:v for k,v in limit.items() if k!='max_open_stop_risk'})
+            if 'max_open_stop_risk' not in limit else mandate_dict(account_alias=facts.account_alias,**limit))
+        result=RiskAuthority(grant).evaluate_safe(intent(account_alias=facts.account_alias),facts)
+>       assert result.reason_code==expected,result
+E       AssertionError: RiskDecision(trade_intent_id='ti-1', decision=<Decision.REJECTED: 'REJECTED'>, reason_code='MAX_POSITIONS_PER_INSTRUME...8cbd4c74c', mandate_hash='0ba5cd869991a18ac696a972fbbdd04a9422f4046cc87e84ab30317b5581cd0f', approval_schema_version=2)
+E       assert 'MAX_POSITIONS_PER_INSTRUMENT' == 'CURRENCY_LEG_EXPOSURE'
+E         
+E         - CURRENCY_LEG_EXPOSURE
+E         + MAX_POSITIONS_PER_INSTRUMENT
+
+trading/tests/test_physical_pending_risk.py:142: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_physical_pending_risk.py::test_existing_authority_applies_pending_limits_with_a_permitted_positive_case[limit0-OK]
+FAILED trading/tests/test_physical_pending_risk.py::test_existing_authority_applies_pending_limits_with_a_permitted_positive_case[limit1-MAX_TOTAL_POSITIONS]
+FAILED trading/tests/test_physical_pending_risk.py::test_existing_authority_applies_pending_limits_with_a_permitted_positive_case[limit3-CURRENCY_LEG_EXPOSURE]
+3 failed, 127 passed in 5.25s

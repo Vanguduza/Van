@@ -1,0 +1,12 @@
+{
+  "observed_at_utc": "2026-10-28T23:17:47.225244+00:00",
+  "source_parent": "ab91a8ebf2a7e94e9ab7d742108eba81b88d93cd",
+  "reference_bytes_unchanged_from_original_published_parent": true,
+  "source_sha256": {
+    "trading/vati/execution/ctrader/proto/OpenApiCommonMessages.proto": "9816cd24b340dcc4eb28548eb4dd16735995d2a61889337591e5c4d8021652a2",
+    "trading/vati/execution/ctrader/proto/OpenApiCommonModelMessages.proto": "b95d7df670a7e890a53ec08f676198ace7bb0a074a4b07ff0b493c4be00a0dea",
+    "trading/vati/execution/ctrader/proto/OpenApiMessages.proto": "a84df9b528e69a494e197d48e21d6291b3d76db31396663a8188721eef9fcf35",
+    "trading/vati/execution/ctrader/proto/OpenApiModelMessages.proto": "56338dcac45a149227678b7c23637d64f4e2b607f6649af82394ce5c0957fedf",
+    "trading/vati/execution/ctrader/proto/PROVENANCE.json": "03ce54a1173187f59312473abf072291baa6ea123abfca37b4b16620b58a0061"
+  }
+}

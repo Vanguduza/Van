@@ -1,0 +1,104 @@
+{
+  "state": "FROZEN_LAC135_R2_SOURCE_REVIEW_READY",
+  "base": "b15b160a3c4f42b35808704f44f6e178342e2149",
+  "preimage_sha256": {
+    "backend/van_gateway/app.py": "2949bcc8e076b0599c6e8ab40eefa2b49e93d6a86c19807d662b96dfffa4da16",
+    "backend/van_gateway/context/forget.py": "d55ce53f5234a0d4239d763136fed974c3324c336d6e88cc8ed2d85017bad44d"
+  },
+  "source_preimages_equal_current_b15": true,
+  "worktree": "/workspace/van-lanes-20261101/account-live-drafts",
+  "source_allowlist": [
+    "backend/van_gateway/trading/account_application_drafts.py",
+    "backend/tests/test_account_application_drafts.py",
+    "backend/van_gateway/app.py",
+    "backend/van_gateway/context/forget.py"
+  ],
+  "source_pins": "/tmp/van-account-live-drafts-20261101/R2/SOURCE_PINS.json",
+  "full_patch": {
+    "path": "/tmp/van-account-live-drafts-20261101/R2/FINAL_FULL.patch",
+    "sha256": "abd9a35fb1ccfcda7b295e3d742331472feffcf238bf0c5f40caa306672bbb26",
+    "bytes": 75857
+  },
+  "delta_from_frozen_R1": {
+    "path": "/tmp/van-account-live-drafts-20261101/R2/R2_DELTA.patch",
+    "sha256": "eed4b8da644c68674b64c4616cbede36473216f0acfcf3cb485d81d336483fc7",
+    "bytes": 21326
+  },
+  "archive": {
+    "path": "/tmp/van-account-live-drafts-20261101/R2/FINAL_SOURCE.zip",
+    "sha256": "05ad969943cc3d21a4b21b6ae47cb253162c66107cfd1e2543a42197b0093695",
+    "bytes": 69572
+  },
+  "R1_reference": "/tmp/van-account-live-drafts-20261101/R2/R1_REFERENCE.json",
+  "review_blocker": "LAC135-REVIEW01",
+  "implementation": "Existing FAMILY head is validated against a gap-free original publication/proven-current-erase revision chain from existing canonical bodies and their own minimal anti-replay tombstones. Null/absent/head counters are never proof. No read writes or reconstructs a head. Opaque family-scope/draft/body identity, original publication revision and optional proven erase revision/checksum survive in the existing erase tombstone, not original body/protocol/device/config data. Canonical body/artifact evidence and original key/owner joins are validated. Unproven/null/stale/missing/wrong/gapped selection =>UNKNOWN/ineligible; no new generation. Independently verified original body/receipt remains readable. Explicit exact-owner erase still removes body/projection under corrupt selection, records no proven-current erase event and leaves corrupt head unchanged, preventing laundering into valid empty.",
+  "compatibility": "App/auth composition, original strict/legacy predicates and memory inventory descriptions are byte-identical to R1; only service/tests changed. All original35 durable workflow test bytes remain prefix-identical; final53 includes those35 plus18 selection cases. R1 legacy erase receipts without family lineage remain historical readback, but cannot establish currentness/virginity; no guessed backfill. Valid new erase\u2192empty\u2192next generation and noncurrent deletion remain supported.",
+  "tests": {
+    "R2_FINAL": {
+      "receipt": "/tmp/van-account-live-drafts-20261101/R2_FINAL/receipt.json",
+      "passed": 53,
+      "skipped": 0,
+      "exit": 0,
+      "elapsed_seconds": 165.0689995759967,
+      "owned_bytes": 101621519,
+      "source_pins_unchanged": true,
+      "children_remaining": []
+    },
+    "R2_COLD_PROCESS": {
+      "receipt": "/tmp/van-account-live-drafts-20261101/R2_COLD_PROCESS/receipt.json",
+      "passed": 1,
+      "skipped": 0,
+      "exit": 0,
+      "elapsed_seconds": 23.47351592299674,
+      "owned_bytes": 1918193,
+      "source_pins_unchanged": true,
+      "children_remaining": []
+    }
+  },
+  "executed_R2_final_distinct_ids": 54,
+  "before_after": {
+    "own_before": "../R2_EXACT_BEFORE:actual intended1FAIL (200 admitted corrupt revision1000), frozen original service hash16f1...",
+    "own_after": "../R2_EXACT_AFTER:exact same regression +3 original positives4PASS",
+    "selection_controls": "../R2_SELECTION:18PASS0skip, missing/false/stale/unsupported head or witness; exact matching owner/body/erase evidence; privacy delete under unknown selection",
+    "independent_R1": "/workspace/van-lac135-independent-review-20261101/review.json and /tmp/van-lac135-probe-y5s9tv98 untouched",
+    "R1_71": "Original71 distinct executions retained under original source pins; not relabeled R2 execution."
+  },
+  "source_proof_reuse": "R1 existing13 auth/artifact and22 memory/retention controls remain original evidence; app.py/contextforget.py and relevant original implementations unchanged. Current R2 final53 re-executes all35 new owner/SQL/HTTP/privacy/receipt tests plus18 lineage controls; fresh owner Python HTTP process validates empty erased state then independently creates explicit next generation and rereads old erase history.",
+  "guards": {
+    "owner_check_exit": 1,
+    "unapplied_generated_outputs": [
+      "registries/owner_endpoints.json",
+      "registries/owner_endpoint_schemas.json",
+      "docs/rebuild/rev118/backend/OWNER_REGISTRY_SOURCE_REFRESH_20261022.json",
+      "registries/owner_features.json",
+      "registries/owner_screens.json",
+      "docs/rebuild/rev118/backend/OWNER_REGISTRY_GENERATION.json"
+    ],
+    "frontend_check_exit": 0,
+    "metadata_check_receipt": "/tmp/van-account-live-drafts-20261101/R2_CHECKS/receipt.json",
+    "mutation_preflight": "/tmp/van-account-live-drafts-20261101/R2/MUTATION_PREFLIGHT.json",
+    "mutation_outcome": "374cases383edits anchors valid; NOT_RUN",
+    "minor_controller_setup": "First R2 metadata controller refused existing R1 output directory before launching checks; corrected unique R2_CHECKS path, original R1 outputs untouched."
+  },
+  "limits": [
+    "Backend LAC135 source only; Android persisted producer still OPEN after OAuth13 exclusive lease",
+    "Provider submission/LAC137, real descriptor/API/URL/issuer/KYC/native receipt and whole BE004/formal/native acceptance remain OPEN",
+    "Owner-derived memory erase semantics unchanged; owner-authored draft DELETE remains explicit",
+    "No new store/database/table/migration/financial event/approval/provider authority",
+    "No commits/push/main writes/generators/subagents/network/SDK or unrelated CI action",
+    "Private-core/final integrated app/auth/owner API source CI still required after sole integration"
+  ],
+  "remaining": [
+    "Independent R2 recheck",
+    "Sole integrator exactb15 apply and six derived source outputs/frontend refresh, existing private-core/app-auth guards and exactheadCI",
+    "Separate Android caller and actual provider/effect qualification"
+  ],
+  "resources": {
+    "workspace_free": 66514944,
+    "tmp_free": 2716401664,
+    "active_owned_jobs": [],
+    "per_run_cap_bytes": 134217728,
+    "tmp_archives_volatile": true,
+    "workspace_note": "Current free bytes below64MiB new-run admission after completed jobs; no additional test/job launched, hard32MiB floor preserved."
+  }
+}

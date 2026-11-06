@@ -1,0 +1,135 @@
+{
+  "schema": "van.source-packet/1",
+  "packet": "APPROVAL_FIXTURE_CONSUMER_CLOSURE_AND_APPROVED_STRATEGY_GAINS",
+  "prepared_utc": "2026-11-02T06:43:22.886983+00:00",
+  "published_base": "23a570cf3f4f6e67fee69a2f8d845c7a8f03d244",
+  "source4": {
+    "backend/tests/test_account_resource_binding.py": {
+      "before_sha256": "fc3fc4b8a094cc49f9cb96736f08131deb80f4fcd762bb1342c51c08d19b06ee",
+      "after_sha256": "a4f3ee16f83ffea31a7d2cc2b0273022e00e49f7d892211c2c4a2dc09fa8ab19",
+      "import_changes": [
+        [
+          "test_trading_api",
+          "backend.tests.test_trading_api"
+        ],
+        [
+          "test_trading_oauth_scope",
+          "backend.tests.test_trading_oauth_scope"
+        ]
+      ],
+      "all_other_AST_exact": true,
+      "assertions": 30
+    },
+    "backend/tests/test_account_operation_recovery.py": {
+      "before_sha256": "dab4bb9906c89d682afdb04221c6c586192ee86aeaed032eeb36f1a0caf2aa7d",
+      "after_sha256": "f1046879664f961a43453e87e1abcb968029f1fd29dc7ca98f57d374c7cef3c8",
+      "import_changes": [
+        [
+          "test_trading_api",
+          "backend.tests.test_trading_api"
+        ],
+        [
+          "test_trading_oauth_scope",
+          "backend.tests.test_trading_oauth_scope"
+        ],
+        [
+          "test_account_resource_binding",
+          "backend.tests.test_account_resource_binding"
+        ],
+        [
+          "test_trading_api",
+          "backend.tests.test_trading_api"
+        ]
+      ],
+      "all_other_AST_exact": true,
+      "assertions": 52
+    },
+    "backend/tests/test_trading_oauth_effects.py": {
+      "before_sha256": "f032a701cea8f2a1b874b994451094f4d049e7a227f5387188b9ac6ccdd1ae14",
+      "after_sha256": "aeba2b7bf488983ca3090334c5581de7274de507cd936800bd29491f4e78a5dd",
+      "import_changes": [
+        [
+          "test_trading_api",
+          "backend.tests.test_trading_api"
+        ],
+        [
+          "test_trading_oauth_scope",
+          "backend.tests.test_trading_oauth_scope"
+        ]
+      ],
+      "all_other_AST_exact": true,
+      "assertions": 74
+    },
+    "backend/tests/test_stateful_link_binding.py": {
+      "before_sha256": "63720c50d1ee5bba47bd6307a47a651ae96a778d0b32426e72b3ac5c7016a657",
+      "after_sha256": "3318a8063954c01d4e582ce47585412606981b77d172c46e36939c017c1d3e79",
+      "import_changes": [
+        [
+          6,
+          "test_trading_api",
+          "backend.tests.test_trading_api"
+        ],
+        [
+          7,
+          "test_trading_oauth_scope",
+          "backend.tests.test_trading_oauth_scope"
+        ],
+        [
+          8,
+          "test_account_resource_binding",
+          "backend.tests.test_account_resource_binding"
+        ],
+        [
+          201,
+          "test_trading_api",
+          "backend.tests.test_trading_api"
+        ]
+      ],
+      "all_other_AST_exact": true,
+      "assertions": 93
+    }
+  },
+  "source_assertions_preserved": 249,
+  "source_nonimport_AST_childscript_waitdrain_exit73_exact": true,
+  "source14_other_inputs_exact": {
+    "trading/vati/funding/classification_journal.py": "59c7f1b9b8a1b1dd4fb416319655d43fcc938fdcb7df006aad9ffa4258d75beb",
+    "backend/van_gateway/trading/funding_classification_api.py": "b306abaacc9bf625333e50bc80487bd9d02e4801b8e3bab976e28b8908b62f7f",
+    "trading/tests/test_funding_classification_journal.py": "3b25920ce903b021923f7030995d649b258f6d5a71d00784aaff7e58a170943d",
+    "backend/tests/test_funding_classification_api.py": "70daa49eaee117c8342d546bef0e531ae612f6e00f490519b461530ef1c87f38",
+    "backend/tests/test_funding_classification_authority.py": "b4787821b263b04feabaf44cc50553dfda714ee4d056578c8b5d1b8185b55d77",
+    "trading/vati/funding/runtime.py": "f12a4ba303b40cc77415ce5a3d760690a3bef737f665ff6ef4cc6ce14aec5efc",
+    "trading/vati/core/events.py": "31480e73e4f067b0e980e592e5527a6a943aea6f634775914fe880c485bafd3a",
+    "backend/van_gateway/app.py": "53ddf7e582e30feff0dd823ec57a7d725d686deeb2a0626759a64abf9db08328",
+    "backend/van_gateway/context/forget.py": "73ab8c429419ce1c5aae4911a602586d0cdc3427b1a2b6fa17d4b81d9cae2784",
+    "trading/tests/test_account_unlink_currentness.py": "aae58de4d30a746c783fbb9d76b5675174501aff8ddb303829c4f6c52d585e0f",
+    "backend/tests/test_account_unlink_review.py": "8b0412a56980c1c5cbbc12af45217fb41e839ef698b06507837a067919d14fba",
+    "backend/tests/test_account_update_review.py": "eaa45b4b612213b74783d8e951fb02d42400f56037ae4b8c67bb2769a20c704f",
+    "backend/tests/test_trading_oauth_scope.py": "54267a0f3e82d51c10395defffeb579e4b094009449f42e3c0a3757b3d111920",
+    "tools/rebuild/refresh_owner_source_contracts.py": "0fbc3c6b8cec9526ec847451cf172a5c0102bea538004fba686c9e13a3dd0165"
+  },
+  "scope": "Only12ImportFromqualifications/fourtestowners; no production/Auth/verifier/crypto/key/importmode/alias/nonce/CI/canonical authority mutation. Two root-approved strategy docs with exact source contract lists and unverified exits.",
+  "source_proof": "docs/rebuild/rev118/receipts/raw/approval-fixture-consumer-closure-20261102/FROZEN_HANDOFF.json",
+  "independent_review": "docs/rebuild/rev118/receipts/raw/approval-fixture-consumer-closure-20261102/INDEPENDENT_REVIEW.json",
+  "strategy_handoff": {
+    "path": "/tmp/van-delivery-strategy-gains-20261102/HANDOFF.json",
+    "sha256": "920d60f5ac0c85d9c461798385fa7e611c4805ae7d0e8b689749a5ddb4691278",
+    "root_approved": true,
+    "root_wording_corrections": "Precommit failure means uncommitted; postcommit failure preserves commit and stops publication. Aggregate verification requires every canonical suboperation/predicate."
+  },
+  "metrics": "docs/rebuild/rev118/receipts/raw/approval-fixture-consumer-closure-20261102/METRICS.json",
+  "CI23a": "41terminal28SUCCESS13FAILURE;53primaryfixtureIDs are all selected;2entry67 andDDS/trustedmain/union/matrix gates remain unwaived. No new-head CI result yet.",
+  "evidence_retention": "Six expected before-fail executions remain failed with coldstores; current82unique168authorPASS +8independent/6unique overlaps separate. No private runtime fixture archives/keys are promoted.",
+  "remaining": "Full native cleanup/durable step/re-auth/grace/retention/provider and depth-production work retain originalscope. Peer cleanupWIP16+HMAC and depth7untested paused remain isolated. No fullunit/BG001/S24/native/provider/production acceptance.",
+  "watch88283": "Actual owned terminalexit1andwaited once; no restart/cancel/duplicate. New exactheadwatch only after normalpublication.",
+  "volatile_roots": [
+    "/tmp/van-approval-fixture-proof-20261102",
+    "/tmp/van-approval-identity-review-fm_q0t41",
+    "/tmp/van-approval-identity-review-fh7ig7ou"
+  ],
+  "reviewer_cleanup_truth": "review.independent_actual.cleanup_error_truth and cleanup supplement remain preserved; actualbodypasses do not relabel outerexit1.",
+  "legacy_manifest_disposition": {
+    "review": "docs/rebuild/rev118/receipts/raw/approval-fixture-consumer-closure-20261102/LEGACY71_REVIEW.json",
+    "resolution": "docs/rebuild/rev118/receipts/raw/approval-fixture-consumer-closure-20261102/LEGACY71_DISPOSITION.json",
+    "scope": "Exact71previously referenced retained bytes nowtracked afterindependentaudit/rootapproval; noignore/generator/history change."
+  }
+}

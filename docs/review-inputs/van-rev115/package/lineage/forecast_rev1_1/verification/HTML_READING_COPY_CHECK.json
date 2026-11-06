@@ -1,0 +1,32 @@
+{
+  "scope": "OFFLINE_DOCUMENT_READING_COPY_ONLY",
+  "method": "System Chromium via Playwright; HTML set_content; screenshots visually inspected",
+  "views": [
+    {
+      "width": 412,
+      "documentWidth": 415,
+      "brokenAnchors": [],
+      "scripts": 0,
+      "images": 0,
+      "remoteAssets": [],
+      "view": "mobile",
+      "theme": "dark",
+      "height": 915
+    },
+    {
+      "width": 1440,
+      "documentWidth": 1440,
+      "brokenAnchors": [],
+      "scripts": 0,
+      "images": 0,
+      "remoteAssets": [],
+      "view": "desktop",
+      "theme": "light",
+      "height": 1100
+    }
+  ],
+  "broken_internal_anchors": 0,
+  "no_scripts_or_remote_assets": true,
+  "application_visual_acceptance": "NOT_PERFORMED",
+  "note": "Mobile document geometry reported 415px for a 412px viewport; no out-of-viewport non-scroll content was found. Wide tables and code have local scrolling. This is not physical S24 acceptance."
+}

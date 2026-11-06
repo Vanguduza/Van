@@ -1,0 +1,24 @@
+{
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "tools/rebuild/source_storage_audit.py",
+    "--report",
+    "/workspace/van-mt5-projected-margin-floor-r2-20261028-audit.json",
+    "trading/tests/test_mt5_projected_margin_floor.py",
+    "trading/tests/test_mt5_final_cash_margin.py",
+    "trading/tests/test_mt5_pending_receipts.py",
+    "trading/tests/test_mql_native_function_bodies.py",
+    "tests/rebuild/test_mt5_cash_unit_source.py",
+    "--junitxml=/workspace/van-mt5-projected-margin-floor-r2-20261028.xml",
+    "-q"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 534118,
+  "started_at_utc": "2026-10-28T14:01:57.833504+00:00",
+  "timeout_seconds": 180,
+  "state": "COMPLETED",
+  "command_pid": 534121,
+  "exit": 0,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-28T14:02:11.115200+00:00"
+}

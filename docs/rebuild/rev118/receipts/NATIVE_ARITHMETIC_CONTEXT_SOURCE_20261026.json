@@ -1,0 +1,48 @@
+{
+  "schema": "van.rebuild.native-arithmetic-context/1",
+  "base_head": "733b7ac93e403048f2807df80f56b7038a4f5d48",
+  "updated_at_utc": "2026-10-26T20:30:55.250193+00:00",
+  "status": "SOURCE_TESTED_COMPONENT_NOT_UNIT_NATIVE_OR_PRODUCTION_ACCEPTANCE",
+  "unit": "BE-006",
+  "acceptance": "NOT_ISSUED",
+  "source_sha256": {
+    "trading/vati/core/decimal_context.py": "6ecf6ecca5c6ce781ea1773de214350e5e985cecfab2be69c9dcf6898c396072",
+    "trading/vati/funding/journal.py": "dba69828c3501d0e43d4404ed1113d5a8811bda13906384bc1b852ad7e0603d3",
+    "trading/vati/funding/deal_journal.py": "165634f768502012410af34cf2c09955a987a523aab019f62b610900c1041e94",
+    "trading/vati/funding/mt5.py": "5a9a37974976902eeb1f329a744a6aa350a3516bd0fa1ecae383fccb8ea9b10c",
+    "trading/vati/execution/ctrader/adapter.py": "3deac92fb37b23b9fe1a0fce9806c3b3e00908186f88bbc1dd08e8c72d7d2e46",
+    "trading/tests/test_native_funding_context.py": "24a64a9f0c91cc561c262d052c549e7cab6afa202edfbd39c488aabaae0f0385"
+  },
+  "confirmed_failure": "Clean published733b baseline: caller Decimal exponents/traps alter or refuse valid native cash/deal validation, MT5 net equity and cTrader PnL/margin; excess precision raises ambient arithmetic signals instead of existing explicit refusal. Actual failing baseline retained.",
+  "fix": "Fresh explicit contexts preserve native 80/512-digit precision, fixed rounding and exponent limits, clean flags/standard traps, independence from mutable Decimal defaults. Native integer PnL uses exact tuple conversion preserving existing default decimal text. Caller settings/flags remain unchanged.",
+  "actual_tests": {
+    "clean_baseline": {
+      "failed": 9,
+      "healthy_controls": 2,
+      "postgres_deselected": 4,
+      "checkout_clean": true
+    },
+    "initial_bad_fixture": "Focused148passed2failed4PGdeselected;firstPG446passed1failed beforemaxfail. Eight-decimal test amount was invalid for two-decimal deal; source correctly refused. Retained as failed, fixture corrected without weakening assertions.",
+    "focused_corrected": "151passed4PGdeselected/audit0",
+    "intermediate_actual_pg": "564passed0skip/audit0;before three decimal-text compatibility cases",
+    "final_actual_pg": {
+      "passed": 567,
+      "skipped": 0,
+      "errors": 0,
+      "audit_violations": 0,
+      "runtime_test_hashes_verified": 490,
+      "owned_fixture_independently_absent": true
+    },
+    "new_cases": 18,
+    "rebuild_workflow_T0_boundary": 122,
+    "counts_overlap": true
+  },
+  "canonical_checks": {
+    "owner_frontend_drift": false,
+    "registry_cases": 374,
+    "registry_edits": 383,
+    "registry_validation_is_execution": false
+  },
+  "qualification": "Source arithmetic only; no payment/order effect, owner authority, native/settlement/risk-capital qualification, unit acceptance, production or S24 proof. Full BE006/007 and remaining canonical programme remain open.",
+  "evidence": "ci/native_arithmetic_context_20261026"
+}

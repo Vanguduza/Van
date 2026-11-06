@@ -1,0 +1,316 @@
+"""Real paired-device/A4 gateway producer and native persistence, without brokers."""
+import json
+import secrets
+
+import pytest
+
+from backend.tests.test_trading_api import client, _env
+from backend.tests.test_trading_oauth_scope import act
+from backend.tests.test_account_resource_binding import approved
+
+
+@pytest.mark.asyncio
+async def test_authenticated_namespace_is_bound_to_approval_native_intent_and_original_read(client,tmp_path):
+    from van_gateway.trading.accounts import LocalAccountControl
+    ac,app=client
+    catalogue=await ac.get('/v1/trading/accounts/catalog')
+    assert catalogue.status_code==200,catalogue.text
+    domain=catalogue.json()['account_control_domain'];assert len(domain)==64
+    body=await approved(ac,'account_upsert',{'alias':'domain_owner','broker':'PAPER'})
+    response=await ac.post('/v1/trading/accounts/action',json=body,headers={'X-Van-Account-Control-Domain':domain})
+    assert response.status_code==200 and response.json()['account_control_domain']==domain,response.text
+    original=body['approval_proof']['challenge_id']
+    read=await ac.get('/v1/trading/accounts/operations/'+original,headers={'X-Van-Account-Control-Domain':domain})
+    assert read.status_code==200 and read.json()['account_control_domain']==domain
+    wrong=await ac.get('/v1/trading/accounts/operations/'+original,headers={'X-Van-Account-Control-Domain':'f'*64})
+    assert wrong.status_code==409 and wrong.json()['reconciliation_required'],wrong.text
+    # Same selected root/device/alias/version cannot make another protected
+    # native store the original domain or recycle its A4 proof.
+    before=await approved(ac,'account_upsert',{'alias':'not_retargeted','broker':'PAPER'})
+    other=LocalAccountControl(str(tmp_path/'other-accounts.json'),str(tmp_path/'other-secrets'),
+        operation_ledger=str(tmp_path/'other-native.sqlite'))
+    assert other.domain()!=domain
+    app.state.onboarding.control=other
+    refused=await ac.post('/v1/trading/accounts/action',json=before)
+    assert refused.status_code==403,refused.text
+    assert not (tmp_path/'other-accounts.json').exists()
+
+
+@pytest.mark.asyncio
+async def test_native_writer_rechecks_descriptor_after_gateway_approval_consumption(client,tmp_path,monkeypatch):
+    from van_gateway.trading.accounts import LocalAccountControl
+    ac,app=client;source=app.state.onboarding.control
+    body=await approved(ac,'account_upsert',{'alias':'not_retargeted','broker':'PAPER'})
+    other=LocalAccountControl(str(tmp_path/'other-accounts.json'),str(tmp_path/'other-secrets'),
+        operation_ledger=str(tmp_path/'other-native.sqlite'))
+    assert source.domain()!=other.domain()
+    run=source.run
+    def switch(command,args):
+        return other.run(command,args) if command=='account_upsert' else run(command,args)
+    monkeypatch.setattr(source,'run',switch)
+    refused=await ac.post('/v1/trading/accounts/action',json=body)
+    assert refused.status_code==409 and refused.json()['reconciliation_required'],refused.text
+    assert not (tmp_path/'other-accounts.json').exists()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize('fault',['provider_reply','native_http_reply','none'])
+async def test_original_demo_creation_runs_through_paired_a4_signed_commander_and_readback(client,tmp_path,monkeypatch,fault):
+    import io
+    from urllib.error import HTTPError,URLError
+    from urllib.parse import urlsplit
+    from fastapi.testclient import TestClient
+    from commander.app import CommanderSettings,create_app
+    from commander.accounts import AccountControlSettings
+    from test_demo_creation_recovery import DemoPeer
+    from van_gateway.trading.accounts import CommanderAccountControl
+    from van_gateway.config import get_settings
+    from vati.core.events import EventKind
+    from vati.core.ledger import Ledger
+    ac,app=client; peer=DemoPeer('reply' if fault=='provider_reply' else '')
+    token='native-demo-fixture-token-'*3
+    token_file=tmp_path/'commander-token';token_file.write_text(token);token_file.chmod(0o600)
+    native=TestClient(create_app(CommanderSettings(tokens={'van-gateway':token},
+        ledger=get_settings().vati_ledger_path,log_dir=str(tmp_path/'native-log'),units=(),
+        account_control=AccountControlSettings(str(tmp_path/'accounts.json'),str(tmp_path/'secrets'),deriv_connector=peer.connector))))
+    calls=[]; dropped=False
+    class Reply:
+        def __init__(self,body):self.body=body
+        def __enter__(self):return self
+        def __exit__(self,*args):pass
+        def read(self):return self.body
+    def https(request,**kwargs):
+        nonlocal dropped
+        path=urlsplit(request.full_url).path
+        response=native.post(path,content=request.data,headers=dict(request.header_items()))
+        calls.append(path)
+        if response.status_code>=400:
+            raise HTTPError(request.full_url,response.status_code,'native refusal',{},io.BytesIO(response.content))
+        if path.endswith('/deriv_create_demo') and fault=='native_http_reply' and not dropped:
+            dropped=True;raise URLError('owned lost native acknowledgement')
+        return Reply(response.content)
+    monkeypatch.setattr('van_gateway.trading.accounts.urlopen',https)
+    app.state.onboarding.control=CommanderAccountControl('https://native.fixture',str(token_file))
+    with native:
+        args={'alias':'owner_demo','email':'owner@example.com','verification_code':'fixture-private-code',
+            'client_password':'fixture-private-password','residence':'zw'}
+        body=await approved(ac,'deriv_create_demo',args)
+        original=body['approval_proof']['challenge_id']
+        response=await ac.post('/v1/trading/accounts/action',json=body)
+        assert response.status_code==(200 if fault=='none' else 409),response.text
+        assert response.json()['operation_id']==original
+        expected='UNKNOWN' if fault=='provider_reply' else 'APPLIED'
+        state=await ac.get('/v1/trading/accounts/operations/'+original)
+        assert state.status_code==200 and state.json()['effect_state']==expected,state.text
+        assert state.json()['action']=='deriv_create_demo'
+        repeat=await ac.post('/v1/trading/accounts/action',json=body)
+        assert repeat.status_code in (403,409) and peer.creates==1
+        if fault=='provider_reply':
+            for changes in [{'alias':'different_alias','email':' OWNER@EXAMPLE.COM ','verification_code':'new-code'},
+                            {'alias':'different_alias','email':''}]:
+                retry=await approved(ac,'deriv_create_demo',{**args,**changes})
+                refused=await ac.post('/v1/trading/accounts/action',json=retry)
+                assert refused.status_code==409 and refused.json()['reconciliation_required'],refused.text
+            assert peer.creates==1
+        else:
+            assert state.json()['result']['account']['login']=='VRTC900'
+            assert (await ac.get('/v1/trading/accounts')).status_code==200
+        ledger=Ledger(get_settings().vati_ledger_path)
+        try:events=json.dumps([event.payload for event in ledger.iter(EventKind.ACCOUNT_OPERATION)])
+        finally:ledger.close()
+        audit=(tmp_path/'native-log/commander-audit.jsonl').read_text()
+        for value in ['fixture-private-code','fixture-private-password','fixture-private-native-token']:
+            assert value not in events and value not in audit and value not in state.text
+        assert calls.count('/v1/cmd/deriv_create_demo')==(3 if fault=='provider_reply' else 1)
+
+
+@pytest.fixture(autouse=True)
+def isolated_account_files(tmp_path, monkeypatch, _env):
+    from van_gateway.config import get_settings
+    monkeypatch.setenv('VAN_VATI_ACCOUNTS_REGISTRY', str(tmp_path/'accounts.json'))
+    monkeypatch.setenv('VAN_VATI_SECRETS_DIR', str(tmp_path/'secrets'))
+    get_settings.cache_clear()
+    yield
+    get_settings.cache_clear()
+
+
+@pytest.fixture
+async def lost_reply_without_automatic_scheduler(tmp_path,monkeypatch,_env):
+    """Isolate this lost-ACK window from unrelated scheduled maintenance."""
+    from httpx import ASGITransport,AsyncClient
+    from van_gateway.app import create_app
+    from van_gateway.config import get_settings
+    from backend.tests.test_trading_api import HDR,DEVICE_PEM,OWNER
+    monkeypatch.setenv('VAN_SCHEDULER_ENABLED','false');get_settings.cache_clear()
+    app=create_app()
+    async with AsyncClient(transport=ASGITransport(app=app),base_url='http://test') as ac:
+        async with app.router.lifespan_context(app):
+            assert app.state.scheduler._task is None
+            ticket=await ac.post('/v1/devices/pairing-ticket',json={'label':'test','ttl_seconds':600},headers=HDR)
+            assert ticket.status_code==200,ticket.text
+            paired=await ac.post('/v1/devices/pair',json={'pairing_token':ticket.json()['pairing_token'],
+                'device_id':'test-device','device_secret':'test-device-secret','public_key_pem':DEVICE_PEM,'label':'test'})
+            assert paired.status_code==200,paired.text
+            ac.headers.update({'X-Van-Ingress-Token':paired.json()['ingress_token'],'X-Van-Device-Token':paired.json()['device_access_token']})
+            app.state.trading.owner_authority=OWNER.verifier
+            yield ac,app
+
+
+@pytest.mark.asyncio
+async def test_lost_reply_is_unknown_then_native_readback_confirms_original_issue(lost_reply_without_automatic_scheduler,tmp_path,monkeypatch):
+    ac,app=lost_reply_without_automatic_scheduler
+    args={'alias':'owner_mt5','server':'Broker-Demo','login':'12345678'}
+    body=await approved(ac,'mt5_ea_issue_key',args)
+    operation_id=body['approval_proof']['challenge_id']
+    run=app.state.onboarding.control.run; calls=[]
+    def lose_reply(command,values):
+        result=run(command,values)
+        calls.append(command)
+        if command=='mt5_ea_issue_key': raise TimeoutError('fixture-private-lost-native-reply')
+        return result
+    with monkeypatch.context() as m:
+        m.setattr(app.state.onboarding.control,'run',lose_reply)
+        response=await ac.post('/v1/trading/accounts/action',json=body)
+    assert response.status_code==409,response.text
+    assert response.json()['effect_state']=='UNKNOWN' and response.json()['operation_id']==operation_id
+    assert response.json()['reconciliation_required'] is True and 'fixture-private' not in response.text
+    before=(tmp_path/'secrets/owner_mt5.env').read_bytes()
+    readback=await ac.get('/v1/trading/accounts/operations/'+operation_id)
+    assert readback.status_code==200,readback.text
+    assert readback.json()['effect_state']=='APPLIED'
+    assert readback.json()['result']['account']['alias']=='owner_mt5'
+    assert readback.json()['result']['credential_export_available'] is False
+    assert 'signing_key' not in readback.text
+    assert calls==['mt5_ea_issue_key']
+    assert (tmp_path/'secrets/owner_mt5.env').read_bytes()==before
+    # Approval remains one-use. Outcome readback does not reauthorize execution.
+    repeat=await ac.post('/v1/trading/accounts/action',json=body)
+    assert repeat.status_code in (403,409),repeat.text
+    assert (tmp_path/'secrets/owner_mt5.env').read_bytes()==before
+
+
+@pytest.mark.asyncio
+async def test_failed_native_completion_blocks_new_approval_but_disjoint_account_works(client,tmp_path,monkeypatch):
+    from commander.account_effects import AccountEffectJournal
+    ac,_=client
+    body=await approved(ac,'account_upsert',{'alias':'paper_owner','broker':'PAPER'})
+    def fail(*args,**kwargs): raise OSError('fixture-native-completion-failed')
+    with monkeypatch.context() as m:
+        m.setattr(AccountEffectJournal,'complete',fail)
+        first=await ac.post('/v1/trading/accounts/action',json=body)
+    assert first.status_code==409 and first.json()['effect_state']=='UNKNOWN',first.text
+    blocked=await act(ac,'account_upsert',{'alias':'paper_owner','broker':'PAPER','label':'Must not overwrite'})
+    assert blocked.status_code==409 and blocked.json()['reconciliation_required'] is True,blocked.text
+    from vati.accounts import AccountRegistry
+    assert AccountRegistry(tmp_path/'accounts.json').get('paper_owner').label=='paper_owner'
+    other=await act(ac,'account_upsert',{'alias':'paper_other','broker':'PAPER'})
+    assert other.status_code==200,other.text
+
+
+@pytest.mark.asyncio
+async def test_absence_of_a_native_record_is_never_evidence_of_no_effect(client):
+    ac,_=client
+    operation_id=secrets.token_urlsafe(24)
+    response=await ac.get('/v1/trading/accounts/operations/'+operation_id)
+    assert response.status_code==409,response.text
+    assert response.json()['effect_state']=='UNKNOWN' and response.json()['operation_id']==operation_id
+    assert response.json()['reconciliation_required'] is True
+
+
+@pytest.mark.asyncio
+async def test_operation_readback_uses_current_authenticated_device_not_a_query_override(client):
+    ac,_=client
+    response=await act(ac,'account_upsert',{'alias':'paper_owner','broker':'PAPER'})
+    assert response.status_code==200,response.text
+    # Obtain the issued identity from native public history, not from a new act.
+    from vati.core.ledger import Ledger
+    from vati.core.events import EventKind
+    from van_gateway.config import get_settings
+    led=Ledger(get_settings().vati_ledger_path)
+    from commander.account_effects import AccountEffectJournal
+    try: operation_id=AccountEffectJournal(led).business_events()[0].correlation_id
+    finally: led.close()
+    observed=[]
+    control=ac._transport.app.state.onboarding.control
+    original=control.operation
+    def watched(operation_id,device_id):
+        observed.append(device_id)
+        return original(operation_id,device_id)
+    control.operation=watched
+    response=await ac.get('/v1/trading/accounts/operations/'+operation_id,params={'device_id':'foreign-device'})
+    assert response.status_code==200 and observed==['test-device'],response.text
+
+
+@pytest.mark.asyncio
+async def test_device_cannot_inject_a_native_operation_context(client):
+    ac,_=client
+    args={'alias':'paper_owner','broker':'PAPER','_native_operation':{'operation_id':'invented'}}
+    response=await act(ac,'account_upsert',args,expected_challenge_status=422)
+    assert response.status_code==422,response.text
+
+
+@pytest.mark.asyncio
+async def test_approval_response_preserves_original_timestamp_across_biometric_delay(client):
+    import hashlib,hmac,time
+    from backend.tests.test_trading_api import _approval_proof
+    from van_gateway.trading.accounts import canonical_action
+    ac,_=client
+    issued=int(time.time())-8
+    args={'alias':'delayed_owner','broker':'PAPER'}
+    def body(timestamp):
+        return {'device_id':'test-device','issued_at_unix':timestamp,'action':'account_upsert','args':args,
+            'signature':hmac.new(b'test-device-secret',canonical_action('test-device',timestamp,'account_upsert',args).encode(),hashlib.sha256).hexdigest()}
+    original=body(issued)
+    challenge=await ac.post('/v1/trading/accounts/challenge',json=original)
+    assert challenge.status_code==200 and challenge.json()['issued_at_unix']==issued,challenge.text
+    proof=_approval_proof(challenge.json())
+    changed=await ac.post('/v1/trading/accounts/action',json={**body(issued+8),'approval_proof':proof})
+    assert changed.status_code==403,changed.text
+    confirmed=await ac.post('/v1/trading/accounts/action',json={**original,'approval_proof':proof})
+    assert confirmed.status_code==200,confirmed.text
+    assert confirmed.json()['operation_id']==proof['challenge_id']
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize('reply_fault',['lost','wrong-command'])
+async def test_signed_remote_commander_lost_reply_is_recovered_by_original_native_identity(client,tmp_path,monkeypatch,reply_fault):
+    import io
+    from urllib.error import HTTPError,URLError
+    from fastapi.testclient import TestClient
+    from commander.app import create_app,CommanderSettings
+    from van_gateway.trading.accounts import CommanderAccountControl
+    ac,app=client
+    token='native-test-gateway-token-'+'x'*40
+    token_file=tmp_path/'commander.token'; token_file.write_text(token); token_file.chmod(0o600)
+    st=CommanderSettings(tokens={'van-gateway':token},ledger=str(tmp_path/'remote.sqlite'),
+        accounts_registry=str(tmp_path/'accounts.json'),secrets_dir=str(tmp_path/'secrets'),
+        log_dir=str(tmp_path/'native-log'))
+    native=TestClient(create_app(st)); lose=[True]; calls=[]
+    class Reply:
+        def __init__(self,body): self.body=body
+        def __enter__(self): return self
+        def __exit__(self,*args): pass
+        def read(self): return self.body
+    def https(request,**kwargs):
+        from urllib.parse import urlsplit
+        path=urlsplit(request.full_url).path
+        response=native.post(path,content=request.data,headers=dict(request.header_items()))
+        calls.append(path)
+        if response.status_code>=400:
+            raise HTTPError(request.full_url,response.status_code,'native refusal',{},io.BytesIO(response.content))
+        if path.endswith('/mt5_ea_issue_key') and lose.pop():
+            if reply_fault=='lost': raise URLError('injected lost remote response')
+            return Reply(json.dumps({**response.json(),'command':'different-native-command'}).encode())
+        return Reply(response.content)
+    monkeypatch.setattr('van_gateway.trading.accounts.urlopen',https)
+    app.state.onboarding.control=CommanderAccountControl('https://native.example',str(token_file))
+    with native:
+        body=await approved(ac,'mt5_ea_issue_key',{'alias':'remote_owner','login':'12345','server':'Broker-Demo'})
+        operation_id=body['approval_proof']['challenge_id']
+        first=await ac.post('/v1/trading/accounts/action',json=body)
+        assert first.status_code==409 and first.json()['effect_state']=='UNKNOWN',first.text
+        before=(tmp_path/'secrets/remote_owner.env').read_bytes()
+        result=await ac.get('/v1/trading/accounts/operations/'+operation_id)
+        assert result.status_code==200 and result.json()['effect_state']=='APPLIED',result.text
+        assert calls.count('/v1/cmd/mt5_ea_issue_key')==1
+        assert (tmp_path/'secrets/remote_owner.env').read_bytes()==before

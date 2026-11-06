@@ -10,6 +10,7 @@ a property of the code rather than a hope."""
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
+from contextlib import contextmanager
 from decimal import Decimal
 from typing import Callable, Optional, Sequence
 
@@ -24,13 +25,14 @@ from vati.execution.pretrade import MarketReference, PreTradeControls
 from vati.execution.route_registry import RouteRegistry
 from vati.execution.style_selector import ExecutionStyleSelector, LiquidityView
 from vati.execution.router import ExecutionRouter, RouterError
-from vati.execution.review import review_trade
+from vati.execution.review import review_trade, closed_trade_pnl, initial_risk_from_ledger, STRATEGY_LEARNING_OUTCOMES
 from vati.execution.tca import compute_tca
 from vati.execution.reconciliation import LedgerPosition, reconcile
 from vati.intelligence.events import EventMatrix, EventWindowState
 from vati.intelligence.market_state import MarketState, build_market_state
 from vati.intelligence.regimes import RegimeEngine
 from vati.learning.episodes import LessonStore, lesson_from_verdict
+from vati.execution.review import native_economic_maturity
 from vati.learning.hooks import LearningHooks, to_payload
 from vati.lifecycle.scale_policy import (
     Adjustment, AdjustmentPolicyRegistry, PositionAdjustmentEngine, ScalePolicyRegistry,
@@ -41,8 +43,10 @@ from vati.cognition.attribution import DecisionQualityInputs, DecisionQualityLed
 from vati.market_data.bars import Bar
 from vati.market_data.calendars import MarketCalendar
 from vati.observability import metrics
+from vati.risk.lockouts import DRAWDOWN_RESUME_EVENT, LockoutPolicy, LossStreakGovernor, relative_top_state, restore_peak_equity, restore_equity_baselines
+from vati.risk.history_scope import RiskHistoryScopeError
 from vati.risk import Decision, KillSwitch, MarketIntegrityState, OpenPosition, RiskAuthority, RiskSnapshot, SymbolContract, TradingMandate
-from vati.risk.contracts import Direction, LossModel, StrategyState
+from vati.risk.contracts import Direction, KillSwitchTrigger, LossModel, StrategyState
 from vati.risk.serde import intent_to_dict, snapshot_to_dict
 from vati.strategies.base import StrategyContext
 from vati.arbiter.strategy_arbiter import ACTIVE_STATES
@@ -85,12 +89,24 @@ class DecisionCycle:
     def __init__(self, *, cfg: SessionConfig, adapter: VenueAdapter, ledger: Ledger, engine: OpportunityEngine, cost_fn: Callable[[MarketState], Decimal],
                  calendar: MarketCalendar, events: EventMatrix, regime_engine: Optional[RegimeEngine] = None, kill_switch: Optional[KillSwitch] = None,
                  admission: Optional[AdmissionLedger] = None, ctx_fn: Optional[Callable[[MarketState, Decimal], StrategyContext]] = None,
-                 learning: Optional[LearningHooks] = None) -> None:
+                 learning: Optional[LearningHooks] = None, runtime_lease=None, lease_clock=None,
+                 lease_permission: Callable[[], bool] = lambda: True, research_environment=None) -> None:
         self.cfg, self.adapter, self.ledger, self.engine, self.cost_fn, self.calendar, self.events = cfg, adapter, ledger, engine, cost_fn, calendar, events
         self.learning = learning
+        self.runtime_lease = runtime_lease
+        self._lease_clock, self._lease_permission = lease_clock, lease_permission
+        if runtime_lease is not None and not callable(lease_clock):
+            raise ValueError("native runtime lease requires a current clock")
         self.regime = regime_engine or RegimeEngine()
         self.kill = kill_switch or KillSwitch()
         self.mandate = TradingMandate.from_mapping(cfg.mandate_dict)
+        from vati.learning.runtime_cohort import execution_cohort_for
+        self.execution_cohort = execution_cohort_for(adapter, self.mandate.mode,
+            research_environment=research_environment)
+        if learning is not None and learning.environment is not self.execution_cohort.environment:
+            raise ValueError('learning cohort differs from the actual runtime execution cohort')
+        if self.mandate.temperament_enabled:
+            raise RuntimeError("DecisionCycle single-symbol path does not admit temperament profiles")
         self.authority = RiskAuthority(self.mandate)
         self.protection = ProtectionManager()
         self.routes = RouteRegistry(ledger=ledger)
@@ -107,18 +123,36 @@ class DecisionCycle:
         self.router = ExecutionRouter(
             ledger=ledger, adapters={cfg.venue: adapter}, kill_switch=self.kill,
             protection=self.protection, route_registry=self.routes,
+            lease_fence=(lambda epoch: lease_permission() and runtime_lease.fence(epoch, now_ms=lease_clock(), min_validity_ms=2_000)) if runtime_lease else None,
+            lease_submission_guard=self._runtime_submission_guard if runtime_lease else None,
             pretrade_controls=self.pretrade, style_selector=self.style_selector,
-            enforce_rev51_controls=True)
+            enforce_rev51_controls=True, clock=lease_clock,
+            current_risk_facts_provider=self._current_risk_facts,
+            current_risk_authority=self.authority)
         self.admission = admission or AdmissionLedger()
         self.ctx_fn = ctx_fn or (lambda st, cost: StrategyContext(round_trip_cost_pct=cost))
         self.peak_equity = ZERO
         self.day_start_equity = ZERO
         self.week_start_equity = ZERO
+        self._period_baselines_restored = False
         self.consecutive_losses = 0
+        # P1-TRADE-RISK-005: lockouts and the high-water mark are rebuilt from the ledger,
+        # so a restart can neither reset a losing-streak lock nor re-baseline the peak.
+        self.streaks = LossStreakGovernor.rebuild(LockoutPolicy(self.mandate.max_consecutive_losses), ledger.iter(), account_alias=cfg.account_alias)
+        try:
+            restored_peak = restore_peak_equity(ledger.iter(), account_alias=cfg.account_alias)
+        except RiskHistoryScopeError:
+            restored_peak = None
+        if self.streaks.recovery_issue or (self.learning is not None and self.learning.recovery_issue):
+            self.kill.trip(KillSwitchTrigger.RECONCILIATION_FAILURE, 0)
+        if restored_peak is not None and restored_peak > ZERO:
+            self.peak_equity = restored_peak
         self.integrity = MarketIntegrityState.NORMAL
         self.reviews: list = []
         self._closed_seen = 0
         self._entries: dict[str, dict] = {}   # trade_intent_id → {entry, stop, direction, strategy_id, cost_pct}
+        self.recovery_unresolved: tuple[str, ...] = ()
+        self.unresolved_entry_attempts: set[str] = set()
         # GAP-F-003. Active-trade intelligence on the single-symbol runtime.
         # Same components the account runtime uses, so backtest-to-live parity
         # covers the thesis path too rather than only the order path.
@@ -128,29 +162,68 @@ class DecisionCycle:
         self.adjustments = PositionAdjustmentEngine(
             ledger=ledger, policies=self.adjustment_policies)
         self.scale_policies = ScalePolicyRegistry()
-        self.decision_quality = DecisionQualityLedger(ledger=ledger)
-        self.lessons = LessonStore(ledger=ledger)
+        learning_scope = self.learning.resolver(ledger).scope if self.learning is not None else None
+        self.decision_quality = DecisionQualityLedger(ledger=ledger, scope=learning_scope)
+        self.decision_quality.restore_from_ledger(ledger)
+        self.lessons = LessonStore(ledger=ledger, scope=learning_scope)
         self.lessons.restore_from_ledger(ledger)
         self.engine.lessons = self.lessons
+        if self.learning is not None and self.learning.recovery_issue:
+            self.kill.trip(KillSwitchTrigger.RECONCILIATION_FAILURE, 0)
         #: Headline ingress (events/news_ingress.py) when the runtime has one.
         #: Reduce-only; the calendar keeps the blackout authority.
         self.news = None
         self.proposals: list = []
 
     # --------------------------------------------------------------- helpers
+    def _current_risk_facts(self, intent, *, now_ms, market_reference):
+        from vati.execution.risk_refresh import CurrentRiskFacts
+        age=market_reference.mark_age_ms if market_reference is not None else -1
+        snapshot=self.snapshot(now_ms=now_ms,quote_age_ms=age,strategy_id=intent.strategy_id)
+        return CurrentRiskFacts(snapshot,self._risk_snapshot_ms)
+
+    @contextmanager
+    def _runtime_submission_guard(self, epoch):
+        if not self._lease_permission():
+            yield False
+            return
+        with self.runtime_lease.submission_guard(epoch, now_ms=self._lease_clock()) as valid:
+            # Recheck native stop/renewal policy after acquiring authority. A
+            # control arriving after the early check must still block entry.
+            yield valid and self._lease_permission()
+
     def _log(self, kind: EventKind, payload: dict, *, now_ms: int, corr: str = "") -> None:
+        if kind in {EventKind.SESSION, EventKind.RISK_DECISION}:
+            payload = {**payload, "account_alias": self.cfg.account_alias}
+        if kind is EventKind.RISK_DECISION:
+            payload = {**payload, "execution_cohort": self.execution_cohort.as_dict()}
+        if kind is EventKind.CAPSULE_STATE and self.learning is not None:
+            payload = {**payload, "account_alias": self.cfg.account_alias,
+                       "learning_environment": self.learning.environment.value}
         self.ledger.append(make_event(kind, "vati-cycle", payload, event_time_ms=now_ms, received_time_ms=now_ms, correlation_id=corr or self.cfg.session_id))
 
-    def _open_positions(self) -> tuple[OpenPosition, ...]:
-        out = []
+    def _open_positions(self, *, include_pending=True) -> tuple[OpenPosition, ...]:
+        from vati.risk.positions import project_open_position
+        out = list(DecisionCycle._legacy_pending_positions(self)) if include_pending else []
         c = self.cfg.contract
         for p in self.adapter.positions():
             stop = p.stop_price if p.stop_price is not None else self.protection.rules.get(p.position_id, None)
             stop_price = stop.stop if hasattr(stop, "stop") else stop
-            if p.loss_model is LossModel.ILLIQUID_EQUITY:
-                out.append(OpenPosition(p.symbol, p.direction, p.quantity, abs(p.entry_price - (stop_price or p.entry_price)), Decimal(1), c.base_currency, c.quote_currency, "", False, LossModel.ILLIQUID_EQUITY, ZERO, p.entry_price * c.liquidity_haircut))
-            else:
-                out.append(OpenPosition(p.symbol, p.direction, p.quantity, abs(p.entry_price - stop_price) if stop_price is not None else ZERO, c.value_per_price_unit_per_lot, c.base_currency, c.quote_currency, "", stop_price is not None))
+            out.append(project_open_position(symbol=p.symbol, direction=p.direction,
+                quantity=p.quantity, entry=p.entry_price, stop=stop_price,
+                contract=c, loss_model=p.loss_model,broker_position_id=p.position_id))
+        return tuple(out)
+
+    def _legacy_pending_positions(self):
+        from vati.risk.positions import project_open_position
+        out=[]
+        c=self.cfg.contract
+        # Resting entries reserve their worst-case risk until they fill or expire.
+        for row in self._entries.values():
+            if row.get("pending") and row.get("stop") is not None:
+                out.append(project_open_position(symbol=row['symbol'], direction=row['direction'],
+                    quantity=row['pending_quantity'], entry=row['entry'], stop=row['stop'],
+                    contract=c, loss_model=c.loss_model))
         return tuple(out)
 
     def _reconciliation_ok(self, *, account_verified: bool) -> bool:
@@ -161,6 +234,8 @@ class DecisionCycle:
         only set the cycle can speak for; a position the venue holds that this cycle never
         opened is an orphan, and `reconcile` already treats it as blocking.
         """
+        if self.recovery_unresolved or self.unresolved_entry_attempts:
+            return False
         ledger_positions = [
             LedgerPosition(
                 trade_intent_id=iid,
@@ -186,9 +261,14 @@ class DecisionCycle:
         The risk store is the ledger: without it the authority cannot know what is open,
         what has been lost today, or whether this decision has already been made. A ledger
         that will not answer is a risk store that is unavailable.
+
+        Incremental (P1-TRADE-LEDGER-001): a full verify from genesis on every decision
+        made decision latency grow with the ledger. `verify_incremental` checks only the
+        rows written since the last check, against an anchor that cannot move unnoticed,
+        and re-verifies from genesis at least hourly.
         """
         try:
-            return bool(self.ledger.verify_chain()[0])
+            return bool(self.ledger.verify_incremental()[0])
         except Exception:  # noqa: BLE001 — an unreadable ledger is not a healthy one
             return False
 
@@ -204,23 +284,103 @@ class DecisionCycle:
             return True
         return window in (EventWindowState.PRE_BLACKOUT, EventWindowState.POST_BLACKOUT)
 
-    def snapshot(self, *, now_ms: int, quote_age_ms: int) -> RiskSnapshot:
+    def _drawdown_top_state(self):
+        """Highest promotion state among the strategies this mandate allows."""
+        states = []
+        for sid in self.mandate.allowed_strategies:
+            try:
+                states.append(self.engine.registry.get(sid).state)
+            except Exception:  # noqa: BLE001 — a strategy not in the registry has no state
+                continue
+        return relative_top_state(states)
+
+    def restore_risk_baselines(self, now_ms: int) -> None:
+        if self._period_baselines_restored:
+            return
+        try:
+            peak, day, week = restore_equity_baselines(self.ledger.iter(), now_ms, account_alias=self.cfg.account_alias)
+        except RiskHistoryScopeError as exc:
+            self.streaks.recovery_issue = str(exc)
+            self.kill.trip(KillSwitchTrigger.RECONCILIATION_FAILURE, now_ms)
+        else:
+            if peak is not None:
+                self.peak_equity = max(peak, self.peak_equity)
+            if day is not None and self.day_start_equity == ZERO:
+                self.day_start_equity = day
+            if week is not None and self.week_start_equity == ZERO:
+                self.week_start_equity = week
+        self._period_baselines_restored = True
+
+    def snapshot(self, *, now_ms: int, quote_age_ms: int, strategy_id: str = "") -> RiskSnapshot:
+        started_ms = now_ms
+        self.restore_risk_baselines(now_ms)
         acct = self.adapter.sync_account()
-        if self.peak_equity == ZERO:
-            self.peak_equity = self.day_start_equity = self.week_start_equity = acct.equity
-        self.peak_equity = max(self.peak_equity, acct.equity)
         hb = self.adapter.heartbeat(now_ms=now_ms)
+        positions = self._open_positions(include_pending=False)
+        reconciled = self._reconciliation_ok(account_verified=acct.verified)
+        store_ok = self._risk_store_ok()
+        if callable(getattr(self, "_lease_clock", None)):
+            now_ms = max(now_ms, self._lease_clock())
+        self._risk_snapshot_ms = now_ms
+        if quote_age_ms >= 0:
+            quote_age_ms += now_ms - started_ms
+        from vati.funding.risk_fence import funding_risk_fence
+        from vati.funding.mt5_runtime import capture_cached_mt5
+        native_capture = capture_cached_mt5(self.ledger, acct, now_ms=now_ms)
+        funding = funding_risk_fence(self.ledger, self.adapter, acct, now_ms=now_ms)
+        from vati.risk.account_context import context_with_funding_hold
+        native_context, funding = context_with_funding_hold(self.ledger, self.adapter, acct, funding,
+            now_ms=now_ms, mt5_capture=native_capture)
+        # A held observation remains visible, but cannot seed or increase the
+        # baselines used by later decisions after native evidence recovers.
+        basis_ref = None
+        pending_risk = ()
+        if funding.available and native_context is not None:
+            from vati.risk.physical_runtime import project_native_risk
+            from vati.funding.risk_fence import FundingRiskFence
+            basis_ref, values, streaks, issue = project_native_risk(self, self.ledger,
+                native_context, self.streaks.policy, now_ms=now_ms, producer='vati-cycle')
+            if issue:
+                funding = FundingRiskFence(False, issue)
+            else:
+                self.peak_equity, self.day_start_equity, self.week_start_equity = values.peak, values.day, values.week
+                self.streaks = streaks
+                from vati.risk.physical_pending import project_pending_risk
+                pending_risk, issue = project_pending_risk(self,self.ledger,native_context,positions,
+                    now_ms=now_ms,contracts={self.cfg.contract.symbol.upper():self.cfg.contract})
+                if issue:
+                    funding = FundingRiskFence(False,issue)
+        elif funding.available:
+            if self.peak_equity == ZERO:
+                self.peak_equity = acct.equity
+            if self.day_start_equity == ZERO:
+                self.day_start_equity = acct.equity
+            if self.week_start_equity == ZERO:
+                self.week_start_equity = acct.equity
+            self.peak_equity = max(self.peak_equity, acct.equity)
+        streak = self.streaks.verdict(strategy_id, now_ms) if strategy_id or self.streaks.recovery_issue else None
+        if native_context is None:
+            positions += self._legacy_pending_positions()
         return RiskSnapshot(now_unix=now_ms // 1000, account_alias=acct.account_alias, account_verified=acct.verified, equity=acct.equity, balance=acct.balance,
-                            peak_equity=self.peak_equity, day_start_equity=self.day_start_equity, week_start_equity=self.week_start_equity, consecutive_losses=self.consecutive_losses,
-                            open_positions=self._open_positions(), symbol_contract=self.cfg.contract, quote_age_ms=quote_age_ms, max_quote_age_ms=self.cfg.max_quote_age_ms,
+                            peak_equity=self.peak_equity, day_start_equity=self.day_start_equity, week_start_equity=self.week_start_equity,
+                            consecutive_losses=streak.losses if streak else 0,
+                            loss_streak_lock=(self.learning.recovery_issue if self.learning is not None else "") or (streak.lock if streak else ""),
+                            loss_streak_multiplier=streak.risk_multiplier if streak else Decimal("1"),
+                            drawdown_top_state=self._drawdown_top_state(),
+                            open_positions=positions, symbol_contract=self.cfg.contract, quote_age_ms=quote_age_ms, max_quote_age_ms=self.cfg.max_quote_age_ms,
                             broker_connected=hb.connected,
-                            reconciliation_ok=self._reconciliation_ok(account_verified=acct.verified),
+                            reconciliation_ok=reconciled,
                             clock_sync_ok=abs(hb.server_offset_ms) < 2000,
-                            risk_store_ok=self._risk_store_ok(),
+                            risk_store_ok=store_ok,
                             market_integrity=self.integrity,
                             tier1_event_blackout_active=self._tier1_blackout(now_ms=now_ms),
                             margin_level_pct=acct.margin_level_pct,
-                            free_margin=acct.free_margin,
+                            free_margin=acct.free_margin, used_margin=acct.used_margin,
+                            native_account_context=native_context,
+                            native_risk_basis_ref=basis_ref,
+                            pending_risk_commitments=pending_risk,
+                            preservation_blocks_new_risk=not funding.available,
+                            preservation_reason=funding.reason,
                             kill_switch_triggers=frozenset(self.kill.active))
 
     def roll_day(self, equity: Decimal, *, new_week: bool = False) -> None:
@@ -255,9 +415,13 @@ class DecisionCycle:
         if oa.intent is None:
             return CycleResult(state.as_of_ms, state.state_hash, oa.decision, oa.abstain_reason)
         intent = oa.intent
-        snap = self.snapshot(now_ms=now_ms, quote_age_ms=state.quote_age_ms)
+        snap = self.snapshot(now_ms=now_ms, quote_age_ms=state.quote_age_ms, strategy_id=intent.strategy_id)
+        now_ms = max(now_ms, getattr(self, "_risk_snapshot_ms", now_ms))
         decision = self.authority.evaluate_safe(intent, snap)
-        self._log(EventKind.RISK_DECISION, {"inputs": {"intent": intent_to_dict(intent), "snapshot": snapshot_to_dict(snap), "mandate": cfg.mandate_dict}, "decision": decision.to_dict()}, now_ms=now_ms, corr=intent.trade_intent_id)
+        from vati.risk.mandate_source import capture_mandate_source
+        original_policy = capture_mandate_source(self.authority.mandate, cfg.mandate_dict, now_ms=now_ms)
+        self._log(EventKind.RISK_DECISION, {"inputs": {"intent": intent_to_dict(intent), "snapshot": snapshot_to_dict(snap),
+            "mandate": cfg.mandate_dict, "original_mandate_source": original_policy}, "decision": decision.to_dict()}, now_ms=now_ms, corr=intent.trade_intent_id)
         metrics.inc("vati_decisions_total", outcome=decision.decision.value)
         if decision.decision is Decision.REJECTED:
             return CycleResult(state.as_of_ms, state.state_hash, f"REJECTED:{decision.reason_code}", decision.reason_detail)
@@ -293,29 +457,92 @@ class DecisionCycle:
                 candidate_id=intent.trade_intent_id,
                 bucket=execution_bucket,
                 event_state=state.event_window.value,
+                entry_type=oa.entry_type,
             )
+            prepared_setup=None
+            if intent.stop is not None:
+                from vati.app.entry_setup import prepare_setup
+                prepared_setup=prepare_setup(self,intent,decision,state,targets,now_ms=now_ms)
+            # Durable before dispatch: restart may not invent the old setup
+            # from today's state, capsule, costs or policy.
+            entry_context = {
+                'symbol':cfg.symbol, 'strategy_id':intent.strategy_id,
+                'direction':intent.direction.value, 'cost_pct':str(cost),
+                'original_approved_risk_pct':str(decision.approved_risk_pct),
+                'session':state.session.value, 'regime':state.regime.trend.value,
+                'event_window':state.event_window.value,
+                'opened_in_blackout':state.event_window.value in ('PRE_BLACKOUT','POST_BLACKOUT'),
+                'event_certified':bool(intent.is_event_certified),
+                'execution_policy_applied':True, 'targets':[str(t) for t in targets],
+                'prepared_setup':prepared_setup,
+            }
+            self._log(EventKind.SESSION,{'event':'ENTRY_CONTEXT','schema':'vati.entry-context/2',
+                'decision_hash':decision.decision_hash,'context':entry_context,
+                'context_hash':canonical_hash(entry_context)},now_ms=now_ms,corr=intent.trade_intent_id)
             rec = self.router.execute(
                 intent, decision, self.mandate, now_ms=now_ms,
                 stop_mode=StopMode.SOFTWARE if cfg.software_stops else StopMode.VENUE,
-                targets=targets, time_in_force=cfg.time_in_force, entry_type="LIMIT",
+                targets=targets, time_in_force=cfg.time_in_force, entry_type=oa.entry_type,
                 execution_policy_decision=policy_decision,
+                lease_epoch=self.runtime_lease.epoch if self.runtime_lease else None,
                 market_reference=MarketReference(
                     last_price=state.features.close,
-                    mark_age_ms=state.quote_age_ms,
+                    mark_age_ms=snap.quote_age_ms,
                     max_mark_age_ms=cfg.max_quote_age_ms,
                 ),
                 liquidity=LiquidityView(),
             )
-        except RouterError as exc:
-            self._log(EventKind.SESSION, {"router_refused": str(exc)}, now_ms=now_ms, corr=intent.trade_intent_id)
-            return CycleResult(state.as_of_ms, state.state_hash, "ROUTER_REFUSED", str(exc), decision.approved_size)
+        except Exception as exc:
+            from vati.app.entry_recovery import command_outcome_unconfirmed
+            if command_outcome_unconfirmed(self,intent.trade_intent_id):
+                rec=None  # caller failure is not a fabricated provider receipt
+            elif isinstance(exc,RouterError):
+                self._log(EventKind.SESSION, {"router_refused": str(exc)}, now_ms=now_ms, corr=intent.trade_intent_id)
+                return CycleResult(state.as_of_ms, state.state_hash, "ROUTER_REFUSED", str(exc), decision.approved_size)
+            else:
+                raise
+        uncertain=rec is None or rec.status in {'UNKNOWN','PARTIAL'}
+        if uncertain or (rec.status == "ACCEPTED" and rec.reject_reason == "PENDING" and rec.filled_qty == ZERO):
+            # P1-TRADE-EXEC-004: a resting entry (an untriggered STOP, a LIMIT away from the
+            # market) is not a position. It reserves its worst-case risk until it fills or
+            # expires (_open_positions), and is excluded from venue reconciliation.
+            self._entries[intent.trade_intent_id] = {
+                "pending": True, "open": False, "entry": intent.entry, "stop": intent.stop,
+                "direction": intent.direction, "strategy_id": intent.strategy_id, "cost_pct": cost,
+                "decision_price": intent.entry, "quantity": ZERO, "pending_quantity": decision.approved_size,
+                "broker_order_id": rec.broker_order_id if rec is not None else '', "broker_position_id": "", "opened_ms": now_ms,
+                "targets": tuple(targets), "original_approved_risk_pct": decision.approved_risk_pct,
+                "protective_stop_confirmed": False, "event_certified": bool(intent.is_event_certified),
+                "execution_policy_applied": True, "regime": state.regime.trend.value,
+                "session": state.session.value, "symbol": cfg.symbol,
+                "opened_in_blackout": state.event_window.value in ("PRE_BLACKOUT", "POST_BLACKOUT"),
+                "best_price": intent.entry, "worst_price": intent.entry,
+                "event_window": state.event_window.value,
+                # In memory only: the fill seals the thesis from the approval that admitted it.
+                "_approval": (intent, decision, state, tuple(targets)),
+                "_prepared_setup": prepared_setup,
+            }
+            if uncertain:
+                self._entries[intent.trade_intent_id]['recovery_context_complete']=False
+                self.unresolved_entry_attempts.add(intent.trade_intent_id)
+                self._log(EventKind.SESSION,{'event':'ENTRY_UNKNOWN','entry_type':oa.entry_type,
+                    'reason':rec.reject_reason if rec is not None else 'native dispatcher outcome unconfirmed',
+                    'approved_quantity':str(decision.approved_size)},
+                    now_ms=now_ms,corr=intent.trade_intent_id)
+                return CycleResult(state.as_of_ms,state.state_hash,
+                    'PARTIAL' if rec is not None and rec.status=='PARTIAL' else 'UNKNOWN',
+                    'original native entry outcome unresolved; reconciliation required',decision.approved_size)
+            self._log(EventKind.SESSION, {"event": "ENTRY_RESTING", "entry_type": oa.entry_type, "order": rec.broker_order_id},
+                      now_ms=now_ms, corr=intent.trade_intent_id)
+            return CycleResult(state.as_of_ms, state.state_hash, decision.decision.value, "pending", decision.approved_size)
         if rec.status in ("FILLED", "PARTIAL", "ACCEPTED", "OWNER_EXECUTED"):
             entry_price = rec.average_fill or intent.entry
             self._entries[intent.trade_intent_id] = {
                 "entry": entry_price, "stop": intent.stop, "direction": intent.direction,
                 "strategy_id": intent.strategy_id, "cost_pct": cost,
                 "decision_price": intent.entry,
-                "quantity": rec.filled_qty,
+                "quantity": rec.filled_qty, "fees": rec.fees,
+                "_prepared_setup": prepared_setup,
                 "broker_position_id": rec.broker_position_id,
                 "opened_ms": now_ms,
                 "best_price": entry_price, "worst_price": entry_price,
@@ -331,24 +558,91 @@ class DecisionCycle:
                 "symbol": cfg.symbol,
             }
             self._seal_thesis(intent, decision, state, targets, entry_price, now_ms)
-            if rec.average_fill is not None and rec.filled_qty > ZERO:
-                tca = compute_tca(rec, direction=intent.direction, qty=rec.filled_qty, value_per_unit=cfg.contract.value_per_price_unit_per_lot if cfg.contract.loss_model is LossModel.STOP_DISTANCE else Decimal(1), modelled_cost_pct=cost)
-                tca_payload = tca.as_dict()
-                if self.learning is not None:
-                    tca_payload |= {
-                        "learning_environment": self.learning.environment.value,
-                        "broker": self.learning.broker,
-                        "symbol": cfg.symbol,
-                        "session": state.session.value,
-                        "event_window": state.event_window.value,
-                        "rejected": False,
-                    }
-                self._log(EventKind.TCA_RECORD, tca_payload, now_ms=now_ms, corr=intent.trade_intent_id)
-                self._entries[intent.trade_intent_id]["cost_ratio"] = tca.cost_ratio
-                if self.learning is not None:
-                    self.learning.on_tca(symbol=cfg.symbol, session=state.session.value, event_window=state.event_window.value, cost_ratio=tca.cost_ratio, slippage=tca.slippage)
-                    self.engine.m.broker_liquidity[cfg.symbol] = self.learning.broker_liquidity(cfg.symbol)
+            self._record_tca(rec, intent.direction, cost, state.session.value, state.event_window.value, now_ms=now_ms)
+        if rec.status in {"REJECTED","CANCELLED","EXPIRED"}:
+            return CycleResult(state.as_of_ms,state.state_hash,rec.status,rec.reject_reason,decision.approved_size)
         return CycleResult(state.as_of_ms, state.state_hash, decision.decision.value, "", decision.approved_size)
+
+    # ------------------------------------------------- owner-signed recovery (A4)
+    def reset_loss_streak(self, scope: str, *, owner_signature_ref: str, authority, now_ms: int) -> None:
+        """Clear a losing-streak suspension. `scope` is a strategy id or ACCOUNT_SCOPE."""
+        verified = authority.verify(owner_signature_ref, act="loss-streak-reset", subject=f"{self.cfg.account_alias}:{scope}", now_unix=now_ms // 1000)
+        metadata = self._direct_native_control_metadata(owner_signature_ref, verified, now_ms)
+        if metadata:
+            with self._direct_native_control_writer(verified, now_ms) as applied_ms:
+                self._refuse_reused_native_control(owner_signature_ref)
+                self._log(EventKind.SESSION, {"event":"LOSS_STREAK_RESET", "scope":scope,
+                    "owner_signature_ref":owner_signature_ref, **metadata}, now_ms=applied_ms)
+            self._restore_direct_native_control(metadata, applied_ms)
+        else:
+            self._log(EventKind.SESSION, {**self.streaks.reset(scope), "owner_signature_ref": owner_signature_ref}, now_ms=now_ms)
+
+    def resume_after_drawdown(self, *, owner_signature_ref: str, authority, now_ms: int) -> None:
+        """Owner decision to resume after the suspending drawdown tier: re-baseline the peak."""
+        verified = authority.verify(owner_signature_ref, act="drawdown-resume", subject=self.cfg.account_alias, now_unix=now_ms // 1000)
+        account = self.adapter.sync_account()
+        from vati.funding.mt5_runtime import capture_cached_mt5
+        from vati.funding.risk_fence import funding_risk_fence
+        capture_cached_mt5(self.ledger, account, now_ms=now_ms)
+        funding = funding_risk_fence(self.ledger, self.adapter, account, now_ms=now_ms)
+        if not funding.available:
+            raise ValueError('drawdown baseline unavailable: ' + funding.reason)
+        metadata = self._direct_native_control_metadata(owner_signature_ref, verified, now_ms, account=account)
+        equity = account.equity
+        old = self.peak_equity
+        if metadata:
+            with self._direct_native_control_writer(verified, now_ms) as applied_ms:
+                self._refuse_reused_native_control(owner_signature_ref)
+                self._log(EventKind.SESSION, {"event":DRAWDOWN_RESUME_EVENT,
+                    "old_peak_equity":str(old),"new_peak_equity":str(equity),
+                    "owner_signature_ref":owner_signature_ref, **metadata}, now_ms=applied_ms)
+            self._restore_direct_native_control(metadata, applied_ms)
+            return
+        self.peak_equity = equity
+        self._log(EventKind.SESSION, {"event": DRAWDOWN_RESUME_EVENT, "old_peak_equity": str(old), "new_peak_equity": str(equity),
+                                      "owner_signature_ref": owner_signature_ref}, now_ms=now_ms)
+
+    def _direct_native_control_metadata(self, token, verified, now_ms, *, account=None):
+        from vati.execution.ctrader.adapter import CtraderAdapter
+        from vati.execution.mt5_bridge import Mt5BridgeAdapter
+        from vati.execution.mt5_pull import Mt5PullAdapter
+        if not isinstance(self.adapter, (CtraderAdapter,Mt5BridgeAdapter,Mt5PullAdapter)):
+            return {}
+        from vati.app.runtime_control_actor import _native_control_metadata
+        from vati.risk.control_archive import archive_verified_control
+        metadata = _native_control_metadata(self, account or self.adapter.sync_account(), now_ms)
+        if 'native_account_context' not in metadata:
+            raise ValueError('native owner control source unavailable; no effect applied')
+        metadata['original_owner_control'] = archive_verified_control(token, verified)
+        return metadata
+
+    def _refuse_reused_native_control(self, token):
+        if any(e.payload.get('owner_signature_ref') == token for e in self.ledger.iter(EventKind.SESSION)
+                if e.payload.get('event') in {'LOSS_STREAK_RESET',DRAWDOWN_RESUME_EVENT}):
+            raise ValueError('original native owner control already applied')
+
+    @contextmanager
+    def _direct_native_control_writer(self, verified, now_ms):
+        from contextlib import nullcontext
+        from vati.core.file_lock import exclusive_state_lock
+        binding = verified._verified_key_binding
+        issuer = exclusive_state_lock(binding.registry_path) if binding.registry_path else nullcontext()
+        with issuer, self.ledger.atomic():
+            applied_ms = max(now_ms, self._lease_clock()) if callable(getattr(self,'_lease_clock',None)) else now_ms
+            if not binding.is_current() or applied_ms//1000 >= verified.expires_at_unix:
+                raise ValueError('native owner control expired or its original issuer changed before apply')
+            yield applied_ms
+
+    def _restore_direct_native_control(self, metadata, now_ms):
+        from vati.risk.contracts import NativeAccountRiskContext
+        from vati.risk.physical_runtime import PhysicalRiskRuntime
+        context = NativeAccountRiskContext(**metadata['native_account_context'])
+        runtime = PhysicalRiskRuntime(self.ledger, context, self.streaks.policy, now_ms=now_ms)
+        self._physical_risk_runtime = runtime
+        self.streaks = runtime.streaks
+        values = runtime.book.projection(now_ms)
+        if values.peak is not None:
+            self.peak_equity = values.peak
 
     # ------------------------------------------------------- marks and exits
     def mark(self, bid: Decimal, ask: Decimal, *, now_ms: int) -> None:
@@ -361,9 +655,95 @@ class DecisionCycle:
         if hasattr(self.adapter, "mark"):
             receipts += self.adapter.mark(cfg.symbol, bid, ask, now_ms=now_ms)  # type: ignore[attr-defined]
         for r in receipts:
+            row = self._entries.get(r.trade_intent_id)
+            if row is not None and row.get("pending"):
+                self._settle_pending(r, row, now_ms=now_ms)
+                continue
             if r.status == "FILLED" and r.trade_intent_id in self._entries and r.reject_reason not in ("TRAIL", "BREAK_EVEN"):
                 self._on_close(r.trade_intent_id, r.average_fill, r.reject_reason, now_ms)
-                self.protection.forget(r.broker_position_id)
+                if r.trade_intent_id not in self._entries:
+                    self.protection.forget(r.broker_position_id)
+
+    def _record_tca(self, rec, direction, cost: Decimal, session: str, event_window: str, *, now_ms: int) -> None:
+        cfg = self.cfg
+        if rec.average_fill is None or rec.filled_qty <= ZERO:
+            return
+        if rec.fees is None:
+            # Cost unavailability is a durable result, not an unknown order.
+            # Retry of a lost local ACK cannot append another cost-status fact.
+            with self.ledger.atomic():
+                original = [e for e in self.ledger.iter(EventKind.SESSION, correlation_id=rec.trade_intent_id)
+                    if e.producer == 'vati-cycle' and e.hash == canonical_hash(e.body())
+                    and e.payload.get('account_alias') == cfg.account_alias
+                    and e.payload.get('event') == 'TCA_UNAVAILABLE'
+                    and e.payload.get('reason') == 'RECORDED_NATIVE_FEES_UNMEASURED'
+                    and e.payload.get('schema') in (None, 'vati.execution-cost-availability/1')
+                    and e.payload.get('source_receipt_hash') == rec.receipt_hash]
+                if not original:
+                    self._log(EventKind.SESSION, {"schema": "vati.execution-cost-availability/1",
+                        "event": "TCA_UNAVAILABLE", "reason": "RECORDED_NATIVE_FEES_UNMEASURED",
+                        "source_receipt_hash": rec.receipt_hash},
+                        now_ms=now_ms, corr=rec.trade_intent_id)
+            return
+        tca = compute_tca(rec, direction=direction, qty=rec.filled_qty, value_per_unit=cfg.contract.value_per_price_unit_per_lot if cfg.contract.loss_model is LossModel.STOP_DISTANCE else Decimal(1), modelled_cost_pct=cost)
+        tca_payload = tca.as_dict()
+        if self.learning is not None:
+            tca_payload |= {
+                "learning_environment": self.learning.environment.value,
+                "broker": self.learning.broker,
+                "symbol": cfg.symbol,
+                "session": session,
+                "event_window": event_window,
+                "rejected": False,
+            }
+        original=[e for e in self.ledger.iter(EventKind.TCA_RECORD,correlation_id=rec.trade_intent_id)
+                  if e.producer=='vati-cycle' and e.hash==canonical_hash(e.body())]
+        if original:
+            core=tca.as_dict()
+            from vati.execution.tca import same_tca_measurement
+            if any(not same_tca_measurement(e.payload,core) for e in original):
+                raise ValueError('original cost measurement conflicts; use native correction/reconciliation')
+        else:
+            self._log(EventKind.TCA_RECORD, tca_payload, now_ms=now_ms, corr=rec.trade_intent_id)
+        self._entries[rec.trade_intent_id]["cost_ratio"] = tca.cost_ratio
+        if self.learning is not None:
+            self.learning.on_tca(self.ledger, trade_intent_id=rec.trade_intent_id, symbol=cfg.symbol, session=session, event_window=event_window, cost_ratio=tca.cost_ratio, slippage=tca.slippage)
+            self.engine.m.broker_liquidity[cfg.symbol] = self.learning.broker_liquidity(cfg.symbol)
+
+    def _settle_pending(self, r, row: dict, *, now_ms: int, native_observation: bool = False) -> None:
+        """A resting entry filled (becomes a position) or expired (reserves nothing)."""
+        payload={k: (v.value if hasattr(v, "value") else v) for k, v in asdict(r).items()}
+        if native_observation:
+            payload['native_entry_observation']={'schema':'vati.native-entry-observation/1',
+                'command_hash':row['_native_command'].command_hash,
+                'source':'ORIGINAL_NATIVE_RESULT'}
+        self._log(EventKind.EXECUTION_RECEIPT, payload,
+                  now_ms=now_ms, corr=r.trade_intent_id)
+        if r.status == "FILLED" and (r.reject_reason == "PENDING_FILLED" or native_observation):
+            row.update({"pending": False, "open": True, "entry": r.average_fill, "quantity": r.filled_qty,
+                        "fees": r.fees,
+                        "broker_position_id": r.broker_position_id,
+                        "protective_stop_confirmed": bool(r.protective_stop_confirmed or self.cfg.software_stops),
+                        "best_price": r.average_fill, "worst_price": r.average_fill})
+            if row.get("stop") is not None and not native_observation:
+                self.router.protection.register(r.broker_position_id, symbol=self.cfg.symbol, direction=row["direction"], entry=r.average_fill,
+                                                stop=row["stop"], target=row["targets"][0] if row.get("targets") else None, opened_ms=now_ms,
+                                                software_stop=bool(self.cfg.software_stops))
+            self._log(EventKind.SESSION, {"event": "ENTRY_FILLED_FROM_REST", "fill": str(r.average_fill), "position": r.broker_position_id},
+                      now_ms=now_ms, corr=r.trade_intent_id)
+            approval = row.get("_approval")
+            if row.get('_prepared_setup') is not None:
+                from vati.app.entry_setup import publish_prepared_thesis
+                publish_prepared_thesis(self,row['_prepared_setup'],r.average_fill,now_ms=now_ms)
+            elif approval is not None:
+                intent, decision, state, targets = approval
+                self._seal_thesis(intent, decision, state, targets, r.average_fill, now_ms)
+            self._record_tca(r, row["direction"], row["cost_pct"], row["session"], row.get("event_window", ""), now_ms=now_ms)
+            if not native_observation:row.pop('_approval',None)
+        elif r.status in ("EXPIRED", "CANCELLED", "REJECTED"):
+            self._entries.pop(r.trade_intent_id, None)
+            self._log(EventKind.SESSION, {"event": "ENTRY_REST_ENDED", "status": r.status, "reason": r.reject_reason},
+                      now_ms=now_ms, corr=r.trade_intent_id)
 
     # ------------------------------------------ active-trade intelligence
     def _seal_thesis(self, intent, decision, state, targets, entry_price: Decimal,
@@ -375,6 +755,11 @@ class DecisionCycle:
         ceiling every later ADD is measured against.
         """
         if intent.stop is None:
+            return
+        prepared=self._entries.get(intent.trade_intent_id,{}).get('_prepared_setup')
+        if prepared is not None:
+            from vati.app.entry_setup import publish_prepared_thesis
+            publish_prepared_thesis(self,prepared,entry_price,now_ms=now_ms)
             return
         capsule_data: dict = {}
         capsule_hash = ""
@@ -413,6 +798,10 @@ class DecisionCycle:
     def _review_open_theses(self, bid: Decimal, ask: Decimal, *, now_ms: int) -> None:
         """Assess every open position's claim and act on what the policy allows."""
         for intent_id, row in list(self._entries.items()):
+            if row.get('recovery_context_complete') is False:
+                continue  # retain native protection; no invented adaptive setup
+            if row.get("pending"):
+                continue   # a resting entry is not a position yet
             thesis = self.thesis.thesis_for(intent_id)
             if thesis is None:
                 continue
@@ -523,9 +912,10 @@ class DecisionCycle:
                     "FILLED", "OWNER_EXECUTED", "BROKER_CONFIRMED"
                 ):
                     self._on_close(intent_id, receipt.average_fill, "EXIT", now_ms)
-                    self.protection.forget(position_id)
+                    if intent_id not in self._entries:
+                        self.protection.forget(position_id)
 
-    def _classify_decision(self, intent_id: str, entry: dict, rv, now_ms: int):
+    def _classify_decision(self, intent_id: str, entry: dict, rv, now_ms: int, *, outcome_known: bool = True):
         """Decision quality x outcome, and the lesson it teaches (GAP-F-003)."""
         thesis = self.thesis.thesis_for(intent_id)
         inputs = DecisionQualityInputs(
@@ -544,8 +934,9 @@ class DecisionCycle:
         )
         verdict = self.decision_quality.record(
             inputs, symbol=self.cfg.symbol, r_multiple=rv.r_multiple, now_ms=now_ms,
+            outcome_known=outcome_known,
             evidence_refs=(rv.artifact_hash,) + ((thesis.seal,) if thesis else ()))
-        if self.learning is not None:
+        if self.learning is not None and outcome_known:
             self.lessons.record(lesson_from_verdict(
                 verdict, symbol=self.cfg.symbol,
                 regime=str(entry.get("regime", "")), session=str(entry.get("session", "")),
@@ -555,30 +946,56 @@ class DecisionCycle:
         return verdict
 
     def _on_close(self, intent_id: str, exit_price: Optional[Decimal], reason: str, now_ms: int) -> None:
-        e = self._entries.pop(intent_id, None)
-        if e is None or exit_price is None:
+        e = self._entries.get(intent_id)
+        if e is None:
             return
-        closed = getattr(self.adapter, "closed", None)
-        pnl = ZERO
-        if closed:
-            for c in reversed(closed):
-                if c["intent"] == intent_id:
-                    pnl = c["pnl"]; break
-        self.consecutive_losses = self.consecutive_losses + 1 if pnl < ZERO else 0
+        if not isinstance(exit_price, Decimal) or not exit_price.is_finite():
+            self._log(EventKind.SESSION, {"event": "CLOSE_PRICE_UNRESOLVED",
+                "reason": reason, "position_id": e.get("broker_position_id")}, now_ms=now_ms, corr=intent_id)
+            return
+        self._entries.pop(intent_id)
+        e["trade_intent_id"] = intent_id
+        from vati.execution.recorded_close_costs import recorded_close_cost_entry
+        e = recorded_close_cost_entry(self.ledger,e,trade_intent_id=intent_id,
+            venue=self.adapter.venue,account_alias=self.cfg.account_alias,available_at_ms=now_ms)
+        measured = closed_trade_pnl(e, exit_price, self.cfg.contract, getattr(self.adapter, "closed", None))
+        maturity = native_economic_maturity(self.adapter, intent_id, measured)
+        if 'recorded_close_costs' in e:
+            maturity={**maturity,'recorded_close_costs':e['recorded_close_costs']}
+        pnl = measured.amount if measured.amount is not None else ZERO
+        initial_risk = initial_risk_from_ledger(self.ledger, intent_id,
+            available_cutoff_ms=int(e.get("opened_ms") or 0) or None)
+        if measured.amount is None:
+            self.streaks.recovery_issue = "unresolved closed-trade money outcome; native reconciliation required"
+            self.kill.trip(KillSwitchTrigger.RECONCILIATION_FAILURE, now_ms)
+        else:
+            from vati.execution.review import economic_outcome_final
+            for lock_event in self.streaks.on_close(e["strategy_id"], pnl, now_ms,
+                profit_final=economic_outcome_final(maturity, measured.basis,
+                    account_currency=self.cfg.contract.account_currency)):
+                self._log(EventKind.SESSION, lock_event, now_ms=now_ms, corr=intent_id)
+        self.consecutive_losses = self.streaks.verdict(e["strategy_id"], now_ms).losses
         rv = review_trade(trade_intent_id=intent_id, strategy_id=e["strategy_id"], entry=e["entry"], exit_price=exit_price, stop=e["stop"] or e["entry"], direction_long=e["direction"] is Direction.LONG,
-                          pnl=pnl, thesis_correct=pnl > ZERO, process_ok=True, exit_reason=reason)
+                          pnl=pnl, thesis_correct=pnl > ZERO, process_ok=True, exit_reason=reason,
+                          broker_ok=measured.amount is not None,
+                          initial_money_risk=initial_risk.amount if initial_risk else None,
+                          initial_risk_evidence_ref=initial_risk.evidence_ref if initial_risk else None,
+                          pnl_basis=measured.basis, thesis_evidence_basis="PNL_SIGN_PROXY_NOT_SETUP_VALIDATION",
+                          account_alias=self.cfg.account_alias,
+                          maturity=maturity)
         self.reviews.append(rv)
         self._log(EventKind.TRADE_REVIEW, {k: (v.value if hasattr(v, "value") else (str(v) if isinstance(v, Decimal) else (list(v) if isinstance(v, tuple) else v))) for k, v in asdict(rv).items()}, now_ms=now_ms, corr=intent_id)
         self.admission.propose(rv.artifact_hash, knowledge_class="TRADE_EXPERIENCE", proposed_by=rv.proposed_by, trust_tier="T0_VAN_TRADING_POLICY")
         metrics.inc("vati_trades_closed_total", outcome=rv.outcome.value)
         verdict = None
         try:
-            verdict = self._classify_decision(intent_id, e, rv, now_ms)
+            if e.get('recovery_context_complete') is not False:
+                verdict = self._classify_decision(intent_id, e, rv, now_ms, outcome_known=measured.amount is not None)
         except Exception as exc:  # noqa: BLE001 — classification never blocks a close
             self._log(EventKind.SESSION,
                       {"event": "DECISION_QUALITY_FAULT", "error": str(exc)[:300]},
                       now_ms=now_ms, corr=intent_id)
-        if self.learning is not None:
+        if self.learning is not None and rv.outcome in STRATEGY_LEARNING_OUTCOMES and e.get('recovery_context_complete') is not False:
             self._learn(intent_id, rv, e.get("cost_ratio", Decimal(1)), now_ms,
                         process_ok=(verdict is None or not verdict.faults))
 

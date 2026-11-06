@@ -1,0 +1,140 @@
+{
+  "schema": "van.rebuild.hosted-source/1",
+  "run_id": 39853172032,
+  "source_head": "9ea88ce2e0385ef014b7229f5f6fe1cdc9526685",
+  "tested_merge": "f4ee682b93a68d5363df84699cecf2ecb9f35e09",
+  "identical_source_tree": "57c1e4050ae3dbb19b624136b58b3cfb557f6b6e",
+  "jobs": [
+    {
+      "id": 120084420038,
+      "name": "backend",
+      "conclusion": "failure"
+    },
+    {
+      "id": 120084420333,
+      "name": "android-instrumentation",
+      "conclusion": "success"
+    },
+    {
+      "id": 120084420355,
+      "name": "postgres-ledger",
+      "conclusion": "success"
+    },
+    {
+      "id": 120084420358,
+      "name": "project-truth-ledger",
+      "conclusion": "failure"
+    },
+    {
+      "id": 120084420393,
+      "name": "mutation (kotlin-3, kotlin, 3/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120084420513,
+      "name": "mutation (kotlin-1, kotlin, 1/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120084420514,
+      "name": "mutation (python-1, python, 1/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120084420544,
+      "name": "mutation (python-0, python, 0/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120084420571,
+      "name": "android-and-visual-evidence",
+      "conclusion": "success"
+    },
+    {
+      "id": 120084420574,
+      "name": "mutation (python-3, python, 3/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120084420576,
+      "name": "mutation (browser-agent, browser-agent, 0/1)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120084420585,
+      "name": "mutation (kotlin-0, kotlin, 0/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120084420652,
+      "name": "rebuild-documentary",
+      "conclusion": "success"
+    },
+    {
+      "id": 120084420756,
+      "name": "mutation (kotlin-2, kotlin, 2/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120084420816,
+      "name": "mutation (python-2, python, 2/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120090773951,
+      "name": "character-forge-gate",
+      "conclusion": "success"
+    }
+  ],
+  "public_source": {
+    "voice-source-report.xml": {
+      "tests": 117,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "f0db452c0183dbbbd69845098d72ae7399e51a13ced70d024a767c883e816c2f"
+    },
+    "trading-source-report.xml": {
+      "tests": 1990,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "sha256": "c0c318bb461664b3eb13337471711a98d93c1690e7acace0a51b3c469e20cde2"
+    },
+    "postgres-ledger-report.xml": {
+      "tests": 26,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "7a25aed570a47c67196133a3de13acf7f33de911297178de780dce863dda192b"
+    }
+  },
+  "legacy_mutations": {
+    "caught": 374,
+    "survived": 0,
+    "receipt": "ci/MUTATION_CORPUS_9ea88ce2.json"
+  },
+  "instrumentation": {
+    "collected": 22,
+    "passed": 18,
+    "failed": 0,
+    "skipped": 4,
+    "skips": "existing core-artwork mode",
+    "voice_methods": {
+      "cancellationBeforeNativeStartCannotCompleteOrDamageTheReplacementAnswer": "PASS 3.189s",
+      "realOfflineAnswerReachesTheApplicationQueueAsSpoken": "PASS 2.189s"
+    },
+    "index_sha256": "29ce1b14ecb39f54108ba50443edb79ae99f569fcbb7f422f779b73e385f1f9f",
+    "voice_report_sha256": "4f8c50e33ede397f1dee227922bc2b831610227c72a10cefae7cf6cd6d80556c",
+    "diagnostics_sha256": "08c774235a873f639674674088dc6a3fe7a1a4f15b7d8ead9589abdd791cbd04"
+  },
+  "retained_failures": {
+    "backend": "Require the DDS contract read key: DDS_CONTRACT_READ_DEPLOY_KEY is not provisioned",
+    "project-truth-ledger": "trusted/tools/ci/project_truth_ledger.py is absent from the current main bootstrap",
+    "logs": {
+      "backend-job.log": "c6ef792b03aff0c0a07d76584c2ddbbe01340faeb635b31e4f5bfd5a4802c2ff",
+      "project-truth-ledger-job.log": "3daeb6ba8abea980cb7ce915c827a45cfc4d3ccec0553a36b0f73a3de4195cce"
+    }
+  },
+  "qualification": "Actual hosted source/emulator evidence only. No S24, production, provider, whole-unit or owner acceptance. Original gates retained."
+}

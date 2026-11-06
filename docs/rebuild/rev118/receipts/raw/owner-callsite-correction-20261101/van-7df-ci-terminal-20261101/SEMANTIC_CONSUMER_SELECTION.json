@@ -1,0 +1,14 @@
+{
+  "selection": "Reference-derived all existing contract/rebuild consumers of generated owner registry/function artifacts, plus explicit source-workmap semantic consumer; direct and imported artemis_acceptance readers included. Broad registry collisions (project mounts, unrelated productiongate registries, ledgerregistry) classified unrelated rather than blanket-running them.",
+  "files": {
+    "tests/contracts/test_artemis_acceptance_plan.py": "bda2cf2ffa37cb235b94fb6e379984b3387ca08a7f04bd1adc4681d743565773",
+    "tests/contracts/test_artemis_usb_acceptance.py": "e2687ec756a176bae44db75febb03c30173e78542ba306f6a5713a1d2eede6ad",
+    "tests/contracts/test_ci_dds_contract_pin.py": "f7bf8a075362adedb187e1541cee8c5126bff598145010376aa293834530715a",
+    "tests/contracts/test_native_artemis_plan.py": "23e3b2f3b61d06944d24f4431f9227fc9f73b39609b7e360f9b9627c67115be3",
+    "tests/contracts/test_owner_endpoint_registry.py": "90d7d18869d6d30b936c6ec54610cbdda673d79cfc314b2ef2e676d49b9f4c7b",
+    "tests/contracts/test_owner_redesign_registry.py": "f62be41f47f127ffc83275aca417ad8d00c31a34d27d599fa46006e5e2ab74c3",
+    "tests/rebuild/test_owner_registry_refresh.py": "2fc772f4612293aa46184a52ca302c2b6507ab56a5b04fb56f58e8551616ba48",
+    "tests/rebuild/test_source_workmap.py": "f9b7a1b3b6839593b8fb7274cab913f3df0813ce6e8e4e2f4f39fa9889822542"
+  },
+  "existing_assertions_modified": false
+}

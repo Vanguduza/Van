@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/workspace/van-37327981-selected-hosted-verify-20261028.py", line 7, in <module>
+    assert len(data)==meta['size_in_bytes']<8*1024*1024
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

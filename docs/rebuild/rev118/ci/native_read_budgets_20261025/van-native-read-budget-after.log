@@ -1,0 +1,28 @@
+........................................................................ [ 29%]
+...........................................F............................ [ 59%]
+........................................................................ [ 88%]
+...........................                                              [100%]
+=================================== FAILURES ===================================
+_ test_frame_budget_fault_after_native_order_write_keeps_unknown_original_effect _
+
+    def test_frame_budget_fault_after_native_order_write_keeps_unknown_original_effect():
+        from test_ctrader import FakeCtrader,make_adapter
+        from test_ctrader_original_outcomes import cmd
+        class LostBroker(FakeCtrader):
+            def handle(self,name,body,cid):
+                if name=='ProtoOANewOrderReq':return self.b.sendall(struct.pack('>I',2**32-1))
+                return super().handle(name,body,cid)
+        native=LostBroker();adapter=make_adapter(native);adapter.transport.timeout_s=.5
+        command=replace(cmd(),account_alias=adapter.account_alias,command_hash='').sealed()
+        result=adapter.submit(command,now_ms=1000)
+        assert result.status=='UNKNOWN' and not result.protective_stop_confirmed
+>       assert 'frame' in result.reject_reason.lower()
+E       AssertionError: assert 'frame' in 'native entry reply unavailable; reconcile original before retrying'
+E        +  where 'native entry reply unavailable; reconcile original before retrying' = <built-in method lower of str object at 0x7f3c58aa6f00>()
+E        +    where <built-in method lower of str object at 0x7f3c58aa6f00> = 'native entry reply unavailable; reconcile original before retrying'.lower
+E        +      where 'native entry reply unavailable; reconcile original before retrying' = ExecutionReceipt(trade_intent_id='original-entry', decision_hash='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...imal('0'), protective_stop_price=None, receipt_hash='8b06790e330edd3eceeed3e9d7893afc8840e16afebf40953c6753869a0f1d3d').reject_reason
+
+trading/tests/test_ctrader_read_budget.py:82: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_ctrader_read_budget.py::test_frame_budget_fault_after_native_order_write_keeps_unknown_original_effect
+1 failed, 242 passed in 5.73s

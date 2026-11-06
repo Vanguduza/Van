@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.overlay.OverlayDragControllerTest" tests="14" skipped="0" failures="0" errors="0" timestamp="2026-10-08T04:43:34" hostname="052fefa249ff" time="0.006">
+  <properties/>
+  <testcase name="the haptic fires on arming, once, not on every frame()" classname="com.dial.van.overlay.OverlayDragControllerTest" time="0.001"/>
+  <testcase name="letting go over the target closes the overlay and renders nothing after()" classname="com.dial.van.overlay.OverlayDragControllerTest" time="0.0"/>
+  <testcase name="a cancelled drag never leaves the overlay armed to close()" classname="com.dial.van.overlay.OverlayDragControllerTest" time="0.001"/>
+  <testcase name="a fast flick toward an edge docks there even released mid-screen()" classname="com.dial.van.overlay.OverlayDragControllerTest" time="0.001"/>
+  <testcase name="velocity resets on a new drag so a stale flick cannot dock the next one()" classname="com.dial.van.overlay.OverlayDragControllerTest" time="0.0"/>
+  <testcase name="a drag moves the window and reports where it ended up()" classname="com.dial.van.overlay.OverlayDragControllerTest" time="0.0"/>
+  <testcase name="reduced motion still reports a duration of zero for a fast flick()" classname="com.dial.van.overlay.OverlayDragControllerTest" time="0.001"/>
+  <testcase name="docking ticks but dismissing never does()" classname="com.dial.van.overlay.OverlayDragControllerTest" time="0.0"/>
+  <testcase name="starting a drag puts the dismiss target up and the menu away()" classname="com.dial.van.overlay.OverlayDragControllerTest" time="0.0"/>
+  <testcase name="letting go anywhere else docks and clears the drag()" classname="com.dial.van.overlay.OverlayDragControllerTest" time="0.0"/>
+  <testcase name="an ordinary dock still reports a positive duration()" classname="com.dial.van.overlay.OverlayDragControllerTest" time="0.001"/>
+  <testcase name="a drag cannot walk VAN off the screen()" classname="com.dial.van.overlay.OverlayDragControllerTest" time="0.0"/>
+  <testcase name="a slow release mid-screen docks nowhere and ticks nothing()" classname="com.dial.van.overlay.OverlayDragControllerTest" time="0.0"/>
+  <testcase name="the dismiss target is taken down however the drag ends()" classname="com.dial.van.overlay.OverlayDragControllerTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

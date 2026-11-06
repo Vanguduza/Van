@@ -1,0 +1,103 @@
+{
+  "cases": 12,
+  "caught": 12,
+  "results": [
+    {
+      "case": "remove arm guard",
+      "caught": true,
+      "expected": "ARM_GUARD_MISMATCH",
+      "findings": [
+        "ARM_GUARD_MISMATCH"
+      ]
+    },
+    {
+      "case": "valid but insufficient proof",
+      "caught": true,
+      "expected": "ARM_GUARD_MISMATCH",
+      "findings": [
+        "ARM_GUARD_MISMATCH"
+      ]
+    },
+    {
+      "case": "draft shortcut",
+      "caught": true,
+      "expected": "UNAPPROVED_EDGE",
+      "findings": [
+        "UNAPPROVED_EDGE"
+      ]
+    },
+    {
+      "case": "signed shortcut",
+      "caught": true,
+      "expected": "UNAPPROVED_EDGE",
+      "findings": [
+        "UNAPPROVED_EDGE"
+      ]
+    },
+    {
+      "case": "single source use",
+      "caught": true,
+      "expected": "USE_GUARD_MISMATCH",
+      "findings": [
+        "USE_GUARD_MISMATCH"
+      ]
+    },
+    {
+      "case": "repin insufficient arming list",
+      "caught": true,
+      "expected": "ARM_PROOFS_CHANGED",
+      "findings": [
+        "ARM_PROOFS_CHANGED"
+      ]
+    },
+    {
+      "case": "duplicate transition",
+      "caught": true,
+      "expected": "DUPLICATE_TRANSITION",
+      "findings": [
+        "DUPLICATE_TRANSITION"
+      ]
+    },
+    {
+      "case": "no typed issuer",
+      "caught": true,
+      "expected": "INCOMPLETE_PROOF_TYPE",
+      "findings": [
+        "INCOMPLETE_PROOF_TYPE"
+      ]
+    },
+    {
+      "case": "future actual needed before arm",
+      "caught": true,
+      "expected": "FUTURE_RELEASE_REQUIRED_TO_ARM",
+      "findings": [
+        "FUTURE_RELEASE_REQUIRED_TO_ARM"
+      ]
+    },
+    {
+      "case": "no arming receipt",
+      "caught": true,
+      "expected": "ARMING_NOT_RECORDED",
+      "findings": [
+        "ARMING_NOT_RECORDED"
+      ]
+    },
+    {
+      "case": "initial already armed",
+      "caught": true,
+      "expected": "INITIAL_BYPASS",
+      "findings": [
+        "INITIAL_BYPASS"
+      ]
+    },
+    {
+      "case": "fake owner accepted",
+      "caught": true,
+      "expected": "FALSE_AUTHORITY_STATE",
+      "findings": [
+        "FALSE_AUTHORITY_STATE"
+      ]
+    }
+  ],
+  "scope": "Proposed schema/transition readiness metadata only; does not validate actual signatures, source health or broker effects."
+}

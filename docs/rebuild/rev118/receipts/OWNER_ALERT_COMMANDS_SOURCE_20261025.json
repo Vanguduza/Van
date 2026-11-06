@@ -1,0 +1,69 @@
+{
+  "schema": "van.rebuild.owner-alert-commands-source/1",
+  "status": "SOURCE_TESTED_COMPONENT_NOT_UNIT_ACCEPTANCE",
+  "base_head": "53b026366050b93d3c26bf90dad0f5fb02782515",
+  "recovery": "EXPLICIT_RECONSTRUCTION_NOT_ORIGINAL_ARCHIVE_RESTORATION",
+  "updated_at_utc": "2026-10-25T16:35:49.259639+00:00",
+  "authority": [
+    "auth-20261022-owner-autonomous-candidate-build",
+    "auth-20261022-owner-owner-contract-refresh",
+    "auth-20261021-owner-rev118-ci-workflow-template"
+  ],
+  "actions": [
+    "trading.alert.pause",
+    "trading.alert.restart",
+    "trading.alert.delete"
+  ],
+  "source_sha256": {
+    "backend/tests/test_learning_recovery.py": "e3c9ff3bc98fd2a8a3cbbd426e6a3437450b23783bf101dcd5d50c3bd26275c1",
+    "backend/tests/test_reminder_delivery_gateway.py": "f88cd5958dc5eebf6a6ec237068ba32f2faf3ec1d05eeda80c44eefa25b9c19c",
+    "backend/van_gateway/action/registry.py": "933a12cebd8e0f3a31505289980803d5fce6c144891aa407897d5a11c923581f",
+    "backend/van_gateway/app.py": "1b291e1a9f39c5f4a37101e920b7ad537f865ba706d02b365c7d46f6eff10295",
+    "backend/van_gateway/command/local_executors.py": "f5416008f9f612de8b774ce38c2e9ea95a8caf65f2cbc8b1e985d4482d9ca0d6",
+    "backend/van_gateway/command/resolver.py": "91602245cdc98489437cab6afb5351418c1a0cd181003df2270458774cc5f342",
+    "backend/van_gateway/command/success_contracts.py": "52b3cca3356ba79a24f4f9810818f6509dce148e2c89164333759329306576b3",
+    "backend/van_gateway/orchestrator.py": "ddce88161d2cbb5caddc22bb017a304b8abe136add49d793eba2493fb0b6dd62",
+    "backend/van_gateway/storage/db.py": "7ba9ea1135da9068c388ae0901fb846854847f803a690bd82ce7c9ac83a61de5",
+    "backend/van_gateway/trading/monitor_schema.py": "fd408a0dc38bcacc22833ac0b2a9c38b28aec27e6be1a15090fddc4cb83ea9e0",
+    "backend/van_gateway/trading/monitor_service.py": "20938f783656cf170f61dfb97289e504107fc57173db5efaf09dbb5e313bee50",
+    "backend/van_gateway/trading/screener_migration.py": "3c56aed7684f699dd331686e9f4e58898a7ae75d6ecdf8e88b81dfc80a33c533",
+    "backend/van_gateway/verification/production.py": "0369f7e4d6e47b0a4aa7f8cee3cf83310ee2cfdadb103a8f0594e01e32a07e1a",
+    "tools/rebuild/refresh_owner_source_contracts.py": "7d2998974068e0af1cf2e6952d9eafa49d16a954c681f0abff8efb0f3383151b",
+    "backend/van_gateway/trading/monitor_commands.py": "bd1383557481f7be59a0d022e9ecc4d815e775f0d4d494d853ac2b7ebb6a4f81",
+    "backend/van_gateway/storage/monitor_migrations.py": "1a6ca069ee25743817d141877bce5e678a38b611793d79f0df4a0dd22bce1cfe",
+    "backend/tests/test_market_monitor_commands.py": "9298dcbda5ba626112bbcde1f1c521bd275f523526887d96acc6b4541345c3bf"
+  },
+  "executed_evidence": {
+    "base_reproduction": "3failed/2passed: both learning final-version assertions and private import closure fail; reminder passes in this fresh run. Original hosted reminder failure is retained separately.",
+    "first_integrated_reconstruction": "123passed/2failed: signed gateway fixtures omitted the mandatory expiry; production expiry requirement was preserved.",
+    "second_command_run": "34passed/1failed: test searched the human message for the service code instead of its native persisted mission final_outcome.",
+    "third_command_run": "34passed/1failed: newly added verifier test used positional arguments against its keyword-only API.",
+    "final_commands": "44passed/0skipped; actual SQL, queued writer expiry, sealed authority/key/parameters, corrupt receipt fields, original replay, independent mission verification and signed gateway paths.",
+    "integrated_before_final_authority_key_guard": "220 passed, zero failed/errors/skipped, before the final key guard and nine extra command cases. Superseded for current candidate execution by the final229-case run; original report retained.",
+    "compatibility": "53passed/1DDS prerequisite skip; after restoring the untouched pinned DDS source the complete7-case CI pin selection passes0skip.",
+    "rebuild": "99passed/0skipped before new documentation/evidence manifest generation.",
+    "faults": {
+      "count": 6,
+      "all_caught": true,
+      "controls_passed": true,
+      "source_restored": true,
+      "receipt": "ci/market_commands_20261025/faults/receipt.json"
+    },
+    "storage_audit_forbidden_events": 0,
+    "registry_preflight": "374cases/383edits;0findings;NOT_RUN",
+    "consolidation": "70branches retained;0findings;frozen package/archive unchanged",
+    "workflow_preservation": "All pre-existing jobs/triggers/gates semantically identical; template byte-identical.",
+    "final_exact_source_integrated": "229 passed, zero failed/errors/skipped, with zero forbidden storage audit events. The final source includes the additional sealed authority key guard and all44command cases."
+  },
+  "migration_sql_sha256": {
+    "58": "9070cba18f62f2e9dc7985e84977a333c89af9058f504568560ed7bfc3675ba3",
+    "59": "1d3a888378e9dfd20b84b2d29d6413614eefbf09b27d5a46e57d6674aed2ba08"
+  },
+  "evidence_directory": "ci/market_commands_20261025",
+  "limitations": [
+    "No original55-file archive byte/hash match can be claimed without its bytes.",
+    "No full-backend, independent unit/admission, hosted current-candidate, native provider, deployment, production signing, profitability or S24 qualification is implied.",
+    "Voice discovery/clarification, native feeds/ticks/dynamic lists, Android consumers and the complete programme remain open.",
+    "All131unitacceptances, F15 and BG-001 remain NOT_ISSUED."
+  ]
+}

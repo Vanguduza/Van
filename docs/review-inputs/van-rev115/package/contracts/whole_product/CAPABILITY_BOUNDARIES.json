@@ -1,0 +1,3097 @@
+{
+  "boundaries": [
+    {
+      "authority": "VAN source owners plus independent Zuul admission",
+      "capability_id": "WP-CAP-BE-001",
+      "declared_obligations": [
+        "admit exact feature-bearing diffs",
+        "retain old app unchanged",
+        "register every provider caller",
+        "construct and falsify parity oracle",
+        "Reconcile the five account coordinator/service variants by function and contract, preserving PR101 fixes, canon Jev/evidence and signed temperament work. Never wholesale-select the most populated branch.",
+        "Extend existing boundaries; justify any new process/store with measured isolation/correctness benefit.",
+        "All inherited requirement/action/context objects remain, with explicit semantic additions not automatic deletion."
+      ],
+      "domain_profiles": [
+        "OPERATIONS"
+      ],
+      "id": "BE-001",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Source consolidation and preservation oracle"
+    },
+    {
+      "authority": "VAN gateway security and existing device authority",
+      "capability_id": "WP-CAP-BE-002",
+      "declared_obligations": [
+        "pair/provision/revoke",
+        "validate signed exact intents",
+        "issue challenges",
+        "expire and fence sessions",
+        "protect account and task scopes",
+        "Operational choices are automatic under qualified grants; novel policies require independent qualification and authorized promotion.",
+        "Evidence update, operational selection and policy mutation are three different typed effects.",
+        "Bind policy/artifact/qualification/venue/account/product/expiry and tested joint parameters to existing mandate.",
+        "New bindings require qualified and authenticated promotion; open parents retain policy unless explicit compatible migration.",
+        "Learned state can evolve under qualified rule; rule/action/reward/scope changes use policy evolution; risk changes keep own authority.",
+        "Trading workers lack withdrawal scope; secret references and account grants remain per environment.",
+        "Spot support does not imply margin/perps/options/DEX/withdraw authority; any extension needs product-specific qualification.",
+        "Approved learned-state updates operate within current bounds; new policies require independent qualification and current promotion authority, with drift monitoring, expiry, fallback and open-parent recovery.",
+        "Point-in-time information, privacy and contamination controls: Build a scoped evidence packet from archived sources available at the cutoff; confirm findings prospectively with sealed outputs and explicit model-weight contamination limitations.",
+        "Separate health dimensions, bounded adaptation and owner readback: Expose policy/procedural, economic, data, calibration and provider health separately; registered drift/hysteresis rules change a later qualified choice with evidence and exact consumer readback."
+      ],
+      "domain_profiles": [
+        "BOOTSTRAP",
+        "SETTINGS",
+        "OPERATIONS"
+      ],
+      "id": "BE-002",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Device identity, bounded authority and intent fencing"
+    },
+    {
+      "authority": "Owning domain ledger and gateway projections",
+      "capability_id": "WP-CAP-BE-003",
+      "declared_obligations": [
+        "append events",
+        "deduplicate",
+        "process outbox",
+        "serve cursor snapshots",
+        "reconcile uncertain outcomes",
+        "redact evidence",
+        "Live/demo/paper/shadow/backtest/counterfactual provenance stays separate and source-authorized.",
+        "Exact command and causal/fence identity committed before side effect; no exactly-once network assumption.",
+        "Authoritative fill identity, correction/bust and fee currency feed one cash/position state.",
+        "Verified anchor plus tail reduces repeated work without accepting tampered history.",
+        "Observation contribution, consumed revision and cursor/snapshot publish atomically.",
+        "No retroactive editing of issued decision; affected future statistics/models are invalidated or restated.",
+        "Preserve every eligible opportunity, immutable decision-time information, maturity and environment provenance; restate corrected analytics without rewriting original decisions or inventing missed fills.",
+        "Shared Jev consumer scope and asynchronous isolation: Run admitted typed Jev judgments and model research through the actual durable asynchronous path; qualified snapshots improve a later eligible decision while urgent execution/protection continues.",
+        "Exact model epoch, output provenance and replay: Bind requested and resolved model, prompt/data/tool/config versions and response receipts to one qualification epoch; replay the recorded response and reproduce downstream decisions without invoking a provider.",
+        "Point-in-time information, privacy and contamination controls: Build a scoped evidence packet from archived sources available at the cutoff; confirm findings prospectively with sealed outputs and explicit model-weight contamination limitations.",
+        "Durable global model and research budgets: Atomically reserve bounded per-attempt monetary/token/tool allowance across workers, settle actual costs and reconcile provider quotas with the global ledger."
+      ],
+      "domain_profiles": [
+        "BOOTSTRAP",
+        "OPERATIONS"
+      ],
+      "id": "BE-003",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Durable event, readback and projection infrastructure"
+    },
+    {
+      "authority": "Broker owns identity; VAN owns link/configuration",
+      "capability_id": "WP-CAP-BE-004",
+      "declared_obligations": [
+        "discover",
+        "create demo",
+        "request live application",
+        "link",
+        "edit local/profile where entitled",
+        "restrict",
+        "unlink",
+        "request remote closure",
+        "At least one eligible supported CEX spot integration; same risk/router/lifecycle owners and current markets preserved.",
+        "API family, account/subaccount, native product, spot type, base/quote/network identities are versioned.",
+        "Spot support does not imply margin/perps/options/DEX/withdraw authority; any extension needs product-specific qualification."
+      ],
+      "domain_profiles": [
+        "ACCOUNTS",
+        "CRYPTO_TRADE"
+      ],
+      "id": "BE-004",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Accounts, broker/exchange directory and operation capabilities"
+    },
+    {
+      "authority": "Broker auth service and protected VAN secret store",
+      "capability_id": "WP-CAP-BE-005",
+      "declared_obligations": [
+        "OAuth start/callback/cancel/recover",
+        "discover accounts",
+        "rotate and verify secrets",
+        "renew",
+        "detect migration",
+        "QR bridge pairing",
+        "Trading workers lack withdrawal scope; secret references and account grants remain per environment.",
+        "Provider chosen by eligible current access; mocked Coinbase Advanced output cannot qualify matching or latency."
+      ],
+      "domain_profiles": [
+        "ACCOUNTS",
+        "CRYPTO_TRADE"
+      ],
+      "id": "BE-005",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Broker authentication, credential rotation and health"
+    },
+    {
+      "authority": "Provider cash history plus deterministic VATI accounting",
+      "capability_id": "WP-CAP-BE-006",
+      "declared_obligations": [
+        "ingest provider cash movements",
+        "classify and reconcile",
+        "post reversals",
+        "calculate flow-adjusted returns/drawdown",
+        "expose statement lineage",
+        "Buy reserves quote, sell owned base; fees/base/quote/third assets and cash conversion explicit; no leverage."
+      ],
+      "domain_profiles": [
+        "ACCOUNTS"
+      ],
+      "id": "BE-006",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Exact funding ledger and flow-adjusted accounting"
+    },
+    {
+      "authority": "Payment provider/custodian and broker; VAN orchestrates",
+      "capability_id": "WP-CAP-BE-007",
+      "declared_obligations": [
+        "quote",
+        "verify beneficiary",
+        "approve",
+        "reserve",
+        "submit",
+        "reconcile",
+        "settle",
+        "compensate",
+        "expose hosted handoff with verified origin",
+        "Trading workers lack withdrawal scope; secret references and account grants remain per environment."
+      ],
+      "domain_profiles": [
+        "ACCOUNTS"
+      ],
+      "id": "BE-007",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Deposits, withdrawals, transfers and provider rails"
+    },
+    {
+      "authority": "Licensed/provider market feed adapter",
+      "capability_id": "WP-CAP-BE-008",
+      "declared_obligations": [
+        "resolve aliases",
+        "discover tradable instruments",
+        "subscribe once",
+        "aggregate bars",
+        "revision snapshots",
+        "recover gaps",
+        "publish genuine depth",
+        "Version canonical bucket key, product, side, amount/participation, fees, volatility, event and regime.",
+        "API family, account/subaccount, native product, spot type, base/quote/network identities are versioned.",
+        "Tick/step/min-notional/max limits and fee reserves apply before exact risk approval.",
+        "Sequence/checksum, timestamps, snapshot boundaries, fill IDs and resync per selected provider.",
+        "24/7 operation still handles maintenance; nonce/clock constraints; cancel/query headroom protected."
+      ],
+      "domain_profiles": [
+        "MARKETS",
+        "CRYPTO_TRADE"
+      ],
+      "id": "BE-008",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Instrument identity, conventional/crypto market feeds, bars and depth"
+    },
+    {
+      "authority": "VATI Risk Authority only",
+      "capability_id": "WP-CAP-BE-009",
+      "declared_obligations": [
+        "verify mandate",
+        "calculate stop/size",
+        "reserve worst-case pending risk",
+        "enforce drawdown, concentration, correlation and margin",
+        "deny new entries while allow risk reduction",
+        "Bind policy/artifact/qualification/venue/account/product/expiry and tested joint parameters to existing mandate.",
+        "Filter authorization, venue capability, order semantics, data, urgency, deadline and protection before scoring.",
+        "Account coordinator owns total worst-case exposure, including uncertain and cancel-pending children.",
+        "Learned state can evolve under qualified rule; rule/action/reward/scope changes use policy evolution; risk changes keep own authority.",
+        "Target delta accounts for actual holdings/working orders, netting mode and manual/strategy ownership.",
+        "Tick/step/min-notional/max limits and fee reserves apply before exact risk approval.",
+        "Buy reserves quote, sell owned base; fees/base/quote/third assets and cash conversion explicit; no leverage.",
+        "Spot support does not imply margin/perps/options/DEX/withdraw authority; any extension needs product-specific qualification."
+      ],
+      "domain_profiles": [
+        "ORDERS",
+        "CRYPTO_TRADE"
+      ],
+      "id": "BE-009",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Mandates, risk, sizing and portfolio reservations"
+    },
+    {
+      "authority": "VATI router and admitted broker adapters",
+      "capability_id": "WP-CAP-BE-010",
+      "declared_obligations": [
+        "submit market/limit/stop/stop-limit where available",
+        "modify",
+        "cancel",
+        "read fills",
+        "map provider states",
+        "reconcile unknowns",
+        "Retain PR101 pending-order progress; close worse-than-limit fills, expiry-policy propagation, pending-stop protection and terminal-order semantics before economic use.",
+        "Operational choices are automatic under qualified grants; novel policies require independent qualification and authorized promotion.",
+        "Bind policy/artifact/qualification/venue/account/product/expiry and tested joint parameters to existing mandate.",
+        "Filter authorization, venue capability, order semantics, data, urgency, deadline and protection before scoring.",
+        "Empty urgent-compatible candidates choose explicit emergency route or refusal appropriate to objective purpose.",
+        "Registry insertion order never decides fallback; decision binds immutable chosen semantics.",
+        "Account coordinator owns total worst-case exposure, including uncertain and cancel-pending children.",
+        "Exact command and causal/fence identity committed before side effect; no exactly-once network assumption.",
+        "Cancel request does not release exposure; all feasible interleavings join authoritative facts.",
+        "Distinguish atomic amend, cancel-replace, identity/priority change and unsupported operations.",
+        "Immediate and pending fills share confirmed-protection/recovery behavior; flatten request is not flatness.",
+        "Use approved deadline/TIF; adapter defaults and restarts cannot extend it.",
+        "Preserve requested order type and side-correct limit; touching does not imply unlimited fills.",
+        "Qualified hysteresis, tie tolerance, persistence and joint action envelope constrain parameter changes.",
+        "New bindings require qualified and authenticated promotion; open parents retain policy unless explicit compatible migration.",
+        "Target delta accounts for actual holdings/working orders, netting mode and manual/strategy ownership.",
+        "Immediate/passive/chase/TWAP/participation/target methods have positive supported paths and constrained unsupported refusal.",
+        "At least one eligible supported CEX spot integration; same risk/router/lifecycle owners and current markets preserved.",
+        "Tick/step/min-notional/max limits and fee reserves apply before exact risk approval.",
+        "Sequence/checksum, timestamps, snapshot boundaries, fill IDs and resync per selected provider.",
+        "No silent coercion, native/synthetic stop distinction, amend priority and trigger sources explicit.",
+        "24/7 operation still handles maintenance; nonce/clock constraints; cancel/query headroom protected.",
+        "Account-wide cancellation must be assessed against protective/manual orders; no automatic blanket enabling.",
+        "Provider chosen by eligible current access; mocked Coinbase Advanced output cannot qualify matching or latency.",
+        "Chain discovery remains read-only; only independently admitted exchange products may enter actual order universe.",
+        "Spot support does not imply margin/perps/options/DEX/withdraw authority; any extension needs product-specific qualification.",
+        "Actual outcome producers and registered consumers must change a later supported strategy decision and a qualified execution choice; record distinct evidence and objective scopes and replay both loops.",
+        "Prioritized net-profitability experiments and value-of-information routing: Execute the registered execution-drag, selection, reasoning, event, capital-efficiency and research-economics experiments with controlled positive/null oracles and cost/risk-matched account paths."
+      ],
+      "domain_profiles": [
+        "ORDERS",
+        "CRYPTO_TRADE"
+      ],
+      "id": "BE-010",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Venue execution, parent/child orders, crypto spot adapters and reconciliation"
+    },
+    {
+      "authority": "Owner intent through unchanged VATI risk/router",
+      "capability_id": "WP-CAP-BE-011",
+      "declared_obligations": [
+        "preview/submit manual entry",
+        "winning-only add",
+        "close/partial",
+        "tighten",
+        "TP changes",
+        "hand to VAN",
+        "take back with management epoch",
+        "At least one eligible supported CEX spot integration; same risk/router/lifecycle owners and current markets preserved."
+      ],
+      "domain_profiles": [
+        "ORDERS"
+      ],
+      "id": "BE-011",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Manual trading, adds and management handover"
+    },
+    {
+      "authority": "VATI protection/lifecycle plus broker readback",
+      "capability_id": "WP-CAP-BE-012",
+      "declared_obligations": [
+        "serve canonical positions",
+        "protect",
+        "build history/statement projections",
+        "compute sourced execution cost",
+        "report risk current/limit/remaining",
+        "Do not call a mixture of medians an expectation or missing cost zero; record units, estimator and uncertainty.",
+        "Version canonical bucket key, product, side, amount/participation, fees, volatility, event and regime.",
+        "Order finality, cash/fee finality and markout maturity are separate; child messages are not independent trades.",
+        "Live/demo/paper/shadow/backtest/counterfactual provenance stays separate and source-authorized.",
+        "Cancel request does not release exposure; all feasible interleavings join authoritative facts.",
+        "Immediate and pending fills share confirmed-protection/recovery behavior; flatten request is not flatness.",
+        "Authoritative fill identity, correction/bust and fee currency feed one cash/position state.",
+        "Register actual outcome consumer, persist update and prove later decision effect.",
+        "Safety response immediate; economic monitoring uses qualified windows/sequential method; rollback never restores account history.",
+        "Frozen benchmark/horizon includes partial/non-fill costs and explicit fees without double counting.",
+        "Target delta accounts for actual holdings/working orders, netting mode and manual/strategy ownership.",
+        "Buy reserves quote, sell owned base; fees/base/quote/third assets and cash conversion explicit; no leverage.",
+        "No silent coercion, native/synthetic stop distinction, amend priority and trigger sources explicit.",
+        "Account-wide cancellation must be assessed against protective/manual orders; no automatic blanket enabling.",
+        "Preserve every eligible opportunity, immutable decision-time information, maturity and environment provenance; restate corrected analytics without rewriting original decisions or inventing missed fills."
+      ],
+      "domain_profiles": [
+        "ORDERS",
+        "CRYPTO_TRADE"
+      ],
+      "id": "BE-012",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Positions, protection, portfolio, history and TCA"
+    },
+    {
+      "authority": "Signed mandate plus VATI strategy qualification",
+      "capability_id": "WP-CAP-BE-013",
+      "declared_obligations": [
+        "list/inspect/promote qualified strategies",
+        "produce edge admission evidence",
+        "apply Normal/Risky/Aggressive requests",
+        "reconcile restart",
+        "attribution",
+        "Do not equate existing AllocatorV1 with calibrated model-weighted ranking. Specify a separately reviewed policy version without adding sizing/reservation authority.",
+        "Required forecasting plugins are complete integrations, while active selection uses qualified minimal stack.",
+        "Version ex-ante setup/regime definitions and transfer rules; discovery data cannot confirm its own pattern, and sparse or drifting support selects a qualified fallback.",
+        "Actual outcome producers and registered consumers must change a later supported strategy decision and a qualified execution choice; record distinct evidence and objective scopes and replay both loops.",
+        "Exact model epoch, output provenance and replay: Bind requested and resolved model, prompt/data/tool/config versions and response receipts to one qualification epoch; replay the recorded response and reproduce downstream decisions without invoking a provider.",
+        "Target-correct calibration and complete economic qualification: Measure a declared target across the eligible opportunity population, against its base-rate comparator; qualify a controlled positive net contribution using registered dependence, selection, uncertainty and cost procedures.",
+        "Prioritized net-profitability experiments and value-of-information routing: Execute the registered execution-drag, selection, reasoning, event, capital-efficiency and research-economics experiments with controlled positive/null oracles and cost/risk-matched account paths."
+      ],
+      "domain_profiles": [
+        "STRATEGIES"
+      ],
+      "id": "BE-013",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Strategy registry, signed trading modes and qualified edge-consumer contracts"
+    },
+    {
+      "authority": "News/Calendar adapters and immutable event ledger",
+      "capability_id": "WP-CAP-BE-014",
+      "declared_obligations": [
+        "admit feeds",
+        "collect scheduled values and headlines",
+        "canonicalize identities",
+        "track original publisher, entitlements, clocks and source failures"
+      ],
+      "domain_profiles": [
+        "NEWS"
+      ],
+      "id": "BE-014",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "News, calendar and source-health ingestion"
+    },
+    {
+      "authority": "Deterministic event research; bounded model proposes labels only",
+      "capability_id": "WP-CAP-BE-015",
+      "declared_obligations": [
+        "cluster/correct/retract",
+        "classify",
+        "measure reactions",
+        "build history",
+        "retrieve analogues",
+        "join prediction-market expectations only when admitted"
+      ],
+      "domain_profiles": [
+        "NEWS"
+      ],
+      "id": "BE-015",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Event analysis, history, analogues and expectations"
+    },
+    {
+      "authority": "VATI event/risk/lifecycle authority, not LLM",
+      "capability_id": "WP-CAP-BE-016",
+      "declared_obligations": [
+        "compute shadow decisions",
+        "reduce size/timing/rank",
+        "preserve VAN-managed positions",
+        "validate event strategies",
+        "admit per-path promotions"
+      ],
+      "domain_profiles": [
+        "NEWS"
+      ],
+      "id": "BE-016",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Governed news effects D1\u2013D7 and news strategy lifecycle"
+    },
+    {
+      "authority": "Device-signed bounded grant and VATI",
+      "capability_id": "WP-CAP-BE-017",
+      "declared_obligations": [
+        "prepare/sign/arm/revalidate/disarm/use",
+        "persist nonce",
+        "record latency",
+        "enforce two-source agreement at execution",
+        "reconcile submission"
+      ],
+      "domain_profiles": [
+        "NEWS"
+      ],
+      "id": "BE-017",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Armed news tickets, readiness and single-use execution"
+    },
+    {
+      "authority": "Chart domain persistence; VATI owns certified indicators",
+      "capability_id": "WP-CAP-BE-018",
+      "declared_obligations": [
+        "serve chart capability contract",
+        "persist indicator instances/drawing anchors/layouts",
+        "revise settings",
+        "calculate certified server indicators",
+        "sync conflicts"
+      ],
+      "domain_profiles": [
+        "CHART"
+      ],
+      "id": "BE-018",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Chart data contracts, indicators, drawings and workspaces"
+    },
+    {
+      "authority": "Isolated replay namespace with no live order capability",
+      "capability_id": "WP-CAP-BE-019",
+      "declared_obligations": [
+        "create deterministic replay sessions",
+        "step/seek",
+        "store paper actions separately",
+        "return outcomes and provenance"
+      ],
+      "domain_profiles": [
+        "CHART"
+      ],
+      "id": "BE-019",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Historical replay, simulation and isolated practice data"
+    },
+    {
+      "authority": "Persistent market/alert services",
+      "capability_id": "WP-CAP-BE-020",
+      "declared_obligations": [
+        "CRUD lists",
+        "evaluate price/indicator/drawing/news alerts on server",
+        "pause/restart/delete",
+        "scan instruments",
+        "emit canonical notifications"
+      ],
+      "domain_profiles": [
+        "MARKETS"
+      ],
+      "id": "BE-020",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Watchlists, persistent alerts and typed screening"
+    },
+    {
+      "authority": "VAN/JEV/research read lane; no execution grant",
+      "capability_id": "WP-CAP-BE-021",
+      "declared_obligations": [
+        "ingest consented chart observations and notes",
+        "join news/portfolio",
+        "generate fact-bound explanations",
+        "track contradiction",
+        "provide evidence artifacts",
+        "Extend registered trading evidence questions through the existing shared dial-jev consumer; answer quality is not a profitable-trade probability.",
+        "Remote interpretation/training stays off decision/protection path; bounded queues and credentials.",
+        "Separate cash accounting, strategy quality, execution contribution, statistical association, simulated alternatives and causal claims; report uncertainty and rival explanations instead of outcome-based stories.",
+        "Shared Jev consumer scope and asynchronous isolation: Run admitted typed Jev judgments and model research through the actual durable asynchronous path; qualified snapshots improve a later eligible decision while urgent execution/protection continues.",
+        "Point-in-time information, privacy and contamination controls: Build a scoped evidence packet from archived sources available at the cutoff; confirm findings prospectively with sealed outputs and explicit model-weight contamination limitations.",
+        "Independent review and measured Jev/model contribution: Compare numerical baseline, baseline plus Jev, and separate Argon/DeepSeek challenger arms on preregistered tasks with equal information and independent outcomes; preserve full trial and reviewer provenance."
+      ],
+      "domain_profiles": [
+        "NEWS"
+      ],
+      "id": "BE-021",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Analyst, chart observations and cross-signal intelligence"
+    },
+    {
+      "authority": "Research/learning pipeline separate from existing strategy training",
+      "capability_id": "WP-CAP-BE-022",
+      "declared_obligations": [
+        "analyse all manual trades",
+        "display soft behaviour findings",
+        "extract entry-time features",
+        "validate new candidates",
+        "track counterfactuals",
+        "Weekly/drift jobs register target/comparator/budget and every attempted or cancelled candidate.",
+        "Separate cash accounting, strategy quality, execution contribution, statistical association, simulated alternatives and causal claims; report uncertainty and rival explanations instead of outcome-based stories.",
+        "Shared Jev consumer scope and asynchronous isolation: Run admitted typed Jev judgments and model research through the actual durable asynchronous path; qualified snapshots improve a later eligible decision while urgent execution/protection continues.",
+        "Target-correct calibration and complete economic qualification: Measure a declared target across the eligible opportunity population, against its base-rate comparator; qualify a controlled positive net contribution using registered dependence, selection, uncertainty and cost procedures.",
+        "Independent review and measured Jev/model contribution: Compare numerical baseline, baseline plus Jev, and separate Argon/DeepSeek challenger arms on preregistered tasks with equal information and independent outcomes; preserve full trial and reviewer provenance.",
+        "Separate health dimensions, bounded adaptation and owner readback: Expose policy/procedural, economic, data, calibration and provider health separately; registered drift/hysteresis rules change a later qualified choice with evidence and exact consumer readback."
+      ],
+      "domain_profiles": [
+        "NEWS"
+      ],
+      "id": "BE-022",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Owner diagnostics, pattern discovery and learning review"
+    },
+    {
+      "authority": "DIAL/Work Tracker/mission owners via typed adapters",
+      "capability_id": "WP-CAP-BE-023",
+      "declared_obligations": [
+        "create/read/update permitted tasks",
+        "stream mission progress",
+        "join stage evidence",
+        "compute dependency graph/critical path",
+        "expose stable node/edge IDs"
+      ],
+      "domain_profiles": [
+        "WORK"
+      ],
+      "id": "BE-023",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Projects, tasks, missions and truthful workflow graphs"
+    },
+    {
+      "authority": "Qualified external worker/provider owns action; VAN projects it",
+      "capability_id": "WP-CAP-BE-024",
+      "declared_obligations": [
+        "assign/steer/cancel under lease",
+        "native conversation protocol",
+        "provider-bound allow/deny",
+        "reconcile job/task/artifact outcomes",
+        "Remote interpretation/training stays off decision/protection path; bounded queues and credentials."
+      ],
+      "domain_profiles": [
+        "AGENTS"
+      ],
+      "id": "BE-024",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Agents, Hermes, Muse and provider-bound interventions"
+    },
+    {
+      "authority": "Browser/device provider with exact owner scope",
+      "capability_id": "WP-CAP-BE-025",
+      "declared_obligations": [
+        "lease session",
+        "observe viewport",
+        "submit exact plan",
+        "upload/download with admission",
+        "report action outcome",
+        "revoke",
+        "bind file destination"
+      ],
+      "domain_profiles": [
+        "REMOTE"
+      ],
+      "id": "BE-025",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Browser, remote interaction, artifact and share intake"
+    },
+    {
+      "authority": "ARTEMIS and independent verification producer",
+      "capability_id": "WP-CAP-BE-026",
+      "declared_obligations": [
+        "enumerate qualified devices",
+        "version plans",
+        "queue/observe/cancel tests",
+        "preserve captures",
+        "publish pass/fail/unknown and build IDs"
+      ],
+      "domain_profiles": [
+        "ARTEMIS"
+      ],
+      "id": "BE-026",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "ARTEMIS device tests and independent evidence services"
+    },
+    {
+      "authority": "Memory/knowledge source owners and privacy policy",
+      "capability_id": "WP-CAP-BE-027",
+      "declared_obligations": [
+        "search/correct/retract facts",
+        "retain provenance",
+        "inspect history",
+        "edit goals",
+        "review/rollback adaptation",
+        "erase scoped records and derivatives"
+      ],
+      "domain_profiles": [
+        "MEMORY"
+      ],
+      "id": "BE-027",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Memory, knowledge, goals, privacy and erasure"
+    },
+    {
+      "authority": "Automation scheduler plus owning effect services",
+      "capability_id": "WP-CAP-BE-028",
+      "declared_obligations": [
+        "candidate/admit/version workflows",
+        "bind standing authority",
+        "schedule",
+        "report next/last run",
+        "execute through domain adapters",
+        "retry safely",
+        "Remote interpretation/training stays off decision/protection path; bounded queues and credentials.",
+        "Weekly/drift jobs register target/comparator/budget and every attempted or cancelled candidate.",
+        "Approved learned-state updates operate within current bounds; new policies require independent qualification and current promotion authority, with drift monitoring, expiry, fallback and open-parent recovery.",
+        "Durable global model and research budgets: Atomically reserve bounded per-attempt monetary/token/tool allowance across workers, settle actual costs and reconcile provider quotas with the global ledger.",
+        "Prioritized net-profitability experiments and value-of-information routing: Execute the registered execution-drag, selection, reasoning, event, capital-efficiency and research-economics experiments with controlled positive/null oracles and cost/risk-matched account paths."
+      ],
+      "domain_profiles": [
+        "AUTOMATION"
+      ],
+      "id": "BE-028",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Automation, reminders and schedules"
+    },
+    {
+      "authority": "Voice/conversation pipeline with OS/device consent boundary",
+      "capability_id": "WP-CAP-BE-029",
+      "declared_obligations": [
+        "create turns",
+        "stream transcript/audio",
+        "interrupt",
+        "retain history",
+        "manage speaker consent/erase",
+        "expose speech and task context"
+      ],
+      "domain_profiles": [
+        "VOICE",
+        "FLOATING"
+      ],
+      "id": "BE-029",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Conversation, voice and speaker-profile services"
+    },
+    {
+      "authority": "Shared owner projection from authoritative sources",
+      "capability_id": "WP-CAP-BE-030",
+      "declared_obligations": [
+        "aggregate typed events",
+        "arbitrate severity/freshness",
+        "dedupe delivery",
+        "persist acknowledgement",
+        "project orb semantics and compact hub summaries",
+        "Expose active binding, changed decision, evidence/maturity, authority and fallback without ungrounded profit claims."
+      ],
+      "domain_profiles": [
+        "HOME",
+        "FLOATING",
+        "MOBILE"
+      ],
+      "id": "BE-030",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Attention, notifications, presence and compact summaries"
+    },
+    {
+      "authority": "VAN settings/device service plus qualified providers",
+      "capability_id": "WP-CAP-BE-031",
+      "declared_obligations": [
+        "serve provider readiness and scopes",
+        "version settings",
+        "manage device inventory/provisioning",
+        "expose connection correlations",
+        "privacy defaults"
+      ],
+      "domain_profiles": [
+        "BOOTSTRAP",
+        "FLOATING",
+        "SETTINGS"
+      ],
+      "id": "BE-031",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Connected providers, settings, devices and diagnostics"
+    },
+    {
+      "authority": "Each domain owns facts; catalog aggregates without gaining authority",
+      "capability_id": "WP-CAP-BE-032",
+      "declared_obligations": [
+        "publish complete versioned capability inventory",
+        "bind every action to input/state/error/authority/readback",
+        "expose display projections and navigable subjects",
+        "Include every new read-only domain capability and actual unavailable/provider/runtime states in the existing capability catalogue.",
+        "Expose active binding, changed decision, evidence/maturity, authority and fallback without ungrounded profit claims.",
+        "Every new lifecycle/crypto operation has producer, caller, tests and scoped evidence before frontend.",
+        "Markets/accounts/order/positions/news/learning show genuine venue and assets, permissions, fee/protection/recovery states.",
+        "Internal optimizer states become contextual typed views; no new default global tab or dense Home.",
+        "Expose explanations, uncertainty, full trials, exact changes and active consumer state through typed account-scoped contracts; controls reconcile authority, version and idempotent outcomes in existing contexts.",
+        "Separate health dimensions, bounded adaptation and owner readback: Expose policy/procedural, economic, data, calibration and provider health separately; registered drift/hysteresis rules change a later qualified choice with evidence and exact consumer readback."
+      ],
+      "domain_profiles": [
+        "MOBILE",
+        "OPERATIONS"
+      ],
+      "id": "BE-032",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Whole-product capability, action and UI-consumption catalog"
+    },
+    {
+      "authority": "DIAL/Zuul qualified deployment and service operators",
+      "capability_id": "WP-CAP-BE-033",
+      "declared_obligations": [
+        "build reproducible service artifacts",
+        "configure staging",
+        "restore backups",
+        "migrate schema",
+        "prove rollback",
+        "quotas",
+        "bounded queues",
+        "alert health",
+        "Verified anchor plus tail reduces repeated work without accepting tampered history.",
+        "Remote interpretation/training stays off decision/protection path; bounded queues and credentials.",
+        "Safety response immediate; economic monitoring uses qualified windows/sequential method; rollback never restores account history.",
+        "24/7 operation still handles maintenance; nonce/clock constraints; cancel/query headroom protected.",
+        "Extend existing boundaries; justify any new process/store with measured isolation/correctness benefit."
+      ],
+      "domain_profiles": [
+        "OPERATIONS"
+      ],
+      "id": "BE-033",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Backend deployment, recovery, capacity and observability"
+    },
+    {
+      "authority": "DDS/qualified studio and control providers remain independent owners",
+      "capability_id": "WP-CAP-BE-034",
+      "declared_obligations": [
+        "project/read stage plans",
+        "expose design/research/security/CI evidence",
+        "admit cinematic/studio workspace candidate APIs and native-control bindings"
+      ],
+      "domain_profiles": [
+        "STUDIO"
+      ],
+      "id": "BE-034",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Development studio, CI/security and evidence-workspace adapters"
+    },
+    {
+      "authority": "VATI research coordinator; risk and order ownership unchanged; independent qualification and exact owner promotion",
+      "capability_id": "WP-CAP-BE-035",
+      "declared_obligations": [
+        "Protection parity for immediate and pending fills",
+        "Limit-price invariants and explicit order semantics",
+        "Pending-order expiry and event-policy propagation",
+        "Qualified chronological evaluator before automated strategy development",
+        "Leakage-proof chronology and genuine walk-forward records",
+        "Immutable dataset, quote, calendar and cost provenance",
+        "Complete trial ledger and honest statistical interpretation",
+        "Governed weekly strategy-development lifecycle",
+        "Preserve all current evaluator corrections: directional intrabar ambiguity, executable timing, limit prices, full cash charges, post-liquidation equity and account-coordinator parity.",
+        "Do not call a mixture of medians an expectation or missing cost zero; record units, estimator and uncertainty.",
+        "Preserve requested order type and side-correct limit; touching does not imply unlimited fills.",
+        "Price/time/cost/account oracle and causal tests are prerequisites to candidate efficacy.",
+        "Fit/selection/calibration/test records reflect actual chronology, with overlap controls.",
+        "Mutating later information cannot affect earlier features, decisions or commands.",
+        "Each arm has its own cash/reservations/holdings while receiving same permissible information and resource limits.",
+        "Frozen benchmark/horizon includes partial/non-fill costs and explicit fees without double counting.",
+        "Immediate/passive/chase/TWAP/participation/target methods have positive supported paths and constrained unsupported refusal.",
+        "DesignChangeProposal binds source/data/evaluator/alternatives/uncertainty, complexity effects and affected contracts.",
+        "No silent coercion, native/synthetic stop distinction, amend priority and trigger sources explicit.",
+        "Crypto full-account arms include correct data conventions, fees, liquidity drought, maintenance, delisting and stablecoin stress.",
+        "Astra proposals bind experimental evidence and causal claims; result classes and amendment path explicit.",
+        "Preregister independent comparison, costs, dependence, selection adjustment, null controls, trial census, protected chronological confirmation and stopping rules; inconclusive evidence cannot promote.",
+        "Version ex-ante setup/regime definitions and transfer rules; discovery data cannot confirm its own pattern, and sparse or drifting support selects a qualified fallback.",
+        "Point-in-time information, privacy and contamination controls: Build a scoped evidence packet from archived sources available at the cutoff; confirm findings prospectively with sealed outputs and explicit model-weight contamination limitations.",
+        "Target-correct calibration and complete economic qualification: Measure a declared target across the eligible opportunity population, against its base-rate comparator; qualify a controlled positive net contribution using registered dependence, selection, uncertainty and cost procedures.",
+        "Independent review and measured Jev/model contribution: Compare numerical baseline, baseline plus Jev, and separate Argon/DeepSeek challenger arms on preregistered tasks with equal information and independent outcomes; preserve full trial and reviewer provenance.",
+        "Prioritized net-profitability experiments and value-of-information routing: Execute the registered execution-drag, selection, reasoning, event, capital-efficiency and research-economics experiments with controlled positive/null oracles and cost/risk-matched account paths."
+      ],
+      "domain_profiles": [
+        "LEARNING"
+      ],
+      "id": "BE-035",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Qualified chronological strategy evaluator and simulator oracle"
+    },
+    {
+      "authority": "VATI research coordinator; risk and order ownership unchanged; independent qualification and exact owner promotion",
+      "capability_id": "WP-CAP-BE-036",
+      "declared_obligations": [
+        "Qualified chronological evaluator before automated strategy development",
+        "Leakage-proof chronology and genuine walk-forward records",
+        "Complete trial ledger and honest statistical interpretation",
+        "Governed weekly strategy-development lifecycle",
+        "Actual outcome producer, durable evidence, selector and evolution consumers form one integrated VATI loop.",
+        "Operational choices are automatic under qualified grants; novel policies require independent qualification and authorized promotion.",
+        "Evidence update, operational selection and policy mutation are three different typed effects.",
+        "Do not call a mixture of medians an expectation or missing cost zero; record units, estimator and uncertainty.",
+        "Version canonical bucket key, product, side, amount/participation, fees, volatility, event and regime.",
+        "Order finality, cash/fee finality and markout maturity are separate; child messages are not independent trades.",
+        "Live/demo/paper/shadow/backtest/counterfactual provenance stays separate and source-authorized.",
+        "Register actual outcome consumer, persist update and prove later decision effect.",
+        "Observation contribution, consumed revision and cursor/snapshot publish atomically.",
+        "No retroactive editing of issued decision; affected future statistics/models are invalidated or restated.",
+        "Use only fresh mature compatible evidence; pooling/fallback is versioned and justified.",
+        "Qualified hysteresis, tie tolerance, persistence and joint action envelope constrain parameter changes.",
+        "Weekly/drift jobs register target/comparator/budget and every attempted or cancelled candidate.",
+        "Price/time/cost/account oracle and causal tests are prerequisites to candidate efficacy.",
+        "Fit/selection/calibration/test records reflect actual chronology, with overlap controls.",
+        "Each arm has its own cash/reservations/holdings while receiving same permissible information and resource limits.",
+        "No live randomized exploration by default; off-policy claims require propensity/overlap assumptions.",
+        "Qualification binds exact cohort/evaluator/artifact, uncertainty and operational limits; author cannot self-certify.",
+        "New bindings require qualified and authenticated promotion; open parents retain policy unless explicit compatible migration.",
+        "Safety response immediate; economic monitoring uses qualified windows/sequential method; rollback never restores account history.",
+        "Frozen benchmark/horizon includes partial/non-fill costs and explicit fees without double counting.",
+        "Full positive loop is mandatory; real candidate may correctly fail economic tests.",
+        "Learned state can evolve under qualified rule; rule/action/reward/scope changes use policy evolution; risk changes keep own authority.",
+        "Required forecasting plugins are complete integrations, while active selection uses qualified minimal stack.",
+        "DesignChangeProposal binds source/data/evaluator/alternatives/uncertainty, complexity effects and affected contracts.",
+        "Each candidate lists operational cost, maintenance/state burden, alternatives and incremental evidence; safety complexity is mandatory.",
+        "Astra proposals bind experimental evidence and causal claims; result classes and amendment path explicit.",
+        "Version ex-ante setup/regime definitions and transfer rules; discovery data cannot confirm its own pattern, and sparse or drifting support selects a qualified fallback.",
+        "Actual outcome producers and registered consumers must change a later supported strategy decision and a qualified execution choice; record distinct evidence and objective scopes and replay both loops.",
+        "Approved learned-state updates operate within current bounds; new policies require independent qualification and current promotion authority, with drift monitoring, expiry, fallback and open-parent recovery.",
+        "Shared Jev consumer scope and asynchronous isolation: Run admitted typed Jev judgments and model research through the actual durable asynchronous path; qualified snapshots improve a later eligible decision while urgent execution/protection continues.",
+        "Exact model epoch, output provenance and replay: Bind requested and resolved model, prompt/data/tool/config versions and response receipts to one qualification epoch; replay the recorded response and reproduce downstream decisions without invoking a provider.",
+        "Target-correct calibration and complete economic qualification: Measure a declared target across the eligible opportunity population, against its base-rate comparator; qualify a controlled positive net contribution using registered dependence, selection, uncertainty and cost procedures.",
+        "Durable global model and research budgets: Atomically reserve bounded per-attempt monetary/token/tool allowance across workers, settle actual costs and reconcile provider quotas with the global ledger.",
+        "Independent review and measured Jev/model contribution: Compare numerical baseline, baseline plus Jev, and separate Argon/DeepSeek challenger arms on preregistered tasks with equal information and independent outcomes; preserve full trial and reviewer provenance.",
+        "Prioritized net-profitability experiments and value-of-information routing: Execute the registered execution-drag, selection, reasoning, event, capital-efficiency and research-economics experiments with controlled positive/null oracles and cost/risk-matched account paths.",
+        "Separate health dimensions, bounded adaptation and owner readback: Expose policy/procedural, economic, data, calibration and provider health separately; registered drift/hysteresis rules change a later qualified choice with evidence and exact consumer readback."
+      ],
+      "domain_profiles": [
+        "STRATEGIES",
+        "LEARNING"
+      ],
+      "id": "BE-036",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Continuous governed strategy and execution-policy development; operational learning integration"
+    },
+    {
+      "authority": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "capability_id": "WP-CAP-VAN-ML-PKT-004",
+      "declared_obligations": [
+        "Lock Qlib, LightGBM, NeuralForecast, XGBoost, Optuna, Feast/MLflow and transitive dependencies by tested version/hash",
+        "Build separate CPU research/inference environments, wheel/architecture matrix, resource and network policy",
+        "Register worker bootstrap, SBOM and safe model-parser compatibility"
+      ],
+      "domain_profiles": [
+        "LEARNING"
+      ],
+      "id": "VAN-ML-PKT-004",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Pinned dependencies and isolated research runtime"
+    },
+    {
+      "authority": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "capability_id": "WP-CAP-VAN-ML-PKT-005",
+      "declared_obligations": [
+        "Implement immutable source vintages, availability clocks, calendars, instrument identity and point-in-time universe",
+        "Join licensed market/news/expectation features without revised-future leakage; distinguish observed and reconstructed availability",
+        "Materialize versioned Parquet research snapshots from the existing data owners",
+        "Domain datasets retain all discovered/rejected/missing/migrated candidates through BE-038/044 joins, without blocking generic dataset development on an unavailable crypto source."
+      ],
+      "domain_profiles": [
+        "LEARNING"
+      ],
+      "id": "VAN-ML-PKT-005",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Point-in-time market dataset and universe snapshots"
+    },
+    {
+      "authority": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "capability_id": "WP-CAP-VAN-ML-PKT-006",
+      "declared_obligations": [
+        "Extend existing FeatureRegistry and feature contracts; compile offline/online transformations from one version",
+        "Implement lag/timeframe/peer expansion, fold-fitted preprocessing and aligned row masks",
+        "Integrate scoped Feast feature views/materialization and deterministic local inference snapshots"
+      ],
+      "domain_profiles": [
+        "LEARNING"
+      ],
+      "id": "VAN-ML-PKT-006",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Shared feature definitions and Feast parity"
+    },
+    {
+      "authority": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "capability_id": "WP-CAP-VAN-ML-PKT-007",
+      "declared_obligations": [
+        "Build returns, setup-event, ranking, realized-volatility, cost and excursion targets with explicit label intervals",
+        "Keep market observations, actual fills, synthetic controls, practice and counterfactual outcomes in separate namespaces",
+        "Preserve candidate sampling, rejection reason and censoring to expose selection bias",
+        "Separate terminal return, strategy outcome, adverse excursion, stop touch and fill targets; distinguish observed quotes from modeled cost distributions."
+      ],
+      "domain_profiles": [
+        "LEARNING"
+      ],
+      "id": "VAN-ML-PKT-007",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Targets, executable labels and outcome provenance"
+    },
+    {
+      "authority": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "capability_id": "WP-CAP-VAN-ML-PKT-008",
+      "declared_obligations": [
+        "Implement FoldPlan with interval purging, cohort-coherent cutoffs, calibration slices and embargo policy",
+        "Build full-versus-prefix and positive-poison diagnostics inspired by Freqtrade",
+        "Measure indicator/model feature convergence versus warmup and cache identity",
+        "Fit/selection/calibration/test records reflect actual chronology, with overlap controls.",
+        "Mutating later information cannot affect earlier features, decisions or commands."
+      ],
+      "domain_profiles": [
+        "LEARNING"
+      ],
+      "id": "VAN-ML-PKT-008",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Chronological folds, lookahead and warmup diagnostics"
+    },
+    {
+      "authority": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "capability_id": "WP-CAP-VAN-ML-PKT-009",
+      "declared_obligations": [
+        "Reproduce and close scoped main-source findings; implement observed intrabar ordering or explicit uncertainty bounds",
+        "Debit commission, financing, borrow/roll and conversion costs exactly once alongside fill spread/slippage",
+        "Produce post-liquidation MTM equity, drawdown and cash-flow-neutral performance with pending risk"
+      ],
+      "domain_profiles": [
+        "LEARNING"
+      ],
+      "id": "VAN-ML-PKT-009",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Simulation accounting, intrabar and timing corrections"
+    },
+    {
+      "authority": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "capability_id": "WP-CAP-VAN-ML-PKT-010",
+      "declared_obligations": [
+        "Replay through the shared account coordinator/risk/reservation/route policy, not only independent single-symbol cycles",
+        "Build comparable event streams, symbol calendars, margin and instrument specifications",
+        "Provide independent oracle export and documented comparator differences; no second live sender",
+        "Replay both whole-policy accounts independently, with nonlinear fees/liquidity, changed trade paths, cash and margin; retain size-only attribution as its separately labelled existing view.",
+        "Each arm has its own cash/reservations/holdings while receiving same permissible information and resource limits.",
+        "Crypto full-account arms include correct data conventions, fees, liquidity drought, maintenance, delisting and stablecoin stress."
+      ],
+      "domain_profiles": [
+        "LEARNING"
+      ],
+      "id": "VAN-ML-PKT-010",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Account-wide replay and execution-policy parity"
+    },
+    {
+      "authority": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "capability_id": "WP-CAP-VAN-ML-PKT-011",
+      "declared_obligations": [
+        "Implement VanQlibDataLoader and fold-scoped DataHandlerLP/DatasetH adapter over VAN-owned snapshots",
+        "Register T3 training tasks and explicit Qlib Recorder/MLflow run binding",
+        "Use model APIs only; disable Qlib execution/exchange and default equity-region semantics in VAN runtime"
+      ],
+      "domain_profiles": [
+        "LEARNING"
+      ],
+      "id": "VAN-ML-PKT-011",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Qlib data, processor and recorder integration"
+    },
+    {
+      "authority": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "capability_id": "WP-CAP-VAN-ML-PKT-012",
+      "declared_obligations": [
+        "Train horizon/cohort-specific regression baselines with explicit cost conventions and objective semantics",
+        "Export native Booster plus feature/target/preprocessor manifests",
+        "Implement out-of-fold predictions, stopping, uncertainty comparison and diagnostic explanations"
+      ],
+      "domain_profiles": [
+        "LEARNING"
+      ],
+      "id": "VAN-ML-PKT-012",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "LightGBM expected-return and net-edge regressors"
+    },
+    {
+      "authority": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "capability_id": "WP-CAP-VAN-ML-PKT-013",
+      "declared_obligations": [
+        "Implement binary event targets and raw-probability output with defined censor/tie behavior",
+        "Create disjoint calibration handoff, imbalance controls and reliability metadata",
+        "Compare against event base rate and existing rules on the same candidate population"
+      ],
+      "domain_profiles": [
+        "LEARNING"
+      ],
+      "id": "VAN-ML-PKT-013",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "LightGBM setup-event classification"
+    },
+    {
+      "authority": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "capability_id": "WP-CAP-VAN-ML-PKT-014",
+      "declared_obligations": [
+        "Implement VAN-owned Qlib-compatible/direct-LightGBM adapters for quantile and ranking objectives",
+        "Train explicit alpha/horizon quantiles and grouped cutoff/universe ranking with integer relevance rules",
+        "Validate quantile order, group contiguity and units; rank score remains ordinal"
+      ],
+      "domain_profiles": [
+        "LEARNING"
+      ],
+      "id": "VAN-ML-PKT-014",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "LightGBM quantile and grouped ranking adapters"
+    },
+    {
+      "authority": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "capability_id": "WP-CAP-VAN-ML-PKT-015",
+      "declared_obligations": [
+        "Integrate XGBoost as a comparable tabular challenger and linear/logistic/persistence/ranking baselines",
+        "Include HAR-style realized-volatility and authorized GARCH implementations with identical data cutoffs",
+        "Version each baseline and preserve failed/no-skill results"
+      ],
+      "domain_profiles": [
+        "LEARNING"
+      ],
+      "id": "VAN-ML-PKT-015",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Challenger and simple baseline suite"
+    },
+    {
+      "authority": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "capability_id": "WP-CAP-VAN-ML-PKT-016",
+      "declared_obligations": [
+        "Implement canonical unique_id/ds/y and historical/future/static exogenous mapping",
+        "Integrate NHITS multi-horizon training, native validation and fold-scoped scaling",
+        "Capture native outputs and learned preprocessing in the shared experiment/artifact contract"
+      ],
+      "domain_profiles": [
+        "LEARNING"
+      ],
+      "id": "VAN-ML-PKT-016",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "NeuralForecast bridge and N-HiTS"
+    },
+    {
+      "authority": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "capability_id": "WP-CAP-VAN-ML-PKT-017",
+      "declared_obligations": [
+        "Implement NBEATSx model plugin and valid exogenous capabilities",
+        "Expose trend/seasonality/exogenous decomposition only when the chosen architecture supports it",
+        "Measure contextual ablation and explanatory output stability"
+      ],
+      "domain_profiles": [
+        "LEARNING"
+      ],
+      "id": "VAN-ML-PKT-017",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "N-BEATSx contextual forecasts and decomposition"
+    },
+    {
+      "authority": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "capability_id": "WP-CAP-VAN-ML-PKT-018",
+      "declared_obligations": [
+        "Integrate DeepAR distribution loss, target-domain checks and pinned RNG/sample manifests",
+        "Retain individual trajectories through a tested adapter, or expose UNSUPPORTED_RAW_PATHS for a pinned API while implementing the documented retained-path adapter before closure",
+        "Keep marginal intervals separate from temporal and cross-asset joint-scenario claims"
+      ],
+      "domain_profiles": [
+        "LEARNING"
+      ],
+      "id": "VAN-ML-PKT-018",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "DeepAR distributional forecasts and retained scenarios"
+    },
+    {
+      "authority": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "capability_id": "WP-CAP-VAN-ML-PKT-019",
+      "declared_obligations": [
+        "Provide usable research plugins for TFT, PatchTST and iTransformer with capability introspection and target compatibility",
+        "Bound cross-market cohorts, missing histories, architecture-specific exogenous support and compute budgets",
+        "Test each admitted plugin in training/export/load/inference; economic admission remains conditional"
+      ],
+      "domain_profiles": [
+        "LEARNING"
+      ],
+      "id": "VAN-ML-PKT-019",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Contextual and multivariate neural challengers"
+    },
+    {
+      "authority": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "capability_id": "WP-CAP-VAN-ML-PKT-020",
+      "declared_obligations": [
+        "Extend existing vati.risk.conformal through separate forecast calibration producers and source-bound buckets",
+        "Implement probability calibration, quantile evaluation, optional conformalized intervals and realized coverage monitoring",
+        "Bind residuals to model/target/cohort/horizon and invalidate on refit; correct guarantee language",
+        "Apply one existing calibration policy with distinct target/model/horizon/state bindings; no source grade or judgment confidence can substitute."
+      ],
+      "domain_profiles": [
+        "LEARNING"
+      ],
+      "id": "VAN-ML-PKT-020",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "One calibration and uncertainty-validation boundary"
+    },
+    {
+      "authority": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "capability_id": "WP-CAP-VAN-ML-PKT-021",
+      "declared_obligations": [
+        "Use one study/budget/trial ledger for Qlib, native LightGBM and NeuralForecast candidates",
+        "Implement bounded neural Auto/Optuna adapter, nested temporal selection and independent final holdout",
+        "Preserve all tried configurations, early/pruned failures and comparison lineage"
+      ],
+      "domain_profiles": [
+        "LEARNING"
+      ],
+      "id": "VAN-ML-PKT-021",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Unified Optuna and rolling research studies"
+    },
+    {
+      "authority": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "capability_id": "WP-CAP-VAN-ML-PKT-022",
+      "declared_obligations": [
+        "Implement native Booster and safe neural artifact formats with verified source/configuration/manifests",
+        "Connect MLflow versions/runs and immutable VAN admission records; aliases remain advisory",
+        "Implement atomic stage transitions, CAS deployment binding and rollback compatibility"
+      ],
+      "domain_profiles": [
+        "LEARNING"
+      ],
+      "id": "VAN-ML-PKT-022",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Safe model artifacts and candidate registry"
+    },
+    {
+      "authority": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "capability_id": "WP-CAP-VAN-ML-PKT-023",
+      "declared_obligations": [
+        "Implement FreqAI-inspired retraining cadence, drift-triggered jobs, expiry and per-scope queues",
+        "Use existing durable workflow/scheduler owner, bounded retries, resumable checkpoints and worker leases",
+        "Finish candidate fits without automatic promotion; prioritize inference/protection over training"
+      ],
+      "domain_profiles": [
+        "LEARNING"
+      ],
+      "id": "VAN-ML-PKT-023",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Adaptive retraining scheduler and lifecycle"
+    },
+    {
+      "authority": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "capability_id": "WP-CAP-VAN-ML-PKT-024",
+      "declared_obligations": [
+        "Implement typed bounded ForecastService and immutable cache keys tied to actual material inputs",
+        "Add model/data/calibration freshness, schema validation, DI-style novelty and optional SVM/DBSCAN/PCA ablations",
+        "Persist accepted and abstained outputs with explicit reason and identity; no order fields"
+      ],
+      "domain_profiles": [
+        "LEARNING"
+      ],
+      "id": "VAN-ML-PKT-024",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Forecast serving, cache, freshness and novelty gates"
+    },
+    {
+      "authority": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "capability_id": "WP-CAP-VAN-ML-PKT-025",
+      "declared_obligations": [
+        "Join forecasts into existing OpportunityEngine/MetaLabeler and account coordinator through versioned evidence inputs",
+        "Train fusion only on OOF predictions, measure redundancy, preserve baseline fallback policies",
+        "Bind independent economic admission producer to Normal/Risky/Aggressive use; never modify signed ceilings",
+        "Required forecasting plugins are complete integrations, while active selection uses qualified minimal stack."
+      ],
+      "domain_profiles": [
+        "LEARNING"
+      ],
+      "id": "VAN-ML-PKT-025",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Forecast fusion, arbiter and mode evidence integration"
+    },
+    {
+      "authority": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "capability_id": "WP-CAP-VAN-ML-PKT-026",
+      "declared_obligations": [
+        "Add native cooldown, stop-loss streak and low-profit suppression proposals inspired by Freqtrade",
+        "Reuse existing drawdown/kill/health controls and resolve overlapping suppression deterministically",
+        "Persist per-account/environment/strategy/instrument/direction state and reasons"
+      ],
+      "domain_profiles": [
+        "LEARNING"
+      ],
+      "id": "VAN-ML-PKT-026",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Instrument and strategy protection policies"
+    },
+    {
+      "authority": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "capability_id": "WP-CAP-VAN-ML-PKT-027",
+      "declared_obligations": [
+        "Persist input-to-forecast-to-decision-to-outcome attribution and counterfactual separation",
+        "Connect existing drift/health/replay and observed broker costs to candidate retraining requests",
+        "Implement privacy/retention/correction invalidation, consented manual-trade datasets and no-survivor bias",
+        "Retain full discovery cohorts, delayed/censored outcomes and transitive invalidation lineage; no synthetic receipt may enter realized performance.",
+        "Preserve every eligible opportunity, immutable decision-time information, maturity and environment provenance; restate corrected analytics without rewriting original decisions or inventing missed fills."
+      ],
+      "domain_profiles": [
+        "LEARNING"
+      ],
+      "id": "VAN-ML-PKT-027",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Outcome ledger, drift and proprietary learning data"
+    },
+    {
+      "authority": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "capability_id": "WP-CAP-VAN-ML-PKT-028",
+      "declared_obligations": [
+        "Extend genuine gateway operations for forecasts, experiments, diagnostics, proposals, retraining and receipts",
+        "Publish complete typed states/actions/eligibility/readback, cancellation and source-age contract",
+        "Map all forecast features to existing Trading/Analyst/Strategy/Risk/Settings/Work surfaces without new frontend code"
+      ],
+      "domain_profiles": [
+        "LEARNING"
+      ],
+      "id": "VAN-ML-PKT-028",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Complete backend APIs and future-screen consumption"
+    },
+    {
+      "authority": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "capability_id": "WP-CAP-VAN-ML-PKT-029",
+      "declared_obligations": [
+        "Build approved VM service manifests with isolated users/quotas/secrets/network and capacity admission",
+        "Exercise install, migration, backup/restore, rollback, model hot-swap and telemetry retention",
+        "Use Global DIAL and Zuul routes; do not run on forbidden desktop or silently substitute local compute"
+      ],
+      "domain_profiles": [
+        "LEARNING"
+      ],
+      "id": "VAN-ML-PKT-029",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "VM deployment, isolation, recovery and service operations"
+    },
+    {
+      "authority": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "capability_id": "WP-CAP-VAN-ML-PKT-037",
+      "declared_obligations": [
+        "Implement reusable source/provider contracts with separate technical reachability, allowed data uses, observed terms reference and acquisition mode; no licence-purchase workflow or external spending.",
+        "Provide Netcup and Oracle worker profiles, actual region/host metadata and Global DIAL placement; distinguish operator/account eligibility from machine location.",
+        "Deliver a no-network fixture/replay path and real read-only adapter path using existing source permissions where established; unavailable access affects that source, never erases other engineering scope."
+      ],
+      "domain_profiles": [
+        "PREDICTION"
+      ],
+      "id": "VAN-ML-PKT-037",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Prediction-market scope, VM profiles and source capability contracts"
+    },
+    {
+      "authority": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "capability_id": "WP-CAP-VAN-ML-PKT-038",
+      "declared_obligations": [
+        "Implement versioned REST pagination, public metadata/books/trades and historical-boundary reconciliation plus authenticated read-only stream support where available.",
+        "Normalize exact fixed-point YES/NO bids; derive opposite asks, book depth and quote-quality metadata without float cash arithmetic.",
+        "Persist idempotent events with provider time, received time, available_at, source revision and gap/late-message state; stream gaps force resnapshot before usability."
+      ],
+      "domain_profiles": [
+        "PREDICTION"
+      ],
+      "id": "VAN-ML-PKT-038",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Kalshi and comparison-provider ingestion, depth and history"
+    },
+    {
+      "authority": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "capability_id": "WP-CAP-VAN-ML-PKT-039",
+      "declared_obligations": [
+        "Add versioned event-contract definitions: exact proposition, units, comparator, thresholds, time window, timezone, official source/vintage, rounding, resolution, cancellation and dispute rules.",
+        "Implement contract relation graph and reviewed exact/complement/overlap/non-equivalent mappings; semantic proposals from models cannot certify equivalence.",
+        "Keep event occurrence, official publication, trade close and settlement as distinct states/clocks; corrected or cancelled outcomes create new versions and invalidation edges."
+      ],
+      "domain_profiles": [
+        "PREDICTION"
+      ],
+      "id": "VAN-ML-PKT-039",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Event semantics, settlement and cross-venue equivalence"
+    },
+    {
+      "authority": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "capability_id": "WP-CAP-VAN-ML-PKT-040",
+      "declared_obligations": [
+        "Implement binary, mutually exclusive outcome and threshold distribution builders; explicit raw versus adjusted estimates, monotonicity, missing bins and open-tail policies.",
+        "Register probability levels/changes, entropy, tail mass, dispersion, consensus differences, spread/depth and freshness as distinct features; fit all transforms on permitted history.",
+        "Prevent artificial jumps at contract roll; compare aligned maturity/proposition only; preserve Kalshi/Polymarket agreement as consistency, not independent-probability multiplication."
+      ],
+      "domain_profiles": [
+        "PREDICTION"
+      ],
+      "id": "VAN-ML-PKT-040",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Coherent event distributions, quality and probability features"
+    },
+    {
+      "authority": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "capability_id": "WP-CAP-VAN-ML-PKT-041",
+      "declared_obligations": [
+        "Extend existing calibration by event family, horizon and liquidity cohort; retain market-implied values separately from calibrated physical-event probabilities.",
+        "Freeze admissible pre-release expectations and calculate surprise only once the correct official release becomes available; preserve every later revision separately.",
+        "Group training/calibration/testing by underlying event and aligned cross-market folds; report event-effective sample size, proper scores and concentration, not inflated quote counts."
+      ],
+      "domain_profiles": [
+        "PREDICTION"
+      ],
+      "id": "VAN-ML-PKT-041",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Event calibration, grouped chronology and frozen surprise"
+    },
+    {
+      "authority": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "capability_id": "WP-CAP-VAN-ML-PKT-042",
+      "declared_obligations": [
+        "Join point-in-time event features into existing Qlib tabular tasks and model-supported NeuralForecast historical exogenous inputs; future probability trajectories are never known covariates.",
+        "Implement conditional asset-response targets for returns, volatility, adverse excursion and trade quality by instrument/horizon/session, with simple market/calendar baselines.",
+        "Use out-of-fold predictions in fusion, measure incremental information beyond price/news/consensus inputs and preserve shared-source dependencies across model families."
+      ],
+      "domain_profiles": [
+        "PREDICTION"
+      ],
+      "id": "VAN-ML-PKT-042",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Conditional asset-response models and forecast-stack integration"
+    },
+    {
+      "authority": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "capability_id": "WP-CAP-VAN-ML-PKT-043",
+      "declared_obligations": [
+        "Implement external-asset evidence integration through inherited D1\u2013D7 policies and preserve manual-position ownership, no stop widening, calendar blackouts and two-source armed expectations.",
+        "Implement sandbox binary-contract value calculations for held-to-settlement and exit-before-settlement strategies with explicit depth/fees/currency/capital lockup; probabilities must be independently calibrated.",
+        "Implement maximum-loss/event-family portfolio stress and constrained Kelly-style research comparisons; output only bounded proposals, never final authority, actual order instructions or self-promotion."
+      ],
+      "domain_profiles": [
+        "PREDICTION"
+      ],
+      "id": "VAN-ML-PKT-043",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Calibrated event value and bounded position evidence"
+    },
+    {
+      "authority": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "capability_id": "WP-CAP-VAN-ML-PKT-044",
+      "declared_obligations": [
+        "Extend the existing replay adapter family with decimal cash, depth/partial-fill logic, order activation/cancel timing, queue uncertainty and trade/bid/ask distinction.",
+        "Bind versioned per-series/per-account fee precision and accumulator semantics; include settlement/dispute/cancel outcomes, venue cash reservations, financing and conversion costs where applicable.",
+        "Keep all positions on one coherent event/book path and reconcile final liquidation/settlement equity; sparse history returns evidence limitations rather than guaranteed maker fills."
+      ],
+      "domain_profiles": [
+        "PREDICTION"
+      ],
+      "id": "VAN-ML-PKT-044",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Execution-realistic prediction-contract replay"
+    },
+    {
+      "authority": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "capability_id": "WP-CAP-VAN-ML-PKT-045",
+      "declared_obligations": [
+        "Implement candidate discovery and exact payoff-state matrices for complementary and related contracts; title embeddings only shortlist candidates.",
+        "Compute worst-case payout/net margin at executable quantities across success/void/cancel/dispute states; separate conditional payoff hedge from guaranteed real execution.",
+        "Simulate venue-specific cash, collateral/currency haircut, settlement delay, partial first-leg fill, failed hedge and feasible unwind; do not assume cross-exchange atomicity or transferable immediate collateral."
+      ],
+      "domain_profiles": [
+        "PREDICTION"
+      ],
+      "id": "VAN-ML-PKT-045",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Contract-consistency and non-atomic arbitrage research laboratory"
+    },
+    {
+      "authority": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "capability_id": "WP-CAP-VAN-ML-PKT-046",
+      "declared_obligations": [
+        "Implement bounded inventory-aware two-sided quoting simulations with jump risk, time-to-event, event-family exposure, toxicity and fill-conditional expected value.",
+        "Compare no-quote, fixed-spread and inventory-aware policies; measure queue dependence, inventory age, markout at several horizons, fee/rebate assumptions and cancel effectiveness.",
+        "Implement research stop/quote-reduction on stale/gapped books and official-release risk; simulate pending cancels and retain exposure until confirmed. No spoofing/wash-trade logic or assumed special market-maker privileges."
+      ],
+      "domain_profiles": [
+        "PREDICTION"
+      ],
+      "id": "VAN-ML-PKT-046",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Inventory-aware event market-making research laboratory"
+    },
+    {
+      "authority": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "capability_id": "WP-CAP-VAN-ML-PKT-047",
+      "declared_obligations": [
+        "Implement four frozen studies: pre-event risk, surprise interpretation, volatility and opportunity ranking, all paired against the same incumbent and exposure-matched/simple controls.",
+        "Include dependency-aware uncertainty, trial census, event counts, publication/acquisition/execution lag tests, shuffled/lagged controls, full-account accounting and operating costs.",
+        "Deliver prospective forecast sealing, outcome maturation and per-use decisions QUALIFIED/REJECTED/INCONCLUSIVE/UNAVAILABLE; useful context is not automatically trading edge."
+      ],
+      "domain_profiles": [
+        "PREDICTION"
+      ],
+      "id": "VAN-ML-PKT-047",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Prediction-market incremental-value and prospective study programme"
+    },
+    {
+      "authority": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "capability_id": "WP-CAP-VAN-ML-PKT-048",
+      "declared_obligations": [
+        "Wire all data, probability, comparison, research-lab and evidence states into existing APIs, capability catalogue, alerts, logs and later-screen contracts; no early frontend.",
+        "Exercise Netcup/Oracle host profiles, endpoint changes, stream gaps, source revocation, disk/backlog pressure, restart, duplicate/unknown publication and schema rollback with no T0/provider network coupling.",
+        "Provide honest per-source integration state and no-procurement development path; all mandatory backend/parent obligations remain visible and source-specific real-data gates cannot be replaced by fixtures."
+      ],
+      "domain_profiles": [
+        "PREDICTION"
+      ],
+      "id": "VAN-ML-PKT-048",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Prediction-market consumers, operations and complete backend integration"
+    },
+    {
+      "authority": "IdentityRegistry and existing market-data/acquisition owners; read-only additive; no new financial authority",
+      "capability_id": "WP-CAP-BE-037",
+      "declared_obligations": [
+        "Validate chain/network/address identity and independent pool/router records; preserve raw IDs and migrations.",
+        "Register bounded discovery/RPC/indexer adapters using permitted existing access; document exact methods and operation allowlists.",
+        "Persist source availability, state anchors, cursors, quotas, retention and disabled-provider readbacks.",
+        "Chain discovery remains read-only; only independently admitted exchange products may enter actual order universe."
+      ],
+      "domain_profiles": [
+        "CHAIN"
+      ],
+      "id": "BE-037",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Chain-aware identity and permitted read-only discovery adapters"
+    },
+    {
+      "authority": "Existing screening, lake and research cohort owners; read-only additive; no new financial authority",
+      "capability_id": "WP-CAP-BE-038",
+      "declared_obligations": [
+        "Archive all discovered candidates before filters; persist every stage decision, reject, unknown and expiry.",
+        "Implement cheap-to-expensive screening with one-survivor invariants, typed unknown normalization and empirical rule versions.",
+        "Use existing scheduling with durable bounded queues, cause-specific rechecks and negative-cache invalidation."
+      ],
+      "domain_profiles": [
+        "CHAIN"
+      ],
+      "id": "BE-038",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Complete discovery cohorts and staged deterministic screening"
+    },
+    {
+      "authority": "Chain-specific research security adapter under existing data/feature owners; read-only additive; no new financial authority",
+      "capability_id": "WP-CAP-BE-039",
+      "declared_obligations": [
+        "Distinguish supported SPL Token and Token-2022 capabilities with explicit parser/program versions.",
+        "Inspect authority, transfer-fee/hook/delegate/extension evidence and technical account roles without transactions.",
+        "Emit factual REJECT/INVESTIGATE/NO_HARD_BLOCK findings, unsupported/unknown states and anchored provenance."
+      ],
+      "domain_profiles": [
+        "CHAIN"
+      ],
+      "id": "BE-039",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Solana token capability and uncertainty analyzer"
+    },
+    {
+      "authority": "EVM research adapter, not an execution client; read-only additive; no new financial authority",
+      "capability_id": "WP-CAP-BE-040",
+      "declared_obligations": [
+        "Inspect chain-qualified code/proxy/implementation/admin state with source and state hashes.",
+        "Evaluate transfer/mint/blacklist/tax/max-transaction and liquidity-removal capabilities through supported read-only evidence.",
+        "Retain code-verification uncertainty and state-dependent restrictions; no signing or broadcast operations."
+      ],
+      "domain_profiles": [
+        "CHAIN"
+      ],
+      "id": "BE-040",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "EVM contract/proxy capability and uncertainty analyzer"
+    },
+    {
+      "authority": "Existing market costs/TCA/target owners with chain-specific read-only simulation adapters; read-only additive; no new financial authority",
+      "capability_id": "WP-CAP-BE-041",
+      "declared_obligations": [
+        "Record independent buy/sell read-only simulation outcomes, route, amount, caller assumptions and state/finality.",
+        "Measure executable depth and cost conventions at several declared sizes; separate quotes from future cost/fill models.",
+        "Join to existing net-edge and TCA/label contracts with no double counting; invalid/unknown exitability remains research-only.",
+        "Chain discovery remains read-only; only independently admitted exchange products may enter actual order universe."
+      ],
+      "domain_profiles": [
+        "CHAIN"
+      ],
+      "id": "BE-041",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "State-bound buy/sell simulations and executable quote facts"
+    },
+    {
+      "authority": "Existing feature definitions and temporal research store; read-only additive; no new financial authority",
+      "capability_id": "WP-CAP-BE-042",
+      "declared_obligations": [
+        "Persist comparable time-indexed holdings, transfers, supply and technical-role evidence.",
+        "Retain raw and adjusted concentration plus uncertain funding/ownership clusters; deduplicate transaction-level routes.",
+        "Produce growth/flow/manipulation research features with coverage and missingness, never narratives from a single snapshot."
+      ],
+      "domain_profiles": [
+        "CHAIN"
+      ],
+      "id": "BE-042",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Temporal wallet attribution and holder-flow intelligence"
+    },
+    {
+      "authority": "Existing provenance, cache, outcome-ledger and data invalidation owners; read-only additive; no new financial authority",
+      "capability_id": "WP-CAP-BE-043",
+      "declared_obligations": [
+        "Maintain transitive source\u2192fact\u2192feature\u2192forecast\u2192experiment dependency references and explicit finality policies.",
+        "Process source correction, chain reorg, pool migration and contract changes as versioned invalidation events.",
+        "Block stale descendant consumption, replay revalidation safely and preserve all prior evidence without hindsight edits.",
+        "Chain discovery remains read-only; only independently admitted exchange products may enter actual order universe."
+      ],
+      "domain_profiles": [
+        "CHAIN"
+      ],
+      "id": "BE-043",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Finality, reorganization and descendant revalidation"
+    },
+    {
+      "authority": "Existing trading research, gateway capability catalogue, shared dial-jev and operations owners; read-only additive; no new financial authority",
+      "capability_id": "WP-CAP-BE-044",
+      "declared_obligations": [
+        "Integrate all new domain producers into existing LightGBM/NeuralForecast/Optuna/MLflow and matched-opportunity research owners; preserve separate generic and domain validations.",
+        "Extend registered shared Jev question sets and exact evidence resolution; no new Jev deployment or authority.",
+        "Publish authenticated headless funnel/cost/wallet/quote/experiment/status readbacks, quotas, retention, recovery and disabled-provider behavior.",
+        "Exercise valid success, negative, interruption, revoke and rollback paths on the DIAL topology with source-bound real integration receipts where required.",
+        "Chain discovery remains read-only; only independently admitted exchange products may enter actual order universe."
+      ],
+      "domain_profiles": [
+        "CHAIN"
+      ],
+      "id": "BE-044",
+      "protocol_contract": "contracts/whole_product/PROTOCOLS.json",
+      "registration_gate": "BG-001",
+      "registration_schema": "contracts/whole_product/RECORDS.schema.json#/$defs/CapabilityBinding",
+      "required_record_fields": [
+        "operation_id",
+        "transport",
+        "handler_ref",
+        "input_schema_ref",
+        "output_schema_ref",
+        "error_schema_ref",
+        "subject_scope",
+        "native_owner",
+        "consumer_ref",
+        "authority_policy_ref",
+        "idempotency_scope",
+        "outcome_lookup_ref",
+        "source_config_digest",
+        "qualification_receipt_refs"
+      ],
+      "runtime_registration": "NOT_QUALIFIED",
+      "title": "Read-only crypto end-to-end research, operations and native consumption contract"
+    }
+  ],
+  "deployment_rule": "No new required deployable services; native owner remains authoritative.",
+  "revision": "1.18"
+}

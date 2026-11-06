@@ -1,0 +1,34 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+____________ test_malformed_or_ambiguous_manifest_is_refused[field] ____________
+
+change = 'field'
+
+    @pytest.mark.parametrize('change', ['field','scope','partition','schema','authority','bool_count','bool_size','digest',
+        'duplicate_target','duplicate_entitlement','duplicate_partition','missing_target','empty_partitions','size_overflow'])
+    def test_malformed_or_ambiguous_manifest_is_refused(change):
+        record=fixture()
+        if change=='field': record['ready']=True
+        elif change=='scope': record['scope']['account_alias']='unbound'
+        elif change=='partition': record['partitions'][0]['path']='/tmp/untrusted'
+        elif change=='schema': record['schema_version']='van-ml/future'
+        elif change=='authority': record['authority_effect']='ORDER'
+        elif change=='bool_count': record['row_count']=True
+        elif change=='bool_size': record['partitions'][0]['size_bytes']=True
+        elif change=='digest': record['row_identity_digest']='A'*64
+        elif change=='duplicate_target': record['target_spec_ids']*=2
+        elif change=='duplicate_entitlement': record['entitlement_refs']*=2
+        elif change=='duplicate_partition': record['partitions']*=2
+        elif change=='missing_target': record['target_spec_ids']=[]
+        elif change=='empty_partitions': record['partitions']=[]
+        elif change=='size_overflow':
+            record['partitions'][0]['size_bytes']=2**63-1
+            record['partitions'].append(dict(record['partitions'][0], artifact_id='different-fixture-id'))
+>       with pytest.raises(DatasetContractError): parse(record)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE DatasetContractError
+
+trading/tests/test_dataset_manifest_candidates.py:72: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_dataset_manifest_candidates.py::test_malformed_or_ambiguous_manifest_is_refused[field]
+1 failed in 0.75s

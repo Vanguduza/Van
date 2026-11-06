@@ -1,0 +1,99 @@
+{
+  "disposition": "BLOCKED_SELECTION_NULL_REVISION_WITHOUT_CANONICAL_ERASE_PROOF",
+  "finding_id": "LAC135-REVIEW01",
+  "source_pins4_before_after": {
+    "backend/van_gateway/trading/account_application_drafts.py": "16f1d4febeeeec6866f34a4431d122cef8365df5e2897d8c9a63528aeda3afa2",
+    "backend/tests/test_account_application_drafts.py": "80e4596a49334e98cf9ed55200290d5d3f2fc1589c188bad8aac859f121eac9d",
+    "backend/van_gateway/app.py": "5dd80495c8a2627bfa2ddc7cf3477b3f5e129a0113e18b2370a23e99e0438140",
+    "backend/van_gateway/context/forget.py": "6fed25f2f105938d6e5be3ebbd98f3ac1bb8b36aee3fbf1b1dc19cbeb87a2625"
+  },
+  "patch_sha256": "fdcb61a5103826d550f68059c9e31ad6def31e46385559b7de15dae4c2c98f2f",
+  "archive_sha256": "e84a5b78f99f0c3f4e0ed89f7eb24c443bda2438f5abf2c521eea3dbac04405a",
+  "export_verified": "exact4 archive members and baseline-applied exact hashes; no runtime exports",
+  "canonical_basis": "T-LAC-135 immutable exact arguments/digest, original independent readback, changed selection invalidates old confirmation. Packet additionally requires corrupt selection UNKNOWN/ineligible/no new generation. LAC137 remains separate.",
+  "finding": {
+    "source_lines": [
+      "backend/van_gateway/trading/account_application_drafts.py:284",
+      "backend/van_gateway/trading/account_application_drafts.py:294",
+      "backend/van_gateway/trading/account_application_drafts.py:305",
+      "backend/van_gateway/trading/account_application_drafts.py:332",
+      "backend/van_gateway/trading/account_application_drafts.py:399"
+    ],
+    "repro": "Actual paired HTTP creates original revision1. Controlled SQL changes ONLY existing family selection row to revision999/draft_id=null; no erase occurs. Original GET says SUPERSEDED, then new operation expected_revision999 returns200/revision1000 and stores second body/projection. _current bypasses canonical joins for null draft_id, treating unsupported counter as trustworthy.",
+    "observation": {
+      "original_read_status": 200,
+      "original_selection_state": "SUPERSEDED",
+      "new_request_status": 200,
+      "new_selection_revision": 1000,
+      "artifacts": 2
+    },
+    "required_boundary": "Validate null/current selection revision against canonical original lifecycle/erase evidence before admitting new generation or reporting known supersession. Missing/malformed/unprovable history must remain UNKNOWN/ineligible and refuse new selection. Preserve lawful exact erase/tombstone privacy, normal post-erase generation, immutable original facts and metadata-only/no execution authority. Implementation choice remains owner controlled.",
+    "scope": "Data/currentness integrity defect; no provider/native authority or effects demonstrated."
+  },
+  "independent_evidence": {
+    "receipt": "/tmp/van-lac135-probe-y5s9tv98/terminal.json",
+    "receipt_sha256": "381fc2a94397e5e274c0027d51076fd0586281f2e40b5de2ad5d22157da7854b",
+    "raw": "/tmp/van-lac135-probe-y5s9tv98/raw.log",
+    "raw_sha256": "151aa83454473a0324c7daa10bf0f9c06a0983a93008ebaab6c88f582488ecf7",
+    "junit": "/tmp/van-lac135-probe-y5s9tv98/junit.xml",
+    "junit_sha256": "e4e676fc4dd48a19810f3afa37eb525ab9e55a1b6ebdaa50e15779613a146f05",
+    "actual_terminal": "exit1, one intended failure+three PASS, no errors/skips; children reaped/group absent",
+    "positive_controls": [
+      "same original id concurrent replay/new generation retains history",
+      "legacy/strict binding exact-request proof/current policy",
+      "explicit erase lost commit ACK, original erased readback, repeat/no resurrection"
+    ],
+    "first_collection_failure": "Preserved /tmp/van-lac135-probe-5avg8zri exit4: missing sparse conftest_automation; no tests executed. Corrected lane-first PYTHONPATH adds author-used baseline main test helper path only.",
+    "source_imports": "candidate backend/trading and tests precede fallback main test helpers",
+    "fixtures": "All own test source, raw/XML, both successful and failed cold SQLite fixtures remain retained. terminal.json includes exact SHA256/CRC32/owner/mode/path inventory; no prefix cleanup/archive/peer deletion."
+  },
+  "author_evidence": {
+    "executions": 71,
+    "unique_classname_name": 71,
+    "groups": {
+      "FINAL05": {
+        "executions": 35,
+        "new_unique": 35,
+        "xml_sha256": "9a2e7e2d77c3555bc55c77f5342c7bcd51048ddfd0d3ac87e492ecb817068d17",
+        "receipt_sha256": "1056fa21189cbbbda5b9a339d495e3805f5b71068db26691688c4b7313cf9c51"
+      },
+      "AFFECTED_AUTH_ARTIFACT03": {
+        "executions": 13,
+        "new_unique": 13,
+        "xml_sha256": "422de9ada29f1577218c0134eda73c507a8725abb8b91a08e5b9d98f5607f7ac",
+        "receipt_sha256": "e18c3476331e1fb60727588b72d940fc00beb24fd26ff723dc7396387df61bc7"
+      },
+      "AFFECTED_MEMORY_RETENTION": {
+        "executions": 22,
+        "new_unique": 22,
+        "xml_sha256": "d0733971f661752f57ac9b8e6c0928562255c64003718c8a9346a1e9502a8639",
+        "receipt_sha256": "f901dcc97b664178dd61f24846323800ac0fc33754e82f24ba755a18c78622e8"
+      },
+      "COLD_PROCESS": {
+        "executions": 1,
+        "new_unique": 1,
+        "xml_sha256": "c8a28ce29eb9d695c919292def284e9494a49d7244d6fe3bb4c597c04a5b6ca2",
+        "receipt_sha256": "9b76b24b3f20e4648527a48b424eff10a20811954be520c17ff030bdd60d78f7"
+      }
+    },
+    "pins": {
+      "backend/van_gateway/trading/account_application_drafts.py": "16f1d4febeeeec6866f34a4431d122cef8365df5e2897d8c9a63528aeda3afa2",
+      "backend/tests/test_account_application_drafts.py": "80e4596a49334e98cf9ed55200290d5d3f2fc1589c188bad8aac859f121eac9d",
+      "backend/van_gateway/app.py": "5dd80495c8a2627bfa2ddc7cf3477b3f5e129a0113e18b2370a23e99e0438140",
+      "backend/van_gateway/context/forget.py": "6fed25f2f105938d6e5be3ebbd98f3ac1bb8b36aee3fbf1b1dc19cbeb87a2625"
+    }
+  },
+  "source_review": {
+    "atomicity": "Existing Store BEGIN IMMEDIATE owns canonical body, selection and ArtifactService.ensure_projection(_db); final caller/expiry recheck before commit, independent inspect after commit uncertainty. Shielded service task survives HTTP cancellation; direct cancellation rollback test preserved.",
+    "identity_policy": "Server owner/device policy only; no account profile invented. Current token/revocation and existing strict/legacy bound proof policy read under writer. History read permitted by current same-owner device policy separately from original caller mutation.",
+    "privacy": "Strict enum-only nonsecret input; source and local policy hashes are descriptive. Explicit narrow delete removes own body/projection; opaque tombstone retains no original selection body. Existing inferred-memory categories/erase behavior unchanged; deliberately kept description additive.",
+    "authority": "provider descriptor unresolved and execution/confirmation eligibility false. No financial/provider/OAuth/approval write, new table/migration or external API. No private-core startup acceptance inferred."
+  },
+  "limits": [
+    "Fix selected corruption blocker and recheck frozen inputs.",
+    "Backend preview only; Android durable producer/wiring OPEN. No whole LAC135/fullBE004/provider/native/formal acceptance.",
+    "Six derived owner registry drifts require sole integration regeneration/review; exact combined source private-core/app-auth/source guards remain integration gates.",
+    "71 author executions correspond to71 distinct JUnit classname/name identities; supplemental fresh-process test is distinct, actual new interpreter HTTP read, not Android death/provider proof.",
+    "No candidate/main edits/commits/CI/Gradle/network/native financial effects/subagents."
+  ]
+}

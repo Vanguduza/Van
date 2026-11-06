@@ -1,0 +1,14 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+____________ test_a_float_cannot_hide_in_an_equal_redundant_sample _____________
+
+    def test_a_float_cannot_hide_in_an_equal_redundant_sample():
+        first=value(1,'100','start',1);last=value(3,'90','end',1)
+>       with pytest.raises(UnitError,match='NORMALIZED_INPUT_INVALID'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE UnitError
+
+trading/tests/test_flow_adjusted_risk.py:110: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_flow_adjusted_risk.py::test_a_float_cannot_hide_in_an_equal_redundant_sample
+1 failed in 1.22s

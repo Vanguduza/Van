@@ -1,0 +1,62 @@
+{
+  "state": "FROZEN_BEFORE_FINAL_AFFECTED_PROOF",
+  "utc": "2026-11-02T07:58:36.012115+00:00",
+  "published": "56dec626ffa0f6a9f52545e890344ebf0c737c24",
+  "lane": "/tmp/van-native-depth-source-lane-20261102",
+  "explicit_export_allowlist": [
+    "trading/vati/app/service.py",
+    "trading/vati/app/account_service.py",
+    "trading/vati/market_data/native_depth_worker.py",
+    "trading/vati/market_data/native_depth.py",
+    "trading/vati/market_data/native_archive.py",
+    "trading/vati/market_data/feeds/lake.py",
+    "trading/tests/test_native_depth_worker.py",
+    "trading/tests/test_native_depth_runtime.py",
+    "backend/tests/test_native_depth_history.py"
+  ],
+  "source_sha256": {
+    "trading/vati/app/service.py": "6963646da556143ae23f6e9e464d85288a3d4630d3e585f15edf9fc189d9d582",
+    "trading/vati/app/account_service.py": "39b8c26e182e15648f3fab6043fc2c68bec3e07d3280548c892da1253cc7a269",
+    "trading/vati/market_data/native_depth_worker.py": "f817d207f66b6f432d0023a25dc392a540d8849551c7fba600b0ad9834db1534",
+    "trading/vati/market_data/native_depth.py": "3d4fde40bb27a82fa70cf41713a65e976400b462ba2ea1276a2766f19d8349fd",
+    "trading/vati/market_data/native_archive.py": "86f4b63b242a07b1a6afde3bca5b78c067d16ee4997fbbaee3a2a9c27ba3e5fc",
+    "trading/vati/market_data/feeds/lake.py": "09572049f5aa06b50dd7795abee3a02bf220c74c768b7b49ce2a593c2897aa8e",
+    "trading/tests/test_native_depth_worker.py": "2c176c46a5effa35726b45a2e2293e69952e736c15a1a1feae7e72de6af84c67",
+    "trading/tests/test_native_depth_runtime.py": "68e3da5f304d3af7956710d2f93478af874510923b40529ce973743ccd143a54",
+    "backend/tests/test_native_depth_history.py": "2aca6ce56272061bdcec59fd58a48fcdfc372bff1f8ff5f14cacc9665b943ded"
+  },
+  "preimage_sha256": {
+    "trading/vati/app/service.py": "1fbf30ce7b79620b759fa11c20f6daad48dd2bcccba2388174c13a1316fbe5e6",
+    "trading/vati/app/account_service.py": "1469ca9a3fc419754999a9e9575f08b3f396cc429763906afb1d0c285c1abc45",
+    "trading/vati/market_data/native_depth_worker.py": null,
+    "trading/vati/market_data/native_depth.py": "0ee15738cfb7ff8705ee5feee1f0b08e9808d0ed0f6b7df06f4337805a447409",
+    "trading/vati/market_data/native_archive.py": "6551356e82cd61dfcbaec836098c861df93575c97cb61635331e75439bda9b3d",
+    "trading/vati/market_data/feeds/lake.py": "a7deb3f0aeb8508df01c47bdbac5ec34f13e1846f8f94f50f9024156809f6fba",
+    "trading/tests/test_native_depth_worker.py": null,
+    "trading/tests/test_native_depth_runtime.py": null,
+    "backend/tests/test_native_depth_history.py": "3925d399516cd3f8fca1430c655ba9b330d30285b138f8fd5e257df3423194c0"
+  },
+  "consumed_dependency_sha256": {
+    "trading/vati/accounts/registry.py": "6178715463eb89b33827d4dbd6cfe427ad9e65c2c00049caef0ec50633c74803",
+    "trading/vati/accounts/resource_version.py": "24712de8e5fe0532a05370708eda1642c8cd2603b497d45dbdb4010a27f7e094",
+    "trading/vati/accounts/physical_scope.py": "be3f035b19e51cc6af17e3d04827433f5e664125514b2427981399587bc37354",
+    "trading/vati/core/file_lock.py": "8a4901f7c958850dd502d24c255bbb60eaa86271e351a4cbedfaa1a4449aa674",
+    "trading/vati/execution/ctrader/transport.py": "a0bedce5225543e5b7f0ef65760ec5d7171a8700d8a5274bccec886bfed6fc60",
+    "trading/vati/execution/ctrader/adapter.py": "015404b1719a0fd3fff66c1cf9c0d6ffe539bf2be9d869ca0a854a4d989e1712",
+    "trading/vati/execution/ctrader/contracts.py": "fc719fecbc9fc032836ffddbd9900421e720fd9277ba6cb229f572f5c8d445d5",
+    "trading/vati/execution/ctrader/depth.py": "2d7229cc05eca6e81b8f5742767ba9fdb231adc02525f24f9048b28be8bbc35a",
+    "trading/vati/execution/ctrader/feed.py": "c68f047b379694eb22993c174c52f1644c91ab0545584d3617b551ad3c594cf8",
+    "backend/van_gateway/app.py": "53ddf7e582e30feff0dd823ec57a7d725d686deeb2a0626759a64abf9db08328",
+    "backend/van_gateway/trading/service.py": "cb28b870f1e454867cde618b1392285baaf6af31b87ac9dd7cbe8b1240efd1ed",
+    "backend/van_gateway/trading/native_depth_history.py": "85eb90654bf5967a17d409eaae1e5cb690841dc6ca9e860803832d642ff5b667",
+    "backend/tests/test_trading_api.py": "65d920eeacadd34589e1078bde5255d7c179893ebd5faa7b394e1991095c357a",
+    "trading/tests/test_ctrader.py": "b137ee346d0412839c18e6c48500ee8f8440ce33f12b5dca90c23d26409d1533",
+    "trading/tests/test_ctrader_native_depth.py": "6c9a235bfef5e73d027a1fe81269f99a114469ce293ab8422921d4a309ca331e",
+    "trading/tests/conftest.py": "7aac5662097f07f77f200dc4a13781f8db0c020298c6ff3760a5a99fe718f535",
+    "trading/tests/conftest_owner_authority.py": "045402ca74ee6824ea231f677aef11a6a08a2a9777bfdec7015628425f25c59d",
+    "registries/google_capabilities.json": "b6045a6f47d2b3c84005fe22c66e23906a7ccfd5b1ff0376453c27e990c22602",
+    "registries/capabilities.json": "7888f518ead54975b99387ea5457998fb83747c408c94dab635bc0f46eaa76bb",
+    "registries/projects.json": "95cb793bbec48f793eb0659685d9d8e78563880447014a151cd73410339f11ad"
+  },
+  "registry_combined_integration_requirement": "Current committed registry.py pin included. Peer cleanup candidate NOT consumed. Recheck same registered identity/generation/finalguard against peer registry changes at sole integration; no new interface presumed."
+}

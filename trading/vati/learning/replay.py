@@ -20,7 +20,7 @@ from typing import Mapping
 from vati.arbiter.strategy_arbiter import ACTIVE_STATES
 from vati.core.events import EventKind
 from vati.learning.episodes import Environment
-from vati.learning.health import HealthObservation
+from vati.learning.evidence import EvidenceClass, EvidenceError, LedgerEvidenceResolver, make_evidence_ref
 from vati.risk.contracts import StrategyState
 from vati.strategies.capsule import Capsule
 
@@ -35,6 +35,9 @@ class LearningReplayReport:
     broker_multipliers: int
     demotions_restored: int
     owner_promotions_restored: int = 0
+    unresolved_scope_refs: tuple[str, ...] = ()
+    excluded_scope_refs: tuple[str, ...] = ()
+    restated_projection_status: str = "NOT_CONSTRUCTED"
 
 
 def _engines_for_strategy(engines_by_symbol: Mapping[str, object], strategy_id: str):
@@ -47,7 +50,7 @@ def _engines_for_strategy(engines_by_symbol: Mapping[str, object], strategy_id: 
 
 
 def _restore_capsule_state_events(
-    ledger, engines_by_symbol: Mapping[str, object]
+    ledger, engines_by_symbol: Mapping[str, object], *, scope=None
 ) -> tuple[int, int]:
     """Replay durable capsule-state events only along the current hash lineage.
 
@@ -64,6 +67,8 @@ def _restore_capsule_state_events(
         by = str(p.get("by") or "")
         if authority == "AUTOMATIC_DEMOTION_ONLY":
             if by != "vati-learning":
+                continue
+            if scope is not None and not scope.admit(event):
                 continue
             kind = "demotion"
         elif authority == "OWNER_SIGNED_PROMOTION":
@@ -166,10 +171,18 @@ def restore_learning_runtime(ledger, learning, engines_by_symbol: Mapping[str, o
     """Rebuild reduce-only learning inputs before a restarted runtime can decide."""
     tca_n = 0
     health_n = 0
+    # C5: every replayed fact cites the ledger event it is read from. Strict: no
+    # session-environment fallback on replay — the event must record its own —
+    # but the restarted runtime's environment bounds what it may record
+    # (A-VATI M1): no replayed fact is weighted above the runtime reading it.
+    resolver = learning.resolver(ledger, replay=True)
+    scope = resolver.scope
 
     # Broker execution learning is only replayed where the original context was
     # persisted. Absence is not filled from current session state.
     for event in ledger.iter(EventKind.TCA_RECORD):
+        if scope is not None and not scope.admit(event):
+            continue
         p = event.payload
         required = (
             "learning_environment", "broker", "symbol", "session", "event_window",
@@ -184,45 +197,42 @@ def restore_learning_runtime(ledger, learning, engines_by_symbol: Mapping[str, o
             continue
         if cost_ratio.is_infinite():
             cost_ratio = Decimal("10")
-        learning.brokers.observe(
-            broker=str(p["broker"]),
-            symbol=str(p["symbol"]),
-            session=str(p["session"]),
-            environment=environment,
-            cost_ratio=cost_ratio,
-            slippage_pips=slippage,
-            rejected=bool(p.get("rejected", False)),
-            in_event_window=str(p["event_window"]) in {
-                "QUIET", "DRIFT", "PRE_BLACKOUT", "POST_BLACKOUT",
-            },
-        )
+        try:
+            learning.brokers.observe(
+                broker=str(p["broker"]),
+                symbol=str(p["symbol"]),
+                session=str(p["session"]),
+                environment=environment,
+                cost_ratio=cost_ratio,
+                slippage_pips=slippage,
+                rejected=bool(p.get("rejected", False)),
+                in_event_window=str(p["event_window"]) in {
+                    "QUIET", "DRIFT", "PRE_BLACKOUT", "POST_BLACKOUT",
+                },
+                evidence_ref=make_evidence_ref(EvidenceClass.TCA_RECORD, event.hash),
+                resolver=resolver,
+                correlation_hint=event.correlation_id,
+            )
+        except EvidenceError:
+            continue
         tca_n += 1
 
     # Experience artifacts are the durable source of the environment weighting
     # used by strategy health. Do not infer it from the current mandate.
     for event in ledger.iter(EventKind.TRADE_EXPERIENCE_ARTIFACT):
-        p = event.payload
-        try:
-            strategy_id = str(p["strategy_id"])
-            environment = Environment(str(p["environment"]))
-            r_multiple = Decimal(str(p["outcome"]["r_multiple"]))
-            process_ok = bool(p["review"]["process_ok"])
-            tca = p.get("execution", {}).get("tca") or {}
-            cost_ratio = Decimal(str(tca.get("cost_ratio", "1")))
-            if cost_ratio.is_infinite():
-                cost_ratio = Decimal("10")
-            evidence_ref = str(p.get("artifact_hash") or event.hash)
-        except (ValueError, ArithmeticError, KeyError, TypeError):
+        if scope is not None and not scope.admit(event):
             continue
-        learning.health.observe(HealthObservation(
-            strategy_id=strategy_id,
-            environment=environment,
-            r_multiple=r_multiple,
-            process_ok=process_ok,
-            cost_ratio=min(cost_ratio, Decimal("10")),
-            regime_fit=True,
-            evidence_ref=evidence_ref,
-        ))
+        # A-VATI M3: every value (R, process verdict, cost) is read from the
+        # artifact and the trade's ledger facts, never re-derived here.
+        strategy_id = event.payload.get("strategy_id")
+        if not strategy_id:
+            continue
+        try:
+            learning.health.observe_evidence(
+                str(strategy_id), make_evidence_ref(EvidenceClass.VTIL_ARTIFACT, event.hash),
+                resolver=resolver, correlation_hint=event.correlation_id)
+        except EvidenceError:
+            continue
         health_n += 1
 
     capsule_multipliers = 0
@@ -268,8 +278,9 @@ def restore_learning_runtime(ledger, learning, engines_by_symbol: Mapping[str, o
             broker_multipliers += 1
 
     exact_demotions, owner_promotions = _restore_capsule_state_events(
-        ledger, engines_by_symbol
+        ledger, engines_by_symbol, scope=scope
     )
+    projection = learning.update_projection(ledger)
     return LearningReplayReport(
         tca_observations=tca_n,
         health_observations=health_n,
@@ -277,6 +288,9 @@ def restore_learning_runtime(ledger, learning, engines_by_symbol: Mapping[str, o
         broker_multipliers=broker_multipliers,
         demotions_restored=exact_demotions,
         owner_promotions_restored=owner_promotions,
+        restated_projection_status=projection["status"],
+        unresolved_scope_refs=tuple(sorted(scope.unresolved_refs)) if scope is not None else (),
+        excluded_scope_refs=tuple(sorted(scope.excluded_refs)) if scope is not None else (),
     )
 
 

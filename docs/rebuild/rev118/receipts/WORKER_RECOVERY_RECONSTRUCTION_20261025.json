@@ -1,0 +1,31 @@
+{
+  "schema": "van.rebuild.worker-recovery/1",
+  "recovered_base": "53b026366050b93d3c26bf90dad0f5fb02782515",
+  "branch": "ccr-9e07e1af-8mgz1p",
+  "new_worker_execution": {
+    "child_exit": 0,
+    "thread_created_and_joined": true,
+    "initial_process_count": 8,
+    "initial_zombies": 0,
+    "initial_pids_current": 36,
+    "pids_max": "max"
+  },
+  "old_workspace_survived": false,
+  "archive_path": "/workspace/van-owner-alert-commands-uncommitted-20261025.zip",
+  "expected_archive_sha256": "f3763a4f565827fb0f8058144bdd0bfa8919060447de83b89c19d2cbc7d25ba6",
+  "archive_retrieved": false,
+  "exact_restoration_claimed": false,
+  "recovery_kind": "EXPLICIT_RECONSTRUCTION_FROM_OWNER_CHECKPOINT_AND_SURVIVING_SOURCE",
+  "investigation": [
+    "New workspace contained only empty library-files/scratch/shared directories; original checkout and all four recovery files absent.",
+    "GitHub PR105 and remote branch both remained at53b02636. No candidate/recovery branch, release or PR comment attachment found. Actions artifact inventory found no recovery backup.",
+    "Cloud Environment exposes current-worker status/network diagnostics, no previous-worker filesystem or restart tool. Editing configuration is not claimed to restart a worker.",
+    "Commander lists dial-control online but filesystem read returned monthly usage limit; do not retry/reconnect.",
+    "Pinned DDS64d6b715 restored into a separate sibling for source contract tests; no DDS development or live runtime claim."
+  ],
+  "limits": [
+    "Original55-file archive content/hash cannot be verified or compared without the original bytes; this reconstructed candidate is separately tested.",
+    "Original11pure checks and failedSQL/HTTP attempts are owner-supplied historical checkpoint evidence only, not recreated original artifacts.",
+    "No PID1/unrelated process killed; large browser/emulator qualification remains on disposable hosted workers."
+  ]
+}

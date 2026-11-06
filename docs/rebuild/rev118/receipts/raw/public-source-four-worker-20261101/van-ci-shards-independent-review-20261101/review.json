@@ -1,0 +1,89 @@
+{
+  "schema": "van.independent-ci-four-worker-source-review/1",
+  "state": "BOUNDED_FROZEN_SOURCE_REVIEW_BLOCKED_ONE_SOURCE_PROVENANCE_FINDING",
+  "base": "fd33b0759b9ae170f8bdfdf27f9afe7082da7830",
+  "worktree": "/workspace/van-review-2026-10-18/publish",
+  "reviewer": "Sol medium independent bounded SOURCE review; root decisions only",
+  "source_identity": {
+    "owned_paths": 8,
+    "archive_patch_all_current_before_after_final_pins_match": true,
+    "before": "before.json",
+    "after": [
+      "after.json",
+      "final-source-pins.json"
+    ],
+    "patch_paths_exact_owned8": true,
+    "archive_sha256": "87bfc6e299e450c9bc2320c791f12ce1deb444b5172475a939685b32b890de0b",
+    "patch_sha256": "247eee1ac6b4120b4516b4557aa9755a756bfcc0de2484107583bc41d46ed3d8"
+  },
+  "blocking_findings": [
+    {
+      "id": "CI4-REVIEW-01",
+      "path": "tools/rebuild/public_source_shards.py:38",
+      "related": [
+        "tools/rebuild/public_source_shards.py:146",
+        "tools/rebuild/backend_public_source.py:124"
+      ],
+      "finding": "Exact-SHA source/fixture/config provenance ignores untracked pytest source/config. source_identity checks git diff HEAD but not additional source files; untracked conftest changes actual collection for same committed source while both independent parent and pytest observations claim clean exact HEAD/tree. If control/workers share this contamination, equal complete inventories do not detect omitted committed cases.",
+      "probe": "untracked-collection-results.json",
+      "observed": "Actual production helper collect on committed tiny8case fixture returns8. Adding only untracked rootconftest drops1case per selectedfile; actual collect returns0 and records4 with identical parent/child before/after sourceidentity and no forbidden storageevents. Allselectedmodules still represented, so assignment accepts reducedinventory.",
+      "qualification_boundary": "Local tiny realpytest instrumentation counterexample, not a four-native-worker execution or fabricated hosted qualification. Local environment is observed honestly; no native runtime acceptance inferred. Needs a narrow source/config cleanliness fix preserving generated evidence/runtime scratch allowances and existing scope.",
+      "state": "ROOT_ACCEPTED_BLOCKING_QUALIFICATION_DEFECT",
+      "root_required_boundary": "Actual pytest-affecting untracked/config/plugin inputs, including ignored paths where relevant, must not change exact committed scope. Agreement/hash of injected reducedinventory is insufficient. Approved generated runtime artifacts need explicit handling outside executable source; no blanket .gitignore trust."
+    }
+  ],
+  "positive_independent_evidence": [
+    {
+      "artifact": "structural-verification.json",
+      "finding": "Every other existingjob and all top-level workflowtrigger/concurrency/permissions/config equal fd33 baseline; only one new4matrix job added. backend-public-source ID/name retained, always-run aggregation, fail-fastfalse, max4, no continue-on-error. Live/template bytes identical; frozen374mutation source unchanged."
+    },
+    {
+      "artifact": "structural-verification.json",
+      "finding": "Original plan/ROOTS/PRIVATE/firewall/exclusions/five exact approvedskip mappings/runtime AST unchanged. Costmap affects wholefile deterministic placement only, with currenttesthash matching or collectedcasecount fallback; selected node scope does not depend on weights."
+    },
+    {
+      "artifact": "edge-results.json",
+      "finding": "Four narrow actualpytest production helper probes failclosed: collection-time moduleskip exit3; emptyinventory exit3; emptyshard exit3; passedcall with actual teardownfailure exit1. Each parent terminal recorded nonzero; teardown failed phase retained."
+    },
+    {
+      "finding": "Aggregate independently verifies exact collection/assignment/execution nodeunion, per-node setup/call/teardown/JUnit property correlation, approvedskip reason, source/environment/runattempt/nonce, real child/parent terminal exits, auditidentity/artifacthashes and required all4 workers/media; missing/status-only/collection-only/partial/failed outputs cannot qualify by status fallback."
+    },
+    {
+      "finding": "Media remains separate hashed runtime with real collection/execution control; fourgatewayjobs own pinned freshPG17.11/Node24.19/Python3.12/Chromium setup and separate basetemps. Other native/private/admission gates unchanged."
+    }
+  ],
+  "independent_probe_scope": {
+    "artifact_files": [
+      "untracked-collection-results.json",
+      "edge-results.json",
+      "structural-verification.json"
+    ],
+    "raw_logs": [
+      "clean-control.log",
+      "untracked-config-control.log",
+      "collection-module-skip.log",
+      "empty-inventory.log",
+      "empty-shard.log",
+      "teardown-failure.log"
+    ],
+    "preflight": "Unchanged4GiB free-space reserve checked before owned /tmp fixtures",
+    "processes": "Bounded subprocess.run timeout30s each; all children terminal and reaped",
+    "cleanup": "Owned TemporaryDirectory fixture repos/basetemps removed. Tiny fixture-only Git commits establish actual exact HEAD; no candidate source edits/commits/CI dispatch or nativeeffects.",
+    "source_imports": "Exact productionhelper/auditor copies with pinned bytes in isolated fixture; explicit fixturePYTHONPATH, no parent source monkeypatch/forged receipts."
+  },
+  "existing_evidence_readback": {
+    "r7_receipt": "/workspace/van-ci-shards-focused-r7-20261101/receipt.json",
+    "r7_actual_xml_verified": {
+      "tests": 88,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "scope": "Worker88 instrument/workflow/legacy/auditorcases, overlapping prior sets; not full application/native4workerqualification or measured performance. R6 preflightrefusal remains unexecuted, no reserve waiver."
+  },
+  "remaining": [
+    "Narrow sourceprovenance repair and new frozenpins; independently rerun exact untracked-config counterexample and affected edgechecks before commit/publication.",
+    "Normal authorizations/canonical manifests/hooks/required baseline verification and publication/exacthead CI remain integration owner responsibility; existing mirror-only template authority stays narrow. No trustedchecker/ledger/authrecord/mutationcorpus edit is authorized here.",
+    "Native exacthead4freshworker execution plus full control/assignment/execution receipts and actual jobtimings are still required. No speedup/native/unit/gate/release acceptance or waiver is issued."
+  ]
+}

@@ -1,0 +1,142 @@
+FFFFFFFFF                                                                [100%]
+=================================== FAILURES ===================================
+_ test_growing_native_record_is_read_with_a_real_bound_even_after_a_small_stat _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-558/test_growing_native_record_is_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f4a8125b800>
+
+    def test_growing_native_record_is_read_with_a_real_bound_even_after_a_small_stat(tmp_path,monkeypatch):
+        target=tmp_path/'growing.json';target.write_bytes(b'x'*5000)
+        stat=Path.stat;opened=Path.open;requests=[]
+        class Tracked:
+            def __init__(self,raw):self.raw=raw
+            def __enter__(self):return self
+            def __exit__(self,*exc):self.raw.close()
+            def read(self,size=-1):requests.append(size);return self.raw.read(size)
+        def small(path,*args,**kwargs):
+            value=stat(path,*args,**kwargs)
+            return SimpleNamespace(st_size=1) if path==target and kwargs.get('follow_symlinks',True) else value
+        def track(path,*args,**kwargs):
+            value=opened(path,*args,**kwargs)
+            return Tracked(value) if path==target else value
+        monkeypatch.setattr(native_archive,'MAX_RECORD_BYTES',64)
+        monkeypatch.setattr(Path,'stat',small);monkeypatch.setattr(Path,'open',track)
+        with pytest.raises(ValueError,match='resource bound'):NativeMarketArchive._read(target)
+>       assert requests==[65],'native source consumed an unbounded record after its pre-read stat'
+E       AssertionError: native source consumed an unbounded record after its pre-read stat
+E       assert [-1] == [65]
+E         
+E         At index 0 diff: -1 != 65
+E         Use -v to get more diff
+
+trading/tests/test_native_archive_read_budget.py:32: AssertionError
+_ test_request_budget_refuses_valid_history_without_modifying_or_recapturing_it _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-558/test_request_budget_refuses_va0')
+
+    def test_request_budget_refuses_valid_history_without_modifying_or_recapturing_it(tmp_path):
+        c=contract();root=tmp_path/'depth';writer=NativeDepthArchive(root,clock=lambda:250000)
+        first=writer.record('original',c,sample(c));part=writer._partition(c.native_scope,'DEPTH')
+        files={p.name:p.read_bytes() for p in part.glob('*.json')};size=sum(map(len,files.values()))
+>       bounded=NativeDepthArchive(root,clock=lambda:500000,max_history_bytes=size-1)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: NativeMarketArchive.__init__() got an unexpected keyword argument 'max_history_bytes'
+
+trading/tests/test_native_archive_read_budget.py:39: TypeError
+_____ test_exact_record_and_index_byte_budget_admits_the_original_snapshot _____
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-558/test_exact_record_and_index_by0')
+
+    def test_exact_record_and_index_byte_budget_admits_the_original_snapshot(tmp_path):
+        c=contract();root=tmp_path/'depth';writer=NativeDepthArchive(root,clock=lambda:250000)
+        first=writer.record('original',c,sample(c));part=writer._partition(c.native_scope,'DEPTH')
+        size=sum(p.stat().st_size for p in part.glob('*.json'))
+>       bounded=NativeDepthArchive(root,clock=lambda:500000,max_history_bytes=size)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: NativeMarketArchive.__init__() got an unexpected keyword argument 'max_history_bytes'
+
+trading/tests/test_native_archive_read_budget.py:51: TypeError
+___ test_configured_publication_capacity_refuses_before_a_new_record_commits ___
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-558/test_configured_publication_ca0')
+
+    def test_configured_publication_capacity_refuses_before_a_new_record_commits(tmp_path):
+        c=contract();root=tmp_path/'depth';writer=NativeDepthArchive(root,clock=lambda:250000)
+        writer.record('original',c,sample(c));part=writer._partition(c.native_scope,'DEPTH')
+        files={p.name:p.read_bytes() for p in part.glob('*.json')};size=sum(map(len,files.values()))
+>       bounded=NativeDepthArchive(root,clock=lambda:400000,max_history_bytes=size)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: NativeMarketArchive.__init__() got an unexpected keyword argument 'max_history_bytes'
+
+trading/tests/test_native_archive_read_budget.py:59: TypeError
+_ test_native_history_budget_is_a_bounded_integer_or_explicit_legacy_mode[True] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-558/test_native_history_budget_is_0')
+bad = True
+
+    @pytest.mark.parametrize('bad',[True,0,-1,1.0,256*1024**2+1])
+    def test_native_history_budget_is_a_bounded_integer_or_explicit_legacy_mode(tmp_path,bad):
+>       with pytest.raises(ValueError):NativeDepthArchive(tmp_path/'depth',max_history_bytes=bad)
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: NativeMarketArchive.__init__() got an unexpected keyword argument 'max_history_bytes'
+
+trading/tests/test_native_archive_read_budget.py:67: TypeError
+__ test_native_history_budget_is_a_bounded_integer_or_explicit_legacy_mode[0] __
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-558/test_native_history_budget_is_1')
+bad = 0
+
+    @pytest.mark.parametrize('bad',[True,0,-1,1.0,256*1024**2+1])
+    def test_native_history_budget_is_a_bounded_integer_or_explicit_legacy_mode(tmp_path,bad):
+>       with pytest.raises(ValueError):NativeDepthArchive(tmp_path/'depth',max_history_bytes=bad)
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: NativeMarketArchive.__init__() got an unexpected keyword argument 'max_history_bytes'
+
+trading/tests/test_native_archive_read_budget.py:67: TypeError
+_ test_native_history_budget_is_a_bounded_integer_or_explicit_legacy_mode[-1] __
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-558/test_native_history_budget_is_2')
+bad = -1
+
+    @pytest.mark.parametrize('bad',[True,0,-1,1.0,256*1024**2+1])
+    def test_native_history_budget_is_a_bounded_integer_or_explicit_legacy_mode(tmp_path,bad):
+>       with pytest.raises(ValueError):NativeDepthArchive(tmp_path/'depth',max_history_bytes=bad)
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: NativeMarketArchive.__init__() got an unexpected keyword argument 'max_history_bytes'
+
+trading/tests/test_native_archive_read_budget.py:67: TypeError
+_ test_native_history_budget_is_a_bounded_integer_or_explicit_legacy_mode[1.0] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-558/test_native_history_budget_is_3')
+bad = 1.0
+
+    @pytest.mark.parametrize('bad',[True,0,-1,1.0,256*1024**2+1])
+    def test_native_history_budget_is_a_bounded_integer_or_explicit_legacy_mode(tmp_path,bad):
+>       with pytest.raises(ValueError):NativeDepthArchive(tmp_path/'depth',max_history_bytes=bad)
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: NativeMarketArchive.__init__() got an unexpected keyword argument 'max_history_bytes'
+
+trading/tests/test_native_archive_read_budget.py:67: TypeError
+_ test_native_history_budget_is_a_bounded_integer_or_explicit_legacy_mode[268435457] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-558/test_native_history_budget_is_4')
+bad = 268435457
+
+    @pytest.mark.parametrize('bad',[True,0,-1,1.0,256*1024**2+1])
+    def test_native_history_budget_is_a_bounded_integer_or_explicit_legacy_mode(tmp_path,bad):
+>       with pytest.raises(ValueError):NativeDepthArchive(tmp_path/'depth',max_history_bytes=bad)
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: NativeMarketArchive.__init__() got an unexpected keyword argument 'max_history_bytes'
+
+trading/tests/test_native_archive_read_budget.py:67: TypeError
+=========================== short test summary info ============================
+FAILED trading/tests/test_native_archive_read_budget.py::test_growing_native_record_is_read_with_a_real_bound_even_after_a_small_stat
+FAILED trading/tests/test_native_archive_read_budget.py::test_request_budget_refuses_valid_history_without_modifying_or_recapturing_it
+FAILED trading/tests/test_native_archive_read_budget.py::test_exact_record_and_index_byte_budget_admits_the_original_snapshot
+FAILED trading/tests/test_native_archive_read_budget.py::test_configured_publication_capacity_refuses_before_a_new_record_commits
+FAILED trading/tests/test_native_archive_read_budget.py::test_native_history_budget_is_a_bounded_integer_or_explicit_legacy_mode[True]
+FAILED trading/tests/test_native_archive_read_budget.py::test_native_history_budget_is_a_bounded_integer_or_explicit_legacy_mode[0]
+FAILED trading/tests/test_native_archive_read_budget.py::test_native_history_budget_is_a_bounded_integer_or_explicit_legacy_mode[-1]
+FAILED trading/tests/test_native_archive_read_budget.py::test_native_history_budget_is_a_bounded_integer_or_explicit_legacy_mode[1.0]
+FAILED trading/tests/test_native_archive_read_budget.py::test_native_history_budget_is_a_bounded_integer_or_explicit_legacy_mode[268435457]
+9 failed in 0.91s

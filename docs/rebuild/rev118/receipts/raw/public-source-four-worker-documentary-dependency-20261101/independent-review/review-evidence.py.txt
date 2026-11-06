@@ -1,0 +1,43 @@
+import hashlib,json,re,subprocess,zipfile,email,xml.etree.ElementTree as ET
+from pathlib import Path
+E=Path('/workspace/van-ci-shards-documentary-dependency-20261101');OUT=Path('/workspace/van-ci-dependency-independent-review-20261101');ROOT=Path('/workspace/van-review-2026-10-18/publish');h=json.loads((E/'HANDOFF.json').read_text())
+normalize=lambda n:re.sub(r'[-_.]+','-',n).lower()
+def pins(text):return {normalize(line.split('==')[0]):line.split('==')[1] for line in text.splitlines() if line.strip() and not line.startswith('#')}
+current=ROOT/'tools/rebuild/requirements.lock';before={p:hashlib.sha256((ROOT/p).read_bytes()).hexdigest() for p in (*h['original_reviewed8_source_pins'],*h['paths'])};assert before=={**h['original_reviewed8_source_pins'],**h['paths']};(OUT/'before.json').write_text(json.dumps(before,indent=2))
+basebytes=subprocess.check_output(['git','show',h['base']+':tools/rebuild/requirements.lock'],cwd=ROOT);assert hashlib.sha256(basebytes).hexdigest()==h['before_sha256']['tools/rebuild/requirements.lock'];assert current.read_bytes().startswith(basebytes);old=pins(basebytes.decode());new=pins(current.read_text());assert all(new[k]==v for k,v in old.items());assert {k:new[k] for k in new.keys()-old.keys()}=={'anyio':'4.15.1','idna':'3.20'}
+assert pins(current.read_text())==pins((E/'PROPOSED_PINS.lock').read_text());assert (E/'ORIGINAL_PINS.lock').read_bytes()==basebytes
+assert hashlib.sha256((E/'DEPENDENCY_SUPPLEMENT.patch').read_bytes()).hexdigest()==h['patch_sha256'];assert hashlib.sha256((E/'SOURCE_SUPPLEMENT.zip').read_bytes()).hexdigest()==h['source_archive_sha256']
+with zipfile.ZipFile(E/'SOURCE_SUPPLEMENT.zip') as z:
+ ns=[n for n in z.namelist() if n.endswith('tools/rebuild/requirements.lock')];assert len(ns)==1;assert z.read(ns[0])==current.read_bytes()
+artifacts=json.loads((E/'OFFICIAL_ARTIFACT_DIGESTS.json').read_text())['artifacts'];wheel_details={}
+for name,a in artifacts.items():
+ p=E/'wheels'/a['filename'];assert hashlib.sha256(p.read_bytes()).hexdigest()==a['sha256'] and p.stat().st_size==a['bytes'] and a['metadata_digest_match'] is True
+ with zipfile.ZipFile(p) as z:
+  meta=email.message_from_bytes(z.read(next(n for n in z.namelist() if n.endswith('.dist-info/METADATA'))))
+  assert normalize(meta['Name'])==name and meta['Version']==new[name]
+  wheel_details[name]={'version':meta['Version'],'sha256':a['sha256'],'requires_dist':meta.get_all('Requires-Dist',[])}
+assert len(artifacts)==len(new)==14
+oldhash={line.split(' --hash=')[0]:line for line in (E/'ORIGINAL_HASHED.lock').read_text().splitlines()};newhash={line.split(' --hash=')[0]:line for line in (E/'PROPOSED_HASHED.lock').read_text().splitlines()};assert all(newhash[k]==v for k,v in oldhash.items())
+for spec,line in newhash.items():
+ name,version=spec.split('==');assert line.endswith(' --hash=sha256:'+artifacts[normalize(name)]['sha256']) and new[normalize(name)]==version
+runtime={}
+for label in ('original','fixed'):
+ receipt=json.loads((E/(label+'-install-receipt.json')).read_text());assert receipt['exit']==0 and '--require-hashes' in receipt['command'] and '--no-index' in receipt['command'];lock=Path(receipt['command'][-1]);assert hashlib.sha256(lock.read_bytes()).hexdigest()==receipt['lock_sha256']
+ exe=E/(label+'-venv/bin/python');code='import importlib.metadata,json;print(json.dumps({d.metadata["Name"]:d.version for d in importlib.metadata.distributions()}))'
+ actual=json.loads(subprocess.check_output([str(exe),'-B','-I','-c',code],text=True));installed={normalize(k):v for k,v in actual.items() if normalize(k)!='pip'};assert installed==(old if label=='original' else new)
+ check=subprocess.run([str(exe),'-B','-I','-m','pip','check'],text=True,capture_output=True,timeout=20);(OUT/(label+'-pip-check.log')).write_text(check.stdout+check.stderr);assert check.returncode==0
+ runtime[label]={'installed_exact_lock_except_bootstrap_pip':True,'pip_check_exit':check.returncode,'packages':installed}
+results={};ids={}
+for label,expected in [('original',(75,73,2,0,0)),('fixed',(75,75,0,0,0))]:
+ receipt=json.loads((E/(label+'-instrument/receipt.json')).read_text());assert receipt['before_sha256']==receipt['after_sha256'] and receipt['source_inputs_unchanged']
+ assert all(receipt['before_sha256'][p]==v for p,v in h['original_reviewed8_source_pins'].items())
+ xml=ET.parse(E/(label+'-instrument/tests.xml')).getroot();cases=list(xml.iter('testcase'));failure=[c for c in cases if c.find('failure') is not None];errors=[c for c in cases if c.find('error') is not None];skips=[c for c in cases if c.find('skipped') is not None];stats=(len(cases),len(cases)-len(failure)-len(errors)-len(skips),len(failure),len(errors),len(skips));assert stats==expected
+ ids[label]=[(c.get('classname'),c.get('name')) for c in cases];assert len(set(ids[label]))==75
+ if label=='original':
+  assert receipt['exit']==1 and all('anyio' in ET.tostring(c,encoding='unicode') for c in failure)
+ else:assert receipt['exit']==0
+ results[label]={'total':stats[0],'passed':stats[1],'failed':stats[2],'errors':stats[3],'skipped':stats[4],'terminal_exit':receipt['exit'],'failure_ids':[c.get('classname')+'::'+c.get('name') for c in failure],'source8pins_unchanged':True}
+assert ids['original']==ids['fixed']
+after={p:hashlib.sha256((ROOT/p).read_bytes()).hexdigest() for p in before};assert after==before;(OUT/'after.json').write_text(json.dumps(after,indent=2))
+record={'only_added_pins':{k:new[k] for k in new.keys()-old.keys()},'all_original_pin_and_proofhash_lines_retained':True,'all14local_wheels_match_preserved_official_tls_metadata_digest_records':True,'wheel_details':wheel_details,'runtime':runtime,'actual_failure_to_pass':results,'identical75ordered_case_ids':True,'all8ci_sourcepins_plus_lock_unchanged_during_review':True,'no_fullsuite_or_install_repeated':True}
+(OUT/'verified-evidence.json').write_text(json.dumps(record,indent=2));print(json.dumps({k:v for k,v in record.items() if k not in ('runtime','wheel_details')}))

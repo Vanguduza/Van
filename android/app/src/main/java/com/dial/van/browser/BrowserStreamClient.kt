@@ -1,12 +1,21 @@
 package com.dial.van.browser
 
 import android.content.Context
+import com.dial.van.VanApplication
 import com.dial.van.telemetry.DecoderStats
 import com.dial.van.telemetry.DeviceTelemetryReporter
 import java.net.HttpURLConnection
 import java.net.URL
+import javax.net.ssl.HttpsURLConnection
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
+import java.nio.charset.CodingErrorAction
+import java.util.concurrent.atomic.AtomicLong
+import java.util.concurrent.atomic.AtomicReference
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -74,6 +83,9 @@ class BrowserStreamClient(
     private var peer: PeerConnection? = null
     private var fast: DataChannel? = null
     private var reliable: DataChannel? = null
+    private var metadata: DataChannel? = null
+    private val epochs = AtomicLong()
+    private val connectMutex = Mutex()
 
     @Volatile
     private var link: Link = Link.CLOSED
@@ -90,95 +102,110 @@ class BrowserStreamClient(
      */
     suspend fun connect(
         grant: BrowserStreamGrant,
+        expected: BrowserSessionSnapshot,
         onVideo: (VideoTrack) -> Unit,
         onLink: (Link) -> Unit,
+        onBinding: (BrowserStreamMetadata.Binding) -> Unit,
+        onMetadata: (BrowserStreamMetadata.Event) -> Unit,
+        onRenderedFrame: (BrowserStreamMetadata.RenderedFrame) -> Unit,
+        onMetadataError: (String) -> Unit,
     ) = withContext(Dispatchers.IO) {
-        require(grant.usableAt(System.currentTimeMillis())) { "browser_stream_grant_expired" }
-        transition(Link.CONNECTING, onLink)
+        connectMutex.withLock {
+            withTimeout(45_000L) {
+                close()
+                val epoch = epochs.incrementAndGet()
+                require(grant.usableAt(System.currentTimeMillis()) && grant.sessionId == expected.sessionId) { "browser_stream_grant_binding_invalid" }
+                transition(Link.CONNECTING, onLink)
+                val gate = AtomicReference<BrowserStreamMetadata.Gate?>(null)
+                fun current() = epochs.get() == epoch
 
-        PeerConnectionFactory.initialize(
-            PeerConnectionFactory.InitializationOptions.builder(context)
-                .createInitializationOptions(),
-        )
-        val built = PeerConnectionFactory.builder()
-            .setVideoDecoderFactory(DefaultVideoDecoderFactory(eglBase.eglBaseContext))
-            .setVideoEncoderFactory(
-                DefaultVideoEncoderFactory(eglBase.eglBaseContext, true, true),
-            )
-            .createPeerConnectionFactory()
-        factory = built
-
-        val config = PeerConnection.RTCConfiguration(
-            grant.iceServers.map { server ->
-                PeerConnection.IceServer.builder(server.urls)
-                    .setUsername(server.username ?: "")
-                    .setPassword(server.credential ?: "")
-                    .createIceServer()
-            },
-        ).apply {
-            sdpSemantics = PeerConnection.SdpSemantics.UNIFIED_PLAN
-            // The host is the only peer and it is reached through the grant's ICE servers.
-            // Gathering host candidates on the phone's own interfaces would expose the
-            // owner's home network to whatever is on the other end of a relay.
-            iceTransportsType = PeerConnection.IceTransportsType.ALL
-            bundlePolicy = PeerConnection.BundlePolicy.MAXBUNDLE
-            rtcpMuxPolicy = PeerConnection.RtcpMuxPolicy.REQUIRE
+                PeerConnectionFactory.initialize(PeerConnectionFactory.InitializationOptions.builder(context).createInitializationOptions())
+                val built = PeerConnectionFactory.builder()
+                    .setVideoDecoderFactory(DefaultVideoDecoderFactory(eglBase.eglBaseContext))
+                    .setVideoEncoderFactory(DefaultVideoEncoderFactory(eglBase.eglBaseContext, true, true))
+                    .createPeerConnectionFactory()
+                factory = built
+                val config = PeerConnection.RTCConfiguration(grant.iceServers.map { server ->
+                    PeerConnection.IceServer.builder(server.urls).setUsername(server.username ?: "")
+                        .setPassword(server.credential ?: "").createIceServer()
+                }).apply {
+                    sdpSemantics = PeerConnection.SdpSemantics.UNIFIED_PLAN
+                    iceTransportsType = PeerConnection.IceTransportsType.ALL
+                    bundlePolicy = PeerConnection.BundlePolicy.MAXBUNDLE
+                    rtcpMuxPolicy = PeerConnection.RtcpMuxPolicy.REQUIRE
+                }
+                val gathered = CompletableDeferred<Unit>()
+                peer = built.createPeerConnection(config, object : PeerObserver() {
+                    override fun onIceGatheringChange(state: PeerConnection.IceGatheringState) {
+                        if (current() && state == PeerConnection.IceGatheringState.COMPLETE) gathered.complete(Unit)
+                    }
+                    override fun onAddTrack(receiver: RtpReceiver, streams: Array<out MediaStream>) {
+                        if (!current()) return
+                        val track = receiver.track() as? VideoTrack ?: return
+                        track.addSink { frame ->
+                            if (current()) {
+                                telemetry?.recordBrowserFrame()
+                                gate.get()?.decoded(frame.rotatedWidth, frame.rotatedHeight)?.let(onRenderedFrame)
+                            }
+                        }
+                        onVideo(track)
+                    }
+                    override fun onDataChannel(channel: DataChannel) {
+                        if (!current() || channel.label() != BrowserStreamMetadata.CHANNEL) { channel.close(); return }
+                        metadata = channel
+                        channel.registerObserver(object : DataChannel.Observer {
+                            override fun onBufferedAmountChange(previousAmount: Long) = Unit
+                            override fun onStateChange() = Unit
+                            override fun onMessage(buffer: DataChannel.Buffer) {
+                                if (!current()) return
+                                try {
+                                    require(!buffer.binary && buffer.data.remaining() <= BrowserStreamMetadata.MAX_BYTES) { "browser_metadata_message_invalid" }
+                                    val text = StandardCharsets.UTF_8.newDecoder().onMalformedInput(CodingErrorAction.REPORT)
+                                        .onUnmappableCharacter(CodingErrorAction.REPORT).decode(buffer.data.duplicate()).toString()
+                                    val event = BrowserStreamMetadata.event(JSONObject(text))
+                                    val activeGate = gate.get() ?: return
+                                    require(activeGate.accept(event)) { "browser_metadata_binding_or_sequence_invalid" }
+                                    onMetadata(event)
+                                } catch (failure: Exception) {
+                                    gate.set(null)
+                                    onMetadataError("Current browser frame information could not be verified. Input is held; reconnect the browser.")
+                                }
+                            }
+                        })
+                    }
+                    override fun onConnectionChange(state: PeerConnection.PeerConnectionState) {
+                        if (!current()) return
+                        transition(when (state) {
+                            PeerConnection.PeerConnectionState.CONNECTED -> Link.LIVE
+                            PeerConnection.PeerConnectionState.DISCONNECTED -> Link.RECOVERING
+                            PeerConnection.PeerConnectionState.FAILED -> Link.FAILED
+                            PeerConnection.PeerConnectionState.CLOSED -> Link.CLOSED
+                            else -> Link.CONNECTING
+                        }, onLink)
+                    }
+                }) ?: error("browser_peer_unavailable")
+                fast = peer?.createDataChannel(CHANNEL_FAST, DataChannel.Init().apply {
+                    ordered = false; maxRetransmits = 0; negotiated = false
+                })
+                reliable = peer?.createDataChannel(CHANNEL_RELIABLE, DataChannel.Init().apply { ordered = true })
+                try {
+                    val offer = createOffer()
+                    setLocal(offer)
+                    gathered.await()
+                    val answer = exchange(grant, expected, peer?.localDescription?.description ?: offer.description)
+                    check(current()) { "browser_peer_superseded" }
+                    gate.set(BrowserStreamMetadata.Gate(answer.binding))
+                    onBinding(answer.binding)
+                    setRemote(SessionDescription(SessionDescription.Type.ANSWER, answer.sdp))
+                } catch (cancelled: CancellationException) {
+                    if (current()) close()
+                    throw cancelled
+                } catch (failure: Exception) {
+                    if (current()) { close(); transition(Link.FAILED, onLink) }
+                    throw failure
+                }
+            }
         }
-
-        val gathered = CompletableDeferred<Unit>()
-        peer = built.createPeerConnection(config, object : PeerObserver() {
-            override fun onIceGatheringChange(state: PeerConnection.IceGatheringState) {
-                // One-shot signalling: the offer is sent once gathering is complete, so
-                // there is no trickle channel to keep open. Slower to establish, and it
-                // removes an entire long-lived bidirectional path from the design.
-                if (state == PeerConnection.IceGatheringState.COMPLETE) gathered.complete(Unit)
-            }
-
-            override fun onAddTrack(receiver: RtpReceiver, streams: Array<out MediaStream>) {
-                val track = receiver.track() as? VideoTrack ?: return
-                // §28.1 — the sink is added before the caller's, so a frame is counted
-                // even if the surface it is handed to drops it. What the decoder produced
-                // and what the owner saw are different numbers and this one is the first.
-                telemetry?.let { reporter -> track.addSink { reporter.recordBrowserFrame() } }
-                onVideo(track)
-            }
-
-            override fun onConnectionChange(state: PeerConnection.PeerConnectionState) {
-                transition(
-                    when (state) {
-                        PeerConnection.PeerConnectionState.CONNECTED -> Link.LIVE
-                        PeerConnection.PeerConnectionState.DISCONNECTED -> Link.RECOVERING
-                        PeerConnection.PeerConnectionState.FAILED -> Link.FAILED
-                        PeerConnection.PeerConnectionState.CLOSED -> Link.CLOSED
-                        else -> Link.CONNECTING
-                    },
-                    onLink,
-                )
-            }
-        }) ?: run {
-            transition(Link.FAILED, onLink)
-            return@withContext
-        }
-
-        fast = peer?.createDataChannel(
-            CHANNEL_FAST,
-            DataChannel.Init().apply {
-                ordered = false
-                maxRetransmits = 0
-                negotiated = false
-            },
-        )
-        reliable = peer?.createDataChannel(
-            CHANNEL_RELIABLE,
-            DataChannel.Init().apply { ordered = true },
-        )
-
-        val offer = createOffer()
-        setLocal(offer)
-        gathered.await()
-
-        val answer = exchange(grant, peer?.localDescription?.description ?: offer.description)
-        setRemote(SessionDescription(SessionDescription.Type.ANSWER, answer))
     }
 
     /**
@@ -219,7 +246,10 @@ class BrowserStreamClient(
     }
 
     fun close() {
+        epochs.incrementAndGet()
         telemetry?.recordBrowserStreamClosed()
+        metadata?.close()
+        metadata = null
         fast?.close()
         reliable?.close()
         peer?.close()
@@ -253,8 +283,13 @@ class BrowserStreamClient(
      * than reusing this, which is why `stream-grant` is a separate route from session
      * creation.
      */
-    private fun exchange(grant: BrowserStreamGrant, offerSdp: String): String {
+    private fun exchange(grant: BrowserStreamGrant, expected: BrowserSessionSnapshot, offerSdp: String): BrowserStreamMetadata.Answer {
+        val gateway = (context.applicationContext as? VanApplication)?.gatewayClient
+            ?: error("browser_gateway_unavailable")
+        gateway.admitBrowserGrant(grant)
         val connection = (URL(grant.signalUrl).openConnection() as HttpURLConnection).apply {
+            instanceFollowRedirects = false
+            if (this is HttpsURLConnection) gateway.browserSignalTransport(grant.signalUrl)?.let { sslSocketFactory = it }
             requestMethod = "POST"
             setRequestProperty("Content-Type", "application/json")
             setRequestProperty("Authorization", "Bearer ${grant.token}")
@@ -262,20 +297,28 @@ class BrowserStreamClient(
             connectTimeout = 15_000
             readTimeout = 30_000
         }
-        val body = JSONObject()
-            .put("session_id", grant.sessionId)
-            .put("sdp", offerSdp)
-            .put("type", "offer")
-            .put(
-                "data_channels",
-                JSONArray(listOf(CHANNEL_FAST, CHANNEL_RELIABLE)),
-            )
-        connection.outputStream.use { it.write(body.toString().toByteArray(StandardCharsets.UTF_8)) }
-        val code = connection.responseCode
-        val stream = if (code in 200..299) connection.inputStream else connection.errorStream
-        val text = stream?.bufferedReader()?.readText().orEmpty()
-        check(code in 200..299) { "browser_stream_signal_failed_$code: $text" }
-        return JSONObject(text).getString("sdp")
+        try {
+            val body = JSONObject().put("protocol", 1).put("session_id", grant.sessionId)
+                .put("control_generation", expected.controlGeneration).put("viewport_revision", expected.viewport.revision)
+                .put("width", expected.viewport.width).put("height", expected.viewport.height)
+                .put("sdp", offerSdp).put("type", "offer")
+                .put("data_channels", JSONArray(listOf(CHANNEL_FAST, CHANNEL_RELIABLE)))
+            connection.outputStream.use { it.write(body.toString().toByteArray(StandardCharsets.UTF_8)) }
+            val code = connection.responseCode
+            check(code in 200..299) { "browser_stream_signal_failed_$code" }
+            val bytes = connection.inputStream.use { input ->
+                val output = java.io.ByteArrayOutputStream()
+                val chunk = ByteArray(4096)
+                while (true) {
+                    val read = input.read(chunk)
+                    if (read < 0) break
+                    check(output.size() + read <= 1_048_576) { "browser_signal_response_too_large" }
+                    output.write(chunk, 0, read)
+                }
+                output.toByteArray()
+            }
+            return BrowserStreamMetadata.answer(JSONObject(String(bytes, StandardCharsets.UTF_8)), expected)
+        } finally { connection.disconnect() }
     }
 
     private suspend fun createOffer(): SessionDescription {

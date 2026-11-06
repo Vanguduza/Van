@@ -8,6 +8,7 @@ from __future__ import annotations
 from collections import defaultdict
 from decimal import Decimal
 from pathlib import Path
+import time
 from typing import Any, Optional
 
 from vati.app.tradebook import _collect, _entry_receipt, current_trades, past_trades, potential_trades
@@ -15,11 +16,15 @@ from vati.core.events import Event, EventKind
 from vati.core.ledger import Ledger
 
 ZERO = Decimal("0")
+# Display/readback currentness only; never risk or execution authority. The
+# gateway passes its existing LEDGER_STALENESS_MS policy explicitly as well.
+ACCOUNT_SNAPSHOT_STALENESS_MS = 15 * 60 * 1000
 
 
 def _d(v) -> Optional[Decimal]:
     try:
-        return None if v is None else Decimal(str(v))
+        value=None if v is None else Decimal(str(v))
+        return value if value is not None and value.is_finite() else None
     except Exception:
         return None
 
@@ -38,7 +43,40 @@ def _latest_by(ledger: Ledger, kind: EventKind, key) -> dict[str, Event]:
 
 
 # ------------------------------------------------------------------ accounts
-def account_states(ledger: Ledger, registry_public: list[dict]) -> list[dict[str, Any]]:
+def _snapshot_readback(event, *, now_ms, staleness_ms, unavailable=False):
+    source_ms = event.event_time_ms if event else None
+    age_ms = now_ms - source_ms if type(source_ms) is int and source_ms > 0 else None
+    if unavailable:
+        state, reason = 'UNAVAILABLE', 'LEDGER_UNAVAILABLE'
+    elif event is None:
+        state, reason = 'NEVER_SYNCED', 'NO_ACCOUNT_SNAPSHOT'
+    elif age_ms is None:
+        state, reason = 'LAST_KNOWN', 'INVALID_SOURCE_TIME'
+    elif age_ms < 0:
+        state, reason = 'LAST_KNOWN', 'FUTURE_SOURCE_TIME'
+    elif age_ms > staleness_ms:
+        state, reason = 'LAST_KNOWN', 'STALE_SOURCE_SNAPSHOT'
+    else:
+        state, reason = 'CURRENT', 'SOURCE_SNAPSHOT_WITHIN_DISPLAY_BOUND'
+    return {'state':state, 'reason':reason, 'source_revision':event.hash if event else None,
+        'source_event_time_ms':source_ms, 'source_received_time_ms':event.received_time_ms if event else None,
+        'read_at_ms':now_ms, 'age_ms':age_ms, 'staleness_threshold_ms':staleness_ms,
+        'execution_authority':False}
+
+
+def unavailable_account_states(registry_public, *, now_ms, staleness_ms=ACCOUNT_SNAPSHOT_STALENESS_MS):
+    return [{**a, 'equity':None, 'balance':None, 'connection_state':'UNAVAILABLE',
+        'snapshot_readback':_snapshot_readback(None,now_ms=now_ms,staleness_ms=staleness_ms,unavailable=True)}
+        for a in registry_public]
+
+
+def account_states(ledger: Ledger, registry_public: list[dict], *, now_ms=None,
+                   staleness_ms=ACCOUNT_SNAPSHOT_STALENESS_MS) -> list[dict[str, Any]]:
+    with ledger.read_snapshot():
+        captured_ms = int(time.time()*1000) if now_ms is None else now_ms
+        return _account_states(ledger,registry_public,now_ms=captured_ms,staleness_ms=staleness_ms)
+
+def _account_states(ledger: Ledger, registry_public: list[dict], *, now_ms, staleness_ms) -> list[dict[str, Any]]:
     snaps = _latest_by(ledger, EventKind.ACCOUNT_SNAPSHOT, lambda e: e.payload.get("account_alias"))
     sessions = _latest_by(ledger, EventKind.SESSION, lambda e: e.correlation_id.split(":")[0] if ":" in e.correlation_id else None)
     open_by_alias: dict[str, int] = defaultdict(int)
@@ -60,14 +98,69 @@ def account_states(ledger: Ledger, registry_public: list[dict]) -> list[dict[str
                "connected": p.get("connected"), "verified": p.get("verified"), "open_positions": open_by_alias.get(a["alias"], p.get("open_positions", 0)), "kill_switch": p.get("kill_switch", []),
                "last_sync_ms": s.event_time_ms if s else None, "connection_state": ("LIVE" if p.get("connected") else "OFFLINE") if s else "NEVER_SYNCED", "session_event": sessions.get(a["alias"]).payload.get("event") if sessions.get(a["alias"]) else None}
         out.append(row)
+        row['snapshot_readback']=_snapshot_readback(s,now_ms=now_ms,staleness_ms=staleness_ms)
+        if row['snapshot_readback']['state']=='LAST_KNOWN':
+            row['connection_state']='STALE'
+        row["risk_history_issue"] = p.get("risk_history_issue") or None
+        row["learning_history_issue"] = p.get("learning_history_issue") or None
+        from vati.readmodels.learning import reported_restated_learning
+        row["restated_learning"] = reported_restated_learning(s, a["alias"])
+        from vati.funding.runtime import reported_funding
+        row['funding']=reported_funding(ledger,s,a)
+        from vati.execution.native_margin import reported_account_margin
+        row["margin"]=reported_account_margin(s,a["alias"])
+        from vati.execution.mt5_observation import reported_account_observation
+        row['native_account_observation']=reported_account_observation(s,a)
+        native_scope=(row['native_account_observation'].get('scope_hash')
+            if row['native_account_observation']['state']=='OBSERVED' else None)
+        native_unbound=a.get("broker") in {"MT5","CTRADER"} and not (row["funding"].get("scope_hash") or native_scope)
+        if native_unbound:
+            row["margin"]={"state":"UNAVAILABLE","reason":"NATIVE_SCOPE_UNBOUND","execution_authority":False}
+        if (a.get('broker')=='MT5' and row['funding']['state'] not in {'OBSERVED','CONFLICT'}
+            and not (native_scope and row['native_account_observation']['valuation_state']=='CREDIT_EXCLUDED')):
+            # Legacy MT5 equity can include broker credit. Without the bound
+            # credit-excluded account mark its difference is not floating PnL.
+            row['floating_pnl']=None
+        if (row['native_account_observation']['state']=='OBSERVED'
+            and row['native_account_observation']['valuation_state']!='CREDIT_EXCLUDED'):
+            row['equity']=None
+        row['raw_equity_change']={'day':row['day_pnl'],'week':row['week_pnl'],
+            'drawdown_from_raw_peak':row['drawdown_pct'],'basis':'UNADJUSTED_EQUITY_INCLUDES_CAPITAL_FLOWS'}
+        if row['equity'] is None:
+            row['raw_equity_change']={**row['raw_equity_change'],'day':None,'week':None,'drawdown_from_raw_peak':None}
+        if a.get('broker')!='PAPER':
+            # Native deposits, withdrawals and restricted credit can change all
+            # three old metrics without any trade. Never label those changes PnL.
+            row['day_pnl']=row['week_pnl']=row['drawdown_pct']=None
+        row['performance_state']='SIMULATED_PAPER_EQUITY' if a.get('broker')=='PAPER' else 'UNMEASURED'
+        if (row['funding']['reason']=='CURRENT_PROFILE_NATIVE_SCOPE_MISMATCH'
+            or row['native_account_observation']['state']=='UNAVAILABLE' or native_unbound):
+            unavailable_reason=(row['native_account_observation'].get('reason')
+                if row['native_account_observation']['state']=='UNAVAILABLE' else
+                'CURRENT_PROFILE_NATIVE_SCOPE_MISMATCH' if row['funding']['reason']=='CURRENT_PROFILE_NATIVE_SCOPE_MISMATCH' else 'NATIVE_SCOPE_UNBOUND')
+            row.update(equity=None,balance=None,floating_pnl=None,connected=False,verified=False,connection_state='STALE',currency=a.get('currency'))
+            row["margin"]={"state":"UNAVAILABLE","reason":unavailable_reason,"execution_authority":False}
+            row['snapshot_readback']={**row['snapshot_readback'],'state':'UNAVAILABLE','reason':unavailable_reason}
+            row['raw_equity_change']={**row['raw_equity_change'],'day':None,'week':None,'drawdown_from_raw_peak':None}
     return out
 
 
-def portfolio(ledger: Ledger, registry_public: list[dict], *, reporting_currency: str = "USD") -> dict[str, Any]:
-    accounts = account_states(ledger, registry_public)
+def portfolio(ledger: Ledger, registry_public: list[dict], *, reporting_currency: str = "USD",
+              now_ms=None, staleness_ms=ACCOUNT_SNAPSHOT_STALENESS_MS) -> dict[str, Any]:
+    with ledger.read_snapshot():
+        captured_ms = int(time.time()*1000) if now_ms is None else now_ms
+        return _portfolio(ledger,registry_public,reporting_currency=reporting_currency,
+            now_ms=captured_ms,staleness_ms=staleness_ms)
+
+def _portfolio(ledger: Ledger, registry_public: list[dict], *, reporting_currency: str = "USD",
+               now_ms, staleness_ms) -> dict[str, Any]:
+    accounts = _account_states(ledger, registry_public,now_ms=now_ms,staleness_ms=staleness_ms)
     same = [a for a in accounts if a["currency"] == reporting_currency and a["equity"] is not None]
     other = [a["alias"] for a in accounts if a["equity"] is not None and a["currency"] != reporting_currency]
-    tot = lambda k: str(sum((Decimal(a[k]) for a in same if a.get(k) is not None), ZERO))  # noqa: E731
+    def tot(key):
+        if any(a.get(key) is None for a in same):return None
+        if not same and key in {'day_pnl','week_pnl'}:return None
+        return str(sum((Decimal(a[key]) for a in same),ZERO))
     chains, assessments = _collect(ledger)
     cur, past = current_trades(chains.values()), past_trades(chains.values())
     latest_dec = None
@@ -157,7 +250,7 @@ def risk(ledger: Ledger, mandate: Optional[dict] = None) -> dict[str, Any]:
 
 
 # ------------------------------------------------------------------ trade detail
-TIMELINE = {EventKind.RISK_DECISION: "RISK_DECISION", EventKind.ORDER_COMMAND: "ORDER_SENT", EventKind.EXECUTION_RECEIPT: "EXECUTION", EventKind.TCA_RECORD: "TCA", EventKind.TRADE_REVIEW: "REVIEW",
+TIMELINE = {EventKind.RISK_REVALIDATION: "RISK_RECHECK", EventKind.RISK_DECISION: "RISK_DECISION", EventKind.ORDER_COMMAND: "ORDER_SENT", EventKind.EXECUTION_RECEIPT: "EXECUTION", EventKind.TCA_RECORD: "TCA", EventKind.TRADE_REVIEW: "REVIEW",
             EventKind.TRADE_EXPERIENCE_ARTIFACT: "EXPERIENCE_ARTIFACT", EventKind.OWNER_TICKET: "OWNER_TICKET", EventKind.CAPSULE_STATE: "CAPSULE_STATE", EventKind.KILL_SWITCH: "KILL_SWITCH", EventKind.SESSION: "SESSION"}
 
 
@@ -166,6 +259,8 @@ def _timeline_entry(ev: Event) -> dict:
     label = TIMELINE.get(ev.kind, ev.kind.value)
     if ev.kind is EventKind.RISK_DECISION:
         d = p.get("decision", {}); text = f"Risk Authority {d.get('decision')} · size {d.get('approved_size')} · risk {d.get('approved_risk_pct')} · heat {d.get('portfolio_heat_before')}→{d.get('portfolio_heat_after')}" + (f" · {d.get('reason_code')}" if d.get("reason_code") else "")
+    elif ev.kind is EventKind.RISK_REVALIDATION:
+        text = f"current risk {p.get('state')} · {p.get('reason_code')} · size limit {p.get('decision', {}).get('approved_size')} · observation only"
     elif ev.kind is EventKind.ORDER_COMMAND:
         text = f"{p.get('entry_type')} {p.get('direction')} {p.get('quantity')} @ {p.get('entry_price')} · stop {p.get('protective_stop')} ({p.get('stop_mode')})"
     elif ev.kind is EventKind.EXECUTION_RECEIPT:

@@ -1,0 +1,124 @@
+{
+  "disposition": "NO_BLOCKING_FINDING_IN_BOUNDED_UNLINK_R2_SOURCE_RECHECK",
+  "closed": "BE004-UNLINK-REVIEW01 final history/lease clock placement",
+  "source_fingerprint": "c742984eec212ce67d7ff6a235883811cd432bed989db240b683b4ebc054f4fe",
+  "source7_before_after": {
+    "trading/commander/accounts.py": "f12b42dfcf26c34a8328e34f95c70d964343a3909484ebf0b89a7a65d087ccc6",
+    "trading/commander/account_retirement.py": "b1894ad6407e17736241479794ebec494a03c039198de47ea94c2b4d5455c7dc",
+    "trading/commander/app.py": "1d0d614fbe867838abb01baefd4534fb65cb02724770354d15cfec807717ee98",
+    "trading/vati/accounts/registry.py": "6178715463eb89b33827d4dbd6cfe427ad9e65c2c00049caef0ec50633c74803",
+    "backend/tests/test_account_unlink_review.py": "b57fd1b21f979f18d06f22c0bc2833bb3febcd4135ccf830c9412867751d7cf2",
+    "trading/tests/test_account_registry_atomic_rea.py": "be80eb54cab1adb6869b572eaccf31e92dc3710b7ad421310da72d9cc89ced73",
+    "trading/tests/test_account_unlink_currentness.py": "4abd5642062e30f5e23fd953b3c30b5517eb12b5e8f39c27dc0497fa6097f00d"
+  },
+  "full7_patch_sha256": "859a634e68569262aac6dec6929548a7fb730dac8c26afb3e714c4a501f3b572",
+  "R1_to_R2_exact3_delta_sha256": "945771a2840f744c989281b8c06ac0110d18bc265de745dcf558476b7f80af48",
+  "export": "Independent full7 base5c apply and base5c+R1+exact3delta apply each verified all7 resulting hashes; no helper eighth path/runtime transfer.",
+  "four_R1_unchanged_paths": {
+    "trading/commander/app.py": "1d0d614fbe867838abb01baefd4534fb65cb02724770354d15cfec807717ee98",
+    "trading/vati/accounts/registry.py": "6178715463eb89b33827d4dbd6cfe427ad9e65c2c00049caef0ec50633c74803",
+    "backend/tests/test_account_unlink_review.py": "b57fd1b21f979f18d06f22c0bc2833bb3febcd4135ccf830c9412867751d7cf2",
+    "trading/tests/test_account_registry_atomic_rea.py": "be80eb54cab1adb6869b572eaccf31e92dc3710b7ad421310da72d9cc89ced73"
+  },
+  "source_review": {
+    "history": "_history exact-refs validation precedes final clock sampling; captured oldest/completed source timestamps and original30s/future predicate unchanged. No source timestamp refresh or providerIO introduced under writer.",
+    "lease": "Actual held lease.fence owner/epoch is checked, then held liveness sampled after store read. Pure held-lease/readback clock predicates run again after later blocking history/key/domain/generation validation waits, immediately before effect marker.",
+    "authority": "Final pure intent-time predicate reads immutable validated original journal intent expiry, not caller timing labels. Current signed key/domain guards remain before pure final clocks. No second nonce/A4 consume/new authority or altered thresholds.",
+    "identity": "Before credential overwrite/unlink, blocking guards precede final original/own overwrite file identity recheck. New optional before_effect defaultsNone and performs only already-bound clock predicates+marker after identity; no blocking scope callback after identity. Marker remains after successful guard, before real write.",
+    "truthfulness": "Pre-first-effect refusal stays originalREFUSED/no mutation; prior removal or possible overwrite remains UNKNOWN/resultNone/no resend. Current partial facts do not grant pending cleanup; own removal/overwrite generation remains separate from original approved version. Default generic remove/shared/external and cached history scope unchanged."
+  },
+  "independent_actual": {
+    "PASS": 10,
+    "skip": 0,
+    "exit": 0,
+    "seconds": 16.8540461063385,
+    "receipt": "/tmp/van-be004-unlink-r2-review-wea7ys9p/terminal.json",
+    "receipt_sha256": "bc98f7a1ed3605ea8a2e18cff96af04d2de7cb327fe20032e1e1369607d01726",
+    "raw": "/tmp/van-be004-unlink-r2-review-wea7ys9p/raw.log",
+    "raw_sha256": "0c9b9c42f75b3be787cf6dbbd7d9c40fbb12baa09c4336506d05d56a74e85568",
+    "JUnit": "/tmp/van-be004-unlink-r2-review-wea7ys9p/junit.xml",
+    "JUnit_sha256": "eb659607a12aa569183402c801b14a2b7c725b79a3658151526b5f15acc021d3",
+    "unchanged_counterexample": {
+      "probe": "/tmp/van-be004-unlink-independent-review-20261102/test_readback_after_history.py",
+      "sha256": "bb0ee2151a62e47ba82f7b6c99716b04258e22a6d96fa3917ae11e22607d6c66",
+      "observation": {
+        "HTTP": 409,
+        "wire_effect_state": "REFUSED",
+        "original_state": "REFUSED",
+        "registry_unchanged": true,
+        "alias_present": true,
+        "native_retirement_clock_advance_seconds": 31,
+        "history_boundary": [
+          {
+            "same_original": true,
+            "authority_unexpired": true,
+            "marker_before_first_swap": false
+          }
+        ],
+        "original_id_preserved": true
+      },
+      "same_before_after_source": true,
+      "new_distinct_after_root": "/tmp/van-be004-unlink-r2-review-wea7ys9p",
+      "scope": "Actual paired A4/SQLite/PAPER source fixture, advances retirement sourceclock31s during final history while original A4 remains unexpired and markerFalse. Now409/wireREFUSED, originalGETREFUSED/bytes unchanged; not missing-selector or preclaim refusal."
+    },
+    "cases": [
+      "::test_blocking_final_history_read_cannot_outwait_native_observation_window",
+      "::test_guard_delayed_symlink_substitution_cannot_touch_external_or_unlink_replacement[overwrite]",
+      "::test_guard_delayed_symlink_substitution_cannot_touch_external_or_unlink_replacement[unlink]",
+      "trading.tests.test_account_unlink_currentness::test_expiry_during_last_shred_identity_wait_preserves_credentials_as_partial_unknown",
+      "trading.tests.test_account_registry_atomic_rea::test_optional_trusted_guard_runs_after_fsync_and_refusal_preserves_bytes_revision_and_memory[remove]",
+      "trading.tests.test_account_unlink_currentness::test_held_retirement_lease_cannot_expire_during_final_validation[history]",
+      "trading.tests.test_account_unlink_currentness::test_held_retirement_lease_cannot_expire_during_final_validation[lease_read]",
+      "trading.tests.test_account_unlink_currentness::test_held_retirement_lease_cannot_expire_during_final_validation[final_domain]",
+      "trading.tests.test_account_unlink_currentness::test_actual_registered_unlink_rechecks_current_envelope_at_writer_and_retains_original_history[key]",
+      "trading.tests.test_account_unlink_currentness::test_actual_registered_unlink_rechecks_current_envelope_at_writer_and_retains_original_history[healthy_cached]"
+    ],
+    "controls": "Three actual held-lease wait cases(history/store/finaldomain), final shred-identity wait partialUNKNOWN+credentials unchanged, afterguard symlink overwrite/unlink substitution protections, actual signed currentkey refusal, healthy/cached original afterexpiry, generic remove optionalguard rollback/healthy.",
+    "fixture_bytes": 14653704,
+    "fixture_cap": 16777216,
+    "child_reaped": true,
+    "group_absent": true,
+    "all_cold_fixtures_retained": "terminal.json exact member SHA256/CRC32/owner/mode/path inventory. No cleanup/prefix deletion/peer cache use.",
+    "external_controller": "/tmp/van-be004-unlink-independent-recheck-r2-20261102/run.py",
+    "external_controller_sha256": "245614de809b397bc71a395d1d985b0362df2e282149bdc7a1b28567b9606e28"
+  },
+  "author_fresh_verified": {
+    "groups": [
+      {
+        "label": "final-backend",
+        "PASS": 40,
+        "PGskip": 0,
+        "raw_sha256": "5662a2dedeca1855fd52e3c897c07ef6759bafba68079a02e62d3461ffbd48c5",
+        "JUnit_sha256": "953bb6432c19ea10d157ab592ce8aa39ab6da4778bdd135c380af77b6051ace0"
+      },
+      {
+        "label": "final-native",
+        "PASS": 115,
+        "PGskip": 5,
+        "raw_sha256": "3e40ff1b1b21a3069e017e922d0012ecc6d38d2b7f57bdb139d6f72c2f50ce01",
+        "JUnit_sha256": "7061d305e87c0542d015ad7c9596ccb04b9b452205b9d7e5bbbc1b90643585e4"
+      }
+    ],
+    "PASS": 155,
+    "declaredPGskip": 5,
+    "unique": 160,
+    "actual_XML_mapping_equal": true,
+    "prior12_positive_controls_fresh_mapped": true,
+    "not_onefullsuite": true,
+    "R1_302_not_added_as_new": true
+  },
+  "history_preservation": {
+    "R1_REQUIRES_REPAIR_receipt_sha256": "38961496a6f039d4afcd207e4dfa5ff8b1242d6b55771dda8aaecbce01cbfb24",
+    "original_failed_root": "/tmp/van-be004-unlink-timing-84xb08nj",
+    "all_original_inventory_file_hashes_verified_unchanged": true,
+    "original_probe_unchanged": true,
+    "earlier_failed/source evidence_not_relabelled": true
+  },
+  "qualification_limits": [
+    "SOURCE repair only, no full307 rerun inferred; R1 broader dated proof remains old-input evidence.",
+    "Pending-shred safe owner action/durable per-step facts remain unimplemented original recovery; current observations do not authorize cleanup.",
+    "Independent reauth/grace/cancel/dispositions/OAuth/strategy/funds/native/provider/PG/S24/fullBE004/unit/formal admission remains OPEN.",
+    "Peer one-test child-wait repair not consumed in isolated native packet; its separate review/integration remains separate.",
+    "No source/main/auth/hooks/canon/protected evidence edits, commit/push/CI/provider/native financial/SDK effects or new agents."
+  ]
+}

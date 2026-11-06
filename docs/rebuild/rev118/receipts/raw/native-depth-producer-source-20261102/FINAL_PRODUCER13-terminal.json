@@ -1,0 +1,277 @@
+{
+  "fs_memory_pins": {
+    "device": 26,
+    "tmp_device": 34,
+    "workspace_device": 27,
+    "memory_max": 17179869184,
+    "memory_current_before": 10851545088,
+    "memory_events_before": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+    "source_only_tmpfs_not_reboot_durability": true
+  },
+  "memory_current_after": 10859286528,
+  "memory_events_after": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+  "tag": "FINAL_PRODUCER13",
+  "cwd": "/tmp/van-native-depth-source-lane-20261102",
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "-B",
+    "-m",
+    "pytest",
+    "trading/tests/test_native_depth_worker.py",
+    "trading/tests/test_native_depth_runtime.py",
+    "backend/tests/test_native_depth_history.py::test_configured_runtime_original_is_independently_read_by_paired_history_without_capture",
+    "--rootdir=/tmp/van-native-depth-source-lane-20261102",
+    "-c",
+    "/tmp/van-native-depth-source-lane-20261102/pytest.ini",
+    "-p",
+    "pytest_asyncio.plugin",
+    "-p",
+    "anyio.pytest_plugin",
+    "-p",
+    "no:cacheprovider",
+    "-o",
+    "asyncio_mode=auto",
+    "-q",
+    "--basetemp=/dev/shm/van-depth-source-test-20261102/FINAL_PRODUCER13/fixtures",
+    "--junitxml=/dev/shm/van-depth-source-test-20261102/FINAL_PRODUCER13/junit.xml"
+  ],
+  "exit": 0,
+  "limit_reason": null,
+  "seconds": 12.859,
+  "owned_peak_allocated": 10674176,
+  "owned_budget": 16777216,
+  "group_absent": true,
+  "cases": [
+    {
+      "classname": "trading.tests.test_native_depth_worker",
+      "name": "test_framed_original_commits_and_cold_replay_after_expiry_without_another_native_read",
+      "outcome": "passed"
+    },
+    {
+      "classname": "trading.tests.test_native_depth_worker",
+      "name": "test_configuration_and_original_binding_refusals_are_not_new_authority[body]",
+      "outcome": "passed"
+    },
+    {
+      "classname": "trading.tests.test_native_depth_worker",
+      "name": "test_configuration_and_original_binding_refusals_are_not_new_authority[version]",
+      "outcome": "passed"
+    },
+    {
+      "classname": "trading.tests.test_native_depth_worker",
+      "name": "test_configuration_and_original_binding_refusals_are_not_new_authority[profile]",
+      "outcome": "passed"
+    },
+    {
+      "classname": "trading.tests.test_native_depth_worker",
+      "name": "test_configuration_and_original_binding_refusals_are_not_new_authority[scope]",
+      "outcome": "passed"
+    },
+    {
+      "classname": "trading.tests.test_native_depth_worker",
+      "name": "test_configuration_and_original_binding_refusals_are_not_new_authority[contract_ref]",
+      "outcome": "passed"
+    },
+    {
+      "classname": "trading.tests.test_native_depth_worker",
+      "name": "test_configuration_and_original_binding_refusals_are_not_new_authority[queue]",
+      "outcome": "passed"
+    },
+    {
+      "classname": "trading.tests.test_native_depth_worker",
+      "name": "test_configuration_and_original_binding_refusals_are_not_new_authority[time]",
+      "outcome": "passed"
+    },
+    {
+      "classname": "trading.tests.test_native_depth_worker",
+      "name": "test_configuration_and_original_binding_refusals_are_not_new_authority[frames]",
+      "outcome": "passed"
+    },
+    {
+      "classname": "trading.tests.test_native_depth_worker",
+      "name": "test_configuration_and_original_binding_refusals_are_not_new_authority[bytes]",
+      "outcome": "passed"
+    },
+    {
+      "classname": "trading.tests.test_native_depth_worker",
+      "name": "test_configuration_and_original_binding_refusals_are_not_new_authority[age]",
+      "outcome": "passed"
+    },
+    {
+      "classname": "trading.tests.test_native_depth_worker",
+      "name": "test_configuration_and_original_binding_refusals_are_not_new_authority[limit]",
+      "outcome": "passed"
+    },
+    {
+      "classname": "trading.tests.test_native_depth_worker",
+      "name": "test_final_after_fsync_currentness_refuses_without_committed_capture[expired]",
+      "outcome": "passed"
+    },
+    {
+      "classname": "trading.tests.test_native_depth_worker",
+      "name": "test_final_after_fsync_currentness_refuses_without_committed_capture[key]",
+      "outcome": "passed"
+    },
+    {
+      "classname": "trading.tests.test_native_depth_worker",
+      "name": "test_final_after_fsync_currentness_refuses_without_committed_capture[profile]",
+      "outcome": "passed"
+    },
+    {
+      "classname": "trading.tests.test_native_depth_worker",
+      "name": "test_final_after_fsync_currentness_refuses_without_committed_capture[contract]",
+      "outcome": "passed"
+    },
+    {
+      "classname": "trading.tests.test_native_depth_worker",
+      "name": "test_final_after_fsync_currentness_refuses_without_committed_capture[stopped]",
+      "outcome": "passed"
+    },
+    {
+      "classname": "trading.tests.test_native_depth_worker",
+      "name": "test_final_after_fsync_currentness_refuses_without_committed_capture[registry_removed]",
+      "outcome": "passed"
+    },
+    {
+      "classname": "trading.tests.test_native_depth_worker",
+      "name": "test_final_after_fsync_currentness_refuses_without_committed_capture[registry_recreated]",
+      "outcome": "passed"
+    },
+    {
+      "classname": "trading.tests.test_native_depth_worker",
+      "name": "test_uncommitted_possible_read_reconstruction_does_not_reread",
+      "outcome": "passed"
+    },
+    {
+      "classname": "trading.tests.test_native_depth_worker",
+      "name": "test_lost_index_ack_reconstructs_only_original_record",
+      "outcome": "passed"
+    },
+    {
+      "classname": "trading.tests.test_native_depth_worker",
+      "name": "test_expiry_before_first_reader_is_durable_refusal",
+      "outcome": "passed"
+    },
+    {
+      "classname": "trading.tests.test_native_depth_worker",
+      "name": "test_cancelled_active_reader_retains_capacity_until_closed",
+      "outcome": "passed"
+    },
+    {
+      "classname": "trading.tests.test_native_depth_worker",
+      "name": "test_real_process_death_after_possible_read_retains_original_unknown",
+      "outcome": "passed"
+    },
+    {
+      "classname": "trading.tests.test_native_depth_worker",
+      "name": "test_generic_atomic_writer_callback_is_optional_and_refusal_preserves_bytes",
+      "outcome": "passed"
+    },
+    {
+      "classname": "trading.tests.test_native_depth_worker",
+      "name": "test_two_real_processes_arbitrate_one_original_one_native_reader",
+      "outcome": "passed"
+    },
+    {
+      "classname": "trading.tests.test_native_depth_worker",
+      "name": "test_real_process_death_recovers_only_actual_original_bytes[after_read]",
+      "outcome": "passed"
+    },
+    {
+      "classname": "trading.tests.test_native_depth_worker",
+      "name": "test_real_process_death_recovers_only_actual_original_bytes[after_record]",
+      "outcome": "passed"
+    },
+    {
+      "classname": "trading.tests.test_native_depth_worker",
+      "name": "test_real_process_death_recovers_only_actual_original_bytes[after_index]",
+      "outcome": "passed"
+    },
+    {
+      "classname": "trading.tests.test_native_depth_worker",
+      "name": "test_source_read_slot_wait_rechecks_expiry_before_any_reader",
+      "outcome": "passed"
+    },
+    {
+      "classname": "trading.tests.test_native_depth_worker",
+      "name": "test_corrupt_original_state_never_recaptures_native[task]",
+      "outcome": "passed"
+    },
+    {
+      "classname": "trading.tests.test_native_depth_worker",
+      "name": "test_corrupt_original_state_never_recaptures_native[record]",
+      "outcome": "passed"
+    },
+    {
+      "classname": "trading.tests.test_native_depth_worker",
+      "name": "test_corrupt_original_state_never_recaptures_native[index]",
+      "outcome": "passed"
+    },
+    {
+      "classname": "trading.tests.test_native_depth_worker",
+      "name": "test_only_explicit_new_request_can_sample_after_uncertainty",
+      "outcome": "passed"
+    },
+    {
+      "classname": "trading.tests.test_native_depth_runtime",
+      "name": "test_actual_runtime_start_step_close_collects_once_and_recovers_original[session]",
+      "outcome": "passed"
+    },
+    {
+      "classname": "trading.tests.test_native_depth_runtime",
+      "name": "test_actual_runtime_start_step_close_collects_once_and_recovers_original[coordinator]",
+      "outcome": "passed"
+    },
+    {
+      "classname": "trading.tests.test_native_depth_runtime",
+      "name": "test_default_off_runtime_constructor_and_read_model_do_not_open_reader",
+      "outcome": "passed"
+    },
+    {
+      "classname": "trading.tests.test_native_depth_runtime",
+      "name": "test_each_actual_runtime_produces_same_original_paired_http_receipt[session]",
+      "outcome": "passed"
+    },
+    {
+      "classname": "trading.tests.test_native_depth_runtime",
+      "name": "test_each_actual_runtime_produces_same_original_paired_http_receipt[coordinator]",
+      "outcome": "passed"
+    },
+    {
+      "classname": "backend.tests.test_native_depth_history",
+      "name": "test_configured_runtime_original_is_independently_read_by_paired_history_without_capture",
+      "outcome": "passed"
+    }
+  ],
+  "counts": {
+    "passed": 40,
+    "failed": 0,
+    "error": 0,
+    "skipped": 0
+  },
+  "source_lane": "/tmp/van-native-depth-source-lane-20261102",
+  "source_sha256": {
+    "trading/vati/market_data/native_depth_worker.py": "f817d207f66b6f432d0023a25dc392a540d8849551c7fba600b0ad9834db1534",
+    "trading/vati/market_data/quality.py": "3a8fde6c76bc3d48882cccf44de2491f7b52324f6139b13fd11efb6bfe7477da",
+    "trading/vati/market_data/native_windows.py": "a0b380c0c6fa488c5d05e75062db85e222a0ff053400a928ee36e0b3c0fd5485",
+    "trading/vati/market_data/native_quotes.py": "729b5d11c54e9fd202960ea5fd34cc41b7131759d085a7edf17301ea3f618aa7",
+    "trading/vati/market_data/native_depth.py": "3d4fde40bb27a82fa70cf41713a65e976400b462ba2ea1276a2766f19d8349fd",
+    "trading/vati/market_data/native_collector.py": "318b83222cafc5ecefa8fe8f87160acc3e55b1eda38d612ad028b31330fd5526",
+    "trading/vati/market_data/native_archive.py": "86f4b63b242a07b1a6afde3bca5b78c067d16ee4997fbbaee3a2a9c27ba3e5fc",
+    "trading/vati/market_data/mt5_symbol_book.py": "910c3eccf6fad3449e34b375809b87ba677917d4c1a29d35d40c48a9c8105ce9",
+    "trading/vati/market_data/mt5_quote_book.py": "f426445c5218e6c5fa9ae2fd96eadb120a9111bbff3f65eeefd17875b44897fc",
+    "trading/vati/market_data/instrument_catalog.py": "c2f654f52d05585ea8a5da8cc83d6b5b5ea2765f5fdbe6a20cce4651cb7c21e2",
+    "trading/vati/market_data/costs.py": "094cacdd9bb5a6fc482d100be9bc31b1d0ed44cd991eed4621e43cd184b3460f",
+    "trading/vati/market_data/catalog_store.py": "a6fb2e4b080ffffa80a5a2067628cd614a6ac20681d408f2b7b0d0811277d1a9",
+    "trading/vati/market_data/calendars.py": "b496430f4f262f8727c58bfc96d97c22f43c6d6428b45d74a4fd3cd25bbc5b77",
+    "trading/vati/market_data/bars.py": "35931986fad0a3a2bd0a824b9c7f5c85a985b8c624ec368203ace2ac4aac6c7d",
+    "trading/vati/market_data/__init__.py": "f74fc55f2bba2dbe2bcac546221fa970a89ecd3df91dc7b00ec630b12eb7d65e",
+    "trading/vati/market_data/feeds/lake.py": "09572049f5aa06b50dd7795abee3a02bf220c74c768b7b49ce2a593c2897aa8e",
+    "trading/vati/market_data/feeds/dukascopy.py": "e23f257a52d936dd9c839e699d70390ed4b23947db7563ed0f6e55a53eadd0c1",
+    "trading/vati/market_data/feeds/csv_source.py": "c3fcaf9e21e313dbc75c9010fac84afc2f164d8f89dc89f0cf121a8865e76835",
+    "trading/vati/market_data/feeds/__init__.py": "e3645dcf2971879890489ea91022e6f9a4ca06bf460d4a021fdf17c7079d8f8c"
+  },
+  "raw": "/dev/shm/van-depth-source-test-20261102/FINAL_PRODUCER13/raw.txt",
+  "junit": "/dev/shm/van-depth-source-test-20261102/FINAL_PRODUCER13/junit.xml",
+  "fixtures_preserved": true
+}

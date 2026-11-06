@@ -403,7 +403,7 @@ def overlay_template_svg(overlay: dict) -> str:
         x, y = piv["artboard"]
         parts.append(f'<circle cx="{x}" cy="{y}" r="5" fill="#EF4444"/><text x="{x+8}" y="{y+5}" font-size="14" fill="#EF4444">{name}</text>')
     return ('<?xml version="1.0" encoding="UTF-8"?>\n<!-- Artboard `Van` composition template: guides only (import as a locked, non-exported guide layer).\n'
-            '     Zones A–C are drawn by Android (VanFieldGeometryEngine) AROUND the artboard; the .riv stays transparent. -->\n'
+            '     Zones A–C are drawn by Android (the flame aura: VanAuraPlan / VanFlameAura) AROUND the artboard; the .riv stays transparent. -->\n'
             f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="{-ART*0.5} {-ART*0.5} {ART*2} {ART*2}" width="{int(ART*2)}" height="{int(ART*2)}">'
             f'<rect x="{-ART*0.5}" y="{-ART*0.5}" width="{ART*2}" height="{ART*2}" fill="#0B0F14"/>' + "".join(parts) + "</svg>\n")
 

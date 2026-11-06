@@ -1,0 +1,12 @@
+{
+  "before_remaining_leg_ids": [
+    "P2"
+  ],
+  "after_remaining_leg_ids": [
+    "P2"
+  ],
+  "result": {
+    "error": "FamilyActionError: a bound requested quantity is required"
+  },
+  "finding": "MANDATORY_OTHER_LEG_CLOSE_BLOCKED_BY_PREEXISTING_UNKNOWN"
+}

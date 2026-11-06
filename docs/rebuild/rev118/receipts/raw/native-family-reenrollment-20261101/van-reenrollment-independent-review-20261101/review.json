@@ -1,0 +1,58 @@
+{
+  "schema": "van.independent-lac348-source-review/1",
+  "state": "BOUNDED_FROZEN_SOURCE_REVIEW_COMPLETE_NO_BLOCKING_FINDING",
+  "base": "2728a83ce203fec867dc536c8d4341c2ce4415cb",
+  "reviewer": "Sol medium independent source reviewer; root retains decisions",
+  "source_pins": "before.json / after.json match all 13 HANDOFF hashes; no source changed during review",
+  "blockers": [],
+  "verified_contracts": [
+    {
+      "path": "backend/van_gateway/auth/reenrollment.py:35",
+      "finding": "Original operation/operator/request digest plus expected binding ID/generation are validated before retirement; writer transaction repeats original-operation and live-binding CAS. Explicit replay returns original intent and never retires current replacement. Legacy ambiguity refuses."
+    },
+    {
+      "path": "backend/van_gateway/auth/reenrollment.py:111",
+      "finding": "Original credential deadline is checked after acquiring writer before retirement and again before activating credentials; expiry cannot be extended by recovery. Encrypted response binds original operator/operation/binding/native operation/issued-expiry/gateway/reason and credential hashes; tampered original identity refuses before CA/native recovery."
+    },
+    {
+      "path": "backend/van_gateway/auth/retirement.py:7",
+      "finding": "Single SQLite writer retires device/grants/hardware binding/unconsumed same-owner bootstrap/undispatched privileged actions/session paths/sessions and records original native operation plus independent CA outbox. Submitted/executing/verifying unknown effects are preserved for original reconciliation."
+    },
+    {
+      "path": "backend/van_gateway/auth/reenrollment.py:144",
+      "finding": "CA retirement requires actual owner revoke and independent listing readback; unavailable CA is pending, not assumed absence. Native retirement remains attempted independently when CA fails. Credential activation requires original strict native APPLIED plus CA marker and no current active binding."
+    },
+    {
+      "path": "backend/van_gateway/auth/native_revocation.py:111",
+      "finding": "Original native result validates operation/device/key/revocation identity and strict APPLIED receipt; retries retain exact original target. Local outbox write loss cannot fabricate durable applied marker."
+    },
+    {
+      "path": "backend/van_gateway/app.py:2387",
+      "finding": "Certificate issuance rechecks device liveness under SQL writer, fencing a proof checked before retirement. New session opening rechecks revoked state under writer. Normal revoke uses same retirement/barrier while additive certificate retirement phase distinguishes PENDING/APPLIED/UNKNOWN."
+    },
+    {
+      "path": "backend/van_gateway/auth/retirement.py:91",
+      "finding": "Decoded public-key identity rejects retired key reuse even with PEM reformat; tombstoned device identity remains revoked. Existing pair/recovery proof contract retains refusal without granting retired authority."
+    },
+    {
+      "path": "backend/van_gateway/storage/reenrollment_migration.py:3",
+      "finding": "Migration60 uses idempotent DDL and preserves original data after interrupted migration marker. Independently compared all59 prior SQL strings equal baseline; schema59\u219260 only."
+    }
+  ],
+  "independent_probes": {
+    "artifact": "probe-results.json",
+    "count": 2,
+    "results": [
+      "Migration60 DDL-before-marker restart preserves original replacement, records version60 once and repeated migrate keeps data: PASS.",
+      "Two competing original intents have one exact winner and normal revoke retains same enrollment barrier: PASS."
+    ],
+    "environment": "Explicit isolated worktree backend/tests/trading PYTHONPATH; actual SQLite and local fixture CA; synthetic authenticated native fixture only. Owned /tmp dirs cleaned."
+  },
+  "artifact_identity": "identity-verification.json verifies archive13 exact source pins, patch hash and prior59 SQL equality.",
+  "remaining_integration_requirements": [
+    "Known pending existing OF-PROVISION-001 / van.devices.provision LAC348 backend contract extension mapping for status GET and regeneration of derived owner/frontend registries; run combined guards against integrated source.",
+    "229 affected tests are worker-reported pre-last-migration-fix evidence; 34 final migration/workflow/startup tests are worker-reported. This independent review ran only the two narrow substantive probes, not combined CI.",
+    "Installer external11 ASGI tests remain evidence only; installer source authorization/path extension is pending and was not edited/reviewed as this backend packet.",
+    "No native CA deployment/device proof, public admission, release, F15, BG, full BE-002/unit acceptance or new authority issued by review."
+  ]
+}

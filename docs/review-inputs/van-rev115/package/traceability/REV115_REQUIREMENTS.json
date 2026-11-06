@@ -1,0 +1,310 @@
+{
+  "count": 8,
+  "requirements": [
+    {
+      "acceptance": "Lose cancel reply; authenticated lookup proves cancelled with partial fills; record fills once, retain protection and release only proven unused reservation. A timeout, absent REST result or expired local timer never proves cancellation or flat exposure. Restart at cancel-send and query boundaries, then accept late fill/correction without resubmission.",
+      "backend_units": [
+        "BE-010",
+        "BE-012"
+      ],
+      "frontend_units": [],
+      "id": "VAN-RV-001",
+      "mapping_grade": "REVIEW_PROPOSAL_NOT_FORMAL_ADMISSION",
+      "other_units": [
+        "BQ-002",
+        "BG-001"
+      ],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "related_requirements": [
+        "VAN-SO-014",
+        "VAN-SO-017"
+      ],
+      "source_refs": [
+        "DOC-EDGE-OUTCOME_UNKNOWN-CANCELLED",
+        "DOC-EDGE-OUTCOME_UNKNOWN-EXPIRED",
+        "DOC-EDGE-CANCEL_REQUESTED-OUTCOME_UNKNOWN"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV3_20261018.md",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-RV-001-POS",
+      "test_ids": [
+        "T-VAN-RV-001-POS",
+        "T-VAN-RV-001-NEG",
+        "T-VAN-RV-001-REC"
+      ],
+      "text": "Complete unknown-order, cancellation and expiry recovery"
+    },
+    {
+      "acceptance": "Dispatch resolves current qualified policy, mandate, reservation, epoch and objective; positive decimal venue increments and complete mature costs validate. Remove only POLICY_QUALIFIED at dispatch and reseal unsigned locks; named semantic check still fails. Reject zero tick and mature unknown costs. Expiry/revocation at any preactivation or drain stage blocks new risk, reconciles in-flight effects and cannot reactivate revoked fallback.",
+      "backend_units": [
+        "BE-002",
+        "BE-010"
+      ],
+      "frontend_units": [],
+      "id": "VAN-RV-002",
+      "mapping_grade": "REVIEW_PROPOSAL_NOT_FORMAL_ADMISSION",
+      "other_units": [
+        "BQ-001",
+        "BG-001"
+      ],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "related_requirements": [
+        "VAN-SO-004",
+        "VAN-SO-034",
+        "VAN-CRYPTO-003"
+      ],
+      "source_refs": [
+        "DOC-DISPATCH-POLICY",
+        "DOC-ZERO-TICK",
+        "DOC-MATURE-UNKNOWN-COST"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV3_20261018.md",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-RV-002-POS",
+      "test_ids": [
+        "T-VAN-RV-002-POS",
+        "T-VAN-RV-002-NEG",
+        "T-VAN-RV-002-REC"
+      ],
+      "text": "Semantic admission independent of mutable hash locks"
+    },
+    {
+      "acceptance": "Real registered consumer applies newer observation revision once, persists cursor/contribution/snapshot atomically, and later eligible selector consumes its fingerprint. Deliver older revision after correction and conflicting equal revision; older evidence cannot overwrite current contribution and conflict is quarantined. Kill actual process before/after commit, replay bounded journal and verify identical logical snapshot/selection with AS_DECIDED unchanged.",
+      "backend_units": [
+        "BE-003",
+        "BE-012",
+        "BE-036"
+      ],
+      "frontend_units": [],
+      "id": "VAN-RV-003",
+      "mapping_grade": "REVIEW_PROPOSAL_NOT_FORMAL_ADMISSION",
+      "other_units": [
+        "BQ-007",
+        "BG-001"
+      ],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "related_requirements": [
+        "VAN-SO-019",
+        "VAN-SO-021",
+        "VAN-SO-022",
+        "VAN-SO-023"
+      ],
+      "source_refs": [
+        "DOC-STALE-REVISION"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV3_20261018.md",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-RV-003-POS",
+      "test_ids": [
+        "T-VAN-RV-003-POS",
+        "T-VAN-RV-003-NEG",
+        "T-VAN-RV-003-REC"
+      ],
+      "text": "Revision precedence and durable causal feedback"
+    },
+    {
+      "acceptance": "One gross base unit filled with 0.01 base fee consumes the entire one-unit execution budget; cash/base/fee-asset postings balance under explicit valuation. Fees, exits or netting cannot reopen entry allowance; TCA decomposition must equal direct signed fill-versus-reference cost plus nonembedded charges. Late fee and fill bust append compensating facts, preserve old decision snapshots and reconcile reservations without automatic re-entry.",
+      "backend_units": [
+        "BE-006",
+        "BE-009",
+        "BE-010",
+        "BE-012",
+        "BE-035"
+      ],
+      "frontend_units": [],
+      "id": "VAN-RV-004",
+      "mapping_grade": "REVIEW_PROPOSAL_NOT_FORMAL_ADMISSION",
+      "other_units": [
+        "BQ-009",
+        "BG-001"
+      ],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "related_requirements": [
+        "VAN-SO-012",
+        "VAN-SO-019",
+        "VAN-SO-036",
+        "VAN-CRYPTO-005"
+      ],
+      "source_refs": [
+        "SPEC-GROSS-FEE",
+        "SRC-TCA-DECOMPOSITION"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV3_20261018.md",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-RV-004-POS",
+      "test_ids": [
+        "T-VAN-RV-004-POS",
+        "T-VAN-RV-004-NEG",
+        "T-VAN-RV-004-REC"
+      ],
+      "text": "Gross execution budget and conserved multi-asset economics"
+    },
+    {
+      "acceptance": "Quantized slices jointly satisfy parent quantity, fresh depth participation, minimum lot/notional, maximum slices, deadline and command budget. Quantity 200, depth 10, participation 0.25 and max 8 slices is infeasible for a one-snapshot plan; never issue eight slices of 25 claiming a cap of 2.5. Replanning uses newly observed depth/time under same grant; restart retains lifetime counters and does not repeat unconfirmed slices.",
+      "backend_units": [
+        "BE-009",
+        "BE-010",
+        "BE-035"
+      ],
+      "frontend_units": [],
+      "id": "VAN-RV-005",
+      "mapping_grade": "REVIEW_PROPOSAL_NOT_FORMAL_ADMISSION",
+      "other_units": [
+        "BQ-002",
+        "BG-001"
+      ],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "related_requirements": [
+        "VAN-SO-004",
+        "VAN-SO-005",
+        "VAN-SO-015",
+        "VAN-SO-025"
+      ],
+      "source_refs": [
+        "SRC-SLICE-CAP"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV3_20261018.md",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-RV-005-POS",
+      "test_ids": [
+        "T-VAN-RV-005-POS",
+        "T-VAN-RV-005-NEG",
+        "T-VAN-RV-005-REC"
+      ],
+      "text": "Joint slice, participation and lifetime feasibility"
+    },
+    {
+      "acceptance": "Reconcile Opus lockout/execution/ledger fixes with canon Jev/temperament/evidence, PR-only Muse/owner controls and their callers; full parity holds. Selecting newer review-input source or main alone must fail retained-feature/caller tests; deleting actual outcome subscription fails later-selection acceptance. Shared-store migrations restore learned state, lockout clocks and account owners; asynchronous Jev outage cannot delay protection.",
+      "backend_units": [
+        "BE-001",
+        "BE-003",
+        "BE-010",
+        "BE-036"
+      ],
+      "frontend_units": [],
+      "id": "VAN-RV-006",
+      "mapping_grade": "REVIEW_PROPOSAL_NOT_FORMAL_ADMISSION",
+      "other_units": [
+        "BQ-007",
+        "BG-001"
+      ],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "related_requirements": [
+        "VAN-SO-021",
+        "VAN-SO-026",
+        "VAN-LEAN-003"
+      ],
+      "source_refs": [
+        "SOURCE_RECONCILIATION_EVIDENCE.json"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV3_20261018.md",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-RV-006-POS",
+      "test_ids": [
+        "T-VAN-RV-006-POS",
+        "T-VAN-RV-006-NEG",
+        "T-VAN-RV-006-REC"
+      ],
+      "text": "Preserve source contributions and verify actual feedback consumers"
+    },
+    {
+      "acceptance": "Qualified event oracle, immutable licensed inputs, full trial census and availability-time features support matched objective and whole-account arms with predeclared costs and uncertainty. Calendar years alone are not walk-forward; bid data cannot silently become mid; poisoned-future changes to earlier decisions fail; fixed JPY conversion is not current USD P&L. Failed/pruned runs and corrections remain in census; evaluator changes invalidate dependent claims and rerun only affected studies.",
+      "backend_units": [
+        "BE-035",
+        "BE-036"
+      ],
+      "frontend_units": [],
+      "id": "VAN-RV-007",
+      "mapping_grade": "REVIEW_PROPOSAL_NOT_FORMAL_ADMISSION",
+      "other_units": [
+        "BQ-009",
+        "BG-001"
+      ],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "related_requirements": [
+        "VAN-SO-028",
+        "VAN-SO-029",
+        "VAN-SO-030",
+        "VAN-SO-031",
+        "VAN-SO-043"
+      ],
+      "source_refs": [
+        "trading/vati/execution/tca.py",
+        "strategy_backtest_20261017/harness.py",
+        "strategy_backtest_20261017/VAN_STRATEGY_BACKTEST_RESEARCH_20261017.md"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV3_20261018.md",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-RV-007-POS",
+      "test_ids": [
+        "T-VAN-RV-007-POS",
+        "T-VAN-RV-007-NEG",
+        "T-VAN-RV-007-REC"
+      ],
+      "text": "Qualified evaluator and complete trial/account comparison"
+    },
+    {
+      "acceptance": "Selected eligible CEX spot adapter demonstrates genuine matching, recovery and settlement/protection for its admitted scope; contextual app contracts expose exact state and receipts. Mock, read-only HTTP response, chain research or unsupported required attached protection cannot close actual trading integration. Private-stream gaps, API clock/rate-limit stress and account-wide cancellation recover without cancelling manual/protective orders outside scope; unavailable provider remains an explicit gate.",
+      "backend_units": [
+        "BE-004",
+        "BE-005",
+        "BE-010",
+        "BE-032"
+      ],
+      "frontend_units": [],
+      "id": "VAN-RV-008",
+      "mapping_grade": "REVIEW_PROPOSAL_NOT_FORMAL_ADMISSION",
+      "other_units": [
+        "BQ-001",
+        "BQ-002",
+        "BG-001"
+      ],
+      "product_truth_refs": [
+        "VAN-PT-SO-01",
+        "VAN-PT-SO-02"
+      ],
+      "related_requirements": [
+        "VAN-CRYPTO-001",
+        "VAN-CRYPTO-007",
+        "VAN-CRYPTO-009",
+        "VAN-CRYPTO-010",
+        "VAN-LEAN-004"
+      ],
+      "source_refs": [
+        "contracts/self_optimization/SELF_OPTIMIZATION_RECORDS.schema.json",
+        "verification/RUNTIME_EXTERNAL_QUALIFICATION_MATRIX.json"
+      ],
+      "specification_ref": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV3_20261018.md",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_id": "T-VAN-RV-008-POS",
+      "test_ids": [
+        "T-VAN-RV-008-POS",
+        "T-VAN-RV-008-NEG",
+        "T-VAN-RV-008-REC"
+      ],
+      "text": "Eligible CEX spot target and backend consumer acceptance"
+    }
+  ],
+  "status": "PROPOSED_REFINEMENTS_OF_EXISTING_SCOPE"
+}

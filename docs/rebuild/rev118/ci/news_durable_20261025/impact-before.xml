@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.732" timestamp="2026-10-25T23:50:48.291138+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_news_durable_publication" name="test_same_time_assessment_with_new_original_evidence_gets_a_distinct_impact" time="0.166"><failure message="vati.events.news_ingress.NewsIngressError: news impact original terms conflict">ledger = &lt;vati.core.ledger.Ledger object at 0x7f75fd7b1640&gt;
+
+    def test_same_time_assessment_with_new_original_evidence_gets_a_distinct_impact(ledger):
+        news=NewsIngress(ledger=ledger);h=story();news.ingest(h,now_ms=NOW)
+        a=news.assess(h,subject_kind='POSITION',subject_id='p',symbol='EURUSD',now_ms=NOW)
+        original=next(ledger.iter(EventKind.EVENT_IMPACT))
+        news.ingest(story(source_id='relay'),now_ms=NOW)
+&gt;       b=news.assess(h,subject_kind='POSITION',subject_id='p',symbol='EURUSD',now_ms=NOW)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_news_durable_publication.py:215: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/events/news_ingress.py:698: in assess
+    self.persist_impact(impact, headline, now_ms=now_ms)
+trading/vati/events/news_ingress.py:735: in persist_impact
+    if read() is None:
+       ^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def read():
+        found=None
+        for event in self._ledger.iter(EventKind.EVENT_IMPACT,correlation_id=impact.subject_id):
+            if event.producer!=self._producer:continue
+            if not isinstance(event.payload,dict) or event.hash!=canonical_hash(event.body()):
+                raise NewsIngressError('news impact original is corrupt')
+            if event.payload.get('impact_id')!=impact.impact_id:continue
+            if event.payload!=payload or event.event_time_ms!=impact.assessed_ms:
+&gt;               raise NewsIngressError('news impact original terms conflict')
+E               vati.events.news_ingress.NewsIngressError: news impact original terms conflict
+
+trading/vati/events/news_ingress.py:730: NewsIngressError</failure></testcase></testsuite></testsuites>

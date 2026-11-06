@@ -6,6 +6,7 @@
 **Implementation baseline:** PR #5 / `feature/living-windy-aura`  
 **Owner-device authority:** the physical Samsung verification that exposed character transparency, body-hugging aura, static workboard behavior and non-interactive control surfaces supersedes preview-only acceptance.  
 **Status:** mandatory corrective implementation; owner visual/UX acceptance remains open until a corrected APK is reverified on-device.
+**Aura supersession:** owner decisions CF-D-06, CF-D-06-REV1 and CF-D-08 (2026-09-24, `docs/character_forge/MANIFEST.yaml`) replace this document's detached electrical-field aura with a flame envelope that wraps VAN's silhouette, and remove wind strands, electrical branches, ion specks and the orb link line. Sections 14–20, the aura items in §47 and §51, and the aura sentence in §52 are superseded by those decisions and `visual-authority/character-forge/aura/AURA_RUNTIME_CONTRACT.yaml`; they are retained as provenance. All other sections remain in force.
 
 ---
 
@@ -337,6 +338,8 @@ Use selective inner highlight, fine grain, local cyan contamination and restrain
 
 ## 14. Living aura Rev 3
 
+> **Superseded by CF-D-06 / CF-D-06-REV1 / CF-D-08.** Retained as provenance; the aura authority is `visual-authority/character-forge/aura/AURA_RUNTIME_CONTRACT.yaml`.
+
 Retain orthogonal identity/activity Zone B and semantic Zone C, but replace the visually body-hugging result with a real detached field.
 
 The field must be:
@@ -375,6 +378,8 @@ data class VanAuraDynamics(
 
 ## 15. Silhouette-aware exclusion
 
+> **Superseded by CF-D-06 / CF-D-06-REV1 / CF-D-08.** Retained as provenance; the aura authority is `visual-authority/character-forge/aura/AURA_RUNTIME_CONTRACT.yaml`.
+
 Do not rely only on a single central ellipse. Approximate head/hair, torso and visible limbs with renderer-neutral exclusion primitives and inflate by a visible air gap.
 
 ```kotlin
@@ -408,6 +413,8 @@ No main field strand may continuously trace the body outline.
 
 ## 16. Vector-field motion
 
+> **Superseded by CF-D-06 / CF-D-06-REV1 / CF-D-08.** Retained as provenance; the aura authority is `visual-authority/character-forge/aura/AURA_RUNTIME_CONTRACT.yaml`.
+
 Each seeded filament should combine base streamline, directional wind, low-frequency wave, higher-frequency ripple, curl and state-specific attraction.
 
 Illustrative formulation:
@@ -437,6 +444,8 @@ Use stable seeds. Motion must deform/travel rather than merely pulse opacity.
 
 ## 17. Non-ring invariant
 
+> **Superseded by CF-D-06 / CF-D-06-REV1 / CF-D-08.** Retained as provenance; the aura authority is `visual-authority/character-forge/aura/AURA_RUNTIME_CONTRACT.yaml`.
+
 A full or broken halo is forbidden. Major strands must vary origin, curvature, radial distance, phase, length, local wind angle and velocity.
 
 Automated evidence should reject geometry that collapses onto a common radius around the character. A frozen still must read as atmospheric flow, not as `( VAN )`.
@@ -444,6 +453,8 @@ Automated evidence should reject geometry that collapses onto a common radius ar
 ---
 
 ## 18. Electrical-life subsystem
+
+> **Superseded by CF-D-06 / CF-D-06-REV1 / CF-D-08.** Retained as provenance; the aura authority is `visual-authority/character-forge/aura/AURA_RUNTIME_CONTRACT.yaml`.
 
 Add explicit short-lived electric structures rather than representing all electricity as dots.
 
@@ -479,6 +490,8 @@ No strobing or full-field flashes.
 
 ## 19. Particle lifecycle
 
+> **Superseded by CF-D-06 / CF-D-06-REV1 / CF-D-08.** Retained as provenance; the aura authority is `visual-authority/character-forge/aura/AURA_RUNTIME_CONTRACT.yaml`.
+
 Particles require deterministic lifetimes: spawn → advect → curl → fade → expire. Do not leave them as static points.
 
 Cache stable topology and update only dynamic coordinates/age each frame to avoid excessive allocation.
@@ -486,6 +499,8 @@ Cache stable topology and update only dynamic coordinates/age each frame to avoi
 ---
 
 ## 20. Glass condensation from field
+
+> **Superseded by CF-D-06 / CF-D-06-REV1 / CF-D-08.** Retained as provenance; the aura authority is `visual-authority/character-forge/aura/AURA_RUNTIME_CONTRACT.yaml`.
 
 Opening a board should visually condense selected field strands into cyan optical glass while residual field remains alive.
 
@@ -1032,8 +1047,8 @@ Motion evidence must contain multiple timestamps; a single still cannot certify 
 Final owner acceptance requires device verification:
 
 1. VAN remains solid over light, dark and busy backgrounds.
-2. Aura is visibly detached, wavy and continuously changing for at least 30 seconds.
-3. Electrical pulses/branches are visible without strobing or halo reconstruction.
+2. Flame aura wraps VAN's silhouette and keeps moving for at least 30 seconds without visible repetition (CF-D-06/CF-D-08; supersedes the detached-field criterion).
+3. No strands, electrical branches, specks or orb link line are visible, and the flame never strobes (CF-D-06-REV1; supersedes the electrical-branch criterion).
 4. Single tap opens/closes board.
 5. Double tap opens Command Centre from full, board-open and minimized states.
 6. Long press exposes working quick controls.
@@ -1153,7 +1168,7 @@ Rev 3.0 is complete only when all are true:
 
 ```text
 VAN character     solid, recognisable, continuously alive
-Aura              detached, wavy, windy, electrically active
+Aura              flame envelope wrapping the silhouette, no line geometry (CF-D-06/CF-D-06-REV1/CF-D-08)
 Glass             baby-cyan optical UI material only
 Single tap        opens/closes workboard
 Double tap        opens Command Centre
@@ -1178,4 +1193,4 @@ Device             owner accepts corrected Samsung build
 
 ## 52. Canonical implementation statement
 
-> **VAN is a continuously alive, optically solid character—not a translucent status widget. He exists inside a detached, wavy, continuously advecting electrical atmosphere. Cyan glass UI condenses from that field only when interaction requires it and never glassifies VAN himself. Single tap toggles the workboard, double tap opens the full administrative Command Centre, long press exposes quick controls, drag repositions VAN and enables bottom-X dismissal, and Minimize collapses VAN into a circular live portrait of his face. The launcher icon uses the same canonical face. The workboard, typed chat, voice interaction and Command Centre are all secure interfaces into one unified owner-command path through the signed VAN gateway to Hermes and the wider system. VAN's body animation, attention, speech motion and living field continue regardless of whether the workboard is open. No static placeholder board, fake module data, fake success state, body-hugging halo, disconnected chat path or visual-only control is acceptable.**
+> **VAN is a continuously alive, optically solid character—not a translucent status widget. He is wrapped by a living flame aura (CF-D-06/CF-D-08; supersedes the earlier detached electrical atmosphere). Cyan glass UI appears only when interaction requires it and never glassifies VAN himself. Single tap toggles the workboard, double tap opens the full administrative Command Centre, long press exposes quick controls, drag repositions VAN and enables bottom-X dismissal, and Minimize collapses VAN into a circular live portrait of his face. The launcher icon uses the same canonical face. The workboard, typed chat, voice interaction and Command Centre are all secure interfaces into one unified owner-command path through the signed VAN gateway to Hermes and the wider system. VAN's body animation, attention, speech motion and living field continue regardless of whether the workboard is open. No static placeholder board, fake module data, fake success state, body-hugging halo, disconnected chat path or visual-only control is acceptable.**

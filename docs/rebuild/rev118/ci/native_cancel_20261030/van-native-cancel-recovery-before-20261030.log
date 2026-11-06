@@ -1,0 +1,149 @@
+.............FFFF                                                        [100%]
+=================================== FAILURES ===================================
+____ test_repeated_reconciliation_reads_original_query_without_republishing ____
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-16/test_repeated_reconciliation_r0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_repeated_reconciliation_reads_original_query_without_republishing(tmp_path,eurusd):
+        ledger,adapter,router,owner,authority,clock,intent,token=setup_cancel(tmp_path,eurusd)
+        try:
+            owner.execute(intent,token)
+            first=owner.reconcile('cancel-1','read-after-cancel',deadline_ms=clock['ms']+1000)
+            count=ledger.count();calls=len(adapter.transport.calls);clock['ms']+=999999
+            second=owner.reconcile('cancel-1','read-after-cancel',deadline_ms=1)
+>           assert second==first
+E           AssertionError: assert {'request_id'...499c9f5', ...} == {'request_id'...885d8ef', ...}
+E             
+E             Omitting 16 identical items, use -vv to show
+E             Differing items:
+E             {'state_ref': '9f463a85773ea67deb09c94489a05c4458bc079454697c525c2502288499c9f5'} != {'state_ref': 'dae7d4630d9ab18d78c9ec709d2f2d66a5f5f2a051588307930b5d763885d8ef'}
+E             {'availability': {'received_at_ms': 1800001001002, 'state': 'AVAILABLE'}} != {'availability': {'received_at_ms': 1800000001003, 'state': 'AVAILABLE'}}
+E             Use -v to get more diff
+
+trading/tests/test_native_cancel_owner.py:193: AssertionError
+__ test_old_preflight_query_cannot_be_presented_as_post_cancel_reconciliation __
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-16/test_old_preflight_query_canno0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_old_preflight_query_cannot_be_presented_as_post_cancel_reconciliation(tmp_path,eurusd):
+        ledger,adapter,router,owner,authority,clock,intent,token=setup_cancel(tmp_path,eurusd)
+        try:
+            owner.execute(intent,token);count=ledger.count()
+>           with pytest.raises(NativeCancelError,match='LATER'):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE NativeCancelError
+
+trading/tests/test_native_cancel_owner.py:203: Failed
+_ test_explicit_rejected_cancel_can_have_a_new_signed_attempt_after_fresh_reconciliation _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-16/test_explicit_rejected_cancel_0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_explicit_rejected_cancel_can_have_a_new_signed_attempt_after_fresh_reconciliation(tmp_path,eurusd):
+        ledger,adapter,router,owner,authority,clock,intent,token=setup_cancel(tmp_path,eurusd)
+        def rejected(name,body,*,expires_at_ms,clock,recheck):
+            _cancel_gate(expires_at_ms,clock,recheck)
+            adapter.transport.cancel_sends.append((name,deepcopy(body)))
+            return 'ProtoOAExecutionEvent',{'ctidTraderAccountId':12345,'executionType':'ORDER_CANCEL_REJECTED',
+                'order':deepcopy(adapter.transport.order_reply['order'])}
+        adapter.transport.call_cancel=rejected
+        try:
+            first=owner.execute(intent,token)
+            owner.reconcile('cancel-1','read-after-rejection',deadline_ms=clock['ms']+1000)
+            next_intent=owner.prepare('cancel-2',intent['command_hash'],intent['margin_source_ref'],2,
+                                      deadline_ms=clock['ms']+1000)
+            next_token=authority.token(act=ACT,subject=cancel_subject(next_intent),issued_at_unix=clock['ms']//1000)
+>           second=owner.execute(next_intent,next_token)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_native_cancel_owner.py:223: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.native_cancel.NativeCancelOwner object at 0x7fab28a8b5f0>
+intent = {'account_alias': 'ctrader_primary', 'command_hash': '6e2a9ac7ce590e9a2e525542ff6da1713eca3f847673938312d779fa245b4017', 'deadline_ms': 1800000002003, 'intent_hash': 'd7039602f0108762a7e2bca7c2c33f8487202b66b8f5d4e8796e264fbffbe464', ...}
+owner_token = 'van-oa1.eyJhY3QiOiJuYXRpdmUtb3JkZXItY2FuY2VsIiwiZXhwIjoxODAwMDAwMzAxLCJpYXQiOjE4MDAwMDAwMDEsImtpZCI6Im93bmVyLXRlc3QtM...NmUyNjRmYmZmYmU0NjQifQ.MEUCIQC_Bk83Ng-RafN4UjhGNBZ25omB5OzMCLryxGJPPqkiOQIgKov1w1dB9s5H9ih-I0BUk4TQgTFooXkE6G7r433hU2U'
+
+    def execute(self, intent, owner_token):
+        require_committed_source_read(self.ledger)
+        if getattr(self.ledger, '_read_snapshot_depth', 0):
+            raise NativeCancelError('NATIVE_CANCEL_REQUIRES_OWN_COMMITTED_WRITER')
+        intent = _intent(intent); key = intent['request_id']; known = self.lookup(key)
+        if known is not None:
+            if known['intent'] != intent:
+                raise NativeCancelError('NATIVE_CANCEL_REQUEST_RETARGET_REFUSED')
+            return known
+        now = self._now()
+        expected = self.prepare(key, intent['command_hash'], intent['margin_source_ref'], intent['native_order_id'],
+                                deadline_ms=intent['deadline_ms'], lease_epoch=intent['lease_epoch'], at_ms=now)
+        if expected != intent:
+            raise NativeCancelError('NATIVE_CANCEL_ORIGINAL_ENTRY_BINDING_DIFFERS')
+        # Signature verification is separate from one-shot redemption. The SQL
+        # writer below owns durable nonce consumption with the exact request;
+        # a process-local set cannot implement crash-safe single use.
+        verified = self.authority.verify(owner_token, act=ACT, subject=cancel_subject(intent),
+                                         now_unix=now//1000, single_use=False)
+        proof = archive_verified_control(owner_token, verified)
+        nonce = _original_signature(proof, intent, now)
+        binding = verified._verified_key_binding; epoch = intent['lease_epoch']
+        router = self.router; adapter = router.adapters.get('ctrader')
+        def fence():
+            current = self._now()
+            return (now <= current < min(intent['deadline_ms'], verified.expires_at_unix*1000)
+                    and current >= verified.issued_at_unix*1000 and binding.is_current()
+                    and (router.lease_fence(epoch) is True if router.lease_fence is not None else epoch is None))
+        guard = router.lease_submission_guard(epoch) if router.lease_submission_guard is not None else nullcontext(epoch is None)
+        with ExitStack() as locks:
+            if binding.registry_path is not None:
+                locks.enter_context(exclusive_state_lock(binding.registry_path))
+            if locks.enter_context(guard) is not True or not fence():
+                raise NativeCancelError('NATIVE_CANCEL_CURRENT_OWNER_OR_LEASE_REFUSED')
+            book = NativeOrderBook(self.ledger, clock=self.clock)
+            prekey = 'cancel-pre-'+intent['intent_hash']
+            book.capture(adapter, prekey, intent['command_hash'], intent['margin_source_ref'],
+                         intent['native_order_id'], deadline_ms=intent['deadline_ms'])
+            pre = book.lookup(prekey); observation = NativeOrderObservation.from_body(pre['observation'])
+            # The adapter validates native pending/nonclosing semantics before
+            # any write. Preserve the original signed request before dispatch.
+            before_head = self.ledger.head(); started = False
+            try:
+                with self.ledger.atomic():
+                    history, nonces, _, last, _ = self._history()
+                    if key in history or nonce in nonces:
+                        raise NativeCancelError('NATIVE_CANCEL_REQUEST_OR_NONCE_ALREADY_COMMITTED')
+                    for other in history.values():
+                        previous = other['request'].payload['intent']
+                        if ((previous['physical_account_key'],previous['native_order_id']) ==
+                                (intent['physical_account_key'],intent['native_order_id'])
+                                and other['attempt'].payload['state'] != 'NOT_SENT'):
+>                           raise NativeCancelError('NATIVE_CANCEL_ORIGINAL_ORDER_ATTEMPT_REQUIRES_RECONCILIATION')
+E                           vati.execution.native_cancel.NativeCancelError: NATIVE_CANCEL_ORIGINAL_ORDER_ATTEMPT_REQUIRES_RECONCILIATION
+
+trading/vati/execution/native_cancel.py:300: NativeCancelError
+_______ test_live_zero_fill_order_contradicts_original_no_effect_receipt _______
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-16/test_live_zero_fill_order_cont0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_live_zero_fill_order_contradicts_original_no_effect_receipt(tmp_path,eurusd):
+        parts=setup_order(tmp_path,eurusd,receipt_changes={'status':'REJECTED','filled_qty':D(0),'average_fill':None})
+        ledger,adapter,book,clock,command,binding,context=parts
+        try:
+            warm=PhysicalPendingRisk(ledger,context,now_ms=clock['ms'])
+            assert warm.refresh((),now_ms=clock['ms'])==()
+            adapter.transport.order_reply['order']['orderStatus']='ORDER_STATUS_ACCEPTED'
+            adapter.transport.order_reply['order']['executedVolume']=0
+            adapter.transport.order_reply['deal']=[]
+            capture(parts)
+>           with pytest.raises(ValueError,match='native order'):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE ValueError
+
+trading/tests/test_native_cancel_pending_contradictions.py:20: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_native_cancel_owner.py::test_repeated_reconciliation_reads_original_query_without_republishing
+FAILED trading/tests/test_native_cancel_owner.py::test_old_preflight_query_cannot_be_presented_as_post_cancel_reconciliation
+FAILED trading/tests/test_native_cancel_owner.py::test_explicit_rejected_cancel_can_have_a_new_signed_attempt_after_fresh_reconciliation
+FAILED trading/tests/test_native_cancel_pending_contradictions.py::test_live_zero_fill_order_contradicts_original_no_effect_receipt
+4 failed, 13 passed in 3.90s

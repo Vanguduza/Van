@@ -1,0 +1,92 @@
+SANITIZED DECODED REPRESENTATIVE EXCERPT; NOT FULL LOG
+URLs removed. Original hosted decoded log remains at GitHub; MCP result held internally.
+2026-11-02T04:46:00.9771647Z E       AssertionError: {"detail":"approval_signature_invalid"}
+2026-11-02T04:46:00.9772464Z E       assert (403 == 409)
+2026-11-02T04:46:00.9819790Z E       AssertionError: {"detail":"approval_signature_invalid"}
+2026-11-02T04:46:00.9820393Z E       assert 403 == 200
+2026-11-02T04:46:00.9849736Z E       KeyError: 'state'
+2026-11-02T04:46:00.9874590Z E       KeyError: 'state'
+2026-11-02T04:46:00.9897973Z E       KeyError: 'state'
+2026-11-02T04:46:00.9930492Z E       AssertionError: {"detail":"approval_signature_invalid"}
+2026-11-02T04:46:00.9930966Z E       assert 403 == 200
+2026-11-02T04:46:00.9962674Z E       AssertionError: {"detail":"approval_signature_invalid"}
+2026-11-02T04:46:00.9963303Z E       assert 403 == 200
+2026-11-02T04:46:00.9994050Z E       AssertionError: {"detail":"approval_signature_invalid"}
+2026-11-02T04:46:00.9994408Z E       assert 403 == 200
+2026-11-02T04:46:01.0021368Z E       AssertionError: {"detail":"approval_signature_invalid"}
+2026-11-02T04:46:01.0021728Z E       assert 403 == 200
+2026-11-02T04:46:01.0048851Z E       AssertionError: {"detail":"approval_signature_invalid"}
+2026-11-02T04:46:01.0049205Z E       assert 403 == 200
+2026-11-02T04:46:01.0074943Z E       AssertionError: {"detail":"approval_signature_invalid"}
+2026-11-02T04:46:01.0075297Z E       assert 403 == 200
+2026-11-02T04:46:01.0099763Z E       AssertionError: {"detail":"approval_signature_invalid"}
+2026-11-02T04:46:01.0100112Z E       assert 403 == 200
+2026-11-02T04:46:01.0124345Z E       AssertionError: {"detail":"approval_signature_invalid"}
+2026-11-02T04:46:01.0124695Z E       assert 403 == 200
+2026-11-02T04:46:01.0148617Z E       AssertionError: {"detail":"approval_signature_invalid"}
+2026-11-02T04:46:01.0148967Z E       assert 403 == 200
+2026-11-02T04:46:01.0173028Z E       AssertionError: {"detail":"approval_signature_invalid"}
+2026-11-02T04:46:01.0173378Z E       assert 403 == 200
+2026-11-02T04:46:01.0197085Z E       AssertionError: {"detail":"approval_signature_invalid"}
+2026-11-02T04:46:01.0197446Z E       assert 403 == 200
+2026-11-02T04:46:01.0224888Z E       AssertionError: {"detail":"approval_signature_invalid"}
+2026-11-02T04:46:01.0225237Z E       assert 403 == 200
+2026-11-02T04:46:01.0250010Z E       AssertionError: {"detail":"approval_signature_invalid"}
+2026-11-02T04:46:01.0250475Z E       assert 403 == 200
+2026-11-02T04:46:01.0296115Z E       AssertionError: {"detail":"approval_signature_invalid"}
+2026-11-02T04:46:01.0296464Z E       assert 403 == 200
+2026-11-02T04:46:01.0323391Z E       AssertionError: {"detail":"approval_signature_invalid"}
+2026-11-02T04:46:01.0323740Z E       assert 403 == 200
+2026-11-02T04:46:01.0350046Z E       AssertionError: {"detail":"approval_signature_invalid"}
+2026-11-02T04:46:01.0350392Z E       assert 403 == 200
+2026-11-02T04:46:01.0379167Z E       AssertionError: {"detail":"approval_signature_invalid"}
+2026-11-02T04:46:01.0379527Z E       assert 403 == 200
+2026-11-02T04:46:01.0405874Z E       AssertionError: {"detail":"approval_signature_invalid"}
+2026-11-02T04:46:01.0406228Z E       assert 403 == 200
+2026-11-02T04:46:01.0423625Z E       assert ['67 "a recon...s not define'] == []
+2026-11-02T04:46:01.0435511Z E       assert ['67 "a recon...s not define'] == []
+2026-11-02T04:46:01.0443617Z FAILED backend/tests/test_account_operation_recovery.py::test_failed_native_completion_blocks_new_approval_but_disjoint_account_works - AssertionError: {"detail":"approval_signature_invalid"}
+2026-11-02T04:46:01.0445713Z FAILED backend/tests/test_account_operation_recovery.py::test_operation_readback_uses_current_authenticated_device_not_a_query_override - AssertionError: {"detail":"approval_signature_invalid"}
+2026-11-02T04:46:01.0446501Z assert 403 == 200
+2026-11-02T04:46:01.0447681Z FAILED backend/tests/test_trading_oauth_effects.py::test_exact_callback_retry_does_not_exchange_a_provider_code_twice - KeyError: 'state'
+2026-11-02T04:46:01.0448774Z FAILED backend/tests/test_trading_oauth_effects.py::test_conflicting_callback_cannot_replace_the_first_accepted_credentials - KeyError: 'state'
+2026-11-02T04:46:01.0450040Z FAILED backend/tests/test_trading_oauth_effects.py::test_link_retry_after_a_lost_reply_returns_receipt_without_repeating_the_local_effect - KeyError: 'state'
+2026-11-02T04:46:01.0451426Z FAILED backend/tests/test_trading_oauth_effects.py::test_concurrent_callback_is_refused_while_owner_polling_and_event_loop_remain_responsive - AssertionError: {"detail":"approval_signature_invalid"}
+2026-11-02T04:46:01.0452504Z assert 403 == 200
+2026-11-02T04:46:01.0453805Z FAILED backend/tests/test_trading_oauth_effects.py::test_cancelled_token_exchange_keeps_unknown_and_a_new_state_cannot_reuse_the_code - AssertionError: {"detail":"approval_signature_invalid"}
+2026-11-02T04:46:01.0454577Z assert 403 == 200
+2026-11-02T04:46:01.0456009Z FAILED backend/tests/test_trading_oauth_effects.py::test_link_effect_without_a_committed_receipt_is_not_repeated_or_bypassed_by_new_state[after_material_before_receipt] - AssertionError: {"detail":"approval_signature_invalid"}
+2026-11-02T04:46:01.0456946Z assert 403 == 200
+2026-11-02T04:46:01.0458333Z FAILED backend/tests/test_trading_oauth_effects.py::test_link_effect_without_a_committed_receipt_is_not_repeated_or_bypassed_by_new_state[after_receipt_before_commit] - AssertionError: {"detail":"approval_signature_invalid"}
+2026-11-02T04:46:01.0459204Z assert 403 == 200
+2026-11-02T04:46:01.0460410Z FAILED backend/tests/test_trading_oauth_effects.py::test_committed_link_receipt_survives_a_lost_response_and_a_new_reader - AssertionError: {"detail":"approval_signature_invalid"}
+2026-11-02T04:46:01.0461141Z assert 403 == 200
+2026-11-02T04:46:01.0462520Z FAILED backend/tests/test_trading_oauth_effects.py::test_real_process_death_after_claim_leaves_unconfirmed_work_without_reexchange - AssertionError: {"detail":"approval_signature_invalid"}
+2026-11-02T04:46:01.0463309Z assert 403 == 200
+2026-11-02T04:46:01.0464505Z FAILED backend/tests/test_trading_oauth_effects.py::test_invalid_link_alias_is_refused_before_claim_and_can_be_corrected - AssertionError: {"detail":"approval_signature_invalid"}
+2026-11-02T04:46:01.0465234Z assert 403 == 200
+2026-11-02T04:46:01.0466494Z FAILED backend/tests/test_trading_oauth_effects.py::test_incomplete_provider_token_response_stays_unknown_and_cannot_be_reexchanged - AssertionError: {"detail":"approval_signature_invalid"}
+2026-11-02T04:46:01.0467270Z assert 403 == 200
+2026-11-02T04:46:01.0468513Z FAILED backend/tests/test_trading_oauth_effects.py::test_missing_native_authorization_material_cannot_create_a_ready_account[acct1] - AssertionError: {"detail":"approval_signature_invalid"}
+2026-11-02T04:46:01.0469292Z assert 403 == 200
+2026-11-02T04:46:01.0470545Z FAILED backend/tests/test_trading_oauth_effects.py::test_missing_native_authorization_material_cannot_create_a_ready_account[token1] - AssertionError: {"detail":"approval_signature_invalid"}
+2026-11-02T04:46:01.0471311Z assert 403 == 200
+2026-11-02T04:46:01.0472989Z FAILED backend/tests/test_trading_oauth_effects.py::test_missing_native_authorization_material_cannot_create_a_ready_account[cur1] - AssertionError: {"detail":"approval_signature_invalid"}
+2026-11-02T04:46:01.0473777Z assert 403 == 200
+2026-11-02T04:46:01.0475100Z FAILED backend/tests/test_trading_oauth_effects.py::test_an_encrypted_receipt_cannot_be_transplanted_to_another_link - AssertionError: {"detail":"approval_signature_invalid"}
+2026-11-02T04:46:01.0475818Z assert 403 == 200
+2026-11-02T04:46:01.0477029Z FAILED backend/tests/test_trading_oauth_effects.py::test_encrypted_authorization_material_cannot_move_to_a_different_state - AssertionError: {"detail":"approval_signature_invalid"}
+2026-11-02T04:46:01.0477824Z assert 403 == 200
+2026-11-02T04:46:01.0479000Z FAILED backend/tests/test_trading_oauth_effects.py::test_mismatched_native_link_receipt_stays_unconfirmed[change0] - AssertionError: {"detail":"approval_signature_invalid"}
+2026-11-02T04:46:01.0479719Z assert 403 == 200
+2026-11-02T04:46:01.0480916Z FAILED backend/tests/test_trading_oauth_effects.py::test_mismatched_native_link_receipt_stays_unconfirmed[change1] - AssertionError: {"detail":"approval_signature_invalid"}
+2026-11-02T04:46:01.0481624Z assert 403 == 200
+2026-11-02T04:46:01.0483053Z FAILED backend/tests/test_trading_oauth_effects.py::test_mismatched_native_link_receipt_stays_unconfirmed[change2] - AssertionError: {"detail":"approval_signature_invalid"}
+2026-11-02T04:46:01.0483765Z assert 403 == 200
+2026-11-02T04:46:01.0485045Z FAILED backend/tests/test_trading_oauth_effects.py::test_a_new_link_cannot_replace_a_registered_alias_without_an_original_unresolved_effect - AssertionError: {"detail":"approval_signature_invalid"}
+2026-11-02T04:46:01.0485843Z assert 403 == 200
+2026-11-02T04:46:01.0487085Z FAILED backend/tests/test_trading_oauth_effects.py::test_original_unconfirmed_link_read_does_not_depend_on_current_native_inventory - AssertionError: {"detail":"approval_signature_invalid"}
+2026-11-02T04:46:01.0487861Z assert 403 == 200
+2026-11-02T04:46:01.0488953Z FAILED tests/contracts/test_red_team_register.py::test_the_repositorys_register_passes_its_own_checker - assert ['67 "a recon...s not define'] == []
+2026-11-02T04:46:01.0495520Z FAILED tests/contracts/test_red_team_register.py::test_the_same_citation_with_its_class_is_accepted - assert ['67 "a recon...s not define'] == []
+2026-11-02T04:46:01.9966870Z 25 failed, 1559 passed, 4624 deselected, 7 warnings in 876.86s (0:14:36)

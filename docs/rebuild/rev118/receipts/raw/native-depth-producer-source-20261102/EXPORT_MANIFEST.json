@@ -1,0 +1,22 @@
+{
+  "SOURCE.patch": {
+    "bytes": 56613,
+    "sha256": "980d63abc83606a171609255dadf0fe00c2e78bef6f6ed40b1347c560110f2cb"
+  },
+  "SOURCE.zip": {
+    "bytes": 101403,
+    "sha256": "405d87a065927637f4f177e6ea7d35ee21f2283c421fe31003d9ae4899b0174b"
+  },
+  "FROZEN.json": {
+    "bytes": 5158,
+    "sha256": "c305ab528a74b4cba12e87ed4f196c0c2d6f85b6d687fcbf39340b0f68c37f30"
+  },
+  "HANDOFF.json": {
+    "bytes": 17720,
+    "sha256": "ab42c076fbc82a0594a54bbe87afe085ed5e99f6fbfd6513462e37ca8c7d1a9d"
+  },
+  "HANDOFF.md": {
+    "bytes": 1320,
+    "sha256": "86be27e5a60c1d3acc927583b62bbd38edde99722888660e878ca773fbe2f2a6"
+  }
+}

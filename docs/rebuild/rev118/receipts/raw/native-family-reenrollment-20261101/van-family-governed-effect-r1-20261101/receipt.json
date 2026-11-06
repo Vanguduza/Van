@@ -1,0 +1,48 @@
+{
+  "started_at_utc": "2026-11-01T03:33:15.845264+00:00",
+  "source_parent": "d43bd396765204a4843cdb7485535e9fcd7af3ce",
+  "owned_temp_preflight": {
+    "path": "/tmp/van-recovery-family-governed-effect-r1-20261101",
+    "free_bytes_before": 8923205632,
+    "free_inodes_before": 2304130,
+    "minimum_free_bytes": 4294967296,
+    "no_preexisting_directory": true
+  },
+  "source_pins": {
+    "trading/vati/execution/paper.py": "b0d7c6a71f2422a66ec16b4e7cf8da677d95f0543706f64ea06b8e5f5a47882a",
+    "trading/vati/lifecycle/family_actions.py": "c83a0e9f453492f4207a7f0ddf2e0cd9b6f5863ce8db47d0958bdf9f9c43e406",
+    "trading/vati/lifecycle/family.py": "32e79c9a4eb7fbfb7489bbb1f0ed1dbc629b1d34f58d66cf0cfc369177d51ab8",
+    "trading/vati/lifecycle/family_membership.py": "8f713bbe62639bff48303a036a940905ae7ed90aff57df14320e00aef7e5b476",
+    "trading/vati/lifecycle/family_action_journal.py": "55e9f69a55c324a76ced2f6fcb5ce51792402970d4886883f615fa6d35659e61",
+    "trading/vati/execution/exit_journal.py": "669c71707d6d43bcbe02ed3f643a51650ca5778e937836fb5730bf90f3fb691b",
+    "trading/vati/execution/router.py": "64425fe610638670afd889387561c2095cfaef3ca36fcd0de0e05a9b4cfa5815",
+    "trading/vati/app/trade_lifecycle.py": "a64e096fe907240b87e348190c76db28013091782d43af79df1b3975b8325ed0",
+    "trading/vati/risk/operational_grant.py": "33bef895acf9bcb220a6d1af27849e17fbd240058d1a171ad4d28aae3abcf165",
+    "trading/vati/lifecycle/family_execution.py": "bd960590bc050d87e2544231128f94020584c9d2ea5b84874f085f046240fece",
+    "trading/tests/test_lifecycle_operational_grant.py": "bbd029c8bb431c04ed3d16223e426deb3451a33b0b345a387c3843ba0334657b",
+    "trading/tests/test_family_governed_workflow.py": "e18997eb41b16afe4e7e11eeb2c056fe9f671dd55c933acec38e2eb0e801ce1a"
+  },
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "tools/rebuild/source_storage_audit.py",
+    "--report",
+    "/workspace/van-family-governed-effect-r1-20261101/storage-audit.json",
+    "trading/tests/test_lifecycle_operational_grant.py",
+    "trading/tests/test_family_governed_workflow.py",
+    "--basetemp=/tmp/van-recovery-family-governed-effect-r1-20261101",
+    "--junitxml=/workspace/van-family-governed-effect-r1-20261101/tests.xml",
+    "-q"
+  ],
+  "exit": 0,
+  "owned_temp_cleanup": {
+    "path": "/tmp/van-recovery-family-governed-effect-r1-20261101",
+    "files": 24,
+    "inventory": "/workspace/van-family-governed-effect-r1-20261101/owned-temp-inventory.json",
+    "inventory_sha256": "6bd7e228884bbe639a60f294836a1c49b77acc419428c227692cbfecf3ed96eb",
+    "free_bytes_before_cleanup": 8922406912,
+    "free_bytes_after_cleanup": 8923205632,
+    "free_inodes_after": 2304130,
+    "independently_absent": true
+  },
+  "completed_at_utc": "2026-11-01T03:33:17.626129+00:00"
+}

@@ -1,0 +1,134 @@
+name: van-forecast-runtime-source
+on:
+  pull_request:
+    paths:
+      - 'trading/vati_forecast_worker/**'
+      - 'trading/vati/core/model_boundary.py'
+      - 'trading/vati/__main__.py'
+      - 'trading/tests/test_forecast_*'
+      - 'trading/tests/test_ml_runtime_boundary.py'
+      - 'trading/vati/research/bar_partitions.py'
+      - 'trading/vati/research/workflow.py'
+      - 'trading/vati/research/dataset_*.py'
+      - 'trading/vati/execution/ctrader/read_identity.py'
+      - 'trading/vati/execution/ctrader/adapter.py'
+      - 'trading/vati/execution/ctrader/catalog.py'
+      - 'trading/tests/test_native_read_identity.py'
+      - 'trading/vati/contracts/**'
+      - 'trading/tests/test_dataset_*'
+      - 'trading/vati/market_data/native_*.py'
+      - 'trading/worker_tests/**'
+      - 'tools/rebuild/run_forecast_runtime_smoke.py'
+      - '.github/workflows/van-forecast-runtime-source.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native-source-parquet:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17.11-bookworm@sha256:858bb5e98eed02eb8cafbcdc007f9a65d1b613972028944a8ec2133ccaf80d27
+        env:
+          POSTGRES_USER: van_fixture
+          POSTGRES_PASSWORD: van_fixture_test_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U van_fixture -d postgres"
+          --health-interval 5s --health-timeout 3s --health-retries 20
+    env:
+      VATI_TEST_PG_DSN: postgresql://van_fixture:van_fixture_test_only@127.0.0.1:5432/postgres
+      VATI_TEST_PG_ISOLATED_FIXTURE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install declared source dependencies and the exact locked Arrow wheel
+        run: |
+          python -m pip install -r backend/requirements.lock -r tools/rebuild/requirements.lock
+          python - <<'PY'
+          from pathlib import Path
+          source=Path('trading/vati_forecast_worker/locks/research-cp312-linux-x86_64.wheel.lock').read_text()
+          lines=[line for line in source.splitlines() if line.startswith('pyarrow==')]
+          assert len(lines)==1
+          Path('/tmp/van-source-arrow.lock').write_text(lines[0]+'\n')
+          PY
+          python -m pip install --no-deps --require-hashes -r /tmp/van-source-arrow.lock
+          python -m pip install --no-deps psycopg==3.2.9 psycopg-binary==3.2.9
+      - name: Initialize only the disposable candidate source database
+        run: |
+          python - <<'PY'
+          import os,psycopg
+          with psycopg.connect(os.environ['VATI_TEST_PG_DSN'],autocommit=True) as db:
+              db.execute('CREATE SCHEMA vati')
+          PY
+      - name: Execute actual archive, Parquet, cold readback and CLI source cases
+        run: |
+          mkdir -p /tmp/van-native-parquet-source
+          git rev-parse HEAD > /tmp/van-native-parquet-source/tested-head.txt
+          python tools/rebuild/source_storage_audit.py --report /tmp/van-native-parquet-source/storage-audit.json \
+            trading/worker_tests trading/tests/test_forecast_source_partitions.py trading/tests/test_ml_runtime_boundary.py \
+            --junitxml=/tmp/van-native-parquet-source/report.xml
+      - name: Require executed source cases without skips
+        run: |
+          python - <<'PY'
+          import json,xml.etree.ElementTree as ET
+          from pathlib import Path
+          root=Path('/tmp/van-native-parquet-source')
+          cases=list(ET.parse(root/'report.xml').getroot().iter('testcase'))
+          assert len(cases)>=38 and not any(c.find(k) is not None for c in cases for k in ('failure','error','skipped'))
+          assert not json.loads((root/'storage-audit.json').read_text())['forbidden_events']
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: van-native-source-parquet-report
+          path: /tmp/van-native-parquet-source/
+          if-no-files-found: error
+  cpu-source-runtime:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Record exact source and runtime inputs
+        run: |
+          mkdir -p /tmp/van-forecast-source-evidence
+          git rev-parse HEAD > /tmp/van-forecast-source-evidence/tested-head.txt
+          sha256sum trading/vati_forecast_worker/locks/* > /tmp/van-forecast-source-evidence/lock-digests.txt
+          python3 -m trading.vati_forecast_worker.inventory \
+            --output /tmp/van-forecast-source-evidence/source-wheel-sbom.json
+      - name: Build the locked CPU worker with actual wheel verification
+        run: |
+          docker build --secret id=system_ca,src=/etc/ssl/certs/ca-certificates.crt --progress plain \
+            --tag van-forecast-source:${{ github.run_id }} trading/vati_forecast_worker
+          docker image inspect van-forecast-source:${{ github.run_id }} --format '{{.Id}}' \
+            > /tmp/van-forecast-source-evidence/image-id.txt
+      - name: Actual fixture training, native export and separate cold inference
+        run: |
+          image_id="$(cat /tmp/van-forecast-source-evidence/image-id.txt)"
+          python3 tools/rebuild/run_forecast_runtime_smoke.py --image "$image_id" \
+            --output /tmp/van-forecast-source-evidence/runtime
+      - name: Require all declared source cases and bounded separate workers
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          root=Path('/tmp/van-forecast-source-evidence/runtime')
+          record=json.loads((root/'receipt.json').read_text())
+          assert record['status']=='SOURCE_FIXTURE_RESEARCH_AND_COLD_INFERENCE_PASS_NOT_ADMISSION'
+          assert record['source_snapshot_unchanged']
+          assert record['research']['removed'] and record['inference']['removed']
+          assert record['research']['container_id']!=record['inference']['container_id']
+          for role in ('research','inference'):
+              observed=record[role]['declared_kernel_configuration']
+              assert observed['NetworkMode']=='none' and observed['ReadonlyRootfs'] and observed['Init']
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: van-forecast-runtime-source-report
+          path: /tmp/van-forecast-source-evidence/
+          if-no-files-found: error

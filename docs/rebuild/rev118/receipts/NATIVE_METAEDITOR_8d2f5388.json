@@ -1,0 +1,47 @@
+{
+  "schema": "van.rebuild.native-metaeditor-hosted-attempt/1",
+  "observed_at_utc": "2026-10-23T09:02:38.721969+00:00",
+  "source_head": "8d2f53889963baee482a7f524bf42828cdaa36b8",
+  "tested_merge": "183e576348baee52857722b8477bb582d5d45f00",
+  "identical_source_tree": "df26c9f4e5b243611d58e9042edc9398fed4dcb5",
+  "run_id": 39925980276,
+  "conclusion": "FAILURE",
+  "native_receipt": {
+    "schema": "van.mql-native-source/1",
+    "source_head": "183e576348baee52857722b8477bb582d5d45f00",
+    "source_sha256": "4bdea422e163db651671a5c8e1e2aa09702fb01ca4178185d06fe59915737dbf",
+    "phase": "PREPARING_COMPILER",
+    "qualification": "Source compilation only; no terminal account, broker order, deployed EA, financial or handset acceptance.",
+    "compile_cases": [],
+    "source_blob_oid": "436e3571b7ae43a7de2abfdaa4741dbb99184cef",
+    "checkout_blob_oid": "436e3571b7ae43a7de2abfdaa4741dbb99184cef",
+    "installer_url": "https://download.terminal.free/cdn/web/metaquotes.ltd/mt5/mt5setup.exe?utm_source=www.metatrader5.com&utm_campaign=download",
+    "installer_sha256": "c8c0a73f86c58974df62fb48f8256a099d6698518cf2defc2b3f169773729e22",
+    "installer_bytes": 22902352,
+    "installer_signature": {
+      "status": "Valid",
+      "subject": "CN=MetaQuotes Ltd., O=MetaQuotes Ltd., S=Lemesos, C=CY",
+      "thumbprint": "5A64A7AED24C33DED342D01D01FA5286F06DA6DC"
+    },
+    "setup_diagnostic": {
+      "observed_at_utc": "2026-10-23T08:45:55.7823310Z",
+      "candidates": [
+        {
+          "exists": false,
+          "path": "C:\\Program Files\\MetaTrader 5\\metaeditor64.exe"
+        },
+        {
+          "exists": true,
+          "path": "D:\\a\\_temp\\van-mql-abb824cac14e4833a412b1f61fd87ffe\\sdk\\metaeditor64.exe"
+        }
+      ],
+      "processes": []
+    },
+    "failure": "The official SDK installer did not supply MetaEditor and the native standard library",
+    "finished_at_utc": "2026-10-23T08:45:56.1414267Z"
+  },
+  "artifact_zip_sha256": "8a000e289c5825921fd7ddfba97924af4f74964e613fc22cce5e7b50fb636040",
+  "job_log_sha256": "9563763ce9cd0555abcf6dc982c4371f2509156605a02f0094277fd76dfa3f83",
+  "interpretation": "Exact source bytes are proven and SDK compiler executable exists in the requested owned install directory. Standard library was not located; no compiler signature/version/case was observed, no MQL compile is claimed. The candidate now initializes signed SDK data with bounded editor startup and, if needed, a network-blocked experts-disabled terminal on a disposable VM. This candidate initialization has not yet run natively.",
+  "candidate_runner_sha256": "6c6481a663cb85dc4458a678a28898d17d2e79d843ed89c3ea3f944e119ce9c4"
+}

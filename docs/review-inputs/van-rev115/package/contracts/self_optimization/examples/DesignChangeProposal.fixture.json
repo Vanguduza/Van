@@ -1,0 +1,30 @@
+{
+  "acceptance_test_refs": [],
+  "comparison_refs": [],
+  "complexity_ledger_ref": "FIXTURE_COMPLEXITY_LEDGER_REF",
+  "data_evaluator_refs": [],
+  "economic_result_ref": null,
+  "environment": "FIXTURE",
+  "financial_activation": "NONE",
+  "hypothesis_ref": "FIXTURE_HYPOTHESIS_REF",
+  "preserved_requirement_refs": [],
+  "problem_class": "IMPLEMENTATION_DEFECT",
+  "proposed_contract_changes": [],
+  "record_id": "FIXTURE_DesignChangeProposal",
+  "record_type": "DesignChangeProposal",
+  "required_authority_ref": "FIXTURE_REQUIRED_AUTHORITY_REF",
+  "safety_result_ref": "FIXTURE_SAFETY_RESULT_REF",
+  "schema_version": 2,
+  "scope": {
+    "account_id": "FIXTURE_ACCOUNT",
+    "market_type": "CRYPTO_SPOT",
+    "ownership": "OWNER_MANUAL",
+    "product_id": "FIXTURE_PRODUCT_ID",
+    "scope_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+    "strategy_id": "FIXTURE_STRATEGY_ID",
+    "venue_id": "FIXTURE_VENUE"
+  },
+  "source_commit": "FIXTURE_SOURCE_COMMIT",
+  "status": "PROPOSED",
+  "uncertainty_ref": "FIXTURE_UNCERTAINTY_REF"
+}

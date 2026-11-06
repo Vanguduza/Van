@@ -1,0 +1,32 @@
+{
+  "fetched_at_utc": "2026-11-01T03:35:15Z",
+  "repository": "Vanguduza/Van",
+  "commit": "d43bd396765204a4843cdb7485535e9fcd7af3ce",
+  "workflow_run_id": 41266388959,
+  "job_id": 124730079370,
+  "job": "backend-public-source",
+  "log_source": "Single GitHub job-log fetch; existing watcher log had step-state summaries only.",
+  "raw_log": {
+    "path": "/workspace/van-d43-backend-public-failure-luna-20261101.log",
+    "bytes": 4297386,
+    "mode": "0600",
+    "sha256": "5be83fc5117277d6c9e4448121e905153c7cd8de241538e4cab8919f73e3bd8f"
+  },
+  "pytest_failure": {
+    "step": "Execute remaining backend, contract and Hermes source cases",
+    "summary": {"failed": 1, "passed": 5897, "skipped": 7, "warnings": 7, "duration_seconds": 2495.27},
+    "failed_node_ids": [
+      "tests/contracts/test_owner_endpoint_registry.py::test_saved_endpoints_match_gateway_and_conditional_contracts"
+    ],
+    "error_node_ids": [],
+    "assertion": "AssertionError: Regenerate using tools/audit/export_owner_endpoints.py",
+    "reason": "Saved owner-endpoint registry did not match gateway and conditional contract data."
+  },
+  "coverage_and_prerequisite_skip_check": {
+    "step": "Require complete selected coverage and exact declared prerequisite skips",
+    "traceback_location": "tools/rebuild/backend_public_source.py:verify (line 72), invoked by main (line 109)",
+    "error": "ValueError: source cases missing, failed or errored",
+    "evidence_context": "The preceding pytest step reported one failure and seven skips. The log does not expose a separate per-skip mismatch detail, so no more specific skip cause is recorded."
+  },
+  "scope": "Log read and extraction only. No code diagnosis, test execution, polling, or repository changes."
+}

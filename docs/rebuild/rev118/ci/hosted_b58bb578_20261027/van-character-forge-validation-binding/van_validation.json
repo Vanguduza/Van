@@ -1,0 +1,26 @@
+{
+  "candidate_sha256": "772f517720f3e39b76b1a93291673d5dabf44c63d0349b2e57259df6d7635457",
+  "github": {
+    "repository": "Vanguduza/Van",
+    "run_attempt": "1",
+    "run_id": "40463198811",
+    "sha": "94ac425e6e5bae9c4b5d5f5ea459932315314e99"
+  },
+  "mode": "core",
+  "production_sha256": null,
+  "reasons": [],
+  "result": "PASS",
+  "schema_version": 1,
+  "tests": {
+    "artboardIsTransparentOnThreeBackgrounds": "passed",
+    "brokenAssetFallsBack": "passed",
+    "contractSurfaceMatches": "passed",
+    "coreInputsDriveTheRig": "passed",
+    "everyStateAndActionRenders": "skipped",
+    "identityColourFamilies": "passed",
+    "idleSoakFrameStats": "skipped",
+    "invalidInputsDegradeSafely": "passed",
+    "mandatoryCombinations": "skipped",
+    "productionAvatarPathKeepsRive": "skipped"
+  }
+}

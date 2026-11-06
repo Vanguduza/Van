@@ -28,12 +28,14 @@ from __future__ import annotations
 
 import hashlib
 import time
+import datetime as dt
 from dataclasses import dataclass
 from enum import Enum
 
 from cryptography.exceptions import InvalidSignature
+from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
-from cryptography.hazmat.primitives.asymmetric import ec, utils as asym_utils
+from cryptography.hazmat.primitives.asymmetric import ec, ed25519, ed448, padding, rsa, utils as asym_utils
 
 #: The OID Android puts the key attestation extension under.
 ATTESTATION_OID = "1.3.6.1.4.1.11129.2.1.17"
@@ -183,6 +185,7 @@ class AttestationFacts:
     verified_boot_state: VerifiedBootState | None
     package_name: str | None
     signing_cert_sha256: str | None
+    device_locked: bool | None = None
 
 
 def parse_attestation_extension(extension: bytes) -> AttestationFacts:
@@ -207,13 +210,25 @@ def parse_attestation_extension(extension: bytes) -> AttestationFacts:
     boot_state: VerifiedBootState | None = None
     package_name: str | None = None
     signing_cert: str | None = None
+    device_locked: bool | None = None
     # §0D.3 reads the *TEE-enforced* list. The software-enforced one is written by the
     # operating system and is exactly what a compromised device can lie in.
     for tag_number, value in _authorization_entries(tee_enforced):
         if tag_number == TAG_ROOT_OF_TRUST:
             boot_state = _root_of_trust_state(value)
+            device_locked = _root_device_locked(value)
         elif tag_number == TAG_ATTESTATION_APPLICATION_ID:
             package_name, signing_cert = _application_id(value)
+
+    # Android supplies attestationApplicationId in softwareEnforced: the OS
+    # identifies the app, while the signed chain and verified locked boot attest
+    # that OS. RootOfTrust must still come from the hardware-enforced list.
+    for tag_number, value in _authorization_entries(software_enforced):
+        if tag_number == TAG_ATTESTATION_APPLICATION_ID:
+            software_package, software_signing_cert = _application_id(value)
+            if package_name is not None and (package_name, signing_cert) != (software_package, software_signing_cert):
+                raise DeviceProofError("attestation_application_id_conflict")
+            package_name, signing_cert = software_package, software_signing_cert
 
     attestation_level = _SECURITY_LEVELS.get(_read_integer(attestation_level_raw))
     keymaster_level = _SECURITY_LEVELS.get(_read_integer(keymaster_level_raw))
@@ -228,6 +243,7 @@ def parse_attestation_extension(extension: bytes) -> AttestationFacts:
         verified_boot_state=boot_state,
         package_name=package_name,
         signing_cert_sha256=signing_cert,
+        device_locked=device_locked,
     )
 
 
@@ -262,10 +278,27 @@ def _root_of_trust_state(body: bytes) -> VerifiedBootState | None:
     return _BOOT_STATES.get(_read_integer(state_raw))
 
 
+def _root_device_locked(body: bytes) -> bool | None:
+    reader = _Der(body)
+    tag, inner = reader.read_tlv()
+    if tag != 0x30:
+        return None
+    fields = _Der(inner)
+    fields.read_tlv()
+    tag, locked = fields.read_tlv()
+    if tag != 0x01 or len(locked) != 1:
+        return None
+    return locked != b"\x00"
+
+
 def _application_id(body: bytes) -> tuple[str | None, str | None]:
     """AttestationApplicationId: the package set and the signing certificate digests."""
     reader = _Der(body)
     tag, inner = reader.read_tlv()
+    # Android's [709] is EXPLICIT OCTET STRING containing the DER application ID.
+    if tag == 0x04:
+        reader = _Der(inner)
+        tag, inner = reader.read_tlv()
     if tag != 0x30:
         return None, None
     fields = _Der(inner)
@@ -335,11 +368,15 @@ def verify_attestation(
         return AttestationVerdict(False, facts, "attestation_challenge_mismatch")
     if policy.require_hardware_backed and not facts.attestation_security_level.hardware_backed:
         return AttestationVerdict(False, facts, "attestation_not_hardware_backed")
+    if policy.require_hardware_backed and not facts.keymaster_security_level.hardware_backed:
+        return AttestationVerdict(False, facts, "attestation_key_not_hardware_backed")
     if policy.require_verified_boot and facts.verified_boot_state is not VerifiedBootState.VERIFIED:
         return AttestationVerdict(
             False, facts,
             f"attestation_verified_boot_{(facts.verified_boot_state or 'absent')}".lower(),
         )
+    if policy.require_verified_boot and facts.device_locked is not True:
+        return AttestationVerdict(False, facts, "attestation_device_not_locked")
     if facts.package_name != policy.expected_package:
         # §0D.3: the binding is package + signing identity + key. A key attested by a
         # different app on the same phone is a different application asking.
@@ -352,6 +389,77 @@ def verify_attestation(
         if root_fingerprint.lower() not in {f.lower() for f in policy.allowed_root_fingerprints}:
             return AttestationVerdict(False, facts, "attestation_root_not_allowed")
     return AttestationVerdict(True, facts, None)
+
+
+def verify_attestation_chain(
+    *, certificates_der: list[bytes], public_key_pem: str,
+    policy: AttestationPolicy, extension: bytes | None = None,
+    now_ms: int | None = None,
+) -> tuple[bytes, str]:
+    """Validate the signed leaf-to-root chain before trusting its Android facts.
+
+    The root pin is deployment authority, never a caller-supplied claim. The
+    returned extension and root digest are derived from the verified chain.
+    """
+    if not policy.allowed_root_fingerprints:
+        raise DeviceProofError("attestation_root_trust_unconfigured")
+    if not 2 <= len(certificates_der) <= 8 or any(not c or len(c) > 65536 for c in certificates_der):
+        raise DeviceProofError("attestation_chain_invalid")
+    try:
+        chain = [x509.load_der_x509_certificate(c) for c in certificates_der]
+        supplied_key = serialization.load_pem_public_key(public_key_pem.encode())
+    except (ValueError, TypeError) as exc:
+        raise DeviceProofError("attestation_chain_malformed") from exc
+    fingerprints = [certificate.fingerprint(hashes.SHA256()).hex() for certificate in chain]
+    if len(set(fingerprints)) != len(chain):
+        raise DeviceProofError("attestation_chain_duplicate")
+    root_fingerprint = fingerprints[-1]
+    if root_fingerprint not in {value.lower() for value in policy.allowed_root_fingerprints}:
+        raise DeviceProofError("attestation_root_not_allowed")
+    now = dt.datetime.fromtimestamp((now_ms if now_ms is not None else int(time.time() * 1000)) / 1000, dt.timezone.utc)
+    for certificate in chain:
+        if not certificate.not_valid_before_utc <= now < certificate.not_valid_after_utc:
+            raise DeviceProofError("attestation_certificate_expired_or_not_yet_valid")
+    spki = lambda key: key.public_bytes(serialization.Encoding.DER, serialization.PublicFormat.SubjectPublicKeyInfo)
+    if spki(chain[0].public_key()) != spki(supplied_key):
+        raise DeviceProofError("attestation_leaf_key_mismatch")
+    for index, certificate in enumerate(chain):
+        issuer = chain[index + 1] if index + 1 < len(chain) else certificate
+        if certificate.issuer != issuer.subject:
+            raise DeviceProofError("attestation_chain_issuer_mismatch")
+        if index + 1 < len(chain):
+            try:
+                constraints = issuer.extensions.get_extension_for_class(x509.BasicConstraints).value
+                if not constraints.ca or (constraints.path_length is not None and index > constraints.path_length):
+                    raise DeviceProofError("attestation_issuer_not_authorized")
+                try:
+                    if not issuer.extensions.get_extension_for_class(x509.KeyUsage).value.key_cert_sign:
+                        raise DeviceProofError("attestation_issuer_not_authorized")
+                except x509.ExtensionNotFound:
+                    pass
+            except x509.ExtensionNotFound as exc:
+                raise DeviceProofError("attestation_issuer_not_authorized") from exc
+        key = issuer.public_key()
+        try:
+            if isinstance(key, rsa.RSAPublicKey):
+                key.verify(certificate.signature, certificate.tbs_certificate_bytes,
+                           certificate.signature_algorithm_parameters or padding.PKCS1v15(), certificate.signature_hash_algorithm)
+            elif isinstance(key, ec.EllipticCurvePublicKey):
+                key.verify(certificate.signature, certificate.tbs_certificate_bytes, ec.ECDSA(certificate.signature_hash_algorithm))
+            elif isinstance(key, (ed25519.Ed25519PublicKey, ed448.Ed448PublicKey)):
+                key.verify(certificate.signature, certificate.tbs_certificate_bytes)
+            else:
+                raise DeviceProofError("attestation_issuer_key_unsupported")
+        except (InvalidSignature, ValueError, TypeError) as exc:
+            raise DeviceProofError("attestation_chain_signature_invalid") from exc
+    try:
+        value = chain[0].extensions.get_extension_for_oid(x509.ObjectIdentifier(ATTESTATION_OID)).value
+        attested_extension = value.value
+    except (x509.ExtensionNotFound, AttributeError) as exc:
+        raise DeviceProofError("attestation_extension_absent") from exc
+    if extension is not None and extension != attested_extension:
+        raise DeviceProofError("attestation_extension_mismatch")
+    return attested_extension, root_fingerprint
 
 
 # --------------------------------------------------------------------------- possession

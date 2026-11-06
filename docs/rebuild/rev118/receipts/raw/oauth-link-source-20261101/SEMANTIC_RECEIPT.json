@@ -1,0 +1,113 @@
+{
+  "state": "TERMINAL",
+  "source_before": {
+    "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt": "b36f12dbfee022ecefbabc2c527327536900a4eae5f9701e85551b211b0f162c",
+    "android/app/src/main/java/com/dial/van/trading/AccountOnboarding.kt": "eef746dc23d52040c27961a3984f1607567a85f3057a343cb71f569bf1fad3c7",
+    "android/app/src/main/java/com/dial/van/trading/AccountOperationRecovery.kt": "aa3be96fae6124a3a1713528bc4e80458962d7f18ad8df9492065ebf22b67afc",
+    "android/app/src/main/java/com/dial/van/trading/ui/AccountOnboardingScreen.kt": "db0b0939e3844a1e2eb9591962a83b53c7080bd673efaeb11506f49caaaab974",
+    "android/app/src/test/java/com/dial/van/trading/AccountOnboardingTest.kt": "f6aba55c2002d6084958b119e8b4a46bea8fc8e0ea504557087b6f372af1f7b8",
+    "android/app/src/test/java/com/dial/van/trading/AccountOperationRecoveryTest.kt": "af44d5a8b161e2e80b9cea4fc2f60a7474f78c77d312335f8211ed638ce27b32",
+    "backend/tests/test_owner_approval_original_binding.py": "bd6e6febc8254bb5190681117f634587c4e7e01967a1ae172e8f1ad3ba0f76b6",
+    "backend/tests/test_stateful_link_binding.py": "36df9402f2eb1703bf5b4827d9d002f1f109371aa38cdf2b9a79f83402876c62",
+    "backend/tests/test_trading_oauth_effects.py": "f032a701cea8f2a1b874b994451094f4d049e7a227f5387188b9ac6ccdd1ae14",
+    "backend/van_gateway/approval/service.py": "c5a1bdb43145ed99e05e3613aa4a3c3b6a9c93a6cf6caf22d5e5b8b080a299b5",
+    "backend/van_gateway/trading/accounts.py": "b67e898aa85844ecbd88094acac7a4ba116d555387139a22ea03e0d4dd7cba61",
+    "backend/van_gateway/trading/oauth_effects.py": "fcefbf2e640c301fd97c9bd2e4dccd9bc1640b9f7bdbeb065dd88d92c642e39e",
+    "trading/commander/accounts.py": "641d924886c388391dbc09631cf774a8f741b12e9c1ded9f70fc18f19807103d",
+    "trading/commander/app.py": "aded70458e7e2c0a8b7cd015518318ea7eb056602e02c628558ca5175c91120c",
+    "trading/tests/test_oauth_link_currentness.py": "b8283e2c8e319aa94d1dda46c8f19c63358322c39732a8b8817f567c591694e8"
+  },
+  "scope": "Actual completecanonical/workflowcontrols oncombined6sourcepaths; exactownedAGPoutputinit setup/argv/coreASTcontrol +allVTIL controls retained. Controlledfixturemodels only; no newAGP/SDK/platformNode/hosted/privatequalification. Earlier136VTIL4 run retainedonitsoriginalinputpins, not silentlyreusedastestfileunchanged.",
+  "outer_node_inputs_shape": {
+    "NODE_OPTIONS": {
+      "present": false,
+      "nonempty": false,
+      "sha256": null
+    },
+    "NODE_PATH": {
+      "present": true,
+      "nonempty": true,
+      "sha256": "dbc7bc884f72c70bb3d320e868da710a56a621286fba48b3c6b610776b41b4fd"
+    },
+    "NODE_COMPILE_CACHE": {
+      "present": false,
+      "nonempty": false,
+      "sha256": null
+    },
+    "NODE_DISABLE_COMPILE_CACHE": {
+      "present": false,
+      "nonempty": false,
+      "sha256": null
+    }
+  },
+  "tmp_reserve": 2147483648,
+  "owned_run_budget": 134217728,
+  "file_cap": 8388608,
+  "started": "2026-11-01T23:07:41.759303+00:00",
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "-B",
+    "/workspace/van-review-2026-10-18/publish/tools/rebuild/source_storage_audit.py",
+    "--checkout-root",
+    "/workspace/van-review-2026-10-18/publish",
+    "--report",
+    "/tmp/van-recovery-link-semantic-consumers-20261101/audit.json",
+    "tests/contracts/test_artemis_acceptance_plan.py",
+    "tests/contracts/test_artemis_usb_acceptance.py",
+    "tests/contracts/test_ci_dds_contract_pin.py",
+    "tests/contracts/test_native_artemis_plan.py",
+    "tests/contracts/test_owner_endpoint_registry.py",
+    "tests/contracts/test_owner_redesign_registry.py",
+    "tests/rebuild/test_owner_registry_refresh.py",
+    "tests/rebuild/test_source_workmap.py",
+    "--rootdir=/workspace/van-review-2026-10-18/publish",
+    "-c",
+    "/workspace/van-review-2026-10-18/publish/pytest.ini",
+    "-p",
+    "pytest_asyncio.plugin",
+    "-p",
+    "anyio.pytest_plugin",
+    "--basetemp=/tmp/van-recovery-pytest-link-semantic-20261101",
+    "--junitxml=/tmp/van-recovery-link-semantic-consumers-20261101/tests.xml",
+    "-q"
+  ],
+  "exit": 0,
+  "child_pid": 1069382,
+  "child_waited": true,
+  "peak_owned_bytes": 17084039,
+  "seconds": 93.24744267299684,
+  "children_remaining": [],
+  "tests": 220,
+  "failures": 0,
+  "errors": 0,
+  "skips": 0,
+  "cleanup": {
+    "path": "/tmp/van-recovery-pytest-link-semantic-20261101",
+    "files": 520,
+    "inventory": "/tmp/van-recovery-link-semantic-consumers-20261101/owned-temp-inventory.json",
+    "inventory_sha256": "1fc19bbc1ce9febd9ac2793ac5c89086bd7c3b5d8d8f91bc52b964c1473d3250",
+    "free_bytes_before_cleanup": 2697629696,
+    "free_bytes_after_cleanup": 2716610560,
+    "free_inodes_after": 2206197,
+    "independently_absent": true
+  },
+  "source_after": {
+    "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt": "b36f12dbfee022ecefbabc2c527327536900a4eae5f9701e85551b211b0f162c",
+    "android/app/src/main/java/com/dial/van/trading/AccountOnboarding.kt": "eef746dc23d52040c27961a3984f1607567a85f3057a343cb71f569bf1fad3c7",
+    "android/app/src/main/java/com/dial/van/trading/AccountOperationRecovery.kt": "aa3be96fae6124a3a1713528bc4e80458962d7f18ad8df9492065ebf22b67afc",
+    "android/app/src/main/java/com/dial/van/trading/ui/AccountOnboardingScreen.kt": "db0b0939e3844a1e2eb9591962a83b53c7080bd673efaeb11506f49caaaab974",
+    "android/app/src/test/java/com/dial/van/trading/AccountOnboardingTest.kt": "f6aba55c2002d6084958b119e8b4a46bea8fc8e0ea504557087b6f372af1f7b8",
+    "android/app/src/test/java/com/dial/van/trading/AccountOperationRecoveryTest.kt": "af44d5a8b161e2e80b9cea4fc2f60a7474f78c77d312335f8211ed638ce27b32",
+    "backend/tests/test_owner_approval_original_binding.py": "bd6e6febc8254bb5190681117f634587c4e7e01967a1ae172e8f1ad3ba0f76b6",
+    "backend/tests/test_stateful_link_binding.py": "36df9402f2eb1703bf5b4827d9d002f1f109371aa38cdf2b9a79f83402876c62",
+    "backend/tests/test_trading_oauth_effects.py": "f032a701cea8f2a1b874b994451094f4d049e7a227f5387188b9ac6ccdd1ae14",
+    "backend/van_gateway/approval/service.py": "c5a1bdb43145ed99e05e3613aa4a3c3b6a9c93a6cf6caf22d5e5b8b080a299b5",
+    "backend/van_gateway/trading/accounts.py": "b67e898aa85844ecbd88094acac7a4ba116d555387139a22ea03e0d4dd7cba61",
+    "backend/van_gateway/trading/oauth_effects.py": "fcefbf2e640c301fd97c9bd2e4dccd9bc1640b9f7bdbeb065dd88d92c642e39e",
+    "trading/commander/accounts.py": "641d924886c388391dbc09631cf774a8f741b12e9c1ded9f70fc18f19807103d",
+    "trading/commander/app.py": "aded70458e7e2c0a8b7cd015518318ea7eb056602e02c628558ca5175c91120c",
+    "trading/tests/test_oauth_link_currentness.py": "b8283e2c8e319aa94d1dda46c8f19c63358322c39732a8b8817f567c591694e8"
+  },
+  "outer_node_environment_unchanged": true,
+  "completed": "2026-11-01T23:09:15.207817+00:00"
+}

@@ -1,6 +1,7 @@
 package com.dial.van.projects
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -49,6 +51,8 @@ import kotlinx.coroutines.launch
  */
 private data class ProjectDetailData(
     val model: ProjectDetailModel,
+    val failures: Map<String, String>,
+    val observedAtMs: Long,
 )
 
 @Composable
@@ -58,29 +62,42 @@ fun ProjectDetailRoute(
     onBack: () -> Unit,
     onOpenDevelopment: (String) -> Unit = {},
     onAskVan: (String) -> Unit = {},
+    onOpenRationale: () -> Unit = {},
+    onOpenMission: (String) -> Unit = {},
+    onOpenAttention: () -> Unit = {},
+    onOpenMemory: () -> Unit = {},
 ) {
     val tokens = LocalVanTokens.current
     val scope = rememberCoroutineScope()
-    var data by remember { mutableStateOf<ProjectDetailData?>(null) }
-    var loading by remember { mutableStateOf(true) }
-    var error by remember { mutableStateOf<String?>(null) }
+    var data by remember(projectId) { mutableStateOf<ProjectDetailData?>(null) }
+    var loading by remember(projectId) { mutableStateOf(true) }
+    var error by remember(projectId) { mutableStateOf<String?>(null) }
 
     fun load() {
         scope.launch {
             loading = true
-            runCatching {
-                val truthJson = runCatching { app.gatewayClient.projectTruth(projectId) }.getOrNull()
-                val truth = truthJson?.let { ProjectTruthParsing.parse(projectId, it) }
-                val missions = MissionParsing.missionSummaries(app.gatewayClient.missions())
-                val attention = app.gatewayClient.attention().objectList()
-                val decisions = app.gatewayClient.decisions().objectList()
-                val facts = runCatching { MemoryReadModel.parseExportFacts(app.gatewayClient.contextExport()) }
-                    .getOrDefault(emptyList())
-                ProjectDetailData(
-                    ProjectDetailBuilder.build(projectId, truth, missions, attention, decisions, facts),
-                )
-            }.onSuccess { data = it; error = null; loading = false }
-                .onFailure { error = it.message ?: "VAN could not open this project."; loading = false }
+            val truth = readProjectSource { ProjectTruthParsing.parse(projectId, app.gatewayClient.projectTruth(projectId)) }
+            val missions = readProjectSource { MissionParsing.missionSummaries(app.gatewayClient.missions()) }
+            val attention = readProjectSource { app.gatewayClient.attention().objectList() }
+            val decisions = readProjectSource { app.gatewayClient.decisions().objectList() }
+            val facts = readProjectSource { MemoryReadModel.parseExportFacts(app.gatewayClient.contextExport()) }
+            val failures = linkedMapOf<String, String>()
+            listOf("truth" to truth.failure, "missions" to missions.failure, "attention" to attention.failure,
+                "decisions" to decisions.failure, "context" to facts.failure).forEach { (source, failure) ->
+                failure?.let { failures[source] = it }
+            }
+            if (failures.size == 5) {
+                error = "VAN could not read any project sources. Refresh to retry."
+            } else {
+                val model = ProjectDetailBuilder.build(projectId, truth.value, missions.value.orEmpty(),
+                    attention.value.orEmpty(), decisions.value.orEmpty(), facts.value.orEmpty())
+                data = ProjectDetailData(model.copy(
+                    health = ProjectSourcePresentation.health(model.health, truth.available, missions.available, attention.available),
+                    phase = ProjectSourcePresentation.phase(model.phase, truth.available, missions.available),
+                ), failures, System.currentTimeMillis())
+                error = null
+            }
+            loading = false
         }
     }
     LaunchedEffect(projectId) { load() }
@@ -92,145 +109,173 @@ fun ProjectDetailRoute(
         emptySentence = "VAN has nothing on this project yet.",
     )
 
-    VanScreen(state = state, onRetry = ::load) { detail ->
-        val model = detail.model
-        LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(horizontal = tokens.space.pageGutter),
-            verticalArrangement = Arrangement.spacedBy(tokens.space.space3),
-            contentPadding = PaddingValues(vertical = tokens.space.space3),
-        ) {
-            item {
-                SectionHeader(
-                    model.projectId,
-                    detail = model.phase,
-                    trailing = { StatusChip(label = model.health.name, role = ProjectHealthPalette.roleFor(model.health)) },
-                )
-            }
-
-            item {
-                VanPanel {
-                    Column(verticalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
-                        Text("Project Truth", style = tokens.type.headline, color = tokens.color.textPrimary)
-                        val truth = model.truth
-                        if (truth == null || truth.truthSha == null) {
-                            Text("VAN has never loaded this project's truth.", style = tokens.type.body, color = tokens.color.textSecondary)
-                        } else {
-                            Row(horizontalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
-                                truthBadge(truth)
-                            }
-                            Text("truth ${truth.truthSha.take(12)}", style = tokens.type.label, color = tokens.color.textTertiary)
-                            truth.repoSha?.let { repoSha ->
-                                Text("repo ${repoSha.take(12)}", style = tokens.type.label, color = tokens.color.textTertiary)
-                            }
-                            if (!truth.ok) {
-                                Text(truth.error ?: "Truth is stale.", style = tokens.type.label, color = tokens.color.forStatusRole(StatusSemantics.ROLE_EVENT_RISK))
-                            }
-                        }
-                        Button(onClick = { onAskVan("What is the state of $projectId?") }) {
-                            Text("Ask VAN about this project", style = tokens.type.label)
-                        }
-                    }
-                }
-            }
-
-            item { DevProjectSection(app, projectId, onOpenDevelopment) }
-
-            item { SectionHeader("Current work", detail = "${model.currentWork.size} running") }
-            if (model.currentWork.isEmpty()) {
-                item { Text("Nothing running on this project right now.", style = tokens.type.body, color = tokens.color.textSecondary) }
-            }
-            items(model.currentWork, key = { "work:" + it.missionId }) { mission ->
-                VanPanel(dense = true) {
-                    Column(verticalArrangement = Arrangement.spacedBy(tokens.space.space1)) {
-                        Text(mission.title.ifBlank { mission.goal }, style = tokens.type.body, color = tokens.color.textPrimary)
-                        Text(mission.ownerReadableStatus, style = tokens.type.label, color = tokens.color.textTertiary)
-                    }
-                }
-            }
-
-            item { SectionHeader("Blockers", detail = if (model.blockedMissions.isEmpty() && model.blockerAttention.isEmpty()) "None" else null) }
-            if (model.blockedMissions.isEmpty() && model.blockerAttention.isEmpty()) {
-                item { Text("Nothing is blocking this project.", style = tokens.type.body, color = tokens.color.textSecondary) }
-            }
-            items(model.blockedMissions, key = { "blockedmission:" + it.missionId }) { mission ->
-                VanPanel(dense = true) {
-                    Column(verticalArrangement = Arrangement.spacedBy(tokens.space.space1)) {
-                        Text(mission.title.ifBlank { mission.goal }, style = tokens.type.body, color = tokens.color.textPrimary)
-                        Text(mission.ownerReadableStatus, style = tokens.type.label, color = tokens.color.forStatusRole(StatusSemantics.ROLE_CRITICAL))
-                    }
-                }
-            }
-            items(model.blockerAttention, key = { "blockerattn:" + it.optString("id") }) { item ->
-                VanPanel(dense = true) {
-                    Column(verticalArrangement = Arrangement.spacedBy(tokens.space.space1)) {
-                        Text(item.optString("title", "Attention item"), style = tokens.type.body, color = tokens.color.textPrimary)
-                        StatusChip(label = item.optString("severity", "BLOCKER"), role = StatusSemantics.ROLE_CRITICAL)
-                    }
-                }
-            }
-
-            item { SectionHeader("Recent changes") }
-            if (model.recentChanges.isEmpty()) {
-                item { Text("No mission activity recorded yet.", style = tokens.type.body, color = tokens.color.textSecondary) }
-            }
-            items(model.recentChanges, key = { "recent:" + it.missionId }) { mission ->
-                VanPanel(dense = true) {
-                    Column(verticalArrangement = Arrangement.spacedBy(tokens.space.space1)) {
-                        Text(mission.title.ifBlank { mission.goal }, style = tokens.type.body, color = tokens.color.textPrimary)
-                        Text(mission.ownerReadableStatus, style = tokens.type.label, color = tokens.color.textTertiary)
-                    }
-                }
-            }
-
-            item { SectionHeader("Decisions", detail = "${model.decisions.size} mentioning this project") }
-            if (model.decisions.isEmpty()) {
-                item { Text("No decisions mention this project yet.", style = tokens.type.body, color = tokens.color.textSecondary) }
-            }
-            items(model.decisions, key = { "decision:" + it.optString("id") }) { decision ->
-                VanPanel(dense = true) {
-                    Column(verticalArrangement = Arrangement.spacedBy(tokens.space.space1)) {
-                        Text(decision.optString("title", "Decision"), style = tokens.type.body, color = tokens.color.textPrimary)
-                        Text(decision.optString("body"), style = tokens.type.label, color = tokens.color.textSecondary)
-                    }
-                }
-            }
-
-            item {
-                SectionHeader(
-                    "Next actions",
-                    detail = if (model.nextActions.isEmpty()) "Nothing open" else "${model.nextActions.size} open",
-                )
-            }
-            if (model.nextActions.isEmpty()) {
-                item { Text("VAN has nothing waiting on you for this project.", style = tokens.type.body, color = tokens.color.textSecondary) }
-            }
-            items(model.nextActions, key = { "next:" + it.optString("id") }) { item ->
-                VanPanel(dense = true) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
-                        Column(modifier = Modifier.fillMaxWidth()) {
-                            Text(item.optString("title", "Attention item"), style = tokens.type.body, color = tokens.color.textPrimary)
-                        }
-                        StatusChip(
-                            label = item.optString("severity", "INFO"),
-                            role = severityRoleFor(item.optString("severity", "INFO")),
+    Column(modifier = Modifier.fillMaxSize()) {
+        Row(modifier = Modifier.padding(horizontal = tokens.space.pageGutter), horizontalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
+            OutlinedButton(onClick = onBack) { Text("← Projects") }
+            OutlinedButton(onClick = onOpenRationale) { Text("Project rationale") }
+        }
+        Box(modifier = Modifier.weight(1f)) {
+            VanScreen(state = state, onRetry = ::load) { detail ->
+                val model = detail.model
+                val sources = detail.failures
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize().padding(horizontal = tokens.space.pageGutter),
+                    verticalArrangement = Arrangement.spacedBy(tokens.space.space3),
+                    contentPadding = PaddingValues(vertical = tokens.space.space3),
+                ) {
+                    item {
+                        Text("Last read ${com.dial.van.command.owner.ownerTime(detail.observedAtMs)}", style = tokens.type.label, color = tokens.color.textTertiary)
+                        error?.let { Text("Refresh failed; last known project information remains visible. $it", style = tokens.type.body, color = tokens.color.textSecondary) }
+                        sources.forEach { (source, reason) -> Text("${source.replaceFirstChar { it.uppercase() }} could not be read. $reason", style = tokens.type.body, color = tokens.color.textSecondary) }
+                        OutlinedButton(enabled = !loading, onClick = ::load) { Text(if (loading) "Refreshing…" else "Refresh project") }
+                        SectionHeader(
+                            model.projectId,
+                            detail = model.phase,
+                            trailing = { StatusChip(label = model.health.name, role = ProjectHealthPalette.roleFor(model.health)) },
                         )
                     }
-                }
-            }
 
-            item { SectionHeader("Relevant context", detail = "${model.relevantFacts.size} facts") }
-            if (model.relevantFacts.isEmpty()) {
-                item { Text("VAN holds no facts scoped to this project.", style = tokens.type.body, color = tokens.color.textSecondary) }
-            }
-            items(model.relevantFacts, key = { "fact:" + it.factId }) { fact ->
-                VanPanel(dense = true) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
-                        Column(modifier = Modifier.fillMaxWidth()) {
-                            Text(fact.predicate.replace('_', ' '), style = tokens.type.body, color = tokens.color.textPrimary)
-                            Text(fact.value, style = tokens.type.label, color = tokens.color.textSecondary)
+                    item {
+                        VanPanel {
+                            Column(verticalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
+                                Text("Project Truth", style = tokens.type.headline, color = tokens.color.textPrimary)
+                                val truth = model.truth
+                                if ("truth" in sources) {
+                                    Text("Current project truth could not be read. Refresh to retry.", style = tokens.type.body, color = tokens.color.textSecondary)
+                                } else if (truth == null || truth.truthSha == null) {
+                                    Text(truth?.error ?: "The gateway reports no loaded truth for this project.", style = tokens.type.body, color = tokens.color.textSecondary)
+                                } else {
+                                    Row(horizontalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
+                                        truthBadge(truth)
+                                    }
+                                    Text("truth ${truth.truthSha.take(12)}", style = tokens.type.label, color = tokens.color.textTertiary)
+                                    truth.repoSha?.let { repoSha ->
+                                        Text("repo ${repoSha.take(12)}", style = tokens.type.label, color = tokens.color.textTertiary)
+                                    }
+                                    if (!truth.ok) {
+                                        Text(truth.error ?: "Truth is stale.", style = tokens.type.label, color = tokens.color.forStatusRole(StatusSemantics.ROLE_EVENT_RISK))
+                                    }
+                                }
+                                Button(onClick = { onAskVan("What is the state of $projectId?") }) {
+                                    Text("Ask VAN about this project", style = tokens.type.label)
+                                }
+                            }
                         }
-                        val tier = ProvenanceTiers.forAuthority(fact.authority)
-                        StatusChip(label = tier.name, role = ProvenanceTiers.statusRole(tier))
+                    }
+
+                    item { DevProjectSection(app, projectId, onOpenDevelopment) }
+
+                    item { SectionHeader("Current work", detail = if ("missions" in sources) "Unavailable" else "${model.currentWork.size} running") }
+                    if ("missions" in sources) item { Text("Current work could not be read.", style = tokens.type.body, color = tokens.color.textSecondary) }
+                    else if (model.currentWork.isEmpty()) {
+                        item { Text("Nothing running on this project right now.", style = tokens.type.body, color = tokens.color.textSecondary) }
+                    }
+                    items(model.currentWork, key = { "work:" + it.missionId }) { mission ->
+                        VanPanel(dense = true) {
+                            Column(verticalArrangement = Arrangement.spacedBy(tokens.space.space1)) {
+                                Text(mission.title.ifBlank { mission.goal }, style = tokens.type.body, color = tokens.color.textPrimary)
+                                Text(mission.ownerReadableStatus, style = tokens.type.label, color = tokens.color.textTertiary)
+                                OutlinedButton(onClick = { onOpenMission(mission.missionId) }) { Text("Open work & controls") }
+                            }
+                        }
+                    }
+
+                    item { SectionHeader("Blockers", detail = if ("missions" in sources || "attention" in sources) "Partial or unavailable" else if (model.blockedMissions.isEmpty() && model.blockerAttention.isEmpty()) "None" else null) }
+                    if ("missions" in sources || "attention" in sources) item { Text("All blockers could not be confirmed; any known blockers remain below.", style = tokens.type.body, color = tokens.color.textSecondary) }
+                    else if (model.blockedMissions.isEmpty() && model.blockerAttention.isEmpty()) {
+                        item { Text("Nothing is blocking this project.", style = tokens.type.body, color = tokens.color.textSecondary) }
+                    }
+                    items(model.blockedMissions, key = { "blockedmission:" + it.missionId }) { mission ->
+                        VanPanel(dense = true) {
+                            Column(verticalArrangement = Arrangement.spacedBy(tokens.space.space1)) {
+                                Text(mission.title.ifBlank { mission.goal }, style = tokens.type.body, color = tokens.color.textPrimary)
+                                Text(mission.ownerReadableStatus, style = tokens.type.label, color = tokens.color.forStatusRole(StatusSemantics.ROLE_CRITICAL))
+                                OutlinedButton(onClick = { onOpenMission(mission.missionId) }) { Text("Open blocker & controls") }
+                            }
+                        }
+                    }
+                    items(model.blockerAttention, key = { "blockerattn:" + it.optString("id") }) { item ->
+                        VanPanel(dense = true) {
+                            Column(verticalArrangement = Arrangement.spacedBy(tokens.space.space1)) {
+                                Text(item.optString("title", "Attention item"), style = tokens.type.body, color = tokens.color.textPrimary)
+                                StatusChip(label = item.optString("severity", "BLOCKER"), role = StatusSemantics.ROLE_CRITICAL)
+                                OutlinedButton(onClick = onOpenAttention) { Text("Open attention & decisions") }
+                            }
+                        }
+                    }
+
+                    item { SectionHeader("Recent changes") }
+                    if ("missions" in sources) item { Text("Recent mission changes could not be read.", style = tokens.type.body, color = tokens.color.textSecondary) }
+                    else if (model.recentChanges.isEmpty()) {
+                        item { Text("No mission activity recorded yet.", style = tokens.type.body, color = tokens.color.textSecondary) }
+                    }
+                    items(model.recentChanges, key = { "recent:" + it.missionId }) { mission ->
+                        VanPanel(dense = true) {
+                            Column(verticalArrangement = Arrangement.spacedBy(tokens.space.space1)) {
+                                Text(mission.title.ifBlank { mission.goal }, style = tokens.type.body, color = tokens.color.textPrimary)
+                                Text(mission.ownerReadableStatus, style = tokens.type.label, color = tokens.color.textTertiary)
+                                OutlinedButton(onClick = { onOpenMission(mission.missionId) }) { Text("Open work & controls") }
+                            }
+                        }
+                    }
+
+                    item { SectionHeader("Decisions", detail = if ("decisions" in sources) "Unavailable" else "${model.decisions.size} mentioning this project") }
+                    if ("decisions" in sources) item { Text("Project decisions could not be read.", style = tokens.type.body, color = tokens.color.textSecondary) }
+                    else if (model.decisions.isEmpty()) {
+                        item { Text("No decisions mention this project yet.", style = tokens.type.body, color = tokens.color.textSecondary) }
+                    }
+                    items(model.decisions, key = { "decision:" + it.optString("id") }) { decision ->
+                        VanPanel(dense = true) {
+                            Column(verticalArrangement = Arrangement.spacedBy(tokens.space.space1)) {
+                                Text(decision.optString("title", "Decision"), style = tokens.type.body, color = tokens.color.textPrimary)
+                                Text(decision.optString("body"), style = tokens.type.label, color = tokens.color.textSecondary)
+                                OutlinedButton(onClick = onOpenAttention) { Text("Review owner decisions") }
+                            }
+                        }
+                    }
+
+                    item {
+                        SectionHeader(
+                            "Next actions",
+                            detail = if ("attention" in sources) "Unavailable" else if (model.nextActions.isEmpty()) "Nothing open" else "${model.nextActions.size} open",
+                        )
+                    }
+                    if ("attention" in sources) item { Text("Next owner actions could not be read.", style = tokens.type.body, color = tokens.color.textSecondary) }
+                    else if (model.nextActions.isEmpty()) {
+                        item { Text("VAN has nothing waiting on you for this project.", style = tokens.type.body, color = tokens.color.textSecondary) }
+                    }
+                    items(model.nextActions, key = { "next:" + it.optString("id") }) { item ->
+                        VanPanel(dense = true) {
+                            Row(horizontalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
+                                Column(modifier = Modifier.fillMaxWidth()) {
+                                    Text(item.optString("title", "Attention item"), style = tokens.type.body, color = tokens.color.textPrimary)
+                                    OutlinedButton(onClick = onOpenAttention) { Text("Open owner action") }
+                                }
+                                StatusChip(
+                                    label = item.optString("severity", "INFO"),
+                                    role = severityRoleFor(item.optString("severity", "INFO")),
+                                )
+                            }
+                        }
+                    }
+
+                    item { SectionHeader("Relevant context", detail = if ("context" in sources) "Unavailable" else "${model.relevantFacts.size} facts") }
+                    if ("context" in sources) item { Text("Project context could not be read.", style = tokens.type.body, color = tokens.color.textSecondary) }
+                    else if (model.relevantFacts.isEmpty()) {
+                        item { Text("VAN holds no facts scoped to this project.", style = tokens.type.body, color = tokens.color.textSecondary) }
+                    }
+                    items(model.relevantFacts, key = { "fact:" + it.factId }) { fact ->
+                        VanPanel(dense = true) {
+                            Row(horizontalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
+                                Column(modifier = Modifier.fillMaxWidth()) {
+                                    Text(fact.predicate.replace('_', ' '), style = tokens.type.body, color = tokens.color.textPrimary)
+                                    Text(fact.value, style = tokens.type.label, color = tokens.color.textSecondary)
+                                    OutlinedButton(onClick = onOpenMemory) { Text("Review memory & provenance") }
+                                }
+                                val tier = ProvenanceTiers.forAuthority(fact.authority)
+                                StatusChip(label = tier.name, role = ProvenanceTiers.statusRole(tier))
+                            }
+                        }
                     }
                 }
             }

@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="10" skipped="0" tests="15" time="2.564" timestamp="2026-10-25T20:53:23.268906+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_ctrader_event_selection" name="test_selective_wait_preserves_original_relative_order_and_complete_payloads" time="0.118"><failure message="TypeError: 'NoneType' object is not subscriptable">harness = &lt;test_ctrader_transport_lifecycle.Harness object at 0x7f40a4e54380&gt;
+
+    def test_selective_wait_preserves_original_relative_order_and_complete_payloads(harness):
+        transport=seeded(harness);before=originals(transport)
+        selected=transport.wait_event(lambda name,body:body['order']['orderId']==2,timeout_s=.1)
+&gt;       assert selected[1]==before[1]
+               ^^^^^^^^^^^
+E       TypeError: 'NoneType' object is not subscriptable
+
+trading/tests/test_ctrader_event_selection.py:41: TypeError</failure></testcase><testcase classname="trading.tests.test_ctrader_event_selection" name="test_predicate_exception_does_not_consume_the_original_financial_delivery" time="0.016"><failure message="AssertionError: selector error discarded original financial evidence&#10;assert [{'payloadTyp...ILLED', ...}}] == [{'payloadTyp...ILLED', ...}}]&#10;  &#10;  At index 0 diff: {'payloadType': 'PROTO_OA_EXECUTION_EVENT', 'ctidTraderAccountId': 12345, 'executionType': 'ORDER_FILLED', 'order': {'orderId': 2, 'tradeData': {'symbolId': 1, 'volume': 100000, 'tradeSide': 'BUY'}, 'orderType': 'MARKET', 'orderStatus': 'ORDER_STATUS_FILLED', 'clientOrderId': '2', 'timeInForce': 'IMMEDIATE_OR_CANCEL', 'stopTriggerMethod': 'TRADE'}} != {'payloadType': 'PROTO_OA_EXECUTION_EVENT', 'ctidTraderAccountId': 12345, 'executionType': 'ORDER_FILLED', 'order': {'orderId': 1, 'tradeData': {'symbolId': 1, 'volume': 100000, 'tradeSide': 'BUY'}, 'order...&#10;  &#10;  ...Full output truncated (3 lines hidden), use '-vv' to show">harness = &lt;test_ctrader_transport_lifecycle.Harness object at 0x7f40a4be7e30&gt;
+
+    def test_predicate_exception_does_not_consume_the_original_financial_delivery(harness):
+        transport=seeded(harness);before=originals(transport)
+        def broken(name,body):raise RuntimeError('fixture selector failure')
+        with pytest.raises(RuntimeError,match='selector failure'):
+            transport.wait_event(broken,timeout_s=.1)
+&gt;       assert originals(transport)==before,'selector error discarded original financial evidence'
+E       AssertionError: selector error discarded original financial evidence
+E       assert [{'payloadTyp...ILLED', ...}}] == [{'payloadTyp...ILLED', ...}}]
+E         
+E         At index 0 diff: {'payloadType': 'PROTO_OA_EXECUTION_EVENT', 'ctidTraderAccountId': 12345, 'executionType': 'ORDER_FILLED', 'order': {'orderId': 2, 'tradeData': {'symbolId': 1, 'volume': 100000, 'tradeSide': 'BUY'}, 'orderType': 'MARKET', 'orderStatus': 'ORDER_STATUS_FILLED', 'clientOrderId': '2', 'timeInForce': 'IMMEDIATE_OR_CANCEL', 'stopTriggerMethod': 'TRADE'}} != {'payloadType': 'PROTO_OA_EXECUTION_EVENT', 'ctidTraderAccountId': 12345, 'executionType': 'ORDER_FILLED', 'order': {'orderId': 1, 'tradeData': {'symbolId': 1, 'volume': 100000, 'tradeSide': 'BUY'}, 'order...
+E         
+E         ...Full output truncated (3 lines hidden), use '-vv' to show
+
+trading/tests/test_ctrader_event_selection.py:50: AssertionError</failure></testcase><testcase classname="trading.tests.test_ctrader_event_selection" name="test_slow_selector_does_not_hide_an_unmatched_event_from_another_consumer" time="0.496"><failure message="AssertionError: unmatched original was hidden in a different selector stash&#10;assert None is not None">harness = &lt;test_ctrader_transport_lifecycle.Harness object at 0x7f40a4be6ba0&gt;
+
+    def test_slow_selector_does_not_hide_an_unmatched_event_from_another_consumer(harness):
+        transport=seeded(harness);entered=threading.Event();release=threading.Event()
+        harness.release.append(release)
+        def slow(name,body):
+            if body['order']['orderId']==1:
+                entered.set();assert release.wait(2)
+            return body['order']['orderId']==3
+        worker,result=harness.worker(lambda:transport.wait_event(slow,timeout_s=.5))
+        assert entered.wait(1)
+        try:
+            other=transport.wait_event(lambda name,body:body['order']['orderId']==1,timeout_s=.1)
+&gt;           assert other is not None,'unmatched original was hidden in a different selector stash'
+E           AssertionError: unmatched original was hidden in a different selector stash
+E           assert None is not None
+
+trading/tests/test_ctrader_event_selection.py:64: AssertionError</failure></testcase><testcase classname="trading.tests.test_ctrader_event_selection" name="test_predicate_cannot_mutate_the_original_native_payload[False]" time="0.037"><failure message="AssertionError: assert (None is None and [] == [{'payloadTyp...ILLED', ...}}]&#10;  &#10;  Right contains one more item: {'payloadType': 'PROTO_OA_EXECUTION_EVENT', 'ctidTraderAccountId': 12345, 'executionType': 'ORDER_FILLED', 'order': {'...symbolId': 1, 'volume': 100000, 'tradeSide': 'BUY'}, 'orderType': 'MARKET', 'orderStatus': 'ORDER_STATUS_FILLED', ...}}&#10;  Use -v to get more diff)">harness = &lt;test_ctrader_transport_lifecycle.Harness object at 0x7f40a4c1c050&gt;
+matched = False
+
+    @pytest.mark.parametrize('matched',[False,True])
+    def test_predicate_cannot_mutate_the_original_native_payload(harness,matched):
+        transport=seeded(harness,count=1);before=originals(transport)
+        def mutating(name,body):
+            body['order']['tradeData']['volume']=999999
+            body['order']['clientOrderId']='different'
+            return matched
+        selected=transport.wait_event(mutating,timeout_s=.03)
+        if matched:
+            assert selected[1]==before[0] and originals(transport)==[]
+        else:
+&gt;           assert selected is None and originals(transport)==before
+E           AssertionError: assert (None is None and [] == [{'payloadTyp...ILLED', ...}}]
+E             
+E             Right contains one more item: {'payloadType': 'PROTO_OA_EXECUTION_EVENT', 'ctidTraderAccountId': 12345, 'executionType': 'ORDER_FILLED', 'order': {'...symbolId': 1, 'volume': 100000, 'tradeSide': 'BUY'}, 'orderType': 'MARKET', 'orderStatus': 'ORDER_STATUS_FILLED', ...}}
+E             Use -v to get more diff)
+
+trading/tests/test_ctrader_event_selection.py:82: AssertionError</failure></testcase><testcase classname="trading.tests.test_ctrader_event_selection" name="test_predicate_cannot_mutate_the_original_native_payload[True]" time="0.036"><failure message="TypeError: 'NoneType' object is not subscriptable">harness = &lt;test_ctrader_transport_lifecycle.Harness object at 0x7f40a4c1c830&gt;
+matched = True
+
+    @pytest.mark.parametrize('matched',[False,True])
+    def test_predicate_cannot_mutate_the_original_native_payload(harness,matched):
+        transport=seeded(harness,count=1);before=originals(transport)
+        def mutating(name,body):
+            body['order']['tradeData']['volume']=999999
+            body['order']['clientOrderId']='different'
+            return matched
+        selected=transport.wait_event(mutating,timeout_s=.03)
+        if matched:
+&gt;           assert selected[1]==before[0] and originals(transport)==[]
+                   ^^^^^^^^^^^
+E           TypeError: 'NoneType' object is not subscriptable
+
+trading/tests/test_ctrader_event_selection.py:80: TypeError</failure></testcase><testcase classname="trading.tests.test_ctrader_event_selection" name="test_two_selectors_cannot_both_claim_one_original_delivery" time="1.007"><failure message="TypeError: 'BrokenBarrierError' object is not subscriptable">harness = &lt;test_ctrader_transport_lifecycle.Harness object at 0x7f40a4c1c3b0&gt;
+
+    def test_two_selectors_cannot_both_claim_one_original_delivery(harness):
+        transport=seeded(harness,count=1);barrier=threading.Barrier(2,timeout=1)
+        def match(name,body):barrier.wait();return True
+        workers=[harness.worker(lambda:transport.wait_event(match,timeout_s=.15)) for _ in range(2)]
+        for worker,_ in workers:worker.join(1);assert not worker.is_alive()
+        values=[result.get_nowait() for _,result in workers]
+        assert sum(value is None for value in values)==1
+        winner=next(value for value in values if value is not None)
+&gt;       assert winner[1]['order']['orderId']==1 and originals(transport)==[]
+               ^^^^^^^^^
+E       TypeError: 'BrokenBarrierError' object is not subscriptable
+
+trading/tests/test_ctrader_event_selection.py:93: TypeError</failure></testcase><testcase classname="trading.tests.test_ctrader_event_selection" name="test_selector_that_returns_after_timeout_leaves_the_original_for_reconciliation" time="0.034"><failure message="AssertionError: assert [] == [{'payloadTyp...ILLED', ...}}]&#10;  &#10;  Right contains one more item: {'payloadType': 'PROTO_OA_EXECUTION_EVENT', 'ctidTraderAccountId': 12345, 'executionType': 'ORDER_FILLED', 'order': {'...symbolId': 1, 'volume': 100000, 'tradeSide': 'BUY'}, 'orderType': 'MARKET', 'orderStatus': 'ORDER_STATUS_FILLED', ...}}&#10;  Use -v to get more diff">harness = &lt;test_ctrader_transport_lifecycle.Harness object at 0x7f40a4c1ebd0&gt;
+
+    def test_selector_that_returns_after_timeout_leaves_the_original_for_reconciliation(harness):
+        transport=seeded(harness,count=1);before=originals(transport)
+        def late(name,body):
+            threading.Event().wait(.03)
+            return True
+        assert transport.wait_event(late,timeout_s=.01) is None
+&gt;       assert originals(transport)==before
+E       AssertionError: assert [] == [{'payloadTyp...ILLED', ...}}]
+E         
+E         Right contains one more item: {'payloadType': 'PROTO_OA_EXECUTION_EVENT', 'ctidTraderAccountId': 12345, 'executionType': 'ORDER_FILLED', 'order': {'...symbolId': 1, 'volume': 100000, 'tradeSide': 'BUY'}, 'orderType': 'MARKET', 'orderStatus': 'ORDER_STATUS_FILLED', ...}}
+E         Use -v to get more diff
+
+trading/tests/test_ctrader_event_selection.py:102: AssertionError</failure></testcase><testcase classname="trading.tests.test_ctrader_event_selection" name="test_unmatched_originals_are_evaluated_once_and_remain_ordered_on_timeout" time="0.033"><failure message="AssertionError: assert ([1, 2, 3] == [1, 2, 3]&#10;  &#10;  Use -v to get more diff and [] == [{'payloadTyp...ILLED', ...}}]&#10;  &#10;  Right contains 3 more items, first extra item: {'payloadType': 'PROTO_OA_EXECUTION_EVENT', 'ctidTraderAccountId': 12345, 'executionType': 'ORDER_FILLED', 'order': {'...symbolId': 1, 'volume': 100000, 'tradeSide': 'BUY'}, 'orderType': 'MARKET', 'orderStatus': 'ORDER_STATUS_FILLED', ...}}&#10;  Use -v to get more diff)">harness = &lt;test_ctrader_transport_lifecycle.Harness object at 0x7f40a4be6d20&gt;
+
+    def test_unmatched_originals_are_evaluated_once_and_remain_ordered_on_timeout(harness):
+        transport=seeded(harness);before=originals(transport);seen=[]
+        def miss(name,body):seen.append(body['order']['orderId']);return False
+        assert transport.wait_event(miss,timeout_s=.02) is None
+&gt;       assert seen==[1,2,3] and originals(transport)==before
+E       AssertionError: assert ([1, 2, 3] == [1, 2, 3]
+E         
+E         Use -v to get more diff and [] == [{'payloadTyp...ILLED', ...}}]
+E         
+E         Right contains 3 more items, first extra item: {'payloadType': 'PROTO_OA_EXECUTION_EVENT', 'ctidTraderAccountId': 12345, 'executionType': 'ORDER_FILLED', 'order': {'...symbolId': 1, 'volume': 100000, 'tradeSide': 'BUY'}, 'orderType': 'MARKET', 'orderStatus': 'ORDER_STATUS_FILLED', ...}}
+E         Use -v to get more diff)
+
+trading/tests/test_ctrader_event_selection.py:109: AssertionError</failure></testcase><testcase classname="trading.tests.test_ctrader_event_selection" name="test_invalid_wait_timeout_does_not_remove_original_evidence[True]" time="0.007" /><testcase classname="trading.tests.test_ctrader_event_selection" name="test_invalid_wait_timeout_does_not_remove_original_evidence[-1]" time="0.010" /><testcase classname="trading.tests.test_ctrader_event_selection" name="test_invalid_wait_timeout_does_not_remove_original_evidence[nan]" time="0.006" /><testcase classname="trading.tests.test_ctrader_event_selection" name="test_invalid_wait_timeout_does_not_remove_original_evidence[inf]" time="0.008" /><testcase classname="trading.tests.test_ctrader_event_selection" name="test_invalid_wait_timeout_does_not_remove_original_evidence[1]" time="0.006" /><testcase classname="trading.tests.test_ctrader_event_selection" name="test_arrival_after_snapshot_wakes_the_original_wait_without_reordering" time="0.307"><failure message="TypeError: 'NoneType' object is not subscriptable">harness = &lt;test_ctrader_transport_lifecycle.Harness object at 0x7f40a4be7950&gt;
+
+    def test_arrival_after_snapshot_wakes_the_original_wait_without_reordering(harness):
+        transport=seeded(harness);before=originals(transport);entered=threading.Event()
+        def match(name,body):
+            entered.set()
+            return body.get('errorCode')=='FIXTURE_NEW_DELIVERY'
+        worker,result=harness.worker(lambda:transport.wait_event(match,timeout_s=.3))
+        assert entered.wait(1)
+        server=harness.sockets[1]
+        frame=SCHEMA.wrap('ProtoOAErrorRes',{'errorCode':'FIXTURE_NEW_DELIVERY','description':'original payload'})
+        server.sendall(struct.pack('&gt;I',len(frame))+frame)
+        worker.join(1);assert not worker.is_alive()
+        selected=result.get_nowait()
+&gt;       assert selected[0]=='ProtoOAErrorRes' and selected[1]['description']=='original payload'
+               ^^^^^^^^^^^
+E       TypeError: 'NoneType' object is not subscriptable
+
+trading/tests/test_ctrader_event_selection.py:131: TypeError</failure></testcase><testcase classname="trading.tests.test_ctrader_event_selection" name="test_retired_quote_cannot_be_returned_after_a_predicate_closes_its_connection" time="0.057"><failure message="AssertionError: assert [] == [{'payloadTyp...ILLED', ...}}]&#10;  &#10;  Right contains 3 more items, first extra item: {'payloadType': 'PROTO_OA_EXECUTION_EVENT', 'ctidTraderAccountId': 12345, 'executionType': 'ORDER_FILLED', 'order': {'...symbolId': 1, 'volume': 100000, 'tradeSide': 'BUY'}, 'orderType': 'MARKET', 'orderStatus': 'ORDER_STATUS_FILLED', ...}}&#10;  Use -v to get more diff">harness = &lt;test_ctrader_transport_lifecycle.Harness object at 0x7f40a4c1fad0&gt;
+
+    def test_retired_quote_cannot_be_returned_after_a_predicate_closes_its_connection(harness):
+        transport=seeded(harness);before=originals(transport)
+        sock=transport._sock
+        transport.events.put((sock,'ProtoOASpotEvent',{'ctidTraderAccountId':12345,'symbolId':1,'bid':110100}))
+        def close_original(name,body):
+            if name=='ProtoOASpotEvent':transport.close();return True
+            return False
+        assert transport.wait_event(close_original,timeout_s=.05) is None
+&gt;       assert originals(transport)==before
+E       AssertionError: assert [] == [{'payloadTyp...ILLED', ...}}]
+E         
+E         Right contains 3 more items, first extra item: {'payloadType': 'PROTO_OA_EXECUTION_EVENT', 'ctidTraderAccountId': 12345, 'executionType': 'ORDER_FILLED', 'order': {'...symbolId': 1, 'volume': 100000, 'tradeSide': 'BUY'}, 'orderType': 'MARKET', 'orderStatus': 'ORDER_STATUS_FILLED', ...}}
+E         Use -v to get more diff
+
+trading/tests/test_ctrader_event_selection.py:143: AssertionError</failure></testcase></testsuite></testsuites>

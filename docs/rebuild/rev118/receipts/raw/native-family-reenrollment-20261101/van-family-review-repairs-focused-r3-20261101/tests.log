@@ -1,0 +1,125 @@
+...FF......................................F...F.                        [100%]
+=================================== FAILURES ===================================
+_ test_preexisting_independent_unknown_cannot_block_new_mandatory_other_leg_close[True] _
+
+tmp_path = PosixPath('/tmp/van-recovery-family-review-repairs-focused-r3-20261101/test_preexisting_independent_u0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f1503df1820>
+effect_applied = True
+
+    @pytest.mark.parametrize('effect_applied',[True,False])
+    def test_preexisting_independent_unknown_cannot_block_new_mandatory_other_leg_close(tmp_path,monkeypatch,effect_applied):
+        w,store,time,grant,plan,history=admitted_source_world(tmp_path,
+            actual_runtime_lease=True,add_child=True,max_quantity='.20')
+        try:
+            family=w.lifecycle.families.get(plan.snapshot.family_id)
+            root=w.lifecycle.entries['ti-e2e-1']['broker_position_id'];close=w.adapter.close;calls=[]
+            def lost_original_reply(pid,*args,**kwargs):
+                calls.append(pid)
+                if pid==root and not effect_applied:raise OSError('synthetic original send outcome unknown before observation')
+                receipt=close(pid,*args,**kwargs)
+                if pid==root:raise OSError('synthetic earlier independent native close reply lost')
+                return receipt
+            monkeypatch.setattr(w.adapter,'close',lost_original_reply)
+            with pytest.raises(OSError):
+                w.router.apply_preservation('paper',position_id=root,trade_intent_id='ti-e2e-1',
+                    action='FULL_CLOSE',now_ms=time[0],reason='EARLIER_INDEPENDENT_FULL')
+            original=w.router.exit_journal.latest('paper',root)
+            assert original.payload['state']=='REQUESTED' and len(w.adapter.positions())==(1 if effect_applied else 2)
+            assert w.router.exit_journal.pending('paper',root).hash==original.hash
+            from vati.risk.contracts import KillSwitchTrigger
+            assert KillSwitchTrigger.RECONCILIATION_FAILURE in w.router.kill.active
+            sibling=next(p for p in w.adapter.positions() if p.position_id!=root)
+            w.adapter._positions[sibling.position_id]['stop']=None
+            w.lifecycle.family_policy_grant_id=''  # Mandatory protection is independent.
+            w.lifecycle.mark('EURUSD',D('1.106'),D('1.1062'),now_ms=time[0]+1000)
+>           assert len(calls)==2 and calls.count(root)==1
+E           AssertionError: assert (1 == 2)
+E            +  where 1 = len(['P1'])
+
+trading/tests/test_family_unknown_independence.py:125: AssertionError
+_ test_preexisting_independent_unknown_cannot_block_new_mandatory_other_leg_close[False] _
+
+tmp_path = PosixPath('/tmp/van-recovery-family-review-repairs-focused-r3-20261101/test_preexisting_independent_u1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f1503dd2d50>
+effect_applied = False
+
+    @pytest.mark.parametrize('effect_applied',[True,False])
+    def test_preexisting_independent_unknown_cannot_block_new_mandatory_other_leg_close(tmp_path,monkeypatch,effect_applied):
+        w,store,time,grant,plan,history=admitted_source_world(tmp_path,
+            actual_runtime_lease=True,add_child=True,max_quantity='.20')
+        try:
+            family=w.lifecycle.families.get(plan.snapshot.family_id)
+            root=w.lifecycle.entries['ti-e2e-1']['broker_position_id'];close=w.adapter.close;calls=[]
+            def lost_original_reply(pid,*args,**kwargs):
+                calls.append(pid)
+                if pid==root and not effect_applied:raise OSError('synthetic original send outcome unknown before observation')
+                receipt=close(pid,*args,**kwargs)
+                if pid==root:raise OSError('synthetic earlier independent native close reply lost')
+                return receipt
+            monkeypatch.setattr(w.adapter,'close',lost_original_reply)
+            with pytest.raises(OSError):
+                w.router.apply_preservation('paper',position_id=root,trade_intent_id='ti-e2e-1',
+                    action='FULL_CLOSE',now_ms=time[0],reason='EARLIER_INDEPENDENT_FULL')
+            original=w.router.exit_journal.latest('paper',root)
+            assert original.payload['state']=='REQUESTED' and len(w.adapter.positions())==(1 if effect_applied else 2)
+            assert w.router.exit_journal.pending('paper',root).hash==original.hash
+            from vati.risk.contracts import KillSwitchTrigger
+            assert KillSwitchTrigger.RECONCILIATION_FAILURE in w.router.kill.active
+            sibling=next(p for p in w.adapter.positions() if p.position_id!=root)
+            w.adapter._positions[sibling.position_id]['stop']=None
+            w.lifecycle.family_policy_grant_id=''  # Mandatory protection is independent.
+            w.lifecycle.mark('EURUSD',D('1.106'),D('1.1062'),now_ms=time[0]+1000)
+>           assert len(calls)==2 and calls.count(root)==1
+E           AssertionError: assert (1 == 2)
+E            +  where 1 = len(['P1'])
+
+trading/tests/test_family_unknown_independence.py:125: AssertionError
+_ test_missing_native_stop_forces_full_family_close_without_partial_policy_admission _
+
+tmp_path = PosixPath('/tmp/van-recovery-family-review-repairs-focused-r3-20261101/test_missing_native_stop_force0')
+
+    def test_missing_native_stop_forces_full_family_close_without_partial_policy_admission(tmp_path):
+        w,store,time,grant,plan,history=admitted_source_world(tmp_path,actual_runtime_lease=True,add_child=True,max_quantity='.20')
+        try:
+            positions=w.adapter.positions();pid=positions[-1].position_id
+            # The actual simulator native owner loses a stop; a remembered manager
+            # rule must not replace this observed absence.
+            w.adapter._positions[pid]["stop"]=None
+            w.lifecycle.family_policy_grant_id=''
+            w.lifecycle.mark('EURUSD',D('1.106'),D('1.1062'),now_ms=time[0])
+>           assert not w.adapter.positions()
+E           AssertionError: assert not [VenuePosition(position_id='P1', symbol='EURUSD', direction=<Direction.LONG: 'LONG'>, quantity=Decimal('0.08'), entry_...e=None, trade_intent_id='d772dfc3-0e2e-5324-a306-a802d6d13d6a', loss_model=<LossModel.STOP_DISTANCE: 'STOP_DISTANCE'>)]
+E            +  where [VenuePosition(position_id='P1', symbol='EURUSD', direction=<Direction.LONG: 'LONG'>, quantity=Decimal('0.08'), entry_...e=None, trade_intent_id='d772dfc3-0e2e-5324-a306-a802d6d13d6a', loss_model=<LossModel.STOP_DISTANCE: 'STOP_DISTANCE'>)] = positions()
+E            +    where positions = PaperAdapter(venue='paper', account_alias='fx_primary', equity=Decimal('10000'), currency='USD', spread=Decimal('0.000...ecimal('0.01'), partial_min=Decimal('0'), partial_max=None, minimum_remaining=Decimal('0'), revision='paper-close/1')}).positions
+E            +      where PaperAdapter(venue='paper', account_alias='fx_primary', equity=Decimal('10000'), currency='USD', spread=Decimal('0.000...ecimal('0.01'), partial_min=Decimal('0'), partial_max=None, minimum_remaining=Decimal('0'), revision='paper-close/1')}) = <test_active_trade_e2e.World object at 0x7f15049dacc0>.adapter
+
+trading/tests/test_family_native_supervision.py:32: AssertionError
+_ test_cold_optional_policy_expiry_does_not_disable_existing_mandatory_family_protection _
+
+tmp_path = PosixPath('/tmp/van-recovery-family-review-repairs-focused-r3-20261101/test_cold_optional_policy_expi0')
+
+    def test_cold_optional_policy_expiry_does_not_disable_existing_mandatory_family_protection(tmp_path):
+        from vati.lifecycle.family import FamilyRegistry
+        w,store,time,grant,plan,history=admitted_source_world(tmp_path,actual_runtime_lease=True,add_child=True,max_quantity='.20')
+        try:
+            time[0]+=61000  # Grant expired; current runtime lease still valid.
+            w.lifecycle.entries.clear();w.lifecycle.families=FamilyRegistry(ledger=w.ledger)
+            restored,unresolved=w.lifecycle.recover_from_venue()
+            assert len(restored)==2 and not unresolved
+            assert all(not row['family_execution_available'] and row['family_native_protection_available']
+                for row in w.lifecycle.entries.values())
+            pid=w.adapter.positions()[-1].position_id;w.adapter._positions[pid]['stop']=None
+            w.lifecycle.mark('EURUSD',D('1.106'),D('1.1062'),now_ms=time[0])
+>           assert not w.adapter.positions() and len(w.lifecycle.reviews)==1
+E           AssertionError: assert (not [VenuePosition(position_id='P1', symbol='EURUSD', direction=<Direction.LONG: 'LONG'>, quantity=Decimal('0.08'), entry_...e=None, trade_intent_id='d772dfc3-0e2e-5324-a306-a802d6d13d6a', loss_model=<LossModel.STOP_DISTANCE: 'STOP_DISTANCE'>)])
+E            +  where [VenuePosition(position_id='P1', symbol='EURUSD', direction=<Direction.LONG: 'LONG'>, quantity=Decimal('0.08'), entry_...e=None, trade_intent_id='d772dfc3-0e2e-5324-a306-a802d6d13d6a', loss_model=<LossModel.STOP_DISTANCE: 'STOP_DISTANCE'>)] = positions()
+E            +    where positions = PaperAdapter(venue='paper', account_alias='fx_primary', equity=Decimal('10000'), currency='USD', spread=Decimal('0.000...ecimal('0.01'), partial_min=Decimal('0'), partial_max=None, minimum_remaining=Decimal('0'), revision='paper-close/1')}).positions
+E            +      where PaperAdapter(venue='paper', account_alias='fx_primary', equity=Decimal('10000'), currency='USD', spread=Decimal('0.000...ecimal('0.01'), partial_min=Decimal('0'), partial_max=None, minimum_remaining=Decimal('0'), revision='paper-close/1')}) = <test_active_trade_e2e.World object at 0x7f1503ea7da0>.adapter
+
+trading/tests/test_family_native_supervision.py:117: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_family_unknown_independence.py::test_preexisting_independent_unknown_cannot_block_new_mandatory_other_leg_close[True]
+FAILED trading/tests/test_family_unknown_independence.py::test_preexisting_independent_unknown_cannot_block_new_mandatory_other_leg_close[False]
+FAILED trading/tests/test_family_native_supervision.py::test_missing_native_stop_forces_full_family_close_without_partial_policy_admission
+FAILED trading/tests/test_family_native_supervision.py::test_cold_optional_policy_expiry_does_not_disable_existing_mandatory_family_protection
+4 failed, 45 passed in 3.33s

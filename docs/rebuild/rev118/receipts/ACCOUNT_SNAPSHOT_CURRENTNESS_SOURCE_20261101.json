@@ -1,0 +1,31 @@
+{
+  "schema": "van.lac134.account-snapshot-currentness-source/1",
+  "at_utc": "2026-11-01T20:23:03.382303+00:00",
+  "source_fingerprint": "1cd68541b19f9c282a008a4ec8fb502e122775726a072cde04481db39a7049c7",
+  "source": "raw/lac134-account-currentness-20261101/FROZEN_SOURCE_PINS.json",
+  "independent_review": "raw/lac134-account-currentness-20261101/INDEPENDENT_REVIEW.json",
+  "behavior": {
+    "policy": "Existing documented gateway LEDGER_STALENESS_MS=900000ms is a display/readback bound per actual ACCOUNT_SNAPSHOT event_time_ms; age<=900000 is within bound, age>900000 stale. No new financial/execution authority.",
+    "projection": "One captured read clock, one SQL snapshot for all account rows and portfolio consumers. Each row keeps original event hash as source_revision, original source/receipt clocks, observed clock, signed age or explicit invalid reason, threshold and execution_authority=false. Unrelated ledger SESSION/heartbeat cannot refresh another account.",
+    "currentness": "Fresh connected LIVE and disconnected OFFLINE remain; absent snapshot NEVER_SYNCED. Expired/invalid/future source clocks become STALE/LAST_KNOWN. Future negative age is retained, not clamped. Native unbound/current-profile/valuation restrictions still override to unavailable, unchanged.",
+    "historical_financial_values": "Original permitted values and existing totals/calculations retained exactly; new snapshot_readback labels LAST_KNOWN/current/unavailable. No ledger/event mutation, risk-money recalculation, financial history rewrite, namespace issuance or replay authority.",
+    "unavailable": "Existing account/portfolio readers now expose explicit missing-ledger provenance without creating a database; account envelope adds truthful ledger_available. Corrupt registry/SQLite still raise, preserve original bytes and cannot turn into a healthy empty list.",
+    "actual_android_caller": "AccountCard preserves additive snapshot metadata with exactLong parsing and permanent executionAuthority=false. Both existing AccountsScreen connection chip and PortfolioSummary.overallDataState consume existing STALE state without layout changes. Actual TradingRepository.accounts() uses AccountCard.parseList; ledger_available=false reaches existing Loaded.Unavailable even for an empty directory, retaining legacy no-field compatibility.",
+    "registration": "No new route/action/component/issuer/store/generator. Existing account GET and portfolio GET reuse current ownership/authentication and SQLite source."
+  },
+  "scope": "Exact9sourcepaths baselineapplied/hashchecked; prior18R3 and independentlyreviewed7CWD files stayexact. Existing15minute displaypolicy uses eachaccount snapshot sourceeventtime/hash andonecapturedclock/SQLsnapshot; unrelatedheartbeat never refreshesotheraccounts. Future/invalid/stale LAST_KNOWN, never-synced, unavailable and permittedhistoricalamounts/totals/nativebinding/funding/valuation restrictions preserved; no eventwrites/executionauthority/newUIlayout.",
+  "author_proof": "194uniquePythonSOURCEcasesallPASS0skip across107native/projectionfixture +29pairedAPI +58directcaller serializedgroups onexact9pins. Distinctfromintegration, notwholeprogramme/native/PG acceptance.",
+  "actual_integration": "29existingpairedAPIreadmodelconsumers rerunPASS0skip/audit0 on9+7integratedbytes; eleven changed-inputCWDconsumers EACHcwdPASS0skip; all8 reference-derived ownerregistry/function-artifact semanticmodules220PASS0skip/audit0. Distinctoverlapping selections, donotsum asuniqueprogrammecoverage.",
+  "derived_source_contracts": "Generator firstrefused TradingRepository.kt18 oldinlineaccounts parser. One exactreviewed replacement binds same client.tradingAccounts() delegationtoAccountCard::parseList;4strict sourceanchorsbindactualtypedparser+ledger_available=false refusal+rowmapping. No genericcallacceptance/matcherrelaxation. Endpoints487/schemas380 exactlyunchanged;42groups/105orderedfunctionIDs/78surfaces preserved, sourcecitations/provenance refreshed withnormalCLI.",
+  "android": "NewTradingModels/Repository/TradingModelsTest wholeSDK/appunit/build/lint qualification remainsPENDINGactualfutureexacthead. Publishedba817 AndroidstepSUCCESS provesoldsourceonly, notnewDTO/targetcase execution or S24/production signing. No heavy localSDK run or refusedrunretroqualification.",
+  "remaining_gates": [
+    "Original11requirements/21acceptance/20contexts/6LAC and all discover/demo/liveapplication/link/entitlededit/restrict/unlink/remoteclosure positive/refusal/unknown/recovery branches remain; this is LAC134 display-currentness SOURCE candidate only.",
+    "No real provider/sandbox matching, creation, native no-effect proof, remote closure, CEX settlement/protection or financial effects performed. Genuine PROVIDER_ADMISSION_REQUIRED remains refusal, never provider-positive completion.",
+    "SDK/app unit, admitted PostgreSQL, BE002/BE003/PRE003/BG001/S24/unit/formal/native/production remain unqualified. No spot-to-margin/perps/options/DEX/withdraw permission inferred."
+  ],
+  "persistence": {
+    "compact_new_and_CI_packet_bytes": 561488,
+    "raw_evidence": "Originalauthor/currenttestlogs/fixturestores/venv/officialnativeZIPs remainvolatileownedtmp; compactsourcepatch/pins/reviews/XML persistedwithout newrawarchives or runtimeidentity export. No environmentpersistence guarantee."
+  },
+  "next": "Combineonlyreviewed7+9+truthfulsourcecitationbinding innewgenuinecommit afterba792; finalrequired4fdverify/one normalpush/exactreadbacks/newheadwatch. No historyrewrite or proposedPR106auth use."
+}

@@ -1,0 +1,79 @@
+{
+  "schema": "van.rev118.native-instrument-catalog-source/1",
+  "source_parent": "291de61baf55255d8ccd51ae7783df0bec4b8692",
+  "observed_at_utc": "2026-10-28T11:33:31.443540+00:00",
+  "source_files_sha256": {
+    "backend/tests/test_native_instrument_catalog_http.py": "27ded6c2ae2ed881abd320f01defd0d501abd6efe5563daa42b22cf5ba27eeb6",
+    "backend/tests/test_trading_api.py": "40b596964983b1ff35455623acac9a0839ecf915b680f962503c0207c4f66d8b",
+    "backend/van_gateway/app.py": "0350fdb7fc1c4425e486572040a96fc5eb3564bd661842704fe62d634e512988",
+    "backend/van_gateway/config.py": "57013a371444ba83f0acbd0f58fab6aa83519ca11661ae189b5b22f66b558648",
+    "backend/van_gateway/trading/instrument_catalog.py": "106f2133c9198fc7d741adc86c83f78bf6a978a5557d84708e0a25391ad98efa",
+    "backend/van_gateway/trading/service.py": "1d35aef8ddc7e2f3b6046902c784f5ea200d2e78be2333aacd947463e342f243",
+    "tools/rebuild/refresh_owner_source_contracts.py": "b14d694be67ab96739116ccd8ad63e6f8e0022c2f73d99e0c0ddedbb62682a29",
+    "trading/tests/test_instrument_catalog.py": "7ff97f10b792690a4628c0c45b8ec563fb9f934b0d5bfd61c805f40739bf4b4b",
+    "trading/vati/core/ledger.py": "68e23c1867118036c2cc6f644c1eb4c7e69c8fc849854b05ca8843f05dc50517",
+    "trading/vati/market_data/instrument_catalog.py": "c2f654f52d05585ea8a5da8cc83d6b5b5ea2765f5fdbe6a20cce4651cb7c21e2"
+  },
+  "implementation": "Original native catalog discovery/alias resolution now reaches the registered paired-owner HTTP route through the existing dedicated catalog store. The new read-only SQLite opener creates/migrates no source and refuses writes. Discovery retains enabled/hidden/archived/omitted-name rows, realm/account identities and original availability. Exact-name collisions stay ambiguous even on a one-row page; explicit IDs disambiguate without trading permission. Source/selector/revision-bound pages preserve original history. Future captures, invalid/conflicting selectors and unavailable/corrupt/over-budget sources remain explicit; disconnected callers retain their owned read slots until completion. Existing frontend InstrumentRef is supplied only for representable original names, with no invented contract revision. Broad SQLr2 remains actualFAILED exit1:5159passed/1outdatedstrictpublic-methodinventoryassertion. The only subsequent AST change adds the two explicit readonly members to that expected set; every other assertion and banned capability check remains intact. Targeted SQLr3 reran the complete affected gateway module, catalog/HTTP/depth/private-core/schema/scope cases:228passed0skip/fail/audit,actualinner/outerexit0,all1255finalinputhashesmatch,ownedPostgreSQLindependentlyabsent. Both runs cover5160unique current-source case identities after that sole inventory correction; runtime input bytes are unchanged. This is reuse of unchanged runtime evidence plus an actual targeted rerun, not a single clean full rerun.84focusedpassesoverlap;30PostgreSQLcaseswereexplicitlydeselectedonlyinthefocusedrun. Frozen unit contracts/dependencies and allidentitysets/105sourcefunctioncontracthashesremainintact;source-rowhashupdatesareonlyactualcitationrefreshplusoneadditivecatalogextensionperexistingchartfeature/surface.0formal/native/production/S24acceptancesissued.",
+  "source_result": {
+    "qualification_method": "UNCHANGED_RUNTIME_EVIDENCE_PLUS_COMPLETE_AFFECTED_SQL_HTTP_RERUN_NOT_ONE_CLEAN_FULL_RUN",
+    "broader_sql_r2": {
+      "actual_inner_exit": 1,
+      "actual_outer_exit": 1,
+      "passed": 5159,
+      "failed": 1,
+      "skipped": 0,
+      "retained_failure": "backend/tests/test_trading_api.py::test_service_never_exposes_an_order_path",
+      "owned_postgres_independently_absent": true
+    },
+    "targeted_sql_r3": {
+      "actual_outer_exit": 0,
+      "actual_inner_exit": 0,
+      "passed": 228,
+      "skipped": 0,
+      "audit_violations": 0,
+      "unique_call_ids_once_in_this_run": 228,
+      "pinned_inputs_matched": 1255,
+      "owned_postgres_independently_absent": true,
+      "raw": "ci/native_instrument_catalog_20261028/sql_r3"
+    },
+    "unique_current_source_cases_covered_after_inventory_correction": 5160,
+    "overlapping_targeted_case_ids": 228,
+    "sole_changed_full_input": "backend/tests/test_trading_api.py",
+    "sole_AST_change": "Two explicit readonly expected members; all other assertions and capability bans preserved"
+  },
+  "retained_attempts": [
+    "Focusedr1:26passed1failed9deselected. The actual causal guard correctly hid future2027 data from a real2026 clock; the readonly fixture now injects its source clock.",
+    "Owner-refreshr2 refused an owned intermediate generated preimage. Its six outputs were CRC/hash-verified against WIP1 and preserved before restoring only those committed preimages. Genuine unchanged CLI regenerated successfully.",
+    "Initial frontend/workmap checks detected stale derived fingerprints. Real CLIs regenerated them; full original row/value/order review confirms source citations plus additive extension only.",
+    "FullSQLr1 was deliberately interrupted after starting before derived regeneration. Actualexit2; original controller cleaned and independently confirmed owned PostgreSQL absent. Partial evidence is not a pass.",
+    "FullSQLr2 actualexit1/5159pass1failure is retained as failed. Only the strict service public-method expected set needed the new readonly method/config field. Original input hash and AST delta independently checked; complete affected module and SQL/HTTP boundary cases reran inr3."
+  ],
+  "scope_review": {
+    "raw": "ci/native_instrument_catalog_20261028/scope_review/verifier.json",
+    "sha256": "fc8f3de0a478249e477b2d2f9c4a8eb62f80d892bbb6770229b481bfadaf5e67",
+    "frozen_unit_contracts_and_dependencies_preserved": true,
+    "all_identity_sets_and105_source_function_contract_hashes_preserved": true,
+    "changed_source_row_hashes": {
+      "source_features": 32,
+      "source_surfaces": 46
+    },
+    "existing_row_changes": "Original source citation refresh only; original lines independently match relocated lines. One additive catalog extension per existing chart feature/surface."
+  },
+  "backend_registry_counts": {
+    "endpoints": 484,
+    "schemas": 378
+  },
+  "formal_acceptances_issued": 0,
+  "limitations": [
+    "The HTTP source path is an existing provisioned SQLite catalog. Existing direct catalog owners retain SQLite/PostgreSQL support; no native collection, provider connection or PostgreSQL HTTP replica is fabricated.",
+    "Original source listings are not a resolved full contract, entitlement or current tradability. Other prescribed native discovery, subscription/stream/bar/gap/depth and qualification obligations remain open.",
+    "SQL/native protobuf and HTTP test fixtures are source evidence, not actual connected-provider or Samsung-device acceptance. Python storage audit is not an OS sandbox.",
+    "All financial reservations/current-policy/reconciliation/payment/manual/handover, forecast/learning/crypto/assistant/security/operations and Android functions remain required."
+  ],
+  "source_authorizations": [
+    "auth-20261022-owner-autonomous-candidate-build",
+    "auth-20261022-owner-owner-contract-refresh"
+  ],
+  "next": "Genuine authorized commit, committed required-baseline verification, normal exact publication and hosted CI; continue full native contract/feed/valuation and shared financial workflow completion without dropping any original function."
+}

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.session.DurableOutboxTest" tests="14" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:57:32" hostname="052fefa249ff" time="0.017">
+  <properties/>
+  <testcase name="an old but still valid command is asked about rather than sent()" classname="com.dial.van.session.DurableOutboxTest" time="0.0"/>
+  <testcase name="ordinary work is stored and flushes silently()" classname="com.dial.van.session.DurableOutboxTest" time="0.0"/>
+  <testcase name="reconfirmation does not rewrite what kind of command it was()" classname="com.dial.van.session.DurableOutboxTest" time="0.0"/>
+  <testcase name="queued never reads as submitted()" classname="com.dial.van.session.DurableOutboxTest" time="0.001"/>
+  <testcase name="a reconfirmed command flushes even though it is stale()" classname="com.dial.van.session.DurableOutboxTest" time="0.0"/>
+  <testcase name="reconfirmation cannot revive an expired command()" classname="com.dial.van.session.DurableOutboxTest" time="0.0"/>
+  <testcase name="an irreversible command is never stored at all()" classname="com.dial.van.session.DurableOutboxTest" time="0.0"/>
+  <testcase name="something that needed the owner present is asked again()" classname="com.dial.van.session.DurableOutboxTest" time="0.0"/>
+  <testcase name="an expired command is dropped rather than asked about()" classname="com.dial.van.session.DurableOutboxTest" time="0.009"/>
+  <testcase name="a NEVER_STORE entry that somehow exists is refused rather than sent()" classname="com.dial.van.session.DurableOutboxTest" time="0.001"/>
+  <testcase name="attempts are counted and the path recorded()" classname="com.dial.van.session.DurableOutboxTest" time="0.0"/>
+  <testcase name="every outcome has a sentence and none of them claims the work happened()" classname="com.dial.van.session.DurableOutboxTest" time="0.0"/>
+  <testcase name="the record carries what section 20_14 asks for and not the payload()" classname="com.dial.van.session.DurableOutboxTest" time="0.0"/>
+  <testcase name="depths are reported by what may be done with each item()" classname="com.dial.van.session.DurableOutboxTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

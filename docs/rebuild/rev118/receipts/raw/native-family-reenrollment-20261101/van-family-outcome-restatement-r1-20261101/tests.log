@@ -1,0 +1,346 @@
+.F.FFFF...............F................s....                             [100%]
+=================================== FAILURES ===================================
+_ test_source_owner_late_cash_revision_replaces_same_parent_without_new_trial __
+
+tmp_path = PosixPath('/tmp/van-recovery-family-outcome-restatement-r1-20261101/test_source_owner_late_cash_re0')
+
+    def test_source_owner_late_cash_revision_replaces_same_parent_without_new_trial(tmp_path):
+        w,time,family=closed_source_family(tmp_path)
+        try:
+            original=next(w.ledger.iter(EventKind.TRADE_REVIEW,correlation_id='ti-e2e-1'))
+            assert original.payload['artifact_hash']==canonical_hash({k:v for k,v in original.payload.items() if k!='artifact_hash'})
+            original_pnl=D(str(original.payload['pnl']));original_episode=next(w.ledger.iter(EventKind.TRADE_EXPERIENCE_ARTIFACT,correlation_id='ti-e2e-1'))
+            native=SyntheticNativeOwner(w,time);w.lifecycle.native_economic_observations=native.reader
+            time[0]+=2000;body=native.observation(family.family_id,fee_delta=D('2'))
+>           fact=native.record(body)
+                 ^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_family_outcome_restatements.py:104: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_family_outcome_restatements.py:58: in record
+    return self.reader.record(body,signature)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/family_economics.py:127: in record
+    total,cash=self._validate(body)
+               ^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/family_economics.py:64: in _validate
+    history=NativePositionHistory(self.ledger,account_alias=self.adapter.account_alias,venue=self.adapter.venue)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/recovery_scope.py:45: in __init__
+    with source_context as source, committed_source_snapshot(source):
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+trading/vati/core/ledger.py:55: in committed_source_snapshot
+    require_committed_source_read(ledger)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ledger = <vati.core.ledger.Ledger object at 0x7f7c0ef95ac0>
+
+    def require_committed_source_read(ledger):
+        """An owned writer's staged rows are not committed source evidence."""
+        connection=getattr(ledger,'_conn',None)
+        if connection is None:
+            raise LedgerError('committed_source_transaction_state_unavailable')
+        if hasattr(connection,'in_transaction'):
+            active=connection.in_transaction
+        elif hasattr(connection,'info'):
+            active=connection.info.transaction_status!=0
+        else:
+            raise LedgerError('committed_source_transaction_state_unavailable')
+        depth=getattr(ledger,'_read_snapshot_depth',0)
+        if active and not (type(depth) is int and depth>0):
+>           raise LedgerError('committed_source_read_requires_idle_or_readonly_snapshot')
+E           vati.core.ledger.LedgerError: committed_source_read_requires_idle_or_readonly_snapshot
+
+trading/vati/core/ledger.py:50: LedgerError
+___ test_source_native_owner_cannot_substitute_deal_scope_or_sequence[deal] ____
+
+tmp_path = PosixPath('/tmp/van-recovery-family-outcome-restatement-r1-20261101/test_source_native_owner_canno1')
+damage = 'deal'
+
+    @pytest.mark.parametrize('damage',['currency','deal','quantity','source-ref','sequence','environment'])
+    def test_source_native_owner_cannot_substitute_deal_scope_or_sequence(tmp_path,damage):
+        w,time,family=closed_source_family(tmp_path)
+        try:
+            native=SyntheticNativeOwner(w,time);time[0]+=1000;body=native.observation(family.family_id)
+            if damage=='currency':body['currency']='EUR'
+            elif damage=='deal':body['deals'][0]['native_deal_id']='foreign-deal'
+            elif damage=='quantity':body['deals'][0]['quantity']='99'
+            elif damage=='source-ref':body['deals'][0]['exit_ref']='foreign-receipt'
+            elif damage=='sequence':body['sequence']=2
+            else:body['environment']='LIVE'
+            before=w.ledger.count()
+>           with pytest.raises(EconomicObservationError):native.record(body)
+                                                         ^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_family_outcome_restatements.py:138: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_family_outcome_restatements.py:58: in record
+    return self.reader.record(body,signature)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/family_economics.py:127: in record
+    total,cash=self._validate(body)
+               ^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/family_economics.py:64: in _validate
+    history=NativePositionHistory(self.ledger,account_alias=self.adapter.account_alias,venue=self.adapter.venue)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/recovery_scope.py:45: in __init__
+    with source_context as source, committed_source_snapshot(source):
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+trading/vati/core/ledger.py:55: in committed_source_snapshot
+    require_committed_source_read(ledger)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ledger = <vati.core.ledger.Ledger object at 0x7f7c0dbc47a0>
+
+    def require_committed_source_read(ledger):
+        """An owned writer's staged rows are not committed source evidence."""
+        connection=getattr(ledger,'_conn',None)
+        if connection is None:
+            raise LedgerError('committed_source_transaction_state_unavailable')
+        if hasattr(connection,'in_transaction'):
+            active=connection.in_transaction
+        elif hasattr(connection,'info'):
+            active=connection.info.transaction_status!=0
+        else:
+            raise LedgerError('committed_source_transaction_state_unavailable')
+        depth=getattr(ledger,'_read_snapshot_depth',0)
+        if active and not (type(depth) is int and depth>0):
+>           raise LedgerError('committed_source_read_requires_idle_or_readonly_snapshot')
+E           vati.core.ledger.LedgerError: committed_source_read_requires_idle_or_readonly_snapshot
+
+trading/vati/core/ledger.py:50: LedgerError
+_ test_source_native_owner_cannot_substitute_deal_scope_or_sequence[quantity] __
+
+tmp_path = PosixPath('/tmp/van-recovery-family-outcome-restatement-r1-20261101/test_source_native_owner_canno2')
+damage = 'quantity'
+
+    @pytest.mark.parametrize('damage',['currency','deal','quantity','source-ref','sequence','environment'])
+    def test_source_native_owner_cannot_substitute_deal_scope_or_sequence(tmp_path,damage):
+        w,time,family=closed_source_family(tmp_path)
+        try:
+            native=SyntheticNativeOwner(w,time);time[0]+=1000;body=native.observation(family.family_id)
+            if damage=='currency':body['currency']='EUR'
+            elif damage=='deal':body['deals'][0]['native_deal_id']='foreign-deal'
+            elif damage=='quantity':body['deals'][0]['quantity']='99'
+            elif damage=='source-ref':body['deals'][0]['exit_ref']='foreign-receipt'
+            elif damage=='sequence':body['sequence']=2
+            else:body['environment']='LIVE'
+            before=w.ledger.count()
+>           with pytest.raises(EconomicObservationError):native.record(body)
+                                                         ^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_family_outcome_restatements.py:138: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_family_outcome_restatements.py:58: in record
+    return self.reader.record(body,signature)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/family_economics.py:127: in record
+    total,cash=self._validate(body)
+               ^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/family_economics.py:64: in _validate
+    history=NativePositionHistory(self.ledger,account_alias=self.adapter.account_alias,venue=self.adapter.venue)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/recovery_scope.py:45: in __init__
+    with source_context as source, committed_source_snapshot(source):
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+trading/vati/core/ledger.py:55: in committed_source_snapshot
+    require_committed_source_read(ledger)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ledger = <vati.core.ledger.Ledger object at 0x7f7c0dc07410>
+
+    def require_committed_source_read(ledger):
+        """An owned writer's staged rows are not committed source evidence."""
+        connection=getattr(ledger,'_conn',None)
+        if connection is None:
+            raise LedgerError('committed_source_transaction_state_unavailable')
+        if hasattr(connection,'in_transaction'):
+            active=connection.in_transaction
+        elif hasattr(connection,'info'):
+            active=connection.info.transaction_status!=0
+        else:
+            raise LedgerError('committed_source_transaction_state_unavailable')
+        depth=getattr(ledger,'_read_snapshot_depth',0)
+        if active and not (type(depth) is int and depth>0):
+>           raise LedgerError('committed_source_read_requires_idle_or_readonly_snapshot')
+E           vati.core.ledger.LedgerError: committed_source_read_requires_idle_or_readonly_snapshot
+
+trading/vati/core/ledger.py:50: LedgerError
+_ test_source_native_owner_cannot_substitute_deal_scope_or_sequence[source-ref] _
+
+tmp_path = PosixPath('/tmp/van-recovery-family-outcome-restatement-r1-20261101/test_source_native_owner_canno3')
+damage = 'source-ref'
+
+    @pytest.mark.parametrize('damage',['currency','deal','quantity','source-ref','sequence','environment'])
+    def test_source_native_owner_cannot_substitute_deal_scope_or_sequence(tmp_path,damage):
+        w,time,family=closed_source_family(tmp_path)
+        try:
+            native=SyntheticNativeOwner(w,time);time[0]+=1000;body=native.observation(family.family_id)
+            if damage=='currency':body['currency']='EUR'
+            elif damage=='deal':body['deals'][0]['native_deal_id']='foreign-deal'
+            elif damage=='quantity':body['deals'][0]['quantity']='99'
+            elif damage=='source-ref':body['deals'][0]['exit_ref']='foreign-receipt'
+            elif damage=='sequence':body['sequence']=2
+            else:body['environment']='LIVE'
+            before=w.ledger.count()
+>           with pytest.raises(EconomicObservationError):native.record(body)
+                                                         ^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_family_outcome_restatements.py:138: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_family_outcome_restatements.py:58: in record
+    return self.reader.record(body,signature)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/family_economics.py:127: in record
+    total,cash=self._validate(body)
+               ^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/family_economics.py:64: in _validate
+    history=NativePositionHistory(self.ledger,account_alias=self.adapter.account_alias,venue=self.adapter.venue)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/recovery_scope.py:45: in __init__
+    with source_context as source, committed_source_snapshot(source):
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+trading/vati/core/ledger.py:55: in committed_source_snapshot
+    require_committed_source_read(ledger)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ledger = <vati.core.ledger.Ledger object at 0x7f7c0dd30260>
+
+    def require_committed_source_read(ledger):
+        """An owned writer's staged rows are not committed source evidence."""
+        connection=getattr(ledger,'_conn',None)
+        if connection is None:
+            raise LedgerError('committed_source_transaction_state_unavailable')
+        if hasattr(connection,'in_transaction'):
+            active=connection.in_transaction
+        elif hasattr(connection,'info'):
+            active=connection.info.transaction_status!=0
+        else:
+            raise LedgerError('committed_source_transaction_state_unavailable')
+        depth=getattr(ledger,'_read_snapshot_depth',0)
+        if active and not (type(depth) is int and depth>0):
+>           raise LedgerError('committed_source_read_requires_idle_or_readonly_snapshot')
+E           vati.core.ledger.LedgerError: committed_source_read_requires_idle_or_readonly_snapshot
+
+trading/vati/core/ledger.py:50: LedgerError
+_ test_source_native_owner_cannot_substitute_deal_scope_or_sequence[sequence] __
+
+tmp_path = PosixPath('/tmp/van-recovery-family-outcome-restatement-r1-20261101/test_source_native_owner_canno4')
+damage = 'sequence'
+
+    @pytest.mark.parametrize('damage',['currency','deal','quantity','source-ref','sequence','environment'])
+    def test_source_native_owner_cannot_substitute_deal_scope_or_sequence(tmp_path,damage):
+        w,time,family=closed_source_family(tmp_path)
+        try:
+            native=SyntheticNativeOwner(w,time);time[0]+=1000;body=native.observation(family.family_id)
+            if damage=='currency':body['currency']='EUR'
+            elif damage=='deal':body['deals'][0]['native_deal_id']='foreign-deal'
+            elif damage=='quantity':body['deals'][0]['quantity']='99'
+            elif damage=='source-ref':body['deals'][0]['exit_ref']='foreign-receipt'
+            elif damage=='sequence':body['sequence']=2
+            else:body['environment']='LIVE'
+            before=w.ledger.count()
+>           with pytest.raises(EconomicObservationError):native.record(body)
+                                                         ^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_family_outcome_restatements.py:138: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_family_outcome_restatements.py:58: in record
+    return self.reader.record(body,signature)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/family_economics.py:127: in record
+    total,cash=self._validate(body)
+               ^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/family_economics.py:64: in _validate
+    history=NativePositionHistory(self.ledger,account_alias=self.adapter.account_alias,venue=self.adapter.venue)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/recovery_scope.py:45: in __init__
+    with source_context as source, committed_source_snapshot(source):
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+trading/vati/core/ledger.py:55: in committed_source_snapshot
+    require_committed_source_read(ledger)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ledger = <vati.core.ledger.Ledger object at 0x7f7c0efa2ed0>
+
+    def require_committed_source_read(ledger):
+        """An owned writer's staged rows are not committed source evidence."""
+        connection=getattr(ledger,'_conn',None)
+        if connection is None:
+            raise LedgerError('committed_source_transaction_state_unavailable')
+        if hasattr(connection,'in_transaction'):
+            active=connection.in_transaction
+        elif hasattr(connection,'info'):
+            active=connection.info.transaction_status!=0
+        else:
+            raise LedgerError('committed_source_transaction_state_unavailable')
+        depth=getattr(ledger,'_read_snapshot_depth',0)
+        if active and not (type(depth) is int and depth>0):
+>           raise LedgerError('committed_source_read_requires_idle_or_readonly_snapshot')
+E           vati.core.ledger.LedgerError: committed_source_read_requires_idle_or_readonly_snapshot
+
+trading/vati/core/ledger.py:50: LedgerError
+___ test_real_add_then_proportional_residual_then_all_native_legs_close_once ___
+
+tmp_path = PosixPath('/tmp/van-recovery-family-outcome-restatement-r1-20261101/test_real_add_then_proportiona0')
+
+    def test_real_add_then_proportional_residual_then_all_native_legs_close_once(tmp_path):
+        from vati.lifecycle.family_outcome import publish_family_outcome
+        from vati.lifecycle.family_action_journal import FamilyActionJournal
+        w,store,time,admitted,plan,history=admitted_source_world(tmp_path,
+            actual_runtime_lease=True,add_child=True,max_quantity='.20')
+        try:
+            family=w.lifecycle.families.get(plan.snapshot.family_id)
+            before={p.position_id:p.quantity for p in w.adapter.positions()}
+            partial=w.lifecycle.request_family_reduction(family.family_id,action_key='two-leg-partial',
+                action='PARTIAL_CLOSE',requested_quantity=D('.04'),now_ms=time[0])
+            assert partial['state']=='INCOMPLETE' and D(partial['residual_quantity'])==D('.01')
+            assert D(partial['confirmed_quantity'])==D('.03')
+            assert sorted(before[p.position_id]-p.quantity for p in w.adapter.positions())==[D('.01'),D('.02')]
+            assert publish_family_outcome(w.lifecycle,family.family_id,reason='PARTIAL',now_ms=time[0]) is None
+            assert not w.lifecycle.reviews
+            time[0]+=1000
+            full=w.lifecycle.request_family_reduction(family.family_id,action_key='two-leg-full',
+                action='FULL_CLOSE',now_ms=time[0])
+            assert full['state']=='COMPLETE' and D(full['residual_quantity'])==0
+            assert not w.adapter.positions() and family.net_quantity==0
+            event=publish_family_outcome(w.lifecycle,family.family_id,reason='FULL_FAMILY',now_ms=time[0])
+            assert event.kind is EventKind.TRADE_REVIEW
+            assert event.correlation_id=='ti-e2e-1' and len(w.lifecycle.reviews)==1
+            episodes=list(w.ledger.iter(EventKind.TRADE_EXPERIENCE_ARTIFACT,correlation_id='ti-e2e-1'))
+            assert len(episodes)==1
+            assert episodes[0].payload['review']['learning_unit']=='POSITION_FAMILY'
+            assert len(episodes[0].payload['execution']['family_native_legs'])==2
+            child_ids={leg['trade_intent_id'] for leg in event.payload['family_outcome']['legs']}-{'ti-e2e-1'}
+            assert not any(list(w.ledger.iter(EventKind.TRADE_EXPERIENCE_ARTIFACT,correlation_id=iid)) for iid in child_ids)
+            assert event.payload['artifact_hash']==canonical_hash({k:v for k,v in event.payload.items() if k!='artifact_hash'})
+            assert event.payload['family_outcome']['child_learning_trials']==0
+            assert len(event.payload['family_outcome']['legs'])==2
+>           assert event.payload['initial_money_risk']==D('40')
+E           AssertionError: assert '40.000' == Decimal('40')
+E            +  where Decimal('40') = D('40')
+
+trading/tests/test_family_governed_workflow.py:220: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_family_outcome_restatements.py::test_source_owner_late_cash_revision_replaces_same_parent_without_new_trial
+FAILED trading/tests/test_family_outcome_restatements.py::test_source_native_owner_cannot_substitute_deal_scope_or_sequence[deal]
+FAILED trading/tests/test_family_outcome_restatements.py::test_source_native_owner_cannot_substitute_deal_scope_or_sequence[quantity]
+FAILED trading/tests/test_family_outcome_restatements.py::test_source_native_owner_cannot_substitute_deal_scope_or_sequence[source-ref]
+FAILED trading/tests/test_family_outcome_restatements.py::test_source_native_owner_cannot_substitute_deal_scope_or_sequence[sequence]
+FAILED trading/tests/test_family_governed_workflow.py::test_real_add_then_proportional_residual_then_all_native_legs_close_once
+6 failed, 37 passed, 1 skipped in 2.92s

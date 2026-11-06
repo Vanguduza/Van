@@ -1,0 +1,81 @@
+{
+  "schema": "van.rebuild.funding-drafts-source/1",
+  "base_head": "2a1186ee1199f56c0ae9fce06d13b27f9098d3c3",
+  "updated_at_utc": "2026-10-27T00:30:25.738199+00:00",
+  "unit": "BE-007",
+  "status": "SOURCE_TESTED_COMPONENT_NOT_UNIT_NATIVE_OR_PRODUCTION_ACCEPTANCE",
+  "acceptance": "NOT_ISSUED",
+  "implementation": "Immutable unapproved funding drafts now bind exact Money, owner/account claims, beneficiary/quote references, all fee assets, conversion reference, operation, original request, revision and expiry. The existing VATI ledger owner stores original drafts with SQL serialization, writer-lock expiry recheck, committed source reads, independent cold readback, lost-ACK/rollback recovery and explicit capacity refusal. Three paired-owner HTTP routes retain original receipts; bound request proof is not payment approval. Existing instrument and owner credential screens reject unsafe metadata before storage; strict JSON/encoded body limits and cancellation-safe worker admission apply. Native draft retention/deletion is explicitly excluded from inferred-memory erasure and remains unqualified. Final377 actual SQLite/PostgreSQL/HTTP/privacy/authority cases pass with0skips/audit violations, all1158 pinned source/test hashes match and owned fixture independently absent;122rebuild/workflow/T0 checks pass. New cases:45value,58dual-engine journal,18gateway and1bound-proof executions; counts overlap. Earlier fixture failures and the uncommitted prototype credential gap remain retained. BE007 is IN_PROGRESS; no payment/provider/native/unit/production/owner acceptance is issued.",
+  "source_sha256": {
+    "trading/vati/core/events.py": "5f46f070021eadc478784c816b8e3eb81479659c04f160be2a221487a0f6ff76",
+    "trading/vati/funding/payment_contracts.py": "a88fdb68ffbe318f31aa189bdd376518bcf82ad608f2d2507a76c1b84ad500b0",
+    "trading/vati/funding/payment_drafts.py": "30bb58b027efef2456fc6f711577dd449b28c64a8a61d680c48baba3bac2a502",
+    "backend/van_gateway/app.py": "73be0cc49401aa8eb4b9070be9fa7998df1d844deb6144efce3a5ba381c324d9",
+    "backend/van_gateway/trading/payment_draft_api.py": "52966ae5864d68f94c8dd4138390a21f9b361fcbb3ad1e5c68f3755eb7d71744",
+    "backend/van_gateway/trading/payment_draft_policy.py": "d1a8546ec2be99c2a8f815944479249604a1e3a177154afa5c5a2a06f7cd5c25",
+    "backend/van_gateway/owner_privacy.py": "a17c1f9b6257b9bfb805a27146c1050b2eb69e484f588e6b10ee27355be2ee17",
+    "backend/van_gateway/context/forget.py": "d55ce53f5234a0d4239d763136fed974c3324c336d6e88cc8ed2d85017bad44d",
+    "trading/tests/test_payment_contracts.py": "13f50f5ffb4001e5e9b0bf511b6ad313090aa7dd8583bb3624c7b78ecc5ecd19",
+    "trading/tests/test_payment_draft_journal.py": "41fa1ac770adf025c3edd153239dfa84cc14bd6e3e81c0ef6c0c37361b74c4bd",
+    "backend/tests/test_payment_draft_gateway.py": "66c5dc410b9054efae4c09d7472c5785cebfecc035059ee7b4dc9394a7e25e54",
+    "backend/tests/test_payment_draft_bound_device.py": "de12fcb4f77f5c4838013cc9e7a7869aa200f1eb1a9de432716f32a04bfe2a54",
+    "tools/rebuild/refresh_owner_source_contracts.py": "7b648d1fc797ea8061ed50bf9cf49e4ae55a5cec1b1fdbb5eedf57c5268d320b"
+  },
+  "actual_tests": {
+    "new_case_executions": {
+      "trading.tests.test_payment_contracts": 45,
+      "trading.tests.test_payment_draft_journal": 58,
+      "backend.tests.test_payment_draft_gateway": 18,
+      "backend.tests.test_payment_draft_bound_device": 1
+    },
+    "new_total": 122,
+    "initial_values_and_money": 86,
+    "failed_first_sql": {
+      "passed": 123,
+      "failed": 3,
+      "status": "FAILED_RETAINED"
+    },
+    "corrected_sql": 126,
+    "failed_first_http": {
+      "passed": 67,
+      "failed": 1,
+      "status": "FAILED_RETAINED"
+    },
+    "http_r2": 68,
+    "http_r3": 72,
+    "integration_before_credential_review": 362,
+    "final_actual_SQLite_Postgres_HTTP_privacy": 377,
+    "final_skips": 0,
+    "final_audit_violations": 0,
+    "source_test_hashes_verified": 1158,
+    "owned_fixture_independently_absent": true,
+    "rebuild_workflow_T0": 122,
+    "counts_overlap": true
+  },
+  "credential_review": "Three public non-secret probe shapes were allowed by the uncommitted prototype guard. Existing owner credential screen is now reused and includes wallet private-key/seed assignments; actual SQL/HTTP refusal cases pass. No production incident or real credential exposure is claimed.",
+  "canonical_checks": {
+    "endpoints": 483,
+    "schemas": 376,
+    "original_feature_groups": 42,
+    "original_functions": 105,
+    "original_surfaces": 78,
+    "owner_frontend_drift": false,
+    "mutation_registry_cases": 374,
+    "mutation_registry_edits": 383,
+    "registry_validation_is_execution": false
+  },
+  "remaining": [
+    "actual provider quote/reference resolution",
+    "beneficiary verification",
+    "fresh exact sealed A4 approval",
+    "shared order/funding reservations",
+    "submission/outbox",
+    "unknown-effect reconciliation",
+    "independent debit/credit settlement",
+    "compensating reversals",
+    "verified hosted handoff",
+    "native draft privacy/deletion, retention and cohort migration qualification"
+  ],
+  "qualification": "Draft preparation/storage only. All reference digests and provider/quote claims remain unverified. No retained payment instrument, automated payment, financial effect, new owner grant, provider certificate, deployment or S24 evidence is issued.",
+  "evidence": "ci/funding_drafts_20261027"
+}

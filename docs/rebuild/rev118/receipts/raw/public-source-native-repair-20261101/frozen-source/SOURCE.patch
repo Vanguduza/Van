@@ -1,0 +1,496 @@
+diff --git a/tests/rebuild/test_public_source_shards.py b/tests/rebuild/test_public_source_shards.py
+index ad6d61da..20273cb6 100644
+--- a/tests/rebuild/test_public_source_shards.py
++++ b/tests/rebuild/test_public_source_shards.py
+@@ -37,7 +37,7 @@ def write_json(path, value):
+ 
+ def seal(folder):
+     receipt = json.loads((folder / "run.json").read_text())
+-    names = ["terminal.json", "phases.jsonl", "storage-audit.json"]
++    names = ["terminal.json", "phases.jsonl", "storage-audit.json", "generated-bytecode.json"]
+     if receipt["mode"] == "execution":
+         names.append("report.xml")
+     receipt["artifact_sha256"] = {name: hashlib.sha256((folder / name).read_bytes()).hexdigest()
+@@ -62,12 +62,14 @@ def frame(folder, selection, runtime, nodeids, costs, index, count, *, control=F
+             "plugins": {p:"d"*64 for p in proof.EXPLICIT_PLUGINS[runtime]}, "autoload": False},
+         "environment_after": copy.deepcopy(environment), "selection": selection,
+         "selected": [r for r in selection["selected"] if gate.runtime(r["path"]) == runtime],
+-        "collection_errors": [], "internal_errors": [], "pytest_exit": 0,
++        "collection_errors": [], "internal_errors": [], "pytest_exit": 0, "generated_cache_candidates": [],
+         "instrument_sha256": hashlib.sha256(Path(proof.__file__).read_bytes()).hexdigest(), "costs": costs,
+         "full_collection": sorted(nodeids), "assignment": bins, "assigned": bins[index],
+         "shard_index": index, "shard_count": count, "full_collection_sha256": proof.fingerprint(sorted(nodeids)),
+         "assignment_sha256": proof.fingerprint(bins)}
+     write_json(folder / "terminal.json", state)
++    write_json(folder / "generated-bytecode.json", {"schema":"van.parent-verified-generated-bytecode/1",
++        "expected_commit":HEAD,"input_bytecode_paths":[],"records":[]})
+     write_json(folder / "storage-audit.json", {"schema": "van.source-storage-audit/1", "forbidden_events": [],
+         "source_sha256": hashlib.sha256(Path(proof.__file__).with_name("source_storage_audit.py").read_bytes()).hexdigest()})
+     events = []
+@@ -81,7 +83,7 @@ def frame(folder, selection, runtime, nodeids, costs, index, count, *, control=F
+         (folder / "report.xml").write_bytes(ET.tostring(suite))
+     (folder / "phases.jsonl").write_text("".join(json.dumps(e)+"\n" for e in events))
+     write_json(folder / "run.json", {"expected_commit": HEAD, "workflow_run": CONTEXT,
+-        "terminal": True, "exit": 0, "mode": state["mode"], "execution_id": state["execution_id"],
++        "terminal": True, "exit": 0, "mode": state["mode"], "execution_id": state["execution_id"], "generated_cache_outputs": [],
+         "source_before": state["source_before"], "source_after": state["source_after"],
+         "environment_before": copy.deepcopy(environment), "environment_after": copy.deepcopy(environment)})
+     seal(folder)
+@@ -334,6 +336,13 @@ def test_actual_pytest_plugin_records_full_collection_disjoint_execution_and_tea
+         "--runtime","gateway","--shards","4","--expected-commit",commit,"--basetemp",str(tmp_path/"reused-temp")],
+         cwd=repo,env=env,capture_output=True,text=True,timeout=90)
+     assert retry.returncode!=0 and original.read_bytes()==original_bytes
++    cache_only=tmp_path/"retained-cache-evidence";cache_only.mkdir()
++    saved=cache_only/"generated-bytecode.json";saved.write_text('{"original":"retained output"}\n')
++    retry=subprocess.run([sys.executable,"tools/rebuild/backend_public_source.py","collect","--output",str(cache_only),
++        "--runtime","gateway","--shards","4","--expected-commit",commit,"--basetemp",str(tmp_path/"cache-reuse-temp")],
++        cwd=repo,env=env,capture_output=True,text=True,timeout=90)
++    assert retry.returncode!=0 and "fresh evidence folder" in retry.stderr
++    assert saved.read_text()=='{"original":"retained output"}\n' and not (cache_only/"terminal.json").exists()
+     assert len(set(all_assigned))==4
+     assert sum(code==0 for code,_ in outcomes)==3
+     assert sum(any(e["when"]=="teardown" and e["outcome"]=="failed" for e in events) for _,events in outcomes)==1
+@@ -409,3 +418,160 @@ def test_actual_collect_refuses_untracked_and_ignored_inputs_but_accepts_inert_o
+     assert rejected.returncode!=0 and "foreign PYTHONPATH" in rejected.stderr and not (folder/"terminal.json").exists()
+     # The extra-file policy refuses rather than modifying any original input/output.
+     assert generated.read_text()=='{"synthetic_inert_output":true}\n' and cache.read_text()=="[]\n"
++
++
++def test_reporter_preserves_all_phases_without_changing_application_json_patch(tmp_path, monkeypatch):
++    from types import SimpleNamespace
++    monkeypatch.setattr(proof,"_STATE",{"output":str(tmp_path)})
++    def report(when):
++        return SimpleNamespace(nodeid="synthetic::original_json_refusal",when=when,
++                               outcome="passed",duration=0.125,skipped=False)
++    proof.pytest_runtest_logreport(report("setup"))
++    def too_deep(*args,**kwargs):
++        raise RecursionError("nested JSON")
++    with monkeypatch.context() as patch:
++        patch.setattr(json,"dumps",too_deep)
++        with pytest.raises(RecursionError,match="nested JSON"):
++            json.dumps({"application":"still patched"})
++        proof.pytest_runtest_logreport(report("call"))
++        assert json.dumps is too_deep
++    proof.pytest_runtest_logreport(report("teardown"))
++    events=[json.loads(line) for line in (tmp_path/"phases.jsonl").read_text().splitlines()]
++    assert [(e["when"],e["outcome"]) for e in events]==[(p,"passed") for p in ("setup","call","teardown")]
++    assert all(e["nodeid"]=="synthetic::original_json_refusal" for e in events)
++
++
++@pytest.mark.parametrize("failure",["encode","write"])
++def test_real_report_encoding_and_storage_errors_propagate_without_fake_events(tmp_path, monkeypatch, failure):
++    from types import SimpleNamespace
++    path=tmp_path/"phases.jsonl";path.write_text('{"earlier":"actual event"}\n');before=path.read_bytes()
++    monkeypatch.setattr(proof,"_STATE",{"output":str(tmp_path)})
++    report=SimpleNamespace(nodeid="synthetic::recording_failure",when="call",outcome="passed",duration=0.1,skipped=False)
++    with monkeypatch.context() as patch:
++        if failure=="encode":
++            def fail(*args,**kwargs):raise TypeError("real report encoding failure")
++            patch.setattr(proof,"_JSON_DUMPS",fail)
++            expected=TypeError
++        else:
++            class FailedWrite:
++                def __enter__(self):return self
++                def __exit__(self,*args):return False
++                def write(self,value):raise OSError("real report storage failure")
++            original=Path.open
++            def open_path(self,*args,**kwargs):
++                return FailedWrite() if self==path else original(self,*args,**kwargs)
++            patch.setattr(Path,"open",open_path)
++            expected=OSError
++        with pytest.raises(expected,match="real report"):
++            proof.pytest_runtest_logreport(report)
++    assert path.read_bytes()==before
++
++
++NATIVE_CACHE_SOURCES = (
++    "backend/van_gateway/__init__.py", "backend/van_gateway/config.py",
++    "backend/van_gateway/auth/__init__.py", "backend/van_gateway/auth/control_scopes.py",
++    "backend/van_gateway/learning/__init__.py", "backend/van_gateway/learning/schema.py",
++    "backend/van_gateway/private_core/__init__.py", "backend/van_gateway/private_core/app.py",
++    "backend/van_gateway/storage/__init__.py", "backend/van_gateway/storage/chart_migration.py",
++    "tools/runtime/preflight_owner_core.py",
++)
++
++
++@pytest.fixture
++def real_cache_source(tmp_path):
++    import shutil
++    import subprocess
++    repo=tmp_path/"exact-tracked-cache-source";repo.mkdir()
++    root=Path(__file__).resolve().parents[2]
++    for relative in NATIVE_CACHE_SOURCES:
++        target=repo/relative;target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(root/relative,target)
++    # This constant explicitly exercises legitimate frozenset marshal ordering across hash seeds.
++    (repo/"seeded.py").write_text("def member(value):\n    return value in {"+','.join(repr('name-'+str(i)) for i in range(70))+"}\n")
++    (repo/"pytest.ini").write_text("[pytest]\n")
++    (repo/".gitignore").write_text("__pycache__/\n")
++    subprocess.run(["git","init","-q"],cwd=repo,check=True);subprocess.run(["git","add","."],cwd=repo,check=True)
++    subprocess.run(["git","-c","user.name=Generated cache source fixture","-c","user.email=source@example.test",
++                    "commit","-qm","Exact native failure module bytes plus explicit hash-seed fixture"],cwd=repo,check=True)
++    head=subprocess.check_output(["git","rev-parse","HEAD"],cwd=repo,text=True).strip()
++    return repo,head
++
++
++def compile_real_cache_sources(repo, seed="17", optimization=0, invalidation="TIMESTAMP"):
++    import os,subprocess,sys
++    paths=[str(repo/p) for p in (*NATIVE_CACHE_SOURCES,"seeded.py")]
++    command=("import py_compile,sys;[py_compile.compile(p,doraise=True,optimize="+str(optimization)
++             +",invalidation_mode=py_compile.PycInvalidationMode."+invalidation+") for p in sys.argv[1:]]")
++    subprocess.run([sys.executable,"-c",command,*paths],
++                   env={**os.environ,"PYTHONHASHSEED":seed},check=True,capture_output=True,text=True)
++
++
++def test_parent_validates_actual_native_module_caches_and_retires_only_verified_outputs(real_cache_source,tmp_path):
++    import base64
++    repo,head=real_cache_source;before=proof.source_identity(repo,head)
++    compile_real_cache_sources(repo)
++    # Valid committed-source caches still cannot be admitted as pre-run inputs.
++    with pytest.raises(ValueError,match="uncommitted executable"):
++        proof.source_identity(repo,head)
++    out=tmp_path/"inert-cache-archive";out.mkdir()
++    outputs=proof.archive_generated_bytecode(repo,head,before,out)
++    artifact=json.loads((out/"generated-bytecode.json").read_text())
++    assert len(outputs)==len(NATIVE_CACHE_SOURCES)+1 and artifact["input_bytecode_paths"]==[]
++    assert {r["source"] for r in artifact["records"]}==set(NATIVE_CACHE_SOURCES)|{"seeded.py"}
++    assert proof.source_identity(repo,head)==before and not list(repo.rglob("*.pyc"))
++    state={"root":str(repo),"generated_cache_candidates":outputs};receipt={"generated_cache_outputs":outputs}
++    proof.verify_generated_bytecode(out,repo,head,state,receipt)
++    first={r["source"]:r["code_identity_sha256"] for r in artifact["records"]}
++    compile_real_cache_sources(repo,seed="93")
++    second=tmp_path/"another-compiler-seed";second.mkdir()
++    proof.archive_generated_bytecode(repo,head,before,second)
++    assert {r["source"]:r["code_identity_sha256"] for r in json.loads((second/"generated-bytecode.json").read_text())["records"]}==first
++    # A valid header cannot authorize changed code; verify archived bytes independently too.
++    record=artifact["records"][-1];data=base64.b64decode(record["payload_base64"])
++    import marshal
++    forged=data[:16]+marshal.dumps(compile("raise RuntimeError('forged payload must never execute')",record["code_filename"],"exec"))
++    record["payload_base64"]=base64.b64encode(forged).decode()
++    write_json(out/"generated-bytecode.json",artifact)
++    with pytest.raises(ValueError,match="payload differs"):
++        proof.verify_generated_bytecode(out,repo,head,state,receipt)
++
++
++@pytest.mark.parametrize("invalidation,optimization",[("CHECKED_HASH",1),("UNCHECKED_HASH",2)])
++def test_exact_native_sources_hash_header_and_optimization_match(real_cache_source,tmp_path,invalidation,optimization):
++    repo,head=real_cache_source;before=proof.source_identity(repo,head)
++    compile_real_cache_sources(repo,optimization=optimization,invalidation=invalidation)
++    output=tmp_path/"verified-other-header";output.mkdir()
++    paths=proof.archive_generated_bytecode(repo,head,before,output)
++    state={"root":str(repo),"generated_cache_candidates":paths};receipt={"generated_cache_outputs":paths}
++    proof.verify_generated_bytecode(output,repo,head,state,receipt)
++    artifact=json.loads((output/"generated-bytecode.json").read_text())
++    assert all(r["optimization"]==optimization and r["flags"]==(3 if invalidation=="CHECKED_HASH" else 1) for r in artifact["records"])
++
++
++@pytest.mark.parametrize("damage",["preexisting","untracked-source","wrong-magic","wrong-flags","wrong-timestamp",
++                                  "forged-payload","wrong-interpreter","source-drift"])
++def test_generated_cache_provenance_refuses_bad_input_without_deleting_it(real_cache_source,tmp_path,damage):
++    import importlib.util,marshal,py_compile
++    repo,head=real_cache_source;before=proof.source_identity(repo,head)
++    compile_real_cache_sources(repo)
++    path=Path(importlib.util.cache_from_source(str(repo/"seeded.py")))
++    data=path.read_bytes()
++    if damage=="preexisting":
++        with pytest.raises(ValueError,match="uncommitted executable"):
++            proof.source_identity(repo,head)
++        assert path.read_bytes()==data
++        return
++    if damage=="untracked-source":
++        foreign=repo/"foreign.py";foreign.write_text("payload='untracked'\n")
++        py_compile.compile(str(foreign),doraise=True)
++        foreign.unlink()  # The orphan cache still cannot claim any tracked source owner.
++    elif damage=="wrong-magic":data=b"BAD!"+data[4:]
++    elif damage=="wrong-flags":data=data[:4]+(7).to_bytes(4,"little")+data[8:]
++    elif damage=="wrong-timestamp":data=data[:8]+((int.from_bytes(data[8:12],"little")+1)%2**32).to_bytes(4,"little")+data[12:]
++    elif damage=="forged-payload":data=data[:16]+marshal.dumps(compile("value='different code'",str(repo/"seeded.py"),"exec"))
++    elif damage=="wrong-interpreter":
++        renamed=path.with_name(path.name.replace("cpython-312","cpython-999"));path.rename(renamed);path=renamed
++    elif damage=="source-drift":(repo/"seeded.py").write_text("different='tracked source changed'\n")
++    path.write_bytes(data)
++    output=tmp_path/"refused-output";output.mkdir()
++    with pytest.raises(ValueError):proof.archive_generated_bytecode(repo,head,before,output)
++    assert path.read_bytes()==data and not (output/"generated-bytecode.json").exists()
+diff --git a/tools/rebuild/backend_public_source.py b/tools/rebuild/backend_public_source.py
+index d8c1e9a5..b35820ef 100644
+--- a/tools/rebuild/backend_public_source.py
++++ b/tools/rebuild/backend_public_source.py
+@@ -103,7 +103,7 @@ def instrument_run(args):
+         raise ValueError("gateway requires four workers; isolated media requires one")
+     if not 0 <= args.shard_index < args.shards:
+         raise ValueError("invalid shard index")
+-    if any((args.output/name).exists() for name in ("run.json", "terminal.json", "phases.jsonl", "report.xml", "storage-audit.json")):
++    if any((args.output/name).exists() for name in ("run.json", "terminal.json", "phases.jsonl", "report.xml", "storage-audit.json", "generated-bytecode.json")):
+         raise ValueError("fresh evidence folder required; preserve original run artifacts")
+     sys.path.insert(0, str(ROOT))
+     sys.dont_write_bytecode = True
+@@ -141,13 +141,18 @@ def instrument_run(args):
+     result = subprocess.run(cmd, cwd=ROOT, env={**os.environ, "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",
+                                               "PYTHONDONTWRITEBYTECODE": "1", "PYTHONNOUSERSITE": "1"})
+     try:
++        outputs = evidence.archive_generated_bytecode(ROOT, args.expected_commit, source_before, args.output)
++        child_state = evidence.read_json(args.output/"terminal.json")
++        evidence.require(child_state.get("generated_cache_candidates") == outputs,
++                         "child/parent generated-cache observation differs")
++        receipt["generated_cache_outputs"] = outputs
+         receipt.update(source_after=evidence.source_identity(ROOT, args.expected_commit),
+             environment_after=evidence.environment_identity(args.runtime))
+     except Exception as exc:
+-        receipt["parent_observation_error"] = type(exc).__name__
++        receipt["parent_observation_error"] = {"type": type(exc).__name__, "message": str(exc)}
+     receipt.update(terminal=True, exit=result.returncode,
+         artifact_sha256={name: digest(args.output/name) for name in
+-            ("terminal.json", "phases.jsonl", "storage-audit.json", *(() if collecting else ("report.xml",)))
++            ("terminal.json", "phases.jsonl", "storage-audit.json", "generated-bytecode.json", *(() if collecting else ("report.xml",)))
+             if (args.output/name).is_file()})
+     receipt_path.write_text(json.dumps(receipt, indent=2)+"\n")
+     return result.returncode or int(bool(receipt.get("parent_observation_error")))
+diff --git a/tools/rebuild/public_source_shards.py b/tools/rebuild/public_source_shards.py
+index 5d1a9746..cfde0b66 100644
+--- a/tools/rebuild/public_source_shards.py
++++ b/tools/rebuild/public_source_shards.py
+@@ -6,16 +6,27 @@ import hashlib
+ import copy
+ import shutil
+ import importlib.metadata
++import importlib.util
+ import json
++import base64
++import marshal
++import io
+ import os
+ from pathlib import Path
+ import platform
++import re
++import struct
+ import subprocess
+ import sys
++import types
+ import xml.etree.ElementTree as ET
+ 
+ import pytest
+ 
++# CALL reports run before test monkeypatch teardown. Preserve the original
++# primitive without altering application patches; real encode/write errors raise.
++_JSON_DUMPS = json.dumps
++
+ SCHEMA = "van.public-source-node-ledger/1"
+ _STATE = None
+ EXPLICIT_PLUGINS = {"gateway": ("pytest_asyncio.plugin", "anyio.pytest_plugin"),
+@@ -43,7 +54,7 @@ def generated_evidence_path(path):
+     names = {"selection.json", "tested-commit.txt", "collection.json", "terminal.json",
+              "run.json", "phases.jsonl", "storage-audit.json", "report.xml", "summary.json",
+              "gateway-report.xml", "media-report.xml", "gateway-storage-audit.json",
+-             "media-storage-audit.json"}
++             "media-storage-audit.json", "generated-bytecode.json"}
+     return (len(parts) >= 3 and parts[0] == "artifacts"
+             and parts[1] in {"backend-public-source", *(f"backend-public-source-gateway-{i}" for i in range(4))}
+             and parts[-1] in names)
+@@ -55,7 +66,7 @@ def require(condition, message):
+ 
+ 
+ def encoded(value):
+-    return json.dumps(value, sort_keys=True, separators=(",", ":")).encode()
++    return _JSON_DUMPS(value, sort_keys=True, separators=(",", ":")).encode()
+ 
+ 
+ def fingerprint(value):
+@@ -66,7 +77,7 @@ def read_json(path):
+     return json.loads(Path(path).read_text())
+ 
+ 
+-def source_identity(root, expected_commit):
++def _source_observation(root, expected_commit, *, after_run=False):
+     root = Path(root)
+     head = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root, text=True).strip()
+     require(head == expected_commit, "checkout differs from expected exact head")
+@@ -75,14 +86,131 @@ def source_identity(root, expected_commit):
+     extra = set()
+     for flags in (("--others", "--exclude-standard"), ("--others", "--ignored", "--exclude-standard")):
+         extra.update(p for p in subprocess.check_output(["git", "ls-files", "-z", *flags], cwd=root).decode().split("\0") if p)
+-    rejected = sorted(p for p in extra if (root/p).is_symlink() or not generated_evidence_path(p))
++    candidates = sorted(p for p in extra if "__pycache__" in Path(p).parts and p.endswith(".pyc")) if after_run else []
++    rejected = sorted(p for p in extra if (root/p).is_symlink()
++                      or (p not in candidates and not generated_evidence_path(p)))
+     require(not rejected, "uncommitted executable/config/fixture inputs outside explicit inert outputs: " + ", ".join(rejected[:10]))
+     config = root / "pytest.ini"
+     require(config.is_file() and subprocess.check_output(["git", "ls-files", "--", "pytest.ini"], cwd=root).strip(),
+             "committed root pytest.ini required")
+     tree = subprocess.check_output(["git", "rev-parse", "HEAD^{tree}"], cwd=root, text=True).strip()
+-    return {"commit": head, "tree": tree, "input_policy": "committed-inputs-explicit-inert-outputs/2",
+-            "pytest_ini_sha256": hashlib.sha256(config.read_bytes()).hexdigest()}
++    return ({"commit": head, "tree": tree, "input_policy": "committed-inputs-parent-verified-cache-outputs/3",
++             "pytest_ini_sha256": hashlib.sha256(config.read_bytes()).hexdigest()}, candidates)
++
++
++def source_identity(root, expected_commit):
++    # Every new collection/execution refuses repository bytecode, even valid caches.
++    return _source_observation(root, expected_commit)[0]
++
++
++def _code_identity(value, depth=0):
++    """Typed code/constant graph; frozenset wire order and interning are not code semantics."""
++    require(depth < 256, "generated code graph exceeds bounded depth")
++    if type(value) is types.CodeType:
++        fields = ("co_argcount", "co_posonlyargcount", "co_kwonlyargcount", "co_nlocals", "co_stacksize",
++                  "co_flags", "co_code", "co_consts", "co_names", "co_varnames", "co_freevars", "co_cellvars",
++                  "co_filename", "co_name", "co_qualname", "co_firstlineno", "co_linetable", "co_exceptiontable")
++        return ["code", {name:_code_identity(getattr(value,name),depth+1) for name in fields}]
++    if type(value) is tuple:
++        return ["tuple", [_code_identity(v,depth+1) for v in value]]
++    if type(value) is frozenset:
++        return ["frozenset", sorted((_code_identity(v,depth+1) for v in value),key=encoded)]
++    if type(value) is bytes:return ["bytes",value.hex()]
++    if type(value) is float:return ["float",struct.pack("!d",value).hex()]
++    if type(value) is complex:return ["complex",struct.pack("!dd",value.real,value.imag).hex()]
++    if type(value) in (str,int,bool):return [type(value).__name__,value]
++    if value is None:return ["None"]
++    if value is Ellipsis:return ["Ellipsis"]
++    raise ValueError("unsupported generated code constant")
++
++
++def _cache_proof(root, expected_commit, relative, data, *, origin_root, source_mtime):
++    """Decode only as verifier data; compare every code field to fresh committed compilation. Never execute/import it."""
++    root = Path(root)
++    path = Path(relative)
++    require(not path.is_absolute() and ".." not in path.parts and path.parent.name == "__pycache__",
++            "noncanonical generated cache path")
++    match = re.fullmatch(r"(.+)\." + re.escape(sys.implementation.cache_tag) + r"(?:\.opt-([12]))?\.pyc", path.name)
++    require(match is not None, "wrong interpreter/optimization cache name")
++    source = path.parent.parent / (match[1] + ".py")
++    mode = subprocess.check_output(["git", "ls-tree", expected_commit, "--", source.as_posix()], cwd=root)
++    require(mode.startswith((b"100644 blob ", b"100755 blob ")), "cache source is not exact tracked regular source")
++    original = subprocess.check_output(["git", "show", expected_commit + ":" + source.as_posix()], cwd=root)
++    require(len(data) >= 16 and data[:4] == importlib.util.MAGIC_NUMBER, "wrong generated cache magic/header")
++    flags = int.from_bytes(data[4:8], "little")
++    require(flags in (0, 1, 3), "invalid generated cache flags")
++    require(type(source_mtime) is int and 0 <= source_mtime < 2**32, "missing original source timestamp")
++    if flags == 0:
++        require(int.from_bytes(data[8:12], "little") == source_mtime
++                and int.from_bytes(data[12:16], "little") == len(original) % 2**32,
++                "generated cache timestamp/size differs from original source")
++    else:
++        require(data[8:16] == importlib.util.source_hash(original), "generated cache source hash differs")
++    require(Path(origin_root).is_absolute(), "missing original compile root")
++    filename = str(Path(origin_root) / source)
++    optimization = int(match[2] or 0)
++    expected = _code_identity(compile(original, filename, "exec", dont_inherit=True, optimize=optimization))
++    stream = io.BytesIO(data[16:])
++    decoded = marshal.load(stream)
++    require(type(decoded) is types.CodeType and stream.tell() == len(data)-16, "invalid/trailing generated code payload")
++    observed = _code_identity(decoded)
++    require(observed == expected, "generated cache payload differs from exact committed compilation")
++    return {"path": relative, "source": source.as_posix(), "source_sha256": hashlib.sha256(original).hexdigest(),
++            "source_mtime": source_mtime, "source_size": len(original), "flags": flags,
++            "optimization": optimization, "code_filename": filename,
++            "code_identity_sha256":fingerprint(expected), "cache_sha256": hashlib.sha256(data).hexdigest()}
++
++
++def archive_generated_bytecode(root, expected_commit, before, output):
++    """Parent-only post-child validation; archive then retire only verified own outputs."""
++    root = Path(root).resolve()
++    after, candidates = _source_observation(root, expected_commit, after_run=True)
++    require(after == before, "source drift before generated-cache validation")
++    records = []
++    for relative in candidates:
++        path = root / relative
++        require(path.stat().st_size <= 8 * 1024 * 1024, "generated cache exceeds bounded evidence size")
++        data = path.read_bytes()
++        # Derive only a candidate source path here; _cache_proof validates the full name/mode.
++        name = path.name.split("." + sys.implementation.cache_tag, 1)[0]
++        source = path.parent.parent / (name + ".py")
++        require(source.is_file() and not source.is_symlink(), "cache source absent or symlinked")
++        original = subprocess.check_output(["git", "show", expected_commit + ":" + str(source.relative_to(root))], cwd=root)
++        require(source.read_bytes() == original, "cache source changed from committed bytes")
++        proof = _cache_proof(root, expected_commit, relative, data, origin_root=str(root),
++                             source_mtime=int(source.stat().st_mtime) % 2**32)
++        records.append({**proof, "payload_base64": base64.b64encode(data).decode("ascii")})
++    artifact = {"schema": "van.parent-verified-generated-bytecode/1", "expected_commit": expected_commit,
++                "input_bytecode_paths": [], "records": records}
++    destination = Path(output) / "generated-bytecode.json"
++    destination.write_text(_JSON_DUMPS(artifact, indent=2) + "\n")
++    require(read_json(destination) == artifact, "generated cache evidence readback failed")
++    for record in records:
++        path = root / record["path"]
++        require(not path.is_symlink() and hashlib.sha256(path.read_bytes()).hexdigest() == record["cache_sha256"],
++                "generated cache changed during archive")
++        path.unlink()  # Absent at strict preflight; exact verified output retained non-importably above.
++    require(source_identity(root, expected_commit) == before, "unexpected inputs after output retirement")
++    return candidates
++
++
++def verify_generated_bytecode(folder, root, expected_commit, state, receipt):
++    artifact = read_json(Path(folder) / "generated-bytecode.json")
++    require(artifact.get("schema") == "van.parent-verified-generated-bytecode/1"
++            and artifact.get("expected_commit") == expected_commit and artifact.get("input_bytecode_paths") == [],
++            "missing parent verified generated-cache provenance")
++    records = artifact.get("records")
++    require(isinstance(records, list), "missing generated-cache records")
++    paths = [r["path"] for r in records]
++    require(paths == sorted(set(paths)) == state.get("generated_cache_candidates")
++            == receipt.get("generated_cache_outputs"), "generated-cache candidate/output disagreement")
++    for record in records:
++        require(len(record["payload_base64"]) <= 12*1024*1024, "generated cache artifact exceeds bounded size")
++        data = base64.b64decode(record["payload_base64"], validate=True)
++        expected = _cache_proof(root, expected_commit, record["path"], data,
++                                origin_root=state["root"], source_mtime=record["source_mtime"])
++        require({k:v for k,v in record.items() if k != "payload_base64"} == expected,
++                "generated cache proof differs from committed source compilation")
+ 
+ 
+ def effective_pytest_inputs(config, root, runtime):
+@@ -231,7 +359,7 @@ def pytest_collection_modifyitems(config, items):
+         config.hook.pytest_deselected(items=dropped)
+     for item in items:
+         item.user_properties.append(("van_source_nodeid", item.nodeid))
+-    (Path(state["output"]) / "collection.json").write_text(json.dumps(state, indent=2) + "\n")
++    (Path(state["output"]) / "collection.json").write_text(_JSON_DUMPS(state, indent=2) + "\n")
+ 
+ 
+ def pytest_collectreport(report):
+@@ -256,17 +384,18 @@ def pytest_runtest_logreport(report):
+     event = {"nodeid": report.nodeid, "when": report.when, "outcome": report.outcome,
+              "duration": report.duration, "skip_reason": reason}
+     with (Path(_STATE["output"]) / "phases.jsonl").open("a") as stream:
+-        stream.write(json.dumps(event, sort_keys=True) + "\n")
++        stream.write(_JSON_DUMPS(event, sort_keys=True) + "\n")
+ 
+ 
+ def pytest_sessionfinish(session, exitstatus):
+     state = getattr(session.config, "_van_source_evidence", None)
+     if state is None:
+         return
+-    state.update(pytest_exit=int(exitstatus),
+-                 source_after=source_identity(state["root"], state["expected_commit"]),
++    source_after, candidates = _source_observation(state["root"], state["expected_commit"], after_run=True)
++    state.update(pytest_exit=int(exitstatus), generated_cache_candidates=candidates,
++                 source_after=source_after,
+                  environment_after=environment_identity(state["runtime"]))
+-    (Path(state["output"]) / "terminal.json").write_text(json.dumps(state, indent=2) + "\n")
++    (Path(state["output"]) / "terminal.json").write_text(_JSON_DUMPS(state, indent=2) + "\n")
+ 
+ 
+ def approved_skip(nodeid, reason):
+@@ -338,10 +467,11 @@ def verify_snapshot(folder, manifest, runtime, expected_commit, costs, root, *,
+     require(state.get("full_collection_sha256") == fingerprint(full)
+             and state.get("assignment_sha256") == fingerprint(bins), "collection/assignment digest mismatch")
+     for name, digest in receipt.get("artifact_sha256", {}).items():
+-        require(name in {"terminal.json", "phases.jsonl", "report.xml", "storage-audit.json"}, "foreign receipt artifact")
++        require(name in {"terminal.json", "phases.jsonl", "report.xml", "storage-audit.json", "generated-bytecode.json"}, "foreign receipt artifact")
+         require(hashlib.sha256((folder / name).read_bytes()).hexdigest() == digest, "worker artifact hash mismatch")
+-    mandatory = {"terminal.json", "phases.jsonl", "storage-audit.json"} | (set() if collection else {"report.xml"})
++    mandatory = {"terminal.json", "phases.jsonl", "storage-audit.json", "generated-bytecode.json"} | (set() if collection else {"report.xml"})
+     require(set(receipt.get("artifact_sha256", {})) == mandatory, "incomplete worker artifact receipt")
++    verify_generated_bytecode(folder, root, expected_commit, state, receipt)
+     audit = read_json(folder / "storage-audit.json")
+     require(audit.get("schema") == "van.source-storage-audit/1" and audit.get("forbidden_events") == []
+             and audit.get("source_sha256") == hashlib.sha256(Path(__file__).with_name("source_storage_audit.py").read_bytes()).hexdigest(),
+@@ -440,7 +570,7 @@ def verify_shards(output, expected_commit, job_result, *, root, shard_count=4):
+             combined.append(copy.deepcopy(suite))
+         child_audits.append({"shard": index, "sha256": hashlib.sha256((folder/"storage-audit.json").read_bytes()).hexdigest()})
+     (output/"gateway-report.xml").write_bytes(ET.tostring(combined))
+-    (output/"gateway-storage-audit.json").write_text(json.dumps({"forbidden_events": [],
++    (output/"gateway-storage-audit.json").write_text(_JSON_DUMPS({"forbidden_events": [],
+         "scope": "Derived union of four independently verified child audits; original artifacts retained",
+         "child_audits": child_audits}, indent=2)+"\n")
+     shutil.copyfile(output/"media/report.xml", output/"media-report.xml")

@@ -1,0 +1,22 @@
+Traceback (most recent call last):
+  File "/workspace/van-review-2026-10-18/publish/tools/rebuild/refresh_owner_source_contracts.py", line 502, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspace/van-review-2026-10-18/publish/tools/rebuild/refresh_owner_source_contracts.py", line 480, in main
+    outputs = build(read=read)
+              ^^^^^^^^^^^^^^^^
+  File "/workspace/van-review-2026-10-18/publish/tools/rebuild/refresh_owner_source_contracts.py", line 136, in build
+    walk(rows)
+  File "/workspace/van-review-2026-10-18/publish/tools/rebuild/refresh_owner_source_contracts.py", line 127, in walk
+    walk(child)
+  File "/workspace/van-review-2026-10-18/publish/tools/rebuild/refresh_owner_source_contracts.py", line 124, in walk
+    walk(child)
+  File "/workspace/van-review-2026-10-18/publish/tools/rebuild/refresh_owner_source_contracts.py", line 127, in walk
+    walk(child)
+  File "/workspace/van-review-2026-10-18/publish/tools/rebuild/refresh_owner_source_contracts.py", line 124, in walk
+    walk(child)
+  File "/workspace/van-review-2026-10-18/publish/tools/rebuild/refresh_owner_source_contracts.py", line 127, in walk
+    walk(child)
+  File "/workspace/van-review-2026-10-18/publish/tools/rebuild/refresh_owner_source_contracts.py", line 111, in walk
+    raise ValueError("Changed/non-unique citation requires review: "+file+":"+str(value["line"]))
+ValueError: Changed/non-unique citation requires review: android/app/src/main/java/com/dial/van/mission/MissionRepository.kt:136

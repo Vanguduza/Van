@@ -1,0 +1,73 @@
+{
+  "schema": "van.rebuild.source-qualification/1",
+  "source_head": "59d5777e95cbd9d6141f5f49ac04d22e0b8d37c3",
+  "result": "FAILED_WITH_FOLLOWUP_TEST_CORRECTIONS",
+  "backend_contracts": {
+    "tests": 6971,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 9,
+    "passed": 6961,
+    "seconds": 2923.196,
+    "xml_sha256": "f9042055b95bef257e7271fbf1391cffa648f24d53d363d9d6497148a150cdf4",
+    "skipped_reasons": [
+      "member of the B1 closed set by definition",
+      "needs root and setpriv",
+      "needs root, unshare -n, nft and setpriv"
+    ]
+  },
+  "trading": {
+    "tests": 2435,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 2434,
+    "seconds": 579.721,
+    "xml_sha256": "38dcc12d7c4ceb31803d25c88e3cb579a9ad29b9c74792ac91664eccd9c1d24f",
+    "skipped_reasons": []
+  },
+  "storage_audit": {
+    "forbidden_events": [],
+    "scope": "backend/tests plus tests/contracts; repo-root invocation; writes and SQLite opens under root/data or backend/data refused"
+  },
+  "backend_pg_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "trading_pg_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "worktree_clean": true,
+  "failures": [
+    {
+      "test": "backend/tests/test_trading_api.py::test_account_onboarding_is_device_signed_and_forwards_without_storing_secrets",
+      "cause": "Old test expected destructive native MT5 unlink without native funds/exposure observations; helper ignored refused approval challenge. Later root test preserves refusal and a positive Paper unlink; production safety not relaxed.",
+      "followup": {
+        "tests": 10,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 10,
+        "seconds": 11.35,
+        "xml_sha256": "63c533970dd564d01e5346f814c7adeeb9537fcc17f0fa68874b6aaffce17ea2",
+        "skipped_reasons": []
+      }
+    },
+    {
+      "test": "trading/tests/test_account_retirement_pg.py::test_actual_pg_row_guard_fences_a_competing_actor_even_beyond_lease_ttl",
+      "cause": "The actor can safely lose CAS to lease expiry after actual row-lock release. Test now checks exact CAS refusal then fresh retry, retaining blocked-while-guarded and removed-account SDK-refusal assertions. Runtime unchanged.",
+      "followup": {
+        "tests": 15,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 15,
+        "seconds": 5.633,
+        "xml_sha256": "4e3dc2a1ce7cff43b918783dcdee88083eee13d3e795de43617fa1d0af19076f",
+        "skipped_reasons": []
+      }
+    }
+  ],
+  "qualification": "Actual failed full runs retained. Later focused passing corrections do not convert these original executions to PASS. No native/provider/production/whole-unit/handset acceptance."
+}

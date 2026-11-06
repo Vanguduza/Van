@@ -1,0 +1,99 @@
+{
+  "state": "TERMINAL",
+  "source_before": {
+    "trading/commander/accounts.py": "f12b42dfcf26c34a8328e34f95c70d964343a3909484ebf0b89a7a65d087ccc6",
+    "trading/commander/account_retirement.py": "b1894ad6407e17736241479794ebec494a03c039198de47ea94c2b4d5455c7dc",
+    "trading/commander/app.py": "1d0d614fbe867838abb01baefd4534fb65cb02724770354d15cfec807717ee98",
+    "trading/vati/accounts/registry.py": "6178715463eb89b33827d4dbd6cfe427ad9e65c2c00049caef0ec50633c74803",
+    "backend/tests/test_account_unlink_review.py": "b57fd1b21f979f18d06f22c0bc2833bb3febcd4135ccf830c9412867751d7cf2",
+    "trading/tests/test_account_registry_atomic_rea.py": "be80eb54cab1adb6869b572eaccf31e92dc3710b7ad421310da72d9cc89ced73",
+    "trading/tests/test_account_unlink_currentness.py": "4abd5642062e30f5e23fd953b3c30b5517eb12b5e8f39c27dc0497fa6097f00d",
+    "backend/tests/test_stateful_link_binding.py": "63720c50d1ee5bba47bd6307a47a651ae96a778d0b32426e72b3ac5c7016a657"
+  },
+  "scope": "Mergedreviewedunlink7+asyncchildwaitfix8pins;actualSQLHTTPsignedunlink/currentness/partialUNKNOWN/lostreply+realchilddeath+preview/defaultregistry. No fullbackend/native/provider/SDK qualification.",
+  "outer_node_inputs_shape": {
+    "NODE_OPTIONS": {
+      "present": false,
+      "nonempty": false,
+      "sha256": null
+    },
+    "NODE_PATH": {
+      "present": true,
+      "nonempty": true,
+      "sha256": "dbc7bc884f72c70bb3d320e868da710a56a621286fba48b3c6b610776b41b4fd"
+    },
+    "NODE_COMPILE_CACHE": {
+      "present": false,
+      "nonempty": false,
+      "sha256": null
+    },
+    "NODE_DISABLE_COMPILE_CACHE": {
+      "present": false,
+      "nonempty": false,
+      "sha256": null
+    }
+  },
+  "tmp_reserve": 2147483648,
+  "owned_run_budget": 134217728,
+  "file_cap": 8388608,
+  "started": "2026-11-02T01:12:00.737882+00:00",
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "-B",
+    "/workspace/van-review-2026-10-18/publish/tools/rebuild/source_storage_audit.py",
+    "--checkout-root",
+    "/workspace/van-review-2026-10-18/publish",
+    "--report",
+    "/tmp/van-recovery-unlink-wait-merged-20261102/audit.json",
+    "backend/tests/test_account_unlink_review.py::test_signed_unlink_keeps_native_history_and_never_reports_broker_closure",
+    "backend/tests/test_account_unlink_review.py::test_lost_native_reply_after_unlink_is_recovered_by_original_read_without_repetition",
+    "backend/tests/test_account_unlink_review.py::test_final_unlink_writer_rechecks_original_scope_and_fresh_native_facts",
+    "backend/tests/test_account_unlink_review.py::test_partial_unlink_stays_original_unknown_without_cleanup_or_resend_authority",
+    "backend/tests/test_stateful_link_binding.py::test_real_link_process_death_keeps_bound_original_unknown_without_native_resend",
+    "backend/tests/test_account_application_drafts.py::test_real_paired_http_atomic_preview_cold_readback_and_no_effect",
+    "trading/tests/test_account_registry_concurrency.py::test_an_unrelated_account_cannot_be_lost_by_a_stale_removal",
+    "trading/tests/test_account_registry_concurrency.py::test_same_account_changed_since_read_refuses_instead_of_overwriting",
+    "--rootdir=/workspace/van-review-2026-10-18/publish",
+    "-c",
+    "/workspace/van-review-2026-10-18/publish/pytest.ini",
+    "-p",
+    "pytest_asyncio.plugin",
+    "-p",
+    "anyio.pytest_plugin",
+    "--basetemp=/tmp/van-recovery-pytest-unlink-wait-merged-20261102",
+    "--junitxml=/tmp/van-recovery-unlink-wait-merged-20261102/tests.xml",
+    "-q"
+  ],
+  "exit": 0,
+  "child_pid": 1284378,
+  "child_waited": true,
+  "peak_owned_bytes": 31161331,
+  "seconds": 38.231011067997315,
+  "children_remaining": [],
+  "tests": 18,
+  "failures": 0,
+  "errors": 0,
+  "skips": 0,
+  "cleanup": {
+    "path": "/tmp/van-recovery-pytest-unlink-wait-merged-20261102",
+    "files": 148,
+    "inventory": "/tmp/van-recovery-unlink-wait-merged-20261102/owned-temp-inventory.json",
+    "inventory_sha256": "8f784e954b38fda9ab6a4ee45fd36b569e5282f0015652bf67b59727c9eee56f",
+    "free_bytes_before_cleanup": 2281893888,
+    "free_bytes_after_cleanup": 2313211904,
+    "free_inodes_after": 2198550,
+    "independently_absent": true
+  },
+  "source_after": {
+    "trading/commander/accounts.py": "f12b42dfcf26c34a8328e34f95c70d964343a3909484ebf0b89a7a65d087ccc6",
+    "trading/commander/account_retirement.py": "b1894ad6407e17736241479794ebec494a03c039198de47ea94c2b4d5455c7dc",
+    "trading/commander/app.py": "1d0d614fbe867838abb01baefd4534fb65cb02724770354d15cfec807717ee98",
+    "trading/vati/accounts/registry.py": "6178715463eb89b33827d4dbd6cfe427ad9e65c2c00049caef0ec50633c74803",
+    "backend/tests/test_account_unlink_review.py": "b57fd1b21f979f18d06f22c0bc2833bb3febcd4135ccf830c9412867751d7cf2",
+    "trading/tests/test_account_registry_atomic_rea.py": "be80eb54cab1adb6869b572eaccf31e92dc3710b7ad421310da72d9cc89ced73",
+    "trading/tests/test_account_unlink_currentness.py": "4abd5642062e30f5e23fd953b3c30b5517eb12b5e8f39c27dc0497fa6097f00d",
+    "backend/tests/test_stateful_link_binding.py": "63720c50d1ee5bba47bd6307a47a651ae96a778d0b32426e72b3ac5c7016a657"
+  },
+  "outer_node_environment_unchanged": true,
+  "completed": "2026-11-02T01:12:39.061346+00:00"
+}

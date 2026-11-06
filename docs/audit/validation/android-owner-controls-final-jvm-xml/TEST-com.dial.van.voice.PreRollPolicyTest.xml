@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.voice.PreRollPolicyTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:57:34" hostname="052fefa249ff" time="0.001">
+  <properties/>
+  <testcase name="captured audio is not written to storage by default()" classname="com.dial.van.voice.PreRollPolicyTest" time="0.0"/>
+  <testcase name="one component owns the microphone and everything else subscribes()" classname="com.dial.van.voice.PreRollPolicyTest" time="0.0"/>
+  <testcase name="the buffer is bounded at both ends()" classname="com.dial.van.voice.PreRollPolicyTest" time="0.0"/>
+  <testcase name="the buffer is long enough to keep the start of a sentence()" classname="com.dial.van.voice.PreRollPolicyTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,202 @@
+........................................................................ [  1%]
+........................................................................ [  2%]
+........................................................................ [  4%]
+........................................................................ [  5%]
+........................................................................ [  7%]
+........................................................................ [  8%]
+........................................................................ [  9%]
+........................................................................ [ 11%]
+........................................................................ [ 12%]
+........................................................................ [ 14%]
+........................................................................ [ 15%]
+...........................ssssss.........sssssssssssssssssssss....s.... [ 16%]
+........................................................................ [ 18%]
+.....ssssss.......sss................................................... [ 19%]
+........................................................................ [ 21%]
+........................................................................ [ 22%]
+...............................ssss............sssssssssssssssssssssssss [ 23%]
+sssssssssssssssssssssssssssssssssssss................................... [ 25%]
+........................................................................ [ 26%]
+........................................................................ [ 28%]
+........................................................................ [ 29%]
+........................................................................ [ 30%]
+........................................................................ [ 32%]
+........................................................................ [ 33%]
+........................................................................ [ 35%]
+........................................................................ [ 36%]
+..............................................................sss.s.ssss [ 37%]
+sss.sss................................................................s [ 39%]
+.sssssssssss.s...s..s................................................... [ 40%]
+........................................................................ [ 42%]
+........................................................................ [ 43%]
+........................................................................ [ 44%]
+........................................................................ [ 46%]
+........................................................................ [ 47%]
+........................................................................ [ 49%]
+........................................................................ [ 50%]
+........................................................................ [ 51%]
+........................................................................ [ 53%]
+........................................................................ [ 54%]
+........................................................................ [ 56%]
+........................................................................ [ 57%]
+........................................................................ [ 59%]
+...................sssss.s...sssssssssssssssss.......................... [ 60%]
+........................................................................ [ 61%]
+........................................................................ [ 63%]
+........................................................................ [ 64%]
+..................................s..................................... [ 66%]
+........................................................................ [ 67%]
+.....................
+B2 FIXTURE corpus stats (not a live measurement)
+  dds57: {"eligibility_rate": 0.2105, "eligible": 12, "measurement_kind": "FIXTURE_CORPUS_NOT_LIVE", "per_class": {"CREDENTIAL": 9, "OWNER_PRIVATE": 19, "POLICY_DENIED": 10, "PUBLIC_ELIGIBLE": 8, "SANITIZABLE_ELIGIBLE": 4, "TRADING_PROTECTED": 7}, "policy_rejection_rate": 0.1754, "privacy_rejection_rate": 0.614, "total": 57}
+  adversarial: {"eligibility_rate": 0.2, "eligible": 9, "measurement_kind": "FIXTURE_CORPUS_NOT_LIVE", "per_class": {"CREDENTIAL": 2, "OWNER_PRIVATE": 26, "POLICY_DENIED": 8, "PUBLIC_ELIGIBLE": 1, "SANITIZABLE_ELIGIBLE": 8}, "policy_rejection_rate": 0.1778, "privacy_rejection_rate": 0.6222, "total": 45}
+  combined: {"eligibility_rate": 0.2059, "eligible": 21, "measurement_kind": "FIXTURE_CORPUS_NOT_LIVE", "per_class": {"CREDENTIAL": 11, "OWNER_PRIVATE": 45, "POLICY_DENIED": 18, "PUBLIC_ELIGIBLE": 9, "SANITIZABLE_ELIGIBLE": 12, "TRADING_PROTECTED": 7}, "policy_rejection_rate": 0.1765, "privacy_rejection_rate": 0.6176, "total": 102}
+.....................................s............. [ 68%]
+...ss................................................................... [ 70%]
+........................................................................ [ 71%]
+..........................FF............................................ [ 73%]
+........................................................................ [ 74%]
+........................................................................ [ 75%]
+........................................................................ [ 77%]
+........................................................................ [ 78%]
+........................................................................ [ 80%]
+........................................................................ [ 81%]
+........................................................................ [ 82%]
+........................................................................ [ 84%]
+........................................................................ [ 85%]
+........................................................................ [ 87%]
+........................................................................ [ 88%]
+........................................................................ [ 89%]
+........................................................................ [ 91%]
+........................................................................ [ 92%]
+........................................................................ [ 94%]
+........................................................................ [ 95%]
+........................................................................ [ 96%]
+........................................................................ [ 98%]
+........................................................................ [ 99%]
+............                                                             [100%]
+=================================== FAILURES ===================================
+_ test_real_process_crash_before_or_after_commit_has_one_recoverable_outcome[before-final-write] _
+
+controls = <van_gateway.mission.control.MissionExecutionControlService object at 0x7fb3a2f526f0>
+crash_phase = 'before-final-write'
+
+    @pytest.mark.parametrize("crash_phase", ["before-final-write", "after-commit"])
+    async def test_real_process_crash_before_or_after_commit_has_one_recoverable_outcome(controls, crash_phase):
+        # Terminate a separate local service process at the actual transaction
+        # boundary. No mock database or staged caller response supplies recovery.
+        script = r'''
+    import asyncio, os, sys
+    import aiosqlite
+    from van_gateway.mission.control import MissionExecutionControlService
+    from van_gateway.storage.db import Store
+    phase, path = sys.argv[1:]
+    original_execute = aiosqlite.Connection.execute
+    original_commit = aiosqlite.Connection.commit
+    def execute(self, sql, parameters=()):
+        if phase == "before-final-write" and sql.startswith("UPDATE mission_execution_controls SET generation="):
+            os._exit(73)
+        return original_execute(self, sql, parameters)
+    async def commit(self):
+        await original_commit(self)
+        if phase == "after-commit":
+            os._exit(74)
+    aiosqlite.Connection.execute = execute
+    aiosqlite.Connection.commit = commit
+    async def run():
+        await MissionExecutionControlService(Store(path)).request(
+            mission_id="mission-control-test", request_id="owner-request-1", operation="PAUSE",
+            expected_generation=0, requested_by="device:owner-control-test", now_ms=17)
+    asyncio.run(run())
+    '''
+        child = await asyncio.create_subprocess_exec(sys.executable, "-c", script, crash_phase, controls.store.path,
+                                                     stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+        stdout, stderr = await asyncio.wait_for(child.communicate(), timeout=10)
+>       assert child.returncode == (73 if crash_phase == "before-final-write" else 74), (stdout, stderr)
+E       AssertionError: (b'', b'Traceback (most recent call last):
+E           File "<string>", line 4, in <module>
+E         ModuleNotFoundError: No module named \'van_gateway\'
+E         ')
+E       assert 1 == 73
+E        +  where 1 = <Process 275015>.returncode
+
+backend/tests/test_mission_execution_control.py:252: AssertionError
+_ test_real_process_crash_before_or_after_commit_has_one_recoverable_outcome[after-commit] _
+
+controls = <van_gateway.mission.control.MissionExecutionControlService object at 0x7fb3c316b1d0>
+crash_phase = 'after-commit'
+
+    @pytest.mark.parametrize("crash_phase", ["before-final-write", "after-commit"])
+    async def test_real_process_crash_before_or_after_commit_has_one_recoverable_outcome(controls, crash_phase):
+        # Terminate a separate local service process at the actual transaction
+        # boundary. No mock database or staged caller response supplies recovery.
+        script = r'''
+    import asyncio, os, sys
+    import aiosqlite
+    from van_gateway.mission.control import MissionExecutionControlService
+    from van_gateway.storage.db import Store
+    phase, path = sys.argv[1:]
+    original_execute = aiosqlite.Connection.execute
+    original_commit = aiosqlite.Connection.commit
+    def execute(self, sql, parameters=()):
+        if phase == "before-final-write" and sql.startswith("UPDATE mission_execution_controls SET generation="):
+            os._exit(73)
+        return original_execute(self, sql, parameters)
+    async def commit(self):
+        await original_commit(self)
+        if phase == "after-commit":
+            os._exit(74)
+    aiosqlite.Connection.execute = execute
+    aiosqlite.Connection.commit = commit
+    async def run():
+        await MissionExecutionControlService(Store(path)).request(
+            mission_id="mission-control-test", request_id="owner-request-1", operation="PAUSE",
+            expected_generation=0, requested_by="device:owner-control-test", now_ms=17)
+    asyncio.run(run())
+    '''
+        child = await asyncio.create_subprocess_exec(sys.executable, "-c", script, crash_phase, controls.store.path,
+                                                     stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+        stdout, stderr = await asyncio.wait_for(child.communicate(), timeout=10)
+>       assert child.returncode == (73 if crash_phase == "before-final-write" else 74), (stdout, stderr)
+E       AssertionError: (b'', b'Traceback (most recent call last):
+E           File "<string>", line 4, in <module>
+E         ModuleNotFoundError: No module named \'van_gateway\'
+E         ')
+E       assert 1 == 74
+E        +  where 1 = <Process 275019>.returncode
+
+backend/tests/test_mission_execution_control.py:252: AssertionError
+=============================== warnings summary ===============================
+backend/tests/test_session_socket_binding.py:12
+  /workspace/van-review-2026-10-18/publish/backend/tests/test_session_socket_binding.py:12: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient
+
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/starlette/testclient.py:53
+  /workspace/van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+tests/test_command_success_contract.py::TestASourceMutationIsVerifiedAgainstTheSources::test_no_source_action_is_certified_by_the_notebook_existing
+  tests/test_command_success_contract.py:427: PytestWarning: The test <Function test_no_source_action_is_certified_by_the_notebook_existing> is marked with '@pytest.mark.asyncio' but it is not an async function. Please remove the asyncio mark. If the test is not marked explicitly, check for global marks applied via 'pytestmark'.
+    def test_no_source_action_is_certified_by_the_notebook_existing(self):
+
+tests/test_command_success_contract.py::TestASourceMutationIsVerifiedAgainstTheSources::test_a_source_action_naming_nothing_gets_no_contract
+  tests/test_command_success_contract.py:451: PytestWarning: The test <Function test_a_source_action_naming_nothing_gets_no_contract> is marked with '@pytest.mark.asyncio' but it is not an async function. Please remove the asyncio mark. If the test is not marked explicitly, check for global marks applied via 'pytestmark'.
+    def test_a_source_action_naming_nothing_gets_no_contract(self):
+
+tests/test_owner_memory_has_a_producer.py::TestStandingGoalsComeFromMissions::test_the_horizon_never_falls_whatever_the_inputs
+  tests/test_owner_memory_has_a_producer.py:193: PytestWarning: The test <Function test_the_horizon_never_falls_whatever_the_inputs> is marked with '@pytest.mark.asyncio' but it is not an async function. Please remove the asyncio mark. If the test is not marked explicitly, check for global marks applied via 'pytestmark'.
+    def test_the_horizon_never_falls_whatever_the_inputs(self, store):
+
+tests/test_owner_memory_has_a_producer.py::TestStandingGoalsComeFromMissions::test_a_promotion_always_records_why
+  tests/test_owner_memory_has_a_producer.py:228: PytestWarning: The test <Function test_a_promotion_always_records_why> is marked with '@pytest.mark.asyncio' but it is not an async function. Please remove the asyncio mark. If the test is not marked explicitly, check for global marks applied via 'pytestmark'.
+    def test_a_promotion_always_records_why(self, store):
+
+tests/test_verification_is_performed.py::TestUnwiredCapabilitiesFailHonestly::test_each_unobservable_strategy_has_an_adapter_waiting_for_its_source
+  tests/test_verification_is_performed.py:254: PytestWarning: The test <Function test_each_unobservable_strategy_has_an_adapter_waiting_for_its_source> is marked with '@pytest.mark.asyncio' but it is not an async function. Please remove the asyncio mark. If the test is not marked explicitly, check for global marks applied via 'pytestmark'.
+    def test_each_unobservable_strategy_has_an_adapter_waiting_for_its_source(self):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED backend/tests/test_mission_execution_control.py::test_real_process_crash_before_or_after_commit_has_one_recoverable_outcome[before-final-write]
+FAILED backend/tests/test_mission_execution_control.py::test_real_process_crash_before_or_after_commit_has_one_recoverable_outcome[after-commit]
+2 failed, 4963 passed, 159 skipped, 7 warnings in 1068.93s (0:17:48)

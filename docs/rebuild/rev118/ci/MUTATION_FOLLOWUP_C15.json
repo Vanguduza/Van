@@ -1,0 +1,33 @@
+{
+  "schema": "van.rebuild.mutation-reconciliation/1",
+  "part": "python",
+  "reference": "e56a38c8d5b51b7c64d3d4ac04e2d8a59f6c9b36",
+  "preserved_case_count": 374,
+  "selected_case_count": 1,
+  "registry_sha256": "c247672b5d3e2a26495c7a015bfc019467c41ba40c658a84dd46d0efb08d3e23",
+  "results": [
+    {
+      "kind": "baseline",
+      "mutation": null,
+      "exit": 0,
+      "verdict": "PASS",
+      "log_sha256": "946f8bffb01990937fae964d67b8af574bf50776c209aa5adeb3c372c8578338",
+      "failed_oracles": [],
+      "summary": ".............                                                            [100%]\n13 passed in 34.19s\n"
+    },
+    {
+      "kind": "mutation",
+      "mutation": "C15 stop reporting test-only symbols",
+      "exit": 1,
+      "verdict": "ASSERTION_DETECTED",
+      "log_sha256": "cf5dfb5010ad1ebb3066cd17986db34a99e17ef7b11656792521a1aaefb95326",
+      "failed_oracles": [
+        "FAILED tests/contracts/test_kotlin_reachability.py::test_fixture_graph_distinguishes_test_only_from_live_and_unreferenced"
+      ],
+      "summary": "re_graph_distinguishes_test_only_from_live_and_unreferenced(tmp_path, monkeypatch):\n        scanner = _scanner()\n        app = tmp_path / \"app\"\n        tests = tmp_path / \"tests\"\n        app.mkdir()\n        tests.mkdir()\n        (app / \"EntryPoint.kt\").write_text(\"class EntryPoint { val live = Alive() }\\n\")\n        (app / \"Alive.kt\").write_text(\"class Alive\\n\")\n        (app / \"OnlyTests.kt\").write_text(\"class OnlyTests\\n\")\n        (app / \"Unused.kt\").write_text(\"class Unused\\n\")\n        (tests / \"OwnerTest.kt\").write_text(\"fun usesIt() = OnlyTests()\\n\")\n        manifest = tmp_path / \"AndroidManifest.xml\"\n        manifest.write_text('<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\"><application android:name=\".EntryPoint\" /></manifest>')\n        for name, value in {\"ROOT\": tmp_path, \"APP\": app, \"APP_TESTS\": tests,\n                            \"HARNESS_TESTS\": tmp_path / \"no-harness\", \"MANIFEST\": manifest}.items():\n            monkeypatch.setattr(scanner, name, value)\n        report = scanner.scan()\n>       assert report[\"test_only\"] == [(\"app/OnlyTests.kt\", [\"OwnerTest.kt\"])]\nE       AssertionError: assert [] == [('app/OnlyTe...nerTest.kt'])]\nE         \nE         Right contains one more item: ('app/OnlyTests.kt', ['OwnerTest.kt'])\nE         Use -v to get more diff\n\ntests/contracts/test_kotlin_reachability.py:258: AssertionError\n=========================== short test summary info ============================\nFAILED tests/contracts/test_kotlin_reachability.py::test_fixture_graph_distinguishes_test_only_from_live_and_unreferenced\n1 failed, 12 passed in 34.03s\n"
+    }
+  ],
+  "status": "PASS",
+  "duration_seconds": 68.863,
+  "source_state": "UNCOMMITTED_CORRECTION_AFTER_fca473cc"
+}

@@ -1,0 +1,34 @@
+{
+  "schema": "van.rebuild.mutation-reconciliation/1",
+  "part": "python",
+  "reference": "e56a38c8d5b51b7c64d3d4ac04e2d8a59f6c9b36",
+  "preserved_case_count": 374,
+  "selected_case_count": 1,
+  "registry_sha256": "c247672b5d3e2a26495c7a015bfc019467c41ba40c658a84dd46d0efb08d3e23",
+  "results": [
+    {
+      "kind": "baseline",
+      "mutation": null,
+      "exit": 0,
+      "verdict": "PASS",
+      "log_sha256": "50206e8a73042de2cab3338d366d59476b79e2081303663aac15181e58a310d8",
+      "failed_oracles": [],
+      "summary": "..........................                                               [100%]\n26 passed in 2.48s\n"
+    },
+    {
+      "kind": "mutation",
+      "mutation": "C11 open a second mission for a command that already has one",
+      "exit": 1,
+      "verdict": "ASSERTION_DETECTED",
+      "log_sha256": "a2868052f0e9f0f4ae7282c6ee33a9f3dbdcece66bcdbdeebecb8469e2945445",
+      "failed_oracles": [
+        "FAILED tests/test_recovery_matrix.py::TestCellRestartAfterDispatchBeforeReceipt::test_the_retry_gets_the_mission_already_open",
+        "FAILED tests/test_recovery_matrix.py::TestCellRestartAfterDispatchBeforeReceipt::test_retaking_a_claim_does_not_open_a_second_mission"
+      ],
+      "summary": "       that to be safe.\n        \"\"\"\n        idempotency = IdempotencyService(store)\n        service = MissionService(store)\n        link = CommandMissionLink(service)\n        request = CommandRequest(\n            command_id=\"cmd-43\", idempotency_key=\"k2\", device_id=\"d\",\n            issued_at_unix=1, signature=\"s\", text=\"halt trading\",\n            principal_type=PrincipalType.OWNER_DEVICE,\n            origin_channel=OriginChannel.VOICE, action_class=ActionClass.A4,\n        )\n        await idempotency.begin(\"k2\", PAYLOAD)\n        first = await link.open(\n            request, effective_action_class=ActionClass.A4, owner_approved=True,\n        )\n        # crash here\n        await _age_claim(store, \"k2\", STALE_CLAIM_SECONDS + 1)\n        assert await idempotency.begin(\"k2\", PAYLOAD) is None\n        second = await link.open(\n            request, effective_action_class=ActionClass.A4, owner_approved=True,\n        )\n>       assert second.mission_id == first.mission_id\nE       AssertionError: assert 'msn_95ab0a85...26ea069e74d1f' == 'msn_3152192f...f6eb7091f2233'\nE         \nE         - msn_3152192f873746a1a23f6eb7091f2233\nE         + msn_95ab0a852826496687626ea069e74d1f\n\ntests/test_recovery_matrix.py:190: AssertionError\n=========================== short test summary info ============================\nFAILED tests/test_recovery_matrix.py::TestCellRestartAfterDispatchBeforeReceipt::test_the_retry_gets_the_mission_already_open\nFAILED tests/test_recovery_matrix.py::TestCellRestartAfterDispatchBeforeReceipt::test_retaking_a_claim_does_not_open_a_second_mission\n2 failed, 24 passed in 2.48s\n"
+    }
+  ],
+  "status": "PASS",
+  "duration_seconds": 5.622,
+  "source_state": "UNCOMMITTED_CORRECTION_AFTER_fca473cc"
+}

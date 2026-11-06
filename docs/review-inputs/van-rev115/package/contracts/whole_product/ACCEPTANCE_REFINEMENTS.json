@@ -1,0 +1,79 @@
+{
+  "action_contract_source": "contracts/whole_product/ACTION_CONTRACTS.json",
+  "base_registry": "verification/TEST_CONTRACTS.json",
+  "domain_scenarios_source": "contracts/whole_product/DOMAIN_SCENARIOS.json",
+  "effective_registry": "verification/EFFECTIVE_TEST_CONTRACTS_REV118.json",
+  "owner_additions": {
+    "T-FEATURE-CHART-03": [
+      "FE-007"
+    ],
+    "T-FEATURE-CHART-04": [
+      "FE-007"
+    ],
+    "T-FEATURE-CHART-11": [
+      "FE-007"
+    ],
+    "T-FEATURE-CHART-12": [
+      "FE-007"
+    ],
+    "T-FEATURE-CHART-13": [
+      "FE-007"
+    ],
+    "T-FEATURE-HOME-01": [
+      "FE-004"
+    ],
+    "T-FEATURE-HOME-06": [
+      "FE-003"
+    ],
+    "T-FEATURE-HOME-07": [
+      "FE-004"
+    ],
+    "T-FEATURE-INTEL-08": [
+      "FE-014"
+    ],
+    "T-FEATURE-INTEL-09": [
+      "FE-014"
+    ],
+    "T-FEATURE-MORE-03": [
+      "FE-020"
+    ],
+    "T-FEATURE-ORDERS-05": [
+      "FE-009"
+    ],
+    "T-FEATURE-ORDERS-09": [
+      "FE-011"
+    ],
+    "T-FEATURE-ORDERS-10": [
+      "FE-011"
+    ],
+    "T-FEATURE-PRESENCE-03": [
+      "FE-021"
+    ],
+    "T-FEATURE-TRADE-02": [
+      "FE-006"
+    ],
+    "T-FEATURE-TRADE-05": [
+      "FE-006"
+    ],
+    "T-FEATURE-TRADE-06": [
+      "FE-006"
+    ],
+    "T-FEATURE-TRADE-07": [
+      "FE-006"
+    ],
+    "T-FEATURE-TRADE-08": [
+      "FE-006"
+    ],
+    "T-FEATURE-WORK-08": [
+      "FE-018"
+    ],
+    "T-FEATURE-WORK-09": [
+      "FE-015"
+    ],
+    "T-SURFACE-106": [
+      "FE-021"
+    ]
+  },
+  "revision": "1.18",
+  "rule": "Mandatory additive assertions and accountable owners; no original assertion/owner removed. All results NOT_RUN."
+}

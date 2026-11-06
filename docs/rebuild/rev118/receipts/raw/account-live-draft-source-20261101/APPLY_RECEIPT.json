@@ -1,0 +1,16 @@
+{
+  "actual_base": "6a0196a951dfb62413f76d3d91ceb855b16f6030",
+  "reviewed_base": "b15b160a3c4f42b35808704f44f6e178342e2149",
+  "remote": "6a0196a951dfb62413f76d3d91ceb855b16f6030",
+  "preimages_equal": true,
+  "source_pins": {
+    "backend/van_gateway/trading/account_application_drafts.py": "4ba0fd716762156346180fa327b7373bad4a470cddb12e2946355efa15ae5ccd",
+    "backend/tests/test_account_application_drafts.py": "a9a01817ddab26970e8f8eed54249e213091e28209a503b2549acc5bfdd06ff2",
+    "backend/van_gateway/app.py": "5dd80495c8a2627bfa2ddc7cf3477b3f5e129a0113e18b2370a23e99e0438140",
+    "backend/van_gateway/context/forget.py": "6fed25f2f105938d6e5be3ebbd98f3ac1bb8b36aee3fbf1b1dc19cbeb87a2625"
+  },
+  "patch_sha256": "abd9a35fb1ccfcda7b295e3d742331472feffcf238bf0c5f40caa306672bbb26",
+  "zip_sha256": "05ad969943cc3d21a4b21b6ae47cb253162c66107cfd1e2543a42197b0093695",
+  "only4_applied": true,
+  "at": "2026-11-01T23:22:06.316482+00:00"
+}

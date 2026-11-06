@@ -1,0 +1,27 @@
+{
+  "head": "156473fcaf28c5407fc558d04de09c3643e34a9c",
+  "run": 40272681203,
+  "terminal_main_result": "FAILURE_17PUBLIC_PASS_2MANDATORY_PREREQUISITES_UNWAIVED",
+  "artifact_id": 12630038001,
+  "artifact_bytes": 155165,
+  "artifact_sha256": "a2cab2f1a034b3531ebca2e7997d56cde0a5973bbb0de4fee95231ce23f41c88",
+  "junit": [
+    {
+      "path": "media-report.xml",
+      "tests": 198,
+      "failed": 0,
+      "errors": 0,
+      "skips": 0,
+      "passed": 198
+    },
+    {
+      "path": "gateway-report.xml",
+      "tests": 5782,
+      "failed": 0,
+      "errors": 0,
+      "skips": 7,
+      "passed": 5775
+    }
+  ],
+  "later_a660_not_qualified": true
+}

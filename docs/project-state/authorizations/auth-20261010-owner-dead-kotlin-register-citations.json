@@ -1,0 +1,45 @@
+{
+ "schema_version": 1,
+ "authorization_id": "auth-20261010-owner-dead-kotlin-register-citations",
+ "project": "van",
+ "authority": "OWNER_EXPLICIT",
+ "owner_instruction_sha256": "899e14562c0ecf43a67d78906d98f48a44be2a507da6cdc6bd5a75a38382bcde",
+ "owner_instruction_excerpt": "I allow you to make dependency downloads in this session so that you deal with the dead kotlin code.",
+ "source": {
+  "kind": "owner_session_instruction",
+  "channel": "claude_code",
+  "request_id": "claude-code-20261010-van-dead-kotlin-register",
+  "owner_attested": true,
+  "device_signature_claimed": false,
+  "cryptographic_signature_claimed": false,
+  "signed_ingress_claimed": false
+ },
+ "issued_at_utc": "2026-10-10T04:00:00Z",
+ "base_sha": "a2bc979523695ddeffb13960a49911e9e8a3b104",
+ "branch_scope": "ccr-71397b02-lm6fid",
+ "commit_scope": {
+  "commits": [
+   "1a59cab6d004b385812b8fcce40cafbc9cc2e4a5"
+  ]
+ },
+ "authorized_paths": [
+  "evidence/van-system-audit/findings.json"
+ ],
+ "change_classes": [
+  "audit_register_citation_reconciliation"
+ ],
+ "material_scope_expansion": false,
+ "feature_removal": false,
+ "business_model_change": false,
+ "security_authority_change": false,
+ "owner_control_boundary_change": false,
+ "legal_position_change": false,
+ "money_or_custody_model_change": false,
+ "locked_provider_change": false,
+ "reusable": false,
+ "revoked": false,
+ "limitations": [
+  "Necessary consequence of removing the dead strand engine: two closures cited the deleted file",
+  "No finding state or residual class is changed"
+ ]
+}

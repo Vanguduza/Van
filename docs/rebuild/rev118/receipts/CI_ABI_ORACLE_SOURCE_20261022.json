@@ -1,0 +1,28 @@
+{
+  "schema": "van.rebuild.instrumentation-abi-oracle-source/1",
+  "source_parent": "9e05f6028a75adb5bc9fcf9cdb395d5f076f6cfc",
+  "source_sha256": {
+    "tests/contracts/test_android_instrumentation_abi.py": "ace18dcee0f956363f6dc8db77671ad4fc4735094942fa98825181806565aa2d"
+  },
+  "passed": 20,
+  "skipped": 0,
+  "positive_command_shapes": [
+    "direct Gradle",
+    "literal bash -c diagnostics wrapper"
+  ],
+  "rejected_cases": [
+    "missing override",
+    "wrong override",
+    "conflicting last override",
+    "commented invocation",
+    "echoed invocation",
+    "echoed invocation inside shell wrapper"
+  ],
+  "actual_agp_release_guard": "EXECUTED_PRODUCTION_PROFILE_REFUSAL_PASSED",
+  "source_workflow_changed": false,
+  "application_or_release_gates_weakened": false,
+  "logs_sha256": {
+    "/tmp/van-abi-wrapped-contract.txt": "138ab427fec7f839d7bcc28f315b8030c61d2a0bcdfb3f32a812cb8d4cb7c91e",
+    "/tmp/van-abi-wrapped-contract.xml": "2ae2caacb3d70aad49f1f1854b9ee92edca03ab73601ef6a92415ce826339c86"
+  }
+}

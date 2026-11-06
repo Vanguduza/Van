@@ -1,0 +1,14 @@
+{
+  "trading/vati/core/ledger_pg.py": {
+    "before_sha256": "9a9db1ffd9cafdca3a16a964fd93287788701282cd31ec0b763007c930f4efc8",
+    "after_sha256": "81be80c128890718e34c99f4e98dd0b09df614f602986deaa482476195375707"
+  },
+  "trading/vati/execution/recovery_scope.py": {
+    "before_sha256": "34631a62e3cae4af24e1014e58fdbd2646d13c53124be45757cc5c9c9ac84825",
+    "after_sha256": "16b722a2e2397ef75e890508ab1ee01988d83e5e9fa27f4a18254ef904c159fe"
+  },
+  "trading/tests/test_family_committed_recovery_postgres.py": {
+    "before_sha256": null,
+    "after_sha256": "40acad3cfafd3a097b93a7ea2dff81825bcf66dfd5cfe0ee663c2c4c8612d339"
+  }
+}

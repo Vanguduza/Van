@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "repository": "Vanguduza/Van",
+  "branch": "consolidation/opus-clean-rev118-20261021",
+  "status": "CONSOLIDATED_SOURCE_CANDIDATE",
+  "default_branch_changed": false,
+  "production_deployed": false,
+  "release_qualified": false,
+  "branch_snapshot_count": 70,
+  "branch_evaluation": "docs/consolidation/BRANCH_EVALUATION.json",
+  "blueprint": {
+    "revision": "1.18",
+    "delivery_commit": "3c3379bd791f7bda7ab66c21bba550d6077ba853",
+    "package": "docs/review-inputs/van-rev115/package",
+    "master": "docs/review-inputs/van-rev115/package/VAN_NEXT_UNIFIED_REBUILD_BLUEPRINT_REV1_18_20261021.md",
+    "effective_tests": "docs/review-inputs/van-rev115/package/verification/EFFECTIVE_TEST_CONTRACTS_REV118.json",
+    "archive": "docs/review-inputs/van-rev115/VAN_NEXT_WHOLE_PRODUCT_BLUEPRINT_PACK_REV1_18_20261021.zip",
+    "archive_sha256": "6c7c7c1cb4fbd4748c0d63ceb2add9bd460778b66fb3b2302e16de09ac3a57a8",
+    "package_tree": "ac0226a22a95f51642cfeb37b3709b40f7cacf10"
+  },
+  "source_inputs": {
+    "ccr-71397b02-lm6fid": "bdd63a40174d36ccdd0ceb8f3fb258c612df8bbe",
+    "ccr-8f1201e9-w1xm0r": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+    "feature/rea-trading-accounts-tactile-20261015": "3b2c9e04df8736f0fbbccd16fcd3905cf1dbe240",
+    "review/van-rev115-20261018": "3c3379bd791f7bda7ab66c21bba550d6077ba853"
+  },
+  "native_dependency": {
+    "repository": "Vanguduza/dial-development-system",
+    "commit": "64d6b7158c723b7700e5b53175ea8048d4e92d00",
+    "scope": "pinned source contract tests; not current deployment attestation"
+  },
+  "application_source_roots": [
+    "android",
+    "backend",
+    "trading",
+    "services",
+    "hermes"
+  ],
+  "historical_evidence_roots": [
+    "docs/audit",
+    "docs/review-inputs/van-rev115/package/evidence",
+    "evidence",
+    "artifacts"
+  ],
+  "build_scope_counts": {
+    "requirements": 324,
+    "acceptance_identities": 1610,
+    "contexts": 234,
+    "owner_actions": 349,
+    "development_units": 131
+  },
+  "release_state": "Keep 0.5.0-dev and all required external/independent gates. This source candidate issues none."
+}

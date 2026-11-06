@@ -1,0 +1,18 @@
+........F
+=================================== FAILURES ===================================
+_ test_financial_or_other_event_kinds_are_not_a_candidate_metadata_store[sqlite] _
+
+publication = (<vati.core.ledger.Ledger object at 0x7f3a7c138f80>, <vati.research.dataset_archive.DatasetCandidateArchive object at ...tive_account_id":123,"schema":"vati.ctrader-symbol/1","transport_host":"demo.ctraderapi.com"}', received_at_ms=100000))
+
+    def test_financial_or_other_event_kinds_are_not_a_candidate_metadata_store(publication):
+        ledger,archive,record,c=publication
+>       ledger.append(make_event(EventKind.DECISION,'test-unrelated',{'preserve':True},
+                                 ^^^^^^^^^^^^^^^^^^
+            event_time_ms=1,received_time_ms=1,correlation_id='unrelated'))
+E       AttributeError: type object 'EventKind' has no attribute 'DECISION'. Did you mean: 'SESSION'?
+
+trading/worker_tests/test_dataset_candidate_archive.py:84: AttributeError
+=========================== short test summary info ============================
+FAILED trading/worker_tests/test_dataset_candidate_archive.py::test_financial_or_other_event_kinds_are_not_a_candidate_metadata_store[sqlite]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 8 passed in 2.84s

@@ -1,0 +1,26 @@
+[
+  {
+    "file": "android/app/src/main/java/com/dial/van/command/nav/VanRoute.kt",
+    "old_line": 176,
+    "pattern_hint": null,
+    "reason": "Changed source requires a reviewed unique anchor"
+  },
+  {
+    "file": "android/app/src/main/java/com/dial/van/command/modules/BrowserModules.kt",
+    "old_line": 283,
+    "pattern_hint": null,
+    "reason": "Changed source requires a reviewed unique anchor"
+  },
+  {
+    "file": "android/buildSrc/src/main/java/com/dial/van/buildconfig/VanProductionTarget.java",
+    "old_line": 17,
+    "pattern_hint": null,
+    "reason": "Changed source requires a reviewed unique anchor"
+  },
+  {
+    "file": "android/app/src/main/java/com/dial/van/command/settings/SettingsRoute.kt",
+    "old_line": 109,
+    "pattern_hint": null,
+    "reason": "Changed source requires a reviewed unique anchor"
+  }
+]

@@ -1,0 +1,48 @@
+{
+  "schema": "van.supplemental-source-faults/1",
+  "original_sha256": "a766d3bea5d58e2deb6314500857b42b1d29e2e74d0b9bab562afb73a8c2d4ca",
+  "source_restored": true,
+  "cases": [
+    {
+      "case": "duplicate-cold-headline",
+      "exit": 1,
+      "mutated_sha256": "c6e0e5c8db1d16915564face77f6812c4b87c3bc8e05204b63899e336e02c06e"
+    },
+    {
+      "case": "recreate-missing-headline",
+      "exit": 1,
+      "mutated_sha256": "f299a1627e628a85cc40769a8f9783145b3b385a016b5348b733021804016f48"
+    },
+    {
+      "case": "recreate-missing-observation",
+      "exit": 1,
+      "mutated_sha256": "a556731acf3a97e845580c8b7e3a79d7b74c412850e7f93fbb9f547ee089ac6e"
+    },
+    {
+      "case": "replace-original-observation-clock",
+      "exit": 1,
+      "mutated_sha256": "2295544163b6685a0ba4b05c1211810084726e7d915d9432f26768d923ed2026"
+    },
+    {
+      "case": "ignore-recovery-chain",
+      "exit": 1,
+      "mutated_sha256": "887be008fe6eb34ac16c6604666819be92e901326703952ce2ea4fcb3f9316f9"
+    },
+    {
+      "case": "ignore-recovery-capacity",
+      "exit": 1,
+      "mutated_sha256": "1fab3b352d5a70fa30d9ff8755d5a755f7c9c928b1e69c0c4ca3ee4148046e58"
+    },
+    {
+      "case": "duplicate-original-impact",
+      "exit": 1,
+      "mutated_sha256": "fe71500dfcda1c9accedc538a582bdcb4a00e57a87125a67e914309f921c3390"
+    },
+    {
+      "case": "collapse-changed-evidence",
+      "exit": 1,
+      "mutated_sha256": "76f57cd44dc2500b35a11a5cd05b66a29dbaac761bbfb4d6748159813d4f862a"
+    }
+  ],
+  "not_canonical_corpus": true
+}

@@ -1,0 +1,87 @@
+{
+  "source_head": "e690d5300c2cc2cdba82beb2f71eabe6eaf30846",
+  "tested_merge": "94492588349cc2132053edfd4ce785295183a00f",
+  "run_id": 40315532625,
+  "status": "TERMINAL_FAILURE_WITH_TRADING_JOB_TIMEOUT",
+  "public_jobs_success": 16,
+  "mandatory_unwaived_failures": [
+    "missing private DDS deploy key",
+    "absent trusted-main checker"
+  ],
+  "incomplete_jobs": [
+    {
+      "id": 121547071007,
+      "name": "postgres-ledger",
+      "conclusion": "cancelled",
+      "annotation": "The job has exceeded the maximum execution time of 35m0s",
+      "full_trading_qualification": "NOT_COMPLETED",
+      "voice_selection": "NOT_EXECUTED",
+      "postgres_stage": "step metadataSUCCESS;original report unavailable"
+    }
+  ],
+  "junit": {
+    "van-market-monitor-source/report.xml": {
+      "passed": 258,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-browser-guard-source/uid-report.xml": {
+      "passed": 1,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-browser-guard-source/full-report.xml": {
+      "passed": 1547,
+      "skips": 1,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-browser-guard-source/report.xml": {
+      "passed": 11,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-browser-guard-source/firewall-report.xml": {
+      "passed": 10,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-actual-release-guards/report.xml": {
+      "passed": 2,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-backend-public-source/media-report.xml": {
+      "passed": 198,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-backend-public-source/gateway-report.xml": {
+      "passed": 5775,
+      "skips": 7,
+      "failures": 0,
+      "errors": 0
+    }
+  },
+  "android_emulator": {
+    "tests": 22,
+    "failures": 0,
+    "skipped": 4,
+    "passed": 18
+  },
+  "canonical_mutations": {
+    "actual_reports": 9,
+    "caught_exactly_once": 374,
+    "edits": 383,
+    "survivors": 0,
+    "unexecuted": 0
+  },
+  "actual_verified_archives": 14,
+  "native_or_unit_acceptance": false
+}

@@ -1,0 +1,144 @@
+[
+  {
+    "source_id": "VAN-A01",
+    "capability": "Executable economics and sellability",
+    "disposition": "EXTEND_EXISTING",
+    "forecast_packet_ids": [
+      "VAN-ML-PKT-009",
+      "VAN-ML-PKT-010",
+      "VAN-ML-PKT-007",
+      "VAN-ML-PKT-044"
+    ],
+    "umbrella_mapping": "BE-010 / BE-035",
+    "required_action": "Keep evaluator repairs and account replay; add route-specific DEX buy/sell simulation, impact, gas/tax and failure facts. Do not build another cost authority.",
+    "adoption_state": "REVIEW_RECOMMENDATION_NOT_ADOPTED"
+  },
+  {
+    "source_id": "VAN-A02",
+    "capability": "Quant research and calibrated models",
+    "disposition": "ALREADY_PLANNED_EXTEND_TARGETS",
+    "forecast_packet_ids": [
+      "VAN-ML-PKT-011",
+      "VAN-ML-PKT-012",
+      "VAN-ML-PKT-013",
+      "VAN-ML-PKT-014",
+      "VAN-ML-PKT-015",
+      "VAN-ML-PKT-016",
+      "VAN-ML-PKT-017",
+      "VAN-ML-PKT-018",
+      "VAN-ML-PKT-019",
+      "VAN-ML-PKT-020",
+      "VAN-ML-PKT-021",
+      "VAN-ML-PKT-022",
+      "VAN-ML-PKT-023",
+      "VAN-ML-PKT-024",
+      "VAN-ML-PKT-025"
+    ],
+    "umbrella_mapping": "Forecast packets retained in Rev1.11",
+    "required_action": "Retain the complete forecast engineering scope; add properly typed crypto safety/execution targets where justified. Qlib recording must use the one experiment owner.",
+    "adoption_state": "REVIEW_RECOMMENDATION_NOT_ADOPTED"
+  },
+  {
+    "source_id": "VAN-A03",
+    "capability": "Matched-opportunity incremental evaluation",
+    "disposition": "EXTEND_EXISTING_WITH_EXPLICIT_COHORT_CONTRACT",
+    "forecast_packet_ids": [
+      "VAN-ML-PKT-005",
+      "VAN-ML-PKT-007",
+      "VAN-ML-PKT-008",
+      "VAN-ML-PKT-010",
+      "VAN-ML-PKT-027",
+      "VAN-ML-PKT-030",
+      "VAN-ML-PKT-031",
+      "VAN-ML-PKT-047"
+    ],
+    "umbrella_mapping": "BE-035 / BE-036",
+    "required_action": "Add all-discovered/rejected token cohorts and altered-entry/exit policy replay; preserve size-only shadow attribution rather than repurposing it.",
+    "adoption_state": "REVIEW_RECOMMENDATION_NOT_ADOPTED"
+  },
+  {
+    "source_id": "VAN-A04",
+    "capability": "Read-only crypto discovery and rejection funnel",
+    "disposition": "NET_NEW_DOMAIN_ADOPTION_PROPOSED",
+    "forecast_packet_ids": [
+      "VAN-ML-PKT-005",
+      "VAN-ML-PKT-006",
+      "VAN-ML-PKT-007",
+      "VAN-ML-PKT-027",
+      "VAN-ML-PKT-028",
+      "VAN-ML-PKT-029"
+    ],
+    "umbrella_mapping": "New admitted backend delta; exact generated IDs not assigned",
+    "required_action": "Reuse bounded acquisition/job/evidence infrastructure; implement chain/token/pool identity, cheap-to-expensive screens, reason-specific rechecks and surviving/rejected cohort retention.",
+    "adoption_state": "REVIEW_RECOMMENDATION_NOT_ADOPTED"
+  },
+  {
+    "source_id": "VAN-A05",
+    "capability": "Chain security and temporal wallet intelligence",
+    "disposition": "NET_NEW_DOMAIN_ADOPTION_PROPOSED",
+    "forecast_packet_ids": [
+      "VAN-ML-PKT-005",
+      "VAN-ML-PKT-006",
+      "VAN-ML-PKT-007",
+      "VAN-ML-PKT-020",
+      "VAN-ML-PKT-027",
+      "VAN-ML-PKT-030"
+    ],
+    "umbrella_mapping": "New admitted backend delta; exact generated IDs not assigned",
+    "required_action": "Implement chain-specific facts, attribution uncertainty, technical-account exclusions, temporal changes, sellability and finality/reorganization invalidation. No custody or signing.",
+    "adoption_state": "REVIEW_RECOMMENDATION_NOT_ADOPTED"
+  },
+  {
+    "source_id": "VAN-A06",
+    "capability": "Typed model-agnostic judgments / Jev",
+    "disposition": "REUSE_BRANCH_IMPLEMENTATION_EXTEND_REGISTERED_QUESTIONS",
+    "forecast_packet_ids": [
+      "VAN-ML-PKT-020",
+      "VAN-ML-PKT-022",
+      "VAN-ML-PKT-024",
+      "VAN-ML-PKT-025",
+      "VAN-ML-PKT-027",
+      "VAN-ML-PKT-030",
+      "VAN-ML-PKT-031"
+    ],
+    "umbrella_mapping": "Existing Jev/cognitive owners plus BE-001 reconciliation",
+    "required_action": "Reuse shared dial-jev consumers and evidence resolvers; add domain questions and comparable evaluation. Existing Jev plumbing is not proof of financial predictive skill.",
+    "adoption_state": "REVIEW_RECOMMENDATION_NOT_ADOPTED"
+  },
+  {
+    "source_id": "VAN-A07",
+    "capability": "Prediction-market context",
+    "disposition": "SUBSET_OF_EXISTING_MANDATORY_SCOPE",
+    "forecast_packet_ids": [
+      "VAN-ML-PKT-037",
+      "VAN-ML-PKT-038",
+      "VAN-ML-PKT-039",
+      "VAN-ML-PKT-040",
+      "VAN-ML-PKT-041",
+      "VAN-ML-PKT-042",
+      "VAN-ML-PKT-043",
+      "VAN-ML-PKT-044",
+      "VAN-ML-PKT-045",
+      "VAN-ML-PKT-046",
+      "VAN-ML-PKT-047",
+      "VAN-ML-PKT-048"
+    ],
+    "umbrella_mapping": "Forecast prediction-market packets retained in Rev1.11",
+    "required_action": "Keep all read-only providers, semantics, calibration, conditional asset response, event valuation and execution/arbitrage/market-making laboratories. Do not reduce to an optional public-feed experiment.",
+    "adoption_state": "REVIEW_RECOMMENDATION_NOT_ADOPTED"
+  },
+  {
+    "source_id": "VAN-A08",
+    "capability": "Agent responsibilities and owner funnel",
+    "disposition": "REUSE_OWNERS_EXTEND_POST_BG_PROJECTIONS",
+    "forecast_packet_ids": [
+      "VAN-ML-PKT-028",
+      "VAN-ML-PKT-029",
+      "VAN-ML-PKT-034",
+      "VAN-ML-PKT-048"
+    ],
+    "umbrella_mapping": "Existing BE/API duties then BG-001 then FE",
+    "required_action": "Reuse Hermes, deterministic risk/router and native owner controls. Build headless contracts before BG; implement candidate-funnel UI only after global BG-001.",
+    "adoption_state": "REVIEW_RECOMMENDATION_NOT_ADOPTED"
+  }
+]

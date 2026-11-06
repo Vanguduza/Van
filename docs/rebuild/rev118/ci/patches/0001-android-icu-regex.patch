@@ -1,0 +1,26 @@
+diff --git a/android/app/src/main/java/com/dial/van/command/nav/VanRoute.kt b/android/app/src/main/java/com/dial/van/command/nav/VanRoute.kt
+index a3b2076d..e71e0a9c 100644
+--- a/android/app/src/main/java/com/dial/van/command/nav/VanRoute.kt
++++ b/android/app/src/main/java/com/dial/van/command/nav/VanRoute.kt
+@@ -194,7 +194,7 @@ object VanRoute {
+     /** Persist the admitted destination's actual arguments, never its unresolved template. */
+     fun concreteRoute(template: String, arguments: Map<String, String?>): String? {
+         if (template !in ALL_TEMPLATES) return null
+-        val placeholder = Regex("\\{(\\w+)}")
++        val placeholder = Regex("\\{(\\w+)\\}")
+         var missingPathArgument = false
+         val path = placeholder.replace(template.substringBefore('?')) { match ->
+             val value = arguments[match.groupValues[1]]?.takeIf { it.isNotBlank() }
+diff --git a/android/app/src/main/java/com/dial/van/command/owner/OwnerServicePresentation.kt b/android/app/src/main/java/com/dial/van/command/owner/OwnerServicePresentation.kt
+index cce15b57..0253ca91 100644
+--- a/android/app/src/main/java/com/dial/van/command/owner/OwnerServicePresentation.kt
++++ b/android/app/src/main/java/com/dial/van/command/owner/OwnerServicePresentation.kt
+@@ -40,7 +40,7 @@ object OwnerServicePresentation {
+             if (value.isBlank() || '\n' in value || '\r' in value) return null
+             command = command.replace("{$field}", value)
+         }
+-        return command.takeIf { !Regex("\\{[a-z_]+}").containsMatchIn(it) }
++        return command.takeIf { !Regex("\\{[a-z_]+\\}").containsMatchIn(it) }
+     }
+ 
+     fun unavailable(code: String): String = when (code) {

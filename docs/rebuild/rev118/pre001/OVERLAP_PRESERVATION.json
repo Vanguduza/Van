@@ -1,0 +1,518 @@
+{
+ "rows": [
+  {
+   "changed_by_inputs": [
+    "accounts_3b2c9e04",
+    "base_bdd63a40"
+   ],
+   "head_present": true,
+   "id": "OVL:android/app/src/main/java/com/dial/van/browser/BrowserActivity.kt:main",
+   "input": "main",
+   "missing_symbols": [
+    "describe",
+    "onDocumentChosen"
+   ],
+   "path": "android/app/src/main/java/com/dial/van/browser/BrowserActivity.kt"
+  },
+  {
+   "changed_by_inputs": [
+    "accounts_3b2c9e04",
+    "base_bdd63a40"
+   ],
+   "head_present": true,
+   "id": "OVL:android/app/src/main/java/com/dial/van/browser/BrowserSessionController.kt:main",
+   "input": "main",
+   "missing_symbols": [
+    "acknowledgeViewport",
+    "beginUpload"
+   ],
+   "path": "android/app/src/main/java/com/dial/van/browser/BrowserSessionController.kt"
+  },
+  {
+   "changed_by_inputs": [
+    "accounts_3b2c9e04",
+    "base_bdd63a40"
+   ],
+   "head_present": true,
+   "id": "OVL:android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt:main",
+   "input": "main",
+   "missing_symbols": [
+    "CommandBottomBar",
+    "CommandSideRail",
+    "MoreSheet",
+    "NavDestination"
+   ],
+   "path": "android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt"
+  },
+  {
+   "changed_by_inputs": [
+    "accounts_3b2c9e04",
+    "base_bdd63a40"
+   ],
+   "head_present": true,
+   "id": "OVL:android/app/src/main/java/com/dial/van/command/connected/ConnectedRoute.kt:main",
+   "input": "main",
+   "missing_symbols": [
+    "ConnectedData",
+    "load"
+   ],
+   "path": "android/app/src/main/java/com/dial/van/command/connected/ConnectedRoute.kt"
+  },
+  {
+   "changed_by_inputs": [
+    "accounts_3b2c9e04",
+    "base_bdd63a40"
+   ],
+   "head_present": true,
+   "id": "OVL:android/app/src/main/java/com/dial/van/command/work/WorkRoute.kt:main",
+   "input": "main",
+   "missing_symbols": [
+    "ConversationBubble",
+    "MissionRow",
+    "ReconfirmationPanel",
+    "WorkActivityRoute",
+    "formatTime",
+    "refresh",
+    "severityRole",
+    "statusRole"
+   ],
+   "path": "android/app/src/main/java/com/dial/van/command/work/WorkRoute.kt"
+  },
+  {
+   "changed_by_inputs": [
+    "accounts_3b2c9e04",
+    "base_bdd63a40"
+   ],
+   "head_present": true,
+   "id": "OVL:android/app/src/main/java/com/dial/van/connectivity/ProvisioningPayload.kt:main",
+   "input": "main",
+   "missing_symbols": [
+    "isAcceptableUrl"
+   ],
+   "path": "android/app/src/main/java/com/dial/van/connectivity/ProvisioningPayload.kt"
+  },
+  {
+   "changed_by_inputs": [
+    "accounts_3b2c9e04",
+    "base_bdd63a40"
+   ],
+   "head_present": true,
+   "id": "OVL:android/app/src/main/java/com/dial/van/notification/NotificationPolicy.kt:main",
+   "input": "main",
+   "missing_symbols": [
+    "AppNotificationPolicy"
+   ],
+   "path": "android/app/src/main/java/com/dial/van/notification/NotificationPolicy.kt"
+  },
+  {
+   "changed_by_inputs": [
+    "accounts_3b2c9e04",
+    "base_bdd63a40"
+   ],
+   "head_present": true,
+   "id": "OVL:android/app/src/main/java/com/dial/van/onboarding/OnboardingActivity.kt:main",
+   "input": "main",
+   "missing_symbols": [
+    "ProvisioningStatus",
+    "isOnboardingComplete"
+   ],
+   "path": "android/app/src/main/java/com/dial/van/onboarding/OnboardingActivity.kt"
+  },
+  {
+   "changed_by_inputs": [
+    "accounts_3b2c9e04",
+    "base_bdd63a40"
+   ],
+   "head_present": true,
+   "id": "OVL:android/app/src/main/java/com/dial/van/trading/TradingRepository.kt:main",
+   "input": "main",
+   "missing_symbols": [
+    "Loaded",
+    "Loading",
+    "Ready",
+    "Unavailable"
+   ],
+   "path": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt"
+  },
+  {
+   "changed_by_inputs": [
+    "base_bdd63a40"
+   ],
+   "head_present": true,
+   "id": "OVL:android/app/src/main/java/com/dial/van/visual/VanCanvasFallback.kt:main",
+   "input": "main",
+   "missing_symbols": [
+    "VanOwnerArtAvatar"
+   ],
+   "path": "android/app/src/main/java/com/dial/van/visual/VanCanvasFallback.kt"
+  },
+  {
+   "changed_by_inputs": [
+    "accounts_3b2c9e04",
+    "base_bdd63a40"
+   ],
+   "head_present": true,
+   "id": "OVL:android/app/src/main/java/com/dial/van/voice/SherpaSpeakerSimilarity.kt:main",
+   "input": "main",
+   "missing_symbols": [
+    "admitted",
+    "cosine",
+    "normalized",
+    "pcm16ToFloat",
+    "readEmbedding",
+    "sha256"
+   ],
+   "path": "android/app/src/main/java/com/dial/van/voice/SherpaSpeakerSimilarity.kt"
+  },
+  {
+   "changed_by_inputs": [
+    "accounts_3b2c9e04",
+    "base_bdd63a40"
+   ],
+   "head_present": true,
+   "id": "OVL:android/app/src/main/java/com/dial/van/voice/VoiceEdge.kt:main",
+   "input": "main",
+   "missing_symbols": [
+    "sha256"
+   ],
+   "path": "android/app/src/main/java/com/dial/van/voice/VoiceEdge.kt"
+  },
+  {
+   "changed_by_inputs": [
+    "accounts_3b2c9e04",
+    "base_bdd63a40"
+   ],
+   "head_present": true,
+   "id": "OVL:android/app/src/main/java/com/dial/van/voice/WakeAcknowledgement.kt:main",
+   "input": "main",
+   "missing_symbols": [
+    "onDone",
+    "onError",
+    "onInit",
+    "onStart"
+   ],
+   "path": "android/app/src/main/java/com/dial/van/voice/WakeAcknowledgement.kt"
+  },
+  {
+   "changed_by_inputs": [
+    "accounts_3b2c9e04",
+    "base_bdd63a40"
+   ],
+   "head_present": true,
+   "id": "OVL:android/verification/src/test/kotlin/com/dial/van/onboarding/OnboardingPlanTest.kt:main",
+   "input": "main",
+   "missing_symbols": [
+    "an",
+    "pairing"
+   ],
+   "path": "android/verification/src/test/kotlin/com/dial/van/onboarding/OnboardingPlanTest.kt"
+  },
+  {
+   "changed_by_inputs": [
+    "accounts_3b2c9e04",
+    "base_bdd63a40"
+   ],
+   "head_present": true,
+   "id": "OVL:backend/tests/test_automation_api.py:main",
+   "input": "main",
+   "missing_symbols": [
+    "_n8n_transport",
+    "_n8n_transport.handler"
+   ],
+   "path": "backend/tests/test_automation_api.py"
+  },
+  {
+   "changed_by_inputs": [
+    "accounts_3b2c9e04",
+    "base_bdd63a40"
+   ],
+   "head_present": true,
+   "id": "OVL:backend/tests/test_automation_compiler.py:main",
+   "input": "main",
+   "missing_symbols": [
+    "test_credentials_compile_to_identifier_never_value",
+    "test_webhook_trigger_compiles_with_authentication"
+   ],
+   "path": "backend/tests/test_automation_compiler.py"
+  },
+  {
+   "changed_by_inputs": [
+    "accounts_3b2c9e04",
+    "base_bdd63a40"
+   ],
+   "head_present": true,
+   "id": "OVL:backend/tests/test_automation_dispatch.py:main",
+   "input": "main",
+   "missing_symbols": [
+    "_transport",
+    "_transport.handler"
+   ],
+   "path": "backend/tests/test_automation_dispatch.py"
+  },
+  {
+   "changed_by_inputs": [
+    "accounts_3b2c9e04",
+    "base_bdd63a40"
+   ],
+   "head_present": true,
+   "id": "OVL:backend/tests/test_automation_health_api.py:main",
+   "input": "main",
+   "missing_symbols": [
+    "test_automation_health_reports_governance_approved"
+   ],
+   "path": "backend/tests/test_automation_health_api.py"
+  },
+  {
+   "changed_by_inputs": [
+    "accounts_3b2c9e04",
+    "base_bdd63a40"
+   ],
+   "head_present": true,
+   "id": "OVL:backend/tests/test_browser_api.py:main",
+   "input": "main",
+   "missing_symbols": [
+    "test_owner_approval_resumes_same_browser_task"
+   ],
+   "path": "backend/tests/test_browser_api.py"
+  },
+  {
+   "changed_by_inputs": [
+    "accounts_3b2c9e04",
+    "base_bdd63a40"
+   ],
+   "head_present": true,
+   "id": "OVL:backend/tests/test_browser_escalation_boundary.py:main",
+   "input": "main",
+   "missing_symbols": [
+    "test_two_different_overruns_are_two_separate_questions"
+   ],
+   "path": "backend/tests/test_browser_escalation_boundary.py"
+  },
+  {
+   "changed_by_inputs": [
+    "accounts_3b2c9e04",
+    "base_bdd63a40"
+   ],
+   "head_present": true,
+   "id": "OVL:backend/tests/test_interactive_browser_api.py:main",
+   "input": "main",
+   "missing_symbols": [
+    "TestUnconfiguredDeployment.test_without_a_signing_key_the_routes_do_not_exist"
+   ],
+   "path": "backend/tests/test_interactive_browser_api.py"
+  },
+  {
+   "changed_by_inputs": [
+    "accounts_3b2c9e04",
+    "base_bdd63a40"
+   ],
+   "head_present": true,
+   "id": "OVL:backend/tests/test_knowledge_runtime.py:main",
+   "input": "main",
+   "missing_symbols": [
+    "test_consumer_preexisting_same_title_is_not_claimed_as_van_created",
+    "test_consumer_preexisting_same_title_is_not_claimed_as_van_created.Harness",
+    "test_consumer_preexisting_same_title_is_not_claimed_as_van_created.Harness.navigate",
+    "test_consumer_preexisting_same_title_is_not_claimed_as_van_created.Harness.page_info",
+    "test_consumer_preexisting_same_title_is_not_claimed_as_van_created.Stagehand",
+    "test_consumer_preexisting_same_title_is_not_claimed_as_van_created.Stagehand.act",
+    "test_consumer_preexisting_same_title_is_not_claimed_as_van_created.Stagehand.extract"
+   ],
+   "path": "backend/tests/test_knowledge_runtime.py"
+  },
+  {
+   "changed_by_inputs": [
+    "accounts_3b2c9e04",
+    "base_bdd63a40"
+   ],
+   "head_present": true,
+   "id": "OVL:backend/tests/test_recovery_matrix.py:main",
+   "input": "main",
+   "missing_symbols": [
+    "TestCellGatewayRestartMidCommand.test_a_conflict_is_never_retaken"
+   ],
+   "path": "backend/tests/test_recovery_matrix.py"
+  },
+  {
+   "changed_by_inputs": [
+    "accounts_3b2c9e04",
+    "base_bdd63a40"
+   ],
+   "head_present": true,
+   "id": "OVL:backend/tests/test_visual_acceptance.py:main",
+   "input": "main",
+   "missing_symbols": [
+    "test_visual_acceptance_is_declared_device_proofed"
+   ],
+   "path": "backend/tests/test_visual_acceptance.py"
+  },
+  {
+   "changed_by_inputs": [
+    "accounts_3b2c9e04",
+    "base_bdd63a40"
+   ],
+   "head_present": true,
+   "id": "OVL:backend/van_gateway/automation/compiler.py:main",
+   "input": "main",
+   "missing_symbols": [
+    "AutomationCompiler._compile_parameters",
+    "AutomationCompiler._position"
+   ],
+   "path": "backend/van_gateway/automation/compiler.py"
+  },
+  {
+   "changed_by_inputs": [
+    "accounts_3b2c9e04",
+    "base_bdd63a40"
+   ],
+   "head_present": true,
+   "id": "OVL:backend/van_gateway/browser/api.py:main",
+   "input": "main",
+   "missing_symbols": [
+    "BrowserApi._install_routes.run_assignment.assert_lease_active"
+   ],
+   "path": "backend/van_gateway/browser/api.py"
+  },
+  {
+   "changed_by_inputs": [
+    "accounts_3b2c9e04",
+    "base_bdd63a40"
+   ],
+   "head_present": true,
+   "id": "OVL:backend/van_gateway/decisions/service.py:main",
+   "input": "main",
+   "missing_symbols": [
+    "DecisionCreate",
+    "DecisionRecord",
+    "DecisionStatus"
+   ],
+   "path": "backend/van_gateway/decisions/service.py"
+  },
+  {
+   "changed_by_inputs": [
+    "accounts_3b2c9e04",
+    "base_bdd63a40"
+   ],
+   "head_present": true,
+   "id": "OVL:tests/contracts/test_stored_command_is_deliverable.py:main",
+   "input": "main",
+   "missing_symbols": [
+    "test_the_builder_is_the_one_the_offline_path_uses"
+   ],
+   "path": "tests/contracts/test_stored_command_is_deliverable.py"
+  },
+  {
+   "changed_by_inputs": [
+    "accounts_3b2c9e04",
+    "base_bdd63a40"
+   ],
+   "head_present": true,
+   "id": "OVL:tests/contracts/test_van_direct_mtls_deploy.py:main",
+   "input": "main",
+   "missing_symbols": [
+    "test_the_app_ships_configured_for_the_direct_link"
+   ],
+   "path": "tests/contracts/test_van_direct_mtls_deploy.py"
+  },
+  {
+   "changed_by_inputs": [
+    "accounts_3b2c9e04"
+   ],
+   "head_present": false,
+   "id": "OVL:tests/test_artemis_subscription.py:accounts_3b2c9e04",
+   "input": "accounts_3b2c9e04",
+   "missing_symbols": [
+    "SubscriptionContracts",
+    "SubscriptionContracts.test_api_key_login_refused",
+    "SubscriptionContracts.test_binding_is_idempotent_and_refuses_unbound_provider",
+    "SubscriptionContracts.test_bound_tool_call_returned_to_artemis",
+    "SubscriptionContracts.test_codex_environment_excludes_native_loader_settings",
+    "SubscriptionContracts.test_command_disables_execution_and_delegation",
+    "SubscriptionContracts.test_different_account_refused",
+    "SubscriptionContracts.test_different_requested_model_refused_before_transport",
+    "SubscriptionContracts.test_every_profile_node_and_fallback_is_exact_model",
+    "SubscriptionContracts.test_fresh_native_task_child_inherits_binding",
+    "SubscriptionContracts.test_inline_image_preserved",
+    "SubscriptionContracts.test_local_file_url_refused",
+    "SubscriptionContracts.test_matching_chatgpt_account",
+    "SubscriptionContracts.test_missing_login_refused",
+    "SubscriptionContracts.test_non_image_payload_refused",
+    "SubscriptionContracts.test_non_object_tool_arguments_refused",
+    "SubscriptionContracts.test_process_environment_excludes_api_billing",
+    "SubscriptionContracts.test_role_and_tool_result_preserved",
+    "SubscriptionContracts.test_unbound_tool_refused"
+   ],
+   "path": "tests/test_artemis_subscription.py"
+  },
+  {
+   "changed_by_inputs": [
+    "accounts_3b2c9e04"
+   ],
+   "head_present": false,
+   "id": "OVL:tools/artemis_subscription/__init__.py:accounts_3b2c9e04",
+   "input": "accounts_3b2c9e04",
+   "missing_symbols": [],
+   "path": "tools/artemis_subscription/__init__.py"
+  },
+  {
+   "changed_by_inputs": [
+    "accounts_3b2c9e04"
+   ],
+   "head_present": false,
+   "id": "OVL:tools/artemis_subscription/mcp_launcher.py:accounts_3b2c9e04",
+   "input": "accounts_3b2c9e04",
+   "missing_symbols": [],
+   "path": "tools/artemis_subscription/mcp_launcher.py"
+  },
+  {
+   "changed_by_inputs": [
+    "accounts_3b2c9e04"
+   ],
+   "head_present": false,
+   "id": "OVL:tools/artemis_subscription/provider.py:accounts_3b2c9e04",
+   "input": "accounts_3b2c9e04",
+   "missing_symbols": [
+    "ChatGPTSubscriptionChatModel",
+    "ChatGPTSubscriptionChatModel._agenerate",
+    "ChatGPTSubscriptionChatModel._astream",
+    "ChatGPTSubscriptionChatModel._generate",
+    "ChatGPTSubscriptionChatModel._identifying_params",
+    "ChatGPTSubscriptionChatModel._llm_type",
+    "ChatGPTSubscriptionChatModel.bind_tools",
+    "ChatGPTSubscriptionChatModel.with_structured_output",
+    "ChatGPTSubscriptionChatModel.with_structured_output.parse",
+    "SubscriptionSession",
+    "SubscriptionSession.__aenter__",
+    "SubscriptionSession.__aexit__",
+    "SubscriptionSession.__init__",
+    "SubscriptionSession.complete",
+    "SubscriptionSession.receive",
+    "SubscriptionSession.rpc",
+    "SubscriptionSession.send",
+    "bind_native_artemis",
+    "bind_native_artemis.create_model",
+    "bind_native_artemis.probe",
+    "codex_command",
+    "messages_to_input",
+    "read_subscription_account",
+    "response_message",
+    "subscription_environment",
+    "tool_response_schema",
+    "validate_account"
+   ],
+   "path": "tools/artemis_subscription/provider.py"
+  },
+  {
+   "changed_by_inputs": [
+    "accounts_3b2c9e04"
+   ],
+   "head_present": false,
+   "id": "OVL:tools/artemis_subscription/sitecustomize.py:accounts_3b2c9e04",
+   "input": "accounts_3b2c9e04",
+   "missing_symbols": [],
+   "path": "tools/artemis_subscription/sitecustomize.py"
+  }
+ ],
+ "rule": "A symbol defined by an input version and absent at HEAD is a preservation finding until dispositioned (T-HVA-002).",
+ "schema": "van.rebuild.pre001.overlap/1"
+}

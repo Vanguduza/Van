@@ -50,7 +50,10 @@ object SessionDownstream {
             val messageId: String,
             val accepted: Boolean,
             val refusal: String?,
-        ) : Frame
+        ) : Frame {
+            /** Admission without a recorded result is not a completed delivery receipt. */
+            val resultPending: Boolean get() = !accepted && refusal == "session_result_pending"
+        }
 
         /** Anything else, including a shape from a Gateway newer than this build. */
         data object Unrecognised : Frame
@@ -88,7 +91,7 @@ object SessionDownstream {
         // The acknowledgement. Identified by `message_id` plus `accepted` rather than by
         // `kind`, which is the envelope's kind and says nothing about the frame.
         val messageId = frame.optString("message_id")
-        if (messageId.isNotEmpty() && frame.has("accepted")) {
+        if (messageId.isNotEmpty() && frame.opt("accepted") is Boolean) {
             return Frame.Acknowledgement(
                 messageId = messageId,
                 accepted = frame.optBoolean("accepted", false),

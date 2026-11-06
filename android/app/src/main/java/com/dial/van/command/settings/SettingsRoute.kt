@@ -11,7 +11,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -21,6 +24,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
+import com.dial.van.degraded.RestoreAction
+import com.dial.van.queue.QueueRestoreRequest
+import kotlinx.coroutines.CancellationException
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -52,9 +61,8 @@ import org.json.JSONObject
  * DNA §4 destination 8: "Devices & Settings — pairing, permissions, voice, notifications
  * policy, quiet hours, character/renderer status, diagnostics."
  *
- * Voice settings and notification policy are the existing, unowned-by-this-worker-to-rewrite
- * `SpeechModule`/`NotificationPolicyModule` bodies, reached here rather than duplicated —
- * both already do everything DNA §4 asks of them (P2-AND-017/018).
+ * Voice enrollment/corrections and notification policy use their shared modules,
+ * reached through native settings destinations rather than duplicated controls.
  *
  * @DataSource("GET /v1/degraded") — the diagnostics section (GAP-F-010).
  */
@@ -63,6 +71,9 @@ fun SettingsRoute(
     app: VanApplication,
     onOpenVoice: () -> Unit,
     onOpenNotifications: () -> Unit,
+    onOpenPermissions: () -> Unit = {},
+    onOpenDiagnostics: () -> Unit = {},
+    onOpenJev: () -> Unit,
 ) {
     val tokens = LocalVanTokens.current
     val context = LocalContext.current
@@ -72,6 +83,10 @@ fun SettingsRoute(
     var gatewayDegradedError by remember { mutableStateOf<String?>(null) }
     var unfixable by remember { mutableStateOf<String?>(null) }
     var characterAcceptanceStatus by remember { mutableStateOf<String?>(null) }
+    var queueReview by rememberSaveable { mutableStateOf<String?>(null) }
+    var queueRestoreResult by rememberSaveable { mutableStateOf<String?>(null) }
+    var queueRestoring by remember { mutableStateOf(false) }
+    var queueAttempted by rememberSaveable { mutableStateOf(false) }
     val characterAcceptance = remember(context, app.gatewayClient) {
         (context as? FragmentActivity)?.let { VanCharacterAcceptance(it, app.gatewayClient) }
     }
@@ -90,21 +105,65 @@ fun SettingsRoute(
     // as live as this screen gets without `visual/` growing observable state for it.
     val rendererStatus = DegradedBridge.lastRendererStatus
 
+    queueReview?.let { sealedSelection ->
+        val reviewed = runCatching { Json.decodeFromString<QueueRestoreRequest>(sealedSelection) }.getOrNull()
+        if (reviewed == null) {
+            LaunchedEffect(sealedSelection) { queueRestoreResult = "Review the current queue again."; queueReview = null }
+        } else {
+            AlertDialog(
+                onDismissRequest = { if (!queueRestoring && !queueAttempted) queueReview = null },
+                title = { Text("Discard selected unsent commands?") },
+                text = { Text("This discards ${reviewed.items.size} selected unsent commands from this device. Submitted work and session or captured-context recovery stay with their existing owners.") },
+                confirmButton = { TextButton(enabled = !queueRestoring, onClick = {
+                    queueRestoring = true
+                    queueAttempted = true
+                    scope.launch {
+                        try {
+                            val result = DeviceSignals.discardReviewed(app, reviewed)
+                            queueRestoreResult = when (result.state) {
+                                "APPLIED" -> "Discarded ${result.removedIds.size} selected unsent commands."
+                                "REFUSED" -> "The queue or current owner changed. Review the queue again."
+                                else -> "The local outcome is unconfirmed. Reopen VAN to recover the original result."
+                            }
+                            if (result.state == "APPLIED" || result.state == "REFUSED") { queueReview = null; queueAttempted = false }
+                        } catch (cancelled: CancellationException) {
+                            queueRestoreResult = "The original restore outcome needs recovery."
+                            throw cancelled
+                        } catch (_: Exception) {
+                            queueRestoreResult = "Restore held. Current owner or storage could not be confirmed."
+                        } finally { queueRestoring = false; app.refreshSubsystemHealth() }
+                    }
+                }) { Text(if (queueRestoring) "Checking original result…" else "Discard selected") } },
+                dismissButton = { TextButton(enabled = !queueRestoring && !queueAttempted, onClick = { queueReview = null }) { Text("Keep commands") } },
+            )
+        }
+    }
+
     LazyColumn(
         modifier = Modifier.fillMaxSize().padding(horizontal = tokens.space.pageGutter),
         verticalArrangement = Arrangement.spacedBy(tokens.space.space3),
         contentPadding = PaddingValues(vertical = tokens.space.space3),
     ) {
-        item { SectionHeader("Settings & Devices", detail = "Pairing, permissions, voice, notifications, diagnostics") }
+        item { SectionHeader("Settings & Devices", detail = "Connection, permissions, voice, notifications, diagnostics") }
+        item {
+            Text("VAN ${BuildConfig.VERSION_NAME} · ${BuildConfig.VAN_SOURCE_SHA.take(12)}",
+                style = tokens.type.label, color = tokens.color.textSecondary)
+            OutlinedButton(onClick = {
+                context.startActivity(Intent(context, com.dial.van.onboarding.OnboardingActivity::class.java)
+                    .putExtra(com.dial.van.onboarding.OnboardingActivity.EXTRA_REVIEW_PERMISSIONS, true))
+            }) { Text("Review Android permissions") }
+        }
+        item { Button(onClick = onOpenPermissions) { Text("Standing permissions & automatic readiness") } }
+        item { OutlinedButton(onClick = onOpenDiagnostics) { Text("Service readiness & recovery") } }
 
         item {
             VanPanel {
                 Column(verticalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
                     val paired = app.gatewayClient.isPaired()
-                    Text("This phone's pairing", style = tokens.type.headline, color = tokens.color.textPrimary)
+                    Text("Automatic phone connection", style = tokens.type.headline, color = tokens.color.textPrimary)
                     Row(horizontalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
                         StatusChip(
-                            label = if (paired) "PAIRED" else "NOT PAIRED",
+                            label = if (paired) "ENROLLED" else "INSTALLER SETUP PENDING",
                             role = if (paired) StatusSemantics.ROLE_FAVOURABLE else StatusSemantics.ROLE_EVENT_RISK,
                         )
                         StatusChip(
@@ -114,9 +173,9 @@ fun SettingsRoute(
                     }
                     Text(
                         when {
-                            paired -> "Ingress, revocable device access and the command signing credential are active."
-                            app.provisioning.configured -> "Waiting for the installer. VAN will not ask you for an address or a code — no screen in this app can change where it connects."
-                            else -> "This build was not given the key it needs to be set up, so it cannot be provisioned at all. A rebuild is what it needs."
+                            paired -> "This phone has enrolled credentials. VAN checks connectivity and capability readiness automatically."
+                            app.provisioning.configured -> "Waiting for supported installer enrollment. VAN will continue when it arrives."
+                            else -> "This build cannot complete enrollment. Restore VAN through its supported installer."
                         },
                         style = tokens.type.body,
                         color = tokens.color.textSecondary,
@@ -199,12 +258,23 @@ fun SettingsRoute(
             // own gateway-mapped list (below) deliberately does not carry buttons for. Legacy
             // `VanGlassStyle`-based, same reasoning as the Browser & Automation children.
             DegradedPanel(degradedState.subsystems, legacyGlassFor(degradedState)) { subsystem ->
-                if (!DeviceSignals.perform(context, app, subsystem)) {
+                if (subsystem.restoreAction == RestoreAction.CLEAR_QUEUE) {
+                    if (queueReview == null && !queueRestoring) scope.launch {
+                        queueRestoring = true
+                        try {
+                            queueReview = Json.encodeToString(DeviceSignals.reviewQueue(app))
+                            queueRestoreResult = null
+                        } catch (cancelled: CancellationException) { throw cancelled }
+                        catch (_: Exception) { queueRestoreResult = "Restore held. Connect and confirm the current owner before discarding commands." }
+                        finally { queueRestoring = false }
+                    }
+                } else if (!DeviceSignals.perform(context, app, subsystem)) {
                     unfixable = subsystem.label
                 }
                 app.refreshSubsystemHealth()
             }
         }
+        queueRestoreResult?.let { line -> item { Text(line, style = tokens.type.label, color = tokens.color.textSecondary) } }
         unfixable?.let { label ->
             item {
                 Text(
@@ -247,6 +317,13 @@ fun SettingsRoute(
                 onClick = onOpenNotifications,
             )
         }
+        item {
+            SettingsLink(
+                title = "Jev Intelligence",
+                detail = "System-1 modules, provider qualification, activity, contribution and owner controls",
+                onClick = onOpenJev,
+            )
+        }
 
         item {
             Text(
@@ -284,16 +361,15 @@ private fun SettingsLink(title: String, detail: String, onClick: () -> Unit) {
 }
 
 /**
- * Settings' "Voice" child (DNA §4: "voice settings"). `SpeechModule` is unowned by this
- * worker to rewrite (P2-AND-018) and is itself a `LazyColumn { fillMaxSize() }`, so it gets
- * its own destination rather than being nested inside Settings' own list.
+ * Settings' "Voice" child: dedicated owner speaker enrollment and personal speech
+ * corrections share this full-screen list, with a native activity for exact biometric consent.
  */
 @Composable
 fun SettingsVoiceRoute(app: VanApplication, onBack: () -> Unit) {
     val degraded by app.degradedModeStore.state.collectAsState()
     Column(modifier = Modifier.fillMaxSize()) {
         SettingsChildHeader("Voice", onBack)
-        SpeechModule(app, legacyGlassFor(degraded))
+        SpeechModule(app, legacyGlassFor(degraded), ownerActivity = LocalContext.current as? FragmentActivity)
     }
 }
 

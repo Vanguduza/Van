@@ -1,0 +1,11 @@
+[Unit]
+Description=Periodic VAN Muse sandbox qualification
+
+[Timer]
+OnBootSec=60s
+OnUnitActiveSec=2min
+AccuracySec=15s
+Unit=van-muse-sandbox-health.service
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,27 @@
+.F...........................                                            [100%]
+=================================== FAILURES ===================================
+__________ test_actual_ea_emergency_close_precedes_optional_cost_work __________
+
+ea = <function ea.<locals>.run at 0x7fcf17b43920>
+
+    def test_actual_ea_emergency_close_precedes_optional_cost_work(ea):
+        data = ea('entry-charge-weak-stop')
+        receipt = data['results'][0]
+        assert receipt['status'] == 'FILLED' and receipt['sl_confirmed'] is False
+>       assert data['close_calls'] == 1 and data['entry_charge_reads'] == 0
+E       assert (1 == 1 and 1 == 0)
+
+trading/tests/test_mt5_recorded_entry_charges.py:68: AssertionError
+=============================== warnings summary ===============================
+../../van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py:53
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED trading/tests/test_mt5_recorded_entry_charges.py::test_actual_ea_emergency_close_precedes_optional_cost_work
+1 failed, 28 passed, 2 warnings in 2.52s

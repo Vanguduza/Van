@@ -1,0 +1,72 @@
+{
+  "schema": "van.rebuild.lease-guard-source/1",
+  "base_head": "ca981d19615f614a1c41f78618e04ea1582d620e",
+  "updated_at_utc": "2026-10-27T02:26:05.050738+00:00",
+  "units": [
+    "BE-003",
+    "BE-009"
+  ],
+  "status": "SOURCE_TESTED_COMPONENT_NOT_UNIT_ACCEPTANCE",
+  "acceptance": "NOT_ISSUED",
+  "implementation": "The existing PostgreSQL runtime-lease store now gives its outer submission guard exclusive ownership of its private connection/transaction. Same-thread reads and nested guards borrow it; other threads wait. Borrowed queries use native savepoints so actual PostgreSQL errors cannot abort the outer row locks. Only the outer exit rolls back; guarded body failures propagate, and reentrant lease mutation/close refuse before changing authority. Original actualSQL baseline3lock failures/1control; first4fixture failures retained separately. Intermediate source670pass did not qualify later2SQL-server-error failures/10controls; those led to savepoint repair. Stable67focused and672final actual PostgreSQL/SQLite/HTTP/runtime/accounting/authority cases pass0skip/audit0; all1162 pinned hashes match and owned fixture independently absent. Twelve new cases observe real peer lock waits/takeovers and retained epochs. Alias scope/current owner controls remain; physical-account duplicate-alias arbitration/shared reservations and full native admission remain required. No unit/native/production/economic/S24 acceptance.",
+  "source_sha256": {
+    "trading/vati/app/account_lease.py": "661d15edf02d2b86f9e305aba19924a84fc054e953053bbd08141c6fc53f3999",
+    "trading/tests/test_postgres_lease_guard_ownership.py": "a9641ccaf1fa6a1369f4da4c850a82268f1609ff35ddaa6fa05db5c96ee54c58"
+  },
+  "actual_tests": {
+    "initial_failed_fixture": {
+      "failed": 4,
+      "passed": 0,
+      "functional_boundary_reached": false,
+      "cause": "Dedicated database had schema only; native ledger initialization was required. STORE_UNREACHABLE was correct."
+    },
+    "corrected_original_SQL_baseline": {
+      "failed": 3,
+      "passed_controls": 1,
+      "application_equals_committed_ca981": true
+    },
+    "focused_r1": 59,
+    "focused_r2": 64,
+    "intermediate_source_integration": 670,
+    "intermediate_actual_SQL_error_baseline": {
+      "failed": 2,
+      "passed_controls": 10,
+      "source": "uncommitted RLock/depth repair"
+    },
+    "focused_stable_r3": 67,
+    "stable_final": 672,
+    "new_cases": 12,
+    "final_skips": 0,
+    "final_audit_violations": 0,
+    "pinned_source_test_hashes": 1162,
+    "owned_fixture_independently_absent": true,
+    "counts_overlap": true
+  },
+  "canonical_checks": {
+    "owner_frontend_drift": false,
+    "registry": [
+      483,
+      376
+    ],
+    "original_coverage": [
+      42,
+      105,
+      78
+    ],
+    "mutation_registry_cases": 374,
+    "mutation_registry_edits": 383,
+    "registry_preflight_execution": "NOT_RUN",
+    "consolidation_findings": []
+  },
+  "qualification": "Private PostgreSQL transaction ownership and tested recoverable query errors only. No broker call or financial effect was exercised; no network-partition/host/provider/cohort qualification or independent certificate is issued. This does not implement physical-account alias scope, account-wide risk/shared reservations or the remaining backend/Android programme. Existing epoch/CAS/refusal and final submission owners remain. Source tests are not unit/native acceptance.",
+  "evidence": "ci/lease_guard_20261027",
+  "earlier_stable_snapshot": "The672case result and its1162matching hashes were measured before the native recovery follow-up. They do not establish current full-source equality.",
+  "current_combined_revalidation": {
+    "passed": 780,
+    "skipped": 0,
+    "audit_violations": 0,
+    "source_hashes_current": 1162,
+    "owned_fixture_independently_absent": true,
+    "evidence": "ci/owner_recovery_20261027/stable_final_780"
+  }
+}

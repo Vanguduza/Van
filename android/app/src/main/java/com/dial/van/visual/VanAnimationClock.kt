@@ -48,6 +48,14 @@ class VanAnimationClock(
         private set
 
     /**
+     * Suspend timestamp integration without resetting phase, elapsed active time or frames.
+     * The next advance anchors its timestamp and contributes no hidden-time movement.
+     */
+    fun suspendTiming() {
+        lastFrameNanos = null
+    }
+
+    /**
      * Advance to [frameNanos] with the given period, and return the new phase.
      *
      * Two guards, both for things that actually happen on a device:

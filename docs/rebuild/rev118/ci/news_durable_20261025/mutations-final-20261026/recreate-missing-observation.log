@@ -1,0 +1,18 @@
+...........F...............                                              [100%]
+=================================== FAILURES ===================================
+__________ test_missing_known_observation_receipt_cannot_be_recreated __________
+
+ledger = <vati.core.ledger.Ledger object at 0x7f652d7668d0>
+
+    def test_missing_known_observation_receipt_cannot_be_recreated(ledger):
+        news=NewsIngress(ledger=ledger);h=story();news.ingest(h)
+        relay=story(source_id='relay');news.ingest(relay)
+        ledger._conn.execute("DELETE FROM events WHERE kind='NEWS_OBSERVATION' AND json_extract(payload_json,'$.full_claim.source_id')='relay'")
+>       with pytest.raises(NewsIngressError,match='missing'):news.ingest(relay)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE NewsIngressError
+
+trading/tests/test_news_durable_publication.py:147: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_news_durable_publication.py::test_missing_known_observation_receipt_cannot_be_recreated
+1 failed, 26 passed, 2 deselected in 1.01s

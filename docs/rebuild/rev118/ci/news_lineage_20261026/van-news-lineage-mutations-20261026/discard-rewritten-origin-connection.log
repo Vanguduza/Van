@@ -1,0 +1,33 @@
+F...........................F.....                                       [100%]
+=================================== FAILURES ===================================
+_________ test_rewritten_syndicated_stories_form_one_declared_cluster __________
+
+ledger = <vati.core.ledger.Ledger object at 0x7fc22352c6e0>
+
+    def test_rewritten_syndicated_stories_form_one_declared_cluster(ledger):
+        news = NewsIngress(ledger=ledger)
+        assert news.ingest_rows([row(), row('wire-b', 'Central bank publishes its policy decision')], now_ms=NOW)['accepted'] == 2
+        report = lineage(news)
+>       assert report['story_clusters'] == 1
+E       assert 2 == 1
+
+trading/tests/test_news_publisher_lineage.py:42: AssertionError
+_______ test_actual_service_file_builder_exposes_lineage_and_recovers_it _______
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-264/test_actual_service_file_build0')
+ledger = <vati.core.ledger.Ledger object at 0x7fc2233ebd10>
+
+    def test_actual_service_file_builder_exposes_lineage_and_recovers_it(tmp_path, ledger):
+        import json
+        from vati.events.news_runtime import build_news_file, news_heartbeat
+        path = tmp_path/'headlines.json'; path.write_text(json.dumps([row(), row('b', 'Rewritten')]))
+        cfg = {'path':str(path)}
+        news = build_news_file(cfg, ledger=ledger, scope='acct/EURUSD', now_ms=NOW)
+>       assert lineage(news)['story_clusters'] == 1
+E       assert 2 == 1
+
+trading/tests/test_news_publisher_lineage.py:247: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_news_publisher_lineage.py::test_rewritten_syndicated_stories_form_one_declared_cluster
+FAILED trading/tests/test_news_publisher_lineage.py::test_actual_service_file_builder_exposes_lineage_and_recovers_it
+2 failed, 32 passed, 2 deselected in 1.60s

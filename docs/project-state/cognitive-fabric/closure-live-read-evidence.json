@@ -1,0 +1,137 @@
+{
+  "observed_at": "2026-10-06T13:09:22.523Z",
+  "tools": [
+    "dial_global_status",
+    "dial_muse_health",
+    "dial_muse_jobs(project:van)",
+    "dial_muse_status(known CF source/export/report jobs)"
+  ],
+  "effects": "Typed read/status projections only; some status reads reconcile durable records. No submission, cancellation, deployment, provider activation or orders.",
+  "global": {
+    "deployed_revision": null,
+    "chatgpt_client": {
+      "principal_id": "CHATGPT_OWNER",
+      "route": "/mcp/chatgpt",
+      "preferred_transport": "OPENAI_PRIVATE_TUNNEL_WHEN_AVAILABLE",
+      "state": "STALE",
+      "qualified_at": "2026-10-06T12:23:20.486Z",
+      "stale_reasons": [
+        "DEPLOYED_REVISION_CHANGED",
+        "POLICY_CHANGED"
+      ],
+      "awaiting": null
+    },
+    "manager_plane": {
+      "policy_id": "DEC049_FABLE_ASTRA_SOL_OPUS_SONNET",
+      "selected_slot": null,
+      "state": "DEGRADED",
+      "reason": "NO_HERMES_MANAGER_RUNTIME"
+    },
+    "activation_gates": [
+      {
+        "gate": "G-2_GENERAL_COMPUTE_RUNTIME",
+        "state": "ACTIVE"
+      },
+      {
+        "gate": "G-3_RECOVERY_CUTOVER",
+        "state": "WAITING_RECOVERY_CUTOVER_EVIDENCE"
+      },
+      {
+        "gate": "GENERAL_COMPUTE_PLANNER",
+        "state": "WAITING_PLANNER"
+      },
+      {
+        "gate": "CHATGPT_GLOBAL_MCP_GREEN",
+        "state": "STALE"
+      },
+      {
+        "gate": "CLAUDE_CODE_LOCAL_GLOBAL_MCP_GREEN",
+        "state": "LIVE_CALL_OBSERVED"
+      },
+      {
+        "gate": "DIAL_REMOTE_OAUTH_MCP_TRANSPORT_GREEN",
+        "state": "STALE"
+      },
+      {
+        "gate": "CLAUDE_CODE_REMOTE_GLOBAL_MCP_GREEN",
+        "state": "STALE"
+      },
+      {
+        "gate": "CLAUDE_CODE_GLOBAL_MCP_GREEN",
+        "state": "NOT_LIVE_QUALIFIED"
+      },
+      {
+        "gate": "GLOBAL_DIAL_MCP_RUNTIME_GREEN",
+        "state": "NOT_LIVE_QUALIFIED"
+      },
+      {
+        "gate": "SUPABASE_OAUTH_MCP_LIVE_QUALIFICATION",
+        "state": "SUPABASE_OAUTH_MCP_LIVE_QUALIFICATION_REQUIRED"
+      }
+    ]
+  },
+  "muse_health": {
+    "schema_version": 2,
+    "state": "GREEN",
+    "url_origin": "https://muse.ai",
+    "title": "Chat — van muse",
+    "authenticated_page_observed": true,
+    "project_aware": true,
+    "response_capture": "CURRENT_JOB_ONLY",
+    "host": "van-trading-core",
+    "workload_class": "MUSE_PROJECT_TASK",
+    "project_truth_authority": false,
+    "vati_authority_effect": "NONE",
+    "estate_root_authority_effect": "NONE"
+  },
+  "known_original_job": {
+    "job_id": "muse_0fb50a8a-3d6f-4e1e-916f-4840d2d0faa1",
+    "state": "INCOMPLETE",
+    "validation_state": "FAILED",
+    "artifact_ref": "muse-result:dial-development-system:muse_0fb50a8a-3d6f-4e1e-916f-4840d2d0faa1",
+    "artifact_sha256": "17878c108c117098af940e7ec5c952a1a33efb3ffe46a82cc90163196a4473b7",
+    "missing_requirements": [
+      "marker:VAN_MUSE_COGNITIVE_FABRIC_R161_IMPLEMENTATION_COMPLETE"
+    ]
+  },
+  "recovery_jobs": [
+    {
+      "job_id": "muse_ea4b2720-31dd-4447-a77f-00622ee2ba61",
+      "state": "INCOMPLETE",
+      "validation_state": "FAILED",
+      "project": "dial-development-system",
+      "participating_projects": [
+        "dial-development-system",
+        "van",
+        "dial-business-group"
+      ],
+      "project_binding_sha256": "2e6218a547a7a0e6599d1281ab1c6c0463a39cafbf3b4f56d7a600836bdc9be9",
+      "artifact_ref": "muse-result:dial-development-system:muse_ea4b2720-31dd-4447-a77f-00622ee2ba61",
+      "artifact_sha256": "a04b60320e6f9c0a5cc8a53781eaa5e02c963549df4c04aae9e4f036e3b3abbe",
+      "artifact_bytes": 18081,
+      "missing_requirements": [
+        "marker:SOURCE_EXPORT_UNAVAILABLE"
+      ]
+    },
+    {
+      "job_id": "muse_df78b635-d817-438d-91dc-9b0aee987126",
+      "state": "SUCCEEDED",
+      "validation_state": "PASSED",
+      "project": "van",
+      "participating_projects": [
+        "van"
+      ],
+      "project_binding_sha256": "1bf3f58b398d1894f45654ff0dbec6172b7b623a2629288505fc33c73e71e055",
+      "artifact_ref": "muse-result:van:muse_df78b635-d817-438d-91dc-9b0aee987126",
+      "artifact_sha256": "17712d861af0effe082f05f8ad2b09a5d7fd4ecd8f2069cd4ab2825bf7e54a3d",
+      "artifact_bytes": 31220,
+      "missing_requirements": []
+    }
+  ],
+  "unverified": [
+    "Muse authenticated page does not qualify PersonalMuse machine API or quotas.",
+    "No arbitrary artifact-download or source-filesystem-read interface is exposed among installed typed tools.",
+    "Artifact refs and reported orphan git SHAs do not constitute recovered bytes or independent source provenance.",
+    "No live VAN gateway cognitive credential/T2 qualified-provider configuration/device acceptance projection was observed."
+  ]
+}

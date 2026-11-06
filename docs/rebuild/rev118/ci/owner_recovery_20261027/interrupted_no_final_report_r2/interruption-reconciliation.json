@@ -1,0 +1,12 @@
+{
+  "observed_at_utc": "2026-10-27T04:02:54.074243+00:00",
+  "state": "INTERRUPTED_NO_FINAL_RECEIPT_NO_PASS_CLAIM",
+  "recorded_call_passes": 754,
+  "recorded_call_failures": 0,
+  "controller_and_test_processes_observed_absent": true,
+  "original_process_exit": "UNKNOWN",
+  "cause": "NOT_ESTABLISHED",
+  "owned_container_id": "e22c2e9808c0ab2bd6973dcc7b6231528a9042d0ec4149ca4a2724af866dda38",
+  "owned_fixture_removed_after_interruption": true,
+  "owned_fixture_independently_absent": true
+}

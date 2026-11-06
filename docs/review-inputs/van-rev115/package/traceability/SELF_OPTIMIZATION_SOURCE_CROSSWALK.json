@@ -1,0 +1,399 @@
+{
+  "gaps": [
+    {
+      "owner": "BE-001",
+      "source_gap": "GAP-01",
+      "status": "CLOSURE_REQUIRED; original dated observation retained, not reclassified as fixed"
+    },
+    {
+      "owner": "BE-001",
+      "source_gap": "GAP-02",
+      "status": "CLOSURE_REQUIRED; original dated observation retained, not reclassified as fixed"
+    },
+    {
+      "owner": "VAN-ML-PKT-024",
+      "source_gap": "GAP-03",
+      "status": "CLOSURE_REQUIRED; original dated observation retained, not reclassified as fixed"
+    },
+    {
+      "owner": "VAN-ML-PKT-025",
+      "source_gap": "GAP-04",
+      "status": "CLOSURE_REQUIRED; original dated observation retained, not reclassified as fixed"
+    },
+    {
+      "owner": "BE-035",
+      "source_gap": "GAP-05",
+      "status": "CLOSURE_REQUIRED; original dated observation retained, not reclassified as fixed"
+    },
+    {
+      "owner": "BE-006",
+      "source_gap": "GAP-06",
+      "status": "CLOSURE_REQUIRED; original dated observation retained, not reclassified as fixed"
+    },
+    {
+      "owner": "BE-035",
+      "source_gap": "GAP-07",
+      "status": "CLOSURE_REQUIRED; original dated observation retained, not reclassified as fixed"
+    },
+    {
+      "owner": "BE-035",
+      "source_gap": "GAP-08",
+      "status": "CLOSURE_REQUIRED; original dated observation retained, not reclassified as fixed"
+    },
+    {
+      "owner": "VAN-ML-PKT-010",
+      "source_gap": "GAP-09",
+      "status": "CLOSURE_REQUIRED; original dated observation retained, not reclassified as fixed"
+    },
+    {
+      "owner": "BE-010",
+      "source_gap": "GAP-10",
+      "status": "CLOSURE_REQUIRED; original dated observation retained, not reclassified as fixed"
+    },
+    {
+      "owner": "BE-010",
+      "source_gap": "GAP-11",
+      "status": "CLOSURE_REQUIRED; original dated observation retained, not reclassified as fixed"
+    },
+    {
+      "owner": "BE-012",
+      "source_gap": "GAP-12",
+      "status": "CLOSURE_REQUIRED; original dated observation retained, not reclassified as fixed"
+    },
+    {
+      "owner": "BE-010",
+      "source_gap": "GAP-13",
+      "status": "CLOSURE_REQUIRED; original dated observation retained, not reclassified as fixed"
+    },
+    {
+      "owner": "BE-010",
+      "source_gap": "GAP-14",
+      "status": "CLOSURE_REQUIRED; original dated observation retained, not reclassified as fixed"
+    },
+    {
+      "owner": "BE-012",
+      "source_gap": "GAP-15",
+      "status": "CLOSURE_REQUIRED; original dated observation retained, not reclassified as fixed"
+    },
+    {
+      "owner": "BE-012",
+      "source_gap": "GAP-16",
+      "status": "CLOSURE_REQUIRED; original dated observation retained, not reclassified as fixed"
+    },
+    {
+      "owner": "BE-008",
+      "source_gap": "GAP-17",
+      "status": "CLOSURE_REQUIRED; original dated observation retained, not reclassified as fixed"
+    },
+    {
+      "owner": "BE-036",
+      "source_gap": "GAP-18",
+      "status": "CLOSURE_REQUIRED; original dated observation retained, not reclassified as fixed"
+    },
+    {
+      "owner": "BE-003",
+      "source_gap": "GAP-19",
+      "status": "CLOSURE_REQUIRED; original dated observation retained, not reclassified as fixed"
+    },
+    {
+      "owner": "BE-036",
+      "source_gap": "GAP-20",
+      "status": "CLOSURE_REQUIRED; original dated observation retained, not reclassified as fixed"
+    },
+    {
+      "owner": "BE-036",
+      "source_gap": "GAP-21",
+      "status": "CLOSURE_REQUIRED; original dated observation retained, not reclassified as fixed"
+    },
+    {
+      "owner": "BE-036",
+      "source_gap": "GAP-22",
+      "status": "CLOSURE_REQUIRED; original dated observation retained, not reclassified as fixed"
+    },
+    {
+      "owner": "BE-021",
+      "source_gap": "GAP-23",
+      "status": "CLOSURE_REQUIRED; original dated observation retained, not reclassified as fixed"
+    },
+    {
+      "owner": "BE-021",
+      "source_gap": "GAP-24",
+      "status": "CLOSURE_REQUIRED; original dated observation retained, not reclassified as fixed"
+    },
+    {
+      "owner": "BE-021",
+      "source_gap": "GAP-25",
+      "status": "CLOSURE_REQUIRED; original dated observation retained, not reclassified as fixed"
+    },
+    {
+      "owner": "BQ-009",
+      "source_gap": "GAP-26",
+      "status": "CLOSURE_REQUIRED; original dated observation retained, not reclassified as fixed"
+    },
+    {
+      "owner": "VAN-ML-PKT-010",
+      "source_gap": "GAP-27",
+      "status": "CLOSURE_REQUIRED; original dated observation retained, not reclassified as fixed"
+    },
+    {
+      "owner": "BQ-009",
+      "source_gap": "GAP-28",
+      "status": "CLOSURE_REQUIRED; original dated observation retained, not reclassified as fixed"
+    },
+    {
+      "owner": "BE-035",
+      "source_gap": "GAP-29",
+      "status": "CLOSURE_REQUIRED; original dated observation retained, not reclassified as fixed"
+    },
+    {
+      "owner": "PRE-003",
+      "source_gap": "GAP-30",
+      "status": "CLOSURE_REQUIRED; original dated observation retained, not reclassified as fixed"
+    }
+  ],
+  "new_owner_scope": [
+    "Automatic operational optimization",
+    "Governed policy evolution",
+    "Actual CEX spot crypto trading",
+    "Astra evidence-driven design optimization"
+  ],
+  "schema": "van.rev114.source-crosswalk/1.0",
+  "sections": [
+    {
+      "canonical_units": [
+        "BE-036",
+        "BG-001"
+      ],
+      "disposition": "Core objective and correct priorities",
+      "implementation_state": "NOT_PROVEN_BY_DOCUMENT",
+      "source_section": "01"
+    },
+    {
+      "canonical_units": [
+        "PRE-001",
+        "PRE-002"
+      ],
+      "disposition": "Scope/authority lineage and no feature thinning",
+      "implementation_state": "NOT_PROVEN_BY_DOCUMENT",
+      "source_section": "02"
+    },
+    {
+      "canonical_units": [
+        "BE-002",
+        "BE-009",
+        "BE-010"
+      ],
+      "disposition": "One account/risk/router ownership and determinism",
+      "implementation_state": "NOT_PROVEN_BY_DOCUMENT",
+      "source_section": "03"
+    },
+    {
+      "canonical_units": [
+        "BE-001",
+        "BE-035"
+      ],
+      "disposition": "Dated source findings and current corrective contracts",
+      "implementation_state": "NOT_PROVEN_BY_DOCUMENT",
+      "source_section": "04"
+    },
+    {
+      "canonical_units": [
+        "VAN-ML-PKT-005",
+        "VAN-ML-PKT-006",
+        "VAN-ML-PKT-007"
+      ],
+      "disposition": "Point-in-time data, target and cohort identity",
+      "implementation_state": "NOT_PROVEN_BY_DOCUMENT",
+      "source_section": "05"
+    },
+    {
+      "canonical_units": [
+        "VAN-ML-PKT-011",
+        "VAN-ML-PKT-012",
+        "VAN-ML-PKT-013",
+        "VAN-ML-PKT-014"
+      ],
+      "disposition": "Qlib/LightGBM actual model integrations retained",
+      "implementation_state": "NOT_PROVEN_BY_DOCUMENT",
+      "source_section": "06"
+    },
+    {
+      "canonical_units": [
+        "VAN-ML-PKT-008",
+        "VAN-ML-PKT-023"
+      ],
+      "disposition": "FreqAI patterns, causal/warmup diagnostics and worker lifecycle",
+      "implementation_state": "NOT_PROVEN_BY_DOCUMENT",
+      "source_section": "07"
+    },
+    {
+      "canonical_units": [
+        "VAN-ML-PKT-016",
+        "VAN-ML-PKT-017",
+        "VAN-ML-PKT-018",
+        "VAN-ML-PKT-019"
+      ],
+      "disposition": "Required NeuralForecast plugins and safe artifacts retained",
+      "implementation_state": "NOT_PROVEN_BY_DOCUMENT",
+      "source_section": "08"
+    },
+    {
+      "canonical_units": [
+        "VAN-ML-PKT-015",
+        "PRE-002"
+      ],
+      "disposition": "Kronos/Chronos additional challenger boundary, no profit/procurement inference",
+      "implementation_state": "NOT_PROVEN_BY_DOCUMENT",
+      "source_section": "09"
+    },
+    {
+      "canonical_units": [
+        "VAN-ML-PKT-020",
+        "VAN-ML-PKT-024",
+        "VAN-ML-PKT-025"
+      ],
+      "disposition": "One calibration, fusion and bounded serving owner",
+      "implementation_state": "NOT_PROVEN_BY_DOCUMENT",
+      "source_section": "10"
+    },
+    {
+      "canonical_units": [
+        "VAN-ML-PKT-037",
+        "VAN-ML-PKT-045",
+        "VAN-ML-PKT-046"
+      ],
+      "disposition": "Prediction-event intelligence and three research labs retained, no live event trading authority",
+      "implementation_state": "NOT_PROVEN_BY_DOCUMENT",
+      "source_section": "11"
+    },
+    {
+      "canonical_units": [
+        "BE-037",
+        "BE-039",
+        "BE-040",
+        "BE-041",
+        "BE-042",
+        "BE-043",
+        "BE-044"
+      ],
+      "disposition": "Read-only chain/wallet research retained separately from new CEX spot execution",
+      "implementation_state": "NOT_PROVEN_BY_DOCUMENT",
+      "source_section": "12"
+    },
+    {
+      "canonical_units": [
+        "BE-013",
+        "BE-035"
+      ],
+      "disposition": "Donor mechanism/strategy edge versus profit evidence",
+      "implementation_state": "NOT_PROVEN_BY_DOCUMENT",
+      "source_section": "13"
+    },
+    {
+      "canonical_units": [
+        "BE-009",
+        "BE-010",
+        "BE-012"
+      ],
+      "disposition": "Core durable parent/child qualified execution",
+      "implementation_state": "NOT_PROVEN_BY_DOCUMENT",
+      "source_section": "14"
+    },
+    {
+      "canonical_units": [
+        "BE-012",
+        "BE-035"
+      ],
+      "disposition": "Cost, fill, accounting and matched objective evaluation",
+      "implementation_state": "NOT_PROVEN_BY_DOCUMENT",
+      "source_section": "15"
+    },
+    {
+      "canonical_units": [
+        "BE-036",
+        "BQ-007"
+      ],
+      "disposition": "Both learning autonomy loops now required and testable",
+      "implementation_state": "NOT_PROVEN_BY_DOCUMENT",
+      "source_section": "16"
+    },
+    {
+      "canonical_units": [
+        "BE-021",
+        "BE-024",
+        "BQ-005"
+      ],
+      "disposition": "Asynchronous shared Jev, noninterference and ablation",
+      "implementation_state": "NOT_PROVEN_BY_DOCUMENT",
+      "source_section": "17"
+    },
+    {
+      "canonical_units": [
+        "BE-009",
+        "BE-011",
+        "BE-013"
+      ],
+      "disposition": "Modes and manual/auto ownership preserve current authority",
+      "implementation_state": "NOT_PROVEN_BY_DOCUMENT",
+      "source_section": "18"
+    },
+    {
+      "canonical_units": [
+        "BE-035",
+        "VAN-ML-PKT-010",
+        "BQ-009"
+      ],
+      "disposition": "Causal statistical/economic evaluation and full-account comparison",
+      "implementation_state": "NOT_PROVEN_BY_DOCUMENT",
+      "source_section": "19"
+    },
+    {
+      "canonical_units": [
+        "BQ-001",
+        "BQ-007",
+        "BQ-009"
+      ],
+      "disposition": "Positive/adverse/recovery contracts reconciled into global registry",
+      "implementation_state": "NOT_PROVEN_BY_DOCUMENT",
+      "source_section": "20"
+    },
+    {
+      "canonical_units": [
+        "BE-033"
+      ],
+      "disposition": "Existing VM governance, limits, recovery and observability",
+      "implementation_state": "NOT_PROVEN_BY_DOCUMENT",
+      "source_section": "21"
+    },
+    {
+      "canonical_units": [
+        "BE-032",
+        "UX-003",
+        "FE-013"
+      ],
+      "disposition": "Existing contextual UI/read models after BG",
+      "implementation_state": "NOT_PROVEN_BY_DOCUMENT",
+      "source_section": "22"
+    },
+    {
+      "canonical_units": [
+        "PRE-002",
+        "BQ-006",
+        "BG-001"
+      ],
+      "disposition": "One plan, fixed ownership, complete backend before UI",
+      "implementation_state": "NOT_PROVEN_BY_DOCUMENT",
+      "source_section": "23"
+    },
+    {
+      "canonical_units": [
+        "PRE-002",
+        "PRE-003"
+      ],
+      "disposition": "Open decisions, source/economic/runtime non-claims",
+      "implementation_state": "NOT_PROVEN_BY_DOCUMENT",
+      "source_section": "24"
+    }
+  ],
+  "source_sha256": "d3d1f8fe9e9c39e23d291115ac3a8b55c46bca8bdca48336dfd29736080ae7cf"
+}

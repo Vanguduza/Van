@@ -1,0 +1,85 @@
+........................................................................ [  6%]
+........................................................................ [ 13%]
+........................................................................ [ 20%]
+........................................................................ [ 27%]
+........................................................................ [ 33%]
+........................................................................ [ 40%]
+........................................................................ [ 47%]
+........................................................................ [ 54%]
+........................................................................ [ 61%]
+........................................................................ [ 67%]
+........................................................................ [ 74%]
+........................................................................ [ 81%]
+........................................................................ [ 88%]
+........................................................................ [ 95%]
+..............................................Timeout (0:02:00)!
+Thread 0x00007f77f63be740 (most recent call first):
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/encoder.py", line 258 in iterencode
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/encoder.py", line 200 in encode
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/__init__.py", line 238 in dumps
+  File "/workspace/van-review-2026-10-18/publish/trading/vati/core/canonical.py", line 42 in canonical_json
+  File "/workspace/van-review-2026-10-18/publish/trading/vati/core/canonical.py", line 46 in canonical_hash
+  File "/workspace/van-review-2026-10-18/publish/trading/vati/core/ledger.py", line 67 in _check_row
+  File "/workspace/van-review-2026-10-18/publish/trading/vati/core/ledger_pg.py", line 224 in _verify_from
+  File "/workspace/van-review-2026-10-18/publish/trading/vati/core/ledger_pg.py", line 202 in verify_chain
+  File "/workspace/van-review-2026-10-18/publish/trading/vati/execution/recovery_scope.py", line 35 in __init__
+  File "/workspace/van-review-2026-10-18/publish/trading/vati/app/session_recovery.py", line 100 in _recover_session
+  File "/workspace/van-review-2026-10-18/publish/trading/vati/app/session_recovery.py", line 84 in recover_session
+  File "/workspace/van-review-2026-10-18/publish/trading/vati/app/runner.py", line 46 in startup
+  File "/workspace/van-review-2026-10-18/publish/trading/vati/app/service.py", line 353 in _start_reconciled
+  File "/workspace/van-review-2026-10-18/publish/trading/vati/app/service.py", line 345 in start
+  File "/workspace/van-review-2026-10-18/publish/trading/tests/test_single_session_unknown_entry.py", line 391 in test_original_cold_refusal_does_not_require_missing_historical_thesis_inputs
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/_pytest/python.py", line 167 in pytest_pyfunc_call
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/pluggy/_callers.py", line 121 in _multicall
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/pluggy/_manager.py", line 120 in _hookexec
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/pluggy/_hooks.py", line 512 in __call__
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/_pytest/python.py", line 1707 in runtest
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/_pytest/runner.py", line 184 in pytest_runtest_call
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/pluggy/_callers.py", line 121 in _multicall
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/pluggy/_manager.py", line 120 in _hookexec
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/pluggy/_hooks.py", line 512 in __call__
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/_pytest/runner.py", line 250 in <lambda>
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/_pytest/runner.py", line 361 in from_call
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/_pytest/runner.py", line 249 in call_and_report
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/_pytest/runner.py", line 139 in runtestprotocol
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/_pytest/runner.py", line 118 in pytest_runtest_protocol
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/pluggy/_callers.py", line 121 in _multicall
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/pluggy/_manager.py", line 120 in _hookexec
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/pluggy/_hooks.py", line 512 in __call__
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/_pytest/main.py", line 408 in pytest_runtestloop
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/pluggy/_callers.py", line 121 in _multicall
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/pluggy/_manager.py", line 120 in _hookexec
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/pluggy/_hooks.py", line 512 in __call__
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/_pytest/main.py", line 384 in _main
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/_pytest/main.py", line 330 in wrap_session
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/_pytest/main.py", line 377 in pytest_cmdline_main
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/pluggy/_callers.py", line 121 in _multicall
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/pluggy/_manager.py", line 120 in _hookexec
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/pluggy/_hooks.py", line 512 in __call__
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/_pytest/config/__init__.py", line 229 in _main
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/_pytest/config/__init__.py", line 201 in main
+  File "/workspace/van-review-2026-10-18/publish/tools/rebuild/source_storage_audit.py", line 142 in main
+  File "/workspace/van-review-2026-10-18/publish/tools/rebuild/source_storage_audit.py", line 149 in <module>
+...
+=============================== warnings summary ===============================
+../../van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py:53
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+trading/tests/test_infra_live.py::test_deriv_ws_transport_over_a_real_websocket_server
+  /workspace/van-review-2026-10-18/publish/trading/vati/execution/transports/deriv_ws.py:97: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+    self._ws.send(wire)
+
+trading/tests/test_account_resource_versions.py::test_a_forked_child_cannot_inherit_the_parents_reentrant_permission
+  /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/multiprocessing/popen_fork.py:66: DeprecationWarning: This process (pid=259297) is multi-threaded, use of fork() may lead to deadlocks in the child.
+    self.pid = os.fork()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! KeyboardInterrupt !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/workspace/van-review-2026-10-18/publish/trading/vati/core/ledger.py:63: KeyboardInterrupt
+(to show a full traceback on KeyboardInterrupt use --full-trace)
+1057 passed, 4 warnings in 1800.29s (0:30:00)

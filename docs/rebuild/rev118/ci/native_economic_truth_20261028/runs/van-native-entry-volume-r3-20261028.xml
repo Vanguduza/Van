@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="4" time="0.850" timestamp="2026-10-28T21:46:53.356116+00:00" hostname="6e9feff21467"><testcase classname="trading.tests.test_native_entry_volume" name="test_actual_original_entry_receipts_and_native_deals_retain_exact_gross_volume" time="0.422"><failure message="vati.core.ledger.LedgerError: evidence availability anchor missing from requested trade scope">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-218/test_actual_original_entry_rec0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_actual_original_entry_receipts_and_native_deals_retain_exact_gross_volume(tmp_path,eurusd):
+        ledger,adapter,book,clock,command,binding=dispatched(tmp_path,eurusd)
+        try:
+            observe(ledger,clock,[(1,2,7,200000,D('-.01')),(2,2,7,300000,None)])
+            count=ledger.count();calls=len(adapter.transport.calls)
+            with localcontext() as context:
+                context.prec=2;context.traps[Inexact]=True;context.traps[Rounded]=True
+&gt;               result=book.lookup_entry_volume(command.command_hash,binding['source_ref'],available_at_ms=clock['ms'])
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_native_entry_volume.py:47: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/risk/native_margin_book.py:116: in lookup_entry_volume
+    return read_original_entry_volume(self,command_hash,source_ref,available_at_ms=available_at_ms).body()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/risk/native_entry_volume.py:88: in read_original_entry_volume
+    observations=DealBook(book.ledger).observations(scope_hash,as_of=available_at_ms)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/funding/journal.py:112: in observations
+    events=self._events(scope_hash,as_of);originals={};conflicts=[];windows=[]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/funding/journal.py:60: in _events
+    rows=history_through(self.ledger,correlation,as_of) if as_of else list(self.ledger.iter(self.kind,correlation_id=correlation))
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ledger = &lt;vati.core.ledger.Ledger object at 0x7fbb4fb28800&gt;
+correlation_id = 'funding-deals:9416990f89cc231045967018d529f8f2a4f42488499c86fb9f71bedc2f9c7f3b'
+anchor = 1800000001003
+
+    def history_through(ledger, correlation_id: str, anchor: str):
+        """Fully read a subject's journal, then retain its original availability.
+    
+        A hash addresses the first publication of an immutable record; replaying
+        identical bytes later cannot move that record's original availability.
+        """
+        rows = list(ledger.iter(correlation_id=correlation_id))
+        for index, event in enumerate(rows):
+            if event.hash == anchor:
+                if event.hash != canonical_hash(event.body()):
+                    raise LedgerError("evidence availability anchor seal mismatch")
+                return rows[:index+1]
+&gt;       raise LedgerError("evidence availability anchor missing from requested trade scope")
+E       vati.core.ledger.LedgerError: evidence availability anchor missing from requested trade scope
+
+trading/vati/core/ledger.py:75: LedgerError</failure></testcase><testcase classname="trading.tests.test_native_entry_volume" name="test_duplicate_native_statements_and_other_orders_never_reduce_or_repeat_gross_entries" time="0.041"><failure message="vati.core.ledger.LedgerError: evidence availability anchor missing from requested trade scope">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-218/test_duplicate_native_statemen0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_duplicate_native_statements_and_other_orders_never_reduce_or_repeat_gross_entries(tmp_path,eurusd):
+        ledger,adapter,book,clock,command,binding=dispatched(tmp_path,eurusd)
+        try:
+            rows=[(1,2,7,200000,D('-.01')),(2,2,7,300000,None)]
+            observe(ledger,clock,rows)
+            clock['ms']+=1
+            # Preserve original economic row times when repeating a vintage.
+            statement=list(ledger.iter(EventKind.FUNDING_DEAL_STATEMENT))[0].payload['statement']
+            repeated=NativeDealStatement.from_body(statement)
+            DealBook(ledger,clock=lambda:clock['ms']).record_statement(replace(repeated,observed_at_ms=clock['ms'],to_ms=clock['ms']))
+            observe(ledger,clock,[(3,99,7,500000,D('99'))])
+&gt;           result=book.lookup_entry_volume(command.command_hash,binding['source_ref'],available_at_ms=clock['ms'])
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_native_entry_volume.py:71: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/risk/native_margin_book.py:116: in lookup_entry_volume
+    return read_original_entry_volume(self,command_hash,source_ref,available_at_ms=available_at_ms).body()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/risk/native_entry_volume.py:88: in read_original_entry_volume
+    observations=DealBook(book.ledger).observations(scope_hash,as_of=available_at_ms)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/funding/journal.py:112: in observations
+    events=self._events(scope_hash,as_of);originals={};conflicts=[];windows=[]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/funding/journal.py:60: in _events
+    rows=history_through(self.ledger,correlation,as_of) if as_of else list(self.ledger.iter(self.kind,correlation_id=correlation))
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ledger = &lt;vati.core.ledger.Ledger object at 0x7fbb4fba98b0&gt;
+correlation_id = 'funding-deals:9416990f89cc231045967018d529f8f2a4f42488499c86fb9f71bedc2f9c7f3b'
+anchor = 1800000001004
+
+    def history_through(ledger, correlation_id: str, anchor: str):
+        """Fully read a subject's journal, then retain its original availability.
+    
+        A hash addresses the first publication of an immutable record; replaying
+        identical bytes later cannot move that record's original availability.
+        """
+        rows = list(ledger.iter(correlation_id=correlation_id))
+        for index, event in enumerate(rows):
+            if event.hash == anchor:
+                if event.hash != canonical_hash(event.body()):
+                    raise LedgerError("evidence availability anchor seal mismatch")
+                return rows[:index+1]
+&gt;       raise LedgerError("evidence availability anchor missing from requested trade scope")
+E       vati.core.ledger.LedgerError: evidence availability anchor missing from requested trade scope
+
+trading/vati/core/ledger.py:75: LedgerError</failure></testcase><testcase classname="trading.tests.test_native_entry_volume" name="test_missing_deals_are_not_zero_outstanding_and_late_conflicts_refuse_current_use" time="0.047"><failure message="vati.core.ledger.LedgerError: evidence availability anchor missing from requested trade scope">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-218/test_missing_deals_are_not_zer0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_missing_deals_are_not_zero_outstanding_and_late_conflicts_refuse_current_use(tmp_path,eurusd):
+        ledger,adapter,book,clock,command,binding=dispatched(tmp_path,eurusd)
+        try:
+&gt;           empty=book.lookup_entry_volume(command.command_hash,binding['source_ref'],available_at_ms=clock['ms'])
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_native_entry_volume.py:80: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/risk/native_margin_book.py:116: in lookup_entry_volume
+    return read_original_entry_volume(self,command_hash,source_ref,available_at_ms=available_at_ms).body()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/risk/native_entry_volume.py:88: in read_original_entry_volume
+    observations=DealBook(book.ledger).observations(scope_hash,as_of=available_at_ms)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/funding/journal.py:112: in observations
+    events=self._events(scope_hash,as_of);originals={};conflicts=[];windows=[]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/funding/journal.py:60: in _events
+    rows=history_through(self.ledger,correlation,as_of) if as_of else list(self.ledger.iter(self.kind,correlation_id=correlation))
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ledger = &lt;vati.core.ledger.Ledger object at 0x7fbb4fb73320&gt;
+correlation_id = 'funding-deals:9416990f89cc231045967018d529f8f2a4f42488499c86fb9f71bedc2f9c7f3b'
+anchor = 1800000001003
+
+    def history_through(ledger, correlation_id: str, anchor: str):
+        """Fully read a subject's journal, then retain its original availability.
+    
+        A hash addresses the first publication of an immutable record; replaying
+        identical bytes later cannot move that record's original availability.
+        """
+        rows = list(ledger.iter(correlation_id=correlation_id))
+        for index, event in enumerate(rows):
+            if event.hash == anchor:
+                if event.hash != canonical_hash(event.body()):
+                    raise LedgerError("evidence availability anchor seal mismatch")
+                return rows[:index+1]
+&gt;       raise LedgerError("evidence availability anchor missing from requested trade scope")
+E       vati.core.ledger.LedgerError: evidence availability anchor missing from requested trade scope
+
+trading/vati/core/ledger.py:75: LedgerError</failure></testcase><testcase classname="trading.tests.test_native_entry_volume" name="test_symbol_conflict_cannot_attribute_a_native_order_to_another_instrument" time="0.041"><failure message="vati.core.ledger.LedgerError: evidence availability anchor missing from requested trade scope">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-218/test_symbol_conflict_cannot_at0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_symbol_conflict_cannot_attribute_a_native_order_to_another_instrument(tmp_path,eurusd):
+        ledger,adapter,book,clock,command,binding=dispatched(tmp_path,eurusd)
+        try:
+            observe(ledger,clock,[(1,2,99,200000,None)])
+            with pytest.raises(NativeEntryVolumeError,match='SYMBOL_CONFLICT'):
+&gt;               book.lookup_entry_volume(command.command_hash,binding['source_ref'],available_at_ms=clock['ms'])
+
+trading/tests/test_native_entry_volume.py:95: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/risk/native_margin_book.py:116: in lookup_entry_volume
+    return read_original_entry_volume(self,command_hash,source_ref,available_at_ms=available_at_ms).body()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/risk/native_entry_volume.py:88: in read_original_entry_volume
+    observations=DealBook(book.ledger).observations(scope_hash,as_of=available_at_ms)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/funding/journal.py:112: in observations
+    events=self._events(scope_hash,as_of);originals={};conflicts=[];windows=[]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/funding/journal.py:60: in _events
+    rows=history_through(self.ledger,correlation,as_of) if as_of else list(self.ledger.iter(self.kind,correlation_id=correlation))
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ledger = &lt;vati.core.ledger.Ledger object at 0x7fbb4fbb33e0&gt;
+correlation_id = 'funding-deals:9416990f89cc231045967018d529f8f2a4f42488499c86fb9f71bedc2f9c7f3b'
+anchor = 1800000001003
+
+    def history_through(ledger, correlation_id: str, anchor: str):
+        """Fully read a subject's journal, then retain its original availability.
+    
+        A hash addresses the first publication of an immutable record; replaying
+        identical bytes later cannot move that record's original availability.
+        """
+        rows = list(ledger.iter(correlation_id=correlation_id))
+        for index, event in enumerate(rows):
+            if event.hash == anchor:
+                if event.hash != canonical_hash(event.body()):
+                    raise LedgerError("evidence availability anchor seal mismatch")
+                return rows[:index+1]
+&gt;       raise LedgerError("evidence availability anchor missing from requested trade scope")
+E       vati.core.ledger.LedgerError: evidence availability anchor missing from requested trade scope
+
+trading/vati/core/ledger.py:75: LedgerError</failure></testcase></testsuite></testsuites>

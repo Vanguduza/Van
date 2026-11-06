@@ -1,0 +1,94 @@
+
+### ['tests/test_command_success_contract.py', 'tests/test_verification_is_performed.py']
+CAUGHT             C5 drop the owner-halt claim
+CAUGHT             C5 revert the joint
+CAUGHT             C5 accept a stale ledger
+CAUGHT             C5 unreachable provider reads as a deletion
+CAUGHT             C5 cite evidence on a failed halt
+
+5/5 caught
+
+### ['tests/test_interactive_browser_session.py']
+CAUGHT             C23 a stale control generation actuates
+CAUGHT             C23 a fabricated control lease id actuates
+CAUGHT             C23 the control fence never moves
+CAUGHT             C23 input lands before the device acknowledges the layout
+CAUGHT             C23 a stale viewport revision actuates
+CAUGHT             C23 the cleanup grace extends actuation authority
+CAUGHT             C23 the grant verifier accepts the algorithm the token names
+CAUGHT             C23 a stream grant is redeemable twice
+CAUGHT             C23 one device's events reach another device
+CAUGHT             C23 the cursor sticks behind another device's rows
+
+10/10 caught
+
+### ['tests/test_voice_speech_stream.py']
+CAUGHT             C30 resume from what arrived, putting a hole in the middle of the answer
+CAUGHT             C30 a device that restarted its queue makes VAN repeat a sentence
+CAUGHT             C30 two streams for one answer, so de-duplication by segment id stops working
+CAUGHT             C30 a barged-in answer is resumed, finishing a sentence the owner cut off
+CAUGHT             C30 delivered counts as heard
+CAUGHT             C30 a pause lands in the middle of 'approx. 40 percent'
+CAUGHT             C30 a long sentence is never actually split
+CAUGHT             C30 every segment claims to be the end of the answer
+
+8/8 caught
+
+### ['tests/test_device_proof_enforcement.py']
+CAUGHT             C28 the proof is verified by nobody, as before
+CAUGHT             C28 a missing proof header is treated as a valid proof
+CAUGHT             C28 a second paired device skips the gate by never enrolling
+CAUGHT             C28 any device may present the owner's proof
+CAUGHT             C28 the proof covers an empty body rather than this request's
+CAUGHT             C28 a Keystore signature is demanded on every poll
+
+6/6 caught
+
+### ['tests/test_browser_takeover_and_downloads.py', 'tests/test_browser_mission_binding_regression.py']
+CAUGHT             C31 quarantine becomes a step on the way to completed
+CAUGHT             C31 a dangerous file completes like any other
+CAUGHT             C31 a server that lied at creation is believed at completion
+CAUGHT             C31 setup.exe served as text/plain is safe
+CAUGHT             C31 invoice.pdf served as an executable is safe
+CAUGHT             C31 ../../.bashrc is a filename
+CAUGHT             C31 a quarantined file whose reason was lost is one tap from opening
+CAUGHT             C31 a caller's own dangerous verdict is ignored
+CAUGHT             C31 a grant already preempted is preempted again, losing when it happened
+CAUGHT             C31 taking control preempts grants issued after it
+CAUGHT             C31 the queue survives preemption, so the agent acts after the owner took over
+CAUGHT             C31 a refused mission binding strands the owner's profile
+CAUGHT             C31 a file appears in a browser the owner already closed
+CAUGHT             C31 a download is reported started and never leaves CREATED
+CAUGHT             C31 one session's device deletes another session's download
+
+15/15 caught
+
+### ['tests/test_browser_quality_api.py', 'tests/test_session_transport_api.py', 'tests/test_observability_metrics.py']
+CAUGHT             C33 a phone certifies its own session and the field is quietly ignored
+CAUGHT             C33 the hysteresis streak restarts on every report
+CAUGHT             C33 a closed session's data usage is billed to the next one
+CAUGHT             C33 a tunnel is reported as a carrier route failure
+CAUGHT             C33 a failover that never came back is not counted
+CAUGHT             C33 a second carrier on the same road is reported as a recovered route
+CAUGHT             C33 an outbox depth with no storability is bucketed with the retry queue
+
+7/7 caught
+
+### ['tests/contracts/test_owner_surfaces_are_reachable.py']
+CAUGHT             C20 the work screen has no render branch
+CAUGHT             C20 the work screen is not navigable
+CAUGHT             C20 the work screen never binds the repository result
+CAUGHT             C20 setting an app policy does nothing
+CAUGHT             C20 the open mission is lost on rotation
+
+5/5 caught
+
+### ['backend/tests/test_google_capabilities_have_routes.py', 'backend/tests/test_control_scopes.py']
+CAUGHT             C19 two new routes fall outside the scope set
+CAUGHT             C19 Google provider executes an A4 record that never received owner approval
+CAUGHT             C19 the owner's tasks reachable with a device token (both guards removed)
+
+3/3 caught
+
+================ SURVIVORS ================
+none

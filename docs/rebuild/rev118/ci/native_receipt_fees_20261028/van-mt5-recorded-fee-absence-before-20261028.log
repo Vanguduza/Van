@@ -1,0 +1,50 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+_____ test_real_signed_worker_result_without_charge_fields_is_not_fee_zero _____
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-230/test_real_signed_worker_result0')
+
+    def test_real_signed_worker_result_without_charge_fields_is_not_fee_zero(tmp_path):
+        worker, client, native = build(tmp_path)
+        adapter = Mt5BridgeAdapter(client, clock=lambda:1000000)
+        receipt = adapter.submit(command(1001000), now_ms=1000000)
+        assert receipt.status == 'FILLED' and receipt.filled_qty == D('.1')
+        assert receipt.protective_stop_confirmed and len(adapter.positions()) == 1
+>       assert receipt.fees is None, 'the signed worker returns no measured charge fields'
+E       AssertionError: the signed worker returns no measured charge fields
+E       assert Decimal('0') is None
+E        +  where Decimal('0') = ExecutionReceipt(trade_intent_id='deadline-original', decision_hash='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...protective_stop_price=Decimal('1.09'), receipt_hash='ae328ee6398093d19c4f95f1b9eb1985cf13bf2ae7d78935b9f5e98723969829').fees
+
+../../test_van_mt5_recorded_fee_absence_20261028.py:17: AssertionError
+______ test_actual_ea_function_fill_without_charge_fields_is_not_fee_zero ______
+
+ea = <function ea.<locals>.run at 0x7ff6804c91c0>
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-230/test_actual_ea_function_fill_w0')
+
+    def test_actual_ea_function_fill_without_charge_fields_is_not_fee_zero(ea, tmp_path):
+        queue = BridgeQueue(tmp_path/'native-result.sqlite3')
+        try:
+            native = ea('entry-market')['results'][0]
+            receipt = Mt5PullAdapter(queue)._entry_receipt(pull_command(), native, now_ms=1700000000000)
+            assert receipt.status in ('FILLED','PARTIAL') and receipt.filled_qty > 0
+            assert receipt.protective_stop_confirmed
+>           assert receipt.fees is None, 'the original EA reply does not measure commission or fees'
+E           AssertionError: the original EA reply does not measure commission or fees
+E           assert Decimal('0') is None
+E            +  where Decimal('0') = ExecutionReceipt(trade_intent_id='fixture', decision_hash='0000007b000000000000000000000000000000000000000000000000000...protective_stop_price=Decimal('1.12'), receipt_hash='d97dd73d8667943efdcb4c7174fc1442de6ab97ad553b133e7050b5e575c6811').fees
+
+../../test_van_mt5_recorded_fee_absence_20261028.py:27: AssertionError
+=============================== warnings summary ===============================
+../../van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py:53
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED ../../test_van_mt5_recorded_fee_absence_20261028.py::test_real_signed_worker_result_without_charge_fields_is_not_fee_zero
+FAILED ../../test_van_mt5_recorded_fee_absence_20261028.py::test_actual_ea_function_fill_without_charge_fields_is_not_fee_zero
+2 failed, 2 warnings in 7.07s

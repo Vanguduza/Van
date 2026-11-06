@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="4" time="0.329" timestamp="2026-10-26T22:50:56.131112+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_bar_aggregation_boundaries" name="test_failed_arithmetic_neither_flushes_nor_partially_updates_original_state[price-False]" time="0.140" /><testcase classname="trading.tests.test_bar_aggregation_boundaries" name="test_failed_arithmetic_neither_flushes_nor_partially_updates_original_state[price-True]" time="0.001" /><testcase classname="trading.tests.test_bar_aggregation_boundaries" name="test_failed_arithmetic_neither_flushes_nor_partially_updates_original_state[volume-False]" time="0.002" /><testcase classname="trading.tests.test_bar_aggregation_boundaries" name="test_failed_arithmetic_neither_flushes_nor_partially_updates_original_state[volume-True]" time="0.001"><failure message="AssertionError: assert (0, 1, Decima...ecimal('3.5')) == (0, 1, Decima...ecimal('1.5'))&#10;  &#10;  At index 4 diff: Decimal('3.5') != Decimal('1.5')&#10;  Use -v to get more diff">same_interval = True, field = 'volume'
+
+    @pytest.mark.parametrize('same_interval',[False,True])
+    @pytest.mark.parametrize('field',['price','volume'])
+    def test_failed_arithmetic_neither_flushes_nor_partially_updates_original_state(same_interval,field):
+        agg=BarAggregator('EURUSD',60000);agg.push(Tick(1,Decimal('1'),Decimal('2'),Decimal('3')))
+        bid,ask,volume=(Decimal('1e999999999'),Decimal('1e999999999'),Decimal('0')) if field=='price' else (Decimal('3'),Decimal('4'),Decimal('1e999999999'))
+        with pytest.raises(Overflow):
+            agg.push(Tick(2 if same_interval else 60001,bid,ask,volume))
+        bar=agg.finish()
+&gt;       assert (bar.start_ms,bar.ticks,bar.volume,bar.open,bar.close)==(0,1,Decimal('3'),Decimal('1.5'),Decimal('1.5'))
+E       AssertionError: assert (0, 1, Decima...ecimal('3.5')) == (0, 1, Decima...ecimal('1.5'))
+E         
+E         At index 4 diff: Decimal('3.5') != Decimal('1.5')
+E         Use -v to get more diff
+
+trading/tests/test_bar_aggregation_boundaries.py:89: AssertionError</failure></testcase></testsuite></testsuites>

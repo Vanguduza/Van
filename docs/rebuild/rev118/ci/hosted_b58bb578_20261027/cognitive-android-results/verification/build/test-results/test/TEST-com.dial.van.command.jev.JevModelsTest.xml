@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.command.jev.JevModelsTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-27T06:50:49" hostname="runnervmtai0g" time="0.018">
+  <properties/>
+  <testcase name="snapshot preserves optional global project and provider qualification state()" classname="com.dial.van.command.jev.JevModelsTest" time="0.008"/>
+  <testcase name="safety projection preserves deterministic breach evidence()" classname="com.dial.van.command.jev.JevModelsTest" time="0.003"/>
+  <testcase name="evaluator proposals remain advisory read models()" classname="com.dial.van.command.jev.JevModelsTest" time="0.001"/>
+  <testcase name="activity and performance projections do not mint authority fields()" classname="com.dial.van.command.jev.JevModelsTest" time="0.001"/>
+  <testcase name="review and candidate projections preserve independent lineage()" classname="com.dial.van.command.jev.JevModelsTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

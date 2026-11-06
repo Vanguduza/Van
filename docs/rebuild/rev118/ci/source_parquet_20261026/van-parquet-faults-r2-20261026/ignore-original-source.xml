@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="2.155" timestamp="2026-10-26T08:47:07.230389+00:00" hostname="2c5a245e39f1"><testcase classname="trading.worker_tests.test_native_source_parquet" name="test_claimed_window_cannot_replace_actual_archive_resolution" time="1.201"><failure message="Failed: DID NOT RAISE ValueError">source = (&lt;vati.market_data.native_archive.NativeMarketArchive object at 0x7f4934a2dd60&gt;, NativeSymbolContract(metadata_json='{...transport_host': 'demo.ctraderapi.com', 'native_account_id': 123, ...}, 'timeframe': 'M1', 'through_revision': 1, ...})
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-365/test_claimed_window_cannot_rep0')
+arrow = &lt;module 'pyarrow' from '/workspace/van-parquet-source-venv-20261026/lib/python3.12/site-packages/pyarrow/__init__.py'&gt;
+
+    def test_claimed_window_cannot_replace_actual_archive_resolution(source, tmp_path, arrow):
+        book, contract, sample, window = source
+        service = NativeBarPartitionService(NativeBarWindowReader(book), tmp_path/'derived')
+        fake = deepcopy(window); fake['rows'][0]['bar']['close'] = fake['rows'][0]['bar']['low']; rehash(fake)
+&gt;       with pytest.raises(ValueError, match='ORIGINAL_READBACK_CONFLICT'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/worker_tests/test_native_source_parquet.py:112: Failed</failure></testcase></testsuite></testsuites>

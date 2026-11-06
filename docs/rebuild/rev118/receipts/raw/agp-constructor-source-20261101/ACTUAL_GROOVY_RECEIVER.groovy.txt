@@ -1,0 +1,9 @@
+def paths = []
+def labels = [['Van', ':'], ['buildSrc', ':'], ['Van', ':app']]
+def projects = labels.collect { label ->
+    [rootProject: [name:label[0]], path:label[1], layout:[buildDirectory:[set: { File f -> paths.add(f.canonicalPath) }]]]
+}
+def gradle = [beforeProject: { Closure callback -> projects.each { callback(it) } }]
+new GroovyShell(new Binding([gradle:gradle])).evaluate(new File(args[0]))
+assert paths.size()==3 && paths.toSet().size()==3
+paths.each { println it }

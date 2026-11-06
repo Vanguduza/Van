@@ -17,7 +17,11 @@
       "licence_class": "PERMISSIVE",
       "adoption_decision_ref": "docs/decisions/VAN-ADOPT-STAGEHAND-001.yaml",
       "pin_status": "UNPINNED_VERIFY_AT_ADOPTION",
-      "source_of_truth": "deploy/van-trading-core/browser/package.json"
+      "source_of_truth": "deploy/van-browser-core/browser/package.json",
+      "upstream_release_commit": "cd7b230778cf92269e4cb90e80d97f5113781c51",
+      "npm_integrity": "sha512-PJikMBVoaCRh6TFD7GcmeISmsMq4IwUu1BD5FOsGUVDUxrVqZomWa6W6dF+a/zu4xRZu2Z2xX1nXVMDaCuZWsw==",
+      "production_zone": "van-browser-core",
+      "model": "anthropic/claude-sonnet-5"
     },
     "browser_harness": {
       "version": "0.1.13",
@@ -42,14 +46,14 @@
       "licence": "Apache-2.0",
       "licence_class": "PERMISSIVE",
       "pin_status": "PINNED",
-      "source_of_truth": "deploy/van-trading-core/browser/package.json"
+      "source_of_truth": "deploy/van-browser-core/browser/package.json"
     },
     "node": {
       "version": ">=22.18.0 <23",
       "licence": "MIT",
       "licence_class": "PERMISSIVE",
       "pin_status": "PINNED",
-      "source_of_truth": "deploy/van-trading-core/browser/package.json"
+      "source_of_truth": "deploy/van-browser-core/browser/package.json"
     }
   }
 }

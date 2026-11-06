@@ -200,6 +200,12 @@ async def test_task_completion_records_status(tmp_path):
         autonomy_tier=AutonomyTier.L1_HARNESS_DETERMINISTIC, action_class=ActionClass.A2,
         target_domain="research.example.com", goal="capture",
     )
+    # Review I M-2: COMPLETED is refused until the verifier's VERIFIED verdict is recorded.
+    from van_gateway.browser.service import BrowserTaskNotVerified
+
+    with pytest.raises(BrowserTaskNotVerified):
+        await service.complete(task_id=task.task_id, status=BrowserTaskStatus.COMPLETED)
+    await service.record_verification(task=task, outcome="VERIFIED", verifier="test")
     await service.complete(
         task_id=task.task_id, status=BrowserTaskStatus.COMPLETED,
         evidence_pointer="gateway://browser/evidence/1",
@@ -255,16 +261,27 @@ async def test_harness_envelope_disables_helper_authoring(tmp_path):
         ExternalRuntimeRegistry(store), base_url="http://127.0.0.1:9141", enabled=True,
         transport=httpx.MockTransport(handler),
     )
-    await adapter.navigate(task, "https://research.example.com/a")
+    # Review I4 MINOR-A: a mutating Harness call is sent only under a lease fence.
+    from van_gateway.browser.adapters import HarnessLeaseFence, harness_lease_fence
+
+    with harness_lease_fence(HarnessLeaseFence(task.profile_alias, task.task_id, 1)):
+        await adapter.navigate(task, "https://research.example.com/a")
     assert seen["mode"] == "PRODUCTION_ACTUATOR"
     assert seen["allow_helper_authoring"] is False
+    assert (seen["lease_generation"], seen["lease_holder_id"]) == (1, task.task_id)
 
 
 async def test_stagehand_unconfigured_without_model_provider(tmp_path):
-    """§418 — no configured provider means the adapter is unconfigured, not defaulted."""
+    """§418 — no configured provider means the adapter is unconfigured, not defaulted.
+
+    Owner decision 2026-09-29 §4: the provider/model come from settings (anthropic /
+    claude-sonnet-5). Settings with no provider leave the adapter unconfigured; the code
+    itself never supplies one.
+    """
     store = await make_store(tmp_path)
     adapter = StagehandAdapter(
-        ExternalRuntimeRegistry(store), base_url="http://127.0.0.1:9140", enabled=True
+        ExternalRuntimeRegistry(store), base_url="http://127.0.0.1:9140", enabled=True,
+        model_provider="", model_name="",
     )
     assert adapter.configured is False
     status = await adapter.status()
@@ -368,6 +385,9 @@ async def test_stagehand_envelope_pins_provider(tmp_path):
         ExternalRuntimeRegistry(store), base_url="http://127.0.0.1:9140", enabled=True,
         model_provider="anthropic", model_name="claude-sonnet-5",
         transport=httpx.MockTransport(handler),
+        # Review I B-1: the envelope is under test here, not the production gate
+        # (tests/test_stagehand_adapter_gate.py), so this adapter is handed an open one.
+        production_gate=lambda: (True, "TEST_GATE_OPEN"),
     )
     await adapter.observe(task, "find the download link")
     assert seen["model_provider"] == "anthropic"

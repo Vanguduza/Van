@@ -37,6 +37,9 @@ class OpportunityAssessment:
     #: these away and re-derive a single target from expected_gross_move_pct, so a strategy
     #: with a scaled exit plan had it silently replaced by one price.
     targets: tuple[Decimal, ...] = ()
+    #: P1-TRADE-EXEC-004 — the winning signal's own entry type (LIMIT | STOP | MARKET |
+    #: PASSIVE_LIMIT). The decision cycle sent every order as LIMIT.
+    entry_type: str = "LIMIT"
     assessment_hash: str = ""
 
 
@@ -187,6 +190,7 @@ class OpportunityEngine:
                 is_event_certified=cap.event_certified, meta_label=mv.label.value,
                 evidence_refs=tuple(mv.reasons) + self._lesson_evidence(
                     cap.strategy_id, state, regime_label),
+                entry_type=sig.entry_type,
             ).sealed())
         return tuple(out)
 
@@ -239,7 +243,8 @@ class OpportunityEngine:
         decision_body = {"state_hash": state.state_hash, "strategy_id": cap.strategy_id, "capsule_hash": cap.capsule_hash, "signal": sig.__dict__, "meta": mv.__dict__, "horizon": horizon}
         decision_hash = canonical_hash(decision_body)
         intent = TradeIntent(
-            trade_intent_id=str(uuid.uuid5(uuid.NAMESPACE_URL, f"vati:{decision_hash}")),
+            trade_intent_id=str(uuid.uuid5(uuid.NAMESPACE_URL, 'vati.intent/2:'+canonical_hash({
+                'account_alias':account_alias,'venue':venue,'decision_hash':decision_hash}))),
             idempotency_key=canonical_hash({"seed": idempotency_seed, "decision": decision_hash})[:32],
             account_alias=account_alias, venue=venue, symbol=sig.symbol, direction=sig.direction, strategy_id=cap.strategy_id, strategy_version=cap.version,
             strategy_state=cap.state, entry=sig.entry, stop=sig.stop, requested_risk_pct=Decimal(str(cap.data["risk_limits"].get("max_risk_per_trade", "0.005"))),
@@ -248,5 +253,5 @@ class OpportunityEngine:
             regime_multiplier=mv.regime_multiplier, confidence_multiplier=mv.confidence_multiplier, volatility_multiplier=mv.volatility_multiplier,
             liquidity_multiplier=mv.liquidity_multiplier, event_risk_multiplier=mv.event_risk_multiplier,
         )
-        oa = OpportunityAssessment(state.symbol, state.as_of_ms, state.activation_id, state.state_hash, tuple(cands), mv.label.value, "", intent, targets=tuple(sig.targets))
+        oa = OpportunityAssessment(state.symbol, state.as_of_ms, state.activation_id, state.state_hash, tuple(cands), mv.label.value, "", intent, targets=tuple(sig.targets), entry_type=sig.entry_type)
         return OpportunityAssessment(**{**oa.__dict__, "assessment_hash": canonical_hash({k: (v.__dict__ if k == "intent" else v) for k, v in oa.__dict__.items() if k != "assessment_hash"})})

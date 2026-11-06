@@ -1,0 +1,404 @@
+{
+  "application_tests_executed_by_audit": 0,
+  "audited_commit": "172d2143d3e6d2ec4b401376f5ef5a4cf94c7429",
+  "contexts_with_inline_endpoint_references": 73,
+  "counts": {
+    "actions": 349,
+    "contexts": 234,
+    "external_qualification": 82,
+    "features": 93,
+    "product_truth": 22,
+    "requirements": 324,
+    "services": 82,
+    "source_atoms": 171,
+    "tests": 1610,
+    "units": 131
+  },
+  "date": "2026-10-21",
+  "domain_context_counts": {
+    "ACCOUNTS": 20,
+    "CHART": 23,
+    "HOME": 12,
+    "INTEL": 27,
+    "MEMORY": 14,
+    "MORE": 19,
+    "ORDERS": 26,
+    "PRESENCE": 10,
+    "TRADE": 15,
+    "TRADING_INTELLIGENCE": 12,
+    "Trading / Intelligence / Research \u2014 existing contextual navigation": 6,
+    "WORK": 50
+  },
+  "feature_primary_test_owner_mismatches": [
+    {
+      "id": "VNX-F-HOME-01",
+      "interpretation": "Primary owner absent from directly linked feature-test ownership; review delegation/additional-unit binding, not proof feature is missing.",
+      "primary_frontend_unit": "FE-004",
+      "test_ids": [
+        "T-FEATURE-HOME-01"
+      ],
+      "test_units": [
+        "FE-001"
+      ],
+      "title": "Spatial Home"
+    },
+    {
+      "id": "VNX-F-HOME-06",
+      "interpretation": "Primary owner absent from directly linked feature-test ownership; review delegation/additional-unit binding, not proof feature is missing.",
+      "primary_frontend_unit": "FE-003",
+      "test_ids": [
+        "T-FEATURE-HOME-06"
+      ],
+      "test_units": [
+        "FE-001"
+      ],
+      "title": "Semantic deep links"
+    },
+    {
+      "id": "VNX-F-HOME-07",
+      "interpretation": "Primary owner absent from directly linked feature-test ownership; review delegation/additional-unit binding, not proof feature is missing.",
+      "primary_frontend_unit": "FE-004",
+      "test_ids": [
+        "T-FEATURE-HOME-07"
+      ],
+      "test_units": [
+        "FE-003"
+      ],
+      "title": "Home state fallbacks"
+    },
+    {
+      "id": "VNX-F-TRADE-02",
+      "interpretation": "Primary owner absent from directly linked feature-test ownership; review delegation/additional-unit binding, not proof feature is missing.",
+      "primary_frontend_unit": "FE-006",
+      "test_ids": [
+        "T-FEATURE-TRADE-02"
+      ],
+      "test_units": [
+        "FE-009"
+      ],
+      "title": "Portfolio summary"
+    },
+    {
+      "id": "VNX-F-TRADE-05",
+      "interpretation": "Primary owner absent from directly linked feature-test ownership; review delegation/additional-unit binding, not proof feature is missing.",
+      "primary_frontend_unit": "FE-006",
+      "test_ids": [
+        "T-FEATURE-TRADE-05"
+      ],
+      "test_units": [
+        "FE-014"
+      ],
+      "title": "Opportunity discovery"
+    },
+    {
+      "id": "VNX-F-TRADE-06",
+      "interpretation": "Primary owner absent from directly linked feature-test ownership; review delegation/additional-unit binding, not proof feature is missing.",
+      "primary_frontend_unit": "FE-006",
+      "test_ids": [
+        "T-FEATURE-TRADE-06"
+      ],
+      "test_units": [
+        "FE-007"
+      ],
+      "title": "Charts entry"
+    },
+    {
+      "id": "VNX-F-TRADE-07",
+      "interpretation": "Primary owner absent from directly linked feature-test ownership; review delegation/additional-unit binding, not proof feature is missing.",
+      "primary_frontend_unit": "FE-006",
+      "test_ids": [
+        "T-FEATURE-TRADE-07"
+      ],
+      "test_units": [
+        "FE-013"
+      ],
+      "title": "Intelligence entry"
+    },
+    {
+      "id": "VNX-F-TRADE-08",
+      "interpretation": "Primary owner absent from directly linked feature-test ownership; review delegation/additional-unit binding, not proof feature is missing.",
+      "primary_frontend_unit": "FE-006",
+      "test_ids": [
+        "T-FEATURE-TRADE-08"
+      ],
+      "test_units": [
+        "FE-010"
+      ],
+      "title": "Account context entry"
+    },
+    {
+      "id": "VNX-F-CHART-03",
+      "interpretation": "Primary owner absent from directly linked feature-test ownership; review delegation/additional-unit binding, not proof feature is missing.",
+      "primary_frontend_unit": "FE-007",
+      "test_ids": [
+        "T-FEATURE-CHART-03"
+      ],
+      "test_units": [
+        "FE-001"
+      ],
+      "title": "Instrument search and alias mapping"
+    },
+    {
+      "id": "VNX-F-CHART-04",
+      "interpretation": "Primary owner absent from directly linked feature-test ownership; review delegation/additional-unit binding, not proof feature is missing.",
+      "primary_frontend_unit": "FE-007",
+      "test_ids": [
+        "T-FEATURE-CHART-04"
+      ],
+      "test_units": [
+        "FE-001"
+      ],
+      "title": "Price and timeframe precision"
+    },
+    {
+      "id": "VNX-F-CHART-11",
+      "interpretation": "Primary owner absent from directly linked feature-test ownership; review delegation/additional-unit binding, not proof feature is missing.",
+      "primary_frontend_unit": "FE-007",
+      "test_ids": [
+        "T-FEATURE-CHART-11"
+      ],
+      "test_units": [
+        "FE-006"
+      ],
+      "title": "Chart alert creation"
+    },
+    {
+      "id": "VNX-F-CHART-12",
+      "interpretation": "Primary owner absent from directly linked feature-test ownership; review delegation/additional-unit binding, not proof feature is missing.",
+      "primary_frontend_unit": "FE-007",
+      "test_ids": [
+        "T-FEATURE-CHART-12"
+      ],
+      "test_units": [
+        "FE-009"
+      ],
+      "title": "Order and position overlays"
+    },
+    {
+      "id": "VNX-F-CHART-13",
+      "interpretation": "Primary owner absent from directly linked feature-test ownership; review delegation/additional-unit binding, not proof feature is missing.",
+      "primary_frontend_unit": "FE-007",
+      "test_ids": [
+        "T-FEATURE-CHART-13"
+      ],
+      "test_units": [
+        "FE-001"
+      ],
+      "title": "Chart source integrity"
+    },
+    {
+      "id": "VNX-F-ORDERS-05",
+      "interpretation": "Primary owner absent from directly linked feature-test ownership; review delegation/additional-unit binding, not proof feature is missing.",
+      "primary_frontend_unit": "FE-009",
+      "test_ids": [
+        "T-FEATURE-ORDERS-05"
+      ],
+      "test_units": [
+        "FE-004"
+      ],
+      "title": "Owner order approval"
+    },
+    {
+      "id": "VNX-F-ORDERS-09",
+      "interpretation": "Primary owner absent from directly linked feature-test ownership; review delegation/additional-unit binding, not proof feature is missing.",
+      "primary_frontend_unit": "FE-011",
+      "test_ids": [
+        "T-FEATURE-ORDERS-09"
+      ],
+      "test_units": [
+        "FE-009"
+      ],
+      "title": "Trade history and TCA"
+    },
+    {
+      "id": "VNX-F-ORDERS-10",
+      "interpretation": "Primary owner absent from directly linked feature-test ownership; review delegation/additional-unit binding, not proof feature is missing.",
+      "primary_frontend_unit": "FE-011",
+      "test_ids": [
+        "T-FEATURE-ORDERS-10"
+      ],
+      "test_units": [
+        "FE-009"
+      ],
+      "title": "Risk command centre"
+    },
+    {
+      "id": "VNX-F-INTEL-08",
+      "interpretation": "Primary owner absent from directly linked feature-test ownership; review delegation/additional-unit binding, not proof feature is missing.",
+      "primary_frontend_unit": "FE-014",
+      "test_ids": [
+        "T-FEATURE-INTEL-08"
+      ],
+      "test_units": [
+        "FE-012"
+      ],
+      "title": "Strategy evidence analysis"
+    },
+    {
+      "id": "VNX-F-INTEL-09",
+      "interpretation": "Primary owner absent from directly linked feature-test ownership; review delegation/additional-unit binding, not proof feature is missing.",
+      "primary_frontend_unit": "FE-014",
+      "test_ids": [
+        "T-FEATURE-INTEL-09"
+      ],
+      "test_units": [
+        "FE-013"
+      ],
+      "title": "Trading opportunity reasoning"
+    },
+    {
+      "id": "VNX-F-WORK-08",
+      "interpretation": "Primary owner absent from directly linked feature-test ownership; review delegation/additional-unit binding, not proof feature is missing.",
+      "primary_frontend_unit": "FE-018",
+      "test_ids": [
+        "T-FEATURE-WORK-08"
+      ],
+      "test_units": [
+        "FE-017"
+      ],
+      "title": "ARTEMIS testing surface"
+    },
+    {
+      "id": "VNX-F-WORK-09",
+      "interpretation": "Primary owner absent from directly linked feature-test ownership; review delegation/additional-unit binding, not proof feature is missing.",
+      "primary_frontend_unit": "FE-015",
+      "test_ids": [
+        "T-FEATURE-WORK-09"
+      ],
+      "test_units": [
+        "FE-004"
+      ],
+      "title": "Review and approval queue"
+    },
+    {
+      "id": "VNX-F-PRESENCE-03",
+      "interpretation": "Primary owner absent from directly linked feature-test ownership; review delegation/additional-unit binding, not proof feature is missing.",
+      "primary_frontend_unit": "FE-021",
+      "test_ids": [
+        "T-FEATURE-PRESENCE-03"
+      ],
+      "test_units": [
+        "FE-017"
+      ],
+      "title": "Voice and conversation"
+    },
+    {
+      "id": "VNX-F-MORE-03",
+      "interpretation": "Primary owner absent from directly linked feature-test ownership; review delegation/additional-unit binding, not proof feature is missing.",
+      "primary_frontend_unit": "FE-020",
+      "test_ids": [
+        "T-FEATURE-MORE-03"
+      ],
+      "test_units": [
+        "FE-019"
+      ],
+      "title": "Automation and schedules"
+    }
+  ],
+  "input_hashes": {
+    "CANONICAL_AUTHORITY.json": {
+      "bytes": 3774,
+      "sha256": "853812a98571cc4bc3fddc501081b9c99ff4354215b824052373bb833dcb354e"
+    },
+    "MANIFEST.json": {
+      "bytes": 157394,
+      "sha256": "ab7ea2178895718cc4a051f0e0b446fbaf180d6c9e281bbbf4a9997140db8bc8"
+    },
+    "VAN_NEXT_UNIFIED_REBUILD_BLUEPRINT_REV1_17_20261018.md": {
+      "bytes": 542143,
+      "sha256": "a106588da1c58b1eeb648441c8814656621ad73206a17f030dabfb335b76f4c2"
+    },
+    "contracts/BACKEND_SERVICE_CATALOG.json": {
+      "bytes": 166543,
+      "sha256": "9035c8969077578a2ee96fe7c87c1d8677c0c28b21d7aa342a7065c037b82892"
+    },
+    "contracts/BACKEND_TO_FRONTEND_CONSUMPTION_CONTRACT.md": {
+      "bytes": 32255,
+      "sha256": "d9174811ab7c4342aec280250f4c39543f4fae250e985237eb5b779767a05d46"
+    },
+    "design/ALL_SURFACE_CONTRACTS.json": {
+      "bytes": 844371,
+      "sha256": "f971bbb2dc4e3efccb7b8590f149a25a5deb04165d8fb6fd0337572565f4347a"
+    },
+    "design/DARK_THEME_READABILITY_AMENDMENT_20261021.md": {
+      "bytes": 7611,
+      "sha256": "76fdb8794c01512c13adaa75da53527f71cf204767f9a97207105641e86dc21c"
+    },
+    "plan/DEVELOPMENT_PLAN.json": {
+      "bytes": 390926,
+      "sha256": "9062ab65e0dd06d9a381cdf86a08a28723c74829daa95301461b597f2237bc0a"
+    },
+    "traceability/LEGACY_349_ACTIONS.json": {
+      "bytes": 201715,
+      "sha256": "4fe9dd0b7050203e0cac8a479c0a21993b890082aed15b28ab85250410c7830d"
+    },
+    "traceability/PRODUCT_TRUTH.json": {
+      "bytes": 16463,
+      "sha256": "4d0bd6be109a8bcc563912f2c40739c68d7fedca8f2d09ca0f4a3a31741f03a3"
+    },
+    "traceability/REQUIREMENTS_AND_DU_MAPPING.json": {
+      "bytes": 298956,
+      "sha256": "ce212f40d89030947edcd67d0a9b1cbf9dae59c54ff095110ef618a86f73fe27"
+    },
+    "traceability/REV2_171_ATOM_CROSSWALK.json": {
+      "bytes": 252461,
+      "sha256": "050a2862effca169b4cab95440894e26edc01225715a23f2ff11624a4e1966ac"
+    },
+    "traceability/REV2_93_FEATURE_CROSSWALK.json": {
+      "bytes": 129683,
+      "sha256": "7627c163c573a7b1a6debdf2a4c973bfbc5e2a373805b053653dbd1cc903d5a2"
+    },
+    "verification/RUNTIME_EXTERNAL_QUALIFICATION_MATRIX.json": {
+      "bytes": 96120,
+      "sha256": "8eb1bbfaba28ee95361b1762f90cf4334ff3431197008b1534485a0bcbc7cd9a"
+    },
+    "verification/TEST_CONTRACTS.json": {
+      "bytes": 907537,
+      "sha256": "8516439e5f58193efcd1df9f8c09f5f189126be978e29961261dea96808aaf62"
+    }
+  },
+  "legacy_action_test_expectation_equals_action_title": 349,
+  "live_services_checked": false,
+  "repeated_test_expectations": [
+    {
+      "count": 34,
+      "expectation": "Exercise every declared operation through actual service registration and independently read its result."
+    },
+    {
+      "count": 34,
+      "expectation": "Crash/restart and lost-response recovery retains durable intent and does not duplicate effects."
+    },
+    {
+      "count": 34,
+      "expectation": "Wrong owner/account/device/grant and expired/revoked context refuse; logs and projections redact secrets."
+    },
+    {
+      "count": 34,
+      "expectation": "Producer-to-consumer contract works against complete dependent services and admitted provider sandbox; no stub at certification."
+    },
+    {
+      "count": 18,
+      "expectation": "Named test rejects a violating plan or evidence set; independently verified per referenced unit."
+    },
+    {
+      "count": 17,
+      "expectation": "refresh"
+    },
+    {
+      "count": 7,
+      "expectation": "back"
+    },
+    {
+      "count": 6,
+      "expectation": "open task/evidence where offered"
+    }
+  ],
+  "services_with_structured_operation_objects": 0,
+  "source_implementation_reassessed": false,
+  "structural_reference_findings": [],
+  "test_execution_states": {
+    "NOT_RUN": 1610
+  },
+  "unique_inline_method_path_pairs": 185,
+  "verdict": "SCOPE_BROADLY_ENUMERATED; NOT_WHOLE_PRODUCT_IMPLEMENTATION_OR_RELEASE_READY"
+}

@@ -1,0 +1,32 @@
+{
+  "base_head": "3c6969ebbec39f2ad9f2836a6bd8acdb487adc34",
+  "source_state": "UNCOMMITTED_NATIVE_SPOT_CANDIDATE",
+  "container": "van-native-spot-extended-pg-20261025",
+  "image": "postgres:17.11-bookworm@sha256:858bb5e98eed02eb8cafbcdc007f9a65d1b613972028944a8ec2133ccaf80d27",
+  "completed": true,
+  "cleaned": true,
+  "source_sha256": {
+    "trading/vati/execution/ctrader/transport.py": "6b3669134d52e3b0fcd0f6bc4d11bfda86af47fb05a4623ee24ffe8328e3a20e",
+    "trading/vati/execution/ctrader/adapter.py": "dd9b57606f6672be3650a826518592d7156adfc2dadb94804735d5e189226f98",
+    "trading/vati/funding/deals.py": "6d036085410710fa88583cbecf6a30487c79ba270f28d5ca8340b23fe1034f19",
+    "trading/tests/conftest.py": "7aac5662097f07f77f200dc4a13781f8db0c020298c6ff3760a5a99fe718f535",
+    "trading/tests/test_ctrader.py": "b137ee346d0412839c18e6c48500ee8f8440ce33f12b5dca90c23d26409d1533",
+    "trading/tests/test_provider_entry_deadline.py": "7617b3e811e391df027ee52d06c90f530ee79e44216219b14dc6321339080f1a",
+    "trading/tests/test_ctrader_transport_lifecycle.py": "c74f3378dee489c91c5b7c198a96bfacdbd28d1eb4a5e2bda2e3016503874937",
+    "trading/tests/test_ctrader_connection_auth.py": "ff646f8e5a01e71df661127ffccd369cf2ec653706056dff3ca48c70f1fafa1f",
+    "trading/vati/execution/ctrader/contracts.py": "fc719fecbc9fc032836ffddbd9900421e720fd9277ba6cb229f572f5c8d445d5",
+    "trading/vati/market_data/native_archive.py": "b3660db5da51e147199ab6eca4ed271c533f71ada00f786ee84034a3430bfc90",
+    "trading/vati/market_data/native_collector.py": "8c7f8396621afc18248ca2c040467f17d46e8d75fa75af35f5b7fe3d9067b1b1",
+    "trading/tests/test_native_market_archive.py": "f0cf0768ddbd07e90d3109cffee239ed159143fe49210eeed5a69026cdafae80",
+    "trading/tests/test_native_market_collector.py": "e0bea76a5761a9dee93d421d5e7ec82bed4709aecd686b6f662e70509e431c47",
+    "trading/tests/test_ctrader_feed_contract.py": "6f240e5f5ac3c345f498abf8a4aa9bdfd71bf9af74b7e7d123709325c8da9cb6",
+    "trading/tests/test_ctrader_read_budget.py": "6d9f1462ab643b7f9b54dbf074b82e21c43cefd45aa5dc68d64a6ad354d97585",
+    "trading/vati/execution/ctrader/__init__.py": "9d2d3998894921923354b378f9ddf03490ed6229090aa553268c88cd78874e18",
+    "trading/vati/execution/ctrader/spots.py": "474eab1961c091f4780919b2250c7a41de96011d408ecbb40162fabe57eadad8",
+    "trading/tests/test_ctrader_spot_contract.py": "268d8b42703599c1c719757e12b9e61a5386cbc3eb3f5c11f3960fc597e53d3f"
+  },
+  "container_id": "a5e0acf88f98d43ec6f1b25fb310ee55812a29f7464dc7b9880d1748c0a00884",
+  "canonical_fixture_schema_initialized": true,
+  "exit": 0,
+  "adopted_children_reaped": []
+}

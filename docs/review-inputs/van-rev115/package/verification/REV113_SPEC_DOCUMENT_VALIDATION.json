@@ -1,0 +1,23 @@
+{
+  "BG": "NOT_ISSUED",
+  "F15": "NOT_ISSUED",
+  "added_acceptance_tests": 41,
+  "application_tests_ran": 0,
+  "backend": 82,
+  "bq": 12,
+  "current_source_status": "BRANCH_HEADS_READ_ONLY_VERIFIED",
+  "documentary_verification_only": true,
+  "environment": "CHATGPT_DOCUMENT_WORKSPACE; source branch read via Global DIAL authorised VM",
+  "finding_count": 0,
+  "goldens_owner_approved": false,
+  "original_pack_sha256": "d898f2a46904a558fa45658543fc142069739e72498ac0ad58ec851529747a99",
+  "packets": 131,
+  "plan_render_check": "0 findings: rendered plan and input provenance match",
+  "recipes": 30,
+  "schema": "van.document.rev113/1.0",
+  "scope": 237,
+  "source_code_merged": false,
+  "styles": 31,
+  "surfaces": 234,
+  "tests_not_run": 1328
+}

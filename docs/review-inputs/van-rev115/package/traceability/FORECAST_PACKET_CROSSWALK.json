@@ -1,0 +1,1099 @@
+{
+  "mappings": [
+    {
+      "all_deliverables_retained": [
+        "Freeze main and every relevant feature-bearing candidate branch; compare parent Rev1.10 and current source",
+        "Create function-level retain/adapt/replace/extend mapping, existing conformal and feature ownership, provider/asset scope and licence provenance",
+        "Write proposed additive-to-parent requirement and packet patch without modifying signed parent inputs",
+        "Reconcile prediction-market parent §8.2/§8.4/§8.5, VAN-NX-036 and actual NewsIngress/CalendarRecorder owners; keep source observations dated."
+      ],
+      "all_exit_evidence_retained": [
+        "Independently reviewed no-loss mapping, source hashes and conflict register",
+        "A missing inherited action or PR-only feature must invalidate the proposed merge"
+      ],
+      "canonical_unit": "PRE-001",
+      "disposition": "MERGED_SAME_OBLIGATION_NO_DUPLICATE_GATE",
+      "source_id": "VAN-ML-PKT-001",
+      "source_obligation_sha256": "c85dbc585dc37b81cd2c2b7dcd63154c5cf23c7febf0cb572dd303ec0132c3a9",
+      "source_parent_duties": [
+        "PRE-001",
+        "PRE-002"
+      ],
+      "source_title": "Source, branch and parent-programme reconciliation",
+      "status": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_ADMISSION"
+    },
+    {
+      "all_deliverables_retained": [
+        "Admit TargetSpecs, cohort/universe definitions, permitted data, validation protocol and research budgets",
+        "Resolve runtime consumers, status/error semantics, numerical boundaries and authority contracts",
+        "Pre-register all required model families, tests, losses, baselines and final holdout access policy",
+        "Apply current no-procurement and Netcup/Oracle owner scope; neither source licence purchases nor direct event-contract eligibility is a prerequisite for adapter/fixture development."
+      ],
+      "all_exit_evidence_retained": [
+        "All affected owner decisions identified by exact scope and gate",
+        "No unresolved START prerequisite hidden by a default; no application PASS claims"
+      ],
+      "canonical_unit": "PRE-002",
+      "disposition": "MERGED_SAME_OBLIGATION_NO_DUPLICATE_GATE",
+      "source_id": "VAN-ML-PKT-002",
+      "source_obligation_sha256": "ddaf1f2ea1d2281c99c95af8f8a1468a5ff627b626ec822b218a578a62e4bf7e",
+      "source_parent_duties": [
+        "PRE-002"
+      ],
+      "source_title": "Target, data, consumer and acceptance contracts",
+      "status": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_ADMISSION"
+    },
+    {
+      "all_deliverables_retained": [
+        "Integrate amended requirements into the parent predevelopment evidence and obtain genuine independent F15 for the admitted source/scope",
+        "Register all code-bearing child packets and parent dependency changes"
+      ],
+      "all_exit_evidence_retained": [
+        "Trusted issuer verifies exact source/scope and owner signature",
+        "A generated JSON PASS, hash or this pack checker cannot issue F15"
+      ],
+      "canonical_unit": "PRE-003",
+      "disposition": "MERGED_SAME_OBLIGATION_NO_DUPLICATE_GATE",
+      "source_id": "VAN-ML-PKT-003",
+      "source_obligation_sha256": "f36a72d32b2bc08c4e8386b21b8b56e509f7193168576d31f413c886dfa01c54",
+      "source_parent_duties": [
+        "PRE-003"
+      ],
+      "source_title": "Independent extended F15 entry barrier",
+      "status": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_ADMISSION"
+    },
+    {
+      "all_deliverables_retained": [
+        "Lock Qlib, LightGBM, NeuralForecast, XGBoost, Optuna, Feast/MLflow and transitive dependencies by tested version/hash",
+        "Build separate CPU research/inference environments, wheel/architecture matrix, resource and network policy",
+        "Register worker bootstrap, SBOM and safe model-parser compatibility"
+      ],
+      "all_exit_evidence_retained": [
+        "Actual train/export/load smoke with locked upstream libraries on an authorized VM",
+        "Import-boundary tests reject heavy model imports and broker credentials in the T0 runtime"
+      ],
+      "canonical_unit": "VAN-ML-PKT-004",
+      "disposition": "ADOPT_FULL_BACKEND_CONTRACT",
+      "source_id": "VAN-ML-PKT-004",
+      "source_obligation_sha256": "7e4295df87d16ccbbdfbf71d61baa733157e6f1c103355356ead81d391a11126",
+      "source_parent_duties": [
+        "BE-001",
+        "BE-033",
+        "BE-034"
+      ],
+      "source_title": "Pinned dependencies and isolated research runtime",
+      "status": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_ADMISSION"
+    },
+    {
+      "all_deliverables_retained": [
+        "Implement immutable source vintages, availability clocks, calendars, instrument identity and point-in-time universe",
+        "Join licensed market/news/expectation features without revised-future leakage; distinguish observed and reconstructed availability",
+        "Materialize versioned Parquet research snapshots from the existing data owners"
+      ],
+      "all_exit_evidence_retained": [
+        "Replay a revision, delisting and late release: past snapshot remains unchanged",
+        "Reject cross-venue collisions, incomplete bars and unknown-use entitlements"
+      ],
+      "canonical_unit": "VAN-ML-PKT-005",
+      "disposition": "ADOPT_FULL_BACKEND_CONTRACT",
+      "source_id": "VAN-ML-PKT-005",
+      "source_obligation_sha256": "5bae1d165675fea0e1bedb1b537d432e826379483463ef0437e61a84015754ec",
+      "source_parent_duties": [
+        "BE-008",
+        "BE-014",
+        "BE-015"
+      ],
+      "source_title": "Point-in-time market dataset and universe snapshots",
+      "status": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_ADMISSION"
+    },
+    {
+      "all_deliverables_retained": [
+        "Extend existing FeatureRegistry and feature contracts; compile offline/online transformations from one version",
+        "Implement lag/timeframe/peer expansion, fold-fitted preprocessing and aligned row masks",
+        "Integrate scoped Feast feature views/materialization and deterministic local inference snapshots"
+      ],
+      "all_exit_evidence_retained": [
+        "Offline/online values and units match within declared tolerances",
+        "Shift peer data, change column order or fit a scaler on validation: qualification fails"
+      ],
+      "canonical_unit": "VAN-ML-PKT-006",
+      "disposition": "ADOPT_FULL_BACKEND_CONTRACT",
+      "source_id": "VAN-ML-PKT-006",
+      "source_obligation_sha256": "278b6aef68a81d0d6a4889df575a9ee253d6745e2b84f36f8c0c33b03750ef92",
+      "source_parent_duties": [
+        "BE-008",
+        "BE-018"
+      ],
+      "source_title": "Shared feature definitions and Feast parity",
+      "status": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_ADMISSION"
+    },
+    {
+      "all_deliverables_retained": [
+        "Implement reusable source/provider contracts with separate technical reachability, allowed data uses, observed terms reference and acquisition mode; no licence-purchase workflow or external spending.",
+        "Provide Netcup and Oracle worker profiles, actual region/host metadata and Global DIAL placement; distinguish operator/account eligibility from machine location.",
+        "Deliver a no-network fixture/replay path and real read-only adapter path using existing source permissions where established; unavailable access affects that source, never erases other engineering scope."
+      ],
+      "all_exit_evidence_retained": [
+        "Positive adapter/replay calls and explicit source-unavailable readback through actual services; source access unresolved must not become a coding prerequisite.",
+        "No country-spoofing, proxy workaround, account creation, trade credential requirement or inferred live permission."
+      ],
+      "canonical_unit": "VAN-ML-PKT-037",
+      "disposition": "ADOPT_FULL_BACKEND_CONTRACT",
+      "source_id": "VAN-ML-PKT-037",
+      "source_obligation_sha256": "2bfcc88f2f2c19692628ae822151bf5eb22b6b993754e040e0be4e79016bd577",
+      "source_parent_duties": [
+        "BE-003",
+        "BE-008",
+        "BE-014",
+        "BE-015",
+        "BE-033"
+      ],
+      "source_title": "Prediction-market scope, VM profiles and source capability contracts",
+      "status": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_ADMISSION"
+    },
+    {
+      "all_deliverables_retained": [
+        "Build returns, setup-event, ranking, realized-volatility, cost and excursion targets with explicit label intervals",
+        "Keep market observations, actual fills, synthetic controls, practice and counterfactual outcomes in separate namespaces",
+        "Preserve candidate sampling, rejection reason and censoring to expose selection bias"
+      ],
+      "all_exit_evidence_retained": [
+        "Labels cannot mature before horizon/outcome availability",
+        "Gross/net/cost conventions reconcile; future holding duration cannot become an entry feature"
+      ],
+      "canonical_unit": "VAN-ML-PKT-007",
+      "disposition": "ADOPT_FULL_BACKEND_CONTRACT",
+      "source_id": "VAN-ML-PKT-007",
+      "source_obligation_sha256": "87cc41bbbdd363771307d2aaea7193a2786e4a48be66d925a158e89ba5bf134b",
+      "source_parent_duties": [
+        "BE-013",
+        "BE-022"
+      ],
+      "source_title": "Targets, executable labels and outcome provenance",
+      "status": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_ADMISSION"
+    },
+    {
+      "all_deliverables_retained": [
+        "Implement versioned REST pagination, public metadata/books/trades and historical-boundary reconciliation plus authenticated read-only stream support where available.",
+        "Normalize exact fixed-point YES/NO bids; derive opposite asks, book depth and quote-quality metadata without float cash arithmetic.",
+        "Persist idempotent events with provider time, received time, available_at, source revision and gap/late-message state; stream gaps force resnapshot before usability."
+      ],
+      "all_exit_evidence_retained": [
+        "Contract-compatible positive integration plus pagination, archive handoff, reconnect, duplicate and precision counterexamples.",
+        "Any genuine provider capture has explicit permission/method and timing provenance; fixtures never count as historical/live captures."
+      ],
+      "canonical_unit": "VAN-ML-PKT-038",
+      "disposition": "ADOPT_FULL_BACKEND_CONTRACT",
+      "source_id": "VAN-ML-PKT-038",
+      "source_obligation_sha256": "0a223542810365bd3b4fd6ea569c45cdd94c1c37a70f5d3986a877987e6bdfee",
+      "source_parent_duties": [
+        "BE-003",
+        "BE-008",
+        "BE-014",
+        "BE-015"
+      ],
+      "source_title": "Kalshi and comparison-provider ingestion, depth and history",
+      "status": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_ADMISSION"
+    },
+    {
+      "all_deliverables_retained": [
+        "Add versioned event-contract definitions: exact proposition, units, comparator, thresholds, time window, timezone, official source/vintage, rounding, resolution, cancellation and dispute rules.",
+        "Implement contract relation graph and reviewed exact/complement/overlap/non-equivalent mappings; semantic proposals from models cannot certify equivalence.",
+        "Keep event occurrence, official publication, trade close and settlement as distinct states/clocks; corrected or cancelled outcomes create new versions and invalidation edges."
+      ],
+      "all_exit_evidence_retained": [
+        "Same-title/different-rule, initial/revised-release, strict/inclusive threshold and settlement-delay cases produce distinct identities.",
+        "Positive exact/complement mapping is usable in research with reviewed evidence; unresolved mapping is explicit, not a permanent empty implementation."
+      ],
+      "canonical_unit": "VAN-ML-PKT-039",
+      "disposition": "ADOPT_FULL_BACKEND_CONTRACT",
+      "source_id": "VAN-ML-PKT-039",
+      "source_obligation_sha256": "89b42c2585d54d59c0a3c8d64316f4895416f298515f52c8830c5af80b8a7b7a",
+      "source_parent_duties": [
+        "BE-008",
+        "BE-014",
+        "BE-015",
+        "BE-016"
+      ],
+      "source_title": "Event semantics, settlement and cross-venue equivalence",
+      "status": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_ADMISSION"
+    },
+    {
+      "all_deliverables_retained": [
+        "Implement FoldPlan with interval purging, cohort-coherent cutoffs, calibration slices and embargo policy",
+        "Build full-versus-prefix and positive-poison diagnostics inspired by Freqtrade",
+        "Measure indicator/model feature convergence versus warmup and cache identity"
+      ],
+      "all_exit_evidence_retained": [
+        "Leakage, full-data normalization, random splits and future exogenous values are detected",
+        "Overlapping horizons do not inflate independent sample counts"
+      ],
+      "canonical_unit": "VAN-ML-PKT-008",
+      "disposition": "ADOPT_FULL_BACKEND_CONTRACT",
+      "source_id": "VAN-ML-PKT-008",
+      "source_obligation_sha256": "597cde5bbbb5b08f7898ed70d5a2ad1ee57108b88b63327c8192ce31f48fe2c9",
+      "source_parent_duties": [
+        "BE-013",
+        "BE-019",
+        "BE-022"
+      ],
+      "source_title": "Chronological folds, lookahead and warmup diagnostics",
+      "status": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_ADMISSION"
+    },
+    {
+      "all_deliverables_retained": [
+        "Reproduce and close scoped main-source findings; implement observed intrabar ordering or explicit uncertainty bounds",
+        "Debit commission, financing, borrow/roll and conversion costs exactly once alongside fill spread/slippage",
+        "Produce post-liquidation MTM equity, drawdown and cash-flow-neutral performance with pending risk"
+      ],
+      "all_exit_evidence_retained": [
+        "Long/short both-hit, gap-stop, same-close latency, funding boundary and partial-fill cases reconcile",
+        "Closed-trade metrics and pre-flatten final equity cannot certify economic performance"
+      ],
+      "canonical_unit": "VAN-ML-PKT-009",
+      "disposition": "ADOPT_FULL_BACKEND_CONTRACT",
+      "source_id": "VAN-ML-PKT-009",
+      "source_obligation_sha256": "4c6e2d093cb0152e37e6e58037dc270a76b04591104b6f4cde74e46383e352a7",
+      "source_parent_duties": [
+        "BE-006",
+        "BE-010",
+        "BE-012",
+        "BE-019"
+      ],
+      "source_title": "Simulation accounting, intrabar and timing corrections",
+      "status": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_ADMISSION"
+    },
+    {
+      "all_deliverables_retained": [
+        "Implement binary, mutually exclusive outcome and threshold distribution builders; explicit raw versus adjusted estimates, monotonicity, missing bins and open-tail policies.",
+        "Register probability levels/changes, entropy, tail mass, dispersion, consensus differences, spread/depth and freshness as distinct features; fit all transforms on permitted history.",
+        "Prevent artificial jumps at contract roll; compare aligned maturity/proposition only; preserve Kalshi/Polymarket agreement as consistency, not independent-probability multiplication."
+      ],
+      "all_exit_evidence_retained": [
+        "Finite coherent full distributions, correctly differenced threshold masses, explicit unavailable/partial distributions and deterministic same-input outputs.",
+        "Low-depth/outdated/crossed or mismatched books cannot become confident features through averaging or silent normalization."
+      ],
+      "canonical_unit": "VAN-ML-PKT-040",
+      "disposition": "ADOPT_FULL_BACKEND_CONTRACT",
+      "source_id": "VAN-ML-PKT-040",
+      "source_obligation_sha256": "b58529a00d567e64869f3c986ada819646942be1a014ef7c295167fc402c8dcf",
+      "source_parent_duties": [
+        "BE-014",
+        "BE-015",
+        "BE-016",
+        "BE-018"
+      ],
+      "source_title": "Coherent event distributions, quality and probability features",
+      "status": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_ADMISSION"
+    },
+    {
+      "all_deliverables_retained": [
+        "Replay through the shared account coordinator/risk/reservation/route policy, not only independent single-symbol cycles",
+        "Build comparable event streams, symbol calendars, margin and instrument specifications",
+        "Provide independent oracle export and documented comparator differences; no second live sender"
+      ],
+      "all_exit_evidence_retained": [
+        "Concurrent orders/cancel-fill races and capital contention have equivalent risk decisions",
+        "Zero-trade replay does not stand in for exercised approval, rejection and protection paths"
+      ],
+      "canonical_unit": "VAN-ML-PKT-010",
+      "disposition": "ADOPT_FULL_BACKEND_CONTRACT",
+      "source_id": "VAN-ML-PKT-010",
+      "source_obligation_sha256": "81c2ba6373b8ee4693f21112d8a8e85b762f163568aa8e7fee3f94d94e700359",
+      "source_parent_duties": [
+        "BE-009",
+        "BE-010",
+        "BE-012",
+        "BE-019"
+      ],
+      "source_title": "Account-wide replay and execution-policy parity",
+      "status": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_ADMISSION"
+    },
+    {
+      "all_deliverables_retained": [
+        "Implement VanQlibDataLoader and fold-scoped DataHandlerLP/DatasetH adapter over VAN-owned snapshots",
+        "Register T3 training tasks and explicit Qlib Recorder/MLflow run binding",
+        "Use model APIs only; disable Qlib execution/exchange and default equity-region semantics in VAN runtime"
+      ],
+      "all_exit_evidence_retained": [
+        "DK_L/DK_I separation, train-only processor fitting and prediction index identity verified",
+        "Qlib default execution path and unrestricted YAML imports are rejected"
+      ],
+      "canonical_unit": "VAN-ML-PKT-011",
+      "disposition": "ADOPT_FULL_BACKEND_CONTRACT",
+      "source_id": "VAN-ML-PKT-011",
+      "source_obligation_sha256": "db932c8f7f028ed749ff5e088b671b961bf6e9965d5c2bedd57d2c7b55f97574",
+      "source_parent_duties": [
+        "BE-013",
+        "BE-022"
+      ],
+      "source_title": "Qlib data, processor and recorder integration",
+      "status": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_ADMISSION"
+    },
+    {
+      "all_deliverables_retained": [
+        "Train horizon/cohort-specific regression baselines with explicit cost conventions and objective semantics",
+        "Export native Booster plus feature/target/preprocessor manifests",
+        "Implement out-of-fold predictions, stopping, uncertainty comparison and diagnostic explanations"
+      ],
+      "all_exit_evidence_retained": [
+        "Reproducible fixed-environment fits; native export/import numerical equivalence",
+        "Data/feature order mismatch and net-cost double subtraction fail tests"
+      ],
+      "canonical_unit": "VAN-ML-PKT-012",
+      "disposition": "ADOPT_FULL_BACKEND_CONTRACT",
+      "source_id": "VAN-ML-PKT-012",
+      "source_obligation_sha256": "cde8d540013c2fe4cc9a10f37f37d56aebf44c8987038121a81428e13f2b09c7",
+      "source_parent_duties": [
+        "BE-013"
+      ],
+      "source_title": "LightGBM expected-return and net-edge regressors",
+      "status": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_ADMISSION"
+    },
+    {
+      "all_deliverables_retained": [
+        "Implement binary event targets and raw-probability output with defined censor/tie behavior",
+        "Create disjoint calibration handoff, imbalance controls and reliability metadata",
+        "Compare against event base rate and existing rules on the same candidate population"
+      ],
+      "all_exit_evidence_retained": [
+        "Class score is not called win probability until packet020 calibration passes",
+        "Unmatured labels, resampling bias and leaked outcome fields fail"
+      ],
+      "canonical_unit": "VAN-ML-PKT-013",
+      "disposition": "ADOPT_FULL_BACKEND_CONTRACT",
+      "source_id": "VAN-ML-PKT-013",
+      "source_obligation_sha256": "007ddbae58d6880c3299cb6d47bf84da6d6e324f8c9383224f4c3db4a67a4eea",
+      "source_parent_duties": [
+        "BE-013"
+      ],
+      "source_title": "LightGBM setup-event classification",
+      "status": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_ADMISSION"
+    },
+    {
+      "all_deliverables_retained": [
+        "Implement VAN-owned Qlib-compatible/direct-LightGBM adapters for quantile and ranking objectives",
+        "Train explicit alpha/horizon quantiles and grouped cutoff/universe ranking with integer relevance rules",
+        "Validate quantile order, group contiguity and units; rank score remains ordinal"
+      ],
+      "all_exit_evidence_retained": [
+        "Stock LGBModel wrapper is not used with unsupported loss values",
+        "Negative regression labels passed as rank relevance and cross-date groups are rejected"
+      ],
+      "canonical_unit": "VAN-ML-PKT-014",
+      "disposition": "ADOPT_FULL_BACKEND_CONTRACT",
+      "source_id": "VAN-ML-PKT-014",
+      "source_obligation_sha256": "4cd43509202ae42d26d1214a694d157a5b93815304a5f704f49941a5ff22f021",
+      "source_parent_duties": [
+        "BE-013"
+      ],
+      "source_title": "LightGBM quantile and grouped ranking adapters",
+      "status": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_ADMISSION"
+    },
+    {
+      "all_deliverables_retained": [
+        "Integrate XGBoost as a comparable tabular challenger and linear/logistic/persistence/ranking baselines",
+        "Include HAR-style realized-volatility and authorized GARCH implementations with identical data cutoffs",
+        "Version each baseline and preserve failed/no-skill results"
+      ],
+      "all_exit_evidence_retained": [
+        "Every mandatory task has a meaningful naive and incumbent comparison",
+        "Different horizons, price units, sample windows or costs cannot be compared as like-for-like"
+      ],
+      "canonical_unit": "VAN-ML-PKT-015",
+      "disposition": "ADOPT_FULL_BACKEND_CONTRACT",
+      "source_id": "VAN-ML-PKT-015",
+      "source_obligation_sha256": "05b00a643f83546b6c2d89441cfa3b374b3d3466a366ec9e2d59992f426e05e9",
+      "source_parent_duties": [
+        "BE-013",
+        "BE-022"
+      ],
+      "source_title": "Challenger and simple baseline suite",
+      "status": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_ADMISSION"
+    },
+    {
+      "all_deliverables_retained": [
+        "Implement canonical unique_id/ds/y and historical/future/static exogenous mapping",
+        "Integrate NHITS multi-horizon training, native validation and fold-scoped scaling",
+        "Capture native outputs and learned preprocessing in the shared experiment/artifact contract"
+      ],
+      "all_exit_evidence_retained": [
+        "Actual locked-library training/inference on admitted data",
+        "Calendar gaps, unavailable future values and scaler refits at prediction fail"
+      ],
+      "canonical_unit": "VAN-ML-PKT-016",
+      "disposition": "ADOPT_FULL_BACKEND_CONTRACT",
+      "source_id": "VAN-ML-PKT-016",
+      "source_obligation_sha256": "e723e5092d612bf279bb3858dd1e12c1376c937bf21908c2d6cc9984186bc5e5",
+      "source_parent_duties": [
+        "BE-013",
+        "BE-022"
+      ],
+      "source_title": "NeuralForecast bridge and N-HiTS",
+      "status": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_ADMISSION"
+    },
+    {
+      "all_deliverables_retained": [
+        "Extend the existing replay adapter family with decimal cash, depth/partial-fill logic, order activation/cancel timing, queue uncertainty and trade/bid/ask distinction.",
+        "Bind versioned per-series/per-account fee precision and accumulator semantics; include settlement/dispute/cancel outcomes, venue cash reservations, financing and conversion costs where applicable.",
+        "Keep all positions on one coherent event/book path and reconcile final liquidation/settlement equity; sparse history returns evidence limitations rather than guaranteed maker fills."
+      ],
+      "all_exit_evidence_retained": [
+        "Deterministic accounting identities and counterexamples for touch-not-fill, queue loss, partial fill/cancel races, settlement delay and fee fragmentation.",
+        "External-asset evaluation uses the actual destination broker model instead of charging hypothetical Kalshi trades."
+      ],
+      "canonical_unit": "VAN-ML-PKT-044",
+      "disposition": "ADOPT_FULL_BACKEND_CONTRACT",
+      "source_id": "VAN-ML-PKT-044",
+      "source_obligation_sha256": "a307e95d0f14e3f370a559ff0511c19eb498ee60fd7143d3eeeeff7be922359d",
+      "source_parent_duties": [
+        "BE-006",
+        "BE-009",
+        "BE-010",
+        "BE-011",
+        "BE-012",
+        "BE-019"
+      ],
+      "source_title": "Execution-realistic prediction-contract replay",
+      "status": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_ADMISSION"
+    },
+    {
+      "all_deliverables_retained": [
+        "Implement NBEATSx model plugin and valid exogenous capabilities",
+        "Expose trend/seasonality/exogenous decomposition only when the chosen architecture supports it",
+        "Measure contextual ablation and explanatory output stability"
+      ],
+      "all_exit_evidence_retained": [
+        "Actual contextual prediction and decomposition round trip",
+        "Explanations cannot claim causal drivers or invent contributions for an unsupported configuration"
+      ],
+      "canonical_unit": "VAN-ML-PKT-017",
+      "disposition": "ADOPT_FULL_BACKEND_CONTRACT",
+      "source_id": "VAN-ML-PKT-017",
+      "source_obligation_sha256": "e6999b4f78624756b591215c8a36342269ecfe77ecd151fe5787352a1b364fea",
+      "source_parent_duties": [
+        "BE-013",
+        "BE-021"
+      ],
+      "source_title": "N-BEATSx contextual forecasts and decomposition",
+      "status": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_ADMISSION"
+    },
+    {
+      "all_deliverables_retained": [
+        "Integrate DeepAR distribution loss, target-domain checks and pinned RNG/sample manifests",
+        "Retain individual trajectories through a tested adapter, or expose UNSUPPORTED_RAW_PATHS for a pinned API while implementing the documented retained-path adapter before closure",
+        "Keep marginal intervals separate from temporal and cross-asset joint-scenario claims"
+      ],
+      "all_exit_evidence_retained": [
+        "Distribution support and raw-path dimensions verified with a real model",
+        "Averaged trajectories cannot masquerade as samples; independent assets cannot claim joint portfolio coverage"
+      ],
+      "canonical_unit": "VAN-ML-PKT-018",
+      "disposition": "ADOPT_FULL_BACKEND_CONTRACT",
+      "source_id": "VAN-ML-PKT-018",
+      "source_obligation_sha256": "26aae531d0da6087fcf69ba3cc51a732d603a63c819871663e25ea9b65fb1b12",
+      "source_parent_duties": [
+        "BE-013",
+        "BE-019"
+      ],
+      "source_title": "DeepAR distributional forecasts and retained scenarios",
+      "status": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_ADMISSION"
+    },
+    {
+      "all_deliverables_retained": [
+        "Implement candidate discovery and exact payoff-state matrices for complementary and related contracts; title embeddings only shortlist candidates.",
+        "Compute worst-case payout/net margin at executable quantities across success/void/cancel/dispute states; separate conditional payoff hedge from guaranteed real execution.",
+        "Simulate venue-specific cash, collateral/currency haircut, settlement delay, partial first-leg fill, failed hedge and feasible unwind; do not assume cross-exchange atomicity or transferable immediate collateral."
+      ],
+      "all_exit_evidence_retained": [
+        "Positive synthetic hedged-payoff case and near-match false-arbitrage/one-leg-failure cases with source-bound research reports.",
+        "No new arbitrage order sender; cashflows and margin do not assume default-free settlement or fabricate a USD-stablecoin equivalence."
+      ],
+      "canonical_unit": "VAN-ML-PKT-045",
+      "disposition": "ADOPT_FULL_BACKEND_CONTRACT",
+      "source_id": "VAN-ML-PKT-045",
+      "source_obligation_sha256": "8dcdd24206b426213beebfb6ada8634f1658a2dffb187183c6190a1b9bbceccc",
+      "source_parent_duties": [
+        "BE-009",
+        "BE-012",
+        "BE-019",
+        "BE-021",
+        "BE-022"
+      ],
+      "source_title": "Contract-consistency and non-atomic arbitrage research laboratory",
+      "status": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_ADMISSION"
+    },
+    {
+      "all_deliverables_retained": [
+        "Provide usable research plugins for TFT, PatchTST and iTransformer with capability introspection and target compatibility",
+        "Bound cross-market cohorts, missing histories, architecture-specific exogenous support and compute budgets",
+        "Test each admitted plugin in training/export/load/inference; economic admission remains conditional"
+      ],
+      "all_exit_evidence_retained": [
+        "Do not infer support from constructor argument names alone",
+        "Global shared weights are not labelled joint dependence, and invalid capabilities fail before training"
+      ],
+      "canonical_unit": "VAN-ML-PKT-019",
+      "disposition": "ADOPT_FULL_BACKEND_CONTRACT",
+      "source_id": "VAN-ML-PKT-019",
+      "source_obligation_sha256": "7e674e35a4901b68f7040277b948e3dcdff3d778800d64aef134d1cbacb4ce31",
+      "source_parent_duties": [
+        "BE-013",
+        "BE-021",
+        "BE-022"
+      ],
+      "source_title": "Contextual and multivariate neural challengers",
+      "status": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_ADMISSION"
+    },
+    {
+      "all_deliverables_retained": [
+        "Extend existing vati.risk.conformal through separate forecast calibration producers and source-bound buckets",
+        "Implement probability calibration, quantile evaluation, optional conformalized intervals and realized coverage monitoring",
+        "Bind residuals to model/target/cohort/horizon and invalidate on refit; correct guarantee language"
+      ],
+      "all_exit_evidence_retained": [
+        "Calibration/test separation and stale/mismatched residual refusal verified",
+        "Nine residuals or nominal coverage alone cannot establish reliable trading confidence"
+      ],
+      "canonical_unit": "VAN-ML-PKT-020",
+      "disposition": "ADOPT_FULL_BACKEND_CONTRACT",
+      "source_id": "VAN-ML-PKT-020",
+      "source_obligation_sha256": "8c0b2e0e4dafea40d0edc7d757073c896ab78e90df0f889c8dd566985c93b4b0",
+      "source_parent_duties": [
+        "BE-009",
+        "BE-013",
+        "BE-021"
+      ],
+      "source_title": "One calibration and uncertainty-validation boundary",
+      "status": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_ADMISSION"
+    },
+    {
+      "all_deliverables_retained": [
+        "Use one study/budget/trial ledger for Qlib, native LightGBM and NeuralForecast candidates",
+        "Implement bounded neural Auto/Optuna adapter, nested temporal selection and independent final holdout",
+        "Preserve all tried configurations, early/pruned failures and comparison lineage"
+      ],
+      "all_exit_evidence_retained": [
+        "Search cannot observe final holdout or mutate live aliases",
+        "Repeat study from snapshot and detect data, target, trial-count and environment changes"
+      ],
+      "canonical_unit": "VAN-ML-PKT-021",
+      "disposition": "ADOPT_FULL_BACKEND_CONTRACT",
+      "source_id": "VAN-ML-PKT-021",
+      "source_obligation_sha256": "c5d47501b51f1291fd55597460d6d9ebfc0771018dafeead69f7680d23bcebc7",
+      "source_parent_duties": [
+        "BE-013",
+        "BE-022",
+        "BE-028"
+      ],
+      "source_title": "Unified Optuna and rolling research studies",
+      "status": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_ADMISSION"
+    },
+    {
+      "all_deliverables_retained": [
+        "Extend existing calibration by event family, horizon and liquidity cohort; retain market-implied values separately from calibrated physical-event probabilities.",
+        "Freeze admissible pre-release expectations and calculate surprise only once the correct official release becomes available; preserve every later revision separately.",
+        "Group training/calibration/testing by underlying event and aligned cross-market folds; report event-effective sample size, proper scores and concentration, not inflated quote counts."
+      ],
+      "all_exit_evidence_retained": [
+        "Positive matured-label/calibration workflow and real producer binding through existing service.",
+        "Post-release input, correlated snapshots split randomly, unsupported probability claims and stale calibration fail qualification."
+      ],
+      "canonical_unit": "VAN-ML-PKT-041",
+      "disposition": "ADOPT_FULL_BACKEND_CONTRACT",
+      "source_id": "VAN-ML-PKT-041",
+      "source_obligation_sha256": "784663bc3d2911a7203ca23aa69093377331c3c0e8c470bf28aef81dbd535fb2",
+      "source_parent_duties": [
+        "BE-015",
+        "BE-016",
+        "BE-021",
+        "BE-022"
+      ],
+      "source_title": "Event calibration, grouped chronology and frozen surprise",
+      "status": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_ADMISSION"
+    },
+    {
+      "all_deliverables_retained": [
+        "Implement native Booster and safe neural artifact formats with verified source/configuration/manifests",
+        "Connect MLflow versions/runs and immutable VAN admission records; aliases remain advisory",
+        "Implement atomic stage transitions, CAS deployment binding and rollback compatibility"
+      ],
+      "all_exit_evidence_retained": [
+        "No untrusted pickle, unapproved dynamic imports or unchecked remote model URI",
+        "Changing registry alias cannot change admitted runtime model without a valid binding"
+      ],
+      "canonical_unit": "VAN-ML-PKT-022",
+      "disposition": "ADOPT_FULL_BACKEND_CONTRACT",
+      "source_id": "VAN-ML-PKT-022",
+      "source_obligation_sha256": "cf946e6283b013ac6fb665cb5cbd5669f78bae0122430e4a876b2e2283f7c4d8",
+      "source_parent_duties": [
+        "BE-013",
+        "BE-031",
+        "BE-033"
+      ],
+      "source_title": "Safe model artifacts and candidate registry",
+      "status": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_ADMISSION"
+    },
+    {
+      "all_deliverables_retained": [
+        "Implement FreqAI-inspired retraining cadence, drift-triggered jobs, expiry and per-scope queues",
+        "Use existing durable workflow/scheduler owner, bounded retries, resumable checkpoints and worker leases",
+        "Finish candidate fits without automatic promotion; prioritize inference/protection over training"
+      ],
+      "all_exit_evidence_retained": [
+        "Kill/restart trainer and duplicate trigger produce no duplicate publication",
+        "Old model remains only while valid; training completion never means approved deployment"
+      ],
+      "canonical_unit": "VAN-ML-PKT-023",
+      "disposition": "ADOPT_FULL_BACKEND_CONTRACT",
+      "source_id": "VAN-ML-PKT-023",
+      "source_obligation_sha256": "887666764b3d670aff1c047ef04f1bae15d5f3c883043f8e5ab248aaea7249ba",
+      "source_parent_duties": [
+        "BE-013",
+        "BE-028",
+        "BE-033"
+      ],
+      "source_title": "Adaptive retraining scheduler and lifecycle",
+      "status": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_ADMISSION"
+    },
+    {
+      "all_deliverables_retained": [
+        "Implement typed bounded ForecastService and immutable cache keys tied to actual material inputs",
+        "Add model/data/calibration freshness, schema validation, DI-style novelty and optional SVM/DBSCAN/PCA ablations",
+        "Persist accepted and abstained outputs with explicit reason and identity; no order fields"
+      ],
+      "all_exit_evidence_retained": [
+        "Timeout, corrupt model, OOD, stale feed, changed feature order and queue saturation return truthful abstention",
+        "No synchronous network/model load can enter T0 risk or protection"
+      ],
+      "canonical_unit": "VAN-ML-PKT-024",
+      "disposition": "ADOPT_FULL_BACKEND_CONTRACT",
+      "source_id": "VAN-ML-PKT-024",
+      "source_obligation_sha256": "137ad54837e2a416695e3492bd7005689974dc2eab544703ddc31ba746130a3e",
+      "source_parent_duties": [
+        "BE-008",
+        "BE-013",
+        "BE-031",
+        "BE-033"
+      ],
+      "source_title": "Forecast serving, cache, freshness and novelty gates",
+      "status": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_ADMISSION"
+    },
+    {
+      "all_deliverables_retained": [
+        "Join forecasts into existing OpportunityEngine/MetaLabeler and account coordinator through versioned evidence inputs",
+        "Train fusion only on OOF predictions, measure redundancy, preserve baseline fallback policies",
+        "Bind independent economic admission producer to Normal/Risky/Aggressive use; never modify signed ceilings"
+      ],
+      "all_exit_evidence_retained": [
+        "Model disagreement, duplicate-signal confidence, missing edge and mid-cycle model change are handled",
+        "Arbiter output still requires new TradeIntent, RiskSnapshot, RiskAuthority and sole router"
+      ],
+      "canonical_unit": "VAN-ML-PKT-025",
+      "disposition": "ADOPT_FULL_BACKEND_CONTRACT",
+      "source_id": "VAN-ML-PKT-025",
+      "source_obligation_sha256": "8e2d88766fa538a8c3d2e9dee303c16fb117e5b3c203f8192e631c24db3596dc",
+      "source_parent_duties": [
+        "BE-009",
+        "BE-013",
+        "BE-016",
+        "BE-021"
+      ],
+      "source_title": "Forecast fusion, arbiter and mode evidence integration",
+      "status": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_ADMISSION"
+    },
+    {
+      "all_deliverables_retained": [
+        "Add native cooldown, stop-loss streak and low-profit suppression proposals inspired by Freqtrade",
+        "Reuse existing drawdown/kill/health controls and resolve overlapping suppression deterministically",
+        "Persist per-account/environment/strategy/instrument/direction state and reasons"
+      ],
+      "all_exit_evidence_retained": [
+        "Partial fills do not multiply loss counts; restarts cannot erase locks",
+        "All entry blocks preserve authorized reductions, stop protection and manual control ownership"
+      ],
+      "canonical_unit": "VAN-ML-PKT-026",
+      "disposition": "ADOPT_FULL_BACKEND_CONTRACT",
+      "source_id": "VAN-ML-PKT-026",
+      "source_obligation_sha256": "2c3b6b1151786dbe0573c623c9976bcd2362f50782990984566e0c49eebb0553",
+      "source_parent_duties": [
+        "BE-009",
+        "BE-012",
+        "BE-013"
+      ],
+      "source_title": "Instrument and strategy protection policies",
+      "status": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_ADMISSION"
+    },
+    {
+      "all_deliverables_retained": [
+        "Join point-in-time event features into existing Qlib tabular tasks and model-supported NeuralForecast historical exogenous inputs; future probability trajectories are never known covariates.",
+        "Implement conditional asset-response targets for returns, volatility, adverse excursion and trade quality by instrument/horizon/session, with simple market/calendar baselines.",
+        "Use out-of-fold predictions in fusion, measure incremental information beyond price/news/consensus inputs and preserve shared-source dependencies across model families."
+      ],
+      "all_exit_evidence_retained": [
+        "Actual fitted-model export/load/inference on adequate permitted research data with predictions joined to exact available event snapshots.",
+        "Event probability cannot be copied into asset-direction or trade-win probability; incapable NF configurations reject unsupported exogenous fields."
+      ],
+      "canonical_unit": "VAN-ML-PKT-042",
+      "disposition": "ADOPT_FULL_BACKEND_CONTRACT",
+      "source_id": "VAN-ML-PKT-042",
+      "source_obligation_sha256": "46c7237b98d13cc918a680d0680e036cd6c092c8c84904d254f7a28d36db9406",
+      "source_parent_duties": [
+        "BE-013",
+        "BE-015",
+        "BE-016",
+        "BE-021",
+        "BE-022"
+      ],
+      "source_title": "Conditional asset-response models and forecast-stack integration",
+      "status": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_ADMISSION"
+    },
+    {
+      "all_deliverables_retained": [
+        "Persist input-to-forecast-to-decision-to-outcome attribution and counterfactual separation",
+        "Connect existing drift/health/replay and observed broker costs to candidate retraining requests",
+        "Implement privacy/retention/correction invalidation, consented manual-trade datasets and no-survivor bias"
+      ],
+      "all_exit_evidence_retained": [
+        "Deletion/correction invalidates affected derived models without pretending unlearning",
+        "Feature drift triggers candidate work or abstention, never unilateral risk expansion"
+      ],
+      "canonical_unit": "VAN-ML-PKT-027",
+      "disposition": "ADOPT_FULL_BACKEND_CONTRACT",
+      "source_id": "VAN-ML-PKT-027",
+      "source_obligation_sha256": "8be0eadbf0b058aa98be966203755a910bb8cf95d02e524edfaec79af646460d",
+      "source_parent_duties": [
+        "BE-012",
+        "BE-013",
+        "BE-022",
+        "BE-027"
+      ],
+      "source_title": "Outcome ledger, drift and proprietary learning data",
+      "status": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_ADMISSION"
+    },
+    {
+      "all_deliverables_retained": [
+        "Implement external-asset evidence integration through inherited D1–D7 policies and preserve manual-position ownership, no stop widening, calendar blackouts and two-source armed expectations.",
+        "Implement sandbox binary-contract value calculations for held-to-settlement and exit-before-settlement strategies with explicit depth/fees/currency/capital lockup; probabilities must be independently calibrated.",
+        "Implement maximum-loss/event-family portfolio stress and constrained Kelly-style research comparisons; output only bounded proposals, never final authority, actual order instructions or self-promotion."
+      ],
+      "all_exit_evidence_retained": [
+        "Positive admitted sandbox evidence consumed by risk evaluation and negative stale/unknown/wrong-use cases, with exact source and independent receipt bindings.",
+        "No live event-contract adapter is registered; event-risk proposals cannot raise existing news multipliers or treat stop distance as maximum binary loss."
+      ],
+      "canonical_unit": "VAN-ML-PKT-043",
+      "disposition": "ADOPT_FULL_BACKEND_CONTRACT",
+      "source_id": "VAN-ML-PKT-043",
+      "source_obligation_sha256": "ff40e2511f34e6c48e08739dcd9986d2e041350dc305c1ae6ef25ce1b3443c29",
+      "source_parent_duties": [
+        "BE-009",
+        "BE-011",
+        "BE-013",
+        "BE-015",
+        "BE-016",
+        "BE-017"
+      ],
+      "source_title": "Calibrated event value and bounded position evidence",
+      "status": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_ADMISSION"
+    },
+    {
+      "all_deliverables_retained": [
+        "Implement bounded inventory-aware two-sided quoting simulations with jump risk, time-to-event, event-family exposure, toxicity and fill-conditional expected value.",
+        "Compare no-quote, fixed-spread and inventory-aware policies; measure queue dependence, inventory age, markout at several horizons, fee/rebate assumptions and cancel effectiveness.",
+        "Implement research stop/quote-reduction on stale/gapped books and official-release risk; simulate pending cancels and retain exposure until confirmed. No spoofing/wash-trade logic or assumed special market-maker privileges."
+      ],
+      "all_exit_evidence_retained": [
+        "Positive simulated quoting/fill/inventory roundtrip and adverse-selection/cancel-race/queue-loss stress evidence.",
+        "Conditional value uses outcomes after actual modeled fills; unconditional spread capture or touched quotes do not qualify profitability."
+      ],
+      "canonical_unit": "VAN-ML-PKT-046",
+      "disposition": "ADOPT_FULL_BACKEND_CONTRACT",
+      "source_id": "VAN-ML-PKT-046",
+      "source_obligation_sha256": "17fa52e0194bf8ea426b948c795a9946d1b3ebcf3015f6bb8efed7a66ba76eba",
+      "source_parent_duties": [
+        "BE-009",
+        "BE-010",
+        "BE-012",
+        "BE-019",
+        "BE-021",
+        "BE-022"
+      ],
+      "source_title": "Inventory-aware event market-making research laboratory",
+      "status": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_ADMISSION"
+    },
+    {
+      "all_deliverables_retained": [
+        "Extend genuine gateway operations for forecasts, experiments, diagnostics, proposals, retraining and receipts",
+        "Publish complete typed states/actions/eligibility/readback, cancellation and source-age contract",
+        "Map all forecast features to existing Trading/Analyst/Strategy/Risk/Settings/Work surfaces without new frontend code"
+      ],
+      "all_exit_evidence_retained": [
+        "Real authenticated headless caller exercises every registered operation",
+        "Uncalibrated scores never exposed as win probabilities; hidden unsupported flags cannot omit required functions"
+      ],
+      "canonical_unit": "VAN-ML-PKT-028",
+      "disposition": "ADOPT_FULL_BACKEND_CONTRACT",
+      "source_id": "VAN-ML-PKT-028",
+      "source_obligation_sha256": "1ea7b54e646becd43275cad5ff83f6ff6c00c7001b168e1aa57e389801d07045",
+      "source_parent_duties": [
+        "BE-020",
+        "BE-021",
+        "BE-022",
+        "BE-030",
+        "BE-031",
+        "BE-032"
+      ],
+      "source_title": "Complete backend APIs and future-screen consumption",
+      "status": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_ADMISSION"
+    },
+    {
+      "all_deliverables_retained": [
+        "Implement four frozen studies: pre-event risk, surprise interpretation, volatility and opportunity ranking, all paired against the same incumbent and exposure-matched/simple controls.",
+        "Include dependency-aware uncertainty, trial census, event counts, publication/acquisition/execution lag tests, shuffled/lagged controls, full-account accounting and operating costs.",
+        "Deliver prospective forecast sealing, outcome maturation and per-use decisions QUALIFIED/REJECTED/INCONCLUSIVE/UNAVAILABLE; useful context is not automatically trading edge."
+      ],
+      "all_exit_evidence_retained": [
+        "Actual comparison/report pipelines with positive and deliberately no-edge fixtures; actual market claims require permitted untouched and prospective observations.",
+        "Fewer trades or reduced capital alone cannot be advertised as superior intelligence; insufficient independent events remains inconclusive."
+      ],
+      "canonical_unit": "VAN-ML-PKT-047",
+      "disposition": "ADOPT_FULL_BACKEND_CONTRACT",
+      "source_id": "VAN-ML-PKT-047",
+      "source_obligation_sha256": "ddbafa4c887a473b43340ff67c3b40115be166adf96be4bf46ddcb2593af857c",
+      "source_parent_duties": [
+        "BE-016",
+        "BE-021",
+        "BE-022",
+        "BQ-001",
+        "BQ-002",
+        "BQ-003"
+      ],
+      "source_title": "Prediction-market incremental-value and prospective study programme",
+      "status": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_ADMISSION"
+    },
+    {
+      "all_deliverables_retained": [
+        "Build approved VM service manifests with isolated users/quotas/secrets/network and capacity admission",
+        "Exercise install, migration, backup/restore, rollback, model hot-swap and telemetry retention",
+        "Use Global DIAL and Zuul routes; do not run on forbidden desktop or silently substitute local compute"
+      ],
+      "all_exit_evidence_retained": [
+        "Kill/pressure/full-disk/mismatched build and lost-receipt drills with actual services",
+        "T0 deadline/protection noninterference and immutable ledger survival independently measured"
+      ],
+      "canonical_unit": "VAN-ML-PKT-029",
+      "disposition": "ADOPT_FULL_BACKEND_CONTRACT",
+      "source_id": "VAN-ML-PKT-029",
+      "source_obligation_sha256": "d831836a0ac68126e09b7db5d470c79f19df58fee75ce67806cd4fc62a103625",
+      "source_parent_duties": [
+        "BE-033",
+        "BE-034"
+      ],
+      "source_title": "VM deployment, isolation, recovery and service operations",
+      "status": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_ADMISSION"
+    },
+    {
+      "all_deliverables_retained": [
+        "Wire all data, probability, comparison, research-lab and evidence states into existing APIs, capability catalogue, alerts, logs and later-screen contracts; no early frontend.",
+        "Exercise Netcup/Oracle host profiles, endpoint changes, stream gaps, source revocation, disk/backlog pressure, restart, duplicate/unknown publication and schema rollback with no T0/provider network coupling.",
+        "Provide honest per-source integration state and no-procurement development path; all mandatory backend/parent obligations remain visible and source-specific real-data gates cannot be replaced by fixtures."
+      ],
+      "all_exit_evidence_retained": [
+        "Headless real-service positive/recovery/error readbacks; all new requirements join independent packet032 closure and parent033/BG-001.",
+        "No background order enablement, licence purchase, new account, cloud bill, fixture-to-live promotion or false full-provider-ready claim."
+      ],
+      "canonical_unit": "VAN-ML-PKT-048",
+      "disposition": "ADOPT_FULL_BACKEND_CONTRACT",
+      "source_id": "VAN-ML-PKT-048",
+      "source_obligation_sha256": "02ebd51d78ee129274842a3736cd63c333d5f173f55c1f14af8b2da6be371354",
+      "source_parent_duties": [
+        "BE-003",
+        "BE-015",
+        "BE-016",
+        "BE-017",
+        "BE-030",
+        "BE-031",
+        "BE-032",
+        "BE-033",
+        "BE-034",
+        "BQ-001",
+        "BQ-005",
+        "BQ-006"
+      ],
+      "source_title": "Prediction-market consumers, operations and complete backend integration",
+      "status": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_ADMISSION"
+    },
+    {
+      "all_deliverables_retained": [
+        "Execute matched baseline/ablation/cost-stress/rank/return/volatility/calibration studies",
+        "Build source-bound certificates from actual outputs, effective sample sizes and uncertainty; report rejected/inconclusive cases honestly",
+        "Independently reproduce selected results and attach immutable artifact/dataset/config evidence"
+      ],
+      "all_exit_evidence_retained": [
+        "Positive, negative and no-edge reporting pathways all exercised",
+        "No raw accuracy, favorable chart, in-sample fit or historic literature metric certifies VAN alpha"
+      ],
+      "canonical_unit": "VAN-ML-PKT-030",
+      "disposition": "ADOPT_FULL_BACKEND_CONTRACT",
+      "source_id": "VAN-ML-PKT-030",
+      "source_obligation_sha256": "e27a12dc6e28392831ddc10f60a10663d52ceb5c5fc9d8ea140f3c907858dbfc",
+      "source_parent_duties": [
+        "BQ-001",
+        "BQ-002",
+        "BQ-003"
+      ],
+      "source_title": "Reproducible forecast and economic qualification reports",
+      "status": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_ADMISSION"
+    },
+    {
+      "all_deliverables_retained": [
+        "Exercise real incoming-data shadow recording and full sandbox train-to-inference-to-arbiter-to-paper lifecycle",
+        "Test trusted sandbox admission, revocation, fallback and rollbacks without live financial authority",
+        "Implement continuing prospective economic review windows and no-edge terminal decisions",
+        "Include prediction-market per-source integration and frozen prospective expectations; source-unavailable cannot be reported as an actual Kalshi data qualification."
+      ],
+      "all_exit_evidence_retained": [
+        "Same gateway/service path supplies genuine scoped receipts before BG",
+        "A fixture-approved model cannot enter a live binding; real-paper evidence is not booked as live profit"
+      ],
+      "canonical_unit": "VAN-ML-PKT-031",
+      "disposition": "ADOPT_FULL_BACKEND_CONTRACT",
+      "source_id": "VAN-ML-PKT-031",
+      "source_obligation_sha256": "275a09db68f8fc1c5237b319a78e5c61a6892a6d54d4733c18ed04ceb5ac0a3e",
+      "source_parent_duties": [
+        "BQ-001",
+        "BQ-002",
+        "BQ-003",
+        "BQ-005"
+      ],
+      "source_title": "Prospective shadow and controlled sandbox admission",
+      "status": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_ADMISSION"
+    },
+    {
+      "all_deliverables_retained": [
+        "Audit every requirement, real provider/model integration, registered consumer and failure/recovery record",
+        "Verify source/runtime identity, no unclosed mandatory implementation gaps and all selected model plugins operational",
+        "Issue independent additive technical closure only through the genuine trusted authority",
+        "Include all12 prediction-market backend packets, all30 added requirements, research labs, real consumer paths and truthful source-specific limitations."
+      ],
+      "all_exit_evidence_retained": [
+        "All backend requirements/tests trace to source-bound results, not this document checker",
+        "Economic rejection is distinct from missing software; false-complete mutation must fail"
+      ],
+      "canonical_unit": "VAN-ML-PKT-032",
+      "disposition": "ADOPT_FULL_BACKEND_CONTRACT",
+      "source_id": "VAN-ML-PKT-032",
+      "source_obligation_sha256": "b6e8fbbba7710bdcfae115c01b81292395e301e9e3d135867deefcce99e17f3c",
+      "source_parent_duties": [
+        "BQ-006"
+      ],
+      "source_title": "Independent additive backend closure",
+      "status": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_ADMISSION"
+    },
+    {
+      "all_deliverables_retained": [
+        "Merge additive evidence and catalogue into parent units and regenerate exact whole-product scope/contract hashes",
+        "Require every original parent backend obligation plus this additive before parent BG-001",
+        "Produce frontend consumption handoff; do not self-issue the global certificate",
+        "Apply the supplied prediction-market parent delta under actual independent admission; preserve VAN-NX-036, OD-14, D1–D7 and original parent IDs."
+      ],
+      "all_exit_evidence_retained": [
+        "No additive-only receipt can unlock parent UX",
+        "Existing backend/parent requirement removal, signature substitution or affected stale receipt blocks entry"
+      ],
+      "canonical_unit": "BG-001",
+      "disposition": "MERGED_SAME_OBLIGATION_NO_DUPLICATE_GATE",
+      "source_id": "VAN-ML-PKT-033",
+      "source_obligation_sha256": "29aa0354e971bab7a62b6b08cb99c23ec45cc31130d16b49e76226f6dee35152",
+      "source_parent_duties": [
+        "BE-032",
+        "BQ-006",
+        "BG-001"
+      ],
+      "source_title": "Parent BG-001 integration and renewed contract baseline",
+      "status": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_ADMISSION"
+    },
+    {
+      "all_deliverables_retained": [
+        "After current BG and parent UX acceptance, implement every mapped projection/control in the locked two-theme design",
+        "Deliver context-specific uncertainty, source age, model/strategy distinction, experiment and review flows",
+        "No dashboards on Home by default, no mobile training or broker authority in charts",
+        "Complete News/Event context, probability/source-age, frozen expectation, research payoff/quote diagnostics and per-use evidence readbacks without enabling live event-contract trading."
+      ],
+      "all_exit_evidence_retained": [
+        "Both-theme/state/action parity, accessibility, lifecycle and offline restoration",
+        "Model version changes and stale bands never leave an enabled misleading action"
+      ],
+      "canonical_unit": "FE-023",
+      "disposition": "MERGED_SAME_OBLIGATION_NO_DUPLICATE_GATE",
+      "source_id": "VAN-ML-PKT-034",
+      "source_obligation_sha256": "e29b645df6d6347fc5d5603018dfee8dad1dea34e2d3706845da0384c09f08e8",
+      "source_parent_duties": [
+        "UX-001",
+        "UX-002",
+        "UX-003",
+        "FE-006",
+        "FE-007",
+        "FE-008",
+        "FE-009",
+        "FE-011",
+        "FE-012",
+        "FE-014",
+        "FE-015",
+        "FE-018",
+        "FE-019",
+        "FE-020",
+        "FE-022",
+        "FE-013"
+      ],
+      "source_title": "Post-BG complete native forecast surfaces",
+      "status": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_ADMISSION"
+    },
+    {
+      "all_deliverables_retained": [
+        "Run actual signed-app/gateway/provider round trips, physical S24 performance and accessibility acceptance",
+        "Verify original and additive action coverage, telemetry privacy and all recovery cases",
+        "Obtain independent owner acceptance without replacing parent evidence"
+      ],
+      "all_exit_evidence_retained": [
+        "Physical device evidence cannot be substituted by emulator or headless tests",
+        "Removing any inherited or additive action fails coverage"
+      ],
+      "canonical_unit": "QA-005",
+      "disposition": "MERGED_SAME_OBLIGATION_NO_DUPLICATE_GATE",
+      "source_id": "VAN-ML-PKT-035",
+      "source_obligation_sha256": "4bab286a58cb6c8c9cb6623aa883d44d84151cde35a2b997556b002eb574874c",
+      "source_parent_duties": [
+        "QA-001",
+        "QA-002",
+        "QA-003",
+        "QA-004",
+        "QA-005"
+      ],
+      "source_title": "Whole-product physical and independent final qualification",
+      "status": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_ADMISSION"
+    },
+    {
+      "all_deliverables_retained": [
+        "Release only exact accepted software under owner-approved rollout and proven rollback",
+        "Promote each economically qualified model/strategy/account/horizon separately using live mandate and prospective evidence",
+        "Retire old presentation only after whole-product parity; retain evidence and qualified baseline fallback"
+      ],
+      "all_exit_evidence_retained": [
+        "Software release does not auto-enable new trading risk",
+        "Rejected/inconclusive models remain available for research, disabled for consequential influence"
+      ],
+      "canonical_unit": "REL-001",
+      "disposition": "MERGED_SAME_OBLIGATION_NO_DUPLICATE_GATE",
+      "source_id": "VAN-ML-PKT-036",
+      "source_obligation_sha256": "c27ab555b861022c89e9946ccc151d6b62b8057e75e3104898fa269a1dc2346e",
+      "source_parent_duties": [
+        "REL-001",
+        "REL-002"
+      ],
+      "source_title": "Controlled software release and separate economic promotion",
+      "status": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_ADMISSION"
+    }
+  ],
+  "status": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_ADMISSION"
+}

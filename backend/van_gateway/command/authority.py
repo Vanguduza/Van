@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field
 
 from van_gateway.action.models import ActionDefinition
 from van_gateway.models import ActionClass, OriginChannel, PrincipalType
+from van_gateway.mission.models import TERMINAL_STATES
 from van_gateway.storage.db import Store
 
 
@@ -42,6 +43,8 @@ class CommandAuthorityRecord(BaseModel):
     authority_source: AuthoritySource = AuthoritySource.OWNER_COMMAND
     source_authority_id: str | None = None
     source_command_id: str | None = None
+    request_hash: str | None = None
+    dispatch_metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 _RANK = {ActionClass.A1: 1, ActionClass.A2: 2, ActionClass.A3: 3, ActionClass.A4: 4, ActionClass.A5: 5}
@@ -63,16 +66,22 @@ class CommandAuthorityService:
 
     async def seal(self, record: CommandAuthorityRecord) -> CommandAuthorityRecord:
         key = self.PREFIX + record.command_id
-        existing = await self.get(record.command_id)
-        if existing is not None and existing != record:
-            raise CommandAuthorityError("command_authority_conflict")
-        await self.store.execute(
-            """
-            INSERT INTO runtime_meta(key, value, updated_at_unix_ms) VALUES (?, ?, ?)
-            ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at_unix_ms=excluded.updated_at_unix_ms
-            """,
-            (key, record.model_dump_json(), int(time.time() * 1000)),
-        )
+        async with self.store.connection() as db:
+            await db.execute("BEGIN IMMEDIATE")
+            try:
+                row = await (await db.execute("SELECT value FROM runtime_meta WHERE key=?", (key,))).fetchone()
+                if row is not None:
+                    existing = CommandAuthorityRecord.model_validate_json(str(row["value"]))
+                    if existing != record:
+                        raise CommandAuthorityError("command_authority_conflict")
+                    await db.rollback()
+                    return existing
+                await db.execute("INSERT INTO runtime_meta(key,value,updated_at_unix_ms) VALUES(?,?,?)",
+                    (key,record.model_dump_json(),int(time.time()*1000)))
+                await db.commit()
+            except BaseException:
+                await db.rollback()
+                raise
         return record
 
     async def get(self, command_id: str) -> CommandAuthorityRecord | None:
@@ -118,6 +127,21 @@ class CommandAuthorityService:
         )
         if device is None or device["revoked_at_unix"] is not None:
             raise CommandAuthorityError("device_or_grant_revoked")
+
+        mission = await self.store.fetchone(
+            "SELECT mission_id,state FROM missions "
+            "WHERE json_extract(authority_envelope_json, '$.source_command_id') = ?",
+            (command_id,),
+        )
+        if mission is not None and str(mission["state"]) in {state.value for state in TERMINAL_STATES}:
+            raise CommandAuthorityError("command_mission_terminal")
+
+        if mission is not None:
+            from van_gateway.mission.control import require_mission_dispatch, MissionControlError
+            try:
+                await require_mission_dispatch(self.store, str(mission["mission_id"]))
+            except MissionControlError as exc:
+                raise CommandAuthorityError(str(exc)) from exc
 
         if _RANK[action.action_class] > _RANK[record.effective_action_class]:
             raise CommandAuthorityError("action_class_escalation_denied")

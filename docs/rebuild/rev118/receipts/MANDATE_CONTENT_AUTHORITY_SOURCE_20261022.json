@@ -1,0 +1,384 @@
+{
+  "schema": "van.rebuild.mandate-content-authority-source/1",
+  "source_parent": "ae98e48b750d197f96e4c555b8fe9fa45a41b01c",
+  "source_sha256": {
+    "trading/vati/risk/mandate.py": "fc75680c132fa4588a2dd9e0133e263cb417f35bb04964efa5aa8520e151b702",
+    "trading/vati/risk/authority.py": "f34d860fb1d83040773895f06ac29b3b9b342820b0b64226c7f00ed7a14c8495",
+    "trading/vati/execution/router.py": "a2cb677da1be3904cdcc0ba8bb3a0a7864c5aad6ba75d7dcc6b4585b58c4dcaa",
+    "trading/tests/test_mandate_content_authority.py": "7e5f1b8709920baed54adfe340ca059eafa3710faeb34e69dd03bde010a46e9e",
+    "trading/tests/conftest.py": "75c12a2b8e3b23aedf457ce01856e28bcd53be2949e6af7b38f49a6420378165",
+    "trading/tests/test_mandate.py": "e10a67d207c2425f62bc959ac0ce9911c8d5c3cfac2315eebcb7b9bd33f6d7be",
+    "trading/tests/test_contract_schemas.py": "9e3604bd3d1cd8a28b8631668fb7449ea54dabde3b2bf67f2f4d5a905d1b1e04",
+    "trading/tests/test_boolean_fact_producers.py": "f835b67e913073d0633fb6439bf18ec6c4a849a9e2c05421ce4d9a15b587c3c8",
+    "backend/tests/test_trading_readmodels.py": "848abdfc79401eeacd098df623fb086357701e25b2b91e1ace4127d133673569",
+    "trading/vati/contracts/schemas/trading_mandate.schema.json": "0f7155d7c612cf2b0e4011eb5afff6935cf0f15ff248a19ebc9ee2a14b94a121",
+    "trading/examples/mandate.fx_primary.example.json": "d37a5f5d75818f4670800fb71f1480b5ae0a7a631da264fe923b86a7dc6e4c16",
+    "trading/examples/README.md": "cfb5cc52f94ecc2d5d9ba48c045c6c0597a6820434a89cb09ae57e701e6dd182",
+    "registries/owner_authority_keys.json": "98ca562ca6df754e27a1a8258997f6a3f6e27ffa83cee31328029837660f0f83"
+  },
+  "initial_actual_unsigned_policy_counterexamples": {
+    "tests": 13,
+    "failures": 13,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "6e54bc756e2ac6c367f75adeef5abde7911d41e48058a69a9c35184f420170e2"
+  },
+  "first_full_suite_retained_example_shape_failure": {
+    "tests": 2074,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "fd9c09f29c44a3c7e2302a67cbdc4cf51877f12b99e512304592fcab0dcc00ea"
+  },
+  "initial_precision_rounding_failure": {
+    "tests": 1,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "7f7d335bf85056ea5d98ec49784e33a36b0acbc4c7dcec7d1fd0643ab8c4f08c"
+  },
+  "full_trading_real_private_postgresql": {
+    "tests": 2077,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "020f6ed6cdbd5348395453d325aca29af2cf281927abe9d6f54fdf80e63530f0"
+  },
+  "focused_after_source_restoration": {
+    "tests": 136,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "aeb9a6c2600766c8b86693b1113f3d2b0b18774aa0cc48f0a87748aa7d198c99"
+  },
+  "rebuild": {
+    "tests": 78,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "672f02919b1c1625285a3916154aefca0d0496a5c71ae5a77be58735bc626738"
+  },
+  "initial_source_faults_retained": {
+    "records": [
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "7610c788b785f7d340233d740fc00b53dd1c4bade1054bdae1b98a39ef43bb01"
+      },
+      {
+        "phase": "mutation",
+        "why": "return to identity-only owner authorization",
+        "returncode": 1,
+        "log_sha256": "514721ed20c243810f1bf6616e22dd46fe8740934bef1a70ed685bd15b30ce9c"
+      },
+      {
+        "phase": "mutation",
+        "why": "omit the native account from the signed policy",
+        "returncode": 1,
+        "log_sha256": "d4a0bf9179acdafb9144bd8f08653f63ea18cb65ef8c4d131e3716eeed6a55a0"
+      },
+      {
+        "phase": "mutation",
+        "why": "omit owner instrument scope",
+        "returncode": 1,
+        "log_sha256": "b27bde5dc74f0a07a774d8e52fffdd901a4d8e24994a08fc7eae36171734c202"
+      },
+      {
+        "phase": "mutation",
+        "why": "omit the actual per-trade risk ceiling",
+        "returncode": 1,
+        "log_sha256": "643cf6bd478c36a38fe8e69bc46bd78916560e2337665fbb09312f20442880f6"
+      },
+      {
+        "phase": "mutation",
+        "why": "omit the standing policy expiry",
+        "returncode": 0,
+        "log_sha256": "7610c788b785f7d340233d740fc00b53dd1c4bade1054bdae1b98a39ef43bb01"
+      },
+      {
+        "phase": "mutation",
+        "why": "omit actual effective drawdown defaults and thresholds",
+        "returncode": 1,
+        "log_sha256": "0838868bc6e64915542dec1ee19fb4cde4e0a4245312bd44c0316a4cc2643a5d"
+      },
+      {
+        "phase": "mutation",
+        "why": "omit nested strategy allocation bounds",
+        "returncode": 1,
+        "log_sha256": "c099b044cf0d8a28d6c4a4127f27f7c1d3e72645b3ddad78bf9c8ff24e045823"
+      },
+      {
+        "phase": "mutation",
+        "why": "allow post-admission mutable policy to receive kernel approval",
+        "returncode": 1,
+        "log_sha256": "e1136a9c7d86a6ef9df791dece1627dd220fc47211ce1737e760b275a2ebbbf8"
+      },
+      {
+        "phase": "mutation",
+        "why": "let a resealed decision bypass current policy admission at dispatch",
+        "returncode": 1,
+        "log_sha256": "3c5ee1f4ca5e746f2a6c917ff231a08ccb58ac2c7c25b8a8287ee434b45aa6de"
+      },
+      {
+        "phase": "mutation",
+        "why": "allow a standing policy to outlive the actual owner grant",
+        "returncode": 1,
+        "log_sha256": "d6577cafc5d24680b7f75e3bc5363f0a43131b4b0e127dc1f977c0fb2fbb5b57"
+      },
+      {
+        "phase": "mutation",
+        "why": "round distinct signed limits through the ambient decimal context",
+        "returncode": 1,
+        "log_sha256": "d479346b9369a9e8d130b0541ed287a047556214f6c8a070b048c5d81ca59342"
+      }
+    ],
+    "definitions": [
+      [
+        "trading/vati/risk/mandate.py",
+        "return 'mandate-v2:'+canonical_hash(normalized(body))",
+        "return policy.mandate_id+':'+policy.version",
+        "return to identity-only owner authorization"
+      ],
+      [
+        "trading/vati/risk/mandate.py",
+        "body=asdict(policy)",
+        "body=asdict(policy);body.pop('account_alias')",
+        "omit the native account from the signed policy"
+      ],
+      [
+        "trading/vati/risk/mandate.py",
+        "body=asdict(policy)",
+        "body=asdict(policy);body.pop('instruments')",
+        "omit owner instrument scope"
+      ],
+      [
+        "trading/vati/risk/mandate.py",
+        "body=asdict(policy)",
+        "body=asdict(policy);body.pop('max_risk_per_trade')",
+        "omit the actual per-trade risk ceiling"
+      ],
+      [
+        "trading/vati/risk/mandate.py",
+        "body=asdict(policy)",
+        "body=asdict(policy);body.pop('expires_at_unix')",
+        "omit the standing policy expiry"
+      ],
+      [
+        "trading/vati/risk/mandate.py",
+        "body=asdict(policy)",
+        "body=asdict(policy);body.pop('drawdown_tiers')",
+        "omit actual effective drawdown defaults and thresholds"
+      ],
+      [
+        "trading/vati/risk/mandate.py",
+        "body=asdict(policy)",
+        "body=asdict(policy);body.pop('strategy_risk_budgets')",
+        "omit nested strategy allocation bounds"
+      ],
+      [
+        "trading/vati/risk/authority.py",
+        "if not m.authority_matches_policy():",
+        "if False:",
+        "allow post-admission mutable policy to receive kernel approval"
+      ],
+      [
+        "trading/vati/execution/router.py",
+        "if not mandate.authority_matches_policy():",
+        "if False:",
+        "let a resealed decision bypass current policy admission at dispatch"
+      ],
+      [
+        "trading/vati/risk/mandate.py",
+        "if m.expires_at_unix > verified.expires_at_unix:",
+        "if False:",
+        "allow a standing policy to outlive the actual owner grant"
+      ],
+      [
+        "trading/vati/risk/mandate.py",
+        "text=format(value,'f')",
+        "text=format(value.normalize(),'f')",
+        "round distinct signed limits through the ambient decimal context"
+      ]
+    ],
+    "source_before_sha256": {
+      "trading/vati/execution/router.py": "a2cb677da1be3904cdcc0ba8bb3a0a7864c5aad6ba75d7dcc6b4585b58c4dcaa",
+      "trading/vati/risk/authority.py": "f34d860fb1d83040773895f06ac29b3b9b342820b0b64226c7f00ed7a14c8495",
+      "trading/vati/risk/mandate.py": "fc75680c132fa4588a2dd9e0133e263cb417f35bb04964efa5aa8520e151b702"
+    },
+    "source_after_sha256": {
+      "trading/vati/execution/router.py": "a2cb677da1be3904cdcc0ba8bb3a0a7864c5aad6ba75d7dcc6b4585b58c4dcaa",
+      "trading/vati/risk/authority.py": "f34d860fb1d83040773895f06ac29b3b9b342820b0b64226c7f00ed7a14c8495",
+      "trading/vati/risk/mandate.py": "fc75680c132fa4588a2dd9e0133e263cb417f35bb04964efa5aa8520e151b702"
+    },
+    "source_restored": true,
+    "journal_present": false
+  },
+  "source_faults": {
+    "records": [
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "d7951a3108dffc4184370c8a48ea74683e7ecba5ff9225c2d0f400d27c86c3ba"
+      },
+      {
+        "phase": "mutation",
+        "why": "return to identity-only owner authorization",
+        "returncode": 1,
+        "log_sha256": "d62bd55dded18b504238a431c83330759df424cc4eda59954f912a1c8f9a7b2c"
+      },
+      {
+        "phase": "mutation",
+        "why": "omit the native account from the signed policy",
+        "returncode": 1,
+        "log_sha256": "b7f9b04f3737642b05a50000244cc3373cd7eb898ee7cc877c058d1facaa6e27"
+      },
+      {
+        "phase": "mutation",
+        "why": "omit owner instrument scope",
+        "returncode": 1,
+        "log_sha256": "e8460449e21f9bd90df83c7ef40ac8cfe227a5a1f7482be6cab3e5617d00c49c"
+      },
+      {
+        "phase": "mutation",
+        "why": "omit the actual per-trade risk ceiling",
+        "returncode": 1,
+        "log_sha256": "ef5bde86e7b63ca02c7127782e02e9ceb88b96000e1ad944c601e4241a92a80b"
+      },
+      {
+        "phase": "mutation",
+        "why": "omit the standing policy expiry",
+        "returncode": 1,
+        "log_sha256": "cb775291257df33aa1baa315e517a7e3090eb7ea73c87da47b1cf67f122f2457"
+      },
+      {
+        "phase": "mutation",
+        "why": "omit actual effective drawdown defaults and thresholds",
+        "returncode": 1,
+        "log_sha256": "6f270a107ac2f223c2fb667f65642d729c7092d3bc01a7bf8d6793b9900dad73"
+      },
+      {
+        "phase": "mutation",
+        "why": "omit nested strategy allocation bounds",
+        "returncode": 1,
+        "log_sha256": "97037ca516a0f08ec84929b70347e48cbda5a9600b8d23c31b347c0bb38ba623"
+      },
+      {
+        "phase": "mutation",
+        "why": "allow post-admission mutable policy to receive kernel approval",
+        "returncode": 1,
+        "log_sha256": "9b47b44faa5d064f105676bdae7dce3574f6d3e202a26b5c97950b7d9ddeca0d"
+      },
+      {
+        "phase": "mutation",
+        "why": "let a resealed decision bypass current policy admission at dispatch",
+        "returncode": 1,
+        "log_sha256": "7cec40cfd7bfa264bfeb81b464570544118792b20bafd7b73f671317ac786807"
+      },
+      {
+        "phase": "mutation",
+        "why": "allow a standing policy to outlive the actual owner grant",
+        "returncode": 1,
+        "log_sha256": "febc39fa780575f991e72197ad7ccac6a9834b2787f91fc92df2b1ebadf61dbd"
+      },
+      {
+        "phase": "mutation",
+        "why": "round distinct signed limits through the ambient decimal context",
+        "returncode": 1,
+        "log_sha256": "5d25425a974ab17c0f16c01b19e90d6d202e016fe279d1df769d2a2888a87c1c"
+      }
+    ],
+    "definitions": [
+      [
+        "trading/vati/risk/mandate.py",
+        "return 'mandate-v2:'+canonical_hash(normalized(body))",
+        "return policy.mandate_id+':'+policy.version",
+        "return to identity-only owner authorization"
+      ],
+      [
+        "trading/vati/risk/mandate.py",
+        "body=asdict(policy)",
+        "body=asdict(policy);body.pop('account_alias')",
+        "omit the native account from the signed policy"
+      ],
+      [
+        "trading/vati/risk/mandate.py",
+        "body=asdict(policy)",
+        "body=asdict(policy);body.pop('instruments')",
+        "omit owner instrument scope"
+      ],
+      [
+        "trading/vati/risk/mandate.py",
+        "body=asdict(policy)",
+        "body=asdict(policy);body.pop('max_risk_per_trade')",
+        "omit the actual per-trade risk ceiling"
+      ],
+      [
+        "trading/vati/risk/mandate.py",
+        "body=asdict(policy)",
+        "body=asdict(policy);body.pop('expires_at_unix')",
+        "omit the standing policy expiry"
+      ],
+      [
+        "trading/vati/risk/mandate.py",
+        "body=asdict(policy)",
+        "body=asdict(policy);body.pop('drawdown_tiers')",
+        "omit actual effective drawdown defaults and thresholds"
+      ],
+      [
+        "trading/vati/risk/mandate.py",
+        "body=asdict(policy)",
+        "body=asdict(policy);body.pop('strategy_risk_budgets')",
+        "omit nested strategy allocation bounds"
+      ],
+      [
+        "trading/vati/risk/authority.py",
+        "if not m.authority_matches_policy():",
+        "if False:",
+        "allow post-admission mutable policy to receive kernel approval"
+      ],
+      [
+        "trading/vati/execution/router.py",
+        "if not mandate.authority_matches_policy():",
+        "if False:",
+        "let a resealed decision bypass current policy admission at dispatch"
+      ],
+      [
+        "trading/vati/risk/mandate.py",
+        "if m.expires_at_unix > verified.expires_at_unix:",
+        "if False:",
+        "allow a standing policy to outlive the actual owner grant"
+      ],
+      [
+        "trading/vati/risk/mandate.py",
+        "text=format(value,'f')",
+        "text=format(value.normalize(),'f')",
+        "round distinct signed limits through the ambient decimal context"
+      ]
+    ],
+    "source_before_sha256": {
+      "trading/vati/execution/router.py": "a2cb677da1be3904cdcc0ba8bb3a0a7864c5aad6ba75d7dcc6b4585b58c4dcaa",
+      "trading/vati/risk/authority.py": "f34d860fb1d83040773895f06ac29b3b9b342820b0b64226c7f00ed7a14c8495",
+      "trading/vati/risk/mandate.py": "fc75680c132fa4588a2dd9e0133e263cb417f35bb04964efa5aa8520e151b702"
+    },
+    "source_after_sha256": {
+      "trading/vati/execution/router.py": "a2cb677da1be3904cdcc0ba8bb3a0a7864c5aad6ba75d7dcc6b4585b58c4dcaa",
+      "trading/vati/risk/authority.py": "f34d860fb1d83040773895f06ac29b3b9b342820b0b64226c7f00ed7a14c8495",
+      "trading/vati/risk/mandate.py": "fc75680c132fa4588a2dd9e0133e263cb417f35bb04964efa5aa8520e151b702"
+    },
+    "source_restored": true,
+    "journal_present": false
+  },
+  "fixture_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "oracle_correction": "The expiry omission initially survived because the token-lifetime backstop rejected only widening beyond its original expiry. Added a within-token shortening case and required the actual content-signature error; all11 final faults detected after22passing controls. Original failure and neutral fault retained.",
+  "historical_authority": "No ID-only token migration or self-signing. Existing immutable historical rows preserved; v2 admission requires a genuine owner content signature.",
+  "public_keys_registry": {
+    "keys": {},
+    "change": "explanatory mandate-admit subject only; all other acts unchanged"
+  },
+  "qualification": "Candidate source only; no current owner signature, native/independent certificate, whole-unit, provider, financial, profitability, production or physical handset acceptance."
+}

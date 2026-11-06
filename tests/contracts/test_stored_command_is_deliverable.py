@@ -62,24 +62,55 @@ def test_the_stored_body_carries_every_field_the_gateway_requires():
     )
 
 
-def test_the_builder_is_the_one_the_offline_path_uses():
+def test_the_offline_path_stores_the_body_prepared_before_dispatch():
     """Guards the guard.
 
-    If `storeSignedBody` stopped calling `buildCommandBody` — went back to assembling a
-    payload by hand, which is how this defect happened — the check above would still pass
-    while describing a function nothing on that path calls.
+    The request builder remains authoritative, but a lost reply must retain that
+    exact prepared request. Building a second signed body in the failure path
+    changes the command identity, signature and issue time of a request that may
+    already have reached the gateway.
     """
     controller = (
         ROOT / "android/app/src/main/java/com/dial/van/control/VanCommandController.kt"
     ).read_text(encoding="utf-8")
-    assert "gateway.buildCommandBody(" in controller, (
-        "the offline path no longer builds its payload with the signed builder"
-    )
+    dispatch_source = CLIENT.read_text(encoding="utf-8")
+    dispatch = dispatch_source.index("suspend fun dispatchCommand(")
+    publish = dispatch_source.index("private fun publishCommandVisualStatus(", dispatch)
+    dispatched = dispatch_source[dispatch:publish]
+    assert "val body = buildCommandBody(" in dispatched
+    assert "val bodyText = body.toString()" in dispatched
+    assert dispatched.index("onPreparedCommand(bodyText)") < dispatched.index("postRawAt(")
+    # The original actor/root are captured before preparation, rather than rereading
+    # a mutable profile after an owner switches accounts while transport is pending.
+    for capture in ("val originalRoot = baseUrl", "val originalDevice = deviceId",
+                    "val originalToken = deviceAccessToken"):
+        assert dispatched.index(capture) < dispatched.index("val body = buildCommandBody(")
+    assert dispatched.count("buildCommandBody(") == 1
+    assert dispatched.count("val bodyText = body.toString()") == 1
+    assert re.search(r'postRawAt\(originalRoot,\s*"/v1/commands",\s*bodyText', dispatched)
+    assert 'proofHeaders("POST", "/v1/commands", bodyText)' in dispatched
+    assert "baseUrl == originalRoot && deviceId == originalDevice && deviceAccessToken == originalToken" in dispatched
+    assert dispatched.index("beforeDispatch()") < dispatched.index('proofHeaders("POST", "/v1/commands", bodyText)')
+    transport_start = dispatch_source.index("private fun postRawAt(")
+    transport_end = dispatch_source.index("private fun postProved(", transport_start)
+    transport = dispatch_source[transport_start:transport_end]
+    assert transport.index("freshHeaders?.invoke()") < transport.index("conn.outputStream.use")
+    assert "it.write(body.toString().toByteArray(StandardCharsets.UTF_8))" in transport
+    prepared = controller.index("onPreparedCommand = {")
+    before_send = controller.index("beforeDispatch = {", prepared)
+    failure = controller.index("recordResponse(command, response)", before_send)
+    assert "preparedBody = it" in controller[prepared:before_send]
+    before_transport = controller[before_send:failure]
+    assert "gateway.permissionProfileIdentity() == originalProfile" in before_transport
+    assert "gateway.deviceIdOrEmpty() == originalDevice" in before_transport
+    assert before_transport.index("originalOwned = storeSignedBody(") < before_transport.index("check(originalOwned)") < before_transport.index("priorHttpAttempt = true")
+    assert "recordFailure(command, t, preparedBody, originalProfile, priorHttpAttempt, originalOwned)" in controller
     stored = controller.index("private fun storeSignedBody(")
-    following = controller[stored : stored + 2000]
-    assert "buildCommandBody(" in following, (
-        "storeSignedBody assembles its own payload again"
-    )
+    following = controller[stored:controller.index("fun reportRecoveredOriginal(", stored)]
+    assert "OfflineSubmission.preparedReplay(preparedBody, command.idempotencyKey)" in following
+    assert "it(body, needsReconfirm, originalProfile, priorHttpAttempt)" in following
+    assert "storeForLater?.invoke(body, needsReconfirm)" in following
+    assert "buildCommandBody(" not in following, "offline recovery must not re-sign an uncertain dispatch"
 
 
 def test_the_signature_is_over_the_moment_the_owner_issued_it():

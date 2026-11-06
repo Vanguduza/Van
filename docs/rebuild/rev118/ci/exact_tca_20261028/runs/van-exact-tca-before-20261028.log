@@ -1,0 +1,395 @@
+FFFFFFFF.FFF                                                             [100%]
+=================================== FAILURES ===================================
+_ test_economic_values_are_exact_and_independent_of_callers_context[2-ROUND_UP-False-LONG] _
+
+direction = <Direction.LONG: 'LONG'>, precision = 2, rounding = 'ROUND_UP'
+traps = False
+
+    @pytest.mark.parametrize('direction', list(Direction))
+    @pytest.mark.parametrize('precision,rounding,traps', [(2, ROUND_UP, False), (7, ROUND_DOWN, False),
+        (3, ROUND_UP, True), (80, ROUND_DOWN, True)])
+    def test_economic_values_are_exact_and_independent_of_callers_context(direction, precision, rounding, traps):
+        r = original(); value = D('123456789.000000000123456789'); model = D('0.000031')
+        baseline = compute_tca(r, direction=direction, qty=r.filled_qty, value_per_unit=value, modelled_cost_pct=model)
+        sign = 1 if direction is Direction.LONG else -1
+        oracle = (F(r.average_fill)-F(r.decision_price))*sign*F(r.filled_qty)*F(value)+F(r.fees)
+        notional = F(r.decision_price)*F(r.filled_qty)*F(value)
+        with localcontext() as context:
+            context.prec=precision;context.rounding=rounding;context.Emax=9;context.Emin=-9
+            context.traps[Inexact]=traps;context.traps[Rounded]=traps
+            before=context.copy()
+            result=compute_tca(r,direction=direction,qty=r.filled_qty,value_per_unit=value,modelled_cost_pct=model)
+>           assert result.as_dict()==baseline.as_dict()
+E           AssertionError: assert {'trade_inten...0000019', ...} == {'trade_inten...0000019', ...}
+E             
+E             Omitting 10 identical items, use -vv to show
+E             Differing items:
+E             {'slippage': '1E-10'} != {'slippage': '1.0E-17'}
+E             {'realised_cost_pct': '1E-10'} != {'realised_cost_pct': '2.799999999999998031671966146E-19'}
+E             {'implementation_shortfall': '0.013'} != {'implementation_shortfall': '4.267642054320984934320987934E-10'}
+E             {'reference_notional': '1.7E+9'} != {'reference_notional': '1524157876.543209976558451555'}...
+E             
+E             ...Full output truncated (5 lines hidden), use '-vv' to show
+
+trading/tests/test_tca_exact_arithmetic.py:36: AssertionError
+_ test_economic_values_are_exact_and_independent_of_callers_context[2-ROUND_UP-False-SHORT] _
+
+direction = <Direction.SHORT: 'SHORT'>, precision = 2, rounding = 'ROUND_UP'
+traps = False
+
+    @pytest.mark.parametrize('direction', list(Direction))
+    @pytest.mark.parametrize('precision,rounding,traps', [(2, ROUND_UP, False), (7, ROUND_DOWN, False),
+        (3, ROUND_UP, True), (80, ROUND_DOWN, True)])
+    def test_economic_values_are_exact_and_independent_of_callers_context(direction, precision, rounding, traps):
+        r = original(); value = D('123456789.000000000123456789'); model = D('0.000031')
+        baseline = compute_tca(r, direction=direction, qty=r.filled_qty, value_per_unit=value, modelled_cost_pct=model)
+        sign = 1 if direction is Direction.LONG else -1
+        oracle = (F(r.average_fill)-F(r.decision_price))*sign*F(r.filled_qty)*F(value)+F(r.fees)
+        notional = F(r.decision_price)*F(r.filled_qty)*F(value)
+        with localcontext() as context:
+            context.prec=precision;context.rounding=rounding;context.Emax=9;context.Emin=-9
+            context.traps[Inexact]=traps;context.traps[Rounded]=traps
+            before=context.copy()
+            result=compute_tca(r,direction=direction,qty=r.filled_qty,value_per_unit=value,modelled_cost_pct=model)
+>           assert result.as_dict()==baseline.as_dict()
+E           AssertionError: assert {'trade_inten...0000019', ...} == {'trade_inten...0000019', ...}
+E             
+E             Omitting 10 identical items, use -vv to show
+E             Differing items:
+E             {'slippage': '-1E-10'} != {'slippage': '-1.0E-17'}
+E             {'realised_cost_pct': '-1E-10'} != {'realised_cost_pct': '-2.800000000000001968272033855E-19'}
+E             {'implementation_shortfall': '-0.014'} != {'implementation_shortfall': '-4.267642054320990934320987934E-10'}
+E             {'reference_notional': '1.7E+9'} != {'reference_notional': '1524157876.543209976558451555'}...
+E             
+E             ...Full output truncated (5 lines hidden), use '-vv' to show
+
+trading/tests/test_tca_exact_arithmetic.py:36: AssertionError
+_ test_economic_values_are_exact_and_independent_of_callers_context[7-ROUND_DOWN-False-LONG] _
+
+direction = <Direction.LONG: 'LONG'>, precision = 7, rounding = 'ROUND_DOWN'
+traps = False
+
+    @pytest.mark.parametrize('direction', list(Direction))
+    @pytest.mark.parametrize('precision,rounding,traps', [(2, ROUND_UP, False), (7, ROUND_DOWN, False),
+        (3, ROUND_UP, True), (80, ROUND_DOWN, True)])
+    def test_economic_values_are_exact_and_independent_of_callers_context(direction, precision, rounding, traps):
+        r = original(); value = D('123456789.000000000123456789'); model = D('0.000031')
+        baseline = compute_tca(r, direction=direction, qty=r.filled_qty, value_per_unit=value, modelled_cost_pct=model)
+        sign = 1 if direction is Direction.LONG else -1
+        oracle = (F(r.average_fill)-F(r.decision_price))*sign*F(r.filled_qty)*F(value)+F(r.fees)
+        notional = F(r.decision_price)*F(r.filled_qty)*F(value)
+        with localcontext() as context:
+            context.prec=precision;context.rounding=rounding;context.Emax=9;context.Emin=-9
+            context.traps[Inexact]=traps;context.traps[Rounded]=traps
+            before=context.copy()
+            result=compute_tca(r,direction=direction,qty=r.filled_qty,value_per_unit=value,modelled_cost_pct=model)
+>           assert result.as_dict()==baseline.as_dict()
+E           AssertionError: assert {'trade_inten...0000019', ...} == {'trade_inten...0000019', ...}
+E             
+E             Omitting 10 identical items, use -vv to show
+E             Differing items:
+E             {'slippage': '0E-15'} != {'slippage': '1.0E-17'}
+E             {'realised_cost_pct': '-0E-15'} != {'realised_cost_pct': '2.799999999999998031671966146E-19'}
+E             {'implementation_shortfall': '-0E-15'} != {'implementation_shortfall': '4.267642054320984934320987934E-10'}
+E             {'reference_notional': '1.524156E+9'} != {'reference_notional': '1524157876.543209976558451555'}...
+E             
+E             ...Full output truncated (5 lines hidden), use '-vv' to show
+
+trading/tests/test_tca_exact_arithmetic.py:36: AssertionError
+_ test_economic_values_are_exact_and_independent_of_callers_context[7-ROUND_DOWN-False-SHORT] _
+
+direction = <Direction.SHORT: 'SHORT'>, precision = 7, rounding = 'ROUND_DOWN'
+traps = False
+
+    @pytest.mark.parametrize('direction', list(Direction))
+    @pytest.mark.parametrize('precision,rounding,traps', [(2, ROUND_UP, False), (7, ROUND_DOWN, False),
+        (3, ROUND_UP, True), (80, ROUND_DOWN, True)])
+    def test_economic_values_are_exact_and_independent_of_callers_context(direction, precision, rounding, traps):
+        r = original(); value = D('123456789.000000000123456789'); model = D('0.000031')
+        baseline = compute_tca(r, direction=direction, qty=r.filled_qty, value_per_unit=value, modelled_cost_pct=model)
+        sign = 1 if direction is Direction.LONG else -1
+        oracle = (F(r.average_fill)-F(r.decision_price))*sign*F(r.filled_qty)*F(value)+F(r.fees)
+        notional = F(r.decision_price)*F(r.filled_qty)*F(value)
+        with localcontext() as context:
+            context.prec=precision;context.rounding=rounding;context.Emax=9;context.Emin=-9
+            context.traps[Inexact]=traps;context.traps[Rounded]=traps
+            before=context.copy()
+            result=compute_tca(r,direction=direction,qty=r.filled_qty,value_per_unit=value,modelled_cost_pct=model)
+>           assert result.as_dict()==baseline.as_dict()
+E           AssertionError: assert {'trade_inten...0000019', ...} == {'trade_inten...0000019', ...}
+E             
+E             Omitting 10 identical items, use -vv to show
+E             Differing items:
+E             {'slippage': '-0E-15'} != {'slippage': '-1.0E-17'}
+E             {'realised_cost_pct': '-0E-15'} != {'realised_cost_pct': '-2.800000000000001968272033855E-19'}
+E             {'implementation_shortfall': '-0E-15'} != {'implementation_shortfall': '-4.267642054320990934320987934E-10'}
+E             {'reference_notional': '1.524156E+9'} != {'reference_notional': '1524157876.543209976558451555'}...
+E             
+E             ...Full output truncated (5 lines hidden), use '-vv' to show
+
+trading/tests/test_tca_exact_arithmetic.py:36: AssertionError
+_ test_economic_values_are_exact_and_independent_of_callers_context[3-ROUND_UP-True-LONG] _
+
+direction = <Direction.LONG: 'LONG'>, precision = 3, rounding = 'ROUND_UP'
+traps = True
+
+    @pytest.mark.parametrize('direction', list(Direction))
+    @pytest.mark.parametrize('precision,rounding,traps', [(2, ROUND_UP, False), (7, ROUND_DOWN, False),
+        (3, ROUND_UP, True), (80, ROUND_DOWN, True)])
+    def test_economic_values_are_exact_and_independent_of_callers_context(direction, precision, rounding, traps):
+        r = original(); value = D('123456789.000000000123456789'); model = D('0.000031')
+        baseline = compute_tca(r, direction=direction, qty=r.filled_qty, value_per_unit=value, modelled_cost_pct=model)
+        sign = 1 if direction is Direction.LONG else -1
+        oracle = (F(r.average_fill)-F(r.decision_price))*sign*F(r.filled_qty)*F(value)+F(r.fees)
+        notional = F(r.decision_price)*F(r.filled_qty)*F(value)
+        with localcontext() as context:
+            context.prec=precision;context.rounding=rounding;context.Emax=9;context.Emin=-9
+            context.traps[Inexact]=traps;context.traps[Rounded]=traps
+            before=context.copy()
+>           result=compute_tca(r,direction=direction,qty=r.filled_qty,value_per_unit=value,modelled_cost_pct=model)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_tca_exact_arithmetic.py:35: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+r = ExecutionReceipt(trade_intent_id='exact-cost', decision_hash='dddddddddddddddddddddddddddddddddddddddddddddddddddddddd...'-3E-25'), protective_stop_price=None, receipt_hash='a50486da33dfe33c435c087056acd9e971cf842e6b6d93260ca2a9ccfb069ec9')
+direction = <Direction.LONG: 'LONG'>, qty = Decimal('0.123456789123456789')
+value_per_unit = Decimal('123456789.000000000123456789')
+modelled_cost_pct = Decimal('0.000031')
+
+    def compute_tca(r: ExecutionReceipt, *, direction: Direction, qty: Decimal, value_per_unit: Decimal, modelled_cost_pct: Decimal) -> TcaRecord:
+        values = (r.filled_qty, r.average_fill, r.decision_price, r.arrival_price,
+                  r.submitted_price, r.spread_at_submit, r.fees, qty, value_per_unit, modelled_cost_pct)
+        if any(not isinstance(v, Decimal) or not v.is_finite() for v in values):
+            raise ValueError("TCA requires finite Decimal economic inputs")
+        if r.average_fill is None or r.filled_qty <= ZERO:
+            raise ValueError("TCA requires a filled receipt")
+        if qty != r.filled_qty:
+            raise ValueError("TCA quantity must equal the receipt's filled quantity")
+        if (min(r.decision_price, r.arrival_price, r.submitted_price, r.average_fill, value_per_unit) <= ZERO
+            or r.spread_at_submit < ZERO or modelled_cost_pct < ZERO):
+            raise ValueError("TCA requires positive prices and contract value, nonnegative spread and modelled cost")
+        if not isinstance(direction, Direction):
+            raise ValueError("TCA direction must be LONG or SHORT")
+        sign = Decimal(1) if direction is Direction.LONG else Decimal(-1)
+>       slippage = (r.average_fill - r.submitted_price) * sign
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       decimal.Inexact: [<class 'decimal.Inexact'>, <class 'decimal.Rounded'>]
+
+trading/vati/execution/tca.py:54: Inexact
+_ test_economic_values_are_exact_and_independent_of_callers_context[3-ROUND_UP-True-SHORT] _
+
+direction = <Direction.SHORT: 'SHORT'>, precision = 3, rounding = 'ROUND_UP'
+traps = True
+
+    @pytest.mark.parametrize('direction', list(Direction))
+    @pytest.mark.parametrize('precision,rounding,traps', [(2, ROUND_UP, False), (7, ROUND_DOWN, False),
+        (3, ROUND_UP, True), (80, ROUND_DOWN, True)])
+    def test_economic_values_are_exact_and_independent_of_callers_context(direction, precision, rounding, traps):
+        r = original(); value = D('123456789.000000000123456789'); model = D('0.000031')
+        baseline = compute_tca(r, direction=direction, qty=r.filled_qty, value_per_unit=value, modelled_cost_pct=model)
+        sign = 1 if direction is Direction.LONG else -1
+        oracle = (F(r.average_fill)-F(r.decision_price))*sign*F(r.filled_qty)*F(value)+F(r.fees)
+        notional = F(r.decision_price)*F(r.filled_qty)*F(value)
+        with localcontext() as context:
+            context.prec=precision;context.rounding=rounding;context.Emax=9;context.Emin=-9
+            context.traps[Inexact]=traps;context.traps[Rounded]=traps
+            before=context.copy()
+>           result=compute_tca(r,direction=direction,qty=r.filled_qty,value_per_unit=value,modelled_cost_pct=model)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_tca_exact_arithmetic.py:35: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+r = ExecutionReceipt(trade_intent_id='exact-cost', decision_hash='dddddddddddddddddddddddddddddddddddddddddddddddddddddddd...'-3E-25'), protective_stop_price=None, receipt_hash='a50486da33dfe33c435c087056acd9e971cf842e6b6d93260ca2a9ccfb069ec9')
+direction = <Direction.SHORT: 'SHORT'>, qty = Decimal('0.123456789123456789')
+value_per_unit = Decimal('123456789.000000000123456789')
+modelled_cost_pct = Decimal('0.000031')
+
+    def compute_tca(r: ExecutionReceipt, *, direction: Direction, qty: Decimal, value_per_unit: Decimal, modelled_cost_pct: Decimal) -> TcaRecord:
+        values = (r.filled_qty, r.average_fill, r.decision_price, r.arrival_price,
+                  r.submitted_price, r.spread_at_submit, r.fees, qty, value_per_unit, modelled_cost_pct)
+        if any(not isinstance(v, Decimal) or not v.is_finite() for v in values):
+            raise ValueError("TCA requires finite Decimal economic inputs")
+        if r.average_fill is None or r.filled_qty <= ZERO:
+            raise ValueError("TCA requires a filled receipt")
+        if qty != r.filled_qty:
+            raise ValueError("TCA quantity must equal the receipt's filled quantity")
+        if (min(r.decision_price, r.arrival_price, r.submitted_price, r.average_fill, value_per_unit) <= ZERO
+            or r.spread_at_submit < ZERO or modelled_cost_pct < ZERO):
+            raise ValueError("TCA requires positive prices and contract value, nonnegative spread and modelled cost")
+        if not isinstance(direction, Direction):
+            raise ValueError("TCA direction must be LONG or SHORT")
+        sign = Decimal(1) if direction is Direction.LONG else Decimal(-1)
+>       slippage = (r.average_fill - r.submitted_price) * sign
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       decimal.Inexact: [<class 'decimal.Inexact'>, <class 'decimal.Rounded'>]
+
+trading/vati/execution/tca.py:54: Inexact
+_ test_economic_values_are_exact_and_independent_of_callers_context[80-ROUND_DOWN-True-LONG] _
+
+direction = <Direction.LONG: 'LONG'>, precision = 80, rounding = 'ROUND_DOWN'
+traps = True
+
+    @pytest.mark.parametrize('direction', list(Direction))
+    @pytest.mark.parametrize('precision,rounding,traps', [(2, ROUND_UP, False), (7, ROUND_DOWN, False),
+        (3, ROUND_UP, True), (80, ROUND_DOWN, True)])
+    def test_economic_values_are_exact_and_independent_of_callers_context(direction, precision, rounding, traps):
+        r = original(); value = D('123456789.000000000123456789'); model = D('0.000031')
+        baseline = compute_tca(r, direction=direction, qty=r.filled_qty, value_per_unit=value, modelled_cost_pct=model)
+        sign = 1 if direction is Direction.LONG else -1
+        oracle = (F(r.average_fill)-F(r.decision_price))*sign*F(r.filled_qty)*F(value)+F(r.fees)
+        notional = F(r.decision_price)*F(r.filled_qty)*F(value)
+        with localcontext() as context:
+            context.prec=precision;context.rounding=rounding;context.Emax=9;context.Emin=-9
+            context.traps[Inexact]=traps;context.traps[Rounded]=traps
+            before=context.copy()
+>           result=compute_tca(r,direction=direction,qty=r.filled_qty,value_per_unit=value,modelled_cost_pct=model)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_tca_exact_arithmetic.py:35: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+r = ExecutionReceipt(trade_intent_id='exact-cost', decision_hash='dddddddddddddddddddddddddddddddddddddddddddddddddddddddd...'-3E-25'), protective_stop_price=None, receipt_hash='a50486da33dfe33c435c087056acd9e971cf842e6b6d93260ca2a9ccfb069ec9')
+direction = <Direction.LONG: 'LONG'>, qty = Decimal('0.123456789123456789')
+value_per_unit = Decimal('123456789.000000000123456789')
+modelled_cost_pct = Decimal('0.000031')
+
+    def compute_tca(r: ExecutionReceipt, *, direction: Direction, qty: Decimal, value_per_unit: Decimal, modelled_cost_pct: Decimal) -> TcaRecord:
+        values = (r.filled_qty, r.average_fill, r.decision_price, r.arrival_price,
+                  r.submitted_price, r.spread_at_submit, r.fees, qty, value_per_unit, modelled_cost_pct)
+        if any(not isinstance(v, Decimal) or not v.is_finite() for v in values):
+            raise ValueError("TCA requires finite Decimal economic inputs")
+        if r.average_fill is None or r.filled_qty <= ZERO:
+            raise ValueError("TCA requires a filled receipt")
+        if qty != r.filled_qty:
+            raise ValueError("TCA quantity must equal the receipt's filled quantity")
+        if (min(r.decision_price, r.arrival_price, r.submitted_price, r.average_fill, value_per_unit) <= ZERO
+            or r.spread_at_submit < ZERO or modelled_cost_pct < ZERO):
+            raise ValueError("TCA requires positive prices and contract value, nonnegative spread and modelled cost")
+        if not isinstance(direction, Direction):
+            raise ValueError("TCA direction must be LONG or SHORT")
+        sign = Decimal(1) if direction is Direction.LONG else Decimal(-1)
+        slippage = (r.average_fill - r.submitted_price) * sign
+        delay = (r.arrival_price - r.decision_price) * sign
+        submission = (r.submitted_price - r.arrival_price) * sign
+        spread_cost = r.spread_at_submit / 2 * qty * value_per_unit
+        # Fill-versus-reference already includes the spread. Keep it as a diagnostic,
+        # and retain favorable fills/rebates with their actual negative cost sign.
+        shortfall = (r.average_fill - r.decision_price) * sign * qty * value_per_unit + r.fees
+        notional = r.decision_price * qty * value_per_unit
+>       realised_pct = shortfall / notional if notional > ZERO else ZERO
+                       ^^^^^^^^^^^^^^^^^^^^
+E       decimal.Inexact: [<class 'decimal.Inexact'>, <class 'decimal.Rounded'>]
+
+trading/vati/execution/tca.py:62: Inexact
+_ test_economic_values_are_exact_and_independent_of_callers_context[80-ROUND_DOWN-True-SHORT] _
+
+direction = <Direction.SHORT: 'SHORT'>, precision = 80, rounding = 'ROUND_DOWN'
+traps = True
+
+    @pytest.mark.parametrize('direction', list(Direction))
+    @pytest.mark.parametrize('precision,rounding,traps', [(2, ROUND_UP, False), (7, ROUND_DOWN, False),
+        (3, ROUND_UP, True), (80, ROUND_DOWN, True)])
+    def test_economic_values_are_exact_and_independent_of_callers_context(direction, precision, rounding, traps):
+        r = original(); value = D('123456789.000000000123456789'); model = D('0.000031')
+        baseline = compute_tca(r, direction=direction, qty=r.filled_qty, value_per_unit=value, modelled_cost_pct=model)
+        sign = 1 if direction is Direction.LONG else -1
+        oracle = (F(r.average_fill)-F(r.decision_price))*sign*F(r.filled_qty)*F(value)+F(r.fees)
+        notional = F(r.decision_price)*F(r.filled_qty)*F(value)
+        with localcontext() as context:
+            context.prec=precision;context.rounding=rounding;context.Emax=9;context.Emin=-9
+            context.traps[Inexact]=traps;context.traps[Rounded]=traps
+            before=context.copy()
+>           result=compute_tca(r,direction=direction,qty=r.filled_qty,value_per_unit=value,modelled_cost_pct=model)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_tca_exact_arithmetic.py:35: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+r = ExecutionReceipt(trade_intent_id='exact-cost', decision_hash='dddddddddddddddddddddddddddddddddddddddddddddddddddddddd...'-3E-25'), protective_stop_price=None, receipt_hash='a50486da33dfe33c435c087056acd9e971cf842e6b6d93260ca2a9ccfb069ec9')
+direction = <Direction.SHORT: 'SHORT'>, qty = Decimal('0.123456789123456789')
+value_per_unit = Decimal('123456789.000000000123456789')
+modelled_cost_pct = Decimal('0.000031')
+
+    def compute_tca(r: ExecutionReceipt, *, direction: Direction, qty: Decimal, value_per_unit: Decimal, modelled_cost_pct: Decimal) -> TcaRecord:
+        values = (r.filled_qty, r.average_fill, r.decision_price, r.arrival_price,
+                  r.submitted_price, r.spread_at_submit, r.fees, qty, value_per_unit, modelled_cost_pct)
+        if any(not isinstance(v, Decimal) or not v.is_finite() for v in values):
+            raise ValueError("TCA requires finite Decimal economic inputs")
+        if r.average_fill is None or r.filled_qty <= ZERO:
+            raise ValueError("TCA requires a filled receipt")
+        if qty != r.filled_qty:
+            raise ValueError("TCA quantity must equal the receipt's filled quantity")
+        if (min(r.decision_price, r.arrival_price, r.submitted_price, r.average_fill, value_per_unit) <= ZERO
+            or r.spread_at_submit < ZERO or modelled_cost_pct < ZERO):
+            raise ValueError("TCA requires positive prices and contract value, nonnegative spread and modelled cost")
+        if not isinstance(direction, Direction):
+            raise ValueError("TCA direction must be LONG or SHORT")
+        sign = Decimal(1) if direction is Direction.LONG else Decimal(-1)
+        slippage = (r.average_fill - r.submitted_price) * sign
+        delay = (r.arrival_price - r.decision_price) * sign
+        submission = (r.submitted_price - r.arrival_price) * sign
+        spread_cost = r.spread_at_submit / 2 * qty * value_per_unit
+        # Fill-versus-reference already includes the spread. Keep it as a diagnostic,
+        # and retain favorable fills/rebates with their actual negative cost sign.
+        shortfall = (r.average_fill - r.decision_price) * sign * qty * value_per_unit + r.fees
+        notional = r.decision_price * qty * value_per_unit
+>       realised_pct = shortfall / notional if notional > ZERO else ZERO
+                       ^^^^^^^^^^^^^^^^^^^^
+E       decimal.Inexact: [<class 'decimal.Inexact'>, <class 'decimal.Rounded'>]
+
+trading/vati/execution/tca.py:62: Inexact
+_ test_unbounded_decimal_inputs_are_refused_before_cost_materialization[filled_qty-value0] _
+
+field = 'filled_qty', value = Decimal('1E-4097')
+
+    @pytest.mark.parametrize('field,value', [('filled_qty', D('1e-4097')),
+        ('fees',D('1e4097')),('decision_price',D('9'*4097))])
+    def test_unbounded_decimal_inputs_are_refused_before_cost_materialization(field,value):
+        r=original(**{field:value})
+>       with pytest.raises(ValueError,match='capacity'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_tca_exact_arithmetic.py:59: Failed
+_ test_unbounded_decimal_inputs_are_refused_before_cost_materialization[fees-value1] _
+
+field = 'fees', value = Decimal('1E+4097')
+
+    @pytest.mark.parametrize('field,value', [('filled_qty', D('1e-4097')),
+        ('fees',D('1e4097')),('decision_price',D('9'*4097))])
+    def test_unbounded_decimal_inputs_are_refused_before_cost_materialization(field,value):
+        r=original(**{field:value})
+>       with pytest.raises(ValueError,match='capacity'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_tca_exact_arithmetic.py:59: Failed
+_ test_unbounded_decimal_inputs_are_refused_before_cost_materialization[decision_price-value2] _
+
+field = 'decision_price'
+value = Decimal('9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999...999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999')
+
+    @pytest.mark.parametrize('field,value', [('filled_qty', D('1e-4097')),
+        ('fees',D('1e4097')),('decision_price',D('9'*4097))])
+    def test_unbounded_decimal_inputs_are_refused_before_cost_materialization(field,value):
+        r=original(**{field:value})
+>       with pytest.raises(ValueError,match='capacity'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_tca_exact_arithmetic.py:59: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_tca_exact_arithmetic.py::test_economic_values_are_exact_and_independent_of_callers_context[2-ROUND_UP-False-LONG]
+FAILED trading/tests/test_tca_exact_arithmetic.py::test_economic_values_are_exact_and_independent_of_callers_context[2-ROUND_UP-False-SHORT]
+FAILED trading/tests/test_tca_exact_arithmetic.py::test_economic_values_are_exact_and_independent_of_callers_context[7-ROUND_DOWN-False-LONG]
+FAILED trading/tests/test_tca_exact_arithmetic.py::test_economic_values_are_exact_and_independent_of_callers_context[7-ROUND_DOWN-False-SHORT]
+FAILED trading/tests/test_tca_exact_arithmetic.py::test_economic_values_are_exact_and_independent_of_callers_context[3-ROUND_UP-True-LONG]
+FAILED trading/tests/test_tca_exact_arithmetic.py::test_economic_values_are_exact_and_independent_of_callers_context[3-ROUND_UP-True-SHORT]
+FAILED trading/tests/test_tca_exact_arithmetic.py::test_economic_values_are_exact_and_independent_of_callers_context[80-ROUND_DOWN-True-LONG]
+FAILED trading/tests/test_tca_exact_arithmetic.py::test_economic_values_are_exact_and_independent_of_callers_context[80-ROUND_DOWN-True-SHORT]
+FAILED trading/tests/test_tca_exact_arithmetic.py::test_unbounded_decimal_inputs_are_refused_before_cost_materialization[filled_qty-value0]
+FAILED trading/tests/test_tca_exact_arithmetic.py::test_unbounded_decimal_inputs_are_refused_before_cost_materialization[fees-value1]
+FAILED trading/tests/test_tca_exact_arithmetic.py::test_unbounded_decimal_inputs_are_refused_before_cost_materialization[decision_price-value2]
+11 failed, 1 passed in 0.37s

@@ -1,0 +1,8 @@
+{
+  "source_parent": "457205e3ac3c73f115a7bf7134b33c98bd905f12",
+  "fixture_file": "trading/tests/test_single_session_unknown_entry.py",
+  "original_assertions_AST_unchanged": 90,
+  "all_original_test_function_names_unchanged": true,
+  "native_order_data_literals_corrected_to_valid_uint64": 7,
+  "reason": "Original positive TCA cases assumed missing fees were0. Actual native recorded-charge producer now supports explicit observations; fixture models knownzero while retaining every original assertion. Missing data has a dedicated optout."
+}

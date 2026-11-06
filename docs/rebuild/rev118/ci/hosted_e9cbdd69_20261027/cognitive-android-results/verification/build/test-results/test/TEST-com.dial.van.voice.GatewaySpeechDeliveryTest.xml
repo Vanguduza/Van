@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.voice.GatewaySpeechDeliveryTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-27T09:52:21" hostname="runnervmtai0g" time="0.086">
+  <properties/>
+  <testcase name="a server interruption on reconnect stops the existing local output()" classname="com.dial.van.voice.GatewaySpeechDeliveryTest" time="0.024"/>
+  <testcase name="a definitive source refusal while reporting stops the remaining audio()" classname="com.dial.van.voice.GatewaySpeechDeliveryTest" time="0.023"/>
+  <testcase name="resume uploads actual heard cursor before read and never replays that prefix()" classname="com.dial.van.voice.GatewaySpeechDeliveryTest" time="0.012"/>
+  <testcase name="server errors retain text fallback without inventing playback success()" classname="com.dial.van.voice.GatewaySpeechDeliveryTest" time="0.006"/>
+  <testcase name="a backward clock does not turn an old answer into a current voice turn()" classname="com.dial.van.voice.GatewaySpeechDeliveryTest" time="0.0"/>
+  <testcase name="a late network answer cannot speak into a changed owner context()" classname="com.dial.van.voice.GatewaySpeechDeliveryTest" time="0.007"/>
+  <testcase name="cancel stops locally before remote interruption and cannot auto resume()" classname="com.dial.van.voice.GatewaySpeechDeliveryTest" time="0.012"/>
+  <testcase name="wire refuses coercion altered words mixed responses gaps and missing finality()" classname="com.dial.van.voice.GatewaySpeechDeliveryTest" time="0.002"/>
+  <testcase name="wire preserves text cues and contiguous unheard tail()" classname="com.dial.van.voice.GatewaySpeechDeliveryTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

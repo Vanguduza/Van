@@ -1,0 +1,23 @@
+.F                                                                       [100%]
+=================================== FAILURES ===================================
+____ test_margin_rounds_to_native_money_before_applying_the_existing_floor _____
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-163/test_margin_rounds_to_native_m0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_margin_rounds_to_native_money_before_applying_the_existing_floor(tmp_path,eurusd):
+        sdk,clock,ledger,command,margin_ref,current_ref=current_entry(tmp_path,eurusd,native_margin=D('199.995'))
+        try:
+            p=projection(ledger,command,margin_ref,current_ref,clock)
+            assert Money.from_body(p['burdens']['free_cash']).decimal==D('200.00')
+>           assert Money.from_body(p['burdens']['margin_floor_equity']).decimal==D('400.00')
+E           AssertionError: assert Decimal('399.99') == Decimal('400.00')
+E            +  where Decimal('399.99') = Money(minor_units=39999, scale=2, currency='USD', asset_ref='9928dda8692befeabcdd08f991f992d07102c610be622a5caadecfcfe0545d3f').decimal
+E            +    where Money(minor_units=39999, scale=2, currency='USD', asset_ref='9928dda8692befeabcdd08f991f992d07102c610be622a5caadecfcfe0545d3f') = from_body({'asset_ref': '9928dda8692befeabcdd08f991f992d07102c610be622a5caadecfcfe0545d3f', 'currency': 'USD', 'minor_units': '39999', 'scale': 2, ...})
+E            +      where from_body = Money.from_body
+E            +  and   Decimal('400.00') = D('400.00')
+
+trading/tests/test_entry_resource_projection.py:36: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_entry_resource_projection.py::test_margin_rounds_to_native_money_before_applying_the_existing_floor
+1 failed, 1 passed in 0.93s

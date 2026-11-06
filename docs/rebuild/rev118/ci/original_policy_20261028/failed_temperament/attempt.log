@@ -1,0 +1,26 @@
+.................F...................................................    [100%]
+=================================== FAILURES ===================================
+______ test_temperament_retains_both_separately_verified_original_grants _______
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-53/test_temperament_retains_both_0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_temperament_retains_both_separately_verified_original_grants(tmp_path,eurusd):
+        from conftest import owner_authority
+        from vati.risk.mandate import trading_temperament_subject
+        raw=mandate_dict(trading_temperament='NORMAL')
+        raw['temperament_owner_signature_ref']=owner_authority().token(act='trading-temperament-admit',
+            subject=trading_temperament_subject(raw),issued_at_unix=raw['signed_at_unix'],
+            lifetime_seconds=raw['expires_at_unix']-raw['signed_at_unix'])
+        mandate=TradingMandate.from_mapping(raw)
+        source=capture_mandate_source(mandate,raw,now_ms=NOW*1000)
+>       assert source['state']=='ORIGINAL_BOUND' and len(source['authorities'])==2
+E       AssertionError: assert ('UNAVAILABLE' == 'ORIGINAL_BOUND'
+E         
+E         - ORIGINAL_BOUND
+E         + UNAVAILABLE)
+
+trading/tests/test_mandate_source.py:133: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_mandate_source.py::test_temperament_retains_both_separately_verified_original_grants
+1 failed, 68 passed in 2.12s

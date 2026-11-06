@@ -1,0 +1,28 @@
+..........F
+=================================== FAILURES ===================================
+______ test_index_recovery_cannot_grow_its_head_past_the_original_budget _______
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-565/test_index_recovery_cannot_gro0')
+
+    def test_index_recovery_cannot_grow_its_head_past_the_original_budget(tmp_path):
+        c=contract();root=tmp_path/'depth';writer=NativeDepthArchive(root,clock=lambda:400000)
+        for n in range(9):writer.record('request-'+str(n),c,sample(c))
+        part=writer._partition(c.native_scope,'DEPTH');old_head=(part/'head.json').read_bytes()
+        tenth=writer.record('request-9',c,sample(c));new_head=(part/'head.json').read_bytes()
+        assert len(new_head)==len(old_head)+1  # The original owner advances revision9 ->10.
+        (part/'head.json').write_bytes(old_head)
+        budget=sum(p.stat().st_size for p in part.glob('*.json'))
+        bounded=NativeDepthArchive(root,max_history_bytes=budget)
+        def never():raise AssertionError('index capacity refusal recaptured original depth')
+        with pytest.raises(NativeArchiveError):NativeDepthCollector(bounded,never).collect('request-9',c)
+>       assert (part/'head.json').read_bytes()==old_head
+E       assert b'{"record_ha...ame":"DEPTH"}' == b'{"record_ha...ame":"DEPTH"}'
+E         
+E         At index 16 diff: b'8' != b'f'
+E         Use -v to get more diff
+
+trading/tests/test_native_archive_read_budget.py:89: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_native_archive_read_budget.py::test_index_recovery_cannot_grow_its_head_past_the_original_budget
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 10 passed in 0.76s

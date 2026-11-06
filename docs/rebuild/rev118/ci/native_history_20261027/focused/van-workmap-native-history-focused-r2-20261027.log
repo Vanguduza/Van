@@ -1,0 +1,18 @@
+................................F...........                             [100%]
+=================================== FAILURES ===================================
+_______ test_changed_original_ledger_bytes_cannot_supply_a_history_index _______
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-705/test_changed_original_ledger_b0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_changed_original_ledger_bytes_cannot_supply_a_history_index(tmp_path, eurusd):
+        ledger, _, _, _, facts = native_facts(tmp_path, eurusd)
+        event = record(ledger, facts)
+>       ledger._conn.execute('UPDATE events SET producer=? WHERE hash=?',
+            ('changed-native-producer', event.hash))
+E       sqlite3.OperationalError: no such column: hash
+
+trading/tests/test_native_risk_history_index.py:158: OperationalError
+=========================== short test summary info ============================
+FAILED trading/tests/test_native_risk_history_index.py::test_changed_original_ledger_bytes_cannot_supply_a_history_index
+1 failed, 43 passed in 26.86s

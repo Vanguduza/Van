@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="3" time="0.442" timestamp="2026-10-25T20:49:59.246783+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_ctrader_event_selection" name="test_selective_wait_preserves_original_relative_order_and_complete_payloads" time="0.030"><failure message="AssertionError: selection reordered earlier native evidence&#10;assert [{'payloadTyp...ILLED', ...}}] == [{'payloadTyp...ILLED', ...}}]&#10;  &#10;  At index 0 diff: {'payloadType': 'PROTO_OA_EXECUTION_EVENT', 'ctidTraderAccountId': 12345, 'executionType': 'ORDER_FILLED', 'order': {'orderId': 3, 'tradeData': {'symbolId': 1, 'volume': 100000, 'tradeSide': 'BUY'}, 'orderType': 'MARKET', 'orderStatus': 'ORDER_STATUS_FILLED', 'clientOrderId': '3', 'timeInForce': 'IMMEDIATE_OR_CANCEL', 'stopTriggerMethod': 'TRADE'}} != {'payloadType': 'PROTO_OA_EXECUTION_EVENT', 'ctidTraderAccountId': 12345, 'executionType': 'ORDER_FILLED', 'order': {'orderId': 1, 'tradeData': {'symbolId': 1, 'volume': 100000, 'tradeSide': 'BUY'}, 'order...&#10;  &#10;  ...Full output truncated (2 lines hidden), use '-vv' to show">harness = &lt;test_ctrader_transport_lifecycle.Harness object at 0x7f55d7ec9d90&gt;
+
+    def test_selective_wait_preserves_original_relative_order_and_complete_payloads(harness):
+        transport=seeded(harness);before=originals(transport)
+        selected=transport.wait_event(lambda name,body:body['order']['orderId']==2,timeout_s=.1)
+        assert selected[1]==before[1]
+&gt;       assert originals(transport)==[before[0],before[2]],'selection reordered earlier native evidence'
+E       AssertionError: selection reordered earlier native evidence
+E       assert [{'payloadTyp...ILLED', ...}}] == [{'payloadTyp...ILLED', ...}}]
+E         
+E         At index 0 diff: {'payloadType': 'PROTO_OA_EXECUTION_EVENT', 'ctidTraderAccountId': 12345, 'executionType': 'ORDER_FILLED', 'order': {'orderId': 3, 'tradeData': {'symbolId': 1, 'volume': 100000, 'tradeSide': 'BUY'}, 'orderType': 'MARKET', 'orderStatus': 'ORDER_STATUS_FILLED', 'clientOrderId': '3', 'timeInForce': 'IMMEDIATE_OR_CANCEL', 'stopTriggerMethod': 'TRADE'}} != {'payloadType': 'PROTO_OA_EXECUTION_EVENT', 'ctidTraderAccountId': 12345, 'executionType': 'ORDER_FILLED', 'order': {'orderId': 1, 'tradeData': {'symbolId': 1, 'volume': 100000, 'tradeSide': 'BUY'}, 'order...
+E         
+E         ...Full output truncated (2 lines hidden), use '-vv' to show
+
+trading/tests/test_ctrader_event_selection.py:42: AssertionError</failure></testcase><testcase classname="trading.tests.test_ctrader_event_selection" name="test_predicate_exception_does_not_consume_the_original_financial_delivery" time="0.007"><failure message="AssertionError: selector error discarded original financial evidence&#10;assert [{'payloadTyp...ILLED', ...}}] == [{'payloadTyp...ILLED', ...}}]&#10;  &#10;  At index 0 diff: {'payloadType': 'PROTO_OA_EXECUTION_EVENT', 'ctidTraderAccountId': 12345, 'executionType': 'ORDER_FILLED', 'order': {'orderId': 2, 'tradeData': {'symbolId': 1, 'volume': 100000, 'tradeSide': 'BUY'}, 'orderType': 'MARKET', 'orderStatus': 'ORDER_STATUS_FILLED', 'clientOrderId': '2', 'timeInForce': 'IMMEDIATE_OR_CANCEL', 'stopTriggerMethod': 'TRADE'}} != {'payloadType': 'PROTO_OA_EXECUTION_EVENT', 'ctidTraderAccountId': 12345, 'executionType': 'ORDER_FILLED', 'order': {'orderId': 1, 'tradeData': {'symbolId': 1, 'volume': 100000, 'tradeSide': 'BUY'}, 'order...&#10;  &#10;  ...Full output truncated (3 lines hidden), use '-vv' to show">harness = &lt;test_ctrader_transport_lifecycle.Harness object at 0x7f55d7edd5b0&gt;
+
+    def test_predicate_exception_does_not_consume_the_original_financial_delivery(harness):
+        transport=seeded(harness);before=originals(transport)
+        def broken(name,body):raise RuntimeError('fixture selector failure')
+        with pytest.raises(RuntimeError,match='selector failure'):
+            transport.wait_event(broken,timeout_s=.1)
+&gt;       assert originals(transport)==before,'selector error discarded original financial evidence'
+E       AssertionError: selector error discarded original financial evidence
+E       assert [{'payloadTyp...ILLED', ...}}] == [{'payloadTyp...ILLED', ...}}]
+E         
+E         At index 0 diff: {'payloadType': 'PROTO_OA_EXECUTION_EVENT', 'ctidTraderAccountId': 12345, 'executionType': 'ORDER_FILLED', 'order': {'orderId': 2, 'tradeData': {'symbolId': 1, 'volume': 100000, 'tradeSide': 'BUY'}, 'orderType': 'MARKET', 'orderStatus': 'ORDER_STATUS_FILLED', 'clientOrderId': '2', 'timeInForce': 'IMMEDIATE_OR_CANCEL', 'stopTriggerMethod': 'TRADE'}} != {'payloadType': 'PROTO_OA_EXECUTION_EVENT', 'ctidTraderAccountId': 12345, 'executionType': 'ORDER_FILLED', 'order': {'orderId': 1, 'tradeData': {'symbolId': 1, 'volume': 100000, 'tradeSide': 'BUY'}, 'order...
+E         
+E         ...Full output truncated (3 lines hidden), use '-vv' to show
+
+trading/tests/test_ctrader_event_selection.py:50: AssertionError</failure></testcase><testcase classname="trading.tests.test_ctrader_event_selection" name="test_slow_selector_does_not_hide_an_unmatched_event_from_another_consumer" time="0.108"><failure message="AssertionError: unmatched original was hidden in a different selector stash&#10;assert None is not None">harness = &lt;test_ctrader_transport_lifecycle.Harness object at 0x7f55d7edf590&gt;
+
+    def test_slow_selector_does_not_hide_an_unmatched_event_from_another_consumer(harness):
+        transport=seeded(harness);entered=threading.Event();release=threading.Event()
+        harness.release.append(release)
+        def slow(name,body):
+            if body['order']['orderId']==1:
+                entered.set();assert release.wait(2)
+            return body['order']['orderId']==3
+        worker,result=harness.worker(lambda:transport.wait_event(slow,timeout_s=.5))
+        assert entered.wait(1)
+        try:
+            other=transport.wait_event(lambda name,body:body['order']['orderId']==1,timeout_s=.1)
+&gt;           assert other is not None,'unmatched original was hidden in a different selector stash'
+E           AssertionError: unmatched original was hidden in a different selector stash
+E           assert None is not None
+
+trading/tests/test_ctrader_event_selection.py:64: AssertionError</failure></testcase></testsuite></testsuites>

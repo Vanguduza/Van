@@ -1,0 +1,57 @@
+{
+  "status": "WHOLE_KOTLIN_SOURCE_COMPILED_AND_CANDIDATE_PUBLISHED_NOT_APK_OR_DEVICE_ACCEPTED",
+  "recorded_at": "2026-11-05T11:55:45.563566+00:00",
+  "source_head": "cdd9a37609b9c84c874bba43ca512b630419bd39",
+  "published_pr": 105,
+  "published_branch": "ccr-9e07e1af-8mgz1p",
+  "draft_unmerged": true,
+  "all_source_compile": {
+    "sources": 373,
+    "real_kotlin_files": 372,
+    "generated_java_inputs": 1,
+    "class_outputs": 5543,
+    "toolchain": "original Kotlin1.9.24/Compose1.5.14/SDK36/Rive9.13.10",
+    "exit_code": 0,
+    "seconds": 628.83,
+    "host": "van-trading-core",
+    "copied_sources_unchanged": true,
+    "current_main_and_debug_sources_unchanged": true,
+    "receipt_sha256": "7bf186c820dfd34b303b907c2d4c48b72026951f3df4c888ca63b989e98b9c2b",
+    "class_manifest_sha256": "edc95907e58d97cb30d27b49228c23330cfec709327b416de459d92f9862e9b3"
+  },
+  "generated_identity": "Original Gradle generateDebugBuildConfig succeeded with current source SHA. The frozen worker copy used previous cached generated BuildConfig; this is not an APK identity proof.",
+  "original_full_history": {
+    "baseline": "4fd466dec3910ed5de614bfbf95887ad619df5ca",
+    "commits": 259,
+    "findings": 0,
+    "status": "GREEN"
+  },
+  "registry_correction": {
+    "original_mutation_identity_retained": "C14 the embodiment resolves its own budget again",
+    "old_target": "visual/VanCanvasFallback.kt",
+    "correct_actual_target": "visual/VanEffectObservations.kt",
+    "all_mutation_identities": 374,
+    "all_edits_preflight": 383,
+    "all_preflight_findings": 0,
+    "canonical_C14_semantic_tests": 9,
+    "canonical_C14_mutations_executed": 7,
+    "canonical_C14_mutations_caught": 7,
+    "full_mutation_suite_executed": false,
+    "checks_weakened": false
+  },
+  "gradle_whole_task": "NOT_PASSED: original offline app:compileDebugKotlin exceeded bounded900s without terminal verdict; no missing-class or compilation-error result inferred",
+  "full_apk_built": false,
+  "native_rive_binary_device_tested": false,
+  "physical_s24_connected": false,
+  "physical_s24_performance_tested": false,
+  "production_rive_promoted": false,
+  "owner_acceptance": false,
+  "authoring_candidate_still_uncommitted": true,
+  "followup_changes_sha256": {
+    "tests/contracts/test_the_runtime_envelope_governs.py": "8288aee77322d4642606d6ec332a86ed5f7359c85a2fb35dcdc6c9783c51e0db",
+    "tools/audit/mutation_suite.py": "1d15435ce4a8412beee0e3b7efa28bff760366f6d6faeed59a832feffdafc48d"
+  },
+  "archive_sha256": "2d9f1c811e1500d386170a626553ba23eb8684d9e645f26e56af2be12a24d45c",
+  "archive_bytes": 354819,
+  "archive_members": 32
+}

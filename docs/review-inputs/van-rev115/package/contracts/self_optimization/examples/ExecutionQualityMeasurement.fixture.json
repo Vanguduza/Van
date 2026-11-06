@@ -1,0 +1,28 @@
+{
+  "actual_cash_ledger_ref": "FIXTURE_ACTUAL_CASH_LEDGER_REF",
+  "benchmark_ref": "FIXTURE_BENCHMARK_REF",
+  "environment": "FIXTURE",
+  "evaluation_horizon_ms": 1000,
+  "evidence_refs": [],
+  "explicit_nonembedded_cost_quote": null,
+  "fees_embedded_convention_ref": "FIXTURE_FEES_EMBEDDED_CONVENTION_REF",
+  "filled_cost_quote": null,
+  "markout_refs": [],
+  "measurement_state": "UNKNOWN",
+  "objective_ref": "FIXTURE_OBJECTIVE_REF",
+  "record_id": "FIXTURE_ExecutionQualityMeasurement",
+  "record_type": "ExecutionQualityMeasurement",
+  "residual_opportunity_quote": null,
+  "schema_version": 2,
+  "scope": {
+    "account_id": "FIXTURE_ACCOUNT",
+    "market_type": "CRYPTO_SPOT",
+    "ownership": "OWNER_MANUAL",
+    "product_id": "FIXTURE_PRODUCT_ID",
+    "scope_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+    "strategy_id": "FIXTURE_STRATEGY_ID",
+    "venue_id": "FIXTURE_VENUE"
+  },
+  "total_benchmark_loss_quote": null,
+  "uncertainty_ref": null
+}

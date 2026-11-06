@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.browser.BrowserShortcutStoreTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-08T06:47:27" hostname="052fefa249ff" time="0.011">
+  <properties/>
+  <testcase name="an authenticated page's tile says VAN, not what the page is()" classname="com.dial.van.browser.BrowserShortcutStoreTest" time="0.001"/>
+  <testcase name="a profile that no longer exists refuses rather than falling back()" classname="com.dial.van.browser.BrowserShortcutStoreTest" time="0.001"/>
+  <testcase name="the launcher gets an id, a label and an icon, and nothing else()" classname="com.dial.van.browser.BrowserShortcutStoreTest" time="0.001"/>
+  <testcase name="renaming changes the label and never the destination()" classname="com.dial.van.browser.BrowserShortcutStoreTest" time="0.0"/>
+  <testcase name="an untitled ordinary page still gets a usable label()" classname="com.dial.van.browser.BrowserShortcutStoreTest" time="0.001"/>
+  <testcase name="an unbound device does not navigate()" classname="com.dial.van.browser.BrowserShortcutStoreTest" time="0.0"/>
+  <testcase name="revoking twice is not two revocations()" classname="com.dial.van.browser.BrowserShortcutStoreTest" time="0.001"/>
+  <testcase name="an unknown shortcut and a revoked one are different answers()" classname="com.dial.van.browser.BrowserShortcutStoreTest" time="0.0"/>
+  <testcase name="a revoked shortcut is not listed and cannot be revived by renaming()" classname="com.dial.van.browser.BrowserShortcutStoreTest" time="0.0"/>
+  <testcase name="a shortcut opens when the device is bound and the profile exists()" classname="com.dial.van.browser.BrowserShortcutStoreTest" time="0.0"/>
+  <testcase name="nothing in the forbidden list can appear in a payload()" classname="com.dial.van.browser.BrowserShortcutStoreTest" time="0.004"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

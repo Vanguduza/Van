@@ -1,0 +1,460 @@
+{
+  "schema": "van.rebuild.prepared-entry-context-source/1",
+  "observed_at_utc": "2026-10-23T00:45:35.426470+00:00",
+  "source_parent": "6d8fc6d757fb60e08707339b09fb09d9a55b6db3",
+  "source_sha256": {
+    "trading/vati/app/cycle.py": "07f20b5326a91fcf40ff640f3f8f43adfd8e10eb88827ba0c4a67052bc4fb619",
+    "trading/vati/app/entry_recovery.py": "5e5694c115d142ed6424fc2f034a7df6cac6d2d0a66a6f1b3aa09c2b9c88970d",
+    "trading/vati/app/session_recovery.py": "3b6723e8b9c3b23ca2c4a8ac54f9980d851da1f2165fcbddc86f960128f0c39d",
+    "trading/vati/app/entry_setup.py": "809197d052caa6e813bc7ba30003897cd099c492ec7d6925aaba1c7631d03682",
+    "trading/tests/test_single_session_recovery.py": "00bc83ab14d12914773aa54c3e5badd68233e17eef3bc022a11f8b257da5a453",
+    "trading/tests/test_single_session_unknown_entry.py": "85ba06a7b00090ed6ac40d26e5bd1c3e0acd16420796fc7991ac9e2874fdfb7f"
+  },
+  "initial_counterexamples": {
+    "van-cold-entry-before-full-pg": {
+      "tests": 3,
+      "failures": 3,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "c9104d6302b3e62ff34fd75c38e810cca4b66e0a775a482543d61df9ffbf1866"
+    },
+    "van-cold-legacy-before-full-pg": {
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "05b6fd4819872c8fdff81e9c1dc8da0177d8862d2ea4cd170f421d7f37b8953f"
+    },
+    "van-cold-entry-edge-before-full-pg": {
+      "tests": 2,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "f7bacbc77f3d1cebb4ee6bb16432b77d2979940c2d0f7ca8b0ce9f98e64759e7"
+    }
+  },
+  "intermediate_exact_plan_vs_quantized_command_failure": {
+    "tests": 3,
+    "failures": 2,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "cb5e8260be0592b43a7b97b3f774cb2cb76b84cf426c786f37947d756eda1b3d"
+  },
+  "intermediate_direction_failure": {
+    "tests": 3,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "3ef8e189899fd7c57d32ae26681b9e501d82d94fc1a817571a895122847035cb"
+  },
+  "interrupted_known_lost_thesis_reply_regression": {
+    "result": {
+      "tests": 20,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "bcc37295fa774abea3022b10e61cf99b44fd9934305728dbd496708f188f6852"
+    },
+    "process_exit": 2,
+    "reason": "Stopped pytest child after known duplicate-publication failure; wrapper retained and cleaned fixture. Not a passing suite.",
+    "cleanup": {
+      "stopped": true,
+      "removed": true
+    }
+  },
+  "publication_and_restart_controls": {
+    "tests": 5,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "cc56f218c3e3e0750d5b5a5c1137c175ac8739794feb93ebc871c01e80054d3e"
+  },
+  "intermediate_full_before_final_edge_cases": {
+    "result": {
+      "tests": 2132,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "fb08277d4cb27d01b3ff784c4b079cbe83a123cd47124faa457ec7193c49d683"
+    },
+    "source_sha256": {
+      "trading/vati/app/cycle.py": "07f20b5326a91fcf40ff640f3f8f43adfd8e10eb88827ba0c4a67052bc4fb619",
+      "trading/vati/app/entry_recovery.py": "5e5694c115d142ed6424fc2f034a7df6cac6d2d0a66a6f1b3aa09c2b9c88970d",
+      "trading/vati/app/session_recovery.py": "3b6723e8b9c3b23ca2c4a8ac54f9980d851da1f2165fcbddc86f960128f0c39d",
+      "trading/vati/app/entry_setup.py": "c4bb5e9d3b70be9fc7e87285bafc113463d514b85797e278ad8d076231332c98",
+      "trading/tests/test_single_session_recovery.py": "4c0f13454ee1b80be684cbc11a9fb21a0b0af98fc8c5ff5043315ce5008fec6d",
+      "trading/tests/test_single_session_unknown_entry.py": "61e51ac1fd3576d40de87b47b02c67412e6272368f6dac79569d383ea081cc0d"
+    }
+  },
+  "final_edge_controls": {
+    "tests": 2,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "19a01dff85edd0861bad65b68ada3a959f280372ec000981a59e200085f91d08"
+  },
+  "full_trading_real_private_postgresql": {
+    "tests": 2134,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "141707aecd8fe971f027bfb4a67c9b134f15d772f301a060ce7abbd22b95ee37"
+  },
+  "rebuild": {
+    "tests": 78,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "df7adf32835239069f64f139497580f0288bda7f2331126327cb2231f6136ce2"
+  },
+  "source_faults": {
+    "definitions": [
+      [
+        [
+          "trading/vati/app/cycle.py",
+          "prepared_setup=prepare_setup(self,intent,decision,state,targets,now_ms=now_ms)",
+          "prepared_setup=None",
+          "omit durable original prepared strategy inputs"
+        ],
+        [
+          "trading/tests/test_single_session_unknown_entry.py::test_process_restart_before_original_native_result_can_reconcile_without_resending[FILLED]"
+        ]
+      ],
+      [
+        [
+          "trading/vati/app/session_recovery.py",
+          "for iid in tuple(issues):",
+          "for iid in ():",
+          "omit cold original in-flight result readback work"
+        ],
+        [
+          "trading/tests/test_single_session_unknown_entry.py::test_process_restart_before_original_native_result_can_reconcile_without_resending[REJECTED]"
+        ]
+      ],
+      [
+        [
+          "trading/vati/app/entry_setup.py",
+          "or capsule['capsule_hash']!=canonical_hash({k:v for k,v in capsule.items() if k!='capsule_hash'})",
+          "or False",
+          "admit a prepared capsule whose contents changed under its old hash"
+        ],
+        [
+          "trading/tests/test_single_session_recovery.py::test_incomplete_historical_context_keeps_native_protection_without_inventing_feedback[prepared-capsule-content]"
+        ]
+      ],
+      [
+        [
+          "trading/vati/app/session_recovery.py",
+          "or setup['capsule'].get('version')!=command['strategy_version']",
+          "or False",
+          "accept a different archived strategy version than the original native command"
+        ],
+        [
+          "trading/tests/test_single_session_recovery.py::test_incomplete_historical_context_keeps_native_protection_without_inventing_feedback[prepared-capsule-version]"
+        ]
+      ],
+      [
+        [
+          "trading/vati/app/session_recovery.py",
+          "i.get('market_snapshot_hash')!=prepared.market_state_hash",
+          "False",
+          "admit prepared market evidence different from the original risk input"
+        ],
+        [
+          "trading/tests/test_single_session_recovery.py::test_incomplete_historical_context_keeps_native_protection_without_inventing_feedback[prepared-thesis-market]"
+        ]
+      ],
+      [
+        [
+          "trading/vati/app/session_recovery.py",
+          "or prepared.original_approved_risk_pct!=result['original_approved_risk_pct']",
+          "or False",
+          "accept unsigned widening of the original prepared risk claim"
+        ],
+        [
+          "trading/tests/test_single_session_recovery.py::test_incomplete_historical_context_keeps_native_protection_without_inventing_feedback[prepared-thesis-risk]"
+        ]
+      ],
+      [
+        [
+          "trading/vati/app/entry_setup.py",
+          "def publish_prepared_thesis(cycle,setup,entry,*,now_ms):\n    \"\"\"A lost write acknowledgement cannot create another original claim.\"\"\"\n    from vati.core import EventKind\n    from vati.execution.recovery_scope import NativePositionHistory\n    thesis=filled_thesis(setup,entry)\n    def original():\n        history=NativePositionHistory(cycle.ledger,account_alias=cycle.cfg.account_alias,venue=cycle.cfg.venue)\n        claims={}\n        for event in history.events(EventKind.TRADE_THESIS):\n            if event.correlation_id!=thesis.trade_intent_id:continue\n            saved=TradeThesis.from_payload(event.payload)\n            if not saved.seal_ok():raise ValueError('original persisted thesis is invalid')\n            claims[saved.seal]=saved\n        if not claims:return None\n        if set(claims)!={thesis.seal}:raise ValueError('original prepared thesis conflicts with persisted claim')\n        return claims[thesis.seal]\n    saved=original()\n    if saved is not None:return cycle.thesis.adopt(saved)\n    try:\n        return cycle.thesis.seal(thesis,now_ms=now_ms)\n    except Exception:\n        saved=original()\n        if saved is None:raise\n        return cycle.thesis.adopt(saved)\n",
+          "def publish_prepared_thesis(cycle,setup,entry,*,now_ms):\n    return cycle.thesis.seal(filled_thesis(setup,entry),now_ms=now_ms)\n",
+          "duplicate the original thesis after its successful write reply is lost"
+        ],
+        [
+          "trading/tests/test_single_session_unknown_entry.py::test_native_thesis_write_failure_recovers_from_real_persistence_not_a_memory_only_claim[after-thesis]"
+        ]
+      ],
+      [
+        [
+          "trading/vati/app/session_recovery.py",
+          "result['direction']=Direction(result['direction'])",
+          "pass",
+          "restore a string direction into native cost and review calculations"
+        ],
+        [
+          "trading/tests/test_single_session_unknown_entry.py::test_process_restart_before_original_native_result_can_reconcile_without_resending[FILLED]"
+        ]
+      ],
+      [
+        [
+          "trading/vati/app/entry_recovery.py",
+          "if not cycle.unresolved_entry_attempts or not callable(reader):return",
+          "if cycle.kill.halted or not cycle.unresolved_entry_attempts or not callable(reader):return",
+          "prevent original evidence readback while the financial kill switch is latched"
+        ],
+        [
+          "trading/tests/test_single_session_unknown_entry.py::test_process_restart_before_original_native_result_can_reconcile_without_resending[REJECTED]"
+        ]
+      ],
+      [
+        [
+          "trading/vati/app/entry_recovery.py",
+          "                    cycle.recovery_unresolved=tuple(v for v in cycle.recovery_unresolved if v!=iid)\n                    continue",
+          "                    cycle.recovery_unresolved=tuple(v for v in cycle.recovery_unresolved if v!=iid)\n                    cycle.kill.active.clear()\n                    continue",
+          "clear an owner-signed kill latch as a side effect of original-result recovery"
+        ],
+        [
+          "trading/tests/test_single_session_unknown_entry.py::test_process_restart_before_original_native_result_can_reconcile_without_resending[REJECTED]"
+        ]
+      ],
+      [
+        [
+          "trading/vati/app/session_recovery.py",
+          "        context=original_context(history,iid)\n        facts=receipts[iid]",
+          "        context=original_context(history,iid)\n        if context is None:continue\n        facts=receipts[iid]",
+          "require unavailable historical strategy inputs to recognize native zero-fill refusal"
+        ],
+        [
+          "trading/tests/test_single_session_unknown_entry.py::test_original_cold_refusal_does_not_require_missing_historical_thesis_inputs"
+        ]
+      ],
+      [
+        [
+          "trading/vati/app/entry_setup.py",
+          "    if not isinstance(setup,dict):raise ValueError('prepared setup must be an object')\n",
+          "",
+          "let malformed prepared setup discard recoverable native position context"
+        ],
+        [
+          "trading/tests/test_single_session_recovery.py::test_incomplete_historical_context_keeps_native_protection_without_inventing_feedback[prepared-setup-shape]"
+        ]
+      ],
+      [
+        [
+          "trading/vati/app/entry_setup.py",
+          "expected_path=path,seal=''",
+          "expected_path=prepared.expected_path,seal=''",
+          "retain planned-price R after the original native fill basis changed"
+        ],
+        [
+          "trading/tests/test_single_session_unknown_entry.py::test_late_native_fill_keeps_original_setup_and_derives_target_r_from_actual_fill"
+        ]
+      ]
+    ],
+    "records": [
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "aad16bd1efa64edc3d90f68a48575088242979cb994679bce10deacdb417a7ce"
+      },
+      {
+        "phase": "mutation",
+        "why": "omit durable original prepared strategy inputs",
+        "returncode": 1,
+        "log_sha256": "5058071bcef56cc28b63edcd189a1c407ae9d78f34e08fc19d4fc1184e3c9d65"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "cedbea6ac8dafd4901c3061567c7f6a90a953633e80d003e347339fff87c6fc3"
+      },
+      {
+        "phase": "mutation",
+        "why": "omit cold original in-flight result readback work",
+        "returncode": 1,
+        "log_sha256": "673fc5346e878cdc361fc7233655cc005bc92dc78dff07f197670f873357ee5b"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "85a7532b40196fb821e4b3dfb1231181e8e280a2da477abec65674576186c6c1"
+      },
+      {
+        "phase": "mutation",
+        "why": "admit a prepared capsule whose contents changed under its old hash",
+        "returncode": 1,
+        "log_sha256": "d4683c75ed420fd3e6470a91876dfe0286aea8df542a16851a867c8e0dc61728"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "fedceb118a93f8e9bed4f5b262246c28f6bfdace0d13713f5045fa2fb6554486"
+      },
+      {
+        "phase": "mutation",
+        "why": "accept a different archived strategy version than the original native command",
+        "returncode": 1,
+        "log_sha256": "867272c3d2a3a598231aee358d12f10f85f54e29dc7b67b4012d47fba3c86dec"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "fedceb118a93f8e9bed4f5b262246c28f6bfdace0d13713f5045fa2fb6554486"
+      },
+      {
+        "phase": "mutation",
+        "why": "admit prepared market evidence different from the original risk input",
+        "returncode": 1,
+        "log_sha256": "def6924d045b8ea241e22082ca42f0fbb7fd2e3fbcf7c6be33b94012f53b05a0"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "ac0988b070cfb8585ee6cce3a7e8654f43da14bf7e316bc0b9277c6ad43db855"
+      },
+      {
+        "phase": "mutation",
+        "why": "accept unsigned widening of the original prepared risk claim",
+        "returncode": 1,
+        "log_sha256": "5a893fa543e54ef08220cd1d25edb5d9993087ad2bd9753a20f3f8ad8cbcd264"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "6a331500deedd2a14e6124b4b324909e6bf845b29bc53681241f1f4209e8e1c7"
+      },
+      {
+        "phase": "mutation",
+        "why": "duplicate the original thesis after its successful write reply is lost",
+        "returncode": 1,
+        "log_sha256": "a04c6dcf4e67acd17804dda0314c3a1f595e018ece980c70aa971407976e6b61"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "38c123c9536fd8a8f4e2c312a065955ff0b8e7b6a6677c92d733fc72a8853992"
+      },
+      {
+        "phase": "mutation",
+        "why": "restore a string direction into native cost and review calculations",
+        "returncode": 1,
+        "log_sha256": "f58cb327f7826d3729b2233a24e60825cea6bfb86ab702aae960213e48456255"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "27092936733b5ac1960c6860d6bd407cfca8caad5f78b70026c6ab03bed50cb5"
+      },
+      {
+        "phase": "mutation",
+        "why": "prevent original evidence readback while the financial kill switch is latched",
+        "returncode": 1,
+        "log_sha256": "e44a3618303a864c612d797864ce9cc65366eb237303341ecc3c1bab1a4d7ee2"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "5477821a90cb4b32709d373a9ce1f4841c7debb827cfdbb5ff13ca11daee4bb2"
+      },
+      {
+        "phase": "mutation",
+        "why": "clear an owner-signed kill latch as a side effect of original-result recovery",
+        "returncode": 1,
+        "log_sha256": "7291665c143720eab1442d8ab9aec28641a984365cd22cab42752ac79480fc4a"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "1e787b1f86239288f688ca4643b6053cb98fd5bfdd0c6c0be06c0646112f1f9f"
+      },
+      {
+        "phase": "mutation",
+        "why": "require unavailable historical strategy inputs to recognize native zero-fill refusal",
+        "returncode": 1,
+        "log_sha256": "e574c3759abbb46b967f044eaf6eb0c6bfecf61adeff879c65c749b3c5201b49"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "c952b5c568a02b83362e5cf5a0f46f1c733434977b415fd71a83aa63e7031707"
+      },
+      {
+        "phase": "mutation",
+        "why": "let malformed prepared setup discard recoverable native position context",
+        "returncode": 1,
+        "log_sha256": "a471a5b7fcfa0b971c756141662353e9b5099a7d4fd31b6a00628c9a6c4d9c94"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "9a579eabc7f555b31b85572978c3ab918cb5ebeac6497e8a887fd28d2da1d67c"
+      },
+      {
+        "phase": "mutation",
+        "why": "retain planned-price R after the original native fill basis changed",
+        "returncode": 1,
+        "log_sha256": "816a1ebf5cffae53f0ff2af14661008300d60b3a6d4d26dd5741a8a81daff75c"
+      }
+    ],
+    "source_before_sha256": {
+      "trading/vati/app/cycle.py": "07f20b5326a91fcf40ff640f3f8f43adfd8e10eb88827ba0c4a67052bc4fb619",
+      "trading/vati/app/entry_recovery.py": "5e5694c115d142ed6424fc2f034a7df6cac6d2d0a66a6f1b3aa09c2b9c88970d",
+      "trading/vati/app/entry_setup.py": "809197d052caa6e813bc7ba30003897cd099c492ec7d6925aaba1c7631d03682",
+      "trading/vati/app/session_recovery.py": "3b6723e8b9c3b23ca2c4a8ac54f9980d851da1f2165fcbddc86f960128f0c39d"
+    },
+    "source_after_sha256": {
+      "trading/vati/app/cycle.py": "07f20b5326a91fcf40ff640f3f8f43adfd8e10eb88827ba0c4a67052bc4fb619",
+      "trading/vati/app/entry_recovery.py": "5e5694c115d142ed6424fc2f034a7df6cac6d2d0a66a6f1b3aa09c2b9c88970d",
+      "trading/vati/app/entry_setup.py": "809197d052caa6e813bc7ba30003897cd099c492ec7d6925aaba1c7631d03682",
+      "trading/vati/app/session_recovery.py": "3b6723e8b9c3b23ca2c4a8ac54f9980d851da1f2165fcbddc86f960128f0c39d"
+    },
+    "source_restored": true,
+    "journal_present": false
+  },
+  "full_fixture_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "mutation_fixture_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "owner_contract_check": {
+    "changed": [],
+    "applied": false,
+    "scope": "SOURCE_CONTRACTS_ONLY"
+  },
+  "legacy_anchor_preflight": {
+    "schema": "van.rebuild.mutation-registry-preflight/1",
+    "registry_sha256": "35d10c7b0f2b8319b7f7305828262c972b2a6451139d75b9e83c7d0062282955",
+    "mutation_count": 374,
+    "edit_count": 383,
+    "findings": [],
+    "execution_state": "NOT_RUN",
+    "status": "ANCHORS_VALID_BASELINES_AND_MUTATIONS_NOT_EXECUTED"
+  },
+  "oracle_corrections": [
+    "Original unquantized plan compared to original risk intent, not quantized executable command; no price tolerance introduced.",
+    "Initial typed-direction error and duplicate successful-thesis-write reply are retained actual implementation failures.",
+    "Prepared capsule-content negative changes contents while preserving version to isolate content-hash validation from the independent version guard.",
+    "Malformed setup checks explicitly assert held entry presence before access; failures are assertions rather than incidental missing-key errors.",
+    "Trace launcher first used a nonexistent temporary script path; it ran no tests and is not product evidence. Diagnostic tracing was temporary and is absent from production/test files."
+  ],
+  "remaining": "Original whole-product programme retained: owner-signed resume/reset endpoint/control integration; native physical identity/mode/epoch/deadline and precision; provider pending/partial/corrected-fill lifecycle and financial finality; persistent paper/research studies and safe retirement; assistant/voice/browser/workflow/memory/resources and all original feature/screen/acceptance contracts.",
+  "qualification": "Candidate source only. No new execution authority, signature, native/independent/whole-unit, production/provider/profitability or S24 qualification. The owner-signed kill latch remains active after evidence recovery."
+}

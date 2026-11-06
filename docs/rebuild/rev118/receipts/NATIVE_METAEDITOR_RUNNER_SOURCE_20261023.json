@@ -1,0 +1,31 @@
+{
+  "schema": "van.rebuild.native-metaeditor-runner-source/1",
+  "observed_at_utc": "2026-10-23T08:14:31.758348+00:00",
+  "source_parent": "8f7d363f6d6f93fc70bb3b8555f8a9e5de67d331",
+  "source_sha256": {
+    ".github/workflows/van-mql-native-source.yml": "4b1edf8a23239836e5f33f633008e9ddb1e60c6b0129d5498e2965de1a6b5c65",
+    "tools/rebuild/native_mql_source.ps1": "f878c9b986aeada7937afc941749f3d6db44ed7fd7d5cd561522324f2dcc07fc",
+    "deploy/van-trading-core/mql5/VanBridgeEA.mq5": "4bdea422e163db651671a5c8e1e2aa09702fb01ca4178185d06fe59915737dbf"
+  },
+  "powershell_grammar": {
+    "exit_code": 0,
+    "runtime": "PowerShell7.5.4, Linux grammar parse only",
+    "log_sha256": "5e7d2c62e0f74fe18e2005940a56eec742f25ba6bcc5200f38853ebdcfd58301",
+    "bootstrap": {
+      "version": "7.5.4",
+      "asset": "powershell-7.5.4-linux-x64.tar.gz",
+      "download_sha256": "1fd7983fe56ca9e6233f126925edb24bf6b6b33e356b69996d925c4db94e2fef",
+      "verified": true
+    },
+    "initial_bootstrap_failure": {
+      "version": "7.5.4",
+      "asset": "powershell-7.5.4-linux-x64.tar.gz",
+      "error": "'utf-8' codec can't decode byte 0xff in position 0: invalid start byte"
+    }
+  },
+  "workflow_yaml": "PARSED, read-only contents permission and windows-2025 runner checked",
+  "official_compiler_documentation": "https://www.metatrader5.com/en/metaeditor/help/beginning/integration_ide#compiler",
+  "native_compilation": "NOT_RUN",
+  "toolchain_version": "ACTUAL_HOSTED_READBACK_PENDING",
+  "qualification": "Runner source and grammar only. No MetaEditor execution, MQL correctness, broker account/effect, native host deployment, new gate, release or handset acceptance claimed."
+}

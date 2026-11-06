@@ -1,0 +1,169 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-10-07T08:16:00.913136+00:00",
+  "baseline_head": "12feb9033dfc1dd68d7b4d41ac477f0d9dbbc4af",
+  "worktree": "Local modified, uncommitted source and review artifacts; no deployment or publication.",
+  "source_manifest": "docs/audit/VAN_OWNER_E2E_SOURCE_MANIFEST_2026-10-07.json",
+  "source_manifest_sha256": "b8ba40d47e00b127ac6cf765ed7e3e70b65d7dc396d7627ce21a184f83966de0",
+  "aggregate_counts": {
+    "passed": 5096,
+    "skipped": 9,
+    "failed": 0
+  },
+  "counting_rule": "Four disjoint Python suite invocations plus the final JVM XML results. Focused and onboarding reruns are excluded from the aggregate.",
+  "python_suites": [
+    {
+      "name": "backend",
+      "cwd": "/workspace/Van",
+      "command": "/workspace/.onboarding/van-venv/bin/python -m pytest -q backend/tests",
+      "status": "PASSED",
+      "counts": {
+        "passed": 2016,
+        "skipped": 0,
+        "failed": 0,
+        "warnings": 31
+      },
+      "summary": "2016 passed, 31 warnings in 231.12s (0:03:51)",
+      "log": "docs/audit/validation/final-backend.log",
+      "log_sha256": "c8e959f96961ba25b5fa62ff666f461366d946483bd65e05d352b09b19ee5513"
+    },
+    {
+      "name": "gateway and frontend contracts",
+      "cwd": "/workspace/Van",
+      "command": "/workspace/.onboarding/van-venv/bin/python -m pytest -q tests/contracts",
+      "status": "PASSED",
+      "counts": {
+        "passed": 578,
+        "skipped": 3,
+        "failed": 0,
+        "warnings": 0
+      },
+      "summary": "578 passed, 3 skipped in 50.56s",
+      "log": "docs/audit/validation/final-contracts.log",
+      "log_sha256": "d9392a6c9a92fbfa8a6475726d851f956b3d992d5b687bfdcb2f6a235a142f3f"
+    },
+    {
+      "name": "services, Hermes profile/policy and scenarios",
+      "cwd": "/workspace/Van",
+      "command": "/workspace/.onboarding/van-venv/bin/python -m pytest -q services tests/hermes hermes/policy/tests tests/scenarios",
+      "status": "PASSED",
+      "counts": {
+        "passed": 204,
+        "skipped": 1,
+        "failed": 0,
+        "warnings": 1
+      },
+      "summary": "204 passed, 1 skipped, 1 warning in 3.83s",
+      "log": "docs/audit/validation/final-services-scenarios.log",
+      "log_sha256": "24cc0a0a59fa64fcb894af6d8e71a9b425bac78bc04fbd7fd484021ac11eb684"
+    },
+    {
+      "name": "trading",
+      "cwd": "/workspace/Van",
+      "command": "/workspace/.onboarding/van-venv/bin/python -m pytest -q trading/tests",
+      "status": "PASSED",
+      "counts": {
+        "passed": 1276,
+        "skipped": 5,
+        "failed": 0,
+        "warnings": 3
+      },
+      "summary": "1276 passed, 5 skipped, 3 warnings in 39.89s",
+      "log": "docs/audit/validation/final-trading-full.log",
+      "log_sha256": "9ff43847ddaff9f07c8d66471786b3913b91aa5bfc286db0d7e193b1d6899241"
+    }
+  ],
+  "android_jvm": {
+    "status": "PASSED",
+    "command": "JAVA_HOME=/workspace/.onboarding/jdk/usr/lib/jvm/java-21-openjdk-amd64 GRADLE_USER_HOME=/workspace/.onboarding/gradle /workspace/.onboarding/gradle-8.11.1/bin/gradle -p android/verification test --offline --no-daemon --max-workers=2 --console=plain",
+    "counts": {
+      "tests": 1022,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "log": "docs/audit/validation/final-kotlin.log",
+    "log_sha256": "d3543972fc7a2cf778560cbab19f03face938edec54cc759702cf60b091ab96a",
+    "scope": "Production session manager and selected pure logic with controlled dependencies; does not compile the Android app."
+  },
+  "android_kotlin_19_smoke": {
+    "status": "PASSED",
+    "scope": "Selected modified sources: actual manager with test gateway fake, hardware identity against android36.jar, pure helpers. Limited compiler smoke, not an app build.",
+    "scratch_log": "/workspace/van-audit/android-manager-repro/static-integration/kotlin19-compile.log"
+  },
+  "android_app_build": {
+    "status": "BLOCKED",
+    "command": "Gradle 8.11.1 :app:assembleDebug with JDK21 and installed SDK platform36; workers2",
+    "completed": "AGP resolution, SDK setup, shippable-voice precheck, debug BuildConfig generation",
+    "blocked_at": ":app:checkDebugAarMetadata",
+    "dependency": "com.github.k2-fsa.sherpa-onnx:sherpa-onnx:v1.13.8",
+    "reason": "HTTPS fetch from jitpack.io denied with HTTP403 by current dependency proxy; pinned dependency retained.",
+    "app_compilation": "NOT_REACHED",
+    "apk": "NOT_PRODUCED",
+    "log": "docs/audit/validation/android-online-build.log",
+    "log_sha256": "827547fd731a91455c8795b94f1619f031ae85375f6434d76af4fc03fb28c1c8"
+  },
+  "frontend_registry": {
+    "features": 42,
+    "screens_and_surfaces": 65,
+    "endpoints": 277,
+    "schemas": 128,
+    "contract_tests": "Included in final contracts suite; dedicated 16-test registry/reachability check passed.",
+    "html_javascript_syntax": "PASSED node --check",
+    "interactive_browser_check": "NOT_RUN: Playwright package is present but browser executable is absent; no rendered-browser claim."
+  },
+  "other_checks": {
+    "git_diff_check": "PASSED",
+    "python_compileall": "PASSED",
+    "runtime_shell_syntax": "PASSED",
+    "pip_check": "PASSED",
+    "systemd_unit_parser": "PASSED local generated unit syntax with custom paths",
+    "native_environment_file_glob": "PASSED local libc glob checks",
+    "local_real_tls_and_cross_process_revocation": "PASSED in backend suite"
+  },
+  "resolved_initial_sweep_failures": [
+    {
+      "suite": "scenarios",
+      "cause": "Test helper reused one command identity for different fresh and stale intents; immutable authority correctly refused.",
+      "correction": "Distinct command identity per logical idempotency key; no authority weakening."
+    },
+    {
+      "suite": "backend",
+      "cause": "Concurrent-process regression subprocess did not inherit pytest sys.path when invoked from repository root.",
+      "correction": "Explicit backend PYTHONPATH and child diagnostics; lock/concurrency assertions preserved."
+    },
+    {
+      "suite": "trading",
+      "cause": "Ledger environment staging creation applied restrictive process umask to an explicitly existing file mode.",
+      "correction": "Unique private staging file with restored trusted ownership/mode before atomic replacement; restrictive-umask and stale-symlink regressions."
+    }
+  ],
+  "warnings": "Python suites report dependency deprecations, async marks on synchronous tests and SQLite worker teardown/closed-loop warnings. Warnings remain recorded and do not establish live lifecycle acceptance.",
+  "unverified_release_gates": [
+    "APK compilation/lint/emulator with matching native ABI",
+    "physical owner device attestation, biometric approval and pinned mTLS",
+    "deployed gateway and Hermes callbacks/reconciliation/cancellation",
+    "live Google, knowledge, automation and browser canaries/media",
+    "live broker/account execution and postconditions",
+    "all required owner UI controls and seven screen states",
+    "signed endpoint/pin/ICE rotation transport application",
+    "Rive accessibility and semantic visual acceptance"
+  ],
+  "cloud_environment": {
+    "configuration_draft_status": "SAVED",
+    "configuration_applied_or_published": false,
+    "additive_custom_network_domain": "jitpack.io",
+    "nonsecret_pending_variables": {
+      "ANDROID_HOME": "/workspace/.onboarding/android-sdk",
+      "ANDROID_USER_HOME": "/workspace/.onboarding/android-user"
+    },
+    "activation": "Review and save changes in environment settings, then publish.",
+    "fresh_task_restoration": "UNVERIFIED",
+    "tools": "See docs/audit/CLOUD_SETUP_2026-10-07.md"
+  },
+  "dial_setup": {
+    "status": "PASSED_INITIAL_ONBOARDING",
+    "scope": "Pinned tenant sync, npm ci, TypeScript typecheck, core build, representative orchestration qualification134 tests; DIAL source unchanged.",
+    "included_in_aggregate_counts": false
+  }
+}

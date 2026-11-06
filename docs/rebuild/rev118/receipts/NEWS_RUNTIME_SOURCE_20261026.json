@@ -1,0 +1,43 @@
+{
+  "schema": "van.rebuild.news-runtime-health-source/1",
+  "status": "SOURCE_TESTED_COMPONENT_NOT_UNIT_ACCEPTANCE",
+  "base_head": "7e84277c70a2f1a4115196dcc8cd7da1151a1598",
+  "updated_at_utc": "2026-10-26T01:33:27.917947+00:00",
+  "source_sha256": {
+    "trading/vati/app/service.py": "c7cd4532d8de147b02936f4985928cd1d1367c2b43fecffcfd1e9a6342477d23",
+    "trading/vati/app/account_service.py": "f726e9a161affcde31cc457bd5a0827969308c948aa30e83b61d301c9a382235",
+    "trading/vati/events/news_ingress.py": "a51674b0e3ab93c01354980af8490146254ad52094d1184a674f9463a8cb5cc7",
+    "trading/vati/events/news_runtime.py": "e3fac385aa891c8ab91d24017f5b306d9ca5a7b95959045de3f18abd12605128",
+    "trading/tests/test_news_runtime_health.py": "83ec0ae8269e16b7fd3c5a2d283d84509b01b0af3418cb747df08e9a5ba3fc44"
+  },
+  "executed": {
+    "initial_before": "12 baseline service/file failures,2 disabled controls; no setup errors",
+    "initial_integration": "92 pass/2 PostgreSQL skips before further health controls",
+    "clock_before": "2 invalid-builder-clock failures/24 controls; fixed before qualification",
+    "assessment_before": "1 account error-state failure/1 session control; previous reduction retained",
+    "profile_before": "2 source-profile identity/future-count failures",
+    "heartbeat_before": "First3 failed due missing Path test import (harness); corrected tests reproduce3 absent owner-heartbeat readbacks",
+    "expanded_controls": "123 pass/2 PostgreSQL skips before final native/heartbeat additions",
+    "broad": "TIMED_OUT1800/pytestexit2;1059 expected,1057 completed call+teardown passes/0 failed assertions/audit0;1058 XML rows includes interrupted case, not1058passes. CANCELLED interrupted,EXPIRED unstarted; owned fixture removed",
+    "broad_scope": "Snapshot before additive owner-heartbeat changes; original hashes and raw reports retained, not a whole-run PASS",
+    "final_postgres": "698 pass/0skip/audit0/exact final source and test hashes; actual pinned isolated PostgreSQL; both unfinished identities and existing unknown-hold heartbeat included; owned fixture removed",
+    "final_controls": "119 pass/0skip,4 PostgreSQL cases explicitly deselected locally and executed in final PostgreSQL selection",
+    "supplemental_faults": "10 assertion-caught/0 setup errors/0skips/audit0/exact restoration; separate from canonical374",
+    "contracts": "Owner/frontend source contracts no drift; original mutation registry preflight0findings, consolidation0findings",
+    "rebuild": "108 final documentary regression cases passed after runtime continuation updates"
+  },
+  "published_source_reference": {
+    "head": "ea272bf834445bf9f2369dbc4377f3aea548892c",
+    "run": 40246053603,
+    "status": "All17 public source jobs pass; overallFAILURE on2 unwaived mandatory prerequisites",
+    "evidence": "receipts/HOSTED_SOURCE_ea272bf8.json",
+    "qualification": "Earlier source only; does not validate later durable/runtime changes"
+  },
+  "evidence": "ci/news_runtime_20261026",
+  "remaining": [
+    "Provider-neutral/public-official cross-checking and original publisher lineage",
+    "Native licences/entitlements/clocks/provider/consumer qualification; OQ06 owner procurement remains unresolved",
+    "File byte/row caps do not qualify total memory or interruptible I/O/host/protective latency",
+    "No unit/native/owner/F15/BG001/provider/economic/production/S24 acceptance"
+  ]
+}

@@ -1,0 +1,164 @@
+{
+  "schema": "van.rebuild.mt5-result-claim-source/1",
+  "observed_at_utc": "2026-10-23T08:34:03.253556+00:00",
+  "source_parent": "a1ee86b284b259781835f45fbdf5ab689a74f937",
+  "source_sha256": {
+    "trading/vati/execution/mt5_pull.py": "fd20db4f22b41f1dba2f30cbd7f97b51fce2cb30b414e46470f4f8fe7e4e2519",
+    "trading/tests/test_mt5_result_claim_boundary.py": "2716a0a120aa169fcb5c20a79b4cf6e7772e166b1f62ef106ee7793e3fe6643b"
+  },
+  "executions": {
+    "before": {
+      "tests": 5,
+      "failures": 4,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.554,
+      "sha256": "5d5a9f10399430cac01c1dd4c9cf18136a31c96fae81a7aeb4654c9261f80d12"
+    },
+    "affected": {
+      "tests": 47,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 5.704,
+      "sha256": "5f62b9085c1ff077f795aebda2185a10715a68bb58216e82c16ad1a81c742343"
+    },
+    "final": {
+      "tests": 48,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 6.165,
+      "sha256": "1802327d4ba9cd966aaca91004c89a29c58bbf9fe05d409f16ec79988a8d6f41"
+    },
+    "rebuild": {
+      "tests": 78,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 32.214,
+      "sha256": "990301cc964565ce3c1122d529f5258719e081b36ff2117d8dda2e0984076f5b"
+    }
+  },
+  "faults": {
+    "definitions": [
+      [
+        [
+          "trading/vati/execution/mt5_pull.py",
+          "WHERE id = ? AND alias = ? AND status = 'TAKEN'",
+          "WHERE id = ? AND alias = ? AND status IN ('TAKEN', 'QUEUED')",
+          "accept an original native result before its command was handed to a consumer"
+        ],
+        "trading/tests/test_mt5_result_claim_boundary.py::test_result_for_an_undelivered_original_cannot_erase_its_dispatch"
+      ],
+      [
+        [
+          "trading/vati/execution/mt5_pull.py",
+          "queue.complete(alias, r[\"id\"],",
+          "queue.complete(alias, int(r[\"id\"]),",
+          "coerce a noninteger poll result into another exact native command identity"
+        ],
+        "trading/tests/test_mt5_result_claim_boundary.py::test_native_result_identity_requires_its_exact_integer_command_id[True]"
+      ],
+      [
+        [
+          "trading/vati/execution/mt5_pull.py",
+          "if type(cid) is not int or not 0<cid<2**63 or not isinstance(result,dict):",
+          "if not 0<cid<2**63 or not isinstance(result,dict):",
+          "accept boolean command identities in the native queue writer"
+        ],
+        "trading/tests/test_mt5_result_claim_boundary.py::test_native_result_identity_requires_its_exact_integer_command_id[True]"
+      ]
+    ],
+    "records": [
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "0553b55951a0d264ffd0e9a1bd6103728b62a06191b9f39625ba7f3726fc4009",
+        "log_sha256": "7b28864108e599fa40be5ef242a8e99369373309a24005493e03e6500fb2376c"
+      },
+      {
+        "phase": "mutation",
+        "why": "accept an original native result before its command was handed to a consumer",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "335da7d4aaf0437ae29c0b43a4e03eddd215579f48f325826a1435f0f110dd67",
+        "log_sha256": "65192c7a1c3ca3646251547571f4c7061b62c4167aaf29279b9f65c0a70b1d35"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "f25c889498820dc1e9ed9144bec48f29280189164dd90e171bfe55ef0ffb76e1",
+        "log_sha256": "c0f8c83c9035c473841a23e6066fa414a8781cf5828ea6e0fefebe26ddc4cfa3"
+      },
+      {
+        "phase": "mutation",
+        "why": "coerce a noninteger poll result into another exact native command identity",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "9f93dffaf930c2522ecfaff704effb3ebdbda97d197eb6e4cd2ab9ebcd65359e",
+        "log_sha256": "4ed052306bf1df8f855b39c1021185af7b0ebc6d07fe14e175e2f498f9042569"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "7c79b12492973d504285d741a06c3a44c4c03e9150d3cd9f7b0ee174980857d1",
+        "log_sha256": "38987257c77fe27d6e461371412ee8e4d9fa848ae2c32a84d3603bcd639c4706"
+      },
+      {
+        "phase": "mutation",
+        "why": "accept boolean command identities in the native queue writer",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "e2e12d0396a0c90c8585f048a8f6db5fa6d311713f0d93e6390d54e39420803c",
+        "log_sha256": "1421ec5a6d7ba7dae43fd7ab5c5b8dcd773c3ac6970e7f13fe47546489620bcf"
+      }
+    ],
+    "source_before_sha256": "fd20db4f22b41f1dba2f30cbd7f97b51fce2cb30b414e46470f4f8fe7e4e2519",
+    "source_after_sha256": "fd20db4f22b41f1dba2f30cbd7f97b51fce2cb30b414e46470f4f8fe7e4e2519",
+    "source_restored": true,
+    "journal_present": false
+  },
+  "owner_contract_derivation": {
+    "changed": [],
+    "applied": false,
+    "scope": "SOURCE_CONTRACTS_ONLY"
+  },
+  "qualification": "Source protocol only. Four original failures plus valid delivered-result control;48final affected tests and78rebuild pass;three faults caught/restored. No full current trading/backend rerun claimed; prior full2560/committed8f7 backend audit are separate. Native compiler preparation failure retained separately; no broker effect, whole-unit, production, profitability or S24 qualification."
+}

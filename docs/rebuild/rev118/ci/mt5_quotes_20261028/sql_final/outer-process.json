@@ -1,0 +1,15 @@
+{
+  "command": [
+    "python3",
+    "/workspace/van-mt5-quotes-sql-r1-20261028.py"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 342649,
+  "started_at_utc": "2026-10-28T10:47:50.691176+00:00",
+  "timeout_seconds": 2100,
+  "state": "COMPLETED",
+  "command_pid": 342676,
+  "exit": 0,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-28T10:56:39.315219+00:00"
+}

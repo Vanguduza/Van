@@ -1,0 +1,118 @@
+{
+  "gates": {
+    "G0": [
+      "PRE-001",
+      "PRE-002",
+      "PRE-003"
+    ],
+    "G1": [
+      "BE-037",
+      "BE-038",
+      "BE-039",
+      "BE-040",
+      "BE-041",
+      "BE-042",
+      "BE-043",
+      "BE-044"
+    ],
+    "G2": [
+      "BE-035",
+      "VAN-ML-PKT-010",
+      "VAN-ML-PKT-030"
+    ],
+    "G3": [
+      "VAN-ML-PKT-030",
+      "VAN-ML-PKT-031"
+    ],
+    "G4": [
+      "BQ-008",
+      "BQ-009"
+    ],
+    "G5": [
+      "BQ-007",
+      "BQ-009"
+    ],
+    "G6": [
+      "REL-001"
+    ]
+  },
+  "milestones": {
+    "M0": [
+      "PRE-001",
+      "PRE-002",
+      "PRE-003",
+      "BE-001"
+    ],
+    "M1": [
+      "BE-008",
+      "BE-010",
+      "VAN-ML-PKT-007",
+      "BE-041"
+    ],
+    "M2": [
+      "BE-035",
+      "VAN-ML-PKT-010",
+      "VAN-ML-PKT-027",
+      "VAN-ML-PKT-030",
+      "BE-044"
+    ],
+    "M3": [
+      "VAN-ML-PKT-011",
+      "VAN-ML-PKT-012",
+      "VAN-ML-PKT-013",
+      "VAN-ML-PKT-014",
+      "VAN-ML-PKT-015"
+    ],
+    "M4": [
+      "VAN-ML-PKT-016",
+      "VAN-ML-PKT-017",
+      "VAN-ML-PKT-018",
+      "VAN-ML-PKT-019"
+    ],
+    "M5": [
+      "BE-037",
+      "BE-038",
+      "BE-039",
+      "BE-040",
+      "BE-041"
+    ],
+    "M6": [
+      "BE-042",
+      "BE-043"
+    ],
+    "M7": [
+      "BE-021",
+      "BE-044",
+      "VAN-ML-PKT-037",
+      "VAN-ML-PKT-038",
+      "VAN-ML-PKT-039",
+      "VAN-ML-PKT-040",
+      "VAN-ML-PKT-041",
+      "VAN-ML-PKT-042",
+      "VAN-ML-PKT-043",
+      "VAN-ML-PKT-044",
+      "VAN-ML-PKT-045",
+      "VAN-ML-PKT-046",
+      "VAN-ML-PKT-047",
+      "VAN-ML-PKT-048"
+    ],
+    "M8": [
+      "BG-001",
+      "UX-003",
+      "FE-023"
+    ],
+    "M9": [
+      "BQ-008",
+      "BQ-009",
+      "BG-001",
+      "QA-005",
+      "REL-001"
+    ]
+  },
+  "only_F15": "PRE-003",
+  "only_frontend_gate": "BG-001",
+  "schema": "van.hva.non-authoritative-alias/1.0",
+  "semantics": "All entries reference obligations only; none is an executable alternate schedule, a gate certificate, a new live mandate or a waiver. G6 names the eventual existing release/owner process, never financial authorization.",
+  "source_revision": "HVA1.0",
+  "target_revision": "Unified1.12"
+}

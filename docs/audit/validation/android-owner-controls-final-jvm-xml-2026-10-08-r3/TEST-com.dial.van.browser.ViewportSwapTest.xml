@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.browser.ViewportSwapTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-08T06:47:27" hostname="052fefa249ff" time="0.003">
+  <properties/>
+  <testcase name="a frame cannot swap a revision the server never acknowledged()" classname="com.dial.van.browser.ViewportSwapTest" time="0.0"/>
+  <testcase name="a frame with no pixels does not divide by zero()" classname="com.dial.van.browser.ViewportSwapTest" time="0.001"/>
+  <testcase name="a trailing frame from the old size does not swap()" classname="com.dial.van.browser.ViewportSwapTest" time="0.0"/>
+  <testcase name="the first frame for the new revision swaps everything at once()" classname="com.dial.van.browser.ViewportSwapTest" time="0.0"/>
+  <testcase name="the held frame is letterboxed rather than stretched()" classname="com.dial.van.browser.ViewportSwapTest" time="0.001"/>
+  <testcase name="a revision must advance()" classname="com.dial.van.browser.ViewportSwapTest" time="0.0"/>
+  <testcase name="a frame larger than the window is scaled down uniformly()" classname="com.dial.van.browser.ViewportSwapTest" time="0.0"/>
+  <testcase name="input is withheld while a revision is unacknowledged()" classname="com.dial.van.browser.ViewportSwapTest" time="0.0"/>
+  <testcase name="the acknowledgement alone does not swap the picture()" classname="com.dial.van.browser.ViewportSwapTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

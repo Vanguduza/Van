@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.trading.TradingModelsTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:35:26" hostname="052fefa249ff" time="0.028">
+  <properties/>
+  <testcase name="formatHelpers" classname="com.dial.van.trading.TradingModelsTest" time="0.003"/>
+  <testcase name="portfolioParsesTotalsAccountsSafetyAndWorstDataState" classname="com.dial.van.trading.TradingModelsTest" time="0.02"/>
+  <testcase name="marketStateRiskBarsAndDetailParse" classname="com.dial.van.trading.TradingModelsTest" time="0.005"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

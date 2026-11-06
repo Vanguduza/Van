@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="3" time="0.883" timestamp="2026-11-01T01:13:46.548940+00:00" hostname="b6ffa15f7e81"><testcase classname="tests.test_lane_auth_commit_expiry" name="test_original_authority_expiring_inside_transaction_rolls_back[pair_device_read]" time="0.202"><failure message="Failed: DID NOT RAISE AuthError">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-33/test_original_authority_expiri0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7fd5021d6240&gt;
+phase = 'pair_device_read'
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize('phase', ['pair_device_read', 'pair_grant_write', 'renew_grant_write'])
+    async def test_original_authority_expiring_inside_transaction_rolls_back(tmp_path, monkeypatch, phase):
+        clock = [1000]
+        monkeypatch.setattr(service, 'time', SimpleNamespace(time=lambda: clock[0]))
+        store = Store(str(tmp_path / 'mid-transaction.sqlite'))
+        await store.migrate()
+        key = Fernet.generate_key().decode()
+        auth = AuthService(store, key)
+        ticket = await auth.create_pairing_ticket(ttl_seconds=60)
+        renewing = phase == 'renew_grant_write'
+        if renewing:
+            await auth.enroll('phone', 'secret', 'PEM')
+            await store.execute('UPDATE capability_grants SET expires_at_unix=1060')
+        before = [dict(r) for r in await store.fetchall('SELECT * FROM capability_grants')]
+        execute = aiosqlite.Connection.execute
+        intercepted = []
+        async def elapsed(db, sql, *args, **kwargs):
+            result = await execute(db, sql, *args, **kwargs)
+            target = ((phase == 'pair_device_read' and sql == 'SELECT device_id, revoked_at_unix FROM devices WHERE device_id = ?')
+                      or (phase == 'pair_grant_write' and sql.startswith('INSERT INTO capability_grants'))
+                      or (phase == 'renew_grant_write' and sql.startswith('UPDATE capability_grants SET expires_at_unix')))
+            if target:
+                intercepted.append(phase)
+                clock[0] = 1060
+            return result
+        monkeypatch.setattr(aiosqlite.Connection, 'execute', elapsed)
+&gt;       with pytest.raises(AuthError) as error:
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE AuthError
+
+backend/tests/test_lane_auth_commit_expiry.py:139: Failed</failure></testcase><testcase classname="tests.test_lane_auth_commit_expiry" name="test_original_authority_expiring_inside_transaction_rolls_back[pair_grant_write]" time="0.213"><failure message="Failed: DID NOT RAISE AuthError">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-33/test_original_authority_expiri1')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7fd5021dab40&gt;
+phase = 'pair_grant_write'
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize('phase', ['pair_device_read', 'pair_grant_write', 'renew_grant_write'])
+    async def test_original_authority_expiring_inside_transaction_rolls_back(tmp_path, monkeypatch, phase):
+        clock = [1000]
+        monkeypatch.setattr(service, 'time', SimpleNamespace(time=lambda: clock[0]))
+        store = Store(str(tmp_path / 'mid-transaction.sqlite'))
+        await store.migrate()
+        key = Fernet.generate_key().decode()
+        auth = AuthService(store, key)
+        ticket = await auth.create_pairing_ticket(ttl_seconds=60)
+        renewing = phase == 'renew_grant_write'
+        if renewing:
+            await auth.enroll('phone', 'secret', 'PEM')
+            await store.execute('UPDATE capability_grants SET expires_at_unix=1060')
+        before = [dict(r) for r in await store.fetchall('SELECT * FROM capability_grants')]
+        execute = aiosqlite.Connection.execute
+        intercepted = []
+        async def elapsed(db, sql, *args, **kwargs):
+            result = await execute(db, sql, *args, **kwargs)
+            target = ((phase == 'pair_device_read' and sql == 'SELECT device_id, revoked_at_unix FROM devices WHERE device_id = ?')
+                      or (phase == 'pair_grant_write' and sql.startswith('INSERT INTO capability_grants'))
+                      or (phase == 'renew_grant_write' and sql.startswith('UPDATE capability_grants SET expires_at_unix')))
+            if target:
+                intercepted.append(phase)
+                clock[0] = 1060
+            return result
+        monkeypatch.setattr(aiosqlite.Connection, 'execute', elapsed)
+&gt;       with pytest.raises(AuthError) as error:
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE AuthError
+
+backend/tests/test_lane_auth_commit_expiry.py:139: Failed</failure></testcase><testcase classname="tests.test_lane_auth_commit_expiry" name="test_original_authority_expiring_inside_transaction_rolls_back[renew_grant_write]" time="0.247"><failure message="Failed: DID NOT RAISE AuthError">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-33/test_original_authority_expiri2')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7fd5021d9430&gt;
+phase = 'renew_grant_write'
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize('phase', ['pair_device_read', 'pair_grant_write', 'renew_grant_write'])
+    async def test_original_authority_expiring_inside_transaction_rolls_back(tmp_path, monkeypatch, phase):
+        clock = [1000]
+        monkeypatch.setattr(service, 'time', SimpleNamespace(time=lambda: clock[0]))
+        store = Store(str(tmp_path / 'mid-transaction.sqlite'))
+        await store.migrate()
+        key = Fernet.generate_key().decode()
+        auth = AuthService(store, key)
+        ticket = await auth.create_pairing_ticket(ttl_seconds=60)
+        renewing = phase == 'renew_grant_write'
+        if renewing:
+            await auth.enroll('phone', 'secret', 'PEM')
+            await store.execute('UPDATE capability_grants SET expires_at_unix=1060')
+        before = [dict(r) for r in await store.fetchall('SELECT * FROM capability_grants')]
+        execute = aiosqlite.Connection.execute
+        intercepted = []
+        async def elapsed(db, sql, *args, **kwargs):
+            result = await execute(db, sql, *args, **kwargs)
+            target = ((phase == 'pair_device_read' and sql == 'SELECT device_id, revoked_at_unix FROM devices WHERE device_id = ?')
+                      or (phase == 'pair_grant_write' and sql.startswith('INSERT INTO capability_grants'))
+                      or (phase == 'renew_grant_write' and sql.startswith('UPDATE capability_grants SET expires_at_unix')))
+            if target:
+                intercepted.append(phase)
+                clock[0] = 1060
+            return result
+        monkeypatch.setattr(aiosqlite.Connection, 'execute', elapsed)
+&gt;       with pytest.raises(AuthError) as error:
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE AuthError
+
+backend/tests/test_lane_auth_commit_expiry.py:139: Failed</failure></testcase></testsuite></testsuites>

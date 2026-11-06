@@ -1,0 +1,25 @@
+# Native account identity and valuation observations
+
+Candidate account/risk information wiring for existing owner features. BE-006 remains in progress; no unit, native admission, production or handset acceptance is issued.
+
+MT5 physical account facts previously disappeared when its unrelated cash-history query was unavailable. Five counterexamples exercise the actual signed-worker adapter. The new optional AccountState.native_observation retains the validated registered login/server/currency/demo binding, original reported equity/balance/credit, original request or poll nonce, source receipt time and local read time. The pull adapter preserves the earlier poll receipt clock separately from the later cache read. Missing legacy metadata withholds this proof without disabling independent physical-identity checks or protective position reads.
+
+Known nonnegative credit is excluded using exact decimal arithmetic. Missing/invalid credit has CREDIT_UNAVAILABLE; negative credit has CREDIT_LIABILITY_UNQUALIFIED. Neither supplies measured risk equity or healthy cash-backed margin bounds. Original gross equity and credit remain explicitly available as observations. The account/portfolio projection withholds its top-level risk equity and floating PnL until the valuation is usable. A cash-history outage still holds new risk through the existing funding fence; an account observation is neither cash coverage nor permission to trade.
+
+Both actual snapshot producers store the observation. Owner readback checks its closed body, source reference, producer/event seal, physical current profile, original amounts and chronology. Invalid evidence cannot fall back to old financial values. Legacy alias-only native snapshots also remain unbound: an exact preimage probe showed them as LIVE money without physical evidence. Their original events are preserved; current-profile values are withheld until bound observations arrive.
+
+## Existing Android endpoints and schema
+
+GET /v1/trading/accounts and GET /v1/trading/portfolio expose native_account_observation. The closed response contract is trading/vati/contracts/schemas/native_account_observation.schema.json. It distinguishes OBSERVED, UNMEASURED and UNAVAILABLE and preserves the three valuation states, exact monetary text, original scope/source/snapshot references and clocks. The schema alone cannot verify seals, arithmetic or physical identity; runtime checks do that. Native double text is not a settled-money qualification.
+
+The existing AccountCard has a pure NativeAccountObservation DTO. It preserves decimal strings and64-bit login/timestamps, checks source/valuation shapes and exact credit subtraction, and always exposes executionAuthority:false. The source screen/feature registry names this response field and schema on existing account surfaces. Inventory remains42 current feature groups,105 original owner functions,78 surfaces,457 endpoints and333 API component schemas; the VATI internal schema set now contains8 contracts. No new frontend, layout or navigation precedes BG-001.
+
+## Executed checks
+
+NATIVE_ACCOUNT_OBSERVATION_SOURCE_20261024.json records190 final native/schema/funding/portfolio checks,20 authenticated API checks with no forbidden source-storage writes,96 rebuild regressions,30 owner/workflow/pinned-source checks, and nine source fault/restored-control pairs. The separate schema oracle accepts five actual/unknown owner variants and rejects35 malformed shapes. The older raw-equity performance fixture now supplies an explicit physical native mark while cash coverage remains unqualified; all ten original assertions in its file are unchanged.
+
+The complete current Kotlin test source compiles against the verified runtime. The full local1,341-case runtime attempt aborted on native coroutine thread exhaustion before a complete report. It is not a passing run. Eight focused current tests pass, including all five new DTO cases and the three original margin cases. Fresh hosted app/JVM qualification remains required.
+
+The public backend run at be61c629 executed5,647 gateway cases:5,636 passed, one service-name source guard failed on a test-module reference, and ten were skipped. Corrections use the already permitted canonical test-file reference without changing that guard, supply pinned Pillow, and fetch full source-head history. Two exact AGP prerequisite skips are explicitly assigned to a required Android step executing the original refusal tests with a strict two-case/no-skip report check. Media coverage runs independently even after gateway failure; any failure still fails qualification. Original required private-DDS/trusted-main and PostgreSQL/browser jobs are unchanged. These corrections await the next full hosted run.
+
+Prospective-order margin, broker stop-out/call rules, reservations, native contract freshness, complete flow-adjusted accounting, provider rails and remaining product implementation/qualification are separate. Production route/trust/signing, native DIAL/Commander/Artemis and S24 results are not inferred from these source fixtures.

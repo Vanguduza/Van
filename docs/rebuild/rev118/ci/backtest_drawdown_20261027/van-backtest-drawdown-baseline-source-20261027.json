@@ -1,0 +1,10 @@
+{
+  "base_head": "5c584b2af6135660d46ba66216330b1c18704b2b",
+  "source_sha256": "4e9089078b0caf5ff941b1fc7826a873fb8351cf1d955e9b69f036459044b18f",
+  "source_equals_committed": true,
+  "failed": 9,
+  "errors": 0,
+  "passed": 2,
+  "test_sha256": "2ee624b2ef8a5bce986408d3ebed2f990f053a03a5682f962a411d319eae38d8",
+  "source_only": true
+}

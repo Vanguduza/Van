@@ -1,0 +1,885 @@
+{
+ "schema": "van.rebuild.amendment-patch/1",
+ "amendment": "AP-001",
+ "base_package_tree": "ac0226a22a95f51642cfeb37b3709b40f7cacf10",
+ "base_plan_revision": "1.18",
+ "new_acceptance_contracts": [
+  {
+   "id": "T-BQ-003-HEADLESS-POS",
+   "unit": "BQ-003",
+   "kind": "POS",
+   "expectation": "One headless run over the complete news, event history, armed grants and chart-observation backend (BE-014, BE-015, BE-016, BE-017, BE-018, BE-019, BE-021) exercises every owned declared operation through actual registered producers and consumers, with real providers where the target requires them; each outcome is independently read back and bound to exact source commit, artifact hashes and configuration version.",
+   "environment": "ADMITTED_DIAL_ISOLATED_TOPOLOGY; actual provider when required; no live authorization inferred",
+   "execution_state": "NOT_RUN",
+   "receipt_required": true,
+   "scope_revision": "1.18-AP-001-PROPOSED",
+   "receipt_binding": [
+    "source",
+    "artifact",
+    "config",
+    "input_manifest",
+    "actual_result",
+    "independent_reviewer",
+    "environment",
+    "fault_injection_log"
+   ],
+   "proves": "BQ exit: 'verified provider or service outcomes ... exact source/artifact/config identity'; 'no required backend feature partial'",
+   "preconditions": "All domain BE units FULL with their own POS/NEG/REC/SEC/INT receipts; admitted isolated DIAL topology; real providers bound where the target requires; exact source commit, artifact hashes and config version recorded before the run",
+   "stimulus": "Drive every owned declared operation of the domain through its registered producer, headless (typed command/event API), in one run",
+   "observable": "For each operation: authoritative backend state/ledger/readback independently read after the effect, matching the declared postcondition; provider receipts where required; operation identity preserved end to end",
+   "pass_evidence": "Run manifest listing every owned operation with result, readback and receipt; zero unreached operations; receipts bound to the admitted source/artifact/config; independent reviewer sign-off",
+   "requirement_refs": [],
+   "exit_contract_ref": "BQ-003.exit_contract"
+  },
+  {
+   "id": "T-BQ-003-HEADLESS-NEG",
+   "unit": "BQ-003",
+   "kind": "NEG",
+   "expectation": "The gate rejects: any owned operation unreached or answered by a stub/fixture, an empty or acknowledgement-only response counted as success, a provider-required outcome without a real provider receipt, or a receipt bound to a different source/artifact/config than the one admitted.",
+   "environment": "ADMITTED_DIAL_ISOLATED_TOPOLOGY; actual provider when required; no live authorization inferred",
+   "execution_state": "NOT_RUN",
+   "receipt_required": true,
+   "scope_revision": "1.18-AP-001-PROPOSED",
+   "receipt_binding": [
+    "source",
+    "artifact",
+    "config",
+    "input_manifest",
+    "actual_result",
+    "independent_reviewer",
+    "environment",
+    "fault_injection_log"
+   ],
+   "proves": "BQ exit: 'No synthetic success'; 'no required backend feature partial'",
+   "preconditions": "Same harness as HEADLESS-POS",
+   "stimulus": "Inject each disallowed shape: a stubbed producer, an acknowledgement-only or empty response, a provider-required outcome without receipt, a receipt from a different source/artifact/config, one owned operation omitted",
+   "observable": "The gate verdict is FAIL naming the offending operation each time; no partial pass",
+   "pass_evidence": "Mutation log with one failing gate verdict per injected shape (gate failure demonstrated, not assumed)",
+   "requirement_refs": [],
+   "exit_contract_ref": "BQ-003.exit_contract"
+  },
+  {
+   "id": "T-BQ-003-HEADLESS-REC",
+   "unit": "BQ-003",
+   "kind": "REC",
+   "expectation": "Inject faults across the domain (process kill at commit/outbox boundaries, provider timeout and lost reply, duplicate and out-of-order events, disconnect/restart); every original operation identity reconciles to an authoritative postcondition with no duplicate effect, and the fault-injection log is part of the receipt.",
+   "environment": "ADMITTED_DIAL_ISOLATED_TOPOLOGY; actual provider when required; no live authorization inferred",
+   "execution_state": "NOT_RUN",
+   "receipt_required": true,
+   "scope_revision": "1.18-AP-001-PROPOSED",
+   "receipt_binding": [
+    "source",
+    "artifact",
+    "config",
+    "input_manifest",
+    "actual_result",
+    "independent_reviewer",
+    "environment",
+    "fault_injection_log"
+   ],
+   "proves": "BQ exit: 'fault-injection receipts'; whole-product protocol recovery and unknown-outcome rules",
+   "preconditions": "Same harness; fault injector able to kill processes at commit/outbox boundaries, drop replies, duplicate/reorder events, disconnect providers",
+   "stimulus": "Inject each fault class during in-flight operations across the domain",
+   "observable": "Every original operation identity reconciles to one authoritative postcondition (applied, refused, or explicitly unknown pending reconciliation); no duplicate external effect; no resubmission before reconciliation",
+   "pass_evidence": "Fault-injection log joined to per-operation reconciliation records and duplicate-effect check",
+   "requirement_refs": [],
+   "exit_contract_ref": "BQ-003.exit_contract"
+  },
+  {
+   "id": "T-BQ-004-HEADLESS-POS",
+   "unit": "BQ-004",
+   "kind": "POS",
+   "expectation": "One headless run over the complete work, agents/Muse, browser, Artemis, memory, automation and voice backend (BE-023, BE-024, BE-025, BE-026, BE-027, BE-028, BE-029) exercises every owned declared operation through actual registered producers and consumers, with real providers where the target requires them; each outcome is independently read back and bound to exact source commit, artifact hashes and configuration version.",
+   "environment": "ADMITTED_DIAL_ISOLATED_TOPOLOGY; actual provider when required; no live authorization inferred",
+   "execution_state": "NOT_RUN",
+   "receipt_required": true,
+   "scope_revision": "1.18-AP-001-PROPOSED",
+   "receipt_binding": [
+    "source",
+    "artifact",
+    "config",
+    "input_manifest",
+    "actual_result",
+    "independent_reviewer",
+    "environment",
+    "fault_injection_log"
+   ],
+   "proves": "BQ exit: 'verified provider or service outcomes ... exact source/artifact/config identity'; 'no required backend feature partial'",
+   "preconditions": "All domain BE units FULL with their own POS/NEG/REC/SEC/INT receipts; admitted isolated DIAL topology; real providers bound where the target requires; exact source commit, artifact hashes and config version recorded before the run",
+   "stimulus": "Drive every owned declared operation of the domain through its registered producer, headless (typed command/event API), in one run",
+   "observable": "For each operation: authoritative backend state/ledger/readback independently read after the effect, matching the declared postcondition; provider receipts where required; operation identity preserved end to end",
+   "pass_evidence": "Run manifest listing every owned operation with result, readback and receipt; zero unreached operations; receipts bound to the admitted source/artifact/config; independent reviewer sign-off",
+   "requirement_refs": [],
+   "exit_contract_ref": "BQ-004.exit_contract"
+  },
+  {
+   "id": "T-BQ-004-HEADLESS-NEG",
+   "unit": "BQ-004",
+   "kind": "NEG",
+   "expectation": "The gate rejects: any owned operation unreached or answered by a stub/fixture, an empty or acknowledgement-only response counted as success, a provider-required outcome without a real provider receipt, or a receipt bound to a different source/artifact/config than the one admitted.",
+   "environment": "ADMITTED_DIAL_ISOLATED_TOPOLOGY; actual provider when required; no live authorization inferred",
+   "execution_state": "NOT_RUN",
+   "receipt_required": true,
+   "scope_revision": "1.18-AP-001-PROPOSED",
+   "receipt_binding": [
+    "source",
+    "artifact",
+    "config",
+    "input_manifest",
+    "actual_result",
+    "independent_reviewer",
+    "environment",
+    "fault_injection_log"
+   ],
+   "proves": "BQ exit: 'No synthetic success'; 'no required backend feature partial'",
+   "preconditions": "Same harness as HEADLESS-POS",
+   "stimulus": "Inject each disallowed shape: a stubbed producer, an acknowledgement-only or empty response, a provider-required outcome without receipt, a receipt from a different source/artifact/config, one owned operation omitted",
+   "observable": "The gate verdict is FAIL naming the offending operation each time; no partial pass",
+   "pass_evidence": "Mutation log with one failing gate verdict per injected shape (gate failure demonstrated, not assumed)",
+   "requirement_refs": [],
+   "exit_contract_ref": "BQ-004.exit_contract"
+  },
+  {
+   "id": "T-BQ-004-HEADLESS-REC",
+   "unit": "BQ-004",
+   "kind": "REC",
+   "expectation": "Inject faults across the domain (process kill at commit/outbox boundaries, provider timeout and lost reply, duplicate and out-of-order events, disconnect/restart); every original operation identity reconciles to an authoritative postcondition with no duplicate effect, and the fault-injection log is part of the receipt.",
+   "environment": "ADMITTED_DIAL_ISOLATED_TOPOLOGY; actual provider when required; no live authorization inferred",
+   "execution_state": "NOT_RUN",
+   "receipt_required": true,
+   "scope_revision": "1.18-AP-001-PROPOSED",
+   "receipt_binding": [
+    "source",
+    "artifact",
+    "config",
+    "input_manifest",
+    "actual_result",
+    "independent_reviewer",
+    "environment",
+    "fault_injection_log"
+   ],
+   "proves": "BQ exit: 'fault-injection receipts'; whole-product protocol recovery and unknown-outcome rules",
+   "preconditions": "Same harness; fault injector able to kill processes at commit/outbox boundaries, drop replies, duplicate/reorder events, disconnect providers",
+   "stimulus": "Inject each fault class during in-flight operations across the domain",
+   "observable": "Every original operation identity reconciles to one authoritative postcondition (applied, refused, or explicitly unknown pending reconciliation); no duplicate external effect; no resubmission before reconciliation",
+   "pass_evidence": "Fault-injection log joined to per-operation reconciliation records and duplicate-effect check",
+   "requirement_refs": [],
+   "exit_contract_ref": "BQ-004.exit_contract"
+  },
+  {
+   "id": "T-QA-002-POS",
+   "unit": "QA-002",
+   "kind": "POS",
+   "expectation": "The exact signed release-candidate APK, enrolled through admitted signed provisioning (zero in-app backend configuration, certificate verification on), reaches every admitted backend operation of every context through the real gateway and bound providers; each result is independently read back on the backend.",
+   "environment": "QUALIFIED_DIAL_TEST_TOPOLOGY_WITH_REAL_BOUND_PROVIDER_WHERE_REQUIRED; exact signed APK on admitted S24 Ultra via Artemis where required",
+   "execution_state": "NOT_RUN",
+   "receipt_required": true,
+   "scope_revision": "1.18-AP-001-PROPOSED",
+   "receipt_binding": [
+    "source",
+    "artifact",
+    "config",
+    "input_manifest",
+    "actual_result",
+    "independent_reviewer",
+    "environment",
+    "fault_injection_log"
+   ],
+   "requirement_refs": [
+    "VAN-NX-024"
+   ],
+   "exit_contract_ref": "QA-002.exit_contract",
+   "proves": "QA-002 'Real gateway/provider integration through the new signed app'; VAN-NX-024 receipt per applicable gate",
+   "preconditions": "BG-001 issued; exact signed release-candidate APK (hash recorded); device enrolled by admitted signed provisioning; real gateway and bound providers",
+   "stimulus": "From the signed app, invoke every admitted backend operation of every context",
+   "observable": "Backend independently confirms each effect/refusal; app state matches backend readback",
+   "pass_evidence": "Per-operation app action log + backend readback + APK hash + device identity + provisioning version; reviewer sign-off"
+  },
+  {
+   "id": "T-QA-002-NEG",
+   "unit": "QA-002",
+   "kind": "NEG",
+   "expectation": "Reject as a pass: a debug or unsigned build, a mocked gateway/provider, cleartext or disabled certificate verification, a user-typed endpoint, an operation shown complete in the app without backend readback, or a feature hidden to avoid a failing integration.",
+   "environment": "QUALIFIED_DIAL_TEST_TOPOLOGY_WITH_REAL_BOUND_PROVIDER_WHERE_REQUIRED; exact signed APK on admitted S24 Ultra via Artemis where required",
+   "execution_state": "NOT_RUN",
+   "receipt_required": true,
+   "scope_revision": "1.18-AP-001-PROPOSED",
+   "receipt_binding": [
+    "source",
+    "artifact",
+    "config",
+    "input_manifest",
+    "actual_result",
+    "independent_reviewer",
+    "environment",
+    "fault_injection_log"
+   ],
+   "requirement_refs": [
+    "VAN-NX-024"
+   ],
+   "exit_contract_ref": "QA-002.exit_contract",
+   "proves": "QA-002 exit 'No feature removed or shortened to make tests pass'; zero-configuration trust",
+   "preconditions": "Same",
+   "stimulus": "Attempt the run with a debug/unsigned build, mocked gateway or provider, cleartext or disabled certificate verification, a user-typed endpoint, or a hidden feature",
+   "observable": "Each attempt is rejected as non-qualifying",
+   "pass_evidence": "Rejection record per shape"
+  },
+  {
+   "id": "T-QA-002-REC",
+   "unit": "QA-002",
+   "kind": "REC",
+   "expectation": "With the signed app: endpoint/trust rotation, revocation and re-enrollment, network loss and process death mid-operation; the app shows accepted/running/applied/outcome-unknown/cancelled truthfully and reconciles before any retry, preserving the original operation identity.",
+   "environment": "QUALIFIED_DIAL_TEST_TOPOLOGY_WITH_REAL_BOUND_PROVIDER_WHERE_REQUIRED; exact signed APK on admitted S24 Ultra via Artemis where required",
+   "execution_state": "NOT_RUN",
+   "receipt_required": true,
+   "scope_revision": "1.18-AP-001-PROPOSED",
+   "receipt_binding": [
+    "source",
+    "artifact",
+    "config",
+    "input_manifest",
+    "actual_result",
+    "independent_reviewer",
+    "environment",
+    "fault_injection_log"
+   ],
+   "requirement_refs": [
+    "VAN-NX-024"
+   ],
+   "exit_contract_ref": "QA-002.exit_contract",
+   "proves": "Whole-product recovery through the real app",
+   "preconditions": "Same",
+   "stimulus": "Endpoint/trust rotation, revocation and re-enrollment, network loss, process death mid-operation",
+   "observable": "Truthful accepted/running/applied/unknown/cancelled states; reconciliation before retry; original operation identity kept",
+   "pass_evidence": "Device trace + backend reconciliation records"
+  },
+  {
+   "id": "T-QA-003-POS",
+   "unit": "QA-003",
+   "kind": "POS",
+   "expectation": "Cross-domain adversarial suite through the signed app and backend: wrong owner/account/device/grant, replayed or forged commands, speaker similarity presented as authorization, model output attempting to widen limits, and partial speech recognition all refuse with redacted logs; authorized paths still succeed.",
+   "environment": "QUALIFIED_DIAL_TEST_TOPOLOGY_WITH_REAL_BOUND_PROVIDER_WHERE_REQUIRED; exact signed APK on admitted S24 Ultra via Artemis where required",
+   "execution_state": "NOT_RUN",
+   "receipt_required": true,
+   "scope_revision": "1.18-AP-001-PROPOSED",
+   "receipt_binding": [
+    "source",
+    "artifact",
+    "config",
+    "input_manifest",
+    "actual_result",
+    "independent_reviewer",
+    "environment",
+    "fault_injection_log"
+   ],
+   "requirement_refs": [
+    "VAN-NX-021",
+    "VAN-NX-024"
+   ],
+   "exit_contract_ref": "QA-003.exit_contract",
+   "proves": "QA-003 'Cross-domain adversarial security, authority and recovery'; VAN-NX-021 negative/pathological tests",
+   "preconditions": "QA-002 environment; all T-BE-*-SEC receipts current (prerequisites, not co-listed)",
+   "stimulus": "Wrong owner/account/device/grant, replay/forgery, speaker similarity as authorization, model output widening limits, partial speech dispatch",
+   "observable": "All refused with redacted logs; authorized paths still succeed",
+   "pass_evidence": "Adversarial run log with expected/observed per case"
+  },
+  {
+   "id": "T-QA-003-NEG",
+   "unit": "QA-003",
+   "kind": "NEG",
+   "expectation": "Any cross-domain path where a refusal in one domain is bypassed through another (e.g. automation, browser, agent or voice routing into a trading/fund/approval effect without that owner's native authority) fails the gate.",
+   "environment": "QUALIFIED_DIAL_TEST_TOPOLOGY_WITH_REAL_BOUND_PROVIDER_WHERE_REQUIRED; exact signed APK on admitted S24 Ultra via Artemis where required",
+   "execution_state": "NOT_RUN",
+   "receipt_required": true,
+   "scope_revision": "1.18-AP-001-PROPOSED",
+   "receipt_binding": [
+    "source",
+    "artifact",
+    "config",
+    "input_manifest",
+    "actual_result",
+    "independent_reviewer",
+    "environment",
+    "fault_injection_log"
+   ],
+   "requirement_refs": [
+    "VAN-NX-021",
+    "VAN-NX-024"
+   ],
+   "exit_contract_ref": "QA-003.exit_contract",
+   "proves": "No cross-domain authority bypass",
+   "preconditions": "Same",
+   "stimulus": "Route an effect through automation, browser, agent or voice into trading/funds/approval without that domain's native authority",
+   "observable": "Gate FAIL whenever any bypass succeeds",
+   "pass_evidence": "Bypass-attempt matrix with zero successes"
+  },
+  {
+   "id": "T-QA-003-REC",
+   "unit": "QA-003",
+   "kind": "REC",
+   "expectation": "Recovery under attack: revocation mid-operation, compromised-device revocation, restore from backup with erasure tombstones, and restart during an outcome-unknown financial command recover to authoritative state without resurrecting revoked authority or erased data.",
+   "environment": "QUALIFIED_DIAL_TEST_TOPOLOGY_WITH_REAL_BOUND_PROVIDER_WHERE_REQUIRED; exact signed APK on admitted S24 Ultra via Artemis where required",
+   "execution_state": "NOT_RUN",
+   "receipt_required": true,
+   "scope_revision": "1.18-AP-001-PROPOSED",
+   "receipt_binding": [
+    "source",
+    "artifact",
+    "config",
+    "input_manifest",
+    "actual_result",
+    "independent_reviewer",
+    "environment",
+    "fault_injection_log"
+   ],
+   "requirement_refs": [
+    "VAN-NX-021",
+    "VAN-NX-024"
+   ],
+   "exit_contract_ref": "QA-003.exit_contract",
+   "proves": "Recovery under attack; erasure and revocation durability",
+   "preconditions": "Same, plus backup/restore capability",
+   "stimulus": "Revocation mid-operation, compromised-device revocation, backup restore with erasure tombstones, restart during outcome-unknown financial command",
+   "observable": "No revived revoked authority or erased data; authoritative state recovered",
+   "pass_evidence": "Restore drill record + post-restore authority/erasure checks"
+  },
+  {
+   "id": "T-REL-002-NEG",
+   "unit": "REL-002",
+   "kind": "NEG",
+   "expectation": "Retirement is refused while any retained behaviour lacks current parity evidence in the new app, without a separate owner-approved retirement review, or if it would remove a functional service, evidence record or owner data instead of presentation only.",
+   "environment": "QUALIFIED_DIAL_TEST_TOPOLOGY_WITH_REAL_BOUND_PROVIDER_WHERE_REQUIRED; exact signed APK on admitted S24 Ultra via Artemis where required",
+   "execution_state": "NOT_RUN",
+   "receipt_required": true,
+   "scope_revision": "1.18-AP-001-PROPOSED",
+   "receipt_binding": [
+    "source",
+    "artifact",
+    "config",
+    "input_manifest",
+    "actual_result",
+    "independent_reviewer",
+    "environment",
+    "fault_injection_log"
+   ],
+   "requirement_refs": [
+    "VAN-NX-054"
+   ],
+   "exit_contract_ref": "REL-002.exit_contract",
+   "proves": "VAN-NX-054 'retirement only after full parity, with its own negative tests'; REL-002 'separate owner-approved retirement review'",
+   "preconditions": "REL-001 signed release with tested rollback",
+   "stimulus": "Attempt retirement with one retained behaviour lacking current parity evidence; without owner-approved retirement review; or removing a functional service/evidence/owner data",
+   "observable": "Retirement refused in each case",
+   "pass_evidence": "Refusal records per case"
+  },
+  {
+   "id": "T-REL-002-REC",
+   "unit": "REL-002",
+   "kind": "REC",
+   "expectation": "After retirement, a detected parity regression or failed signed release restores a working path (rollback to the prior signed release) without data loss, preserving com.dial.van identity and signing continuity.",
+   "environment": "QUALIFIED_DIAL_TEST_TOPOLOGY_WITH_REAL_BOUND_PROVIDER_WHERE_REQUIRED; exact signed APK on admitted S24 Ultra via Artemis where required",
+   "execution_state": "NOT_RUN",
+   "receipt_required": true,
+   "scope_revision": "1.18-AP-001-PROPOSED",
+   "receipt_binding": [
+    "source",
+    "artifact",
+    "config",
+    "input_manifest",
+    "actual_result",
+    "independent_reviewer",
+    "environment",
+    "fault_injection_log"
+   ],
+   "requirement_refs": [
+    "VAN-NX-054"
+   ],
+   "exit_contract_ref": "REL-002.exit_contract",
+   "proves": "VAN-NX-054 'tested rollback' applied after retirement",
+   "preconditions": "Retirement executed under approval",
+   "stimulus": "Detect a parity regression or failed signed release after retirement",
+   "observable": "Rollback to prior signed release restores a working path; no data loss; com.dial.van identity and signing continuity preserved",
+   "pass_evidence": "Rollback drill record with APK hashes and data integrity check"
+  }
+ ],
+ "unit_acceptance_additions": {
+  "BQ-003": [
+   "T-BE-014-INT",
+   "T-BE-014-REC",
+   "T-BE-015-INT",
+   "T-BE-015-REC",
+   "T-BE-016-INT",
+   "T-BE-016-REC",
+   "T-BE-017-INT",
+   "T-BE-017-REC",
+   "T-BE-018-INT",
+   "T-BE-018-REC",
+   "T-BE-019-INT",
+   "T-BE-019-REC",
+   "T-BE-021-INT",
+   "T-BE-021-REC",
+   "T-BE-014-POS",
+   "T-BE-014-NEG",
+   "T-BE-018-POS",
+   "T-BE-018-NEG",
+   "T-BQ-003-HEADLESS-POS",
+   "T-BQ-003-HEADLESS-NEG",
+   "T-BQ-003-HEADLESS-REC"
+  ],
+  "BQ-004": [
+   "T-BE-023-INT",
+   "T-BE-023-REC",
+   "T-BE-024-INT",
+   "T-BE-024-REC",
+   "T-BE-025-INT",
+   "T-BE-025-REC",
+   "T-BE-026-INT",
+   "T-BE-026-REC",
+   "T-BE-027-INT",
+   "T-BE-027-REC",
+   "T-BE-028-INT",
+   "T-BE-028-REC",
+   "T-BE-029-INT",
+   "T-BE-029-REC",
+   "T-BE-023-POS",
+   "T-BE-024-POS",
+   "T-BE-025-POS",
+   "T-BE-027-POS",
+   "T-BE-028-POS",
+   "T-BE-029-POS",
+   "T-BQ-004-HEADLESS-POS",
+   "T-BQ-004-HEADLESS-NEG",
+   "T-BQ-004-HEADLESS-REC"
+  ],
+  "QA-002": [
+   "T-QA-002-POS",
+   "T-QA-002-NEG",
+   "T-QA-002-REC"
+  ],
+  "QA-003": [
+   "T-QA-003-POS",
+   "T-QA-003-NEG",
+   "T-QA-003-REC"
+  ],
+  "REL-002": [
+   "T-NX-054",
+   "T-REL-002-NEG",
+   "T-REL-002-REC"
+  ]
+ },
+ "co_listed_kind_overrides": {
+  "T-NX-054": "POS"
+ },
+ "proposed_verification_requirement_ownership": {
+  "BQ-003": [
+   "VAN-CX-004",
+   "VAN-CX-005",
+   "VAN-CX-010",
+   "VAN-CX-012",
+   "VAN-CX-015",
+   "VAN-CX-018",
+   "VAN-EL-002",
+   "VAN-HVA-027",
+   "VAN-HVA-028",
+   "VAN-JM-001",
+   "VAN-JM-003",
+   "VAN-JM-006",
+   "VAN-NX-009",
+   "VAN-NX-012",
+   "VAN-NX-013",
+   "VAN-NX-032",
+   "VAN-NX-033",
+   "VAN-NX-036",
+   "VAN-NX-037",
+   "VAN-NX-038",
+   "VAN-NX-041",
+   "VAN-NX-042",
+   "VAN-NX-043",
+   "VAN-NX-044",
+   "VAN-NX-046",
+   "VAN-NX-065",
+   "VAN-NX-076",
+   "VAN-NX-BF-016",
+   "VAN-SO-026"
+  ],
+  "BQ-004": [
+   "VAN-CX-014",
+   "VAN-EL-006",
+   "VAN-HVA-027",
+   "VAN-JM-005",
+   "VAN-JM-007",
+   "VAN-NX-006",
+   "VAN-NX-014",
+   "VAN-NX-015",
+   "VAN-NX-016",
+   "VAN-NX-017",
+   "VAN-NX-018",
+   "VAN-NX-020",
+   "VAN-NX-066",
+   "VAN-NX-067",
+   "VAN-NX-068",
+   "VAN-NX-069",
+   "VAN-NX-072",
+   "VAN-NX-BF-013",
+   "VAN-SO-026",
+   "VAN-SO-027"
+  ],
+  "_rule": "Verification ownership only: the domain units keep implementation ownership; BQ units verify the union of requirements their domain units own. Optional part of AP-001; reviewer may admit coverage without it."
+ },
+ "preservation": "Additive only: no identity, predicate, owner, dependency or requirement is removed or rewritten; effective registry grows from 1,610 to 1,624 identities.",
+ "co_listing_rationale": {
+  "BQ-003:T-BE-014-INT": {
+   "owner_unit": "BE-014",
+   "expectation": "Producer-to-consumer contract works against complete dependent services and admitted provider sandbox; no stub at certification.",
+   "covers": "Asserts producer-to-consumer against complete dependent services, no stub, for this domain unit; covers the BQ exit's 'verified provider or service outcomes' and 'no synthetic success' for that unit.",
+   "insufficient_alone": "Per-unit evidence; does not prove the whole-domain run, which the new identities add."
+  },
+  "BQ-003:T-BE-014-REC": {
+   "owner_unit": "BE-014",
+   "expectation": "Crash/restart and lost-response recovery retains durable intent and does not duplicate effects.",
+   "covers": "Asserts crash/restart and lost-response recovery without duplicate effects for this domain unit; part of the BQ exit's fault-injection evidence.",
+   "insufficient_alone": "Per-unit evidence; does not prove the whole-domain run, which the new identities add."
+  },
+  "BQ-003:T-BE-015-INT": {
+   "owner_unit": "BE-015",
+   "expectation": "Producer-to-consumer contract works against complete dependent services and admitted provider sandbox; no stub at certification.",
+   "covers": "Asserts producer-to-consumer against complete dependent services, no stub, for this domain unit; covers the BQ exit's 'verified provider or service outcomes' and 'no synthetic success' for that unit.",
+   "insufficient_alone": "Per-unit evidence; does not prove the whole-domain run, which the new identities add."
+  },
+  "BQ-003:T-BE-015-REC": {
+   "owner_unit": "BE-015",
+   "expectation": "Crash/restart and lost-response recovery retains durable intent and does not duplicate effects.",
+   "covers": "Asserts crash/restart and lost-response recovery without duplicate effects for this domain unit; part of the BQ exit's fault-injection evidence.",
+   "insufficient_alone": "Per-unit evidence; does not prove the whole-domain run, which the new identities add."
+  },
+  "BQ-003:T-BE-016-INT": {
+   "owner_unit": "BE-016",
+   "expectation": "Producer-to-consumer contract works against complete dependent services and admitted provider sandbox; no stub at certification.",
+   "covers": "Asserts producer-to-consumer against complete dependent services, no stub, for this domain unit; covers the BQ exit's 'verified provider or service outcomes' and 'no synthetic success' for that unit.",
+   "insufficient_alone": "Per-unit evidence; does not prove the whole-domain run, which the new identities add."
+  },
+  "BQ-003:T-BE-016-REC": {
+   "owner_unit": "BE-016",
+   "expectation": "Crash/restart and lost-response recovery retains durable intent and does not duplicate effects.",
+   "covers": "Asserts crash/restart and lost-response recovery without duplicate effects for this domain unit; part of the BQ exit's fault-injection evidence.",
+   "insufficient_alone": "Per-unit evidence; does not prove the whole-domain run, which the new identities add."
+  },
+  "BQ-003:T-BE-017-INT": {
+   "owner_unit": "BE-017",
+   "expectation": "Producer-to-consumer contract works against complete dependent services and admitted provider sandbox; no stub at certification.",
+   "covers": "Asserts producer-to-consumer against complete dependent services, no stub, for this domain unit; covers the BQ exit's 'verified provider or service outcomes' and 'no synthetic success' for that unit.",
+   "insufficient_alone": "Per-unit evidence; does not prove the whole-domain run, which the new identities add."
+  },
+  "BQ-003:T-BE-017-REC": {
+   "owner_unit": "BE-017",
+   "expectation": "Crash/restart and lost-response recovery retains durable intent and does not duplicate effects.",
+   "covers": "Asserts crash/restart and lost-response recovery without duplicate effects for this domain unit; part of the BQ exit's fault-injection evidence.",
+   "insufficient_alone": "Per-unit evidence; does not prove the whole-domain run, which the new identities add."
+  },
+  "BQ-003:T-BE-018-INT": {
+   "owner_unit": "BE-018",
+   "expectation": "Producer-to-consumer contract works against complete dependent services and admitted provider sandbox; no stub at certification.",
+   "covers": "Asserts producer-to-consumer against complete dependent services, no stub, for this domain unit; covers the BQ exit's 'verified provider or service outcomes' and 'no synthetic success' for that unit.",
+   "insufficient_alone": "Per-unit evidence; does not prove the whole-domain run, which the new identities add."
+  },
+  "BQ-003:T-BE-018-REC": {
+   "owner_unit": "BE-018",
+   "expectation": "Crash/restart and lost-response recovery retains durable intent and does not duplicate effects.",
+   "covers": "Asserts crash/restart and lost-response recovery without duplicate effects for this domain unit; part of the BQ exit's fault-injection evidence.",
+   "insufficient_alone": "Per-unit evidence; does not prove the whole-domain run, which the new identities add."
+  },
+  "BQ-003:T-BE-019-INT": {
+   "owner_unit": "BE-019",
+   "expectation": "Producer-to-consumer contract works against complete dependent services and admitted provider sandbox; no stub at certification.",
+   "covers": "Asserts producer-to-consumer against complete dependent services, no stub, for this domain unit; covers the BQ exit's 'verified provider or service outcomes' and 'no synthetic success' for that unit.",
+   "insufficient_alone": "Per-unit evidence; does not prove the whole-domain run, which the new identities add."
+  },
+  "BQ-003:T-BE-019-REC": {
+   "owner_unit": "BE-019",
+   "expectation": "Crash/restart and lost-response recovery retains durable intent and does not duplicate effects.",
+   "covers": "Asserts crash/restart and lost-response recovery without duplicate effects for this domain unit; part of the BQ exit's fault-injection evidence.",
+   "insufficient_alone": "Per-unit evidence; does not prove the whole-domain run, which the new identities add."
+  },
+  "BQ-003:T-BE-021-INT": {
+   "owner_unit": "BE-021",
+   "expectation": "Producer-to-consumer contract works against complete dependent services and admitted provider sandbox; no stub at certification.",
+   "covers": "Asserts producer-to-consumer against complete dependent services, no stub, for this domain unit; covers the BQ exit's 'verified provider or service outcomes' and 'no synthetic success' for that unit.",
+   "insufficient_alone": "Per-unit evidence; does not prove the whole-domain run, which the new identities add."
+  },
+  "BQ-003:T-BE-021-REC": {
+   "owner_unit": "BE-021",
+   "expectation": "Crash/restart and lost-response recovery retains durable intent and does not duplicate effects.",
+   "covers": "Asserts crash/restart and lost-response recovery without duplicate effects for this domain unit; part of the BQ exit's fault-injection evidence.",
+   "insufficient_alone": "Per-unit evidence; does not prove the whole-domain run, which the new identities add."
+  },
+  "BQ-003:T-BE-014-POS": {
+   "owner_unit": "BE-014",
+   "expectation": "Exercise every declared operation through actual service registration and independently read its result.",
+   "covers": "Carries a whole-product domain scenario oracle (see whole_product_scenarios) for the domain this BQ unit verifies headlessly.",
+   "insufficient_alone": "Per-unit evidence; does not prove the whole-domain run, which the new identities add."
+  },
+  "BQ-003:T-BE-014-NEG": {
+   "owner_unit": "BE-014",
+   "expectation": "Syndicated copies count once; preliminary/forecast/revised previous is not actual; unsupported licence or failed feed does not fake coverage",
+   "covers": "Carries the domain scenario's negative oracle for the domain this BQ unit verifies.",
+   "insufficient_alone": "Per-unit evidence; does not prove the whole-domain run, which the new identities add."
+  },
+  "BQ-003:T-BE-018-POS": {
+   "owner_unit": "BE-018",
+   "expectation": "Exercise every declared operation through actual service registration and independently read its result.",
+   "covers": "Carries a whole-product domain scenario oracle (see whole_product_scenarios) for the domain this BQ unit verifies headlessly.",
+   "insufficient_alone": "Per-unit evidence; does not prove the whole-domain run, which the new identities add."
+  },
+  "BQ-003:T-BE-018-NEG": {
+   "owner_unit": "BE-018",
+   "expectation": "No rendered pixels as canonical geometry; parameter versions and price/time anchors round-trip; cross-device edit conflict explicit; no server dependency on a new renderer",
+   "covers": "Carries the domain scenario's negative oracle for the domain this BQ unit verifies.",
+   "insufficient_alone": "Per-unit evidence; does not prove the whole-domain run, which the new identities add."
+  },
+  "BQ-004:T-BE-023-INT": {
+   "owner_unit": "BE-023",
+   "expectation": "Producer-to-consumer contract works against complete dependent services and admitted provider sandbox; no stub at certification.",
+   "covers": "Asserts producer-to-consumer against complete dependent services, no stub, for this domain unit; covers the BQ exit's 'verified provider or service outcomes' and 'no synthetic success' for that unit.",
+   "insufficient_alone": "Per-unit evidence; does not prove the whole-domain run, which the new identities add."
+  },
+  "BQ-004:T-BE-023-REC": {
+   "owner_unit": "BE-023",
+   "expectation": "Crash/restart and lost-response recovery retains durable intent and does not duplicate effects.",
+   "covers": "Asserts crash/restart and lost-response recovery without duplicate effects for this domain unit; part of the BQ exit's fault-injection evidence.",
+   "insufficient_alone": "Per-unit evidence; does not prove the whole-domain run, which the new identities add."
+  },
+  "BQ-004:T-BE-024-INT": {
+   "owner_unit": "BE-024",
+   "expectation": "Producer-to-consumer contract works against complete dependent services and admitted provider sandbox; no stub at certification.",
+   "covers": "Asserts producer-to-consumer against complete dependent services, no stub, for this domain unit; covers the BQ exit's 'verified provider or service outcomes' and 'no synthetic success' for that unit.",
+   "insufficient_alone": "Per-unit evidence; does not prove the whole-domain run, which the new identities add."
+  },
+  "BQ-004:T-BE-024-REC": {
+   "owner_unit": "BE-024",
+   "expectation": "Crash/restart and lost-response recovery retains durable intent and does not duplicate effects.",
+   "covers": "Asserts crash/restart and lost-response recovery without duplicate effects for this domain unit; part of the BQ exit's fault-injection evidence.",
+   "insufficient_alone": "Per-unit evidence; does not prove the whole-domain run, which the new identities add."
+  },
+  "BQ-004:T-BE-025-INT": {
+   "owner_unit": "BE-025",
+   "expectation": "Producer-to-consumer contract works against complete dependent services and admitted provider sandbox; no stub at certification.",
+   "covers": "Asserts producer-to-consumer against complete dependent services, no stub, for this domain unit; covers the BQ exit's 'verified provider or service outcomes' and 'no synthetic success' for that unit.",
+   "insufficient_alone": "Per-unit evidence; does not prove the whole-domain run, which the new identities add."
+  },
+  "BQ-004:T-BE-025-REC": {
+   "owner_unit": "BE-025",
+   "expectation": "Crash/restart and lost-response recovery retains durable intent and does not duplicate effects.",
+   "covers": "Asserts crash/restart and lost-response recovery without duplicate effects for this domain unit; part of the BQ exit's fault-injection evidence.",
+   "insufficient_alone": "Per-unit evidence; does not prove the whole-domain run, which the new identities add."
+  },
+  "BQ-004:T-BE-026-INT": {
+   "owner_unit": "BE-026",
+   "expectation": "Producer-to-consumer contract works against complete dependent services and admitted provider sandbox; no stub at certification.",
+   "covers": "Asserts producer-to-consumer against complete dependent services, no stub, for this domain unit; covers the BQ exit's 'verified provider or service outcomes' and 'no synthetic success' for that unit.",
+   "insufficient_alone": "Per-unit evidence; does not prove the whole-domain run, which the new identities add."
+  },
+  "BQ-004:T-BE-026-REC": {
+   "owner_unit": "BE-026",
+   "expectation": "Crash/restart and lost-response recovery retains durable intent and does not duplicate effects.",
+   "covers": "Asserts crash/restart and lost-response recovery without duplicate effects for this domain unit; part of the BQ exit's fault-injection evidence.",
+   "insufficient_alone": "Per-unit evidence; does not prove the whole-domain run, which the new identities add."
+  },
+  "BQ-004:T-BE-027-INT": {
+   "owner_unit": "BE-027",
+   "expectation": "Producer-to-consumer contract works against complete dependent services and admitted provider sandbox; no stub at certification.",
+   "covers": "Asserts producer-to-consumer against complete dependent services, no stub, for this domain unit; covers the BQ exit's 'verified provider or service outcomes' and 'no synthetic success' for that unit.",
+   "insufficient_alone": "Per-unit evidence; does not prove the whole-domain run, which the new identities add."
+  },
+  "BQ-004:T-BE-027-REC": {
+   "owner_unit": "BE-027",
+   "expectation": "Crash/restart and lost-response recovery retains durable intent and does not duplicate effects.",
+   "covers": "Asserts crash/restart and lost-response recovery without duplicate effects for this domain unit; part of the BQ exit's fault-injection evidence.",
+   "insufficient_alone": "Per-unit evidence; does not prove the whole-domain run, which the new identities add."
+  },
+  "BQ-004:T-BE-028-INT": {
+   "owner_unit": "BE-028",
+   "expectation": "Producer-to-consumer contract works against complete dependent services and admitted provider sandbox; no stub at certification.",
+   "covers": "Asserts producer-to-consumer against complete dependent services, no stub, for this domain unit; covers the BQ exit's 'verified provider or service outcomes' and 'no synthetic success' for that unit.",
+   "insufficient_alone": "Per-unit evidence; does not prove the whole-domain run, which the new identities add."
+  },
+  "BQ-004:T-BE-028-REC": {
+   "owner_unit": "BE-028",
+   "expectation": "Crash/restart and lost-response recovery retains durable intent and does not duplicate effects.",
+   "covers": "Asserts crash/restart and lost-response recovery without duplicate effects for this domain unit; part of the BQ exit's fault-injection evidence.",
+   "insufficient_alone": "Per-unit evidence; does not prove the whole-domain run, which the new identities add."
+  },
+  "BQ-004:T-BE-029-INT": {
+   "owner_unit": "BE-029",
+   "expectation": "Producer-to-consumer contract works against complete dependent services and admitted provider sandbox; no stub at certification.",
+   "covers": "Asserts producer-to-consumer against complete dependent services, no stub, for this domain unit; covers the BQ exit's 'verified provider or service outcomes' and 'no synthetic success' for that unit.",
+   "insufficient_alone": "Per-unit evidence; does not prove the whole-domain run, which the new identities add."
+  },
+  "BQ-004:T-BE-029-REC": {
+   "owner_unit": "BE-029",
+   "expectation": "Crash/restart and lost-response recovery retains durable intent and does not duplicate effects.",
+   "covers": "Asserts crash/restart and lost-response recovery without duplicate effects for this domain unit; part of the BQ exit's fault-injection evidence.",
+   "insufficient_alone": "Per-unit evidence; does not prove the whole-domain run, which the new identities add."
+  },
+  "BQ-004:T-BE-023-POS": {
+   "owner_unit": "BE-023",
+   "expectation": "Exercise every declared operation through actual service registration and independently read its result.",
+   "covers": "Carries a whole-product domain scenario oracle (see whole_product_scenarios) for the domain this BQ unit verifies headlessly.",
+   "insufficient_alone": "Per-unit evidence; does not prove the whole-domain run, which the new identities add."
+  },
+  "BQ-004:T-BE-024-POS": {
+   "owner_unit": "BE-024",
+   "expectation": "Exercise every declared operation through actual service registration and independently read its result.",
+   "covers": "Carries a whole-product domain scenario oracle (see whole_product_scenarios) for the domain this BQ unit verifies headlessly.",
+   "insufficient_alone": "Per-unit evidence; does not prove the whole-domain run, which the new identities add."
+  },
+  "BQ-004:T-BE-025-POS": {
+   "owner_unit": "BE-025",
+   "expectation": "Exercise every declared operation through actual service registration and independently read its result.",
+   "covers": "Carries a whole-product domain scenario oracle (see whole_product_scenarios) for the domain this BQ unit verifies headlessly.",
+   "insufficient_alone": "Per-unit evidence; does not prove the whole-domain run, which the new identities add."
+  },
+  "BQ-004:T-BE-027-POS": {
+   "owner_unit": "BE-027",
+   "expectation": "Exercise every declared operation through actual service registration and independently read its result.",
+   "covers": "Carries a whole-product domain scenario oracle (see whole_product_scenarios) for the domain this BQ unit verifies headlessly.",
+   "insufficient_alone": "Per-unit evidence; does not prove the whole-domain run, which the new identities add."
+  },
+  "BQ-004:T-BE-028-POS": {
+   "owner_unit": "BE-028",
+   "expectation": "Exercise every declared operation through actual service registration and independently read its result.",
+   "covers": "Carries a whole-product domain scenario oracle (see whole_product_scenarios) for the domain this BQ unit verifies headlessly.",
+   "insufficient_alone": "Per-unit evidence; does not prove the whole-domain run, which the new identities add."
+  },
+  "BQ-004:T-BE-029-POS": {
+   "owner_unit": "BE-029",
+   "expectation": "Exercise every declared operation through actual service registration and independently read its result.",
+   "covers": "Carries a whole-product domain scenario oracle (see whole_product_scenarios) for the domain this BQ unit verifies headlessly.",
+   "insufficient_alone": "Per-unit evidence; does not prove the whole-domain run, which the new identities add."
+  },
+  "REL-002:T-NX-054": {
+   "owner_unit": "REL-001",
+   "expectation": "\u00a719.1 P5\u2013P6; signed APK, tested rollback; retirement only after full parity, with its own negative tests",
+   "covers": "Requirement VAN-NX-054 already lists REL-002; this identity's text is the positive retirement-after-parity oracle REL-002 must meet.",
+   "insufficient_alone": "Positive only; the negative/recovery identities are added."
+  }
+ },
+ "owner_additions": {
+  "T-BE-014-INT": [
+   "BQ-003"
+  ],
+  "T-BE-014-REC": [
+   "BQ-003"
+  ],
+  "T-BE-015-INT": [
+   "BQ-003"
+  ],
+  "T-BE-015-REC": [
+   "BQ-003"
+  ],
+  "T-BE-016-INT": [
+   "BQ-003"
+  ],
+  "T-BE-016-REC": [
+   "BQ-003"
+  ],
+  "T-BE-017-INT": [
+   "BQ-003"
+  ],
+  "T-BE-017-REC": [
+   "BQ-003"
+  ],
+  "T-BE-018-INT": [
+   "BQ-003"
+  ],
+  "T-BE-018-REC": [
+   "BQ-003"
+  ],
+  "T-BE-019-INT": [
+   "BQ-003"
+  ],
+  "T-BE-019-REC": [
+   "BQ-003"
+  ],
+  "T-BE-021-INT": [
+   "BQ-003"
+  ],
+  "T-BE-021-REC": [
+   "BQ-003"
+  ],
+  "T-BE-014-POS": [
+   "BQ-003"
+  ],
+  "T-BE-014-NEG": [
+   "BQ-003"
+  ],
+  "T-BE-018-POS": [
+   "BQ-003"
+  ],
+  "T-BE-018-NEG": [
+   "BQ-003"
+  ],
+  "T-BE-023-INT": [
+   "BQ-004"
+  ],
+  "T-BE-023-REC": [
+   "BQ-004"
+  ],
+  "T-BE-024-INT": [
+   "BQ-004"
+  ],
+  "T-BE-024-REC": [
+   "BQ-004"
+  ],
+  "T-BE-025-INT": [
+   "BQ-004"
+  ],
+  "T-BE-025-REC": [
+   "BQ-004"
+  ],
+  "T-BE-026-INT": [
+   "BQ-004"
+  ],
+  "T-BE-026-REC": [
+   "BQ-004"
+  ],
+  "T-BE-027-INT": [
+   "BQ-004"
+  ],
+  "T-BE-027-REC": [
+   "BQ-004"
+  ],
+  "T-BE-028-INT": [
+   "BQ-004"
+  ],
+  "T-BE-028-REC": [
+   "BQ-004"
+  ],
+  "T-BE-029-INT": [
+   "BQ-004"
+  ],
+  "T-BE-029-REC": [
+   "BQ-004"
+  ],
+  "T-BE-023-POS": [
+   "BQ-004"
+  ],
+  "T-BE-024-POS": [
+   "BQ-004"
+  ],
+  "T-BE-025-POS": [
+   "BQ-004"
+  ],
+  "T-BE-027-POS": [
+   "BQ-004"
+  ],
+  "T-BE-028-POS": [
+   "BQ-004"
+  ],
+  "T-BE-029-POS": [
+   "BQ-004"
+  ],
+  "T-NX-054": [
+   "REL-002"
+  ]
+ }
+}

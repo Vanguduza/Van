@@ -1,0 +1,7 @@
+{
+  "container": "van-ml004-98662b1a0e6a43d4b1d90a335228423b",
+  "image_id": "sha256:1b040479f0d3ace1fff2387eaaf0c172f259fd6f44bd45fddb3b528f83ae199d",
+  "role": "INFERENCE_FIXTURE_SMOKE",
+  "status": "CREATE_REQUESTED",
+  "removed": false
+}

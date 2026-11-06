@@ -73,6 +73,7 @@ data class TradeRow(
     val tradeIntentId: String? = null,
     val stopPrice: Double? = null,
     val entryPrice: Double? = null,
+    val currentRisk: CurrentAccountRisk = CurrentAccountRisk.from(null),
 )
 
 sealed class TradeBookState {
@@ -116,6 +117,7 @@ object TradeBookParser {
                     timestampMs = o.long("closed_ms") ?: 0L,
                     reasons = o.strList("lessons"),
                     tradeIntentId = id, stopPrice = stopPx, entryPrice = entryPx,
+                    currentRisk = CurrentAccountRisk.from(o["current_risk"] as? JsonObject),
                 )
             }
             TradeView.CURRENT -> {
@@ -135,6 +137,7 @@ object TradeBookParser {
                     confidence = conf,
                     timestampMs = o.long("opened_ms") ?: o.long("decided_ms") ?: 0L,
                     tradeIntentId = id, stopPrice = stopPx, entryPrice = entryPx,
+                    currentRisk = CurrentAccountRisk.from(o["current_risk"] as? JsonObject),
                 )
             }
             TradeView.POTENTIAL -> {
@@ -153,6 +156,7 @@ object TradeBookParser {
                     timestampMs = o.long("assessed_ms") ?: o.long("decided_ms") ?: 0L,
                     reasons = o.strList("reasons"),
                     tradeIntentId = id, stopPrice = stopPx, entryPrice = entryPx,
+                    currentRisk = CurrentAccountRisk.from(o["current_risk"] as? JsonObject),
                 )
             }
         }

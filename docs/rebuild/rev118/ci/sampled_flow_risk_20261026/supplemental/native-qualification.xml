@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="2.042" timestamp="2026-10-26T19:03:30.540694+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_flow_adjusted_risk" name="test_intermediate_loss_between_external_flows_cannot_disappear_from_drawdown" time="0.300"><failure message="AssertionError: assert 'QUALIFIED' == 'NOT_ISSUED'&#10;  &#10;  - NOT_ISSUED&#10;  + QUALIFIED">def test_intermediate_loss_between_external_flows_cannot_disappear_from_drawdown():
+        first=value(1000,'100','baseline');last=value(4000,'150','closing')
+        flows=[flow(2000,'100','180','deposit'),flow(3000,'-90','180','withdrawal')]
+        samples=[value(1500,'80','first-loss'),value(2250,'50','deep-loss'),value(2500,'270','recovery')]
+        # Shares:100 -&gt;225 afterdeposit -&gt;150 afterwithdrawal. The intermediate
+        # 50/225 NAV is2/9, so drawdown from NAV1 is7/9; closing NAV returns to1.
+        original=unitize(first,last,flows)
+        assert D(original['worst_observed_drawdown'])==D('.2')
+        result=FlowAdjustedRisk(first,last,flows,samples=samples).body();calculation=result['calculation']
+        assert result['state']=='MEASURED' and D(calculation['units'])==150
+        assert D(calculation['flow_neutral_return'])==0 and D(calculation['external_net_flow'])==10
+        assert D(calculation['net_account_pnl'])==40
+        assert abs(Fraction(D(calculation['worst_observed_drawdown']))-Fraction(7,9))&lt;Fraction(1,10**79)
+        assert result['risk_capital_qualified'] is result['execution_authority'] is False
+&gt;       assert result['native_source_qualification']==result['settlement_qualification']=='NOT_ISSUED'
+E       AssertionError: assert 'QUALIFIED' == 'NOT_ISSUED'
+E         
+E         - NOT_ISSUED
+E         + QUALIFIED
+
+trading/tests/test_flow_adjusted_risk.py:32: AssertionError</failure></testcase></testsuite></testsuites>

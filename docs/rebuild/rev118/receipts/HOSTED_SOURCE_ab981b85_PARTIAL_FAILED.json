@@ -1,0 +1,157 @@
+{
+  "schema": "van.rebuild.hosted-source-partial/1",
+  "observed_at_utc": "2026-10-24T14:04:51.784923+00:00",
+  "status": "PARTIAL_FAILED",
+  "run_id": 40098185124,
+  "source_head": "ab981b8573b0a7784ada912dc4910fde30855d58",
+  "tested_merge": "75ac79d979ab1c31911b0f645744f05f76630a0a",
+  "identical_source_tree": "43d3257affcef5fa072be43c13a605020ad6c8b0",
+  "jobs": [
+    {
+      "databaseId": 120885795665,
+      "name": "postgres-ledger",
+      "conclusion": "success"
+    },
+    {
+      "databaseId": 120885795843,
+      "name": "android-instrumentation",
+      "conclusion": "success"
+    },
+    {
+      "databaseId": 120885795852,
+      "name": "mutation (python-1, python, 1/4)",
+      "conclusion": "success"
+    },
+    {
+      "databaseId": 120885795862,
+      "name": "mutation (python-0, python, 0/4)",
+      "conclusion": "success"
+    },
+    {
+      "databaseId": 120885795872,
+      "name": "backend",
+      "conclusion": "failure"
+    },
+    {
+      "databaseId": 120885795881,
+      "name": "android-and-visual-evidence",
+      "conclusion": "success"
+    },
+    {
+      "databaseId": 120885795882,
+      "name": "browser-guard-source",
+      "conclusion": "success"
+    },
+    {
+      "databaseId": 120885795887,
+      "name": "mutation (kotlin-1, kotlin, 1/4)",
+      "conclusion": "success"
+    },
+    {
+      "databaseId": 120885795890,
+      "name": "mutation (kotlin-3, kotlin, 3/4)",
+      "conclusion": "success"
+    },
+    {
+      "databaseId": 120885795894,
+      "name": "mutation (kotlin-2, kotlin, 2/4)",
+      "conclusion": "success"
+    },
+    {
+      "databaseId": 120885795915,
+      "name": "mutation (kotlin-0, kotlin, 0/4)",
+      "conclusion": "success"
+    },
+    {
+      "databaseId": 120885795921,
+      "name": "mutation (python-3, python, 3/4)",
+      "conclusion": "success"
+    },
+    {
+      "databaseId": 120885795936,
+      "name": "mutation (browser-agent, browser-agent, 0/1)",
+      "conclusion": "success"
+    },
+    {
+      "databaseId": 120885795995,
+      "name": "mutation (python-2, python, 2/4)",
+      "conclusion": "success"
+    },
+    {
+      "databaseId": 120885796002,
+      "name": "rebuild-documentary",
+      "conclusion": "success"
+    },
+    {
+      "databaseId": 120885796044,
+      "name": "project-truth-ledger",
+      "conclusion": "failure"
+    },
+    {
+      "databaseId": 120888690404,
+      "name": "character-forge-gate",
+      "conclusion": "success"
+    }
+  ],
+  "public_source": {
+    "voice-source-report.xml": {
+      "tests": 117,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "bd4b303aac49990f8eda3d5c40faafa3a18a90c5c83f2d28314bf8988b67b5c9",
+      "passed": 117
+    },
+    "trading-source-report.xml": {
+      "tests": 2778,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "sha256": "9787ed2fefea12cc8ca5ec8625df69273bdbcd321e2cad66ffc6eb308deccab8",
+      "passed": 2777
+    },
+    "postgres-ledger-report.xml": {
+      "tests": 26,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "74e512b328249cf316cf4fa79759ada753936fe9435cae9f3836c9f86983120b",
+      "passed": 26
+    }
+  },
+  "legacy_mutations": {
+    "caught": 374,
+    "survived": 0,
+    "not_executed": 0,
+    "receipt": "ci/MUTATION_CORPUS_ab981b85.json"
+  },
+  "private_source_not_executed_publicly": {
+    "test": "trading.tests.test_vtil_borrow::test_dial_resolver_selects_trading_knowledge_from_van_registry",
+    "reason": "dial-new checkout not available (set DIAL_REPO)",
+    "independent_local_exact_head": "receipts/FULL_TRADING_SOURCE_ab981b85.json records all2778pass0skip with actual pinned DDS and PostgreSQL."
+  },
+  "instrumentation": {
+    "collected": 22,
+    "passed": 18,
+    "failed": 0,
+    "skipped": 4,
+    "skip_reason": "existing core-artwork mode",
+    "voice_methods": {
+      "cancellationBeforeNativeStartCannotCompleteOrDamageTheReplacementAnswer": "3.737s",
+      "realOfflineAnswerReachesTheApplicationQueueAsSpoken": "2.586s"
+    },
+    "index_sha256": "95e1bfc0a5dd55f75f3a8deedc2b03e755eb838079eb253dd64d86404728a0ab",
+    "voice_report_sha256": "b49ecd85d0453232ea7ba4d4b00d87b13ac77220f39162568645e6e37909f166"
+  },
+  "browser_source": "receipts/HOSTED_BROWSER_SOURCE_ab981b85.json; earlier original11-case scope only. All50 browser/harness files and privileged source namespace controls are not yet executed by the new worker extension.",
+  "native_metaeditor": "receipts/NATIVE_METAEDITOR_ab981b85.json",
+  "retained_failures": {
+    "backend": "DDS_CONTRACT_READ_DEPLOY_KEY is not provisioned",
+    "project-truth-ledger": "trusted main bootstrap checker absent",
+    "logs": {
+      "backend-job.log": "0c375ad0236b50e28d2e6cf881dddf9cb34434ff46c5d2c7138c40317387ca5b",
+      "project-truth-ledger-job.log": "51001d66fee1d8db719dc214603da4592887326312a2ac3762c76dad5adce694"
+    }
+  },
+  "qualification": "Actual source/emulator evidence for exact earlier head only. Overall workflow failed. No complete backend, provider financial/production, deployed native host, F15/BG, whole unit or S24 acceptance."
+}

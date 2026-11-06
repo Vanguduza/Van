@@ -1,0 +1,36 @@
+{
+  "schema": "van.safe-source-R5-handoff/1",
+  "state": "R5_FROZEN_SAFE_STATIC_MEMORY_PROOF_ONLY_REVIEW_PENDING",
+  "pins": "/dev/shm/van-be004-grace-source-20261102/FROZEN_SOURCE_R5/FROZEN_PINS.json",
+  "pins_sha256": "695b491d8208b4d3de43f2d3716b2c0d3dd999113dda34993e9fda861e3f6767",
+  "zip": "/dev/shm/van-be004-grace-source-20261102/FROZEN_SOURCE_R5/SOURCE21.zip",
+  "zip_sha256": "2e49f21c744dd224dccc52204abd34d002c1edccd0687729b8e2faee671a50d1",
+  "full_patch": "/dev/shm/van-be004-grace-source-20261102/FROZEN_SOURCE_R5/SOURCE.patch",
+  "full_patch_sha256": "2c3e745d405da4a3f09b8019a5feea8ece654732ee0fd7060108c7e6ff4a1dc1",
+  "incremental_patch": "/dev/shm/van-be004-grace-source-20261102/FROZEN_SOURCE_R5/R4_TO_R5.patch",
+  "incremental_patch_sha256": "113fa4573430bba6e63861159c441270dcfc9e5ca3f3386ebaaeb1d6b765da9f",
+  "changed_from_R4": "trading/commander/account_lifecycle.py",
+  "current_source_sha256": "c83e9c99d8f97e093d2549308741dfa0e1e5a5908dcf6165596deb9fcbd0ba8c",
+  "method": "Every old guard retained; final actual source binding after post-sample blocking checks; only existing pure time predicates afterward. Final pure mark and physical helper callbacks unchanged. Safe memory validation only.",
+  "safe_proof": {
+    "terminal": "/dev/shm/van-be004-grace-source-20261102/R5_SAFE_METHOD/SAFE_RUN/terminal.json",
+    "terminal_sha256": "f603b2a38c44193cd0fd6931c5751a931367ee8e69fe95232eeb0fe04b0720f2",
+    "raw": "/dev/shm/van-be004-grace-source-20261102/R5_SAFE_METHOD/SAFE_RUN/stdout.json",
+    "raw_sha256": "6121e67e4ceb8a940033aeaf79e561955bf4a2a2288a1254c2d5afc50bc6eb3b",
+    "script": "/dev/shm/van-be004-grace-source-20261102/R5_SAFE_METHOD/MEMORY_VALIDATION.py",
+    "script_sha256": "9e0696678c29e8000a352c120c9c5e317c645fb7d8b224e8015b2b28e3b8bcd5",
+    "current_R5_checks": 14,
+    "historical_R4_in_memory_reference": 1,
+    "method": "AST compile ONLY actual guard helper/callback composition with non-sensitive memory callbacks, no product imports or operational calls",
+    "limits": "Control flow only. Feature suites/native/credential/provider/account/network/integration checks after R5 UNEXECUTED."
+  },
+  "historical_blocked_R4": {
+    "receipt": "/tmp/van-be004-grace-independent-recheck-r4-20261102.json",
+    "receipt_sha256": "fc6077ebd13ad8395d2e53348032eb5231eb0cf3796e94030141207dce9e0125",
+    "terminal_sha256": "2e9244d8789ce5848cca3a3431fb67cba4b54084a81484b6975fcaf38368377b",
+    "actual": "Existing completed 2PASS/1FAIL, childexit1/waited/groupabsent/sourceunchanged. REVIEW01/02 closed; REVIEW03 HIGH post-sample wait allowed modification while original correctly UNKNOWN/null. No rerun/relocation.",
+    "automated_agent_failure": "Automatic possible-cybersecurity-risk content flag occurred after historical terminal; not itself a test outcome; no bypass/retry."
+  },
+  "after_fix_feature_native_integration": "UNEXECUTED_OPEN",
+  "review": "Root-authorized read-only diff/receipt and non-sensitive memory-proof review only. No active integrity-key/credential ordering probe retry/rephrase/relocation."
+}

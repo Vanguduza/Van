@@ -1,0 +1,17 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_ test_well_formed_manifest_stays_unresolved_and_mutation_cannot_rewrite_candidate _
+
+    def test_well_formed_manifest_stays_unresolved_and_mutation_cannot_rewrite_candidate():
+        record=fixture(); candidate=parse(record); before=candidate.digest
+        assert candidate.body() == record
+        result=candidate.unresolved()
+>       assert result['status']=='UNRESOLVED_DATASET_CANDIDATE' and result['qualified_for_research'] is False
+E       AssertionError: assert ('UNRESOLVED_DATASET_CANDIDATE' == 'UNRESOLVED_DATASET_CANDIDATE'
+E         
+E           UNRESOLVED_DATASET_CANDIDATE and True is False)
+
+trading/tests/test_dataset_manifest_candidates.py:42: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_dataset_manifest_candidates.py::test_well_formed_manifest_stays_unresolved_and_mutation_cannot_rewrite_candidate
+1 failed in 0.59s

@@ -1,0 +1,183 @@
+{
+  "source_head": "2a1186ee1199f56c0ae9fce06d13b27f9098d3c3",
+  "tested_merge": "76184cd978eee3dc558a2778ecb5501f2685546d",
+  "run_id": 40421043580,
+  "status": "TERMINAL_FAILURE_MANDATORY_PREREQUISITES_AND_PUBLIC_JOB_CANCELLATION_UNWAIVED",
+  "public_jobs_success": 16,
+  "public_backend_job": "CANCELLED at configured45minute boundary; actual gateway5807/7 and media198, coverage verify and artifact upload succeeded; cancellation is not relabelled SUCCESS",
+  "public_source_selection_hashes_and_canonical_verify_match_exact_committed_head": true,
+  "mandatory_unwaived_failures": [
+    "missing private DDS deploy key",
+    "absent trusted-main checker"
+  ],
+  "junit": {
+    "van-market-monitor-source/report.xml": {
+      "passed": 258,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-browser-guard-source/uid-report.xml": {
+      "passed": 1,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-browser-guard-source/full-report.xml": {
+      "passed": 1547,
+      "skips": 1,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-browser-guard-source/report.xml": {
+      "passed": 11,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-browser-guard-source/firewall-report.xml": {
+      "passed": 10,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-postgres-ledger-report/trading-source-report.xml": {
+      "passed": 4157,
+      "skips": 1,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-postgres-ledger-report/voice-source-report.xml": {
+      "passed": 117,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-postgres-ledger-report/postgres-ledger-report.xml": {
+      "passed": 26,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-actual-release-guards/report.xml": {
+      "passed": 2,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-backend-public-source/media-report.xml": {
+      "passed": 198,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-backend-public-source/gateway-report.xml": {
+      "passed": 5807,
+      "skips": 7,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-character-forge-validation-binding/junit/TEST-emulator-5554 - 12-_app-.xml": {
+      "passed": 18,
+      "skips": 4,
+      "failures": 0,
+      "errors": 0
+    }
+  },
+  "canonical_mutations": {
+    "reports": 9,
+    "caught_exactly_once": 374,
+    "edits": 383,
+    "survivors": 0,
+    "unexecuted": 0
+  },
+  "actual_verified_main_archives": 17,
+  "native_or_unit_acceptance": false,
+  "qualification": "Published2a source only; not later funding drafts or A4 expiry repair",
+  "file_sha256": {
+    "van-instrumentation-report.zip": "2f6a37f63a70f28e9c72b30ae5f61f7671ae32b6fbeb1e186a3b4e77f876c58c",
+    "run-and-jobs-metadata.json": "abd9b87af4c38bfbc577565e3c54de1900085118625d946f68b07ac067da778e",
+    "van-market-monitor-source.zip": "f8ac6a632bd63df64f0fd6301c430cc185e8e79dc72d9893f9d1c92d0624fb8e",
+    "van-actual-release-guards.zip": "d03223ec624e964f3af8731dd56b5aa9ae7352e0b113c630814ddb956a612654",
+    "van-voice-runtime.zip": "ebdfa3d6a8ed1e8a2af43d9e8e8ede6b556b16c60e223b099f673b4171139e69",
+    "public-job.log": "49305c6d11b413b6a11dafa1d7e051b4f0087f89f3e36235c5545c3f1baf0478",
+    "van-mutation-report-python-0.zip": "713e3406d8b1a583dbf8ad2eb992f682b0dadf529c72ab60d03bec3579523f63",
+    "van-postgres-ledger-report.zip": "4fe1bcfb7ac7e733aabb30b4587bee1f94cf4ca6699945e71234ff1d9abff806",
+    "van-mutation-report-kotlin-2.zip": "6a01c5eab5550ac579486c03feb6529b0764f51bae62be44019dcc58832396d2",
+    "van-character-forge-validation-binding.zip": "764304a9527dab8178edd9fa221dc0a85bcf270b8f01dda89a53cd6a8624de83",
+    "van-browser-guard-source.zip": "0a4786a68b9879f4c7dafc37c11ac3b6934630794ff1ea9a14cb938c331b722e",
+    "van-mutation-report-kotlin-0.zip": "16b9490c5be0fd67d55e9dd3e1ffdf529d6f6081a4ed20b6f0a5ccc4bedacbc2",
+    "van-mutation-report-kotlin-1.zip": "6c2aacf8e96ee1594570ecd5795aa0de891fe505ef59edec02edd5008378ec22",
+    "van-backend-public-source.zip": "177533924c740ea623f3615a66e8450dc71a967190b386aecf2569864d5fb39d",
+    "private-job.log": "1db94988a90457a519804a1a7260e0f30f0aff52d4949b3b602e078674669c74",
+    "van-mutation-report-python-3.zip": "4f4b3e08d2037a44a09de00b2b071ace0ecdb581642b460fdf950fd8133fd7a1",
+    "van-mutation-report-kotlin-3.zip": "68e5c2b088c669f2cc00f0216967e20473a005a3651fc51945910c4ca55063d2",
+    "van-mutation-report-python-2.zip": "560d80f6bd2b0dddef6b59389f658faf5da6e4a72ebe43d29bb696acd4415809",
+    "truth-job.log": "9ee658f95be84191732083590d8df9fea46f1db69169488f45861e6ba8122439",
+    "van-mutation-report-python-1.zip": "941cab1b216e1ed7371ddd50d88921dc9b24125691e057ebf748ef9eb96b649f",
+    "download-receipts.json": "8e692f5da5627634d4065f5d767fe5f617f4287dee227b66149997dc48ce3f37",
+    "van-mutation-report-browser-agent.zip": "55de0d2e291c84f436cc373e3d0417272c497fa753b298941066a36e3b864aae",
+    "van-mutation-report-kotlin-1/mutation-registry.json": "37964fd82d7516acf4af9dc3165d4754ce85f4d7e8c51bdcfd7a72bca9e0611e",
+    "van-mutation-report-kotlin-1/mutation-report.txt": "1366f2d48fcca6799618ece96fe3916764244cb769f6ff4fbc9cc89b995be4d1",
+    "van-voice-runtime/logcat.txt": "397489278b2d82109c9bd02bdfe432c874e4ede0d5acc2ea6dee760b1bdec65e",
+    "van-mutation-report-python-0/mutation-registry.json": "37964fd82d7516acf4af9dc3165d4754ce85f4d7e8c51bdcfd7a72bca9e0611e",
+    "van-mutation-report-python-0/mutation-report.txt": "dd104db97d3badc8b1438b6177cea5f388f27f055fc9ccb7161d293c63c6327b",
+    "van-mutation-report-kotlin-2/mutation-registry.json": "37964fd82d7516acf4af9dc3165d4754ce85f4d7e8c51bdcfd7a72bca9e0611e",
+    "van-mutation-report-kotlin-2/mutation-report.txt": "890b7a4461725cb8a390ada3c5d45aff8727b8a25d9e057fc4564ddd8cb3a3a7",
+    "van-market-monitor-source/storage-audit.json": "128b04a8c8f58c8d4d335db930e1fabd533499ca88e5c1c3afb2e49eb25caea1",
+    "van-market-monitor-source/tested-commit.txt": "9532becbf756772a6c12046d5bb2aa9f06c3cd38336a8bb074b46a6ed6db822a",
+    "van-market-monitor-source/report.xml": "4119222dcad9fda520de6229e29de1a56555484c0db270c786dad855a659ca56",
+    "van-mutation-report-python-1/mutation-registry.json": "37964fd82d7516acf4af9dc3165d4754ce85f4d7e8c51bdcfd7a72bca9e0611e",
+    "van-mutation-report-python-1/mutation-report.txt": "8bdb7bd24258c234e32b634be95c4bc20cc7eea3819839251367d7dfad3577e7",
+    "van-mutation-report-kotlin-3/mutation-registry.json": "37964fd82d7516acf4af9dc3165d4754ce85f4d7e8c51bdcfd7a72bca9e0611e",
+    "van-mutation-report-kotlin-3/mutation-report.txt": "5c356d0c2e148dd801553a3f7e5b68a7e343d27d6638c6b0068636e9152da1b5",
+    "van-mutation-report-browser-agent/mutation-registry.json": "37964fd82d7516acf4af9dc3165d4754ce85f4d7e8c51bdcfd7a72bca9e0611e",
+    "van-mutation-report-browser-agent/mutation-report.txt": "1de5887f4df8d80fafb959d96e289e881ba46ac6bfb420dc6c51f45e0aeaf5d9",
+    "van-mutation-report-python-3/mutation-registry.json": "37964fd82d7516acf4af9dc3165d4754ce85f4d7e8c51bdcfd7a72bca9e0611e",
+    "van-mutation-report-python-3/mutation-report.txt": "14c8fc346a53bff4388bc940ec90ec47892082a87f11188dfcdae8dffc254834",
+    "van-browser-guard-source/firewall-storage-audit.json": "128b04a8c8f58c8d4d335db930e1fabd533499ca88e5c1c3afb2e49eb25caea1",
+    "van-browser-guard-source/uid-storage-audit.json": "128b04a8c8f58c8d4d335db930e1fabd533499ca88e5c1c3afb2e49eb25caea1",
+    "van-browser-guard-source/uid-report.xml": "5a414be0592855837eb2360fedb343087cc1ee21654474a3c6bd6c8a98e80a8d",
+    "van-browser-guard-source/nft-version.txt": "89995fd0c92187974133511999d65ba41513837cf75e37d0713b14fd3ada7e9d",
+    "van-browser-guard-source/full-report.xml": "c060be3f533d9fc26b1a541db114f33d7bd78a899ab0ad0a901ae4cadb6b9404",
+    "van-browser-guard-source/storage-audit.json": "128b04a8c8f58c8d4d335db930e1fabd533499ca88e5c1c3afb2e49eb25caea1",
+    "van-browser-guard-source/kernel-version.txt": "968b9059a40ef049e1e0e9b68b5c1104d6687376f38c1566ec6a0e88991517d4",
+    "van-browser-guard-source/tested-commit.txt": "86eb567fe4f69dab0fe51cf99dcc69f9af0a56c965505243d10068f440957418",
+    "van-browser-guard-source/full-storage-audit.json": "128b04a8c8f58c8d4d335db930e1fabd533499ca88e5c1c3afb2e49eb25caea1",
+    "van-browser-guard-source/full-suite-files.json": "d2c98ddac2a9f05a755088c69caa1193d2c7202a5882d6dafef125c4801fa83d",
+    "van-browser-guard-source/report.xml": "dae5ef7c017c13356ea0eec038fa05fe4ac236909349cd1ac1378bb43fc64e7a",
+    "van-browser-guard-source/firewall-report.xml": "70d240ebf42f474adecbfe7d5fb6a3c76b5971491f2b250b1d1e986a176c628b",
+    "van-browser-guard-source/chromium-version.txt": "2ad066640772a38a7acd9f2b40ddda00d0ca6f78ccba87be5c3126793b6517b0",
+    "van-postgres-ledger-report/trading-source-report.xml": "ccf0cb1c3323c9a372970dc0406729b2159db1ed35edb901e33b4803fe3dba61",
+    "van-postgres-ledger-report/voice-source-report.xml": "2a01a7c00a9341e002ab956e0e347a5a918d892d09d01a1a4bc820418d3df029",
+    "van-postgres-ledger-report/trading-source.log": "459a76b9e3360c5917f3815065d47422b45829316dd7728c749c7bd3dcd51453",
+    "van-postgres-ledger-report/postgres-ledger-report.xml": "59c8dd5a43a830f70c1e7ae0bbe3e3063e9f41d27d35613d5ae18d2552eeeecb",
+    "van-character-forge-validation-binding/van_candidate.sha256": "fb7b03ce82db1b1adc3044ef67e2af97a670eabe43dd6cd08a3b1fe4e574bef2",
+    "van-character-forge-validation-binding/van_production.sha256": "19254b59d1f5b1c4b91fc854285fed67fca6723015db612c6fa55e0c87919376",
+    "van-character-forge-validation-binding/van_validation.json": "ed8e7d599a8b4b2c0a16d137fe7dccd5c154545e01268315296e9f4bca948489",
+    "van-mutation-report-python-2/mutation-registry.json": "37964fd82d7516acf4af9dc3165d4754ce85f4d7e8c51bdcfd7a72bca9e0611e",
+    "van-mutation-report-python-2/mutation-report.txt": "7fff702edf4532a5ce97f921f41465ad4af3a5ab7ac7bb3b8ad39ed4ae4b993f",
+    "van-actual-release-guards/report.xml": "4c0b29bb5956a2e8b330d4d3ece4a8b2eb33806402a0f15e64cd23d039768382",
+    "van-backend-public-source/summary.json": "c6dcc4712420a105b99d7989beff215fb127abba76506b48e349142688d26f33",
+    "van-backend-public-source/gateway-storage-audit.json": "128b04a8c8f58c8d4d335db930e1fabd533499ca88e5c1c3afb2e49eb25caea1",
+    "van-backend-public-source/media-report.xml": "348fd1f77addf794fbb6bc196b9fad59954a1dcb0059021045c2386b337b1295",
+    "van-backend-public-source/tested-commit.txt": "9532becbf756772a6c12046d5bb2aa9f06c3cd38336a8bb074b46a6ed6db822a",
+    "van-backend-public-source/selection.json": "5371ca9d74e6b9c6a7e530568271c749ca85a0337a0ebab865ccba36601a0fa2",
+    "van-backend-public-source/gateway-report.xml": "a7998afb4124fab6a706cbc6ab502a020de81b21d9334a6e01995f11c64c11fd",
+    "van-backend-public-source/media-storage-audit.json": "128b04a8c8f58c8d4d335db930e1fabd533499ca88e5c1c3afb2e49eb25caea1",
+    "van-mutation-report-kotlin-0/mutation-registry.json": "37964fd82d7516acf4af9dc3165d4754ce85f4d7e8c51bdcfd7a72bca9e0611e",
+    "van-mutation-report-kotlin-0/mutation-report.txt": "f08f9619f8a0fefb0faf3ec13beb6700f6342a514a185fff89c3b4cb8dcd9da9",
+    "van-instrumentation-report/debug/com.dial.van.instrumentation.VoicePlaybackRuntimeTest.html": "26b0c486063c4a8739ba8c3aee2a263d49b0d2995728d14edf4d60b1079b4b9e",
+    "van-instrumentation-report/debug/com.dial.van.instrumentation.FloatingOverlayServiceTest.html": "251ccde29324f616b2e01e545de2f0c90063eceba234fcb5c9b3976b5ca9073a",
+    "van-instrumentation-report/debug/index.html": "b234d05f8e9707c44644ab737e663ba3f98eb44fd73cd50f88b7d1aa75a46ba6",
+    "van-instrumentation-report/debug/com.dial.van.instrumentation.html": "5cbe6954ae4e4bea49e8e81d3318d2f766c80d530d524b6070602a4394e7b885",
+    "van-instrumentation-report/debug/com.dial.van.instrumentation.NetworkSecurityRuntimeTest.html": "a123ff20ba06462c083a36ff15828b4a9bf7e5d7f8aa45edfdadb76ea50fd506",
+    "van-instrumentation-report/debug/com.dial.van.instrumentation.RiveContractTest.html": "0ef4bb4e7cd340f57329f62799246c2872bb77aa1093f3eabd746636d21ba317",
+    "van-instrumentation-report/debug/com.dial.van.instrumentation.CommandCentreLaunchTest.html": "34621098934ae08911d201b42819fc088f6c22439f30df71a5871d318949ccd8",
+    "van-instrumentation-report/debug/com.dial.van.instrumentation.TemplateRuntimeTest.html": "c5a15ba4623a3f2ac35d76a95877280ea1ed7cb85a23f108e6e7e9d67c3531ba",
+    "van-instrumentation-report/debug/css/style.css": "f1b366319836f8726d0939654d0eeddfc5b20f67d9e5954b9a1632c60f2f31bf",
+    "van-instrumentation-report/debug/css/base-style.css": "2851d0b2f14f4ff1b75f0d01438887911eb474e235be93e561709227cefb18db",
+    "van-instrumentation-report/debug/js/report.js": "0aa306f94805890682c639b2d5c06108801d64b859a171a3c6eea66c8bab4c6a",
+    "van-character-forge-validation-binding/junit/TEST-emulator-5554 - 12-_app-.xml": "7797a47c4205add4f435a1b1a55a55124e39f84af449490be496b220dd953578"
+  }
+}

@@ -1,0 +1,1482 @@
+{
+  "entries": [
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "VAN source owners plus independent Zuul admission",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "BE-001",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "VAN gateway security and existing device authority",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "BE-002",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Owning domain ledger and gateway projections",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "BE-003",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Broker owns identity; VAN owns link/configuration",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "BE-004",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Broker auth service and protected VAN secret store",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "BE-005",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Provider cash history plus deterministic VATI accounting",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "BE-006",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Payment provider/custodian and broker; VAN orchestrates",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "BE-007",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Licensed/provider market feed adapter",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "BE-008",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "VATI Risk Authority only",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "BE-009",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "VATI router and admitted broker adapters",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "BE-010",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Owner intent through unchanged VATI risk/router",
+      "economic_state": "NOT_EVALUATED",
+      "exit_gate": "BG-001",
+      "id": "BE-011",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "VATI protection/lifecycle plus broker readback",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "BE-012",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Signed mandate plus VATI strategy qualification",
+      "economic_state": "NOT_EVALUATED",
+      "exit_gate": "BG-001",
+      "id": "BE-013",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "News/Calendar adapters and immutable event ledger",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "BE-014",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Deterministic event research; bounded model proposes labels only",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "BE-015",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "VATI event/risk/lifecycle authority, not LLM",
+      "economic_state": "NOT_EVALUATED",
+      "exit_gate": "BG-001",
+      "id": "BE-016",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Device-signed bounded grant and VATI",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "BE-017",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Chart domain persistence; VATI owns certified indicators",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "BE-018",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Isolated replay namespace with no live order capability",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "BE-019",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Persistent market/alert services",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "BE-020",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "VAN/JEV/research read lane; no execution grant",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "BE-021",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Research/learning pipeline separate from existing strategy training",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "BE-022",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "DIAL/Work Tracker/mission owners via typed adapters",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "BE-023",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Qualified external worker/provider owns action; VAN projects it",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "BE-024",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Browser/device provider with exact owner scope",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "BE-025",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "ARTEMIS and independent verification producer",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "BE-026",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Memory/knowledge source owners and privacy policy",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "BE-027",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Automation scheduler plus owning effect services",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "BE-028",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Voice/conversation pipeline with OS/device consent boundary",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "BE-029",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Shared owner projection from authoritative sources",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "BE-030",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "VAN settings/device service plus qualified providers",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "BE-031",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Each domain owns facts; catalog aggregates without gaining authority",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "BE-032",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "DIAL/Zuul qualified deployment and service operators",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "BE-033",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "DDS/qualified studio and control providers remain independent owners",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "BE-034",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "VATI research coordinator; risk and order ownership unchanged; independent qualification and exact owner promotion",
+      "economic_state": "NOT_EVALUATED",
+      "exit_gate": "BG-001",
+      "id": "BE-035",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "VATI research coordinator; risk and order ownership unchanged; independent qualification and exact owner promotion",
+      "economic_state": "NOT_EVALUATED",
+      "exit_gate": "BG-001",
+      "id": "BE-036",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "economic_state": "NOT_EVALUATED",
+      "exit_gate": "BG-001",
+      "id": "VAN-ML-PKT-004",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "VAN-ML-PKT-005",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "VAN-ML-PKT-006",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "VAN-ML-PKT-007",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "VAN-ML-PKT-008",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "VAN-ML-PKT-009",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "VAN-ML-PKT-010",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "VAN-ML-PKT-011",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "VAN-ML-PKT-012",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "VAN-ML-PKT-013",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "VAN-ML-PKT-014",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "VAN-ML-PKT-015",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "economic_state": "NOT_EVALUATED",
+      "exit_gate": "BG-001",
+      "id": "VAN-ML-PKT-016",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "economic_state": "NOT_EVALUATED",
+      "exit_gate": "BG-001",
+      "id": "VAN-ML-PKT-017",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "economic_state": "NOT_EVALUATED",
+      "exit_gate": "BG-001",
+      "id": "VAN-ML-PKT-018",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "VAN-ML-PKT-019",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "VAN-ML-PKT-020",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "economic_state": "NOT_EVALUATED",
+      "exit_gate": "BG-001",
+      "id": "VAN-ML-PKT-021",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "VAN-ML-PKT-022",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "VAN-ML-PKT-023",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "economic_state": "NOT_EVALUATED",
+      "exit_gate": "BG-001",
+      "id": "VAN-ML-PKT-024",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "economic_state": "NOT_EVALUATED",
+      "exit_gate": "BG-001",
+      "id": "VAN-ML-PKT-025",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "economic_state": "NOT_EVALUATED",
+      "exit_gate": "BG-001",
+      "id": "VAN-ML-PKT-026",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "VAN-ML-PKT-027",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "VAN-ML-PKT-028",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "VAN-ML-PKT-029",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "VAN-ML-PKT-037",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "VAN-ML-PKT-038",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "VAN-ML-PKT-039",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "VAN-ML-PKT-040",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "VAN-ML-PKT-041",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "economic_state": "NOT_EVALUATED",
+      "exit_gate": "BG-001",
+      "id": "VAN-ML-PKT-042",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "VAN-ML-PKT-043",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "VAN-ML-PKT-044",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "economic_state": "NOT_EVALUATED",
+      "exit_gate": "BG-001",
+      "id": "VAN-ML-PKT-045",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "economic_state": "NOT_EVALUATED",
+      "exit_gate": "BG-001",
+      "id": "VAN-ML-PKT-046",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "VAN-ML-PKT-047",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Read-only research/forecast evidence; VATI remains sole risk and order authority",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "VAN-ML-PKT-048",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "IdentityRegistry and existing market-data/acquisition owners; read-only additive; no new financial authority",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "BE-037",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Existing screening, lake and research cohort owners; read-only additive; no new financial authority",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "BE-038",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Chain-specific research security adapter under existing data/feature owners; read-only additive; no new financial authority",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "BE-039",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "EVM research adapter, not an execution client; read-only additive; no new financial authority",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "BE-040",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Existing market costs/TCA/target owners with chain-specific read-only simulation adapters; read-only additive; no new financial authority",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "BE-041",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Existing feature definitions and temporal research store; read-only additive; no new financial authority",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "BE-042",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Existing provenance, cache, outcome-ledger and data invalidation owners; read-only additive; no new financial authority",
+      "economic_state": "NOT_APPLICABLE_UNLESS_ECONOMIC_CLAIM",
+      "exit_gate": "BG-001",
+      "id": "BE-043",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    },
+    {
+      "device_state": "NOT_RUN",
+      "domain_owner": "Existing trading research, gateway capability catalogue, shared dial-jev and operations owners; read-only additive; no new financial authority",
+      "economic_state": "NOT_EVALUATED",
+      "exit_gate": "BG-001",
+      "id": "BE-044",
+      "provider_state": "NOT_QUALIFIED",
+      "receipt_refs": [],
+      "required_bindings": [
+        "exact source/config and native owner",
+        "required provider/account/entitlement/operation or evidenced provider-free local mode",
+        "positive/refusal/unknown/recovery receipts",
+        "input/output/errors and registered caller",
+        "measured budget and rollback proof"
+      ],
+      "runtime_state": "NOT_QUALIFIED",
+      "source_state": "NOT_REQUALIFIED"
+    }
+  ],
+  "revision": "1.18",
+  "status": "REQUIRED_REAL_EVIDENCE_NOT_PRESENT"
+}

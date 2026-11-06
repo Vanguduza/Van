@@ -1,0 +1,20 @@
+{
+  "path": "/workspace/van-ctrader-close-cost-wip5-20261030.zip",
+  "bytes": 83371,
+  "sha256": "95919ed480e9ef2995c5364adfc3ce8c5a3095408f3f27a94107483fde8970a5",
+  "base_head": "0aa3bfc19cd7d0aa285d8b897ec1aa61ef157fd7",
+  "created_at_utc": "2026-10-30T12:34:08.299568+00:00",
+  "files": {
+    "trading/tests/test_ctrader_close_fee_knowledge.py": "5cfa4f49bbd0d9b194288977096439d2e374015f5184aa32b3a1baa90beeaf40",
+    "trading/tests/test_ctrader_close_fee_knowledge_postgres.py": "0ab978b0b05e3a85e767b573a124f3a559d7dbfcf050c3000e645527e9e97c04",
+    "trading/tests/test_native_fee_provenance.py": "ce0a29c88538ff6ced8953ad25b384fac5cb36664435c73f7a3391da1bb380c1",
+    "trading/tests/test_recorded_close_cost_scope.py": "c2803a5419fb5eee186ca00fad2a4888cb8ea14a88f3b4dbd53acc3ee4e36d15",
+    "trading/vati/execution/ctrader/charge_source.py": "a18d977d5401cea7d7e2d80515a799f5716a876f56b04e5a799a48ce7cd009d0",
+    "trading/vati/execution/recorded_close_costs.py": "25231a1413eab41501d0a1cf8c016b765bddede271052875e08057f314e7498f",
+    "trading/vati/app/cycle.py": "fc31a0061e679e60c6059c25832fa37c8055baf9df3287a42ca3a0863b0c881d",
+    "trading/vati/app/trade_lifecycle.py": "92006a2ec5fef6b0395af5630e4694fc9603cef3a9846373aa40aba068a078f4",
+    "trading/vati/execution/ctrader/adapter.py": "015404b1719a0fd3fff66c1cf9c0d6ffe539bf2be9d869ca0a854a4d989e1712",
+    "trading/vati/execution/review.py": "c60a5b074077199156cb1ca02900b701ca88f1b2bfa0acab7dd968b1567805a7",
+    "trading/vati/execution/router.py": "873d67e68bffd3dceec32455502526b73708ad895448c575e96aebf6bab19960"
+  }
+}

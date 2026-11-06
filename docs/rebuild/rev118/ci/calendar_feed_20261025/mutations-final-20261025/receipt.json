@@ -1,0 +1,48 @@
+{
+  "schema": "van.supplemental-source-faults/1",
+  "control_sha256": {
+    "trading/vati/core/calendar_time.py": "595a99ef6df533f11f3d6cbd6459af3c59396f88908cced13ea4610911aea556",
+    "trading/vati/calendar/recorder.py": "f1804cf7a61d6b942298fcaa7ad46b0bddf1fe7a007857829a15f5a03ca2bcc3",
+    "trading/vati/intelligence/calendar_feed.py": "b4ca2bc92aaa4909a34dd52a6eaf4e2a4fdfa10da5068069748cbe0f3be89e25"
+  },
+  "source_restored": true,
+  "cases": [
+    {
+      "case": "assume-worker-timezone",
+      "path": "trading/vati/core/calendar_time.py",
+      "exit": 1,
+      "mutated_sha256": "e933b30b47f50a68aa2ecf7046ae7213c61d963bff8d149156e35fe532041fef"
+    },
+    {
+      "case": "silently-truncate-long-fraction",
+      "path": "trading/vati/core/calendar_time.py",
+      "exit": 1,
+      "mutated_sha256": "36bff2568cdf61462233473cb63ab5c55c1ff75c760903a1ff9c7fa885d00e41"
+    },
+    {
+      "case": "discard-original-event-key",
+      "path": "trading/vati/calendar/recorder.py",
+      "exit": 1,
+      "mutated_sha256": "51b3c5674ed162d79e4cfcf1c06f580ea4990e0088f37646102d650f6ca7e8de"
+    },
+    {
+      "case": "ignore-key-scope-conflicts",
+      "path": "trading/vati/intelligence/calendar_feed.py",
+      "exit": 1,
+      "mutated_sha256": "0071f1841cfaa44536bd31fe6d48a99406ffbe6652b59e05c1e7387934583ba8"
+    },
+    {
+      "case": "promote-file-labels-to-live",
+      "path": "trading/vati/intelligence/calendar_feed.py",
+      "exit": 1,
+      "mutated_sha256": "c1db06e6c9b5a9fabc64c77a212018ce173c23f5edaa6235d98916c17b60e558"
+    },
+    {
+      "case": "drop-bare-array-rows",
+      "path": "trading/vati/calendar/recorder.py",
+      "exit": 1,
+      "mutated_sha256": "6a826763bda9e70819af5d7506dc33d621d649b9a7725940fbe419dcd80fbc00"
+    }
+  ],
+  "not_canonical_corpus": true
+}

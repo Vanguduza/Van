@@ -1,0 +1,1 @@
+{"original_entry_body_sha256": "ac13b14ee9a9c732f8c89cfd3617183003f98ca1d7ea6e3cbc7d72f7e238628f", "cases": {"entry-cash-credit": {"entry_calls": 1, "margin_calls": 0, "status": "FILLED"}, "entry-cash-used": {"entry_calls": 1, "margin_calls": 0, "status": "FILLED"}, "entry-good": {"entry_calls": 1, "margin_calls": 0, "status": "FILLED"}}, "not_MetaTrader_runtime": true}

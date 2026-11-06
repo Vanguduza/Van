@@ -1,0 +1,68 @@
+{
+  "cwd": "/workspace/Van",
+  "environment_overrides": {
+    "ANDROID_HOME": "/workspace/.onboarding/android-sdk",
+    "ANDROID_USER_HOME": "/workspace/.onboarding/android-user",
+    "GRADLE_USER_HOME": "/workspace/.onboarding/gradle",
+    "JAVA_HOME": "/workspace/.onboarding/jdk/usr/lib/jvm/java-21-openjdk-amd64"
+  },
+  "runs": [
+    {
+      "after": {
+        "path": "docs/audit/validation/android-owner-controls-final-app-inputs-after-2026-10-08-r4.json",
+        "sha256": "b3a120d0020cbe5d8f8759e272b9185760beecba2c578fae738e9ab70e224fdf"
+      },
+      "argv": [
+        "/workspace/.onboarding/gradle-8.11.1/bin/gradle",
+        "-p",
+        "android",
+        ":app:assembleDebug",
+        ":app:testDebugUnitTest",
+        ":app:lintDebug",
+        "--offline",
+        "--no-daemon",
+        "--max-workers=2",
+        "--console=plain",
+        "--rerun-tasks"
+      ],
+      "before": {
+        "path": "docs/audit/validation/android-owner-controls-final-app-inputs-before-2026-10-08-r4.json",
+        "sha256": "b3a120d0020cbe5d8f8759e272b9185760beecba2c578fae738e9ab70e224fdf"
+      },
+      "exit_code": 0,
+      "kind": "app",
+      "logs": {
+        "path": "docs/audit/validation/android-owner-controls-final-app-2026-10-08-r4.log",
+        "sha256": "a2e156db7719f9bb3b0a44569e2995f9d7f67d2bef06b349f9887d6654abe60a"
+      }
+    },
+    {
+      "after": {
+        "path": "docs/audit/validation/android-owner-controls-final-jvm-inputs-after-2026-10-08-r4.json",
+        "sha256": "b3a120d0020cbe5d8f8759e272b9185760beecba2c578fae738e9ab70e224fdf"
+      },
+      "argv": [
+        "/workspace/.onboarding/gradle-8.11.1/bin/gradle",
+        "-p",
+        "android/verification",
+        "test",
+        "--offline",
+        "--no-daemon",
+        "--max-workers=2",
+        "--console=plain",
+        "--rerun-tasks"
+      ],
+      "before": {
+        "path": "docs/audit/validation/android-owner-controls-final-jvm-inputs-before-2026-10-08-r4.json",
+        "sha256": "b3a120d0020cbe5d8f8759e272b9185760beecba2c578fae738e9ab70e224fdf"
+      },
+      "exit_code": 0,
+      "kind": "jvm",
+      "logs": {
+        "path": "docs/audit/validation/android-owner-controls-final-jvm-2026-10-08-r4.log",
+        "sha256": "63ed694b0b4dfbc30fd8c0c437ddcbc0fcc598b3b1e29eedeb9a0eec401579bd"
+      }
+    }
+  ],
+  "source_changed_between_successful_components": []
+}

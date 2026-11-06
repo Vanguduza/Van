@@ -1,0 +1,1400 @@
+{
+  "schema": "van.be004.unlink-r2.frozen-source-handoff/1",
+  "at_utc": "2026-11-02T01:02:17.484139+00:00",
+  "state": "FROZEN_SOURCE_CANDIDATE_READY_FOR_INDEPENDENT_RECHECK",
+  "accepted_blocker": "BE004-UNLINK-REVIEW01",
+  "review": "/workspace/van-be004-unlink-independent-review-20261102/review.json",
+  "review_sha256": "38961496a6f039d4afcd207e4dfa5ff8b1242d6b55771dda8aaecbce01cbfb24",
+  "base": "5c80526ddb6effe9f61c4761645f7377314260f5",
+  "source_fingerprint": "c742984eec212ce67d7ff6a235883811cd432bed989db240b683b4ebc054f4fe",
+  "pins": "/tmp/van-be004-unlink-r2-final-pins.json",
+  "explicit7_sha256": {
+    "trading/commander/accounts.py": "f12b42dfcf26c34a8328e34f95c70d964343a3909484ebf0b89a7a65d087ccc6",
+    "trading/commander/account_retirement.py": "b1894ad6407e17736241479794ebec494a03c039198de47ea94c2b4d5455c7dc",
+    "trading/commander/app.py": "1d0d614fbe867838abb01baefd4534fb65cb02724770354d15cfec807717ee98",
+    "trading/vati/accounts/registry.py": "6178715463eb89b33827d4dbd6cfe427ad9e65c2c00049caef0ec50633c74803",
+    "backend/tests/test_account_unlink_review.py": "b57fd1b21f979f18d06f22c0bc2833bb3febcd4135ccf830c9412867751d7cf2",
+    "trading/tests/test_account_registry_atomic_rea.py": "be80eb54cab1adb6869b572eaccf31e92dc3710b7ad421310da72d9cc89ced73",
+    "trading/tests/test_account_unlink_currentness.py": "4abd5642062e30f5e23fd953b3c30b5517eb12b5e8f39c27dc0497fa6097f00d"
+  },
+  "full_base5c_export": {
+    "schema": "van.be004.unlink-r1.explicit-source-export/1",
+    "base": "5c80526ddb6effe9f61c4761645f7377314260f5",
+    "source_fingerprint": "c742984eec212ce67d7ff6a235883811cd432bed989db240b683b4ebc054f4fe",
+    "explicit7_paths": [
+      "trading/commander/accounts.py",
+      "trading/commander/account_retirement.py",
+      "trading/commander/app.py",
+      "trading/vati/accounts/registry.py",
+      "backend/tests/test_account_unlink_review.py",
+      "trading/tests/test_account_registry_atomic_rea.py",
+      "trading/tests/test_account_unlink_currentness.py"
+    ],
+    "patch": "/tmp/van-be004-unlink-r2-source-20261102.patch",
+    "patch_bytes": 41828,
+    "patch_sha256": "859a634e68569262aac6dec6929548a7fb730dac8c26afb3e714c4a501f3b572",
+    "members": 7,
+    "baseline_applied_all7_hashes_verified": true,
+    "preimage_sha256": {
+      "trading/commander/accounts.py": "6b20d5ae1ee01f00672287bb0d9183f41083c57874b5c53afa1ea339f648082a",
+      "trading/commander/account_retirement.py": "702636bfaa18b74315b2194eaac858ec93495e53d2a4b7861f1c5afa767ebd94",
+      "trading/commander/app.py": "aa353acaa9ac8d74a51e6f2e500cae7ecdbc382e64413da4ccfae75fdbd85540",
+      "trading/vati/accounts/registry.py": "e7925dc1cacb1ce84af601fbbfb870220f43e6bd423fa52855d4900ce96f0be9",
+      "backend/tests/test_account_unlink_review.py": "8b9d9e4111cfa17ed3ea2a27d7c6da79513aa5500c42d4a1750898d883caa253",
+      "trading/tests/test_account_registry_atomic_rea.py": "0f371d8d35d609d585fd615b6e0393298749b839608bea3ac66f85a858a53674"
+    },
+    "candidate_sha256": {
+      "trading/commander/accounts.py": "f12b42dfcf26c34a8328e34f95c70d964343a3909484ebf0b89a7a65d087ccc6",
+      "trading/commander/account_retirement.py": "b1894ad6407e17736241479794ebec494a03c039198de47ea94c2b4d5455c7dc",
+      "trading/commander/app.py": "1d0d614fbe867838abb01baefd4534fb65cb02724770354d15cfec807717ee98",
+      "trading/vati/accounts/registry.py": "6178715463eb89b33827d4dbd6cfe427ad9e65c2c00049caef0ec50633c74803",
+      "backend/tests/test_account_unlink_review.py": "b57fd1b21f979f18d06f22c0bc2833bb3febcd4135ccf830c9412867751d7cf2",
+      "trading/tests/test_account_registry_atomic_rea.py": "be80eb54cab1adb6869b572eaccf31e92dc3710b7ad421310da72d9cc89ced73",
+      "trading/tests/test_account_unlink_currentness.py": "4abd5642062e30f5e23fd953b3c30b5517eb12b5e8f39c27dc0497fa6097f00d"
+    },
+    "runtime_files_excluded": true,
+    "owned_apply_fixture_removed_after_verification": "/tmp/van-unlink-r1-baseline-apply-_hd47ylp"
+  },
+  "R1_to_R2_delta": {
+    "schema": "van.unlink-r2.exact-R1-delta/1",
+    "R1_fingerprint": "0dd786e0245158360066cb3ed627fba8bf0b03f09abd89c226dbc70cb05da951",
+    "R2_fingerprint": "c742984eec212ce67d7ff6a235883811cd432bed989db240b683b4ebc054f4fe",
+    "changed3_paths": [
+      "trading/commander/accounts.py",
+      "trading/commander/account_retirement.py",
+      "trading/tests/test_account_unlink_currentness.py"
+    ],
+    "unchanged4_paths": [
+      "trading/commander/app.py",
+      "trading/vati/accounts/registry.py",
+      "backend/tests/test_account_unlink_review.py",
+      "trading/tests/test_account_registry_atomic_rea.py"
+    ],
+    "old7_sha256": {
+      "trading/commander/accounts.py": "3adefc8f489826cec13103a17f104122b0bc9a40fa72b9463111f73688a14e56",
+      "trading/commander/account_retirement.py": "4f254398a7dc7c209520d5d18467657bad997cf075deb4a128c38b48fb9a47bb",
+      "trading/commander/app.py": "1d0d614fbe867838abb01baefd4534fb65cb02724770354d15cfec807717ee98",
+      "trading/vati/accounts/registry.py": "6178715463eb89b33827d4dbd6cfe427ad9e65c2c00049caef0ec50633c74803",
+      "backend/tests/test_account_unlink_review.py": "b57fd1b21f979f18d06f22c0bc2833bb3febcd4135ccf830c9412867751d7cf2",
+      "trading/tests/test_account_registry_atomic_rea.py": "be80eb54cab1adb6869b572eaccf31e92dc3710b7ad421310da72d9cc89ced73",
+      "trading/tests/test_account_unlink_currentness.py": "79b72a274d656ce98b5a8b5f44fa81009f9036704fd80943f4b85765c533afab"
+    },
+    "new7_sha256": {
+      "trading/commander/accounts.py": "f12b42dfcf26c34a8328e34f95c70d964343a3909484ebf0b89a7a65d087ccc6",
+      "trading/commander/account_retirement.py": "b1894ad6407e17736241479794ebec494a03c039198de47ea94c2b4d5455c7dc",
+      "trading/commander/app.py": "1d0d614fbe867838abb01baefd4534fb65cb02724770354d15cfec807717ee98",
+      "trading/vati/accounts/registry.py": "6178715463eb89b33827d4dbd6cfe427ad9e65c2c00049caef0ec50633c74803",
+      "backend/tests/test_account_unlink_review.py": "b57fd1b21f979f18d06f22c0bc2833bb3febcd4135ccf830c9412867751d7cf2",
+      "trading/tests/test_account_registry_atomic_rea.py": "be80eb54cab1adb6869b572eaccf31e92dc3710b7ad421310da72d9cc89ced73",
+      "trading/tests/test_account_unlink_currentness.py": "4abd5642062e30f5e23fd953b3c30b5517eb12b5e8f39c27dc0497fa6097f00d"
+    },
+    "delta": "/tmp/van-be004-unlink-r1-to-r2-delta-20261102.patch",
+    "delta_sha256": "945771a2840f744c989281b8c06ac0110d18bc265de745dcf558476b7f80af48",
+    "delta_bytes": 14520,
+    "applied_R1_export_then_delta_all7_hashes_verified": true,
+    "owned_verify_fixture_removed": "/tmp/van-unlink-r2-delta-verify-7rgeklsr"
+  },
+  "repair": {
+    "history": "Validate actual unchanged native history first, then sample trusted source clock. Retain captured oldest/completed observation facts; existing30s/future predicate unchanged. No timestamp refresh or providerIO under writer.",
+    "held_lease": "Actual existing lease.fence verifies held owner/epoch under continuously held submission lock; current liveness sampled AGAIN after store read and pure lease clock predicate reruns after later native validation waits. Production lease TTL unchanged. Owned short5s SOURCE fixture isolates lease expiry while source window30s and A4 remain valid.",
+    "final_effect": "Blocking scope/history/lease/key/domain/generation and final identity reads precede final pure clock predicates/marker. Final private predicate uses immutable validated original journal intent expiry with the existing native effect clock, not caller timing labels. No blocking callback introduced after final credential identity check; mark immediately precedes actual swap/overwrite/unlink.",
+    "compatibility": "Existing7 lease only, R2 changes accounts.py/account_retirement.py plus new focused tests appended to currentness file. Four other source/test paths byte-identical R1. Existing no-hook/shared/external/cached original, upsert/LINK/demo behaviors preserved by selected actual fresh controls. No schema/issuer/action/authority API/policy/frontend/CI/source-family change."
+  },
+  "before_after_exact_counterexample": {
+    "unchanged_probe": "/tmp/van-be004-unlink-independent-review-20261102/test_readback_after_history.py",
+    "probe_sha256": "bb0ee2151a62e47ba82f7b6c99716b04258e22a6d96fa3917ae11e22607d6c66",
+    "before_failed_root": "/tmp/van-be004-unlink-timing-84xb08nj",
+    "before_failed_terminal": {
+      "receipt": "/tmp/van-be004-unlink-timing-84xb08nj/terminal.json",
+      "receipt_sha256": "fe8676c3ceaf295d2178788ac695c2e55ee4546d3418c05bd73df31c1de71d71",
+      "root": "/tmp/van-be004-unlink-timing-84xb08nj",
+      "raw": "/tmp/van-be004-unlink-timing-84xb08nj/raw.log",
+      "raw_sha256": "bb871c640ebd59f98ea892890b9a4a828ac05b8e3371907bba3591379c816b67",
+      "JUnit": "/tmp/van-be004-unlink-timing-84xb08nj/junit.xml",
+      "JUnit_sha256": "674988a8285bc55dfd286c6d8d4f6387553b79316db11171ac724567493ca134",
+      "exit": 1,
+      "cases": 1,
+      "PASS": 0,
+      "intended_failures": 1,
+      "seconds": 25.807745933532715,
+      "child_reaped": true,
+      "process_group_absent": true,
+      "fixture_bytes": 2107162,
+      "test_ids": [
+        "test_readback_after_history::test_blocking_final_history_read_cannot_outwait_native_observation_window"
+      ]
+    },
+    "before_observation_path": "/tmp/van-be004-unlink-timing-84xb08nj/fixtures/test_blocking_final_history_re0/timing_observation.json",
+    "before_observation": {
+      "HTTP": 200,
+      "wire_effect_state": "APPLIED",
+      "original_state": "APPLIED",
+      "registry_unchanged": false,
+      "alias_present": false,
+      "native_retirement_clock_advance_seconds": 31,
+      "history_boundary": [
+        {
+          "same_original": true,
+          "authority_unexpired": true,
+          "marker_before_first_swap": false
+        }
+      ],
+      "original_id_preserved": true
+    },
+    "before_selected_file_hash_checkpoint": {
+      "/tmp/van-be004-unlink-timing-84xb08nj/terminal.json": "fe8676c3ceaf295d2178788ac695c2e55ee4546d3418c05bd73df31c1de71d71",
+      "/tmp/van-be004-unlink-timing-84xb08nj/junit.xml": "674988a8285bc55dfd286c6d8d4f6387553b79316db11171ac724567493ca134",
+      "/tmp/van-be004-unlink-timing-84xb08nj/raw.log": "bb871c640ebd59f98ea892890b9a4a828ac05b8e3371907bba3591379c816b67",
+      "/tmp/van-be004-unlink-timing-84xb08nj/fixtures/test_blocking_final_history_re0/timing_observation.json": "2e9620bfca5015e516271bf7d93414e8f0611ab55f9e002b163a241b8e3a746f",
+      "/tmp/van-be004-unlink-timing-84xb08nj/fixtures/test_blocking_final_history_re0/accounts.json": "ff292d2ac04956cc8dd7be94163bbe0eb6be43968c02e8733335ed1772564a72",
+      "/tmp/van-be004-unlink-timing-84xb08nj/fixtures/test_blocking_final_history_re0/vati.sqlite": "3221215b213b07df22fa4a763cfa22dacfd7422874274557a210343d2b889384",
+      "/tmp/van-be004-unlink-timing-84xb08nj/fixtures/test_blocking_final_history_re0/gw.sqlite3": "104537dfa4d641fd373133eaab865b9d3c07e2bf3fa25f4483d853d760f4810d"
+    },
+    "before_raw_JUnit_terminal_hashes_match_independent_review": true,
+    "after_path": "/tmp/van-be004-unlink-r2-final-backend-pytest/test_blocking_final_history_re0/timing_observation.json",
+    "after_sha256": "b94e3846ddb1024f5dc47564822a4861bb4b5f083cea2ec9a08cdf9a9c4ea5ee",
+    "after_observation": {
+      "HTTP": 409,
+      "wire_effect_state": "REFUSED",
+      "original_state": "REFUSED",
+      "registry_unchanged": true,
+      "alias_present": true,
+      "native_retirement_clock_advance_seconds": 31,
+      "history_boundary": [
+        {
+          "same_original": true,
+          "authority_unexpired": true,
+          "marker_before_first_swap": false
+        }
+      ],
+      "original_id_preserved": true
+    },
+    "after_result": "409/authoritative originalREFUSED, original A4 still unexpired/same ID, markerFalse, registry bytes/generation untouched. Fresh distinct owned destination; no overwrite/restoration/reconstruction.",
+    "original_R1_5c_before_manifest_still_unchanged": true
+  },
+  "actual_final_proof": {
+    "fresh_PASS": 155,
+    "declared_PG_SKIP": 5,
+    "unique": 160,
+    "no_overlaps": true,
+    "terms": [
+      {
+        "schema": "van.be004.account-unlink-r2.source-proof-terminal/1",
+        "label": "final-backend",
+        "source_fingerprint": "c742984eec212ce67d7ff6a235883811cd432bed989db240b683b4ebc054f4fe",
+        "source_pins": "/tmp/van-be004-unlink-r2-final-pins.json",
+        "command": [
+          "/workspace/van-backend-venv-20261025/bin/python",
+          "-m",
+          "pytest",
+          "-v",
+          "-p",
+          "no:cacheprovider",
+          "-o",
+          "faulthandler_timeout=60",
+          "-o",
+          "asyncio_mode=auto",
+          "/tmp/van-be004-unlink-independent-review-20261102/test_readback_after_history.py",
+          "/tmp/van-be004-unlink-independent-review-20261102/test_original_expiry.py",
+          "/tmp/van-be004-unlink-independent-review-20261102/test_shred_identity.py",
+          "trading/tests/test_account_unlink_currentness.py",
+          "backend/tests/test_account_unlink_review.py",
+          "trading/tests/test_account_registry_atomic_rea.py",
+          "--basetemp=/tmp/van-be004-unlink-r2-final-backend-pytest",
+          "--junitxml=/tmp/van-be004-unlink-r2-final-backend.xml"
+        ],
+        "cwd": "/workspace/van-lanes-20261101/accounts-demo-recovery",
+        "exit_code": 0,
+        "guard_reason": null,
+        "wall_seconds": 80.77454903000034,
+        "owned_pid_and_pgid": 1277123,
+        "owned_process_terminal": true,
+        "raw_log": "/tmp/van-be004-unlink-r2-final-backend.log",
+        "raw_log_sha256": "5662a2dedeca1855fd52e3c897c07ef6759bafba68079a02e62d3461ffbd48c5",
+        "raw_bytes": 7125,
+        "junit": "/tmp/van-be004-unlink-r2-final-backend.xml",
+        "junit_sha256": "953bb6432c19ea10d157ab592ce8aa39ab6da4778bdd135c380af77b6051ace0",
+        "tmp_reserve_bytes": 2147483648,
+        "tmp_min_free_observed": 2359926784,
+        "admission_budget_bytes": 134217728,
+        "raw_cap_bytes": 8388608,
+        "selection_input_hashes": {
+          "/tmp/van-be004-unlink-independent-review-20261102/test_readback_after_history.py": "bb0ee2151a62e47ba82f7b6c99716b04258e22a6d96fa3917ae11e22607d6c66",
+          "/tmp/van-be004-unlink-independent-review-20261102/test_original_expiry.py": "43dd315501417f76d18afc1ae47e7e40ba17ed16666e9361bee02dbf0a353c97",
+          "/tmp/van-be004-unlink-independent-review-20261102/test_shred_identity.py": "74695f57b836df4d042a3d991ffdf6ec2b294aa9e830a9d4c081a6de397d79f8",
+          "trading/tests/test_account_unlink_currentness.py": "4abd5642062e30f5e23fd953b3c30b5517eb12b5e8f39c27dc0497fa6097f00d",
+          "backend/tests/test_account_unlink_review.py": "b57fd1b21f979f18d06f22c0bc2833bb3febcd4135ccf830c9412867751d7cf2",
+          "trading/tests/test_account_registry_atomic_rea.py": "be80eb54cab1adb6869b572eaccf31e92dc3710b7ad421310da72d9cc89ced73"
+        }
+      },
+      {
+        "schema": "van.be004.account-unlink-r2.source-proof-terminal/1",
+        "label": "final-native",
+        "source_fingerprint": "c742984eec212ce67d7ff6a235883811cd432bed989db240b683b4ebc054f4fe",
+        "source_pins": "/tmp/van-be004-unlink-r2-final-pins.json",
+        "command": [
+          "/workspace/van-backend-venv-20261025/bin/python",
+          "-m",
+          "pytest",
+          "-v",
+          "-p",
+          "no:cacheprovider",
+          "-o",
+          "faulthandler_timeout=60",
+          "-o",
+          "asyncio_mode=auto",
+          "trading/tests/test_account_retirement_native_guards.py",
+          "trading/tests/test_account_retirement_pg.py",
+          "trading/tests/test_retirement_venue_observations.py",
+          "trading/tests/test_native_account_effects.py",
+          "trading/tests/test_account_update_semantics.py",
+          "trading/tests/test_oauth_link_currentness.py",
+          "trading/tests/test_demo_creation_recovery.py",
+          "--basetemp=/tmp/van-be004-unlink-r2-final-native-pytest",
+          "--junitxml=/tmp/van-be004-unlink-r2-final-native.xml"
+        ],
+        "cwd": "/workspace/van-lanes-20261101/accounts-demo-recovery",
+        "exit_code": 0,
+        "guard_reason": null,
+        "wall_seconds": 12.056035029003397,
+        "owned_pid_and_pgid": 1280670,
+        "owned_process_terminal": true,
+        "raw_log": "/tmp/van-be004-unlink-r2-final-native.log",
+        "raw_log_sha256": "3e40ff1b1b21a3069e017e922d0012ecc6d38d2b7f57bdb139d6f72c2f50ce01",
+        "raw_bytes": 18374,
+        "junit": "/tmp/van-be004-unlink-r2-final-native.xml",
+        "junit_sha256": "7061d305e87c0542d015ad7c9596ccb04b9b452205b9d7e5bbbc1b90643585e4",
+        "tmp_reserve_bytes": 2147483648,
+        "tmp_min_free_observed": 2357964800,
+        "admission_budget_bytes": 134217728,
+        "raw_cap_bytes": 8388608,
+        "selection_input_hashes": {
+          "trading/tests/test_account_retirement_native_guards.py": "cca045735bd4b1a603fab62c5648e565e26dad19d71c80cef98d68bcf42d1341",
+          "trading/tests/test_account_retirement_pg.py": "418d41b11a7c19ae2c35182cb262330cc9beef0529321176ebb053e8158561e4",
+          "trading/tests/test_retirement_venue_observations.py": "de3840d10740ba93f9a443c34330b93d6d73b3df3f26f9cf77590a88501bcb2f",
+          "trading/tests/test_native_account_effects.py": "332a900ddc0207d9e9bc78a37e3d07a00571c5d7d2be91cc7c242ae3f6d05f8c",
+          "trading/tests/test_account_update_semantics.py": "394c88eea36d654d12be8feb157323f3fc36ecd04f79a73af0612540926ff253",
+          "trading/tests/test_oauth_link_currentness.py": "b8283e2c8e319aa94d1dda46c8f19c63358322c39732a8b8817f567c591694e8",
+          "trading/tests/test_demo_creation_recovery.py": "1593fb9f62aeeb9f1a5fd3dc65b477e4abca8b70a2128d9f9a28524ed07431ad"
+        }
+      }
+    ],
+    "case_input_mapping": [
+      {
+        "id": "::test_blocking_final_history_read_cannot_outwait_native_observation_window",
+        "state": "PASS",
+        "terminal": "final-backend",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+      },
+      {
+        "id": "::test_original_unlink_expiry_before_actual_registry_swap_refuses",
+        "state": "PASS",
+        "terminal": "final-backend",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+      },
+      {
+        "id": "::test_guard_delayed_symlink_substitution_cannot_touch_external_or_unlink_replacement[overwrite]",
+        "state": "PASS",
+        "terminal": "final-backend",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+      },
+      {
+        "id": "::test_guard_delayed_symlink_substitution_cannot_touch_external_or_unlink_replacement[unlink]",
+        "state": "PASS",
+        "terminal": "final-backend",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+      },
+      {
+        "id": "trading.tests.test_account_unlink_currentness::test_actual_registered_unlink_rechecks_current_envelope_at_writer_and_retains_original_history[key]",
+        "state": "PASS",
+        "terminal": "final-backend",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+      },
+      {
+        "id": "trading.tests.test_account_unlink_currentness::test_actual_registered_unlink_rechecks_current_envelope_at_writer_and_retains_original_history[transport_time]",
+        "state": "PASS",
+        "terminal": "final-backend",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+      },
+      {
+        "id": "trading.tests.test_account_unlink_currentness::test_actual_registered_unlink_rechecks_current_envelope_at_writer_and_retains_original_history[healthy_cached]",
+        "state": "PASS",
+        "terminal": "final-backend",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+      },
+      {
+        "id": "trading.tests.test_account_unlink_currentness::test_real_queued_unlink_writer_refuses_expiry_without_original_mutation",
+        "state": "PASS",
+        "terminal": "final-backend",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+      },
+      {
+        "id": "trading.tests.test_account_unlink_currentness::test_real_child_death_after_unlink_cannot_reopen_original_or_grant_cleanup",
+        "state": "PASS",
+        "terminal": "final-backend",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+      },
+      {
+        "id": "trading.tests.test_account_unlink_currentness::test_held_retirement_lease_cannot_expire_during_final_validation[history]",
+        "state": "PASS",
+        "terminal": "final-backend",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+      },
+      {
+        "id": "trading.tests.test_account_unlink_currentness::test_held_retirement_lease_cannot_expire_during_final_validation[lease_read]",
+        "state": "PASS",
+        "terminal": "final-backend",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+      },
+      {
+        "id": "trading.tests.test_account_unlink_currentness::test_held_retirement_lease_cannot_expire_during_final_validation[final_domain]",
+        "state": "PASS",
+        "terminal": "final-backend",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+      },
+      {
+        "id": "trading.tests.test_account_unlink_currentness::test_expiry_during_last_shred_identity_wait_preserves_credentials_as_partial_unknown",
+        "state": "PASS",
+        "terminal": "final-backend",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+      },
+      {
+        "id": "backend.tests.test_account_unlink_review::test_signed_unlink_keeps_native_history_and_never_reports_broker_closure",
+        "state": "PASS",
+        "terminal": "final-backend",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+      },
+      {
+        "id": "backend.tests.test_account_unlink_review::test_lost_native_reply_after_unlink_is_recovered_by_original_read_without_repetition",
+        "state": "PASS",
+        "terminal": "final-backend",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+      },
+      {
+        "id": "backend.tests.test_account_unlink_review::test_active_runtime_refuses_unlink_before_an_owner_challenge_is_issued",
+        "state": "PASS",
+        "terminal": "final-backend",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+      },
+      {
+        "id": "backend.tests.test_account_unlink_review::test_runtime_starting_after_proof_is_consumed_refuses_original_without_shredding",
+        "state": "PASS",
+        "terminal": "final-backend",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+      },
+      {
+        "id": "backend.tests.test_account_unlink_review::test_catalog_requires_the_same_native_review_for_local_unlink",
+        "state": "PASS",
+        "terminal": "final-backend",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+      },
+      {
+        "id": "backend.tests.test_account_unlink_review::test_exact_nonzero_native_funds_are_in_the_signed_owner_review",
+        "state": "PASS",
+        "terminal": "final-backend",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+      },
+      {
+        "id": "backend.tests.test_account_unlink_review::test_native_funds_changing_after_gateway_preflight_requires_fresh_review",
+        "state": "PASS",
+        "terminal": "final-backend",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+      },
+      {
+        "id": "backend.tests.test_account_unlink_review::test_incomplete_or_broker_closing_native_review_is_refused_before_signature[remote_account_closed-True]",
+        "state": "PASS",
+        "terminal": "final-backend",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+      },
+      {
+        "id": "backend.tests.test_account_unlink_review::test_incomplete_or_broker_closing_native_review_is_refused_before_signature[retained_remote_funds-None]",
+        "state": "PASS",
+        "terminal": "final-backend",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+      },
+      {
+        "id": "backend.tests.test_account_unlink_review::test_final_unlink_writer_rechecks_original_scope_and_fresh_native_facts[resolution]",
+        "state": "PASS",
+        "terminal": "final-backend",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+      },
+      {
+        "id": "backend.tests.test_account_unlink_review::test_final_unlink_writer_rechecks_original_scope_and_fresh_native_facts[fsync]",
+        "state": "PASS",
+        "terminal": "final-backend",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+      },
+      {
+        "id": "backend.tests.test_account_unlink_review::test_final_unlink_writer_rechecks_original_scope_and_fresh_native_facts[namespace]",
+        "state": "PASS",
+        "terminal": "final-backend",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+      },
+      {
+        "id": "backend.tests.test_account_unlink_review::test_final_unlink_writer_rechecks_original_scope_and_fresh_native_facts[version]",
+        "state": "PASS",
+        "terminal": "final-backend",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+      },
+      {
+        "id": "backend.tests.test_account_unlink_review::test_final_unlink_writer_rechecks_original_scope_and_fresh_native_facts[readback_age]",
+        "state": "PASS",
+        "terminal": "final-backend",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+      },
+      {
+        "id": "backend.tests.test_account_unlink_review::test_final_unlink_writer_rechecks_original_scope_and_fresh_native_facts[future_clock]",
+        "state": "PASS",
+        "terminal": "final-backend",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+      },
+      {
+        "id": "backend.tests.test_account_unlink_review::test_final_unlink_writer_rechecks_original_scope_and_fresh_native_facts[lease]",
+        "state": "PASS",
+        "terminal": "final-backend",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+      },
+      {
+        "id": "backend.tests.test_account_unlink_review::test_partial_unlink_stays_original_unknown_without_cleanup_or_resend_authority[before_shred]",
+        "state": "PASS",
+        "terminal": "final-backend",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+      },
+      {
+        "id": "backend.tests.test_account_unlink_review::test_partial_unlink_stays_original_unknown_without_cleanup_or_resend_authority[before_shred_missing]",
+        "state": "PASS",
+        "terminal": "final-backend",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+      },
+      {
+        "id": "backend.tests.test_account_unlink_review::test_partial_unlink_stays_original_unknown_without_cleanup_or_resend_authority[after_overwrite_expiry]",
+        "state": "PASS",
+        "terminal": "final-backend",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+      },
+      {
+        "id": "backend.tests.test_account_unlink_review::test_partial_unlink_stays_original_unknown_without_cleanup_or_resend_authority[after_overwrite_io]",
+        "state": "PASS",
+        "terminal": "final-backend",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+      },
+      {
+        "id": "trading.tests.test_account_registry_atomic_rea::test_replace_validates_before_any_registry_mutation",
+        "state": "PASS",
+        "terminal": "final-backend",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+      },
+      {
+        "id": "trading.tests.test_account_registry_atomic_rea::test_failed_atomic_swap_does_not_destroy_old_registry",
+        "state": "PASS",
+        "terminal": "final-backend",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+      },
+      {
+        "id": "trading.tests.test_account_registry_atomic_rea::test_new_registry_file_is_owner_only_and_is_valid_json",
+        "state": "PASS",
+        "terminal": "final-backend",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+      },
+      {
+        "id": "trading.tests.test_account_registry_atomic_rea::test_upsert_alternative_is_explicit_replace_only",
+        "state": "PASS",
+        "terminal": "final-backend",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+      },
+      {
+        "id": "trading.tests.test_account_registry_atomic_rea::test_optional_trusted_guard_runs_after_fsync_and_refusal_preserves_bytes_revision_and_memory[add]",
+        "state": "PASS",
+        "terminal": "final-backend",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+      },
+      {
+        "id": "trading.tests.test_account_registry_atomic_rea::test_optional_trusted_guard_runs_after_fsync_and_refusal_preserves_bytes_revision_and_memory[replace]",
+        "state": "PASS",
+        "terminal": "final-backend",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+      },
+      {
+        "id": "trading.tests.test_account_registry_atomic_rea::test_optional_trusted_guard_runs_after_fsync_and_refusal_preserves_bytes_revision_and_memory[remove]",
+        "state": "PASS",
+        "terminal": "final-backend",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+      },
+      {
+        "id": "trading.tests.test_account_retirement_native_guards::test_native_unlink_retains_profile_and_protection_credentials_when_not_safe[position]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_retirement_native_guards::test_native_unlink_retains_profile_and_protection_credentials_when_not_safe[pending]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_retirement_native_guards::test_native_unlink_retains_profile_and_protection_credentials_when_not_safe[funds]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_retirement_native_guards::test_native_unlink_retains_profile_and_protection_credentials_when_not_safe[unavailable]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_retirement_native_guards::test_native_unlink_retains_profile_and_protection_credentials_when_not_safe[lease]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_retirement_native_guards::test_native_unlink_retains_profile_and_protection_credentials_when_not_safe[original-unknown]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_retirement_native_guards::test_known_nonzero_funds_are_retained_remotely_not_reported_closed",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_retirement_native_guards::test_unbound_original_protective_exit_cannot_be_assumed_to_belong_to_another_account",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_retirement_native_guards::test_actual_paper_order_and_cash_close_need_settled_history_before_local_unlink[False]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_retirement_native_guards::test_actual_paper_order_and_cash_close_need_settled_history_before_local_unlink[True]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_retirement_native_guards::test_unlink_does_not_destroy_credentials_shared_with_another_native_account",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_retirement_native_guards::test_unmanaged_credential_reference_does_not_authorize_deleting_another_alias_file",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_retirement_native_guards::test_a_shared_reference_added_after_native_readback_is_rechecked_before_deletion",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_retirement_native_guards::test_unreachable_authority_is_not_reported_as_observed_lease_exclusion",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_retirement_pg::test_actual_pg_live_runtime_prevents_destructive_unlink",
+        "state": "SKIP",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_retirement_pg::test_actual_pg_first_retirement_owns_the_previously_absent_lease_row",
+        "state": "SKIP",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_retirement_pg::test_actual_pg_row_guard_fences_a_competing_actor_even_beyond_lease_ttl",
+        "state": "SKIP",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_retirement_venue_observations::test_native_ctrader_currency_is_resolved_from_deposit_asset_not_default_usd",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_retirement_venue_observations::test_missing_or_mismatched_native_funds_are_not_healthy_defaults[currency]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_retirement_venue_observations::test_missing_or_mismatched_native_funds_are_not_healthy_defaults[precision]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_retirement_venue_observations::test_missing_or_mismatched_native_funds_are_not_healthy_defaults[identity]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_retirement_venue_observations::test_missing_deriv_native_balance_cannot_be_guessed_zero",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_retirement_venue_observations::test_legacy_ea_snapshot_has_unknown_orders_until_explicit_observation",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_completed_original_returns_its_original_result_without_reissuing_a_key",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_operation_identity_cannot_be_reassigned_after_completion[change0]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_operation_identity_cannot_be_reassigned_after_completion[change1]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_operation_identity_cannot_be_reassigned_after_completion[change2]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_operation_identity_cannot_be_reassigned_after_completion[change3]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_failure_after_a_registry_effect_fences_original_and_new_approvals",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_validation_refusal_before_effect_does_not_permanently_fence_the_target",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_actual_child_death_after_native_effect_cannot_reopen_the_original_attempt",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_postcommit_reply_failure_reads_confirmed_history_without_another_effect",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_well_sealed_but_invalid_operation_history_refuses_all_new_effects[producer]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_well_sealed_but_invalid_operation_history_refuses_all_new_effects[intent]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_well_sealed_but_invalid_operation_history_refuses_all_new_effects[predecessor]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_well_sealed_but_invalid_operation_history_refuses_all_new_effects[phase]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_well_sealed_but_invalid_operation_history_refuses_all_new_effects[secret]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_in_flight_scope_survives_authority_expiry_and_cold_reader",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_missing_native_operation_is_unknown_and_a_foreign_device_cannot_read_result",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_provider_link_cannot_bypass_an_unconfirmed_account_target",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_expired_original_authority_is_refused_before_any_native_effect",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_postgres_original_operation_is_atomic_and_isolated_between_named_ledgers",
+        "state": "SKIP",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_actual_concurrent_native_claim_writers_cannot_admit_two_effects_for_a_target[sqlite]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_actual_concurrent_native_claim_writers_cannot_admit_two_effects_for_a_target[postgres]",
+        "state": "SKIP",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_update_semantics::test_an_approved_label_edit_cannot_reset_unsupplied_native_fields[mode]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_update_semantics::test_an_approved_label_edit_cannot_reset_unsupplied_native_fields[currency]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_update_semantics::test_an_approved_label_edit_cannot_reset_unsupplied_native_fields[server]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_update_semantics::test_an_approved_label_edit_cannot_reset_unsupplied_native_fields[login]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_update_semantics::test_an_approved_label_edit_cannot_reset_unsupplied_native_fields[venue]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_update_semantics::test_an_approved_label_edit_cannot_reset_unsupplied_native_fields[bridge_url]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_update_semantics::test_an_approved_label_edit_cannot_reset_unsupplied_native_fields[credential_ref]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_update_semantics::test_an_approved_label_edit_cannot_reset_unsupplied_native_fields[demo]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_update_semantics::test_an_approved_label_edit_cannot_reset_unsupplied_native_fields[enabled]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_update_semantics::test_an_approved_label_edit_cannot_reset_unsupplied_native_fields[mandate_ref]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_update_semantics::test_an_approved_label_edit_cannot_reset_unsupplied_native_fields[notes]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_update_semantics::test_metadata_edit_does_not_create_a_new_empty_vault_or_drop_existing_reference",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_update_semantics::test_owner_can_disable_and_reenable_without_resupplying_or_rebinding_account_identity",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_update_semantics::test_ambiguous_enabled_values_are_refused_before_any_native_write[false]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_update_semantics::test_ambiguous_enabled_values_are_refused_before_any_native_write[0]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_update_semantics::test_ambiguous_enabled_values_are_refused_before_any_native_write[None]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_update_semantics::test_unsupported_control_is_never_reported_as_applied",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_update_semantics::test_registration_cannot_redirect_future_deriv_credentials_to_an_untrusted_endpoint[wss://ws.derivws.com.evil.invalid/websockets/v3]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_update_semantics::test_registration_cannot_redirect_future_deriv_credentials_to_an_untrusted_endpoint[wss://ws.derivws.com@evil.invalid/websockets/v3]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_update_semantics::test_registration_cannot_redirect_future_deriv_credentials_to_an_untrusted_endpoint[ws://ws.derivws.com/websockets/v3]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_update_semantics::test_existing_untrusted_connection_can_be_disabled_without_first_repairing_identity",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_update_semantics::test_provider_link_cannot_rebind_an_existing_alias_or_replace_its_secret_reference",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_oauth_link_currentness::test_slow_authorization_cannot_overtake_original_link_currentness[expired]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_oauth_link_currentness::test_slow_authorization_cannot_overtake_original_link_currentness[namespace]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_oauth_link_currentness::test_slow_authorization_cannot_overtake_original_link_currentness[version]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_oauth_link_currentness::test_slow_authorization_cannot_overtake_original_link_currentness[authority]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_oauth_link_currentness::test_expiry_before_protected_credentials_preserves_partial_history",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_oauth_link_currentness::test_actual_registered_signed_owner_rechecked_after_authorize[key]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_oauth_link_currentness::test_actual_registered_signed_owner_rechecked_after_authorize[time]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_oauth_link_currentness::test_queued_profile_writer_keeps_original_link_and_refuses_stale_preimage",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_healthy_original_is_independently_verified_and_never_creates_again",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_uncertain_remote_or_local_completion_fences_original_and_new_approval[reply]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_uncertain_remote_or_local_completion_fences_original_and_new_approval[identity]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_uncertain_remote_or_local_completion_fences_original_and_new_approval[credentials]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_uncertain_remote_or_local_completion_fences_original_and_new_approval[registry]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_uncertain_remote_or_local_completion_fences_original_and_new_approval[completion]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_ambiguous_provider_subject_overlaps_unresolved_known_subject[None-owner@example.com]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_ambiguous_provider_subject_overlaps_unresolved_known_subject[owner@example.com-None]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_ambiguous_provider_subject_overlaps_unresolved_known_subject[owner@example.com-bad-email]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_unverified_different_email_cannot_escape_but_unrelated_account_stays_operable",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_lost_or_changed_vault_cannot_rekey_unresolved_creation[missing]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_lost_or_changed_vault_cannot_rekey_unresolved_creation[malformed]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_lost_or_changed_vault_cannot_rekey_unresolved_creation[replaced]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_lost_or_changed_vault_cannot_rekey_unresolved_creation[permissions]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_completed_history_remains_readable_without_vault_key",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_authenticated_namespace_is_current_state_data_without_business_effect_or_revision",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_namespace_vault_continuity_never_mints_an_independent_replacement[missing]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_namespace_vault_continuity_never_mints_an_independent_replacement[malformed]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_namespace_vault_continuity_never_mints_an_independent_replacement[conflicting]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_namespace_vault_continuity_never_mints_an_independent_replacement[missing_hint]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_namespace_commit_or_vault_write_loss_recovers_only_same_immutable_hint[vault_write]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_namespace_commit_or_vault_write_loss_recovers_only_same_immutable_hint[commit_ack]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_legacy_original_is_never_retroactively_bound_and_its_provider_fence_remains",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_backup_namespace_continuity_and_independent_authenticated_native_stores",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_original_demo_result_cannot_be_read_or_reassigned_by_another_device",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_missing_original_creation_identity_cannot_invent_a_completed_account[client_id]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_missing_original_creation_identity_cannot_invent_a_completed_account[currency]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_missing_original_creation_identity_cannot_invent_a_completed_account[oauth_token]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_registered_signed_owner_current_key_is_rechecked_after_native_claim",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_last_wire_guard_rechecks_after_slow_provider_connect[expiry]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_last_wire_guard_rechecks_after_slow_provider_connect[namespace]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_last_wire_guard_rechecks_after_slow_provider_connect[version]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_signed_current_token_is_rechecked_at_wire_after_connect",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_transport_hook_is_per_call_and_refusal_does_not_leak_into_default_read_path",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_legacy_signed_current_owner_without_private_metadata_has_original_intent[none]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_legacy_signed_current_owner_without_private_metadata_has_original_intent[provider_reply]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_legacy_signed_current_owner_without_private_metadata_has_original_intent[completed_reply]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_refusal_and_currentness_checks_precede_first_provider_send[expired]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_refusal_and_currentness_checks_precede_first_provider_send[version]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_refusal_and_currentness_checks_precede_first_provider_send[digest]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_refusal_and_currentness_checks_precede_first_provider_send[dispatch-revoked]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_refusal_and_currentness_checks_precede_first_provider_send[late-expiry]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_refusal_and_currentness_checks_precede_first_provider_send[malformed]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_real_process_death_after_send_retains_original_claim_and_never_resends",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_real_process_key_race_and_provider_subject_arbitration[True]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_real_process_key_race_and_provider_subject_arbitration[False]",
+        "state": "PASS",
+        "terminal": "final-native",
+        "JUnit": "/tmp/van-be004-unlink-r2-final-native.xml"
+      }
+    ],
+    "old12_positive_controls_fresh_mapping": {
+      "::test_original_unlink_expiry_before_actual_registry_swap_refuses": [
+        {
+          "id": "::test_original_unlink_expiry_before_actual_registry_swap_refuses",
+          "state": "PASS",
+          "terminal": "final-backend",
+          "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+        }
+      ],
+      "::test_guard_delayed_symlink_substitution_cannot_touch_external_or_unlink_replacement[overwrite]": [
+        {
+          "id": "::test_guard_delayed_symlink_substitution_cannot_touch_external_or_unlink_replacement[overwrite]",
+          "state": "PASS",
+          "terminal": "final-backend",
+          "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+        }
+      ],
+      "::test_guard_delayed_symlink_substitution_cannot_touch_external_or_unlink_replacement[unlink]": [
+        {
+          "id": "::test_guard_delayed_symlink_substitution_cannot_touch_external_or_unlink_replacement[unlink]",
+          "state": "PASS",
+          "terminal": "final-backend",
+          "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+        }
+      ],
+      "trading.tests.test_account_unlink_currentness::test_real_queued_unlink_writer_refuses_expiry_without_original_mutation": [
+        {
+          "id": "trading.tests.test_account_unlink_currentness::test_real_queued_unlink_writer_refuses_expiry_without_original_mutation",
+          "state": "PASS",
+          "terminal": "final-backend",
+          "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+        }
+      ],
+      "trading.tests.test_account_registry_atomic_rea::test_optional_trusted_guard_runs_after_fsync_and_refusal_preserves_bytes_revision_and_memory[remove]": [
+        {
+          "id": "trading.tests.test_account_registry_atomic_rea::test_optional_trusted_guard_runs_after_fsync_and_refusal_preserves_bytes_revision_and_memory[remove]",
+          "state": "PASS",
+          "terminal": "final-backend",
+          "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+        }
+      ],
+      "backend.tests.test_account_unlink_review::test_final_unlink_writer_rechecks_original_scope_and_fresh_native_facts[readback_age]": [
+        {
+          "id": "backend.tests.test_account_unlink_review::test_final_unlink_writer_rechecks_original_scope_and_fresh_native_facts[readback_age]",
+          "state": "PASS",
+          "terminal": "final-backend",
+          "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+        }
+      ],
+      "backend.tests.test_account_unlink_review::test_final_unlink_writer_rechecks_original_scope_and_fresh_native_facts[future_clock]": [
+        {
+          "id": "backend.tests.test_account_unlink_review::test_final_unlink_writer_rechecks_original_scope_and_fresh_native_facts[future_clock]",
+          "state": "PASS",
+          "terminal": "final-backend",
+          "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+        }
+      ],
+      "backend.tests.test_account_unlink_review::test_final_unlink_writer_rechecks_original_scope_and_fresh_native_facts[lease]": [
+        {
+          "id": "backend.tests.test_account_unlink_review::test_final_unlink_writer_rechecks_original_scope_and_fresh_native_facts[lease]",
+          "state": "PASS",
+          "terminal": "final-backend",
+          "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+        }
+      ],
+      "trading.tests.test_account_unlink_currentness::test_actual_registered_unlink_rechecks_current_envelope_at_writer_and_retains_original_history[key]": [
+        {
+          "id": "trading.tests.test_account_unlink_currentness::test_actual_registered_unlink_rechecks_current_envelope_at_writer_and_retains_original_history[key]",
+          "state": "PASS",
+          "terminal": "final-backend",
+          "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+        }
+      ],
+      "trading.tests.test_account_unlink_currentness::test_actual_registered_unlink_rechecks_current_envelope_at_writer_and_retains_original_history[healthy_cached]": [
+        {
+          "id": "trading.tests.test_account_unlink_currentness::test_actual_registered_unlink_rechecks_current_envelope_at_writer_and_retains_original_history[healthy_cached]",
+          "state": "PASS",
+          "terminal": "final-backend",
+          "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+        }
+      ],
+      "backend.tests.test_account_unlink_review::test_partial_unlink_stays_original_unknown_without_cleanup_or_resend_authority[before_shred_missing]": [
+        {
+          "id": "backend.tests.test_account_unlink_review::test_partial_unlink_stays_original_unknown_without_cleanup_or_resend_authority[before_shred_missing]",
+          "state": "PASS",
+          "terminal": "final-backend",
+          "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+        }
+      ],
+      "backend.tests.test_account_unlink_review::test_partial_unlink_stays_original_unknown_without_cleanup_or_resend_authority[after_overwrite_expiry]": [
+        {
+          "id": "backend.tests.test_account_unlink_review::test_partial_unlink_stays_original_unknown_without_cleanup_or_resend_authority[after_overwrite_expiry]",
+          "state": "PASS",
+          "terminal": "final-backend",
+          "JUnit": "/tmp/van-be004-unlink-r2-final-backend.xml"
+        }
+      ]
+    },
+    "R1_old302PASS5SKIP307_not_added_to_new_proof": true,
+    "NOT_full_suite_or_unit_acceptance": true,
+    "justified_selection": "40fresh paired/control cases cover all newly changed timing/marker paths, unchanged exact reviewer probe and its12 old positives, new3held-lease waits+last-identity-wait UNKNOWN.115fresh native cases/5PGskips cover affected retirement/lease/readback/native history plus default upsert/LINK/demo/journal semantics. No automatic all307 rerun; no old cases represented as new-byte passes.",
+    "new_cases": [
+      "held lease expires during final native history while A4 valid and source age6s<30s",
+      "held lease store read returns after captured early clock; actual held lease expires before mark",
+      "current native domain read waits after history/lease validation; final pure clock refuses",
+      "last protected shred identity check waits beyond31s after guard; registry already removed, credentials unchanged, originalUNKNOWN/resultNone"
+    ],
+    "no_reuse_as_new_bytes": "Prior R1 raw302PASS/5SKIP and case/input mapping retained historical only. Source input preservation noted for unchanged paths, not a new entire unit result. Five PG scenarios still skipped; no provider/hardware qualification."
+  },
+  "history_preservation": {
+    "R1_handoff": "/tmp/van-be004-unlink-r1-handoff-20261101.json",
+    "R1_handoff_sha256": "7ee736f67749ef6da3d24bf992d80f14e38103b550ecc3df7a71c873fd8d00a7",
+    "R1_before_manifest": "/tmp/van-be004-unlink-r1-before-preservation-20261101.json",
+    "R1_review_failed_fixture_retained": true,
+    "intermediate_R2_dev36PASS": "/tmp/van-be004-unlink-r2-dev1-terminal.json; earlier candidate, not current frozen proof. Final pure-marker refinement and final identity-wait regression freshly rerun.",
+    "R2_completed_success_cleanup": "/tmp/van-be004-unlink-r2-prior-completed-fixture-cleanup-20261102.json",
+    "cleanup_scope": "Only own completed successful R1 caller/OAuth fixture trees after raw/JUnit/pins + no live FD validation; all before/partial/reviewer failures and raw/JUnit/source receipts retained. No peer/cache/platform cleanup.",
+    "known_peer_test_input_repair": "Root separate test_stateful_link_binding deterministic async-wait repair not absorbed or modified; no execution/qualification of future peer bytes claimed."
+  },
+  "preserved_unleased_consumed_inputs": {
+    "trading/commander/account_effects.py": true,
+    "trading/vati/accounts/resource_version.py": true,
+    "trading/vati/app/account_lease.py": true,
+    "trading/vati/app/sqlite_lease.py": true,
+    "backend/van_gateway/trading/accounts.py": true,
+    "backend/tests/test_account_update_review.py": true,
+    "backend/tests/test_trading_api.py": true,
+    "backend/tests/test_trading_oauth_scope.py": true,
+    "trading/tests/test_account_retirement_native_guards.py": true
+  },
+  "consumed_gateway_composition_mapping": "/tmp/van-be004-unlink-r1-consumed-preimages-20261101.json; four account-route ASTs equal5c, whole gateway app preview mount delta explicit; own lane HTTP composition tested, no merged main app claim.",
+  "OPEN_original_obligations": [
+    "Safe owner pending-shred reconciliation and durable per-step facts remain UNIMPLEMENTED original BE004 recovery. Strict UNKNOWN.resultNone/no reopen/no resend retained; current file/registry observations are Source projection facts, never completion or cleanup authority.",
+    "Independent fresh reauth/lockout is implementation/contract design missing; existing actual per-use biometric key may support a separately purpose-bound challenge if its existing owner contract permits. No new issuer or externalpermission need inferred from absence; not implemented or assumed here; genuine hardware/native admission separate.",
+    "Grace delete/cancel/OQ15 owner-selected duration, retention/anonymization, OAuth/strategy/funds dispositions and provider-closure/settlement remain OPEN, no seven-day/default/remoteclosed inference.",
+    "Full11requirements/21acceptance/20contexts/6LAC, other entitled edits, unit/formal/PRE003/BG001/PG/provider/native/SDK/S24/production acceptance remain OPEN."
+  ],
+  "execution": {
+    "all_owned_groups_terminal": true,
+    "owned_run_pgids": [
+      1277123,
+      1280670,
+      1273124
+    ],
+    "active_owned_children": [],
+    "own_child_thread_work_reaped": true,
+    "no_main_peer_source_auth_hooks_canon_commits_push_CI_provider_native_SDK_effect": true,
+    "source_helper_context_schema_unchanged": true,
+    "no_runtime_key_or_old_quarantined_export_read_copy_promotion": true,
+    "tmp_free_bytes": 2297303040,
+    "workspace_free_bytes": 91238400,
+    "tmp_reserve_bytes": 2147483648,
+    "per_run_budget_bytes": 134217728,
+    "raw_cap_bytes": 8388608,
+    "wall_cap_seconds": 600
+  }
+}

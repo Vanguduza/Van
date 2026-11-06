@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="10" time="0.449" timestamp="2026-10-27T05:42:36.133232+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_risk_arithmetic_context" name="test_portfolio_loss_and_leg_reports_do_not_inherit_caller_rounding[ROUND_DOWN]" time="0.162" /><testcase classname="trading.tests.test_risk_arithmetic_context" name="test_portfolio_loss_and_leg_reports_do_not_inherit_caller_rounding[ROUND_UP]" time="0.002" /><testcase classname="trading.tests.test_risk_arithmetic_context" name="test_native_sizing_keeps_exact_budget_and_venue_round_down[ROUND_DOWN]" time="0.001" /><testcase classname="trading.tests.test_risk_arithmetic_context" name="test_native_sizing_keeps_exact_budget_and_venue_round_down[ROUND_UP]" time="0.001" /><testcase classname="trading.tests.test_risk_arithmetic_context" name="test_bounded_multiplier_product_preserves_original_joint_parameters[ROUND_DOWN]" time="0.001" /><testcase classname="trading.tests.test_risk_arithmetic_context" name="test_bounded_multiplier_product_preserves_original_joint_parameters[ROUND_UP]" time="0.001" /><testcase classname="trading.tests.test_risk_arithmetic_context" name="test_real_authority_cannot_admit_over_heat_by_lowering_callers_precision" time="0.023" /><testcase classname="trading.tests.test_risk_arithmetic_context" name="test_normal_context_positive_control_still_produces_bound_native_approval" time="0.006" /><testcase classname="trading.tests.test_risk_arithmetic_context" name="test_nonterminating_tick_conversion_preserves_exact_original_loss" time="0.001" /><testcase classname="trading.tests.test_risk_arithmetic_context" name="test_rounding_a_reporting_ratio_cannot_hide_any_excess_over_signed_heat" time="0.007"><failure message="AssertionError: assert &lt;Decision.APPROVED: 'APPROVED'&gt; is &lt;Decision.REJECTED: 'REJECTED'&gt;&#10; +  where &lt;Decision.APPROVED: 'APPROVED'&gt; = RiskDecision(trade_intent_id='ti-1', decision=&lt;Decision.APPROVED: 'APPROVED'&gt;, reason_code='OK', reason_detail='', app...e7eb6c80c', mandate_hash='e8e2de458db1f7319db784502e7405bbdfffb52d2eadcd43e56d07307f9385b3', approval_schema_version=2).decision&#10; +  and   &lt;Decision.REJECTED: 'REJECTED'&gt; = Decision.REJECTED">eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+mandate = TradingMandate(mandate_id='mandate-fx-primary', version='1.0.0', account_alias='fx_primary', venue='mt5', mode=&lt;Author...se)), strategy_risk_budgets={}, trading_temperament=None, strategy_temperaments={}, temperament_owner_signature_ref='')
+
+    def test_rounding_a_reporting_ratio_cannot_hide_any_excess_over_signed_heat(eurusd, mandate):
+        contract = replace(eurusd, tick_value=Decimal('5e-102'))
+        positions = tuple(OpenPosition('GBPUSD', side, Decimal('1'), Decimal('0.000750075'),
+            Decimal('100000'), 'GBP', 'USD', has_broker_side_stop=True)
+            for side in (Direction.LONG, Direction.SHORT))
+        facts = snapshot(contract, equity=Decimal('10001'), balance=Decimal('10001'),
+            peak_equity=Decimal('10001'), day_start_equity=Decimal('10001'),
+            week_start_equity=Decimal('10001'), open_positions=positions)
+        # Existing gross heat equals the signed ceiling exactly. Opposing currency
+        # legs cancel, but gross loss does not. Any positive new loss must refuse.
+        original_loss = sum((Fraction(p.lots) * Fraction(p.stop_distance)
+                             * Fraction(p.value_per_price_unit_per_lot) for p in positions), Fraction())
+        assert original_loss / Fraction(facts.equity) == Fraction(mandate.max_open_stop_risk)
+        with localcontext(native_decimal_context()):
+            result = RiskAuthority(mandate).evaluate_safe(intent(), facts)
+&gt;       assert result.decision is Decision.REJECTED
+E       AssertionError: assert &lt;Decision.APPROVED: 'APPROVED'&gt; is &lt;Decision.REJECTED: 'REJECTED'&gt;
+E        +  where &lt;Decision.APPROVED: 'APPROVED'&gt; = RiskDecision(trade_intent_id='ti-1', decision=&lt;Decision.APPROVED: 'APPROVED'&gt;, reason_code='OK', reason_detail='', app...e7eb6c80c', mandate_hash='e8e2de458db1f7319db784502e7405bbdfffb52d2eadcd43e56d07307f9385b3', approval_schema_version=2).decision
+E        +  and   &lt;Decision.REJECTED: 'REJECTED'&gt; = Decision.REJECTED
+
+trading/tests/test_risk_arithmetic_context.py:103: AssertionError</failure></testcase></testsuite></testsuites>

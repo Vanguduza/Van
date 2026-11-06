@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.security.DeviceProofQueryTargetTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-10-27T06:50:50" hostname="runnervmtai0g" time="0.016">
+  <properties/>
+  <testcase name="a signed owner DELETE cannot change its subject predicate or scope query()" classname="com.dial.van.security.DeviceProofQueryTargetTest" time="0.016"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

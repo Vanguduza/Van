@@ -1,0 +1,1531 @@
+{
+  "schema": "van.be004.lac134.source-handoff/1",
+  "at_utc": "2026-11-01T19:38:35.076385+00:00",
+  "state": "FROZEN_CANDIDATE_SOURCE_FOR_INDEPENDENT_REVIEW_IDLE",
+  "published_base": "ba817c4a6aeaf9a8272d81270f6d0abaf7c18feb",
+  "isolated_checkout": "/workspace/van-lanes-20261101/accounts-demo-recovery",
+  "isolated_original_HEAD": "53c3457c417a8545380ab8c4e538c727c862dfba",
+  "source_pins": "/tmp/van-be004-lac134-final-pins.json",
+  "source_fingerprint": "1cd68541b19f9c282a008a4ec8fb502e122775726a072cde04481db39a7049c7",
+  "source_paths_sha256": {
+    "trading/vati/app/portfolio.py": "1072ec238104568bfece9ea4461824b63096ede0b559999af4c0da9c686b88e9",
+    "backend/van_gateway/trading/service.py": "cb28b870f1e454867cde618b1392285baaf6af31b87ac9dd7cbe8b1240efd1ed",
+    "trading/tests/test_portfolio_views.py": "3cb11f07d209342265cf1145001557fade4b618491f26b5cf504316608720d63",
+    "trading/tests/test_account_snapshot_freshness.py": "d052d7a831a4d7254747edf69a9274dcde09220663a6c78fa8f55587c0e2ed8d",
+    "backend/tests/test_accounts_freshness_api.py": "67e787c18ecf523142c1255d28640b56d8e34b9238907884ffe3375304c3798c",
+    "backend/tests/test_trading_api.py": "65d920eeacadd34589e1078bde5255d7c179893ebd5faa7b394e1991095c357a",
+    "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
+    "android/app/src/main/java/com/dial/van/trading/TradingModels.kt": "880ddda71469a417d4ff27c8aeaa327db623b36bdd64b5056dc7c3e639fba1a9",
+    "android/app/src/test/java/com/dial/van/trading/TradingModelsTest.kt": "1939c3bc6e8911f1a7aca4c0e7d9671249c779e867baddaf8daab945ce5660b4"
+  },
+  "published_preimage_sha256": {
+    "trading/vati/app/portfolio.py": "4edeb4ea65a2f390311c3bc5bee17cf68f7319f4afaa9eb778a0f963df701188",
+    "backend/van_gateway/trading/service.py": "1d35aef8ddc7e2f3b6046902c784f5ea200d2e78be2333aacd947463e342f243",
+    "trading/tests/test_portfolio_views.py": "d66de1bc0da40318751dd4fa636ffeaf9679e0ec5740a6146bebedce974d78fc",
+    "trading/tests/test_account_snapshot_freshness.py": "ABSENT_NEW_EXPLICIT_SOURCE_FILE",
+    "backend/tests/test_accounts_freshness_api.py": "ABSENT_NEW_EXPLICIT_SOURCE_FILE",
+    "backend/tests/test_trading_api.py": "40b596964983b1ff35455623acac9a0839ecf915b680f962503c0207c4f66d8b",
+    "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+    "android/app/src/main/java/com/dial/van/trading/TradingModels.kt": "aa7bfa98e6b0a8c7cecd49aa9b57b34189393d0d52a694e57a6784d5ef87d962",
+    "android/app/src/test/java/com/dial/van/trading/TradingModelsTest.kt": "03a02daaca2845cc774036305e6e47b057d45aaca5482d924398ab2f8c753a7c"
+  },
+  "source_export": {
+    "schema": "van.be004.lac134.source-export/1",
+    "base": "ba817c4a6aeaf9a8272d81270f6d0abaf7c18feb",
+    "patch": "/tmp/van-be004-lac134-source-20261101.patch",
+    "sha256": "4f30c1e280c9d494bfd7689724593fc7d5a603566cee7943a7bdca6035fed9f6",
+    "bytes": 33825,
+    "members": [
+      "trading/vati/app/portfolio.py",
+      "backend/van_gateway/trading/service.py",
+      "trading/tests/test_portfolio_views.py",
+      "trading/tests/test_account_snapshot_freshness.py",
+      "backend/tests/test_accounts_freshness_api.py",
+      "backend/tests/test_trading_api.py",
+      "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
+      "android/app/src/main/java/com/dial/van/trading/TradingModels.kt",
+      "android/app/src/test/java/com/dial/van/trading/TradingModelsTest.kt"
+    ],
+    "explicit_allowlist_only": true,
+    "applied_source_hashes_verified": true,
+    "no_R3_runtime_unrelated_source_exported": true
+  },
+  "existing18_R3_files_untouched": {
+    "source_fingerprint": "f651112819df2a6703e6296c562cf880eadf826a9d8e1da922f95d2e6c3769b3",
+    "all18_exact_after": true,
+    "already_in_published_base": true,
+    "runtime_vault_and_quarantined_bad_export_not_read_or_exported": true
+  },
+  "behavior": {
+    "policy": "Existing documented gateway LEDGER_STALENESS_MS=900000ms is a display/readback bound per actual ACCOUNT_SNAPSHOT event_time_ms; age<=900000 is within bound, age>900000 stale. No new financial/execution authority.",
+    "projection": "One captured read clock, one SQL snapshot for all account rows and portfolio consumers. Each row keeps original event hash as source_revision, original source/receipt clocks, observed clock, signed age or explicit invalid reason, threshold and execution_authority=false. Unrelated ledger SESSION/heartbeat cannot refresh another account.",
+    "currentness": "Fresh connected LIVE and disconnected OFFLINE remain; absent snapshot NEVER_SYNCED. Expired/invalid/future source clocks become STALE/LAST_KNOWN. Future negative age is retained, not clamped. Native unbound/current-profile/valuation restrictions still override to unavailable, unchanged.",
+    "historical_financial_values": "Original permitted values and existing totals/calculations retained exactly; new snapshot_readback labels LAST_KNOWN/current/unavailable. No ledger/event mutation, risk-money recalculation, financial history rewrite, namespace issuance or replay authority.",
+    "unavailable": "Existing account/portfolio readers now expose explicit missing-ledger provenance without creating a database; account envelope adds truthful ledger_available. Corrupt registry/SQLite still raise, preserve original bytes and cannot turn into a healthy empty list.",
+    "actual_android_caller": "AccountCard preserves additive snapshot metadata with exactLong parsing and permanent executionAuthority=false. Both existing AccountsScreen connection chip and PortfolioSummary.overallDataState consume existing STALE state without layout changes. Actual TradingRepository.accounts() uses AccountCard.parseList; ledger_available=false reaches existing Loaded.Unavailable even for an empty directory, retaining legacy no-field compatibility.",
+    "registration": "No new route/action/component/issuer/store/generator. Existing account GET and portfolio GET reuse current ownership/authentication and SQLite source."
+  },
+  "fresh_python_SOURCE_proof": {
+    "passed": 194,
+    "skipped": 0,
+    "unique_cases": 194,
+    "single_full_programme_run": false,
+    "serialized_frozen_groups": [
+      {
+        "schema": "van.be004.r3.source-proof-terminal/1",
+        "label": "final-native-fixture",
+        "source_fingerprint": "1cd68541b19f9c282a008a4ec8fb502e122775726a072cde04481db39a7049c7",
+        "source_pins": "/tmp/van-be004-lac134-final-pins.json",
+        "command": [
+          "/workspace/van-backend-venv-20261025/bin/python",
+          "-m",
+          "pytest",
+          "-v",
+          "-p",
+          "no:cacheprovider",
+          "-o",
+          "faulthandler_timeout=60",
+          "-o",
+          "asyncio_mode=auto",
+          "trading/tests/test_account_snapshot_freshness.py",
+          "trading/tests/test_portfolio_views.py",
+          "trading/tests/test_native_account_observation.py",
+          "trading/tests/test_native_margin_facts.py",
+          "trading/tests/test_funding_owner_reports.py",
+          "trading/tests/test_native_balance_runtime.py",
+          "--basetemp=/tmp/van-be004-lac134-final-native-fixture-pytest",
+          "--junitxml=/tmp/van-be004-lac134-final-native-fixture.xml"
+        ],
+        "cwd": "/workspace/van-lanes-20261101/accounts-demo-recovery",
+        "exit_code": 0,
+        "guard_reason": null,
+        "wall_seconds": 56.70352748299774,
+        "owned_pid_and_pgid": 861656,
+        "owned_process_terminal": true,
+        "raw_log": "/tmp/van-be004-lac134-final-native-fixture.log",
+        "raw_log_sha256": "2110f35bf8ec6133f5c538ddf0b08586d378c9b06af65f6836fcbf94cc45efca",
+        "raw_bytes": 15534,
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "junit_sha256": "8572ca38e9c3e30ed3f01088649de0de60aaac62c3f3b2a25731d263accbbc9e",
+        "tmp_reserve_bytes": 2147483648,
+        "tmp_min_free_observed": 4197855232,
+        "admission_budget_bytes": 134217728,
+        "raw_cap_bytes": 8388608,
+        "selection_input_hashes": {
+          "trading/tests/test_account_snapshot_freshness.py": "d052d7a831a4d7254747edf69a9274dcde09220663a6c78fa8f55587c0e2ed8d",
+          "trading/tests/test_portfolio_views.py": "3cb11f07d209342265cf1145001557fade4b618491f26b5cf504316608720d63",
+          "trading/tests/test_native_account_observation.py": "7fd2376bc9d15b7de5c8eae29156b52c30263ff11a2af1949151d939aec3a4b3",
+          "trading/tests/test_native_margin_facts.py": "9542d4ff38a6d826e15b8312d8a537b763070f34718608964eb4a1ec65318035",
+          "trading/tests/test_funding_owner_reports.py": "f90140337aa1d14ee25c17dcdb753d07fdbf0d952ce95883c9d79bf52c170a2f",
+          "trading/tests/test_native_balance_runtime.py": "6c0d3b0d10f86d3fc4c768e622336328bbaf7a3217ac1dfd2c84011dedfa47e5"
+        }
+      },
+      {
+        "schema": "van.be004.r3.source-proof-terminal/1",
+        "label": "final-api",
+        "source_fingerprint": "1cd68541b19f9c282a008a4ec8fb502e122775726a072cde04481db39a7049c7",
+        "source_pins": "/tmp/van-be004-lac134-final-pins.json",
+        "command": [
+          "/workspace/van-backend-venv-20261025/bin/python",
+          "-m",
+          "pytest",
+          "-v",
+          "-p",
+          "no:cacheprovider",
+          "-o",
+          "faulthandler_timeout=60",
+          "-o",
+          "asyncio_mode=auto",
+          "backend/tests/test_accounts_freshness_api.py",
+          "backend/tests/test_trading_api.py",
+          "backend/tests/test_native_account_observation_api.py",
+          "backend/tests/test_funding_owner_api.py",
+          "--basetemp=/tmp/van-be004-lac134-final-api-pytest",
+          "--junitxml=/tmp/van-be004-lac134-final-api.xml"
+        ],
+        "cwd": "/workspace/van-lanes-20261101/accounts-demo-recovery",
+        "exit_code": 0,
+        "guard_reason": null,
+        "wall_seconds": 60.232235760006006,
+        "owned_pid_and_pgid": 861784,
+        "owned_process_terminal": true,
+        "raw_log": "/tmp/van-be004-lac134-final-api.log",
+        "raw_log_sha256": "36416ac01e3947f3da4f9b2f08da7fa708ec1297107cc491b46e9649b28678d5",
+        "raw_bytes": 5523,
+        "junit": "/tmp/van-be004-lac134-final-api.xml",
+        "junit_sha256": "9ddea84448a683d7e72c20bbbd2446042d7df3483d75917f1d68355376f2e4cf",
+        "tmp_reserve_bytes": 2147483648,
+        "tmp_min_free_observed": 4146728960,
+        "admission_budget_bytes": 134217728,
+        "raw_cap_bytes": 8388608,
+        "selection_input_hashes": {
+          "backend/tests/test_accounts_freshness_api.py": "67e787c18ecf523142c1255d28640b56d8e34b9238907884ffe3375304c3798c",
+          "backend/tests/test_trading_api.py": "65d920eeacadd34589e1078bde5255d7c179893ebd5faa7b394e1991095c357a",
+          "backend/tests/test_native_account_observation_api.py": "c26a9f902422a9ca0fb3d576543f890201c819a7d8fa675d4d5722ddc986d9da",
+          "backend/tests/test_funding_owner_api.py": "0b846acb14a66081f455f438773ed17e7c57c24765d1dd36f508fa4bba3c94b0"
+        }
+      },
+      {
+        "schema": "van.be004.r3.source-proof-terminal/1",
+        "label": "final-callers",
+        "source_fingerprint": "1cd68541b19f9c282a008a4ec8fb502e122775726a072cde04481db39a7049c7",
+        "source_pins": "/tmp/van-be004-lac134-final-pins.json",
+        "command": [
+          "/workspace/van-backend-venv-20261025/bin/python",
+          "-m",
+          "pytest",
+          "-v",
+          "-p",
+          "no:cacheprovider",
+          "-o",
+          "faulthandler_timeout=60",
+          "-o",
+          "asyncio_mode=auto",
+          "trading/tests/test_financial_movement_runtime.py",
+          "trading/tests/test_mt5_funding_runtime.py",
+          "trading/tests/test_account_risk_recovery_scope.py",
+          "--basetemp=/tmp/van-be004-lac134-final-callers-pytest",
+          "--junitxml=/tmp/van-be004-lac134-final-callers.xml"
+        ],
+        "cwd": "/workspace/van-lanes-20261101/accounts-demo-recovery",
+        "exit_code": 0,
+        "guard_reason": null,
+        "wall_seconds": 3.056449023002642,
+        "owned_pid_and_pgid": 864317,
+        "owned_process_terminal": true,
+        "raw_log": "/tmp/van-be004-lac134-final-callers.log",
+        "raw_log_sha256": "a74509fae09f095424283cc7b64a6ff2b6cb856b511a6b9027d11de0fd2ea792",
+        "raw_bytes": 8524,
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "junit_sha256": "6de2de2ba235aca526908d1889e6a27242b2b3611c33079ef1a9630a37e1d223",
+        "tmp_reserve_bytes": 2147483648,
+        "tmp_min_free_observed": 4138827776,
+        "admission_budget_bytes": 134217728,
+        "raw_cap_bytes": 8388608,
+        "selection_input_hashes": {
+          "trading/tests/test_financial_movement_runtime.py": "9290de71f9fd10a882a618a8b38afdb67a28e70d7722d7751ed436401a68bbbb",
+          "trading/tests/test_mt5_funding_runtime.py": "f3f7590f596fdf0373b1348ac902c974fb4b38d224ead311809ca28a751f6ece",
+          "trading/tests/test_account_risk_recovery_scope.py": "2da44566f763f34bf86dfb6125e2b3135e60e97f5a51506696fd8dd5f87b8f87"
+        }
+      }
+    ],
+    "case_identity_mapping": {
+      "trading.tests.test_account_snapshot_freshness::test_account_original_clock_boundary_and_recorded_values[0-True-LIVE-SOURCE_SNAPSHOT_WITHIN_DISPLAY_BOUND]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_account_snapshot_freshness",
+        "name": "test_account_original_clock_boundary_and_recorded_values[0-True-LIVE-SOURCE_SNAPSHOT_WITHIN_DISPLAY_BOUND]"
+      },
+      "trading.tests.test_account_snapshot_freshness::test_account_original_clock_boundary_and_recorded_values[900000-True-LIVE-SOURCE_SNAPSHOT_WITHIN_DISPLAY_BOUND]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_account_snapshot_freshness",
+        "name": "test_account_original_clock_boundary_and_recorded_values[900000-True-LIVE-SOURCE_SNAPSHOT_WITHIN_DISPLAY_BOUND]"
+      },
+      "trading.tests.test_account_snapshot_freshness::test_account_original_clock_boundary_and_recorded_values[900001-True-STALE-STALE_SOURCE_SNAPSHOT]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_account_snapshot_freshness",
+        "name": "test_account_original_clock_boundary_and_recorded_values[900001-True-STALE-STALE_SOURCE_SNAPSHOT]"
+      },
+      "trading.tests.test_account_snapshot_freshness::test_account_original_clock_boundary_and_recorded_values[-1-True-STALE-FUTURE_SOURCE_TIME]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_account_snapshot_freshness",
+        "name": "test_account_original_clock_boundary_and_recorded_values[-1-True-STALE-FUTURE_SOURCE_TIME]"
+      },
+      "trading.tests.test_account_snapshot_freshness::test_account_original_clock_boundary_and_recorded_values[2000000000000-True-STALE-INVALID_SOURCE_TIME]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_account_snapshot_freshness",
+        "name": "test_account_original_clock_boundary_and_recorded_values[2000000000000-True-STALE-INVALID_SOURCE_TIME]"
+      },
+      "trading.tests.test_account_snapshot_freshness::test_account_original_clock_boundary_and_recorded_values[2000000000001-True-STALE-INVALID_SOURCE_TIME]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_account_snapshot_freshness",
+        "name": "test_account_original_clock_boundary_and_recorded_values[2000000000001-True-STALE-INVALID_SOURCE_TIME]"
+      },
+      "trading.tests.test_account_snapshot_freshness::test_account_original_clock_boundary_and_recorded_values[0-False-OFFLINE-SOURCE_SNAPSHOT_WITHIN_DISPLAY_BOUND]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_account_snapshot_freshness",
+        "name": "test_account_original_clock_boundary_and_recorded_values[0-False-OFFLINE-SOURCE_SNAPSHOT_WITHIN_DISPLAY_BOUND]"
+      },
+      "trading.tests.test_account_snapshot_freshness::test_account_original_clock_boundary_and_recorded_values[900001-False-STALE-STALE_SOURCE_SNAPSHOT]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_account_snapshot_freshness",
+        "name": "test_account_original_clock_boundary_and_recorded_values[900001-False-STALE-STALE_SOURCE_SNAPSHOT]"
+      },
+      "trading.tests.test_account_snapshot_freshness::test_each_account_owns_its_freshness_and_restart_preserves_evidence": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_account_snapshot_freshness",
+        "name": "test_each_account_owns_its_freshness_and_restart_preserves_evidence"
+      },
+      "trading.tests.test_account_snapshot_freshness::test_one_snapshot_and_one_clock_even_if_concurrent_writer_appends": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_account_snapshot_freshness",
+        "name": "test_one_snapshot_and_one_clock_even_if_concurrent_writer_appends"
+      },
+      "trading.tests.test_account_snapshot_freshness::test_fresh_process_rereads_original_snapshot_without_ledger_mutation": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_account_snapshot_freshness",
+        "name": "test_fresh_process_rereads_original_snapshot_without_ledger_mutation"
+      },
+      "trading.tests.test_portfolio_views::test_portfolio_accounts_risk_and_market_state": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_portfolio_views",
+        "name": "test_portfolio_accounts_risk_and_market_state"
+      },
+      "trading.tests.test_portfolio_views::test_trade_detail_timeline_levels_and_chart": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_portfolio_views",
+        "name": "test_trade_detail_timeline_levels_and_chart"
+      },
+      "trading.tests.test_native_account_observation::test_actual_signed_worker_keeps_physical_observation_without_cash_history": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_account_observation",
+        "name": "test_actual_signed_worker_keeps_physical_observation_without_cash_history"
+      },
+      "trading.tests.test_native_account_observation::test_unknown_or_liability_credit_is_not_a_measured_risk_valuation[None]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_account_observation",
+        "name": "test_unknown_or_liability_credit_is_not_a_measured_risk_valuation[None]"
+      },
+      "trading.tests.test_native_account_observation::test_unknown_or_liability_credit_is_not_a_measured_risk_valuation[missing]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_account_observation",
+        "name": "test_unknown_or_liability_credit_is_not_a_measured_risk_valuation[missing]"
+      },
+      "trading.tests.test_native_account_observation::test_unknown_or_liability_credit_is_not_a_measured_risk_valuation[nan]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_account_observation",
+        "name": "test_unknown_or_liability_credit_is_not_a_measured_risk_valuation[nan]"
+      },
+      "trading.tests.test_native_account_observation::test_unknown_or_liability_credit_is_not_a_measured_risk_valuation[-10.0]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_account_observation",
+        "name": "test_unknown_or_liability_credit_is_not_a_measured_risk_valuation[-10.0]"
+      },
+      "trading.tests.test_native_account_observation::test_actual_snapshot_producers_supply_bound_account_and_margin_during_cash_outage[single]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_account_observation",
+        "name": "test_actual_snapshot_producers_supply_bound_account_and_margin_during_cash_outage[single]"
+      },
+      "trading.tests.test_native_account_observation::test_actual_snapshot_producers_supply_bound_account_and_margin_during_cash_outage[account]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_account_observation",
+        "name": "test_actual_snapshot_producers_supply_bound_account_and_margin_during_cash_outage[account]"
+      },
+      "trading.tests.test_native_account_observation::test_owner_receives_original_amounts_with_explicit_unknown_risk_valuation[None]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_account_observation",
+        "name": "test_owner_receives_original_amounts_with_explicit_unknown_risk_valuation[None]"
+      },
+      "trading.tests.test_native_account_observation::test_owner_receives_original_amounts_with_explicit_unknown_risk_valuation[-10.0]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_account_observation",
+        "name": "test_owner_receives_original_amounts_with_explicit_unknown_risk_valuation[-10.0]"
+      },
+      "trading.tests.test_native_account_observation::test_cash_outage_does_not_let_old_native_values_attach_to_changed_physical_profile[login-12345679]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_account_observation",
+        "name": "test_cash_outage_does_not_let_old_native_values_attach_to_changed_physical_profile[login-12345679]"
+      },
+      "trading.tests.test_native_account_observation::test_cash_outage_does_not_let_old_native_values_attach_to_changed_physical_profile[server-Different-Demo]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_account_observation",
+        "name": "test_cash_outage_does_not_let_old_native_values_attach_to_changed_physical_profile[server-Different-Demo]"
+      },
+      "trading.tests.test_native_account_observation::test_cash_outage_does_not_let_old_native_values_attach_to_changed_physical_profile[currency-EUR]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_account_observation",
+        "name": "test_cash_outage_does_not_let_old_native_values_attach_to_changed_physical_profile[currency-EUR]"
+      },
+      "trading.tests.test_native_account_observation::test_cash_outage_does_not_let_old_native_values_attach_to_changed_physical_profile[demo-False]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_account_observation",
+        "name": "test_cash_outage_does_not_let_old_native_values_attach_to_changed_physical_profile[demo-False]"
+      },
+      "trading.tests.test_native_account_observation::test_cash_outage_does_not_let_old_native_values_attach_to_changed_physical_profile[broker-CTRADER]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_account_observation",
+        "name": "test_cash_outage_does_not_let_old_native_values_attach_to_changed_physical_profile[broker-CTRADER]"
+      },
+      "trading.tests.test_native_account_observation::test_cash_outage_does_not_let_old_native_values_attach_to_changed_physical_profile[login-None]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_account_observation",
+        "name": "test_cash_outage_does_not_let_old_native_values_attach_to_changed_physical_profile[login-None]"
+      },
+      "trading.tests.test_native_account_observation::test_original_account_readback_rejects_forged_or_unjoined_observations[authority]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_account_observation",
+        "name": "test_original_account_readback_rejects_forged_or_unjoined_observations[authority]"
+      },
+      "trading.tests.test_native_account_observation::test_original_account_readback_rejects_forged_or_unjoined_observations[numeric-authority]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_account_observation",
+        "name": "test_original_account_readback_rejects_forged_or_unjoined_observations[numeric-authority]"
+      },
+      "trading.tests.test_native_account_observation::test_original_account_readback_rejects_forged_or_unjoined_observations[source-seal]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_account_observation",
+        "name": "test_original_account_readback_rejects_forged_or_unjoined_observations[source-seal]"
+      },
+      "trading.tests.test_native_account_observation::test_original_account_readback_rejects_forged_or_unjoined_observations[scope]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_account_observation",
+        "name": "test_original_account_readback_rejects_forged_or_unjoined_observations[scope]"
+      },
+      "trading.tests.test_native_account_observation::test_original_account_readback_rejects_forged_or_unjoined_observations[future]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_account_observation",
+        "name": "test_original_account_readback_rejects_forged_or_unjoined_observations[future]"
+      },
+      "trading.tests.test_native_account_observation::test_original_account_readback_rejects_forged_or_unjoined_observations[bad-clock]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_account_observation",
+        "name": "test_original_account_readback_rejects_forged_or_unjoined_observations[bad-clock]"
+      },
+      "trading.tests.test_native_account_observation::test_original_account_readback_rejects_forged_or_unjoined_observations[money]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_account_observation",
+        "name": "test_original_account_readback_rejects_forged_or_unjoined_observations[money]"
+      },
+      "trading.tests.test_native_account_observation::test_original_account_readback_rejects_forged_or_unjoined_observations[source-kind]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_account_observation",
+        "name": "test_original_account_readback_rejects_forged_or_unjoined_observations[source-kind]"
+      },
+      "trading.tests.test_native_account_observation::test_original_account_readback_rejects_forged_or_unjoined_observations[alias]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_account_observation",
+        "name": "test_original_account_readback_rejects_forged_or_unjoined_observations[alias]"
+      },
+      "trading.tests.test_native_account_observation::test_original_account_readback_rejects_forged_or_unjoined_observations[unknown-field]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_account_observation",
+        "name": "test_original_account_readback_rejects_forged_or_unjoined_observations[unknown-field]"
+      },
+      "trading.tests.test_native_account_observation::test_original_account_readback_rejects_forged_or_unjoined_observations[producer]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_account_observation",
+        "name": "test_original_account_readback_rejects_forged_or_unjoined_observations[producer]"
+      },
+      "trading.tests.test_native_account_observation::test_original_account_readback_rejects_forged_or_unjoined_observations[snapshot-seal]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_account_observation",
+        "name": "test_original_account_readback_rejects_forged_or_unjoined_observations[snapshot-seal]"
+      },
+      "trading.tests.test_native_account_observation::test_original_account_readback_rejects_forged_or_unjoined_observations[snapshot-valuation]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_account_observation",
+        "name": "test_original_account_readback_rejects_forged_or_unjoined_observations[snapshot-valuation]"
+      },
+      "trading.tests.test_native_account_observation::test_actual_pull_adapter_keeps_poll_and_read_clocks_without_cash_history[200]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_account_observation",
+        "name": "test_actual_pull_adapter_keeps_poll_and_read_clocks_without_cash_history[200]"
+      },
+      "trading.tests.test_native_account_observation::test_actual_pull_adapter_keeps_poll_and_read_clocks_without_cash_history[None]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_account_observation",
+        "name": "test_actual_pull_adapter_keeps_poll_and_read_clocks_without_cash_history[None]"
+      },
+      "trading.tests.test_native_account_observation::test_legacy_missing_observation_nonce_withholds_proof_without_disabling_protective_reads": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_account_observation",
+        "name": "test_legacy_missing_observation_nonce_withholds_proof_without_disabling_protective_reads"
+      },
+      "trading.tests.test_native_account_observation::test_legacy_alias_only_native_snapshot_cannot_supply_current_profile_money": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_account_observation",
+        "name": "test_legacy_alias_only_native_snapshot_cannot_supply_current_profile_money"
+      },
+      "trading.tests.test_native_margin_facts::test_missing_native_margin_is_not_an_approval": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_missing_native_margin_is_not_an_approval"
+      },
+      "trading.tests.test_native_margin_facts::test_original_decimal_margin_facts_survive_replay_without_turning_into_strings": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_original_decimal_margin_facts_survive_replay_without_turning_into_strings"
+      },
+      "trading.tests.test_native_margin_facts::test_partially_missing_leveraged_margin_cannot_be_filled_with_a_healthy_default[used_margin]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_partially_missing_leveraged_margin_cannot_be_filled_with_a_healthy_default[used_margin]"
+      },
+      "trading.tests.test_native_margin_facts::test_partially_missing_leveraged_margin_cannot_be_filled_with_a_healthy_default[free_margin]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_partially_missing_leveraged_margin_cannot_be_filled_with_a_healthy_default[free_margin]"
+      },
+      "trading.tests.test_native_margin_facts::test_partially_missing_leveraged_margin_cannot_be_filled_with_a_healthy_default[margin_level_pct]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_partially_missing_leveraged_margin_cannot_be_filled_with_a_healthy_default[margin_level_pct]"
+      },
+      "trading.tests.test_native_margin_facts::test_invalid_native_margin_amounts_are_not_capacity[True-used_margin]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_invalid_native_margin_amounts_are_not_capacity[True-used_margin]"
+      },
+      "trading.tests.test_native_margin_facts::test_invalid_native_margin_amounts_are_not_capacity[True-free_margin]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_invalid_native_margin_amounts_are_not_capacity[True-free_margin]"
+      },
+      "trading.tests.test_native_margin_facts::test_invalid_native_margin_amounts_are_not_capacity[True-margin_level_pct]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_invalid_native_margin_amounts_are_not_capacity[True-margin_level_pct]"
+      },
+      "trading.tests.test_native_margin_facts::test_invalid_native_margin_amounts_are_not_capacity[10000-used_margin]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_invalid_native_margin_amounts_are_not_capacity[10000-used_margin]"
+      },
+      "trading.tests.test_native_margin_facts::test_invalid_native_margin_amounts_are_not_capacity[10000-free_margin]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_invalid_native_margin_amounts_are_not_capacity[10000-free_margin]"
+      },
+      "trading.tests.test_native_margin_facts::test_invalid_native_margin_amounts_are_not_capacity[10000-margin_level_pct]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_invalid_native_margin_amounts_are_not_capacity[10000-margin_level_pct]"
+      },
+      "trading.tests.test_native_margin_facts::test_invalid_native_margin_amounts_are_not_capacity[value2-used_margin]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_invalid_native_margin_amounts_are_not_capacity[value2-used_margin]"
+      },
+      "trading.tests.test_native_margin_facts::test_invalid_native_margin_amounts_are_not_capacity[value2-free_margin]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_invalid_native_margin_amounts_are_not_capacity[value2-free_margin]"
+      },
+      "trading.tests.test_native_margin_facts::test_invalid_native_margin_amounts_are_not_capacity[value2-margin_level_pct]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_invalid_native_margin_amounts_are_not_capacity[value2-margin_level_pct]"
+      },
+      "trading.tests.test_native_margin_facts::test_invalid_native_margin_amounts_are_not_capacity[value3-used_margin]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_invalid_native_margin_amounts_are_not_capacity[value3-used_margin]"
+      },
+      "trading.tests.test_native_margin_facts::test_invalid_native_margin_amounts_are_not_capacity[value3-free_margin]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_invalid_native_margin_amounts_are_not_capacity[value3-free_margin]"
+      },
+      "trading.tests.test_native_margin_facts::test_invalid_native_margin_amounts_are_not_capacity[value3-margin_level_pct]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_invalid_native_margin_amounts_are_not_capacity[value3-margin_level_pct]"
+      },
+      "trading.tests.test_native_margin_facts::test_credit_in_reported_margin_cannot_replenish_cash_backed_risk_capacity[150-100-1050-1150-MARGIN_FLOOR]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_credit_in_reported_margin_cannot_replenish_cash_backed_risk_capacity[150-100-1050-1150-MARGIN_FLOOR]"
+      },
+      "trading.tests.test_native_margin_facts::test_credit_in_reported_margin_cannot_replenish_cash_backed_risk_capacity[90-100-990-1090-MARGIN_CALL]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_credit_in_reported_margin_cannot_replenish_cash_backed_risk_capacity[90-100-990-1090-MARGIN_CALL]"
+      },
+      "trading.tests.test_native_margin_facts::test_credit_in_reported_margin_cannot_replenish_cash_backed_risk_capacity[100-0-0-0-NO_FREE_MARGIN]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_credit_in_reported_margin_cannot_replenish_cash_backed_risk_capacity[100-0-0-0-NO_FREE_MARGIN]"
+      },
+      "trading.tests.test_native_margin_facts::test_flat_native_margin_has_a_real_zero_commitment_without_a_fabricated_healthy_ratio": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_flat_native_margin_has_a_real_zero_commitment_without_a_fabricated_healthy_ratio"
+      },
+      "trading.tests.test_native_margin_facts::test_absent_added_margin_field_preserves_legacy_snapshot_hash_and_serialization": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_absent_added_margin_field_preserves_legacy_snapshot_hash_and_serialization"
+      },
+      "trading.tests.test_native_margin_facts::test_signed_worker_original_margin_fields_reach_the_actual_native_adapter": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_signed_worker_original_margin_fields_reach_the_actual_native_adapter"
+      },
+      "trading.tests.test_native_margin_facts::test_missing_cash_history_does_not_make_known_broker_credit_into_risk_equity": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_missing_cash_history_does_not_make_known_broker_credit_into_risk_equity"
+      },
+      "trading.tests.test_native_margin_facts::test_ctrader_native_position_margin_keeps_independent_precision_and_credit_exclusion": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_ctrader_native_position_margin_keeps_independent_precision_and_credit_exclusion"
+      },
+      "trading.tests.test_native_margin_facts::test_unknown_or_changed_ctrader_margin_is_not_available_capacity[missing]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_unknown_or_changed_ctrader_margin_is_not_available_capacity[missing]"
+      },
+      "trading.tests.test_native_margin_facts::test_unknown_or_changed_ctrader_margin_is_not_available_capacity[bool]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_unknown_or_changed_ctrader_margin_is_not_available_capacity[bool]"
+      },
+      "trading.tests.test_native_margin_facts::test_unknown_or_changed_ctrader_margin_is_not_available_capacity[negative]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_unknown_or_changed_ctrader_margin_is_not_available_capacity[negative]"
+      },
+      "trading.tests.test_native_margin_facts::test_unknown_or_changed_ctrader_margin_is_not_available_capacity[missing_digits]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_unknown_or_changed_ctrader_margin_is_not_available_capacity[missing_digits]"
+      },
+      "trading.tests.test_native_margin_facts::test_unknown_or_changed_ctrader_margin_is_not_available_capacity[changed]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_unknown_or_changed_ctrader_margin_is_not_available_capacity[changed]"
+      },
+      "trading.tests.test_native_margin_facts::test_ctrader_margin_uses_native_enum_and_per_symbol_hedge_rules[0-12]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_ctrader_margin_uses_native_enum_and_per_symbol_hedge_rules[0-12]"
+      },
+      "trading.tests.test_native_margin_facts::test_ctrader_margin_uses_native_enum_and_per_symbol_hedge_rules[1-17]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_ctrader_margin_uses_native_enum_and_per_symbol_hedge_rules[1-17]"
+      },
+      "trading.tests.test_native_margin_facts::test_ctrader_margin_uses_native_enum_and_per_symbol_hedge_rules[2-7]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_ctrader_margin_uses_native_enum_and_per_symbol_hedge_rules[2-7]"
+      },
+      "trading.tests.test_native_margin_facts::test_ctrader_margin_uses_native_enum_and_per_symbol_hedge_rules[MAX-12]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_ctrader_margin_uses_native_enum_and_per_symbol_hedge_rules[MAX-12]"
+      },
+      "trading.tests.test_native_margin_facts::test_ctrader_margin_uses_native_enum_and_per_symbol_hedge_rules[SUM-17]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_ctrader_margin_uses_native_enum_and_per_symbol_hedge_rules[SUM-17]"
+      },
+      "trading.tests.test_native_margin_facts::test_ctrader_margin_uses_native_enum_and_per_symbol_hedge_rules[NET-7]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_ctrader_margin_uses_native_enum_and_per_symbol_hedge_rules[NET-7]"
+      },
+      "trading.tests.test_native_margin_facts::test_ctrader_unknown_margin_mode_does_not_default_to_sum[None]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_ctrader_unknown_margin_mode_does_not_default_to_sum[None]"
+      },
+      "trading.tests.test_native_margin_facts::test_ctrader_unknown_margin_mode_does_not_default_to_sum[True]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_ctrader_unknown_margin_mode_does_not_default_to_sum[True]"
+      },
+      "trading.tests.test_native_margin_facts::test_ctrader_unknown_margin_mode_does_not_default_to_sum[unknown]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_ctrader_unknown_margin_mode_does_not_default_to_sum[unknown]"
+      },
+      "trading.tests.test_native_margin_facts::test_ctrader_unknown_margin_mode_does_not_default_to_sum[3]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_ctrader_unknown_margin_mode_does_not_default_to_sum[3]"
+      },
+      "trading.tests.test_native_margin_facts::test_owner_margin_distinguishes_original_reported_amounts_and_cash_backed_bounds": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_owner_margin_distinguishes_original_reported_amounts_and_cash_backed_bounds"
+      },
+      "trading.tests.test_native_margin_facts::test_owner_margin_rejects_unbound_or_invented_facts[producer]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_owner_margin_rejects_unbound_or_invented_facts[producer]"
+      },
+      "trading.tests.test_native_margin_facts::test_owner_margin_rejects_unbound_or_invented_facts[authority]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_owner_margin_rejects_unbound_or_invented_facts[authority]"
+      },
+      "trading.tests.test_native_margin_facts::test_owner_margin_rejects_unbound_or_invented_facts[future]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_owner_margin_rejects_unbound_or_invented_facts[future]"
+      },
+      "trading.tests.test_native_margin_facts::test_owner_margin_rejects_unbound_or_invented_facts[account]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_owner_margin_rejects_unbound_or_invented_facts[account]"
+      },
+      "trading.tests.test_native_margin_facts::test_owner_margin_rejects_unbound_or_invented_facts[missing_money]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_owner_margin_rejects_unbound_or_invented_facts[missing_money]"
+      },
+      "trading.tests.test_native_margin_facts::test_owner_margin_rejects_unbound_or_invented_facts[invented_free_bound]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_owner_margin_rejects_unbound_or_invented_facts[invented_free_bound]"
+      },
+      "trading.tests.test_native_margin_facts::test_owner_margin_rejects_unbound_or_invented_facts[invented_level_bound]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_owner_margin_rejects_unbound_or_invented_facts[invented_level_bound]"
+      },
+      "trading.tests.test_native_margin_facts::test_owner_margin_rejects_unbound_or_invented_facts[wrong_basis]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_owner_margin_rejects_unbound_or_invented_facts[wrong_basis]"
+      },
+      "trading.tests.test_native_margin_facts::test_calculated_margin_ratios_reach_owner_readback_without_precision_truncation[3]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_calculated_margin_ratios_reach_owner_readback_without_precision_truncation[3]"
+      },
+      "trading.tests.test_native_margin_facts::test_calculated_margin_ratios_reach_owner_readback_without_precision_truncation[7]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_calculated_margin_ratios_reach_owner_readback_without_precision_truncation[7]"
+      },
+      "trading.tests.test_native_margin_facts::test_calculated_margin_ratios_reach_owner_readback_without_precision_truncation[13]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_calculated_margin_ratios_reach_owner_readback_without_precision_truncation[13]"
+      },
+      "trading.tests.test_native_margin_facts::test_calculated_margin_ratios_reach_owner_readback_without_precision_truncation[17]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_calculated_margin_ratios_reach_owner_readback_without_precision_truncation[17]"
+      },
+      "trading.tests.test_native_margin_facts::test_calculated_margin_ratios_reach_owner_readback_without_precision_truncation[19]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_calculated_margin_ratios_reach_owner_readback_without_precision_truncation[19]"
+      },
+      "trading.tests.test_native_margin_facts::test_actual_book_account_snapshot_supplies_original_margin_to_owner": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_actual_book_account_snapshot_supplies_original_margin_to_owner"
+      },
+      "trading.tests.test_native_margin_facts::test_native_owner_margin_cannot_attach_to_a_profile_without_a_physical_scope": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_native_owner_margin_cannot_attach_to_a_profile_without_a_physical_scope"
+      },
+      "trading.tests.test_native_margin_facts::test_actual_risk_snapshot_producers_preserve_native_used_margin[single]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_actual_risk_snapshot_producers_preserve_native_used_margin[single]"
+      },
+      "trading.tests.test_native_margin_facts::test_actual_risk_snapshot_producers_preserve_native_used_margin[account]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_margin_facts",
+        "name": "test_actual_risk_snapshot_producers_preserve_native_used_margin[account]"
+      },
+      "trading.tests.test_funding_owner_reports::test_native_deposit_without_qualified_cash_coverage_is_not_reported_as_profit": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_funding_owner_reports",
+        "name": "test_native_deposit_without_qualified_cash_coverage_is_not_reported_as_profit"
+      },
+      "trading.tests.test_funding_owner_reports::test_nonfinite_native_equity_is_unknown_instead_of_a_nonfinite_owner_total": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_funding_owner_reports",
+        "name": "test_nonfinite_native_equity_is_unknown_instead_of_a_nonfinite_owner_total"
+      },
+      "trading.tests.test_funding_owner_reports::test_native_funding_facts_survive_runtime_snapshot_and_only_current_profile_can_read_them": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_funding_owner_reports",
+        "name": "test_native_funding_facts_survive_runtime_snapshot_and_only_current_profile_can_read_them"
+      },
+      "trading.tests.test_native_balance_runtime::test_both_native_statement_types_reach_the_existing_owner_account_projection": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-native-fixture.xml",
+        "classname": "trading.tests.test_native_balance_runtime",
+        "name": "test_both_native_statement_types_reach_the_existing_owner_account_projection"
+      },
+      "tests.test_accounts_freshness_api::test_actual_paired_accounts_and_portfolio_keep_original_age_and_revision[0-True-LIVE-SOURCE_SNAPSHOT_WITHIN_DISPLAY_BOUND]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-api.xml",
+        "classname": "tests.test_accounts_freshness_api",
+        "name": "test_actual_paired_accounts_and_portfolio_keep_original_age_and_revision[0-True-LIVE-SOURCE_SNAPSHOT_WITHIN_DISPLAY_BOUND]"
+      },
+      "tests.test_accounts_freshness_api::test_actual_paired_accounts_and_portfolio_keep_original_age_and_revision[900000-True-LIVE-SOURCE_SNAPSHOT_WITHIN_DISPLAY_BOUND]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-api.xml",
+        "classname": "tests.test_accounts_freshness_api",
+        "name": "test_actual_paired_accounts_and_portfolio_keep_original_age_and_revision[900000-True-LIVE-SOURCE_SNAPSHOT_WITHIN_DISPLAY_BOUND]"
+      },
+      "tests.test_accounts_freshness_api::test_actual_paired_accounts_and_portfolio_keep_original_age_and_revision[900001-True-STALE-STALE_SOURCE_SNAPSHOT]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-api.xml",
+        "classname": "tests.test_accounts_freshness_api",
+        "name": "test_actual_paired_accounts_and_portfolio_keep_original_age_and_revision[900001-True-STALE-STALE_SOURCE_SNAPSHOT]"
+      },
+      "tests.test_accounts_freshness_api::test_actual_paired_accounts_and_portfolio_keep_original_age_and_revision[-1-True-STALE-FUTURE_SOURCE_TIME]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-api.xml",
+        "classname": "tests.test_accounts_freshness_api",
+        "name": "test_actual_paired_accounts_and_portfolio_keep_original_age_and_revision[-1-True-STALE-FUTURE_SOURCE_TIME]"
+      },
+      "tests.test_accounts_freshness_api::test_actual_paired_accounts_and_portfolio_keep_original_age_and_revision[2000000000000-True-STALE-INVALID_SOURCE_TIME]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-api.xml",
+        "classname": "tests.test_accounts_freshness_api",
+        "name": "test_actual_paired_accounts_and_portfolio_keep_original_age_and_revision[2000000000000-True-STALE-INVALID_SOURCE_TIME]"
+      },
+      "tests.test_accounts_freshness_api::test_actual_paired_accounts_and_portfolio_keep_original_age_and_revision[0-False-OFFLINE-SOURCE_SNAPSHOT_WITHIN_DISPLAY_BOUND]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-api.xml",
+        "classname": "tests.test_accounts_freshness_api",
+        "name": "test_actual_paired_accounts_and_portfolio_keep_original_age_and_revision[0-False-OFFLINE-SOURCE_SNAPSHOT_WITHIN_DISPLAY_BOUND]"
+      },
+      "tests.test_accounts_freshness_api::test_actual_paired_accounts_and_portfolio_keep_original_age_and_revision[None-False-NEVER_SYNCED-NO_ACCOUNT_SNAPSHOT]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-api.xml",
+        "classname": "tests.test_accounts_freshness_api",
+        "name": "test_actual_paired_accounts_and_portfolio_keep_original_age_and_revision[None-False-NEVER_SYNCED-NO_ACCOUNT_SNAPSHOT]"
+      },
+      "tests.test_accounts_freshness_api::test_two_accounts_unrelated_fresh_session_restart_and_current_scope_denial": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-api.xml",
+        "classname": "tests.test_accounts_freshness_api",
+        "name": "test_two_accounts_unrelated_fresh_session_restart_and_current_scope_denial"
+      },
+      "tests.test_accounts_freshness_api::test_missing_and_corrupt_sources_remain_explicit": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-api.xml",
+        "classname": "tests.test_accounts_freshness_api",
+        "name": "test_missing_and_corrupt_sources_remain_explicit"
+      },
+      "tests.test_trading_api::test_status_without_ledger_is_degraded_not_fatal": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-api.xml",
+        "classname": "tests.test_trading_api",
+        "name": "test_status_without_ledger_is_degraded_not_fatal"
+      },
+      "tests.test_trading_api::test_status_and_tickets_read_from_chained_ledger": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-api.xml",
+        "classname": "tests.test_trading_api",
+        "name": "test_status_and_tickets_read_from_chained_ledger"
+      },
+      "tests.test_trading_api::test_a_current_ledger_is_not_reported_stale": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-api.xml",
+        "classname": "tests.test_trading_api",
+        "name": "test_a_current_ledger_is_not_reported_stale"
+      },
+      "tests.test_trading_api::test_halt_requires_internal_token_and_owner_signature_and_appends_event": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-api.xml",
+        "classname": "tests.test_trading_api",
+        "name": "test_halt_requires_internal_token_and_owner_signature_and_appends_event"
+      },
+      "tests.test_trading_api::test_ticket_confirmation_is_once_bounded_and_owner_signed": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-api.xml",
+        "classname": "tests.test_trading_api",
+        "name": "test_ticket_confirmation_is_once_bounded_and_owner_signed"
+      },
+      "tests.test_trading_api::test_service_never_exposes_an_order_path": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-api.xml",
+        "classname": "tests.test_trading_api",
+        "name": "test_service_never_exposes_an_order_path"
+      },
+      "tests.test_trading_api::test_trade_book_views_without_and_with_ledger": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-api.xml",
+        "classname": "tests.test_trading_api",
+        "name": "test_trade_book_views_without_and_with_ledger"
+      },
+      "tests.test_trading_api::test_command_center_read_models_without_and_with_data": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-api.xml",
+        "classname": "tests.test_trading_api",
+        "name": "test_command_center_read_models_without_and_with_data"
+      },
+      "tests.test_trading_api::test_strategy_promotion_requires_exact_device_signature_and_a4_proof": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-api.xml",
+        "classname": "tests.test_trading_api",
+        "name": "test_strategy_promotion_requires_exact_device_signature_and_a4_proof"
+      },
+      "tests.test_trading_api::test_account_onboarding_is_device_signed_and_forwards_without_storing_secrets": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-api.xml",
+        "classname": "tests.test_trading_api",
+        "name": "test_account_onboarding_is_device_signed_and_forwards_without_storing_secrets"
+      },
+      "tests.test_trading_api::test_cognitive_projections_and_imports_cannot_reach_order_authority": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-api.xml",
+        "classname": "tests.test_trading_api",
+        "name": "test_cognitive_projections_and_imports_cannot_reach_order_authority"
+      },
+      "tests.test_trading_api::test_existing_account_endpoint_exposes_recorded_learning_with_scope_and_source": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-api.xml",
+        "classname": "tests.test_trading_api",
+        "name": "test_existing_account_endpoint_exposes_recorded_learning_with_scope_and_source"
+      },
+      "tests.test_trading_api::test_account_learning_readback_refuses_other_accounts_cohorts_or_authority[patch0]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-api.xml",
+        "classname": "tests.test_trading_api",
+        "name": "test_account_learning_readback_refuses_other_accounts_cohorts_or_authority[patch0]"
+      },
+      "tests.test_trading_api::test_account_learning_readback_refuses_other_accounts_cohorts_or_authority[patch1]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-api.xml",
+        "classname": "tests.test_trading_api",
+        "name": "test_account_learning_readback_refuses_other_accounts_cohorts_or_authority[patch1]"
+      },
+      "tests.test_trading_api::test_account_learning_readback_refuses_other_accounts_cohorts_or_authority[patch2]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-api.xml",
+        "classname": "tests.test_trading_api",
+        "name": "test_account_learning_readback_refuses_other_accounts_cohorts_or_authority[patch2]"
+      },
+      "tests.test_native_account_observation_api::test_owner_account_routes_preserve_original_facts_without_unknown_credit_as_capital[known]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-api.xml",
+        "classname": "tests.test_native_account_observation_api",
+        "name": "test_owner_account_routes_preserve_original_facts_without_unknown_credit_as_capital[known]"
+      },
+      "tests.test_native_account_observation_api::test_owner_account_routes_preserve_original_facts_without_unknown_credit_as_capital[None]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-api.xml",
+        "classname": "tests.test_native_account_observation_api",
+        "name": "test_owner_account_routes_preserve_original_facts_without_unknown_credit_as_capital[None]"
+      },
+      "tests.test_native_account_observation_api::test_owner_account_routes_preserve_original_facts_without_unknown_credit_as_capital[-10.0]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-api.xml",
+        "classname": "tests.test_native_account_observation_api",
+        "name": "test_owner_account_routes_preserve_original_facts_without_unknown_credit_as_capital[-10.0]"
+      },
+      "tests.test_funding_owner_api::test_native_cash_history_reaches_accounts_and_portfolio_without_profit_or_effect_authority": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-api.xml",
+        "classname": "tests.test_funding_owner_api",
+        "name": "test_native_cash_history_reaches_accounts_and_portfolio_without_profit_or_effect_authority"
+      },
+      "tests.test_funding_owner_api::test_signed_mt5_cash_query_reaches_owner_api_without_credit_as_profit": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-api.xml",
+        "classname": "tests.test_funding_owner_api",
+        "name": "test_signed_mt5_cash_query_reaches_owner_api_without_credit_as_profit"
+      },
+      "trading.tests.test_financial_movement_runtime::test_real_capture_and_current_owner_report_read_exact_native_postings": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_financial_movement_runtime",
+        "name": "test_real_capture_and_current_owner_report_read_exact_native_postings"
+      },
+      "trading.tests.test_financial_movement_runtime::test_native_source_committed_before_restart_is_projected_from_older_window": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_financial_movement_runtime",
+        "name": "test_native_source_committed_before_restart_is_projected_from_older_window"
+      },
+      "trading.tests.test_financial_movement_runtime::test_projection_failure_preserves_native_facts_and_owner_read_never_writes": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_financial_movement_runtime",
+        "name": "test_projection_failure_preserves_native_facts_and_owner_read_never_writes"
+      },
+      "trading.tests.test_financial_movement_runtime::test_actual_projection_commit_lost_ack_is_unknown_then_original_recovers": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_financial_movement_runtime",
+        "name": "test_actual_projection_commit_lost_ack_is_unknown_then_original_recovers"
+      },
+      "trading.tests.test_financial_movement_runtime::test_readonly_projection_unavailable_does_not_claim_empty_or_qualified_cash": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_financial_movement_runtime",
+        "name": "test_readonly_projection_unavailable_does_not_claim_empty_or_qualified_cash"
+      },
+      "trading.tests.test_financial_movement_runtime::test_actual_separate_worker_publishes_and_reaps_its_owned_reader_thread": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_financial_movement_runtime",
+        "name": "test_actual_separate_worker_publishes_and_reaps_its_owned_reader_thread"
+      },
+      "trading.tests.test_mt5_funding_runtime::test_native_query_is_required_before_risk_and_never_grants_effect_authority": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_mt5_funding_runtime",
+        "name": "test_native_query_is_required_before_risk_and_never_grants_effect_authority"
+      },
+      "trading.tests.test_mt5_funding_runtime::test_unsafe_funding_transition_holds_new_risk[newcash]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_mt5_funding_runtime",
+        "name": "test_unsafe_funding_transition_holds_new_risk[newcash]"
+      },
+      "trading.tests.test_mt5_funding_runtime::test_unsafe_funding_transition_holds_new_risk[shrink]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_mt5_funding_runtime",
+        "name": "test_unsafe_funding_transition_holds_new_risk[shrink]"
+      },
+      "trading.tests.test_mt5_funding_runtime::test_unsafe_funding_transition_holds_new_risk[correction]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_mt5_funding_runtime",
+        "name": "test_unsafe_funding_transition_holds_new_risk[correction]"
+      },
+      "trading.tests.test_mt5_funding_runtime::test_unsafe_funding_transition_holds_new_risk[credit]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_mt5_funding_runtime",
+        "name": "test_unsafe_funding_transition_holds_new_risk[credit]"
+      },
+      "trading.tests.test_mt5_funding_runtime::test_unsafe_funding_transition_holds_new_risk[server]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_mt5_funding_runtime",
+        "name": "test_unsafe_funding_transition_holds_new_risk[server]"
+      },
+      "trading.tests.test_mt5_funding_runtime::test_unsafe_funding_transition_holds_new_risk[future]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_mt5_funding_runtime",
+        "name": "test_unsafe_funding_transition_holds_new_risk[future]"
+      },
+      "trading.tests.test_mt5_funding_runtime::test_unsafe_funding_transition_holds_new_risk[identitymissing]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_mt5_funding_runtime",
+        "name": "test_unsafe_funding_transition_holds_new_risk[identitymissing]"
+      },
+      "trading.tests.test_mt5_funding_runtime::test_unsafe_funding_transition_holds_new_risk[markmissing]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_mt5_funding_runtime",
+        "name": "test_unsafe_funding_transition_holds_new_risk[markmissing]"
+      },
+      "trading.tests.test_mt5_funding_runtime::test_unsafe_funding_transition_holds_new_risk[backclock]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_mt5_funding_runtime",
+        "name": "test_unsafe_funding_transition_holds_new_risk[backclock]"
+      },
+      "trading.tests.test_mt5_funding_runtime::test_unsafe_funding_transition_holds_new_risk[unknownoperation]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_mt5_funding_runtime",
+        "name": "test_unsafe_funding_transition_holds_new_risk[unknownoperation]"
+      },
+      "trading.tests.test_mt5_funding_runtime::test_lost_commit_ack_retries_original_query_without_changing_first_availability": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_mt5_funding_runtime",
+        "name": "test_lost_commit_ack_retries_original_query_without_changing_first_availability"
+      },
+      "trading.tests.test_mt5_funding_runtime::test_snapshot_exposes_original_cash_components_without_fabricating_cash_delta_or_return": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_mt5_funding_runtime",
+        "name": "test_snapshot_exposes_original_cash_components_without_fabricating_cash_delta_or_return"
+      },
+      "trading.tests.test_mt5_funding_runtime::test_forged_query_snapshot_or_legacy_credit_cannot_display_floating_profit": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_mt5_funding_runtime",
+        "name": "test_forged_query_snapshot_or_legacy_credit_cannot_display_floating_profit"
+      },
+      "trading.tests.test_mt5_funding_runtime::test_query_cannot_be_backdated_or_changed_into_execution_authority": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_mt5_funding_runtime",
+        "name": "test_query_cannot_be_backdated_or_changed_into_execution_authority"
+      },
+      "trading.tests.test_mt5_funding_runtime::test_invalid_cached_native_account_becomes_unavailable_not_an_uncaught_parse_error[equity-NaN]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_mt5_funding_runtime",
+        "name": "test_invalid_cached_native_account_becomes_unavailable_not_an_uncaught_parse_error[equity-NaN]"
+      },
+      "trading.tests.test_mt5_funding_runtime::test_invalid_cached_native_account_becomes_unavailable_not_an_uncaught_parse_error[balance-Infinity]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_mt5_funding_runtime",
+        "name": "test_invalid_cached_native_account_becomes_unavailable_not_an_uncaught_parse_error[balance-Infinity]"
+      },
+      "trading.tests.test_mt5_funding_runtime::test_invalid_cached_native_account_becomes_unavailable_not_an_uncaught_parse_error[currency-]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_mt5_funding_runtime",
+        "name": "test_invalid_cached_native_account_becomes_unavailable_not_an_uncaught_parse_error[currency-]"
+      },
+      "trading.tests.test_mt5_funding_runtime::test_invalid_cached_native_account_becomes_unavailable_not_an_uncaught_parse_error[equity-True]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_mt5_funding_runtime",
+        "name": "test_invalid_cached_native_account_becomes_unavailable_not_an_uncaught_parse_error[equity-True]"
+      },
+      "trading.tests.test_mt5_funding_runtime::test_returning_to_old_telemetry_cannot_erase_an_observed_funding_hazard[cash]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_mt5_funding_runtime",
+        "name": "test_returning_to_old_telemetry_cannot_erase_an_observed_funding_hazard[cash]"
+      },
+      "trading.tests.test_mt5_funding_runtime::test_returning_to_old_telemetry_cannot_erase_an_observed_funding_hazard[credit]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_mt5_funding_runtime",
+        "name": "test_returning_to_old_telemetry_cannot_erase_an_observed_funding_hazard[credit]"
+      },
+      "trading.tests.test_mt5_funding_runtime::test_returning_to_old_telemetry_cannot_erase_an_observed_funding_hazard[clock]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_mt5_funding_runtime",
+        "name": "test_returning_to_old_telemetry_cannot_erase_an_observed_funding_hazard[clock]"
+      },
+      "trading.tests.test_mt5_funding_runtime::test_returning_to_old_telemetry_cannot_erase_an_observed_funding_hazard[clockbasis]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_mt5_funding_runtime",
+        "name": "test_returning_to_old_telemetry_cannot_erase_an_observed_funding_hazard[clockbasis]"
+      },
+      "trading.tests.test_mt5_funding_runtime::test_provider_reverting_a_corrected_row_does_not_hide_original_conflict_from_owner": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_mt5_funding_runtime",
+        "name": "test_provider_reverting_a_corrected_row_does_not_hide_original_conflict_from_owner"
+      },
+      "trading.tests.test_account_risk_recovery_scope::test_another_accounts_win_cannot_reset_the_restarted_accounts_losses": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_account_risk_recovery_scope",
+        "name": "test_another_accounts_win_cannot_reset_the_restarted_accounts_losses"
+      },
+      "trading.tests.test_account_risk_recovery_scope::test_another_accounts_losses_cannot_cool_down_this_account": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_account_risk_recovery_scope",
+        "name": "test_another_accounts_losses_cannot_cool_down_this_account"
+      },
+      "trading.tests.test_account_risk_recovery_scope::test_another_accounts_owner_resume_cannot_rebaseline_this_accounts_peak": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_account_risk_recovery_scope",
+        "name": "test_another_accounts_owner_resume_cannot_rebaseline_this_accounts_peak"
+      },
+      "trading.tests.test_account_risk_recovery_scope::test_another_accounts_reset_cannot_clear_this_accounts_probation": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_account_risk_recovery_scope",
+        "name": "test_another_accounts_reset_cannot_clear_this_accounts_probation"
+      },
+      "trading.tests.test_account_risk_recovery_scope::test_unbound_historical_financial_records_never_inherit_the_configured_account[TRADE_REVIEW-payload0]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_account_risk_recovery_scope",
+        "name": "test_unbound_historical_financial_records_never_inherit_the_configured_account[TRADE_REVIEW-payload0]"
+      },
+      "trading.tests.test_account_risk_recovery_scope::test_unbound_historical_financial_records_never_inherit_the_configured_account[SESSION-payload1]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_account_risk_recovery_scope",
+        "name": "test_unbound_historical_financial_records_never_inherit_the_configured_account[SESSION-payload1]"
+      },
+      "trading.tests.test_account_risk_recovery_scope::test_unbound_historical_financial_records_never_inherit_the_configured_account[SESSION-payload2]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_account_risk_recovery_scope",
+        "name": "test_unbound_historical_financial_records_never_inherit_the_configured_account[SESSION-payload2]"
+      },
+      "trading.tests.test_account_risk_recovery_scope::test_unbound_historical_financial_records_never_inherit_the_configured_account[RISK_DECISION-payload3]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_account_risk_recovery_scope",
+        "name": "test_unbound_historical_financial_records_never_inherit_the_configured_account[RISK_DECISION-payload3]"
+      },
+      "trading.tests.test_account_risk_recovery_scope::test_legacy_review_uses_exact_native_order_identity_not_current_configuration": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_account_risk_recovery_scope",
+        "name": "test_legacy_review_uses_exact_native_order_identity_not_current_configuration"
+      },
+      "trading.tests.test_account_risk_recovery_scope::test_a_trade_id_reused_by_two_accounts_is_ambiguous_even_without_reviews": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_account_risk_recovery_scope",
+        "name": "test_a_trade_id_reused_by_two_accounts_is_ambiguous_even_without_reviews"
+      },
+      "trading.tests.test_account_risk_recovery_scope::test_invalid_ownership_evidence_cannot_select_a_financial_fact[producer]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_account_risk_recovery_scope",
+        "name": "test_invalid_ownership_evidence_cannot_select_a_financial_fact[producer]"
+      },
+      "trading.tests.test_account_risk_recovery_scope::test_invalid_ownership_evidence_cannot_select_a_financial_fact[seal]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_account_risk_recovery_scope",
+        "name": "test_invalid_ownership_evidence_cannot_select_a_financial_fact[seal]"
+      },
+      "trading.tests.test_account_risk_recovery_scope::test_invalid_ownership_evidence_cannot_select_a_financial_fact[identity]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_account_risk_recovery_scope",
+        "name": "test_invalid_ownership_evidence_cannot_select_a_financial_fact[identity]"
+      },
+      "trading.tests.test_account_risk_recovery_scope::test_invalid_ownership_evidence_cannot_select_a_financial_fact[review_identity]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_account_risk_recovery_scope",
+        "name": "test_invalid_ownership_evidence_cannot_select_a_financial_fact[review_identity]"
+      },
+      "trading.tests.test_account_risk_recovery_scope::test_first_real_snapshot_restores_only_this_accounts_daily_and_weekly_loss_baselines": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_account_risk_recovery_scope",
+        "name": "test_first_real_snapshot_restores_only_this_accounts_daily_and_weekly_loss_baselines"
+      },
+      "trading.tests.test_account_risk_recovery_scope::test_actual_close_records_account_inside_the_review_seal": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_account_risk_recovery_scope",
+        "name": "test_actual_close_records_account_inside_the_review_seal"
+      },
+      "trading.tests.test_account_risk_recovery_scope::test_malformed_financial_identity_remains_unresolved[payload0]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_account_risk_recovery_scope",
+        "name": "test_malformed_financial_identity_remains_unresolved[payload0]"
+      },
+      "trading.tests.test_account_risk_recovery_scope::test_malformed_financial_identity_remains_unresolved[payload1]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_account_risk_recovery_scope",
+        "name": "test_malformed_financial_identity_remains_unresolved[payload1]"
+      },
+      "trading.tests.test_account_risk_recovery_scope::test_malformed_financial_identity_remains_unresolved[payload2]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_account_risk_recovery_scope",
+        "name": "test_malformed_financial_identity_remains_unresolved[payload2]"
+      },
+      "trading.tests.test_account_risk_recovery_scope::test_malformed_financial_identity_remains_unresolved[payload3]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_account_risk_recovery_scope",
+        "name": "test_malformed_financial_identity_remains_unresolved[payload3]"
+      },
+      "trading.tests.test_account_risk_recovery_scope::test_invalid_review_pnl_cannot_reset_recovered_losses_or_crash_protection[None]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_account_risk_recovery_scope",
+        "name": "test_invalid_review_pnl_cannot_reset_recovered_losses_or_crash_protection[None]"
+      },
+      "trading.tests.test_account_risk_recovery_scope::test_invalid_review_pnl_cannot_reset_recovered_losses_or_crash_protection[NaN]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_account_risk_recovery_scope",
+        "name": "test_invalid_review_pnl_cannot_reset_recovered_losses_or_crash_protection[NaN]"
+      },
+      "trading.tests.test_account_risk_recovery_scope::test_invalid_review_pnl_cannot_reset_recovered_losses_or_crash_protection[Infinity]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_account_risk_recovery_scope",
+        "name": "test_invalid_review_pnl_cannot_reset_recovered_losses_or_crash_protection[Infinity]"
+      },
+      "trading.tests.test_account_risk_recovery_scope::test_invalid_review_pnl_cannot_reset_recovered_losses_or_crash_protection[-Infinity]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_account_risk_recovery_scope",
+        "name": "test_invalid_review_pnl_cannot_reset_recovered_losses_or_crash_protection[-Infinity]"
+      },
+      "trading.tests.test_account_risk_recovery_scope::test_invalid_review_pnl_cannot_reset_recovered_losses_or_crash_protection[not-money]": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_account_risk_recovery_scope",
+        "name": "test_invalid_review_pnl_cannot_reset_recovered_losses_or_crash_protection[not-money]"
+      },
+      "trading.tests.test_account_risk_recovery_scope::test_ambiguous_scope_keeps_existing_venue_protection_running": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_account_risk_recovery_scope",
+        "name": "test_ambiguous_scope_keeps_existing_venue_protection_running"
+      },
+      "trading.tests.test_account_risk_recovery_scope::test_real_service_start_exposes_the_scope_issue_to_owner_readback": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_account_risk_recovery_scope",
+        "name": "test_real_service_start_exposes_the_scope_issue_to_owner_readback"
+      },
+      "trading.tests.test_account_risk_recovery_scope::test_account_runtime_adjustment_probe_retains_scope_refusal_without_a_strategy_id": {
+        "state": "PASS",
+        "junit": "/tmp/van-be004-lac134-final-callers.xml",
+        "classname": "trading.tests.test_account_risk_recovery_scope",
+        "name": "test_account_runtime_adjustment_probe_retains_scope_refusal_without_a_strategy_id"
+      }
+    },
+    "required_controls": [
+      "Actual paired HTTP+independent registry/SQLite readback, exact boundary/future/invalid source clocks, fresh/disconnected/never-synced/unavailable/corrupt variants.",
+      "Two accounts with one stale/one fresh plus unrelated SESSION/global status fresh; per-account source revision/timestamp remain original.",
+      "Repeated GET and reconstructed read owner stable original source; actual fresh Python process rereads same immutable original data with owned process-group timeout/cleanup.",
+      "Concurrent writer after first SQL read does not alter captured account snapshot; one captured display clock and one account snapshot scan.",
+      "Historical monetary text and existing totals retained; native physical scope/funding/observation/margin/risk recovery and movement restrictions preserved in all existing direct projection caller modules.",
+      "Paired wrong-device-token denial; exact alias/native-profile readback restrictions; secret locators/private inline values absent. No account operation or authority issued by reads."
+    ],
+    "selection_closure": "New11 SQL cases + existing portfolio/native observation/margin/funding/balance direct readers (107); actual new9 paired HTTP controls plus complete existing tradingAPI/native observationAPI/fundingAPI modules(29); remaining financial movement/MT5 funding/account risk recovery direct consumers(58). All groups used same final9 pins, no fixture assertion trimming.",
+    "dependency_materialization": {
+      "path": "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py",
+      "sha256": "ad2a971130f13b4e041c46d722d56228122d982e0e14c3638f8f491c43e0b2cd",
+      "bytes": 55604,
+      "HEAD53c_and_publishedba817_exact_same": true,
+      "existing_tracked_read_only_fixture_not_exported": true
+    }
+  },
+  "preserved_failed_history": {
+    "original_before_counterexample": "/tmp/van-be004-discover-diagnosis-20261101.json (original intended failure/raw/XML/observation untouched)",
+    "development1": "/tmp/van-be004-lac134-dev1-terminal.json:20PASS2FAIL, test assumptions about sorted registry order corrected by exact alias mapping, source assertions not weakened",
+    "development2": "/tmp/van-be004-lac134-dev2-terminal.json:20PASS; not added to final194 count",
+    "initial_final_collection": "/tmp/van-be004-lac134-final-native-terminal.json:exit2 missing existing tracked worker fixture, no tests executed. Exact original fixture materialized then full group passed."
+  },
+  "android_qualification": {
+    "status": "PENDING_GENUINE_INTEGRATED_SDK_APP_COMPILE_AND_APP_UNIT_EXECUTION",
+    "changed_production": [
+      "com/dial/van/trading/TradingModels.kt",
+      "com/dial/van/trading/TradingRepository.kt"
+    ],
+    "actual_unit_class": "com.dial.van.trading.TradingModelsTest",
+    "new_methods": [
+      "unavailableAccountLedgerDoesNotBecomeHealthyEmptyDirectory",
+      "accountSnapshotReadbackPreservesOriginalRevisionAndNoncurrentClocks"
+    ],
+    "owner": "Existing unfiltered hosted :app:testDebugUnitTest :app:assembleDebug :app:lintDebug on exact integrated candidate after publication; no workflow change or local SDK/Gradle attempt.",
+    "resource_basis": "New focused local phase limits each run128MiB; broad Android remains fresh-hosted or separately admitted. Historical SDK capacity refusals and old4GiB floors unchanged."
+  },
+  "full_BE004_contract": {
+    "unit_id": "BE-004",
+    "packet_id": "VAN-PKT-007",
+    "title": "Accounts, broker/exchange directory and operation capabilities",
+    "contract_hash": "b7fb19c27f8758a5500274a2cd5cae860111db8ff6f520298a67166db5754bc3",
+    "sequence": 7,
+    "stage": 1,
+    "plan_status": "NOT_STARTED",
+    "plan_dependencies": [
+      "BE-002",
+      "BE-003",
+      "PRE-003"
+    ],
+    "workmap_acceptance": "NOT_ISSUED",
+    "workmap_source_inspection": "REQUIRED_AT_WORKFLOW_START_NOT_A_MISSING_CODE_CLAIM",
+    "requirements": [
+      "VAN-NX-048",
+      "VAN-NX-049",
+      "VAN-NX-050",
+      "VAN-NX-056",
+      "VAN-NX-057",
+      "VAN-NX-064",
+      "VAN-CX-016",
+      "VAN-CRYPTO-001",
+      "VAN-CRYPTO-002",
+      "VAN-CRYPTO-013",
+      "VAN-RV-008"
+    ],
+    "acceptance_ids": [
+      "T-BE-004-POS",
+      "T-BE-004-NEG",
+      "T-BE-004-REC",
+      "T-BE-004-SEC",
+      "T-BE-004-INT",
+      "T-VAN-CX-016-POS",
+      "T-VAN-CX-016-NEG",
+      "T-VAN-CX-016-REC",
+      "T-REV113-003",
+      "T-VAN-CRYPTO-001-POS",
+      "T-VAN-CRYPTO-001-NEG",
+      "T-VAN-CRYPTO-001-REC",
+      "T-VAN-CRYPTO-002-POS",
+      "T-VAN-CRYPTO-002-NEG",
+      "T-VAN-CRYPTO-002-REC",
+      "T-VAN-CRYPTO-013-POS",
+      "T-VAN-CRYPTO-013-NEG",
+      "T-VAN-CRYPTO-013-REC",
+      "T-VAN-RV-008-POS",
+      "T-VAN-RV-008-NEG",
+      "T-VAN-RV-008-REC"
+    ],
+    "contexts": [
+      "VNX-S-ACCOUNTS-01",
+      "VNX-S-ACCOUNTS-02",
+      "VNX-S-ACCOUNTS-03",
+      "VNX-S-ACCOUNTS-04",
+      "VNX-S-ACCOUNTS-05",
+      "VNX-S-ACCOUNTS-06",
+      "VNX-S-ACCOUNTS-07",
+      "VNX-S-ACCOUNTS-08",
+      "VNX-S-ACCOUNTS-09",
+      "VNX-S-ACCOUNTS-10",
+      "VNX-S-ACCOUNTS-11",
+      "VNX-S-ACCOUNTS-12",
+      "VNX-S-ACCOUNTS-13",
+      "VNX-S-ACCOUNTS-14",
+      "VNX-S-ACCOUNTS-15",
+      "VNX-S-ACCOUNTS-16",
+      "VNX-S-ACCOUNTS-17",
+      "VNX-S-ACCOUNTS-18",
+      "van.trading.accounts",
+      "van.trading.accounts.add"
+    ],
+    "owner_actions": [
+      "LAC-134",
+      "LAC-135",
+      "LAC-137",
+      "LAC-138",
+      "LAC-139",
+      "LAC-140"
+    ],
+    "owner_action_text": {
+      "LAC-134": "For \"refresh\" on van.trading.accounts: Readback belongs to the exact subject/scope and carries source revision, timestamp and freshness; paging/filtering returns the requested records without domain mutation. Domain assertions: No new native command, approval, account/position mutation, or mission dispatch occurs from this read/navigation interaction. The selected context and subject survive reentry without changing owner/account/project; any denied target remains explicit. Refusal: Denied scope, expired lease, unavailable source or invalid cursor is explicit; cached data is not relabelled current. Recovery: Resume cursor only within its source epoch; on gap get a new snapshot; repeated reads create no commands.",
+      "LAC-135": "For \"add\" on van.trading.accounts: An immutable typed candidate/preview is stored with exact subject, arguments and digest; no consequential domain effect has run. Domain assertions: The requested verb/variant and arguments in the authoritative receipt match this action and its selected subject; unrelated fields and scopes do not change. A lost response retains the original operation identity; an independently reread postcondition, not the transport response alone, determines completion. Refusal: Invalid/unsupported branch, stale scope or untrusted payload is refused with field-level reason before effect. Recovery: Recover the same artifact by draft ID and hash; changed arguments create a new draft and invalidate old confirmation.",
+      "LAC-137": "For \"submit account actions\" on van.trading.accounts.add: Every named branch in the inherited action is exercised separately against its advertised typed variant and exact independent postcondition; read, draft and effect branches are not interchangeable. Domain assertions: The requested verb/variant and arguments in the authoritative receipt match this action and its selected subject; unrelated fields and scopes do not change. A lost response retains the original operation identity; an independently reread postcondition, not the transport response alone, determines completion. Refusal: Invalid branch/scope, stale target and missing per-variant authority refuse; a passing read branch cannot certify an effect branch. Recovery: Recover each branch using its original local/native identity; repeat no already-applied effect and preserve partial/unknown outcomes.",
+      "LAC-138": "Return a fresh native challenge bound to exact subject, arguments, device and expiry; no proof, grant activation or domain effect is claimed. Domain assertions: The requested verb/variant and arguments in the authoritative receipt match this action and its selected subject; unrelated fields and scopes do not change. A lost response retains the original operation identity; an independently reread postcondition, not the transport response alone, determines completion. Refusal: Changed arguments, wrong device/scope, expired challenge or revoked authority refuses before dispatch; OS prompt dismissal grants nothing. Recovery: Recover original decision/command after lost response; never mint a second effect from repeated approval.",
+      "LAC-139": "Produce only the current exact cryptographic proof after native biometric success; independent command dispatch and postcondition remain separately required. Domain assertions: The requested verb/variant and arguments in the authoritative receipt match this action and its selected subject; unrelated fields and scopes do not change. A lost response retains the original operation identity; an independently reread postcondition, not the transport response alone, determines completion. Refusal: Changed arguments, wrong device/scope, expired challenge or revoked authority refuses before dispatch; OS prompt dismissal grants nothing. Recovery: Recover original decision/command after lost response; never mint a second effect from repeated approval.",
+      "LAC-140": "For \"Done\" on van.trading.accounts.add: Destination and selected subject match the requested route; back returns to the expected origin; domain state and command count are unchanged. Domain assertions: No new native command, approval, account/position mutation, or mission dispatch occurs from this read/navigation interaction. The selected context and subject survive reentry without changing owner/account/project; any denied target remains explicit. Refusal: Invalid, unavailable or revoked target displays the exact reason; no effect is dispatched. Recovery: After recreation/deep-link reentry restore the selected authorized subject and stack; do not replay effects."
+    },
+    "context_text_pointer": "VAN_NEXT_DETERMINISTIC_PLAN_REV1_18.md lines 4453\u20134472 for 18 VNX-S-ACCOUNTS contexts and account surfaces; account action text lines 4473\u20134478; full contextual contracts and scope fingerprints are in PROPOSED_SCOPE_LOCK.json."
+  },
+  "full_acceptance_contracts_pointer": "/tmp/van-be004-remaining-contract-inventory-20261101.json",
+  "remaining_gates": [
+    "Original11requirements/21acceptance/20contexts/6LAC and all discover/demo/liveapplication/link/entitlededit/restrict/unlink/remoteclosure positive/refusal/unknown/recovery branches remain; this is LAC134 display-currentness SOURCE candidate only.",
+    "No real provider/sandbox matching, creation, native no-effect proof, remote closure, CEX settlement/protection or financial effects performed. Genuine PROVIDER_ADMISSION_REQUIRED remains refusal, never provider-positive completion.",
+    "SDK/app unit, admitted PostgreSQL, BE002/BE003/PRE003/BG001/S24/unit/formal/native/production remain unqualified. No spot-to-margin/perps/options/DEX/withdraw permission inferred."
+  ],
+  "resources_and_execution": {
+    "phase_receipt": "/workspace/van-be004-integration-20261101/NEXT_PHASE_RESOURCE_RECEIPT.json",
+    "new_phase_tmp_floor_bytes": 2147483648,
+    "workspace_floor_bytes": 33554432,
+    "workspace_batch_admission_bytes": 67108864,
+    "per_focused_run_budget_cap": 134217728,
+    "raw_cap": 8388608,
+    "wall_cap_seconds": 600,
+    "workspace_free": 69660672,
+    "tmp_free": 4137123840,
+    "final_owned_process_groups_absent": [
+      861656,
+      861784,
+      864317
+    ],
+    "owned_SQL_fixtures_raw_JUnit_preserved_in_tmp": true,
+    "tmp_volatile": true,
+    "no_archive_main_commit_push_CI_provider_authority_cleanup_effect": true
+  }
+}

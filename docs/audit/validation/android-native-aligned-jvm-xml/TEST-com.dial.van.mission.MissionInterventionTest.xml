@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.mission.MissionInterventionTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:11:47" hostname="052fefa249ff" time="0.001">
+  <properties/>
+  <testcase name="recorded messages require an event receipt()" classname="com.dial.van.mission.MissionInterventionTest" time="0.001"/>
+  <testcase name="a different mission or nonterminal state cannot acknowledge cancellation()" classname="com.dial.van.mission.MissionInterventionTest" time="0.0"/>
+  <testcase name="a matching cancelled receipt permits the cancellation acknowledgment()" classname="com.dial.van.mission.MissionInterventionTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

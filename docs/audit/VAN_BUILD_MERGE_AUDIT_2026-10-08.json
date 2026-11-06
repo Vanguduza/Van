@@ -1,0 +1,418 @@
+{
+  "schema_version": 1,
+  "observed_at_utc": "2026-10-08T22:33:53.922048+00:00",
+  "repository": "Vanguduza/Van",
+  "main_sha": "8eb1889822fc8a83f219977c15340172e16acd91",
+  "consolidation_branch": "codex/van-canon-consolidation-2026-10-08",
+  "consolidation_parent_sha": "d9067978267226d7321b1e95fa510c0a341e896a",
+  "protected_merge_performed": false,
+  "corrected_apk_installed": false,
+  "physical_acceptance": {
+    "executed": 0,
+    "declared_cases": 826
+  },
+  "installed_rejected_source_sha": "f3cab5cb75d73f0255c60a6639a2df43dbb08d90",
+  "branches": [
+    {
+      "branch": "origin/chatgpt/vati-opportunity-modes-20261008",
+      "sha": "923ecf9bbb81a2b3b485a3730071279851596b06",
+      "subject": "feat(vati): signed opportunity temperaments and controlled winner pursuit",
+      "ancestor_of_main": false,
+      "ancestor_of_consolidation_parent": true
+    },
+    {
+      "branch": "origin/codex/van-direct-artemis-2026-10-08",
+      "sha": "f3cab5cb75d73f0255c60a6639a2df43dbb08d90",
+      "subject": "Verify the exact subscription profile resolved by native task children",
+      "ancestor_of_main": false,
+      "ancestor_of_consolidation_parent": true
+    },
+    {
+      "branch": "origin/main",
+      "sha": "8eb1889822fc8a83f219977c15340172e16acd91",
+      "subject": "Merge pull request #91 from Vanguduza/owner/dial-universe-whatsapp-browser-20261008",
+      "ancestor_of_main": true,
+      "ancestor_of_consolidation_parent": true
+    },
+    {
+      "branch": "origin/muse/vati-opportunity-modes-20261008",
+      "sha": "8eb1889822fc8a83f219977c15340172e16acd91",
+      "subject": "Merge pull request #91 from Vanguduza/owner/dial-universe-whatsapp-browser-20261008",
+      "ancestor_of_main": true,
+      "ancestor_of_consolidation_parent": true
+    },
+    {
+      "branch": "origin/owner/dial-universe-whatsapp-browser-20261008",
+      "sha": "c0c2984e1eadfb47351aa7449e2129049cede55e",
+      "subject": "Admit Facebook browser scope for Dial Universe WhatsApp setup",
+      "ancestor_of_main": true,
+      "ancestor_of_consolidation_parent": true
+    },
+    {
+      "branch": "origin/chatgpt/van-browser-task-read-auth-20261008",
+      "sha": "9cab59773476713b9ffa23f4d2277820bb6005df",
+      "subject": "fix(browser): admit scoped task status and evidence reads",
+      "ancestor_of_main": true,
+      "ancestor_of_consolidation_parent": true
+    },
+    {
+      "branch": "origin/chatgpt/van-browser-tested-source-20261008",
+      "sha": "e22080c496dbc2862bb9cbdd47007116e99008af",
+      "subject": "Restore complete tested browser module and exact source bytes after export truncation",
+      "ancestor_of_main": true,
+      "ancestor_of_consolidation_parent": true
+    },
+    {
+      "branch": "origin/chatgpt/van-browser-assignment-proof-20261008",
+      "sha": "1b3c6d014f68a61e3360fde57d2c269d351ea239",
+      "subject": "Require scoped profile leases and sealed observations for browser assignment completion",
+      "ancestor_of_main": true,
+      "ancestor_of_consolidation_parent": true
+    },
+    {
+      "branch": "origin/chatgpt/van-browser-sandbox-launch-20261008",
+      "sha": "5ffa59ef2bf0003b5248749c5692fdb1a4eceed4",
+      "subject": "Fix private Chromium sandbox namespace and writable profile startup paths",
+      "ancestor_of_main": true,
+      "ancestor_of_consolidation_parent": true
+    },
+    {
+      "branch": "origin/chatgpt/harden-playwright-chromium-ownership-20261008",
+      "sha": "306834775ab3e0e33c54bc72828a04f04cd7f135",
+      "subject": "test(browser): lock Chromium ownership hardening",
+      "ancestor_of_main": true,
+      "ancestor_of_consolidation_parent": true
+    },
+    {
+      "branch": "origin/chatgpt/allow-sandboxed-playwright-userns-20261008",
+      "sha": "504a3f6759ffff9d13fe3528037be041a6536088",
+      "subject": "docs(browser): keep sandbox contract machine-checkable",
+      "ancestor_of_main": true,
+      "ancestor_of_consolidation_parent": true
+    },
+    {
+      "branch": "origin/chatgpt/fix-stagehand-readiness-window-20261008",
+      "sha": "7043d0aadd42322c16393e3fabb3a35113986de1",
+      "subject": "fix(browser): align Stagehand readiness terminal attempt",
+      "ancestor_of_main": true,
+      "ancestor_of_consolidation_parent": true
+    },
+    {
+      "branch": "origin/chatgpt/fix-gateway-browser-runtime-staging-20261008",
+      "sha": "5402cabb1c854518839b7544e591eb7ea6f901a3",
+      "subject": "test(gateway): require browser governance in staged runtime",
+      "ancestor_of_main": false,
+      "ancestor_of_consolidation_parent": false
+    },
+    {
+      "branch": "origin/chatgpt/stage-browser-governance-certification-20261008",
+      "sha": "7231caf101cf89f33316c133a2ac99e87eb3e9b4",
+      "subject": "test(runtime): lock browser governance staging",
+      "ancestor_of_main": true,
+      "ancestor_of_consolidation_parent": true
+    },
+    {
+      "branch": "origin/chatgpt/fix-stagehand-listen-syntax-v2-20261008",
+      "sha": "96bc3590a0cd48a6083441d7a27e4b8f8bf46683",
+      "subject": "fix(browser): correct Stagehand service listen syntax",
+      "ancestor_of_main": true,
+      "ancestor_of_consolidation_parent": true
+    },
+    {
+      "branch": "origin/chatgpt/fix-browser-systemd-retry-20261008",
+      "sha": "36690fd7c65660aea667e953eab8455e707271a1",
+      "subject": "test(browser): lock restart recovery semantics",
+      "ancestor_of_main": false,
+      "ancestor_of_consolidation_parent": false
+    },
+    {
+      "branch": "origin/chatgpt/fix-browser-systemd-retry2-20261008",
+      "sha": "71a01e7a5450b38e42068fe2b7a580e7230f2aa3",
+      "subject": "test(browser): lock worker start-limit recovery",
+      "ancestor_of_main": true,
+      "ancestor_of_consolidation_parent": true
+    },
+    {
+      "branch": "origin/chatgpt/fix-browser-systemd-startlimit-20261008",
+      "sha": "71a01e7a5450b38e42068fe2b7a580e7230f2aa3",
+      "subject": "test(browser): lock worker start-limit recovery",
+      "ancestor_of_main": true,
+      "ancestor_of_consolidation_parent": true
+    },
+    {
+      "branch": "origin/chatgpt/fix-stagehand-listen-syntax-20261008",
+      "sha": "6ade5eed60b7574d5296c9d3eb6770fd8de6368f",
+      "subject": "fix(browser): correct Stagehand service listen syntax",
+      "ancestor_of_main": false,
+      "ancestor_of_consolidation_parent": false
+    },
+    {
+      "branch": "origin/chatgpt/fix-browser-runtime-ancestor-acl-20261008",
+      "sha": "5dcf149693598dc6ad0998a7ed63ecfd45d4e8a5",
+      "subject": "test(browser): lock ancestor ACL isolation",
+      "ancestor_of_main": false,
+      "ancestor_of_consolidation_parent": false
+    },
+    {
+      "branch": "origin/chatgpt/fix-browser-runtime-path-access-20261008",
+      "sha": "b8af36e4ed354ba7f55582dbdd8e2a36b15ae9a1",
+      "subject": "test(browser): lock narrow runtime path ACL",
+      "ancestor_of_main": true,
+      "ancestor_of_consolidation_parent": true
+    },
+    {
+      "branch": "origin/chatgpt/fix-browser-runtime-path-perms-20261008",
+      "sha": "1698430078d8cd2e1309b7bfa24a0043349ea811",
+      "subject": "test(browser): lock browser runtime directory ownership",
+      "ancestor_of_main": true,
+      "ancestor_of_consolidation_parent": true
+    },
+    {
+      "branch": "origin/chatgpt/fix-browser-harness-pillow-pin-20261008",
+      "sha": "1e9e18a710d77cdc0ab046ad09f78d903cb7f3ec",
+      "subject": "test(browser): lock Browser Harness Pillow dependency",
+      "ancestor_of_main": true,
+      "ancestor_of_consolidation_parent": true
+    },
+    {
+      "branch": "origin/codex/van-owner-core-only-2026-10-08",
+      "sha": "75e2e95b734b29f8e6aa54eadde53a0348c9c499",
+      "subject": "Place VAN gateway and runtime together on trading core",
+      "ancestor_of_main": false,
+      "ancestor_of_consolidation_parent": true
+    },
+    {
+      "branch": "origin",
+      "sha": "652ef3f38717c808f57fcbc97f92d1030f9ab4a8",
+      "subject": "Complete VAN owner contracts and Android backend wiring",
+      "ancestor_of_main": false,
+      "ancestor_of_consolidation_parent": true
+    },
+    {
+      "branch": "origin/codex/van-owner-wiring-2026-10-08",
+      "sha": "652ef3f38717c808f57fcbc97f92d1030f9ab4a8",
+      "subject": "Complete VAN owner contracts and Android backend wiring",
+      "ancestor_of_main": false,
+      "ancestor_of_consolidation_parent": true
+    },
+    {
+      "branch": "origin/chatgpt/van-overlay-firewall-persistence-20261007",
+      "sha": "cc60ea8edacde5d545ada67b7af08e1e3623655c",
+      "subject": "test(oci): require persistent DIAL overlay firewall rules",
+      "ancestor_of_main": false,
+      "ancestor_of_consolidation_parent": true
+    },
+    {
+      "branch": "origin/codex/cognitive-fabric-r161-20261006",
+      "sha": "c091d22ce21728de33b5c8318385a147809dc207",
+      "subject": "Complete bounded Cognitive Fabric source integrations and closure evidence",
+      "ancestor_of_main": false,
+      "ancestor_of_consolidation_parent": true
+    },
+    {
+      "branch": "origin/chatgpt/van-web-acquisition-fabric-20261004",
+      "sha": "01e7d84a1edd6e902619b284fac1a1e560a2d38d",
+      "subject": "fix(acquisition): bound initial Crawlee concurrency for small crawls",
+      "ancestor_of_main": false,
+      "ancestor_of_consolidation_parent": true
+    },
+    {
+      "branch": "origin/gpt/memory-fabric-rev1-2-van-20260929",
+      "sha": "8c67f53ee52298f31b0d6f0d68548a3e279515bd",
+      "subject": "project-truth: supersession rows covering unit G16-a under auth-20261002-owner-derived-programme-a-ledger-abbrev-pin",
+      "ancestor_of_main": false,
+      "ancestor_of_consolidation_parent": true
+    },
+    {
+      "branch": "origin/gpt/jev-openmuse-convergence-r1-van-20260929",
+      "sha": "5138ae9a5e647e3e1700d64fc84bc9a21ca2cbb4",
+      "subject": "project-truth: supersession rows covering unit G16 (review-I9 remediation) under auth-20261001-owner-derived-programme-b-review-i9-remediation",
+      "ancestor_of_main": false,
+      "ancestor_of_consolidation_parent": true
+    },
+    {
+      "branch": "origin/gpt/meta-muse-access-live-green-20261002",
+      "sha": "f11a8949ba140be850f1135c46b5dd8b3d836cd5",
+      "subject": "Add machine-readable Meta Muse access evidence",
+      "ancestor_of_main": false,
+      "ancestor_of_consolidation_parent": false
+    },
+    {
+      "branch": "origin/gpt/meta-muse-secure-access-20261002",
+      "sha": "51f84a38a7ae3ad45de9a64ef804fb35f9884a11",
+      "subject": "muse: record live secure access pre-auth receipt",
+      "ancestor_of_main": false,
+      "ancestor_of_consolidation_parent": false
+    },
+    {
+      "branch": "origin/gpt/muse-egress-hardening-20260930",
+      "sha": "4cac338e6d2069b9eb61014d39541ea1387acbb5",
+      "subject": "fix(test): match escaped Muse bootstrap JSON source",
+      "ancestor_of_main": false,
+      "ancestor_of_consolidation_parent": false
+    },
+    {
+      "branch": "origin/ops/dial-control-recovery-20260930",
+      "sha": "72635c8832befcbb45ffe3d902707c61ef3ff1ec",
+      "subject": "ops: prestage one-shot DDS runner recovery on boot",
+      "ancestor_of_main": false,
+      "ancestor_of_consolidation_parent": false
+    },
+    {
+      "branch": "origin/gpt/jev-openmuse-convergence-r1-van-20260929-parent-ccr-integration",
+      "sha": "78ca1baeccd859d57ade2f5f87c5723473544421",
+      "subject": "Move the Jev interaction-lanes card into command/jev using design tokens",
+      "ancestor_of_main": false,
+      "ancestor_of_consolidation_parent": true
+    },
+    {
+      "branch": "origin/gpt/openmuse-van-convergence-r1",
+      "sha": "a8d3f1930ad9f6d479717ab1a5e161cfd2f87144",
+      "subject": "fix(convergence): certify semantic Gmail reply header implementation",
+      "ancestor_of_main": false,
+      "ancestor_of_consolidation_parent": true
+    },
+    {
+      "branch": "origin/forge/candidate-b-rive-mechanics-20260925",
+      "sha": "80f3f0f304cf41945101dc502777fd8f02a4eab2",
+      "subject": "fix(rive): layer action transforms under durable pose",
+      "ancestor_of_main": false,
+      "ancestor_of_consolidation_parent": true
+    },
+    {
+      "branch": "origin/claude/van-forge-audit-11n4wh",
+      "sha": "2ff009646e4b4933d0313550e6cbfd5238c7199f",
+      "subject": "Debug only: try an owner-imported VRM model in place of VAN",
+      "ancestor_of_main": false,
+      "ancestor_of_consolidation_parent": false
+    },
+    {
+      "branch": "origin/gpt/jev-control-centre-20260925",
+      "sha": "f3df7a10e12fc76d25f958e9f19cb0b25c798168",
+      "subject": "feat: define Jev+LLM live trading analyst contract",
+      "ancestor_of_main": false,
+      "ancestor_of_consolidation_parent": false
+    },
+    {
+      "branch": "origin/claude/busy-bardeen-sbfo2u",
+      "sha": "4554ee22e438ec0362bd7048321b29320aef073d",
+      "subject": "VAN Android: ship configured for the direct mutual-TLS link",
+      "ancestor_of_main": true,
+      "ancestor_of_consolidation_parent": true
+    },
+    {
+      "branch": "origin/gpt/van-character-forge-production-v3-20260924",
+      "sha": "85610c9a2949abf22e9ad289624dcb8bd30cd5af",
+      "subject": "ci: remove one-shot Character Forge master promotion workflow",
+      "ancestor_of_main": true,
+      "ancestor_of_consolidation_parent": true
+    },
+    {
+      "branch": "origin/gpt/van-character-forge-authority-closure-20260924",
+      "sha": "49d8d4cf8ba613b2222fec48fb932f77d595c77b",
+      "subject": "fix: remove remaining retired OwnerArt references from preview compilation",
+      "ancestor_of_main": true,
+      "ancestor_of_consolidation_parent": true
+    },
+    {
+      "branch": "origin/gpt/van-rive-build-input-pack-20260924",
+      "sha": "ae764c510de8d8ba99f8aa6e26e674b5a8fc6d79",
+      "subject": "character-forge: fix asset pack artboard drift check",
+      "ancestor_of_main": false,
+      "ancestor_of_consolidation_parent": false
+    },
+    {
+      "branch": "origin/gpt/character-forge-production-closure-20260924",
+      "sha": "4a858df1d355efd5da3efde940846b95e48e501a",
+      "subject": "character-forge: require frozen visual authority in release provenance",
+      "ancestor_of_main": true,
+      "ancestor_of_consolidation_parent": true
+    },
+    {
+      "branch": "origin/gpt/van-artemis-console-20260923",
+      "sha": "ed7dd6179ca5e4a1c2ce1187dd02421df392dc4c",
+      "subject": "Test ARTEMIS console mutation CSRF boundary",
+      "ancestor_of_main": true,
+      "ancestor_of_consolidation_parent": true
+    },
+    {
+      "branch": "origin/gpt/character-forge-netcup-qualification-fix-20260923",
+      "sha": "359ec7d12f7da26fd066ffb3159ef7f41bd32431",
+      "subject": "character-forge: guard Commander-callable qualification",
+      "ancestor_of_main": false,
+      "ancestor_of_consolidation_parent": false
+    },
+    {
+      "branch": "origin/gpt/character-forge-netcup-env-hotfix-20260923",
+      "sha": "9d20ce68b9b17fe246c8d77e7193b9aa89801c05",
+      "subject": "character-forge: align bootstrap contracts with isolated Rive home",
+      "ancestor_of_main": false,
+      "ancestor_of_consolidation_parent": false
+    },
+    {
+      "branch": "origin/gpt/van-character-forge-engineering-20260922",
+      "sha": "b8bc8a0795d1b22b880802c50494499bcafa25a0",
+      "subject": "character-forge: keep Rive smoke diagnostics fail-closed",
+      "ancestor_of_main": true,
+      "ancestor_of_consolidation_parent": true
+    },
+    {
+      "branch": "origin/claude/van-fable-forensic-audit-ds8g0o",
+      "sha": "620cba868ab94439c2158043c5f8bc5f661ee024",
+      "subject": "docs(audit): PR #60 Character Forge audit \u2014 M0\u2013M5, bootstrap, riv completion build",
+      "ancestor_of_main": false,
+      "ancestor_of_consolidation_parent": false
+    },
+    {
+      "branch": "origin/gpt/van-post-fable-product-closure-20260922",
+      "sha": "67eee3f924d666f8622070e0732468bb49f444e6",
+      "subject": "trading(stack): record adopted Temporal durable runtime",
+      "ancestor_of_main": true,
+      "ancestor_of_consolidation_parent": true
+    }
+  ],
+  "scoped_dispositions": [
+    {
+      "sha": "4cac338e6d2069b9eb61014d39541ea1387acbb5",
+      "status": "SCOPED_SECURITY_SOURCE_RECONCILED_CURRENT_BROWSER_HANDOFF_UNBOUND",
+      "included": "33-file Muse enclave security source, repaired actual Python syntax, standalone source tests",
+      "excluded": "separate TypeSafe Jev worker, parallel Jev service and egress proxy, Hermes gateway SSH transport, bootstrap/runtime activation",
+      "live_qualification": false
+    },
+    {
+      "sha": "f3df7a10e12fc76d25f958e9f19cb0b25c798168",
+      "status": "CONTENT_RECONCILED_BY_PARENT_CCR_AND_LATER_REVIEW_BRANCHES_NOT_ANCESTRY",
+      "scope": "Existing public Jev/owner surfaces retained; canonical single DDS Jev path and later safety reviews govern."
+    },
+    {
+      "sha": "ae764c510de8d8ba99f8aa6e26e674b5a8fc6d79",
+      "status": "OLDER_ASSET_PACK_PATHS_EXIST_WITH_LATER_AUTHORITY_AND_CANDIDATE_B_SOURCE",
+      "scope": "Do not replace later frozen Candidate B authority or mechanics with older art/pack bytes."
+    },
+    {
+      "sha": "f11a8949ba140be850f1135c46b5dd8b3d836cd5",
+      "status": "HISTORICAL_EXTERNAL_META_ACCESS_EVIDENCE_NOT_CURRENT_BUILD_OR_ADMISSION"
+    },
+    {
+      "sha": "51f84a38a7ae3ad45de9a64ef804fb35f9884a11",
+      "status": "HISTORICAL_EXTERNAL_META_ACCESS_EVIDENCE_NOT_CURRENT_BUILD_OR_ADMISSION"
+    },
+    {
+      "sha": "72635c8832befcbb45ffe3d902707c61ef3ff1ec",
+      "status": "DDS_CONTROL_RECOVERY_OUTSIDE_VAN_BUILD_SCOPE"
+    },
+    {
+      "sha": "2ff009646e4b4933d0313550e6cbfd5238c7199f",
+      "status": "RETIRED_DEBUG_VRM_EXPERIMENT_NOT_CANON"
+    }
+  ],
+  "qualification": {
+    "final_source_bound_backend": "PENDING",
+    "final_source_bound_android": "PENDING",
+    "final_source_bound_contracts": "PENDING",
+    "signed_core_only_owner_release": "NOT_CREATED",
+    "project_truth_protected_admission": "PENDING",
+    "production_runtime": "PREVIOUS_SOURCE_NOT_CONSOLIDATION"
+  },
+  "known_release_input_limit": "The existing Android profile remains historical-dial-control-debug. A real core-only deployment profile, existing trusted connectivity keys, owner release signing inputs and admitted installer credential are not available in the reviewed build inputs."
+}

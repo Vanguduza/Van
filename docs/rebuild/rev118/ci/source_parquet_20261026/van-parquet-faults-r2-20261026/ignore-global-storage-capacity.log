@@ -1,0 +1,54 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+_ test_storage_capacity_refuses_before_new_publication_and_preserves_original[bytes] _
+
+source = (<vati.market_data.native_archive.NativeMarketArchive object at 0x7f67c3399c10>, NativeSymbolContract(metadata_json='{...transport_host': 'demo.ctraderapi.com', 'native_account_id': 123, ...}, 'timeframe': 'M1', 'through_revision': 1, ...})
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-369/test_storage_capacity_refuses_0')
+arrow = <module 'pyarrow' from '/workspace/van-parquet-source-venv-20261026/lib/python3.12/site-packages/pyarrow/__init__.py'>
+limit = 'bytes'
+
+    @pytest.mark.parametrize('limit', ['bytes', 'count'])
+    def test_storage_capacity_refuses_before_new_publication_and_preserves_original(source, tmp_path, arrow, limit):
+        from vati.research.bar_partitions import PartitionBudget
+        book, contract, sample, window = source
+        budget = PartitionBudget(stored_bytes=1) if limit == 'bytes' else PartitionBudget(publications=1)
+        service = NativeBarPartitionService(NativeBarWindowReader(book), tmp_path/'derived', budget=budget)
+        if limit == 'count':
+            original = service.publish(window, expected_scope=contract.native_scope)
+            receipt = book.record('another-source-window', contract, replace(sample, bars=(sample.bars[0],)))
+            other = capture(book, contract, receipt)
+        else: other = window
+        before = {p.name:p.read_bytes() for p in service.root.iterdir()}
+>       with pytest.raises(SourcePartitionError, match='STORAGE_CAPACITY'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE SourcePartitionError
+
+trading/worker_tests/test_native_source_parquet.py:209: Failed
+_ test_storage_capacity_refuses_before_new_publication_and_preserves_original[count] _
+
+source = (<vati.market_data.native_archive.NativeMarketArchive object at 0x7f67c33ba1e0>, NativeSymbolContract(metadata_json='{...transport_host': 'demo.ctraderapi.com', 'native_account_id': 123, ...}, 'timeframe': 'M1', 'through_revision': 1, ...})
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-369/test_storage_capacity_refuses_1')
+arrow = <module 'pyarrow' from '/workspace/van-parquet-source-venv-20261026/lib/python3.12/site-packages/pyarrow/__init__.py'>
+limit = 'count'
+
+    @pytest.mark.parametrize('limit', ['bytes', 'count'])
+    def test_storage_capacity_refuses_before_new_publication_and_preserves_original(source, tmp_path, arrow, limit):
+        from vati.research.bar_partitions import PartitionBudget
+        book, contract, sample, window = source
+        budget = PartitionBudget(stored_bytes=1) if limit == 'bytes' else PartitionBudget(publications=1)
+        service = NativeBarPartitionService(NativeBarWindowReader(book), tmp_path/'derived', budget=budget)
+        if limit == 'count':
+            original = service.publish(window, expected_scope=contract.native_scope)
+            receipt = book.record('another-source-window', contract, replace(sample, bars=(sample.bars[0],)))
+            other = capture(book, contract, receipt)
+        else: other = window
+        before = {p.name:p.read_bytes() for p in service.root.iterdir()}
+>       with pytest.raises(SourcePartitionError, match='STORAGE_CAPACITY'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE SourcePartitionError
+
+trading/worker_tests/test_native_source_parquet.py:209: Failed
+=========================== short test summary info ============================
+FAILED trading/worker_tests/test_native_source_parquet.py::test_storage_capacity_refuses_before_new_publication_and_preserves_original[bytes]
+FAILED trading/worker_tests/test_native_source_parquet.py::test_storage_capacity_refuses_before_new_publication_and_preserves_original[count]
+2 failed in 1.39s

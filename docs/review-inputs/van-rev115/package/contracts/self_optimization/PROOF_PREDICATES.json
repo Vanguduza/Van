@@ -1,0 +1,258 @@
+{
+  "proofs": [
+    {
+      "id": "OBJECTIVE_APPROVED",
+      "must_resolve_real_artifact": true,
+      "predicate": "Exact objective economics, owner, mandate and permitted action match current authoritative approval.",
+      "resolver_owner": "RiskAuthority/account coordinator",
+      "runtime_state": "NOT_IMPLEMENTED_OR_QUALIFIED_BY_SPEC"
+    },
+    {
+      "id": "RESERVATION_CURRENT",
+      "must_resolve_real_artifact": true,
+      "predicate": "Authoritative version and worst-case aggregate exposure including unknown/cancel-pending children are held.",
+      "resolver_owner": "Account reservation transaction owner",
+      "runtime_state": "NOT_IMPLEMENTED_OR_QUALIFIED_BY_SPEC"
+    },
+    {
+      "id": "FENCE_CURRENT",
+      "must_resolve_real_artifact": true,
+      "predicate": "Only current account execution epoch may emit a new command.",
+      "resolver_owner": "Account lease/fence owner",
+      "runtime_state": "NOT_IMPLEMENTED_OR_QUALIFIED_BY_SPEC"
+    },
+    {
+      "id": "GRANT_CURRENT",
+      "must_resolve_real_artifact": true,
+      "predicate": "Verify signature issuer from existing trust store, scope, artifact hashes, validity and revocation; not request boolean.",
+      "resolver_owner": "Existing owner-policy verifier",
+      "runtime_state": "NOT_IMPLEMENTED_OR_QUALIFIED_BY_SPEC"
+    },
+    {
+      "id": "POLICY_QUALIFIED",
+      "must_resolve_real_artifact": true,
+      "predicate": "Exact artifact, estimator, action set, parameters and use cohort are eligible for this objective.",
+      "resolver_owner": "Independent policy qualifier",
+      "runtime_state": "NOT_IMPLEMENTED_OR_QUALIFIED_BY_SPEC"
+    },
+    {
+      "id": "FEASIBLE_ACTION",
+      "must_resolve_real_artifact": true,
+      "predicate": "Order type, urgency, deadline, venue, source data and protection constraints all hold.",
+      "resolver_owner": "Qualified execution planner",
+      "runtime_state": "NOT_IMPLEMENTED_OR_QUALIFIED_BY_SPEC"
+    },
+    {
+      "id": "COMMAND_DURABLE",
+      "must_resolve_real_artifact": true,
+      "predicate": "Exact command payload/client identity and reservation were durably committed before transport.",
+      "resolver_owner": "Authoritative journal/outbox",
+      "runtime_state": "NOT_IMPLEMENTED_OR_QUALIFIED_BY_SPEC"
+    },
+    {
+      "id": "VENUE_ACK",
+      "must_resolve_real_artifact": true,
+      "predicate": "Actual acknowledgement belongs to exact account/order and is not inferred from network success.",
+      "resolver_owner": "Admitted venue evidence resolver",
+      "runtime_state": "NOT_IMPLEMENTED_OR_QUALIFIED_BY_SPEC"
+    },
+    {
+      "id": "VENUE_FILL",
+      "must_resolve_real_artifact": true,
+      "predicate": "Actual fill ID/revision/amount/price/fees, including late or unauthorized fills; record facts even when mandate now revoked.",
+      "resolver_owner": "Admitted venue fill resolver",
+      "runtime_state": "NOT_IMPLEMENTED_OR_QUALIFIED_BY_SPEC"
+    },
+    {
+      "id": "CANCEL_FINAL",
+      "must_resolve_real_artifact": true,
+      "predicate": "Cancellation confirmation and late-fill history yield known remaining exposure; request is insufficient.",
+      "resolver_owner": "Venue outcome reconciliation",
+      "runtime_state": "NOT_IMPLEMENTED_OR_QUALIFIED_BY_SPEC"
+    },
+    {
+      "id": "VENUE_TERMINAL",
+      "must_resolve_real_artifact": true,
+      "predicate": "Expiry/rejection/cancel terminal state backed by authoritative venue/history evidence, not one missing lookup.",
+      "resolver_owner": "Venue status resolver",
+      "runtime_state": "NOT_IMPLEMENTED_OR_QUALIFIED_BY_SPEC"
+    },
+    {
+      "id": "EXPOSURE_RECONCILED",
+      "must_resolve_real_artifact": true,
+      "predicate": "Filled plus potentially executable remainder and cash/fees match authoritative actual state.",
+      "resolver_owner": "Account coordinator",
+      "runtime_state": "NOT_IMPLEMENTED_OR_QUALIFIED_BY_SPEC"
+    },
+    {
+      "id": "PROTECTION_RESOLVED",
+      "must_resolve_real_artifact": true,
+      "predicate": "Actual protection or completed authorized reduction is established; close request alone is not flat.",
+      "resolver_owner": "Protection/lifecycle owner",
+      "runtime_state": "NOT_IMPLEMENTED_OR_QUALIFIED_BY_SPEC"
+    },
+    {
+      "id": "MATURE_OBSERVATION",
+      "must_resolve_real_artifact": true,
+      "predicate": "Declared source availability, finality/fees/markout or censoring conditions hold for the target.",
+      "resolver_owner": "Outcome/target owner",
+      "runtime_state": "NOT_IMPLEMENTED_OR_QUALIFIED_BY_SPEC"
+    },
+    {
+      "id": "SOURCE_VALID",
+      "must_resolve_real_artifact": true,
+      "predicate": "Correct source/environment/context and evidence identity; synthetic is never live fact.",
+      "resolver_owner": "Existing evidence resolver",
+      "runtime_state": "NOT_IMPLEMENTED_OR_QUALIFIED_BY_SPEC"
+    },
+    {
+      "id": "NOT_APPLIED",
+      "must_resolve_real_artifact": true,
+      "predicate": "Observation revision not already applied; correction reverses/recomputes old contribution atomically.",
+      "resolver_owner": "Durable reducer cursor owner",
+      "runtime_state": "NOT_IMPLEMENTED_OR_QUALIFIED_BY_SPEC"
+    },
+    {
+      "id": "UPDATE_RULE_QUALIFIED",
+      "must_resolve_real_artifact": true,
+      "predicate": "Only permitted projection state under exact registered update formula is modified.",
+      "resolver_owner": "Qualified estimator policy owner",
+      "runtime_state": "NOT_IMPLEMENTED_OR_QUALIFIED_BY_SPEC"
+    },
+    {
+      "id": "SNAPSHOT_COMMITTED",
+      "must_resolve_real_artifact": true,
+      "predicate": "Contribution, revision cursor and immutable snapshot publication are atomic.",
+      "resolver_owner": "Evidence projection owner",
+      "runtime_state": "NOT_IMPLEMENTED_OR_QUALIFIED_BY_SPEC"
+    },
+    {
+      "id": "RESEARCH_GRANT",
+      "must_resolve_real_artifact": true,
+      "predicate": "Job has bounded data/source/compute/allowed operations and no economic sender credential.",
+      "resolver_owner": "Existing research authority",
+      "runtime_state": "NOT_IMPLEMENTED_OR_QUALIFIED_BY_SPEC"
+    },
+    {
+      "id": "ARTIFACT_SEALED",
+      "must_resolve_real_artifact": true,
+      "predicate": "Exact code/model/config/feature/update/action/target version and complete attempt lineage exist.",
+      "resolver_owner": "Existing content artifact owner",
+      "runtime_state": "NOT_IMPLEMENTED_OR_QUALIFIED_BY_SPEC"
+    },
+    {
+      "id": "EVALUATOR_QUALIFIED",
+      "must_resolve_real_artifact": true,
+      "predicate": "Chronology/matching/cost/account/leakage properties established for exact evaluation scope.",
+      "resolver_owner": "Independent evaluator owner",
+      "runtime_state": "NOT_IMPLEMENTED_OR_QUALIFIED_BY_SPEC"
+    },
+    {
+      "id": "OFFLINE_ACCEPTANCE",
+      "must_resolve_real_artifact": true,
+      "predicate": "Candidate passed preregistered held-out/economic/operational criteria; inconclusive cannot be relabeled.",
+      "resolver_owner": "Registered study result verifier",
+      "runtime_state": "NOT_IMPLEMENTED_OR_QUALIFIED_BY_SPEC"
+    },
+    {
+      "id": "PROSPECTIVE_EVIDENCE",
+      "must_resolve_real_artifact": true,
+      "predicate": "Actual eligible prospective path and environmental limits verified; mocked responses not matching proof.",
+      "resolver_owner": "Independent forward/demo resolver",
+      "runtime_state": "NOT_IMPLEMENTED_OR_QUALIFIED_BY_SPEC"
+    },
+    {
+      "id": "INDEPENDENT_QUALIFICATION",
+      "must_resolve_real_artifact": true,
+      "predicate": "Candidate artifact, scope, validity, uncertainty, safety and economics bound; not author self-report.",
+      "resolver_owner": "Independent existing qualification authority",
+      "runtime_state": "NOT_IMPLEMENTED_OR_QUALIFIED_BY_SPEC"
+    },
+    {
+      "id": "PROMOTION_AUTHORIZED",
+      "must_resolve_real_artifact": true,
+      "predicate": "Correct signature/mandate scope for exact qualified candidate; no authority from model output.",
+      "resolver_owner": "Existing financial promotion authority",
+      "runtime_state": "NOT_IMPLEMENTED_OR_QUALIFIED_BY_SPEC"
+    },
+    {
+      "id": "ACTIVATION_READBACK",
+      "must_resolve_real_artifact": true,
+      "predicate": "Atomic epoch compare-and-swap and exact active binding reconciled; open parents maintain permitted versions.",
+      "resolver_owner": "Binding publication owner",
+      "runtime_state": "NOT_IMPLEMENTED_OR_QUALIFIED_BY_SPEC"
+    },
+    {
+      "id": "SUSPENSION_CAUSE",
+      "must_resolve_real_artifact": true,
+      "predicate": "Qualified safety or monitoring condition and responsible authority recorded.",
+      "resolver_owner": "Existing protection/health/promotion owner",
+      "runtime_state": "NOT_IMPLEMENTED_OR_QUALIFIED_BY_SPEC"
+    },
+    {
+      "id": "COMPATIBLE_FALLBACK",
+      "must_resolve_real_artifact": true,
+      "predicate": "Fallback still qualified, non-revoked and compatible with current account state, never rewinds economic history.",
+      "resolver_owner": "Existing qualification/binding owner",
+      "runtime_state": "NOT_IMPLEMENTED_OR_QUALIFIED_BY_SPEC"
+    },
+    {
+      "id": "RETIREMENT_SAFE",
+      "must_resolve_real_artifact": true,
+      "predicate": "No active parent/consumer depends on retired artifact; durable history and authority records retained.",
+      "resolver_owner": "Existing retention/policy owner",
+      "runtime_state": "NOT_IMPLEMENTED_OR_QUALIFIED_BY_SPEC"
+    },
+    {
+      "id": "SOURCE_CORRECTION",
+      "must_resolve_real_artifact": true,
+      "predicate": "Authenticated correction/bust/revocation references original event and invalidation scope.",
+      "resolver_owner": "Authoritative original evidence owner",
+      "runtime_state": "NOT_IMPLEMENTED_OR_QUALIFIED_BY_SPEC"
+    },
+    {
+      "id": "INVALID_EVIDENCE_DETECTED",
+      "must_resolve_real_artifact": true,
+      "predicate": "Trusted resolver assesses an invalid, malformed, revoked or incompatible observation and retains raw hash/reason. This is evidence of detection, not assertion that rejected input was valid.",
+      "resolver_owner": "Existing evidence resolver / LearningBoundary",
+      "runtime_state": "NOT_IMPLEMENTED_OR_QUALIFIED_BY_SPEC"
+    },
+    {
+      "id": "CASH_RECONCILED",
+      "must_resolve_real_artifact": true,
+      "predicate": "Venue charges, filled cash, remaining reservations and reconciliation deltas match authoritative economic records; no invented settlement.",
+      "resolver_owner": "Existing account cash/fee reconciliation owner",
+      "runtime_state": "NOT_IMPLEMENTED_OR_QUALIFIED_BY_SPEC"
+    },
+    {
+      "id": "COHORT_COMPATIBLE",
+      "must_resolve_real_artifact": true,
+      "predicate": "Evidence matches admitted environment, venue/account/product, quantity/liquidity context, template/update-policy version and information cutoff; cannot promote simulated evidence into a live cohort.",
+      "resolver_owner": "Existing evidence resolver and qualified execution selector",
+      "runtime_state": "NOT_IMPLEMENTED_OR_QUALIFIED_BY_SPEC"
+    },
+    {
+      "id": "CANCEL_SCOPE_AUTHORIZED",
+      "must_resolve_real_artifact": true,
+      "predicate": "Cancel action is permitted for exact order and current ownership epoch or authorized protective recovery; account-wide effects include manual/protective orders and are separately admitted.",
+      "resolver_owner": "Existing router/account ownership authority",
+      "runtime_state": "NOT_IMPLEMENTED_OR_QUALIFIED_BY_SPEC"
+    },
+    {
+      "id": "BINDING_EXPIRED",
+      "must_resolve_real_artifact": true,
+      "predicate": "Trusted time and exact binding validity interval establish expiry. Local timeout does not establish venue cancellation.",
+      "resolver_owner": "Existing binding authority",
+      "runtime_state": "NOT_IMPLEMENTED_OR_QUALIFIED_BY_SPEC"
+    },
+    {
+      "id": "RESEARCH_STOP_AUTHORIZED",
+      "must_resolve_real_artifact": true,
+      "predicate": "Owner stop, budget exhaustion, expiry/revocation or failed dependency permits terminating bounded research; stopping never requires a still-current grant to start more work.",
+      "resolver_owner": "Existing research job owner",
+      "runtime_state": "NOT_IMPLEMENTED_OR_QUALIFIED_BY_SPEC"
+    }
+  ],
+  "schema": "van.so.proof-predicates/1.0",
+  "status": "SPECIFICATION_NOT_RUNTIME_TRUST_STORE"
+}

@@ -1,0 +1,21 @@
+................F........                                                [100%]
+=================================== FAILURES ===================================
+_ test_invalid_or_incomplete_recovery_refuses_partial_success_without_rewriting[capacity] _
+
+ledger = <vati.core.ledger.Ledger object at 0x7f25783284a0>, fault = 'capacity'
+
+    @pytest.mark.parametrize('fault',['corruption','missing-observation','capacity','chain'])
+    def test_invalid_or_incomplete_recovery_refuses_partial_success_without_rewriting(ledger,fault):
+        news=NewsIngress(ledger=ledger);h=story();news.ingest(h)
+        if fault=='corruption':ledger._conn.execute("UPDATE events SET payload_json='{}' WHERE kind='NEWS_HEADLINE'")
+        elif fault=='missing-observation':ledger._conn.execute("DELETE FROM events WHERE kind='NEWS_OBSERVATION'")
+        elif fault=='chain':ledger._conn.execute("UPDATE events SET prev_hash='broken' WHERE kind='NEWS_OBSERVATION'")
+        head=ledger.head();count=ledger.count()
+>       with pytest.raises(NewsIngressError):NewsIngress.from_ledger(ledger,max_events=1 if fault=='capacity' else 100)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE NewsIngressError
+
+trading/tests/test_news_durable_publication.py:183: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_news_durable_publication.py::test_invalid_or_incomplete_recovery_refuses_partial_success_without_rewriting[capacity]
+1 failed, 24 passed, 2 deselected in 0.75s

@@ -1,0 +1,27 @@
+{
+  "expected_context_revision": 0,
+  "candidate_id": "example-guardian-1",
+  "provider_product": "openai-dot",
+  "candidate_type": "GUARDIAN_OBSERVATION",
+  "observed_at_ms": 1791280000000,
+  "expires_at_ms": 1791280060000,
+  "source_refs": [
+    "projection:van:example"
+  ],
+  "evidence_hashes": [
+    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  ],
+  "confidence_permille": 600,
+  "affected_scopes": [
+    "van"
+  ],
+  "summary": "Owner-visible journey needs independent reproduction",
+  "proposed_follow_up": "",
+  "data_class": "INTERNAL_SANITIZED",
+  "response_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "sensitive_inference": false,
+  "counterexamples": [],
+  "observed_instances": [],
+  "attention_dimensions": {},
+  "supersedes_candidate_id": null
+}

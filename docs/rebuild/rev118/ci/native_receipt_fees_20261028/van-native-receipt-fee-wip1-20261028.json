@@ -1,0 +1,18 @@
+{
+  "archive": "/workspace/van-native-receipt-fee-wip1-20261028.zip",
+  "bytes": 62203,
+  "sha256": "f097d98465a0418a1b10821121daca20d182762ce7d47e47e79229667d66698d",
+  "manifest": {
+    "base": "ab91a8ebf2a7e94e9ab7d742108eba81b88d93cd",
+    "files": {
+      "trading/tests/test_native_receipt_fee_knowledge.py": "35e30e418ace34cd6ac7406f05035821bd070bb818ae274fca9f92d3fb51eab5",
+      "trading/tests/test_native_receipt_fee_knowledge_postgres.py": "404ab87600557b2ec4f05368070215fc6b3932c49e8dd191b5a171e4c7914aaa",
+      "trading/vati/app/cycle.py": "7ba06a29f59273da2e968f3f25ecf54a52db0141d6e62e3d43016ab0fefd30a3",
+      "trading/vati/app/trade_lifecycle.py": "e34b8dcce7cacb208c12b80bc0998083a671c182dcf39153ef24c140737ccbe5",
+      "trading/vati/contracts/schemas/execution_receipt.schema.json": "0a102a83397f1ad3f4a5777cd51278888b1e54e3fc3c89a4d882f38e290ca7bf",
+      "trading/vati/execution/base.py": "5d2ba5f4e5f4b8ec1400ef9fce5249b96672c2f9dc6aa6228b4eaa702b7c0e35",
+      "trading/vati/execution/ctrader/adapter.py": "d8767490bd64439baa1c95b4b6379d1c8d34ad12b3f7359275f029d6032ac6ae",
+      "trading/vati/execution/review.py": "97e5fa96df29122a1d84292eaf95f863e3bb0925a3f762ed1c7e01bad9e4ffb0"
+    }
+  }
+}

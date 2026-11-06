@@ -1,0 +1,114 @@
+{
+  "schema": "van.rebuild.source-qualification/1",
+  "source_head": "c36d6a21bea1618707e353912d3f5b9508eca5ba",
+  "hosted_run": 39736489867,
+  "tested_merge": "b93a4d07f078da0efd7c0b4678cbab1e37d1f255",
+  "identical_source_tree": "ac03ad2c098e49b2ab1e1700b040b8c8695b11ba",
+  "backend_and_contracts": {
+    "command": "audited pytest backend/tests tests/contracts -q --disable-warnings --maxfail=5",
+    "passed": 6535,
+    "skipped": 166,
+    "warnings": 7,
+    "seconds": 1526.08,
+    "log_sha256": "aa176d7879d20724abd4dd7cc1294761a14a6ed7fd9ea23f3c7dab874419624a",
+    "audit": {
+      "forbidden_events": [],
+      "scope": "backend/tests plus tests/contracts; repo-root invocation; writes and SQLite opens under root/data or backend/data refused"
+    },
+    "audit_sha256": "1b56ec3befec4b9a93f4edf7df778c2b426d7820087e51a143a9ca6967174f1c"
+  },
+  "rebuild": {
+    "passed": 52,
+    "log_sha256": "f5a88ad8cba732534c0974d44c958b9c66c1ad5b17125a7578b4dbdbacd3f059"
+  },
+  "hosted_jobs": [
+    {
+      "id": 119683279842,
+      "name": "rebuild-documentary",
+      "conclusion": "success"
+    },
+    {
+      "id": 119683280067,
+      "name": "backend",
+      "conclusion": "failure"
+    },
+    {
+      "id": 119683280125,
+      "name": "mutation (python-0, python, 0/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119683280141,
+      "name": "android-instrumentation",
+      "conclusion": "success"
+    },
+    {
+      "id": 119683280183,
+      "name": "mutation (kotlin-1, kotlin, 1/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119683280219,
+      "name": "mutation (kotlin-3, kotlin, 3/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119683280237,
+      "name": "mutation (kotlin-0, kotlin, 0/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119683280256,
+      "name": "mutation (python-2, python, 2/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119683280261,
+      "name": "android-and-visual-evidence",
+      "conclusion": "success"
+    },
+    {
+      "id": 119683280265,
+      "name": "mutation (python-1, python, 1/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119683280275,
+      "name": "mutation (kotlin-2, kotlin, 2/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119683280321,
+      "name": "mutation (browser-agent, browser-agent, 0/1)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119683280340,
+      "name": "mutation (python-3, python, 3/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119683280471,
+      "name": "project-truth-ledger",
+      "conclusion": "failure"
+    },
+    {
+      "id": 119687871662,
+      "name": "character-forge-gate",
+      "conclusion": "success"
+    }
+  ],
+  "instrumentation": {
+    "tests": 20,
+    "failures": 0,
+    "skipped": 4,
+    "passed": 16,
+    "summary_html_sha256": "1ce14c57f2b8e6a6edf2202c79584023f542d35bf61595b70bd6e0912fa37ceb"
+  },
+  "mutations": "ci/MUTATION_CORPUS_c36d6a21.json",
+  "remaining_CI_failures": [
+    "DDS_CONTRACT_READ_DEPLOY_KEY not provisioned; do not copy private DDS source into public VAN",
+    "Trusted-main Project Truth bootstrap missing; existing PR94 adoption/intake required"
+  ],
+  "qualification": "Source validation only; not Rev1.18 unit/native/provider/release/S24 acceptance"
+}

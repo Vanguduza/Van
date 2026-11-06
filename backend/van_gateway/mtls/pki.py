@@ -28,6 +28,7 @@ import re
 import sys
 import tempfile
 import threading
+from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -35,6 +36,11 @@ from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.x509.oid import ExtendedKeyUsageOID, NameOID
+
+try:
+    import fcntl
+except ImportError:  # the deployment host is Linux; unsupported hosts must fail closed
+    fcntl = None
 
 #: Device ids are chosen by the phone at pairing; this is the character set a certificate
 #: subject may carry for one. Anything else is refused rather than escaped.
@@ -46,6 +52,7 @@ MAX_CLIENT_DAYS = 825
 CA_CERT, CA_KEY = "ca.crt", "ca.key"
 SERVER_CERT, SERVER_KEY = "server.crt", "server.key"
 STATE = "issued.json"
+STATE_LOCK = "issued.lock"
 
 
 class PkiError(Exception):
@@ -137,7 +144,7 @@ def _parse_san(spec: str) -> list[x509.GeneralName]:
 
 
 class DeviceCA:
-    """The CA plus its issuance record. Thread-safe; one instance per process."""
+    """The CA plus its issuance record, coordinated across gateway threads and CLI processes."""
 
     def __init__(self, directory: str | os.PathLike[str]):
         self.dir = Path(directory)
@@ -152,13 +159,30 @@ class DeviceCA:
         self._state = self._load_state()
 
     # ---- record ------------------------------------------------------------------------------
+    @contextmanager
+    def _record_lock(self):
+        """Serialize the gateway and operator CLI around the atomically replaced record."""
+        if fcntl is None:
+            raise PkiError("state_lock_unsupported", "device certificate records require OS file locking")
+        with self._lock:
+            flags = os.O_RDWR | os.O_CREAT | getattr(os, "O_NOFOLLOW", 0)
+            fd = os.open(self.dir / STATE_LOCK, flags, 0o600)
+            try:
+                fcntl.flock(fd, fcntl.LOCK_EX)
+                yield
+            finally:
+                # Closing also releases the lock if acquiring it failed.
+                os.close(fd)
+
     def _load_state(self) -> dict:
         path = self.dir / STATE
         if not path.exists():
             return {"certificates": {}}
         data = json.loads(path.read_text(encoding="utf-8"))
-        if not isinstance(data.get("certificates"), dict):
+        if not isinstance(data, dict) or not isinstance(data.get("certificates"), dict):
             raise PkiError("state_invalid", f"{path} is not a device certificate record")
+        if any(not isinstance(entry, dict) for entry in data["certificates"].values()):
+            raise PkiError("state_invalid", f"{path} contains an invalid certificate entry")
         return data
 
     def _save_state(self) -> None:
@@ -169,9 +193,17 @@ class DeviceCA:
         return self._ca_cert.public_bytes(serialization.Encoding.PEM).decode()
 
     def admitted(self, serial_hex: str, device_id: str) -> bool:
-        """True only for a certificate this CA issued to `device_id` and has not revoked."""
-        entry = self._state["certificates"].get(serial_hex.lower())
-        return bool(entry) and entry.get("device_id") == device_id and not entry.get("revoked_at_unix")
+        """Read the issuance authority on every request, including operator CLI revocations."""
+        try:
+            with self._record_lock():
+                self._state = self._load_state()
+                entry = self._state["certificates"].get(serial_hex.lower())
+                return (isinstance(entry, dict) and bool(entry)
+                        and entry.get("device_id") == device_id and not entry.get("revoked_at_unix"))
+        except (OSError, ValueError, PkiError):
+            # Never retain an admission from memory when its on-disk authority is
+            # unavailable or malformed. The CLI atomically replaces this same file.
+            return False
 
     # ---- server ------------------------------------------------------------------------------
     def issue_server(self, san: str, days: int = SERVER_DAYS) -> None:
@@ -240,7 +272,8 @@ class DeviceCA:
             .sign(self._ca_key, hashes.SHA256())
         )
         serial_hex = format(serial, "x")
-        with self._lock:
+        with self._record_lock():
+            self._state = self._load_state()
             revoked_at = int(now.timestamp())
             for entry in self._state["certificates"].values():
                 if entry.get("device_id") == device_id and not entry.get("revoked_at_unix"):
@@ -260,7 +293,8 @@ class DeviceCA:
         )
 
     def revoke_device(self, device_id: str, reason: str = "revoked") -> int:
-        with self._lock:
+        with self._record_lock():
+            self._state = self._load_state()
             count = 0
             now = int(_now().timestamp())
             for entry in self._state["certificates"].values():
@@ -273,7 +307,8 @@ class DeviceCA:
             return count
 
     def listing(self) -> list[dict]:
-        with self._lock:
+        with self._record_lock():
+            self._state = self._load_state()
             return [dict(serial=s, **e) for s, e in sorted(self._state["certificates"].items())]
 
 

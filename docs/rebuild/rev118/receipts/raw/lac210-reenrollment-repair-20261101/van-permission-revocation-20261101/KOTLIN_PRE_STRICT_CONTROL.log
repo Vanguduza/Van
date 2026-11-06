@@ -1,0 +1,35 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.11.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :compileKotlin UP-TO-DATE
+> Task :compileJava NO-SOURCE
+> Task :processResources NO-SOURCE
+> Task :classes UP-TO-DATE
+> Task :jar UP-TO-DATE
+> Task :compileTestKotlin UP-TO-DATE
+> Task :compileTestJava NO-SOURCE
+> Task :processTestResources UP-TO-DATE
+> Task :testClasses UP-TO-DATE
+
+> Task :test
+
+GatewayMutationRetryTest > legacy one return pairing is not retryable and prepared bound pairing is() PASSED
+
+GatewayMutationRetryTest > lost create response does not automatically create a second unkeyed resource() PASSED
+
+GatewayMutationRetryTest > only documented stable operation identities permit mutation retries() PASSED
+
+GatewayMutationRetryTest > uncertain server response stays unknown and explicit refusals keep their response() PASSED
+
+PermissionRevocationOperationsTest > corrupt durable history refuses rather than replacing an unknown operation() PASSED
+
+PermissionRevocationOperationsTest > wrong original scope or incomplete receipt cannot discard pending intent() PASSED
+
+PermissionRevocationOperationsTest > authoritative terminal refusal allows a later explicit owner attempt with fresh identity() PASSED
+
+PermissionRevocationOperationsTest > prepare commits original before delivery and process restart preserves exact body() PASSED
+
+PermissionRevocationOperationsTest > storage failure never returns an undurable operation to network caller() PASSED
+
+BUILD SUCCESSFUL in 14s
+5 actionable tasks: 1 executed, 4 up-to-date

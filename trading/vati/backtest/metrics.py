@@ -7,6 +7,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from decimal import Decimal
+from fractions import Fraction
 from itertools import combinations
 from typing import Sequence
 
@@ -52,13 +53,17 @@ def compute_metrics(pnls: Sequence[Decimal], r_multiples: Sequence[Decimal], sta
         return Metrics(0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3.0, 0.0)
     wins = [x for x in p if x > 0]; losses = [-x for x in p if x < 0]
     mean, sd, skew, kurt = _moments(p)
-    eq = float(start_equity); peak = eq; mdd = 0.0; mdd_pct = 0.0
-    for x in p:
-        eq += x; peak = max(peak, eq); dd = peak - eq
-        if dd > mdd:
-            mdd, mdd_pct = dd, dd / peak if peak else 0.0
+    # Keep original account amounts through the equity path. Converting the
+    # starting equity first can erase a real cent before any drawdown exists.
+    # Currency and percentage maxima can occur at different points in time.
+    eq = Fraction(start_equity); peak = eq; mdd = Fraction(0); mdd_pct = Fraction(0)
+    for original in pnls:
+        eq += Fraction(original); peak = max(peak, eq); dd = peak - eq
+        mdd = max(mdd, dd)
+        if peak:
+            mdd_pct = max(mdd_pct, dd / peak)
     pf = (sum(wins) / sum(losses)) if losses else (float("inf") if wins else 0.0)
-    return Metrics(n, len(wins), len(wins) / n, mean, (sum(r) / n) if r else 0.0, pf, mdd, mdd_pct, (mean / sd) if sd else 0.0, skew, kurt, sum(p))
+    return Metrics(n, len(wins), len(wins) / n, mean, (sum(r) / n) if r else 0.0, pf, float(mdd), float(mdd_pct), (mean / sd) if sd else 0.0, skew, kurt, sum(p))
 
 
 def _norm_cdf(x: float) -> float:
@@ -98,18 +103,25 @@ def deflated_sharpe(observed_sr: float, *, n_obs: int, skew: float, kurtosis: fl
 
 
 def pbo_cscv(returns_matrix: Sequence[Sequence[float]], *, partitions: int = 4) -> float:
-    """Probability of backtest overfitting via combinatorially symmetric CV.
+    """CSCV selection-instability diagnostic for the declared trial population.
     returns_matrix[trial][t]; each trial is one strategy configuration.
     Splits time into `partitions` blocks; for every half/half combination picks
     the in-sample best trial and measures its out-of-sample rank. PBO = share of
-    combinations where the IS-best is below median OOS."""
-    if not returns_matrix or partitions < 2 or partitions % 2:
+    combinations where the IS-best is below median OOS. This empirical fraction
+    is not a general probability of market skill or future profitability."""
+    if not returns_matrix or type(partitions) is not int or partitions < 2 or partitions % 2:
         raise ValueError("need ≥1 trial and an even partition count")
-    T = min(len(r) for r in returns_matrix)
+    T = len(returns_matrix[0])
+    if any(len(row) != T for row in returns_matrix):
+        raise ValueError("trial histories must be aligned; ragged rows cannot be truncated")
+    if any(isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value)
+           for row in returns_matrix for value in row):
+        raise ValueError("trial histories require finite numeric observations")
     if T < partitions:
         return 1.0
-    block = T // partitions
-    blocks = [(i * block, (i + 1) * block) for i in range(partitions)]
+    # Equal-width floor blocks dropped the final T % partitions observations.
+    # Balanced integer boundaries cover every observation exactly once.
+    blocks = [(i * T // partitions, (i + 1) * T // partitions) for i in range(partitions)]
     n_trials = len(returns_matrix)
     below = total = 0
     for is_idx in combinations(range(partitions), partitions // 2):

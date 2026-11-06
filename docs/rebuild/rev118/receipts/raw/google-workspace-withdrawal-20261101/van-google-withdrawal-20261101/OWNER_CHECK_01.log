@@ -1,0 +1,23 @@
+Traceback (most recent call last):
+  File "/workspace/van-lanes-20261101/google-withdrawal/tools/rebuild/refresh_owner_source_contracts.py", line 502, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspace/van-lanes-20261101/google-withdrawal/tools/rebuild/refresh_owner_source_contracts.py", line 480, in main
+    outputs = build(read=read)
+              ^^^^^^^^^^^^^^^^
+  File "/workspace/van-lanes-20261101/google-withdrawal/tools/rebuild/refresh_owner_source_contracts.py", line 91, in build
+    endpoint_doc = export()
+                   ^^^^^^^^
+  File "/workspace/van-lanes-20261101/google-withdrawal/tools/audit/export_owner_endpoints.py", line 36, in export
+    from van_gateway.app import app
+  File "/workspace/van-lanes-20261101/google-withdrawal/backend/van_gateway/app.py", line 22, in <module>
+    from van_gateway.action.service import ActionPolicyError
+  File "/workspace/van-lanes-20261101/google-withdrawal/backend/van_gateway/action/__init__.py", line 2, in <module>
+    from van_gateway.action.service import ActionPolicyError, ActionRuntime
+  File "/workspace/van-lanes-20261101/google-withdrawal/backend/van_gateway/action/service.py", line 19, in <module>
+    from van_gateway.proactive.autonomy import AutonomyPolicy
+  File "/workspace/van-lanes-20261101/google-withdrawal/backend/van_gateway/proactive/autonomy.py", line 33, in <module>
+    from van_gateway.storage.db import Store
+  File "/workspace/van-lanes-20261101/google-withdrawal/backend/van_gateway/storage/db.py", line 10, in <module>
+    import aiosqlite
+ModuleNotFoundError: No module named 'aiosqlite'

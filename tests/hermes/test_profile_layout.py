@@ -48,7 +48,7 @@ SKILL_NAMES = [
     "google-design", "google-development", "project-steering", "research",
     "decision-support", "document-work", "notification-triage",
     "infrastructure-diagnostics", "hermes-administration", "trading-intelligence",
-    "automation-fabric", "browser-intelligence",
+    "automation-fabric", "browser-intelligence", "jev-management",
 ]
 
 AUTHORITY_ORDER_MARKERS = [

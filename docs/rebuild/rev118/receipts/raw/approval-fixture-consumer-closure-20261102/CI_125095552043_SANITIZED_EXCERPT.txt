@@ -1,0 +1,19 @@
+SANITIZED DECODED REPRESENTATIVE EXCERPT; NOT FULL LOG
+URLs removed. Original hosted decoded log remains at GitHub; MCP result held internally.
+2026-11-02T04:40:24.1164518Z E       assert 403 == 200
+2026-11-02T04:40:24.1182516Z E       assert 403 == 200
+2026-11-02T04:40:24.1203965Z E       assert 403 == 200
+2026-11-02T04:40:24.1238858Z E       assert 403 == 200
+2026-11-02T04:40:24.1260032Z E       assert 403 == 200
+2026-11-02T04:40:24.1288754Z E       assert 403 == 200
+2026-11-02T04:40:24.1306508Z E       assert 403 == 200
+2026-11-02T04:40:27.3515689Z E       assert 403 == 200
+2026-11-02T04:40:27.3526387Z FAILED backend/tests/test_account_resource_binding.py::test_delayed_owner_approval_cannot_overwrite_a_newer_account[account_upsert] - assert 403 == 200
+2026-11-02T04:40:27.3527199Z FAILED backend/tests/test_account_resource_binding.py::test_delayed_owner_approval_cannot_overwrite_a_newer_account[account_remove] - assert 403 == 200
+2026-11-02T04:40:27.3527983Z FAILED backend/tests/test_account_resource_binding.py::test_approval_for_an_absent_alias_cannot_replace_a_later_registration - assert 403 == 200
+2026-11-02T04:40:27.3528815Z FAILED backend/tests/test_account_resource_binding.py::test_native_cas_still_checks_changes_after_gateway_proof_verification - assert 403 == 200
+2026-11-02T04:40:27.3529651Z FAILED backend/tests/test_account_resource_binding.py::test_credential_generation_change_invalidates_a_pending_local_edit - assert 403 == 200
+2026-11-02T04:40:27.3530382Z FAILED backend/tests/test_account_resource_binding.py::test_a_disjoint_owner_edit_does_not_invalidate_this_account_approval - assert 403 == 200
+2026-11-02T04:40:27.3531101Z FAILED backend/tests/test_account_resource_binding.py::test_restoring_old_metadata_does_not_restore_an_obsolete_approval - assert 403 == 200
+2026-11-02T04:40:27.3532000Z FAILED backend/tests/test_account_resource_binding.py::test_failed_native_readback_returns_refused_without_dispatching_a_change - assert 403 == 200
+2026-11-02T04:40:27.3532627Z 8 failed, 1774 passed, 2 skipped, 4424 deselected, 2 warnings in 546.48s (0:09:06)

@@ -51,10 +51,30 @@ class VanEmbodimentReducerTest {
 
     @Test
     fun `mission completed presents the result card`() {
-        val effect = VanEmbodimentReducer.forMissionEvent("mission.completed")
+        val effect = VanEmbodimentReducer.forMissionEvent("mission.completed", stateHint = "VERIFIED_SUCCESS")
         assertEquals(
             VanEmbodimentReducer.Effect.Both(VanDurableState.SUCCESS, VanFiniteAction.PRESENT_CARD),
             effect,
+        )
+    }
+
+    @Test
+    fun `mission completed with no verified result is never animated as success`() {
+        for (unknown in listOf(null, "", "CANCELLED", "EXPIRED", "success", "UNKNOWN")) {
+            val effect = VanEmbodimentReducer.forMissionEvent("mission.completed", stateHint = unknown)
+            assertEquals(
+                VanEmbodimentReducer.Effect.ToState(VanDurableState.WARNING, urgency = 0.30f),
+                effect,
+                "stateHint=" + unknown,
+            )
+        }
+    }
+
+    @Test
+    fun `mission completed with failed state is an error not a completion card`() {
+        assertEquals(
+            VanEmbodimentReducer.Effect.ToState(VanDurableState.ERROR, urgency = 0.55f),
+            VanEmbodimentReducer.forMissionEvent("mission.completed", stateHint = "FAILED"),
         )
     }
 

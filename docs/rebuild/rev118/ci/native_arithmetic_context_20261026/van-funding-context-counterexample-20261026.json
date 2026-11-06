@@ -1,0 +1,50 @@
+[
+  {
+    "source": "cash",
+    "mode": "normal",
+    "result": "None"
+  },
+  {
+    "source": "deal",
+    "mode": "normal",
+    "result": "None"
+  },
+  {
+    "source": "mt5",
+    "mode": "normal",
+    "result": "10000"
+  },
+  {
+    "source": "cash",
+    "mode": "small_exponent",
+    "error": "InvalidOperation",
+    "detail": "[<class 'decimal.InvalidOperation'>]"
+  },
+  {
+    "source": "deal",
+    "mode": "small_exponent",
+    "error": "InvalidOperation",
+    "detail": "[<class 'decimal.InvalidOperation'>]"
+  },
+  {
+    "source": "mt5",
+    "mode": "small_exponent",
+    "error": "Overflow",
+    "detail": "[<class 'decimal.Overflow'>]"
+  },
+  {
+    "source": "cash",
+    "mode": "traps",
+    "result": "None"
+  },
+  {
+    "source": "deal",
+    "mode": "traps",
+    "result": "None"
+  },
+  {
+    "source": "mt5",
+    "mode": "traps",
+    "result": "10000"
+  }
+]

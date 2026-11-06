@@ -1,0 +1,15 @@
+{
+  "command": [
+    "python3",
+    "/workspace/van-37327981-selected-hosted-verify-20261028.py"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 492432,
+  "started_at_utc": "2026-10-28T13:32:53.212667+00:00",
+  "timeout_seconds": 120,
+  "state": "COMPLETED",
+  "command_pid": 492433,
+  "exit": 1,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-28T13:32:54.183932+00:00"
+}

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.mission.MissionSelectionTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-08T06:59:31" hostname="052fefa249ff" time="0.002">
+  <properties/>
+  <testcase name="deep linked waiting mission is selected without being shown again in waiting list()" classname="com.dial.van.mission.MissionSelectionTest" time="0.001"/>
+  <testcase name="plain Work keeps running and waiting lists intact()" classname="com.dial.van.mission.MissionSelectionTest" time="0.0"/>
+  <testcase name="completed mission fetched by ID stays visible after leaving active lists()" classname="com.dial.van.mission.MissionSelectionTest" time="0.0"/>
+  <testcase name="deep linked running mission is selected once and other running work remains visible()" classname="com.dial.van.mission.MissionSelectionTest" time="0.0"/>
+  <testcase name="a response for another mission cannot satisfy the requested ID()" classname="com.dial.van.mission.MissionSelectionTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

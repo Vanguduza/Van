@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="2" time="5.173" timestamp="2026-11-01T00:44:42.883686+00:00" hostname="b6ffa15f7e81"><testcase classname="tests.test_lane_auth_commit_expiry_http" name="test_signed_pairing_writer_wait_and_original_durable_result[False]" time="2.003" /><testcase classname="tests.test_lane_auth_commit_expiry_http" name="test_signed_pairing_writer_wait_and_original_durable_result[True]" time="1.357"><failure message="AssertionError: {&quot;detail&quot;:&quot;Pairing ticket invalid or expired&quot;}&#10;assert 400 == 403&#10; +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code">client = (&lt;httpx.AsyncClient object at 0x7f73e95153a0&gt;, &lt;fastapi.applications.FastAPI object at 0x7f73e98c56a0&gt;)
+proofs = &lt;test_pairing_recovery.Proofs object at 0x7f73e96f55e0&gt;
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7f73eb6d0860&gt;
+expire = True
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize('expire', [False, True])
+    async def test_signed_pairing_writer_wait_and_original_durable_result(client, proofs, monkeypatch, expire):
+        ac, app = client
+        payload, key = await _pending(app)
+        clock = [int(time.time())]
+        monkeypatch.setattr(service, 'time', SimpleNamespace(time=lambda: clock[0]))
+        ticket = await app.state.store.fetchone('SELECT expires_at_unix FROM pairing_tickets')
+        original_pair = app.state.auth.pair_device
+        original_execute = aiosqlite.Connection.execute
+        waiting = asyncio.Event()
+        async def execute(db, sql, *args, **kwargs):
+            if sql == 'BEGIN IMMEDIATE': waiting.set()
+            return await original_execute(db, sql, *args, **kwargs)
+        async def contended(*args, **kwargs):
+            async with app.state.store.connection() as blocker:
+                await blocker.execute('BEGIN IMMEDIATE')
+                with monkeypatch.context() as local:
+                    local.setattr(aiosqlite.Connection, 'execute', execute)
+                    task = asyncio.create_task(original_pair(*args, **kwargs))
+                    try:
+                        await asyncio.wait_for(waiting.wait(), 2)
+                        assert not task.done()
+                        if expire: clock[0] = int(ticket['expires_at_unix'])
+                        await blocker.commit()
+                        return await asyncio.wait_for(task, 3)
+                    finally:
+                        if not task.done():
+                            task.cancel()
+                            await asyncio.gather(task, return_exceptions=True)
+        monkeypatch.setattr(app.state.auth, 'pair_device', contended)
+        response = await _post(ac, payload, key, proofs)
+        if expire:
+&gt;           assert response.status_code == 403, response.text
+E           AssertionError: {"detail":"Pairing ticket invalid or expired"}
+E           assert 400 == 403
+E            +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code
+
+backend/tests/test_lane_auth_commit_expiry_http.py:43: AssertionError</failure></testcase></testsuite></testsuites>

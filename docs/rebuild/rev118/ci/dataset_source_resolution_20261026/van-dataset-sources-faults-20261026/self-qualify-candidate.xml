@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.548" timestamp="2026-10-26T09:22:35.444670+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_dataset_manifest_candidates" name="test_well_formed_manifest_stays_unresolved_and_mutation_cannot_rewrite_candidate" time="0.195"><failure message="AssertionError: assert ('UNRESOLVED_DATASET_CANDIDATE' == 'UNRESOLVED_DATASET_CANDIDATE'&#10;  &#10;    UNRESOLVED_DATASET_CANDIDATE and True is False)">def test_well_formed_manifest_stays_unresolved_and_mutation_cannot_rewrite_candidate():
+        record=fixture(); candidate=parse(record); before=candidate.digest
+        assert candidate.body() == record
+        result=candidate.unresolved()
+&gt;       assert result['status']=='UNRESOLVED_DATASET_CANDIDATE' and result['qualified_for_research'] is False
+E       AssertionError: assert ('UNRESOLVED_DATASET_CANDIDATE' == 'UNRESOLVED_DATASET_CANDIDATE'
+E         
+E           UNRESOLVED_DATASET_CANDIDATE and True is False)
+
+trading/tests/test_dataset_manifest_candidates.py:42: AssertionError</failure></testcase></testsuite></testsuites>

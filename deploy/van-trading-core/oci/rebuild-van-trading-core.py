@@ -7,6 +7,9 @@ TARGET='van-trading-core'; PRIVATE_IP='10.0.1.233'; TRADING_SUBNET='van-trading-
 # dial-hermes-control's old A1 (10.0.0.184) was terminated 2026-09-25 (DEC-060); dial-control reaches
 # this host over the WireGuard overlay (hub 10.77.0.1), so no VCN rule names it any more.
 ADMIN_IP='10.0.0.123'; VEKL_IP='10.0.0.51'; SHAPE='VM.Standard.A1.Flex'
+# OCI control nodes that must exist and are never selected. Hermes (dial-control, alias
+# dial-hermes-control) runs on Netcup, not in this compartment, so it is not looked up here.
+PROTECTED_CONTROL_NODES=('oracle-admin','vekl-worker')
 VEKL_OCID='ocid1.instance.oc1.af-johannesburg-1.anvg4ljrvbgkoeqcctvikyk5hgz362mirgruwg64fzlhwwox35ozh5bjc2ha'
 OCPUS=2.0; MEMORY_GB=12.0; BOOT_GB=50
 BRANCH=os.environ.get('VAN_REBUILD_BRANCH','main')
@@ -65,7 +68,7 @@ def get_resources(comp):
     inst=oci('compute','instance','list','--compartment-id',comp,'--all')['data']
     active=[x for x in inst if x['lifecycle-state']!='TERMINATED']
     by={x['display-name']:x for x in active}
-    for n in ('oracle-admin','dial-hermes-control','vekl-worker'):
+    for n in PROTECTED_CONTROL_NODES:
         if n not in by: raise RuntimeError(f'protected control node missing: {n}')
     if by['vekl-worker']['id'] != VEKL_OCID: raise RuntimeError('vekl-worker OCID mismatch; refusing destructive action')
     subs=oci('network','subnet','list','--compartment-id',comp,'--all')['data']
@@ -285,10 +288,18 @@ def public_tls_canary(host, timeout=600):
         last=(p.stderr or p.stdout)[-300:]; time.sleep(10)
     raise RuntimeError('public TLS canary failed: '+last)
 
+def select_image(existing):
+    """The boot image used to come from the Hermes A1, terminated 2026-09-25 (DEC-060). A replacement
+    keeps the image of the trading core it replaces; a clean creation needs an explicit image."""
+    explicit=os.environ.get('VAN_TRADING_IMAGE_OCID','').strip()
+    if explicit: return explicit
+    if len(existing)==1 and existing[0].get('image-id'): return existing[0]['image-id']
+    raise RuntimeError('no trading-core image: set VAN_TRADING_IMAGE_OCID to an aarch64 Ubuntu image for VM.Standard.A1.Flex')
+
 def main():
     meta=imds(); comp=meta['compartmentId']; ad=meta['availabilityDomain']
     active,by,sub=get_resources(comp)
-    protected={by[n]['id'] for n in ('oracle-admin','dial-hermes-control','vekl-worker')}
+    protected={by[n]['id'] for n in PROTECTED_CONTROL_NODES}
     doomed=[x for x in active if x['display-name'].startswith('van-trading-core') and (x.get('freeform-tags') or {}).get('project')=='VAN' and (x.get('freeform-tags') or {}).get('role')=='TRADING_CORE']
     force_recreate='--force-recreate' in sys.argv
     dry_run='--dry-run' in sys.argv
@@ -296,7 +307,7 @@ def main():
         print('NO_EXISTING_TRADING_CORE: proceeding with clean creation',flush=True)
     if any(x['id'] in protected for x in doomed):
         raise RuntimeError('protected instance selected for termination')
-    print('PROTECTED',[(n,by[n]['id']) for n in ('oracle-admin','dial-hermes-control','vekl-worker')],flush=True)
+    print('PROTECTED',[(n,by[n]['id']) for n in PROTECTED_CONTROL_NODES],flush=True)
     print('TRADING_CORE_CANDIDATES',[(x['display-name'],x['id']) for x in doomed],flush=True)
     if doomed and not force_recreate:
         if len(doomed) != 1:
@@ -309,6 +320,8 @@ def main():
         action='force-recreate the existing trading core' if doomed else 'create a clean trading core'
         print(f'DRY_RUN_GREEN: would harden trading subnet and {action}; protected control nodes remain untouched',flush=True)
         return
+    image=select_image(doomed)   # before any lifecycle or network mutation
+    print('TRADING_CORE_IMAGE',image,flush=True)
     expected_sha=resolve_repository_sha()
     print('EXPECTED_REPOSITORY_SHA',expected_sha,flush=True)
     apub,hpub=ensure_keys()
@@ -317,7 +330,6 @@ def main():
     terminate_trading(active)
     run(['ssh-keygen','-R',PRIVATE_IP],check=False)
     ssh('hermes',f'ssh-keygen -R {PRIVATE_IP} >/dev/null 2>&1 || true',check=False)
-    image=by['dial-hermes-control']['image-id']
     with tempfile.TemporaryDirectory() as td:
         td=pathlib.Path(td)
         keys=td/'authorized_keys'; keys.write_text(apub+'\n'+hpub+'\n')

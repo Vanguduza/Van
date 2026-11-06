@@ -1,0 +1,12 @@
+{
+  "at_utc": "2026-11-01T15:22:39.367756+00:00",
+  "session_id": 57805,
+  "head": "629a986019a4eb298f58dd98c62e6bcbade36ab7",
+  "run_id": 41313426404,
+  "original_receipt_state": "WATCH_COMPLETED_ONLY_SOURCE_EVIDENCE_UNOBSERVED",
+  "original_watch_exit": 1,
+  "resume_attempt": "write_stdin returned Unknown process id 57805; not retried",
+  "controller_pid": 566204,
+  "controller_proc_exists": false,
+  "claim": "Original controller terminal receipt retained; no reaping success claimed from unavailable session; no replacement watcher or process signal"
+}

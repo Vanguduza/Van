@@ -1,0 +1,166 @@
+{
+  "dial_repo": "/workspace/dial-development-system",
+  "dial_resolver": "engineering-resource-resolver.mjs (unmodified)",
+  "registry_validation": {
+    "ok": true,
+    "source_count": 21,
+    "resource_count": 25,
+    "failures": []
+  },
+  "cases": [
+    {
+      "case_id": "VT-001",
+      "ok": true,
+      "policy_version": "vekl-2.1",
+      "resolver_version": "purpose-role-minimal-coalition-v1",
+      "task_classes": [
+        "NFP_EVENT_TRADING",
+        "MACRO_POINT_IN_TIME"
+      ],
+      "selected": [
+        "van.trading.rules.rev2-canon",
+        "ref.bls.employment-situation",
+        "ref.alfred.vintages",
+        "community.forums.nfp-trading-anecdotes"
+      ],
+      "roles": {
+        "van.trading.rules.rev2-canon": "POLICY/VAN_TRADING_GOVERNANCE",
+        "ref.bls.employment-situation": "AUTHORITY/LABOUR_RELEASE_SCHEDULE",
+        "ref.alfred.vintages": "AUTHORITY/MACRO_VINTAGES",
+        "community.forums.nfp-trading-anecdotes": "DIAGNOSTIC/COMMUNITY_NFP_SIGNAL"
+      },
+      "missing": [],
+      "leaked": [],
+      "community_corroboration_only": [
+        "community.forums.nfp-trading-anecdotes"
+      ]
+    },
+    {
+      "case_id": "VT-002",
+      "ok": true,
+      "policy_version": "vekl-2.1",
+      "resolver_version": "purpose-role-minimal-coalition-v1",
+      "task_classes": [
+        "MT5_EXECUTION",
+        "SYMBOL_CONTRACT_SYNC",
+        "TRADING_KERNEL",
+        "VENUE_ADAPTER"
+      ],
+      "selected": [
+        "van.trading.rules.rev2-canon",
+        "ref.nautilus.adapter-template",
+        "ref.nautilus.docs",
+        "ref.metaquotes.mt5-python"
+      ],
+      "roles": {
+        "van.trading.rules.rev2-canon": "POLICY/VAN_TRADING_GOVERNANCE",
+        "ref.nautilus.adapter-template": "REFERENCE/ADAPTER_TEMPLATE",
+        "ref.nautilus.docs": "AUTHORITY/KERNEL_CONCEPTS",
+        "ref.metaquotes.mt5-python": "AUTHORITY/MT5_VENUE_API"
+      },
+      "missing": [],
+      "leaked": [],
+      "community_corroboration_only": []
+    },
+    {
+      "case_id": "VT-003",
+      "ok": true,
+      "policy_version": "vekl-2.1",
+      "resolver_version": "purpose-role-minimal-coalition-v1",
+      "task_classes": [
+        "DERIV_EXECUTION",
+        "DERIV_SYNTHETIC",
+        "RECONCILIATION",
+        "VENUE_ADAPTER"
+      ],
+      "selected": [
+        "van.trading.rules.rev2-canon",
+        "ref.deriv.api",
+        "ref.nautilus.adapter-template",
+        "ref.nautilus.docs"
+      ],
+      "roles": {
+        "van.trading.rules.rev2-canon": "POLICY/VAN_TRADING_GOVERNANCE",
+        "ref.deriv.api": "AUTHORITY/DERIV_VENUE_API",
+        "ref.nautilus.adapter-template": "REFERENCE/ADAPTER_TEMPLATE",
+        "ref.nautilus.docs": "AUTHORITY/KERNEL_CONCEPTS"
+      },
+      "missing": [],
+      "leaked": [],
+      "community_corroboration_only": []
+    },
+    {
+      "case_id": "VT-004",
+      "ok": true,
+      "policy_version": "vekl-2.1",
+      "resolver_version": "purpose-role-minimal-coalition-v1",
+      "task_classes": [
+        "RATES_POLICY",
+        "FOMC_EVENT_TRADING",
+        "POSITIONING_COT",
+        "IMPLIED_VOLATILITY",
+        "INDEX_VOLATILITY_REGIME",
+        "GOLD_MACRO"
+      ],
+      "selected": [
+        "van.trading.rules.rev2-canon",
+        "ref.cme.cvol",
+        "ref.fomc.statements",
+        "ref.cftc.cot",
+        "ref.cboe.vix-term-structure",
+        "ref.wgc.gold-demand",
+        "ref.cme.gold-futures-spec"
+      ],
+      "roles": {
+        "van.trading.rules.rev2-canon": "POLICY/VAN_TRADING_GOVERNANCE",
+        "ref.cme.cvol": "AUTHORITY/CROSS_ASSET_IMPLIED_VOL",
+        "ref.fomc.statements": "AUTHORITY/FED_POLICY_COMMUNICATION",
+        "ref.cftc.cot": "AUTHORITY/FUTURES_POSITIONING",
+        "ref.cboe.vix-term-structure": "AUTHORITY/INDEX_VOL_TERM_STRUCTURE",
+        "ref.wgc.gold-demand": "AUTHORITY/GOLD_DEMAND_FLOWS",
+        "ref.cme.gold-futures-spec": "AUTHORITY/GOLD_FUTURES_REFERENCE"
+      },
+      "missing": [],
+      "leaked": [],
+      "community_corroboration_only": []
+    },
+    {
+      "case_id": "VT-005",
+      "ok": true,
+      "policy_version": "vekl-2.1",
+      "resolver_version": "purpose-role-minimal-coalition-v1",
+      "task_classes": [
+        "ZSE_MARKET_RULES",
+        "ZSE_COMPLIANCE",
+        "ZIG_CURRENCY_REGIME",
+        "ZSE_MARKET_DATA"
+      ],
+      "selected": [
+        "van.trading.rules.rev2-canon",
+        "ref.rbz.exchange-control",
+        "ref.zse.currency-rebasing-2024",
+        "ref.zse.trading-procedures",
+        "community.zim.parallel-rate-trackers",
+        "ref.vfex.investor-faq",
+        "ref.seczim.securities-dealers",
+        "ref.data.zse-daily-pricesheets-archive"
+      ],
+      "roles": {
+        "van.trading.rules.rev2-canon": "POLICY/VAN_TRADING_GOVERNANCE",
+        "ref.rbz.exchange-control": "AUTHORITY/ZIM_EXCHANGE_CONTROL",
+        "ref.zse.currency-rebasing-2024": "AUTHORITY/ZSE_CURRENCY_HISTORY",
+        "ref.zse.trading-procedures": "AUTHORITY/ZSE_RULEBOOK",
+        "community.zim.parallel-rate-trackers": "DIAGNOSTIC/COMMUNITY_ZIG_SIGNAL",
+        "ref.vfex.investor-faq": "AUTHORITY/VFEX_RULEBOOK",
+        "ref.seczim.securities-dealers": "AUTHORITY/ZSE_REGULATORY",
+        "ref.data.zse-daily-pricesheets-archive": "REFERENCE/ZSE_HISTORY_SEED"
+      },
+      "missing": [],
+      "leaked": [],
+      "community_corroboration_only": [
+        "community.zim.parallel-rate-trackers"
+      ]
+    }
+  ],
+  "status": "GREEN"
+}

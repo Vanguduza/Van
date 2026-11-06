@@ -1,0 +1,106 @@
+{
+  "directory": "/tmp/van-recovery-family-native-supervision-r2-20261101",
+  "at_utc": "2026-11-01T05:02:09.189920+00:00",
+  "files": [
+    {
+      "path": "test_real_add_then_proportiona0/vati.sqlite",
+      "bytes": 102400,
+      "sha256": "b87903f9cd3def0d9b123b4345e975ef1ae836f06fb379e37a03f24bf9a9916c"
+    },
+    {
+      "path": "test_real_lifecycle_caller_use0/vati.sqlite",
+      "bytes": 53248,
+      "sha256": "38ca9d9f64bbf5248c0b49f9226724342975587cd6d68be94f65ae254f7ca161"
+    },
+    {
+      "path": "test_admitted_partial_effect_i0/vati.sqlite",
+      "bytes": 53248,
+      "sha256": "fb8d45610143295e6bae533b0bcf3ecce1df5e7b2fae64bec2d075c83fdbf51e"
+    },
+    {
+      "path": "test_current_effect_context_ca9/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "5402f1bb1a5d16a7514a7f07603eaa8ab6ad86bb694c8a8f844cccc18ae91b27"
+    },
+    {
+      "path": "test_current_effect_context_ca8/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "0b283da75eae10a288ee19ce34a65435b92a884a852ccf8f9010d2b3524dcd43"
+    },
+    {
+      "path": "test_current_effect_context_ca7/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "eed79a7ab68fe506cb4c726d7b6a2b0743823bd71d305ef7e874573e3f096dba"
+    },
+    {
+      "path": "test_current_effect_context_ca6/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "de1e5d1ae39a85eddbc6df8f5e4bff8ed1a52a4009f14f1cbbb5c83ac2a95674"
+    },
+    {
+      "path": "test_current_effect_context_ca5/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "d2b60bedbbcd1e6cd5e48330da3aa498e4b319ad05509165a0098c4cc622dc9c"
+    },
+    {
+      "path": "test_current_effect_context_ca4/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "6c431f43d1147237b29eb65ab20fac8415f4d1dfa8c0cf616e3f8d97d402f876"
+    },
+    {
+      "path": "test_current_effect_context_ca3/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "edfe23620d0f3e1960c9cc5757b3ef2a896925b35a25255a861630ec1defac46"
+    },
+    {
+      "path": "test_current_effect_context_ca2/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "04379f75dd7d6d0238e2da041d494128b6dbce76656a1babf336de221fc47833"
+    },
+    {
+      "path": "test_current_effect_context_ca1/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "47cccae8bac724d5e68ce85319b2edbdc3d5602f2c8ba6c770a784e59c0c9fc3"
+    },
+    {
+      "path": "test_current_effect_context_ca0/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "f93f468f3223b64a79392a3685a637287329666c28db6d9ec1dc0ab62a9e21cd"
+    },
+    {
+      "path": "test_real_current_mandate_orig0/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "b7d24554aa91db782bde79fa2c7231d90d306536ea41e3e08a8d0e445bb75978"
+    },
+    {
+      "path": "test_committed_other_writer_re0/vati.sqlite",
+      "bytes": 77824,
+      "sha256": "395225abcf8466ab1792922a4c2919641395cb70e4ebdd85b16f0e5948ec31f1"
+    },
+    {
+      "path": "test_original_unknown_full_tar0/vati.sqlite",
+      "bytes": 73728,
+      "sha256": "0a4918123eda555c62dc0dd09e95a081138d277511d2feeb3320c6729c7ce4e8"
+    },
+    {
+      "path": "test_missing_native_stop_force0/vati.sqlite",
+      "bytes": 94208,
+      "sha256": "7ae678f0b42262c72600ba3ea198b6791cb2b2e50d4aa00bf4e5d86ae04585b8"
+    },
+    {
+      "path": "test_mark_supervises_once_and_0/vati.sqlite",
+      "bytes": 73728,
+      "sha256": "d3e213527d7d6ed0e2295fbfbd07e346a085d4d824f986a0189c444a68134585"
+    },
+    {
+      "path": "owner-authority0/owner_authority_keys.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "owner-authority0/owner_authority_keys.json",
+      "bytes": 212,
+      "sha256": "b3791f1ebf32d815b5d8f2474053d7fa9daf4ead60e717d92a9d7a5b3cc2b728"
+    }
+  ]
+}

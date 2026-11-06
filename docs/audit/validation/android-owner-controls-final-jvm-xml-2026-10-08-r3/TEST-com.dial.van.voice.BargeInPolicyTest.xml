@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.voice.BargeInPolicyTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-08T06:47:30" hostname="052fefa249ff" time="0.002">
+  <properties/>
+  <testcase name="the owner speaking does interrupt()" classname="com.dial.van.voice.BargeInPolicyTest" time="0.0"/>
+  <testcase name="VAN does not interrupt itself on its own voice()" classname="com.dial.van.voice.BargeInPolicyTest" time="0.0"/>
+  <testcase name="a confirmation being read back is not interruptible()" classname="com.dial.van.voice.BargeInPolicyTest" time="0.0"/>
+  <testcase name="an ordinary answer is interruptible and so is nothing at all()" classname="com.dial.van.voice.BargeInPolicyTest" time="0.0"/>
+  <testcase name="playback stops before anything is sent anywhere()" classname="com.dial.van.voice.BargeInPolicyTest" time="0.001"/>
+  <testcase name="room noise below the threshold does not interrupt()" classname="com.dial.van.voice.BargeInPolicyTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

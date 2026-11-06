@@ -32,17 +32,17 @@ from __future__ import annotations
 import csv
 import json
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal
 from enum import Enum
 from pathlib import Path
 from typing import Any, Iterable, Iterator, Mapping, Optional
 
 from vati.core.canonical import canonical_hash, dec
 from vati.core.events import EventKind, make_event
+from vati.core.calendar_time import parse_calendar_ms
 
 PRODUCER = "vati-calendar-recorder"
-RECORDER_VERSION = "calendar-recorder/5.1.0"
+RECORDER_VERSION = "calendar-recorder/5.1.1"
 
 #: A release value is only VERIFIED when this many independent sources agree.
 MIN_AGREEING_SOURCES = 2
@@ -66,19 +66,28 @@ class ObservationConflict(ValueError):
 
 
 def _parse_ms(v: Any) -> int:
-    s = str(v).strip()
-    if s.isdigit():
-        return int(s) * (1000 if len(s) <= 10 else 1)
-    return int(datetime.fromisoformat(s.replace("Z", "+00:00")).astimezone(timezone.utc).timestamp() * 1000)
+    return parse_calendar_ms(v)
 
 
 def _opt_dec(v: Any) -> Optional[Decimal]:
     if v is None or str(v).strip() == "":
         return None
-    try:
-        return dec(str(v).strip())
-    except (InvalidOperation, ValueError, TypeError):
-        return None
+    value=dec(str(v).strip())
+    if not value.is_finite():raise ValueError('calendar number must be finite')
+    return value
+
+
+def _milliseconds(value):
+    if type(value) is not int or not -(2**63)<=value<=2**63-1:
+        raise ObservationConflict('calendar milliseconds must be a signed integer')
+    return value
+
+
+def _numbers(record):
+    for key in ('actual','forecast','previous'):
+        value=getattr(record,key,None)
+        if value is not None and (not isinstance(value,Decimal) or not value.is_finite()):
+            raise ObservationConflict('calendar '+key+' must be an exact finite Decimal')
 
 
 @dataclass(frozen=True)
@@ -170,6 +179,11 @@ class ReleaseRecord:
             "first_observed_ms": self.first_observed_ms,
             "latency_ms": self.latency_ms,
             "recorder_version": RECORDER_VERSION,
+            "agreement_basis": "DECLARED_SOURCE_LABELS_NOT_VERIFIED_PUBLISHER_INDEPENDENCE",
+            "unqualified_timing_observation_ids": [o.observation_id for o in self.observations
+                if o.actual is not None and not o.observed_ms>=o.released_ms>=self.scheduled.scheduled_ms],
+            "provider_qualified": False,
+            "authority_effect": "NONE",
         }
 
 
@@ -182,68 +196,139 @@ class CalendarRecorder:
         self._scheduled: dict[str, ScheduledRelease] = {}
         self._observed: dict[str, list[ReleaseObservation]] = {}
         self._seen: set[str] = set()
+        self._recovered = False
+        self._legacy_availability: set[str] = set()
         self.skipped: list[dict[str, str]] = []
+
+    @classmethod
+    def from_ledger(cls,ledger,*,producer=PRODUCER,max_events=100000):
+        try:return cls._recover_ledger(ledger,producer=producer,max_events=max_events)
+        except ObservationConflict:raise
+        except (KeyError,TypeError,ValueError,ArithmeticError) as exc:
+            raise ObservationConflict('calendar recovery original format unavailable: '+str(exc)) from exc
+
+    @classmethod
+    def _recover_ledger(cls,ledger,*,producer,max_events):
+        """Read originals without republishing them or rewriting legacy clocks.
+
+        This restores declared observations, not native publisher admission.
+        Invalid legacy data refuses recovery. Whole-ledger verification is not
+        a bounded host sandbox and belongs off the protective execution path.
+        """
+        if type(max_events) is not int or not 1<=max_events<=1000000:
+            raise ValueError('calendar recovery capacity must be a positive bounded integer')
+        recovered=cls(producer=producer)
+        with ledger.read_snapshot():
+            if sum(ledger.count(kind) for kind in (EventKind.CALENDAR_SCHEDULE,EventKind.CALENDAR_RELEASE))>max_events:
+                raise ObservationConflict('calendar recovery capacity exhausted')
+            if not ledger.verify_chain()[0]:raise ObservationConflict('calendar recovery ledger integrity unavailable')
+            for kind in (EventKind.CALENDAR_SCHEDULE,EventKind.CALENDAR_RELEASE):
+                for event in ledger.iter(kind):
+                    if event.producer!=producer:continue
+                    payload=event.payload
+                    if not isinstance(payload,dict) or event.hash!=canonical_hash(event.body()):
+                        raise ObservationConflict('calendar recovery original seal invalid')
+                    if kind is EventKind.CALENDAR_SCHEDULE:
+                        item=ScheduledRelease(payload['event_key'],payload['name'],payload['scheduled_ms'],
+                            tuple(payload['currencies']),payload['tier'],payload['unit'],
+                            _opt_dec(payload['forecast']),_opt_dec(payload['previous']))
+                        if item.body()!=payload or event.event_time_ms!=item.scheduled_ms:
+                            raise ObservationConflict('calendar recovery schedule format invalid')
+                        recovered.schedule(item)
+                    else:
+                        item=ReleaseObservation(payload['event_key'],payload['source'],_opt_dec(payload['actual']),
+                            payload['observed_ms'],payload['released_ms'],_opt_dec(payload['forecast']),
+                            _opt_dec(payload['previous']),payload['revision_of'])
+                        if ({**item.body(),'observation_id':item.observation_id}!=payload
+                                or event.event_time_ms!=item.released_ms):
+                            raise ObservationConflict('calendar recovery observation format invalid')
+                        recovered.observe(item)
+                        if event.received_time_ms!=item.observed_ms:
+                            recovered._legacy_availability.add(item.observation_id)
+                    if event.correlation_id!=item.event_key:
+                        raise ObservationConflict('calendar recovery original scope differs')
+        recovered._ledger=ledger
+        recovered._recovered=True
+        return recovered
 
     # ------------------------------------------------------------- scheduling
     def schedule(self, release: ScheduledRelease) -> ScheduledRelease:
+        _numbers(release);_milliseconds(release.scheduled_ms)
         prior = self._scheduled.get(release.event_key)
         if prior is not None and prior.body() != release.body():
             # A moved release time is a new event, not an edit of this one.
             raise ObservationConflict(
                 f"{release.event_key} is already scheduled with different terms")
+        self._emit(EventKind.CALENDAR_SCHEDULE, release.body(),
+                   event_ms=release.scheduled_ms, corr=release.event_key, must_exist=prior is not None)
         if prior is None:
             self._scheduled[release.event_key] = release
-            self._emit(EventKind.CALENDAR_SCHEDULE, release.body(),
-                       event_ms=release.scheduled_ms, corr=release.event_key)
         return release
 
     # ------------------------------------------------------------ observation
     def observe(self, obs: ReleaseObservation) -> ReleaseObservation:
         """Record one source's claim. Idempotent on identical claims."""
+        _numbers(obs);_milliseconds(obs.observed_ms);_milliseconds(obs.released_ms)
+        if not isinstance(obs.source,str) or not obs.source.strip() or not isinstance(obs.revision_of,str):
+            raise ObservationConflict('calendar source/revision identity invalid')
         if obs.event_key not in self._scheduled:
             raise ObservationConflict(
                 f"observation for unscheduled event {obs.event_key}; schedule it first")
         oid = obs.observation_id
         if oid in self._seen:
+            self._emit(EventKind.CALENDAR_RELEASE,{**obs.body(),'observation_id':oid},
+                event_ms=obs.released_ms,received_ms=obs.observed_ms,corr=obs.event_key,must_exist=True)
             return obs
         existing = [o for o in self._observed.get(obs.event_key, ())
                     if o.source == obs.source and o.actual is not None]
+        if obs.revision_of:
+            target=next((o for o in existing if o.observation_id==obs.revision_of),None)
+            latest=max(enumerate(existing),key=lambda item:(item[1].observed_ms,item[0]))[1] if existing else None
+            if (target is None or obs.actual is None or target is not latest
+                    or obs.observed_ms<target.observed_ms):
+                raise ObservationConflict('calendar revision must bind the latest original claim of this source/event')
         if existing and obs.actual is not None and not obs.revision_of:
-            prior = existing[-1]
+            prior = max(enumerate(existing),key=lambda item:(item[1].observed_ms,item[0]))[1]
             if prior.actual != obs.actual:
                 # A source changing its mind is normal; pretending it did not
                 # is what breaks replay. Make the supersession explicit.
                 raise ObservationConflict(
                     f"{obs.source} already reported {prior.actual} for {obs.event_key}; "
                     f"a different value must carry revision_of={prior.observation_id}")
+        self._emit(EventKind.CALENDAR_RELEASE, {**obs.body(), "observation_id": oid},
+                   event_ms=obs.released_ms, received_ms=obs.observed_ms, corr=obs.event_key)
         self._seen.add(oid)
         self._observed.setdefault(obs.event_key, []).append(obs)
-        self._emit(EventKind.CALENDAR_RELEASE, {**obs.body(), "observation_id": oid},
-                   event_ms=obs.released_ms, corr=obs.event_key)
         return obs
 
     # ----------------------------------------------------------------- verdict
     def record(self, event_key: str, *, now_ms: Optional[int] = None) -> ReleaseRecord:
+        if now_ms is not None:_milliseconds(now_ms)
         sched = self._scheduled.get(event_key)
         if sched is None:
             raise KeyError(event_key)
-        obs = tuple(sorted(self._observed.get(event_key, ()), key=lambda o: (o.observed_ms, o.source)))
+        obs = tuple(sorted((o for o in self._observed.get(event_key, ())
+                            if now_ms is None or o.observed_ms<=now_ms),
+                           key=lambda o: (o.observed_ms, o.source)))
 
         #: Only the newest non-superseded claim per source counts toward agreement.
-        superseded = {o.revision_of for o in obs if o.revision_of}
+        # Keep bad-clock claims visible (including negative latency), but do
+        # not let their values or supersessions establish agreement.
+        eligible=tuple(o for o in obs if o.observed_ms>=o.released_ms>=sched.scheduled_ms)
+        superseded = {o.revision_of for o in eligible if o.revision_of}
         current: dict[str, ReleaseObservation] = {}
-        for o in obs:
+        for o in eligible:
             if o.observation_id in superseded or o.actual is None:
                 continue
             prev = current.get(o.source)
             if prev is None or o.observed_ms >= prev.observed_ms:
                 current[o.source] = o
 
-        by_value: dict[str, list[str]] = {}
+        by_value: dict[Decimal, list[str]] = {}
         for source, o in current.items():
-            by_value.setdefault(str(o.actual), []).append(source)
+            by_value.setdefault(o.actual, []).append(source)
 
-        first_ms = min((o.observed_ms for o in obs), default=None)
+        first_ms = min((o.observed_ms for o in obs if o.actual is not None), default=None)
 
         if not current:
             due = now_ms is not None and now_ms > sched.scheduled_ms
@@ -252,7 +337,7 @@ class CalendarRecorder:
 
         best_value, best_sources = max(by_value.items(), key=lambda kv: (len(kv[1]), kv[0]))
         dissent = tuple(sorted(
-            (s, v) for v, srcs in by_value.items() if v != best_value for s in srcs))
+            (s, str(v)) for v, srcs in by_value.items() if v != best_value for s in srcs))
 
         if len(by_value) > 1:
             status = ReleaseStatus.DISPUTED
@@ -268,6 +353,7 @@ class CalendarRecorder:
                              tuple(sorted(best_sources)), dissent, first_ms)
 
     def records(self, *, now_ms: Optional[int] = None) -> list[ReleaseRecord]:
+        if now_ms is not None:_milliseconds(now_ms)
         return [self.record(k, now_ms=now_ms)
                 for k in sorted(self._scheduled, key=lambda k: self._scheduled[k].scheduled_ms)]
 
@@ -317,25 +403,56 @@ class CalendarRecorder:
         return {
             "recorder_version": RECORDER_VERSION,
             "scheduled": len(self._scheduled),
-            "observations": sum(len(v) for v in self._observed.values()),
+            "observations": sum(len(r.observations) for r in recs),
             "by_status": dict(sorted(by_status.items())),
             "disputed": disputed,
             "skipped": self.skipped,
             "now_ms": now_ms,
+            "recovered_from_ledger": self._recovered,
+            "legacy_envelope_availability_unqualified": sorted(self._legacy_availability & {
+                o.observation_id for record in recs for o in record.observations}),
         }
 
     # -------------------------------------------------------------- internals
-    def _emit(self, kind: EventKind, payload: dict, *, event_ms: int, corr: str) -> None:
+    def _emit(self, kind: EventKind, payload: dict, *, event_ms: int, corr: str, received_ms=None,must_exist=False) -> None:
         if self._ledger is None:
             return
-        self._ledger.append(make_event(kind, self._producer, payload,
-                                       event_time_ms=event_ms, received_time_ms=event_ms,
-                                       correlation_id=corr))
+        def original():
+            found=None
+            for event in self._ledger.iter(kind,correlation_id=corr):
+                if event.producer!=self._producer:continue
+                if not isinstance(event.payload,dict) or event.hash!=canonical_hash(event.body()):
+                    raise ObservationConflict('calendar original publication is corrupt')
+                if kind is EventKind.CALENDAR_RELEASE and event.payload.get('observation_id')!=payload['observation_id']:
+                    continue
+                if (event.payload!=payload
+                        or event.event_time_ms!=event_ms):
+                    raise ObservationConflict('calendar original publication conflicts or is corrupt')
+                if found is None:found=event
+            return found
+        # Local publication only: no provider I/O or memory success inside this
+        # writer. Stable original identity reconciles a lost acknowledgement.
+        with self._ledger.atomic():
+            if original() is None:
+                if must_exist:raise ObservationConflict('calendar original publication missing; not recreated')
+                self._ledger.append(make_event(kind,self._producer,payload,event_time_ms=event_ms,
+                    received_time_ms=event_ms if received_ms is None else received_ms,correlation_id=corr))
+        if original() is None:
+            raise OSError('calendar original durable publication not confirmed')
 
 
 # --------------------------------------------------------------------- parsing
 def event_key(name: str, scheduled_ms: int) -> str:
     return f"{name.upper().replace(' ', '_')}:{scheduled_ms}"
+
+
+def declared_event_key(row,name,scheduled_ms):
+    explicit=row.get('event_key')
+    if explicit is None or explicit=='':return event_key(name,scheduled_ms)
+    if (not isinstance(explicit,str) or not explicit.strip() or len(explicit)>512
+            or any(ord(char)<32 for char in explicit)):
+        raise ValueError('calendar explicit event key invalid')
+    return explicit.strip()
 
 
 def scheduled_from_row(row: Mapping[str, Any]) -> ScheduledRelease:
@@ -345,15 +462,15 @@ def scheduled_from_row(row: Mapping[str, Any]) -> ScheduledRelease:
     if not ccy:
         raise ValueError("no currencies")
     return ScheduledRelease(
-        event_key=event_key(name, ms), name=name, scheduled_ms=ms, currencies=ccy,
+        event_key=declared_event_key(row,name,ms), name=name, scheduled_ms=ms, currencies=ccy,
         tier=int(row.get("tier", 1)), unit=str(row.get("unit", "")),
         forecast=_opt_dec(row.get("forecast")), previous=_opt_dec(row.get("previous")))
 
 
 def observation_from_row(row: Mapping[str, Any]) -> ReleaseObservation:
-    key = str(row.get("event_key") or "").strip()
-    if not key:
-        key = event_key(str(row["name"]), _parse_ms(row.get("scheduled") or row["release"]))
+    explicit=row.get('event_key')
+    key=declared_event_key(row,'',0) if explicit is not None and explicit!='' else declared_event_key(
+        row,str(row['name']),_parse_ms(row.get('scheduled') or row['release']))
     released = _parse_ms(row.get("released") or row.get("scheduled") or row["release"])
     observed = _parse_ms(row["observed"]) if row.get("observed") else released
     source = str(row.get("source", "")).strip()
@@ -370,8 +487,11 @@ def rows_from_file(path: str | Path, key: str = "events") -> list[dict]:
     p = Path(path)
     if p.suffix.lower() == ".json":
         data = json.loads(p.read_text(encoding="utf-8"))
-        if isinstance(data, list):
-            return list(data)
-        return list(data.get(key, []))
+        if isinstance(data,list):rows=data
+        elif isinstance(data,dict) and key in data:rows=data[key]
+        else:raise ValueError('calendar file requires a row array or '+key+' array')
+        if not isinstance(rows,list) or any(not isinstance(row,dict) for row in rows):
+            raise ValueError('calendar file requires an array of row objects')
+        return list(rows)
     with open(p, newline="", encoding="utf-8") as f:
         return list(csv.DictReader(f))

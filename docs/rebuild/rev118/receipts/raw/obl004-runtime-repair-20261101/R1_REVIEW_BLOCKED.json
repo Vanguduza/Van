@@ -1,0 +1,86 @@
+{
+  "disposition": "BLOCKING_FINDING",
+  "base": "4084a0bd04fd507889fe61b426c8f96bea29c054",
+  "blocker": {
+    "id": "OBL004-SETUP-REVIEW01",
+    "constraint_sources": [
+      {
+        "path": "tools/rebuild/canonical_source_audit.py:55",
+        "fact": "android_guards declares BACKEND_LOCK via PROFILES"
+      },
+      {
+        "path": "backend/requirements.lock:46",
+        "fact": "PyYAML==6.0.3"
+      },
+      {
+        "path": "tools/rebuild/canonical_source_audit.py:135",
+        "fact": "environment() checks installed versions against every declared lock before AGP checks"
+      },
+      {
+        "path": "tools/rebuild/canonical_source_audit.py:162",
+        "fact": "environment() separately requires result.pyyaml ==6.0.2"
+      },
+      {
+        "path": "tools/rebuild/canonical_source_audit.py:177",
+        "fact": "verify_environment() checks package versions against every declared lock"
+      },
+      {
+        "path": "tools/rebuild/canonical_source_audit.py:186",
+        "fact": "verify_environment() separately requires pyyaml==6.0.2"
+      }
+    ],
+    "actual_callable_proof": "probe.json; production verify_environment() on explicit modeled declared-runtime records refuses6.0.3 with missing original AGP runtime and6.0.2 with locked package mismatch. Not a real Java/AGP runtime qualification.",
+    "effect": "Current new setup preserves6.0.3 then android_guards fails its subsequent hardcoded6.0.2 check before collection. No value satisfies both constraints.",
+    "origin": "6.0.2 is a real overlay in unchanged original android-and-visual-evidence owner job, workflow874. It was copied into additive AGP profile constraints. Original tests import yaml/safe_load; neither of the two AGP test sources asserts6.0.2 or demonstrates a version-specific requirement. The isolated installer3\u21922\u21923 proof establishes packages, not compatibility with both validator predicates.",
+    "repair_boundary": "Resolve additive profile declared setup/lock and both producer/readback validator constraints consistently with exact owner dependency evidence. Preserve original job, strict exact matching, actual Java17/wrapper checks and all gates. Add regression exercising actual environment and verify_environment acceptance for the chosen installed closure and refusal for the other version, rather than checking only pip literal overlays. Root/source owner chooses exact implementation; reviewer makes no policy change."
+  },
+  "positive_scope_checks": {
+    "exact3paths": [
+      ".github/workflows/van-ci.yml",
+      "tools/ci/github-actions-ci.yml",
+      "tests/rebuild/test_canonical_source_audit.py"
+    ],
+    "only_changed_job": "obl004-scenarios",
+    "other_job_objects_topfields_unchanged": true,
+    "mirror_exact": true,
+    "test_original_prefix_unchanged": true,
+    "actual60pass0skip_xml_and_exit0": true,
+    "audit0": true,
+    "real_isolated_pyyaml_install_metadata_module3_2_3_preserved": true,
+    "no_suite_weakened_or_lock_edited": true
+  },
+  "evidence_limits": [
+    "Current60 tests and installer proof are genuine but do not exercise AGP profile-specific producer/readback acceptance; they do not establish repaired native closure.",
+    "Full matrix remains blocked/unqualified; missing pinned DDS prerequisites are a separate expected BLOCKED state, no pytest pass.",
+    "No installs/network/Gradle/CI/provider/native actions or candidate edits during review. Only bounded production validator calls on modeled records.",
+    "Current watch and PR106 untouched. All full OBL004/native/formal/historical snapshot gates remain separate."
+  ],
+  "frozen_before_after": {
+    "kind": "Actual production validator on modeled declared-runtime records; no runtime/native execution claim",
+    "rows": [
+      {
+        "declared_pyyaml_version": "6.0.3",
+        "refused": "missing original AGP runtime"
+      },
+      {
+        "declared_pyyaml_version": "6.0.2",
+        "refused": "locked package mismatch"
+      }
+    ],
+    "validator_source": "/workspace/van-review-2026-10-18/publish/tools/rebuild/canonical_source_audit.py",
+    "validator_sha256": "88f7b3efe0791b6a366a0d08e7f3eb6ea7eef0e5c8ec53a145c2771e442cc768",
+    "source_pins_before": {
+      ".github/workflows/van-ci.yml": "3ab3df781f9bb1444bd853f1b5035fb3a57db51a422aed9c7708738b7ac5d407",
+      "tools/ci/github-actions-ci.yml": "3ab3df781f9bb1444bd853f1b5035fb3a57db51a422aed9c7708738b7ac5d407",
+      "tests/rebuild/test_canonical_source_audit.py": "6733bc3689d1fa668bf831fe40fa9b08932a8ba2f8bc722211494b2e7ed5008a"
+    },
+    "source_pins_after": {
+      ".github/workflows/van-ci.yml": "3ab3df781f9bb1444bd853f1b5035fb3a57db51a422aed9c7708738b7ac5d407",
+      "tools/ci/github-actions-ci.yml": "3ab3df781f9bb1444bd853f1b5035fb3a57db51a422aed9c7708738b7ac5d407",
+      "tests/rebuild/test_canonical_source_audit.py": "6733bc3689d1fa668bf831fe40fa9b08932a8ba2f8bc722211494b2e7ed5008a"
+    },
+    "patch_sha256": "63834e0556a6448792dabf232958ba332b51fe9c37cd6dc1d3701a3cb4c97118",
+    "archive_sha256": "7648fdbedde71fc86e9e257bc76ecbd27b5e9ab71dad3fbaf23695a5f24bd36f"
+  },
+  "owned_fixture_writes": "Only compact external review/probe files; no /tmp fixture/install created"
+}

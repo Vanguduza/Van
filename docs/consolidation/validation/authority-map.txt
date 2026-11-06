@@ -1,0 +1,19 @@
+invariants: 54 across 16 domains, 7 owning documents
+  android          2
+  authority        6
+  automation       3
+  context          1
+  dial_dev         3
+  evolution        2
+  google           1
+  governance       2
+  mission          4
+  ops              3
+  performance      1
+  reasoning        1
+  trading          12
+  trust            5
+  understanding    5
+  verification     3
+
+AUTHORITY MAP PASSED — every invariant is owned once, implemented and tested.

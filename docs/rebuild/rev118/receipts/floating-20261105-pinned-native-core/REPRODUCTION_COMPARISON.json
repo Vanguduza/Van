@@ -1,0 +1,218 @@
+{
+  "scope": "Independent complete rebuild compared with earlier actual native-core run",
+  "images": [
+    {
+      "image": "action-1.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "action-10.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "action-11.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "action-12.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "action-13.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "action-14.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "action-15.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "action-16.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "action-17.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "action-18.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "action-19.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "action-2.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "action-20.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "action-21.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "action-22.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "action-23.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "action-24.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "action-25.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "action-26.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "action-3.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "action-4.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "action-5.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "action-6.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "action-7.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "action-8.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "action-9.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "legacy-wave.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "mouth-0.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "mouth-1.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "mouth-2.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "mouth-3.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "mouth-4.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "orb-other-side.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "orb-return.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "orb-start.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "state-0.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "state-1.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "state-10.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "state-11.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "state-12.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "state-13.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "state-14.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "state-15.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "state-16.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "state-17.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "state-2.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "state-3.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "state-4.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "state-5.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "state-6.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "state-7.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "state-8.png",
+      "same_pixels_png_bytes": true
+    },
+    {
+      "image": "state-9.png",
+      "same_pixels_png_bytes": true
+    }
+  ],
+  "all53_identical": true
+}

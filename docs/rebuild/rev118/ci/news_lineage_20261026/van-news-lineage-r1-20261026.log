@@ -1,0 +1,38 @@
+.................................F.s.s.................................. [ 53%]
+........................................................s.s...           [100%]
+=================================== FAILURES ===================================
+_ test_actual_process_death_after_commit_recovers_without_duplicate_publication _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-256/test_actual_process_death_afte0')
+
+    def test_actual_process_death_after_commit_recovers_without_duplicate_publication(tmp_path):
+        import subprocess,sys
+        path=tmp_path/'process.sqlite'
+        code='''
+    import os,sys
+    from decimal import Decimal
+    from vati.core.ledger import Ledger
+    from vati.core.events import EventKind
+    from vati.events.news_ingress import Headline,NewsIngress,SourceTrust
+    ledger=Ledger(sys.argv[1]);read=ledger.iter
+    def die_after_commit(kind=None,correlation_id=None):
+        if kind is EventKind.NEWS_HEADLINE and not ledger._conn.in_transaction:os._exit(77)
+        return read(kind,correlation_id=correlation_id)
+    ledger.iter=die_after_commit
+    NewsIngress(ledger=ledger).ingest(Headline(source_id='publisher',trust=SourceTrust.T1_PRIMARY,
+        published_ms=1800000000000,observed_ms=1800000000000,title='Emergency policy decision',
+        symbols=('EURUSD',),severity=Decimal('1')),now_ms=1800000000100)
+    '''
+        child=subprocess.run([sys.executable,'-c',code,str(path)],capture_output=True,text=True,timeout=20)
+>       assert child.returncode==77,child.stderr
+E       AssertionError: Traceback (most recent call last):
+E           File "<string>", line 4, in <module>
+E         ModuleNotFoundError: No module named 'vati'
+E         
+E       assert 1 == 77
+E        +  where 1 = CompletedProcess(args=['/workspace/van-backend-venv-20261025/bin/python', '-c', "\nimport os,sys\nfrom decimal import ...ack (most recent call last):\n  File "<string>", line 4, in <module>\nModuleNotFoundError: No module named \'vati\'\n').returncode
+
+trading/tests/test_news_durable_publication.py:253: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_news_durable_publication.py::test_actual_process_death_after_commit_recovers_without_duplicate_publication
+1 failed, 129 passed, 4 skipped in 3.67s

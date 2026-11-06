@@ -1,0 +1,320 @@
+{
+  "schema": "van.rebuild.hosted-source/1",
+  "source_head": "f2f541c9f2d1fe3b52a5756f46d7b01556baa03a",
+  "tested_merge": "55552cc593c6e3dba5783296251a64683a5ace11",
+  "run_id": 39997193133,
+  "jobs": [
+    {
+      "databaseId": 120563682039,
+      "name": "postgres-ledger",
+      "conclusion": "success"
+    },
+    {
+      "databaseId": 120563682372,
+      "name": "mutation (python-0, python, 0/4)",
+      "conclusion": "failure"
+    },
+    {
+      "databaseId": 120563682496,
+      "name": "rebuild-documentary",
+      "conclusion": "success"
+    },
+    {
+      "databaseId": 120563682554,
+      "name": "project-truth-ledger",
+      "conclusion": "failure"
+    },
+    {
+      "databaseId": 120563682578,
+      "name": "android-and-visual-evidence",
+      "conclusion": "success"
+    },
+    {
+      "databaseId": 120563682814,
+      "name": "backend",
+      "conclusion": "failure"
+    },
+    {
+      "databaseId": 120563682826,
+      "name": "mutation (python-1, python, 1/4)",
+      "conclusion": "failure"
+    },
+    {
+      "databaseId": 120563682876,
+      "name": "mutation (python-2, python, 2/4)",
+      "conclusion": "failure"
+    },
+    {
+      "databaseId": 120563682885,
+      "name": "mutation (kotlin-2, kotlin, 2/4)",
+      "conclusion": "failure"
+    },
+    {
+      "databaseId": 120563682940,
+      "name": "android-instrumentation",
+      "conclusion": "success"
+    },
+    {
+      "databaseId": 120563682958,
+      "name": "mutation (browser-agent, browser-agent, 0/1)",
+      "conclusion": "failure"
+    },
+    {
+      "databaseId": 120563683051,
+      "name": "mutation (kotlin-1, kotlin, 1/4)",
+      "conclusion": "failure"
+    },
+    {
+      "databaseId": 120563683075,
+      "name": "mutation (kotlin-0, kotlin, 0/4)",
+      "conclusion": "failure"
+    },
+    {
+      "databaseId": 120563683091,
+      "name": "mutation (kotlin-3, kotlin, 3/4)",
+      "conclusion": "failure"
+    },
+    {
+      "databaseId": 120563683116,
+      "name": "mutation (python-3, python, 3/4)",
+      "conclusion": "failure"
+    },
+    {
+      "databaseId": 120568658472,
+      "name": "character-forge-gate",
+      "conclusion": "success"
+    }
+  ],
+  "public_source": {
+    "voice-source-report.xml": {
+      "tests": 117,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "42b35be1b61c1c43a60e784fd6d57400d450fd959ce1a5e6e8bd0d1913cd89f2"
+    },
+    "trading-source-report.xml": {
+      "tests": 2539,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "sha256": "8227d075e283cabc094b457d6c7f43154f1159048df95394c7630bf8d64995c4"
+    },
+    "postgres-ledger-report.xml": {
+      "tests": 26,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "530abbe29d8d3c04ab28b47fea20650f0028db26cf8008c63cf9f84d4bade99e"
+    }
+  },
+  "legacy_mutations": {
+    "state": "NOT_RUN_PREFLIGHT_FAILED",
+    "registered": 374,
+    "edits": 383,
+    "caught": null,
+    "survived": null,
+    "preflights": [
+      {
+        "artifact": "van-mutation-report-browser-agent",
+        "preflight": {
+          "schema": "van.rebuild.mutation-registry-preflight/1",
+          "registry_sha256": "35d10c7b0f2b8319b7f7305828262c972b2a6451139d75b9e83c7d0062282955",
+          "mutation_count": 374,
+          "edit_count": 383,
+          "findings": [
+            {
+              "kind": "SOURCE_ANCHOR_MISSING",
+              "path": "van_gateway/understanding/memory.py",
+              "mutation": "RC4 a brand-new goal starts standing",
+              "anchor": "            current=IntentHorizon.EPHEMERAL,\n            observations=1,"
+            }
+          ],
+          "execution_state": "NOT_RUN",
+          "status": "INVALID_REGISTRY"
+        },
+        "sha256": "99060cd13b9bdff5d3bf6c9c1a6a59779839a60f8881f92a246352e3ce866217"
+      },
+      {
+        "artifact": "van-mutation-report-kotlin-0",
+        "preflight": {
+          "schema": "van.rebuild.mutation-registry-preflight/1",
+          "registry_sha256": "35d10c7b0f2b8319b7f7305828262c972b2a6451139d75b9e83c7d0062282955",
+          "mutation_count": 374,
+          "edit_count": 383,
+          "findings": [
+            {
+              "kind": "SOURCE_ANCHOR_MISSING",
+              "path": "van_gateway/understanding/memory.py",
+              "mutation": "RC4 a brand-new goal starts standing",
+              "anchor": "            current=IntentHorizon.EPHEMERAL,\n            observations=1,"
+            }
+          ],
+          "execution_state": "NOT_RUN",
+          "status": "INVALID_REGISTRY"
+        },
+        "sha256": "99060cd13b9bdff5d3bf6c9c1a6a59779839a60f8881f92a246352e3ce866217"
+      },
+      {
+        "artifact": "van-mutation-report-kotlin-1",
+        "preflight": {
+          "schema": "van.rebuild.mutation-registry-preflight/1",
+          "registry_sha256": "35d10c7b0f2b8319b7f7305828262c972b2a6451139d75b9e83c7d0062282955",
+          "mutation_count": 374,
+          "edit_count": 383,
+          "findings": [
+            {
+              "kind": "SOURCE_ANCHOR_MISSING",
+              "path": "van_gateway/understanding/memory.py",
+              "mutation": "RC4 a brand-new goal starts standing",
+              "anchor": "            current=IntentHorizon.EPHEMERAL,\n            observations=1,"
+            }
+          ],
+          "execution_state": "NOT_RUN",
+          "status": "INVALID_REGISTRY"
+        },
+        "sha256": "99060cd13b9bdff5d3bf6c9c1a6a59779839a60f8881f92a246352e3ce866217"
+      },
+      {
+        "artifact": "van-mutation-report-kotlin-2",
+        "preflight": {
+          "schema": "van.rebuild.mutation-registry-preflight/1",
+          "registry_sha256": "35d10c7b0f2b8319b7f7305828262c972b2a6451139d75b9e83c7d0062282955",
+          "mutation_count": 374,
+          "edit_count": 383,
+          "findings": [
+            {
+              "kind": "SOURCE_ANCHOR_MISSING",
+              "path": "van_gateway/understanding/memory.py",
+              "mutation": "RC4 a brand-new goal starts standing",
+              "anchor": "            current=IntentHorizon.EPHEMERAL,\n            observations=1,"
+            }
+          ],
+          "execution_state": "NOT_RUN",
+          "status": "INVALID_REGISTRY"
+        },
+        "sha256": "99060cd13b9bdff5d3bf6c9c1a6a59779839a60f8881f92a246352e3ce866217"
+      },
+      {
+        "artifact": "van-mutation-report-kotlin-3",
+        "preflight": {
+          "schema": "van.rebuild.mutation-registry-preflight/1",
+          "registry_sha256": "35d10c7b0f2b8319b7f7305828262c972b2a6451139d75b9e83c7d0062282955",
+          "mutation_count": 374,
+          "edit_count": 383,
+          "findings": [
+            {
+              "kind": "SOURCE_ANCHOR_MISSING",
+              "path": "van_gateway/understanding/memory.py",
+              "mutation": "RC4 a brand-new goal starts standing",
+              "anchor": "            current=IntentHorizon.EPHEMERAL,\n            observations=1,"
+            }
+          ],
+          "execution_state": "NOT_RUN",
+          "status": "INVALID_REGISTRY"
+        },
+        "sha256": "99060cd13b9bdff5d3bf6c9c1a6a59779839a60f8881f92a246352e3ce866217"
+      },
+      {
+        "artifact": "van-mutation-report-python-0",
+        "preflight": {
+          "schema": "van.rebuild.mutation-registry-preflight/1",
+          "registry_sha256": "35d10c7b0f2b8319b7f7305828262c972b2a6451139d75b9e83c7d0062282955",
+          "mutation_count": 374,
+          "edit_count": 383,
+          "findings": [
+            {
+              "kind": "SOURCE_ANCHOR_MISSING",
+              "path": "van_gateway/understanding/memory.py",
+              "mutation": "RC4 a brand-new goal starts standing",
+              "anchor": "            current=IntentHorizon.EPHEMERAL,\n            observations=1,"
+            }
+          ],
+          "execution_state": "NOT_RUN",
+          "status": "INVALID_REGISTRY"
+        },
+        "sha256": "99060cd13b9bdff5d3bf6c9c1a6a59779839a60f8881f92a246352e3ce866217"
+      },
+      {
+        "artifact": "van-mutation-report-python-1",
+        "preflight": {
+          "schema": "van.rebuild.mutation-registry-preflight/1",
+          "registry_sha256": "35d10c7b0f2b8319b7f7305828262c972b2a6451139d75b9e83c7d0062282955",
+          "mutation_count": 374,
+          "edit_count": 383,
+          "findings": [
+            {
+              "kind": "SOURCE_ANCHOR_MISSING",
+              "path": "van_gateway/understanding/memory.py",
+              "mutation": "RC4 a brand-new goal starts standing",
+              "anchor": "            current=IntentHorizon.EPHEMERAL,\n            observations=1,"
+            }
+          ],
+          "execution_state": "NOT_RUN",
+          "status": "INVALID_REGISTRY"
+        },
+        "sha256": "99060cd13b9bdff5d3bf6c9c1a6a59779839a60f8881f92a246352e3ce866217"
+      },
+      {
+        "artifact": "van-mutation-report-python-2",
+        "preflight": {
+          "schema": "van.rebuild.mutation-registry-preflight/1",
+          "registry_sha256": "35d10c7b0f2b8319b7f7305828262c972b2a6451139d75b9e83c7d0062282955",
+          "mutation_count": 374,
+          "edit_count": 383,
+          "findings": [
+            {
+              "kind": "SOURCE_ANCHOR_MISSING",
+              "path": "van_gateway/understanding/memory.py",
+              "mutation": "RC4 a brand-new goal starts standing",
+              "anchor": "            current=IntentHorizon.EPHEMERAL,\n            observations=1,"
+            }
+          ],
+          "execution_state": "NOT_RUN",
+          "status": "INVALID_REGISTRY"
+        },
+        "sha256": "99060cd13b9bdff5d3bf6c9c1a6a59779839a60f8881f92a246352e3ce866217"
+      },
+      {
+        "artifact": "van-mutation-report-python-3",
+        "preflight": {
+          "schema": "van.rebuild.mutation-registry-preflight/1",
+          "registry_sha256": "35d10c7b0f2b8319b7f7305828262c972b2a6451139d75b9e83c7d0062282955",
+          "mutation_count": 374,
+          "edit_count": 383,
+          "findings": [
+            {
+              "kind": "SOURCE_ANCHOR_MISSING",
+              "path": "van_gateway/understanding/memory.py",
+              "mutation": "RC4 a brand-new goal starts standing",
+              "anchor": "            current=IntentHorizon.EPHEMERAL,\n            observations=1,"
+            }
+          ],
+          "execution_state": "NOT_RUN",
+          "status": "INVALID_REGISTRY"
+        },
+        "sha256": "99060cd13b9bdff5d3bf6c9c1a6a59779839a60f8881f92a246352e3ce866217"
+      }
+    ],
+    "cause": "RC4 fresh-intent horizon anchor collapsed by the prior source refactor. Registry refuses all shards before mutation execution; no corpus success is claimed.",
+    "correction": "Restore source anchor without changing mutation identities or new observation semantics, explicitly inspect exit code and findings, execute the selected mutation and rerun hosted current source."
+  },
+  "instrumentation": {
+    "collected": 22,
+    "passed": 18,
+    "failed": 0,
+    "skipped": 4,
+    "voice_methods": {
+      "cancellationBeforeNativeStartCannotCompleteOrDamageTheReplacementAnswer": "2.687s",
+      "realOfflineAnswerReachesTheApplicationQueueAsSpoken": "2.263s"
+    },
+    "index_sha256": "ee428788e9693375439605c7074acb22ef3c11ad87754892f4a356ddea76be5c",
+    "voice_report_sha256": "e2f2e42a8bfa43caab879d4b24adce6a44c80b4516cadcc8d48ec8d1dbc22d17",
+    "qualification": "Actual source emulator only; durations are method times, not S24 or startup performance certificates."
+  },
+  "retained_external_failures": {
+    "backend": "DDS_CONTRACT_READ_DEPLOY_KEY not bound",
+    "project-truth-ledger": "Trusted main bootstrap absent"
+  },
+  "qualification": "Mixed hosted result: 9 mutation shards refused before execution due a source anchor regression; source emulator/PG/public tests pass as recorded. No source-corpus, whole-unit, provider, production or S24 acceptance."
+}

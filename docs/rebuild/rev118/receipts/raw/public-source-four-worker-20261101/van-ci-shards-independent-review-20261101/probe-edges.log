@@ -1,0 +1,1 @@
+[{"case": "collection-module-skip", "exit": 3, "result": "REFUSES_AS_REQUIRED"}, {"case": "empty-inventory", "exit": 3, "result": "REFUSES_AS_REQUIRED"}, {"case": "empty-shard", "exit": 3, "result": "REFUSES_AS_REQUIRED"}, {"case": "teardown-failure", "exit": 1, "result": "REFUSES_AS_REQUIRED"}]

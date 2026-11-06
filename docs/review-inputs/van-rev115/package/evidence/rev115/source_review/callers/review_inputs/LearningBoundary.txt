@@ -1,0 +1,22 @@
+cbd059cfb1ddfb80766bdebc2c74d3b25302a992:trading/vati/app/cycle.py:588:        """Observe the closed trade; apply only LearningBoundary-checked, reduce-only effects.
+cbd059cfb1ddfb80766bdebc2c74d3b25302a992:trading/vati/app/service.py:195:        # LearningBoundary permits reduce-only adjustments, and a demotion moves a capsule
+cbd059cfb1ddfb80766bdebc2c74d3b25302a992:trading/vati/learning/__init__.py:6:from vati.learning.boundary import LearningBoundary, LearningBoundaryError, LiveAdjustment
+cbd059cfb1ddfb80766bdebc2c74d3b25302a992:trading/vati/learning/boundary.py:18:class LearningBoundaryError(RuntimeError):
+cbd059cfb1ddfb80766bdebc2c74d3b25302a992:trading/vati/learning/boundary.py:41:class LearningBoundary:
+cbd059cfb1ddfb80766bdebc2c74d3b25302a992:trading/vati/learning/boundary.py:47:            raise LearningBoundaryError(f"learning may not touch {adj.target}")
+cbd059cfb1ddfb80766bdebc2c74d3b25302a992:trading/vati/learning/boundary.py:49:            raise LearningBoundaryError("learning multipliers are reduce-only within [0, 1]")
+cbd059cfb1ddfb80766bdebc2c74d3b25302a992:trading/vati/learning/boundary.py:51:            raise LearningBoundaryError("only capsule health may demote")
+cbd059cfb1ddfb80766bdebc2c74d3b25302a992:trading/vati/learning/boundary.py:53:            raise LearningBoundaryError("demotion targets are DEGRADED|SHADOW|SUSPENDED; promotion is never a learning output")
+cbd059cfb1ddfb80766bdebc2c74d3b25302a992:trading/vati/learning/boundary.py:55:            raise LearningBoundaryError(f"insufficient environment-weighted samples ({adj.environment_weighted_samples} < {cls.MIN_WEIGHTED_SAMPLES}) for a live adjustment")
+cbd059cfb1ddfb80766bdebc2c74d3b25302a992:trading/vati/learning/boundary.py:57:            raise LearningBoundaryError("a live adjustment must cite evidence artifact hashes")
+cbd059cfb1ddfb80766bdebc2c74d3b25302a992:trading/vati/learning/boundary.py:63:        raise LearningBoundaryError(f"learning may not touch {target}; use the owner-signed promotion path")
+cbd059cfb1ddfb80766bdebc2c74d3b25302a992:trading/vati/learning/broker.py:13:from vati.learning.boundary import LearningBoundary, LiveAdjustment, LiveTarget
+cbd059cfb1ddfb80766bdebc2c74d3b25302a992:trading/vati/learning/broker.py:82:        if p is None or p._w() < LearningBoundary.MIN_WEIGHTED_SAMPLES:
+cbd059cfb1ddfb80766bdebc2c74d3b25302a992:trading/vati/learning/broker.py:84:        return LearningBoundary.check(LiveAdjustment(LiveTarget.BROKER_PROFILE, f"{broker}:{symbol}:{session}", p.liquidity_multiplier(), None, (f"broker-profile:{broker}:{symbol}:{session}",), p._w()))
+cbd059cfb1ddfb80766bdebc2c74d3b25302a992:trading/vati/learning/episodes.py:220:    LearningBoundary targets, and this is not one of them.
+cbd059cfb1ddfb80766bdebc2c74d3b25302a992:trading/vati/learning/health.py:10:from vati.learning.boundary import LearningBoundary, LiveAdjustment, LiveTarget
+cbd059cfb1ddfb80766bdebc2c74d3b25302a992:trading/vati/learning/health.py:81:        if v.weighted_samples < LearningBoundary.MIN_WEIGHTED_SAMPLES:
+cbd059cfb1ddfb80766bdebc2c74d3b25302a992:trading/vati/learning/health.py:84:        return LearningBoundary.check(adj)
+cbd059cfb1ddfb80766bdebc2c74d3b25302a992:trading/vati/learning/hooks.py:5:the live path are the three LearningBoundary targets: a capsule-health
+cbd059cfb1ddfb80766bdebc2c74d3b25302a992:trading/vati/learning/hooks.py:18:from vati.learning.boundary import LearningBoundary, LiveAdjustment, LiveTarget
+cbd059cfb1ddfb80766bdebc2c74d3b25302a992:trading/vati/learning/hooks.py:76:        ms = [p.liquidity_multiplier() for (b, s, _), p in self.brokers.profiles.items() if b == self.broker and s == symbol and p._w() >= LearningBoundary.MIN_WEIGHTED_SAMPLES]

@@ -1,0 +1,30 @@
+...........................F.......                                      [100%]
+=================================== FAILURES ===================================
+_ test_closing_one_held_hedged_position_does_not_close_the_other_family_members _
+
+tmp_path = PosixPath('/tmp/van-recovery-family-native-protection-r1-20261101/test_closing_one_held_hedged_p0')
+
+    def test_closing_one_held_hedged_position_does_not_close_the_other_family_members(tmp_path):
+        from test_account_lifecycle import _lifecycle
+        with closing(Ledger(tmp_path/'hedged-close.sqlite')) as ledger:
+            life,adapter,root,child,entry,child_receipt=recorded_scale(ledger,netted=False)
+            recovered=_lifecycle(ledger,adapter);recovered.recover_from_venue()
+            family=recovered.families.for_intent(root.trade_intent_id)
+            original_members=[member.body() for member in family.members]
+            closed=recovered.router.apply_preservation('paper',position_id=entry.broker_position_id,
+                trade_intent_id=root.trade_intent_id,action='FULL_CLOSE',quantity=None,now_ms=4000,
+                reason='SOURCE_NATIVE_PROTECTIVE_CLOSE')
+            assert closed.filled_qty==D('.06')
+            recovered._on_close(root.trade_intent_id,closed.average_fill,'SOURCE_NATIVE_PROTECTIVE_CLOSE',4000)
+            assert [position.trade_intent_id for position in adapter.positions()]==[child.trade_intent_id]
+            assert family.gross_added==D('.15') and family.scale_ins==1
+>           assert [member.body() for member in family.members]==original_members
+E           AssertionError: assert [{'member_id'... '1.11', ...}] == [{'member_id'... '1.11', ...}]
+E             
+E             Left contains one more item: {'member_id': 'family-native-receipt:0bace65cb44308a4c7d3d6791f902fae6912bc8f7ecffc28d15508418c0ad54a', 'role': 'PARTIAL_EXIT', 'quantity': '0.06', 'price': '1.11', ...}
+E             Use -v to get more diff
+
+trading/tests/test_family_durable_projection.py:200: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_family_durable_projection.py::test_closing_one_held_hedged_position_does_not_close_the_other_family_members
+1 failed, 34 passed in 0.91s

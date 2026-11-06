@@ -1,0 +1,22 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_ test_original_exact_native_value_and_optional_credit_keep_distinct_bases[sqlite] _
+
+original = (<vati.core.ledger.Ledger object at 0x7efec6576c00>, Event(kind=<EventKind.ACCOUNT_SNAPSHOT: 'ACCOUNT_SNAPSHOT'>, prod...ce_version=1, manager_bonus=Decimal('3.01'), ib_bonus=None, nonwithdrawable_bonus=Decimal('5'), registered_at_ms=None))
+
+    def test_original_exact_native_value_and_optional_credit_keep_distinct_bases(original):
+        ledger,event,point=original;before=ledger.head(),ledger.count()
+        with localcontext() as context:
+            context.prec=2;context.Emax=2;context.Emin=-2
+            context.traps[Inexact]=context.traps[Rounded]=True
+            value=read(original);body=value.body()
+>           assert value.net_equity.decimal==point.net_equity
+E           assert Decimal('9007199254740993.01') == Decimal('9007199254740993.0100000001')
+E            +  where Decimal('9007199254740993.01') = Money(minor_units=900719925474099301, scale=2, currency='EUR', asset_ref='709ed669a75479dd23b7fcb23c859da3dee94dde2deb4767af05ae368e74de8e').decimal
+E            +    where Money(minor_units=900719925474099301, scale=2, currency='EUR', asset_ref='709ed669a75479dd23b7fcb23c859da3dee94dde2deb4767af05ae368e74de8e') = ValuationSnapshot(_body_json=b'{"availability_basis":"LOCAL_CAPTURE_CLOCK_NOT_NATIVE_CLOCK_QUALIFICATION","available_a...0ca4efeef72c29d340234e9ba53014c47a8a1","value_basis":"BALANCE_PLUS_NATIVE_NET_UNREALIZED_EXCLUDING_SEPARATE_BONUSES"}').net_equity
+E            +  and   Decimal('9007199254740993.0100000001') = NativeAccountMark(provider='CTRADER', environment='DEMO', account_alias='ctrader_primary', native_account_id=12345, de...nce_version=1, manager_bonus=Decimal('3.01'), ib_bonus=None, nonwithdrawable_bonus=Decimal('5'), registered_at_ms=None).net_equity
+
+trading/tests/test_native_valuation.py:43: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_native_valuation.py::test_original_exact_native_value_and_optional_credit_keep_distinct_bases[sqlite]
+1 failed, 1 deselected in 5.01s

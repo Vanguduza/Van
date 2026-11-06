@@ -1,0 +1,66 @@
+{
+  "assertions": [
+    "Hardware-bound signed owner request and current same-device ACTIVE logical session",
+    "Strict normalized scope and bounded owner-authored fields; machine tokens and forged evidence/confidence refused",
+    "Persisted separate readback with generated declaration provenance and unchanged execution grants",
+    "Preserved inferred complement hypotheses and stable existing upsert ID",
+    "Exact vocabulary read scope, shared resolver normalization, and owner memory deletion/witness cleanup"
+  ],
+  "date": "2026-10-07",
+  "elapsed_seconds": 39.27,
+  "failed": 0,
+  "files": [
+    {
+      "bytes": 28606,
+      "path": "backend/van_gateway/understanding/api.py",
+      "sha256": "a5382177adda95107ba0598055b28dfe901b1f2e0103ffdcd4ad1c72ccfb543e"
+    },
+    {
+      "bytes": 12307,
+      "path": "backend/van_gateway/understanding/owner_preferences.py",
+      "sha256": "795252eff1e2b41b87e627b4597139d5352168ec5206787b5f7f65c8953e4d83"
+    },
+    {
+      "bytes": 29552,
+      "path": "backend/van_gateway/understanding/memory.py",
+      "sha256": "6f3ec79001f8cde7bf6d44e1fef48746821c45e94d104062995f4b8ee5e37021"
+    },
+    {
+      "bytes": 7609,
+      "path": "backend/van_gateway/context/forget.py",
+      "sha256": "2d87e6e39afe1335d5e7e3c2b37d97d7ba43ff960c7c18646558cf13d6c3940b"
+    },
+    {
+      "bytes": 10801,
+      "path": "backend/van_gateway/context/memory_erasure.py",
+      "sha256": "b91a359559896c569a2f0cad333eda73a445e10f09650eb80688ffb80e341977"
+    },
+    {
+      "bytes": 15295,
+      "path": "backend/tests/test_owner_declaration_writers.py",
+      "sha256": "368ddbeafcc71de4a005a0b19075835d9d6a6e256f1c147c2ab096663139c26c"
+    },
+    {
+      "bytes": 5634,
+      "path": "docs/OWNER_UNDERSTANDING_CONTROLS.md",
+      "sha256": "010a135bede7c9ec0b3b2ab59d4becb682be33aff0bce851a64e56cde70446c8"
+    }
+  ],
+  "limits": [
+    "Confidence/provenance covers the exact owner declaration, not provider correctness or psychological inference",
+    "This writer/read contract does not independently prove future assistant response compliance",
+    "Final parent integration report supersedes this scoped receipt"
+  ],
+  "log": "/workspace/van-audit/owner-declaration-wiring-2026-10-07.log",
+  "log_sha256": "52f67452495a3705a56450123e022b0e868cada37777dc0cd4ccfc2ed152c717",
+  "passed": 99,
+  "schema_version": 1,
+  "scope": "Source and local owner ingress integration; no live handset or provider acceptance",
+  "selection": [
+    "backend/tests/test_owner_declaration_writers.py",
+    "backend/tests/test_epistemics_context_understanding.py",
+    "backend/tests/test_owner_memory_erasure.py",
+    "backend/tests/test_context_lifecycle_governance.py",
+    "backend/tests/test_relationship_calibration.py"
+  ]
+}

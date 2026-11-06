@@ -1,0 +1,203 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:van:forecast:prediction-market:PredictionMarketContract:1.0",
+  "title": "PredictionMarketContract",
+  "description": "Proposed VAN contract. JSON shape/local arithmetic is not evidence admission, source permission or financial authority.",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "record_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "environment": {
+      "enum": [
+        "FIXTURE",
+        "RESEARCH",
+        "SHADOW"
+      ]
+    },
+    "authority_effect": {
+      "const": "NONE"
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0
+    },
+    "source_digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "provider": {
+      "enum": [
+        "KALSHI",
+        "POLYMARKET",
+        "FIXTURE_PROVIDER"
+      ]
+    },
+    "market_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "canonical_event_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "event_family": {
+      "type": "string",
+      "minLength": 1
+    },
+    "proposition": {
+      "type": "string",
+      "minLength": 1
+    },
+    "units": {
+      "type": "string",
+      "minLength": 1
+    },
+    "comparator": {
+      "enum": [
+        "GT",
+        "GTE",
+        "LT",
+        "LTE",
+        "RANGE",
+        "CATEGORICAL",
+        "BINARY"
+      ]
+    },
+    "lower_bound": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^-?[0-9]+(?:\\.[0-9]+)?$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "upper_bound": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^-?[0-9]+(?:\\.[0-9]+)?$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "observation_start": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "observation_end": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "timezone": {
+      "type": "string",
+      "minLength": 1
+    },
+    "official_source": {
+      "type": "string",
+      "minLength": 1
+    },
+    "official_vintage_rule": {
+      "type": "string",
+      "minLength": 1
+    },
+    "rounding_rule": {
+      "type": "string",
+      "minLength": 1
+    },
+    "resolution_rules_digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "trade_close_rule": {
+      "type": "string",
+      "minLength": 1
+    },
+    "resolution_policy": {
+      "type": "string",
+      "minLength": 1
+    },
+    "void_policy": {
+      "type": "string",
+      "minLength": 1
+    },
+    "dispute_policy": {
+      "type": "string",
+      "minLength": 1
+    },
+    "payout_currency": {
+      "type": "string",
+      "minLength": 1
+    },
+    "success_payout_per_contract": {
+      "type": "string",
+      "pattern": "^-?[0-9]+(?:\\.[0-9]+)?$"
+    },
+    "equivalence_state": {
+      "enum": [
+        "UNREVIEWED",
+        "EXACT_REVIEWED",
+        "COMPLEMENT_REVIEWED",
+        "OVERLAPS",
+        "NOT_EQUIVALENT"
+      ]
+    },
+    "review_ref": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "schema_version",
+    "record_id",
+    "environment",
+    "authority_effect",
+    "evidence_refs",
+    "source_digest",
+    "provider",
+    "market_id",
+    "canonical_event_id",
+    "event_family",
+    "proposition",
+    "units",
+    "comparator",
+    "lower_bound",
+    "upper_bound",
+    "observation_start",
+    "observation_end",
+    "timezone",
+    "official_source",
+    "official_vintage_rule",
+    "rounding_rule",
+    "resolution_rules_digest",
+    "trade_close_rule",
+    "resolution_policy",
+    "void_policy",
+    "dispute_policy",
+    "payout_currency",
+    "success_payout_per_contract",
+    "equivalence_state",
+    "review_ref"
+  ],
+  "additionalProperties": false
+}

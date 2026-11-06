@@ -1,4 +1,7 @@
 # VAN Visual Production System — Rev 2.1 Master Technical Blueprint
+
+> **SUPERSEDED — provenance only. Do not implement from this document.** Visual implementation authority is `docs/VAN_PRODUCTION_VISUAL_FLOATING_UX_OWNER_ADMIN_REV_3_0.md` with `docs/VAN_CHARACTER_VISUAL_IDENTITY.md`; the aura is governed by owner decisions CF-D-06, CF-D-06-REV1 and CF-D-08 (`docs/character_forge/MANIFEST.yaml`) and `visual-authority/character-forge/aura/AURA_RUNTIME_CONTRACT.yaml` (flame envelope; no strands, branches, specks or orb link line). Identity is Candidate B (CF-D-05-REV2_1).
+
 **Product:** VAN — DIAL Owner Operator  
 **Document type:** Canonical consolidated visual-production and implementation blueprint  
 **Revision:** 2.1  

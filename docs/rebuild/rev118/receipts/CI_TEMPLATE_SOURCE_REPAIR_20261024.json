@@ -1,0 +1,41 @@
+{
+  "schema": "van.rebuild.ci-template-source-repair/1",
+  "source_parent": "edaebda2fc47aebb02cf2286a88f60b2068024aa",
+  "cause": "Fresh browser job was added to live workflow without its byte-identical installation template; original contract correctly failed a hosted mutation control.",
+  "hosted_nonpass": {
+    "run_id": 40087510048,
+    "family": "python",
+    "shard": "3/4",
+    "report_sha256": "bc1e6219b9404d83aac1abbcb29bf0dd8da60b7859a07ce73d2b8d31d372de45",
+    "caught_before_failed_control": 51,
+    "not_executed_after_control_failure": "C12 workflow/APK group,6 cases. No whole374-corpus pass claimed for this run."
+  },
+  "corrected_source": {
+    "template_sha256": "107537144e5b3b3b4d9d6e2a9ebf4cc44135621391076f19a3f209e4c8482a8f",
+    "live_sha256": "107537144e5b3b3b4d9d6e2a9ebf4cc44135621391076f19a3f209e4c8482a8f",
+    "byte_identical": true,
+    "all_original_jobs_and_oracles_preserved": true
+  },
+  "executions": {
+    "template_apk_dds_contracts": {
+      "tests": 17,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "complete_python_shard_3_of_4": {
+      "caught": 57,
+      "survived": 0,
+      "groups": 8,
+      "log_sha256": "14c8fc346a53bff4388bc940ec90ec47892082a87f11188dfcdae8dffc254834",
+      "source_restored_to_only_intended_template_diff": true
+    }
+  },
+  "retained_local_invocation_error": {
+    "log_sha256": "0528969c08090d435f2ccd64187c5108308d1e61c1e0fe8c54889b12d1c20435",
+    "exit_code": 4,
+    "meaning": "First attempt used repository cwd rather than backend; baseline collected zero tests, so no mutations were executed. Correct final run used isolated backend cwd."
+  },
+  "authorization": "Existing reusable auth-20261021-owner-rev118-ci-workflow-template covers exactly the mirror; no new or broadened authority.",
+  "qualification": "Source repair only; hosted whole-corpus rerun still required on the resulting head. Existing mandatory private DDS/main/release gates remain."
+}

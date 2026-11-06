@@ -1,0 +1,17 @@
+{
+  "scope": "REVIEW_HINTS_ONLY_NOT_APPLIED",
+  "blocking_guard": "OWNER_FINAL.log",
+  "first_blocker": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1492 in b02075f327ea8180ab6d269eba358cf8c5479878",
+  "old_anchor": "    suspend fun revokePermission(grantId: String): JSONObject = withContext(Dispatchers.IO) {",
+  "new_anchor": "    suspend fun revokePermission(grantId: String, reviewed: JSONObject, reviewedProfile: String): JSONObject = withContext(Dispatchers.IO) {",
+  "other_reviewed_changes": "Old unkeyed POST anchor is now the exact persisted-body submit callback; PermissionsRoute old one-arg call now passes reviewed snapshot+profile. Do not blindly relax citation assertions.",
+  "existing_mapping": {
+    "feature": "OF-AUTHORITY-001",
+    "screens": [
+      "van.permissions",
+      "van.permissions.grant"
+    ],
+    "action": "LAC-210",
+    "additional_original_result_endpoint": "GET /v1/permissions/{grant_id}/revocations/{operation_id}"
+  }
+}

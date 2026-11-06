@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.telemetry.SessionTelemetryTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-08T06:47:29" hostname="052fefa249ff" time="0.002">
+  <properties/>
+  <testcase name="the outbox depth carries its label in the dimension field not the surface()" classname="com.dial.van.telemetry.SessionTelemetryTest" time="0.001"/>
+  <testcase name="a negative duration is dropped rather than observed()" classname="com.dial.van.telemetry.SessionTelemetryTest" time="0.0"/>
+  <testcase name="a class nobody has ever reported is not invented()" classname="com.dial.van.telemetry.SessionTelemetryTest" time="0.0"/>
+  <testcase name="two failovers in one flush are two observations()" classname="com.dial.van.telemetry.SessionTelemetryTest" time="0.0"/>
+  <testcase name="a failover duration is reported once and not again()" classname="com.dial.van.telemetry.SessionTelemetryTest" time="0.0"/>
+  <testcase name="the depth is re-posted on every flush so the gauge does not go stale()" classname="com.dial.van.telemetry.SessionTelemetryTest" time="0.001"/>
+  <testcase name="a class that empties is posted as a zero rather than left behind()" classname="com.dial.van.telemetry.SessionTelemetryTest" time="0.0"/>
+  <testcase name="nothing is posted before an outbox has ever been seen()" classname="com.dial.van.telemetry.SessionTelemetryTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

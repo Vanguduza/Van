@@ -1,0 +1,190 @@
+{
+  "schema": "van.rebuild.hosted-source/1",
+  "run_id": 39891050108,
+  "source_head": "a4a91e8e56120db6bd8433a1512f5d9963d5377e",
+  "tested_merge": "790db5e6a33d3f6016c3c7c19c3c8324a7a6a4d0",
+  "identical_source_tree": "5ed16bf182c2596cda38e64b5ec15164653f96bb",
+  "jobs": [
+    {
+      "id": 120217702285,
+      "name": "mutation (kotlin-2, kotlin, 2/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120217702327,
+      "name": "mutation (python-0, python, 0/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120217702619,
+      "name": "android-and-visual-evidence",
+      "conclusion": "success"
+    },
+    {
+      "id": 120217703063,
+      "name": "character-forge-gate",
+      "conclusion": "success"
+    },
+    {
+      "id": 120217703184,
+      "name": "mutation (kotlin-0, kotlin, 0/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120217703282,
+      "name": "mutation (browser-agent, browser-agent, 0/1)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120217703328,
+      "name": "postgres-ledger",
+      "conclusion": "success"
+    },
+    {
+      "id": 120217703356,
+      "name": "mutation (kotlin-3, kotlin, 3/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120217703359,
+      "name": "backend",
+      "conclusion": "failure"
+    },
+    {
+      "id": 120217734549,
+      "name": "project-truth-ledger",
+      "conclusion": "failure"
+    },
+    {
+      "id": 120217735264,
+      "name": "rebuild-documentary",
+      "conclusion": "success"
+    },
+    {
+      "id": 120217736161,
+      "name": "android-instrumentation",
+      "conclusion": "success"
+    },
+    {
+      "id": 120217736743,
+      "name": "mutation (python-2, python, 2/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120217739682,
+      "name": "mutation (python-3, python, 3/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120217748121,
+      "name": "mutation (kotlin-1, kotlin, 1/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120217748125,
+      "name": "mutation (python-1, python, 1/4)",
+      "conclusion": "success"
+    }
+  ],
+  "public_source": {
+    "voice-source-report.xml": {
+      "tests": 117,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "30c2214afa03367c6bd7706ba87cf66d0b1b39905032ba8b185d6ce7e2a3a6a9"
+    },
+    "trading-source-report.xml": {
+      "tests": 2163,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "sha256": "4e1562c9f4baf16ebc35a6975190aaab723da1c5c3a2904cd5c2952c124329b1"
+    },
+    "postgres-ledger-report.xml": {
+      "tests": 26,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "669388b113e30eed79c3bfbfdd50290de2f88664c3b591a442d42f3d336987a5"
+    }
+  },
+  "legacy_mutations": {
+    "caught": 374,
+    "survived": 0,
+    "receipt": "ci/MUTATION_CORPUS_a4a91e8e.json"
+  },
+  "instrumentation": {
+    "collected": 22,
+    "passed": 18,
+    "failed": 0,
+    "skipped": 4,
+    "skips": "existing core-artwork mode",
+    "voice_methods": {
+      "cancellationBeforeNativeStartCannotCompleteOrDamageTheReplacementAnswer": "PASS 2.709s",
+      "realOfflineAnswerReachesTheApplicationQueueAsSpoken": "PASS 1.874s"
+    },
+    "index_sha256": "d0b926e0727518dbee6dab0cec733aafc2c80bfbf92c831b13998aa0821277d5",
+    "voice_report_sha256": "6b7b339e6740f685d0084afa63d8239021f36e28ca27070a276513a34ee596fb",
+    "diagnostics_sha256": "f531ce52f574e7a8c66b2058e74d3799a66e7b31ae5b73beaf1284d5c9231a02"
+  },
+  "retained_failures": {
+    "backend": "Require the DDS contract read key: DDS_CONTRACT_READ_DEPLOY_KEY is not provisioned",
+    "project-truth-ledger": "trusted/tools/ci/project_truth_ledger.py is absent from the current main bootstrap",
+    "logs": {
+      "backend-job.log": "583cad8e7bdd031db3ed28f5038a375886feb9e5cfbd8f0cd695283a7226e83c",
+      "project-truth-ledger-job.log": "9be95b15768d46a19b9dce4ffb9769f923d56c6b08f92adcd6f881066c0163f1"
+    }
+  },
+  "qualification": "Actual hosted source/emulator evidence only. No S24, production, provider, whole-unit or owner acceptance. Original gates retained.",
+  "initial_attempt_dependency_failure": {
+    "schema": "van.rebuild.hosted-source-attempt/1",
+    "run_id": 39891050108,
+    "source_head": "a4a91e8e56120db6bd8433a1512f5d9963d5377e",
+    "attempt": 1,
+    "caught_available": 345,
+    "missing_cases": [
+      "C40 nothing is ever taken out of flight, so a resume resends everything",
+      "C38 a command good for sixty seconds is saved for four hours and denied later",
+      "C37 an A4 that will never be sent is described as queued",
+      "C36 a delivered command is never forgotten, and is re-sent after every restart",
+      "C36 the phone asks by one identity and the Gateway answers about another",
+      "C35 the queue's day-long default silently replaces the outbox's four-hour window",
+      "C35 a phone whose battery cannot be read holds a spare socket open",
+      "C34 a release build is pointed at a plain-http gateway",
+      "C34 an enrolment is authorised with nothing to attest it against",
+      "C33 one failover is observed again at every flush for the life of the app",
+      "C33 a phone at 5 percent holds a second socket open",
+      "C33 an A4 is stored and executes an hour later because connectivity returned",
+      "C32 the keyboard and the navigation bar are subtracted twice",
+      "C32 a tap is transformed across an unacknowledged reflow",
+      "C32 a search with a host in it is navigated to",
+      "C32 the page the owner is about to open is sent to a provider",
+      "C32 a home-screen tile opens on a phone that is not the owner's",
+      "C32 an external link carries a second scheme into the page",
+      "C32 an ephemeral copy never expires",
+      "C32 a session the Gateway ended is resumed anyway",
+      "C31 drop counts are posted cumulatively, so every flush re-counts them",
+      "C31 the decoder's whole history lands in the first flush",
+      "C14 thermal critical reads as fine",
+      "C14 reduced motion ranked as rich, so pressure clamps it into a moving budget",
+      "C14 a stretched backoff exceeds the ceiling",
+      "C30 the device asks to resume past audio it never played",
+      "C30 an unrecognised request is assumed to be answerable on the phone",
+      "C30 VAN ducks a phone call to read out a search result",
+      "C30 an answer from hours ago speaks the moment the owner opens VAN"
+    ],
+    "new_failure": "Kotlin2control dependency fetch org.jetbrains.kotlin kotlin-gradle-plugins-bom2.0.21 MavenHTTP403; no mutation report produced",
+    "log_sha256": "bae21e7e48531da6d1e570d91c588a4da4d3184e6174969e564902dc559033c6",
+    "retry_job_id": 120210638128,
+    "retry_request_http_status": 201,
+    "not_a_complete_corpus": true
+  },
+  "retried_job": {
+    "id": 120217702285,
+    "name": "mutation (kotlin-2, kotlin, 2/4)",
+    "conclusion": "success",
+    "run_attempt": 2,
+    "scope": "Same exact source and merge tree; prior345cases+retried29cases; full374 distinct identities now actually present"
+  }
+}

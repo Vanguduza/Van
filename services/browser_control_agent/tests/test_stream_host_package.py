@@ -17,16 +17,21 @@ that the agent rejects a foreign certificate — is a fact about a host and is R
 from __future__ import annotations
 
 import re
+import json
+import os
+import subprocess
+import textwrap
 from pathlib import Path
 
 import pytest
 
 from services.browser_control_agent.cdp import CdpUnavailable, LoopbackCdp
-from services.browser_control_agent.server import BindRefused, require_private_bind
+from services.browser_control_agent.server import BindRefused, main, require_private_bind
 
 ROOT = Path(__file__).resolve().parents[3]
 PACKAGE = ROOT / "deploy" / "van-browser-stream"
 CHROMIUM_UNIT = PACKAGE / "systemd" / "van-browser-chromium.service"
+EGRESS_UNIT = PACKAGE / "systemd" / "van-browser-egress-proxy.service"
 AGENT_UNIT = PACKAGE / "systemd" / "van-browser-control-agent.service"
 QUALIFY = PACKAGE / "qualify.sh"
 BOOTSTRAP = PACKAGE / "bootstrap.sh"
@@ -45,6 +50,31 @@ class TestTheDebuggerIsFenced:
         unit = CHROMIUM_UNIT.read_text()
         for wrong in ("--remote-debugging-address=0.0.0.0", "--remote-debugging-address=::"):
             assert wrong not in unit
+
+    def test_chromium_is_forced_through_the_exact_ip_proxy(self):
+        unit = CHROMIUM_UNIT.read_text()
+        assert "--proxy-server=http://127.0.0.1:${VAN_BROWSER_EGRESS_PORT}" in unit
+        assert "--proxy-bypass-list=<-loopback>" in unit
+        assert "--disable-quic" in unit
+        assert "--force-webrtc-ip-handling-policy=disable_non_proxied_udp" in unit
+        dependencies = {
+            dependency
+            for directive in re.findall(r"^Requires=(.*)$", unit, re.MULTILINE)
+            for dependency in directive.split()
+        }
+        assert {
+            "van-browser-profiles.mount",
+            "van-browser-transfer-stage.service",
+            "van-browser-egress-proxy.service",
+        } <= dependencies
+        assert "BindsTo=van-browser-egress-proxy.service" in unit
+
+    def test_egress_proxy_is_loopback_only_and_has_no_profile_access(self):
+        unit = EGRESS_UNIT.read_text()
+        assert "User=van-egress" in unit
+        assert "--host 127.0.0.1" in unit
+        assert "InaccessiblePaths=-/var/lib/van-browser-profiles" in unit
+        assert "NoNewPrivileges=true" in unit
 
     def test_the_browser_user_is_not_root_and_has_no_docker(self):
         unit = CHROMIUM_UNIT.read_text()
@@ -139,17 +169,73 @@ class TestQualifyIsHonest:
         """Otherwise the "not public" check passes on a host where nothing is running,
         which is the easiest way to get a green report for a broken machine."""
         assert 'record "cdp_on_loopback"' in QUALIFY.read_text()
+        assert 'record "egress_on_loopback"' in QUALIFY.read_text()
+        assert 'record "egress_not_public"' in QUALIFY.read_text()
+        assert 'record "egress_refuses_private"' in QUALIFY.read_text()
+        assert 'record "chromium_uses_exact_ip_proxy"' in QUALIFY.read_text()
 
-    def test_every_recorded_check_can_fail(self):
+    def test_every_recorded_check_can_fail(self, tmp_path):
         """A check with no RED branch is a decoration."""
         script = QUALIFY.read_text()
         names = set(re.findall(r'record "(\w+)"', script))
         assert names, "qualify.sh records nothing"
         for name in names:
             statuses = set(re.findall(rf'record "{name}" "(\w+)"', script))
-            assert "RED" in statuses or "UNKNOWN" in statuses, (
-                f"{name} can only ever report GREEN"
-            )
+            if "RED" in statuses or "UNKNOWN" in statuses:
+                continue
+            # A helper-derived status needs executed failure paths, not a name
+            # exemption or a decorative literal UNKNOWN in the source.
+            blocks = list(re.finditer(
+                r'(?m)^observed=\$\(python3 "\$CHROMIUM_PROBE" --check kernel [^\n]* \|\| true\)\n'
+                r'status=[^\n]*\n'
+                r'detail=[^\n]*\n'
+                rf'record "{name}" "\$\{{status:-UNKNOWN\}}" [^\n]*$', script))
+            assert len(blocks) == 1, f"{name} has no tested failure-producing branch"
+            self._assert_kernel_helper_failure_paths(script, blocks[0].group(), name, tmp_path)
+
+    def _assert_kernel_helper_failure_paths(self, script, block, name, tmp_path):
+        record = re.search(r'(?ms)^record\(\) \{.*?^\}', script)
+        assert record, "the actual qualification record implementation is missing"
+        probe = tmp_path / "kernel_failure_probe.py"
+        probe.write_text(textwrap.dedent("""\
+            import importlib.util
+            import json
+            import os
+
+            spec = importlib.util.spec_from_file_location("actual_qualifier", os.environ["VAN_TEST_QUALIFY_HELPER"])
+            helper = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(helper)
+            # Controlled observation inputs exercise the real helper without
+            # reading or changing a host firewall. They grant no live acceptance.
+            declaration = {"instances": [{
+                "instance": instance,
+                "users": ["van-browser-" + instance, "van-control-" + instance, "van-stream-" + instance],
+                "egress_user": "van-egress-" + instance,
+                "cdp_port": 9222 + index, "egress_port": 8899 + index,
+            } for index, instance in enumerate(("public", "owner"))]}
+            identities = {user: 2000 + index for index, user in enumerate(
+                user for entry in declaration["instances"] for user in entry["users"] + [entry["egress_user"]])}
+            mode = os.environ["VAN_TEST_QUALIFY_FAILURE"]
+            observation = None if mode == "missing_observation" else {}
+            if mode == "conflicting_uid_declaration":
+                identities["van-egress-owner"] = identities["van-browser-public"]
+                observation = {"nftables": []}
+            result = helper.firewall_status(observation, declaration, identities)
+            print(json.dumps(result))
+            raise SystemExit(0 if result["status"] == "GREEN" else 1)
+            """))
+        harness = '\n'.join((
+            "set -uo pipefail", "results=()", "overall=0", record.group(), block,
+            'printf \'{"checks":[%s]}\\n\' "$(IFS=,; echo "${results[*]}")"', 'exit "$overall"',
+        ))
+        for mode, expected in (("missing_observation", "UNKNOWN"), ("malformed_observation", "UNKNOWN"),
+                               ("conflicting_uid_declaration", "RED")):
+            result = subprocess.run(["bash", "-c", harness], capture_output=True, text=True, timeout=5,
+                env={**os.environ, "CHROMIUM_PROBE": str(probe), "INSTANCE": "public", "EGRESS_PORT": "8899",
+                    "VAN_TEST_QUALIFY_HELPER": str(PACKAGE / "qualify_chromium.py"), "VAN_TEST_QUALIFY_FAILURE": mode})
+            assert result.returncode == 1, (name, mode, result.stdout, result.stderr)
+            checks = json.loads(result.stdout)["checks"]
+            assert len(checks) == 1 and checks[0]["check"] == name and checks[0]["status"] == expected, checks
 
     def test_the_exit_code_is_the_verdict(self):
         assert 'exit "$overall"' in QUALIFY.read_text()
@@ -189,15 +275,44 @@ class TestBootstrapRefusesRatherThanGuesses:
 
 class TestThePackageDoesNotOverstate:
 
+    def test_unbound_server_is_a_failed_startup_without_opening_a_listener(self, monkeypatch, capsys):
+        monkeypatch.setenv("VAN_BROWSER_CONTROL_BIND", "10.0.1.240")
+        monkeypatch.setattr('asyncio.start_server', lambda *args, **kwargs: pytest.fail('unbound server opened a listener'))
+        assert main() == 2
+        report = json.loads(capsys.readouterr().out)
+        assert report["error"] in {"RUNTIME_NOT_INSTALLED", "RUNTIME_NOT_CONFIGURED"}
+        assert report["ready"] is False
+
+    def test_bootstrap_stops_before_installation_when_runtime_is_absent(self):
+        environment = {
+            **os.environ,
+            "VAN_BROWSER_CONTROL_BIND": "10.0.1.240",
+            "VAN_BROWSER_PROFILE_DEVICE": "/dev/unused-profile-device",
+            "VAN_BROWSER_STREAM_TLS_CERT": "/unused/tls.crt",
+            "VAN_BROWSER_STREAM_TLS_KEY": "/unused/tls.key",
+            "VAN_BROWSER_BROKER_ORIGIN": "https://10.0.1.2:8443",
+            "VAN_BROWSER_BROKER_CA": "/unused/broker-ca.crt",
+            "VAN_BROWSER_CONTROL_BROKER_TOKEN_FILE": "/unused/control.token",
+            "VAN_BROWSER_STREAM_BROKER_TOKEN_FILE": "/unused/stream.token",
+            "VAN_BROWSER_GRANT_PUBLIC_KEY": "/unused/grant.pem",
+        }
+        result = subprocess.run(["bash", str(BOOTSTRAP), "--dry-run"], env=environment, text=True, capture_output=True, timeout=10)
+        assert result.returncode == 2
+        assert "RUNTIME_NOT_INSTALLED" in result.stdout + result.stderr
+        assert "== users ==" not in result.stdout
+        assert "would:" not in result.stdout
+        assert "installed." not in result.stdout
+
     def test_the_readme_says_nothing_here_has_been_run(self):
         readme = (PACKAGE / "README.md").read_text()
-        assert "Nothing in this directory has ever been run" in readme
+        assert "No live host or physical Android device has been qualified" in readme
 
     def test_the_server_entry_point_does_not_pretend_to_serve(self):
         """A process that binds a socket to prove it can is the "integrated because it
         starts" claim §42.5 forbids."""
         server = (ROOT / "services" / "browser_control_agent" / "server.py").read_text()
-        assert "no HTTP server is wired in this repository" in server
+        assert "--check-runtime" in server
+        assert "asyncio.start_server" in server
 
     def test_the_cdp_client_says_it_cannot_send(self):
         cdp = LoopbackCdp("ws://127.0.0.1:9222/x")

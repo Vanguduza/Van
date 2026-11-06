@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.433" timestamp="2026-10-25T23:28:25.089350+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_news_causal_boundaries" name="test_replaying_the_same_observation_cannot_move_its_original_ingress_clock_backwards" time="0.147"><failure message="AssertionError: assert ('publisher',) == ()&#10;  &#10;  Left contains one more item: 'publisher'&#10;  Use -v to get more diff">def test_replaying_the_same_observation_cannot_move_its_original_ingress_clock_backwards():
+        news=NewsIngress();h=story();news.ingest(h,now_ms=NOW+1000)
+        news.ingest(h,now_ms=NOW)
+&gt;       assert news.relayed_by(h.headline_id,as_of_ms=NOW)==()
+E       AssertionError: assert ('publisher',) == ()
+E         
+E         Left contains one more item: 'publisher'
+E         Use -v to get more diff
+
+trading/tests/test_news_causal_boundaries.py:99: AssertionError</failure></testcase></testsuite></testsuites>

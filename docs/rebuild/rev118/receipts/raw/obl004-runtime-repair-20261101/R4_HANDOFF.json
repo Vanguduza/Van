@@ -1,0 +1,48 @@
+{
+  "state": "FROZEN_R4_FOR_INDEPENDENT_RECHECK",
+  "base": "4084a0bd04fd507889fe61b426c8f96bea29c054",
+  "source_pins": {
+    ".github/workflows/van-ci.yml": "3ab3df781f9bb1444bd853f1b5035fb3a57db51a422aed9c7708738b7ac5d407",
+    "tools/ci/github-actions-ci.yml": "3ab3df781f9bb1444bd853f1b5035fb3a57db51a422aed9c7708738b7ac5d407",
+    "tests/rebuild/test_canonical_source_audit.py": "cad9b6f6f69cfda849ed4fbef4b2e2b2919ce28360c1a8b01fb524a3c71eda35",
+    "tools/rebuild/canonical_source_audit.py": "7f977e794725fd529736f822ba183a3e2d2348c57826fcaf1e588bc9f1dd056c"
+  },
+  "archive_sha256": "ad8d173a245230ace2109deb6733de0c1c515b6b6e4e6459c7e6acaf11ab76ec",
+  "patch_sha256": "8060182a443bdfeed13679a8544da6ab1ec624f02fb3d4836bd1a61e5d853207",
+  "r4_delta_sha256": "530fe827d9ef5570bf2c37640846258d3953262b39d2fb3bcb187b19a383ecc6",
+  "R3_source_pins": {
+    ".github/workflows/van-ci.yml": "3ab3df781f9bb1444bd853f1b5035fb3a57db51a422aed9c7708738b7ac5d407",
+    "tools/ci/github-actions-ci.yml": "3ab3df781f9bb1444bd853f1b5035fb3a57db51a422aed9c7708738b7ac5d407",
+    "tests/rebuild/test_canonical_source_audit.py": "f2c5746079dea90d45e7871e23a3dc920991e810e1d7d51feea3a70d26820115",
+    "tools/rebuild/canonical_source_audit.py": "4cd1d3167bc2a1606e495c89e6e3b5ecf2209fe09afdd86ffd9c8b11895ebac6"
+  },
+  "R3_blocked_review": "/workspace/van-obl004-runtime-setup-independent-recheck-r3-20261101/review.json",
+  "repair": "Archived validator binds recorded tempUID to exact joined original producer environmentUID after unchanged profile validation; readerUID is not producerUID. Live creation/session/cleanup still requires processUID and actual lstatUID/device/inode0700/marker. Malformed owner identifiers refuse. Root-only profiles still require producer0; no root-read workaround.",
+  "positive_scope": "Actual current UID1000 production verify_profile readback on modeled producerUID0 and1000 records, then modeled inverse reader UID. This is SOURCE receipt validation, not actual root-profile execution. Exact actual source/phase/JUnit pipeline remains validated.",
+  "checks": {
+    "final": "checks-final/CHECKS_TERMINAL.json actual95pass0skip/exit0/audit0/current4pins before=after; controller54405 terminal0/reaped and own runner basetemp cleaned with inventory.",
+    "negative": "Malformed/mismatched producerUID, tempUID, wrong root-profile UID, live foreign UID and joined producer-environment drift refuse; R3 command/temp/actualdir/cleanup/path/source/phase tamper controls retained.",
+    "initial_failure": "checks/CHECKS_TERMINAL.json actual94pass1fixture-inputfail: new modeled-root test inherited main PYTHONPATH rather than fixture checkout. Fixed only explicit fixture PYTHONPATH; initial raw/XML/pins retained. Failed owned fixtures retained, not silently deleted.",
+    "reuse_mapping": "R2 workflow+AGP closure exact, R3 lifecycle/socket/keymarker assertions retained and included in current95 controls. Prior R3 actual85 and separate11 remain historical separate runs, not new native evidence."
+  },
+  "preservation": "Whole4path packet only; workflows byte-identical R2/R3. All original12jobs/topfields/permissions/gates/nativeprereqs/mirror, originalAGP6.0.2 and additive6.0.3 remain. Sourceproduct/account/Store/testassertions unchanged.",
+  "native": "Original4084 failed setup/pytest-/AF_UNIX and expected DDS BLOCKED retained; fullmatrix FAILED/unqualified/all10cells open; PR106open/ready/unmerged/proposalauthunused/protectedevidenceunchanged. No CI/artifact polling.",
+  "watch": {
+    "session": 93403,
+    "run": 41334969955,
+    "exit": 1,
+    "completed": "2026-11-01T18:40:24.375577+00:00",
+    "reconcile": "One write_stdin returned completed original controller JSON; wrapperexit0 with watch exit1. Successfully reaped; no restart/signal/duplicatewatch.",
+    "receipt": "/workspace/van-obl004-matrix-watch-20261101.json"
+  },
+  "next": "Independent R4 exactUID recheck before genuine publication; no commit/push in author lane.",
+  "resources": {
+    "workspace_free": 38330368,
+    "tmp_free": 4344541184,
+    "floors": {
+      "workspace": 33554432,
+      "tmp": 4294967296
+    }
+  },
+  "at_utc": "2026-11-01T19:02:33.884773+00:00"
+}

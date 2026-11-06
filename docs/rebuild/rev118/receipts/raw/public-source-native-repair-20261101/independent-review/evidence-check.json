@@ -1,0 +1,23 @@
+{
+  "original_real_case": {
+    "cases": 1,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0
+  },
+  "fixed_real_permission_module": {
+    "cases": 18,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0
+  },
+  "actual_saved_module_cache_payloads_reverified_without_execution": 11,
+  "final_guard_junit": {
+    "cases": 89,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0
+  },
+  "three_path_only_delta_and_unchanged_workflow_mirror_dependencies_application_assertion": true,
+  "current_source_archive_patch_exact_after": true
+}

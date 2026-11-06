@@ -1,0 +1,25 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+___ test_deadline_expiring_during_history_parse_prevents_archive_publication ___
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-418/test_deadline_expiring_during_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f0e7dbd54c0>
+
+    def test_deadline_expiring_during_history_parse_prevents_archive_publication(tmp_path,monkeypatch):
+        from vati.execution.ctrader import feed
+        expected=identity(wire=True);peer=HistoryPeer();parent=make_adapter(peer);parent.clock=lambda:NOW
+        book=NativeMarketArchive(tmp_path/'native',clock=lambda:NOW+1000);read=feed.read_trendbars
+        def expire(source,*args,**kwargs):
+            result=read(source,*args,**kwargs)
+            source.transport._operation_deadline=0.0
+            return result
+        monkeypatch.setattr(feed,'read_trendbars',expire)
+        try:
+>           with pytest.raises(CtraderError):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE CtraderError
+
+trading/tests/test_native_read_identity.py:225: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_native_read_identity.py::test_deadline_expiring_during_history_parse_prevents_archive_publication
+1 failed in 0.74s

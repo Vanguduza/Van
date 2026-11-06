@@ -2,11 +2,16 @@ from __future__ import annotations
 
 from typing import Any
 
+import httpx
 from pydantic import ValidationError
 
 from van_gateway.action.models import ExecutionStatus, VerificationObservation
 from van_gateway.action.service import ActionPolicyError, ActionRuntime
-from van_gateway.browser.adapters import HttpBrowserHarnessAdapter, StagehandAdapter
+from van_gateway.browser.adapters import (
+    HttpBrowserHarnessAdapter,
+    StagehandAdapter,
+    harness_fence_key_from_settings,
+)
 from van_gateway.browser.policy import BrowserPolicyEngine
 from van_gateway.browser.service import BrowserTaskService
 from van_gateway.automation.external_runtime import ExternalRuntimeRegistry
@@ -89,7 +94,11 @@ class KnowledgeRuntime:
             enabled=settings.browser_enabled,
             expected_version=settings.browser_harness_expected_version or None,
             timeout_seconds=settings.notebook_consumer_timeout_seconds,
+            fence_key=harness_fence_key_from_settings(settings),
         )
+        # Unit G11 (review I7 MAJOR-1): a page lease the notebook consumer gives back ends the
+        # Harness's network guard for it (page frozen, interception removed).
+        browser_tasks.broker.page_release_hook = browser_harness.release_page
         browser_stagehand = StagehandAdapter(
             browser_registry,
             base_url=settings.browser_stagehand_base_url,
@@ -99,6 +108,9 @@ class KnowledgeRuntime:
             model_name=settings.browser_stagehand_model_name,
             max_tier=browser_policy.max_tier,
             timeout_seconds=settings.notebook_consumer_timeout_seconds,
+            # Review I B-1: the adapter enforces the Stagehand production gate itself,
+            # evaluated against these settings.
+            settings=settings,
         )
         self.notebook_consumer = NotebookConsumerProvider(
             store, self.evidence,
@@ -262,6 +274,19 @@ class KnowledgeRuntime:
             return await actions.fail_execution(
                 execution_id, status=self._provider_failure_status(str(exc)), error_code=str(exc),
             )
+        except httpx.TimeoutException:
+            # The provider handles ambiguous mutation responses in its durable
+            # operation ledger. An unhandled preflight/readback transport fault
+            # must also close the canonical action, rather than leave EXECUTING.
+            return await actions.fail_execution(
+                execution_id, status=ExecutionStatus.RETRYABLE_FAILURE,
+                error_code="knowledge_provider_timeout",
+            )
+        except httpx.HTTPError:
+            return await actions.fail_execution(
+                execution_id, status=ExecutionStatus.RETRYABLE_FAILURE,
+                error_code="knowledge_provider_unavailable",
+            )
 
         if result.status == KnowledgeOperationStatus.VERIFIED_SUCCESS:
             await actions.mark_submitted(
@@ -274,7 +299,7 @@ class KnowledgeRuntime:
                 correlation=result.correlation,
                 observed_postcondition=result.observed_postcondition,
                 evidence_pointer=result.evidence_pointer,
-            ))
+            ), independent_observer=True)
         if result.status == KnowledgeOperationStatus.SUBMITTED:
             return await actions.mark_submitted(
                 execution_id, correlation=result.correlation, evidence_pointer=result.evidence_pointer,

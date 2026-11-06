@@ -1,0 +1,26 @@
+{
+  "schema": "van.be004.account-demo-recovery-source/1",
+  "at_utc": "2026-11-01T19:14:45.261207+00:00",
+  "base": "887cf06f8f3abd3bee77fedeb4814dcb7d46c368",
+  "source_paths": 18,
+  "source_fingerprint": "f651112819df2a6703e6296c562cf880eadf826a9d8e1da922f95d2e6c3769b3",
+  "exact_apply": "raw/account-demo-recovery-20261101/EXACT18_APPLY.json",
+  "behavior": "Recover the original exact signed account operation after uncertain demo creation, even when creation changed current resource version. Current lawful owner/device/profile/domain joins remain required; exact original body/digest/version/targets and durable pre-send identity prevent redispatch, re-signing or cached foreign completion. Server-owned demo intent is supported without fabricating caller identity. Unknown native effect stays HOLD. Wire paths retain last-moment auth/currentness and immutable receipt/domain binding.",
+  "source_review": "R3 bounded independent recheck closes export contamination and unchanged-original recovery counterexamples. Explicit18-only patch verified after53c\u21924084\u2192887 consumed-source equivalence. Quarantined20-member export unused; runtime identity files never copied.",
+  "source_evidence": "Current author87PASS2PGskip across two source-pinned terminal runs; explicit339identity composite334PASS5SKIP with earlier unchanged input reuse, not one green fullrun. Independent original and reconstructed HTTP probes one-create/no-second-effect with strict body/version/domain/staleauth refusals. PriorR2 and wrong-interpreter failedterminals retained.",
+  "integration": "Initial10module consumer run229PASS1derived-workmapFAIL/0skip remainsfailed. Canonical source-index regeneration changed only current registry fingerprints, preserving original identities/dependencies. Exact existing workmap11case finalrun passed0skip/audit0; earlier229 unchanged-input passes explicitly reused with11 overlap, yielding230unique resolved sourceconsumer identities, never one230pass run. Account18pins unchanged before/after both. All8 ownerartifact consumers plus actual Kotlin body/type source and appnamespace guards included.",
+  "derived_contracts": "Genuine generators retain all487 endpoints/380 schema identities,42features/78screens/105functions and original349actions. Only current sourcecitations plus account_control_domain fields in AccountActionCatalog/AccountChallengeResponse(required response fields) and AccountOperationResponse(optional nullable response field). No new route/action/authority.",
+  "limits": {
+    "android_sdk_compile_and_app_unit_execution": "NOT_EXECUTED_HERE_RESOURCE_ADMISSION_REFUSED",
+    "static_compile_contract_is_not_compilation": true,
+    "existing_hosted_owner": "backend_continuation_sol confirmed existing unfiltered :app:testDebugUnitTest :app:assembleDebug :app:lintDebug; exact integrated-candidate terminal still required.",
+    "app_test_classes": [
+      "com.dial.van.trading.AccountOperationRecoveryTest",
+      "com.dial.van.trading.AccountOnboardingTest"
+    ],
+    "five_PG_skips": "Two native effects and three retirement opt-ins require actual explicitly isolated PostgreSQL fixture; no local Docker/daemon/image-copy workaround.",
+    "provider": "All sockets owned SOURCE fixtures/loopback only. Actual Deriv original remote creation/no-effect proof unavailable; uncertain original remains HOLD. Actual eligible CEX matching/recovery/settlement/protection, live application/remote closure and independently observed native postconditions remain required/unqualified."
+  },
+  "remaining": "Local fullSDK/appunit resource-admission refusal retained; static sourceguard is not compilerproof. Exactnewhead existing unfiltered Android appunit/assemble/lint and allnative/provider/PG postconditions required. Five declaredPGskips remain unqualified here. FullBE004/all originaloperations/BG001/unit/native/formal gates remainopen, no provider effect/productioncertificate. OBL004 currentmatrix stillfailed/unqualified; protectedredteam/PR106openunmerged proposedauthunused and mandatoryDDS/trustedchecker prerequisites unwaived.",
+  "next": "Second genuinehook sourcecommit after canonicalmanifest. Required4fd committedverification finalcandidate terminal0, freshremote/normalpushbothcommits/exactPR+gitreadback, one boundedownedwatch and actual freshsource/matrix/profile/Android terminal artifact validation."
+}

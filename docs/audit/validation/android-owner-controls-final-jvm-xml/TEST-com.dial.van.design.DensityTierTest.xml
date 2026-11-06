@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.design.DensityTierTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:57:32" hostname="052fefa249ff" time="0.003">
+  <properties/>
+  <testcase name="overlay is always compact regardless of width()" classname="com.dial.van.design.DensityTierTest" time="0.001"/>
+  <testcase name="600dp and above is wide()" classname="com.dial.van.design.DensityTierTest" time="0.0"/>
+  <testcase name="breakpoint constant matches the boundary()" classname="com.dial.van.design.DensityTierTest" time="0.0"/>
+  <testcase name="narrow non-overlay widths are regular()" classname="com.dial.van.design.DensityTierTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,22 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_ test_incremental_verification_does_not_misreport_corruption_after_owned_writer_rollback[postgres] _
+
+source = (<vati.core.ledger_pg.PostgresLedger object at 0x7f41b8b38a40>, '9416990f89cc231045967018d529f8f2a4f42488499c86fb9f71bedc2f9c7f3b')
+
+    def test_incremental_verification_does_not_misreport_corruption_after_owned_writer_rollback(source):
+        ledger,scope=source;assert ledger.verify_incremental()[0]
+        before=ledger.head(),ledger.count()
+        with pytest.raises(RollbackFixture):
+            with ledger.atomic():
+                closing_snapshot(ledger)
+                assert ledger.verify_incremental()[0]
+                raise RollbackFixture()
+        assert (ledger.head(),ledger.count())==before and ledger.verify_chain()[0]
+>       assert ledger.verify_incremental()[0]
+E       assert False
+
+trading/tests/test_funding_committed_reads.py:105: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_funding_committed_reads.py::test_incremental_verification_does_not_misreport_corruption_after_owned_writer_rollback[postgres]
+1 failed, 1 deselected in 2.28s

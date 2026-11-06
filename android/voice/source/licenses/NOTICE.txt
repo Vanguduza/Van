@@ -1,0 +1,15 @@
+VAN generic offline acoustic assets and native runtime notices
+
+The generic models do not contain an enrolled VAN owner speech profile or owner embedding.
+
+KWS: sherpa-onnx-kws-zipformer-gigaspeech-3.3M-2024-01-01, official k2-fsa/sherpa-onnx kws-models release. The supplied model README declares Apache License 2.0. Dynamic-shape encoder selected after real native decode; mobile variants were excluded following an inference shape error. Retain APACHE-2.0.txt.
+
+ASR: sherpa-onnx-zipformer-gigaspeech-2023-12-12, official asr-models release. Model card https://huggingface.co/k2-fsa/sherpa-onnx-zipformer-gigaspeech-2023-12-12 (revision4115aa3f7d3ff431cc04ce8223d8a20a37ef3cae) declares Apache-2.0. Retain APACHE-2.0.txt.
+
+TTS: vits-ljs, official tts-models release. Model card https://huggingface.co/csukuangfj/vits-ljs (revision7ac337c834f318e45a34037cb3371cc3929187ff) declares Apache-2.0 and traces checkpoint pretrained_ljs.pth to yo2266911/mb-vits-models and lexicon conversion to https://people.umass.edu/nconstan/CMU-IPA/CMU-in-IPA.zip. Retain APACHE-2.0.txt and CMU-DICTIONARY-NOTICE.txt. The selected lexicon adds exactly: hie h ˈ a ɪ, using the unchanged hi/high entries for canonical greeting text hie van. The actual synthesized acknowledgement uses this generic model, speaker ID0; it is not the owner's voice.
+
+Native runtime: com.github.k2-fsa.sherpa-onnx:sherpa-onnx:v1.13.8, official AAR SHA256633c24321e06b1fe79feafa03ea16cbc0f8a286641e2da3559bac91bdb13bd96. Sherpa's own code is Apache-2.0. Its TTS-enabled native combination includes Piper Phonemize (MIT) and eSpeak NG (GPL-3.0-or-later), statically linked. The VITS LJSpeech lexicon-only execution path does not use eSpeak data files. That does not remove the GPL component from the distributed native binary. Retain ESPEAK-GPL-3.0.txt, PIPER-MIT.txt, component notices, and NATIVE-SOURCE-INPUTS.json.
+
+These files retain the inspected upstream notices and source-input selectors. The corresponding-source inventory is not a complete source bundle or a source-to-binary reproducibility attestation. Public distribution is not qualified by this private owner acceptance preparation.
+
+Speaker extractor: generic WeSpeaker VoxCeleb ResNet34, staged with CC-BY4.0 dataset/model attribution and Apache2.0 code notices. See WESPEAKER-ATTRIBUTION.txt for the two differing upstream license statements. This generic model is not an enrolled owner profile or owner embedding.

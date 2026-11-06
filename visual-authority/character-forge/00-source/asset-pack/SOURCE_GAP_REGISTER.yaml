@@ -3,7 +3,7 @@ register:
   - id: ASSET-GAP-001
     state: RESOLVED_BY_AUTHORITY_CONSOLIDATION
     finding: rejected light-skinned/headband lock sheet conflicted with canonical medium-brown/no-headband VAN
-    disposition: removed and denylisted; canonical owner_board_visual_authority.png is sole primary visual
+    disposition: rejected sheet removed and denylisted; Candidate B later superseded the original board under CF-D-05-REV2_1
   - id: ASSET-GAP-002
     state: RESOLVED_BY_DELETION
     finding: procedural placeholder turnaround/expression/gesture/presentation/icon sheets were named as authority

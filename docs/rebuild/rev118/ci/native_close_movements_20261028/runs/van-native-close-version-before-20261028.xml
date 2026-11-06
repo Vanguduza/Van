@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="10" time="0.424" timestamp="2026-10-28T19:52:11.136382+00:00" hostname="6e9feff21467"><testcase classname="trading.tests.test_native_close_movement" name="test_original_native_balance_delta_does_not_guess_commission_sign_or_future_fees" time="0.046" /><testcase classname="trading.tests.test_native_close_movement" name="test_unbound_balance_baseline_cannot_supply_a_closing_cash_delta[gap]" time="0.004" /><testcase classname="trading.tests.test_native_close_movement" name="test_unbound_balance_baseline_cannot_supply_a_closing_cash_delta[wrong_scope]" time="0.004" /><testcase classname="trading.tests.test_native_close_movement" name="test_unbound_balance_baseline_cannot_supply_a_closing_cash_delta[future_availability]" time="0.006" /><testcase classname="trading.tests.test_native_close_movement" name="test_existing_financial_owner_publishes_and_independently_reads_original_close_observation" time="0.142" /><testcase classname="trading.tests.test_native_close_movement" name="test_cash_or_prior_close_can_anchor_the_next_exact_native_balance_version[cash]" time="0.004" /><testcase classname="trading.tests.test_native_close_movement" name="test_cash_or_prior_close_can_anchor_the_next_exact_native_balance_version[close]" time="0.004" /><testcase classname="trading.tests.test_native_close_movement" name="test_current_native_version_ambiguity_blocks_new_close_postings[two_closes]" time="0.007"><failure message="Failed: DID NOT RAISE ValueError">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-194/test_current_native_version_am0')
+collision = 'two_closes'
+
+    @pytest.mark.parametrize('collision',['two_closes','cash_and_close','contradictory_mark'])
+    def test_current_native_version_ambiguity_blocks_new_close_postings(tmp_path,collision):
+        from vati.funding.movement_journal import FinancialMovementBook
+        from test_native_balance_reconciliation import cash
+        ledger=Ledger(tmp_path/'facts.sqlite')
+        try:
+            before=snapshot(ledger,mark(1000));deals=(closed(),);cash_rows=()
+            if collision=='two_closes':deals+=(replace(closed(),native_id=2),)
+            elif collision=='cash_and_close':cash_rows=(cash(delta='10',balance='110',version=2),)
+            else:snapshot(ledger,mark(1100,balance='101',equity='101',version=1))
+            scope=observe(ledger,cash=cash_rows,deals=deals)
+            event=next(ledger.iter(EventKind.FUNDING_DEAL_STATEMENT));count=ledger.count()
+&gt;           with pytest.raises(ValueError,match='NATIVE_BALANCE_VERSION_CONFLICT'):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE ValueError
+
+trading/tests/test_native_close_movement.py:111: Failed</failure></testcase><testcase classname="trading.tests.test_native_close_movement" name="test_current_native_version_ambiguity_blocks_new_close_postings[cash_and_close]" time="0.008"><failure message="Failed: DID NOT RAISE ValueError">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-194/test_current_native_version_am1')
+collision = 'cash_and_close'
+
+    @pytest.mark.parametrize('collision',['two_closes','cash_and_close','contradictory_mark'])
+    def test_current_native_version_ambiguity_blocks_new_close_postings(tmp_path,collision):
+        from vati.funding.movement_journal import FinancialMovementBook
+        from test_native_balance_reconciliation import cash
+        ledger=Ledger(tmp_path/'facts.sqlite')
+        try:
+            before=snapshot(ledger,mark(1000));deals=(closed(),);cash_rows=()
+            if collision=='two_closes':deals+=(replace(closed(),native_id=2),)
+            elif collision=='cash_and_close':cash_rows=(cash(delta='10',balance='110',version=2),)
+            else:snapshot(ledger,mark(1100,balance='101',equity='101',version=1))
+            scope=observe(ledger,cash=cash_rows,deals=deals)
+            event=next(ledger.iter(EventKind.FUNDING_DEAL_STATEMENT));count=ledger.count()
+&gt;           with pytest.raises(ValueError,match='NATIVE_BALANCE_VERSION_CONFLICT'):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE ValueError
+
+trading/tests/test_native_close_movement.py:111: Failed</failure></testcase><testcase classname="trading.tests.test_native_close_movement" name="test_current_native_version_ambiguity_blocks_new_close_postings[contradictory_mark]" time="0.011"><failure message="Failed: DID NOT RAISE ValueError">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-194/test_current_native_version_am2')
+collision = 'contradictory_mark'
+
+    @pytest.mark.parametrize('collision',['two_closes','cash_and_close','contradictory_mark'])
+    def test_current_native_version_ambiguity_blocks_new_close_postings(tmp_path,collision):
+        from vati.funding.movement_journal import FinancialMovementBook
+        from test_native_balance_reconciliation import cash
+        ledger=Ledger(tmp_path/'facts.sqlite')
+        try:
+            before=snapshot(ledger,mark(1000));deals=(closed(),);cash_rows=()
+            if collision=='two_closes':deals+=(replace(closed(),native_id=2),)
+            elif collision=='cash_and_close':cash_rows=(cash(delta='10',balance='110',version=2),)
+            else:snapshot(ledger,mark(1100,balance='101',equity='101',version=1))
+            scope=observe(ledger,cash=cash_rows,deals=deals)
+            event=next(ledger.iter(EventKind.FUNDING_DEAL_STATEMENT));count=ledger.count()
+&gt;           with pytest.raises(ValueError,match='NATIVE_BALANCE_VERSION_CONFLICT'):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE ValueError
+
+trading/tests/test_native_close_movement.py:111: Failed</failure></testcase></testsuite></testsuites>

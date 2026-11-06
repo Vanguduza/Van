@@ -5,7 +5,9 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from pathlib import Path
+import stat
 from typing import Any
+from urllib.parse import urlsplit
 
 #: What Android calls. Nothing under this prefix is reachable without owner-device auth.
 PREFIX = "/v1/dial-dev"
@@ -84,6 +86,10 @@ class DialDevConfig:
     stale_ms: int = 30_000
     workspaces_stale_ms: int = 10_000
     attention_enabled: bool = True
+    production: bool = False
+    tls_ca_file: str = ""
+    tls_client_cert_file: str = ""
+    tls_client_key_file: str = ""
 
     @classmethod
     def from_settings(cls, settings: Any) -> "DialDevConfig":
@@ -95,13 +101,51 @@ class DialDevConfig:
             stale_ms=max(1, int(settings.dial_dev_stale_ms)),
             workspaces_stale_ms=max(1, int(settings.dial_dev_workspaces_stale_ms)),
             attention_enabled=bool(settings.dial_dev_attention_enabled),
+            production=str(getattr(settings, "van_env", "")).strip().lower() == "production",
+            tls_ca_file=str(getattr(settings, "dial_dev_tls_ca_file", "") or ""),
+            tls_client_cert_file=str(getattr(settings, "dial_dev_tls_client_cert_file", "") or ""),
+            tls_client_key_file=str(getattr(settings, "dial_dev_tls_client_key_file", "") or ""),
         )
 
     @property
+    def product_gateway_route(self) -> bool:
+        """DEC-056: production never bypasses the fixed typed product gateway."""
+        try:
+            url = urlsplit(self.base_url)
+            return (
+                url.scheme == "https" and url.hostname == "10.77.0.2" and url.port == 8443
+                and url.path in ("", "/") and url.username is None and url.password is None
+                and "?" not in self.base_url and "#" not in self.base_url
+            )
+        except ValueError:
+            return False
+
+    @property
+    def tls_configured(self) -> bool:
+        files = (self.tls_ca_file, self.tls_client_cert_file, self.tls_client_key_file)
+        try:
+            return all(files) and all(Path(file).is_file() for file in files)
+        except OSError:
+            return False
+
+    @property
     def configured(self) -> bool:
-        return (
+        basic = (
             self.enabled
             and self.base_url.startswith(("http://", "https://"))
             and bool(self.token_file)
             and Path(self.token_file).is_file()
         )
+        any_tls = any((self.tls_ca_file, self.tls_client_cert_file, self.tls_client_key_file))
+        if not basic or (any_tls and not self.tls_configured):
+            return False
+        if self.production:
+            if not self.product_gateway_route or not self.tls_configured:
+                return False
+            try:
+                # The product's private key must never be group/world readable.
+                if stat.S_IMODE(Path(self.tls_client_key_file).stat().st_mode) & 0o077:
+                    return False
+            except OSError:
+                return False
+        return True

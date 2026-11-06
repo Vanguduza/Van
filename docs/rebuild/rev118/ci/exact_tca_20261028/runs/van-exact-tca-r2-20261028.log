@@ -1,0 +1,247 @@
+..............FFFFFFFFFFF............................................... [ 53%]
+...............................................................          [100%]
+=================================== FAILURES ===================================
+_ test_resealed_durable_cost_corruption_cannot_enter_broker_learning[cost_ratio] _
+
+field = 'cost_ratio'
+
+    @pytest.mark.parametrize('field', ['cost_ratio','implementation_shortfall','slippage','delay_cost',
+        'submission_cost','reference_notional','realised_cost_pct','fees','filled_quantity',
+        'contract_value_per_price_unit','measurement_version'])
+    def test_resealed_durable_cost_corruption_cannot_enter_broker_learning(field):
+        from vati.core import EventKind,Ledger,make_event
+        from vati.learning import Environment
+        from vati.learning.hooks import LearningHooks
+        from vati.learning.replay import restore_learning_runtime
+        r=original();body=compute_tca(r,direction=Direction.LONG,qty=r.filled_qty,value_per_unit=D('100000'),modelled_cost_pct=D('0.01')).as_dict()
+        body|={'learning_environment':'DEMO','broker':'paper','symbol':'EURUSD','session':'LONDON',
+               'event_window':'NONE','rejected':False}
+        body[field]='900' if field!='measurement_version' else 'invented'
+>       with Ledger() as ledger:
+             ^^^^^^^^
+E       TypeError: 'Ledger' object does not support the context manager protocol
+
+trading/tests/test_tca_exact_arithmetic.py:92: TypeError
+_ test_resealed_durable_cost_corruption_cannot_enter_broker_learning[implementation_shortfall] _
+
+field = 'implementation_shortfall'
+
+    @pytest.mark.parametrize('field', ['cost_ratio','implementation_shortfall','slippage','delay_cost',
+        'submission_cost','reference_notional','realised_cost_pct','fees','filled_quantity',
+        'contract_value_per_price_unit','measurement_version'])
+    def test_resealed_durable_cost_corruption_cannot_enter_broker_learning(field):
+        from vati.core import EventKind,Ledger,make_event
+        from vati.learning import Environment
+        from vati.learning.hooks import LearningHooks
+        from vati.learning.replay import restore_learning_runtime
+        r=original();body=compute_tca(r,direction=Direction.LONG,qty=r.filled_qty,value_per_unit=D('100000'),modelled_cost_pct=D('0.01')).as_dict()
+        body|={'learning_environment':'DEMO','broker':'paper','symbol':'EURUSD','session':'LONDON',
+               'event_window':'NONE','rejected':False}
+        body[field]='900' if field!='measurement_version' else 'invented'
+>       with Ledger() as ledger:
+             ^^^^^^^^
+E       TypeError: 'Ledger' object does not support the context manager protocol
+
+trading/tests/test_tca_exact_arithmetic.py:92: TypeError
+_ test_resealed_durable_cost_corruption_cannot_enter_broker_learning[slippage] _
+
+field = 'slippage'
+
+    @pytest.mark.parametrize('field', ['cost_ratio','implementation_shortfall','slippage','delay_cost',
+        'submission_cost','reference_notional','realised_cost_pct','fees','filled_quantity',
+        'contract_value_per_price_unit','measurement_version'])
+    def test_resealed_durable_cost_corruption_cannot_enter_broker_learning(field):
+        from vati.core import EventKind,Ledger,make_event
+        from vati.learning import Environment
+        from vati.learning.hooks import LearningHooks
+        from vati.learning.replay import restore_learning_runtime
+        r=original();body=compute_tca(r,direction=Direction.LONG,qty=r.filled_qty,value_per_unit=D('100000'),modelled_cost_pct=D('0.01')).as_dict()
+        body|={'learning_environment':'DEMO','broker':'paper','symbol':'EURUSD','session':'LONDON',
+               'event_window':'NONE','rejected':False}
+        body[field]='900' if field!='measurement_version' else 'invented'
+>       with Ledger() as ledger:
+             ^^^^^^^^
+E       TypeError: 'Ledger' object does not support the context manager protocol
+
+trading/tests/test_tca_exact_arithmetic.py:92: TypeError
+_ test_resealed_durable_cost_corruption_cannot_enter_broker_learning[delay_cost] _
+
+field = 'delay_cost'
+
+    @pytest.mark.parametrize('field', ['cost_ratio','implementation_shortfall','slippage','delay_cost',
+        'submission_cost','reference_notional','realised_cost_pct','fees','filled_quantity',
+        'contract_value_per_price_unit','measurement_version'])
+    def test_resealed_durable_cost_corruption_cannot_enter_broker_learning(field):
+        from vati.core import EventKind,Ledger,make_event
+        from vati.learning import Environment
+        from vati.learning.hooks import LearningHooks
+        from vati.learning.replay import restore_learning_runtime
+        r=original();body=compute_tca(r,direction=Direction.LONG,qty=r.filled_qty,value_per_unit=D('100000'),modelled_cost_pct=D('0.01')).as_dict()
+        body|={'learning_environment':'DEMO','broker':'paper','symbol':'EURUSD','session':'LONDON',
+               'event_window':'NONE','rejected':False}
+        body[field]='900' if field!='measurement_version' else 'invented'
+>       with Ledger() as ledger:
+             ^^^^^^^^
+E       TypeError: 'Ledger' object does not support the context manager protocol
+
+trading/tests/test_tca_exact_arithmetic.py:92: TypeError
+_ test_resealed_durable_cost_corruption_cannot_enter_broker_learning[submission_cost] _
+
+field = 'submission_cost'
+
+    @pytest.mark.parametrize('field', ['cost_ratio','implementation_shortfall','slippage','delay_cost',
+        'submission_cost','reference_notional','realised_cost_pct','fees','filled_quantity',
+        'contract_value_per_price_unit','measurement_version'])
+    def test_resealed_durable_cost_corruption_cannot_enter_broker_learning(field):
+        from vati.core import EventKind,Ledger,make_event
+        from vati.learning import Environment
+        from vati.learning.hooks import LearningHooks
+        from vati.learning.replay import restore_learning_runtime
+        r=original();body=compute_tca(r,direction=Direction.LONG,qty=r.filled_qty,value_per_unit=D('100000'),modelled_cost_pct=D('0.01')).as_dict()
+        body|={'learning_environment':'DEMO','broker':'paper','symbol':'EURUSD','session':'LONDON',
+               'event_window':'NONE','rejected':False}
+        body[field]='900' if field!='measurement_version' else 'invented'
+>       with Ledger() as ledger:
+             ^^^^^^^^
+E       TypeError: 'Ledger' object does not support the context manager protocol
+
+trading/tests/test_tca_exact_arithmetic.py:92: TypeError
+_ test_resealed_durable_cost_corruption_cannot_enter_broker_learning[reference_notional] _
+
+field = 'reference_notional'
+
+    @pytest.mark.parametrize('field', ['cost_ratio','implementation_shortfall','slippage','delay_cost',
+        'submission_cost','reference_notional','realised_cost_pct','fees','filled_quantity',
+        'contract_value_per_price_unit','measurement_version'])
+    def test_resealed_durable_cost_corruption_cannot_enter_broker_learning(field):
+        from vati.core import EventKind,Ledger,make_event
+        from vati.learning import Environment
+        from vati.learning.hooks import LearningHooks
+        from vati.learning.replay import restore_learning_runtime
+        r=original();body=compute_tca(r,direction=Direction.LONG,qty=r.filled_qty,value_per_unit=D('100000'),modelled_cost_pct=D('0.01')).as_dict()
+        body|={'learning_environment':'DEMO','broker':'paper','symbol':'EURUSD','session':'LONDON',
+               'event_window':'NONE','rejected':False}
+        body[field]='900' if field!='measurement_version' else 'invented'
+>       with Ledger() as ledger:
+             ^^^^^^^^
+E       TypeError: 'Ledger' object does not support the context manager protocol
+
+trading/tests/test_tca_exact_arithmetic.py:92: TypeError
+_ test_resealed_durable_cost_corruption_cannot_enter_broker_learning[realised_cost_pct] _
+
+field = 'realised_cost_pct'
+
+    @pytest.mark.parametrize('field', ['cost_ratio','implementation_shortfall','slippage','delay_cost',
+        'submission_cost','reference_notional','realised_cost_pct','fees','filled_quantity',
+        'contract_value_per_price_unit','measurement_version'])
+    def test_resealed_durable_cost_corruption_cannot_enter_broker_learning(field):
+        from vati.core import EventKind,Ledger,make_event
+        from vati.learning import Environment
+        from vati.learning.hooks import LearningHooks
+        from vati.learning.replay import restore_learning_runtime
+        r=original();body=compute_tca(r,direction=Direction.LONG,qty=r.filled_qty,value_per_unit=D('100000'),modelled_cost_pct=D('0.01')).as_dict()
+        body|={'learning_environment':'DEMO','broker':'paper','symbol':'EURUSD','session':'LONDON',
+               'event_window':'NONE','rejected':False}
+        body[field]='900' if field!='measurement_version' else 'invented'
+>       with Ledger() as ledger:
+             ^^^^^^^^
+E       TypeError: 'Ledger' object does not support the context manager protocol
+
+trading/tests/test_tca_exact_arithmetic.py:92: TypeError
+___ test_resealed_durable_cost_corruption_cannot_enter_broker_learning[fees] ___
+
+field = 'fees'
+
+    @pytest.mark.parametrize('field', ['cost_ratio','implementation_shortfall','slippage','delay_cost',
+        'submission_cost','reference_notional','realised_cost_pct','fees','filled_quantity',
+        'contract_value_per_price_unit','measurement_version'])
+    def test_resealed_durable_cost_corruption_cannot_enter_broker_learning(field):
+        from vati.core import EventKind,Ledger,make_event
+        from vati.learning import Environment
+        from vati.learning.hooks import LearningHooks
+        from vati.learning.replay import restore_learning_runtime
+        r=original();body=compute_tca(r,direction=Direction.LONG,qty=r.filled_qty,value_per_unit=D('100000'),modelled_cost_pct=D('0.01')).as_dict()
+        body|={'learning_environment':'DEMO','broker':'paper','symbol':'EURUSD','session':'LONDON',
+               'event_window':'NONE','rejected':False}
+        body[field]='900' if field!='measurement_version' else 'invented'
+>       with Ledger() as ledger:
+             ^^^^^^^^
+E       TypeError: 'Ledger' object does not support the context manager protocol
+
+trading/tests/test_tca_exact_arithmetic.py:92: TypeError
+_ test_resealed_durable_cost_corruption_cannot_enter_broker_learning[filled_quantity] _
+
+field = 'filled_quantity'
+
+    @pytest.mark.parametrize('field', ['cost_ratio','implementation_shortfall','slippage','delay_cost',
+        'submission_cost','reference_notional','realised_cost_pct','fees','filled_quantity',
+        'contract_value_per_price_unit','measurement_version'])
+    def test_resealed_durable_cost_corruption_cannot_enter_broker_learning(field):
+        from vati.core import EventKind,Ledger,make_event
+        from vati.learning import Environment
+        from vati.learning.hooks import LearningHooks
+        from vati.learning.replay import restore_learning_runtime
+        r=original();body=compute_tca(r,direction=Direction.LONG,qty=r.filled_qty,value_per_unit=D('100000'),modelled_cost_pct=D('0.01')).as_dict()
+        body|={'learning_environment':'DEMO','broker':'paper','symbol':'EURUSD','session':'LONDON',
+               'event_window':'NONE','rejected':False}
+        body[field]='900' if field!='measurement_version' else 'invented'
+>       with Ledger() as ledger:
+             ^^^^^^^^
+E       TypeError: 'Ledger' object does not support the context manager protocol
+
+trading/tests/test_tca_exact_arithmetic.py:92: TypeError
+_ test_resealed_durable_cost_corruption_cannot_enter_broker_learning[contract_value_per_price_unit] _
+
+field = 'contract_value_per_price_unit'
+
+    @pytest.mark.parametrize('field', ['cost_ratio','implementation_shortfall','slippage','delay_cost',
+        'submission_cost','reference_notional','realised_cost_pct','fees','filled_quantity',
+        'contract_value_per_price_unit','measurement_version'])
+    def test_resealed_durable_cost_corruption_cannot_enter_broker_learning(field):
+        from vati.core import EventKind,Ledger,make_event
+        from vati.learning import Environment
+        from vati.learning.hooks import LearningHooks
+        from vati.learning.replay import restore_learning_runtime
+        r=original();body=compute_tca(r,direction=Direction.LONG,qty=r.filled_qty,value_per_unit=D('100000'),modelled_cost_pct=D('0.01')).as_dict()
+        body|={'learning_environment':'DEMO','broker':'paper','symbol':'EURUSD','session':'LONDON',
+               'event_window':'NONE','rejected':False}
+        body[field]='900' if field!='measurement_version' else 'invented'
+>       with Ledger() as ledger:
+             ^^^^^^^^
+E       TypeError: 'Ledger' object does not support the context manager protocol
+
+trading/tests/test_tca_exact_arithmetic.py:92: TypeError
+_ test_resealed_durable_cost_corruption_cannot_enter_broker_learning[measurement_version] _
+
+field = 'measurement_version'
+
+    @pytest.mark.parametrize('field', ['cost_ratio','implementation_shortfall','slippage','delay_cost',
+        'submission_cost','reference_notional','realised_cost_pct','fees','filled_quantity',
+        'contract_value_per_price_unit','measurement_version'])
+    def test_resealed_durable_cost_corruption_cannot_enter_broker_learning(field):
+        from vati.core import EventKind,Ledger,make_event
+        from vati.learning import Environment
+        from vati.learning.hooks import LearningHooks
+        from vati.learning.replay import restore_learning_runtime
+        r=original();body=compute_tca(r,direction=Direction.LONG,qty=r.filled_qty,value_per_unit=D('100000'),modelled_cost_pct=D('0.01')).as_dict()
+        body|={'learning_environment':'DEMO','broker':'paper','symbol':'EURUSD','session':'LONDON',
+               'event_window':'NONE','rejected':False}
+        body[field]='900' if field!='measurement_version' else 'invented'
+>       with Ledger() as ledger:
+             ^^^^^^^^
+E       TypeError: 'Ledger' object does not support the context manager protocol
+
+trading/tests/test_tca_exact_arithmetic.py:92: TypeError
+=========================== short test summary info ============================
+FAILED trading/tests/test_tca_exact_arithmetic.py::test_resealed_durable_cost_corruption_cannot_enter_broker_learning[cost_ratio]
+FAILED trading/tests/test_tca_exact_arithmetic.py::test_resealed_durable_cost_corruption_cannot_enter_broker_learning[implementation_shortfall]
+FAILED trading/tests/test_tca_exact_arithmetic.py::test_resealed_durable_cost_corruption_cannot_enter_broker_learning[slippage]
+FAILED trading/tests/test_tca_exact_arithmetic.py::test_resealed_durable_cost_corruption_cannot_enter_broker_learning[delay_cost]
+FAILED trading/tests/test_tca_exact_arithmetic.py::test_resealed_durable_cost_corruption_cannot_enter_broker_learning[submission_cost]
+FAILED trading/tests/test_tca_exact_arithmetic.py::test_resealed_durable_cost_corruption_cannot_enter_broker_learning[reference_notional]
+FAILED trading/tests/test_tca_exact_arithmetic.py::test_resealed_durable_cost_corruption_cannot_enter_broker_learning[realised_cost_pct]
+FAILED trading/tests/test_tca_exact_arithmetic.py::test_resealed_durable_cost_corruption_cannot_enter_broker_learning[fees]
+FAILED trading/tests/test_tca_exact_arithmetic.py::test_resealed_durable_cost_corruption_cannot_enter_broker_learning[filled_quantity]
+FAILED trading/tests/test_tca_exact_arithmetic.py::test_resealed_durable_cost_corruption_cannot_enter_broker_learning[contract_value_per_price_unit]
+FAILED trading/tests/test_tca_exact_arithmetic.py::test_resealed_durable_cost_corruption_cannot_enter_broker_learning[measurement_version]
+11 failed, 124 passed in 2.25s

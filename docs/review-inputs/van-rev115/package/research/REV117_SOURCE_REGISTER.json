@@ -1,0 +1,102 @@
+{
+  "scope": "Primary public documentation as retrieved; no provider invocations or performance experiments",
+  "search_limit": "Search-engine fetches yielded redirect/scaffolding; identity confirmed directly from Google model catalogue and model page, not search snippets.",
+  "sources": [
+    {
+      "archived_excerpt": "research/rev117_sources/google_models.excerpt.txt",
+      "body_hash_scope": "Full fetched response, retained only in execution workspace; excerpt identity is separately hashed.",
+      "excerpt_sha256": "b1f7f7b1b9876ebeb3b9641be52c93a83ac923623b496f4877393f927c4b6c99",
+      "final_url": "https://ai.google.dev/gemini-api/docs/models",
+      "id": "google_models",
+      "retrieved_at_utc": "2026-10-18; exact time unavailable for this fetch",
+      "sha256": "219b228368c64911f8f96c41314ce9362ce22fb5f3de8881c97eb595caab40a6",
+      "status": 200,
+      "url": "https://ai.google.dev/gemini-api/docs/models"
+    },
+    {
+      "archived_excerpt": "research/rev117_sources/google_argon.excerpt.txt",
+      "body_hash_scope": "Full fetched response, retained only in execution workspace; excerpt identity is separately hashed.",
+      "excerpt_sha256": "4e2a178c9b0c0c93fb47d7d4866af5a0b77f5df5622adad6981e103b206846ed",
+      "final_url": "https://ai.google.dev/gemini-api/docs/models/gemini-4-argon",
+      "id": "google_argon",
+      "retrieved_at_utc": "2026-10-18T19:47:23.387870+00:00",
+      "sha256": "69d994739e29ffa28206030a0d1912123115c61d433bd78dd8e22ab5ffa241db",
+      "status": 200,
+      "url": "https://ai.google.dev/gemini-api/docs/models/gemini-4-argon"
+    },
+    {
+      "archived_excerpt": "research/rev117_sources/google_pricing.excerpt.txt",
+      "body_hash_scope": "Full fetched response, retained only in execution workspace; excerpt identity is separately hashed.",
+      "excerpt_sha256": "513ee0f46f2fed7a905a963c752d3ea0de6a386d516b679bbb24d167bf052533",
+      "final_url": "https://ai.google.dev/gemini-api/docs/pricing",
+      "id": "google_pricing",
+      "retrieved_at_utc": "2026-10-18T19:47:24.269863+00:00",
+      "sha256": "c5b8479fcb6a71ac271c5de14408032d558f228dba8a83389de26130ecdda8d9",
+      "status": 200,
+      "url": "https://ai.google.dev/gemini-api/docs/pricing"
+    },
+    {
+      "archived_excerpt": "research/rev117_sources/deepseek_docs.excerpt.txt",
+      "body_hash_scope": "Full fetched response, retained only in execution workspace; excerpt identity is separately hashed.",
+      "bytes": 49316,
+      "content_type": "text/html",
+      "excerpt_sha256": "2436596f4a4d04fa35a90edd01ba1be1b0cf5f67aea0fe8c6d5f40f7d11017bc",
+      "final_url": "https://api-docs.deepseek.com/",
+      "id": "deepseek_docs",
+      "retrieved_at_utc": "2026-10-18T19:45:15.374554+00:00",
+      "sha256": "5b940bd5a3f03d4e261e3e525278774f91d3b60f2fb3d6142303aae1133a7f1f",
+      "status": 200,
+      "url": "https://api-docs.deepseek.com/"
+    },
+    {
+      "archived_excerpt": "research/rev117_sources/deepseek_prices.excerpt.txt",
+      "body_hash_scope": "Full fetched response, retained only in execution workspace; excerpt identity is separately hashed.",
+      "bytes": 26043,
+      "content_type": "text/html",
+      "excerpt_sha256": "ef3f4e11256cf0758b5f6342126a48d89b57e53d86384ae15ac9d1150eab09e6",
+      "final_url": "https://api-docs.deepseek.com/quick_start/pricing/",
+      "id": "deepseek_prices",
+      "retrieved_at_utc": "2026-10-18T19:45:15.375784+00:00",
+      "sha256": "38f583f627523f45a0cacd00d43ad49cd4f7e3aa5c20cc98bdbc3674f5c74c95",
+      "status": 200,
+      "url": "https://api-docs.deepseek.com/quick_start/pricing"
+    },
+    {
+      "archived_excerpt": "research/rev117_sources/deepseek_thinking.excerpt.txt",
+      "body_hash_scope": "Full fetched response, retained only in execution workspace; excerpt identity is separately hashed.",
+      "bytes": 115902,
+      "content_type": "text/html",
+      "excerpt_sha256": "d513fe2c64a93273bc17dbd06d9f5f7369ddbab3ac7dccee4cb4e2de1c3f80fa",
+      "final_url": "https://api-docs.deepseek.com/guides/thinking_mode/",
+      "id": "deepseek_thinking",
+      "retrieved_at_utc": "2026-10-18T19:45:15.376281+00:00",
+      "sha256": "2d9258749cbef1bebf70d447c3d37d57f7bf295622615e2e5b61b8f527a8b8fb",
+      "status": 200,
+      "url": "https://api-docs.deepseek.com/guides/thinking_mode"
+    },
+    {
+      "archived_excerpt": "research/rev117_sources/google_timesfm.excerpt.txt",
+      "body_hash_scope": "Full fetched response, retained only in execution workspace; excerpt identity is separately hashed.",
+      "excerpt_sha256": "0f254274d520b24d28aa62374a1d9f63ac1033b19fafd2ac8b5e775841c3e241",
+      "final_url": "https://raw.githubusercontent.com/google-research/timesfm/master/README.md",
+      "id": "google_timesfm",
+      "retrieved_at_utc": "2026-10-18; exact time unavailable for this fetch",
+      "sha256": "4312675e2c65ce105cb9006e3caba3d3648fc9269b6bc297e3e94e37f76563d8",
+      "status": 200,
+      "url": "https://raw.githubusercontent.com/google-research/timesfm/master/README.md"
+    },
+    {
+      "archived_excerpt": "research/rev117_sources/fingpt.excerpt.txt",
+      "body_hash_scope": "Full fetched response, retained only in execution workspace; excerpt identity is separately hashed.",
+      "bytes": 32497,
+      "content_type": "text/plain; charset=utf-8",
+      "excerpt_sha256": "560df324fe6007ed7b9981983d3025886b4cc1c0edda17e493ed5b2ab7393116",
+      "final_url": "https://raw.githubusercontent.com/AI4Finance-Foundation/FinGPT/master/README.md",
+      "id": "fingpt",
+      "retrieved_at_utc": "2026-10-18T19:45:15.378035+00:00",
+      "sha256": "8f2b9963d39c4a6e9ef558db018cfa1abf66126906912a55a8dc261647140aaf",
+      "status": 200,
+      "url": "https://raw.githubusercontent.com/AI4Finance-Foundation/FinGPT/master/README.md"
+    }
+  ]
+}

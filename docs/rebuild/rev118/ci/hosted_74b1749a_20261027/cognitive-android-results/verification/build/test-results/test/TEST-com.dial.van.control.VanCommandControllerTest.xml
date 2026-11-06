@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.control.VanCommandControllerTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-27T08:07:57" hostname="runnervmtai0g" time="0.15">
+  <properties/>
+  <testcase name="declining a stale approval cannot discard a newer challenge()" classname="com.dial.van.control.VanCommandControllerTest" time="0.025"/>
+  <testcase name="ambiguous dispatch stores the exact original command instead of resigning it()" classname="com.dial.van.control.VanCommandControllerTest" time="0.006"/>
+  <testcase name="gateway upgraded A4 approval cannot be stored after its receipt is lost()" classname="com.dial.van.control.VanCommandControllerTest" time="0.016"/>
+  <testcase name="late voice result stays visible without speaking hours after its question()" classname="com.dial.van.control.VanCommandControllerTest" time="0.01"/>
+  <testcase name="a lost server error remains recoverable but an authenticated refusal is never queued()" classname="com.dial.van.control.VanCommandControllerTest" time="0.029"/>
+  <testcase name="Gmail send cannot bypass challenge bound content review on another screen()" classname="com.dial.van.control.VanCommandControllerTest" time="0.008"/>
+  <testcase name="new capture or typed command revokes an older voice answer context()" classname="com.dial.van.control.VanCommandControllerTest" time="0.004"/>
+  <testcase name="intermediate status changes do not multiply pending copies of the same command()" classname="com.dial.van.control.VanCommandControllerTest" time="0.003"/>
+  <testcase name="overlapping polls append and speak a terminal answer only once()" classname="com.dial.van.control.VanCommandControllerTest" time="0.047"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

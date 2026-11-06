@@ -1,0 +1,322 @@
+{
+  "status": "PUBLIC_SOURCE_SUBSET_PASS",
+  "tests": 5980,
+  "passed": 5973,
+  "declared_unexecuted": [
+    {
+      "id": "backend.tests.test_jev_browser_eligibility::test_vendored_dds_files_are_the_audited_blobs",
+      "reason": "DDS checkout not present; blob hashes pinned above"
+    },
+    {
+      "id": "backend.tests.test_jev_no_generic_executor::test_no_fabric_or_generic_operation_survives_the_b1_validator[click]",
+      "reason": "member of the B1 closed set by definition"
+    },
+    {
+      "id": "backend.tests.test_jev_no_generic_executor::test_no_fabric_or_generic_operation_survives_the_b1_validator[scroll]",
+      "reason": "member of the B1 closed set by definition"
+    },
+    {
+      "id": "backend.tests.test_jev_no_generic_executor::test_no_fabric_or_generic_operation_survives_the_b1_validator[select]",
+      "reason": "member of the B1 closed set by definition"
+    },
+    {
+      "id": "tests.contracts.test_android_instrumentation_abi::test_actual_agp_direct_package_release_refuses_missing_core_deployment_profile",
+      "reason": "opt-in actual AGP release guard check"
+    },
+    {
+      "id": "tests.contracts.test_android_production_target::test_actual_agp_valid_target_still_refuses_missing_production_signing",
+      "reason": "opt-in actual AGP signing guard check"
+    },
+    {
+      "id": "tests.contracts.test_ci_dds_contract_pin::test_recorded_blobs_are_the_pinned_dds_blobs_when_dds_is_present",
+      "reason": "no DDS git clone beside this checkout; the CI step verifies the same table itself"
+    }
+  ],
+  "selected_modules": 379,
+  "separate_modules": [
+    {
+      "path": "backend/tests/test_browser_action_plans.py",
+      "sha256": "6be3f8c56306857b129a9445d94d4fed81e9e019e3223e952f7209d3527030c5",
+      "reason": "SEPARATE_COMPLETE_BROWSER_SOURCE_JOB"
+    },
+    {
+      "path": "backend/tests/test_browser_api.py",
+      "sha256": "b83d83c54aa7384b6f01ff1e1dc5b31e3e515bf443c80278f07cdd2c77d8fd75",
+      "reason": "SEPARATE_COMPLETE_BROWSER_SOURCE_JOB"
+    },
+    {
+      "path": "backend/tests/test_browser_artifact_admission.py",
+      "sha256": "3c1cd7f848a6319aa2714471ccbab2eec8e62270b80c08717a1d4b7f1bfb83ef",
+      "reason": "SEPARATE_COMPLETE_BROWSER_SOURCE_JOB"
+    },
+    {
+      "path": "backend/tests/test_browser_artifact_owner_http_e2e.py",
+      "sha256": "29131312478b7fc216900e14f73c666a8b5fc278d66ac3d96af5e0c377bbbdc1",
+      "reason": "SEPARATE_COMPLETE_BROWSER_SOURCE_JOB"
+    },
+    {
+      "path": "backend/tests/test_browser_artifact_provider.py",
+      "sha256": "a4ca5b5e522575f656f059f99494bee5a4d650ca41afe45bbba08a3b229edba6",
+      "reason": "SEPARATE_COMPLETE_BROWSER_SOURCE_JOB"
+    },
+    {
+      "path": "backend/tests/test_browser_assignment_execution.py",
+      "sha256": "4d56abdb22f9fce8cb873b7c9c313f145ccf2d1c91eb3e9f7bc48603ecf5ad3b",
+      "reason": "SEPARATE_COMPLETE_BROWSER_SOURCE_JOB"
+    },
+    {
+      "path": "backend/tests/test_browser_canary_origin.py",
+      "sha256": "8143c31118c26c341f3913e8cf6064fe2e7853028b741b037916a93c7199e81c",
+      "reason": "SEPARATE_COMPLETE_BROWSER_SOURCE_JOB"
+    },
+    {
+      "path": "backend/tests/test_browser_completion_requires_verification.py",
+      "sha256": "ea06b6519ceb15cae47058ffbb8f1cd217a081635e007bee2cd31ce929d3acd6",
+      "reason": "SEPARATE_COMPLETE_BROWSER_SOURCE_JOB"
+    },
+    {
+      "path": "backend/tests/test_browser_egress_proxy.py",
+      "sha256": "727f6dc73b55d84d4e8a142e64733044d4175e858aca21cb6bdb479326a930ab",
+      "reason": "SEPARATE_COMPLETE_BROWSER_SOURCE_JOB"
+    },
+    {
+      "path": "backend/tests/test_browser_egress_proxy_i8.py",
+      "sha256": "f83c71d8f3e479b9b44687cff7a48bfb77795c9f9f47cc5e29b62d1a393ac9a3",
+      "reason": "SEPARATE_COMPLETE_BROWSER_SOURCE_JOB"
+    },
+    {
+      "path": "backend/tests/test_browser_egress_proxy_i9.py",
+      "sha256": "fadffb123486321640f3f34222ad2bb995a57b60094deb49cc715c8c9752077f",
+      "reason": "SEPARATE_COMPLETE_BROWSER_SOURCE_JOB"
+    },
+    {
+      "path": "backend/tests/test_browser_escalation_boundary.py",
+      "sha256": "5337026fa0b7550d4ec0d984158e597b8b6a0ab83d9fc42425235ff7a0a09212",
+      "reason": "SEPARATE_COMPLETE_BROWSER_SOURCE_JOB"
+    },
+    {
+      "path": "backend/tests/test_browser_fabric.py",
+      "sha256": "1d439d3afed4662384e82e9a4a806f01cfc9850d6e3336e5207d0353f0db589c",
+      "reason": "SEPARATE_COMPLETE_BROWSER_SOURCE_JOB"
+    },
+    {
+      "path": "backend/tests/test_browser_flood_bounds.py",
+      "sha256": "9414d8be5472161678bcfc809ee24d1b8a255bf49d8ba6a6b1ca37e7bc76bbd1",
+      "reason": "SEPARATE_COMPLETE_BROWSER_SOURCE_JOB"
+    },
+    {
+      "path": "backend/tests/test_browser_guard_lost_regression.py",
+      "sha256": "7198d5baee78e15415e706bfd3156db2c10d04dace91ad7d8bf131c719a6dbb3",
+      "reason": "SEPARATE_COMPLETE_BROWSER_SOURCE_JOB"
+    },
+    {
+      "path": "backend/tests/test_browser_i5_integration_g8.py",
+      "sha256": "b3b6bf6b2c69e476c33f8696fba01d1ca72a55cc5cad38390a6060e17dbf5a04",
+      "reason": "SEPARATE_COMPLETE_BROWSER_SOURCE_JOB"
+    },
+    {
+      "path": "backend/tests/test_browser_injection_containment.py",
+      "sha256": "bc1fc8348193c016263fc63dc7e98ade04f9d7a36805220f1db5128b69a3024b",
+      "reason": "SEPARATE_COMPLETE_BROWSER_SOURCE_JOB"
+    },
+    {
+      "path": "backend/tests/test_browser_input_protocol.py",
+      "sha256": "ed0b324f8f43f5f2a571d8fe09503a1c1a85dcc7846416f06d893e66c62146cd",
+      "reason": "SEPARATE_COMPLETE_BROWSER_SOURCE_JOB"
+    },
+    {
+      "path": "backend/tests/test_browser_interaction_router.py",
+      "sha256": "7ec745ba48382be1f09fe0720f83397ecda98a9fffadb6bb3203abca959a7e8f",
+      "reason": "SEPARATE_COMPLETE_BROWSER_SOURCE_JOB"
+    },
+    {
+      "path": "backend/tests/test_browser_interactive_worker.py",
+      "sha256": "1d10160a4e66f883b40cfdfd7cb2a3b51d3f3c5f6e9e0d794b37276e8fc26c81",
+      "reason": "SEPARATE_COMPLETE_BROWSER_SOURCE_JOB"
+    },
+    {
+      "path": "backend/tests/test_browser_late_block_callers.py",
+      "sha256": "c163826125e26838e8d2aeeaea5473fd574b2aa80fdc3e990e0026ae21cb4690",
+      "reason": "SEPARATE_COMPLETE_BROWSER_SOURCE_JOB"
+    },
+    {
+      "path": "backend/tests/test_browser_mission_binding_regression.py",
+      "sha256": "a052fe670772a4933c11214cdee16f5d761f5fe1bde9a1ad2a57d40df8bfc358",
+      "reason": "SEPARATE_COMPLETE_BROWSER_SOURCE_JOB"
+    },
+    {
+      "path": "backend/tests/test_browser_network_effect_guard.py",
+      "sha256": "c7d33f084324a6170870c43e7156a7bc0b8bf101f6c4a2254c78fb896ebc3e6c",
+      "reason": "SEPARATE_COMPLETE_BROWSER_SOURCE_JOB"
+    },
+    {
+      "path": "backend/tests/test_browser_network_guard_lease.py",
+      "sha256": "dea4993fea282096ae2b8685a7e9386fa8c8bc92d0ddd8e63f4091064007c368",
+      "reason": "SEPARATE_COMPLETE_BROWSER_SOURCE_JOB"
+    },
+    {
+      "path": "backend/tests/test_browser_owner_command_e2e.py",
+      "sha256": "d826d173b62360584c62f1c970d1a7a9e9e038c91aaa4b8d7b36aabed9bb9ae0",
+      "reason": "SEPARATE_COMPLETE_BROWSER_SOURCE_JOB"
+    },
+    {
+      "path": "backend/tests/test_browser_owner_file_grants.py",
+      "sha256": "f5370789c61ca8c236b2255b8b5c57dc35d8dee2fc8a86ea4d98705585c77c62",
+      "reason": "SEPARATE_COMPLETE_BROWSER_SOURCE_JOB"
+    },
+    {
+      "path": "backend/tests/test_browser_owner_preemption.py",
+      "sha256": "5131aeee055fc1b6e1205f538e66d812ea9622408ff23b6834fabf66df7906db",
+      "reason": "SEPARATE_COMPLETE_BROWSER_SOURCE_JOB"
+    },
+    {
+      "path": "backend/tests/test_browser_producer_api.py",
+      "sha256": "cd235a08a40975608201e109f5a4cf9b19597a0c58ce5dd0b491210a5697aa80",
+      "reason": "SEPARATE_COMPLETE_BROWSER_SOURCE_JOB"
+    },
+    {
+      "path": "backend/tests/test_browser_quality_api.py",
+      "sha256": "57829f0ded427482d3f37e566065acf774b400866b2d5f0973eff14865b7d57f",
+      "reason": "SEPARATE_COMPLETE_BROWSER_SOURCE_JOB"
+    },
+    {
+      "path": "backend/tests/test_browser_repeated_owner_work.py",
+      "sha256": "d350da8643148fa22c8848887325e9827687c353f59b3fee51b19f8bb390b434",
+      "reason": "SEPARATE_COMPLETE_BROWSER_SOURCE_JOB"
+    },
+    {
+      "path": "backend/tests/test_browser_review_i2_lifecycle.py",
+      "sha256": "6d25fec3da76dad9d137a9a4bd21020ed6ed7c9c9c9f7b3b3cb7518b99d32642",
+      "reason": "SEPARATE_COMPLETE_BROWSER_SOURCE_JOB"
+    },
+    {
+      "path": "backend/tests/test_browser_review_i2_router.py",
+      "sha256": "f2ac68641698ea5ca1cf45720ad436d013f1b3ba0042200aef1df9194fd1a03c",
+      "reason": "SEPARATE_COMPLETE_BROWSER_SOURCE_JOB"
+    },
+    {
+      "path": "backend/tests/test_browser_review_i3.py",
+      "sha256": "291c810ba43e97a98b0ad0f87128ff43d30cbecba946c024dd20d241a1817d00",
+      "reason": "SEPARATE_COMPLETE_BROWSER_SOURCE_JOB"
+    },
+    {
+      "path": "backend/tests/test_browser_review_i3_classifier.py",
+      "sha256": "d3f5874e8e3c8b3b5c0180ffb14df3f87aaa0072c1046519a9e0a151850600bb",
+      "reason": "SEPARATE_COMPLETE_BROWSER_SOURCE_JOB"
+    },
+    {
+      "path": "backend/tests/test_browser_review_i4_fail_safe_classifier.py",
+      "sha256": "087017f7c8a358896f3addae9c514ec10cfdcc6f9249873ca418d4865e4c4c20",
+      "reason": "SEPARATE_COMPLETE_BROWSER_SOURCE_JOB"
+    },
+    {
+      "path": "backend/tests/test_browser_review_i4_fence.py",
+      "sha256": "feae64a8e22b4640962c9ddd8f0efead41350d393f13dfcfc19626690804ffdf",
+      "reason": "SEPARATE_COMPLETE_BROWSER_SOURCE_JOB"
+    },
+    {
+      "path": "backend/tests/test_browser_review_i5_fence.py",
+      "sha256": "28d9f1aeeca17f6abaaf36192bc1e7ba6a3cb3a4f15fd073dbd2c19d46974f22",
+      "reason": "SEPARATE_COMPLETE_BROWSER_SOURCE_JOB"
+    },
+    {
+      "path": "backend/tests/test_browser_review_i5_task_scope.py",
+      "sha256": "092641283a24ea3a87c2b4a7788a3a9434ce392593e6e5f63723365fbe0fd647",
+      "reason": "SEPARATE_COMPLETE_BROWSER_SOURCE_JOB"
+    },
+    {
+      "path": "backend/tests/test_browser_review_i6_scope.py",
+      "sha256": "36cbf8c99d9c85adcec5e7b757a8e4b8f5bd197f5dbe1a6aea1710a1624eadd4",
+      "reason": "SEPARATE_COMPLETE_BROWSER_SOURCE_JOB"
+    },
+    {
+      "path": "backend/tests/test_browser_sealed_resume.py",
+      "sha256": "f68711890b327fc4fe92178478b3ed1de55435889bcc674f9350f409124bd9d0",
+      "reason": "SEPARATE_COMPLETE_BROWSER_SOURCE_JOB"
+    },
+    {
+      "path": "backend/tests/test_browser_semantic_worker.py",
+      "sha256": "7d4e7d80c868b554fdfb08f5a403a5ae7d5d08c0fb3e39a395df8e67a1b6bba5",
+      "reason": "SEPARATE_COMPLETE_BROWSER_SOURCE_JOB"
+    },
+    {
+      "path": "backend/tests/test_browser_subagent.py",
+      "sha256": "81eb279b88620c7e0af72c9384c3a06a001231de0f8c4e8a6ed8c3d120560a8f",
+      "reason": "SEPARATE_COMPLETE_BROWSER_SOURCE_JOB"
+    },
+    {
+      "path": "backend/tests/test_browser_takeover_and_downloads.py",
+      "sha256": "df83b788220eb2ff7c415a53ca9e4aa7357d4fcd34bc3e51d5ea804ed3397881",
+      "reason": "SEPARATE_COMPLETE_BROWSER_SOURCE_JOB"
+    },
+    {
+      "path": "backend/tests/test_browser_task_preparation.py",
+      "sha256": "af156480f47cf3bbe056f8f98a6781a5ee2d63f6004ea5527659ccd663e67148",
+      "reason": "SEPARATE_COMPLETE_BROWSER_SOURCE_JOB"
+    },
+    {
+      "path": "backend/tests/test_browser_task_read_auth.py",
+      "sha256": "ec8ff0a8404776119465487121d1b441963fb26f8c9d9e3fb9ab371abd6fa1dc",
+      "reason": "SEPARATE_COMPLETE_BROWSER_SOURCE_JOB"
+    },
+    {
+      "path": "backend/tests/test_browser_task_tombstones.py",
+      "sha256": "c93c1bbd835bc88c06cea945a11cdb0ddb3dfeddcfe9b5f1d7fbe308ddfdf361",
+      "reason": "SEPARATE_COMPLETE_BROWSER_SOURCE_JOB"
+    },
+    {
+      "path": "backend/tests/test_harness_chromium_argv.py",
+      "sha256": "777f241b4672cb9b16e61b2fc87f59186771bfc8fd8fa1c23a1d559b8570bdc5",
+      "reason": "SEPARATE_COMPLETE_BROWSER_SOURCE_JOB"
+    },
+    {
+      "path": "backend/tests/test_harness_elements.py",
+      "sha256": "3fffbd1ba46fdc48e0ed43ae58947802f51da64b8e70c56ba1edca0787f2a1d0",
+      "reason": "SEPARATE_COMPLETE_BROWSER_SOURCE_JOB"
+    },
+    {
+      "path": "backend/tests/test_harness_i5_redaction.py",
+      "sha256": "094c5d029ad10c2cbd2dc7ba51169bf306e89f2528d8e6d162d53a57dbe538f7",
+      "reason": "SEPARATE_COMPLETE_BROWSER_SOURCE_JOB"
+    },
+    {
+      "path": "backend/tests/test_harness_page_startup.py",
+      "sha256": "8cf47b366c0ef80cdabfdb7e25b3912901d0af7b845c15efcec8ab9029861b96",
+      "reason": "SEPARATE_COMPLETE_BROWSER_SOURCE_JOB"
+    },
+    {
+      "path": "backend/tests/test_harness_pseudo_hit_ownership.py",
+      "sha256": "d7f82ce7718b2fe6ea6ab7dd83c2fe1bf436e7558a256c856c3fd6e5aef528b5",
+      "reason": "SEPARATE_COMPLETE_BROWSER_SOURCE_JOB"
+    },
+    {
+      "path": "tests/contracts/test_artemis_acceptance_plan.py",
+      "sha256": "bda2cf2ffa37cb235b94fb6e379984b3387ca08a7f04bd1adc4681d743565773",
+      "reason": "PINNED_PRIVATE_DDS_SOURCE_REQUIRED"
+    },
+    {
+      "path": "tests/contracts/test_artemis_usb_acceptance.py",
+      "sha256": "e2687ec756a176bae44db75febb03c30173e78542ba306f6a5713a1d2eede6ad",
+      "reason": "PINNED_PRIVATE_DDS_SOURCE_REQUIRED"
+    },
+    {
+      "path": "tests/contracts/test_van_browser_core_firewall.py",
+      "sha256": "7da780b370bec3886f8219aea3a78313777cdc1e909001f9294ff70c4f99521b",
+      "reason": "SEPARATE_PRIVILEGED_NAMESPACE_SOURCE_JOB"
+    }
+  ],
+  "isolated_runtimes": {
+    "gateway": {
+      "junit_sha256": "5dfd02fb30a550b0df9c466863a03eb5ac25ba2b7501c51c485a796aa69253d8",
+      "storage_audit_sha256": "128b04a8c8f58c8d4d335db930e1fabd533499ca88e5c1c3afb2e49eb25caea1",
+      "tests": 5782
+    },
+    "media": {
+      "junit_sha256": "42ce9a156011f6b931d44bad10251eb724d9fd9d2b2dfd1f5775a35d20d94f47",
+      "storage_audit_sha256": "128b04a8c8f58c8d4d335db930e1fabd533499ca88e5c1c3afb2e49eb25caea1",
+      "tests": 198
+    }
+  },
+  "limits": "SOURCE_SUBSET_ONLY; private DDS, deployed hosts/devices and original required backend gate remain separate",
+  "certificates_issued": []
+}

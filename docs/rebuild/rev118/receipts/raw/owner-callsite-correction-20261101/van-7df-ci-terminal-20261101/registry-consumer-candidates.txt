@@ -1,0 +1,14 @@
+tests/rebuild/test_ap001.py
+tests/rebuild/test_owner_registry_refresh.py
+tests/rebuild/test_pre001.py
+tests/contracts/test_project_truth_ledger.py
+tests/contracts/test_owner_endpoint_registry.py
+tests/contracts/test_project_mount_isolation.py
+tests/contracts/test_remote_browser_dependencies.py
+tests/contracts/test_automation_browser_governance.py
+tests/contracts/test_jev_effect_owner_reference.py
+tests/contracts/test_capability_namespaces_are_distinct.py
+tests/contracts/test_remote_browser_matrix.py
+tests/contracts/test_owner_redesign_registry.py
+tests/contracts/test_stream_host_readiness_is_earned.py
+tests/contracts/test_artemis_acceptance_plan.py

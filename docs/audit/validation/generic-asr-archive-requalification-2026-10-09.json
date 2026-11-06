@@ -1,0 +1,53 @@
+{
+  "all_signed_model_pins_match": true,
+  "archive_bytes": 310562559,
+  "archive_sha256": "ec7f27abbbdba3b261deab9a853803b5ec72cb3295c01a77f34e6de5b62bf5c4",
+  "owner_profile_included": false,
+  "previous_lock": {
+    "archive": "archives/sherpa-onnx-zipformer-gigaspeech-2023-12-12.tar.bz2",
+    "published_sha256": "5ecc36d163454fa7eaf12ff3513f97ac87c2179295a3a155fade0fc32e76b60d",
+    "sha256": "5ecc36d163454fa7eaf12ff3513f97ac87c2179295a3a155fade0fc32e76b60d",
+    "size": 310562506
+  },
+  "production_qualification": false,
+  "public_source_url": "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-zipformer-gigaspeech-2023-12-12.tar.bz2",
+  "published_asset_metadata": {
+    "api_url": "https://api.github.com/repos/k2-fsa/sherpa-onnx/releases/tags/asr-models",
+    "digest": "sha256:ec7f27abbbdba3b261deab9a853803b5ec72cb3295c01a77f34e6de5b62bf5c4",
+    "name": "sherpa-onnx-zipformer-gigaspeech-2023-12-12.tar.bz2",
+    "size": 310562559,
+    "updated_at": "2026-10-08T23:48:35Z"
+  },
+  "published_digest_matches_measured_archive": true,
+  "recorded_at_utc": "2026-10-09T05:16:36.495737+00:00",
+  "selected_weights": [
+    {
+      "bytes": 259417,
+      "expected_bytes": 259417,
+      "expected_sha256": "80160e45cca71dd52f6b0a6d3d12be18126f5308b2d4ba03f001300fea377c64",
+      "matched": true,
+      "member": "sherpa-onnx-zipformer-gigaspeech-2023-12-12/joiner-epoch-30-avg-1.int8.onnx",
+      "path": "asr/joiner-epoch-30-avg-1.int8.onnx",
+      "sha256": "80160e45cca71dd52f6b0a6d3d12be18126f5308b2d4ba03f001300fea377c64"
+    },
+    {
+      "bytes": 72850738,
+      "expected_bytes": 72850738,
+      "expected_sha256": "d3eff4b1bd747bd781a47966795988539227d05638524b0313f26d3a166962d7",
+      "matched": true,
+      "member": "sherpa-onnx-zipformer-gigaspeech-2023-12-12/encoder-epoch-30-avg-1.int8.onnx",
+      "path": "asr/encoder-epoch-30-avg-1.int8.onnx",
+      "sha256": "d3eff4b1bd747bd781a47966795988539227d05638524b0313f26d3a166962d7"
+    },
+    {
+      "bytes": 540688,
+      "expected_bytes": 540688,
+      "expected_sha256": "2b0580feb757696fa929922670b7126aaee609630349a1809fd5a2aee926d56e",
+      "matched": true,
+      "member": "sherpa-onnx-zipformer-gigaspeech-2023-12-12/decoder-epoch-30-avg-1.int8.onnx",
+      "path": "asr/decoder-epoch-30-avg-1.int8.onnx",
+      "sha256": "2b0580feb757696fa929922670b7126aaee609630349a1809fd5a2aee926d56e"
+    }
+  ],
+  "voice_manifest_sha256": "7fa17db389349bd587c1f061c7162f9a4c419a552c9d57cd03e8e937bf935e30"
+}

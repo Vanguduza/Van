@@ -1,0 +1,224 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:van:forecast:prediction-market:PredictionMarketObservation:1.0",
+  "title": "PredictionMarketObservation",
+  "description": "Proposed VAN contract. JSON shape/local arithmetic is not evidence admission, source permission or financial authority.",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "record_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "environment": {
+      "enum": [
+        "FIXTURE",
+        "RESEARCH",
+        "SHADOW"
+      ]
+    },
+    "authority_effect": {
+      "const": "NONE"
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0
+    },
+    "source_digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "provider": {
+      "type": "string",
+      "minLength": 1
+    },
+    "market_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "canonical_event_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "contract_digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "provider_event_at": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "date-time"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "received_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "available_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "decision_cutoff": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "availability_method": {
+      "enum": [
+        "OBSERVED",
+        "RECONSTRUCTED",
+        "FIXTURE"
+      ]
+    },
+    "input_mode": {
+      "enum": [
+        "FIXTURE_REPLAY",
+        "AUTHORIZED_HISTORICAL_IMPORT",
+        "AUTHORIZED_READ_ONLY_CAPTURE"
+      ]
+    },
+    "book_state": {
+      "enum": [
+        "VALID",
+        "GAPPED",
+        "STALE",
+        "INVALID",
+        "EMPTY"
+      ]
+    },
+    "sequence": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "gap_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "yes_bids": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "price": {
+            "type": "string",
+            "pattern": "^-?[0-9]+(?:\\.[0-9]+)?$"
+          },
+          "quantity": {
+            "type": "string",
+            "pattern": "^-?[0-9]+(?:\\.[0-9]+)?$"
+          }
+        },
+        "required": [
+          "price",
+          "quantity"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 0
+    },
+    "no_bids": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "price": {
+            "type": "string",
+            "pattern": "^-?[0-9]+(?:\\.[0-9]+)?$"
+          },
+          "quantity": {
+            "type": "string",
+            "pattern": "^-?[0-9]+(?:\\.[0-9]+)?$"
+          }
+        },
+        "required": [
+          "price",
+          "quantity"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 0
+    },
+    "derived_yes_ask": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^-?[0-9]+(?:\\.[0-9]+)?$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "derived_no_ask": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^-?[0-9]+(?:\\.[0-9]+)?$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "permission_ref": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "archive_cutoff_ref": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "schema_version",
+    "record_id",
+    "environment",
+    "authority_effect",
+    "evidence_refs",
+    "source_digest",
+    "provider",
+    "market_id",
+    "canonical_event_id",
+    "contract_digest",
+    "provider_event_at",
+    "received_at",
+    "available_at",
+    "decision_cutoff",
+    "availability_method",
+    "input_mode",
+    "book_state",
+    "sequence",
+    "gap_count",
+    "yes_bids",
+    "no_bids",
+    "derived_yes_ask",
+    "derived_no_ask",
+    "permission_ref",
+    "archive_cutoff_ref"
+  ],
+  "additionalProperties": false
+}

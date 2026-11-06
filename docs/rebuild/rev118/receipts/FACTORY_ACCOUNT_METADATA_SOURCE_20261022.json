@@ -1,0 +1,35 @@
+{
+  "schema": "van.rebuild.factory-account-metadata-source/1",
+  "source_parent": "17f4badac6f7b23d2efb219ada60af7ef2afd506",
+  "source_sha256": {
+    "trading/vati/app/service.py": "7deba2753820bbe3dbf1e725e3e5b7b8aa8cf59db0f2d1893b80954f18ea36e0",
+    "trading/tests/test_factory_account_metadata.py": "d6b836fa2033d596b2a124d8f6117edf9ad42db7635cfb690a5cf0ecb8363709"
+  },
+  "initial_counterexamples": 4,
+  "full_trading_real_postgresql": {
+    "tests": 1935,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "2671952f467134bb7ebba127919c1e15487ac401629114ec6f3cfcbf1ebcd940"
+  },
+  "focused": {
+    "tests": 29,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1,
+    "sha256": "f85aeba0f303145090890e7ebb7a9a7fb709d3bdf521c665cc78d0bdbfa9bed4"
+  },
+  "private_fixture_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "whole_unit_acceptance": "NOT_ISSUED",
+  "provider_verification": "NOT_ADDED",
+  "remaining": [
+    "generic operation/result recovery",
+    "physical account/lease and exposure/funds lifecycle",
+    "symbol-specific paper contract valuation",
+    "original provider/production/handset qualification"
+  ]
+}

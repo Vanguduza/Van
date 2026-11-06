@@ -1,0 +1,33 @@
+{
+  "schema": "van.rebuild.mutation-reconciliation/1",
+  "part": "python",
+  "reference": "e56a38c8d5b51b7c64d3d4ac04e2d8a59f6c9b36",
+  "preserved_case_count": 374,
+  "selected_case_count": 1,
+  "registry_sha256": "c247672b5d3e2a26495c7a015bfc019467c41ba40c658a84dd46d0efb08d3e23",
+  "results": [
+    {
+      "kind": "baseline",
+      "mutation": null,
+      "exit": 0,
+      "verdict": "PASS",
+      "log_sha256": "746bf6b56e589420af6fedf731b4d57fd2b9c543de8486d867bbca85131dc32d",
+      "failed_oracles": [],
+      "summary": "..............                                                           [100%]\n14 passed in 1.93s\n"
+    },
+    {
+      "kind": "mutation",
+      "mutation": "C18 check classes that assert nothing about reachability",
+      "exit": 1,
+      "verdict": "ASSERTION_DETECTED",
+      "log_sha256": "3a1c6d779a4f7a4313acccb7c1a96f1a35eec4f8156d778e7a3402a4924a13f8",
+      "failed_oracles": [
+        "FAILED tests/contracts/test_ledger_reconcile.py::test_non_reachability_classes_are_not_judged_as_unreachability_claims"
+      ],
+      "summary": "ry(component=\"AlreadyLive\", maturity_class=\"CALLED_UNTESTED\",\n                   reachability_symbols=[\"MissionService\"]),\n            _entry(component=\"NotAReachabilityClaim\", maturity_class=\"CALLED_UNTESTED\"),\n        ]}, \"--strict\")\n>       assert result.returncode == 0, result.stdout + result.stderr\nE       AssertionError: 0 unreached claims confirmed against the source\nE         \nE         1 entries declare no reachability_symbols:\nE           unverifiable     NotAReachabilityClaim (CALLED_UNTESTED)\nE           These are judged by hand. Adding `reachability_symbols` brings one under CI.\nE         \nE         1 STALE \u2014 the ledger says unreached, the source disagrees:\nE           STALE  AlreadyLive: claims CALLED_UNTESTED but MissionService <- android/app/src/main/java/com/dial/van/visual/VanEmbodimentReducer.kt, backend/van_gateway/app.py\nE         \nE         The work was done and the ledger was not updated. Give each a terminal_state with its evidence, or correct the maturity_class.\nE         \nE       assert 1 == 0\nE        +  where 1 = CompletedProcess(args=['/workspace/van-audit/canon-backend-venv-2026-10-09/bin/python', '/workspace/van-review-2026-10...the ledger was not updated. Give each a terminal_state with its evidence, or correct the maturity_class.\\n', stderr='').returncode\n\ntests/contracts/test_ledger_reconcile.py:203: AssertionError\n=========================== short test summary info ============================\nFAILED tests/contracts/test_ledger_reconcile.py::test_non_reachability_classes_are_not_judged_as_unreachability_claims\n1 failed, 13 passed in 2.14s\n"
+    }
+  ],
+  "status": "PASS",
+  "duration_seconds": 4.766,
+  "source_state": "UNCOMMITTED_CORRECTION_AFTER_fca473cc"
+}

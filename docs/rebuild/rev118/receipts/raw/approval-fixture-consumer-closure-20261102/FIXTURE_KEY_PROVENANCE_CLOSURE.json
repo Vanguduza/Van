@@ -1,0 +1,525 @@
+{
+  "files": [
+    {
+      "path": "backend/tests/test_account_operation_recovery.py",
+      "sha256": "f1046879664f961a43453e87e1abcb968029f1fd29dc7ca98f57d374c7cef3c8",
+      "paired_client_key_module": "backend.tests.test_trading_api",
+      "proof_or_public_key_modules": {
+        "act:backend.tests.test_trading_oauth_scope": "backend.tests.test_trading_api",
+        "approved:backend.tests.test_account_resource_binding": "backend.tests.test_trading_api",
+        "_approval_proof:backend.tests.test_trading_api": "backend.tests.test_trading_api"
+      },
+      "result": "SAME_KEY_OWNER",
+      "imports": [
+        {
+          "module": "backend.tests.test_trading_api",
+          "names": [
+            "client",
+            "_env"
+          ],
+          "line": 7
+        },
+        {
+          "module": "backend.tests.test_trading_oauth_scope",
+          "names": [
+            "act"
+          ],
+          "line": 8
+        },
+        {
+          "module": "backend.tests.test_account_resource_binding",
+          "names": [
+            "approved"
+          ],
+          "line": 9
+        },
+        {
+          "module": "backend.tests.test_trading_api",
+          "names": [
+            "_approval_proof"
+          ],
+          "line": 233
+        }
+      ]
+    },
+    {
+      "path": "backend/tests/test_account_resource_binding.py",
+      "sha256": "a4f3ee16f83ffea31a7d2cc2b0273022e00e49f7d892211c2c4a2dc09fa8ab19",
+      "paired_client_key_module": "backend.tests.test_trading_api",
+      "proof_or_public_key_modules": {
+        "_approval_proof:backend.tests.test_trading_api": "backend.tests.test_trading_api",
+        "act:backend.tests.test_trading_oauth_scope": "backend.tests.test_trading_api"
+      },
+      "result": "SAME_KEY_OWNER",
+      "imports": [
+        {
+          "module": "backend.tests.test_trading_api",
+          "names": [
+            "client",
+            "_env",
+            "_approval_proof"
+          ],
+          "line": 9
+        },
+        {
+          "module": "backend.tests.test_trading_oauth_scope",
+          "names": [
+            "act"
+          ],
+          "line": 10
+        }
+      ]
+    },
+    {
+      "path": "backend/tests/test_account_runtime_recovery_gateway.py",
+      "sha256": "349567e58df2530e3da61fdfefe45ce7c815669f3138a45d58b2f056e68d2c73",
+      "paired_client_key_module": "test_trading_api",
+      "proof_or_public_key_modules": {
+        "_approval_proof:test_trading_api": "test_trading_api"
+      },
+      "result": "SAME_KEY_OWNER",
+      "imports": [
+        {
+          "module": "test_trading_api",
+          "names": [
+            "client",
+            "_env",
+            "_approval_proof"
+          ],
+          "line": 9
+        }
+      ]
+    },
+    {
+      "path": "trading/tests/test_account_unlink_currentness.py",
+      "sha256": "aae58de4d30a746c783fbb9d76b5675174501aff8ddb303829c4f6c52d585e0f",
+      "paired_client_key_module": "backend.tests.test_trading_api",
+      "proof_or_public_key_modules": {},
+      "result": "READ_ONLY_OR_SELF_CONTAINED_HELPER_NO_CROSS_OWNER_PROOF_IMPORT",
+      "imports": [
+        {
+          "module": "backend.tests.test_account_unlink_review",
+          "names": [
+            "client",
+            "_env",
+            "isolate",
+            "paper",
+            "challenge"
+          ],
+          "line": 9
+        },
+        {
+          "module": "backend.tests.test_account_unlink_review",
+          "names": [
+            "native_funds"
+          ],
+          "line": 201
+        }
+      ]
+    },
+    {
+      "path": "backend/tests/test_account_unlink_review.py",
+      "sha256": "8b0412a56980c1c5cbbc12af45217fb41e839ef698b06507837a067919d14fba",
+      "paired_client_key_module": "backend.tests.test_trading_api",
+      "proof_or_public_key_modules": {
+        "challenge:backend.tests.test_account_update_review": "backend.tests.test_trading_api",
+        "act:backend.tests.test_trading_oauth_scope": "backend.tests.test_trading_api"
+      },
+      "result": "SAME_KEY_OWNER",
+      "imports": [
+        {
+          "module": "backend.tests.test_trading_api",
+          "names": [
+            "client",
+            "_env"
+          ],
+          "line": 7
+        },
+        {
+          "module": "backend.tests.test_account_update_review",
+          "names": [
+            "isolate",
+            "challenge"
+          ],
+          "line": 8
+        },
+        {
+          "module": "backend.tests.test_trading_oauth_scope",
+          "names": [
+            "act"
+          ],
+          "line": 9
+        }
+      ]
+    },
+    {
+      "path": "backend/tests/test_account_update_review.py",
+      "sha256": "eaa45b4b612213b74783d8e951fb02d42400f56037ae4b8c67bb2769a20c704f",
+      "paired_client_key_module": "backend.tests.test_trading_api",
+      "proof_or_public_key_modules": {
+        "_approval_proof:backend.tests.test_trading_api": "backend.tests.test_trading_api",
+        "act:backend.tests.test_trading_oauth_scope": "backend.tests.test_trading_api"
+      },
+      "result": "SAME_KEY_OWNER",
+      "imports": [
+        {
+          "module": "backend.tests.test_trading_api",
+          "names": [
+            "client",
+            "_env",
+            "_approval_proof"
+          ],
+          "line": 10
+        },
+        {
+          "module": "backend.tests.test_trading_oauth_scope",
+          "names": [
+            "act"
+          ],
+          "line": 11
+        }
+      ]
+    },
+    {
+      "path": "backend/tests/test_accounts_freshness_api.py",
+      "sha256": "67e787c18ecf523142c1255d28640b56d8e34b9238907884ffe3375304c3798c",
+      "paired_client_key_module": "test_trading_api",
+      "proof_or_public_key_modules": {},
+      "result": "READ_ONLY_OR_SELF_CONTAINED_HELPER_NO_CROSS_OWNER_PROOF_IMPORT",
+      "imports": [
+        {
+          "module": "test_trading_api",
+          "names": [
+            "client",
+            "_env",
+            "EventKind",
+            "make_event",
+            "Ledger"
+          ],
+          "line": 5
+        }
+      ]
+    },
+    {
+      "path": "backend/tests/test_funding_owner_api.py",
+      "sha256": "0b846acb14a66081f455f438773ed17e7c57c24765d1dd36f508fa4bba3c94b0",
+      "paired_client_key_module": "test_trading_api",
+      "proof_or_public_key_modules": {},
+      "result": "READ_ONLY_OR_SELF_CONTAINED_HELPER_NO_CROSS_OWNER_PROOF_IMPORT",
+      "imports": [
+        {
+          "module": "test_trading_api",
+          "names": [
+            "client",
+            "_env"
+          ],
+          "line": 4
+        }
+      ]
+    },
+    {
+      "path": "backend/tests/test_native_account_observation_api.py",
+      "sha256": "c26a9f902422a9ca0fb3d576543f890201c819a7d8fa675d4d5722ddc986d9da",
+      "paired_client_key_module": "test_trading_api",
+      "proof_or_public_key_modules": {},
+      "result": "READ_ONLY_OR_SELF_CONTAINED_HELPER_NO_CROSS_OWNER_PROOF_IMPORT",
+      "imports": [
+        {
+          "module": "test_trading_api",
+          "names": [
+            "client",
+            "_env"
+          ],
+          "line": 4
+        }
+      ]
+    },
+    {
+      "path": "backend/tests/test_native_balance_owner_api.py",
+      "sha256": "87a951195e4f096e5268a7c1ceea320ae6855be5cedc1083e2bc4e65c53647ca",
+      "paired_client_key_module": "test_trading_api",
+      "proof_or_public_key_modules": {},
+      "result": "READ_ONLY_OR_SELF_CONTAINED_HELPER_NO_CROSS_OWNER_PROOF_IMPORT",
+      "imports": [
+        {
+          "module": "test_trading_api",
+          "names": [
+            "client",
+            "_env"
+          ],
+          "line": 4
+        }
+      ]
+    },
+    {
+      "path": "backend/tests/test_native_depth_history.py",
+      "sha256": "3925d399516cd3f8fca1430c655ba9b330d30285b138f8fd5e257df3423194c0",
+      "paired_client_key_module": "test_trading_api",
+      "proof_or_public_key_modules": {},
+      "result": "READ_ONLY_OR_SELF_CONTAINED_HELPER_NO_CROSS_OWNER_PROOF_IMPORT",
+      "imports": [
+        {
+          "module": "test_trading_api",
+          "names": [
+            "client",
+            "_env"
+          ],
+          "line": 12
+        }
+      ]
+    },
+    {
+      "path": "backend/tests/test_native_instrument_catalog_http.py",
+      "sha256": "27ded6c2ae2ed881abd320f01defd0d501abd6efe5563daa42b22cf5ba27eeb6",
+      "paired_client_key_module": "test_trading_api",
+      "proof_or_public_key_modules": {},
+      "result": "READ_ONLY_OR_SELF_CONTAINED_HELPER_NO_CROSS_OWNER_PROOF_IMPORT",
+      "imports": [
+        {
+          "module": "test_trading_api",
+          "names": [
+            "client",
+            "_env"
+          ],
+          "line": 7
+        }
+      ]
+    },
+    {
+      "path": "backend/tests/test_native_owner_key_revocation.py",
+      "sha256": "eb4cc6abed6b05b1350ef742515c8ef7e59bbe9a8e366dc6650bfdea4ee36753",
+      "paired_client_key_module": "test_trading_api",
+      "proof_or_public_key_modules": {
+        "prepare:test_runtime_recovery_gateway": "test_trading_api",
+        "DEVICE_PEM:test_trading_api": "test_trading_api",
+        "DEVICE_KEY:test_trading_api": "test_trading_api"
+      },
+      "result": "SAME_KEY_OWNER",
+      "imports": [
+        {
+          "module": "test_runtime_recovery_gateway",
+          "names": [
+            "client",
+            "_env",
+            "session_control",
+            "prepare",
+            "BASE"
+          ],
+          "line": 7
+        },
+        {
+          "module": "test_trading_api",
+          "names": [
+            "HDR",
+            "DEVICE_PEM",
+            "DEVICE_KEY"
+          ],
+          "line": 8
+        },
+        {
+          "module": "test_runtime_recovery_gateway",
+          "names": [
+            "HERMES_TOKEN"
+          ],
+          "line": 393
+        }
+      ]
+    },
+    {
+      "path": "backend/tests/test_payment_draft_gateway.py",
+      "sha256": "66c5dc410b9054efae4c09d7472c5785cebfecc035059ee7b4dc9394a7e25e54",
+      "paired_client_key_module": "test_trading_api",
+      "proof_or_public_key_modules": {},
+      "result": "READ_ONLY_OR_SELF_CONTAINED_HELPER_NO_CROSS_OWNER_PROOF_IMPORT",
+      "imports": [
+        {
+          "module": "test_trading_api",
+          "names": [
+            "client",
+            "_env"
+          ],
+          "line": 12
+        }
+      ]
+    },
+    {
+      "path": "backend/tests/test_runtime_recovery_faults.py",
+      "sha256": "05b4d321a1f2feb5b89f32abbf6df4e23947984f8bf5ed26414efeb8e0e45c63",
+      "paired_client_key_module": "test_trading_api",
+      "proof_or_public_key_modules": {
+        "prepare:test_runtime_recovery_gateway": "test_trading_api",
+        "DEVICE_PEM:test_trading_api": "test_trading_api"
+      },
+      "result": "SAME_KEY_OWNER",
+      "imports": [
+        {
+          "module": "test_runtime_recovery_gateway",
+          "names": [
+            "client",
+            "_env",
+            "session_control",
+            "prepare",
+            "BASE"
+          ],
+          "line": 7
+        },
+        {
+          "module": "test_trading_api",
+          "names": [
+            "HDR",
+            "DEVICE_PEM"
+          ],
+          "line": 8
+        }
+      ]
+    },
+    {
+      "path": "backend/tests/test_runtime_recovery_gateway.py",
+      "sha256": "17209f6f7b91de38f61d197b3693f085dc1762f1011d2f5576b887826bea87e8",
+      "paired_client_key_module": "test_trading_api",
+      "proof_or_public_key_modules": {
+        "DEVICE_KEY:test_trading_api": "test_trading_api",
+        "_approval_proof:test_trading_api": "test_trading_api"
+      },
+      "result": "SAME_KEY_OWNER",
+      "imports": [
+        {
+          "module": "test_trading_api",
+          "names": [
+            "client",
+            "_env",
+            "DEVICE_KEY",
+            "_approval_proof"
+          ],
+          "line": 15
+        }
+      ]
+    },
+    {
+      "path": "backend/tests/test_runtime_recovery_outbox.py",
+      "sha256": "6a2057f73c223e7197d03645c5e5eef15f10ed8e286d2ec5e84e42b3721a9c87",
+      "paired_client_key_module": "test_trading_api",
+      "proof_or_public_key_modules": {
+        "prepare:test_runtime_recovery_gateway": "test_trading_api"
+      },
+      "result": "SAME_KEY_OWNER",
+      "imports": [
+        {
+          "module": "test_runtime_recovery_gateway",
+          "names": [
+            "client",
+            "_env",
+            "session_control",
+            "prepare",
+            "BASE"
+          ],
+          "line": 6
+        }
+      ]
+    },
+    {
+      "path": "backend/tests/test_stateful_link_binding.py",
+      "sha256": "3318a8063954c01d4e582ce47585412606981b77d172c46e36939c017c1d3e79",
+      "paired_client_key_module": "backend.tests.test_trading_api",
+      "proof_or_public_key_modules": {
+        "act:backend.tests.test_trading_oauth_scope": "backend.tests.test_trading_api",
+        "approved:backend.tests.test_account_resource_binding": "backend.tests.test_trading_api",
+        "DEVICE_PEM:backend.tests.test_trading_api": "backend.tests.test_trading_api"
+      },
+      "result": "SAME_KEY_OWNER",
+      "imports": [
+        {
+          "module": "backend.tests.test_trading_api",
+          "names": [
+            "client",
+            "_env"
+          ],
+          "line": 6
+        },
+        {
+          "module": "backend.tests.test_trading_oauth_scope",
+          "names": [
+            "act"
+          ],
+          "line": 7
+        },
+        {
+          "module": "backend.tests.test_account_resource_binding",
+          "names": [
+            "approved"
+          ],
+          "line": 8
+        },
+        {
+          "module": "backend.tests.test_trading_api",
+          "names": [
+            "HDR",
+            "DEVICE_PEM"
+          ],
+          "line": 201
+        }
+      ]
+    },
+    {
+      "path": "backend/tests/test_trading_api.py",
+      "sha256": "65d920eeacadd34589e1078bde5255d7c179893ebd5faa7b394e1991095c357a",
+      "paired_client_key_module": "test_trading_api",
+      "proof_or_public_key_modules": {},
+      "result": "READ_ONLY_OR_SELF_CONTAINED_HELPER_NO_CROSS_OWNER_PROOF_IMPORT",
+      "imports": []
+    },
+    {
+      "path": "backend/tests/test_trading_oauth_effects.py",
+      "sha256": "aeba2b7bf488983ca3090334c5581de7274de507cd936800bd29491f4e78a5dd",
+      "paired_client_key_module": "backend.tests.test_trading_api",
+      "proof_or_public_key_modules": {
+        "act:backend.tests.test_trading_oauth_scope": "backend.tests.test_trading_api"
+      },
+      "result": "SAME_KEY_OWNER",
+      "imports": [
+        {
+          "module": "backend.tests.test_trading_api",
+          "names": [
+            "client",
+            "_env"
+          ],
+          "line": 5
+        },
+        {
+          "module": "backend.tests.test_trading_oauth_scope",
+          "names": [
+            "act"
+          ],
+          "line": 6
+        }
+      ]
+    },
+    {
+      "path": "backend/tests/test_trading_oauth_scope.py",
+      "sha256": "54267a0f3e82d51c10395defffeb579e4b094009449f42e3c0a3757b3d111920",
+      "paired_client_key_module": "backend.tests.test_trading_api",
+      "proof_or_public_key_modules": {
+        "_approval_proof:backend.tests.test_trading_api": "backend.tests.test_trading_api",
+        "DEVICE_PEM:backend.tests.test_trading_api": "backend.tests.test_trading_api"
+      },
+      "result": "SAME_KEY_OWNER",
+      "imports": [
+        {
+          "module": "backend.tests.test_trading_api",
+          "names": [
+            "client",
+            "_env",
+            "_approval_proof",
+            "DEVICE_PEM",
+            "HDR"
+          ],
+          "line": 6
+        }
+      ]
+    }
+  ],
+  "count": 21,
+  "mismatches_after": [],
+  "mutations": "Only12ImportFromqualifications in4provedfailedconsumers. Others retain selfconsistent bare cohorts or readonly imports. No module alias/importmode/key change.",
+  "independent_scope": "Static symbol provenance, not execution of every unaffected consumer. Selected full4runtime closure and explicit actual caller/crypto controls separately recorded."
+}

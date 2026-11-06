@@ -1,0 +1,13 @@
+# Funding evidence and loss-baseline preservation
+
+Candidate risk-state correction within BE-006/BE-009. No unit, native or production acceptance is issued.
+
+Both snapshot producers previously seeded or increased their high-water/day/week baselines before checking the native funding fence. Missing cash history, unknown credit or a deposit could therefore affect later loss limits even though the current decision was correctly held. Six original counterexamples reproduce that mutation. The producers now retain original account observations but change baselines only when current funding evidence is usable. Account startup follows the same rule: it preserves restored history or the existing uninitialized sentinel until usable evidence arrives. A sentinel is not an observed zero native balance.
+
+Two further counterexamples show restart replaying the inflated value from older held-funding decisions. Those original ledger records remain unchanged. Restoration excludes their unqualified funding baselines, retaining earlier qualified history or an unset state. Other risk, loss-streak and owner recovery evidence remains governed by the existing account-scope checks.
+
+Both direct owner drawdown resume and the durable recovery actor require current usable funding before rebasing the peak. Owner identity/signature checks remain required; approval does not manufacture an accounting observation. Protective account/position reads continue during missing-credit/history conditions, and no native order is sent by these operations.
+
+FUNDING_BASELINE_PRESERVATION_SOURCE_20261024.json retains eight original failures,125 focused passing checks,75 final root checks, and five semantic fault/restored-control pairs. The final disposable PostgreSQL batch has223 passes and two process-arbitration failures with explicit thread/fork exhaustion. Its new PostgreSQL baseline and startup cases pass, and cleanup confirms the server stopped and its fixture was removed. No complete225-case pass is claimed. A separate startup mutation attempt never passed its control because PostgreSQL could not fork a connection; it counts as no detection. Earlier fixture/signature/store/cleanup mistakes and failed runs remain recorded.
+
+Fresh full-source hosted qualification remains pending. The subsequent BE-004_006_NATIVE_ACCOUNT_OBSERVATION.md packet separates bound physical/credit facts from cash coverage and supplies explicit unknown-credit readback. Prospective margin and broker thresholds, reservations, flow-adjusted economics and remaining product work are separate. This correction neither normalizes capital flows nor grants entry permission, provider effects or new frontend scope.

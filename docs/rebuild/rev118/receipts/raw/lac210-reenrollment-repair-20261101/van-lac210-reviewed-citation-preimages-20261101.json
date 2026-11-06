@@ -1,0 +1,20 @@
+[
+  {
+    "path": "android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt",
+    "old_line": 66,
+    "old_anchor": "                            app.gatewayClient.revokePermission(id).also { receipt ->",
+    "current_match_count": 0
+  },
+  {
+    "path": "android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt",
+    "old_line": 68,
+    "old_anchor": "                                val current = app.gatewayClient.permissionGrant(id)",
+    "current_match_count": 0
+  },
+  {
+    "path": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
+    "old_line": 1492,
+    "old_anchor": "    suspend fun revokePermission(grantId: String): JSONObject = withContext(Dispatchers.IO) {",
+    "current_match_count": 0
+  }
+]

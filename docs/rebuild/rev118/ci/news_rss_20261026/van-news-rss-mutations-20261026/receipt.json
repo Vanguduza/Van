@@ -1,0 +1,60 @@
+{
+  "schema": "van.supplemental-source-faults/1",
+  "control_sha256": {
+    "trading/vati/events/news_runtime.py": "8939bb0b8c1c20d9a8cedf3ee462eeece919c022c25d7fa7267f9ac2ea151fd3",
+    "trading/vati/events/news_feed.py": "18497f7014acccbd3eb3126ec0dde96a61012eab15d3c428538e28a956522011",
+    "trading/vati/events/news_ingress.py": "a5da30fe05cc7974c735be4173e858e30044fd8620a991457365932cb67e5cf2"
+  },
+  "source_restored": true,
+  "cases": [
+    {
+      "case": "renew-unchanged-raw-clock",
+      "path": "trading/vati/events/news_runtime.py",
+      "exit": 1,
+      "mutated_sha256": "5a76bf3b653447cb3949320d609d6b1e12ecbbc71578291d01f884ee6a91511d"
+    },
+    {
+      "case": "skip-raw-readback",
+      "path": "trading/vati/events/news_feed.py",
+      "exit": 1,
+      "mutated_sha256": "9f681d08c5a38ac588bca3f7ea9f389ebd6b0ffb292d45cdca94fb20f35561cd"
+    },
+    {
+      "case": "guess-unzoned-publication",
+      "path": "trading/vati/events/news_feed.py",
+      "exit": 1,
+      "mutated_sha256": "597fab802d4c511a6e1b4fb286c22575d8583619db85feaef1137730383fb35d"
+    },
+    {
+      "case": "invent-origin-from-title",
+      "path": "trading/vati/events/news_feed.py",
+      "exit": 1,
+      "mutated_sha256": "b7c84f05470ad6ea1048a1f37623cfba3510b29e73d14733d399e172b11efd51"
+    },
+    {
+      "case": "accept-dtd",
+      "path": "trading/vati/events/news_feed.py",
+      "exit": 1,
+      "mutated_sha256": "cc16bfcc0506cb6a6dc2b786172468d5a2e420f42e74fedd9a87eb224efd9698"
+    },
+    {
+      "case": "ignore-original-raw-checksum",
+      "path": "trading/vati/events/news_feed.py",
+      "exit": 1,
+      "mutated_sha256": "90f50f9a32b1108378f7043a8f5c20e4ffff2281813751e118c0775f6187317d"
+    },
+    {
+      "case": "ignore-missing-snapshot-recovery",
+      "path": "trading/vati/events/news_ingress.py",
+      "exit": 1,
+      "mutated_sha256": "98b0f292c719175b7540162e737f03ec99f4c91770eb93b76bafb7f4a07f5433"
+    },
+    {
+      "case": "alias-owner-snapshot-report",
+      "path": "trading/vati/events/news_ingress.py",
+      "exit": 1,
+      "mutated_sha256": "0899ec49af017c68b89114583e8afc0a30a2c7532014259b00472169d485f42b"
+    }
+  ],
+  "not_canonical_corpus": true
+}

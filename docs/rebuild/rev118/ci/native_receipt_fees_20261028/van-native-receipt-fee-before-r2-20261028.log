@@ -1,0 +1,91 @@
+FFF.                                                                     [100%]
+=================================== FAILURES ===================================
+_ test_valid_wire_fill_retains_unknown_fee_and_preserves_an_explicit_zero[missing0] _
+
+missing = ('commission',)
+
+    @pytest.mark.parametrize('missing',[('commission',),('moneyDigits',),('commission','moneyDigits'),()])
+    def test_valid_wire_fill_retains_unknown_fee_and_preserves_an_explicit_zero(missing):
+        class Peer(FakeCtrader):
+            def send(self,name,body,cid=None):
+                body=deepcopy(body)
+                if name=='ProtoOAExecutionEvent' and 'deal' in body:
+                    body['deal']['commission']=-350 if missing else 0
+                    for key in missing:body['deal'].pop(key,None)
+                return super().send(name,body,cid)
+        peer=Peer();adapter=make_adapter(peer)
+        try:
+            adapter.sync_account()
+            command=OrderCommand('fee-knowledge','d'*64,'fee-knowledge-key','ct_demo','ctrader','EURUSD',
+                Direction.LONG,'MARKET',D('.10'),D('1.10008'),D('1.09808'),StopMode.VENUE,LossModel.STOP_DISTANCE).sealed()
+            receipt=adapter.submit(command,now_ms=1700000000000)
+            assert receipt.status=='FILLED' and receipt.filled_qty==D('.10')
+            assert receipt.protective_stop_confirmed and len(adapter.positions())==1
+>           if missing:assert receipt.fees is None,'missing native fee/precision is unknown, not measured zero'
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           AssertionError: missing native fee/precision is unknown, not measured zero
+E           assert Decimal('0') is None
+E            +  where Decimal('0') = ExecutionReceipt(trade_intent_id='fee-knowledge', decision_hash='ddddddddddddddddddddddddddddddddddddddddddddddddddddd...tective_stop_price=Decimal('1.09808'), receipt_hash='ae92dd27fd4d8c71097b853337705752b428aca1659ff6d2aa5bc57368310da5').fees
+
+../../test_van_native_receipt_fee_knowledge_20261028.py:29: AssertionError
+_ test_valid_wire_fill_retains_unknown_fee_and_preserves_an_explicit_zero[missing1] _
+
+missing = ('moneyDigits',)
+
+    @pytest.mark.parametrize('missing',[('commission',),('moneyDigits',),('commission','moneyDigits'),()])
+    def test_valid_wire_fill_retains_unknown_fee_and_preserves_an_explicit_zero(missing):
+        class Peer(FakeCtrader):
+            def send(self,name,body,cid=None):
+                body=deepcopy(body)
+                if name=='ProtoOAExecutionEvent' and 'deal' in body:
+                    body['deal']['commission']=-350 if missing else 0
+                    for key in missing:body['deal'].pop(key,None)
+                return super().send(name,body,cid)
+        peer=Peer();adapter=make_adapter(peer)
+        try:
+            adapter.sync_account()
+            command=OrderCommand('fee-knowledge','d'*64,'fee-knowledge-key','ct_demo','ctrader','EURUSD',
+                Direction.LONG,'MARKET',D('.10'),D('1.10008'),D('1.09808'),StopMode.VENUE,LossModel.STOP_DISTANCE).sealed()
+            receipt=adapter.submit(command,now_ms=1700000000000)
+            assert receipt.status=='FILLED' and receipt.filled_qty==D('.10')
+            assert receipt.protective_stop_confirmed and len(adapter.positions())==1
+>           if missing:assert receipt.fees is None,'missing native fee/precision is unknown, not measured zero'
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           AssertionError: missing native fee/precision is unknown, not measured zero
+E           assert Decimal('3.5') is None
+E            +  where Decimal('3.5') = ExecutionReceipt(trade_intent_id='fee-knowledge', decision_hash='ddddddddddddddddddddddddddddddddddddddddddddddddddddd...tective_stop_price=Decimal('1.09808'), receipt_hash='b32173afd97e35e35691cfc73796658b707865034266cf1b7105f9d8c8f2be36').fees
+
+../../test_van_native_receipt_fee_knowledge_20261028.py:29: AssertionError
+_ test_valid_wire_fill_retains_unknown_fee_and_preserves_an_explicit_zero[missing2] _
+
+missing = ('commission', 'moneyDigits')
+
+    @pytest.mark.parametrize('missing',[('commission',),('moneyDigits',),('commission','moneyDigits'),()])
+    def test_valid_wire_fill_retains_unknown_fee_and_preserves_an_explicit_zero(missing):
+        class Peer(FakeCtrader):
+            def send(self,name,body,cid=None):
+                body=deepcopy(body)
+                if name=='ProtoOAExecutionEvent' and 'deal' in body:
+                    body['deal']['commission']=-350 if missing else 0
+                    for key in missing:body['deal'].pop(key,None)
+                return super().send(name,body,cid)
+        peer=Peer();adapter=make_adapter(peer)
+        try:
+            adapter.sync_account()
+            command=OrderCommand('fee-knowledge','d'*64,'fee-knowledge-key','ct_demo','ctrader','EURUSD',
+                Direction.LONG,'MARKET',D('.10'),D('1.10008'),D('1.09808'),StopMode.VENUE,LossModel.STOP_DISTANCE).sealed()
+            receipt=adapter.submit(command,now_ms=1700000000000)
+            assert receipt.status=='FILLED' and receipt.filled_qty==D('.10')
+            assert receipt.protective_stop_confirmed and len(adapter.positions())==1
+>           if missing:assert receipt.fees is None,'missing native fee/precision is unknown, not measured zero'
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           AssertionError: missing native fee/precision is unknown, not measured zero
+E           assert Decimal('0') is None
+E            +  where Decimal('0') = ExecutionReceipt(trade_intent_id='fee-knowledge', decision_hash='ddddddddddddddddddddddddddddddddddddddddddddddddddddd...tective_stop_price=Decimal('1.09808'), receipt_hash='ae92dd27fd4d8c71097b853337705752b428aca1659ff6d2aa5bc57368310da5').fees
+
+../../test_van_native_receipt_fee_knowledge_20261028.py:29: AssertionError
+=========================== short test summary info ============================
+FAILED ../../test_van_native_receipt_fee_knowledge_20261028.py::test_valid_wire_fill_retains_unknown_fee_and_preserves_an_explicit_zero[missing0]
+FAILED ../../test_van_native_receipt_fee_knowledge_20261028.py::test_valid_wire_fill_retains_unknown_fee_and_preserves_an_explicit_zero[missing1]
+FAILED ../../test_van_native_receipt_fee_knowledge_20261028.py::test_valid_wire_fill_retains_unknown_fee_and_preserves_an_explicit_zero[missing2]
+3 failed, 1 passed in 0.77s

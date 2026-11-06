@@ -1,0 +1,7 @@
+android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1632:    suspend fun revokePermission(grantId: String, reviewed: JSONObject, reviewedProfile: String): JSONObject = withContext(Dispatchers.IO) {
+android/app/src/main/java/com/dial/van/command/work/MissionControls.kt:38:    val repository = remember(app) { MissionRepository(app.gatewayClient) }
+android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt:91:                                app.gatewayClient.revokePermission(id, selected, profile).also { receipt ->
+android/app/src/main/java/com/dial/van/command/work/WorkRoute.kt:99:    val repository = remember(app) { MissionRepository(app.gatewayClient) }
+android/app/src/main/java/com/dial/van/mission/MissionRepository.kt:29:class MissionRepository(private val client: VanGatewayClient) {
+android/app/src/main/java/com/dial/van/mission/MissionRepository.kt:139:    suspend fun revokePermission(grantId: String, reviewed: JSONObject, reviewedProfile: String) =
+android/app/src/main/java/com/dial/van/mission/MissionRepository.kt:140:        client.revokePermission(grantId, reviewed, reviewedProfile)

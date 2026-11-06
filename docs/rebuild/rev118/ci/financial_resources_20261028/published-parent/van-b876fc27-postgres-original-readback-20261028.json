@@ -1,0 +1,49 @@
+{
+  "artifact_id": 12834333705,
+  "head": "b876fc27f35765244fb169dbde1030f2b79b836e",
+  "bytes": 195586,
+  "sha256": "1d521a36b67a93c8ff05fb2a6e0835c44eef1b5b507059463e53b94fba1d36de",
+  "expected_bytes": 195586,
+  "expected_sha256": "1d521a36b67a93c8ff05fb2a6e0835c44eef1b5b507059463e53b94fba1d36de",
+  "original_archive_independently_verified": true,
+  "state": "ORIGINAL_ARCHIVE_SIZE_SHA_CRC_PATHS_AND_EXTRACTED_BYTES_VERIFIED",
+  "entries": [
+    "trading-source-report.xml",
+    "voice-source-report.xml",
+    "trading-source.log",
+    "postgres-ledger-report.xml"
+  ],
+  "junit_summaries": {
+    "trading-source-report.xml": {
+      "cases": 5120,
+      "passed": 5119,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "skip_reasons": [
+        "dial-new checkout not available (set DIAL_REPO)"
+      ]
+    },
+    "voice-source-report.xml": {
+      "cases": 117,
+      "passed": 117,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skip_reasons": []
+    },
+    "postgres-ledger-report.xml": {
+      "cases": 26,
+      "passed": 26,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "skip_reasons": []
+    }
+  },
+  "artifact_metadata_bound_to_exact_head": true,
+  "original_job_checkout": [
+    "4c3bddc Merge b876fc27f35765244fb169dbde1030f2b79b836e into 8eb1889822fc8a83f219977c15340172e16acd91"
+  ],
+  "original_job_log_and_JUnit_counts_match": true
+}

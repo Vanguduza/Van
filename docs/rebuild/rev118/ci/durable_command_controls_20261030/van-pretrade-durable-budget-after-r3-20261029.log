@@ -1,0 +1,33 @@
+................F....................................................... [ 75%]
+.......................                                                  [100%]
+=================================== FAILURES ===================================
+_____ test_original_command_sizes_restore_fat_finger_control_after_reopen ______
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-260/test_original_command_sizes_re0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_original_command_sizes_restore_fat_finger_control_after_reopen(tmp_path,eurusd):
+        path=tmp_path/'sizes.sqlite';ledger=Ledger(path)
+        try:
+            _,adapter,_,_,send=durable_controls(ledger,eurusd,max_orders=100)
+            for index in range(20):
+>               receipt=send(index,risk=D('.0002'))
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_pretrade_durable_command_budget.py:145: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+index = 0, risk = Decimal('0.0002'), now = None
+
+    def send(index, *, risk=None, now=None):
+        request=replace(trade,trade_intent_id='command-'+str(index),idempotency_key='command-key-'+str(index),
+            **({'requested_risk_pct':risk} if risk is not None else {}))
+        decision=RiskAuthority(mandate).evaluate_safe(request,native)
+>       assert decision.decision in {Decision.APPROVED,Decision.REDUCED}
+E       AssertionError: assert <Decision.REJECTED: 'REJECTED'> in {<Decision.APPROVED: 'APPROVED'>, <Decision.REDUCED: 'REDUCED'>}
+E        +  where <Decision.REJECTED: 'REJECTED'> = RiskDecision(trade_intent_id='command-0', decision=<Decision.REJECTED: 'REJECTED'>, reason_code='SIZE_BELOW_VENUE_MIN'...bdcbbf835', mandate_hash='07a90fa7a4e50831a3d0a69b06526e5ec46d93e8bf88995c93d4b9f340b686b5', approval_schema_version=2).decision
+
+trading/tests/test_pretrade_durable_command_budget.py:34: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_pretrade_durable_command_budget.py::test_original_command_sizes_restore_fat_finger_control_after_reopen
+1 failed, 94 passed in 2.51s

@@ -1,0 +1,1140 @@
+diff --git a/android/app/src/main/java/com/dial/van/command/settings/OwnerPermissionGrantSection.kt b/android/app/src/main/java/com/dial/van/command/settings/OwnerPermissionGrantSection.kt
+index c6e42683..0a61d9b9 100644
+--- a/android/app/src/main/java/com/dial/van/command/settings/OwnerPermissionGrantSection.kt
++++ b/android/app/src/main/java/com/dial/van/command/settings/OwnerPermissionGrantSection.kt
+@@ -88,9 +88,13 @@ internal fun PermissionGrantDetailDialog(app: VanApplication, grantId: String, o
+         Column(modifier = Modifier.heightIn(max = 420.dp).verticalScroll(rememberScrollState())) {
+             OwnerDataSection("Current grant $grantId", load = { app.gatewayClient.permissionGrant(grantId) }) { row, _ ->
+                 Text("${row.ownerValue("permission")}\nOrigin: ${row.ownerValue("origin_evidence_ref")}")
+-                val nativeAdmissions = row.optBoolean("native_authority_required")
++                val nativeAdmissions = row.optString("use_count_semantics") == "CANONICAL_EFFECT_ADMISSION_RESERVATIONS"
+                 Text("Expires ${ownerTime(row.optLong("expires_at_ms"))}\nRevoked ${ownerTime(row.optLong("revoked_at_ms"))}\n${row.optInt("use_count")} ${if (nativeAdmissions) "admissions charged" else "uses"} · last ${if (nativeAdmissions) "admission" else "use"} ${ownerTime(row.optLong("last_used_at_ms"))}")
+                 if (nativeAdmissions) Text("An admission reserves the budget before execution. Interrupted or uncertain execution remains charged; this count does not prove provider completion.")
++                if (row.optBoolean("source_verified") && row.optBoolean("accounting_verified")) {
++                    Text("Maximum ${row.optInt("max_uses")} admissions · ${row.optInt("remaining_uses")} remaining · ${row.optInt("effective_remaining_uses")} currently available")
++                    Text("Current state: ${row.ownerValue("authority_state")}")
++                } else Text("This registry entry needs review. Current available authority is zero. Revoking it does not confirm provider access was removed.")
+                 row.optJSONObject("exact_scope")?.let { Text(it.toString(2)) }
+                 Text(if (row.optBoolean("native_authority_required")) "Every effect still requires independent canonical action authority." else "This historical grant has no supplied native consumption contract.")
+                 if (row.optBoolean("fresh_native_approval_per_use")) Text("Fresh native biometric approval is required for each A4 use.")
+diff --git a/android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt b/android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt
+index f9b06b03..6578c277 100644
+--- a/android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt
++++ b/android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt
+@@ -13,6 +13,7 @@ import androidx.compose.material3.OutlinedButton
+ import androidx.compose.material3.Text
+ import androidx.compose.material3.TextButton
+ import androidx.compose.runtime.Composable
++import androidx.compose.runtime.LaunchedEffect
+ import androidx.compose.runtime.getValue
+ import androidx.compose.runtime.mutableStateOf
+ import androidx.compose.runtime.remember
+@@ -59,18 +60,42 @@ fun PermissionsRoute(app: VanApplication, onBack: () -> Unit, onOpenRoute: (Stri
+                 val revoked = body.optJSONArray("revoked").ownerRows()
+                 if (revoked.isNotEmpty()) SectionHeader("Revoked permissions")
+                 revoked.forEach { Text("${it.ownerValue("permission")} · revoked ${ownerTime(it.optLong("revoked_at_ms"))}", style = tokens.type.label, color = tokens.color.textSecondary) }
+-                revoking?.let { grant -> AlertDialog(onDismissRequest = { revoking = null }, title = { Text("Revoke ${grant.ownerValue("display_name")}?") }, text = { Text("VAN will lose this standing permission. Completed effects are unchanged. Any later authority must be granted through a supported owner approval.") }, confirmButton = {
+-                    Button(enabled = actions.canMutate, onClick = {
+-                        val id = grant.getString("grant_id"); revoking = null
+-                        actions.mutate("revoke:$id", "Permission revocation independently read back.") {
+-                            app.gatewayClient.revokePermission(id).also { receipt ->
+-                                check(receipt.optString("grant_id") == id && receipt.optBoolean("revoked")) { "Revocation was not confirmed." }
+-                                val current = app.gatewayClient.permissionGrant(id)
+-                                check(current.optString("grant_id") == id && !current.isNull("revoked_at_ms") && current.optLong("revoked_at_ms") > 0L) { "The revoked grant could not be independently read back." }
+-                            }
++                revoking?.let { grant ->
++                    val id = grant.getString("grant_id")
++                    var reviewed by remember(id) { mutableStateOf<org.json.JSONObject?>(null) }
++                    var reviewedProfile by remember(id) { mutableStateOf("") }
++                    var reviewFailed by remember(id) { mutableStateOf(false) }
++                    LaunchedEffect(id) {
++                        val profile = app.gatewayClient.permissionProfileIdentity()
++                        runCatching { app.gatewayClient.permissionGrant(id) }.onSuccess {
++                            if (app.gatewayClient.permissionProfileIdentity() == profile) { reviewedProfile = profile; reviewed = it }
++                            else reviewFailed = true
++                        }.onFailure { reviewFailed = true }
++                    }
++                    AlertDialog(onDismissRequest = { revoking = null }, title = { Text("Revoke ${grant.ownerValue("display_name")}?") }, text = {
++                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
++                            Text("Revoke this exact grant. Provider access is managed separately; completed effects are unchanged. Later actions still need their own current authority.")
++                            val current = reviewed
++                            if (current != null) {
++                                Text("${current.ownerValue("permission")} · ${current.ownerValue("authority_state")}")
++                                Text("Scope: ${current.ownerValue("scope")}")
++                            } else Text(if (reviewFailed) "Permission details are unavailable. Close and review them again before confirming." else "Reading current permission details…")
+                         }
+-                    }) { Text("Revoke permission") }
+-                }, dismissButton = { TextButton(onClick = { revoking = null }) { Text("Keep permission") } }) }
++                    }, confirmButton = {
++                        Button(enabled = actions.canMutate && reviewed != null, onClick = {
++                            val selected = reviewed ?: return@Button
++                            val profile = reviewedProfile
++                            revoking = null
++                            actions.mutate("revoke:$id", "Permission revocation independently read back.") {
++                                app.gatewayClient.revokePermission(id, selected, profile).also { receipt ->
++                                    check(receipt.optString("grant_id") == id && receipt.optBoolean("revoked")) { "Revocation was not confirmed." }
++                                    val current = app.gatewayClient.permissionGrant(id)
++                                    check(current.optString("grant_id") == id && !current.isNull("revoked_at_ms") && current.optLong("revoked_at_ms") > 0L) { "The revoked grant could not be independently read back." }
++                                }
++                            }
++                        }) { Text("Revoke permission") }
++                    }, dismissButton = { TextButton(onClick = { revoking = null }) { Text("Keep permission") } })
++                }
+                 inspecting?.let { PermissionGrantDetailDialog(app, it, onDismiss = { inspecting = null }) }
+             }
+         }
+diff --git a/android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt b/android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt
+index 835583b3..0516566e 100644
+--- a/android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt
++++ b/android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt
+@@ -1621,8 +1621,38 @@ class VanGatewayClient(context: Context) {
+         getJson("/v1/permissions/grants/${encodeSegment(grantId)}")
+     }
+ 
+-    suspend fun revokePermission(grantId: String): JSONObject = withContext(Dispatchers.IO) {
+-        postJson("/v1/permissions/${encodeSegment(grantId)}/revoke", JSONObject())
++    private val permissionRevocations = PermissionRevocationOperations(object : PermissionRevocationStore {
++        override fun load(): String? = prefs.getString("permission_revocation_originals_v1", null)
++        override fun save(value: String): Boolean = prefs.edit().putString("permission_revocation_originals_v1", value).commit()
++    })
++
++    fun permissionProfileIdentity(): String = java.security.MessageDigest.getInstance("SHA-256")
++        .digest(baseUrl.toByteArray(Charsets.UTF_8)).joinToString("") { "%02x".format(it) }
++
++    suspend fun revokePermission(grantId: String, reviewed: JSONObject, reviewedProfile: String): JSONObject = withContext(Dispatchers.IO) {
++        val owner = deviceId ?: error("The active owner changed. Review the permission again.")
++        try {
++            permissionRevocations.revoke(reviewedProfile, owner, grantId, reviewed,
++                currentProfile = { permissionProfileIdentity() }, currentDevice = { deviceId },
++                detail = { getJson("/v1/permissions/grants/${encodeSegment(grantId)}") },
++                originalResult = { original ->
++                    try { getJson("/v1/permissions/${encodeSegment(grantId)}/revocations/${encodeSegment(original.operationId)}") }
++                    catch (failure: GatewayHttpException) { if (failure.code == 404) null else throw failure }
++                },
++                submit = { original -> postProved("/v1/permissions/${encodeSegment(grantId)}/revoke", JSONObject(original.requestBody)) },
++            )
++        } catch (failure: IllegalStateException) {
++            val message = when (failure.message) {
++                "permission_revocation_request_expired" -> "This permission review expired. Review the current details and confirm again."
++                "permission_caller_changed", "permission_revocation_caller_changed" -> "The active owner or connection changed. Review the permission again."
++                "permission_revocation_stale_revision", "permission_revocation_original_changed" -> "Permission changed. Review its current details before confirming again."
++                else -> "The original permission change cannot be confirmed yet. Its recovery record has been kept."
++            }
++            throw IllegalStateException(message, failure)
++        } catch (failure: GatewayHttpException) {
++            if (failure.code == 409) throw IllegalStateException("Permission changed. Review its current details before confirming again.", failure)
++            throw failure
++        }
+     }
+ 
+     suspend fun autonomy(): JSONObject = withContext(Dispatchers.IO) { getJson("/v1/autonomy") }
+diff --git a/android/verification/build.gradle.kts b/android/verification/build.gradle.kts
+index 9f3f8a60..3fb59a72 100644
+--- a/android/verification/build.gradle.kts
++++ b/android/verification/build.gradle.kts
+@@ -146,6 +146,7 @@ sourceSets {
+             "com/dial/van/onboarding/OnboardingPlan.kt",
+             "com/dial/van/gateway/GatewayRetry.kt",
+             "com/dial/van/gateway/GatewayMutationRetry.kt",
++            "com/dial/van/gateway/PermissionRevocationOperations.kt",
+             "com/dial/van/gateway/ReplayTrigger.kt",
+             "com/dial/van/telemetry/DeviceTelemetry.kt",
+             "com/dial/van/telemetry/BrowserStreamTelemetry.kt",
+diff --git a/backend/van_gateway/capability/owner_permissions.py b/backend/van_gateway/capability/owner_permissions.py
+index 42aeb7fa..c3a9c785 100644
+--- a/backend/van_gateway/capability/owner_permissions.py
++++ b/backend/van_gateway/capability/owner_permissions.py
+@@ -12,7 +12,7 @@ import re
+ import time
+ from typing import Any
+ 
+-from fastapi import APIRouter, HTTPException
++from fastapi import APIRouter, HTTPException, Request
+ 
+ from van_gateway.capability.permissions import KNOWN_PERMISSIONS, _SECRET_SHAPED
+ from van_gateway.models import ActionClass, PrincipalType
+@@ -243,6 +243,7 @@ async def enforce_permission_scope(store: Store, *, action_id: str, parameters:
+         device = await (await connection.execute("SELECT revoked_at_unix FROM devices WHERE device_id=?", (current["device_id"],))).fetchone()
+         if not row or row["revoked_at_ms"] is not None or row["expires_at_ms"] <= now or not device or device["revoked_at_unix"] is not None:
+             raise OwnerPermissionDenied("permission_scope_revoked_or_expired")
++        await _validated_permission_uses(connection,row,current['parameters'])
+         if prior and (not isinstance(prior, dict) or prior.get("grant_id") != current["grant_id"]
+             or prior.get("scope_digest") != digest(current["parameters"])
+             or prior.get("action_id") != action_id or digest(prior.get("parameters")) != digest(parameters)):
+@@ -299,14 +300,264 @@ def build_owner_permission_router(store: Store) -> APIRouter:
+     @router.get("/contracts")
+     async def contracts(): return await permission_contracts(store)
+     @router.get("/grants/{grant_id}")
+-    async def detail(grant_id: str):
+-        row=await store.fetchone("SELECT * FROM permission_grants WHERE grant_id=?",(grant_id,))
+-        if not row: raise HTTPException(status_code=404,detail="permission_grant_not_found")
+-        result=dict(row)
+-        if str(row["origin_evidence_ref"] or "").startswith("owner-permission://"):
+-            result["exact_scope"]=json.loads(row["scope"])
+-            result["native_authority_required"]=True
+-            result["use_count_semantics"] = USE_COUNT_SEMANTICS
+-            result["fresh_native_approval_per_use"] = next((c["fresh_native_approval_per_use"] for c in (await permission_contracts(store))["contracts"] if c["action_id"]==result["exact_scope"]["action_id"]),True)
+-        return result
++    async def detail(grant_id: str, request: Request):
++        from van_gateway.capability.permissions import PermissionError_
++        try:
++            cipher=request.app.state.auth._fernet
++            return await owner_grant_detail(store,grant_id,device_id=getattr(request.state,"van_device_id",None),cipher=cipher,
++                access_token_hash=hashlib.sha256(request.headers.get("X-Van-Device-Token","").encode()).hexdigest())
++        except PermissionError_ as exc:
++            raise permission_http_error(exc) from exc
+     return router
++
++
++def permission_http_error(exc):
++    status=404 if exc.code in {"permission_grant_not_found","permission_revocation_unknown"} else 403 if exc.code in {"permission_device_mismatch","permission_device_revoked"} else 503 if exc.code in {"permission_scope_integrity_failed","permission_revocation_history_unavailable"} else 409
++    return HTTPException(status_code=status,detail=exc.code)
++
++# LAC-210 uses the existing permission registry and runtime_meta original journal.
++# A receipt never grants provider/native authority or replaces the grant owner.
++REVOCATION_PREFIX = 'owner_permission_revocation:'
++REVOCATION_SCHEMA = 'van.owner-permission-revocation/1'
++REVOCATION_REQUEST_TTL_MS = 600_000
++REFUSALS = {'permission_revocation_stale_revision','permission_revocation_request_expired','permission_revocation_caller_changed'}
++
++async def _validated_permission_uses(db,row,parameters):
++    count=row['use_count']
++    if type(count) is not int or not 0<=count<=parameters['max_uses']:
++        raise OwnerPermissionDenied('permission_use_count_integrity_failed')
++    claims=await (await db.execute(
++        "SELECT key,value FROM runtime_meta WHERE key GLOB ? AND CASE WHEN json_valid(value) "
++        "THEN json_extract(value,'$.grant_id')=? ELSE 0 END LIMIT 1001",
++        (CLAIM_PREFIX+'*',row['grant_id']),
++    )).fetchall()
++    if count!=len(claims):raise OwnerPermissionDenied('permission_use_count_integrity_failed')
++    for claim in claims:
++        value=json.loads(claim['value'])
++        if (set(value)!={'grant_id','scope_digest','action_id','parameters'}
++            or not claim['key'][len(CLAIM_PREFIX):] or value['scope_digest']!=digest(parameters)
++            or value['action_id']!=parameters['action_id'] or digest(value['parameters'])!=digest(parameters['parameters'])):
++            raise OwnerPermissionDenied('permission_use_count_integrity_failed')
++    return count
++
++async def _raw_meta(db,key):
++    row=await (await db.execute('SELECT value FROM runtime_meta WHERE key=?',(key,))).fetchone()
++    return row['value'] if row else None
++
++async def grant_detail_in_snapshot(db,grant_id,*,now_ms=None):
++    from van_gateway.capability.permissions import PermissionError_
++    row=await (await db.execute('SELECT * FROM permission_grants WHERE grant_id=?',(grant_id,))).fetchone()
++    if row is None:raise PermissionError_('permission_grant_not_found')
++    immutable={k:row[k] for k in ('grant_id','permission','display_name','scope','origin','origin_evidence_ref','granted_at_ms','expires_at_ms')}
++    result=dict(row)
++    now=int(time.time()*1000) if now_ms is None else now_ms
++    bound=False;accounting=False;witness=None;raw_witness=None;raw_authority=None
++    owner_source=str(row['origin_evidence_ref'] or '').startswith('owner-permission://')
++    if owner_source:
++        command_id=str(row['origin_evidence_ref'])[len('owner-permission://'):]
++        raw_witness=await _raw_meta(db,WITNESS_PREFIX+command_id)
++        from van_gateway.command.authority import CommandAuthorityService
++        raw_authority=await _raw_meta(db,CommandAuthorityService.PREFIX+command_id)
++        try:
++            if not raw_witness or len(raw_witness)>32768 or not raw_authority or len(raw_authority)>65536:
++                raise ValueError('original source unavailable')
++            witness=json.loads(raw_witness)
++            params=permission_parameters(json.loads(row['scope']))
++            bound=await _source_bound(db,witness,row,params)
++        except (ValueError,TypeError,KeyError,AttributeError,RecursionError):
++            bound=False
++    if bound:
++        try:
++            current=await _meta(db,scope_key(params['action_id'],params['parameters']))
++            current_matches=isinstance(current,dict) and digest(current)==digest(witness)
++            await _validated_permission_uses(db,row,params)
++            accounting=True
++        except (ValueError,TypeError,KeyError):current_matches=False
++        issuer=await (await db.execute('SELECT revoked_at_unix FROM devices WHERE device_id=?',(witness['device_id'],))).fetchone()
++        definition=await (await db.execute('SELECT enabled,action_class FROM action_definitions WHERE action_id=?',(params['action_id'],))).fetchone()
++        available=bool(definition and definition['enabled'] and definition['action_class']!='A5')
++        remaining=max(0,params['max_uses']-row['use_count']) if accounting else None
++        live=bool(accounting and row['revoked_at_ms'] is None and row['expires_at_ms']>now and issuer and issuer['revoked_at_unix'] is None)
++        usable=bool(live and current_matches and available and remaining and remaining>0)
++        state=('CORRUPT' if not accounting else 'REVOKED' if row['revoked_at_ms'] is not None else
++            'EXPIRED' if row['expires_at_ms']<=now else 'ISSUER_REVOKED' if not issuer or issuer['revoked_at_unix'] is not None else
++            'SUPERSEDED' if not current_matches else 'UNAVAILABLE' if not available else 'EXHAUSTED' if remaining==0 else 'CURRENT')
++        result.update(exact_scope=params,device_id=witness['device_id'],grant_device_id=witness['device_id'],
++            max_uses=params['max_uses'],remaining_uses=remaining,effective_remaining_uses=remaining if usable else 0,
++            grant_current=usable,source_verified=True,accounting_verified=accounting,
++            use_count_semantics=USE_COUNT_SEMANTICS if accounting else 'UNVERIFIED_STORED_COUNT',
++            fresh_native_approval_per_use=not definition or definition['action_class']=='A4',
++            effect_scope='EXACT_OWNER_CONSENT_WITH_INDEPENDENT_NATIVE_AUTHORITY')
++    else:
++        state='CORRUPT' if owner_source else 'REVOKED' if row['revoked_at_ms'] is not None else 'EXPIRED' if row['expires_at_ms'] is not None and row['expires_at_ms']<=now else 'SOURCE_UNVERIFIED'
++        result.update(device_id=None,grant_device_id=None,max_uses=None,remaining_uses=None,effective_remaining_uses=0,
++            grant_current=False,source_verified=False,accounting_verified=False,use_count_semantics='UNVERIFIED_STORED_COUNT',
++            effect_scope='LOCAL_REGISTRY_ONLY_CORRUPT_SOURCE' if owner_source else 'LOCAL_REGISTRY_ONLY_SOURCE_UNVERIFIED')
++    # Untrusted source fields remain visible as stored claims, never as authority;
++    # credential-shaped values are redacted even when corrupt history is inspected.
++    for field in ('scope','origin_evidence_ref','display_name'):
++        if _SECRET_SHAPED.search(str(result.get(field) or '')):result[field]='[redacted credential-shaped stored value]'
++    result.update(authority_state=state,native_authority_required=True,observed_at_ms=now)
++    result['source_digest']=digest({'grant':immutable,'witness_raw':raw_witness,'authority_raw':raw_authority})
++    # Protective withdrawal selects immutable authority generation, not a moving
++    # reservation counter. Accounting is independently read/preserved in this snapshot.
++    result['source_revision']=digest({'grant_id':grant_id,'source':result['source_digest']})
++    result['accounting_revision']=digest({'use_count':row['use_count'],'last_used_at_ms':row['last_used_at_ms'],
++        'revoked_at_ms':row['revoked_at_ms'],'revocation_reason':row['revocation_reason'],'state':state})
++    return result
++
++async def _revocation_actor(db,device_id,*,access_token_hash=None,proof_required=False):
++    from van_gateway.capability.permissions import PermissionError_
++    row=await (await db.execute('SELECT * FROM devices WHERE device_id=?',(device_id,))).fetchone()
++    if not row or row['revoked_at_unix'] is not None or access_token_hash is not None and row['access_token_hash']!=access_token_hash:
++        raise PermissionError_('permission_device_revoked')
++    binding=await (await db.execute('SELECT binding_id,status,device_key_fingerprint FROM owner_device_bindings WHERE device_id=?',(device_id,))).fetchone()
++    if proof_required and (not binding or binding['status']!='ACTIVE'):
++        raise PermissionError_('permission_device_revoked')
++    return digest({'caller_device_id':device_id,'enrolled_at_unix':row['enrolled_at_unix'],
++        'public_key_pem':row['public_key_pem'],'access_token_hash':row['access_token_hash'],
++        'binding':dict(binding) if binding else None})
++
++async def owner_grant_detail(store,grant_id,*,device_id=None,cipher=None,access_token_hash=None):
++    import uuid
++    async with store.connection() as db:
++        await db.execute('BEGIN')
++        detail=await grant_detail_in_snapshot(db,grant_id)
++        if device_id is not None:
++            caller=await _revocation_actor(db,device_id,access_token_hash=access_token_hash)
++            detail['caller_device_id']=device_id
++            detail['revocation_request_available']=cipher is not None
++            if cipher is None:detail['revocation_unavailable_reason']='protected_operation_storage_unavailable'
++            if cipher is not None:
++                # Stateless inert proposal: GET creates no command, grant or journal row.
++                proposal=dict(operation_id='permission-revoke-'+uuid.uuid4().hex,caller_device_id=device_id,
++                    grant_device_id=detail['grant_device_id'],expected_revision=detail['source_revision'],
++                    expected_source_digest=detail['source_digest'])
++                token=dict(schema='van.permission-revocation-request/1',request=proposal,grant_id=grant_id,
++                    caller_context=caller,issued_at_ms=detail['observed_at_ms'],expires_at_ms=detail['observed_at_ms']+REVOCATION_REQUEST_TTL_MS)
++                detail['revocation_request']={**proposal,'request_token':cipher.encrypt(Store.dumps(token).encode()).decode()}
++        return detail
++
++REQUEST_FIELDS={'operation_id','caller_device_id','grant_device_id','expected_revision','expected_source_digest','request_token'}
++RESULT_FIELDS={'operation_id','grant_id','caller_device_id','grant_device_id','state','revoked','revoked_at_ms',
++    'source_digest','expected_revision','effect_scope','native_authority_issued','reason_code','changed','request_deadline_ms'}
++
++def _decode_request(cipher,request,grant_id):
++    from cryptography.fernet import InvalidToken
++    from van_gateway.capability.permissions import PermissionError_
++    try:
++        raw=request['request_token']
++        if not isinstance(raw,str) or not 1<=len(raw)<=16384:raise ValueError('token shape')
++        token=json.loads(cipher.decrypt(raw.encode()))
++        proposal={k:request[k] for k in REQUEST_FIELDS if k!='request_token'}
++        if (set(token)!={'schema','request','grant_id','caller_context','issued_at_ms','expires_at_ms'}
++            or token['schema']!='van.permission-revocation-request/1' or token['grant_id']!=grant_id
++            or token['request']!=proposal or type(token['issued_at_ms']) is not int or type(token['expires_at_ms']) is not int
++            or token['expires_at_ms']-token['issued_at_ms']!=REVOCATION_REQUEST_TTL_MS):raise ValueError('request binding')
++        return token
++    except (InvalidToken,ValueError,TypeError,KeyError,AttributeError):
++        raise PermissionError_('permission_revocation_request_invalid') from None
++
++async def _original_revocation(db,*,operation_id,grant_id,device_id,cipher):
++    from cryptography.fernet import InvalidToken
++    from van_gateway.capability.permissions import PermissionError_
++    raw=await _raw_meta(db,REVOCATION_PREFIX+operation_id)
++    if raw is None:return None
++    try:
++        record=json.loads(cipher.decrypt(raw.encode()))
++        if set(record)!={'schema','grant_id','request','request_digest','source_digest','revocation_digest','result'} or record['schema']!=REVOCATION_SCHEMA:
++            raise ValueError('original schema')
++        request=record['request'];result=record['result']
++        if (set(request)!=REQUEST_FIELDS or set(result)!=RESULT_FIELDS or digest(request)!=record['request_digest']
++            or request['operation_id']!=operation_id or result['operation_id']!=operation_id
++            or result['grant_id']!=record['grant_id'] or result['caller_device_id']!=request['caller_device_id']
++            or result['expected_revision']!=request['expected_revision'] or result['source_digest']!=record['source_digest']
++            or result['native_authority_issued'] is not False or result['state'] not in {'APPLIED','REFUSED'}
++            or type(result['request_deadline_ms']) is not int or result['request_deadline_ms']<=0
++            or request['request_token'] is not None and result['grant_device_id']!=request['grant_device_id']):raise ValueError('original binding')
++        if result['state']=='APPLIED':
++            if (result['revoked'] is not True or type(result['revoked_at_ms']) is not int or result['revoked_at_ms']<=0
++                or result['reason_code'] is not None or type(result['changed']) is not bool):raise ValueError('applied outcome')
++        elif result['revoked'] is not False or result['revoked_at_ms'] is not None or result['changed'] is not False or result['reason_code'] not in REFUSALS:
++            raise ValueError('refused outcome')
++    except (InvalidToken,ValueError,TypeError,KeyError,AttributeError):
++        raise PermissionError_('permission_revocation_history_unavailable') from None
++    if request['caller_device_id']!=device_id:raise PermissionError_('permission_device_mismatch')
++    if record['grant_id']!=grant_id:raise PermissionError_('permission_revocation_operation_conflict')
++    if result['state']=='REFUSED':return record
++    detail=await grant_detail_in_snapshot(db,grant_id)
++    if (detail['source_digest']!=record['source_digest'] or detail['grant_device_id']!=result['grant_device_id']
++        or detail['effect_scope']!=result['effect_scope']
++        or detail['revoked_at_ms']!=result['revoked_at_ms']
++        or digest({'revoked_at_ms':detail['revoked_at_ms'],'reason':detail['revocation_reason']})!=record['revocation_digest']):
++        raise PermissionError_('permission_revocation_subject_changed')
++    return record
++
++async def revoke_permission_grant(store,*,grant_id,device_id,cipher,operation_id=None,caller_device_id=None,
++        grant_device_id=None,expected_revision=None,expected_source_digest=None,request_token=None,
++        access_token_hash=None,proof_required=False):
++    from van_gateway.capability.permissions import PermissionError_
++    received_at=int(time.time()*1000)
++    legacy=operation_id is None
++    if legacy:
++        if any(v is not None for v in (caller_device_id,grant_device_id,expected_revision,expected_source_digest,request_token)):
++            raise PermissionError_('permission_revocation_identity_required')
++        operation_id='legacy-'+digest({'grant_id':grant_id,'caller_device_id':device_id})
++        caller_device_id=device_id
++    else:
++        if caller_device_id is None:raise PermissionError_('permission_revocation_precondition_required')
++        if caller_device_id!=device_id:raise PermissionError_('permission_device_mismatch')
++        if (not isinstance(operation_id,str) or not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._-]{15,127}',operation_id)
++            or not isinstance(expected_revision,str) or not re.fullmatch(r'[0-9a-f]{64}',expected_revision)
++            or not isinstance(expected_source_digest,str) or not re.fullmatch(r'[0-9a-f]{64}',expected_source_digest)):
++            raise PermissionError_('permission_revocation_precondition_required')
++    request=dict(operation_id=operation_id,caller_device_id=caller_device_id,grant_device_id=grant_device_id,
++        expected_revision=expected_revision,expected_source_digest=expected_source_digest,request_token=request_token)
++    async with store.connection() as db:
++        await db.execute('BEGIN IMMEDIATE')
++        caller=await _revocation_actor(db,device_id,access_token_hash=access_token_hash,proof_required=proof_required)
++        try:
++            original=await _original_revocation(db,operation_id=operation_id,grant_id=grant_id,device_id=device_id,cipher=cipher)
++        except PermissionError_ as exc:
++            if legacy and exc.code=='permission_revocation_subject_changed':raise PermissionError_('permission_revocation_identity_required') from exc
++            raise
++        if original is not None:
++            if digest(request)!=original['request_digest']:raise PermissionError_('permission_revocation_operation_conflict')
++            return original['result']
++        token=_decode_request(cipher,request,grant_id) if not legacy else None
++        detail=await grant_detail_in_snapshot(db,grant_id)
++        if not legacy and (detail['source_digest']!=expected_source_digest or detail['grant_device_id']!=grant_device_id):
++            raise PermissionError_('permission_revocation_subject_changed')
++        if legacy and detail['revoked_at_ms'] is not None:
++            raise PermissionError_('permission_revocation_original_identity_required')
++        now=int(time.time()*1000)
++        deadline=token['expires_at_ms'] if token else received_at+REVOCATION_REQUEST_TTL_MS
++        refusal=('permission_revocation_request_expired' if now>=deadline or token and now+30000<token['issued_at_ms'] else
++            'permission_revocation_caller_changed' if token and caller!=token['caller_context'] else
++            'permission_revocation_stale_revision' if not legacy and detail['source_revision']!=expected_revision else None)
++        changed=False;stamp=detail['revoked_at_ms'];reason=detail['revocation_reason']
++        if refusal is None and stamp is None:
++            now=int(time.time()*1000)
++            update=await db.execute("UPDATE permission_grants SET revoked_at_ms=?,revocation_reason='owner revoked' "
++                "WHERE grant_id=? AND revoked_at_ms IS NULL AND CAST((julianday('now')-2440587.5)*86400000 AS INTEGER)<?",(now,grant_id,deadline))
++            if update.rowcount!=1:refusal='permission_revocation_request_expired'
++            else:changed=True;stamp=now;reason='owner revoked'
++        result=dict(operation_id=operation_id,grant_id=grant_id,caller_device_id=device_id,grant_device_id=detail['grant_device_id'],
++            state='REFUSED' if refusal else 'APPLIED',revoked=False if refusal else True,revoked_at_ms=None if refusal else stamp,
++            source_digest=detail['source_digest'],expected_revision=expected_revision,effect_scope=detail['effect_scope'],
++            native_authority_issued=False,reason_code=refusal,changed=changed,request_deadline_ms=deadline)
++        record=dict(schema=REVOCATION_SCHEMA,grant_id=grant_id,request=request,request_digest=digest(request),
++            source_digest=detail['source_digest'],revocation_digest=digest({'revoked_at_ms':stamp,'reason':reason}),result=result)
++        await db.execute('INSERT INTO runtime_meta(key,value,updated_at_unix_ms) VALUES(?,?,?)',
++            (REVOCATION_PREFIX+operation_id,cipher.encrypt(Store.dumps(record).encode()).decode(),now))
++        await db.commit()
++        return result
++
++async def original_permission_revocation(store,*,operation_id,grant_id,device_id,cipher,access_token_hash=None):
++    from van_gateway.capability.permissions import PermissionError_
++    async with store.connection() as db:
++        await db.execute('BEGIN')
++        await _revocation_actor(db,device_id,access_token_hash=access_token_hash)
++        record=await _original_revocation(db,operation_id=operation_id,grant_id=grant_id,device_id=device_id,cipher=cipher)
++        if record is None:raise PermissionError_('permission_revocation_unknown')
++        return record['result']
+diff --git a/backend/van_gateway/capability/permissions.py b/backend/van_gateway/capability/permissions.py
+index 1404fc17..3cf335ba 100644
+--- a/backend/van_gateway/capability/permissions.py
++++ b/backend/van_gateway/capability/permissions.py
+@@ -157,6 +157,10 @@ class PermissionRegistry:
+             await db.commit()
+             return cur.rowcount == 1
+ 
++    async def revoke_original(self, **kwargs):
++        from van_gateway.capability.owner_permissions import revoke_permission_grant
++        return await revoke_permission_grant(self.store,**kwargs)
++
+     async def get(self, grant_id: str) -> PermissionGrant | None:
+         row = await self.store.fetchone(
+             "SELECT * FROM permission_grants WHERE grant_id = ?", (grant_id,)
+diff --git a/backend/van_gateway/understanding/api.py b/backend/van_gateway/understanding/api.py
+index acd2462f..7b8d1706 100644
+--- a/backend/van_gateway/understanding/api.py
++++ b/backend/van_gateway/understanding/api.py
+@@ -22,7 +22,7 @@ import json
+ 
+ from fastapi import APIRouter, Header, HTTPException, Query, Request
+ from fastapi.responses import JSONResponse
+-from pydantic import BaseModel, Field
++from pydantic import BaseModel, ConfigDict, Field
+ 
+ from van_gateway.auth.control_scopes import ControlScope, require_scoped_internal
+ from van_gateway.attention.scoring import AttentionScorer
+@@ -77,6 +77,16 @@ from van_gateway.understanding.record_models import (
+ )
+ 
+ 
++class PermissionRevocationBody(BaseModel):
++    model_config=ConfigDict(extra="forbid")
++    operation_id: str | None = Field(default=None,min_length=16,max_length=128)
++    caller_device_id: str | None = Field(default=None,min_length=1,max_length=128)
++    grant_device_id: str | None = Field(default=None,min_length=1,max_length=128)
++    expected_revision: str | None = None
++    expected_source_digest: str | None = None
++    request_token: str | None = Field(default=None,max_length=16384)
++
++
+ class ObserveBody(BaseModel):
+     owner_principal_id: str
+     field: OwnerModelField
+@@ -519,10 +529,36 @@ class UnderstandingApi:
+             return await self.permissions.owner_view()
+ 
+         @router.post("/permissions/{grant_id}/revoke")
+-        async def revoke_permission(grant_id: str):
+-            if not await self.permissions.revoke(grant_id):
+-                raise HTTPException(status_code=409, detail="PERMISSION_ALREADY_REVOKED")
+-            return {"grant_id": grant_id, "revoked": True}
++        async def revoke_permission(grant_id: str, request: Request, body: PermissionRevocationBody | None = None):
++            from van_gateway.capability.owner_permissions import permission_http_error
++            from van_gateway.capability.permissions import PermissionError_
++            from van_gateway.auth.service import AuthError
++            try:
++                result=await self.permissions.revoke_original(grant_id=grant_id,
++                    device_id=getattr(request.state,"van_device_id",None),cipher=request.app.state.auth._cipher(),
++                    access_token_hash=__import__('hashlib').sha256(request.headers.get("X-Van-Device-Token","").encode()).hexdigest(),
++                    proof_required=getattr(request.state,"van_device_proved",False),
++                    **(body or PermissionRevocationBody()).model_dump())
++                return JSONResponse(result,status_code=409 if result["state"]=="REFUSED" else 200,headers={"Cache-Control":"no-store"})
++            except PermissionError_ as exc:
++                raise permission_http_error(exc) from exc
++            except AuthError as exc:
++                raise HTTPException(503,exc.code) from exc
++
++        @router.get("/permissions/{grant_id}/revocations/{operation_id}")
++        async def original_permission_revoke(grant_id: str, operation_id: str, request: Request):
++            from van_gateway.capability.owner_permissions import original_permission_revocation, permission_http_error
++            from van_gateway.capability.permissions import PermissionError_
++            from van_gateway.auth.service import AuthError
++            try:
++                result=await original_permission_revocation(self.store,grant_id=grant_id,operation_id=operation_id,
++                    device_id=getattr(request.state,"van_device_id",None),cipher=request.app.state.auth._cipher(),
++                    access_token_hash=__import__('hashlib').sha256(request.headers.get("X-Van-Device-Token","").encode()).hexdigest())
++                return JSONResponse(result,headers={"Cache-Control":"no-store"})
++            except PermissionError_ as exc:
++                raise permission_http_error(exc) from exc
++            except AuthError as exc:
++                raise HTTPException(503,exc.code) from exc
+ 
+         @router.get("/technology-radar")
+         async def technology_radar():
+diff --git a/android/app/src/main/java/com/dial/van/gateway/PermissionRevocationOperations.kt b/android/app/src/main/java/com/dial/van/gateway/PermissionRevocationOperations.kt
+new file mode 100644
+index 00000000..3643b5eb
+--- /dev/null
++++ b/android/app/src/main/java/com/dial/van/gateway/PermissionRevocationOperations.kt
+@@ -0,0 +1,115 @@
++package com.dial.van.gateway
++
++import org.json.JSONArray
++import org.json.JSONObject
++
++interface PermissionRevocationStore {
++    fun load(): String?
++    fun save(value: String): Boolean
++}
++
++data class PendingPermissionRevocation(val profileId: String, val deviceId: String, val grantId: String, val requestBody: String) {
++    val operationId: String get() = JSONObject(requestBody).getString("operation_id")
++    val sourceDigest: String get() = JSONObject(requestBody).getString("expected_source_digest")
++}
++
++/** LAC-210 original intent and server-owned deadline survive lost replies and process death. */
++class PermissionRevocationOperations(private val store: PermissionRevocationStore) {
++    companion object {
++        private val lock = Any()
++        private val fingerprint = Regex("[0-9a-f]{64}")
++        private val identity = Regex("[A-Za-z0-9][A-Za-z0-9._-]{15,127}")
++        private val requestKeys = setOf("operation_id", "caller_device_id", "grant_device_id", "expected_revision", "expected_source_digest", "request_token")
++    }
++    private fun read(): List<PendingPermissionRevocation> {
++        val raw = store.load() ?: return emptyList()
++        check(raw.length <= 131072) { "permission_revocation_history_unreadable" }
++        val rows = JSONArray(raw)
++        check(rows.length() <= 64) { "permission_revocation_history_unreadable" }
++        val result = (0 until rows.length()).map { index ->
++            val row = rows.getJSONObject(index)
++            check(row.keys().asSequence().toSet() == setOf("profile_id", "device_id", "grant_id", "request_body"))
++            val value = PendingPermissionRevocation(row.getString("profile_id"), row.getString("device_id"), row.getString("grant_id"), row.getString("request_body"))
++            val request = JSONObject(value.requestBody)
++            check(value.profileId.isNotBlank() && value.deviceId.isNotBlank() && value.grantId.isNotBlank())
++            check(request.keys().asSequence().toSet() == requestKeys && identity.matches(value.operationId))
++            check(request.getString("caller_device_id") == value.deviceId && request.getString("request_token").length in 1..16384)
++            check(fingerprint.matches(request.getString("expected_revision")) && fingerprint.matches(value.sourceDigest))
++            value
++        }
++        check(result.map { listOf(it.profileId, it.deviceId, it.grantId, it.sourceDigest) }.toSet().size == result.size)
++        check(result.map { it.operationId }.toSet().size == result.size)
++        return result
++    }
++    private fun write(rows: List<PendingPermissionRevocation>) {
++        val value = JSONArray()
++        rows.forEach { value.put(JSONObject().put("profile_id", it.profileId).put("device_id", it.deviceId).put("grant_id", it.grantId).put("request_body", it.requestBody)) }
++        check(value.toString().length <= 131072 && rows.size <= 64)
++        check(store.save(value.toString())) { "permission_revocation_original_store_failed" }
++    }
++    fun pending(profileId: String, deviceId: String, grantId: String, sourceDigest: String): PendingPermissionRevocation? = synchronized(lock) {
++        read().firstOrNull { it.profileId == profileId && it.deviceId == deviceId && it.grantId == grantId && it.sourceDigest == sourceDigest }
++    }
++    fun prepare(profileId: String, deviceId: String, grantId: String, reviewed: JSONObject): PendingPermissionRevocation = synchronized(lock) {
++        require(profileId.isNotBlank() && deviceId.isNotBlank() && grantId.isNotBlank() && reviewed.getString("grant_id") == grantId)
++        val source = reviewed.getString("source_digest")
++        pending(profileId, deviceId, grantId, source)?.let { return@synchronized it }
++        check(reviewed.getString("caller_device_id") == deviceId) { "permission_caller_changed" }
++        val request = reviewed.optJSONObject("revocation_request") ?: error("permission_revocation_request_unavailable")
++        check(request.keys().asSequence().toSet() == requestKeys && request.getString("caller_device_id") == deviceId)
++        check(request.opt("grant_device_id") == reviewed.opt("grant_device_id"))
++        check(request.getString("expected_revision") == reviewed.getString("source_revision") && request.getString("expected_source_digest") == source)
++        check(identity.matches(request.getString("operation_id")) && request.getString("request_token").length in 1..16384)
++        check(fingerprint.matches(request.getString("expected_revision")) && fingerprint.matches(source))
++        val original = PendingPermissionRevocation(profileId, deviceId, grantId, request.toString())
++        // Another UNKNOWN generation is retained; only an explicit fresh reviewed
++        // selection can prepare this different generation. No old intent is retargeted.
++        write(read() + original)
++        original
++    }
++    fun observe(original: PendingPermissionRevocation, receipt: JSONObject): Boolean = synchronized(lock) {
++        val current = read().firstOrNull { it.operationId == original.operationId }
++        check(current == null || current == original) { "permission_revocation_original_changed" }
++        val request = JSONObject(original.requestBody)
++        check(receipt.getString("operation_id") == original.operationId && receipt.getString("grant_id") == original.grantId &&
++            receipt.getString("caller_device_id") == original.deviceId && receipt.opt("grant_device_id") == request.opt("grant_device_id") &&
++            receipt.getString("expected_revision") == request.getString("expected_revision"))
++        check(receipt.opt("native_authority_issued") == false && receipt.getString("source_digest") == original.sourceDigest)
++        val applied = receipt.getString("state") == "APPLIED"
++        if (applied) {
++            val timestamp = receipt.opt("revoked_at_ms")
++            check(receipt.opt("revoked") == true && (timestamp is Int || timestamp is Long) && (timestamp as Number).toLong() > 0)
++        } else {
++            check(receipt.getString("state") == "REFUSED" && receipt.opt("revoked") == false && receipt.isNull("revoked_at_ms"))
++            check(receipt.getString("reason_code") in setOf("permission_revocation_stale_revision", "permission_revocation_request_expired", "permission_revocation_caller_changed"))
++        }
++        if (current != null) write(read().filterNot { it.operationId == original.operationId })
++        applied
++    }
++    /** Real app HTTP adapters use this same persisted exchange tested by the JVM harness. */
++    fun revoke(profileId: String, deviceId: String, grantId: String, reviewed: JSONObject,
++               currentProfile: () -> String, currentDevice: () -> String?, detail: () -> JSONObject,
++               originalResult: (PendingPermissionRevocation) -> JSONObject?, submit: (PendingPermissionRevocation) -> Unit): JSONObject {
++        fun currentOwner() = check(currentDevice() == deviceId && currentProfile() == profileId) { "permission_caller_changed" }
++        currentOwner()
++        val original = prepare(profileId, deviceId, grantId, reviewed)
++        var observed = originalResult(original)
++        if (observed == null) {
++            currentOwner()
++            try { submit(original) } catch (failure: Throwable) {
++                observed = originalResult(original)
++                if (observed == null) throw failure
++            }
++            if (observed == null) observed = originalResult(original)
++        }
++        val receipt = observed ?: error("permission_revocation_original_unavailable")
++        currentOwner()
++        if (receipt.optString("state") == "APPLIED") {
++            val current = detail()
++            check(current.getString("grant_id") == grantId && current.getLong("revoked_at_ms") == receipt.getLong("revoked_at_ms") &&
++                current.getString("source_digest") == receipt.getString("source_digest") && current.getInt("effective_remaining_uses") == 0)
++        }
++        check(observe(original, receipt)) { receipt.optString("reason_code", "permission_revocation_refused") }
++        return receipt
++    }
++}
+diff --git a/android/verification/src/test/kotlin/com/dial/van/gateway/PermissionRevocationOperationsTest.kt b/android/verification/src/test/kotlin/com/dial/van/gateway/PermissionRevocationOperationsTest.kt
+new file mode 100644
+index 00000000..9626f881
+--- /dev/null
++++ b/android/verification/src/test/kotlin/com/dial/van/gateway/PermissionRevocationOperationsTest.kt
+@@ -0,0 +1,132 @@
++package com.dial.van.gateway
++
++import org.json.JSONObject
++import java.io.IOException
++import java.util.UUID
++import kotlin.test.*
++
++class PermissionRevocationOperationsTest {
++    private class Store : PermissionRevocationStore {
++        var value: String? = null
++        var writable = true
++        override fun load() = value
++        override fun save(value: String): Boolean { if (!writable) return false; this.value = value; return true }
++    }
++    private fun detail(source: String = "b".repeat(64), issuer: String? = "historic-issuer"): JSONObject {
++        val request = JSONObject().put("operation_id", "permission-revoke-${UUID.randomUUID()}")
++            .put("caller_device_id", "owner-one").put("grant_device_id", issuer ?: JSONObject.NULL)
++            .put("expected_revision", "a".repeat(64)).put("expected_source_digest", source).put("request_token", "opaque-server-sealed-request-fixture")
++        return JSONObject().put("grant_id", "grant-one").put("caller_device_id", "owner-one")
++            .put("grant_device_id", issuer ?: JSONObject.NULL).put("source_revision", "a".repeat(64)).put("source_digest", source)
++            .put("revoked_at_ms", JSONObject.NULL).put("effective_remaining_uses", 3).put("revocation_request", request)
++    }
++    private fun receipt(p: PendingPermissionRevocation, applied: Boolean = true): JSONObject = JSONObject()
++        .put("operation_id", p.operationId).put("grant_id", p.grantId).put("caller_device_id", p.deviceId)
++        .put("grant_device_id", JSONObject(p.requestBody).opt("grant_device_id"))
++        .put("expected_revision", JSONObject(p.requestBody).getString("expected_revision")).put("source_digest", p.sourceDigest)
++        .put("state", if (applied) "APPLIED" else "REFUSED").put("revoked", applied)
++        .put("revoked_at_ms", if (applied) 12345 else JSONObject.NULL).put("native_authority_issued", false)
++        .put("reason_code", if (applied) JSONObject.NULL else "permission_revocation_request_expired")
++    @Test fun `original body deadline and distinct historic issuer survive process restart`() {
++        val store = Store(); val operations = PermissionRevocationOperations(store)
++        val original = operations.prepare("profile-one", "owner-one", "grant-one", detail())
++        val restarted = PermissionRevocationOperations(store)
++        assertEquals(original, restarted.pending("profile-one", "owner-one", "grant-one", original.sourceDigest))
++        assertEquals(original, restarted.prepare("profile-one", "owner-one", "grant-one", detail()))
++        assertNull(restarted.pending("other-profile", "owner-one", "grant-one", original.sourceDigest))
++        assertNull(restarted.pending("profile-one", "other-owner", "grant-one", original.sourceDigest))
++        assertTrue(restarted.observe(original, receipt(original)))
++        assertTrue(restarted.observe(original, receipt(original)))
++    }
++    @Test fun `only explicit different reviewed generation creates fresh intent and old unknown is retained`() {
++        val store = Store(); val operations = PermissionRevocationOperations(store)
++        val old = operations.prepare("profile-one", "owner-one", "grant-one", detail())
++        val fresh = operations.prepare("profile-one", "owner-one", "grant-one", detail(source = "c".repeat(64)))
++        assertNotEquals(old.operationId, fresh.operationId)
++        assertEquals(old, operations.pending("profile-one", "owner-one", "grant-one", old.sourceDigest))
++        assertTrue(operations.observe(fresh, receipt(fresh)))
++        assertEquals(old, operations.pending("profile-one", "owner-one", "grant-one", old.sourceDigest))
++    }
++    @Test fun `wrong scope unknown and malformed receipt cannot discard original`() {
++        val store = Store(); val operations = PermissionRevocationOperations(store)
++        val original = operations.prepare("profile-one", "owner-one", "grant-one", detail())
++        for (changed in listOf(receipt(original).put("caller_device_id", "other-owner"),receipt(original).put("grant_device_id", "other-issuer"),
++            receipt(original).put("grant_id", "other-grant"),receipt(original).put("operation_id", "other-operation-123456"),
++            receipt(original).put("source_digest", "c".repeat(64)),receipt(original).put("state", "UNKNOWN"),
++            receipt(original).put("revoked_at_ms", "12345"),receipt(original).put("revoked_at_ms", 12345.0))) {
++            assertFails { operations.observe(original, changed) }
++            assertEquals(original, operations.pending("profile-one", "owner-one", "grant-one", original.sourceDigest))
++        }
++    }
++    @Test fun `save failure precedes network and failed cleanup retains known original`() {
++        val store = Store(); val operations = PermissionRevocationOperations(store)
++        store.writable = false
++        assertFailsWith<IllegalStateException> { operations.prepare("profile-one", "owner-one", "grant-one", detail()) }
++        assertNull(store.value)
++        store.writable = true
++        val original = operations.prepare("profile-one", "owner-one", "grant-one", detail())
++        store.writable = false
++        assertFails { operations.observe(original, receipt(original)) }
++        assertEquals(original, operations.pending("profile-one", "owner-one", "grant-one", original.sourceDigest))
++    }
++    @Test fun `terminal refusal does not clear later explicit operation`() {
++        val store = Store(); val operations = PermissionRevocationOperations(store)
++        val old = operations.prepare("profile-one", "owner-one", "grant-one", detail())
++        assertFalse(operations.observe(old, receipt(old, false)))
++        val fresh = operations.prepare("profile-one", "owner-one", "grant-one", detail())
++        assertNotEquals(old.operationId, fresh.operationId)
++        assertFalse(operations.observe(old, receipt(old, false)))
++        assertEquals(fresh, operations.pending("profile-one", "owner-one", "grant-one", fresh.sourceDigest))
++    }
++    @Test fun `actual caller exchange recovers lost commit response with one effect and independent detail`() {
++        val store = Store(); val operations = PermissionRevocationOperations(store)
++        val review = detail(); var current = review; var completed: JSONObject? = null; var submits = 0
++        val result = operations.revoke("profile-one", "owner-one", "grant-one", review,
++            currentProfile = { "profile-one" }, currentDevice = { "owner-one" }, detail = { current },
++            originalResult = { completed }, submit = { original ->
++                submits++; completed = receipt(original)
++                current = detail().put("revoked_at_ms", 12345).put("effective_remaining_uses", 0)
++                throw IOException("lost response after actual modeled commit")
++            })
++        assertEquals(1, submits); assertEquals("APPLIED", result.getString("state"))
++        assertNull(operations.pending("profile-one", "owner-one", "grant-one", review.getString("source_digest")))
++    }
++    @Test fun `unavailable readback keeps original and restart never resubmits applied effect`() {
++        val store = Store(); val review = detail(); var completed: JSONObject? = null; var reads = 0; var submits = 0
++        assertFailsWith<IOException> {
++            PermissionRevocationOperations(store).revoke("profile-one", "owner-one", "grant-one", review,
++                currentProfile = { "profile-one" },currentDevice = { "owner-one" },detail = { error("unavailable") },
++                originalResult = { if (++reads == 1) null else throw IOException("readback unavailable") },submit = { original ->
++                    submits++; completed = receipt(original); throw IOException("reply lost")
++                })
++        }
++        val restarted = PermissionRevocationOperations(store)
++        assertNotNull(restarted.pending("profile-one", "owner-one", "grant-one", review.getString("source_digest")))
++        val result = restarted.revoke("profile-one", "owner-one", "grant-one", detail(),
++            currentProfile = { "profile-one" },currentDevice = { "owner-one" },
++            detail = { detail().put("revoked_at_ms", 12345).put("effective_remaining_uses", 0) },
++            originalResult = { completed },submit = { error("applied effect must not be resubmitted") })
++        assertEquals(1, submits); assertEquals("APPLIED", result.getString("state"))
++    }
++    @Test fun `profile or caller switch prevents any original lookup or mutation`() {
++        for (switched in listOf("profile", "caller")) {
++            val operations = PermissionRevocationOperations(Store())
++            assertFails {
++                operations.revoke("profile-one", "owner-one", "grant-one", detail(),
++                    currentProfile = { if (switched == "profile") "other-profile" else "profile-one" },
++                    currentDevice = { if (switched == "caller") "other-owner" else "owner-one" },
++                    detail = { error("no read") },originalResult = { error("no original lookup") },submit = { error("no mutation") })
++            }
++        }
++    }
++    @Test fun `unverified local target can be withdrawn without claiming a historic issuer`() {
++        val operations = PermissionRevocationOperations(Store())
++        val original = operations.prepare("profile-one", "owner-one", "grant-one", detail(issuer = null))
++        assertTrue(operations.observe(original, receipt(original)))
++    }
++    @Test fun `corrupt history never starts a replacement operation`() {
++        val store = Store(); store.value = "[{broken]"
++        assertFails { PermissionRevocationOperations(store).prepare("profile-one", "owner-one", "grant-one", detail()) }
++        assertEquals("[{broken]", store.value)
++    }
++}
+diff --git a/backend/tests/test_owner_permission_revocation_recovery.py b/backend/tests/test_owner_permission_revocation_recovery.py
+new file mode 100644
+index 00000000..2adfcd8f
+--- /dev/null
++++ b/backend/tests/test_owner_permission_revocation_recovery.py
+@@ -0,0 +1,351 @@
++"""LAC-210 actual owner consent/revoker/effect/readback source recovery."""
++import json
++import pytest
++from tests.test_local_typed_actions import client, _settings
++from tests.test_owner_memory_erasure import _pair
++from test_owner_permissions import _approved, _parameters, _begin
++from van_gateway.capability import owner_permissions as permissions
++
++pytestmark=pytest.mark.asyncio
++
++async def grant(ac,app,*,idem='revocation-source'):
++    key=await _pair(ac,app)
++    params=_parameters(max_uses=3)
++    command=await _approved(ac,app,key,params,idem)
++    result=await ac.post('/v1/commands',json=command)
++    assert result.json()['status']=='accepted',result.text
++    witness=await app.state.store.fetchone('SELECT value FROM runtime_meta WHERE key=?',(permissions.WITNESS_PREFIX+command['command_id'],))
++    return json.loads(witness['value'])['grant_id'],params
++
++async def test_lost_successful_revocation_reply_recovers_instead_of_conflicting(client):
++    ac,app,_=client
++    grant_id,_=await grant(ac,app)
++    path='/v1/permissions/'+grant_id+'/revoke'
++    first=await ac.post(path,json={})
++    assert first.status_code==200,first.text
++    retry=await ac.post(path,json={})
++    assert retry.status_code==200,retry.text
++    assert retry.json()==first.json()
++
++async def explicit_request(ac,grant_id):
++    detail=await ac.get('/v1/permissions/grants/'+grant_id)
++    assert detail.status_code==200,detail.text
++    data=detail.json()
++    request=data['revocation_request']
++    assert request['expected_revision']==data['source_revision'] and request['expected_source_digest']==data['source_digest']
++    return request
++
++async def test_exact_detail_ceiling_and_actual_http_revoke_fence_effect_and_original_readback(client):
++    from van_gateway.action.service import ActionPolicyError
++    from van_gateway.action.models import ExecutionStatus
++    ac,app,_=client
++    grant_id,params=await grant(ac,app)
++    before=(await ac.get('/v1/permissions/grants/'+grant_id)).json()
++    assert before['max_uses']==before['remaining_uses']==before['effective_remaining_uses']==3
++    assert before['source_verified'] and before['grant_current'] and before['device_id']=='dev-erasure'
++    await _begin(app,params,'queued-revocation-use')
++    detail=(await ac.get('/v1/permissions/grants/'+grant_id)).json()
++    assert detail['remaining_uses']==detail['effective_remaining_uses']==2
++    request=await explicit_request(ac,grant_id)
++    path='/v1/permissions/'+grant_id+'/revoke'
++    first=await ac.post(path,json=request)
++    assert first.status_code==200,first.text
++    with pytest.raises(ActionPolicyError,match='revoked_or_expired'):
++        await app.state.owner_runtime.actions.mark_executing('queued-revocation-use')
++    assert (await app.state.owner_runtime.actions.get_execution('queued-revocation-use')).status is ExecutionStatus.AUTHORIZED
++    original=await ac.get('/v1/permissions/'+grant_id+'/revocations/'+request['operation_id'])
++    assert original.status_code==200 and original.json()==first.json()
++    assert original.headers['cache-control']=='no-store'
++    after=(await ac.get('/v1/permissions/grants/'+grant_id)).json()
++    assert after['remaining_uses']==2 and after['effective_remaining_uses']==0 and not after['grant_current']
++    assert (await ac.post(path,json=request)).json()==first.json()
++    changed=await ac.post(path,json={**request,'expected_revision':'0'*64})
++    assert changed.status_code==409 and changed.json()['detail']=='permission_revocation_operation_conflict'
++
++async def test_admission_wins_then_same_generation_owner_revoke_preserves_budget_and_blocks_next_use(client):
++    from van_gateway.action.service import ActionPolicyError
++    ac,app,_=client
++    grant_id,params=await grant(ac,app)
++    before=(await ac.get('/v1/permissions/grants/'+grant_id)).json()
++    request=before['revocation_request']
++    await _begin(app,params,'charged-after-review')
++    detail=(await ac.get('/v1/permissions/grants/'+grant_id)).json()
++    assert detail['source_revision']==before['source_revision']
++    assert detail['accounting_revision']!=before['accounting_revision'] and detail['use_count']==1
++    response=await ac.post('/v1/permissions/'+grant_id+'/revoke',json=request)
++    assert response.status_code==200 and response.json()['state']=='APPLIED',response.text
++    assert (await app.state.store.fetchone('SELECT use_count FROM permission_grants WHERE grant_id=?',(grant_id,)))[0]==1
++    with pytest.raises(ActionPolicyError,match='revoked_or_expired'):
++        await _begin(app,params,'next-admission-after-revoke')
++
++async def test_wrong_device_tampered_receipt_and_reused_grant_identity_fail_closed(client):
++    from van_gateway.capability.owner_permissions import REVOCATION_PREFIX
++    ac,app,_=client
++    grant_id,_=await grant(ac,app)
++    request=await explicit_request(ac,grant_id)
++    path='/v1/permissions/'+grant_id+'/revoke'
++    original_headers=dict(ac.headers)
++    await _pair(ac,app,device='other-phone')
++    denied=await ac.post(path,json=request)
++    assert denied.status_code==403,denied.text
++    assert not await app.state.store.fetchone('SELECT key FROM runtime_meta WHERE key=?',(REVOCATION_PREFIX+request['operation_id'],))
++    ac.headers.clear();ac.headers.update(original_headers)
++    applied=await ac.post(path,json=request)
++    assert applied.status_code==200,applied.text
++    row=await app.state.store.fetchone('SELECT value FROM runtime_meta WHERE key=?',(REVOCATION_PREFIX+request['operation_id'],))
++    await app.state.store.execute('UPDATE runtime_meta SET value=? WHERE key=?',('corrupt',REVOCATION_PREFIX+request['operation_id']))
++    unavailable=await ac.get('/v1/permissions/'+grant_id+'/revocations/'+request['operation_id'])
++    assert unavailable.status_code==503,unavailable.text
++    await app.state.store.execute('UPDATE runtime_meta SET value=? WHERE key=?',(row['value'],REVOCATION_PREFIX+request['operation_id']))
++    await app.state.store.execute('UPDATE permission_grants SET revoked_at_ms=NULL WHERE grant_id=?',(grant_id,))
++    retry=await ac.post(path,json=request)
++    assert retry.status_code==409 and retry.json()['detail']=='permission_revocation_subject_changed'
++    assert (await app.state.store.fetchone('SELECT revoked_at_ms FROM permission_grants WHERE grant_id=?',(grant_id,)))[0] is None
++
++async def test_revocation_writer_wins_against_queued_actual_effect_without_rewriting_submitted_work(client,monkeypatch):
++    import asyncio
++    from van_gateway.action.service import ActionPolicyError
++    ac,app,_=client
++    grant_id,params=await grant(ac,app)
++    await _begin(app,params,'submitted-original')
++    await app.state.owner_runtime.actions.mark_executing('submitted-original')
++    await app.state.owner_runtime.actions.mark_submitted('submitted-original',correlation={'original':'provider-command'})
++    await _begin(app,params,'queued-after-original')
++    request=await explicit_request(ac,grant_id)
++    entered,release=asyncio.Event(),asyncio.Event()
++    original=permissions.grant_detail_in_snapshot
++    async def paused(*args,**kwargs):
++        detail=await original(*args,**kwargs)
++        entered.set();await release.wait()
++        return detail
++    monkeypatch.setattr(permissions,'grant_detail_in_snapshot',paused)
++    revoke=asyncio.create_task(ac.post('/v1/permissions/'+grant_id+'/revoke',json=request))
++    await asyncio.wait_for(entered.wait(),10)
++    effect=asyncio.create_task(app.state.owner_runtime.actions.mark_executing('queued-after-original'))
++    release.set()
++    response=await revoke
++    assert response.status_code==200,response.text
++    with pytest.raises(ActionPolicyError,match='revoked_or_expired'):await effect
++    assert (await app.state.owner_runtime.actions.get_execution('submitted-original')).status.value=='SUBMITTED'
++    assert (await app.state.owner_runtime.actions.mark_verifying('submitted-original')).status.value=='VERIFYING'
++
++async def test_registry_update_and_original_receipt_rollback_together_on_write_failure(client):
++    ac,app,_=client
++    grant_id,_=await grant(ac,app)
++    request=await explicit_request(ac,grant_id)
++    await app.state.store.execute("CREATE TRIGGER fail_permission_receipt BEFORE INSERT ON runtime_meta WHEN NEW.key GLOB 'owner_permission_revocation:*' BEGIN SELECT RAISE(ABORT,'original receipt failure'); END")
++    from van_gateway.capability.permissions import PermissionRegistry
++    with pytest.raises(Exception,match='original receipt failure'):
++        await PermissionRegistry(app.state.store).revoke_original(grant_id=grant_id,device_id='dev-erasure',cipher=app.state.auth._cipher(),**request)
++    assert (await app.state.store.fetchone('SELECT revoked_at_ms FROM permission_grants WHERE grant_id=?',(grant_id,)))[0] is None
++
++async def test_remaining_ceiling_and_actual_guard_refuse_refunded_or_corrupt_use_count(client):
++    from van_gateway.action.service import ActionPolicyError
++    ac,app,_=client
++    grant_id,params=await grant(ac,app)
++    await _begin(app,params,'actual-charged-use')
++    await app.state.store.execute('UPDATE permission_grants SET use_count=0 WHERE grant_id=?',(grant_id,))
++    detail=await ac.get('/v1/permissions/grants/'+grant_id)
++    assert detail.status_code==200 and detail.json()['authority_state']=='CORRUPT' and detail.json()['effective_remaining_uses']==0,detail.text
++    with pytest.raises(ActionPolicyError,match='use_count_integrity_failed'):
++        await app.state.owner_runtime.actions.mark_executing('actual-charged-use')
++
++async def test_expired_request_is_refused_but_expired_target_and_legacy_cleanup_remain_available(client,monkeypatch):
++    from van_gateway.capability.permissions import PermissionOrigin,PermissionRegistry
++    ac,app,_=client
++    grant_id,params=await grant(ac,app)
++    request=await explicit_request(ac,grant_id)
++    token=json.loads(app.state.auth._cipher().decrypt(request['request_token'].encode()))
++    with monkeypatch.context() as scoped:
++        scoped.setattr(permissions.time,'time',lambda:token['expires_at_ms']/1000+1)
++        response=await ac.post('/v1/permissions/'+grant_id+'/revoke',json=request)
++    assert response.status_code==409 and response.json()['reason_code']=='permission_revocation_request_expired',response.text
++    assert (await ac.get('/v1/permissions/'+grant_id+'/revocations/'+request['operation_id'])).json()==response.json()
++    with monkeypatch.context() as scoped:
++        scoped.setattr(permissions.time,'time',lambda:params['expires_at_ms']/1000+1)
++        detail=(await ac.get('/v1/permissions/grants/'+grant_id)).json()
++        assert detail['authority_state']=='EXPIRED' and detail['effective_remaining_uses']==0
++        fresh=detail['revocation_request']
++        applied=await ac.post('/v1/permissions/'+grant_id+'/revoke',json=fresh)
++    assert applied.status_code==200 and applied.json()['state']=='APPLIED',applied.text
++    registry=PermissionRegistry(app.state.store)
++    legacy=await registry.grant(permission='email.read',origin=PermissionOrigin.OAUTH_CONSENT,origin_evidence_ref='oauth://historical-consent')
++    detail=(await ac.get('/v1/permissions/grants/'+legacy.grant_id)).json()
++    assert detail['source_verified'] is False and detail['effective_remaining_uses']==0
++    result=await ac.post('/v1/permissions/'+legacy.grant_id+'/revoke',json={})
++    assert result.status_code==200 and result.json()['effect_scope']=='LOCAL_REGISTRY_ONLY_SOURCE_UNVERIFIED'
++    assert result.json()['native_authority_issued'] is False
++
++@pytest.mark.parametrize('crash',['before_commit','after_commit'])
++async def test_actual_process_death_recovers_exact_original_operation(client,tmp_path,crash):
++    import subprocess,sys,os
++    ac,app,_=client
++    grant_id,params=await grant(ac,app)
++    request=await explicit_request(ac,grant_id)
++    program=r'''
++import asyncio,os,sys,json
++import aiosqlite
++from van_gateway.storage.db import Store
++from van_gateway.auth.service import AuthService
++from van_gateway.capability.permissions import PermissionRegistry
++async def main():
++    store=Store(sys.argv[1])
++    request=json.loads(sys.argv[3])
++    if sys.argv[4]=='before_commit':
++        original=aiosqlite.Connection.execute
++        async def execute(self,sql,*args,**kwargs):
++            if sql.startswith('INSERT INTO runtime_meta') and args and str(args[0][0]).startswith('owner_permission_revocation:'):
++                os._exit(27)
++            return await original(self,sql,*args,**kwargs)
++        aiosqlite.Connection.execute=execute
++    await PermissionRegistry(store).revoke_original(grant_id=sys.argv[2],device_id='dev-erasure',
++        cipher=AuthService(store,os.environ['VAN_DEVICE_SECRET_FERNET_KEY'])._cipher(),**request)
++    os._exit(28)
++asyncio.run(main())
++'''
++    result=subprocess.run([sys.executable,'-c',program,app.state.store.path,grant_id,json.dumps(request),crash],
++        capture_output=True,timeout=30,env=dict(os.environ))
++    (tmp_path/'child.stdout').write_bytes(result.stdout)
++    (tmp_path/'child.stderr').write_bytes(result.stderr)
++    assert result.returncode==(27 if crash=='before_commit' else 28),result.stderr.decode()
++    original_path='/v1/permissions/'+grant_id+'/revocations/'+request['operation_id']
++    observed=await ac.get(original_path)
++    before=(await ac.get('/v1/permissions/grants/'+grant_id)).json()
++    if crash=='before_commit':
++        assert observed.status_code==404 and before['revoked_at_ms'] is None
++    else:
++        assert observed.status_code==200 and observed.json()['revoked_at_ms']==before['revoked_at_ms']
++    response=await ac.post('/v1/permissions/'+grant_id+'/revoke',json=request)
++    assert response.status_code==200,response.text
++    assert (await ac.get(original_path)).json()==response.json()
++    assert len(await app.state.store.fetchall("SELECT key FROM runtime_meta WHERE key GLOB 'owner_permission_revocation:*'"))==1
++
++async def test_legacy_rebound_subject_requires_explicit_identity_without_retargeting(client):
++    from van_gateway.capability.permissions import PermissionOrigin,PermissionRegistry
++    ac,app,_=client
++    await _pair(ac,app)
++    row=await PermissionRegistry(app.state.store).grant(permission='email.read',origin=PermissionOrigin.OAUTH_CONSENT,origin_evidence_ref='oauth://original')
++    path='/v1/permissions/'+row.grant_id+'/revoke'
++    assert (await ac.post(path,json={})).status_code==200
++    await app.state.store.execute("UPDATE permission_grants SET scope='different-subject',granted_at_ms=granted_at_ms+1,revoked_at_ms=NULL WHERE grant_id=?",(row.grant_id,))
++    response=await ac.post(path,json={})
++    assert response.status_code==409,response.text
++    assert (await app.state.store.fetchone('SELECT revoked_at_ms FROM permission_grants WHERE grant_id=?',(row.grant_id,)))[0] is None
++
++async def test_restored_cached_scope_cannot_dispatch_after_actual_http_revocation(client):
++    from van_gateway.action.service import ActionPolicyError
++    ac,app,_=client
++    grant_id,params=await grant(ac,app)
++    await _begin(app,params,'retained-original-claim')
++    key=permissions.scope_key(params['action_id'],params['parameters'])
++    cached=await app.state.store.fetchone('SELECT value FROM runtime_meta WHERE key=?',(key,))
++    request=await explicit_request(ac,grant_id)
++    assert (await ac.post('/v1/permissions/'+grant_id+'/revoke',json=request)).status_code==200
++    await app.state.store.execute('UPDATE runtime_meta SET value=? WHERE key=?',(cached['value'],key))
++    with pytest.raises(ActionPolicyError,match='revoked_or_expired'):
++        await app.state.owner_runtime.actions.mark_executing('retained-original-claim')
++
++async def test_current_owner_may_inspect_revoke_historical_other_device_grant(client):
++    ac,app,_=client
++    grant_id,_=await grant(ac,app)
++    old_request=await explicit_request(ac,grant_id)
++    await _pair(ac,app,device='replacement-owner-phone')
++    # The current authenticated owner remains allowed to manage the old target.
++    await app.state.auth.revoke('dev-erasure')
++    detail=(await ac.get('/v1/permissions/grants/'+grant_id)).json()
++    assert detail['grant_device_id']=='dev-erasure' and detail['caller_device_id']=='replacement-owner-phone'
++    assert detail['source_verified'] and detail['authority_state']=='ISSUER_REVOKED' and detail['effective_remaining_uses']==0
++    switched=await ac.post('/v1/permissions/'+grant_id+'/revoke',json=old_request)
++    assert switched.status_code==403,switched.text
++    request=detail['revocation_request']
++    result=await ac.post('/v1/permissions/'+grant_id+'/revoke',json=request)
++    assert result.status_code==200 and result.json()['caller_device_id']=='replacement-owner-phone'
++    assert result.json()['grant_device_id']=='dev-erasure' and result.json()['changed'] is True
++    again=(await ac.get('/v1/permissions/grants/'+grant_id)).json()['revocation_request']
++    no_op=await ac.post('/v1/permissions/'+grant_id+'/revoke',json=again)
++    assert no_op.status_code==200 and no_op.json()['changed'] is False
++    assert no_op.json()['revoked_at_ms']==result.json()['revoked_at_ms']
++
++async def test_corrupt_target_source_remains_inspectable_and_defensively_revocable(client):
++    from van_gateway.action.service import ActionPolicyError
++    ac,app,_=client
++    grant_id,params=await grant(ac,app)
++    await _begin(app,params,'corrupt-source-queued')
++    await app.state.store.execute("UPDATE runtime_meta SET value='malformed original witness' WHERE key GLOB 'owner_permission_witness:*'")
++    detail=await ac.get('/v1/permissions/grants/'+grant_id)
++    assert detail.status_code==200,detail.text
++    body=detail.json()
++    assert body['authority_state']=='CORRUPT' and not body['source_verified'] and body['effective_remaining_uses']==0
++    assert body['grant_device_id'] is None
++    with pytest.raises(ActionPolicyError,match='scope_integrity_failed'):
++        await app.state.owner_runtime.actions.mark_executing('corrupt-source-queued')
++    result=await ac.post('/v1/permissions/'+grant_id+'/revoke',json=body['revocation_request'])
++    assert result.status_code==200 and result.json()['effect_scope']=='LOCAL_REGISTRY_ONLY_CORRUPT_SOURCE',result.text
++    assert result.json()['native_authority_issued'] is False
++
++async def test_detail_proposals_are_inert_and_completed_original_survives_request_deadline(client,monkeypatch):
++    ac,app,_=client
++    grant_id,_=await grant(ac,app)
++    before=dict(await app.state.store.fetchone('SELECT * FROM permission_grants WHERE grant_id=?',(grant_id,)))
++    request=await explicit_request(ac,grant_id)
++    other=await explicit_request(ac,grant_id)
++    assert request['operation_id']!=other['operation_id']
++    assert not await app.state.store.fetchall("SELECT key FROM runtime_meta WHERE key GLOB 'owner_permission_revocation:*'")
++    assert dict(await app.state.store.fetchone('SELECT * FROM permission_grants WHERE grant_id=?',(grant_id,)))==before
++    applied=await ac.post('/v1/permissions/'+grant_id+'/revoke',json=request)
++    assert applied.status_code==200,applied.text
++    deadline=applied.json()['request_deadline_ms']
++    with monkeypatch.context() as scoped:
++        scoped.setattr(permissions.time,'time',lambda:deadline/1000+100)
++        original=await ac.get('/v1/permissions/'+grant_id+'/revocations/'+request['operation_id'])
++        replay=await ac.post('/v1/permissions/'+grant_id+'/revoke',json=request)
++    assert original.json()==replay.json()==applied.json()
++
++async def test_changed_source_generation_or_tampered_proposal_cannot_retarget(client):
++    ac,app,_=client
++    grant_id,_=await grant(ac,app)
++    request=await explicit_request(ac,grant_id)
++    malformed=await ac.post('/v1/permissions/'+grant_id+'/revoke',json={**request,'request_token':'invalid'})
++    assert malformed.status_code==409 and malformed.json()['detail']=='permission_revocation_request_invalid'
++    wrong=await ac.post('/v1/permissions/'+grant_id+'/revoke',json={**request,'grant_device_id':'other-issuer'})
++    assert wrong.status_code==409
++    assert (await app.state.store.fetchone('SELECT revoked_at_ms FROM permission_grants WHERE grant_id=?',(grant_id,)))[0] is None
++    await app.state.store.execute("UPDATE permission_grants SET scope='different-domain-target' WHERE grant_id=?",(grant_id,))
++    changed=await ac.post('/v1/permissions/'+grant_id+'/revoke',json=request)
++    assert changed.status_code==409 and changed.json()['detail']=='permission_revocation_subject_changed'
++
++async def test_pending_request_bound_to_caller_token_and_writer_rechecks_revocation(client):
++    ac,app,_=client
++    grant_id,_=await grant(ac,app)
++    request=await explicit_request(ac,grant_id)
++    # Token rotation keeps the device/owner lawful, but requires a new explicit intent.
++    import hashlib
++    fresh_token='fresh-current-owner-token-0123456789'
++    await app.state.store.execute('UPDATE devices SET access_token_hash=? WHERE device_id=?',
++        (hashlib.sha256(fresh_token.encode()).hexdigest(),'dev-erasure'))
++    ac.headers['X-Van-Device-Token']=fresh_token
++    result=await ac.post('/v1/permissions/'+grant_id+'/revoke',json=request)
++    assert result.status_code==409 and result.json()['reason_code']=='permission_revocation_caller_changed',result.text
++    assert result.json()['changed'] is False
++    fresh=await explicit_request(ac,grant_id)
++    assert (await ac.post('/v1/permissions/'+grant_id+'/revoke',json=fresh)).status_code==200
++
++async def test_caller_retirement_after_http_authentication_is_rechecked_before_writer_effect(client,monkeypatch):
++    import asyncio
++    ac,app,_=client
++    grant_id,_=await grant(ac,app)
++    request=await explicit_request(ac,grant_id)
++    entered,release=asyncio.Event(),asyncio.Event()
++    original=permissions.revoke_permission_grant
++    async def after_authentication(*args,**kwargs):
++        entered.set();await release.wait()
++        return await original(*args,**kwargs)
++    monkeypatch.setattr(permissions,'revoke_permission_grant',after_authentication)
++    task=asyncio.create_task(ac.post('/v1/permissions/'+grant_id+'/revoke',json=request))
++    await asyncio.wait_for(entered.wait(),10)
++    await app.state.auth.revoke('dev-erasure')
++    release.set()
++    response=await task
++    assert response.status_code==403,response.text
++    assert (await app.state.store.fetchone('SELECT revoked_at_ms FROM permission_grants WHERE grant_id=?',(grant_id,)))[0] is None
++    assert not await app.state.store.fetchone('SELECT key FROM runtime_meta WHERE key=?',(permissions.REVOCATION_PREFIX+request['operation_id'],))

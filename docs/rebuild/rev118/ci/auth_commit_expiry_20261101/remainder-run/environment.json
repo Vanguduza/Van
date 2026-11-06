@@ -1,0 +1,16 @@
+{
+  "source_pins_sha256": "7fd5c7b2571ebf6738509a4e74ded7bf2721c4b08e27b78555eb05fbe0ac2fe9",
+  "collection_receipt_sha256": "484fa06161cf289234ce2455cba025317bc4d3e148b886f94ef626bd006405d3",
+  "python": "/workspace/van-backend-venv-20261025/bin/python",
+  "package_freeze_sha256": "c366d89315f0f832ec8e3cb1db8234b1476953f5d8ba748586433446ef4942fb",
+  "environment_selectors": {
+    "PYTHONPATH": "/workspace/van-lanes-20261101/auth-final/backend:/workspace/van-lanes-20261101/auth-final/backend/tests:/workspace/van-lanes-20261101/auth-final/trading:/workspace/van-lanes-20261101/auth-final/trading/tests:/workspace/van-lanes-20261101/auth-final",
+    "DIAL_REPO": "/workspace/van-review-2026-10-18/dial-development-system"
+  },
+  "fixture_selectors_present": {
+    "VATI_TEST_PG_DSN": false,
+    "VATI_TEST_PG_ISOLATED_FIXTURE": false
+  },
+  "timeout_seconds": 3600,
+  "timeout_rationale": "Original whole-backend attempt exhausted40minutes before completion. This disjoint4416-case remainder receives a bounded60-minute budget to avoid repeating that insufficient whole-suite limit while sharing CPU with the existing1527-case shard; no original tests are credited as passed, and no covered tests are restarted. Actual original terminal evidence and exact collection union are retained."
+}

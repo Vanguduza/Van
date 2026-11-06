@@ -20,6 +20,34 @@ from van_gateway.models import ReminderCreate
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize("enabled", [False, True])
+async def test_gateway_arms_standing_runs_only_when_automation_enabled(tmp_path, monkeypatch, enabled):
+    from cryptography.fernet import Fernet
+    from van_gateway.app import create_app
+    from van_gateway.config import get_settings
+
+    monkeypatch.setenv("VAN_DATABASE_PATH", str(tmp_path / "gateway.sqlite3"))
+    monkeypatch.setenv("VAN_GOOGLE_TOKEN_FERNET_KEY", Fernet.generate_key().decode())
+    monkeypatch.setenv("VAN_DEVICE_SECRET_FERNET_KEY", Fernet.generate_key().decode())
+    monkeypatch.setenv("VAN_AUTOMATION_ENABLED", str(enabled).lower())
+    monkeypatch.setenv("VAN_SCHEDULER_ENABLED", "false")
+    get_settings.cache_clear()
+    try:
+        app = create_app()
+        async with app.router.lifespan_context(app):
+            job = app.state.scheduler.jobs.get("automation.standing_sweep")
+            assert (job is not None) is enabled
+            if enabled:
+                assert job.interval_seconds == 15
+                assert job.run.__self__ is app.state.automation.standing_runner
+                result = await app.state.scheduler.run_job(job)
+                assert result["outcome"] == "OK"
+                assert result["detail"] == {"started": 0, "refused": 0}
+    finally:
+        get_settings.cache_clear()
+
+
+@pytest.mark.asyncio
 async def test_a_reminder_that_comes_due_is_fired_by_the_system_itself(tmp_path):
     store = await make_store(tmp_path)
     reminders = ReminderService(store)

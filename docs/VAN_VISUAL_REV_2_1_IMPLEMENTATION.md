@@ -1,6 +1,6 @@
 # VAN Visual Rev 2.1 — Historical implementation notes
 
-Status: historical baseline. Aura/runtime sections are superseded by `docs/VAN_LIVING_WIND_FIELD_RUNTIME_REV_1.md` and canonical `visual-authority/van-visual-authority-v2.yaml` revision **2.3**.
+Status: historical baseline. Aura/runtime sections are superseded by owner decisions CF-D-06, CF-D-06-REV1 and CF-D-08 (`docs/character_forge/MANIFEST.yaml`) and `visual-authority/character-forge/aura/AURA_RUNTIME_CONTRACT.yaml`. The intermediate `docs/VAN_LIVING_WIND_FIELD_RUNTIME_REV_1.md` is itself superseded.
 
 Original authority lineage: `docs/VAN_VISUAL_PRODUCTION_SYSTEM_REV_2_1_MASTER_BLUEPRINT.md`, `docs/VAN_VISUAL_PRODUCTION_SYSTEM_REV_2_2_ADDENDUM_AURA_SEMANTIC_ENVELOPE.md`, and `docs/CURSOR_PATCH_PROMPT_VAN_AURA_SEMANTIC_ENVELOPE.md`.
 

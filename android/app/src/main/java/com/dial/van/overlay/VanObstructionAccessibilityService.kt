@@ -85,7 +85,18 @@ class VanObstructionAccessibilityService : AccessibilityService() {
             val horizontalStrip = b.width() >= (width * 0.75f) && b.height() in 1..(height / 5)
             horizontalStrip && (b.top <= tolerance || b.bottom >= height - tolerance)
         }
-        return !hasSystemBarStrip
+        // Use only existing window IDs/layers, never accessibility node contents.
+        // A full-screen app UNDER the visible VAN overlay must not freeze its aura.
+        // If Android hides/removes the overlay or layer metadata is absent, retain
+        // the original conservative pause rather than asserting visibility.
+        val ownId = OverlayOwnWindowIdentity.id
+        val ownLayer = currentWindows.firstOrNull { ownId >= 0 && it.id == ownId }?.layer
+        return OverlayWindowAwareness.externalFullscreenCoversOverlay(
+            externalFillsDisplay = fillsDisplay,
+            systemBarVisible = hasSystemBarStrip,
+            externalLayer = activeApp.layer,
+            ownOverlayLayer = ownLayer,
+        )
     }
 
     private fun publish(

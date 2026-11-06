@@ -27,6 +27,7 @@ data class VanPresenceFrame(
     val viseme: Int = 0,
     val urgency: Float = 0f,
     val actionCode: Int = 0,
+    val contextCode: Int = 0,
     /**
      * P1-AURA-003 — live trading state, as a semantic fact alongside the others.
      *
@@ -112,6 +113,7 @@ data class VanPresenceFrame(
         urgency = urgency.coerceIn(0f, 1f),
         viseme = if (health == VanHealthState.OFFLINE) 0 else viseme.coerceAtLeast(0),
         actionCode = actionCode,
+        contextCode = contextCode,
         trade = tradeAuraSemantic(),
         auraPulseGeneration = tradeClosePulse,
     )
@@ -189,8 +191,12 @@ object VanPresenceReducer {
 
     fun speechFrame(frame: VanPresenceFrame, mouthOpen: Float, viseme: Int): VanPresenceFrame = frame.copy(
         speech = VanSpeechState.SPEAKING,
-        mouthOpen = mouthOpen.coerceIn(0f, 1f),
-        viseme = viseme.coerceAtLeast(0),
+        mouthOpen = if (mouthOpen.isFinite()) mouthOpen.coerceIn(0f, 1f) else 0f,
+        viseme = when {
+            viseme < 0 -> 0
+            viseme > 4 -> 1 // canonical unknown-positive shape
+            else -> viseme
+        },
     )
 
     fun speechEnded(frame: VanPresenceFrame): VanPresenceFrame = frame.copy(

@@ -1,0 +1,377 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="1.114" timestamp="2026-10-28T16:38:24.970637+00:00" hostname="6e9feff21467"><testcase classname="test_van_short_entry_margin_binding_20261028" name="test_original_short_selects_actual_sell_estimate_and_never_sends[mt5]" time="0.404"><failure message="vati.risk.mandate.MandateError: mandate is not owner-signed: mandate-admit: owner authority key 'owner-test-1' is not registered on this host">cls = &lt;class 'vati.risk.mandate.TradingMandate'&gt;
+data = {'mandate_id': 'mandate-fx-primary', 'version': '1.0.0', 'account_alias': 'native', 'venue': 'mt5', ...}
+ceilings = PlatformCeilings(max_risk_per_trade=Decimal('0.0200'), max_open_stop_risk=Decimal('0.0600'), max_daily_loss=Decimal('0...max_weekly_drawdown=Decimal('0.1000'), max_currency_leg_exposure=Decimal('0.0400'), policy_version='risk-policy/2.0.0')
+authority = None
+
+    @classmethod
+    def from_mapping(
+        cls,
+        data: Mapping[str, Any],
+        *,
+        ceilings: PlatformCeilings = PlatformCeilings(),
+        authority: "OwnerAuthorityVerifier | None" = None,
+    ) -&gt; "TradingMandate":
+        required = (
+            "mandate_id", "version", "account_alias", "venue", "mode", "instruments",
+            "allowed_strategies", "max_risk_per_trade", "max_open_stop_risk",
+            "max_daily_loss", "max_weekly_drawdown", "max_currency_leg_exposure",
+            "max_consecutive_losses", "max_positions_per_instrument", "max_total_positions",
+            "tier1_event_policy", "weekend_hold_allowed", "forbidden",
+            "owner_signature_ref", "signed_at_unix", "expires_at_unix",
+        )
+        missing = [k for k in required if k not in data]
+        if missing:
+            raise MandateError(f"mandate missing fields: {missing}")
+    
+        try:
+            AuthorizationMode(str(data["mode"]))
+        except ValueError as exc:
+            raise MandateError(f"invalid mode: {data['mode']!r}") from exc
+    
+        policy = _effective_policy(data)
+    
+        # A standing grant covers the complete effective policy, including
+        # defaults. An unchanged identity/version cannot authorize altered
+        # accounts, scope, bounds, expiry or later mutable allocation maps.
+        verifier = authority if authority is not None else OwnerAuthorityVerifier()
+        try:
+&gt;           verified = verifier.verify(
+                str(data["owner_signature_ref"]),
+                act="mandate-admit",
+                subject=mandate_subject(policy),
+                now_unix=int(data.get("signed_at_unix") or time.time()),
+                # A mandate is a standing document, re-read on every process start, so it
+                # is not a one-shot act. Its complete policy and lifetime remain bound.
+                single_use=False,
+                max_lifetime_seconds=MAX_STANDING_LIFETIME_SECONDS,
+            )
+
+trading/vati/risk/mandate.py:246: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;vati.authority.OwnerAuthorityVerifier object at 0x7fa284780770&gt;
+token = 'van-oa1.eyJhY3QiOiJtYW5kYXRlLWFkbWl0IiwiZXhwIjoxODAyNTkyMDAwLCJpYXQiOjE3OTk5OTY0MDAsImtpZCI6Im93bmVyLXRlc3QtMSIsIm5vb...WY5Yzc0YTRiNmRiYzgifQ.MEYCIQCsAQSvR9jBuLrk5sqq_Dh6U1SfXbzSL5_XuqE5Tap9JAIhAPwaHv-h68jnro-3IEiggzSNeWm416PFU6AwKLWWhZXO'
+act = 'mandate-admit'
+subject = 'mandate-v2:c8991ff1b7bc5e2f1e25d6ea1ca27913fa7e4f5eec10929317ef9c74a4b6dbc8'
+now_unix = 1799996400, single_use = False, max_lifetime_seconds = 7776000
+
+    def verify(
+        self,
+        token: str | None,
+        *,
+        act: str,
+        subject: str,
+        now_unix: int | None = None,
+        single_use: bool = True,
+        max_lifetime_seconds: int = MAX_ACT_LIFETIME_SECONDS,
+    ) -&gt; OwnerAuthority:
+        """Verify a token for one act on one subject.
+    
+        `single_use` is on by default because most acts are decisions made once. It is
+        turned off only for a standing document, which is re-read every time the process
+        starts; there the replay bound is the document's own expiry and the fact that the
+        signature covers its version, so a widened mandate needs a new signature.
+        """
+        now = int(time.time()) if now_unix is None else int(now_unix)
+        if not token or not str(token).strip():
+            raise OwnerAuthorityError(
+                f"{act} requires owner authority: no token supplied"
+            )
+        parts = str(token).strip().split(".")
+        if len(parts) != 3 or parts[0] != PREFIX:
+            raise OwnerAuthorityError(
+                f"{act} requires owner authority: not a {PREFIX} token. "
+                "A bare reference string is not a signature."
+            )
+        try:
+            payload = json.loads(_unb64u(parts[1]))
+            signature = _unb64u(parts[2])
+        except (ValueError, json.JSONDecodeError) as exc:
+            raise OwnerAuthorityError(f"{act}: owner authority is malformed") from exc
+    
+        key_id = str(payload.get("kid", ""))
+        if not key_id or key_id in self.revoked_key_ids:
+            raise OwnerAuthorityError(f"{act}: owner authority key {key_id!r} is not usable")
+        verified_registry_path = self.registry_path
+        if verified_registry_path is not None:
+            try:
+                self.keys = load_owner_keys(verified_registry_path)
+            except (OSError, ValueError, TypeError) as exc:
+                raise OwnerAuthorityError(f"{act}: current owner authority registry is unavailable") from exc
+        pem = self.keys.get(key_id)
+        if not pem:
+&gt;           raise OwnerAuthorityError(
+                f"{act}: owner authority key {key_id!r} is not registered on this host"
+            )
+E           vati.authority.OwnerAuthorityError: mandate-admit: owner authority key 'owner-test-1' is not registered on this host
+
+trading/vati/authority.py:257: OwnerAuthorityError
+
+The above exception was the direct cause of the following exception:
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-152/test_original_short_selects_ac0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+provider = 'mt5'
+
+    @pytest.mark.parametrize('provider',['mt5','ctrader'])
+    def test_original_short_selects_actual_sell_estimate_and_never_sends(tmp_path,eurusd,provider):
+        if provider=='mt5':
+            sdk,worker,adapter,now,ledger,context=mt5_source(tmp_path,at=NOW*1000)
+            facts=snapshot(eurusd,account_alias=adapter.account_alias,balance=D('10000'),equity=D('10000'),
+                used_margin=D('0'),free_margin=D('10000'),margin_level_pct=None,native_account_context=context)
+            book=NativeMarginBook(ledger,clock=lambda:now['ms']);quantity=D('.10')
+        else:
+            ledger,adapter,old,book,now,facts=setup_book(tmp_path,eurusd)
+            facts=replace(facts,used_margin=D('0'),free_margin=D('10000'),margin_level_pct=None)
+            quantity=D('.123')
+        try:
+            request=intent(venue=provider,account_alias=adapter.account_alias,direction=Direction.SHORT,stop=D('1.11'))
+&gt;           original=record(ledger,facts,request=request)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+../../test_van_short_entry_margin_binding_20261028.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_native_risk_history_inputs.py:25: in record
+    decision = RiskAuthority(TradingMandate.from_mapping(grant)).evaluate_safe(request, facts)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = &lt;class 'vati.risk.mandate.TradingMandate'&gt;
+data = {'mandate_id': 'mandate-fx-primary', 'version': '1.0.0', 'account_alias': 'native', 'venue': 'mt5', ...}
+ceilings = PlatformCeilings(max_risk_per_trade=Decimal('0.0200'), max_open_stop_risk=Decimal('0.0600'), max_daily_loss=Decimal('0...max_weekly_drawdown=Decimal('0.1000'), max_currency_leg_exposure=Decimal('0.0400'), policy_version='risk-policy/2.0.0')
+authority = None
+
+    @classmethod
+    def from_mapping(
+        cls,
+        data: Mapping[str, Any],
+        *,
+        ceilings: PlatformCeilings = PlatformCeilings(),
+        authority: "OwnerAuthorityVerifier | None" = None,
+    ) -&gt; "TradingMandate":
+        required = (
+            "mandate_id", "version", "account_alias", "venue", "mode", "instruments",
+            "allowed_strategies", "max_risk_per_trade", "max_open_stop_risk",
+            "max_daily_loss", "max_weekly_drawdown", "max_currency_leg_exposure",
+            "max_consecutive_losses", "max_positions_per_instrument", "max_total_positions",
+            "tier1_event_policy", "weekend_hold_allowed", "forbidden",
+            "owner_signature_ref", "signed_at_unix", "expires_at_unix",
+        )
+        missing = [k for k in required if k not in data]
+        if missing:
+            raise MandateError(f"mandate missing fields: {missing}")
+    
+        try:
+            AuthorizationMode(str(data["mode"]))
+        except ValueError as exc:
+            raise MandateError(f"invalid mode: {data['mode']!r}") from exc
+    
+        policy = _effective_policy(data)
+    
+        # A standing grant covers the complete effective policy, including
+        # defaults. An unchanged identity/version cannot authorize altered
+        # accounts, scope, bounds, expiry or later mutable allocation maps.
+        verifier = authority if authority is not None else OwnerAuthorityVerifier()
+        try:
+            verified = verifier.verify(
+                str(data["owner_signature_ref"]),
+                act="mandate-admit",
+                subject=mandate_subject(policy),
+                now_unix=int(data.get("signed_at_unix") or time.time()),
+                # A mandate is a standing document, re-read on every process start, so it
+                # is not a one-shot act. Its complete policy and lifetime remain bound.
+                single_use=False,
+                max_lifetime_seconds=MAX_STANDING_LIFETIME_SECONDS,
+            )
+        except OwnerAuthorityError as exc:
+&gt;           raise MandateError(f"mandate is not owner-signed: {exc}") from exc
+E           vati.risk.mandate.MandateError: mandate is not owner-signed: mandate-admit: owner authority key 'owner-test-1' is not registered on this host
+
+trading/vati/risk/mandate.py:257: MandateError</failure></testcase><testcase classname="test_van_short_entry_margin_binding_20261028" name="test_original_short_selects_actual_sell_estimate_and_never_sends[ctrader]" time="0.005"><failure message="vati.risk.mandate.MandateError: mandate is not owner-signed: mandate-admit: owner authority key 'owner-test-1' is not registered on this host">cls = &lt;class 'vati.risk.mandate.TradingMandate'&gt;
+data = {'mandate_id': 'mandate-fx-primary', 'version': '1.0.0', 'account_alias': 'ctrader_primary', 'venue': 'ctrader', ...}
+ceilings = PlatformCeilings(max_risk_per_trade=Decimal('0.0200'), max_open_stop_risk=Decimal('0.0600'), max_daily_loss=Decimal('0...max_weekly_drawdown=Decimal('0.1000'), max_currency_leg_exposure=Decimal('0.0400'), policy_version='risk-policy/2.0.0')
+authority = None
+
+    @classmethod
+    def from_mapping(
+        cls,
+        data: Mapping[str, Any],
+        *,
+        ceilings: PlatformCeilings = PlatformCeilings(),
+        authority: "OwnerAuthorityVerifier | None" = None,
+    ) -&gt; "TradingMandate":
+        required = (
+            "mandate_id", "version", "account_alias", "venue", "mode", "instruments",
+            "allowed_strategies", "max_risk_per_trade", "max_open_stop_risk",
+            "max_daily_loss", "max_weekly_drawdown", "max_currency_leg_exposure",
+            "max_consecutive_losses", "max_positions_per_instrument", "max_total_positions",
+            "tier1_event_policy", "weekend_hold_allowed", "forbidden",
+            "owner_signature_ref", "signed_at_unix", "expires_at_unix",
+        )
+        missing = [k for k in required if k not in data]
+        if missing:
+            raise MandateError(f"mandate missing fields: {missing}")
+    
+        try:
+            AuthorizationMode(str(data["mode"]))
+        except ValueError as exc:
+            raise MandateError(f"invalid mode: {data['mode']!r}") from exc
+    
+        policy = _effective_policy(data)
+    
+        # A standing grant covers the complete effective policy, including
+        # defaults. An unchanged identity/version cannot authorize altered
+        # accounts, scope, bounds, expiry or later mutable allocation maps.
+        verifier = authority if authority is not None else OwnerAuthorityVerifier()
+        try:
+&gt;           verified = verifier.verify(
+                str(data["owner_signature_ref"]),
+                act="mandate-admit",
+                subject=mandate_subject(policy),
+                now_unix=int(data.get("signed_at_unix") or time.time()),
+                # A mandate is a standing document, re-read on every process start, so it
+                # is not a one-shot act. Its complete policy and lifetime remain bound.
+                single_use=False,
+                max_lifetime_seconds=MAX_STANDING_LIFETIME_SECONDS,
+            )
+
+trading/vati/risk/mandate.py:246: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;vati.authority.OwnerAuthorityVerifier object at 0x7fa2846971d0&gt;
+token = 'van-oa1.eyJhY3QiOiJtYW5kYXRlLWFkbWl0IiwiZXhwIjoxODAyNTkyMDAwLCJpYXQiOjE3OTk5OTY0MDAsImtpZCI6Im93bmVyLXRlc3QtMSIsIm5vb...Y2Y1N2FkNzNkNzUzYmEifQ.MEUCIQDSyVglfoIuvCmgq0P53RjwUnRKaiOv-stH9tphoEcmEwIgWgqLspiLItAABw7R8vhSueen2V43pYGvtx00_fjv1q0'
+act = 'mandate-admit'
+subject = 'mandate-v2:e451eaee3e08df62ea39e304d5c8e3d307ced6c54ea99e87cccf57ad73d753ba'
+now_unix = 1799996400, single_use = False, max_lifetime_seconds = 7776000
+
+    def verify(
+        self,
+        token: str | None,
+        *,
+        act: str,
+        subject: str,
+        now_unix: int | None = None,
+        single_use: bool = True,
+        max_lifetime_seconds: int = MAX_ACT_LIFETIME_SECONDS,
+    ) -&gt; OwnerAuthority:
+        """Verify a token for one act on one subject.
+    
+        `single_use` is on by default because most acts are decisions made once. It is
+        turned off only for a standing document, which is re-read every time the process
+        starts; there the replay bound is the document's own expiry and the fact that the
+        signature covers its version, so a widened mandate needs a new signature.
+        """
+        now = int(time.time()) if now_unix is None else int(now_unix)
+        if not token or not str(token).strip():
+            raise OwnerAuthorityError(
+                f"{act} requires owner authority: no token supplied"
+            )
+        parts = str(token).strip().split(".")
+        if len(parts) != 3 or parts[0] != PREFIX:
+            raise OwnerAuthorityError(
+                f"{act} requires owner authority: not a {PREFIX} token. "
+                "A bare reference string is not a signature."
+            )
+        try:
+            payload = json.loads(_unb64u(parts[1]))
+            signature = _unb64u(parts[2])
+        except (ValueError, json.JSONDecodeError) as exc:
+            raise OwnerAuthorityError(f"{act}: owner authority is malformed") from exc
+    
+        key_id = str(payload.get("kid", ""))
+        if not key_id or key_id in self.revoked_key_ids:
+            raise OwnerAuthorityError(f"{act}: owner authority key {key_id!r} is not usable")
+        verified_registry_path = self.registry_path
+        if verified_registry_path is not None:
+            try:
+                self.keys = load_owner_keys(verified_registry_path)
+            except (OSError, ValueError, TypeError) as exc:
+                raise OwnerAuthorityError(f"{act}: current owner authority registry is unavailable") from exc
+        pem = self.keys.get(key_id)
+        if not pem:
+&gt;           raise OwnerAuthorityError(
+                f"{act}: owner authority key {key_id!r} is not registered on this host"
+            )
+E           vati.authority.OwnerAuthorityError: mandate-admit: owner authority key 'owner-test-1' is not registered on this host
+
+trading/vati/authority.py:257: OwnerAuthorityError
+
+The above exception was the direct cause of the following exception:
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-152/test_original_short_selects_ac1')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+provider = 'ctrader'
+
+    @pytest.mark.parametrize('provider',['mt5','ctrader'])
+    def test_original_short_selects_actual_sell_estimate_and_never_sends(tmp_path,eurusd,provider):
+        if provider=='mt5':
+            sdk,worker,adapter,now,ledger,context=mt5_source(tmp_path,at=NOW*1000)
+            facts=snapshot(eurusd,account_alias=adapter.account_alias,balance=D('10000'),equity=D('10000'),
+                used_margin=D('0'),free_margin=D('10000'),margin_level_pct=None,native_account_context=context)
+            book=NativeMarginBook(ledger,clock=lambda:now['ms']);quantity=D('.10')
+        else:
+&gt;           ledger,adapter,old,book,now,facts=setup_book(tmp_path,eurusd)
+                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+../../test_van_short_entry_margin_binding_20261028.py:23: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_native_margin_book.py:22: in setup_book
+    event=record(ledger,facts)
+          ^^^^^^^^^^^^^^^^^^^^
+trading/tests/test_native_risk_history_inputs.py:25: in record
+    decision = RiskAuthority(TradingMandate.from_mapping(grant)).evaluate_safe(request, facts)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = &lt;class 'vati.risk.mandate.TradingMandate'&gt;
+data = {'mandate_id': 'mandate-fx-primary', 'version': '1.0.0', 'account_alias': 'ctrader_primary', 'venue': 'ctrader', ...}
+ceilings = PlatformCeilings(max_risk_per_trade=Decimal('0.0200'), max_open_stop_risk=Decimal('0.0600'), max_daily_loss=Decimal('0...max_weekly_drawdown=Decimal('0.1000'), max_currency_leg_exposure=Decimal('0.0400'), policy_version='risk-policy/2.0.0')
+authority = None
+
+    @classmethod
+    def from_mapping(
+        cls,
+        data: Mapping[str, Any],
+        *,
+        ceilings: PlatformCeilings = PlatformCeilings(),
+        authority: "OwnerAuthorityVerifier | None" = None,
+    ) -&gt; "TradingMandate":
+        required = (
+            "mandate_id", "version", "account_alias", "venue", "mode", "instruments",
+            "allowed_strategies", "max_risk_per_trade", "max_open_stop_risk",
+            "max_daily_loss", "max_weekly_drawdown", "max_currency_leg_exposure",
+            "max_consecutive_losses", "max_positions_per_instrument", "max_total_positions",
+            "tier1_event_policy", "weekend_hold_allowed", "forbidden",
+            "owner_signature_ref", "signed_at_unix", "expires_at_unix",
+        )
+        missing = [k for k in required if k not in data]
+        if missing:
+            raise MandateError(f"mandate missing fields: {missing}")
+    
+        try:
+            AuthorizationMode(str(data["mode"]))
+        except ValueError as exc:
+            raise MandateError(f"invalid mode: {data['mode']!r}") from exc
+    
+        policy = _effective_policy(data)
+    
+        # A standing grant covers the complete effective policy, including
+        # defaults. An unchanged identity/version cannot authorize altered
+        # accounts, scope, bounds, expiry or later mutable allocation maps.
+        verifier = authority if authority is not None else OwnerAuthorityVerifier()
+        try:
+            verified = verifier.verify(
+                str(data["owner_signature_ref"]),
+                act="mandate-admit",
+                subject=mandate_subject(policy),
+                now_unix=int(data.get("signed_at_unix") or time.time()),
+                # A mandate is a standing document, re-read on every process start, so it
+                # is not a one-shot act. Its complete policy and lifetime remain bound.
+                single_use=False,
+                max_lifetime_seconds=MAX_STANDING_LIFETIME_SECONDS,
+            )
+        except OwnerAuthorityError as exc:
+&gt;           raise MandateError(f"mandate is not owner-signed: {exc}") from exc
+E           vati.risk.mandate.MandateError: mandate is not owner-signed: mandate-admit: owner authority key 'owner-test-1' is not registered on this host
+
+trading/vati/risk/mandate.py:257: MandateError</failure></testcase></testsuite></testsuites>

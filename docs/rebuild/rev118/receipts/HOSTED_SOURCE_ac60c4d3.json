@@ -1,0 +1,213 @@
+{
+  "schema": "van.rebuild.hosted-source/1",
+  "source_head": "ac60c4d3ba57ff488a39fa1962920ce4711c0ffc",
+  "tested_merge": "dc50d4839ae4741d57776fe84df79cd39e1772d1",
+  "tested_tree": "bcbaf08a6b47498b715fde8e701e593a36b8fa6a",
+  "head_and_tested_merge_tree_equality_verified": true,
+  "run_id": 40219703232,
+  "conclusion": "failure",
+  "qualification": "Every public source job succeeded; actual overall run remains failed on two unwaived native/trusted prerequisites. Does not qualify subsequent local commits.",
+  "jobs": [
+    {
+      "id": 121248386512,
+      "name": "android-instrumentation",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121248386682,
+      "name": "mutation (python-0, python, 0/4)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121248386703,
+      "name": "backend-public-source",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121248386704,
+      "name": "market-monitor-source",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121248386724,
+      "name": "rebuild-documentary",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121248386769,
+      "name": "browser-guard-source",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121248386784,
+      "name": "project-truth-ledger",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 121248386806,
+      "name": "backend",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 121248386809,
+      "name": "postgres-ledger",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121248386817,
+      "name": "mutation (browser-agent, browser-agent, 0/1)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121248386820,
+      "name": "android-and-visual-evidence",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121248386832,
+      "name": "mutation (python-1, python, 1/4)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121248386840,
+      "name": "mutation (python-2, python, 2/4)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121248386855,
+      "name": "mutation (python-3, python, 3/4)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121248386920,
+      "name": "mutation (kotlin-2, kotlin, 2/4)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121248386940,
+      "name": "mutation (kotlin-1, kotlin, 1/4)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121248386960,
+      "name": "mutation (kotlin-0, kotlin, 0/4)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121248386989,
+      "name": "mutation (kotlin-3, kotlin, 3/4)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121250870050,
+      "name": "character-forge-gate",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ],
+  "counts": {
+    "monitor": {
+      "tests": 258,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 258
+    },
+    "gateway": {
+      "tests": 5782,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 7,
+      "passed": 5775
+    },
+    "media": {
+      "tests": 198,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 198
+    },
+    "trading": {
+      "tests": 3109,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "passed": 3108
+    },
+    "postgres": {
+      "tests": 26,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 26
+    },
+    "voice": {
+      "tests": 117,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 117
+    },
+    "browser_full": {
+      "tests": 1548,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "passed": 1547
+    },
+    "browser_foreground": {
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 11
+    },
+    "browser_uid": {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 1
+    },
+    "browser_firewall": {
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 10
+    }
+  },
+  "android_emulator": {
+    "tests": 22,
+    "passed": 18,
+    "failed": 0,
+    "declared_core_production_skips": 4,
+    "artifact_id": 12609153333,
+    "s24": false
+  },
+  "mutation_corpus": "ci/MUTATION_CORPUS_ac60c4d3.json",
+  "remaining_gates": [
+    "DDS_CONTRACT_READ_DEPLOY_KEY not provisioned; backend mandatory job failed before private suite",
+    "Trusted main8eb18898 lacks tools/ci/project_truth_ledger.py; mandatory ledger job failed before judging PR",
+    "PRE-003/F15, independent/owner admission, production profile/signing/service/provider/economic/S24 acceptance unissued"
+  ],
+  "evidence": "ci/hosted_ac60c4d3_20261025"
+}

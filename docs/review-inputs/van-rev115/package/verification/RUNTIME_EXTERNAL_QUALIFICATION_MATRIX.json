@@ -1,0 +1,1970 @@
+{
+  "capabilities": [
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "BE-001",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review",
+        "Reconcile Opus lockout/execution/ledger fixes with canon Jev/temperament/evidence, PR-only Muse/owner controls and their callers; full parity holds. Shared-store migrations restore learned state, lockout clocks and account owners; asynchronous Jev outage cannot delay protection."
+      ],
+      "rev115_requirements": [
+        "VAN-RV-006"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "BE-002",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review",
+        "Dispatch resolves current qualified policy, mandate, reservation, epoch and objective; positive decimal venue increments and complete mature costs validate. Expiry/revocation at any preactivation or drain stage blocks new risk, reconciles in-flight effects and cannot reactivate revoked fallback."
+      ],
+      "rev115_requirements": [
+        "VAN-RV-002"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "BE-003",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review",
+        "Real registered consumer applies newer observation revision once, persists cursor/contribution/snapshot atomically, and later eligible selector consumes its fingerprint. Kill actual process before/after commit, replay bounded journal and verify identical logical snapshot/selection with AS_DECIDED unchanged.",
+        "Reconcile Opus lockout/execution/ledger fixes with canon Jev/temperament/evidence, PR-only Muse/owner controls and their callers; full parity holds. Shared-store migrations restore learned state, lockout clocks and account owners; asynchronous Jev outage cannot delay protection."
+      ],
+      "rev115_requirements": [
+        "VAN-RV-003",
+        "VAN-RV-006"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "BE-004",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review",
+        "Selected eligible CEX spot adapter demonstrates genuine matching, recovery and settlement/protection for its admitted scope; contextual app contracts expose exact state and receipts. Private-stream gaps, API clock/rate-limit stress and account-wide cancellation recover without cancelling manual/protective orders outside scope; unavailable provider remains an explicit gate."
+      ],
+      "rev114_missing_proof_state": "NOT_QUALIFIED; identify exact admitted environment before implementation; no new accounts or live money inferred.",
+      "rev114_target": "Mandatory selected eligible CEX spot provider integration; mock-only endpoints do not establish matching, fee, cancel/protection behavior.",
+      "rev115_requirements": [
+        "VAN-RV-008"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "BE-005",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review",
+        "Selected eligible CEX spot adapter demonstrates genuine matching, recovery and settlement/protection for its admitted scope; contextual app contracts expose exact state and receipts. Private-stream gaps, API clock/rate-limit stress and account-wide cancellation recover without cancelling manual/protective orders outside scope; unavailable provider remains an explicit gate."
+      ],
+      "rev114_missing_proof_state": "NOT_QUALIFIED; identify exact admitted environment before implementation; no new accounts or live money inferred.",
+      "rev114_target": "Mandatory selected eligible CEX spot provider integration; mock-only endpoints do not establish matching, fee, cancel/protection behavior.",
+      "rev115_requirements": [
+        "VAN-RV-008"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "BE-006",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review",
+        "One gross base unit filled with 0.01 base fee consumes the entire one-unit execution budget; cash/base/fee-asset postings balance under explicit valuation. Late fee and fill bust append compensating facts, preserve old decision snapshots and reconcile reservations without automatic re-entry."
+      ],
+      "rev115_requirements": [
+        "VAN-RV-004"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "BE-007",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "BE-008",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "rev114_missing_proof_state": "NOT_QUALIFIED; identify exact admitted environment before implementation; no new accounts or live money inferred.",
+      "rev114_target": "Mandatory selected eligible CEX spot provider integration; mock-only endpoints do not establish matching, fee, cancel/protection behavior.",
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "BE-009",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review",
+        "One gross base unit filled with 0.01 base fee consumes the entire one-unit execution budget; cash/base/fee-asset postings balance under explicit valuation. Late fee and fill bust append compensating facts, preserve old decision snapshots and reconcile reservations without automatic re-entry.",
+        "Quantized slices jointly satisfy parent quantity, fresh depth participation, minimum lot/notional, maximum slices, deadline and command budget. Replanning uses newly observed depth/time under same grant; restart retains lifetime counters and does not repeat unconfirmed slices."
+      ],
+      "rev115_requirements": [
+        "VAN-RV-004",
+        "VAN-RV-005"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "BE-010",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review",
+        "Lose cancel reply; authenticated lookup proves cancelled with partial fills; record fills once, retain protection and release only proven unused reservation. Restart at cancel-send and query boundaries, then accept late fill/correction without resubmission.",
+        "Dispatch resolves current qualified policy, mandate, reservation, epoch and objective; positive decimal venue increments and complete mature costs validate. Expiry/revocation at any preactivation or drain stage blocks new risk, reconciles in-flight effects and cannot reactivate revoked fallback.",
+        "One gross base unit filled with 0.01 base fee consumes the entire one-unit execution budget; cash/base/fee-asset postings balance under explicit valuation. Late fee and fill bust append compensating facts, preserve old decision snapshots and reconcile reservations without automatic re-entry.",
+        "Quantized slices jointly satisfy parent quantity, fresh depth participation, minimum lot/notional, maximum slices, deadline and command budget. Replanning uses newly observed depth/time under same grant; restart retains lifetime counters and does not repeat unconfirmed slices.",
+        "Reconcile Opus lockout/execution/ledger fixes with canon Jev/temperament/evidence, PR-only Muse/owner controls and their callers; full parity holds. Shared-store migrations restore learned state, lockout clocks and account owners; asynchronous Jev outage cannot delay protection.",
+        "Selected eligible CEX spot adapter demonstrates genuine matching, recovery and settlement/protection for its admitted scope; contextual app contracts expose exact state and receipts. Private-stream gaps, API clock/rate-limit stress and account-wide cancellation recover without cancelling manual/protective orders outside scope; unavailable provider remains an explicit gate."
+      ],
+      "rev114_missing_proof_state": "NOT_QUALIFIED; identify exact admitted environment before implementation; no new accounts or live money inferred.",
+      "rev114_target": "Mandatory selected eligible CEX spot provider integration; mock-only endpoints do not establish matching, fee, cancel/protection behavior.",
+      "rev115_requirements": [
+        "VAN-RV-001",
+        "VAN-RV-002",
+        "VAN-RV-004",
+        "VAN-RV-005",
+        "VAN-RV-006",
+        "VAN-RV-008"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "BE-011",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "BE-012",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review",
+        "Lose cancel reply; authenticated lookup proves cancelled with partial fills; record fills once, retain protection and release only proven unused reservation. Restart at cancel-send and query boundaries, then accept late fill/correction without resubmission.",
+        "Real registered consumer applies newer observation revision once, persists cursor/contribution/snapshot atomically, and later eligible selector consumes its fingerprint. Kill actual process before/after commit, replay bounded journal and verify identical logical snapshot/selection with AS_DECIDED unchanged.",
+        "One gross base unit filled with 0.01 base fee consumes the entire one-unit execution budget; cash/base/fee-asset postings balance under explicit valuation. Late fee and fill bust append compensating facts, preserve old decision snapshots and reconcile reservations without automatic re-entry."
+      ],
+      "rev114_missing_proof_state": "NOT_QUALIFIED; identify exact admitted environment before implementation; no new accounts or live money inferred.",
+      "rev114_target": "Mandatory selected eligible CEX spot provider integration; mock-only endpoints do not establish matching, fee, cancel/protection behavior.",
+      "rev115_requirements": [
+        "VAN-RV-001",
+        "VAN-RV-003",
+        "VAN-RV-004"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "BE-013",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "BE-014",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "BE-015",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "BE-016",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "BE-017",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "BE-018",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "BE-019",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "BE-020",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "BE-021",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "BE-022",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "BE-023",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "BE-024",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "BE-025",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "BE-026",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "BE-027",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "BE-028",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "BE-029",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "BE-030",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "BE-031",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "BE-032",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review",
+        "Selected eligible CEX spot adapter demonstrates genuine matching, recovery and settlement/protection for its admitted scope; contextual app contracts expose exact state and receipts. Private-stream gaps, API clock/rate-limit stress and account-wide cancellation recover without cancelling manual/protective orders outside scope; unavailable provider remains an explicit gate."
+      ],
+      "rev115_requirements": [
+        "VAN-RV-008"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "BE-033",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "BE-034",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "BE-035",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review",
+        "One gross base unit filled with 0.01 base fee consumes the entire one-unit execution budget; cash/base/fee-asset postings balance under explicit valuation. Late fee and fill bust append compensating facts, preserve old decision snapshots and reconcile reservations without automatic re-entry.",
+        "Quantized slices jointly satisfy parent quantity, fresh depth participation, minimum lot/notional, maximum slices, deadline and command budget. Replanning uses newly observed depth/time under same grant; restart retains lifetime counters and does not repeat unconfirmed slices.",
+        "Qualified event oracle, immutable licensed inputs, full trial census and availability-time features support matched objective and whole-account arms with predeclared costs and uncertainty. Failed/pruned runs and corrections remain in census; evaluator changes invalidate dependent claims and rerun only affected studies."
+      ],
+      "rev115_requirements": [
+        "VAN-RV-004",
+        "VAN-RV-005",
+        "VAN-RV-007"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "BE-036",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review",
+        "Real registered consumer applies newer observation revision once, persists cursor/contribution/snapshot atomically, and later eligible selector consumes its fingerprint. Kill actual process before/after commit, replay bounded journal and verify identical logical snapshot/selection with AS_DECIDED unchanged.",
+        "Reconcile Opus lockout/execution/ledger fixes with canon Jev/temperament/evidence, PR-only Muse/owner controls and their callers; full parity holds. Shared-store migrations restore learned state, lockout clocks and account owners; asynchronous Jev outage cannot delay protection.",
+        "Qualified event oracle, immutable licensed inputs, full trial census and availability-time features support matched objective and whole-account arms with predeclared costs and uncertainty. Failed/pruned runs and corrections remain in census; evaluator changes invalidate dependent claims and rerun only affected studies."
+      ],
+      "rev114_target": "Both automatic operational learning and governed policy evolution positive/adverse/recovery paths through actual registration and durable evidence; economic results may be inconclusive.",
+      "rev115_requirements": [
+        "VAN-RV-003",
+        "VAN-RV-006",
+        "VAN-RV-007"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "VAN-ML-PKT-004",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "VAN-ML-PKT-005",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "VAN-ML-PKT-006",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "VAN-ML-PKT-007",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "VAN-ML-PKT-008",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "VAN-ML-PKT-009",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "VAN-ML-PKT-010",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "VAN-ML-PKT-011",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "VAN-ML-PKT-012",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "VAN-ML-PKT-013",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "VAN-ML-PKT-014",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "VAN-ML-PKT-015",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "VAN-ML-PKT-016",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "VAN-ML-PKT-017",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "VAN-ML-PKT-018",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "VAN-ML-PKT-019",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "VAN-ML-PKT-020",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "VAN-ML-PKT-021",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "VAN-ML-PKT-022",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "VAN-ML-PKT-023",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "VAN-ML-PKT-024",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "VAN-ML-PKT-025",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "VAN-ML-PKT-026",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "VAN-ML-PKT-027",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "VAN-ML-PKT-028",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "VAN-ML-PKT-029",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "VAN-ML-PKT-037",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "VAN-ML-PKT-038",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "VAN-ML-PKT-039",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "VAN-ML-PKT-040",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "VAN-ML-PKT-041",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "VAN-ML-PKT-042",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "VAN-ML-PKT-043",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "VAN-ML-PKT-044",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "VAN-ML-PKT-045",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "VAN-ML-PKT-046",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "VAN-ML-PKT-047",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Admitted DIAL isolated backend deployment; real permitted provider sandbox where required; fixtures identified as fixtures",
+      "financial_activation": "Separate owner authority; no real money authorized",
+      "gate": "BG-001",
+      "id": "VAN-ML-PKT-048",
+      "invalidate_on": [
+        "source change",
+        "contract change",
+        "policy change",
+        "provider permission change",
+        "evidence expiry"
+      ],
+      "no_procurement": "Forecast additive has no purchase/license/account-creation requirement; inaccessible required integration remains not qualified, never fake ready",
+      "required_receipts": [
+        "exact source/config/dependency scope",
+        "real registered producer and consumer",
+        "success/refusal/failure/recovery postconditions",
+        "concurrent event and restart proof",
+        "independent review"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "CANDIDATE_NOT_COMPLETED_BY_CONSOLIDATION"
+    },
+    {
+      "environment": "Actual qualified Netcup/Oracle DIAL test topology; existing permitted read-only provider access; no on-chain transaction.",
+      "financial_activation": "NONE from additive. Existing financial paths remain sovereign.",
+      "gate": "BG-001",
+      "id": "BE-037",
+      "invalidate_on": [
+        "state revision/reorg",
+        "source permission expiry",
+        "schema/policy/model change",
+        "evidence expiry"
+      ],
+      "no_procurement": "No purchase/account task. Required unverified source remains not qualified; unrelated work may proceed.",
+      "required_receipts": [
+        "exact source/schema/provider version",
+        "real registered producer/store/consumer and independent readback",
+        "positive and negative semantics",
+        "interruption/reorg/revocation recovery",
+        "permitted source scope and actual integration proof"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "SPECIFIED_NOT_IMPLEMENTED"
+    },
+    {
+      "environment": "Actual qualified Netcup/Oracle DIAL test topology; existing permitted read-only provider access; no on-chain transaction.",
+      "financial_activation": "NONE from additive. Existing financial paths remain sovereign.",
+      "gate": "BG-001",
+      "id": "BE-038",
+      "invalidate_on": [
+        "state revision/reorg",
+        "source permission expiry",
+        "schema/policy/model change",
+        "evidence expiry"
+      ],
+      "no_procurement": "No purchase/account task. Required unverified source remains not qualified; unrelated work may proceed.",
+      "required_receipts": [
+        "exact source/schema/provider version",
+        "real registered producer/store/consumer and independent readback",
+        "positive and negative semantics",
+        "interruption/reorg/revocation recovery",
+        "permitted source scope and actual integration proof"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "SPECIFIED_NOT_IMPLEMENTED"
+    },
+    {
+      "environment": "Actual qualified Netcup/Oracle DIAL test topology; existing permitted read-only provider access; no on-chain transaction.",
+      "financial_activation": "NONE from additive. Existing financial paths remain sovereign.",
+      "gate": "BG-001",
+      "id": "BE-039",
+      "invalidate_on": [
+        "state revision/reorg",
+        "source permission expiry",
+        "schema/policy/model change",
+        "evidence expiry"
+      ],
+      "no_procurement": "No purchase/account task. Required unverified source remains not qualified; unrelated work may proceed.",
+      "required_receipts": [
+        "exact source/schema/provider version",
+        "real registered producer/store/consumer and independent readback",
+        "positive and negative semantics",
+        "interruption/reorg/revocation recovery",
+        "permitted source scope and actual integration proof"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "SPECIFIED_NOT_IMPLEMENTED"
+    },
+    {
+      "environment": "Actual qualified Netcup/Oracle DIAL test topology; existing permitted read-only provider access; no on-chain transaction.",
+      "financial_activation": "NONE from additive. Existing financial paths remain sovereign.",
+      "gate": "BG-001",
+      "id": "BE-040",
+      "invalidate_on": [
+        "state revision/reorg",
+        "source permission expiry",
+        "schema/policy/model change",
+        "evidence expiry"
+      ],
+      "no_procurement": "No purchase/account task. Required unverified source remains not qualified; unrelated work may proceed.",
+      "required_receipts": [
+        "exact source/schema/provider version",
+        "real registered producer/store/consumer and independent readback",
+        "positive and negative semantics",
+        "interruption/reorg/revocation recovery",
+        "permitted source scope and actual integration proof"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "SPECIFIED_NOT_IMPLEMENTED"
+    },
+    {
+      "environment": "Actual qualified Netcup/Oracle DIAL test topology; existing permitted read-only provider access; no on-chain transaction.",
+      "financial_activation": "NONE from additive. Existing financial paths remain sovereign.",
+      "gate": "BG-001",
+      "id": "BE-041",
+      "invalidate_on": [
+        "state revision/reorg",
+        "source permission expiry",
+        "schema/policy/model change",
+        "evidence expiry"
+      ],
+      "no_procurement": "No purchase/account task. Required unverified source remains not qualified; unrelated work may proceed.",
+      "required_receipts": [
+        "exact source/schema/provider version",
+        "real registered producer/store/consumer and independent readback",
+        "positive and negative semantics",
+        "interruption/reorg/revocation recovery",
+        "permitted source scope and actual integration proof"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "SPECIFIED_NOT_IMPLEMENTED"
+    },
+    {
+      "environment": "Actual qualified Netcup/Oracle DIAL test topology; existing permitted read-only provider access; no on-chain transaction.",
+      "financial_activation": "NONE from additive. Existing financial paths remain sovereign.",
+      "gate": "BG-001",
+      "id": "BE-042",
+      "invalidate_on": [
+        "state revision/reorg",
+        "source permission expiry",
+        "schema/policy/model change",
+        "evidence expiry"
+      ],
+      "no_procurement": "No purchase/account task. Required unverified source remains not qualified; unrelated work may proceed.",
+      "required_receipts": [
+        "exact source/schema/provider version",
+        "real registered producer/store/consumer and independent readback",
+        "positive and negative semantics",
+        "interruption/reorg/revocation recovery",
+        "permitted source scope and actual integration proof"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "SPECIFIED_NOT_IMPLEMENTED"
+    },
+    {
+      "environment": "Actual qualified Netcup/Oracle DIAL test topology; existing permitted read-only provider access; no on-chain transaction.",
+      "financial_activation": "NONE from additive. Existing financial paths remain sovereign.",
+      "gate": "BG-001",
+      "id": "BE-043",
+      "invalidate_on": [
+        "state revision/reorg",
+        "source permission expiry",
+        "schema/policy/model change",
+        "evidence expiry"
+      ],
+      "no_procurement": "No purchase/account task. Required unverified source remains not qualified; unrelated work may proceed.",
+      "required_receipts": [
+        "exact source/schema/provider version",
+        "real registered producer/store/consumer and independent readback",
+        "positive and negative semantics",
+        "interruption/reorg/revocation recovery",
+        "permitted source scope and actual integration proof"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "SPECIFIED_NOT_IMPLEMENTED"
+    },
+    {
+      "environment": "Actual qualified Netcup/Oracle DIAL test topology; existing permitted read-only provider access; no on-chain transaction.",
+      "financial_activation": "NONE from additive. Existing financial paths remain sovereign.",
+      "gate": "BG-001",
+      "id": "BE-044",
+      "invalidate_on": [
+        "state revision/reorg",
+        "source permission expiry",
+        "schema/policy/model change",
+        "evidence expiry"
+      ],
+      "no_procurement": "No purchase/account task. Required unverified source remains not qualified; unrelated work may proceed.",
+      "required_receipts": [
+        "exact source/schema/provider version",
+        "real registered producer/store/consumer and independent readback",
+        "positive and negative semantics",
+        "interruption/reorg/revocation recovery",
+        "permitted source scope and actual integration proof"
+      ],
+      "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "source_state": "SPECIFIED_NOT_IMPLEMENTED"
+    }
+  ],
+  "revision": "1.15",
+  "schema": "van.canonical.f13/1.1",
+  "status": "PREDEVELOPMENT_MATRIX_NOT_RUNTIME_PROOF"
+}

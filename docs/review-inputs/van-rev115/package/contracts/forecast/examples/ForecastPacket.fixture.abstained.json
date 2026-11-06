@@ -1,0 +1,43 @@
+{
+  "schema_version": "van-ml/1.0",
+  "record_id": "fixture-forecast-002",
+  "authority_effect": "NONE",
+  "scope": {
+    "project_id": "fixture-van-project",
+    "cohort_id": "fixture-cohort",
+    "instrument_id": "FIXTURE:TEST-INSTRUMENT",
+    "venue_id": "FIXTURE-VENUE",
+    "environment": "FIXTURE"
+  },
+  "target_spec_id": "fixture-return-h4",
+  "target_spec_digest": "34a04005bcaf206eec990bd9637d9fdb6725e0a0c0d4aebf003f17f4c956eb5c",
+  "horizon": {
+    "steps": 4,
+    "unit": "BARS",
+    "interval_id": "H1",
+    "calendar_digest": "5152790e278eb89039f8bfaa354b944ec1b44c5d3fc144edc5720c3edc045c73"
+  },
+  "unit": "arithmetic_return_fraction",
+  "cost_basis": "NET_EXPLICIT",
+  "input_snapshot_digest": "c96c6d5be8d08a12e7b5cdc1b207fa6b2430974c86803d8891675e76fd992c20",
+  "feature_manifest_digest": "5b8a8b56dada6ce7567442b4935298df7de2badd7becdcf4915a59487338ca4b",
+  "model_artifact_digest": "9372c470eeadd5ecd9c3c74c2b3cb633f8e2f2fad799250a0f70d652b6b825e4",
+  "transform_digest": "aa214ea38326805d95661c3ad1643cc07f88e2bae0438ac0448a66d93335ca6e",
+  "calibration_artifact_digest": null,
+  "train_label_available_cutoff": "2026-10-01T00:00:00Z",
+  "input_cutoff": "2026-10-17T08:00:00Z",
+  "max_input_available_at": "2026-10-17T08:00:00Z",
+  "generated_at": "2026-10-17T08:00:05Z",
+  "expires_at": "2026-10-17T08:05:00Z",
+  "binding_epoch": 1,
+  "status": "ABSTAINED",
+  "reason_codes": [
+    "DATA_STALE"
+  ],
+  "calibration_state": "UNCALIBRATED",
+  "payload": null,
+  "evidence_refs": [
+    "fixture-not-market-evidence"
+  ],
+  "sampling_policy_digest": null
+}

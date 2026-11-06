@@ -1,0 +1,25 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_ test_incomplete_independent_source_readback_cannot_claim_a_complete_original[sqlite] _
+
+original = (<vati.core.ledger.Ledger object at 0x7f29a038f050>, Event(kind=<EventKind.ACCOUNT_SNAPSHOT: 'ACCOUNT_SNAPSHOT'>, prod...ce_version=1, manager_bonus=Decimal('3.01'), ib_bonus=None, nonwithdrawable_bonus=Decimal('5'), registered_at_ms=None))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f29a0453b00>
+
+    def test_incomplete_independent_source_readback_cannot_claim_a_complete_original(original,monkeypatch):
+        ledger,event,point=original
+        snapshot(ledger,replace(point,observed_at_ms=3000),received=4000)
+        iterator=ledger.iter
+        def missing(kind=None,**kwargs):
+            for row in iterator(kind,**kwargs):
+                if kind is EventKind.ACCOUNT_SNAPSHOT and row.hash!=event.hash:continue
+                yield row
+        monkeypatch.setattr(ledger,'iter',missing)
+        assert ledger.verify_chain()[0]
+>       with pytest.raises(UnitError,match='READBACK_COUNT_INVALID'):read(original)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE UnitError
+
+trading/tests/test_native_valuation.py:109: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_native_valuation.py::test_incomplete_independent_source_readback_cannot_claim_a_complete_original[sqlite]
+1 failed, 1 deselected in 0.96s

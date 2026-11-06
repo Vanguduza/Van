@@ -1,0 +1,36 @@
+{
+  "account_replay_ref": "FIXTURE_ACCOUNT_REPLAY_REF",
+  "all_trial_census_ref": "FIXTURE_ALL_TRIAL_CENSUS_REF",
+  "baseline_ref": "FIXTURE_BASELINE_REF",
+  "candidate_refs": [
+    "FIXTURE_CANDIDATE"
+  ],
+  "cohort_definition_ref": "FIXTURE_COHORT_DEFINITION_REF",
+  "cost_model_ref": "FIXTURE_COST_MODEL_REF",
+  "dataset_manifest_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+  "dependence_method_ref": "FIXTURE_DEPENDENCE_METHOD_REF",
+  "environment": "FIXTURE",
+  "evaluator_artifact_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+  "fold_records_ref": "FIXTURE_FOLD_RECORDS_REF",
+  "holdout_lock_ref": "FIXTURE_HOLDOUT_LOCK_REF",
+  "hypothesis_ref": "FIXTURE_HYPOTHESIS_REF",
+  "live_exploration_authorization_ref": null,
+  "materiality_policy_ref": "FIXTURE_MATERIALITY_POLICY_REF",
+  "objective_definition_ref": "FIXTURE_OBJECTIVE_DEFINITION_REF",
+  "off_policy_assumptions_ref": null,
+  "prospective_plan_ref": "FIXTURE_PROSPECTIVE_PLAN_REF",
+  "record_id": "FIXTURE_ExecutionStudySpec",
+  "record_type": "ExecutionStudySpec",
+  "resource_budget_ref": "FIXTURE_RESOURCE_BUDGET_REF",
+  "schema_version": 2,
+  "scope": {
+    "account_id": "FIXTURE_ACCOUNT",
+    "market_type": "CRYPTO_SPOT",
+    "ownership": "OWNER_MANUAL",
+    "product_id": "FIXTURE_PRODUCT_ID",
+    "scope_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+    "strategy_id": "FIXTURE_STRATEGY_ID",
+    "venue_id": "FIXTURE_VENUE"
+  },
+  "stopping_rule_ref": "FIXTURE_STOPPING_RULE_REF"
+}

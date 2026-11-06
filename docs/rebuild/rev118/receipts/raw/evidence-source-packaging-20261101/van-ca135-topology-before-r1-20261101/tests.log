@@ -1,0 +1,35 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+__________ test_only_private_core_modules_touch_the_protected_tables ___________
+
+    def test_only_private_core_modules_touch_the_protected_tables():
+        t = topology()
+        allowed = set(t["private_core_modules"]) | set(t["store_definition_and_governance_modules"])
+        pattern = table_access_re(t["protected_tables"])
+        offenders = {}
+        for path in source_files(ROOT):
+            rel = path.relative_to(ROOT).as_posix()
+            if rel in allowed:
+                continue
+            found = sorted({m.group(0) for m in pattern.finditer(
+                path.read_text(encoding="utf-8", errors="ignore"))})
+            if found:
+                offenders[rel] = found
+>       assert offenders == {}, (
+            "direct access to van-private-core stores outside the plane; use the "
+            f"private-core API (or the Owner Model interface, pending split): {offenders}")
+E       AssertionError: direct access to van-private-core stores outside the plane; use the private-core API (or the Owner Model interface, pending split): {'docs/rebuild/rev118/receipts/raw/native-family-reenrollment-20261101/van-reenrollment-recovery-evidence-20261101/baseline_db_2728.py': ['FROM owner_cognitive_model', 'FROM owner_model_episodes', 'FROM owner_model_revisions', 'INTO owner_model_episodes', 'INTO owner_model_outbox', 'INTO owner_model_revisions', 'JOIN owner_cognitive_model', 'ON owner_cognitive_model', 'ON owner_model_episodes', 'ON owner_model_outbox', 'TABLE IF NOT EXISTS owner_cognitive_model', 'TABLE IF NOT EXISTS owner_model_episodes', 'TABLE IF NOT EXISTS owner_model_outbox', 'TABLE IF NOT EXISTS owner_model_revisions', 'TABLE owner_model_outbox', 'UPDATE owner_cognitive_model', 'UPDATE owner_model_revisions']}
+E       assert {'docs/rebuil...isions', ...]} == {}
+E         
+E         Left contains 1 more item:
+E         {'docs/rebuild/rev118/receipts/raw/native-family-reenrollment-20261101/van-reenrollment-recovery-evidence-20261101/baseline_db_2728.py': ['FROM '
+E                                                                                                                                                   'owner_cognitive_model',
+E                                                                                                                                                   'FROM '
+E                                                                                                                                       ...
+E         
+E         ...Full output truncated (44 lines hidden), use '-vv' to show
+
+tests/contracts/test_van_private_core_topology.py:290: AssertionError
+=========================== short test summary info ============================
+FAILED tests/contracts/test_van_private_core_topology.py::test_only_private_core_modules_touch_the_protected_tables
+1 failed in 3.65s

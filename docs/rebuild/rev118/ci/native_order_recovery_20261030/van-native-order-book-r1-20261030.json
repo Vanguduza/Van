@@ -1,0 +1,22 @@
+{
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "trading/tests/test_native_order_book.py",
+    "trading/tests/test_ctrader_order_details.py",
+    "trading/tests/test_native_entry_volume.py",
+    "trading/tests/test_physical_pending_risk.py",
+    "--junitxml=/workspace/van-native-order-book-r1-20261030.xml"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 42043,
+  "started_at_utc": "2026-10-30T10:12:30.737359+00:00",
+  "timeout_seconds": 180,
+  "state": "COMPLETED",
+  "command_pid": 42046,
+  "exit": 0,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-30T10:12:35.796114+00:00"
+}

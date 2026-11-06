@@ -1,0 +1,39 @@
+{
+  "schema": "van.rebuild.native-raw-depth/1",
+  "base_head": "52a9daa5a2515684fa9223b0a2db859abe239629",
+  "updated_at_utc": "2026-10-26T20:55:23.862666+00:00",
+  "unit": "BE-008",
+  "status": "SOURCE_TESTED_COMPONENT_NOT_UNIT_NATIVE_OR_PRODUCTION_ACCEPTANCE",
+  "acceptance": "NOT_ISSUED",
+  "source_sha256": {
+    "trading/vati/execution/ctrader/depth.py": "2d7229cc05eca6e81b8f5742767ba9fdb231adc02525f24f9048b28be8bbc35a",
+    "trading/vati/execution/ctrader/adapter.py": "646af5f020e0b4a4c8618e65d064d4aa976c4cd7392e0de75fea1b4e0915dcbe",
+    "trading/vati/execution/ctrader/transport.py": "fe76f6794b799d0125ef40ae6afeec70f2fee6848c51602a44a7012d79be3f99",
+    "trading/tests/test_ctrader_native_depth.py": "6c9a235bfef5e73d027a1fe81269f99a114469ce293ab8422921d4a309ca331e"
+  },
+  "implementation": "Bounded native quote-ID delta book, exact uint64 raw prices/cent sizes, connection/contract scope, subscribe-once/stop-before-IO/unknown-control refusal, sticky recovery, processing-age/backlog holds, isolated existing read transport and financial-event retention. No native timestamp, sequence, snapshot boundary or depth-price scale invented.",
+  "actual_tests": {
+    "initial_depth": 24,
+    "focused_depth_spot_transport_archives_feed": 171,
+    "new_cases": 31,
+    "final_actual_SQLite_Postgres": 738,
+    "skips": 0,
+    "audit_violations": 0,
+    "runtime_test_hashes_verified": 492,
+    "owned_fixture_independently_absent": true,
+    "supplemental_assertion_faults_caught": 5,
+    "positive_and_restored_controls": 31,
+    "supplemental_source_exactly_restored": true,
+    "rebuild_workflow_T0_boundary": 122,
+    "counts_overlap": true
+  },
+  "canonical_checks": {
+    "owner_frontend_drift": false,
+    "registry_cases": 374,
+    "registry_edits": 383,
+    "registry_validation_is_execution": false
+  },
+  "qualification": "Ephemeral raw source depth only. No normalized depth price, complete/native-fresh/executable book, provider entitlement, authority, native/unit/production/economic or S24 acceptance. No endpoint or frontend feature enabled.",
+  "remaining": "Durable depth revision/as-of recovery, verified price semantics, service/existing-screen consumers, provider continuity/health/admission and full BE008/backend/ML/assistant/Android programme.",
+  "evidence": "ci/native_raw_depth_20261026"
+}

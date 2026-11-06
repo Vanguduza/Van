@@ -1,0 +1,498 @@
+FFFFFFFFFFFFFFFFFFFFFFFFFFF                                              [100%]
+=================================== FAILURES ===================================
+_____ test_oversized_native_header_retires_before_waiting_for_its_payload ______
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7f9893b82630>
+
+    def test_oversized_native_header_retires_before_waiting_for_its_payload(harness):
+        client,server=harness.pair();transport=harness.transport(lambda *_:client)
+        transport.connect();worker=transport._reader
+        server.sendall(struct.pack('>I',2**32-1))
+        worker.join(.3)
+>       assert not worker.is_alive(),'unbounded native length left the reader waiting for a multi-gigabyte payload'
+E       AssertionError: unbounded native length left the reader waiting for a multi-gigabyte payload
+E       assert not True
+E        +  where True = is_alive()
+E        +    where is_alive = <Thread(Thread-1 (_read_loop), started daemon 140293290051264)>.is_alive
+
+trading/tests/test_ctrader_read_budget.py:27: AssertionError
+_____ test_invalid_native_frame_budget_is_refused_before_connecting[True] ______
+
+bad = True
+
+    @pytest.mark.parametrize('bad',[True,False,0,-1,2**32,'1024',1.5])
+    def test_invalid_native_frame_budget_is_refused_before_connecting(bad):
+>       with pytest.raises(ValueError):CtraderTransport(max_frame_bytes=bad)
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: CtraderTransport.__init__() got an unexpected keyword argument 'max_frame_bytes'
+
+trading/tests/test_ctrader_read_budget.py:33: TypeError
+_____ test_invalid_native_frame_budget_is_refused_before_connecting[False] _____
+
+bad = False
+
+    @pytest.mark.parametrize('bad',[True,False,0,-1,2**32,'1024',1.5])
+    def test_invalid_native_frame_budget_is_refused_before_connecting(bad):
+>       with pytest.raises(ValueError):CtraderTransport(max_frame_bytes=bad)
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: CtraderTransport.__init__() got an unexpected keyword argument 'max_frame_bytes'
+
+trading/tests/test_ctrader_read_budget.py:33: TypeError
+_______ test_invalid_native_frame_budget_is_refused_before_connecting[0] _______
+
+bad = 0
+
+    @pytest.mark.parametrize('bad',[True,False,0,-1,2**32,'1024',1.5])
+    def test_invalid_native_frame_budget_is_refused_before_connecting(bad):
+>       with pytest.raises(ValueError):CtraderTransport(max_frame_bytes=bad)
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: CtraderTransport.__init__() got an unexpected keyword argument 'max_frame_bytes'
+
+trading/tests/test_ctrader_read_budget.py:33: TypeError
+______ test_invalid_native_frame_budget_is_refused_before_connecting[-1] _______
+
+bad = -1
+
+    @pytest.mark.parametrize('bad',[True,False,0,-1,2**32,'1024',1.5])
+    def test_invalid_native_frame_budget_is_refused_before_connecting(bad):
+>       with pytest.raises(ValueError):CtraderTransport(max_frame_bytes=bad)
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: CtraderTransport.__init__() got an unexpected keyword argument 'max_frame_bytes'
+
+trading/tests/test_ctrader_read_budget.py:33: TypeError
+__ test_invalid_native_frame_budget_is_refused_before_connecting[4294967296] ___
+
+bad = 4294967296
+
+    @pytest.mark.parametrize('bad',[True,False,0,-1,2**32,'1024',1.5])
+    def test_invalid_native_frame_budget_is_refused_before_connecting(bad):
+>       with pytest.raises(ValueError):CtraderTransport(max_frame_bytes=bad)
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: CtraderTransport.__init__() got an unexpected keyword argument 'max_frame_bytes'
+
+trading/tests/test_ctrader_read_budget.py:33: TypeError
+_____ test_invalid_native_frame_budget_is_refused_before_connecting[1024] ______
+
+bad = '1024'
+
+    @pytest.mark.parametrize('bad',[True,False,0,-1,2**32,'1024',1.5])
+    def test_invalid_native_frame_budget_is_refused_before_connecting(bad):
+>       with pytest.raises(ValueError):CtraderTransport(max_frame_bytes=bad)
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: CtraderTransport.__init__() got an unexpected keyword argument 'max_frame_bytes'
+
+trading/tests/test_ctrader_read_budget.py:33: TypeError
+______ test_invalid_native_frame_budget_is_refused_before_connecting[1.5] ______
+
+bad = 1.5
+
+    @pytest.mark.parametrize('bad',[True,False,0,-1,2**32,'1024',1.5])
+    def test_invalid_native_frame_budget_is_refused_before_connecting(bad):
+>       with pytest.raises(ValueError):CtraderTransport(max_frame_bytes=bad)
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: CtraderTransport.__init__() got an unexpected keyword argument 'max_frame_bytes'
+
+trading/tests/test_ctrader_read_budget.py:33: TypeError
+__________ test_frame_at_exact_budget_preserves_original_correlation ___________
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7f9893ba9310>
+
+    def test_frame_at_exact_budget_preserves_original_correlation(harness):
+        client,server=harness.pair()
+        size=len(SCHEMA.wrap('ProtoHeartbeatEvent',{},'a'*16))
+>       transport=CtraderTransport(connector=lambda *_:client,max_frame_bytes=size)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: CtraderTransport.__init__() got an unexpected keyword argument 'max_frame_bytes'
+
+trading/tests/test_ctrader_read_budget.py:39: TypeError
+_ test_frame_budget_fault_after_native_order_write_keeps_unknown_original_effect _
+
+    def test_frame_budget_fault_after_native_order_write_keeps_unknown_original_effect():
+        from test_ctrader import FakeCtrader,make_adapter
+        from test_ctrader_original_outcomes import cmd
+        class LostBroker(FakeCtrader):
+            def handle(self,name,body,cid):
+                if name=='ProtoOANewOrderReq':return self.b.sendall(struct.pack('>I',2**32-1))
+                return super().handle(name,body,cid)
+        native=LostBroker();adapter=make_adapter(native);adapter.transport.timeout_s=.5
+        command=replace(cmd(),account_alias=adapter.account_alias,command_hash='').sealed()
+        result=adapter.submit(command,now_ms=1000)
+        assert result.status=='UNKNOWN' and not result.protective_stop_confirmed
+>       assert 'frame' in result.reject_reason.lower()
+E       AssertionError: assert 'frame' in 'native entry reply unavailable; reconcile original before retrying'
+E        +  where 'native entry reply unavailable; reconcile original before retrying' = <built-in method lower of str object at 0x7f9893cd46c0>()
+E        +    where <built-in method lower of str object at 0x7f9893cd46c0> = 'native entry reply unavailable; reconcile original before retrying'.lower
+E        +      where 'native entry reply unavailable; reconcile original before retrying' = ExecutionReceipt(trade_intent_id='original-entry', decision_hash='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...imal('0'), protective_stop_price=None, receipt_hash='8b06790e330edd3eceeed3e9d7893afc8840e16afebf40953c6753869a0f1d3d').reject_reason
+
+trading/tests/test_ctrader_read_budget.py:60: AssertionError
+________ test_invalid_total_read_budget_refuses_before_native_io[True] _________
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7f9893b87dd0>
+bad = True
+
+    @pytest.mark.parametrize('bad',[True,False,0,-1,float('nan'),float('inf'),'1'])
+    def test_invalid_total_read_budget_refuses_before_native_io(harness,bad):
+        cls=getattr(module,'CtraderReadTransport',None)
+>       assert cls is not None,'explicit bounded source transport missing'
+E       AssertionError: explicit bounded source transport missing
+E       assert None is not None
+
+trading/tests/test_ctrader_read_budget.py:68: AssertionError
+________ test_invalid_total_read_budget_refuses_before_native_io[False] ________
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7f9893ee1af0>
+bad = False
+
+    @pytest.mark.parametrize('bad',[True,False,0,-1,float('nan'),float('inf'),'1'])
+    def test_invalid_total_read_budget_refuses_before_native_io(harness,bad):
+        cls=getattr(module,'CtraderReadTransport',None)
+>       assert cls is not None,'explicit bounded source transport missing'
+E       AssertionError: explicit bounded source transport missing
+E       assert None is not None
+
+trading/tests/test_ctrader_read_budget.py:68: AssertionError
+__________ test_invalid_total_read_budget_refuses_before_native_io[0] __________
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7f9893ee37a0>
+bad = 0
+
+    @pytest.mark.parametrize('bad',[True,False,0,-1,float('nan'),float('inf'),'1'])
+    def test_invalid_total_read_budget_refuses_before_native_io(harness,bad):
+        cls=getattr(module,'CtraderReadTransport',None)
+>       assert cls is not None,'explicit bounded source transport missing'
+E       AssertionError: explicit bounded source transport missing
+E       assert None is not None
+
+trading/tests/test_ctrader_read_budget.py:68: AssertionError
+_________ test_invalid_total_read_budget_refuses_before_native_io[-1] __________
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7f9893f057c0>
+bad = -1
+
+    @pytest.mark.parametrize('bad',[True,False,0,-1,float('nan'),float('inf'),'1'])
+    def test_invalid_total_read_budget_refuses_before_native_io(harness,bad):
+        cls=getattr(module,'CtraderReadTransport',None)
+>       assert cls is not None,'explicit bounded source transport missing'
+E       AssertionError: explicit bounded source transport missing
+E       assert None is not None
+
+trading/tests/test_ctrader_read_budget.py:68: AssertionError
+_________ test_invalid_total_read_budget_refuses_before_native_io[nan] _________
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7f9893f078f0>
+bad = nan
+
+    @pytest.mark.parametrize('bad',[True,False,0,-1,float('nan'),float('inf'),'1'])
+    def test_invalid_total_read_budget_refuses_before_native_io(harness,bad):
+        cls=getattr(module,'CtraderReadTransport',None)
+>       assert cls is not None,'explicit bounded source transport missing'
+E       AssertionError: explicit bounded source transport missing
+E       assert None is not None
+
+trading/tests/test_ctrader_read_budget.py:68: AssertionError
+_________ test_invalid_total_read_budget_refuses_before_native_io[inf] _________
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7f9893f09820>
+bad = inf
+
+    @pytest.mark.parametrize('bad',[True,False,0,-1,float('nan'),float('inf'),'1'])
+    def test_invalid_total_read_budget_refuses_before_native_io(harness,bad):
+        cls=getattr(module,'CtraderReadTransport',None)
+>       assert cls is not None,'explicit bounded source transport missing'
+E       AssertionError: explicit bounded source transport missing
+E       assert None is not None
+
+trading/tests/test_ctrader_read_budget.py:68: AssertionError
+__________ test_invalid_total_read_budget_refuses_before_native_io[1] __________
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7f9893ec6720>
+bad = '1'
+
+    @pytest.mark.parametrize('bad',[True,False,0,-1,float('nan'),float('inf'),'1'])
+    def test_invalid_total_read_budget_refuses_before_native_io(harness,bad):
+        cls=getattr(module,'CtraderReadTransport',None)
+>       assert cls is not None,'explicit bounded source transport missing'
+E       AssertionError: explicit bounded source transport missing
+E       assert None is not None
+
+trading/tests/test_ctrader_read_budget.py:68: AssertionError
+_ test_read_only_transport_refuses_financial_or_unknown_operations_before_connection[ProtoOANewOrderReq] _
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7f9893ec74d0>
+message = 'ProtoOANewOrderReq'
+
+    @pytest.mark.parametrize('message',['ProtoOANewOrderReq','ProtoOAClosePositionReq','ProtoOAAmendPositionSLTPReq',
+                                       'unknown',None,{}])
+    def test_read_only_transport_refuses_financial_or_unknown_operations_before_connection(harness,message):
+        calls=[]
+>       transport=reader(harness,connector=lambda *_:calls.append(True))
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_ctrader_read_budget.py:76: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7f9893ec74d0>
+options = {'connector': <function test_read_only_transport_refuses_financial_or_unknown_operations_before_connection.<locals>.<lambda> at 0x7f9893bd5300>}
+
+    def reader(harness, **options):
+        cls=getattr(module,'CtraderReadTransport',None)
+>       assert cls is not None,'explicit bounded read-only native transport is missing'
+E       AssertionError: explicit bounded read-only native transport is missing
+E       assert None is not None
+
+trading/tests/test_ctrader_read_budget.py:17: AssertionError
+_ test_read_only_transport_refuses_financial_or_unknown_operations_before_connection[ProtoOAClosePositionReq] _
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7f9893b856d0>
+message = 'ProtoOAClosePositionReq'
+
+    @pytest.mark.parametrize('message',['ProtoOANewOrderReq','ProtoOAClosePositionReq','ProtoOAAmendPositionSLTPReq',
+                                       'unknown',None,{}])
+    def test_read_only_transport_refuses_financial_or_unknown_operations_before_connection(harness,message):
+        calls=[]
+>       transport=reader(harness,connector=lambda *_:calls.append(True))
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_ctrader_read_budget.py:76: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7f9893b856d0>
+options = {'connector': <function test_read_only_transport_refuses_financial_or_unknown_operations_before_connection.<locals>.<lambda> at 0x7f9893bd4ea0>}
+
+    def reader(harness, **options):
+        cls=getattr(module,'CtraderReadTransport',None)
+>       assert cls is not None,'explicit bounded read-only native transport is missing'
+E       AssertionError: explicit bounded read-only native transport is missing
+E       assert None is not None
+
+trading/tests/test_ctrader_read_budget.py:17: AssertionError
+_ test_read_only_transport_refuses_financial_or_unknown_operations_before_connection[ProtoOAAmendPositionSLTPReq] _
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7f9893b869f0>
+message = 'ProtoOAAmendPositionSLTPReq'
+
+    @pytest.mark.parametrize('message',['ProtoOANewOrderReq','ProtoOAClosePositionReq','ProtoOAAmendPositionSLTPReq',
+                                       'unknown',None,{}])
+    def test_read_only_transport_refuses_financial_or_unknown_operations_before_connection(harness,message):
+        calls=[]
+>       transport=reader(harness,connector=lambda *_:calls.append(True))
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_ctrader_read_budget.py:76: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7f9893b869f0>
+options = {'connector': <function test_read_only_transport_refuses_financial_or_unknown_operations_before_connection.<locals>.<lambda> at 0x7f9893bd5b20>}
+
+    def reader(harness, **options):
+        cls=getattr(module,'CtraderReadTransport',None)
+>       assert cls is not None,'explicit bounded read-only native transport is missing'
+E       AssertionError: explicit bounded read-only native transport is missing
+E       assert None is not None
+
+trading/tests/test_ctrader_read_budget.py:17: AssertionError
+_ test_read_only_transport_refuses_financial_or_unknown_operations_before_connection[unknown] _
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7f9893b84f80>
+message = 'unknown'
+
+    @pytest.mark.parametrize('message',['ProtoOANewOrderReq','ProtoOAClosePositionReq','ProtoOAAmendPositionSLTPReq',
+                                       'unknown',None,{}])
+    def test_read_only_transport_refuses_financial_or_unknown_operations_before_connection(harness,message):
+        calls=[]
+>       transport=reader(harness,connector=lambda *_:calls.append(True))
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_ctrader_read_budget.py:76: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7f9893b84f80>
+options = {'connector': <function test_read_only_transport_refuses_financial_or_unknown_operations_before_connection.<locals>.<lambda> at 0x7f9893bd5f80>}
+
+    def reader(harness, **options):
+        cls=getattr(module,'CtraderReadTransport',None)
+>       assert cls is not None,'explicit bounded read-only native transport is missing'
+E       AssertionError: explicit bounded read-only native transport is missing
+E       assert None is not None
+
+trading/tests/test_ctrader_read_budget.py:17: AssertionError
+_ test_read_only_transport_refuses_financial_or_unknown_operations_before_connection[None] _
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7f9893ba86b0>
+message = None
+
+    @pytest.mark.parametrize('message',['ProtoOANewOrderReq','ProtoOAClosePositionReq','ProtoOAAmendPositionSLTPReq',
+                                       'unknown',None,{}])
+    def test_read_only_transport_refuses_financial_or_unknown_operations_before_connection(harness,message):
+        calls=[]
+>       transport=reader(harness,connector=lambda *_:calls.append(True))
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_ctrader_read_budget.py:76: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7f9893ba86b0>
+options = {'connector': <function test_read_only_transport_refuses_financial_or_unknown_operations_before_connection.<locals>.<lambda> at 0x7f9893bd5c60>}
+
+    def reader(harness, **options):
+        cls=getattr(module,'CtraderReadTransport',None)
+>       assert cls is not None,'explicit bounded read-only native transport is missing'
+E       AssertionError: explicit bounded read-only native transport is missing
+E       assert None is not None
+
+trading/tests/test_ctrader_read_budget.py:17: AssertionError
+_ test_read_only_transport_refuses_financial_or_unknown_operations_before_connection[message5] _
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7f9893ba9bb0>
+message = {}
+
+    @pytest.mark.parametrize('message',['ProtoOANewOrderReq','ProtoOAClosePositionReq','ProtoOAAmendPositionSLTPReq',
+                                       'unknown',None,{}])
+    def test_read_only_transport_refuses_financial_or_unknown_operations_before_connection(harness,message):
+        calls=[]
+>       transport=reader(harness,connector=lambda *_:calls.append(True))
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_ctrader_read_budget.py:76: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7f9893ba9bb0>
+options = {'connector': <function test_read_only_transport_refuses_financial_or_unknown_operations_before_connection.<locals>.<lambda> at 0x7f9893bd6160>}
+
+    def reader(harness, **options):
+        cls=getattr(module,'CtraderReadTransport',None)
+>       assert cls is not None,'explicit bounded read-only native transport is missing'
+E       AssertionError: explicit bounded read-only native transport is missing
+E       assert None is not None
+
+trading/tests/test_ctrader_read_budget.py:17: AssertionError
+______ test_silent_native_peer_uses_one_total_budget_and_reaps_its_reader ______
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7f9893b86690>
+
+    def test_silent_native_peer_uses_one_total_budget_and_reaps_its_reader(harness):
+>       client,server=harness.pair();transport=reader(harness,connector=lambda *_:client,timeout_s=2,operation_timeout_s=.12)
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_ctrader_read_budget.py:83: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7f9893b86690>
+options = {'connector': <function test_silent_native_peer_uses_one_total_budget_and_reaps_its_reader.<locals>.<lambda> at 0x7f9893bd6ac0>, 'timeout_s': 2, 'operation_timeout_s': 0.12}
+
+    def reader(harness, **options):
+        cls=getattr(module,'CtraderReadTransport',None)
+>       assert cls is not None,'explicit bounded read-only native transport is missing'
+E       AssertionError: explicit bounded read-only native transport is missing
+E       assert None is not None
+
+trading/tests/test_ctrader_read_budget.py:17: AssertionError
+________ test_total_budget_is_not_reset_by_a_later_request_or_reconnect ________
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7f9893b87890>
+
+    def test_total_budget_is_not_reset_by_a_later_request_or_reconnect(harness):
+        client,server=harness.pair();clock={'now':0.0};calls=[]
+        def connector(*_):calls.append(True);return client
+>       transport=reader(harness,connector=connector,operation_timeout_s=.2,monotonic=lambda:clock['now'])
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_ctrader_read_budget.py:94: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7f9893b87890>
+options = {'connector': <function test_total_budget_is_not_reset_by_a_later_request_or_reconnect.<locals>.connector at 0x7f9893b...otonic': <function test_total_budget_is_not_reset_by_a_later_request_or_reconnect.<locals>.<lambda> at 0x7f9893bd4f40>}
+
+    def reader(harness, **options):
+        cls=getattr(module,'CtraderReadTransport',None)
+>       assert cls is not None,'explicit bounded read-only native transport is missing'
+E       AssertionError: explicit bounded read-only native transport is missing
+E       assert None is not None
+
+trading/tests/test_ctrader_read_budget.py:17: AssertionError
+__ test_budget_is_checked_after_the_actual_send_lock_before_any_source_write ___
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7f9893ec7710>
+
+    def test_budget_is_checked_after_the_actual_send_lock_before_any_source_write(harness):
+        client,server=harness.pair();clock={'now':0.0}
+>       transport=reader(harness,connector=lambda *_:client,operation_timeout_s=.1,monotonic=lambda:clock['now'])
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_ctrader_read_budget.py:106: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7f9893ec7710>
+options = {'connector': <function test_budget_is_checked_after_the_actual_send_lock_before_any_source_write.<locals>.<lambda> at...unction test_budget_is_checked_after_the_actual_send_lock_before_any_source_write.<locals>.<lambda> at 0x7f9893bd6980>}
+
+    def reader(harness, **options):
+        cls=getattr(module,'CtraderReadTransport',None)
+>       assert cls is not None,'explicit bounded read-only native transport is missing'
+E       AssertionError: explicit bounded read-only native transport is missing
+E       assert None is not None
+
+trading/tests/test_ctrader_read_budget.py:17: AssertionError
+_ test_actual_native_collection_shares_one_budget_across_auth_metadata_and_history _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-77/test_actual_native_collection_0')
+
+    def test_actual_native_collection_shares_one_budget_across_auth_metadata_and_history(tmp_path):
+        from test_ctrader import FakeCtrader,make_adapter
+        from vati.execution.base import VenueUnavailable
+        from vati.market_data.native_archive import NativeMarketArchive
+        from vati.market_data.native_collector import NativeMarketCollector
+        primary=FakeCtrader();adapter=make_adapter(primary)
+        end=(28_333_333+3*60)*60000;adapter.clock=lambda:end;adapter._ensure_auth()
+        expected=adapter.symbol('EURUSD').native_contract;before=list(primary.requests);peers=[]
+        class SlowBroker(FakeCtrader):
+            def handle(self,*args):time.sleep(.035);return super().handle(*args)
+        def separate(host,port):
+            peer=SlowBroker();peers.append(peer);return peer.connector(host,port)
+        adapter.transport._connector=separate
+        archive=NativeMarketArchive(tmp_path/'native',clock=lambda:end+100)
+        collector=NativeMarketCollector(archive,lambda:adapter.market_reader(collection_timeout_s=.09))
+        started=time.monotonic()
+        with pytest.raises(VenueUnavailable):
+>           collector.collect('bounded-source',expected,timeframe='H1',from_ms=28_333_333*60000,to_ms=end)
+
+trading/tests/test_ctrader_read_budget.py:133: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/market_data/native_collector.py:36: in collect
+    reader=self.reader_factory()
+           ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+>   collector=NativeMarketCollector(archive,lambda:adapter.market_reader(collection_timeout_s=.09))
+                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: CtraderAdapter.market_reader() got an unexpected keyword argument 'collection_timeout_s'
+
+trading/tests/test_ctrader_read_budget.py:130: TypeError
+=========================== short test summary info ============================
+FAILED trading/tests/test_ctrader_read_budget.py::test_oversized_native_header_retires_before_waiting_for_its_payload
+FAILED trading/tests/test_ctrader_read_budget.py::test_invalid_native_frame_budget_is_refused_before_connecting[True]
+FAILED trading/tests/test_ctrader_read_budget.py::test_invalid_native_frame_budget_is_refused_before_connecting[False]
+FAILED trading/tests/test_ctrader_read_budget.py::test_invalid_native_frame_budget_is_refused_before_connecting[0]
+FAILED trading/tests/test_ctrader_read_budget.py::test_invalid_native_frame_budget_is_refused_before_connecting[-1]
+FAILED trading/tests/test_ctrader_read_budget.py::test_invalid_native_frame_budget_is_refused_before_connecting[4294967296]
+FAILED trading/tests/test_ctrader_read_budget.py::test_invalid_native_frame_budget_is_refused_before_connecting[1024]
+FAILED trading/tests/test_ctrader_read_budget.py::test_invalid_native_frame_budget_is_refused_before_connecting[1.5]
+FAILED trading/tests/test_ctrader_read_budget.py::test_frame_at_exact_budget_preserves_original_correlation
+FAILED trading/tests/test_ctrader_read_budget.py::test_frame_budget_fault_after_native_order_write_keeps_unknown_original_effect
+FAILED trading/tests/test_ctrader_read_budget.py::test_invalid_total_read_budget_refuses_before_native_io[True]
+FAILED trading/tests/test_ctrader_read_budget.py::test_invalid_total_read_budget_refuses_before_native_io[False]
+FAILED trading/tests/test_ctrader_read_budget.py::test_invalid_total_read_budget_refuses_before_native_io[0]
+FAILED trading/tests/test_ctrader_read_budget.py::test_invalid_total_read_budget_refuses_before_native_io[-1]
+FAILED trading/tests/test_ctrader_read_budget.py::test_invalid_total_read_budget_refuses_before_native_io[nan]
+FAILED trading/tests/test_ctrader_read_budget.py::test_invalid_total_read_budget_refuses_before_native_io[inf]
+FAILED trading/tests/test_ctrader_read_budget.py::test_invalid_total_read_budget_refuses_before_native_io[1]
+FAILED trading/tests/test_ctrader_read_budget.py::test_read_only_transport_refuses_financial_or_unknown_operations_before_connection[ProtoOANewOrderReq]
+FAILED trading/tests/test_ctrader_read_budget.py::test_read_only_transport_refuses_financial_or_unknown_operations_before_connection[ProtoOAClosePositionReq]
+FAILED trading/tests/test_ctrader_read_budget.py::test_read_only_transport_refuses_financial_or_unknown_operations_before_connection[ProtoOAAmendPositionSLTPReq]
+FAILED trading/tests/test_ctrader_read_budget.py::test_read_only_transport_refuses_financial_or_unknown_operations_before_connection[unknown]
+FAILED trading/tests/test_ctrader_read_budget.py::test_read_only_transport_refuses_financial_or_unknown_operations_before_connection[None]
+FAILED trading/tests/test_ctrader_read_budget.py::test_read_only_transport_refuses_financial_or_unknown_operations_before_connection[message5]
+FAILED trading/tests/test_ctrader_read_budget.py::test_silent_native_peer_uses_one_total_budget_and_reaps_its_reader
+FAILED trading/tests/test_ctrader_read_budget.py::test_total_budget_is_not_reset_by_a_later_request_or_reconnect
+FAILED trading/tests/test_ctrader_read_budget.py::test_budget_is_checked_after_the_actual_send_lock_before_any_source_write
+FAILED trading/tests/test_ctrader_read_budget.py::test_actual_native_collection_shares_one_budget_across_auth_metadata_and_history
+27 failed in 2.33s

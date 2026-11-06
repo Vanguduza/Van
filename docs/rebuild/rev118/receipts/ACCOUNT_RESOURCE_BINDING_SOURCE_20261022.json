@@ -1,0 +1,137 @@
+{
+  "schema": "van.rebuild.account-resource-binding-source/1",
+  "source_parent": "a2f116423abf63dd010399e608000d25de1649ee",
+  "source_sha256": {
+    "backend/tests/test_account_resource_binding.py": "d3f3bc061c06ec843478b34cda7a8cfaeefbd3d28b989edb780a7acf4ac3c708",
+    "backend/tests/test_trading_oauth_effects.py": "2bad75cb0a384b3343b5b21d97b1c33916ebeaaaccfb0eaa6dba59c97e616ff9",
+    "backend/tests/test_trading_oauth_scope.py": "092d722c451a8e801aab58757b242e20a511291ca36d88631007f10760b5ccd4",
+    "backend/van_gateway/app.py": "5613f7027721601254d86ae633d6dfbf5b1052d9e727a3967ff35d7cf58e572b",
+    "backend/van_gateway/trading/accounts.py": "e8dbec33f88e03ce65bf7f56301d566930aa07fcec528553571de0acf10b9b65",
+    "backend/van_gateway/trading/oauth_effects.py": "ff85797423b61ce050f788b203ee28312a8f3fe76c7e433208041da0dabf0854",
+    "trading/commander/accounts.py": "90612836b1c677b5d5c09d99e71354e309b88baa10751fc2d8c8cf049d0c8ccc",
+    "trading/commander/app.py": "f6e03bf7eb482694a6cdbcd6b0c42e462fdc92b27c3f85adfaf9918146f3c9d7",
+    "trading/tests/test_account_resource_versions.py": "72202762aecb0574b680a5838d86ce0b1f052807cf1935f720ab5e88e0c4d5c6",
+    "trading/tests/test_commander.py": "1689bc9ff4b9316c2c43900c75540b5971e924dc363da394bf95a3c2831c5a97",
+    "trading/vati/accounts/registry.py": "081300e109e82049d5fc7a068df22dce4f854b8e4cae873afb1dc6e66553ca39",
+    "trading/vati/accounts/resource_version.py": "24712de8e5fe0532a05370708eda1642c8cd2603b497d45dbdb4010a27f7e094",
+    "trading/vati/core/file_lock.py": "8a4901f7c958850dd502d24c255bbb60eaa86271e351a4cbedfaa1a4449aa674"
+  },
+  "initial_gateway_counterexamples": 5,
+  "full_trading_real_postgresql": {
+    "tests": 1926,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "60421ae0761cfe1f12a28d7dae336fa884d2dd0a4d30885ff8eb684eb52e1baa"
+  },
+  "gateway_audited": {
+    "tests": 91,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "961e8919b6317f8710ce8603688318310f5bd48570ad15bb94bd07884816cbf9"
+  },
+  "gateway_storage_audit": {
+    "forbidden_events": [],
+    "scope": "backend/tests plus tests/contracts; repo-root invocation; writes and SQLite opens under root/data or backend/data refused"
+  },
+  "focused_before_final_two_positive_controls": {
+    "tests": 36,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "91cfcdc8643096905fc97878f1bc7f3ed887bd9dd5ff0afdb24a7dfede7a643d"
+  },
+  "callback_escaping": {
+    "tests": 4,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "db6416bf8759dd9d308ac965f5622a3643c18a732469e0f9b85196bdaa9bf46f"
+  },
+  "custom_mutants": {
+    "detected": 7,
+    "survived": 0,
+    "source_restored": true,
+    "rows": [
+      {
+        "kind": "baseline",
+        "mutation": null,
+        "exit_code": 0,
+        "log": "/tmp/van-account-resource-mutant-0.txt",
+        "sha256": "a75f0e46fc41e13ea940bca6b30bc39114a2b61aa26c9c35dcfb4993a8d95163"
+      },
+      {
+        "kind": "mutation",
+        "mutation": "remove the native resource from the owner approval",
+        "exit_code": 1,
+        "log": "/tmp/van-account-resource-mutant-1.txt",
+        "sha256": "2ce9fbb5216d28368f9404d2be45bd89e89fe8c17fec924e1721b3504e0431ba"
+      },
+      {
+        "kind": "mutation",
+        "mutation": "skip the final native compare-and-set under the writer lock",
+        "exit_code": 1,
+        "log": "/tmp/van-account-resource-mutant-2.txt",
+        "sha256": "c5f7a79bfbf9a751839dec26e140d7780f131a45f81c15341ec119d6a22ca306"
+      },
+      {
+        "kind": "mutation",
+        "mutation": "allow reverted metadata to restore an obsolete approval",
+        "exit_code": 1,
+        "log": "/tmp/van-account-resource-mutant-3.txt",
+        "sha256": "28a0fd8f6039d8f4a1a39c3fa9f6cf30009fde5f37d1bbfcd706780d15ffcce6"
+      },
+      {
+        "kind": "mutation",
+        "mutation": "let a fork inherit permission to bypass the kernel lock",
+        "exit_code": 1,
+        "log": "/tmp/van-account-resource-mutant-4.txt",
+        "sha256": "76fdf3ef83fd96e43e7aaa3b08a5e8281f478d508c2cc8c6171f72b984621b60"
+      },
+      {
+        "kind": "mutation",
+        "mutation": "omit the native ingress resource-version requirement",
+        "exit_code": 1,
+        "log": "/tmp/van-account-resource-mutant-5.txt",
+        "sha256": "73c60b6df187ec93aa9b923bf86712a247621ab5190583756618e6463cdd1248"
+      },
+      {
+        "kind": "mutation",
+        "mutation": "ignore a changed native credential-file generation",
+        "exit_code": 1,
+        "log": "/tmp/van-account-resource-mutant-6.txt",
+        "sha256": "8d5594184b9a5745258f46adf1766c5ad1137bb46ea6a4fe804a6c3c815e44e3"
+      },
+      {
+        "kind": "mutation",
+        "mutation": "let a stale registry writer overwrite a newer reverted generation",
+        "exit_code": 1,
+        "log": "/tmp/van-account-resource-mutant-7.txt",
+        "sha256": "eec4901808ccdbebcb66f092d73f85f203e5c101b5a2319dd2de3b3fb4cd9b8e"
+      }
+    ]
+  },
+  "private_fixture_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "owner_registry_scope": "437 endpoints/255 schemas; existing feature/screen/function identities and authority states preserved; source citation refresh only",
+  "whole_unit_acceptance": "NOT_ISSUED",
+  "live_provider_qualification": false,
+  "remaining": [
+    "Durable generic native account operation/result reconciliation",
+    "Resolved owner-review presentation and device key/epoch scope",
+    "Provider entitlement/resource-version and other credential families",
+    "Cross-host lease, exposure and funds-safe unlink",
+    "Product-specific provider execution/settlement and original CEX/funds scope",
+    "Original independent/production/handset qualifications"
+  ],
+  "owner_and_artemis_plan_contracts": {
+    "tests": 192,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "ec5cff055e3a72a5007a8a791e4a4daf67042a94f66699c4069a20280c87e47b"
+  }
+}

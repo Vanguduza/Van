@@ -1,0 +1,37 @@
+import hashlib,json,os,shutil,subprocess,tempfile,zipfile
+from pathlib import Path
+OUT=Path('/workspace/van-ci-shards-independent-review-20261101');ROOT=Path('/workspace/van-review-2026-10-18/publish');E=Path('/workspace/van-ci-shards-wip-r1-20261101');h=json.loads((E/'FROZEN_REVIEW_HANDOFF.json').read_text())
+def pins():return {p:hashlib.sha256((ROOT/p).read_bytes()).hexdigest() for p in h['owned_paths']}
+before=pins();assert before==h['owned_paths'];(OUT/'before.json').write_text(json.dumps(before,indent=2));assert hashlib.sha256((E/'SOURCE.zip').read_bytes()).hexdigest()==h['archive_sha256'];assert hashlib.sha256((E/'SOURCE.patch').read_bytes()).hexdigest()==h['patch_sha256']
+with zipfile.ZipFile(E/'SOURCE.zip') as z:
+ for p,want in before.items():
+  names=[n for n in z.namelist() if n==p or n.endswith('/'+p)];assert len(names)==1;assert hashlib.sha256(z.read(names[0])).hexdigest()==want
+free=shutil.disk_usage('/tmp').free;assert free>=4*1024**3
+record={'storage_preflight':{'free_bytes':free,'reserve_bytes':4*1024**3},'producer_sources':{p:before[p] for p in ('tools/rebuild/backend_public_source.py','tools/rebuild/public_source_shards.py')}}
+with tempfile.TemporaryDirectory(prefix='van-ci-untracked-collection-review-',dir='/tmp') as temp:
+ base=Path(temp);repo=base/'source';repo.mkdir()
+ for rel in ('tools/rebuild/backend_public_source.py','tools/rebuild/public_source_shards.py','tools/rebuild/source_storage_audit.py'):
+  dest=repo/rel;dest.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(ROOT/rel,dest)
+ (repo/'tools/rebuild/backend_public_source_costs.json').write_text('{"costs":{}}')
+ for rel in ('tests/contracts/test_artemis_acceptance_plan.py','tests/contracts/test_artemis_usb_acceptance.py','tests/contracts/test_van_browser_core_firewall.py'):
+  p=repo/rel;p.parent.mkdir(parents=True,exist_ok=True);p.write_text('# excluded fixture\n')
+ for i in range(4):
+  p=repo/f'backend/tests/test_case_{i}.py';p.parent.mkdir(parents=True,exist_ok=True);p.write_text(f'def test_kept_{i}():\n    assert True\ndef test_dropped_{i}():\n    assert True\n')
+ subprocess.run(['git','init','-q'],cwd=repo,check=True)
+ subprocess.run(['git','add','.'],cwd=repo,check=True)
+ subprocess.run(['git','-c','user.name=Owned SOURCE fixture','-c','user.email=source@example.test','-c','core.hooksPath=/dev/null','commit','-qm','isolated test fixture'],cwd=repo,check=True)
+ head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=repo,text=True).strip()
+ env={**os.environ,'PYTHONPATH':str(repo),'GITHUB_RUN_ID':'independent-source-fixture','GITHUB_RUN_ATTEMPT':'1'}
+ for key in ('PYTEST_ADDOPTS','PYTEST_PLUGINS','VATI_TEST_PG_DSN'):env.pop(key,None)
+ def collect(label):
+  output=base/label;command=[os.sys.executable,str(repo/'tools/rebuild/backend_public_source.py'),'collect','--output',str(output),'--runtime','gateway','--shards','4','--expected-commit',head,'--basetemp',str(base/(label+'-basetemp'))]
+  run=subprocess.run(command,cwd=repo,env=env,text=True,capture_output=True,timeout=30);(OUT/(label+'.log')).write_text(run.stdout+run.stderr)
+  assert run.returncode==0,run.stdout+run.stderr
+  state=json.loads((output/'terminal.json').read_text());parent=json.loads((output/'run.json').read_text());assert parent['terminal'] and parent['exit']==0 and state['pytest_exit']==0
+  return {'full_collection':state['full_collection'],'source_before':state['source_before'],'source_after':state['source_after'],'parent_source_before':parent['source_before'],'parent_source_after':parent['source_after'],'exit':run.returncode,'forbidden_events':json.loads((output/'storage-audit.json').read_text())['forbidden_events']}
+ clean=collect('clean-control');assert len(clean['full_collection'])==8
+ (repo/'conftest.py').write_text('def pytest_collection_modifyitems(items):\n    items[:] = [item for item in items if "test_dropped_" not in item.nodeid]\n')
+ altered=collect('untracked-config-control');assert len(altered['full_collection'])==4
+ assert clean['source_before']==altered['source_before']==altered['source_after']==altered['parent_source_before']==altered['parent_source_after']
+ record.update(result='REPRODUCED_UNTRACKED_PYTEST_SOURCE_OMISSION_NOT_DETECTED',clean=clean,altered=altered,untracked_source=subprocess.check_output(['git','ls-files','--others','--exclude-standard'],cwd=repo,text=True).splitlines(),fixture_repository_commit_only=True,native_qualification=False)
+record['owned_tmp_cleanup']=True;after=pins();assert after==before;(OUT/'after.json').write_text(json.dumps(after,indent=2));(OUT/'untracked-collection-results.json').write_text(json.dumps(record,indent=2));print(json.dumps({'result':record['result'],'clean_count':len(record['clean']['full_collection']),'altered_count':len(record['altered']['full_collection']),'all8_task_source_pins_unchanged':True,'owned_tmp_cleanup':True}))

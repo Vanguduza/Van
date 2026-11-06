@@ -1,0 +1,72 @@
+..................F..........                                            [100%]
+=================================== FAILURES ===================================
+_ test_current_registry_binds_current_review_and_keeps_local_vs_external_qualification_separate _
+
+    def test_current_registry_binds_current_review_and_keeps_local_vs_external_qualification_separate():
+        import hashlib
+    
+        feature_doc = read("owner_features.json")
+        screen_doc = read("owner_screens.json")
+        features = {f["id"]: f for f in feature_doc["features"]}
+        for document in (feature_doc, screen_doc):
+            qualification = document["current_source_qualification"]
+            review = ROOT / qualification["source_review_manifest"]
+            assert qualification["source_review_manifest_sha256"] == hashlib.sha256(review.read_bytes()).hexdigest()
+            assert qualification["physical_cases_executed"] == 0
+            assert qualification["owner_release"] is False and qualification["deployment_accepted"] is False
+            if qualification["status"] == "SOURCE_REVIEWED_LOCAL_VALIDATION_PASSED":
+                manifest = ROOT / qualification["source_freeze_manifest"]
+                assert qualification["source_freeze_sha256"] == hashlib.sha256(manifest.read_bytes()).hexdigest()
+                receipt = ROOT / qualification["android_receipt"]
+                assert qualification["android_receipt_sha256"] == hashlib.sha256(receipt.read_bytes()).hexdigest()
+            else:
+                assert qualification["status"] == "SOURCE_REVIEWED_FINAL_VALIDATION_PENDING"
+                assert qualification["android_receipt"] is None
+        ceiling = features["OF-AUTHORITY-001"]
+        change = next(f for f in ceiling["current_implementation"]["functions"] if f["id"].endswith(":set-domain-ceiling"))
+        assert "A4" in change["authority_gate"] and "S0..S4" in change["authority_gate"]
+        grant = next(f for f in ceiling["current_implementation"]["functions"] if f["id"].endswith(":grant-exact-consent"))
+        assert "A4" in grant["authority_gate"] and "use limit" in grant["authority_gate"]
+        assert ceiling["functional_wiring_status"] == "SOURCE_WIRED_REQUIRES_ACCEPTANCE"
+        learning = features["OF-LEARNING-001"]
+        for suffix in (":define-vocabulary", ":set-collaboration-preference"):
+            action = next(f for f in learning["current_implementation"]["functions"] if f["id"].endswith(suffix))
+            assert "owner" in action["authority_gate"] and "session/epoch" in action["authority_gate"]
+        for identity in ("OF-BROWSER-001", "OF-LEARNING-003", "OF-AUTOMATION-001"):
+            assert features[identity]["functional_wiring_status"] == "SOURCE_WIRED_REQUIRES_ACCEPTANCE"
+        for row in feature_doc["features"] + screen_doc["screens"]:
+            verification = row["current_implementation"]["verification"]
+            assert verification["device_live"] == "UNVERIFIED"
+            assert verification["deployment_live"] == "UNVERIFIED"
+            history = row.get("historical_source_state")
+            if history:
+                path = ROOT / history["registry_snapshot"]
+>               assert history["registry_snapshot_sha256"] == hashlib.sha256(path.read_bytes()).hexdigest()
+                                                                             ^^^^^^^^^^^^^^^^^
+
+tests/contracts/test_owner_redesign_registry.py:379: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py:1019: in read_bytes
+    with self.open(mode='rb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/workspace/van-lanes-20261101/d43-endpoint-ci-fix/docs/audit/validation/registry-before-final-wiring/owner_features.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/workspace/van-lanes-20261101/d43-endpoint-ci-fix/docs/audit/validation/registry-before-final-wiring/owner_features.json'
+
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py:1013: FileNotFoundError
+=========================== short test summary info ============================
+FAILED tests/contracts/test_owner_redesign_registry.py::test_current_registry_binds_current_review_and_keeps_local_vs_external_qualification_separate
+1 failed, 28 passed in 6.22s

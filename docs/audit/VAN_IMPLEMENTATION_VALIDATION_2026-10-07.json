@@ -1,0 +1,306 @@
+{
+  "schema_version": 2,
+  "recorded_at_utc": "2026-10-07T10:04:17.301389+00:00",
+  "baseline_head": "12feb9033dfc1dd68d7b4d41ac477f0d9dbbc4af",
+  "worktree": "Local modified/uncommitted implementation and audit artifacts. No production deployment, commit, push or live qualification.",
+  "source_manifest": {
+    "path": "docs/audit/VAN_IMPLEMENTATION_SOURCE_MANIFEST_2026-10-07.json",
+    "sha256": "28af2ab3217d409636073c4f27278936ec25a9e163c06edb9e76680fcba27b31"
+  },
+  "aggregate_counts": {
+    "passed": 5524,
+    "skipped": 10,
+    "failed": 0
+  },
+  "counting_rule": "Four disjoint Python invocations plus final JVM and app-unit case results. JVM/app case identities are disjoint. Focused reruns, onboarding and earlier snapshots are excluded; executed cases do not represent unique requirements.",
+  "python_suites": [
+    {
+      "name": "backend",
+      "cwd": "/workspace/Van/backend",
+      "command": "PYTHONPATH=/workspace/Van/backend /workspace/.onboarding/van-venv/bin/python -m pytest -q tests",
+      "status": "PASSED",
+      "counts": {
+        "passed": 2157,
+        "skipped": 0,
+        "failed": 0,
+        "warnings": 30
+      },
+      "summary": "2157 passed, 30 warnings in 289.22s (0:04:49)",
+      "log": {
+        "path": "docs/audit/validation/implementation/implementation-backend-full.log",
+        "sha256": "856f4567bea37854db17884d8064a4a7e1c5f40fa29de4305c378a0190c78ae7"
+      }
+    },
+    {
+      "name": "gateway and frontend contracts",
+      "cwd": "/workspace/Van",
+      "command": "/workspace/.onboarding/van-venv/bin/python -m pytest -q tests/contracts",
+      "status": "PASSED",
+      "counts": {
+        "passed": 616,
+        "skipped": 4,
+        "failed": 0,
+        "warnings": 0
+      },
+      "summary": "616 passed, 4 skipped in 57.05s",
+      "log": {
+        "path": "docs/audit/validation/implementation/implementation-contracts-final.log",
+        "sha256": "47ddf0de525f55342039a2e169a40ae3bcf1f05893c59053dbce30010b50fc1a"
+      }
+    },
+    {
+      "name": "services, Hermes policy/profile and scenarios",
+      "cwd": "/workspace/Van",
+      "command": "/workspace/.onboarding/van-venv/bin/python -m pytest -q services tests/hermes hermes/policy/tests tests/scenarios",
+      "status": "PASSED",
+      "counts": {
+        "passed": 204,
+        "skipped": 1,
+        "failed": 0,
+        "warnings": 0
+      },
+      "summary": "204 passed, 1 skipped in 3.80s",
+      "log": {
+        "path": "docs/audit/validation/implementation/implementation-services-full.log",
+        "sha256": "2551b101d1551d043431e5c0aab841c2bed8f157d0fc4deb6e215dd207e04cd6"
+      }
+    },
+    {
+      "name": "trading",
+      "cwd": "/workspace/Van",
+      "command": "/workspace/.onboarding/van-venv/bin/python -m pytest -q trading/tests",
+      "status": "PASSED",
+      "counts": {
+        "passed": 1276,
+        "skipped": 5,
+        "failed": 0,
+        "warnings": 3
+      },
+      "summary": "1276 passed, 5 skipped, 3 warnings in 39.95s",
+      "log": {
+        "path": "docs/audit/validation/implementation/implementation-trading-full.log",
+        "sha256": "2b7c6f7486f63bae17f3565802c31c82b18edd66e23c85b5ad03da2d60f200fa"
+      }
+    }
+  ],
+  "backend_source_stability": {
+    "files": 352,
+    "changed": [],
+    "evidence": {
+      "implementation-backend-result.json": {
+        "path": "docs/audit/validation/implementation/implementation-backend-result.json",
+        "sha256": "7ba060ca2ac80863631aaef29c87ff239982fdf18e4720a97a75111fd50cb7bd"
+      },
+      "implementation-backend-inputs.json": {
+        "path": "docs/audit/validation/implementation/implementation-backend-inputs.json",
+        "sha256": "c507ab24f3457e30eac23d808d4d5878d1418798bb4f0dbe311caf995cba60ee"
+      }
+    }
+  },
+  "android_jvm": {
+    "counts": {
+      "tests": 1068,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "suites": 122,
+    "xml_archive": {
+      "path": "docs/audit/validation/implementation/android-jvm-results.zip",
+      "sha256": "39913e9c5b06f487f9525d4772515d51c70b233b282cb24f08270514f1c8cf3a"
+    },
+    "status": "PASSED",
+    "log": {
+      "path": "docs/audit/validation/implementation/implementation-kotlin-final.log",
+      "sha256": "555cc523e63ea121a03204c4b39a27642baa7f1633a5ee601bcd59ffe448082b"
+    },
+    "cwd": "/workspace",
+    "command": "JAVA_HOME=/workspace/.onboarding/jdk/usr/lib/jvm/java-21-openjdk-amd64 GRADLE_USER_HOME=/workspace/.onboarding/gradle /workspace/.onboarding/gradle-8.11.1/bin/gradle -p /workspace/Van/android/verification test --console=plain",
+    "scope": "Actual selected production Kotlin logic and session manager with controlled gateway/socket dependencies; no physical-device execution."
+  },
+  "android_app": {
+    "counts": {
+      "tests": 203,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "suites": 36,
+    "xml_archive": {
+      "path": "docs/audit/validation/implementation/android-app-unit-results.zip",
+      "sha256": "5f7352761fd5589742d7b7e0934b63f812ef165ec2a1a49675983a116b19d87d"
+    },
+    "status": "PASSED",
+    "build": {
+      "android_test_apk": null,
+      "app_unit_test_results": {
+        "errors": 0,
+        "failures": 0,
+        "skipped": 0,
+        "suites": 36,
+        "tests": 203
+      },
+      "changed_inputs": [],
+      "debug_apk": {
+        "bytes": 123474978,
+        "native_abis": [
+          "arm64-v8a"
+        ],
+        "path": "/workspace/Van/android/app/build/outputs/apk/debug/app-debug.apk",
+        "sha256": "87ff0cbd549fb70cae10c002dbef143704e8cda9d1ffef760b0f5e9b567ccf5f"
+      },
+      "emulator_executed": false,
+      "gradle_build_successful": true,
+      "live_device_executed": false,
+      "observed_at": "2026-10-07T09:48:04.137658+00:00",
+      "production_signed": false,
+      "source_inputs_unchanged": true
+    },
+    "evidence": {
+      "final-control-restoration-build.log": {
+        "path": "docs/audit/validation/implementation/final-control-restoration-build.log",
+        "sha256": "bfc6be3d0b946c9c9c49e6f0e29becf2b66dc1bbfe527fa22132ac63f3ae76f3"
+      },
+      "final-control-restoration-build-receipt.json": {
+        "path": "docs/audit/validation/implementation/final-control-restoration-build-receipt.json",
+        "sha256": "99745a604e86846039ef20bf08145c805e3e9d0539f97b1c6af8601af1561b24"
+      },
+      "final-control-restoration-build-inputs-before.json": {
+        "path": "docs/audit/validation/implementation/final-control-restoration-build-inputs-before.json",
+        "sha256": "87516a6416d079d501104a1328a14c3ca2ae028f475bb3fd996c5230d62ee786"
+      },
+      "final-control-restoration-build-inputs-after.json": {
+        "path": "docs/audit/validation/implementation/final-control-restoration-build-inputs-after.json",
+        "sha256": "87516a6416d079d501104a1328a14c3ca2ae028f475bb3fd996c5230d62ee786"
+      }
+    },
+    "cwd": "/workspace/Van/android",
+    "command": "JAVA_HOME=/workspace/.onboarding/jdk/usr/lib/jvm/java-21-openjdk-amd64 ANDROID_HOME=/workspace/.onboarding/android-sdk ANDROID_USER_HOME=/workspace/.onboarding/android-user GRADLE_USER_HOME=/workspace/.onboarding/gradle /workspace/.onboarding/gradle-8.11.1/bin/gradle --no-daemon --console=plain --max-workers=2 :app:testDebugUnitTest :app:assembleDebug :app:lintDebug",
+    "retained_apk": {
+      "path": "/workspace/van-audit/apks/van-debug-arm64-v8a-control-restoration.apk",
+      "sha256": "87ff0cbd549fb70cae10c002dbef143704e8cda9d1ffef760b0f5e9b567ccf5f"
+    },
+    "scope": "Full debug app compilation/native packaging/APK, app-unit tests and lint. Debug signing; no production release, emulator or handset execution."
+  },
+  "android_x86_instrumentation_packaging": {
+    "status": "PASSED_RECORDED_EARLIER_SNAPSHOT",
+    "evidence": {
+      "android-x86-instrumentation-build.log": {
+        "path": "docs/audit/validation/implementation/android-x86-instrumentation-build.log",
+        "sha256": "6f493560c3ddae6c46504dc90bf84ed236a92019b3d921fa2a32ecbf94d3d1a1"
+      },
+      "android-x86-instrumentation-build-receipt.json": {
+        "path": "docs/audit/validation/implementation/android-x86-instrumentation-build-receipt.json",
+        "sha256": "c85525ad4d36f39be8a68db5d4f4bbdaaa85b2007db05ec546b6a467bd3268a0"
+      },
+      "android-x86-instrumentation-build-inputs-before.json": {
+        "path": "docs/audit/validation/implementation/android-x86-instrumentation-build-inputs-before.json",
+        "sha256": "9690c3c684e57f0ed99ce33b43c4d723d78e833f2bad99b352e329890a0228f7"
+      },
+      "android-x86-instrumentation-build-inputs-after.json": {
+        "path": "docs/audit/validation/implementation/android-x86-instrumentation-build-inputs-after.json",
+        "sha256": "9690c3c684e57f0ed99ce33b43c4d723d78e833f2bad99b352e329890a0228f7"
+      }
+    },
+    "scope": "Test-only x86_64 app and instrumentation APK compilation/packaging; not instrumentation execution or qualification of final UI edits."
+  },
+  "frontend_registry": {
+    "features": 42,
+    "screens": 68,
+    "endpoints": 285,
+    "schemas": 149,
+    "contract_tests": "Included in final contracts suite",
+    "browser": {
+      "recorded_at_utc": "2026-10-07T09:59:22.708547+00:00",
+      "status": "PASSED",
+      "kind": "OFFLINE_FRONTEND_REGISTRY_RENDER_AND_INTERACTION",
+      "counts": {
+        "features": 42,
+        "screens": 68,
+        "endpoints": 285
+      },
+      "html_sha256": "b13c7b4a1a2acd32554a33191f0926d0cab8a5b01b7ceb934098c0a1ea9f836b",
+      "checks": [
+        "three registry tabs",
+        "current/baseline coverage filtering",
+        "search including no matches",
+        "endpoint authority details"
+      ],
+      "page_errors": [],
+      "handset_screen_acceptance": false
+    },
+    "browser_evidence": {
+      "path": "docs/audit/validation/implementation/owner-contract-browser-check.json",
+      "sha256": "8204eba6aecf7b7a50773c7dfb647dfade71ed7baf8d6839772c312660d79510"
+    }
+  },
+  "live_acceptance": {
+    "status": "BLOCKED",
+    "handset": "Owner S24 Ultra",
+    "evidence": {
+      "live-acceptance-readiness.json": {
+        "path": "docs/audit/validation/implementation/live-acceptance-readiness.json",
+        "sha256": "df38c8923907c7908490fa4c34c8b4feba2b31d627f8137e9093b121934a621c"
+      },
+      "final-cloud-readiness.json": {
+        "path": "docs/audit/validation/implementation/final-cloud-readiness.json",
+        "sha256": "262a1f1333577431db89c5f3b658bae43c21d22cfc6b91f4302c925a670a5587"
+      },
+      "device-route-readiness.json": {
+        "path": "docs/audit/validation/implementation/device-route-readiness.json",
+        "sha256": "a3fdf1b1de0ed98f256dc47654801b98d22fa4476b9073fb8a9728273d2582ea"
+      }
+    },
+    "host_inventory_source": "Repository declarations only; current governed connector is absent.",
+    "hosts": [
+      "dial-control",
+      "dial-hermes-control",
+      "van-trading-core",
+      "oracle-admin",
+      "vekl-worker"
+    ],
+    "missing": [
+      "Governed DIAL host route",
+      "Connected S24 Ultra route",
+      "Machine-scoped live credential bindings",
+      "Trusted device/gateway CA route",
+      "Stable owner-signed release APK"
+    ],
+    "deployed_source_verified": false,
+    "handset_verified": false,
+    "hermes_owner_command_verified": false,
+    "tls_observation": "Cloud proxy interception does not establish pinned gateway CA drift. Verification was not bypassed."
+  },
+  "other_checks": {
+    "git_diff_check": "PASSED",
+    "pip_check": "PASSED",
+    "python_compileall": "PASSED",
+    "canonical_security_policy_sha256": "bea251efba7e04ac4b813abe29aa44a2a7243c6830b54b252b1ed32e635206e8"
+  },
+  "warnings": "Final backend: 30 warnings (2 dependency deprecations, 5 synchronous async marks, 21 duplicate Artemis OpenAPI operation IDs, 2 SQLite worker closed-loop warnings during test teardown). The teardown warnings were absent in the prior completed run and remain recorded; no live lifecycle qualification is claimed. Trading: 3 warnings. Android lint reports an unavailable optional analytics settings path under the read-only account home.",
+  "resolved_validation_failures": [
+    "Owner Work route exceeded the existing screen line cap; same-package details extraction preserved behavior and cap enforcement.",
+    "Artemis/DIAL boundary tests assumed inline proof classifiers; tests now inspect the actual middleware closure without removing authority checks.",
+    "Canonical SecurityPolicy hash was restored byte-for-byte; namespace and tracked-APK contracts retain their original governance checks.",
+    "Maturity ledger pointed beyond the refactored Work file; the citation now names the same ConversationBubble in WorkDetails.",
+    "Independent final review corrected the legacy memory DELETE OpenAPI status and browser outcome presentation coverage."
+  ],
+  "remaining_acceptance": [
+    "Stable-owner release build/enrollment on S24 Ultra with pinned mTLS and hardware attestation",
+    "Physical biometric A4 confirmation and real owner screen/error-state navigation",
+    "Current deployed gateway/Hermes callbacks and supported remote cancellation protocol",
+    "Credentialed Google, knowledge, automation, browser/media and broker postcondition checks",
+    "Rive redesign/accessibility and rendered handset acceptance"
+  ],
+  "cloud_environment": {
+    "draft_status": "SAVED_REQUIRES_PUBLISH",
+    "draft_id": "7fe355d1-d734-4ad7-9bd4-954e1ee610c7~cecfgdraft_6ac5f2c2ead881909c4f334c58255a49",
+    "fresh_task_restoration_verified": false,
+    "instructions": "docs/audit/CLOUD_SETUP_2026-10-07.md"
+  },
+  "dial_setup": {
+    "status": "PASSED_INITIAL_ONBOARDING",
+    "source_changed": false,
+    "scope": "Pinned tenant sync, npm ci, TypeScript typecheck, core build and representative orchestration qualification; excluded from aggregate."
+  }
+}

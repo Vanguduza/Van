@@ -1,0 +1,67 @@
+{
+  "qualification": "Supplemental source assertions; not canonical374 or host resource qualification",
+  "positive": {
+    "exit": 0,
+    "cases": 11,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "failure_messages": []
+  },
+  "faults": [
+    {
+      "name": "unbounded-actual-read",
+      "exit": 1,
+      "cases": 1,
+      "failures": 1,
+      "errors": 0,
+      "skips": 0,
+      "failure_messages": [
+        "AssertionError: native source consumed an unbounded record after its pre-read stat\nassert [-1] == [65]\n  \n  At index 0 diff: -1 != 65\n  Use -v to get more diff"
+      ]
+    },
+    {
+      "name": "reset-cumulative-budget",
+      "exit": 1,
+      "cases": 2,
+      "failures": 1,
+      "errors": 0,
+      "skips": 0,
+      "failure_messages": [
+        "Failed: DID NOT RAISE NativeArchiveError"
+      ]
+    },
+    {
+      "name": "postcommit-only-capacity",
+      "exit": 1,
+      "cases": 4,
+      "failures": 1,
+      "errors": 0,
+      "skips": 0,
+      "failure_messages": [
+        "assert {'00000000000...me\":\"DEPTH\"}'} == {'head.json':...me\":\"DEPTH\"}'}\n  \n  Omitting 2 identical items, use -vv to show\n  Left contains 1 more item:\n  {'00000000000000000002-079ad8caa5b1d28d414fd725a32d2afd9a577bad99914e7cf4ca288e472bf205.json': b'{\"co'\n                                                                                                 b'ntra'\n                                                                                                 b'ct\":'\n                                                                                                 b'{\"au'...\n  \n  ...Full output truncated (807 lines hidden), use '-vv' to show"
+      ]
+    },
+    {
+      "name": "unbounded-index-repair",
+      "exit": 1,
+      "cases": 11,
+      "failures": 1,
+      "errors": 0,
+      "skips": 0,
+      "failure_messages": [
+        "assert b'{\"record_ha...ame\":\"DEPTH\"}' == b'{\"record_ha...ame\":\"DEPTH\"}'\n  \n  At index 16 diff: b'8' != b'f'\n  Use -v to get more diff"
+      ]
+    }
+  ],
+  "all_restored": true,
+  "restored": {
+    "exit": 0,
+    "cases": 11,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "failure_messages": []
+  },
+  "source_sha256": "6551356e82cd61dfcbaec836098c861df93575c97cb61635331e75439bda9b3d"
+}

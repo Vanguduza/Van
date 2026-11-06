@@ -1,0 +1,406 @@
+{
+  "schema": "van.rebuild.mt5-worker-physical-identity-source/1",
+  "observed_at_utc": "2026-10-23T04:32:01.206416+00:00",
+  "source_parent": "d6fa7eee9c449cd182bfd0514cb6b4cb6bf7cb13",
+  "source_sha256": {
+    "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py": "5436cc4d85c6aa6742e9df4e8e516481761cd0889ab05391bea0307b4ef237dc",
+    "deploy/van-trading-core/windows/mt5_worker/README.md": "75e352b50153917acf396656cd3100ac94e9bdf202d4b2e56a8e77785360ceaa",
+    "deploy/van-trading-core/windows/mt5_worker/install.ps1": "ed460a729a960a76eca2e057ea8bfbf220bc2e5ac80cbd8f17158ab427069823",
+    "trading/tests/test_mt5_worker.py": "07e2b29ed72686555b5c9087b9f6ca66d99c2ed031e7f55ec6bd33e99d91d4ec",
+    "trading/tests/test_mt5_physical_identity.py": "2521a65a357db9c71e7f08d476479facb1a081f088f12163b1891afef53b099d"
+  },
+  "executions": {
+    "before": {
+      "tests": 7,
+      "failures": 5,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.328,
+      "sha256": "142d6a3dc7f8db542e7e3566844e20f94249aaf420acef6e80226dd2749d3e96"
+    },
+    "proposed": {
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.284,
+      "sha256": "9e798d94b1d03d905a65a485d41c48964b6d7bff98976a4e977290964b0be60f"
+    },
+    "first": {
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.85,
+      "sha256": "df28efce38f3b3345331072bfb3e2dd483ab85bac8fbcdf0646a4e00e2be0bd3"
+    },
+    "delayed-before": {
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.099,
+      "sha256": "214f4c63a931986ab86f97b1b2531b10d684c39c660b494024dce4168fb9e22d"
+    },
+    "delayed-valid-before": {
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.092,
+      "sha256": "ea1864da74e5dd396e66e7abd478c4cf804a1a5024c80918f5c946c5b15ee6b2"
+    },
+    "final-controls": {
+      "tests": 34,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 1.441,
+      "sha256": "4905c1a538fe5066331b28f38f80912df81d68930df1db316f6e14697a71fdbb"
+    },
+    "expanded-controls": {
+      "tests": 45,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 1.25,
+      "sha256": "0d83c670cf98990d94e18c53026eaea6da985ae9372ea60fb135d71551ed9234"
+    },
+    "final-focused": {
+      "tests": 45,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 1.666,
+      "sha256": "69ef4dd48f23b079e7ea93a062c34cc47f3c1f7d50ac3a4b3ecff5d2327c8966"
+    },
+    "restored": {
+      "tests": 45,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 1.836,
+      "sha256": "d0c4cb063279ba5966c02c0e1f3ec636de5f484f400347056e36f97077c1ce39"
+    },
+    "rebuild": {
+      "tests": 78,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 31.96,
+      "sha256": "c9365c97414163396838ac603c6ee35ea81d671e766466392492dd79a5ce170e"
+    },
+    "final-full-pg": {
+      "tests": 2249,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 483.173,
+      "sha256": "7f3c49131a6fd956bfd902838b178e73447f9066e62b8f75b4a253a35cd949db"
+    }
+  },
+  "initial_probes": [
+    {
+      "defect": "server",
+      "result": {
+        "status": "FILLED",
+        "retcode": 10009,
+        "reason": "done",
+        "order": 700,
+        "position": 700,
+        "volume": "0.1",
+        "price": "1.10008",
+        "arrival": "1.10008",
+        "sl_confirmed": true,
+        "server_time_ms": 1792728748570,
+        "nonce": 1,
+        "worker_time_ms": 1000000
+      },
+      "native_sends": 1
+    },
+    {
+      "defect": "currency",
+      "result": {
+        "status": "FILLED",
+        "retcode": 10009,
+        "reason": "done",
+        "order": 700,
+        "position": 700,
+        "volume": "0.1",
+        "price": "1.10008",
+        "arrival": "1.10008",
+        "sl_confirmed": true,
+        "server_time_ms": 1792728748570,
+        "nonce": 1,
+        "worker_time_ms": 1000000
+      },
+      "native_sends": 1
+    },
+    {
+      "defect": "demo",
+      "result": {
+        "status": "FILLED",
+        "retcode": 10009,
+        "reason": "done",
+        "order": 700,
+        "position": 700,
+        "volume": "0.1",
+        "price": "1.10008",
+        "arrival": "1.10008",
+        "sl_confirmed": true,
+        "server_time_ms": 1792728748570,
+        "nonce": 1,
+        "worker_time_ms": 1000000
+      },
+      "native_sends": 1
+    },
+    {
+      "defect": "truthy-permission",
+      "result": {
+        "status": "FILLED",
+        "retcode": 10009,
+        "reason": "done",
+        "order": 700,
+        "position": 700,
+        "volume": "0.1",
+        "price": "1.10008",
+        "arrival": "1.10008",
+        "sl_confirmed": true,
+        "server_time_ms": 1792728748571,
+        "nonce": 1,
+        "worker_time_ms": 1000000
+      },
+      "native_sends": 1
+    }
+  ],
+  "retained_control_setup_error": {
+    "description": "An incorrectly named explicit-boolean test target caused collection exit4 before any tests; corrected targets used thereafter. Not counted as a product failure.",
+    "log_sha256": "f1811f0bde1819a44ec2dcb7d14970014d79431b60057c8c545a23f57df86c6d"
+  },
+  "source_faults": {
+    "definitions": [
+      [
+        [
+          "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py",
+          "a.get(\"server\") != acc[\"server\"]",
+          "False",
+          "send on a different physical server"
+        ],
+        [
+          "trading/tests/test_mt5_physical_identity.py::test_a_signed_request_cannot_send_on_a_different_physical_identity_or_ambiguous_permission[actual0]"
+        ]
+      ],
+      [
+        [
+          "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py",
+          "a.get(\"currency\") != acc[\"currency\"]",
+          "False",
+          "send with a different native currency"
+        ],
+        [
+          "trading/tests/test_mt5_physical_identity.py::test_a_signed_request_cannot_send_on_a_different_physical_identity_or_ambiguous_permission[actual1]"
+        ]
+      ],
+      [
+        [
+          "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py",
+          "a[\"demo\"] is not acc[\"demo\"]",
+          "False",
+          "send live from a configured demo alias"
+        ],
+        [
+          "trading/tests/test_mt5_physical_identity.py::test_a_signed_request_cannot_send_on_a_different_physical_identity_or_ambiguous_permission[actual2]"
+        ]
+      ],
+      [
+        [
+          "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py",
+          "a.get(\"trade_allowed\") is not True",
+          "not a.get(\"trade_allowed\")",
+          "treat a truthy permission string as a native grant"
+        ],
+        [
+          "trading/tests/test_mt5_physical_identity.py::test_a_signed_request_cannot_send_on_a_different_physical_identity_or_ambiguous_permission[actual3]"
+        ]
+      ],
+      [
+        [
+          "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py",
+          "if self.logged_in == (login, server):",
+          "if self.logged_in and self.logged_in[0] == login:",
+          "cache the same login across different broker servers"
+        ],
+        [
+          "trading/tests/test_mt5_physical_identity.py::test_the_terminal_login_cache_cannot_transfer_a_login_number_across_servers"
+        ]
+      ],
+      [
+        [
+          [
+            [
+              "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py",
+              "import argparse",
+              "import argparse\nfrom contextlib import nullcontext"
+            ],
+            [
+              "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py",
+              "with self._terminal_lock:",
+              "with nullcontext():"
+            ]
+          ],
+          "let concurrent aliases switch the terminal during native sending"
+        ],
+        [
+          "trading/tests/test_mt5_physical_identity.py::test_parallel_aliases_cannot_switch_the_terminal_between_identity_check_and_send"
+        ]
+      ],
+      [
+        [
+          "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py",
+          "if abs(self.clock() - int(req[\"issued_ms\"])) > SKEW_MS:",
+          "if False:",
+          "extend the native entry request lifetime while waiting for login"
+        ],
+        [
+          "trading/tests/test_mt5_physical_identity.py::test_waiting_for_native_login_cannot_extend_a_signed_entry_request_lifetime"
+        ]
+      ],
+      [
+        [
+          "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py",
+          "type(mode) is int and mode in (0, 2)",
+          "isinstance(mode,int) and mode in (0,2)",
+          "let a boolean native trade mode establish demo identity"
+        ],
+        [
+          "trading/tests/test_mt5_physical_identity.py::test_unknown_or_ambiguous_native_trade_mode_cannot_establish_demo_identity[False]"
+        ]
+      ]
+    ],
+    "records": [
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "3be6ffcaecf85b5bd3eef3693ab214b0e7c9eb4e36d117fcf1825652de5eb298"
+      },
+      {
+        "phase": "mutation",
+        "why": "send on a different physical server",
+        "returncode": 1,
+        "log_sha256": "ff9c7ddc2329497b358476ddacb5bd3a41e745d872dcc5d42edfcc83e40c41e8"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "976ea3fe6dfa65b827ec05fc16bf49cec94d3fda3b2d6ad4719708e74a38b32d"
+      },
+      {
+        "phase": "mutation",
+        "why": "send with a different native currency",
+        "returncode": 1,
+        "log_sha256": "fe63fdf51c21dc239e154b777c094a5a4f42dc932a466ceec86ee741396d42c9"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "e596cce97643441f2f2c7ef01ee068b6705ce1e028a07a32ba3bd3b3d35d7353"
+      },
+      {
+        "phase": "mutation",
+        "why": "send live from a configured demo alias",
+        "returncode": 1,
+        "log_sha256": "95b12a4ae2e5dcbfe207dcac4b4ba4c2327e80afdeff392d1fb8e5d072683dea"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "09229b326b028651d725fa47cd1bae9fd8e0145ff8779bdb84ae2762c00ab737"
+      },
+      {
+        "phase": "mutation",
+        "why": "treat a truthy permission string as a native grant",
+        "returncode": 1,
+        "log_sha256": "2542709d36cd72787964f050f4c2ad3bd38cdc05b7a0cbec96059893c324fc07"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "09229b326b028651d725fa47cd1bae9fd8e0145ff8779bdb84ae2762c00ab737"
+      },
+      {
+        "phase": "mutation",
+        "why": "cache the same login across different broker servers",
+        "returncode": 1,
+        "log_sha256": "0eb8c9c2e91db9432c4149fa61b31615a20d55780b5648611ca01805dd027881"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "0234d51de03c8da96792f0ed8d0043697c9f1b2888dbf66e9cf6b5620819903b"
+      },
+      {
+        "phase": "mutation",
+        "why": "let concurrent aliases switch the terminal during native sending",
+        "returncode": 1,
+        "log_sha256": "c490d0a9043e5690a5f09863b853bd3e4a85f12978f466054a6dd3fdc9ac2f2f"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "e596cce97643441f2f2c7ef01ee068b6705ce1e028a07a32ba3bd3b3d35d7353"
+      },
+      {
+        "phase": "mutation",
+        "why": "extend the native entry request lifetime while waiting for login",
+        "returncode": 1,
+        "log_sha256": "38ded4d85f2bf40a39384b3715c401bdd9682af29d9526529b34c27e5b34b64c"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "76af71df60bb5f93ea635e8763126ecf98e837672c9980e80aefde989b203765"
+      },
+      {
+        "phase": "mutation",
+        "why": "let a boolean native trade mode establish demo identity",
+        "returncode": 1,
+        "log_sha256": "c6788437d71856c499a256da29f9ffa83141ac02c4dda4e675ca4cf0b61f7932"
+      }
+    ],
+    "source_before_sha256": {
+      "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py": "5436cc4d85c6aa6742e9df4e8e516481761cd0889ab05391bea0307b4ef237dc"
+    },
+    "source_after_sha256": {
+      "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py": "5436cc4d85c6aa6742e9df4e8e516481761cd0889ab05391bea0307b4ef237dc"
+    },
+    "source_restored": true,
+    "journal_present": false
+  },
+  "private_postgresql_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "owner_export": {
+    "changed": [],
+    "applied": false,
+    "scope": "SOURCE_CONTRACTS_ONLY"
+  },
+  "legacy_anchor_preflight": {
+    "schema": "van.rebuild.mutation-registry-preflight/1",
+    "registry_sha256": "35d10c7b0f2b8319b7f7305828262c972b2a6451139d75b9e83c7d0062282955",
+    "mutation_count": 374,
+    "edit_count": 383,
+    "findings": [],
+    "execution_state": "NOT_RUN",
+    "status": "ANCHORS_VALID_BASELINES_AND_MUTATIONS_NOT_EXECUTED"
+  },
+  "qualification": "Real source worker/mTLS/HMAC with model terminal, not native Windows or provider acceptance. Linux profile binding, pullEA, native epochs/deadlines/precision, finality and entire-unit requirements remain."
+}

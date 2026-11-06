@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="5" time="9.296" timestamp="2026-10-27T00:38:34.140568+00:00" hostname="2c5a245e39f1"><testcase classname="tests.test_owner_approval_expiry_boundaries" name="test_expiry_rechecked_after_actual_writer_wait_and_before_consumption[sql_writer-None]" time="0.237"><failure message="Failed: DID NOT RAISE OwnerApprovalError">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-614/test_expiry_rechecked_after_ac0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7f7bc464a1e0&gt;
+durable_receipt = None, boundary = 'sql_writer'
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize('durable_receipt', [None, {'request_id': 'original-recovery-request'}])
+    @pytest.mark.parametrize('boundary', ['sql_writer', 'device_read'])
+    async def test_expiry_rechecked_after_actual_writer_wait_and_before_consumption(
+            tmp_path, monkeypatch, durable_receipt, boundary):
+        parameters = {'account': 'Demo', 'scope': 'autonomous'}
+        service, challenge, identity, proof = await _approval(tmp_path, parameters)
+        clock = [1001]
+        monkeypatch.setattr('van_gateway.approval.service.time.time', lambda: clock[0])
+        original_connection = service.store.connection
+        connection_ready, permit_begin, begin_requested = (asyncio.Event() for _ in range(3))
+        device_read, permit_device_result = asyncio.Event(), asyncio.Event()
+        loop = asyncio.get_running_loop()
+    
+        @asynccontextmanager
+        async def observed_connection():
+            async with original_connection() as db:
+                await db.set_trace_callback(lambda sql: loop.call_soon_threadsafe(begin_requested.set)
+                                            if sql.strip().upper() == 'BEGIN IMMEDIATE' else None)
+                original_execute = db.execute
+    
+                async def execute(sql, *args, **kwargs):
+                    cursor = await original_execute(sql, *args, **kwargs)
+                    if 'SELECT public_key_pem, revoked_at_unix FROM devices' in sql:
+                        device_read.set()
+                        await permit_device_result.wait()
+                    return cursor
+    
+                db.execute = execute
+                connection_ready.set()
+                await permit_begin.wait()
+                yield db
+    
+        monkeypatch.setattr(service.store, 'connection', observed_connection)
+        task = asyncio.create_task(service.verify_and_consume(
+            **identity, challenge_id=challenge.challenge_id, signature_b64=proof,
+            parameters=parameters, durable_receipt=durable_receipt))
+        try:
+            await asyncio.wait_for(connection_ready.wait(), 5)
+            if boundary == 'sql_writer':
+                async with original_connection() as blocker:
+                    await blocker.execute('BEGIN IMMEDIATE')
+                    permit_begin.set()
+                    await asyncio.wait_for(begin_requested.wait(), 5)
+                    assert not task.done()
+                    clock[0] = challenge.expires_at_unix
+                    permit_device_result.set()
+                    await blocker.rollback()
+            else:
+                permit_begin.set()
+                await asyncio.wait_for(device_read.wait(), 5)
+                clock[0] = challenge.expires_at_unix
+                permit_device_result.set()
+&gt;           with pytest.raises(OwnerApprovalError, match='approval_challenge_expired'):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE OwnerApprovalError
+
+backend/tests/test_owner_approval_expiry_boundaries.py:64: Failed</failure></testcase><testcase classname="tests.test_owner_approval_expiry_boundaries" name="test_expiry_rechecked_after_actual_writer_wait_and_before_consumption[sql_writer-durable_receipt1]" time="0.282"><failure message="Failed: DID NOT RAISE OwnerApprovalError">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-614/test_expiry_rechecked_after_ac1')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7f7bc46aa900&gt;
+durable_receipt = {'request_id': 'original-recovery-request'}
+boundary = 'sql_writer'
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize('durable_receipt', [None, {'request_id': 'original-recovery-request'}])
+    @pytest.mark.parametrize('boundary', ['sql_writer', 'device_read'])
+    async def test_expiry_rechecked_after_actual_writer_wait_and_before_consumption(
+            tmp_path, monkeypatch, durable_receipt, boundary):
+        parameters = {'account': 'Demo', 'scope': 'autonomous'}
+        service, challenge, identity, proof = await _approval(tmp_path, parameters)
+        clock = [1001]
+        monkeypatch.setattr('van_gateway.approval.service.time.time', lambda: clock[0])
+        original_connection = service.store.connection
+        connection_ready, permit_begin, begin_requested = (asyncio.Event() for _ in range(3))
+        device_read, permit_device_result = asyncio.Event(), asyncio.Event()
+        loop = asyncio.get_running_loop()
+    
+        @asynccontextmanager
+        async def observed_connection():
+            async with original_connection() as db:
+                await db.set_trace_callback(lambda sql: loop.call_soon_threadsafe(begin_requested.set)
+                                            if sql.strip().upper() == 'BEGIN IMMEDIATE' else None)
+                original_execute = db.execute
+    
+                async def execute(sql, *args, **kwargs):
+                    cursor = await original_execute(sql, *args, **kwargs)
+                    if 'SELECT public_key_pem, revoked_at_unix FROM devices' in sql:
+                        device_read.set()
+                        await permit_device_result.wait()
+                    return cursor
+    
+                db.execute = execute
+                connection_ready.set()
+                await permit_begin.wait()
+                yield db
+    
+        monkeypatch.setattr(service.store, 'connection', observed_connection)
+        task = asyncio.create_task(service.verify_and_consume(
+            **identity, challenge_id=challenge.challenge_id, signature_b64=proof,
+            parameters=parameters, durable_receipt=durable_receipt))
+        try:
+            await asyncio.wait_for(connection_ready.wait(), 5)
+            if boundary == 'sql_writer':
+                async with original_connection() as blocker:
+                    await blocker.execute('BEGIN IMMEDIATE')
+                    permit_begin.set()
+                    await asyncio.wait_for(begin_requested.wait(), 5)
+                    assert not task.done()
+                    clock[0] = challenge.expires_at_unix
+                    permit_device_result.set()
+                    await blocker.rollback()
+            else:
+                permit_begin.set()
+                await asyncio.wait_for(device_read.wait(), 5)
+                clock[0] = challenge.expires_at_unix
+                permit_device_result.set()
+&gt;           with pytest.raises(OwnerApprovalError, match='approval_challenge_expired'):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE OwnerApprovalError
+
+backend/tests/test_owner_approval_expiry_boundaries.py:64: Failed</failure></testcase><testcase classname="tests.test_owner_approval_expiry_boundaries" name="test_expiry_rechecked_after_actual_writer_wait_and_before_consumption[device_read-None]" time="0.247"><failure message="Failed: DID NOT RAISE OwnerApprovalError">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-614/test_expiry_rechecked_after_ac2')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7f7bc4730830&gt;
+durable_receipt = None, boundary = 'device_read'
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize('durable_receipt', [None, {'request_id': 'original-recovery-request'}])
+    @pytest.mark.parametrize('boundary', ['sql_writer', 'device_read'])
+    async def test_expiry_rechecked_after_actual_writer_wait_and_before_consumption(
+            tmp_path, monkeypatch, durable_receipt, boundary):
+        parameters = {'account': 'Demo', 'scope': 'autonomous'}
+        service, challenge, identity, proof = await _approval(tmp_path, parameters)
+        clock = [1001]
+        monkeypatch.setattr('van_gateway.approval.service.time.time', lambda: clock[0])
+        original_connection = service.store.connection
+        connection_ready, permit_begin, begin_requested = (asyncio.Event() for _ in range(3))
+        device_read, permit_device_result = asyncio.Event(), asyncio.Event()
+        loop = asyncio.get_running_loop()
+    
+        @asynccontextmanager
+        async def observed_connection():
+            async with original_connection() as db:
+                await db.set_trace_callback(lambda sql: loop.call_soon_threadsafe(begin_requested.set)
+                                            if sql.strip().upper() == 'BEGIN IMMEDIATE' else None)
+                original_execute = db.execute
+    
+                async def execute(sql, *args, **kwargs):
+                    cursor = await original_execute(sql, *args, **kwargs)
+                    if 'SELECT public_key_pem, revoked_at_unix FROM devices' in sql:
+                        device_read.set()
+                        await permit_device_result.wait()
+                    return cursor
+    
+                db.execute = execute
+                connection_ready.set()
+                await permit_begin.wait()
+                yield db
+    
+        monkeypatch.setattr(service.store, 'connection', observed_connection)
+        task = asyncio.create_task(service.verify_and_consume(
+            **identity, challenge_id=challenge.challenge_id, signature_b64=proof,
+            parameters=parameters, durable_receipt=durable_receipt))
+        try:
+            await asyncio.wait_for(connection_ready.wait(), 5)
+            if boundary == 'sql_writer':
+                async with original_connection() as blocker:
+                    await blocker.execute('BEGIN IMMEDIATE')
+                    permit_begin.set()
+                    await asyncio.wait_for(begin_requested.wait(), 5)
+                    assert not task.done()
+                    clock[0] = challenge.expires_at_unix
+                    permit_device_result.set()
+                    await blocker.rollback()
+            else:
+                permit_begin.set()
+                await asyncio.wait_for(device_read.wait(), 5)
+                clock[0] = challenge.expires_at_unix
+                permit_device_result.set()
+&gt;           with pytest.raises(OwnerApprovalError, match='approval_challenge_expired'):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE OwnerApprovalError
+
+backend/tests/test_owner_approval_expiry_boundaries.py:64: Failed</failure></testcase><testcase classname="tests.test_owner_approval_expiry_boundaries" name="test_expiry_rechecked_after_actual_writer_wait_and_before_consumption[device_read-durable_receipt1]" time="0.291"><failure message="Failed: DID NOT RAISE OwnerApprovalError">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-614/test_expiry_rechecked_after_ac3')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7f7bc4732a20&gt;
+durable_receipt = {'request_id': 'original-recovery-request'}
+boundary = 'device_read'
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize('durable_receipt', [None, {'request_id': 'original-recovery-request'}])
+    @pytest.mark.parametrize('boundary', ['sql_writer', 'device_read'])
+    async def test_expiry_rechecked_after_actual_writer_wait_and_before_consumption(
+            tmp_path, monkeypatch, durable_receipt, boundary):
+        parameters = {'account': 'Demo', 'scope': 'autonomous'}
+        service, challenge, identity, proof = await _approval(tmp_path, parameters)
+        clock = [1001]
+        monkeypatch.setattr('van_gateway.approval.service.time.time', lambda: clock[0])
+        original_connection = service.store.connection
+        connection_ready, permit_begin, begin_requested = (asyncio.Event() for _ in range(3))
+        device_read, permit_device_result = asyncio.Event(), asyncio.Event()
+        loop = asyncio.get_running_loop()
+    
+        @asynccontextmanager
+        async def observed_connection():
+            async with original_connection() as db:
+                await db.set_trace_callback(lambda sql: loop.call_soon_threadsafe(begin_requested.set)
+                                            if sql.strip().upper() == 'BEGIN IMMEDIATE' else None)
+                original_execute = db.execute
+    
+                async def execute(sql, *args, **kwargs):
+                    cursor = await original_execute(sql, *args, **kwargs)
+                    if 'SELECT public_key_pem, revoked_at_unix FROM devices' in sql:
+                        device_read.set()
+                        await permit_device_result.wait()
+                    return cursor
+    
+                db.execute = execute
+                connection_ready.set()
+                await permit_begin.wait()
+                yield db
+    
+        monkeypatch.setattr(service.store, 'connection', observed_connection)
+        task = asyncio.create_task(service.verify_and_consume(
+            **identity, challenge_id=challenge.challenge_id, signature_b64=proof,
+            parameters=parameters, durable_receipt=durable_receipt))
+        try:
+            await asyncio.wait_for(connection_ready.wait(), 5)
+            if boundary == 'sql_writer':
+                async with original_connection() as blocker:
+                    await blocker.execute('BEGIN IMMEDIATE')
+                    permit_begin.set()
+                    await asyncio.wait_for(begin_requested.wait(), 5)
+                    assert not task.done()
+                    clock[0] = challenge.expires_at_unix
+                    permit_device_result.set()
+                    await blocker.rollback()
+            else:
+                permit_begin.set()
+                await asyncio.wait_for(device_read.wait(), 5)
+                clock[0] = challenge.expires_at_unix
+                permit_device_result.set()
+&gt;           with pytest.raises(OwnerApprovalError, match='approval_challenge_expired'):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE OwnerApprovalError
+
+backend/tests/test_owner_approval_expiry_boundaries.py:64: Failed</failure></testcase><testcase classname="tests.test_owner_approval_expiry_boundaries" name="test_original_window_remains_usable_until_half_open_expiry" time="0.212" /></testsuite></testsuites>

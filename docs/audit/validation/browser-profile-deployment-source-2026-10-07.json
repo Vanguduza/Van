@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "scope": "VAN_ISOLATED_BROWSER_PROFILES_DEPLOYMENT_SOURCE",
+  "recorded_at_utc": "2026-10-07T23:13:33.190434+00:00",
+  "test_result": {
+    "passed": 66,
+    "failed": 0,
+    "skipped": 0,
+    "command": "PYTHONPATH=backend:. /workspace/van-browser-runtime-venv/bin/python -m pytest -q tests/contracts/test_browser_profile_deployment.py services/browser_control_agent/tests/test_stream_host_package.py"
+  },
+  "source_sha256": {
+    "deploy/van-browser-stream/README.md": "2174ed1ffe0b6b2ebe580ea3c4a40b2900fb0498cbf570e811cd7b1e43064ebf",
+    "deploy/van-browser-stream/bootstrap.sh": "a170d93ffd46f5e3cf61c44965d171a0dabee82cad38018206c37f81a05e6d07",
+    "deploy/van-browser-stream/install_profiles.py": "a9b47f66597f60c3ea1e7a344eb9f33cbb21444023a2c98ea795e07bcd5ab6e1",
+    "deploy/van-browser-stream/pki/make-stream-pki.sh": "a2ca8b1ff705c9f0c07f4ed80c701f615869f1085de6e7eec54f0e9c99ad008c",
+    "deploy/van-browser-stream/prepare_profiles.py": "6e0e6f612da04cf43ec317dec87143138c8e07073e7284675d9913d0961965b2",
+    "deploy/van-browser-stream/profiles.example.json": "545d5398e441537a759e43599ef142feed3aeb5f3e78ba74f03999773c6c22c3",
+    "deploy/van-browser-stream/runtime.env.example": "276aa9b19cfddb31fa6d1801fb22ae01c99bf31613700c72bcfaf8c2057f3495",
+    "deploy/van-browser-stream/systemd/van-browser-cdp-isolation.service": "d950c3975bd39b8d9a6800b53fe4f44196ca784142b624db116e696c3a4bad6b",
+    "deploy/van-browser-stream/systemd/van-browser-chromium@.service": "eb4be630b2860eee57d7c348cd909f9d9886222fb574adfe9af87f4bcd5ca416",
+    "deploy/van-browser-stream/systemd/van-browser-control-agent@.service": "7349aff6c24e1df4493789a31d0cc836a77d2cf9540f677a63640a5fb6a9a71b",
+    "deploy/van-browser-stream/systemd/van-browser-ingress-stage.service": "e2d6ce6179f6ee8e02ef663edf84aae67491a49a06d81e648a4d942201346528",
+    "deploy/van-browser-stream/systemd/van-browser-media-ingress.service": "860215a71d98f7f86a9ca5f54f9031a50730439f269b53ebed637595e2d81a47",
+    "deploy/van-browser-stream/systemd/van-browser-stream@.service": "401d4155206f4f7877507d6742e9953194c32c439dec780dd965ade61b55cf23",
+    "deploy/van-browser-stream/systemd/van-browser-transfer-stage@.service": "ef1ad30214cc99d57efbae542b539d59aa2c5fdcf7d5a9967e6a66c76387e853",
+    "tests/contracts/test_browser_profile_deployment.py": "2c87ffe3dc194958f6eff1cdd73b131dca64a4fc3c370858e6015d31ded14a79"
+  },
+  "checks": {
+    "shell_syntax": true,
+    "python_compilation": true,
+    "whitespace": true
+  },
+  "binary_syntax_checks": {
+    "nginx": "PASS_OFFICIAL_SIGNED_PACKAGE_LOCAL_FIXTURE_NGINX_T",
+    "systemd": "PASS_EXECUTABLE_SELECTOR_LOCAL_FIXTURE_VERIFY",
+    "nft": "BLOCKED_NETLINK_CAPABILITY_NO_CONFINEMENT_CLAIM"
+  },
+  "host_executed": false,
+  "device_executed": false,
+  "services_started": false,
+  "live_qualified": false,
+  "pending_machine_bindings": [
+    "current host identity/exclusive recipe admission",
+    "existing encrypted volume identity and profile migration/new-profile admission",
+    "observed pinned Chromium and nginx binary/hash/capability",
+    "four independently scoped producer tokens and independent broker mTLS identities",
+    "core per-profile client CA/SAN/current caller allowlist and signed media URL/CA bindings",
+    "actual source-preserving firewall and UID-scoped cross-profile CDP denial",
+    "public ingress DNS/SAN/CA/reachability and upstream TLS verification",
+    "separate per-profile host qualification and actual core browser/transfer canaries",
+    "later Artemis handset acceptance"
+  ],
+  "native_parser_receipt": "/workspace/van-audit/browser-deployment-native-parser-2026-10-07.json"
+}

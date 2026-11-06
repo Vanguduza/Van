@@ -1,0 +1,328 @@
+{
+  "schema": "van.rebuild.execution-cohort-source/1",
+  "observed_at_utc": "2026-10-23T04:17:54.229482+00:00",
+  "source_parent": "c68b2dd6e2bcfd14c7854a88b496e3a7dc519626",
+  "source_sha256": {
+    "trading/vati/learning/runtime_cohort.py": "6c33805aa6e0b2827cf5410f59367b4f6a603cd3ce7c3a7cf3b5496209991a88",
+    "trading/vati/learning/scope.py": "7cce8f9fc7ec9f63da8a3d14ec5476e1ec350f2e0bb2baf075d0db2d38e25738",
+    "trading/vati/app/cycle.py": "359703a38bba7896dab0f4ff22682566bd6dddb06b64c0a5b002ab6a408573d6",
+    "trading/vati/app/service.py": "432ae209e57d4bde81bba759837431403812fc779b2ae5bf6c10a12aa1259897",
+    "trading/vati/app/account_service.py": "ae8dc321d6e79e7a79c6f672b5630bc3cd3d441ec5f5fa1ccbf2d377ef22f853",
+    "trading/vati/backtest/engine.py": "e05b628d8556bbe8799fb5c7a138e454d11739323fa2212ede780e354216e41f",
+    "trading/tests/test_runtime_learning_cohort.py": "50b00b7c874d4450934b55b4069ba69e9456ff748ba4b44b8c72518e2a26a5c1",
+    "trading/tests/test_learning.py": "8d94b34cfcf7604caef6a3deb648680a001b72ad83d2e722a8df454040b0470b"
+  },
+  "executions": {
+    "before": {
+      "tests": 6,
+      "failures": 6,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 2.804,
+      "sha256": "e118a8e9e8cf1cfa0f7f6d9c7760bf491cbf1beac38e8bbcf410bd98c5853aff"
+    },
+    "valid-before": {
+      "tests": 6,
+      "failures": 6,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 2.948,
+      "sha256": "ce6ab784cf6afcd4183f541693c1fd10e2d62d1e62d0612bba25a42ade1c07a2"
+    },
+    "first": {
+      "tests": 47,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "seconds": 13.319,
+      "sha256": "2c895a51d53e05f74a29203b0b5a1965e6bb3cfa783ab2e1bf3772e59e7f7835"
+    },
+    "expanded": {
+      "tests": 16,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "seconds": 4.158,
+      "sha256": "0fffb6326374d401c6075e960fa04e6e827cc8424c9021413c212fc68acb2af8"
+    },
+    "restored": {
+      "tests": 57,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 2,
+      "seconds": 16.103,
+      "sha256": "d371d72bd3f2ec6fda7d85333a4548d21f602d3afb48bb0e06eae8c449eb757d"
+    },
+    "rebuild": {
+      "tests": 78,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 30.759,
+      "sha256": "04a6847ff1fbdc0a39251b88be848ab4c1f9179c514ac331182a662a733b2fb9"
+    },
+    "final-full-pg": {
+      "tests": 2229,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 467.334,
+      "sha256": "fb96b284d2402654359202c7f581f96e88d2cc8d62567f08fbd5cdf65ebd1113"
+    },
+    "book-control-full-pg": {
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.34,
+      "sha256": "1bb08cf037f44e9f20140a2a05662cff0fffc3ba448ff43126e9c313a1b77e8c"
+    },
+    "book-corrected-full-pg": {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.306,
+      "sha256": "706a644789088f021619f01f1f9368423fa5dde8971a5c63337a961fb20b0e85"
+    }
+  },
+  "source_faults": {
+    "definitions": [
+      [
+        [
+          "trading/vati/backtest/engine.py",
+          "        self._check_learning_cohort()\n",
+          "",
+          "accept a LIVE hook at historical engine construction"
+        ],
+        [
+          "trading/tests/test_runtime_learning_cohort.py::test_backtest_refuses_a_non_backtest_hook_before_creating_financial_history[LIVE]"
+        ]
+      ],
+      [
+        [
+          "trading/vati/backtest/engine.py",
+          "        self._check_learning_cohort()\n        cfg = self.cfg",
+          "        cfg = self.cfg",
+          "allow a relabelled hook to create history before cohort refusal"
+        ],
+        [
+          "trading/tests/test_runtime_learning_cohort.py::test_a_relabelled_hook_is_refused_again_before_a_backtest_run"
+        ]
+      ],
+      [
+        [
+          "trading/vati/learning/runtime_cohort.py",
+          "if simulated:\n",
+          "if False:\n",
+          "let a paper runtime borrow the configured live policy cohort"
+        ],
+        [
+          "trading/tests/test_runtime_learning_cohort.py::test_actual_paper_service_cannot_label_its_execution_facts_as_live"
+        ]
+      ],
+      [
+        [
+          "trading/vati/learning/runtime_cohort.py",
+          "return ExecutionCohort('SIMULATED_PAPER', research)",
+          "return ExecutionCohort('SIMULATED_PAPER', Environment.DEMO)",
+          "record backtest fills as ordinary demo execution"
+        ],
+        [
+          "trading/tests/test_runtime_learning_cohort.py::test_a_backtest_without_hooks_still_records_its_native_research_cohort"
+        ]
+      ],
+      [
+        [
+          "trading/vati/app/cycle.py",
+          "            payload = {**payload, \"execution_cohort\": self.execution_cohort.as_dict()}",
+          "            payload = payload",
+          "discard the source execution binding from native risk history"
+        ],
+        [
+          "trading/tests/test_runtime_learning_cohort.py::test_a_backtest_without_hooks_still_records_its_native_research_cohort"
+        ]
+      ],
+      [
+        [
+          "trading/vati/learning/scope.py",
+          "environments.add(recorded_cohort(p[\"execution_cohort\"], mode))",
+          "environments.add(ENVIRONMENT_FOR_MODE[mode])",
+          "relabel historical research from the financial permission ceiling"
+        ],
+        [
+          "trading/tests/test_runtime_learning_cohort.py::test_scoped_backtest_health_and_execution_facts_keep_their_research_weights_after_restart"
+        ]
+      ],
+      [
+        [
+          "trading/vati/learning/runtime_cohort.py",
+          "RESEARCH_COHORTS | {Environment.DEMO, Environment.SHADOW}",
+          "RESEARCH_COHORTS | {Environment.DEMO, Environment.SHADOW, Environment.LIVE}",
+          "accept a sealed simulated LIVE cohort claim"
+        ],
+        [
+          "trading/tests/test_runtime_learning_cohort.py::test_a_malformed_native_cohort_stays_unresolved_instead_of_acquiring_live_weight[simulated-live]"
+        ]
+      ],
+      [
+        [
+          "trading/vati/app/account_service.py",
+          "environment=execution_cohort_for(self.adapter, mandate.mode).environment,",
+          "environment=ENVIRONMENT_FOR_MODE[mandate.mode],",
+          "let the actual book builder assign LIVE weight to paper execution"
+        ],
+        [
+          "trading/tests/test_runtime_learning_cohort.py::test_actual_book_builder_keeps_a_paper_live_policy_in_the_demo_cohort"
+        ]
+      ]
+    ],
+    "records": [
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "036bb9390fb408c39eb19a61d865bc4044aa29eeea8139e62a988a5a83930a4d"
+      },
+      {
+        "phase": "mutation",
+        "why": "accept a LIVE hook at historical engine construction",
+        "returncode": 1,
+        "log_sha256": "fa0943f37e68bc36f2d8fb6799a2b793438209a32dac1d21e0acf16d8a915b10"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "b4eb7be9000651a3e89c6a77e8b346d05d1d706d620aa6f8193e574a39b3ced1"
+      },
+      {
+        "phase": "mutation",
+        "why": "allow a relabelled hook to create history before cohort refusal",
+        "returncode": 1,
+        "log_sha256": "214812689c54937be8c729618c08c258c2fdf7c7f1f9311b5b301f74c5124ad7"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "b4eb7be9000651a3e89c6a77e8b346d05d1d706d620aa6f8193e574a39b3ced1"
+      },
+      {
+        "phase": "mutation",
+        "why": "let a paper runtime borrow the configured live policy cohort",
+        "returncode": 1,
+        "log_sha256": "a0e0ff698b2a1f5583e30427c3300fdd6510147704c2458c837b08b8eb0b1e87"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "1a66abe03b6728e6f464afeaafc29f0b4ee7a563d2b6a2dc77c82c9c357a9fe3"
+      },
+      {
+        "phase": "mutation",
+        "why": "record backtest fills as ordinary demo execution",
+        "returncode": 1,
+        "log_sha256": "81d5991de72422bcb52bd32b278325386b1867d6859b9b1c9312f13aa3986d0c"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "fa2024f7b1addf6135eacdcff31a6852f6b6f0275ea8d7ad40bf57f96bb7ea06"
+      },
+      {
+        "phase": "mutation",
+        "why": "discard the source execution binding from native risk history",
+        "returncode": 1,
+        "log_sha256": "4677ee2a87b2f4f1f895836c893f3d89d19a1b83e175d4d26546c9bea5203132"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "7c0fdb691f3513ce0b6ee669f8a369b8f9d36703c5a74532d484fc5fa48fcba7"
+      },
+      {
+        "phase": "mutation",
+        "why": "relabel historical research from the financial permission ceiling",
+        "returncode": 1,
+        "log_sha256": "140bdbb2091ca60a460f37c57ece0e932acf897dd4a70e3a6f52fb8518ea4215"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "59b9466559aeabf218a54ec041fd83cd357cf9bf1d80a17c47aab62ed0c205bf"
+      },
+      {
+        "phase": "mutation",
+        "why": "accept a sealed simulated LIVE cohort claim",
+        "returncode": 1,
+        "log_sha256": "eebbff276f0ca3951720f2dc7875ca7a81fe728c5f493ac0bbf51f451a58ba28"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "730410d23add507d10274b5400f29dd16f80db2f65bf9ef1c50a875848f3486b"
+      },
+      {
+        "phase": "mutation",
+        "why": "let the actual book builder assign LIVE weight to paper execution",
+        "returncode": 1,
+        "log_sha256": "641e0666b974f94cadee9ae3aafb6758ffc4c329f57b8072c8ded8dff19fed24"
+      }
+    ],
+    "source_before_sha256": {
+      "trading/vati/app/account_service.py": "ae8dc321d6e79e7a79c6f672b5630bc3cd3d441ec5f5fa1ccbf2d377ef22f853",
+      "trading/vati/app/cycle.py": "359703a38bba7896dab0f4ff22682566bd6dddb06b64c0a5b002ab6a408573d6",
+      "trading/vati/backtest/engine.py": "e05b628d8556bbe8799fb5c7a138e454d11739323fa2212ede780e354216e41f",
+      "trading/vati/learning/runtime_cohort.py": "6c33805aa6e0b2827cf5410f59367b4f6a603cd3ce7c3a7cf3b5496209991a88",
+      "trading/vati/learning/scope.py": "7cce8f9fc7ec9f63da8a3d14ec5476e1ec350f2e0bb2baf075d0db2d38e25738"
+    },
+    "source_after_sha256": {
+      "trading/vati/app/account_service.py": "ae8dc321d6e79e7a79c6f672b5630bc3cd3d441ec5f5fa1ccbf2d377ef22f853",
+      "trading/vati/app/cycle.py": "359703a38bba7896dab0f4ff22682566bd6dddb06b64c0a5b002ab6a408573d6",
+      "trading/vati/backtest/engine.py": "e05b628d8556bbe8799fb5c7a138e454d11739323fa2212ede780e354216e41f",
+      "trading/vati/learning/runtime_cohort.py": "6c33805aa6e0b2827cf5410f59367b4f6a603cd3ce7c3a7cf3b5496209991a88",
+      "trading/vati/learning/scope.py": "7cce8f9fc7ec9f63da8a3d14ec5476e1ec350f2e0bb2baf075d0db2d38e25738"
+    },
+    "source_restored": true,
+    "journal_present": false
+  },
+  "private_fixture_cleanup": {
+    "final": {
+      "stopped": true,
+      "removed": true
+    },
+    "book-control": {
+      "stopped": true,
+      "removed": true
+    },
+    "book-corrected": {
+      "stopped": true,
+      "removed": true
+    },
+    "faults": {
+      "stopped": true,
+      "removed": true
+    }
+  },
+  "owner_export": {
+    "changed": [],
+    "applied": false,
+    "scope": "SOURCE_CONTRACTS_ONLY"
+  },
+  "legacy_anchor_preflight": {
+    "schema": "van.rebuild.mutation-registry-preflight/1",
+    "registry_sha256": "35d10c7b0f2b8319b7f7305828262c972b2a6451139d75b9e83c7d0062282955",
+    "mutation_count": 374,
+    "edit_count": 383,
+    "findings": [],
+    "execution_state": "NOT_RUN",
+    "status": "ANCHORS_VALID_BASELINES_AND_MUTATIONS_NOT_EXECUTED"
+  },
+  "qualification": "Candidate source only. Initial invalid registry.update fixture attempt retained separately from six valid counterexamples. Full run retained2228pass1fixturecleanupfailure; corrected actualPGcontrol passes. New clean full qualification pending. No provider/native identity, unit, production, profitability or S24 acceptance."
+}

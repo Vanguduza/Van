@@ -1,0 +1,22 @@
+F..............                                                          [100%]
+=================================== FAILURES ===================================
+_ test_selective_wait_preserves_original_relative_order_and_complete_payloads __
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7f7598023fe0>
+
+    def test_selective_wait_preserves_original_relative_order_and_complete_payloads(harness):
+        transport=seeded(harness);before=originals(transport)
+        selected=transport.wait_event(lambda name,body:body['order']['orderId']==2,timeout_s=.1)
+        assert selected[1]==before[1]
+>       assert originals(transport)==[before[0],before[2]],'selection reordered earlier native evidence'
+E       AssertionError: selection reordered earlier native evidence
+E       assert [{'payloadTyp...ILLED', ...}}] == [{'payloadTyp...ILLED', ...}}]
+E         
+E         At index 0 diff: {'payloadType': 'PROTO_OA_EXECUTION_EVENT', 'ctidTraderAccountId': 12345, 'executionType': 'ORDER_FILLED', 'order': {'orderId': 3, 'tradeData': {'symbolId': 1, 'volume': 100000, 'tradeSide': 'BUY'}, 'orderType': 'MARKET', 'orderStatus': 'ORDER_STATUS_FILLED', 'clientOrderId': '3', 'timeInForce': 'IMMEDIATE_OR_CANCEL', 'stopTriggerMethod': 'TRADE'}} != {'payloadType': 'PROTO_OA_EXECUTION_EVENT', 'ctidTraderAccountId': 12345, 'executionType': 'ORDER_FILLED', 'order': {'orderId': 1, 'tradeData': {'symbolId': 1, 'volume': 100000, 'tradeSide': 'BUY'}, 'order...
+E         
+E         ...Full output truncated (2 lines hidden), use '-vv' to show
+
+trading/tests/test_ctrader_event_selection.py:42: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_ctrader_event_selection.py::test_selective_wait_preserves_original_relative_order_and_complete_payloads
+1 failed, 14 passed in 0.69s

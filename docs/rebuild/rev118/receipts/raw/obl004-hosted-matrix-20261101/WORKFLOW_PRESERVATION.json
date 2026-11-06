@@ -1,0 +1,18 @@
+{
+  "original_job_count": 12,
+  "additive_job_ids": [
+    "obl004-backend-gateway",
+    "obl004-backend-public-source",
+    "obl004-browser-namespace",
+    "obl004-canonical-matrix",
+    "obl004-documentary",
+    "obl004-forecast-source",
+    "obl004-private-dds",
+    "obl004-scenarios",
+    "obl004-trading-pg"
+  ],
+  "all_original_objects_and_topfields_identical": true,
+  "workflow_mirror_identical": true,
+  "application_and_mutation_and_authority_paths_unchanged": true,
+  "full_matrix_state": "UNEXECUTED_NATIVE_DISPATCH_PENDING"
+}

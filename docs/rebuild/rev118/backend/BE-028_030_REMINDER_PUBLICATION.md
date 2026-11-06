@@ -1,0 +1,11 @@
+# Reminder state, follow-up and publication integrity
+
+Reminder creation now binds its idempotency key to the original text, instant, project, follow-up and source. Concurrent callers return one original row; a changed request conflicts. Resolution and follow-up creation commit together. A failed dependent insert rolls back resolution, follow-ups preserve the parent's project/source, and repeated resolution creates no new work. Cancellation and resolution have explicit state conflicts rather than silently overriding each other.
+
+Due claiming is atomic across schedulers. A fired row remains pending server publication until its event and attention item are committed. The next sweep reconciles interrupted publication using the original reminder, stable event identity and attention dedupe; it also reuses existing historical events. A lost reply does not re-fire the reminder, duplicate its event or reopen an owner-acknowledged attention item. The publication receipt records server persistence, not handset delivery or owner acknowledgement.
+
+The actual paired gateway and scheduler test exposed a concurrent attention insert failure. Attention upsert now reads and writes under one SQLite write transaction, preserving a racing owner acknowledgement. Its returned source/project match persisted values. A controlled independent SQLite owner write tests the real read/write gap; ordinary scheduler timing alone initially missed a removed-transaction fault, and that survivor is retained in the evidence.
+
+Relative time is elapsed time across daylight-saving changes. Supplied local wall times must roundtrip to one unique instant; nonexistent and ambiguous times are refused. Invalid minutes, AM/PM phrases, overflow and out-of-range epochs produce typed parse errors. The existing default remains explicitly UTC. Device timezone binding, recurring workflow calendars, domain authority and provider execution remain original programme obligations; this change invents no owner timezone or misfire preference.
+
+Evidence: `receipts/REMINDER_PUBLICATION_SOURCE_20261023.json`, including reproduced failures, real stored-state/concurrency checks, paired gateway replay, publication failures before/after commit, deliberately broken source and exact restored hashes. The original BE-028/030 units and their independent/native/release requirements remain unqualified.

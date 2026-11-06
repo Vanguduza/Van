@@ -1,0 +1,98 @@
+......F...FF.............................                                [100%]
+=================================== FAILURES ===================================
+_ test_malformed_jsonl_line_keeps_both_valid_neighbors_and_a_parse_diagnostic __
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-244/test_malformed_jsonl_line_keep0')
+ledger = <vati.core.ledger.Ledger object at 0x7f82895fd3a0>
+
+    def test_malformed_jsonl_line_keeps_both_valid_neighbors_and_a_parse_diagnostic(tmp_path,ledger):
+        path=tmp_path/'news.jsonl';path.write_text(json.dumps(row('First'))+'\n{bad\n'+json.dumps(row('Second'))+'\n')
+        news=NewsIngress(ledger=ledger)
+>       try:counts=news.ingest_rows(rows_from_file(path),now_ms=NOW)
+                                    ^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_news_runtime_health.py:83: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/events/news_ingress.py:1015: in rows_from_file
+    return rows_from_text(text,suffix=p.suffix,key=key)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/events/news_ingress.py:1026: in rows_from_text
+    row=json.loads(line)
+        ^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/__init__.py:346: in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/decoder.py:338: in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <json.decoder.JSONDecoder object at 0x7f828bb2e7e0>, s = '{bad', idx = 0
+
+    def raw_decode(self, s, idx=0):
+        """Decode a JSON document from ``s`` (a ``str`` beginning with
+        a JSON document) and return a 2-tuple of the Python
+        representation and the index in ``s`` where the document ended.
+    
+        This can be used to decode a JSON document from a string that may
+        have extraneous data at the end.
+    
+        """
+        try:
+>           obj, end = self.scan_once(s, idx)
+                       ^^^^^^^^^^^^^^^^^^^^^^
+E           json.decoder.JSONDecodeError: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)
+
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/decoder.py:354: JSONDecodeError
+
+During handling of the above exception, another exception occurred:
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-244/test_malformed_jsonl_line_keep0')
+ledger = <vati.core.ledger.Ledger object at 0x7f82895fd3a0>
+
+    def test_malformed_jsonl_line_keeps_both_valid_neighbors_and_a_parse_diagnostic(tmp_path,ledger):
+        path=tmp_path/'news.jsonl';path.write_text(json.dumps(row('First'))+'\n{bad\n'+json.dumps(row('Second'))+'\n')
+        news=NewsIngress(ledger=ledger)
+        try:counts=news.ingest_rows(rows_from_file(path),now_ms=NOW)
+>       except Exception as exc:pytest.fail('one malformed line discarded its valid neighbors: '+type(exc).__name__)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: one malformed line discarded its valid neighbors: JSONDecodeError
+
+trading/tests/test_news_runtime_health.py:84: Failed
+_ test_corrected_file_recovers_from_partial_without_erasing_original_history[session] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-244/test_corrected_file_recovers_f0')
+ledger = <vati.core.ledger.Ledger object at 0x7f82895ff740>, kind = 'session'
+
+    @pytest.mark.parametrize('kind',['session','account'])
+    def test_corrected_file_recovers_from_partial_without_erasing_original_history(tmp_path,ledger,kind):
+        path=tmp_path/'news.jsonl';path.write_text(json.dumps(row('First'))+'\n{bad\n')
+        value=service(kind,ledger,configured(path));news=build(value,kind)
+>       assert news.report(now_ms=NOW)['source_health']['state']=='PARTIAL'
+E       AssertionError: assert 'UNREADABLE' == 'PARTIAL'
+E         
+E         - PARTIAL
+E         + UNREADABLE
+
+trading/tests/test_news_runtime_health.py:100: AssertionError
+_ test_corrected_file_recovers_from_partial_without_erasing_original_history[account] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-244/test_corrected_file_recovers_f1')
+ledger = <vati.core.ledger.Ledger object at 0x7f82895fe000>, kind = 'account'
+
+    @pytest.mark.parametrize('kind',['session','account'])
+    def test_corrected_file_recovers_from_partial_without_erasing_original_history(tmp_path,ledger,kind):
+        path=tmp_path/'news.jsonl';path.write_text(json.dumps(row('First'))+'\n{bad\n')
+        value=service(kind,ledger,configured(path));news=build(value,kind)
+>       assert news.report(now_ms=NOW)['source_health']['state']=='PARTIAL'
+E       AssertionError: assert 'UNREADABLE' == 'PARTIAL'
+E         
+E         - PARTIAL
+E         + UNREADABLE
+
+trading/tests/test_news_runtime_health.py:100: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_news_runtime_health.py::test_malformed_jsonl_line_keeps_both_valid_neighbors_and_a_parse_diagnostic
+FAILED trading/tests/test_news_runtime_health.py::test_corrected_file_recovers_from_partial_without_erasing_original_history[session]
+FAILED trading/tests/test_news_runtime_health.py::test_corrected_file_recovers_from_partial_without_erasing_original_history[account]
+3 failed, 38 passed, 2 deselected in 1.43s

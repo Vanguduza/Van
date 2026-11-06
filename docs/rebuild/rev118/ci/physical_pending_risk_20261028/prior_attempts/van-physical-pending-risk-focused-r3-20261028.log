@@ -1,0 +1,39 @@
+........................................................................ [ 57%]
+......F.F............................................                    [100%]
+=================================== FAILURES ===================================
+_________________ test_risk_snapshot_schema_matches_dataclass __________________
+
+    def test_risk_snapshot_schema_matches_dataclass():
+        fields = {f.name for f in dataclasses.fields(RiskSnapshot)}
+        schema = load_schema("risk_snapshot")
+        assert fields == set(schema["properties"])
+        # Optional source observations do not retroactively become mandatory in
+        # immutable legacy bodies. Every original required field stays mandatory.
+>       assert fields - {"used_margin", "native_account_context", "native_risk_basis_ref"} == required_keys("risk_snapshot")
+E       AssertionError: assert {'account_ali..._losses', ...} == {'account_ali..._losses', ...}
+E         
+E         Extra items in the left set:
+E         'pending_risk_commitments'
+E         Use -v to get more diff
+
+trading/tests/test_contract_schemas.py:47: AssertionError
+_________ test_position_schema_preserves_original_optional_stop_inputs _________
+
+    def test_position_schema_preserves_original_optional_stop_inputs():
+        schema = load_schema("risk_snapshot")
+        position = schema["properties"]["open_positions"]["items"]
+        fields = {f.name for f in dataclasses.fields(OpenPosition)}
+        assert fields <= set(position["properties"])
+        # Keep the inherited optional broker identifier extension intact.
+>       assert set(position["properties"]) - fields == {"broker_position_id"}
+E       AssertionError: assert set() == {'broker_position_id'}
+E         
+E         Extra items in the right set:
+E         'broker_position_id'
+E         Use -v to get more diff
+
+trading/tests/test_contract_schemas.py:68: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_contract_schemas.py::test_risk_snapshot_schema_matches_dataclass
+FAILED trading/tests/test_contract_schemas.py::test_position_schema_preserves_original_optional_stop_inputs
+2 failed, 123 passed in 3.52s

@@ -1,0 +1,684 @@
+{
+  "schema": "van.rebuild.account-runtime-recovery-source/1",
+  "observed_at_utc": "2026-10-23T08:11:45.725165+00:00",
+  "source_parent": "3b4049bdf067c04ddc6f9419cae228c3ccf37d3a",
+  "source_provenance": "Current candidate patch bound by source hashes; full trading and native/gateway recovery selection after final app changes and restored faults. Frozen f35 broad backend qualification is separate, before this account patch.",
+  "source_sha256": {
+    "trading/vati/app/account_recovery.py": "4f18a80fd3a7229b240dcd84b8ca7f3ca05e75f9682554c90a5d3b565f397441",
+    "trading/vati/app/account_service.py": "f0450ede81a17436a75cd9ce54ba6c00265c308ad6de306ec720b4280378f39a",
+    "trading/vati/app/runtime_control_actor.py": "b72faaad9d673226c21f674710c7228404ee6fb6965176ba5433044fabe00681",
+    "trading/commander/runtime_controls.py": "4de3ab7a4740d6af5a49f6c9494a854413b9b5ede49462cfd9ef5a43ce800ba5",
+    "backend/van_gateway/trading/runtime_controls.py": "dac9ef391fb4d4eec494647d5d4cbf438af6a81ed948526f20c48f8340f3dc1a",
+    "trading/tests/test_account_runtime_recovery.py": "dd79e6a71a5b8d71beb9a4e9b0e85af60e5536a72d674cc5282f327cc580810a",
+    "backend/tests/test_account_runtime_recovery_gateway.py": "349567e58df2530e3da61fdfefe45ce7c815669f3138a45d58b2f056e68d2c73",
+    "tools/rebuild/refresh_owner_source_contracts.py": "c99e773d0d0635006236eb87227a200544f32886b6272abec32ee17cfb1d9585"
+  },
+  "full_private_postgresql": {
+    "tests": 2560,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 605.065,
+    "sha256": "f574408b2d1661529a166de1e770a0a29defa631f5bb7f576f3dfecb0d1e4421"
+  },
+  "private_fixture_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "executions": {
+    "before": {
+      "tests": 11,
+      "failures": 10,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 1.121,
+      "sha256": "230f6fe7685370ae39aa8fe1f1d96cc6afc235b05c2d58696f52db223ef99cd9"
+    },
+    "isolated-before": {
+      "tests": 11,
+      "failures": 0,
+      "errors": 11,
+      "skipped": 0,
+      "seconds": 1.05,
+      "sha256": "c2c4702c0364889374ec625a793fa041988a06ae6c790bc1b47f08547cbf0d7a"
+    },
+    "valid-before": {
+      "tests": 11,
+      "failures": 11,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 1.52,
+      "sha256": "4422556a2c75de5b1432b33eb8380cadca9b3abff42363a356e4eb197b5a8246"
+    },
+    "first": {
+      "tests": 11,
+      "failures": 0,
+      "errors": 11,
+      "skipped": 0,
+      "seconds": 1.579,
+      "sha256": "fada4c76c28a53027b82882528e327c0ae75c7a45184ac0ecf8ab7028327afa9"
+    },
+    "second": {
+      "tests": 11,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 1.246,
+      "sha256": "ef466e89a1e630372ea038be939e80e0b2bdec836945d2167cbd819dfa5945b5"
+    },
+    "third": {
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 1.489,
+      "sha256": "14892245c305e7441de64ed821f6d54242935a3f1b3477e331ec9e41df5c7a9f"
+    },
+    "race-before": {
+      "tests": 2,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.597,
+      "sha256": "4d4f84526b1909f56dfb216316168096d66a7f18dd3ca836d41c96227c6549d5"
+    },
+    "pending-before": {
+      "tests": 2,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.564,
+      "sha256": "92f270f4c8f779a06e5277311eda7d105a440fc532052b19f3942cd0eba22b63"
+    },
+    "fourth": {
+      "tests": 16,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 2.089,
+      "sha256": "fe52c2c420d5232042d4bdd20f4c99cf689925282ba23f7ef88ea3f91f69c217"
+    },
+    "fifth": {
+      "tests": 18,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 2.288,
+      "sha256": "fc0fc33f1b58f2c66275b99984b591a6d554ae1425aab59cd64e41412119d491"
+    },
+    "gateway": {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 2.684,
+      "sha256": "9b00d21ce13413483060c9454ac078be3808077755219568f7334b3ab6455a01"
+    },
+    "money-before": {
+      "tests": 4,
+      "failures": 4,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.725,
+      "sha256": "2ab9f38c1ef2af2671292a01f8ad020e08818495373a23646249c539d17c7d92"
+    },
+    "affected": {
+      "tests": 269,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 63.143,
+      "sha256": "70dd08dd2e23660acb055bb93f6b3606e28b264c1f860532fde34cfed49f598d"
+    },
+    "affected-final": {
+      "tests": 269,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 64.077,
+      "sha256": "5d4c93085c66252c239138134e0f0b376edc8ec6a4ba533cbf9f2811d9173cc9"
+    },
+    "rebuild": {
+      "tests": 78,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 34.986,
+      "sha256": "b397f529b7e3902eb1200a2d70b92c09b7dca8517954491561d96cf92ecaf6a3"
+    },
+    "owner": {
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 3.232,
+      "sha256": "f76d71fc58fed7aa280058b181a0da453c95445a12589650a9f76e5d46b15784"
+    }
+  },
+  "evidence_interpretation": {
+    "original_counterexamples": "Eleven valid failures at parent source using a separate real native PostgreSQL database per scenario. The earlier shared-history run had ten failures and one vacuous positive; the URL-form isolation fixture initially failed setup, then was corrected before the eleven-counterexample run.",
+    "implementation_iterations": [
+      "Initial account view incorrectly referenced the single-cycle software_stops field; corrected to the actual account broker mode.",
+      "Expiry case also expired its lease when invoking the actor directly; corrected to the actual service loop renewal, preserving the real lease-lost refusal.",
+      "A bare component-only bar pipeline has no native lease or policy; preserve that component contract while built production actors always renew and process signed recovery."
+    ],
+    "staged_hardening": "After the initial account path worked, two real key-retirement/PEM failures, an unresolved-order risk snapshot failure, and four invalid-fill-price failures in the new history fold were reproduced and fixed. They are not labeled original parent counterexamples.",
+    "transport": "Actual paired gateway, real P256 approval, signed Commander HTTP handlers, native journal and running account actor; HTTP transport is in-process. No deployed host, phone CryptoObject or broker effect is claimed.",
+    "atomicity": "Real PostgreSQL rollback before commit and lost reply after actual commit; original operation readback and exactly one effect confirmed.",
+    "faults": "Fourteen independent controls pass; all fourteen introduced semantic regressions fail assertions with no collection/setup errors or skips; source restored exactly."
+  },
+  "faults": {
+    "definitions": [
+      [
+        [
+          "trading/vati/app/account_service.py",
+          "outstanding_owner_halts(self._ledger,self.cfg.account_alias)",
+          "outstanding_owner_halts(self._ledger,'some_other_account')",
+          "let a foreign account halt this account actor"
+        ],
+        "trading/tests/test_account_runtime_recovery.py::test_foreign_account_owner_halt_cannot_stop_this_book"
+      ],
+      [
+        [
+          "trading/vati/app/account_service.py",
+          "if self.lease is not None and self.mandate is not None and self.lifecycle is not None:",
+          "if False:",
+          "omit the actual account recovery review from native heartbeat"
+        ],
+        "trading/tests/test_account_runtime_recovery.py::test_account_review_is_stable_between_polls_and_binds_the_real_actor_and_scope"
+      ],
+      [
+        [
+          "trading/vati/app/account_service.py",
+          "renewal=self.lease.renew(now_ms=now)",
+          "renewal=self.lease.renew(now_ms=now-31000)",
+          "let an idle actor lose its current lease while market data is absent"
+        ],
+        "trading/tests/test_account_runtime_recovery.py::test_no_market_data_does_not_expire_the_owner_recovery_actor"
+      ],
+      [
+        [
+          "trading/vati/app/account_service.py",
+          "            process_recovery_requests(self)",
+          "            pass",
+          "never process a valid signed account recovery in the service loop"
+        ],
+        "trading/tests/test_account_runtime_recovery.py::test_signed_account_owner_clear_changes_only_the_cited_cause_and_never_submits"
+      ],
+      [
+        [
+          "trading/vati/app/account_recovery.py",
+          "'specs':{k:asdict(v) for k,v in sorted(service.specs.items())}",
+          "'specs':{}",
+          "reuse account recovery approval after its instrument configuration changed"
+        ],
+        "trading/tests/test_account_runtime_recovery.py::test_account_review_is_stable_between_polls_and_binds_the_real_actor_and_scope"
+      ],
+      [
+        [
+          "trading/vati/app/account_recovery.py",
+          "            if not facts:\n                unresolved.add(iid);continue",
+          "            if not facts:\n                continue",
+          "treat an original native command with no result as a healthy empty account"
+        ],
+        "trading/tests/test_account_runtime_recovery.py::test_unconfirmed_original_native_order_blocks_account_recovery_without_a_resend"
+      ],
+      [
+        [
+          "trading/vati/app/account_service.py",
+          "reconciliation_ok=report.permit_new_orders and not originals_unresolved",
+          "reconciliation_ok=report.permit_new_orders",
+          "supply a healthy risk snapshot with an unresolved original order"
+        ],
+        "trading/tests/test_account_runtime_recovery.py::test_unconfirmed_native_order_is_not_a_healthy_account_risk_snapshot"
+      ],
+      [
+        [
+          "trading/vati/app/runtime_control_actor.py",
+          "exclusive_state_lock(owner_registry_path(service.cfg.owner_authority_keys or None))",
+          "__import__('contextlib').nullcontext()",
+          "acknowledge key retirement during its approved recovery effect"
+        ],
+        "trading/tests/test_account_runtime_recovery.py::test_owner_key_retirement_cannot_acknowledge_during_a_recovery_effect"
+      ],
+      [
+        [
+          "trading/vati/app/runtime_control_actor.py",
+          "_same_owner_key(keys[request.proof.key_id],request.public_key_pem)",
+          "(keys[request.proof.key_id].strip()==request.public_key_pem.strip())",
+          "refuse the same approved public key because PEM line endings changed"
+        ],
+        "trading/tests/test_account_runtime_recovery.py::test_equivalent_pem_format_keeps_the_same_approved_recovery_key"
+      ],
+      [
+        [
+          "trading/vati/app/runtime_control_actor.py",
+          ", c.ledger.atomic():",
+          ", __import__('contextlib').nullcontext():",
+          "persist a recovery effect separately from its original outcome transaction"
+        ],
+        "trading/tests/test_account_runtime_recovery.py::test_account_recovery_effect_and_original_outcome_are_one_real_pg_commit[False]"
+      ],
+      [
+        [
+          "trading/vati/app/account_recovery.py",
+          "status in no_effect and all(q==0 for q in quantities)",
+          "status in no_effect",
+          "erase a positive original partial fill with a later zero-quantity refusal"
+        ],
+        "trading/tests/test_account_runtime_recovery.py::test_late_zero_quantity_refusal_cannot_erase_an_original_positive_partial_fill"
+      ],
+      [
+        [
+          "trading/vati/app/account_recovery.py",
+          "and _positive_price(last.get('average_fill'))",
+          "and True",
+          "use a native fill without valid money as final order truth"
+        ],
+        "trading/tests/test_account_runtime_recovery.py::test_invalid_original_fill_money_cannot_clear_native_uncertainty[None]"
+      ],
+      [
+        [
+          "trading/vati/app/runtime_control_actor.py",
+          "if (c.unresolved_entry_attempts or c.streaks.recovery_issue or account.verified is not True",
+          "if (c.streaks.recovery_issue or account.verified is not True",
+          "let an owner clear bypass an unresolved native original"
+        ],
+        "trading/tests/test_account_runtime_recovery.py::test_unconfirmed_original_native_order_blocks_account_recovery_without_a_resend"
+      ],
+      [
+        [
+          "trading/vati/app/runtime_control_actor.py",
+          "c.kill.active.discard(KillSwitchTrigger(dict(request.intent.arguments)['trigger']))",
+          "c.kill.active.clear()",
+          "clear unrelated risk latches under a single-trigger owner approval"
+        ],
+        "trading/tests/test_account_runtime_recovery.py::test_signed_account_owner_clear_changes_only_the_cited_cause_and_never_submits"
+      ]
+    ],
+    "records": [
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "log_sha256": "fedceb118a93f8e9bed4f5b262246c28f6bfdace0d13713f5045fa2fb6554486",
+        "xml_sha256": "284b5a81a355f8232ebfcf53bf3d3b328cde9a6a65f079a8454ddf7fb44024b9"
+      },
+      {
+        "phase": "mutation",
+        "why": "let a foreign account halt this account actor",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "log_sha256": "0d415b91a54443b307e087f99a1763537b09c8f6d3e88a06243ba8601a87e6c3",
+        "xml_sha256": "e1f50de8270fb6547dc0ef2001f1c17352c08a3086aec30fa5477605d275ed76"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "log_sha256": "b263d69c44b612282137de0281bd9556f3ac416582ffd664301063cbd8c10652",
+        "xml_sha256": "0aa356536441fe33ba144906b76a901aeecd6f3f6e395481c2044e426dcc7ca7"
+      },
+      {
+        "phase": "mutation",
+        "why": "omit the actual account recovery review from native heartbeat",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "log_sha256": "389b50c7e4887f62aba936426da5718f294eae3cf191079ae154154e6232732b",
+        "xml_sha256": "e8a33e56909791194082167489ca66d000fc12d6daf1873eef7b33e4019cd821"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "log_sha256": "6262dd4ae1e1610248aa7a1d90c86e6b7861110a1a434aeede186690d3652770",
+        "xml_sha256": "91f60cbc5fb951cdbc9cbc68c7723e03976ad8e3bdacf5f83cc9a8857aba3d4c"
+      },
+      {
+        "phase": "mutation",
+        "why": "let an idle actor lose its current lease while market data is absent",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "log_sha256": "265533cf870c241e4a843e715e80122bdb8d65d56e6b8937ad1110fe72fa0c9a",
+        "xml_sha256": "3765ae783ddf7f11f5f9535dbd1df28224e60a171eb8ea63970a548cdcdd6b41"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "log_sha256": "0ee5888eac5501909c7d7da392d69c44baa7c918e85045cdb4f2eb4f722f4c68",
+        "xml_sha256": "04a49e5dcbbb00412b6ff1ce6d6d89cdeb8d108b1f0827bd54a56754ba3e1084"
+      },
+      {
+        "phase": "mutation",
+        "why": "never process a valid signed account recovery in the service loop",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "log_sha256": "21912cb6e6a6473a826463214fc4dc3b6db820ad0811a8ba56c56087aa3272df",
+        "xml_sha256": "4cf49f1d3b4f8315cda4afd598e633c09a834d1e3cd50513a94d66ca4d7201de"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "log_sha256": "c3015b35bbe497af98bf5a2b3ceb02f809f7f7feb0377d20d0fae299787ed553",
+        "xml_sha256": "04c36ae9285742589eb669b6813f2741b22ca46087c4eb23ace17895b3ee68e9"
+      },
+      {
+        "phase": "mutation",
+        "why": "reuse account recovery approval after its instrument configuration changed",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "log_sha256": "b5068600881d98e8185f38e7830ef67f9e218136da7b2ce0199047866415951c",
+        "xml_sha256": "0edb7f4fd4ffb9d64e4c70bfb578959cd6cca140c6159c10f8104014eb54e210"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "log_sha256": "0234d51de03c8da96792f0ed8d0043697c9f1b2888dbf66e9cf6b5620819903b",
+        "xml_sha256": "395b590b5d3456b5543b6c90456304facf510eec2e1fce66f2d1f9e4ec2075a0"
+      },
+      {
+        "phase": "mutation",
+        "why": "treat an original native command with no result as a healthy empty account",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "log_sha256": "e5d21b527ed4851feb6eb76fed97184d24473435217183e40830f0661c96a1da",
+        "xml_sha256": "e5075a0d519160ee1acee91ee3ee55d33c3c56ae0fcda7f6bed95da165e7029b"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "log_sha256": "8a5d3f8c1b452931de963c4bdff9775f7404361fdf3f79b4d740fb5a4f7e6e92",
+        "xml_sha256": "27dea6b209595eb746fbb5cb2499fe51f23bdf6d3f11ae4142f1ddc5461d4a06"
+      },
+      {
+        "phase": "mutation",
+        "why": "supply a healthy risk snapshot with an unresolved original order",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "log_sha256": "ca9093dfc3aeafff88d2fe8a8c1a7ce62db14a8653d13873b2a06c38cbf0a8cb",
+        "xml_sha256": "b58215af0ab036c27970eecc628715ddf3dfd6788103bc8be85d874bf36e4073"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "log_sha256": "f110ea65f6d33cdc6322b155f056abd01a7abd63e18b0f61e05569402024ad9d",
+        "xml_sha256": "036e01cf1c4476b77e9cef9d0cab98b5c5bc02150c218af48fab167f4c35e4fa"
+      },
+      {
+        "phase": "mutation",
+        "why": "acknowledge key retirement during its approved recovery effect",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "log_sha256": "db078099fadea7a8513d3c5d42e5464c7714c7da2d5d447e28a38aa0e657b6a6",
+        "xml_sha256": "2aa3cc4de081ada3c04eb05b37987ab99687792e555a84b40968e703ff3f86f8"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "log_sha256": "212504876166ec78d6893ba7cb632e14878599d119e4df02390a6a5464c97ea0",
+        "xml_sha256": "a429f230cd5a4b6e7457367fbe25b328f0bcdb7aa19cba4b5aba2b6af08c7d77"
+      },
+      {
+        "phase": "mutation",
+        "why": "refuse the same approved public key because PEM line endings changed",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "log_sha256": "c9c54cfd2eb2a32b87a6494e0fb90e2149774e83e8ff49737050b1c827b5b7b0",
+        "xml_sha256": "24d77d4f5686699181213c697138fadb8df7f4d1da8a4bc99dddbf5e7ccb988d"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "log_sha256": "bc4c2ff1a05d78db864338a871f51116604f720d25667467a47cb7c30039c666",
+        "xml_sha256": "23b37bd773330effbb047c8b14bc7e4342369b87c972e580559bf793860f9916"
+      },
+      {
+        "phase": "mutation",
+        "why": "persist a recovery effect separately from its original outcome transaction",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "log_sha256": "0286addf657c61a92a96bef20e17463146513514ada7795a0dff88163f92ee30",
+        "xml_sha256": "623ace2ebe99aa76a00f019dd52d01e0476afd4ed2aa724d35dde76e84ae4322"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "log_sha256": "c952b5c568a02b83362e5cf5a0f46f1c733434977b415fd71a83aa63e7031707",
+        "xml_sha256": "97d7e3ab617de11dc53b67b7fbe9d8dd8a2ff100d7c9e44fc2202c888bfe908b"
+      },
+      {
+        "phase": "mutation",
+        "why": "erase a positive original partial fill with a later zero-quantity refusal",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "log_sha256": "52ed35ad3fbc548e7253557372c36e5ce3e80b62c631892a23a646071caae468",
+        "xml_sha256": "c59ebb26298c81c4164ea0b73fb80ef0c4086ad067f60d2311896bed1006ad8c"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "log_sha256": "bc4c2ff1a05d78db864338a871f51116604f720d25667467a47cb7c30039c666",
+        "xml_sha256": "ab6cf5d4927be7268bee0d882c051606f83a9ddd8a0234a67095ef60d07304a0"
+      },
+      {
+        "phase": "mutation",
+        "why": "use a native fill without valid money as final order truth",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "log_sha256": "8f5f82c4bc67e39b22244d7c4b163df1b41d8d70dc083ce329d71bea123ad2ad",
+        "xml_sha256": "5854f9546feec9ca74ba0220378ed95df436fd266f0e8eca9596ecfe6a6a7ebe"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "log_sha256": "1ab9905d8b0f34f6d791ff7da4efa2de0f7f3e282a078758cc0496cc0230c0f0",
+        "xml_sha256": "60b5ff52d9921c9eeb81419ef05e064c89976b26c75f9a615793b03a33957aa7"
+      },
+      {
+        "phase": "mutation",
+        "why": "let an owner clear bypass an unresolved native original",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "log_sha256": "e0b383d0deecf4a86af6db73481d27c6d4a8a2dd5d8524c729b06d184ab42ec3",
+        "xml_sha256": "068dee2a196b7fdde25556a9d4eb6b4ce06cce5a1bb0d120f4f55c9e64a237f6"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "log_sha256": "142e711fac20a466998c8bbeb42619edb1e1722cf84dfe39f564f9b894494392",
+        "xml_sha256": "a2ad4056b0e62bab7b6653f35cd95af1fe606588cd024270773195939a1ee335"
+      },
+      {
+        "phase": "mutation",
+        "why": "clear unrelated risk latches under a single-trigger owner approval",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "log_sha256": "b801ede1d2a67b881f4e4fcad33146cb325401869fd6e1ee7c0841425e7dceb8",
+        "xml_sha256": "995f459a5416624967bc19888aeab2c2b04979303af9064eda3318959759fbdf"
+      }
+    ],
+    "source_before_sha256": {
+      "trading/vati/app/account_service.py": "f0450ede81a17436a75cd9ce54ba6c00265c308ad6de306ec720b4280378f39a",
+      "trading/vati/app/account_recovery.py": "4f18a80fd3a7229b240dcd84b8ca7f3ca05e75f9682554c90a5d3b565f397441",
+      "trading/vati/app/runtime_control_actor.py": "b72faaad9d673226c21f674710c7228404ee6fb6965176ba5433044fabe00681"
+    },
+    "source_after_sha256": {
+      "trading/vati/app/account_service.py": "f0450ede81a17436a75cd9ce54ba6c00265c308ad6de306ec720b4280378f39a",
+      "trading/vati/app/account_recovery.py": "4f18a80fd3a7229b240dcd84b8ca7f3ca05e75f9682554c90a5d3b565f397441",
+      "trading/vati/app/runtime_control_actor.py": "b72faaad9d673226c21f674710c7228404ee6fb6965176ba5433044fabe00681"
+    },
+    "source_restored": true,
+    "journal_present": false
+  },
+  "owner_contract_derivation": {
+    "changed": [],
+    "applied": false,
+    "scope": "SOURCE_CONTRACTS_ONLY"
+  },
+  "qualification": "Candidate source only. Original 131units/324requirements/1610acceptanceIDs/234contexts/349owneractions/93plannedfeatures preserved. No whole-unit, provider finality, native host, release, independent certificate, financial permission, profitability or S24 acceptance issued."
+}

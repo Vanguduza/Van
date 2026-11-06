@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="1.169" timestamp="2026-10-26T11:15:19.413282+00:00" hostname="2c5a245e39f1"><testcase classname="trading.worker_tests.test_dataset_candidate_archive" name="test_real_publication_readback_replay_and_current_inspection_stay_unadmitted[sqlite]" time="0.148"><failure message="AssertionError: assert ('CANDIDATE_PU..._NOT_ADMITTED' == 'CANDIDATE_PU..._NOT_ADMITTED'&#10;  &#10;    CANDIDATE_PUBLISHED_NOT_ADMITTED and True is False)">publication = (&lt;vati.core.ledger.Ledger object at 0x7f7c1d744860&gt;, &lt;vati.research.dataset_archive.DatasetCandidateArchive object at ...tive_account_id":123,"schema":"vati.ctrader-symbol/1","transport_host":"demo.ctraderapi.com"}', received_at_ms=100000))
+
+    def test_real_publication_readback_replay_and_current_inspection_stay_unadmitted(publication):
+        ledger,archive,record,contract=publication
+        first=archive.publish('original',parse(record),expected_scope=contract.native_scope)
+&gt;       assert first['status']=='CANDIDATE_PUBLISHED_NOT_ADMITTED' and first['qualified_for_research'] is False
+E       AssertionError: assert ('CANDIDATE_PU..._NOT_ADMITTED' == 'CANDIDATE_PU..._NOT_ADMITTED'
+E         
+E           CANDIDATE_PUBLISHED_NOT_ADMITTED and True is False)
+
+trading/worker_tests/test_dataset_candidate_archive.py:48: AssertionError</failure></testcase></testsuite></testsuites>

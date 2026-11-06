@@ -21,6 +21,7 @@ Two kinds, one discipline:
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+import math
 from typing import Any, Mapping, Optional
 
 from vati.core.canonical import canonical_hash
@@ -30,6 +31,7 @@ from vati.validation.policy import (
     ValidationPolicy,
     ValidationStatistics,
     evaluate,
+    finite_number,
 )
 
 GREEN = "GREEN"
@@ -151,6 +153,19 @@ def evaluate_strategy_certificate(
         reasons.append(f"policy_version:{cert.validation_policy_version}!={policy.version}")
     verdict = evaluate(cert.stats, policy)
     reasons.extend(verdict.reasons)
+    for name in ("expectancy_R", "expectancy_lower_bound_R", "max_drawdown"):
+        if not finite_number(getattr(cert, name)):
+            reasons.append(f"invalid_performance:{name}")
+    if finite_number(cert.max_drawdown) and cert.max_drawdown < 0:
+        reasons.append("invalid_performance:max_drawdown_negative")
+    if (finite_number(cert.expectancy_R) and finite_number(cert.expectancy_lower_bound_R)
+        and cert.expectancy_lower_bound_R > cert.expectancy_R):
+        reasons.append("invalid_performance:lower_bound_above_expectancy")
+    # An all-winning sample has undefined/unbounded profit factor by the
+    # existing producer convention. It remains a diagnostic, never a substitute
+    # for finite Sharpe/probabilities or the other qualification gates.
+    if (not finite_number(cert.profit_factor) and cert.profit_factor != math.inf) or isinstance(cert.profit_factor, bool) or cert.profit_factor < 0:
+        reasons.append("invalid_performance:profit_factor")
     for name, value in (
         ("cost_stress_2x", cert.cost_stress_2x),
         ("latency_slippage_stress", cert.latency_slippage_stress),
@@ -227,6 +242,26 @@ def classify_feature_certificate(
         return FEATURE_REJECTED_UNSTABLE, ("no_data_manifest",)
     if not cert.evidence_refs or any(not str(ref).strip() for ref in cert.evidence_refs):
         return FEATURE_REJECTED_UNSTABLE, ("no_validation_evidence_refs",)
+    if cert.validation_policy_version != policy.version:
+        return FEATURE_REJECTED_UNSTABLE, ("feature_policy_version_mismatch",)
+    numeric_fields = ("redundancy_correlation", "incremental_expectancy_delta", "incremental_dsr_probability",
+                      "incremental_pbo_probability", "walk_forward_delta")
+    invalid = [name for name in numeric_fields if not finite_number(getattr(cert, name))]
+    if cert.mutual_information_delta is not None and not finite_number(cert.mutual_information_delta):
+        invalid.append("mutual_information_delta")
+    for name in ("regime_stability", "instrument_stability"):
+        values = getattr(cert, name)
+        if not isinstance(values, Mapping) or any(not finite_number(v) for v in values.values()):
+            invalid.append(name)
+    if invalid:
+        return FEATURE_REJECTED_UNSTABLE, tuple(f"invalid_feature_statistics:{name}" for name in invalid)
+    for name in ("incremental_dsr_probability", "incremental_pbo_probability"):
+        if not 0 <= getattr(cert, name) <= 1:
+            reasons.append(f"invalid_probability:{name}")
+    if not -1 <= cert.redundancy_correlation <= 1:
+        reasons.append("invalid_correlation")
+    if reasons:
+        return FEATURE_REJECTED_UNSTABLE, tuple(reasons)
     if abs(cert.redundancy_correlation) > max_baseline_correlation:
         return FEATURE_REJECTED_REDUNDANT, (
             f"redundancy_correlation:{cert.redundancy_correlation:.3f}>{max_baseline_correlation}",)
@@ -247,6 +282,9 @@ def classify_feature_certificate(
     negative_regimes = sorted(k for k, v in cert.regime_stability.items() if v < 0)
     if negative_regimes:
         reasons.append("regime_instability:" + ",".join(negative_regimes))
+    negative_instruments = sorted(k for k, v in cert.instrument_stability.items() if v < 0)
+    if negative_instruments:
+        reasons.append("instrument_instability:" + ",".join(negative_instruments))
 
     if reasons:
         return FEATURE_SHADOW_APPROVED if cert.incremental_expectancy_delta > 0 else FEATURE_REJECTED_UNSTABLE, tuple(reasons)

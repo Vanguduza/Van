@@ -1,0 +1,112 @@
+..................FF.................................................... [ 43%]
+........................................................................ [ 86%]
+.......................                                                  [100%]
+=================================== FAILURES ===================================
+_ test_actual_process_death_preserves_original_transaction_or_recovery[before_commit] _
+
+tmp_path = PosixPath('/tmp/van-recovery-combined-family-reenrollment-boundary-r1-20261101/test_actual_process_death_pres0')
+crash = 'before_commit'
+
+    @pytest.mark.parametrize("crash",["before_commit","after_commit"])
+    async def test_actual_process_death_preserves_original_transaction_or_recovery(tmp_path,crash):
+        import os
+        import subprocess
+        import sys
+        from pathlib import Path
+        key=Fernet.generate_key().decode()
+        program = r"""
+    import asyncio,os,sys
+    from pathlib import Path
+    from cryptography.fernet import Fernet
+    from test_owner_device_reenrollment_recovery import setup
+    async def main():
+        fixture=await setup(Path(sys.argv[1]))
+        fixture.auth._fernet=Fernet(os.environ['VAN_REENROLLMENT_CRASH_TEST_KEY'].encode())
+        if sys.argv[2]=='before_commit':
+            import aiosqlite
+            original=aiosqlite.Connection.execute
+            async def execute(self,sql,*args,**kwargs):
+                if sql.startswith('INSERT INTO owner_device_reenrollments'):
+                    os._exit(27)
+                return await original(self,sql,*args,**kwargs)
+            aiosqlite.Connection.execute=execute
+        else:
+            async def die(**kwargs):os._exit(28)
+            fixture.service.recover=die
+        await fixture.service.start(**fixture.request)
+    asyncio.run(main())
+    """
+        result=subprocess.run([sys.executable,"-c",program,str(tmp_path),crash],
+            env={**os.environ,"VAN_REENROLLMENT_CRASH_TEST_KEY":key},capture_output=True,timeout=30)
+        (tmp_path/"child.stdout").write_bytes(result.stdout)
+        (tmp_path/"child.stderr").write_bytes(result.stderr)
+>       assert result.returncode==(27 if crash=="before_commit" else 28),result.stderr.decode()
+E       AssertionError: Traceback (most recent call last):
+E           File "<string>", line 5, in <module>
+E         ModuleNotFoundError: No module named 'test_owner_device_reenrollment_recovery'
+E         
+E       assert 1 == 27
+E        +  where 1 = CompletedProcess(args=['/workspace/van-backend-venv-20261025/bin/python', '-c', "\nimport asyncio,os,sys\nfrom pathlib...e "<string>", line 5, in <module>\nModuleNotFoundError: No module named \'test_owner_device_reenrollment_recovery\'\n').returncode
+
+backend/tests/test_owner_device_reenrollment_recovery.py:308: AssertionError
+_ test_actual_process_death_preserves_original_transaction_or_recovery[after_commit] _
+
+tmp_path = PosixPath('/tmp/van-recovery-combined-family-reenrollment-boundary-r1-20261101/test_actual_process_death_pres1')
+crash = 'after_commit'
+
+    @pytest.mark.parametrize("crash",["before_commit","after_commit"])
+    async def test_actual_process_death_preserves_original_transaction_or_recovery(tmp_path,crash):
+        import os
+        import subprocess
+        import sys
+        from pathlib import Path
+        key=Fernet.generate_key().decode()
+        program = r"""
+    import asyncio,os,sys
+    from pathlib import Path
+    from cryptography.fernet import Fernet
+    from test_owner_device_reenrollment_recovery import setup
+    async def main():
+        fixture=await setup(Path(sys.argv[1]))
+        fixture.auth._fernet=Fernet(os.environ['VAN_REENROLLMENT_CRASH_TEST_KEY'].encode())
+        if sys.argv[2]=='before_commit':
+            import aiosqlite
+            original=aiosqlite.Connection.execute
+            async def execute(self,sql,*args,**kwargs):
+                if sql.startswith('INSERT INTO owner_device_reenrollments'):
+                    os._exit(27)
+                return await original(self,sql,*args,**kwargs)
+            aiosqlite.Connection.execute=execute
+        else:
+            async def die(**kwargs):os._exit(28)
+            fixture.service.recover=die
+        await fixture.service.start(**fixture.request)
+    asyncio.run(main())
+    """
+        result=subprocess.run([sys.executable,"-c",program,str(tmp_path),crash],
+            env={**os.environ,"VAN_REENROLLMENT_CRASH_TEST_KEY":key},capture_output=True,timeout=30)
+        (tmp_path/"child.stdout").write_bytes(result.stdout)
+        (tmp_path/"child.stderr").write_bytes(result.stderr)
+>       assert result.returncode==(27 if crash=="before_commit" else 28),result.stderr.decode()
+E       AssertionError: Traceback (most recent call last):
+E           File "<string>", line 5, in <module>
+E         ModuleNotFoundError: No module named 'test_owner_device_reenrollment_recovery'
+E         
+E       assert 1 == 28
+E        +  where 1 = CompletedProcess(args=['/workspace/van-backend-venv-20261025/bin/python', '-c', "\nimport asyncio,os,sys\nfrom pathlib...e "<string>", line 5, in <module>\nModuleNotFoundError: No module named \'test_owner_device_reenrollment_recovery\'\n').returncode
+
+backend/tests/test_owner_device_reenrollment_recovery.py:308: AssertionError
+=============================== warnings summary ===============================
+../../van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py:53
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED backend/tests/test_owner_device_reenrollment_recovery.py::test_actual_process_death_preserves_original_transaction_or_recovery[before_commit]
+FAILED backend/tests/test_owner_device_reenrollment_recovery.py::test_actual_process_death_preserves_original_transaction_or_recovery[after_commit]
+2 failed, 165 passed, 2 warnings in 59.96s

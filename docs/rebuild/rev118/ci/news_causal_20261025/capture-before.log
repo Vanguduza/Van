@@ -1,0 +1,38 @@
+..............FFF.......                                                 [100%]
+=================================== FAILURES ===================================
+_ test_supplied_ingress_clock_prevents_a_backdated_claim_from_entering_earlier_decisions _
+
+    def test_supplied_ingress_clock_prevents_a_backdated_claim_from_entering_earlier_decisions():
+        news=NewsIngress();h=story();news.ingest(h,now_ms=NOW+1000)
+>       assert news.assess(h,subject_kind='POSITION',subject_id='p',symbol='EURUSD',now_ms=NOW) is None
+E       AssertionError: assert EventImpactAssessment(impact_id='c509c4d168802183e0cd9e38', headline_id='138bd873f2a6c652858d8f2f466ac369', subject_ki...66ac369cd194fb68ff43f2a00a3d50a892ec36f', 'publisher'), assessed_ms=1800000000000, impact_version='event-impact/5.1.1') is None
+E        +  where EventImpactAssessment(impact_id='c509c4d168802183e0cd9e38', headline_id='138bd873f2a6c652858d8f2f466ac369', subject_ki...66ac369cd194fb68ff43f2a00a3d50a892ec36f', 'publisher'), assessed_ms=1800000000000, impact_version='event-impact/5.1.1') = assess(Headline(source_id='publisher', trust=<SourceTrust.T1_PRIMARY: 'T1_PRIMARY'>, published_ms=1800000000000, observed_ms=...bols=('EURUSD',), event_class='', severity=Decimal('1'), concern=<Concern.UNCLEAR: 'UNCLEAR'>, url='', body_excerpt=''), subject_kind='POSITION', subject_id='p', symbol='EURUSD', now_ms=1800000000000)
+E        +    where assess = <vati.events.news_ingress.NewsIngress object at 0x7fc56d85f5c0>.assess
+
+trading/tests/test_news_causal_boundaries.py:84: AssertionError
+_ test_a_backdated_relay_stays_out_of_evidence_before_its_supplied_ingress_clock _
+
+    def test_a_backdated_relay_stays_out_of_evidence_before_its_supplied_ingress_clock():
+        news=NewsIngress();h=story();news.ingest(h,now_ms=NOW)
+        news.ingest(story(source_id='backdated-relay'),now_ms=NOW+1000)
+        impact=news.assess(h,subject_kind='POSITION',subject_id='p',symbol='EURUSD',now_ms=NOW)
+>       assert 'backdated-relay' not in impact.evidence_refs
+E       AssertionError: assert 'backdated-relay' not in ('138bd873f2a6c652858d8f2f466ac369cd194fb68ff43f2a00a3d50a892ec36f', 'publisher', 'backdated-relay')
+E        +  where ('138bd873f2a6c652858d8f2f466ac369cd194fb68ff43f2a00a3d50a892ec36f', 'publisher', 'backdated-relay') = EventImpactAssessment(impact_id='c509c4d168802183e0cd9e38', headline_id='138bd873f2a6c652858d8f2f466ac369', subject_ki...3f2a00a3d50a892ec36f', 'publisher', 'backdated-relay'), assessed_ms=1800000000000, impact_version='event-impact/5.1.1').evidence_refs
+
+trading/tests/test_news_causal_boundaries.py:93: AssertionError
+______ test_report_cutoff_does_not_count_unavailable_headlines_or_impacts ______
+
+    def test_report_cutoff_does_not_count_unavailable_headlines_or_impacts():
+        news=NewsIngress();h=story();news.ingest(h,now_ms=NOW+1000)
+        news.assess(h,subject_kind='POSITION',subject_id='p',symbol='EURUSD',now_ms=NOW+1000)
+        before=news.report(now_ms=NOW)
+>       assert before['headlines']==0 and before['by_trust']=={} and before['impacts']==0
+E       assert (1 == 0)
+
+trading/tests/test_news_causal_boundaries.py:100: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_news_causal_boundaries.py::test_supplied_ingress_clock_prevents_a_backdated_claim_from_entering_earlier_decisions
+FAILED trading/tests/test_news_causal_boundaries.py::test_a_backdated_relay_stays_out_of_evidence_before_its_supplied_ingress_clock
+FAILED trading/tests/test_news_causal_boundaries.py::test_report_cutoff_does_not_count_unavailable_headlines_or_impacts
+3 failed, 21 passed in 1.63s

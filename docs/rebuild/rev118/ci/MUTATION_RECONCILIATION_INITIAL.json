@@ -1,0 +1,368 @@
+{
+  "schema": "van.rebuild.mutation-reconciliation/1",
+  "part": "python",
+  "reference": "e56a38c8d5b51b7c64d3d4ac04e2d8a59f6c9b36",
+  "preserved_case_count": 374,
+  "selected_case_count": 25,
+  "registry_sha256": "d6705f517c065905f83e15bfc16d802191dc091ce4ee3c078e352ccfe9de26e7",
+  "results": [
+    {
+      "kind": "baseline",
+      "mutation": null,
+      "exit": 0,
+      "verdict": "PASS",
+      "log_sha256": "0c15948e3e16483bedf87bc0f9680c9fc3067d50fcb935f6c932a701a875dec8",
+      "failed_oracles": [],
+      "summary": "...                                                                      [100%]\n3 passed in 0.09s\n"
+    },
+    {
+      "kind": "mutation",
+      "mutation": "C38 the offline path assembles its own payload again",
+      "exit": 1,
+      "verdict": "ASSERTION_DETECTED",
+      "log_sha256": "c8990250f6735f50f0fec780bd94e5d520365117fc447581c04c32d010d9091e",
+      "failed_oracles": [
+        "FAILED ../tests/contracts/test_stored_command_is_deliverable.py::test_the_offline_path_stores_the_body_prepared_before_dispatch"
+      ],
+      "summary": "_text(encoding=\"utf-8\")\n        dispatch = dispatch_source.index(\"suspend fun dispatchCommand(\")\n        publish = dispatch_source.index(\"private fun publishCommandVisualStatus(\", dispatch)\n        dispatched = dispatch_source[dispatch:publish]\n        assert \"val body = buildCommandBody(\" in dispatched\n        assert \"val bodyText = body.toString()\" in dispatched\n        assert dispatched.index(\"onPreparedCommand(bodyText)\") < dispatched.index(\"postRawAt(\")\n        assert re.search(r'postRawAt\\(baseUrl,\\s*\"/v1/commands\",\\s*bodyText', dispatched)\n        assert \"onPreparedCommand = { preparedBody = it }\" in controller\n        assert \"recordFailure(command, t, preparedBody)\" in controller\n        stored = controller.index(\"private fun storeSignedBody(\")\n        following = controller[stored:controller.index(\"fun reportUndelivered(\", stored)]\n>       assert \"OfflineSubmission.preparedReplay(preparedBody, command.idempotencyKey)\" in following\nE       assert 'OfflineSubmission.preparedReplay(preparedBody, command.idempotencyKey)' in 'private fun storeSignedBody(command: VanOwnerCommand, needsReconfirm: Boolean, preparedBody: String?): Boolean {\\n   ...ion it belonged to\\n     * is replaced. Without a caller for this, \"the owner is told\" is an intention.\\n     */\\n    '\n\n../tests/contracts/test_stored_command_is_deliverable.py:88: AssertionError\n=========================== short test summary info ============================\nFAILED ../tests/contracts/test_stored_command_is_deliverable.py::test_the_offline_path_stores_the_body_prepared_before_dispatch\n1 failed, 2 passed in 0.10s\n"
+    },
+    {
+      "kind": "baseline",
+      "mutation": null,
+      "exit": 0,
+      "verdict": "PASS",
+      "log_sha256": "523fa0ee2a34d0085fb9dc1fa2f6bd7e32a2abbf11a23d12c30b187ff8534424",
+      "failed_oracles": [],
+      "summary": "...............................................                          [100%]\n47 passed in 15.20s\n"
+    },
+    {
+      "kind": "mutation",
+      "mutation": "C36 a refused message keeps its idempotency key and the corrected resend is refused",
+      "exit": 1,
+      "verdict": "ASSERTION_DETECTED",
+      "log_sha256": "8a8ba3ac6f1f03bc7c708a8507f4e0ae581c872b5509dd10eedeafd915af29c5",
+      "failed_oracles": [
+        "FAILED tests/test_session_transport_api.py::TestTheSessionCarriesEveryKindItClaimsTo::test_a_refused_message_does_not_take_its_idempotency_key_with_it",
+        "FAILED tests/test_session_transport_api.py::TestTheSessionCarriesEveryKindItClaimsTo::test_a_refused_message_is_not_left_in_the_admission_table",
+        "FAILED tests/test_van_hermes_session.py::TestSessionRouter::test_a_delegate_refusal_releases_the_key_for_the_corrected_resend",
+        "FAILED tests/test_van_hermes_session.py::TestSessionRouter::test_an_unexpected_failure_also_releases_the_key_and_is_not_a_refusal"
+      ],
+      "summary": "ext attempt \u2014 and it must not keep the key, because a\n        transient failure that burned one would turn a recoverable error into a command\n        that can never be sent again.\n        \"\"\"\n        service, _ = await _service(tmp_path)\n    \n        async def explode(payload, device_id):\n            raise RuntimeError(\"a bug\")\n    \n        router = SessionRouter(service, SessionDelegates(submit_command=explode))\n        session, epoch = await service.open(device_id=DEVICE, path=_path(), now_ms=1_000)\n        with pytest.raises(RuntimeError):\n            await router.route(_envelope(session, epoch, idempotency_key=\"k_bug\"))\n        row = await service.store.fetchone(\n            \"SELECT message_id FROM van_session_messages WHERE idempotency_key = ?\",\n            (\"k_bug\",),\n        )\n>       assert row is None\nE       assert <sqlite3.Row object at 0x7f4eadb89c00> is None\n\ntests/test_van_hermes_session.py:500: AssertionError\n=========================== short test summary info ============================\nFAILED tests/test_session_transport_api.py::TestTheSessionCarriesEveryKindItClaimsTo::test_a_refused_message_does_not_take_its_idempotency_key_with_it\nFAILED tests/test_session_transport_api.py::TestTheSessionCarriesEveryKindItClaimsTo::test_a_refused_message_is_not_left_in_the_admission_table\nFAILED tests/test_van_hermes_session.py::TestSessionRouter::test_a_delegate_refusal_releases_the_key_for_the_corrected_resend\nFAILED tests/test_van_hermes_session.py::TestSessionRouter::test_an_unexpected_failure_also_releases_the_key_and_is_not_a_refusal\n4 failed, 43 passed in 14.72s\n"
+    },
+    {
+      "kind": "mutation",
+      "mutation": "C36 an envelope nobody can carry out is written into the admission table first",
+      "exit": 1,
+      "verdict": "ASSERTION_DETECTED",
+      "log_sha256": "317caa687646abbb12e242e1c3d3f8d6949e52d40fcf1cf266566e122a042a2c",
+      "failed_oracles": [
+        "FAILED tests/test_van_hermes_session.py::TestSessionRouter::test_a_kind_with_no_delegate_is_not_written_into_the_admission_table"
+      ],
+      "summary": "t to do, came back ALREADY_KNOWN, which reads as success. The\n        owner's instruction was acknowledged, never performed, and unrepeatable.\n    \n        Every kind is wired in production today, which is exactly why this test builds a\n        router that is missing one: with all four present the ordering is unobservable,\n        and an unobservable rule is one a later change silently removes.\n        \"\"\"\n        service, router = await self._router(tmp_path)\n        session, epoch = await service.open(device_id=DEVICE, path=_path(), now_ms=1_000)\n        refused = await router.route(\n            _envelope(\n                session, epoch, kind=\"mission.cancel\", idempotency_key=\"k_orphan\",\n                payload={\"mission_id\": \"m_1\"},\n            )\n        )\n        assert not refused.accepted\n        assert refused.refusal == \"session_kind_unknown\"\n    \n        row = await service.store.fetchone(\n            \"SELECT message_id FROM van_session_messages WHERE idempotency_key = ?\",\n            (\"k_orphan\",),\n        )\n>       assert row is None, (\n            \"a message nobody could carry out took the idempotency key with it\"\n        )\nE       AssertionError: a message nobody could carry out took the idempotency key with it\nE       assert <sqlite3.Row object at 0x7f7c60b0e200> is None\n\ntests/test_van_hermes_session.py:446: AssertionError\n=========================== short test summary info ============================\nFAILED tests/test_van_hermes_session.py::TestSessionRouter::test_a_kind_with_no_delegate_is_not_written_into_the_admission_table\n1 failed, 46 passed in 15.01s\n"
+    },
+    {
+      "kind": "mutation",
+      "mutation": "C36 the Gateway holds the message and tells the phone to send it again",
+      "exit": 1,
+      "verdict": "ASSERTION_DETECTED",
+      "log_sha256": "35a4b33937488d79ebf604a59f43d0a2534b843975afbdb5e18b95c30c31845b",
+      "failed_oracles": [
+        "FAILED tests/test_session_transport_api.py::TestWhatAResumeSaysAboutWhatTheClientLost::test_a_message_the_gateway_admitted_is_not_reported_unknown"
+      ],
+      "summary": "\"decisions_open\": 0, \"intents_stale\": 0, \"missions_expired\": 0, \"missions_waiting\": 0}, \"total\": 0}, \"device_id\": null, \"error_class\": null, \"level\": \"INFO\", \"logger\": \"van.scheduler\", \"message\": \"scheduled job completed\", \"mission_id\": null, \"principal\": null, \"result\": \"OK\", \"service\": \"van-gateway\", \"ts\": \"2026-10-22T03:54:37.516Z\"}\n{\"action_class\": null, \"command_id\": null, \"correlation_id\": null, \"degraded_code\": null, \"detail\": {\"duration_ms\": 25.41, \"method\": \"POST\", \"route\": \"/v1/session/resume\"}, \"device_id\": null, \"error_class\": null, \"level\": \"INFO\", \"logger\": \"van.request\", \"message\": \"request\", \"mission_id\": null, \"principal\": null, \"result\": \"200\", \"service\": \"van-gateway\", \"ts\": \"2026-10-22T03:54:37.523Z\"}\n------------------------------ Captured log call -------------------------------\nINFO     van.request:logging.py:112 request\nINFO     van.scheduler:logging.py:112 scheduled job completed\nINFO     van.request:logging.py:112 request\nINFO     van.scheduler:logging.py:112 scheduled job completed\nINFO     van.scheduler:logging.py:112 scheduled job completed\nINFO     van.request:logging.py:112 request\nINFO     van.scheduler:logging.py:112 scheduled job completed\nINFO     van.request:logging.py:112 request\nINFO     van.scheduler:logging.py:112 scheduled job completed\nINFO     van.request:logging.py:112 request\n=========================== short test summary info ============================\nFAILED tests/test_session_transport_api.py::TestWhatAResumeSaysAboutWhatTheClientLost::test_a_message_the_gateway_admitted_is_not_reported_unknown\n1 failed, 46 passed in 15.17s\n"
+    },
+    {
+      "kind": "baseline",
+      "mutation": null,
+      "exit": 0,
+      "verdict": "PASS",
+      "log_sha256": "1917d2280f0a11b20aec3055776e03d1cc772b23183c848adec634b1ec2eb87a",
+      "failed_oracles": [],
+      "summary": ".......................                                                  [100%]\n23 passed in 17.46s\n"
+    },
+    {
+      "kind": "mutation",
+      "mutation": "C24 the routes mount with no signing key configured",
+      "exit": 1,
+      "verdict": "ASSERTION_DETECTED",
+      "log_sha256": "960d7eba26ad3cce905616e753f1891156527ccceecdd88afaa8668cc1c7c683",
+      "failed_oracles": [
+        "FAILED tests/test_interactive_browser_api.py::TestUnconfiguredDeployment::test_without_a_signing_key_provider_preparation_has_no_execution_authority"
+      ],
+      "summary": "tch.setenv(\"VAN_INTERNAL_CONTROL_TOKEN\", INTERNAL)\n        monkeypatch.setenv(\"VAN_BROWSER_STREAM_SIGNING_KEY_FILE\", \"\")\n        get_settings.cache_clear()\n        app = create_app()\n        try:\n            catalog_path = f\"{SESSIONS}/{{session_id}}/file-provider-contracts\"\n            schema = app.openapi()[\"paths\"]\n            request_path=f\"{SESSIONS}/{{session_id}}/file-provider-requests\"\n>           assert {p for p in schema if \"interactive-sessions\" in p} == {catalog_path,request_path,\n                request_path+\"/{request_id}\",request_path+\"/{request_id}/cancel\",request_path+\"/{request_id}/observation\"}\nE               AssertionError: assert {'/v1/browser...rations', ...} == {'/v1/browser.../observation'}\nE                 \nE                 Extra items in the left set:\nE                 '/v1/browser/interactive-sessions/{session_id}/events'\nE                 '/v1/browser/interactive-sessions/{session_id}/transfer-grants'\nE                 '/v1/browser/interactive-sessions/{session_id}/stream-grant'\nE                 '/v1/browser/interactive-sessions/{session_id}/viewport'\nE                 '/v1/browser/interactive-sessions/{session_id}/take-control'...\nE                 \nE                 ...Full output truncated (14 lines hidden), use '-vv' to show\n\ntests/test_interactive_browser_api.py:437: AssertionError\n=========================== short test summary info ============================\nFAILED tests/test_interactive_browser_api.py::TestUnconfiguredDeployment::test_without_a_signing_key_provider_preparation_has_no_execution_authority\n1 failed, 22 passed in 18.26s\n"
+    },
+    {
+      "kind": "baseline",
+      "mutation": null,
+      "exit": 0,
+      "verdict": "PASS",
+      "log_sha256": "3f77109a885be7f270e97b1ccc65bde22984379022e48ce6ea9c7360fb0b69c6",
+      "failed_oracles": [],
+      "summary": "...............................                                          [100%]\n31 passed in 2.67s\n"
+    },
+    {
+      "kind": "mutation",
+      "mutation": "C26 a different payload under a known key is executed",
+      "exit": 1,
+      "verdict": "ASSERTION_DETECTED",
+      "log_sha256": "879afeeb4ecd91f27a8a79ff3f4ea548859589f1a79e5fb9d9cd1b4656b03027",
+      "failed_oracles": [
+        "FAILED tests/test_van_hermes_session.py::TestEffectivelyOnce::test_the_same_key_with_a_different_payload_is_a_conflict",
+        "FAILED tests/test_van_hermes_session.py::TestSessionRouter::test_a_conflicting_resubmission_executes_nothing"
+      ],
+      "summary": "FLICT: 'CONFLICT'> = CommandAdmission.CONFLICT\n\ntests/test_van_hermes_session.py:269: AssertionError\n______ TestSessionRouter.test_a_conflicting_resubmission_executes_nothing ______\n\nself = <test_van_hermes_session.TestSessionRouter object at 0x7f9c7cb26b10>\ntmp_path = PosixPath('/tmp/pytest-of-agent/pytest-27/test_a_conflicting_resubmissio0')\n\n    async def test_a_conflicting_resubmission_executes_nothing(self, tmp_path):\n        submitted: list = []\n        service, router = await self._router(tmp_path, submitted)\n        session, epoch = await service.open(device_id=DEVICE, path=_path(), now_ms=1_000)\n        await router.route(_envelope(session, epoch, idempotency_key=\"k1\"))\n        conflicting = await router.route(\n            _envelope(\n                session, epoch, idempotency_key=\"k1\", message_id=\"msg_c\",\n                payload={\"text\": \"pay the invoice\"},\n            )\n        )\n>       assert conflicting.accepted is False\nE       AssertionError: assert True is False\nE        +  where True = RoutedResult(accepted=True, kind='command.submit', result={'command_id': 'cmd_1', 'status': 'accepted'}, refusal=None, admission=<CommandAdmission.ALREADY_KNOWN: 'ALREADY_KNOWN'>).accepted\n\ntests/test_van_hermes_session.py:525: AssertionError\n=========================== short test summary info ============================\nFAILED tests/test_van_hermes_session.py::TestEffectivelyOnce::test_the_same_key_with_a_different_payload_is_a_conflict\nFAILED tests/test_van_hermes_session.py::TestSessionRouter::test_a_conflicting_resubmission_executes_nothing\n2 failed, 29 passed in 2.59s\n"
+    },
+    {
+      "kind": "baseline",
+      "mutation": null,
+      "exit": 0,
+      "verdict": "PASS",
+      "log_sha256": "1253f6ca793d46eb9c48b6f1606064815d0bb62be75a701be4c49494044e47ce",
+      "failed_oracles": [],
+      "summary": "..........                                                               [100%]\n10 passed in 0.03s\n"
+    },
+    {
+      "kind": "mutation",
+      "mutation": "C20 the work screen has no render branch",
+      "exit": 1,
+      "verdict": "ASSERTION_DETECTED",
+      "log_sha256": "843ccd8c573306f85d281b6cdec064bd1575f7f118713e1ec360904f1fd38a19",
+      "failed_oracles": [
+        "FAILED tests/contracts/test_owner_surfaces_are_reachable.py::test_work_has_a_rendered_destination_and_a_primary_navigation_entry"
+      ],
+      "summary": ".F........                                                               [100%]\n=================================== FAILURES ===================================\n_____ test_work_has_a_rendered_destination_and_a_primary_navigation_entry ______\n\n    def test_work_has_a_rendered_destination_and_a_primary_navigation_entry():\n        \"\"\"A working repository cannot compensate for an empty or unreachable destination.\"\"\"\n        activity = _text(ACTIVITY)\n        start = activity.index(\"composable(VanRoute.WORK) {\")\n        end = activity.index(\"\\n                    }\", start)\n>       assert \"WorkRoute(\" in activity[start:end]\nE       AssertionError: assert 'WorkRoute(' in 'composable(VanRoute.WORK) {\\n                        Unit'\n\ntests/contracts/test_owner_surfaces_are_reachable.py:65: AssertionError\n=========================== short test summary info ============================\nFAILED tests/contracts/test_owner_surfaces_are_reachable.py::test_work_has_a_rendered_destination_and_a_primary_navigation_entry\n1 failed, 9 passed in 0.04s\n"
+    },
+    {
+      "kind": "mutation",
+      "mutation": "C20 the work screen is not navigable",
+      "exit": 1,
+      "verdict": "ASSERTION_DETECTED",
+      "log_sha256": "db4791cc0af8938b081716d5bb71d9ab99856b29028151a7491483c5e75211f7",
+      "failed_oracles": [
+        "FAILED tests/contracts/test_owner_surfaces_are_reachable.py::test_work_has_a_rendered_destination_and_a_primary_navigation_entry"
+      ],
+      "summary": ".F........                                                               [100%]\n=================================== FAILURES ===================================\n_____ test_work_has_a_rendered_destination_and_a_primary_navigation_entry ______\n\n    def test_work_has_a_rendered_destination_and_a_primary_navigation_entry():\n        \"\"\"A working repository cannot compensate for an empty or unreachable destination.\"\"\"\n        activity = _text(ACTIVITY)\n        start = activity.index(\"composable(VanRoute.WORK) {\")\n        end = activity.index(\"\\n                    }\", start)\n        assert \"WorkRoute(\" in activity[start:end]\n        primary = re.search(r\"val PRIMARY: List<String> = listOf\\(([^)]*)\\)\", _text(ROUTES))\n        assert primary is not None\n>       assert \"WORK\" in {entry.strip() for entry in primary.group(1).split(\",\")}\nE       AssertionError: assert 'WORK' in {'ATTENTION', 'HOME', 'MEMORY', 'TRADING'}\n\ntests/contracts/test_owner_surfaces_are_reachable.py:68: AssertionError\n=========================== short test summary info ============================\nFAILED tests/contracts/test_owner_surfaces_are_reachable.py::test_work_has_a_rendered_destination_and_a_primary_navigation_entry\n1 failed, 9 passed in 0.04s\n"
+    },
+    {
+      "kind": "mutation",
+      "mutation": "C20 the work screen never binds the repository result",
+      "exit": 1,
+      "verdict": "ASSERTION_DETECTED",
+      "log_sha256": "a596eea2f6223c643ef1a970340524c205be7ee927873ac87dd8df69691fddb7",
+      "failed_oracles": [
+        "FAILED tests/contracts/test_owner_surfaces_are_reachable.py::test_mission_repository_is_constructed_and_read_from_work"
+      ],
+      "summary": "F.........                                                               [100%]\n=================================== FAILURES ===================================\n__________ test_mission_repository_is_constructed_and_read_from_work ___________\n\n    def test_mission_repository_is_constructed_and_read_from_work():\n        \"\"\"The surface P2-AND-015 found dead: constructed by nothing, called by nothing.\"\"\"\n        work = _text(WORK)\n        assert \"MissionRepository(app.gatewayClient)\" in work\n        # The owner now also needs completed/failed/cancelled records. Reading the home\n        # summary loses those; Work reads the mission collection and groups actual states.\n        assert \"runCatching { repository.missions() }\" in work\n>       assert \"active = it.filter { mission -> mission.isActive }\" in work\nE       assert 'active = it.filter { mission -> mission.isActive }' in 'package com.dial.van.command.work\\n\\nimport androidx.compose.foundation.layout.Arrangement\\nimport androidx.compose.f...y) {\\n                Text(\"Activity \u2014 delegated agents and the owner timeline\")\\n            }\\n        }\\n    }\\n}\\n'\n\ntests/contracts/test_owner_surfaces_are_reachable.py:51: AssertionError\n=========================== short test summary info ============================\nFAILED tests/contracts/test_owner_surfaces_are_reachable.py::test_mission_repository_is_constructed_and_read_from_work\n1 failed, 9 passed in 0.04s\n"
+    },
+    {
+      "kind": "mutation",
+      "mutation": "C20 the open mission is lost on rotation",
+      "exit": 1,
+      "verdict": "ASSERTION_DETECTED",
+      "log_sha256": "818c2d197187934ea792a9b26b30272a6a03ae92d2438ed8344809c8474332bb",
+      "failed_oracles": [
+        "FAILED tests/contracts/test_owner_surfaces_are_reachable.py::test_work_survives_rotation"
+      ],
+      "summary": "..F.......                                                               [100%]\n=================================== FAILURES ===================================\n_________________________ test_work_survives_rotation __________________________\n\n    def test_work_survives_rotation():\n        \"\"\"A mission's expanded/collapsed state is exactly what turning the phone used to lose.\"\"\"\n        work = _text(WORK)\n        details = _text(WORK_DETAILS)\n        assert \"MissionRow(app, mission,\" in work\n        assert \"internal fun MissionRow(app: VanApplication, mission: MissionSummary\" in details\n        assert \"import androidx.compose.runtime.saveable.rememberSaveable\" in details\n>       assert \"rememberSaveable(mission.missionId)\" in details\nE       assert 'rememberSaveable(mission.missionId)' in 'package com.dial.van.command.work\\n\\nimport androidx.compose.foundation.layout.Arrangement\\nimport androidx.compose.f...Long): String =\\n    if (epochMs <= 0L) \"\" else SimpleDateFormat(\"HH:mm\", Locale.getDefault()).format(Date(epochMs))\\n'\n\ntests/contracts/test_owner_surfaces_are_reachable.py:78: AssertionError\n=========================== short test summary info ============================\nFAILED tests/contracts/test_owner_surfaces_are_reachable.py::test_work_survives_rotation\n1 failed, 9 passed in 0.04s\n"
+    },
+    {
+      "kind": "baseline",
+      "mutation": null,
+      "exit": 0,
+      "verdict": "PASS",
+      "log_sha256": "8ee6d32340ed25d0bef8fe2c601baf9dd06287a36c17e53f3473f4e45e07442b",
+      "failed_oracles": [],
+      "summary": "..........................                                               [100%]\n26 passed in 7.39s\n"
+    },
+    {
+      "kind": "mutation",
+      "mutation": "C19 two new routes fall outside the scope set",
+      "exit": 1,
+      "verdict": "ASSERTION_DETECTED",
+      "log_sha256": "1475c060aa491c6ee85455f0116d876decfe102261fbb2b7cc0f643babe44293",
+      "failed_oracles": [
+        "FAILED backend/tests/test_google_capabilities_have_routes.py::test_each_new_route_is_declared_in_the_one_scope_set"
+      ],
+      "summary": "...F......................                                               [100%]\n=================================== FAILURES ===================================\n_____________ test_each_new_route_is_declared_in_the_one_scope_set _____________\n\n    def test_each_new_route_is_declared_in_the_one_scope_set():\n        \"\"\"`control_scope_for` and the guard beside it read one set now.\n    \n        They held separate copies, and a route present in one and missing from the other is a\n        hole rather than an inconsistency: the middleware would not demand the credential the\n        handler assumes it has.\n        \"\"\"\n        for path in NEW_ROUTES:\n>           assert path in GOOGLE_CONTROL_ROUTES, f\"{path} is a Google route outside the scope set\"\nE           AssertionError: /v1/google/drive/search is a Google route outside the scope set\nE           assert '/v1/google/drive/search' in frozenset({'/v1/google/actions/execute', '/v1/google/calendar/agenda', '/v1/google/calendar/reschedule', '/v1/google/calendar/review', '/v1/google/connect', '/v1/google/gmail/attachment/import-pdf', ...})\n\nbackend/tests/test_google_capabilities_have_routes.py:137: AssertionError\n=========================== short test summary info ============================\nFAILED backend/tests/test_google_capabilities_have_routes.py::test_each_new_route_is_declared_in_the_one_scope_set\n1 failed, 25 passed in 7.20s\n"
+    },
+    {
+      "kind": "mutation",
+      "mutation": "C19 Google provider executes an A4 record that never received owner approval",
+      "exit": 0,
+      "verdict": "SURVIVED",
+      "log_sha256": "9811e6222fbcecbe9ccb622081645ff51122ed9c0d3fe8fea47f26f97c6552b7",
+      "failed_oracles": [],
+      "summary": "..........................                                               [100%]\n26 passed in 7.40s\n"
+    },
+    {
+      "kind": "mutation",
+      "mutation": "C19 the owner's tasks reachable with a device token (both guards removed)",
+      "exit": 1,
+      "verdict": "ASSERTION_DETECTED",
+      "log_sha256": "b72d18144444a6a905d23c3896b3f755a13018eac0730b21f1706100860b0538",
+      "failed_oracles": [
+        "FAILED backend/tests/test_google_capabilities_have_routes.py::test_each_new_route_is_declared_in_the_one_scope_set",
+        "FAILED backend/tests/test_google_capabilities_have_routes.py::test_an_unconnected_google_reports_unable_rather_than_refusing"
+      ],
+      "summary": " in GOOGLE_CONTROL_ROUTES, f\"{path} is a Google route outside the scope set\"\nE           AssertionError: /v1/google/tasks is a Google route outside the scope set\nE           assert '/v1/google/tasks' in frozenset({'/v1/google/actions/execute', '/v1/google/calendar/agenda', '/v1/google/calendar/reschedule', '/v1/google/calendar/review', '/v1/google/connect', '/v1/google/contacts/resolve', ...})\n\nbackend/tests/test_google_capabilities_have_routes.py:137: AssertionError\n________ test_an_unconnected_google_reports_unable_rather_than_refusing ________\n\nclient = (<httpx.AsyncClient object at 0x7f6a9e3a4080>, <fastapi.applications.FastAPI object at 0x7f6a9e09adb0>)\n\n    @pytest.mark.asyncio\n    async def test_an_unconnected_google_reports_unable_rather_than_refusing(client):\n        \"\"\"503, not 403. \"VAN cannot reach Google\" and \"you may not do that\" send the owner to\n        entirely different places, and the audit kept finding them collapsed.\"\"\"\n        ac, _ = client\n        response = await _call(ac, \"/v1/google/tasks\", \"GET\")\n>       assert response.status_code == 503\nE       assert 401 == 503\nE        +  where 401 = <Response [401 Unauthorized]>.status_code\n\nbackend/tests/test_google_capabilities_have_routes.py:170: AssertionError\n=========================== short test summary info ============================\nFAILED backend/tests/test_google_capabilities_have_routes.py::test_each_new_route_is_declared_in_the_one_scope_set\nFAILED backend/tests/test_google_capabilities_have_routes.py::test_an_unconnected_google_reports_unable_rather_than_refusing\n2 failed, 24 passed in 8.09s\n"
+    },
+    {
+      "kind": "baseline",
+      "mutation": null,
+      "exit": 0,
+      "verdict": "PASS",
+      "log_sha256": "c1362b50b77d43d286ef0b773c3df4a9d2a71c32adbbb3278fda100872bdc52a",
+      "failed_oracles": [],
+      "summary": "...............................                                          [100%]\n31 passed in 9.17s\n"
+    },
+    {
+      "kind": "mutation",
+      "mutation": "C19 the premise ingress moves and nothing records",
+      "exit": 1,
+      "verdict": "ASSERTION_DETECTED",
+      "log_sha256": "075940948925c3ccf75eacd39fb78dfe0597aa69501b9c737254055efec0e700",
+      "failed_oracles": [
+        "FAILED backend/tests/test_irreversible_work_waits_on_assumptions.py::test_a_premise_assessment_can_be_recorded_and_reaches_the_metric",
+        "FAILED backend/tests/test_irreversible_work_waits_on_assumptions.py::test_a_caller_cannot_mark_its_own_agreement_well_founded",
+        "FAILED backend/tests/test_irreversible_work_waits_on_assumptions.py::test_citing_evidence_is_what_makes_agreement_well_founded",
+        "FAILED backend/tests/test_irreversible_work_waits_on_assumptions.py::test_disagreeing_with_the_owner_is_not_counted_as_unsupported_agreement",
+        "FAILED backend/tests/test_irreversible_work_waits_on_assumptions.py::test_a_preference_is_not_a_factual_premise"
+      ],
+      "summary": "C LIMIT 1\"\n        )\n>       assert int(row[\"agreed_without_evidence\"]) == 0\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE       TypeError: 'NoneType' object is not subscriptable\n\nbackend/tests/test_irreversible_work_waits_on_assumptions.py:616: TypeError\n----------------------------- Captured stdout call -----------------------------\n{\"action_class\": null, \"command_id\": null, \"correlation_id\": null, \"degraded_code\": null, \"detail\": {\"duration_ms\": 92.1, \"method\": \"POST\", \"route\": \"unrouted\"}, \"device_id\": null, \"error_class\": null, \"level\": \"INFO\", \"logger\": \"van.request\", \"message\": \"request\", \"mission_id\": null, \"principal\": null, \"result\": \"404\", \"service\": \"van-gateway\", \"ts\": \"2026-10-22T03:56:39.377Z\"}\n------------------------------ Captured log call -------------------------------\nINFO     van.request:logging.py:112 request\n=========================== short test summary info ============================\nFAILED backend/tests/test_irreversible_work_waits_on_assumptions.py::test_a_premise_assessment_can_be_recorded_and_reaches_the_metric\nFAILED backend/tests/test_irreversible_work_waits_on_assumptions.py::test_a_caller_cannot_mark_its_own_agreement_well_founded\nFAILED backend/tests/test_irreversible_work_waits_on_assumptions.py::test_citing_evidence_is_what_makes_agreement_well_founded\nFAILED backend/tests/test_irreversible_work_waits_on_assumptions.py::test_disagreeing_with_the_owner_is_not_counted_as_unsupported_agreement\nFAILED backend/tests/test_irreversible_work_waits_on_assumptions.py::test_a_preference_is_not_a_factual_premise\n5 failed, 26 passed in 9.15s\n"
+    },
+    {
+      "kind": "mutation",
+      "mutation": "C19 agreeing with a preference counts as unsupported agreement",
+      "exit": 1,
+      "verdict": "ASSERTION_DETECTED",
+      "log_sha256": "d6a9590326531acacba88e6049b1f49f5f48dbb6f8f83fd86dd15a39378a5ec3",
+      "failed_oracles": [
+        "FAILED backend/tests/test_irreversible_work_waits_on_assumptions.py::test_a_preference_is_not_a_factual_premise"
+      ],
+      "summary": "reference* is not a claim about\n        reality at all. Counting agreement with one as unsupported would make the rate fire on\n        VAN doing exactly what it should.\n        \"\"\"\n        ac, app = runtime\n        await ac.post(\"/v1/runtime/reasoning/premises\", json={\n            \"owner_premise\": \"I prefer terse updates\",\n            \"van_position\": \"agreed\",\n            \"semantic_class\": \"OWNER_PREFERENCE\",\n        })\n        row = await app.state.store.fetchone(\n            \"SELECT agreed_without_evidence FROM premise_assessments ORDER BY rowid DESC LIMIT 1\"\n        )\n>       assert int(row[\"agreed_without_evidence\"]) == 0\nE       assert 1 == 0\nE        +  where 1 = int(1)\n\nbackend/tests/test_irreversible_work_waits_on_assumptions.py:616: AssertionError\n----------------------------- Captured stdout call -----------------------------\n{\"action_class\": null, \"command_id\": null, \"correlation_id\": null, \"degraded_code\": null, \"detail\": {\"duration_ms\": 28.68, \"method\": \"POST\", \"route\": \"/v1/runtime/reasoning/premises\"}, \"device_id\": null, \"error_class\": null, \"level\": \"INFO\", \"logger\": \"van.request\", \"message\": \"request\", \"mission_id\": null, \"principal\": null, \"result\": \"200\", \"service\": \"van-gateway\", \"ts\": \"2026-10-22T03:56:50.375Z\"}\n------------------------------ Captured log call -------------------------------\nINFO     van.request:logging.py:112 request\n=========================== short test summary info ============================\nFAILED backend/tests/test_irreversible_work_waits_on_assumptions.py::test_a_preference_is_not_a_factual_premise\n1 failed, 30 passed in 8.49s\n"
+    },
+    {
+      "kind": "mutation",
+      "mutation": "C19 a correction is counted as agreement",
+      "exit": 1,
+      "verdict": "ASSERTION_DETECTED",
+      "log_sha256": "71feb0851b6708043e207eca28db4aea756dfddae19b3b0243279000f97aa499",
+      "failed_oracles": [
+        "FAILED backend/tests/test_irreversible_work_waits_on_assumptions.py::test_disagreeing_with_the_owner_is_not_counted_as_unsupported_agreement"
+      ],
+      "summary": "me):\n        \"\"\"A correction is the behaviour \u00a771 wants, not the behaviour it measures.\"\"\"\n        ac, app = runtime\n        await ac.post(\"/v1/runtime/reasoning/premises\", json={\n            \"owner_premise\": \"the deploy succeeded\",\n            \"van_position\": \"the deploy failed at the migration step\",\n            \"semantic_class\": \"FACT_UNVERIFIED\",\n            \"corrected\": True,\n        })\n        row = await app.state.store.fetchone(\n            \"SELECT agreed_without_evidence FROM premise_assessments ORDER BY rowid DESC LIMIT 1\"\n        )\n>       assert int(row[\"agreed_without_evidence\"]) == 0\nE       assert 1 == 0\nE        +  where 1 = int(1)\n\nbackend/tests/test_irreversible_work_waits_on_assumptions.py:596: AssertionError\n----------------------------- Captured stdout call -----------------------------\n{\"action_class\": null, \"command_id\": null, \"correlation_id\": null, \"degraded_code\": null, \"detail\": {\"duration_ms\": 25.52, \"method\": \"POST\", \"route\": \"/v1/runtime/reasoning/premises\"}, \"device_id\": null, \"error_class\": null, \"level\": \"INFO\", \"logger\": \"van.request\", \"message\": \"request\", \"mission_id\": null, \"principal\": null, \"result\": \"200\", \"service\": \"van-gateway\", \"ts\": \"2026-10-22T03:57:01.011Z\"}\n------------------------------ Captured log call -------------------------------\nINFO     van.request:logging.py:112 request\n=========================== short test summary info ============================\nFAILED backend/tests/test_irreversible_work_waits_on_assumptions.py::test_disagreeing_with_the_owner_is_not_counted_as_unsupported_agreement\n1 failed, 30 passed in 8.58s\n"
+    },
+    {
+      "kind": "mutation",
+      "mutation": "C19 citing evidence no longer makes agreement well-founded",
+      "exit": 1,
+      "verdict": "ASSERTION_DETECTED",
+      "log_sha256": "49872b105cac8dde4c2855f047b38769acab1f510c86b51c58ec145bf7f46b7b",
+      "failed_oracles": [
+        "FAILED backend/tests/test_irreversible_work_waits_on_assumptions.py::test_citing_evidence_is_what_makes_agreement_well_founded"
+      ],
+      "summary": "t_makes_agreement_well_founded(runtime):\n        \"\"\"And the other direction, or the flag would be a constant.\"\"\"\n        ac, app = runtime\n        await ac.post(\"/v1/runtime/reasoning/premises\", json={\n            \"owner_premise\": \"the API returns 200\",\n            \"van_position\": \"agreed\",\n            \"semantic_class\": \"FACT_VERIFIED\",\n            \"evidence_refs\": [\"https://ci.example/run/1\"],\n        })\n        row = await app.state.store.fetchone(\n            \"SELECT agreed_without_evidence FROM premise_assessments ORDER BY rowid DESC LIMIT 1\"\n        )\n>       assert int(row[\"agreed_without_evidence\"]) == 0\nE       assert 1 == 0\nE        +  where 1 = int(1)\n\nbackend/tests/test_irreversible_work_waits_on_assumptions.py:580: AssertionError\n----------------------------- Captured stdout call -----------------------------\n{\"action_class\": null, \"command_id\": null, \"correlation_id\": null, \"degraded_code\": null, \"detail\": {\"duration_ms\": 28.63, \"method\": \"POST\", \"route\": \"/v1/runtime/reasoning/premises\"}, \"device_id\": null, \"error_class\": null, \"level\": \"INFO\", \"logger\": \"van.request\", \"message\": \"request\", \"mission_id\": null, \"principal\": null, \"result\": \"200\", \"service\": \"van-gateway\", \"ts\": \"2026-10-22T03:57:11.443Z\"}\n------------------------------ Captured log call -------------------------------\nINFO     van.request:logging.py:112 request\n=========================== short test summary info ============================\nFAILED backend/tests/test_irreversible_work_waits_on_assumptions.py::test_citing_evidence_is_what_makes_agreement_well_founded\n1 failed, 30 passed in 8.78s\n"
+    },
+    {
+      "kind": "baseline",
+      "mutation": null,
+      "exit": 0,
+      "verdict": "PASS",
+      "log_sha256": "6379b7364f2ca2cac9f3aee4951d92f1207e415d0d25a658605f411c9a971816",
+      "failed_oracles": [],
+      "summary": "............                                                             [100%]\n12 passed in 33.08s\n"
+    },
+    {
+      "kind": "mutation",
+      "mutation": "C15 a symbol named in a line comment counts as a call site",
+      "exit": 1,
+      "verdict": "ASSERTION_DETECTED",
+      "log_sha256": "18ef716e0de3537315c7fe765d3db37adb01ae7fdbb9293ce69556c6cef57965",
+      "failed_oracles": [
+        "FAILED tests/contracts/test_kotlin_reachability.py::test_no_unexplained_dead_kotlin_file",
+        "FAILED tests/contracts/test_kotlin_reachability.py::test_a_symbol_named_only_in_a_line_comment_is_not_a_call_site"
+      ],
+      "summary": "ith no recorded reason: ['android/app/src/main/java/com/dial/van/memory/GoalsRoute.kt', 'android/app/src/main/java/com/dial/van/memory/MemoryRoute.kt', 'android/app/src/main/java/com/dial/van/memory/UnderstandingRoutes.kt', 'android/app/src/main/java/com/dial/van/projects/ProjectDetailRoute.kt', 'android/app/src/main/java/com/dial/van/projects/ProjectRationaleRoute.kt']. Either wire them, delete them, or add them to EXPLAINED_UNREFERENCED with why.\nE       assert ['android/app...naleRoute.kt'] == []\nE         \nE         Left contains 5 more items, first extra item: 'android/app/src/main/java/com/dial/van/memory/GoalsRoute.kt'\nE         Use -v to get more diff\n\ntests/contracts/test_kotlin_reachability.py:106: AssertionError\n________ test_a_symbol_named_only_in_a_line_comment_is_not_a_call_site _________\n\n    def test_a_symbol_named_only_in_a_line_comment_is_not_a_call_site():\n        strip = _scanner()._strip_noise\n>       assert \"VanResourceEnvelope\" not in strip(\"val x = 1 // see VanResourceEnvelope\\n\")\nE       AssertionError: assert 'VanResourceEnvelope' not in 'val x = 1 /...ceEnvelope\\n'\nE         \nE         'VanResourceEnvelope' is contained here:\nE           val x = 1 / / see VanResourceEnvelope\n\ntests/contracts/test_kotlin_reachability.py:192: AssertionError\n=========================== short test summary info ============================\nFAILED tests/contracts/test_kotlin_reachability.py::test_no_unexplained_dead_kotlin_file\nFAILED tests/contracts/test_kotlin_reachability.py::test_a_symbol_named_only_in_a_line_comment_is_not_a_call_site\n2 failed, 10 passed in 38.40s\n"
+    },
+    {
+      "kind": "mutation",
+      "mutation": "C15 a symbol named in a KDoc counts as a call site",
+      "exit": 1,
+      "verdict": "ASSERTION_DETECTED",
+      "log_sha256": "a9af94a014a76e8c8e05ed21c651caa51f84c06ebbb1edd8a5ec37529046e06c",
+      "failed_oracles": [
+        "FAILED tests/contracts/test_kotlin_reachability.py::test_a_symbol_named_only_in_a_kdoc_is_not_a_call_site"
+      ],
+      "summary": "......F.....                                                             [100%]\n=================================== FAILURES ===================================\n____________ test_a_symbol_named_only_in_a_kdoc_is_not_a_call_site _____________\n\n    def test_a_symbol_named_only_in_a_kdoc_is_not_a_call_site():\n        strip = _scanner()._strip_noise\n        source = \"\"\"\n    /**\n     * Replaces MissionRepository, which nothing constructs.\n     */\n    class Something\n    \"\"\"\n>       assert \"MissionRepository\" not in strip(source)\nE       AssertionError: assert 'MissionRepository' not in '\\n/ **\\n * ... Something\\n'\nE         \nE         'MissionRepository' is contained here:\nE           \nE           / **\nE            * Replaces MissionRepository, which nothing constructs.\nE         ?             +++++++++++++++++\nE            */\nE           class Something\n\ntests/contracts/test_kotlin_reachability.py:186: AssertionError\n=========================== short test summary info ============================\nFAILED tests/contracts/test_kotlin_reachability.py::test_a_symbol_named_only_in_a_kdoc_is_not_a_call_site\n1 failed, 11 passed in 46.48s\n"
+    },
+    {
+      "kind": "mutation",
+      "mutation": "C15 a symbol named in a string counts as a call site",
+      "exit": 1,
+      "verdict": "ASSERTION_DETECTED",
+      "log_sha256": "ef4a2ad635a42af1e6e0d6a6c08394c714f47722eaaf9b222fb2f3279d83fd70",
+      "failed_oracles": [
+        "FAILED tests/contracts/test_kotlin_reachability.py::test_a_symbol_named_only_in_a_string_is_not_a_call_site"
+      ],
+      "summary": "........F...                                                             [100%]\n=================================== FAILURES ===================================\n___________ test_a_symbol_named_only_in_a_string_is_not_a_call_site ____________\n\n    def test_a_symbol_named_only_in_a_string_is_not_a_call_site():\n        \"\"\"A class name in a log message or a route constant is not a construction.\"\"\"\n        strip = _scanner()._strip_noise\n>       assert \"MissionRepository\" not in strip('Log.d(TAG, \"MissionRepository failed\")')\nE       assert 'MissionRepository' not in \"Log.d(TAG, ...ory failed')\"\nE         \nE         'MissionRepository' is contained here:\nE           Log.d(TAG, 'MissionRepository failed')\n\ntests/contracts/test_kotlin_reachability.py:198: AssertionError\n=========================== short test summary info ============================\nFAILED tests/contracts/test_kotlin_reachability.py::test_a_symbol_named_only_in_a_string_is_not_a_call_site\n1 failed, 11 passed in 41.70s\n"
+    },
+    {
+      "kind": "mutation",
+      "mutation": "C15 strip everything, so all code looks dead",
+      "exit": 1,
+      "verdict": "ASSERTION_DETECTED",
+      "log_sha256": "059e6a3c045a463118b272d52d8162a10053f312e4d72241e2395ba291f83430",
+      "failed_oracles": [
+        "FAILED tests/contracts/test_kotlin_reachability.py::test_every_explained_entry_still_describes_something_real",
+        "FAILED tests/contracts/test_kotlin_reachability.py::test_a_symbol_named_only_in_a_kdoc_is_not_a_call_site",
+        "FAILED tests/contracts/test_kotlin_reachability.py::test_stripping_does_not_swallow_the_code_around_it"
+      ],
+      "summary": "te():\n        strip = _scanner()._strip_noise\n        source = \"\"\"\n    /**\n     * Replaces MissionRepository, which nothing constructs.\n     */\n    class Something\n    \"\"\"\n        assert \"MissionRepository\" not in strip(source)\n>       assert \"Something\" in strip(source), \"the declaration itself was stripped\"\nE       AssertionError: the declaration itself was stripped\nE       assert 'Something' in ''\nE        +  where '' = <function <lambda> at 0x7efd132ad8a0>('\\n/**\\n * Replaces MissionRepository, which nothing constructs.\\n */\\nclass Something\\n')\n\ntests/contracts/test_kotlin_reachability.py:187: AssertionError\n______________ test_stripping_does_not_swallow_the_code_around_it ______________\n\n    def test_stripping_does_not_swallow_the_code_around_it():\n        \"\"\"Over-eager stripping would report everything as dead, which is its own failure.\"\"\"\n        strip = _scanner()._strip_noise\n        source = 'val a = Alpha() // comment\\nval b = Beta(\"text\")\\n'\n        stripped = strip(source)\n>       assert \"Alpha\" in stripped and \"Beta\" in stripped\nE       AssertionError: assert ('Alpha' in '')\n\ntests/contracts/test_kotlin_reachability.py:207: AssertionError\n=========================== short test summary info ============================\nFAILED tests/contracts/test_kotlin_reachability.py::test_every_explained_entry_still_describes_something_real\nFAILED tests/contracts/test_kotlin_reachability.py::test_a_symbol_named_only_in_a_kdoc_is_not_a_call_site\nFAILED tests/contracts/test_kotlin_reachability.py::test_stripping_does_not_swallow_the_code_around_it\n3 failed, 9 passed in 0.12s\n"
+    },
+    {
+      "kind": "baseline",
+      "mutation": null,
+      "exit": 0,
+      "verdict": "PASS",
+      "log_sha256": "06cdf8bcb89efbe1e002f486792f1f4e5041790a94a9ede6adf87e5214f877f9",
+      "failed_oracles": [],
+      "summary": "..........                                                               [100%]\n10 passed in 0.04s\n"
+    },
+    {
+      "kind": "mutation",
+      "mutation": "C12 drop the APK upload entirely",
+      "exit": 1,
+      "verdict": "ASSERTION_DETECTED",
+      "log_sha256": "aec6691550abc63bb25e95b8af93b650507166d5ee178f7487067cb3c90d54e6",
+      "failed_oracles": [
+        "FAILED tests/contracts/test_the_apk_leaves_ci.py::test_an_apk_is_uploaded_at_all",
+        "FAILED tests/contracts/test_the_apk_leaves_ci.py::test_the_upload_fails_rather_than_publishing_an_empty_artefact",
+        "FAILED tests/contracts/test_the_apk_leaves_ci.py::test_the_upload_runs_after_the_task_that_produces_the_apk"
+      ],
+      "summary": "rtionError\n________ test_the_upload_fails_rather_than_publishing_an_empty_artefact ________\n\n    def test_the_upload_fails_rather_than_publishing_an_empty_artefact():\n        \"\"\"An empty artifact named van-debug-apk is worse than no artifact.\n    \n        The owner downloads it, finds nothing, and cannot tell whether the build stopped\n        producing an APK or the upload pointed somewhere wrong.\n        \"\"\"\n        workflow = _workflow()\n>       apk_step = workflow[workflow.index(\"name: van-debug-apk\") :]\n                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE       ValueError: substring not found\n\ntests/contracts/test_the_apk_leaves_ci.py:49: ValueError\n__________ test_the_upload_runs_after_the_task_that_produces_the_apk ___________\n\n    def test_the_upload_runs_after_the_task_that_produces_the_apk():\n        workflow = _workflow()\n        assert \":app:assembleDebug\" in workflow\n>       assert workflow.index(\":app:assembleDebug\") < workflow.index(\"name: van-debug-apk\")\n                                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE       ValueError: substring not found\n\ntests/contracts/test_the_apk_leaves_ci.py:57: ValueError\n=========================== short test summary info ============================\nFAILED tests/contracts/test_the_apk_leaves_ci.py::test_an_apk_is_uploaded_at_all\nFAILED tests/contracts/test_the_apk_leaves_ci.py::test_the_upload_fails_rather_than_publishing_an_empty_artefact\nFAILED tests/contracts/test_the_apk_leaves_ci.py::test_the_upload_runs_after_the_task_that_produces_the_apk\n3 failed, 7 passed in 0.06s\n"
+    },
+    {
+      "kind": "mutation",
+      "mutation": "C12 point the upload at a variant the build never assembles",
+      "exit": 1,
+      "verdict": "ASSERTION_DETECTED",
+      "log_sha256": "162a432841db08bb2df37f66e47cb6619d393213afa4a34922601dceb4726d0b",
+      "failed_oracles": [
+        "FAILED tests/contracts/test_the_apk_leaves_ci.py::test_an_apk_is_uploaded_at_all"
+      ],
+      "summary": "F.........                                                               [100%]\n=================================== FAILURES ===================================\n________________________ test_an_apk_is_uploaded_at_all ________________________\n\n    def test_an_apk_is_uploaded_at_all():\n        workflow = _workflow()\n        assert \"name: van-debug-apk\" in workflow, (\n            \"no APK artifact is published, so a green Android job still leaves the owner \"\n            \"with nothing to install; Gate 14 cannot begin.\"\n        )\n>       assert DECLARED_PATH in workflow\nE       AssertionError: assert 'android/app/build/outputs/apk/debug/*.apk' in 'name: van-ci\\n\\non:\\n  push:\\n    # P3-OPS-011 \u2014 `main` alone meant the branch doing the certifying was never certifi...  with:\\n          name: van-mutation-report\\n          path: artifacts/mutation/\\n          if-no-files-found: warn\\n'\n\ntests/contracts/test_the_apk_leaves_ci.py:39: AssertionError\n=========================== short test summary info ============================\nFAILED tests/contracts/test_the_apk_leaves_ci.py::test_an_apk_is_uploaded_at_all\n1 failed, 9 passed in 0.06s\n"
+    },
+    {
+      "kind": "baseline",
+      "mutation": null,
+      "exit": 2,
+      "verdict": "INVALID_CONTROL",
+      "log_sha256": "19487086ccb897e7885dfff2449407e0407b1c45f85ebcc9b15ed3955e539ba1",
+      "failed_oracles": [],
+      "summary": "ts/test_owner_files.py:11: in <module>\n    from services.browser_stream_host.tests.test_native_stream import authority\nservices/browser_stream_host/tests/test_native_stream.py:12: in <module>\n    from aiortc import RTCPeerConnection, RTCConfiguration, RTCSessionDescription\nE   ModuleNotFoundError: No module named 'aiortc'\n___ ERROR collecting services/browser_stream_host/tests/test_owner_files.py ____\nImportError while importing test module '/workspace/van-review-2026-10-18/publish/services/browser_stream_host/tests/test_owner_files.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/importlib/__init__.py:90: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nservices/browser_stream_host/tests/test_owner_files.py:11: in <module>\n    from services.browser_stream_host.tests.test_native_stream import authority\nservices/browser_stream_host/tests/test_native_stream.py:12: in <module>\n    from aiortc import RTCPeerConnection, RTCConfiguration, RTCSessionDescription\nE   ModuleNotFoundError: No module named 'aiortc'\n=========================== short test summary info ============================\nERROR services/browser_stream_host/tests/test_native_stream.py\nERROR services/browser_stream_host/tests/test_owner_file_analysis.py\nERROR services/browser_stream_host/tests/test_owner_files.py\n!!!!!!!!!!!!!!!!!!! Interrupted: 3 errors during collection !!!!!!!!!!!!!!!!!!!!\n3 errors in 0.36s\n"
+    }
+  ],
+  "status": "ERROR",
+  "error": "INVALID_CONTROL: None; inspect /tmp/van-mutation-python-20261022/032-baseline.txt",
+  "duration_seconds": 383.157
+}

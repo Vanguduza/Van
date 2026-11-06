@@ -1,0 +1,371 @@
+{
+  "state": "FINAL_DERIVED_FROZEN_MAPPING_PENDING_REVIEW_READBACK",
+  "base": "9cfde69c38bc39a54875c2a9bf60c6269f363d64",
+  "generator_sha256": "1d10b8c00e7a187711730ba2b1a76b61d8a7fc5c33e97695d6283b2734eb4c64",
+  "product16_exact": true,
+  "paths": {
+    "registries/owner_endpoints.json": "afb95fbcf431762bd0bf30e45f4a7b806f9f8d30088eebbc033c6959549843ee",
+    "registries/owner_endpoint_schemas.json": "b6dd330fa4a075c4745421a4363da5b624404f279a15c598e852d28f36f0dc3b",
+    "registries/owner_features.json": "3dd588ddee279b8667b4f1b7dd0ea9a1e9f8189bce7d3d08afbd2a735dd020ec",
+    "registries/owner_screens.json": "f246500dd9c17e07629a6df9c338f607adcedb0b29f31a26f65a5150dfd60b49",
+    "docs/rebuild/rev118/backend/OWNER_REGISTRY_SOURCE_REFRESH_20261022.json": "e01c36ad9c8acb214f582cb0fe311d6c2a62c7f6396f3e5e8767cef63c8d52ee",
+    "docs/rebuild/rev118/backend/OWNER_REGISTRY_GENERATION.json": "21b7d8c53b2cf02d11c8e50834251c36acef0e6b86540b01fb8efbdbd346cd66",
+    "docs/rebuild/rev118/backend/OWNER_FRONTEND_SCREEN_REGISTRY.md": "384c0938ae1c6e0f232e44e4b2a301fe73aa66d824a20a4a2adde00e90b23a3f"
+  },
+  "counts": {
+    "old_endpoints": 493,
+    "new_endpoints": 497,
+    "old_schemas": 394,
+    "new_schemas": 401,
+    "groups": 42,
+    "functions": 105,
+    "surfaces": 78
+  },
+  "new_endpoints": [
+    {
+      "endpoint_id": "VE-3685603aa437",
+      "method": "GET",
+      "path": "/v1/trading/accounts/cleanup/reauth/facts/{fact_id}",
+      "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+      "device_proof_required_when_bound": false,
+      "registration": "DEFAULT",
+      "condition": null,
+      "source": "backend/van_gateway/trading/account_cleanup_api.py:361",
+      "summary": "Fact",
+      "tags": [
+        "account-cleanup"
+      ],
+      "parameters": [
+        {
+          "name": "fact_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "title": "Fact Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": {}
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "openapi_components": "owner_endpoint_schemas.json",
+      "readiness": "REPOSITORY_DECLARATION_ONLY"
+    },
+    {
+      "endpoint_id": "VE-47aaebbab4d8",
+      "method": "GET",
+      "path": "/v1/trading/accounts/cleanup/operations/{operation_id}",
+      "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+      "device_proof_required_when_bound": false,
+      "registration": "DEFAULT",
+      "condition": null,
+      "source": "backend/van_gateway/trading/account_cleanup_api.py:370",
+      "summary": "Original",
+      "tags": [
+        "account-cleanup"
+      ],
+      "parameters": [
+        {
+          "name": "operation_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "title": "Operation Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": {}
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "openapi_components": "owner_endpoint_schemas.json",
+      "readiness": "REPOSITORY_DECLARATION_ONLY"
+    },
+    {
+      "endpoint_id": "VE-d18bcca95622",
+      "method": "POST",
+      "path": "/v1/trading/accounts/cleanup/reauth/verify",
+      "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+      "device_proof_required_when_bound": true,
+      "registration": "DEFAULT",
+      "condition": null,
+      "source": "backend/van_gateway/trading/account_cleanup_api.py:359",
+      "summary": "Verify",
+      "tags": [
+        "account-cleanup"
+      ],
+      "parameters": [],
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ReauthRequest"
+            }
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": {}
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "openapi_components": "owner_endpoint_schemas.json",
+      "readiness": "REPOSITORY_DECLARATION_ONLY"
+    },
+    {
+      "endpoint_id": "VE-f4440e03b938",
+      "method": "POST",
+      "path": "/v1/trading/accounts/cleanup/reauth/challenge",
+      "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+      "device_proof_required_when_bound": true,
+      "registration": "DEFAULT",
+      "condition": null,
+      "source": "backend/van_gateway/trading/account_cleanup_api.py:357",
+      "summary": "Challenge",
+      "tags": [
+        "account-cleanup"
+      ],
+      "parameters": [],
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ReauthRequest"
+            }
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": {}
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "openapi_components": "owner_endpoint_schemas.json",
+      "readiness": "REPOSITORY_DECLARATION_ONLY"
+    }
+  ],
+  "new_schema_names": [
+    "AccountCleanupReview",
+    "AccountCleanupSummary",
+    "CleanupLocalState",
+    "CleanupOriginalAccount",
+    "CleanupStepFact",
+    "CleanupView",
+    "ReauthRequest"
+  ],
+  "changed_old_schemas": [
+    "AccountChallengeResponse",
+    "AccountOperationResponse"
+  ],
+  "cleanup_bindings": {
+    "OF-TRADING-003": [
+      {
+        "method": "GET",
+        "path": "/v1/trading/accounts/cleanup/operations/{operation_id}",
+        "endpoint_id": "VE-47aaebbab4d8",
+        "source_ref": "backend/van_gateway/trading/account_cleanup_api.py:370",
+        "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+        "device_proof_required_when_bound": false,
+        "source_status": "CANDIDATE_SOURCE_DATA_ANDROID_TWO_PROOF_CONSUMER_PENDING",
+        "authority": "SOURCE_DATA_ONLY_SEPARATE_CURRENT_PERMISSION_REQUIRED_NO_NEW_ISSUER",
+        "canonical_units": [
+          "BE-004"
+        ],
+        "scope": "Purpose-bound reauthentication facts and original cleanup-child readback under the existing paired account owner. Fresh reauthentication data and a distinct substantive A4 permission remain separate. Historical parent UNKNOWN/null is preserved; exact original target/managed identity/current guards and independent child postconditions are required. Missing or unsealed evidence holds without guessed rebinding, credential restoration or effect resend. Android two-proof production/recovery, native hardware/provider qualification, full grace/delete/cancel and all other original account predicates remain pending.",
+        "specification": "docs/rebuild/rev118/receipts/ACCOUNT_CLEANUP_RECOVERY_SOURCE_20261102.json",
+        "new_ui_implemented": false,
+        "live_qualified": false
+      },
+      {
+        "method": "GET",
+        "path": "/v1/trading/accounts/cleanup/reauth/facts/{fact_id}",
+        "endpoint_id": "VE-3685603aa437",
+        "source_ref": "backend/van_gateway/trading/account_cleanup_api.py:361",
+        "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+        "device_proof_required_when_bound": false,
+        "source_status": "CANDIDATE_SOURCE_DATA_ANDROID_TWO_PROOF_CONSUMER_PENDING",
+        "authority": "SOURCE_DATA_ONLY_SEPARATE_CURRENT_PERMISSION_REQUIRED_NO_NEW_ISSUER",
+        "canonical_units": [
+          "BE-004"
+        ],
+        "scope": "Purpose-bound reauthentication facts and original cleanup-child readback under the existing paired account owner. Fresh reauthentication data and a distinct substantive A4 permission remain separate. Historical parent UNKNOWN/null is preserved; exact original target/managed identity/current guards and independent child postconditions are required. Missing or unsealed evidence holds without guessed rebinding, credential restoration or effect resend. Android two-proof production/recovery, native hardware/provider qualification, full grace/delete/cancel and all other original account predicates remain pending.",
+        "specification": "docs/rebuild/rev118/receipts/ACCOUNT_CLEANUP_RECOVERY_SOURCE_20261102.json",
+        "new_ui_implemented": false,
+        "live_qualified": false
+      },
+      {
+        "method": "POST",
+        "path": "/v1/trading/accounts/cleanup/reauth/challenge",
+        "endpoint_id": "VE-f4440e03b938",
+        "source_ref": "backend/van_gateway/trading/account_cleanup_api.py:357",
+        "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+        "device_proof_required_when_bound": true,
+        "source_status": "CANDIDATE_SOURCE_DATA_ANDROID_TWO_PROOF_CONSUMER_PENDING",
+        "authority": "SOURCE_DATA_ONLY_SEPARATE_CURRENT_PERMISSION_REQUIRED_NO_NEW_ISSUER",
+        "canonical_units": [
+          "BE-004"
+        ],
+        "scope": "Purpose-bound reauthentication facts and original cleanup-child readback under the existing paired account owner. Fresh reauthentication data and a distinct substantive A4 permission remain separate. Historical parent UNKNOWN/null is preserved; exact original target/managed identity/current guards and independent child postconditions are required. Missing or unsealed evidence holds without guessed rebinding, credential restoration or effect resend. Android two-proof production/recovery, native hardware/provider qualification, full grace/delete/cancel and all other original account predicates remain pending.",
+        "specification": "docs/rebuild/rev118/receipts/ACCOUNT_CLEANUP_RECOVERY_SOURCE_20261102.json",
+        "new_ui_implemented": false,
+        "live_qualified": false
+      },
+      {
+        "method": "POST",
+        "path": "/v1/trading/accounts/cleanup/reauth/verify",
+        "endpoint_id": "VE-d18bcca95622",
+        "source_ref": "backend/van_gateway/trading/account_cleanup_api.py:359",
+        "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+        "device_proof_required_when_bound": true,
+        "source_status": "CANDIDATE_SOURCE_DATA_ANDROID_TWO_PROOF_CONSUMER_PENDING",
+        "authority": "SOURCE_DATA_ONLY_SEPARATE_CURRENT_PERMISSION_REQUIRED_NO_NEW_ISSUER",
+        "canonical_units": [
+          "BE-004"
+        ],
+        "scope": "Purpose-bound reauthentication facts and original cleanup-child readback under the existing paired account owner. Fresh reauthentication data and a distinct substantive A4 permission remain separate. Historical parent UNKNOWN/null is preserved; exact original target/managed identity/current guards and independent child postconditions are required. Missing or unsealed evidence holds without guessed rebinding, credential restoration or effect resend. Android two-proof production/recovery, native hardware/provider qualification, full grace/delete/cancel and all other original account predicates remain pending.",
+        "specification": "docs/rebuild/rev118/receipts/ACCOUNT_CLEANUP_RECOVERY_SOURCE_20261102.json",
+        "new_ui_implemented": false,
+        "live_qualified": false
+      }
+    ],
+    "van.trading.accounts": [
+      {
+        "method": "GET",
+        "path": "/v1/trading/accounts/cleanup/operations/{operation_id}",
+        "endpoint_id": "VE-47aaebbab4d8",
+        "source_ref": "backend/van_gateway/trading/account_cleanup_api.py:370",
+        "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+        "device_proof_required_when_bound": false,
+        "source_status": "CANDIDATE_SOURCE_DATA_ANDROID_TWO_PROOF_CONSUMER_PENDING",
+        "authority": "SOURCE_DATA_ONLY_SEPARATE_CURRENT_PERMISSION_REQUIRED_NO_NEW_ISSUER",
+        "canonical_units": [
+          "BE-004"
+        ],
+        "scope": "Purpose-bound reauthentication facts and original cleanup-child readback under the existing paired account owner. Fresh reauthentication data and a distinct substantive A4 permission remain separate. Historical parent UNKNOWN/null is preserved; exact original target/managed identity/current guards and independent child postconditions are required. Missing or unsealed evidence holds without guessed rebinding, credential restoration or effect resend. Android two-proof production/recovery, native hardware/provider qualification, full grace/delete/cancel and all other original account predicates remain pending.",
+        "specification": "docs/rebuild/rev118/receipts/ACCOUNT_CLEANUP_RECOVERY_SOURCE_20261102.json",
+        "new_ui_implemented": false,
+        "live_qualified": false
+      },
+      {
+        "method": "GET",
+        "path": "/v1/trading/accounts/cleanup/reauth/facts/{fact_id}",
+        "endpoint_id": "VE-3685603aa437",
+        "source_ref": "backend/van_gateway/trading/account_cleanup_api.py:361",
+        "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+        "device_proof_required_when_bound": false,
+        "source_status": "CANDIDATE_SOURCE_DATA_ANDROID_TWO_PROOF_CONSUMER_PENDING",
+        "authority": "SOURCE_DATA_ONLY_SEPARATE_CURRENT_PERMISSION_REQUIRED_NO_NEW_ISSUER",
+        "canonical_units": [
+          "BE-004"
+        ],
+        "scope": "Purpose-bound reauthentication facts and original cleanup-child readback under the existing paired account owner. Fresh reauthentication data and a distinct substantive A4 permission remain separate. Historical parent UNKNOWN/null is preserved; exact original target/managed identity/current guards and independent child postconditions are required. Missing or unsealed evidence holds without guessed rebinding, credential restoration or effect resend. Android two-proof production/recovery, native hardware/provider qualification, full grace/delete/cancel and all other original account predicates remain pending.",
+        "specification": "docs/rebuild/rev118/receipts/ACCOUNT_CLEANUP_RECOVERY_SOURCE_20261102.json",
+        "new_ui_implemented": false,
+        "live_qualified": false
+      },
+      {
+        "method": "POST",
+        "path": "/v1/trading/accounts/cleanup/reauth/challenge",
+        "endpoint_id": "VE-f4440e03b938",
+        "source_ref": "backend/van_gateway/trading/account_cleanup_api.py:357",
+        "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+        "device_proof_required_when_bound": true,
+        "source_status": "CANDIDATE_SOURCE_DATA_ANDROID_TWO_PROOF_CONSUMER_PENDING",
+        "authority": "SOURCE_DATA_ONLY_SEPARATE_CURRENT_PERMISSION_REQUIRED_NO_NEW_ISSUER",
+        "canonical_units": [
+          "BE-004"
+        ],
+        "scope": "Purpose-bound reauthentication facts and original cleanup-child readback under the existing paired account owner. Fresh reauthentication data and a distinct substantive A4 permission remain separate. Historical parent UNKNOWN/null is preserved; exact original target/managed identity/current guards and independent child postconditions are required. Missing or unsealed evidence holds without guessed rebinding, credential restoration or effect resend. Android two-proof production/recovery, native hardware/provider qualification, full grace/delete/cancel and all other original account predicates remain pending.",
+        "specification": "docs/rebuild/rev118/receipts/ACCOUNT_CLEANUP_RECOVERY_SOURCE_20261102.json",
+        "new_ui_implemented": false,
+        "live_qualified": false
+      },
+      {
+        "method": "POST",
+        "path": "/v1/trading/accounts/cleanup/reauth/verify",
+        "endpoint_id": "VE-d18bcca95622",
+        "source_ref": "backend/van_gateway/trading/account_cleanup_api.py:359",
+        "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+        "device_proof_required_when_bound": true,
+        "source_status": "CANDIDATE_SOURCE_DATA_ANDROID_TWO_PROOF_CONSUMER_PENDING",
+        "authority": "SOURCE_DATA_ONLY_SEPARATE_CURRENT_PERMISSION_REQUIRED_NO_NEW_ISSUER",
+        "canonical_units": [
+          "BE-004"
+        ],
+        "scope": "Purpose-bound reauthentication facts and original cleanup-child readback under the existing paired account owner. Fresh reauthentication data and a distinct substantive A4 permission remain separate. Historical parent UNKNOWN/null is preserved; exact original target/managed identity/current guards and independent child postconditions are required. Missing or unsealed evidence holds without guessed rebinding, credential restoration or effect resend. Android two-proof production/recovery, native hardware/provider qualification, full grace/delete/cancel and all other original account predicates remain pending.",
+        "specification": "docs/rebuild/rev118/receipts/ACCOUNT_CLEANUP_RECOVERY_SOURCE_20261102.json",
+        "new_ui_implemented": false,
+        "live_qualified": false
+      }
+    ]
+  }
+}

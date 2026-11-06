@@ -1,0 +1,262 @@
+{
+  "schema": "van.rebuild.mt5-final-native-entry-source/1",
+  "observed_at_utc": "2026-10-23T14:00:57.558698+00:00",
+  "source_parent": "c9dd2a9c0c309e73e866f7b9fc60df00ad07f5dc",
+  "source_sha256": {
+    "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py": "13f0d6387c97b46a189fc5d718ab861cbf599abe3ae105e35f8cccc58ccd7c0d",
+    "trading/tests/test_mt5_physical_identity.py": "6621dfd8b7564b7a47a05d02cbcfed4aa6eadf1a098bc7d7048925a6f97bc68f",
+    "trading/tests/test_mt5_final_native_entry_fence.py": "7121a24887a7961d42addb48e78454c753f0b47b229e513e8f1288badbe89bcb"
+  },
+  "executions": {
+    "initial_before": {
+      "tests": 5,
+      "failures": 4,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.186,
+      "sha256": "addb180e4dc20c1edd429f6dec633311f34e3f77b744a587998a1f5acd342bad"
+    },
+    "isolated_first": {
+      "tests": 32,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 1.518,
+      "sha256": "51f0e0cbf9ad80d71001eb1707f09ef9337f0c459fbcc95c38db52e38abb3bf1"
+    },
+    "isolated_focused": {
+      "tests": 58,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 2.183,
+      "sha256": "086b1cb9b9cb929042d7e2c3b108fafda33f9be30b59d4cdd3a5be55ed5c3fd3"
+    },
+    "integrated_before": {
+      "tests": 6,
+      "failures": 5,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.119,
+      "sha256": "20c4cfd897dc7218de6765dcfe20c8ceb5f8b4ffa3568bfcfc7613ce567284e1"
+    },
+    "integrated_focused": {
+      "tests": 58,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 1.979,
+      "sha256": "43b276081d504942da340c261d97312b4de21117057f247c3d9a97e944a9c1d9"
+    },
+    "full_trading_actual_pg": {
+      "tests": 2484,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 523.38,
+      "sha256": "6ced9e0c56cc7fa443b535ab04a2ddea771753f92e7d6c6987ff85dca8d153f8"
+    }
+  },
+  "fault_campaign": {
+    "definitions": [
+      [
+        "skip final SDK boundary guard",
+        [
+          [
+            "if before_dispatch is not None:",
+            "if False:"
+          ]
+        ]
+      ],
+      [
+        "accept drifted native account",
+        [
+          [
+            "or current.get('server')!=physical['server']",
+            "or False"
+          ]
+        ]
+      ],
+      [
+        "accept revoked native trading permission",
+        [
+          [
+            "or current.get('trade_allowed') is not True",
+            "or False"
+          ]
+        ]
+      ],
+      [
+        "ignore original signed entry age",
+        [
+          [
+            "if abs(self.clock()-int(req['issued_ms']))>SKEW_MS:",
+            "if False:"
+          ]
+        ]
+      ],
+      [
+        "measure signed age before final blocking native read",
+        [
+          [
+            "current=self.t.account()",
+            "observed_before=self.clock();current=self.t.account()"
+          ],
+          [
+            "if abs(self.clock()-int(req['issued_ms']))>SKEW_MS:",
+            "if abs(observed_before-int(req['issued_ms']))>SKEW_MS:"
+          ]
+        ]
+      ]
+    ],
+    "records": [
+      {
+        "case": 0,
+        "phase": "control",
+        "reason": "skip final SDK boundary guard",
+        "exit_code": 0,
+        "counts": {
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "c7f35b5ce2511ba7d6ee6936badf0af12b0a434fb47468443408d931db90b5cd"
+      },
+      {
+        "case": 0,
+        "phase": "fault",
+        "reason": "skip final SDK boundary guard",
+        "exit_code": 1,
+        "counts": {
+          "tests": 6,
+          "failures": 5,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 5,
+        "xml_sha256": "d8786452a4771115bc50b8b575610735a4f1727e6c6cc6f4226a8b68d92af542"
+      },
+      {
+        "case": 1,
+        "phase": "control",
+        "reason": "accept drifted native account",
+        "exit_code": 0,
+        "counts": {
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "65b4b5298d06202a0408dbe082eee9924cd9c78401d45817e69581333a42a0b6"
+      },
+      {
+        "case": 1,
+        "phase": "fault",
+        "reason": "accept drifted native account",
+        "exit_code": 1,
+        "counts": {
+          "tests": 6,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 1,
+        "xml_sha256": "28483e1d0750c2627a5200b67377198a145f7d418453c2e198c739319a386643"
+      },
+      {
+        "case": 2,
+        "phase": "control",
+        "reason": "accept revoked native trading permission",
+        "exit_code": 0,
+        "counts": {
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "241f1cf7093531fd4a34b24ba35a636ba4af27ef0c551e61f2ad92956aeb920b"
+      },
+      {
+        "case": 2,
+        "phase": "fault",
+        "reason": "accept revoked native trading permission",
+        "exit_code": 1,
+        "counts": {
+          "tests": 6,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 1,
+        "xml_sha256": "1e9f68f3b5f0f57a8a81e0ea946e8dba8ae164d98c927b4074107de120ad57ce"
+      },
+      {
+        "case": 3,
+        "phase": "control",
+        "reason": "ignore original signed entry age",
+        "exit_code": 0,
+        "counts": {
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "09d2ae650fbeaac96d977f229e08f2a8ece85393cea1bdea296ce0a056020780"
+      },
+      {
+        "case": 3,
+        "phase": "fault",
+        "reason": "ignore original signed entry age",
+        "exit_code": 1,
+        "counts": {
+          "tests": 6,
+          "failures": 2,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 2,
+        "xml_sha256": "0fec61cb03acc64f4a031bc0618b066ac73d4503a16ca05644934af50942d467"
+      },
+      {
+        "case": 4,
+        "phase": "control",
+        "reason": "measure signed age before final blocking native read",
+        "exit_code": 0,
+        "counts": {
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "599e5fa5211a1c95f5d4d11bdbfe4e063b0b1cefed35e1e364b5bfdf5fc4b4e2"
+      },
+      {
+        "case": 4,
+        "phase": "fault",
+        "reason": "measure signed age before final blocking native read",
+        "exit_code": 1,
+        "counts": {
+          "tests": 6,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 1,
+        "xml_sha256": "6a976985796882170e6944c78e045516b07ab4ffeff3b26c53251c278e9f19b2"
+      }
+    ],
+    "source_sha256": "13f0d6387c97b46a189fc5d718ab861cbf599abe3ae105e35f8cccc58ccd7c0d",
+    "source_restored": true
+  },
+  "private_pg_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "qualification": "Candidate source only. Existing signed transport freshness, current physical identity/permission/connection checked at the final SDK boundary. No complete explicit command-deadline, lease-epoch/risk-budget envelope, Windows terminal/broker deployment, whole-unit, financial or handset acceptance."
+}

@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "authorization_id": "auth-20261021-owner-repository-consolidation",
+  "project": "van",
+  "authority": "OWNER_EXPLICIT",
+  "owner_instruction_sha256": "d508284fb40d041695230949a04dcc0ba03f30c942519cbf1cc4d24ef9c57d84",
+  "owner_instruction_excerpt": "Perform repository consolidation with all branches evaluated so opus 5.5 will start on a a clean unpolluted repository",
+  "source": {
+    "kind": "owner_session_instruction",
+    "channel": "codex",
+    "owner_attested": true,
+    "device_signature_claimed": false,
+    "cryptographic_signature_claimed": false,
+    "signed_ingress_claimed": false
+  },
+  "issued_at_utc": "2026-10-21T10:49:13.462514+00:00",
+  "base_sha": "bdd63a40174d36ccdd0ceb8f3fb258c612df8bbe",
+  "branch_scope": "consolidation/opus-clean-rev118-20261021",
+  "authorized_paths": [
+    "README.md",
+    "CLAUDE.md",
+    "CONSOLIDATION_STATE.json",
+    ".gitignore",
+    "docs/**",
+    "tools/consolidation/**",
+    "tests/contracts/test_repository_consolidation.py",
+    "trading/**",
+    "backend/van_gateway/trading/account_operations.py"
+  ],
+  "change_classes": [
+    "repository_consolidation",
+    "branch_evaluation",
+    "source_integration",
+    "provenance",
+    "entrypoint_documentation",
+    "regression_validation"
+  ],
+  "reusable": true,
+  "revoked": false,
+  "limitations": [
+    "Applies only to the owner-requested Van source consolidation; not an independent approval or signed runtime authority.",
+    "No deployment, live trading, purchases, remote branch deletion, history rewrite, or reduction of existing acceptance requirements.",
+    "Keep existing authorization records and ledger rows append-only.",
+    "Required independent code-owner review and trusted-base admission remain separate from this instruction receipt."
+  ]
+}

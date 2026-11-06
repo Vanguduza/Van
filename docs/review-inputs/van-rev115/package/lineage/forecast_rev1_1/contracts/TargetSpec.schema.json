@@ -1,0 +1,219 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:van:ml:1.0:TargetSpec",
+  "title": "TargetSpec",
+  "description": "Proposed VAN interchange contract. Shape validity is not permission, factual evidence or runtime qualification. Cross-record semantic validation and independent trusted receipts are required.",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "van-ml/1.0"
+    },
+    "record_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "authority_effect": {
+      "const": "NONE"
+    },
+    "scope": {
+      "type": "object",
+      "properties": {
+        "project_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "cohort_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "instrument_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "venue_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "environment": {
+          "enum": [
+            "FIXTURE",
+            "RESEARCH",
+            "SHADOW",
+            "LIVE_ADVISORY"
+          ]
+        }
+      },
+      "required": [
+        "project_id",
+        "cohort_id",
+        "instrument_id",
+        "venue_id",
+        "environment"
+      ],
+      "additionalProperties": false
+    },
+    "target_family": {
+      "enum": [
+        "RETURN",
+        "NET_EDGE",
+        "BINARY_EVENT",
+        "RANK_RELEVANCE",
+        "REALIZED_VARIANCE",
+        "EXECUTION_COST",
+        "EXCURSION",
+        "TRAJECTORY"
+      ]
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "horizon": {
+      "type": "object",
+      "properties": {
+        "steps": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "unit": {
+          "enum": [
+            "BARS",
+            "SESSIONS",
+            "ELAPSED_SECONDS"
+          ]
+        },
+        "interval_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "calendar_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "steps",
+        "unit",
+        "interval_id",
+        "calendar_digest"
+      ],
+      "additionalProperties": false
+    },
+    "unit": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "cost_basis": {
+      "enum": [
+        "GROSS",
+        "NET_EXPLICIT",
+        "EMBEDDED_IN_FILLS",
+        "NOT_APPLICABLE"
+      ]
+    },
+    "cost_policy_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "definition_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "transformation_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "start_price_rule": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "end_price_rule": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "label_available_rule": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "censoring_policy": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "ambiguous_bar_policy": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "domain": {
+      "enum": [
+        "REAL",
+        "NONNEGATIVE",
+        "PROBABILITY",
+        "INTEGER_RELEVANCE"
+      ]
+    },
+    "event_definition": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "ranking_group_rule": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "use_of_future_values": {
+      "const": "TARGET_ONLY_NOT_FEATURE"
+    }
+  },
+  "required": [
+    "schema_version",
+    "record_id",
+    "authority_effect",
+    "scope",
+    "target_family",
+    "name",
+    "horizon",
+    "unit",
+    "cost_basis",
+    "cost_policy_digest",
+    "definition_digest",
+    "transformation_digest",
+    "start_price_rule",
+    "end_price_rule",
+    "label_available_rule",
+    "censoring_policy",
+    "ambiguous_bar_policy",
+    "domain",
+    "event_definition",
+    "ranking_group_rule",
+    "use_of_future_values"
+  ],
+  "additionalProperties": false
+}

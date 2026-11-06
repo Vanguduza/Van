@@ -1,0 +1,53 @@
+{
+  "schema": "van.supplemental-source-faults/1",
+  "original_sha256": "8389e2a44e1e583204d9443aa8c78c9bff97fece9345642f4c50d29d4b6e419a",
+  "source_restored": true,
+  "cases": [
+    {
+      "case": "ignore-future-availability",
+      "exit": 1,
+      "mutated_sha256": "67f4d952ff58049a1393ce520bf657707c62f03637aa34525d801732bdd932ef"
+    },
+    {
+      "case": "ignore-original-capture-clock",
+      "exit": 1,
+      "mutated_sha256": "2ab4f6eb2d2fc9b319c958f99def978f06a7c852809bffc6862a64034cff9c45"
+    },
+    {
+      "case": "include-future-relays",
+      "exit": 1,
+      "mutated_sha256": "4510ceea200db948ce990d707934b735daa7e0bc34b6cbd8117da623af8dd74d"
+    },
+    {
+      "case": "feed-self-promotes-trust",
+      "exit": 1,
+      "mutated_sha256": "5a454fc534838f31b112334e2875fb0a6ee054c37d64f0f36d1d2578b81b6f33"
+    },
+    {
+      "case": "unbounded-risk-floor",
+      "exit": 1,
+      "mutated_sha256": "715c550bcd054f1c27b61738a726af7bc1b58f9fced72f273547912e0e2f46b8"
+    },
+    {
+      "case": "nonfinite-materiality",
+      "exit": 1,
+      "mutated_sha256": "1d4c5c610986902678ecd6671c8178f30e00a925403c2b00a9c340b5af9e72b3"
+    },
+    {
+      "case": "collide-subject-kinds",
+      "exit": 1,
+      "mutated_sha256": "dc85d1f45ea1d6e50c800056defac48d4139e92a0c4878ef39aca2f7a1dfe9ea"
+    },
+    {
+      "case": "backdate-replayed-observation",
+      "exit": 1,
+      "mutated_sha256": "45c02168dda503cf341217862840acd2470f0b5a7db93d7655023b4f43768aa5"
+    },
+    {
+      "case": "count-unavailable-report",
+      "exit": 1,
+      "mutated_sha256": "55b348a70ac8caf9ef2868d19cb5b27f4898547d5cd4bdd83f0aea1b02a38f90"
+    }
+  ],
+  "not_canonical_corpus": true
+}

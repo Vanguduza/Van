@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="3" time="3.071" timestamp="2026-10-25T16:33:17.340714+00:00" hostname="2c5a245e39f1"><testcase classname="tests.test_market_monitor_commands" name="test_corrupt_receipt_never_verifies[request_sha256-0000000000000000000000000000000000000000000000000000000000000000]" time="0.334"><failure message="Failed: DID NOT RAISE ValueError">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-16/test_corrupt_receipt_never_ver0')
+column = 'request_sha256'
+value = '0000000000000000000000000000000000000000000000000000000000000000'
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize('column,value', [
+        ('request_sha256','0'*64), ('result_json','{}'),
+        ('result_json',json.dumps({'request_id':'wrong','object_id':ALERT,'kind':'ALERT','revision':2,'status':'PAUSED','state_sha256':'a'*64})),
+    ])
+    async def test_corrupt_receipt_never_verifies(tmp_path,column,value):
+        s = await service(tmp_path); alert = await create_alert(s); ctx = await command(s,alert.object_id)
+        await AlertControlExecutor().execute(ctx)
+        await s.store.execute(f'UPDATE market_monitor_operations SET {column}=? WHERE request_id=?',(value,request_id(ctx.command_id)))
+&gt;       with pytest.raises(ValueError):await control_readback(s.store,ctx.command_id)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+backend/tests/test_market_monitor_commands.py:153: Failed</failure></testcase><testcase classname="tests.test_market_monitor_commands" name="test_corrupt_receipt_never_verifies[result_json-{}]" time="0.258" /><testcase classname="tests.test_market_monitor_commands" name="test_corrupt_receipt_never_verifies[result_json-{&quot;request_id&quot;: &quot;wrong&quot;, &quot;object_id&quot;: &quot;mal_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&quot;, &quot;kind&quot;: &quot;ALERT&quot;, &quot;revision&quot;: 2, &quot;status&quot;: &quot;PAUSED&quot;, &quot;state_sha256&quot;: &quot;aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&quot;}]" time="0.278" /></testsuite></testsuites>

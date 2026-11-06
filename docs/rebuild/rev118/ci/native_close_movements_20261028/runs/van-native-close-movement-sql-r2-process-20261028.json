@@ -1,0 +1,15 @@
+{
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "/workspace/van-native-close-movement-sql-r2-20261028.py"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 718467,
+  "started_at_utc": "2026-10-28T20:12:14.275627+00:00",
+  "timeout_seconds": 1950,
+  "state": "COMPLETED",
+  "command_pid": 718471,
+  "exit": 0,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-28T20:13:10.777985+00:00"
+}

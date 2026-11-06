@@ -1,0 +1,6 @@
+{
+  "base_head": "c08ea48674647311c46e0c1853c1d7b9f9afc4e6",
+  "existing_archive_source_matches_committed": true,
+  "source_sha256": "202b6c5b16ac2b7e26a0dfb31ee46eb663045942bf1dc1132604f894b16a9416",
+  "reproduction": "Controlled stat/read growth window on a real5000byte file with declared64byte bound. Original functional read ultimately refuses, but actual read request is unbounded(-1), not65bytes. No claim of natural race, OOM, processquota or host qualification. Other before-failures are new optional budget API not yet implemented."
+}

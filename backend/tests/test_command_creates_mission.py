@@ -217,7 +217,7 @@ class TestTheLadderIsEarned:
         device_id = await _enrol(ac, app)
 
         async def boom(text, metadata=None):
-            raise HermesBridgeError("hermes_unreachable", "connection refused")
+            raise HermesBridgeError("hermes_unreachable", "connection refused", retry_safe=True)
 
         monkeypatch.setattr(app.state.orchestrator.hermes, "create_run", boom)
         resp = await ac.post(

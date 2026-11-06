@@ -1,0 +1,4386 @@
+{
+  "status": "AUTHOR_RECONCILED_NOT_INDEPENDENTLY_ACCEPTED",
+  "features": [
+    {
+      "id": "VNX-F-HOME-01",
+      "domain": "HOME",
+      "title": "Spatial Home",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible spatial home capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "VAN_DISPLAY_EVIDENCE",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-HOME-01",
+      "requirement_ids": [
+        "VNX-R-001",
+        "VNX-R-014",
+        "VNX-R-018",
+        "VNX-R-019",
+        "VNX-R-143",
+        "VNX-R-165",
+        "VNX-R-166",
+        "VNX-R-168",
+        "VNX-R-169",
+        "VNX-R-170",
+        "VNX-R-171"
+      ],
+      "primary_surface_id": "VNX-S-HOME-01",
+      "van_requirements": [
+        "VAN-NX-003"
+      ],
+      "backend_units": [
+        "BE-032"
+      ],
+      "frontend_units": [
+        "FE-001",
+        "FE-003",
+        "FE-004"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-HOME-01"
+      ],
+      "primary_frontend_unit": "FE-004",
+      "context_ids": [
+        "VNX-S-HOME-01"
+      ]
+    },
+    {
+      "id": "VNX-F-HOME-02",
+      "domain": "HOME",
+      "title": "State-aware metallic orb",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible state-aware metallic orb capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "VAN_DISPLAY_EVIDENCE",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-HOME-02",
+      "requirement_ids": [
+        "VNX-R-002",
+        "VNX-R-020",
+        "VNX-R-142",
+        "VNX-R-145",
+        "VNX-R-146",
+        "VNX-R-164",
+        "VNX-R-167"
+      ],
+      "primary_surface_id": "VNX-S-HOME-02",
+      "van_requirements": [
+        "VAN-NX-004"
+      ],
+      "backend_units": [
+        "BE-030"
+      ],
+      "frontend_units": [
+        "FE-004"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-HOME-02"
+      ],
+      "primary_frontend_unit": "FE-004",
+      "context_ids": [
+        "VNX-S-HOME-01",
+        "VNX-S-HOME-07"
+      ]
+    },
+    {
+      "id": "VNX-F-HOME-03",
+      "domain": "HOME",
+      "title": "Home quick hub",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible home quick hub capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "VAN_DISPLAY_EVIDENCE",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-HOME-02",
+      "requirement_ids": [
+        "VNX-R-003",
+        "VNX-R-021",
+        "VNX-R-144"
+      ],
+      "primary_surface_id": "VNX-S-HOME-02",
+      "van_requirements": [
+        "VAN-NX-005"
+      ],
+      "backend_units": [
+        "BE-030",
+        "BE-032"
+      ],
+      "frontend_units": [
+        "FE-004"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-HOME-03"
+      ],
+      "primary_frontend_unit": "FE-004",
+      "context_ids": [
+        "VNX-S-HOME-02"
+      ]
+    },
+    {
+      "id": "VNX-F-HOME-04",
+      "domain": "HOME",
+      "title": "Attention preview",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible attention preview capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "VAN_DISPLAY_EVIDENCE",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-HOME-03",
+      "requirement_ids": [
+        "VNX-R-022"
+      ],
+      "primary_surface_id": "VNX-S-HOME-03",
+      "van_requirements": [
+        "VAN-NX-007"
+      ],
+      "backend_units": [
+        "BE-002",
+        "BE-030"
+      ],
+      "frontend_units": [
+        "FE-004"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-HOME-04"
+      ],
+      "primary_frontend_unit": "FE-004",
+      "context_ids": [
+        "VNX-S-HOME-01",
+        "VNX-S-HOME-03",
+        "VNX-S-HOME-05",
+        "VNX-S-HOME-06"
+      ]
+    },
+    {
+      "id": "VNX-F-HOME-05",
+      "domain": "HOME",
+      "title": "Smart briefing",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible smart briefing capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "VAN_DISPLAY_EVIDENCE",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-HOME-01",
+      "requirement_ids": [
+        "VNX-R-023"
+      ],
+      "primary_surface_id": "VNX-S-HOME-01",
+      "van_requirements": [
+        "VAN-NX-063"
+      ],
+      "backend_units": [
+        "BE-030",
+        "BE-032"
+      ],
+      "frontend_units": [
+        "FE-004"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-HOME-05"
+      ],
+      "primary_frontend_unit": "FE-004",
+      "context_ids": [
+        "VNX-S-HOME-01",
+        "VNX-S-HOME-04"
+      ]
+    },
+    {
+      "id": "VNX-F-HOME-06",
+      "domain": "HOME",
+      "title": "Semantic deep links",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible semantic deep links capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "VAN_DISPLAY_EVIDENCE",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-HOME-01",
+      "requirement_ids": [
+        "VNX-R-024"
+      ],
+      "primary_surface_id": "VNX-S-HOME-01",
+      "van_requirements": [
+        "VAN-NX-003"
+      ],
+      "backend_units": [
+        "BE-032"
+      ],
+      "frontend_units": [
+        "FE-001",
+        "FE-003"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-HOME-06"
+      ],
+      "primary_frontend_unit": "FE-003",
+      "context_ids": [
+        "VNX-S-HOME-01",
+        "VNX-S-HOME-02",
+        "VNX-S-HOME-03",
+        "VNX-S-HOME-06"
+      ]
+    },
+    {
+      "id": "VNX-F-HOME-07",
+      "domain": "HOME",
+      "title": "Home state fallbacks",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible home state fallbacks capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "VAN_DISPLAY_EVIDENCE",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-HOME-01",
+      "requirement_ids": [
+        "VNX-R-025"
+      ],
+      "primary_surface_id": "VNX-S-HOME-01",
+      "van_requirements": [
+        "VAN-NX-021"
+      ],
+      "backend_units": [
+        "BE-002",
+        "BE-003",
+        "BE-033"
+      ],
+      "frontend_units": [
+        "FE-003",
+        "FE-004"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-HOME-07"
+      ],
+      "primary_frontend_unit": "FE-004",
+      "context_ids": [
+        "VNX-S-HOME-01",
+        "VNX-S-HOME-02",
+        "VNX-S-HOME-05",
+        "VNX-S-HOME-07"
+      ]
+    },
+    {
+      "id": "VNX-F-TRADE-01",
+      "domain": "TRADE",
+      "title": "Trading Home",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible trading home capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "VAN_DISPLAY_EVIDENCE",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-TRADE-01",
+      "requirement_ids": [
+        "VNX-R-005",
+        "VNX-R-026"
+      ],
+      "primary_surface_id": "VNX-S-TRADE-01",
+      "van_requirements": [
+        "VAN-NX-008"
+      ],
+      "backend_units": [
+        "BE-008",
+        "BE-012",
+        "BE-013",
+        "BE-020",
+        "BE-032"
+      ],
+      "frontend_units": [
+        "FE-006"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-TRADE-01"
+      ],
+      "primary_frontend_unit": "FE-006",
+      "context_ids": [
+        "VNX-S-TRADE-01",
+        "VNX-S-TRADE-12"
+      ]
+    },
+    {
+      "id": "VNX-F-TRADE-02",
+      "domain": "TRADE",
+      "title": "Portfolio summary",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible portfolio summary capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "VAN_DISPLAY_EVIDENCE",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-TRADE-02",
+      "requirement_ids": [
+        "VNX-R-027"
+      ],
+      "primary_surface_id": "VNX-S-TRADE-02",
+      "van_requirements": [
+        "VAN-NX-052",
+        "VAN-NX-062"
+      ],
+      "backend_units": [
+        "BE-010",
+        "BE-011",
+        "BE-012"
+      ],
+      "frontend_units": [
+        "FE-009",
+        "FE-011",
+        "FE-006"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-TRADE-02"
+      ],
+      "primary_frontend_unit": "FE-006",
+      "context_ids": [
+        "VNX-S-TRADE-01",
+        "VNX-S-TRADE-02"
+      ]
+    },
+    {
+      "id": "VNX-F-TRADE-03",
+      "domain": "TRADE",
+      "title": "Markets overview",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible markets overview capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "VAN_DISPLAY_EVIDENCE",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-TRADE-03",
+      "requirement_ids": [
+        "VNX-R-028"
+      ],
+      "primary_surface_id": "VNX-S-TRADE-03",
+      "van_requirements": [
+        "VAN-NX-011"
+      ],
+      "backend_units": [
+        "BE-008",
+        "BE-020"
+      ],
+      "frontend_units": [
+        "FE-006"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-TRADE-03"
+      ],
+      "primary_frontend_unit": "FE-006",
+      "context_ids": [
+        "VNX-S-TRADE-01",
+        "VNX-S-TRADE-03",
+        "VNX-S-TRADE-04",
+        "VNX-S-TRADE-05"
+      ]
+    },
+    {
+      "id": "VNX-F-TRADE-04",
+      "domain": "TRADE",
+      "title": "Watchlists",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible watchlists capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "VAN_DISPLAY_EVIDENCE",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-TRADE-06",
+      "requirement_ids": [
+        "VNX-R-029"
+      ],
+      "primary_surface_id": "VNX-S-TRADE-06",
+      "van_requirements": [
+        "VAN-NX-011",
+        "VAN-NX-047"
+      ],
+      "backend_units": [
+        "BE-008",
+        "BE-020"
+      ],
+      "frontend_units": [
+        "FE-006"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-TRADE-04"
+      ],
+      "primary_frontend_unit": "FE-006",
+      "context_ids": [
+        "VNX-S-TRADE-01",
+        "VNX-S-TRADE-06",
+        "VNX-S-TRADE-07"
+      ]
+    },
+    {
+      "id": "VNX-F-TRADE-05",
+      "domain": "TRADE",
+      "title": "Opportunity discovery",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible opportunity discovery capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "VAN_DISPLAY_EVIDENCE",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-TRADE-01",
+      "requirement_ids": [
+        "VNX-R-030"
+      ],
+      "primary_surface_id": "VNX-S-TRADE-01",
+      "van_requirements": [
+        "VAN-NX-012"
+      ],
+      "backend_units": [
+        "BE-021"
+      ],
+      "frontend_units": [
+        "FE-014",
+        "FE-006"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-TRADE-05"
+      ],
+      "primary_frontend_unit": "FE-006",
+      "context_ids": [
+        "VNX-S-TRADE-01",
+        "VNX-S-TRADE-08"
+      ]
+    },
+    {
+      "id": "VNX-F-TRADE-06",
+      "domain": "TRADE",
+      "title": "Charts entry",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible charts entry capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "VAN_DISPLAY_EVIDENCE",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-TRADE-09",
+      "requirement_ids": [
+        "VNX-R-031"
+      ],
+      "primary_surface_id": "VNX-S-TRADE-09",
+      "van_requirements": [
+        "VAN-NX-009"
+      ],
+      "backend_units": [
+        "BE-008",
+        "BE-018"
+      ],
+      "frontend_units": [
+        "FE-007",
+        "FE-006"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-TRADE-06"
+      ],
+      "primary_frontend_unit": "FE-006",
+      "context_ids": [
+        "VNX-S-TRADE-01",
+        "VNX-S-TRADE-09"
+      ]
+    },
+    {
+      "id": "VNX-F-TRADE-07",
+      "domain": "TRADE",
+      "title": "Intelligence entry",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible intelligence entry capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "VAN_DISPLAY_EVIDENCE",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-TRADE-10",
+      "requirement_ids": [
+        "VNX-R-032"
+      ],
+      "primary_surface_id": "VNX-S-TRADE-10",
+      "van_requirements": [
+        "VAN-NX-012",
+        "VAN-NX-013"
+      ],
+      "backend_units": [
+        "BE-014",
+        "BE-015",
+        "BE-016",
+        "BE-021"
+      ],
+      "frontend_units": [
+        "FE-013",
+        "FE-014",
+        "FE-006"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-TRADE-07"
+      ],
+      "primary_frontend_unit": "FE-006",
+      "context_ids": [
+        "VNX-S-TRADE-01",
+        "VNX-S-TRADE-10"
+      ]
+    },
+    {
+      "id": "VNX-F-TRADE-08",
+      "domain": "TRADE",
+      "title": "Account context entry",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible account context entry capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "VAN_DISPLAY_EVIDENCE",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-TRADE-10",
+      "requirement_ids": [
+        "VNX-R-033"
+      ],
+      "primary_surface_id": "VNX-S-TRADE-10",
+      "van_requirements": [
+        "VAN-NX-048"
+      ],
+      "backend_units": [
+        "BE-004",
+        "BE-005"
+      ],
+      "frontend_units": [
+        "FE-010",
+        "FE-006"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-TRADE-08"
+      ],
+      "primary_frontend_unit": "FE-006",
+      "context_ids": [
+        "VNX-S-TRADE-01",
+        "VNX-S-TRADE-02",
+        "VNX-S-TRADE-11",
+        "VNX-S-TRADE-12"
+      ]
+    },
+    {
+      "id": "VNX-F-CHART-01",
+      "domain": "CHART",
+      "title": "Native chart previews",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible native chart previews capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "VAN_DISPLAY_EVIDENCE",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-CHART-20",
+      "requirement_ids": [
+        "VNX-R-034",
+        "VNX-R-132",
+        "VNX-R-135",
+        "VNX-R-136",
+        "VNX-R-138",
+        "VNX-R-139"
+      ],
+      "primary_surface_id": "VNX-S-CHART-20",
+      "van_requirements": [
+        "VAN-NX-041"
+      ],
+      "backend_units": [
+        "BE-008",
+        "BE-018"
+      ],
+      "frontend_units": [
+        "FE-007"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-CHART-01"
+      ],
+      "primary_frontend_unit": "FE-007",
+      "context_ids": [
+        "VNX-S-CHART-20"
+      ]
+    },
+    {
+      "id": "VNX-F-CHART-02",
+      "domain": "CHART",
+      "title": "Rich chart terminal",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Keep full toolset hidden in contextual sheets while preserving precision and interaction.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "VAN_DISPLAY_EVIDENCE",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-CHART-02",
+      "requirement_ids": [
+        "VNX-R-035",
+        "VNX-R-134"
+      ],
+      "primary_surface_id": "VNX-S-CHART-02",
+      "van_requirements": [
+        "VAN-NX-009",
+        "VAN-NX-041",
+        "VAN-NX-042"
+      ],
+      "backend_units": [
+        "BE-008",
+        "BE-018"
+      ],
+      "frontend_units": [
+        "FE-007"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-CHART-02"
+      ],
+      "primary_frontend_unit": "FE-007",
+      "context_ids": [
+        "VNX-S-CHART-02",
+        "VNX-S-CHART-07",
+        "VNX-S-CHART-09"
+      ]
+    },
+    {
+      "id": "VNX-F-CHART-03",
+      "domain": "CHART",
+      "title": "Instrument search and alias mapping",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible instrument search and alias mapping capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "VAN_DISPLAY_EVIDENCE",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-CHART-01",
+      "requirement_ids": [
+        "VNX-R-036"
+      ],
+      "primary_surface_id": "VNX-S-CHART-01",
+      "van_requirements": [
+        "VAN-NX-040",
+        "VAN-NX-045"
+      ],
+      "backend_units": [
+        "BE-003",
+        "BE-008",
+        "BE-010",
+        "BE-012"
+      ],
+      "frontend_units": [
+        "FE-001",
+        "FE-006",
+        "FE-009",
+        "FE-007"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-CHART-03"
+      ],
+      "primary_frontend_unit": "FE-007",
+      "context_ids": [
+        "VNX-S-CHART-01"
+      ]
+    },
+    {
+      "id": "VNX-F-CHART-04",
+      "domain": "CHART",
+      "title": "Price and timeframe precision",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible price and timeframe precision capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "VAN_DISPLAY_EVIDENCE",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-CHART-08",
+      "requirement_ids": [
+        "VNX-R-037"
+      ],
+      "primary_surface_id": "VNX-S-CHART-08",
+      "van_requirements": [
+        "VAN-NX-040",
+        "VAN-NX-045"
+      ],
+      "backend_units": [
+        "BE-003",
+        "BE-008",
+        "BE-010",
+        "BE-012"
+      ],
+      "frontend_units": [
+        "FE-001",
+        "FE-006",
+        "FE-009",
+        "FE-007"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-CHART-04"
+      ],
+      "primary_frontend_unit": "FE-007",
+      "context_ids": [
+        "VNX-S-CHART-01",
+        "VNX-S-CHART-02",
+        "VNX-S-CHART-07",
+        "VNX-S-CHART-08"
+      ]
+    },
+    {
+      "id": "VNX-F-CHART-05",
+      "domain": "CHART",
+      "title": "Indicators and parameters",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible indicators and parameters capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "VAN_DISPLAY_EVIDENCE",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-CHART-01",
+      "requirement_ids": [
+        "VNX-R-038"
+      ],
+      "primary_surface_id": "VNX-S-CHART-01",
+      "van_requirements": [
+        "VAN-NX-043"
+      ],
+      "backend_units": [
+        "BE-018"
+      ],
+      "frontend_units": [
+        "FE-008"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-CHART-05"
+      ],
+      "primary_frontend_unit": "FE-008",
+      "context_ids": [
+        "VNX-S-CHART-03",
+        "VNX-S-CHART-04",
+        "VNX-S-CHART-07"
+      ]
+    },
+    {
+      "id": "VNX-F-CHART-06",
+      "domain": "CHART",
+      "title": "Drawing tools and persistence",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible drawing tools and persistence capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "VAN_DISPLAY_EVIDENCE",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-CHART-05",
+      "requirement_ids": [
+        "VNX-R-039",
+        "VNX-R-133"
+      ],
+      "primary_surface_id": "VNX-S-CHART-05",
+      "van_requirements": [
+        "VAN-NX-043"
+      ],
+      "backend_units": [
+        "BE-018"
+      ],
+      "frontend_units": [
+        "FE-008"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-CHART-06"
+      ],
+      "primary_frontend_unit": "FE-008",
+      "context_ids": [
+        "VNX-S-CHART-05",
+        "VNX-S-CHART-06"
+      ]
+    },
+    {
+      "id": "VNX-F-CHART-07",
+      "domain": "CHART",
+      "title": "Chart overlays and crosshair",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible chart overlays and crosshair capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "VAN_DISPLAY_EVIDENCE",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-CHART-17",
+      "requirement_ids": [
+        "VNX-R-040"
+      ],
+      "primary_surface_id": "VNX-S-CHART-17",
+      "van_requirements": [
+        "VAN-NX-009",
+        "VAN-NX-010"
+      ],
+      "backend_units": [
+        "BE-008",
+        "BE-010",
+        "BE-011",
+        "BE-012",
+        "BE-018"
+      ],
+      "frontend_units": [
+        "FE-007",
+        "FE-009",
+        "FE-011"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-CHART-07"
+      ],
+      "primary_frontend_unit": "FE-007",
+      "context_ids": [
+        "VNX-S-CHART-02",
+        "VNX-S-CHART-17"
+      ]
+    },
+    {
+      "id": "VNX-F-CHART-08",
+      "domain": "CHART",
+      "title": "Bar replay sandbox",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible bar replay sandbox capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "VAN_DISPLAY_EVIDENCE",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-CHART-12",
+      "requirement_ids": [
+        "VNX-R-041",
+        "VNX-R-137"
+      ],
+      "primary_surface_id": "VNX-S-CHART-12",
+      "van_requirements": [
+        "VAN-NX-044"
+      ],
+      "backend_units": [
+        "BE-019"
+      ],
+      "frontend_units": [
+        "FE-008"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-CHART-08"
+      ],
+      "primary_frontend_unit": "FE-008",
+      "context_ids": [
+        "VNX-S-CHART-12",
+        "VNX-S-CHART-13",
+        "VNX-S-CHART-14"
+      ]
+    },
+    {
+      "id": "VNX-F-CHART-09",
+      "domain": "CHART",
+      "title": "Multi-chart layouts",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible multi-chart layouts capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "VAN_DISPLAY_EVIDENCE",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-CHART-01",
+      "requirement_ids": [
+        "VNX-R-042"
+      ],
+      "primary_surface_id": "VNX-S-CHART-01",
+      "van_requirements": [
+        "VAN-NX-043"
+      ],
+      "backend_units": [
+        "BE-018"
+      ],
+      "frontend_units": [
+        "FE-008"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-CHART-09"
+      ],
+      "primary_frontend_unit": "FE-008",
+      "context_ids": [
+        "VNX-S-CHART-07",
+        "VNX-S-CHART-10",
+        "VNX-S-CHART-11"
+      ]
+    },
+    {
+      "id": "VNX-F-CHART-10",
+      "domain": "CHART",
+      "title": "Orderbook market depth",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible orderbook market depth capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "VAN_DISPLAY_EVIDENCE",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-CHART-15",
+      "requirement_ids": [
+        "VNX-R-043",
+        "VNX-R-140"
+      ],
+      "primary_surface_id": "VNX-S-CHART-15",
+      "van_requirements": [
+        "VAN-NX-009",
+        "VAN-NX-045"
+      ],
+      "backend_units": [
+        "BE-008",
+        "BE-010",
+        "BE-018"
+      ],
+      "frontend_units": [
+        "FE-007",
+        "FE-009"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-CHART-10"
+      ],
+      "primary_frontend_unit": "FE-007",
+      "context_ids": [
+        "VNX-S-CHART-15"
+      ]
+    },
+    {
+      "id": "VNX-F-CHART-11",
+      "domain": "CHART",
+      "title": "Chart alert creation",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible chart alert creation capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "VAN_DISPLAY_EVIDENCE",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-CHART-01",
+      "requirement_ids": [
+        "VNX-R-044"
+      ],
+      "primary_surface_id": "VNX-S-CHART-01",
+      "van_requirements": [
+        "VAN-NX-047"
+      ],
+      "backend_units": [
+        "BE-020"
+      ],
+      "frontend_units": [
+        "FE-006",
+        "FE-007"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-CHART-11"
+      ],
+      "primary_frontend_unit": "FE-007",
+      "context_ids": [
+        "VNX-S-CHART-16"
+      ]
+    },
+    {
+      "id": "VNX-F-CHART-12",
+      "domain": "CHART",
+      "title": "Order and position overlays",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible order and position overlays capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "VAN_DISPLAY_EVIDENCE",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-CHART-01",
+      "requirement_ids": [
+        "VNX-R-006",
+        "VNX-R-045"
+      ],
+      "primary_surface_id": "VNX-S-CHART-01",
+      "van_requirements": [
+        "VAN-NX-010",
+        "VAN-NX-045"
+      ],
+      "backend_units": [
+        "BE-010",
+        "BE-011",
+        "BE-012"
+      ],
+      "frontend_units": [
+        "FE-009",
+        "FE-011",
+        "FE-007"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-CHART-12"
+      ],
+      "primary_frontend_unit": "FE-007",
+      "context_ids": [
+        "VNX-S-CHART-02"
+      ]
+    },
+    {
+      "id": "VNX-F-CHART-13",
+      "domain": "CHART",
+      "title": "Chart source integrity",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible chart source integrity capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "VAN_DISPLAY_EVIDENCE",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-CHART-01",
+      "requirement_ids": [
+        "VNX-R-046"
+      ],
+      "primary_surface_id": "VNX-S-CHART-01",
+      "van_requirements": [
+        "VAN-NX-040",
+        "VAN-NX-041"
+      ],
+      "backend_units": [
+        "BE-003",
+        "BE-008",
+        "BE-012",
+        "BE-018"
+      ],
+      "frontend_units": [
+        "FE-001",
+        "FE-006",
+        "FE-007"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-CHART-13"
+      ],
+      "primary_frontend_unit": "FE-007",
+      "context_ids": [
+        "VNX-S-CHART-01",
+        "VNX-S-CHART-02",
+        "VNX-S-CHART-18"
+      ]
+    },
+    {
+      "id": "VNX-F-CHART-14",
+      "domain": "CHART",
+      "title": "Chart observation export",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Emit provenance-bound drawing/crosshair/annotation observations as non-authoritative analyst inputs.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "VAN_DISPLAY_EVIDENCE",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-CHART-19",
+      "requirement_ids": [
+        "VNX-R-047",
+        "VNX-R-141"
+      ],
+      "primary_surface_id": "VNX-S-CHART-19",
+      "van_requirements": [
+        "VAN-NX-046",
+        "VAN-NX-065"
+      ],
+      "backend_units": [
+        "BE-021"
+      ],
+      "frontend_units": [
+        "FE-014"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-CHART-14"
+      ],
+      "primary_frontend_unit": "FE-014",
+      "context_ids": [
+        "VNX-S-CHART-19"
+      ]
+    },
+    {
+      "id": "VNX-F-CHART-15",
+      "domain": "CHART",
+      "title": "Chart renderer failover",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible chart renderer failover capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "VAN_DISPLAY_EVIDENCE",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-CHART-01",
+      "requirement_ids": [
+        "VNX-R-048"
+      ],
+      "primary_surface_id": "VNX-S-CHART-01",
+      "van_requirements": [
+        "VAN-NX-041",
+        "VAN-NX-042"
+      ],
+      "backend_units": [
+        "BE-008",
+        "BE-018"
+      ],
+      "frontend_units": [
+        "FE-007"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-CHART-15"
+      ],
+      "primary_frontend_unit": "FE-007",
+      "context_ids": [
+        "VNX-S-CHART-20"
+      ]
+    },
+    {
+      "id": "VNX-F-ORDERS-01",
+      "domain": "ORDERS",
+      "title": "Open positions",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible open positions capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "VATI_RISK_EXECUTION",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-ORDERS-01",
+      "requirement_ids": [
+        "VNX-R-049"
+      ],
+      "primary_surface_id": "VNX-S-ORDERS-01",
+      "van_requirements": [
+        "VAN-NX-010"
+      ],
+      "backend_units": [
+        "BE-010",
+        "BE-011",
+        "BE-012"
+      ],
+      "frontend_units": [
+        "FE-009",
+        "FE-011"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-ORDERS-01"
+      ],
+      "primary_frontend_unit": "FE-009",
+      "context_ids": [
+        "VNX-S-ORDERS-01"
+      ]
+    },
+    {
+      "id": "VNX-F-ORDERS-02",
+      "domain": "ORDERS",
+      "title": "Position details",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible position details capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "VATI_RISK_EXECUTION",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-ORDERS-02",
+      "requirement_ids": [
+        "VNX-R-050"
+      ],
+      "primary_surface_id": "VNX-S-ORDERS-02",
+      "van_requirements": [
+        "VAN-NX-010"
+      ],
+      "backend_units": [
+        "BE-010",
+        "BE-011",
+        "BE-012"
+      ],
+      "frontend_units": [
+        "FE-009",
+        "FE-011"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-ORDERS-02"
+      ],
+      "primary_frontend_unit": "FE-009",
+      "context_ids": [
+        "VNX-S-ORDERS-02",
+        "VNX-S-ORDERS-03"
+      ]
+    },
+    {
+      "id": "VNX-F-ORDERS-03",
+      "domain": "ORDERS",
+      "title": "Pending orders",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible pending orders capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "VATI_RISK_EXECUTION",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-ORDERS-04",
+      "requirement_ids": [
+        "VNX-R-007",
+        "VNX-R-051"
+      ],
+      "primary_surface_id": "VNX-S-ORDERS-04",
+      "van_requirements": [
+        "VAN-NX-010",
+        "VAN-NX-045"
+      ],
+      "backend_units": [
+        "BE-010",
+        "BE-011",
+        "BE-012"
+      ],
+      "frontend_units": [
+        "FE-009",
+        "FE-011"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-ORDERS-03"
+      ],
+      "primary_frontend_unit": "FE-009",
+      "context_ids": [
+        "VNX-S-ORDERS-01",
+        "VNX-S-ORDERS-04"
+      ]
+    },
+    {
+      "id": "VNX-F-ORDERS-04",
+      "domain": "ORDERS",
+      "title": "Order creation proposals",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Chart/assistant can draft order but only VATI and owner mandate can authorize execution.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "VATI_RISK_EXECUTION",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-ORDERS-05",
+      "requirement_ids": [
+        "VNX-R-052"
+      ],
+      "primary_surface_id": "VNX-S-ORDERS-05",
+      "van_requirements": [
+        "VAN-NX-027"
+      ],
+      "backend_units": [
+        "BE-009",
+        "BE-010",
+        "BE-011"
+      ],
+      "frontend_units": [
+        "FE-009"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-ORDERS-04"
+      ],
+      "primary_frontend_unit": "FE-009",
+      "context_ids": [
+        "VNX-S-ORDERS-05",
+        "VNX-S-ORDERS-06"
+      ]
+    },
+    {
+      "id": "VNX-F-ORDERS-05",
+      "domain": "ORDERS",
+      "title": "Owner order approval",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible owner order approval capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "VATI_RISK_EXECUTION",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-ORDERS-07",
+      "requirement_ids": [
+        "VNX-R-053"
+      ],
+      "primary_surface_id": "VNX-S-ORDERS-07",
+      "van_requirements": [
+        "VAN-NX-007",
+        "VAN-NX-027"
+      ],
+      "backend_units": [
+        "BE-002",
+        "BE-009",
+        "BE-010",
+        "BE-011",
+        "BE-030"
+      ],
+      "frontend_units": [
+        "FE-004",
+        "FE-009"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-ORDERS-05"
+      ],
+      "primary_frontend_unit": "FE-009",
+      "context_ids": [
+        "VNX-S-ORDERS-06",
+        "VNX-S-ORDERS-07"
+      ]
+    },
+    {
+      "id": "VNX-F-ORDERS-06",
+      "domain": "ORDERS",
+      "title": "Broker order receipt",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible broker order receipt capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "VATI_RISK_EXECUTION",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-ORDERS-08",
+      "requirement_ids": [
+        "VNX-R-054"
+      ],
+      "primary_surface_id": "VNX-S-ORDERS-08",
+      "van_requirements": [
+        "VAN-NX-010",
+        "VAN-NX-045"
+      ],
+      "backend_units": [
+        "BE-010",
+        "BE-011",
+        "BE-012"
+      ],
+      "frontend_units": [
+        "FE-009",
+        "FE-011"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-ORDERS-06"
+      ],
+      "primary_frontend_unit": "FE-009",
+      "context_ids": [
+        "VNX-S-ORDERS-08"
+      ]
+    },
+    {
+      "id": "VNX-F-ORDERS-07",
+      "domain": "ORDERS",
+      "title": "Stop loss take profit management",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible stop loss take profit management capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "VATI_RISK_EXECUTION",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-ORDERS-09",
+      "requirement_ids": [
+        "VNX-R-055"
+      ],
+      "primary_surface_id": "VNX-S-ORDERS-09",
+      "van_requirements": [
+        "VAN-NX-010",
+        "VAN-NX-027"
+      ],
+      "backend_units": [
+        "BE-009",
+        "BE-010",
+        "BE-011",
+        "BE-012"
+      ],
+      "frontend_units": [
+        "FE-009",
+        "FE-011"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-ORDERS-07"
+      ],
+      "primary_frontend_unit": "FE-009",
+      "context_ids": [
+        "VNX-S-ORDERS-02",
+        "VNX-S-ORDERS-03",
+        "VNX-S-ORDERS-09"
+      ]
+    },
+    {
+      "id": "VNX-F-ORDERS-08",
+      "domain": "ORDERS",
+      "title": "Partial reduction intents",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible partial reduction intents capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "VATI_RISK_EXECUTION",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-ORDERS-10",
+      "requirement_ids": [
+        "VNX-R-056"
+      ],
+      "primary_surface_id": "VNX-S-ORDERS-10",
+      "van_requirements": [
+        "VAN-NX-027"
+      ],
+      "backend_units": [
+        "BE-009",
+        "BE-010",
+        "BE-011"
+      ],
+      "frontend_units": [
+        "FE-009"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-ORDERS-08"
+      ],
+      "primary_frontend_unit": "FE-009",
+      "context_ids": [
+        "VNX-S-ORDERS-03",
+        "VNX-S-ORDERS-10"
+      ]
+    },
+    {
+      "id": "VNX-F-ORDERS-09",
+      "domain": "ORDERS",
+      "title": "Trade history and TCA",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible trade history and tca capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "VATI_RISK_EXECUTION",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-ORDERS-11",
+      "requirement_ids": [
+        "VNX-R-057"
+      ],
+      "primary_surface_id": "VNX-S-ORDERS-11",
+      "van_requirements": [
+        "VAN-NX-061"
+      ],
+      "backend_units": [
+        "BE-010",
+        "BE-011",
+        "BE-012"
+      ],
+      "frontend_units": [
+        "FE-009",
+        "FE-011"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-ORDERS-09"
+      ],
+      "primary_frontend_unit": "FE-011",
+      "context_ids": [
+        "VNX-S-ORDERS-11",
+        "VNX-S-ORDERS-12"
+      ]
+    },
+    {
+      "id": "VNX-F-ORDERS-10",
+      "domain": "ORDERS",
+      "title": "Risk command centre",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible risk command centre capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "VATI_RISK_EXECUTION",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-ORDERS-06",
+      "requirement_ids": [
+        "VNX-R-058"
+      ],
+      "primary_surface_id": "VNX-S-ORDERS-06",
+      "van_requirements": [
+        "VAN-NX-062"
+      ],
+      "backend_units": [
+        "BE-010",
+        "BE-011",
+        "BE-012"
+      ],
+      "frontend_units": [
+        "FE-009",
+        "FE-011"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-ORDERS-10"
+      ],
+      "primary_frontend_unit": "FE-011",
+      "context_ids": [
+        "VNX-S-ORDERS-13",
+        "VNX-S-ORDERS-14"
+      ]
+    },
+    {
+      "id": "VNX-F-ACCOUNTS-01",
+      "domain": "ACCOUNTS",
+      "title": "Accounts overview",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible accounts overview capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "OWNER_A4_GATEWAY",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-ACCOUNTS-01",
+      "requirement_ids": [
+        "VNX-R-059",
+        "VNX-R-116",
+        "VNX-R-117",
+        "VNX-R-122",
+        "VNX-R-123",
+        "VNX-R-124",
+        "VNX-R-130",
+        "VNX-R-154",
+        "VNX-R-155",
+        "VNX-R-156",
+        "VNX-R-157",
+        "VNX-R-158",
+        "VNX-R-159",
+        "VNX-R-160",
+        "VNX-R-162",
+        "VNX-R-163"
+      ],
+      "primary_surface_id": "VNX-S-ACCOUNTS-01",
+      "van_requirements": [
+        "VAN-NX-048",
+        "VAN-NX-052"
+      ],
+      "backend_units": [
+        "BE-004",
+        "BE-005",
+        "BE-012"
+      ],
+      "frontend_units": [
+        "FE-010",
+        "FE-011"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-ACCOUNTS-01"
+      ],
+      "primary_frontend_unit": "FE-010",
+      "context_ids": [
+        "VNX-S-ACCOUNTS-01",
+        "VNX-S-ACCOUNTS-06"
+      ]
+    },
+    {
+      "id": "VNX-F-ACCOUNTS-02",
+      "domain": "ACCOUNTS",
+      "title": "Link existing broker account",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible link existing broker account capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "BROKER_MONEY_AUTHORITY",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-ACCOUNTS-05",
+      "requirement_ids": [
+        "VNX-R-009",
+        "VNX-R-060",
+        "VNX-R-119",
+        "VNX-R-129"
+      ],
+      "primary_surface_id": "VNX-S-ACCOUNTS-05",
+      "van_requirements": [
+        "VAN-NX-048",
+        "VAN-NX-057"
+      ],
+      "backend_units": [
+        "BE-004",
+        "BE-005"
+      ],
+      "frontend_units": [
+        "FE-010"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-ACCOUNTS-02"
+      ],
+      "primary_frontend_unit": "FE-010",
+      "context_ids": [
+        "VNX-S-ACCOUNTS-02",
+        "VNX-S-ACCOUNTS-05"
+      ]
+    },
+    {
+      "id": "VNX-F-ACCOUNTS-03",
+      "domain": "ACCOUNTS",
+      "title": "Create demo account",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible create demo account capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "OWNER_A4_GATEWAY",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-ACCOUNTS-03",
+      "requirement_ids": [
+        "VNX-R-061",
+        "VNX-R-112",
+        "VNX-R-127"
+      ],
+      "primary_surface_id": "VNX-S-ACCOUNTS-03",
+      "van_requirements": [
+        "VAN-NX-048",
+        "VAN-NX-057"
+      ],
+      "backend_units": [
+        "BE-004",
+        "BE-005"
+      ],
+      "frontend_units": [
+        "FE-010"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-ACCOUNTS-03"
+      ],
+      "primary_frontend_unit": "FE-010",
+      "context_ids": [
+        "VNX-S-ACCOUNTS-03"
+      ]
+    },
+    {
+      "id": "VNX-F-ACCOUNTS-04",
+      "domain": "ACCOUNTS",
+      "title": "Apply for live broker account",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible apply for live broker account capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "BROKER_MONEY_AUTHORITY",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-ACCOUNTS-04",
+      "requirement_ids": [
+        "VNX-R-015",
+        "VNX-R-062"
+      ],
+      "primary_surface_id": "VNX-S-ACCOUNTS-04",
+      "van_requirements": [
+        "VAN-NX-048",
+        "VAN-NX-057"
+      ],
+      "backend_units": [
+        "BE-004",
+        "BE-005"
+      ],
+      "frontend_units": [
+        "FE-010"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-ACCOUNTS-04"
+      ],
+      "primary_frontend_unit": "FE-010",
+      "context_ids": [
+        "VNX-S-ACCOUNTS-02",
+        "VNX-S-ACCOUNTS-04"
+      ]
+    },
+    {
+      "id": "VNX-F-ACCOUNTS-05",
+      "domain": "ACCOUNTS",
+      "title": "Edit local account configuration",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Validate immutable account identity and use atomic write before reporting success.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "OWNER_A4_GATEWAY",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-ACCOUNTS-07",
+      "requirement_ids": [
+        "VNX-R-063",
+        "VNX-R-114",
+        "VNX-R-115",
+        "VNX-R-128"
+      ],
+      "primary_surface_id": "VNX-S-ACCOUNTS-07",
+      "van_requirements": [
+        "VAN-NX-049"
+      ],
+      "backend_units": [
+        "BE-004",
+        "BE-005"
+      ],
+      "frontend_units": [
+        "FE-010"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-ACCOUNTS-05"
+      ],
+      "primary_frontend_unit": "FE-010",
+      "context_ids": [
+        "VNX-S-ACCOUNTS-07"
+      ]
+    },
+    {
+      "id": "VNX-F-ACCOUNTS-06",
+      "domain": "ACCOUNTS",
+      "title": "Edit broker account details",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible edit broker account details capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "BROKER_MONEY_AUTHORITY",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-ACCOUNTS-08",
+      "requirement_ids": [
+        "VNX-R-064"
+      ],
+      "primary_surface_id": "VNX-S-ACCOUNTS-08",
+      "van_requirements": [
+        "VAN-NX-064"
+      ],
+      "backend_units": [
+        "BE-004",
+        "BE-005"
+      ],
+      "frontend_units": [
+        "FE-010"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-ACCOUNTS-06"
+      ],
+      "primary_frontend_unit": "FE-010",
+      "context_ids": [
+        "VNX-S-ACCOUNTS-08"
+      ]
+    },
+    {
+      "id": "VNX-F-ACCOUNTS-07",
+      "domain": "ACCOUNTS",
+      "title": "Credential rotation",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible credential rotation capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "OWNER_A4_GATEWAY",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-ACCOUNTS-01",
+      "requirement_ids": [
+        "VNX-R-065",
+        "VNX-R-118",
+        "VNX-R-161"
+      ],
+      "primary_surface_id": "VNX-S-ACCOUNTS-01",
+      "van_requirements": [
+        "VAN-NX-049"
+      ],
+      "backend_units": [
+        "BE-004",
+        "BE-005"
+      ],
+      "frontend_units": [
+        "FE-010"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-ACCOUNTS-07"
+      ],
+      "primary_frontend_unit": "FE-010",
+      "context_ids": [
+        "VNX-S-ACCOUNTS-09"
+      ]
+    },
+    {
+      "id": "VNX-F-ACCOUNTS-08",
+      "domain": "ACCOUNTS",
+      "title": "Account connection validation",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Read fresh broker/account heartbeat, credentials valid and independent state.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "OWNER_A4_GATEWAY",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-ACCOUNTS-02",
+      "requirement_ids": [
+        "VNX-R-016",
+        "VNX-R-066"
+      ],
+      "primary_surface_id": "VNX-S-ACCOUNTS-02",
+      "van_requirements": [
+        "VAN-NX-048"
+      ],
+      "backend_units": [
+        "BE-004",
+        "BE-005"
+      ],
+      "frontend_units": [
+        "FE-010"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-ACCOUNTS-08"
+      ],
+      "primary_frontend_unit": "FE-010",
+      "context_ids": [
+        "VNX-S-ACCOUNTS-02",
+        "VNX-S-ACCOUNTS-06",
+        "VNX-S-ACCOUNTS-10"
+      ]
+    },
+    {
+      "id": "VNX-F-ACCOUNTS-09",
+      "domain": "ACCOUNTS",
+      "title": "Unlink local account",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible unlink local account capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "OWNER_A4_GATEWAY",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-ACCOUNTS-07",
+      "requirement_ids": [
+        "VNX-R-067",
+        "VNX-R-113"
+      ],
+      "primary_surface_id": "VNX-S-ACCOUNTS-07",
+      "van_requirements": [
+        "VAN-NX-050"
+      ],
+      "backend_units": [
+        "BE-004",
+        "BE-005"
+      ],
+      "frontend_units": [
+        "FE-010"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-ACCOUNTS-09"
+      ],
+      "primary_frontend_unit": "FE-010",
+      "context_ids": [
+        "VNX-S-ACCOUNTS-11"
+      ]
+    },
+    {
+      "id": "VNX-F-ACCOUNTS-10",
+      "domain": "ACCOUNTS",
+      "title": "Close remote broker account",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Only broker can close external account; local unlink alone must never mark remote closure.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "BROKER_MONEY_AUTHORITY",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-ACCOUNTS-02",
+      "requirement_ids": [
+        "VNX-R-068",
+        "VNX-R-125"
+      ],
+      "primary_surface_id": "VNX-S-ACCOUNTS-02",
+      "van_requirements": [
+        "VAN-NX-057"
+      ],
+      "backend_units": [
+        "BE-004",
+        "BE-005"
+      ],
+      "frontend_units": [
+        "FE-010"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-ACCOUNTS-10"
+      ],
+      "primary_frontend_unit": "FE-010",
+      "context_ids": [
+        "VNX-S-ACCOUNTS-12"
+      ]
+    },
+    {
+      "id": "VNX-F-ACCOUNTS-11",
+      "domain": "ACCOUNTS",
+      "title": "Deposit funds",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Issue only provider-authorized deposit intent; require provider settlement readback and owner context.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "BROKER_MONEY_AUTHORITY",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-ACCOUNTS-01",
+      "requirement_ids": [
+        "VNX-R-069",
+        "VNX-R-120",
+        "VNX-R-121",
+        "VNX-R-126"
+      ],
+      "primary_surface_id": "VNX-S-ACCOUNTS-01",
+      "van_requirements": [
+        "VAN-NX-055"
+      ],
+      "backend_units": [
+        "BE-007"
+      ],
+      "frontend_units": [
+        "FE-010"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-ACCOUNTS-11"
+      ],
+      "primary_frontend_unit": "FE-010",
+      "context_ids": [
+        "VNX-S-ACCOUNTS-13",
+        "VNX-S-ACCOUNTS-14"
+      ]
+    },
+    {
+      "id": "VNX-F-ACCOUNTS-12",
+      "domain": "ACCOUNTS",
+      "title": "Withdraw funds",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Require account and beneficiary binding, amount/fee quote, A4, provider receipt and eventual settlement.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "BROKER_MONEY_AUTHORITY",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-ACCOUNTS-01",
+      "requirement_ids": [
+        "VNX-R-070"
+      ],
+      "primary_surface_id": "VNX-S-ACCOUNTS-01",
+      "van_requirements": [
+        "VAN-NX-055"
+      ],
+      "backend_units": [
+        "BE-007"
+      ],
+      "frontend_units": [
+        "FE-010"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-ACCOUNTS-12"
+      ],
+      "primary_frontend_unit": "FE-010",
+      "context_ids": [
+        "VNX-S-ACCOUNTS-15",
+        "VNX-S-ACCOUNTS-16"
+      ]
+    },
+    {
+      "id": "VNX-F-ACCOUNTS-13",
+      "domain": "ACCOUNTS",
+      "title": "Transfer between accounts",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Bind exact source/destination/currency/fees and independent transfer reconciliation.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "BROKER_MONEY_AUTHORITY",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-ACCOUNTS-01",
+      "requirement_ids": [
+        "VNX-R-071"
+      ],
+      "primary_surface_id": "VNX-S-ACCOUNTS-01",
+      "van_requirements": [
+        "VAN-NX-055"
+      ],
+      "backend_units": [
+        "BE-007"
+      ],
+      "frontend_units": [
+        "FE-010"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-ACCOUNTS-13"
+      ],
+      "primary_frontend_unit": "FE-010",
+      "context_ids": [
+        "VNX-S-ACCOUNTS-17"
+      ]
+    },
+    {
+      "id": "VNX-F-ACCOUNTS-14",
+      "domain": "ACCOUNTS",
+      "title": "Payment methods",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible payment methods capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "OWNER_A4_GATEWAY",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-ACCOUNTS-01",
+      "requirement_ids": [
+        "VNX-R-072",
+        "VNX-R-131"
+      ],
+      "primary_surface_id": "VNX-S-ACCOUNTS-01",
+      "van_requirements": [
+        "VAN-NX-055"
+      ],
+      "backend_units": [
+        "BE-007"
+      ],
+      "frontend_units": [
+        "FE-010"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-ACCOUNTS-14"
+      ],
+      "primary_frontend_unit": "FE-010",
+      "context_ids": [
+        "VNX-S-ACCOUNTS-14",
+        "VNX-S-ACCOUNTS-16"
+      ]
+    },
+    {
+      "id": "VNX-F-ACCOUNTS-15",
+      "domain": "ACCOUNTS",
+      "title": "Transaction and settlement history",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible transaction and settlement history capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "OWNER_A4_GATEWAY",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-ACCOUNTS-01",
+      "requirement_ids": [
+        "VNX-R-073"
+      ],
+      "primary_surface_id": "VNX-S-ACCOUNTS-01",
+      "van_requirements": [
+        "VAN-NX-051",
+        "VAN-NX-052",
+        "VAN-NX-055"
+      ],
+      "backend_units": [
+        "BE-006",
+        "BE-007",
+        "BE-009",
+        "BE-012"
+      ],
+      "frontend_units": [
+        "FE-010",
+        "FE-011"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-ACCOUNTS-15"
+      ],
+      "primary_frontend_unit": "FE-010",
+      "context_ids": [
+        "VNX-S-ACCOUNTS-01",
+        "VNX-S-ACCOUNTS-06",
+        "VNX-S-ACCOUNTS-18"
+      ]
+    },
+    {
+      "id": "VNX-F-ACCOUNTS-16",
+      "domain": "ACCOUNTS",
+      "title": "KYC account restrictions",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible kyc account restrictions capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "OWNER_A4_GATEWAY",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-ACCOUNTS-01",
+      "requirement_ids": [
+        "VNX-R-074"
+      ],
+      "primary_surface_id": "VNX-S-ACCOUNTS-01",
+      "van_requirements": [
+        "VAN-NX-048",
+        "VAN-NX-057"
+      ],
+      "backend_units": [
+        "BE-004",
+        "BE-005"
+      ],
+      "frontend_units": [
+        "FE-010"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-ACCOUNTS-16"
+      ],
+      "primary_frontend_unit": "FE-010",
+      "context_ids": [
+        "VNX-S-ACCOUNTS-04",
+        "VNX-S-ACCOUNTS-06"
+      ]
+    },
+    {
+      "id": "VNX-F-ACCOUNTS-17",
+      "domain": "ACCOUNTS",
+      "title": "Leverage and account permissions",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible leverage and account permissions capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "OWNER_A4_GATEWAY",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-ACCOUNTS-01",
+      "requirement_ids": [
+        "VNX-R-075"
+      ],
+      "primary_surface_id": "VNX-S-ACCOUNTS-01",
+      "van_requirements": [
+        "VAN-NX-048",
+        "VAN-NX-049",
+        "VAN-NX-058"
+      ],
+      "backend_units": [
+        "BE-004",
+        "BE-005",
+        "BE-013"
+      ],
+      "frontend_units": [
+        "FE-010",
+        "FE-012"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-ACCOUNTS-17"
+      ],
+      "primary_frontend_unit": "FE-010",
+      "context_ids": [
+        "VNX-S-ACCOUNTS-06"
+      ]
+    },
+    {
+      "id": "VNX-F-INTEL-01",
+      "domain": "INTEL",
+      "title": "Intelligence overview",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible intelligence overview capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "VAN_DISPLAY_EVIDENCE",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-INTEL-01",
+      "requirement_ids": [
+        "VNX-R-008",
+        "VNX-R-076"
+      ],
+      "primary_surface_id": "VNX-S-INTEL-01",
+      "van_requirements": [
+        "VAN-NX-012",
+        "VAN-NX-013"
+      ],
+      "backend_units": [
+        "BE-014",
+        "BE-015",
+        "BE-016",
+        "BE-021"
+      ],
+      "frontend_units": [
+        "FE-013",
+        "FE-014"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-INTEL-01"
+      ],
+      "primary_frontend_unit": "FE-013",
+      "context_ids": [
+        "VNX-S-INTEL-01"
+      ]
+    },
+    {
+      "id": "VNX-F-INTEL-02",
+      "domain": "INTEL",
+      "title": "News feed",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Use source age, dedupe, relevance and trust evidence; do not fabricate articles or timestamps.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "VAN_DISPLAY_EVIDENCE",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-INTEL-02",
+      "requirement_ids": [
+        "VNX-R-077"
+      ],
+      "primary_surface_id": "VNX-S-INTEL-02",
+      "van_requirements": [
+        "VAN-NX-013",
+        "VAN-NX-038"
+      ],
+      "backend_units": [
+        "BE-014",
+        "BE-015",
+        "BE-016",
+        "BE-021"
+      ],
+      "frontend_units": [
+        "FE-013",
+        "FE-014"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-INTEL-02"
+      ],
+      "primary_frontend_unit": "FE-013",
+      "context_ids": [
+        "VNX-S-INTEL-01",
+        "VNX-S-INTEL-02"
+      ]
+    },
+    {
+      "id": "VNX-F-INTEL-03",
+      "domain": "INTEL",
+      "title": "Full article analysis",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Separate verified claims, counterevidence, uncertainty, prices and account impact.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "VAN_DISPLAY_EVIDENCE",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-INTEL-03",
+      "requirement_ids": [
+        "VNX-R-078"
+      ],
+      "primary_surface_id": "VNX-S-INTEL-03",
+      "van_requirements": [
+        "VAN-NX-013",
+        "VAN-NX-037"
+      ],
+      "backend_units": [
+        "BE-014",
+        "BE-015",
+        "BE-016",
+        "BE-021"
+      ],
+      "frontend_units": [
+        "FE-013",
+        "FE-014"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-INTEL-03"
+      ],
+      "primary_frontend_unit": "FE-013",
+      "context_ids": [
+        "VNX-S-INTEL-03"
+      ]
+    },
+    {
+      "id": "VNX-F-INTEL-04",
+      "domain": "INTEL",
+      "title": "Economic calendar",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible economic calendar capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "VAN_DISPLAY_EVIDENCE",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-INTEL-04",
+      "requirement_ids": [
+        "VNX-R-079"
+      ],
+      "primary_surface_id": "VNX-S-INTEL-04",
+      "van_requirements": [
+        "VAN-NX-013",
+        "VAN-NX-032"
+      ],
+      "backend_units": [
+        "BE-014",
+        "BE-015",
+        "BE-016",
+        "BE-021"
+      ],
+      "frontend_units": [
+        "FE-013",
+        "FE-014"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-INTEL-04"
+      ],
+      "primary_frontend_unit": "FE-013",
+      "context_ids": [
+        "VNX-S-INTEL-04",
+        "VNX-S-INTEL-05"
+      ]
+    },
+    {
+      "id": "VNX-F-INTEL-05",
+      "domain": "INTEL",
+      "title": "Instrument and portfolio impact",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible instrument and portfolio impact capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "VAN_DISPLAY_EVIDENCE",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-INTEL-06",
+      "requirement_ids": [
+        "VNX-R-080"
+      ],
+      "primary_surface_id": "VNX-S-INTEL-06",
+      "van_requirements": [
+        "VAN-NX-032"
+      ],
+      "backend_units": [
+        "BE-016"
+      ],
+      "frontend_units": [
+        "FE-013"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-INTEL-05"
+      ],
+      "primary_frontend_unit": "FE-013",
+      "context_ids": [
+        "VNX-S-INTEL-01",
+        "VNX-S-INTEL-03",
+        "VNX-S-INTEL-05",
+        "VNX-S-INTEL-06",
+        "VNX-S-INTEL-07"
+      ]
+    },
+    {
+      "id": "VNX-F-INTEL-06",
+      "domain": "INTEL",
+      "title": "Source verification and contradictions",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible source verification and contradictions capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "VAN_DISPLAY_EVIDENCE",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-INTEL-09",
+      "requirement_ids": [
+        "VNX-R-081"
+      ],
+      "primary_surface_id": "VNX-S-INTEL-09",
+      "van_requirements": [
+        "VAN-NX-013"
+      ],
+      "backend_units": [
+        "BE-014",
+        "BE-015",
+        "BE-016",
+        "BE-021"
+      ],
+      "frontend_units": [
+        "FE-013",
+        "FE-014"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-INTEL-06"
+      ],
+      "primary_frontend_unit": "FE-013",
+      "context_ids": [
+        "VNX-S-INTEL-03",
+        "VNX-S-INTEL-08",
+        "VNX-S-INTEL-09"
+      ]
+    },
+    {
+      "id": "VNX-F-INTEL-07",
+      "domain": "INTEL",
+      "title": "Live VAN trading analyst",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible live van trading analyst capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "VAN_DISPLAY_EVIDENCE",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-INTEL-11",
+      "requirement_ids": [
+        "VNX-R-082"
+      ],
+      "primary_surface_id": "VNX-S-INTEL-11",
+      "van_requirements": [
+        "VAN-NX-012"
+      ],
+      "backend_units": [
+        "BE-021"
+      ],
+      "frontend_units": [
+        "FE-014"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-INTEL-07"
+      ],
+      "primary_frontend_unit": "FE-014",
+      "context_ids": [
+        "VNX-S-INTEL-01",
+        "VNX-S-INTEL-11",
+        "VNX-S-INTEL-13"
+      ]
+    },
+    {
+      "id": "VNX-F-INTEL-08",
+      "domain": "INTEL",
+      "title": "Strategy evidence analysis",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible strategy evidence analysis capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "VAN_DISPLAY_EVIDENCE",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-INTEL-08",
+      "requirement_ids": [
+        "VNX-R-083"
+      ],
+      "primary_surface_id": "VNX-S-INTEL-08",
+      "van_requirements": [
+        "VAN-NX-012",
+        "VAN-NX-058"
+      ],
+      "backend_units": [
+        "BE-013",
+        "BE-021"
+      ],
+      "frontend_units": [
+        "FE-012",
+        "FE-014"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-INTEL-08"
+      ],
+      "primary_frontend_unit": "FE-014",
+      "context_ids": [
+        "VNX-S-INTEL-10"
+      ]
+    },
+    {
+      "id": "VNX-F-INTEL-09",
+      "domain": "INTEL",
+      "title": "Trading opportunity reasoning",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible trading opportunity reasoning capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "VAN_DISPLAY_EVIDENCE",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-INTEL-12",
+      "requirement_ids": [
+        "VNX-R-084"
+      ],
+      "primary_surface_id": "VNX-S-INTEL-12",
+      "van_requirements": [
+        "VAN-NX-012",
+        "VAN-NX-032"
+      ],
+      "backend_units": [
+        "BE-016",
+        "BE-021"
+      ],
+      "frontend_units": [
+        "FE-013",
+        "FE-014"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-INTEL-09"
+      ],
+      "primary_frontend_unit": "FE-014",
+      "context_ids": [
+        "VNX-S-INTEL-12",
+        "VNX-S-INTEL-13"
+      ]
+    },
+    {
+      "id": "VNX-F-INTEL-10",
+      "domain": "INTEL",
+      "title": "Cross-signal intelligence packet",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible cross-signal intelligence packet capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "VAN_DISPLAY_EVIDENCE",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-INTEL-01",
+      "requirement_ids": [
+        "VNX-R-085"
+      ],
+      "primary_surface_id": "VNX-S-INTEL-01",
+      "van_requirements": [
+        "VAN-NX-065"
+      ],
+      "backend_units": [
+        "BE-021"
+      ],
+      "frontend_units": [
+        "FE-014"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-INTEL-10"
+      ],
+      "primary_frontend_unit": "FE-014",
+      "context_ids": [
+        "VNX-S-INTEL-14"
+      ]
+    },
+    {
+      "id": "VNX-F-INTEL-11",
+      "domain": "INTEL",
+      "title": "Learning and outcome review",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Reject lookahead bias and preserve outcomes, counterfactuals and owner annotations.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "VAN_DISPLAY_EVIDENCE",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-INTEL-01",
+      "requirement_ids": [
+        "VNX-R-086"
+      ],
+      "primary_surface_id": "VNX-S-INTEL-01",
+      "van_requirements": [
+        "VAN-NX-034",
+        "VAN-NX-035"
+      ],
+      "backend_units": [
+        "BE-022"
+      ],
+      "frontend_units": [
+        "FE-014"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-INTEL-11"
+      ],
+      "primary_frontend_unit": "FE-014",
+      "context_ids": [
+        "VNX-S-INTEL-14"
+      ]
+    },
+    {
+      "id": "VNX-F-WORK-01",
+      "domain": "WORK",
+      "title": "Work command centre",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible work command centre capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "OWNER_A4_GATEWAY",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-WORK-01",
+      "requirement_ids": [
+        "VNX-R-017",
+        "VNX-R-087"
+      ],
+      "primary_surface_id": "VNX-S-WORK-01",
+      "van_requirements": [
+        "VAN-NX-014"
+      ],
+      "backend_units": [
+        "BE-023"
+      ],
+      "frontend_units": [
+        "FE-015"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-WORK-01"
+      ],
+      "primary_frontend_unit": "FE-015",
+      "context_ids": [
+        "VNX-S-WORK-01",
+        "VNX-S-WORK-10"
+      ]
+    },
+    {
+      "id": "VNX-F-WORK-02",
+      "domain": "WORK",
+      "title": "Projects overview",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible projects overview capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "OWNER_A4_GATEWAY",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-WORK-02",
+      "requirement_ids": [
+        "VNX-R-088"
+      ],
+      "primary_surface_id": "VNX-S-WORK-02",
+      "van_requirements": [
+        "VAN-NX-014"
+      ],
+      "backend_units": [
+        "BE-023"
+      ],
+      "frontend_units": [
+        "FE-015"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-WORK-02"
+      ],
+      "primary_frontend_unit": "FE-015",
+      "context_ids": [
+        "VNX-S-WORK-02",
+        "VNX-S-WORK-03"
+      ]
+    },
+    {
+      "id": "VNX-F-WORK-03",
+      "domain": "WORK",
+      "title": "Task lists",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible task lists capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "OWNER_A4_GATEWAY",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-WORK-04",
+      "requirement_ids": [
+        "VNX-R-089"
+      ],
+      "primary_surface_id": "VNX-S-WORK-04",
+      "van_requirements": [
+        "VAN-NX-014"
+      ],
+      "backend_units": [
+        "BE-023"
+      ],
+      "frontend_units": [
+        "FE-015"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-WORK-03"
+      ],
+      "primary_frontend_unit": "FE-015",
+      "context_ids": [
+        "VNX-S-WORK-01",
+        "VNX-S-WORK-04",
+        "VNX-S-WORK-05"
+      ]
+    },
+    {
+      "id": "VNX-F-WORK-04",
+      "domain": "WORK",
+      "title": "Live dependency graph",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Render typed task edges, owner restrictions, proof counts, revision and accessibility list.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "OWNER_A4_GATEWAY",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-WORK-06",
+      "requirement_ids": [
+        "VNX-R-090",
+        "VNX-R-147",
+        "VNX-R-150"
+      ],
+      "primary_surface_id": "VNX-S-WORK-06",
+      "van_requirements": [
+        "VAN-NX-015"
+      ],
+      "backend_units": [
+        "BE-023"
+      ],
+      "frontend_units": [
+        "FE-015"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-WORK-04"
+      ],
+      "primary_frontend_unit": "FE-015",
+      "context_ids": [
+        "VNX-S-WORK-06"
+      ]
+    },
+    {
+      "id": "VNX-F-WORK-05",
+      "domain": "WORK",
+      "title": "Agent relationship graph",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Show live actor responsibilities, lease, handoff, contention and independently verified status.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "OWNER_A4_GATEWAY",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-WORK-07",
+      "requirement_ids": [
+        "VNX-R-091",
+        "VNX-R-148"
+      ],
+      "primary_surface_id": "VNX-S-WORK-07",
+      "van_requirements": [
+        "VAN-NX-016"
+      ],
+      "backend_units": [
+        "BE-024"
+      ],
+      "frontend_units": [
+        "FE-016"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-WORK-05"
+      ],
+      "primary_frontend_unit": "FE-016",
+      "context_ids": [
+        "VNX-S-WORK-07"
+      ]
+    },
+    {
+      "id": "VNX-F-WORK-06",
+      "domain": "WORK",
+      "title": "Evidence-based progress",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible evidence-based progress capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "OWNER_A4_GATEWAY",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-WORK-09",
+      "requirement_ids": [
+        "VNX-R-011",
+        "VNX-R-092",
+        "VNX-R-149"
+      ],
+      "primary_surface_id": "VNX-S-WORK-09",
+      "van_requirements": [
+        "VAN-NX-014",
+        "VAN-NX-015"
+      ],
+      "backend_units": [
+        "BE-023"
+      ],
+      "frontend_units": [
+        "FE-015"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-WORK-06"
+      ],
+      "primary_frontend_unit": "FE-015",
+      "context_ids": [
+        "VNX-S-WORK-01",
+        "VNX-S-WORK-03",
+        "VNX-S-WORK-06",
+        "VNX-S-WORK-09"
+      ]
+    },
+    {
+      "id": "VNX-F-WORK-07",
+      "domain": "WORK",
+      "title": "Muse native control",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible muse native control capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "OWNER_A4_GATEWAY",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-WORK-11",
+      "requirement_ids": [
+        "VNX-R-093",
+        "VNX-R-151"
+      ],
+      "primary_surface_id": "VNX-S-WORK-11",
+      "van_requirements": [
+        "VAN-NX-017"
+      ],
+      "backend_units": [
+        "BE-024"
+      ],
+      "frontend_units": [
+        "FE-016"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-WORK-07"
+      ],
+      "primary_frontend_unit": "FE-016",
+      "context_ids": [
+        "VNX-S-WORK-11",
+        "VNX-S-WORK-12"
+      ]
+    },
+    {
+      "id": "VNX-F-WORK-08",
+      "domain": "WORK",
+      "title": "ARTEMIS testing surface",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible artemis testing surface capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "OWNER_A4_GATEWAY",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-WORK-13",
+      "requirement_ids": [
+        "VNX-R-094",
+        "VNX-R-152"
+      ],
+      "primary_surface_id": "VNX-S-WORK-13",
+      "van_requirements": [
+        "VAN-NX-069"
+      ],
+      "backend_units": [
+        "BE-025",
+        "BE-026",
+        "BE-029",
+        "BE-034"
+      ],
+      "frontend_units": [
+        "FE-017",
+        "FE-018",
+        "FE-021"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-WORK-08"
+      ],
+      "primary_frontend_unit": "FE-018",
+      "context_ids": [
+        "VNX-S-WORK-13"
+      ]
+    },
+    {
+      "id": "VNX-F-WORK-09",
+      "domain": "WORK",
+      "title": "Review and approval queue",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible review and approval queue capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "OWNER_A4_GATEWAY",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-WORK-14",
+      "requirement_ids": [
+        "VNX-R-095"
+      ],
+      "primary_surface_id": "VNX-S-WORK-14",
+      "van_requirements": [
+        "VAN-NX-007"
+      ],
+      "backend_units": [
+        "BE-002",
+        "BE-030"
+      ],
+      "frontend_units": [
+        "FE-004",
+        "FE-015"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-WORK-09"
+      ],
+      "primary_frontend_unit": "FE-015",
+      "context_ids": [
+        "VNX-S-WORK-05",
+        "VNX-S-WORK-12",
+        "VNX-S-WORK-14",
+        "VNX-S-WORK-15"
+      ]
+    },
+    {
+      "id": "VNX-F-WORK-10",
+      "domain": "WORK",
+      "title": "Blocker and handoff tracking",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible blocker and handoff tracking capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "OWNER_A4_GATEWAY",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-WORK-08",
+      "requirement_ids": [
+        "VNX-R-096"
+      ],
+      "primary_surface_id": "VNX-S-WORK-08",
+      "van_requirements": [
+        "VAN-NX-016"
+      ],
+      "backend_units": [
+        "BE-024"
+      ],
+      "frontend_units": [
+        "FE-016"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-WORK-10"
+      ],
+      "primary_frontend_unit": "FE-016",
+      "context_ids": [
+        "VNX-S-WORK-05",
+        "VNX-S-WORK-07",
+        "VNX-S-WORK-08"
+      ]
+    },
+    {
+      "id": "VNX-F-WORK-11",
+      "domain": "WORK",
+      "title": "Activity and execution receipts",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible activity and execution receipts capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "OWNER_A4_GATEWAY",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-WORK-16",
+      "requirement_ids": [
+        "VNX-R-010",
+        "VNX-R-097"
+      ],
+      "primary_surface_id": "VNX-S-WORK-16",
+      "van_requirements": [
+        "VAN-NX-014",
+        "VAN-NX-016"
+      ],
+      "backend_units": [
+        "BE-023",
+        "BE-024"
+      ],
+      "frontend_units": [
+        "FE-015",
+        "FE-016"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-WORK-11"
+      ],
+      "primary_frontend_unit": "FE-015",
+      "context_ids": [
+        "VNX-S-WORK-01",
+        "VNX-S-WORK-09",
+        "VNX-S-WORK-10",
+        "VNX-S-WORK-16"
+      ]
+    },
+    {
+      "id": "VNX-F-WORK-12",
+      "domain": "WORK",
+      "title": "Workflow accessibility parity",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible workflow accessibility parity capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "OWNER_A4_GATEWAY",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-WORK-01",
+      "requirement_ids": [
+        "VNX-R-098",
+        "VNX-R-153"
+      ],
+      "primary_surface_id": "VNX-S-WORK-01",
+      "van_requirements": [
+        "VAN-NX-015",
+        "VAN-NX-022"
+      ],
+      "backend_units": [
+        "BE-023",
+        "BE-033"
+      ],
+      "frontend_units": [
+        "FE-015"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-WORK-12"
+      ],
+      "primary_frontend_unit": "FE-015",
+      "context_ids": [
+        "VNX-S-WORK-06"
+      ]
+    },
+    {
+      "id": "VNX-F-PRESENCE-01",
+      "domain": "PRESENCE",
+      "title": "Floating VAN service",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible floating van service capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "PRODUCT_CONSENT_AUTHORITY",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-PRESENCE-01",
+      "requirement_ids": [
+        "VNX-R-099"
+      ],
+      "primary_surface_id": "VNX-S-PRESENCE-01",
+      "van_requirements": [
+        "VAN-NX-006"
+      ],
+      "backend_units": [
+        "BE-029",
+        "BE-030",
+        "BE-031"
+      ],
+      "frontend_units": [
+        "FE-005",
+        "FE-021"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-PRESENCE-01"
+      ],
+      "primary_frontend_unit": "FE-005",
+      "context_ids": [
+        "VNX-S-PRESENCE-01"
+      ]
+    },
+    {
+      "id": "VNX-F-PRESENCE-02",
+      "domain": "PRESENCE",
+      "title": "Floating workboard",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible floating workboard capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "PRODUCT_CONSENT_AUTHORITY",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-PRESENCE-02",
+      "requirement_ids": [
+        "VNX-R-100"
+      ],
+      "primary_surface_id": "VNX-S-PRESENCE-02",
+      "van_requirements": [
+        "VAN-NX-006"
+      ],
+      "backend_units": [
+        "BE-029",
+        "BE-030",
+        "BE-031"
+      ],
+      "frontend_units": [
+        "FE-005",
+        "FE-021"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-PRESENCE-02"
+      ],
+      "primary_frontend_unit": "FE-005",
+      "context_ids": [
+        "VNX-S-PRESENCE-02",
+        "VNX-S-PRESENCE-03",
+        "VNX-S-PRESENCE-04"
+      ]
+    },
+    {
+      "id": "VNX-F-PRESENCE-03",
+      "domain": "PRESENCE",
+      "title": "Voice and conversation",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible voice and conversation capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "PRODUCT_CONSENT_AUTHORITY",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-PRESENCE-05",
+      "requirement_ids": [
+        "VNX-R-101"
+      ],
+      "primary_surface_id": "VNX-S-PRESENCE-05",
+      "van_requirements": [
+        "VAN-NX-020"
+      ],
+      "backend_units": [
+        "BE-025",
+        "BE-026",
+        "BE-029",
+        "BE-034"
+      ],
+      "frontend_units": [
+        "FE-017",
+        "FE-018",
+        "FE-021"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-PRESENCE-03"
+      ],
+      "primary_frontend_unit": "FE-021",
+      "context_ids": [
+        "VNX-S-PRESENCE-05"
+      ]
+    },
+    {
+      "id": "VNX-F-PRESENCE-04",
+      "domain": "PRESENCE",
+      "title": "Floating gestures and recovery",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible floating gestures and recovery capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "PRODUCT_CONSENT_AUTHORITY",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-PRESENCE-06",
+      "requirement_ids": [
+        "VNX-R-004",
+        "VNX-R-102"
+      ],
+      "primary_surface_id": "VNX-S-PRESENCE-06",
+      "van_requirements": [
+        "VAN-NX-006"
+      ],
+      "backend_units": [
+        "BE-029",
+        "BE-030",
+        "BE-031"
+      ],
+      "frontend_units": [
+        "FE-005",
+        "FE-021"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-PRESENCE-04"
+      ],
+      "primary_frontend_unit": "FE-005",
+      "context_ids": [
+        "VNX-S-PRESENCE-04",
+        "VNX-S-PRESENCE-06"
+      ]
+    },
+    {
+      "id": "VNX-F-PRESENCE-05",
+      "domain": "PRESENCE",
+      "title": "Shared orb presence projection",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Separate operational state from animation; priority and expiry must be deterministic.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "PRODUCT_CONSENT_AUTHORITY",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-PRESENCE-01",
+      "requirement_ids": [
+        "VNX-R-103"
+      ],
+      "primary_surface_id": "VNX-S-PRESENCE-01",
+      "van_requirements": [
+        "VAN-NX-004"
+      ],
+      "backend_units": [
+        "BE-030"
+      ],
+      "frontend_units": [
+        "FE-004"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-PRESENCE-05"
+      ],
+      "primary_frontend_unit": "FE-004",
+      "context_ids": [
+        "VNX-S-PRESENCE-01"
+      ]
+    },
+    {
+      "id": "VNX-F-MEMORY-01",
+      "domain": "MEMORY",
+      "title": "Memory and record search",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible memory and record search capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "PRODUCT_CONSENT_AUTHORITY",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-MEMORY-02",
+      "requirement_ids": [
+        "VNX-R-012",
+        "VNX-R-104"
+      ],
+      "primary_surface_id": "VNX-S-MEMORY-02",
+      "van_requirements": [
+        "VAN-NX-018"
+      ],
+      "backend_units": [
+        "BE-027",
+        "BE-028"
+      ],
+      "frontend_units": [
+        "FE-019",
+        "FE-020"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-MEMORY-01"
+      ],
+      "primary_frontend_unit": "FE-019",
+      "context_ids": [
+        "VNX-S-MEMORY-01",
+        "VNX-S-MEMORY-02"
+      ]
+    },
+    {
+      "id": "VNX-F-MEMORY-02",
+      "domain": "MEMORY",
+      "title": "Research and sources",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible research and sources capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "PRODUCT_CONSENT_AUTHORITY",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-MEMORY-03",
+      "requirement_ids": [
+        "VNX-R-105"
+      ],
+      "primary_surface_id": "VNX-S-MEMORY-03",
+      "van_requirements": [
+        "VAN-NX-018",
+        "VAN-NX-026"
+      ],
+      "backend_units": [
+        "BE-027",
+        "BE-028"
+      ],
+      "frontend_units": [
+        "FE-019",
+        "FE-020"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-MEMORY-02"
+      ],
+      "primary_frontend_unit": "FE-019",
+      "context_ids": [
+        "VNX-S-MEMORY-03"
+      ]
+    },
+    {
+      "id": "VNX-F-MEMORY-03",
+      "domain": "MEMORY",
+      "title": "Memory privacy and erasure",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible memory privacy and erasure capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "PRODUCT_CONSENT_AUTHORITY",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-MEMORY-04",
+      "requirement_ids": [
+        "VNX-R-106"
+      ],
+      "primary_surface_id": "VNX-S-MEMORY-04",
+      "van_requirements": [
+        "VAN-NX-066"
+      ],
+      "backend_units": [
+        "BE-027",
+        "BE-028"
+      ],
+      "frontend_units": [
+        "FE-019",
+        "FE-020"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-MEMORY-03"
+      ],
+      "primary_frontend_unit": "FE-019",
+      "context_ids": [
+        "VNX-S-MEMORY-04"
+      ]
+    },
+    {
+      "id": "VNX-F-MEMORY-04",
+      "domain": "MEMORY",
+      "title": "Learning goals and adaptations",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible learning goals and adaptations capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "PRODUCT_CONSENT_AUTHORITY",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-MEMORY-01",
+      "requirement_ids": [
+        "VNX-R-107"
+      ],
+      "primary_surface_id": "VNX-S-MEMORY-01",
+      "van_requirements": [
+        "VAN-NX-067"
+      ],
+      "backend_units": [
+        "BE-027",
+        "BE-028"
+      ],
+      "frontend_units": [
+        "FE-019",
+        "FE-020"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-MEMORY-04"
+      ],
+      "primary_frontend_unit": "FE-019",
+      "context_ids": [
+        "VNX-S-MEMORY-01"
+      ]
+    },
+    {
+      "id": "VNX-F-MORE-01",
+      "domain": "MORE",
+      "title": "Connected services",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible connected services capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "PRODUCT_CONSENT_AUTHORITY",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-MORE-02",
+      "requirement_ids": [
+        "VNX-R-108"
+      ],
+      "primary_surface_id": "VNX-S-MORE-02",
+      "van_requirements": [
+        "VAN-NX-019"
+      ],
+      "backend_units": [
+        "BE-031"
+      ],
+      "frontend_units": [
+        "FE-022"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-MORE-01"
+      ],
+      "primary_frontend_unit": "FE-022",
+      "context_ids": [
+        "VNX-S-MORE-01",
+        "VNX-S-MORE-02"
+      ]
+    },
+    {
+      "id": "VNX-F-MORE-02",
+      "domain": "MORE",
+      "title": "Permissions and device authority",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible permissions and device authority capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "PRODUCT_CONSENT_AUTHORITY",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-MORE-03",
+      "requirement_ids": [
+        "VNX-R-013",
+        "VNX-R-109"
+      ],
+      "primary_surface_id": "VNX-S-MORE-03",
+      "van_requirements": [
+        "VAN-NX-019"
+      ],
+      "backend_units": [
+        "BE-031"
+      ],
+      "frontend_units": [
+        "FE-022"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-MORE-02"
+      ],
+      "primary_frontend_unit": "FE-022",
+      "context_ids": [
+        "VNX-S-MORE-01",
+        "VNX-S-MORE-03"
+      ]
+    },
+    {
+      "id": "VNX-F-MORE-03",
+      "domain": "MORE",
+      "title": "Automation and schedules",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible automation and schedules capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "PRODUCT_CONSENT_AUTHORITY",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-MORE-01",
+      "requirement_ids": [
+        "VNX-R-110"
+      ],
+      "primary_surface_id": "VNX-S-MORE-01",
+      "van_requirements": [
+        "VAN-NX-068"
+      ],
+      "backend_units": [
+        "BE-027",
+        "BE-028"
+      ],
+      "frontend_units": [
+        "FE-019",
+        "FE-020"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-MORE-03"
+      ],
+      "primary_frontend_unit": "FE-020",
+      "context_ids": [
+        "VNX-S-MORE-01"
+      ]
+    },
+    {
+      "id": "VNX-F-MORE-04",
+      "domain": "MORE",
+      "title": "Settings diagnostics appearance",
+      "product_technology": "Android Jetpack Compose + typed gateway adapters",
+      "description": "Provide a correctly state-bound, accessible settings diagnostics appearance capability in VAN Next without importing legacy visual code.",
+      "required_states": [
+        "LOADING",
+        "READY",
+        "EMPTY",
+        "STALE",
+        "OFFLINE",
+        "ERROR",
+        "UNKNOWN"
+      ],
+      "functional_authority": "PRODUCT_CONSENT_AUTHORITY",
+      "visual_authority": "VAN_LOCKED_DARK_LIGHT",
+      "stage": "DESIGN_CANDIDATE_NOT_IMPLEMENTED",
+      "provenance": "OWNER_REQUIREMENT_OR_DESIGN_PROPOSAL",
+      "provisional_primary_surface_id": "VNX-S-MORE-04",
+      "requirement_ids": [
+        "VNX-R-111"
+      ],
+      "primary_surface_id": "VNX-S-MORE-04",
+      "van_requirements": [
+        "VAN-NX-019",
+        "VAN-NX-022"
+      ],
+      "backend_units": [
+        "BE-031",
+        "BE-033"
+      ],
+      "frontend_units": [
+        "FE-022"
+      ],
+      "mapping_grade": "AUTHOR_RECONCILED_PENDING_INDEPENDENT_REVIEW",
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "test_ids": [
+        "T-FEATURE-MORE-04"
+      ],
+      "primary_frontend_unit": "FE-022",
+      "context_ids": [
+        "VNX-S-MORE-01",
+        "VNX-S-MORE-04"
+      ]
+    }
+  ]
+}

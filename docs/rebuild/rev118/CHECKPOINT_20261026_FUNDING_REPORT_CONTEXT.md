@@ -1,0 +1,13 @@
+# Funding report context continuation
+
+2026-10-26T12:36:10.774469+00:00
+
+Published parent6698a9dfb4dd25b8d761b93006ea2e40e81cbf5c,branchccr-9e07e1af-8mgz1p,draftPR105. Genuinehook/committedGREEN156 against4fd466dec3910ed5de614bfbf95887ad619df5ca/manifest3759 files0mismatch/alltracked/normalpush/remote readback verified.
+
+Confirmed ambient Decimal rounding/traps/exponent settings changed or broke identical native-scoped unitization reports. Explicit report Context now fixes80-digit ROUND_HALF_EVEN and standard bounds/traps while exact Fraction calculations,normal outputs and all risk/unknown states remain unchanged.9actual regressions retained;24focused and219final actual-PG funding/cash/balance passes,0skips/audit0/final runtime-test hashes match/owned fixture independently absent. Startup-only refusal retained. Component only;fullBE006 remains IN_PROGRESS.
+
+Exactparent forecast40322141956bothjobsSUCCESS. Actual ZIP size/SHA/CRC/path/source/controller/report hashes and tree-equivalent tested mergede3f2d4f101c6aea377da4944f31828f2991354f verified.114actualParquet/SQL source cases0skip/audit0;6upstream synthetic fixtures/3separatecoldmodels10/10/2rowsparity0/232versions/kernel limits/bothdistinctworkersremoved. These qualify parent source fixtures only,not later funding-renderer changes. Main40322142900 terminalFAILED on2unwaived mandatory private/trusted-main prerequisites;all17publicjobsSUCCESS.15rawarchivesverified;gateway5775+7skips/media198/trading3819+1privateDDSskip/PG26/voice117/monitor258/browser1547+1skip plus11/1/10/emulator18+4skips.374canonicalidentities caught exactly once/383edits. These results qualify parent6698source only. Failed164/e690 trading timeouts ande690 Parquet dependency failure remain retained.
+
+Nextcomplete source checks,evidence,manifest,verifiedstagedbackup,genuinecommit/committedbaselineverify;normalpush afterparentmainterminal/readback/exactCI. Continue confirmed remainingBE006 Money/Posting/FinancialMovement/reversals/flow-adjusted risk and shared reservations,thenBE007 quote/beneficiary/A4 approval/native rails/unknown send/reconcile/settle/compensate;reuseactual owners perbackend/BE-006_007_FUNDING_CONTINUATION_INVENTORY.md. FullML005 and all backend/assistant/forecast obligations remain.
+
+0formalunitacceptances. Frozen131units/324requirements/1610acceptances/234contexts/349actions/93features and original42frontendgroups/105functions/78surfaces preserved;backend479endpoints/369schemas/internalVATI9schemas. No newfrontenddesign beforeBG001,no /workspace/Van access,no delegation. Trading core chosenhost;native/provisioning/signing/deployment/economic/ArtemisS24 gates unissued. Profitability requires evidence,never guaranteed.

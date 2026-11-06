@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "authorization_id": "auth-20261021-owner-rev118-pre001-pre002",
+  "project": "van",
+  "authority": "OWNER_EXPLICIT",
+  "owner_instruction_sha256": "68c9b8af583d4517120414bd430ee40f2c6f131c6a8516f294ed39ee1ad19077",
+  "owner_instruction_excerpt": "I explicitly authorize you to create the owner authorization record needed for PRE-001 and PRE-002 work on branch ccr-9e07e1af-8mgz1p, covering:\n\n- tools/rebuild/**\n- tests/rebuild/**\n- docs/rebuild/**\n\nRecord this message accurately as my authorization. Do not claim a cryptographic signature, independent certification, or approval of findings I have not reviewed.",
+  "derivation": "Owner session instruction (2026-10-21) explicitly authorizing this record for PRE-001 and PRE-002 work on ccr-9e07e1af-8mgz1p over the three listed path globs. The SHA-256 covers the quoted excerpt exactly as recorded here. The same message orders a separate intake commit, then the inventory tooling, tests, assessments and execution ledger.",
+  "source": {
+    "kind": "owner_session_instruction",
+    "channel": "claude-code",
+    "owner_attested": true,
+    "device_signature_claimed": false,
+    "cryptographic_signature_claimed": false,
+    "signed_ingress_claimed": false
+  },
+  "issued_at_utc": "2026-10-21T15:47:24.173262+00:00",
+  "branch_scope": "ccr-9e07e1af-8mgz1p",
+  "authorized_paths": [
+    "tools/rebuild/**",
+    "tests/rebuild/**",
+    "docs/rebuild/**"
+  ],
+  "reusable": true,
+  "revoked": false,
+  "limitations": [
+    "PRE-001 and PRE-002 evidence, tooling, tests, assessments and continuation records only.",
+    "Does not cover application roots, the admitted blueprint package, existing Project Truth records, hooks or CI.",
+    "No cryptographic signature, independent certification, PRE-001/PRE-002 acceptance, F15 or approval of unreviewed findings is claimed."
+  ]
+}

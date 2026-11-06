@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:van:forecast:prediction-market:MarketMakingPolicy:1.0",
+  "title": "MarketMakingPolicy",
+  "description": "Proposed VAN contract. JSON shape/local arithmetic is not evidence admission, source permission or financial authority.",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "record_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "environment": {
+      "enum": [
+        "FIXTURE",
+        "RESEARCH",
+        "SHADOW"
+      ]
+    },
+    "authority_effect": {
+      "const": "NONE"
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0
+    },
+    "source_digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "policy_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "canonical_event_family": {
+      "type": "string",
+      "minLength": 1
+    },
+    "inventory_limit_contracts": {
+      "type": "string",
+      "pattern": "^-?[0-9]+(?:\\.[0-9]+)?$"
+    },
+    "max_open_quote_count": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "max_gross_outlay": {
+      "type": "string",
+      "pattern": "^-?[0-9]+(?:\\.[0-9]+)?$"
+    },
+    "currency": {
+      "type": "string",
+      "minLength": 1
+    },
+    "quote_model_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "fill_conditional_value_required": {
+      "const": true
+    },
+    "gap_behavior": {
+      "const": "WITHDRAW_NEW_QUOTES_KEEP_PENDING_EXPOSURE"
+    },
+    "pending_cancel_reservations_retained": {
+      "const": true
+    },
+    "official_release_policy_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "queue_assumption_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "special_venue_privileges_assumed": {
+      "const": false
+    },
+    "market_manipulation_allowed": {
+      "const": false
+    },
+    "live_order_submission": {
+      "const": false
+    }
+  },
+  "required": [
+    "schema_version",
+    "record_id",
+    "environment",
+    "authority_effect",
+    "evidence_refs",
+    "source_digest",
+    "policy_id",
+    "canonical_event_family",
+    "inventory_limit_contracts",
+    "max_open_quote_count",
+    "max_gross_outlay",
+    "currency",
+    "quote_model_ref",
+    "fill_conditional_value_required",
+    "gap_behavior",
+    "pending_cancel_reservations_retained",
+    "official_release_policy_ref",
+    "queue_assumption_ref",
+    "special_venue_privileges_assumed",
+    "market_manipulation_allowed",
+    "live_order_submission"
+  ],
+  "additionalProperties": false
+}

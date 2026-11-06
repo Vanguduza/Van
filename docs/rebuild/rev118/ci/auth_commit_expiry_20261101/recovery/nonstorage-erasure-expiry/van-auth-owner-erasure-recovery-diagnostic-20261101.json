@@ -1,0 +1,46 @@
+{
+  "fixture_db": "/tmp/van-recovery-auth-selected-20261101/test_actual_record_a4_erasure_0/gw.sqlite3",
+  "action_execution_timing": [
+    {
+      "execution_id": "exec_773c900f611f49bea27e192cac4d00c1",
+      "command_id": "f4dd2e8b-b068-4943-95c8-fb7500bd5f65",
+      "error_code": "memory_erasure_authority_expired",
+      "submitted_at_ms": null,
+      "verified_at_ms": null,
+      "updated_at_unix_ms": 1793497907629
+    }
+  ],
+  "observed_authority_tables": [
+    "standing_automation_authorities"
+  ],
+  "authority_timing": [
+    {
+      "key": "command_authority:f4dd2e8b-b068-4943-95c8-fb7500bd5f65",
+      "updated_at_ms": 1793497901786,
+      "command_id": "f4dd2e8b-b068-4943-95c8-fb7500bd5f65",
+      "issued_at_unix": 1793497897,
+      "expires_at_unix": 1793497907,
+      "created_at_unix": null,
+      "owner_approved": true
+    }
+  ],
+  "retained_synthetic_test_fixture_db": {
+    "path": "/workspace/van-auth-owner-erasure-recovery-fixture-20261101.sqlite3",
+    "sha256": "3710d31bd1c0e26daba3a100e9f195644724c0152fa55c82c1ae00b5242f417f",
+    "bytes": 2023424,
+    "source_sha256": "3710d31bd1c0e26daba3a100e9f195644724c0152fa55c82c1ae00b5242f417f"
+  },
+  "classification": "Actual inherited positive-test 10-second signed command deadline exhausted; production guard correctly refused expired authority. Not classified as infrastructure or production defect.",
+  "root_decision": "Retain actual deadline failure; production fail-closed expiry correct; no source/policy change. One isolated unchanged exact-case replay on healthy owned basetemp after current recovery. Report result before any fixture change.",
+  "deadline_seconds": 10,
+  "denial_after_deadline_ms": 629,
+  "unchanged_isolated_replay": {
+    "directory": "/workspace/van-auth-erasure-isolated-storage-recovery-r1-20261101",
+    "terminal_exit": 0,
+    "passed": 1,
+    "pytest_seconds": 5.337,
+    "verified_before_signed_deadline_ms": 8541,
+    "source_fixture_and_deadline_unchanged": true,
+    "root_decision": "Accept observed isolatedpass for exact composite casecoverage; retain priorfailure and known10second timing sensitivity; no latency/performance guarantee or production/fixture edit."
+  }
+}

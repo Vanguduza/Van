@@ -1,0 +1,33 @@
+{
+  "state": "CLEARED_EXACT_HUNK_AND_FINAL_DERIVED_READBACK",
+  "base": "9cfde69c38bc39a54875c2a9bf60c6269f363d64",
+  "patch_sha256": "0229ead1b7c192f4c9be5328d75a326b088a618b9674bff949b0bb2e21eafd7e",
+  "generator_sha256": "1d10b8c00e7a187711730ba2b1a76b61d8a7fc5c33e97695d6283b2734eb4c64",
+  "final_pins_sha256": "a6c255fd148bc90e84dd7729e884ddc3d126abdd5efb61160f7cb4d7c7c12ed8",
+  "derived7": {
+    "registries/owner_endpoints.json": "afb95fbcf431762bd0bf30e45f4a7b806f9f8d30088eebbc033c6959549843ee",
+    "registries/owner_endpoint_schemas.json": "b6dd330fa4a075c4745421a4363da5b624404f279a15c598e852d28f36f0dc3b",
+    "registries/owner_features.json": "3dd588ddee279b8667b4f1b7dd0ea9a1e9f8189bce7d3d08afbd2a735dd020ec",
+    "registries/owner_screens.json": "f246500dd9c17e07629a6df9c338f607adcedb0b29f31a26f65a5150dfd60b49",
+    "docs/rebuild/rev118/backend/OWNER_REGISTRY_SOURCE_REFRESH_20261022.json": "e01c36ad9c8acb214f582cb0fe311d6c2a62c7f6396f3e5e8767cef63c8d52ee",
+    "docs/rebuild/rev118/backend/OWNER_REGISTRY_GENERATION.json": "21b7d8c53b2cf02d11c8e50834251c36acef0e6b86540b01fb8efbdbd346cd66",
+    "docs/rebuild/rev118/backend/OWNER_FRONTEND_SCREEN_REGISTRY.md": "384c0938ae1c6e0f232e44e4b2a301fe73aa66d824a20a4a2adde00e90b23a3f"
+  },
+  "checks": {
+    "owner_features": "All original semantic row values and functions/status/authority preserved except actual citation line/hash refresh; exactly4matched appendeddataextensions on soleexistingtarget",
+    "owner_screens": "All original semantic row values and functions/status/authority preserved except actual citation line/hash refresh; exactly4matched appendeddataextensions on soleexistingtarget",
+    "schemas": "394preserved;7added;only2oldresponses additive optionalcleanup field/union,oldrequiredunchanged"
+  },
+  "observed_counts": {
+    "old_endpoints": 493,
+    "new_endpoints": 497,
+    "old_schemas": 394,
+    "new_schemas": 401,
+    "groups": 42,
+    "functions": 105,
+    "surfaces": 78
+  },
+  "frozen16_exact": true,
+  "tests_generator_productimports_run": false,
+  "scope": "Independent read-only comparison of actual bytes/JSON; no product/native/unit acceptance. Source receipt exists; writer may fill final actual guard metrics without altering source16 or generatorhunk."
+}

@@ -236,3 +236,24 @@ def test_a_generic_function_declaration_is_still_found():
     assert "VanScreen" in declarations("fun <T> VanScreen(state: ScreenState<T>) {}")
     assert "VanPanel" in declarations("@Composable\nfun VanPanel(modifier: Modifier) {}")
     assert declarations("fun <K, V> merge(a: K, b: V) {}") == {"merge"}
+
+
+def test_fixture_graph_distinguishes_test_only_from_live_and_unreferenced(tmp_path, monkeypatch):
+    scanner = _scanner()
+    app = tmp_path / "app"
+    tests = tmp_path / "tests"
+    app.mkdir()
+    tests.mkdir()
+    (app / "EntryPoint.kt").write_text("class EntryPoint { val live = Alive() }\n")
+    (app / "Alive.kt").write_text("class Alive\n")
+    (app / "OnlyTests.kt").write_text("class OnlyTests\n")
+    (app / "Unused.kt").write_text("class Unused\n")
+    (tests / "OwnerTest.kt").write_text("fun usesIt() = OnlyTests()\n")
+    manifest = tmp_path / "AndroidManifest.xml"
+    manifest.write_text('<manifest xmlns:android="http://schemas.android.com/apk/res/android"><application android:name=".EntryPoint" /></manifest>')
+    for name, value in {"ROOT": tmp_path, "APP": app, "APP_TESTS": tests,
+                        "HARNESS_TESTS": tmp_path / "no-harness", "MANIFEST": manifest}.items():
+        monkeypatch.setattr(scanner, name, value)
+    report = scanner.scan()
+    assert report["test_only"] == [("app/OnlyTests.kt", ["OwnerTest.kt"])]
+    assert report["unreferenced_files"] == ["app/Unused.kt"]

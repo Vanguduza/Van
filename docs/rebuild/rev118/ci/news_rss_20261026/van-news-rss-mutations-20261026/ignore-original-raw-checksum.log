@@ -1,0 +1,30 @@
+.............................F..                                         [100%]
+=================================== FAILURES ===================================
+_ test_correct_event_seal_cannot_hide_wrong_raw_bytes_or_self_admit_a_snapshot[change0] _
+
+setup = (<vati.core.ledger.Ledger object at 0x7fd56a978140>, PosixPath('/tmp/pytest-of-agent/pytest-287/test_correct_event_sea...t_correct_event_seal_cannot0/feed.xml', 'input_format': 'rss2', 'source_id': 'transport', 'publisher_id': 'publisher'})
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-287/test_correct_event_seal_cannot0')
+change = {'raw_base64': 'b3RoZXIgYnl0ZXM='}
+
+    @pytest.mark.parametrize('change',[{'raw_base64':'b3RoZXIgYnl0ZXM='},
+        {'provider_qualified':True},{'native_clock_qualified':True}])
+    def test_correct_event_seal_cannot_hide_wrong_raw_bytes_or_self_admit_a_snapshot(setup,tmp_path,change):
+        from vati.core.events import make_event
+        ledger,path,config=setup;build(ledger,config);original,=snapshots(ledger)
+        value=Ledger(tmp_path/'forged-snapshot.sqlite')
+        try:
+            value.append(make_event(original.kind,original.producer,original.payload | change,
+                event_time_ms=original.event_time_ms,received_time_ms=original.received_time_ms,
+                correlation_id=original.correlation_id))
+            assert value.verify_chain()[0];head=value.head()
+            news=build(value,config)
+>           assert news.source_health['state']=='RECOVERY_UNAVAILABLE'
+E           AssertionError: assert 'READY_DECLARED' == 'RECOVERY_UNAVAILABLE'
+E             
+E             - RECOVERY_UNAVAILABLE
+E             + READY_DECLARED
+
+trading/tests/test_news_rss_feed.py:294: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_news_rss_feed.py::test_correct_event_seal_cannot_hide_wrong_raw_bytes_or_self_admit_a_snapshot[change0]
+1 failed, 31 passed, 2 deselected in 1.00s

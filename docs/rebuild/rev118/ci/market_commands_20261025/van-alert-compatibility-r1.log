@@ -1,0 +1,12 @@
+................................................s.....                   [100%]
+=============================== warnings summary ===============================
+backend/tests/test_command_success_contract.py::TestASourceMutationIsVerifiedAgainstTheSources::test_no_source_action_is_certified_by_the_notebook_existing
+  backend/tests/test_command_success_contract.py:427: PytestWarning: The test <Function test_no_source_action_is_certified_by_the_notebook_existing> is marked with '@pytest.mark.asyncio' but it is not an async function. Please remove the asyncio mark. If the test is not marked explicitly, check for global marks applied via 'pytestmark'.
+    def test_no_source_action_is_certified_by_the_notebook_existing(self):
+
+backend/tests/test_command_success_contract.py::TestASourceMutationIsVerifiedAgainstTheSources::test_a_source_action_naming_nothing_gets_no_contract
+  backend/tests/test_command_success_contract.py:451: PytestWarning: The test <Function test_a_source_action_naming_nothing_gets_no_contract> is marked with '@pytest.mark.asyncio' but it is not an async function. Please remove the asyncio mark. If the test is not marked explicitly, check for global marks applied via 'pytestmark'.
+    def test_a_source_action_naming_nothing_gets_no_contract(self):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+53 passed, 1 skipped, 2 warnings in 85.24s (0:01:25)

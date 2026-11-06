@@ -1,0 +1,10 @@
+081a547117ea7d585e2cb6089e2c88c76acc2355:trading/vati/app/cycle.py:28:from vati.execution.tca import compute_tca
+081a547117ea7d585e2cb6089e2c88c76acc2355:trading/vati/app/cycle.py:335:                tca = compute_tca(rec, direction=intent.direction, qty=rec.filled_qty, value_per_unit=cfg.contract.value_per_price_unit_per_lot if cfg.contract.loss_model is LossModel.STOP_DISTANCE else Decimal(1), modelled_cost_pct=cost)
+081a547117ea7d585e2cb6089e2c88c76acc2355:trading/vati/app/trade_lifecycle.py:23:from vati.execution.tca import compute_tca
+081a547117ea7d585e2cb6089e2c88c76acc2355:trading/vati/app/trade_lifecycle.py:372:                    tca = compute_tca(
+081a547117ea7d585e2cb6089e2c88c76acc2355:trading/vati/app/trade_lifecycle.py:457:        tca = compute_tca(
+081a547117ea7d585e2cb6089e2c88c76acc2355:trading/vati/app/trade_lifecycle.py:601:        tca = compute_tca(
+081a547117ea7d585e2cb6089e2c88c76acc2355:trading/vati/execution/__init__.py:9:from vati.execution.tca import TcaRecord, compute_tca
+081a547117ea7d585e2cb6089e2c88c76acc2355:trading/vati/execution/__init__.py:15:           "compute_tca", "Outcome", "TradeReview", "review_trade"]
+081a547117ea7d585e2cb6089e2c88c76acc2355:trading/vati/execution/policy.py:5:    ExecutionReceipt -> compute_tca -> LearningBroker -> BrokerExecutionProfile
+081a547117ea7d585e2cb6089e2c88c76acc2355:trading/vati/execution/tca.py:34:def compute_tca(r: ExecutionReceipt, *, direction: Direction, qty: Decimal, value_per_unit: Decimal, modelled_cost_pct: Decimal) -> TcaRecord:

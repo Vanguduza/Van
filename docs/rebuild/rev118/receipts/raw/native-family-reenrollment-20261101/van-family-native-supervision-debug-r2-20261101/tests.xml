@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.967" timestamp="2026-11-01T05:34:01.681842+00:00" hostname="07611d75dea7"><testcase classname="trading.tests.test_family_native_supervision" name="test_cold_expired_optional_policy_keeps_independent_native_stops_in_one_original_trial" time="0.498"><failure message="AssertionError: {'sessions': [{'grant': {'activated_ms': 1800000060000, 'evidence_refs': ['SYNTHETIC_SOURCE_NOT_NATIVE'], 'expires_ms'...family': {'family_id': 'family:ti-e2e-1', 'account_alias': 'fx_primary', 'symbol': 'EURUSD', 'direction': 'LONG', ...}}&#10;assert (not [] and 0 == 1)&#10; +  where [] = positions()&#10; +    where positions = PaperAdapter(venue='paper', account_alias='fx_primary', equity=Decimal('10032.7600000'), currency='USD', spread=Decima...ecimal('0.01'), partial_min=Decimal('0'), partial_max=None, minimum_remaining=Decimal('0'), revision='paper-close/1')}).positions&#10; +      where PaperAdapter(venue='paper', account_alias='fx_primary', equity=Decimal('10032.7600000'), currency='USD', spread=Decima...ecimal('0.01'), partial_min=Decimal('0'), partial_max=None, minimum_remaining=Decimal('0'), revision='paper-close/1')}) = &lt;test_active_trade_e2e.World object at 0x7f7391f53ec0&gt;.adapter&#10; +  and   0 = len([])&#10; +    where [] = AccountTradeLifecycle(ledger=&lt;vati.core.ledger.Ledger object at 0x7f73917f7800&gt;, adapter=PaperAdapter(venue='paper', a...BTTKRX7FEn-NSbl6YDKpUMnQPV_GHtkheTywIgOjl7AOx-A9rWP5EMS5QZr1O9huwj6IBZMZ7t8M0F4bU'}, native_economic_observations=None).reviews&#10; +      where AccountTradeLifecycle(ledger=&lt;vati.core.ledger.Ledger object at 0x7f73917f7800&gt;, adapter=PaperAdapter(venue='paper', a...BTTKRX7FEn-NSbl6YDKpUMnQPV_GHtkheTywIgOjl7AOx-A9rWP5EMS5QZr1O9huwj6IBZMZ7t8M0F4bU'}, native_economic_observations=None) = &lt;test_active_trade_e2e.World object at 0x7f7391f53ec0&gt;.lifecycle">tmp_path = PosixPath('/tmp/van-recovery-family-native-supervision-debug-r2-20261101/test_cold_expired_optional_pol0')
+
+    def test_cold_expired_optional_policy_keeps_independent_native_stops_in_one_original_trial(tmp_path):
+        from vati.lifecycle.family import FamilyRegistry
+        w,store,time,grant,plan,history=admitted_source_world(tmp_path,actual_runtime_lease=True,add_child=True,max_quantity='.20')
+        try:
+            time[0]+=61000
+            w.lifecycle.entries.clear();w.lifecycle.families=FamilyRegistry(ledger=w.ledger)
+            w.lifecycle.recover_from_venue()
+            root=w.lifecycle.entries['ti-e2e-1']['broker_position_id']
+            w.adapter._positions[root]['stop']=D('1.105')
+            w.lifecycle.mark('EURUSD',D('1.104'),D('1.1042'),now_ms=time[0])
+            assert len(w.adapter.positions())==1 and not w.lifecycle.reviews and not w.learning.episodes
+            remaining=w.adapter.positions()[0]
+            w.lifecycle.mark('EURUSD',remaining.stop_price-D('.001'),remaining.stop_price,now_ms=time[0]+1000)
+&gt;           assert not w.adapter.positions() and len(w.lifecycle.reviews)==1, {'sessions':[e.payload for e in w.ledger.iter(EventKind.SESSION)],'entries':w.lifecycle.entries,'family':w.lifecycle.families.get(plan.snapshot.family_id).body()}
+E           AssertionError: {'sessions': [{'grant': {'activated_ms': 1800000060000, 'evidence_refs': ['SYNTHETIC_SOURCE_NOT_NATIVE'], 'expires_ms'...family': {'family_id': 'family:ti-e2e-1', 'account_alias': 'fx_primary', 'symbol': 'EURUSD', 'direction': 'LONG', ...}}
+E           assert (not [] and 0 == 1)
+E            +  where [] = positions()
+E            +    where positions = PaperAdapter(venue='paper', account_alias='fx_primary', equity=Decimal('10032.7600000'), currency='USD', spread=Decima...ecimal('0.01'), partial_min=Decimal('0'), partial_max=None, minimum_remaining=Decimal('0'), revision='paper-close/1')}).positions
+E            +      where PaperAdapter(venue='paper', account_alias='fx_primary', equity=Decimal('10032.7600000'), currency='USD', spread=Decima...ecimal('0.01'), partial_min=Decimal('0'), partial_max=None, minimum_remaining=Decimal('0'), revision='paper-close/1')}) = &lt;test_active_trade_e2e.World object at 0x7f7391f53ec0&gt;.adapter
+E            +  and   0 = len([])
+E            +    where [] = AccountTradeLifecycle(ledger=&lt;vati.core.ledger.Ledger object at 0x7f73917f7800&gt;, adapter=PaperAdapter(venue='paper', a...BTTKRX7FEn-NSbl6YDKpUMnQPV_GHtkheTywIgOjl7AOx-A9rWP5EMS5QZr1O9huwj6IBZMZ7t8M0F4bU'}, native_economic_observations=None).reviews
+E            +      where AccountTradeLifecycle(ledger=&lt;vati.core.ledger.Ledger object at 0x7f73917f7800&gt;, adapter=PaperAdapter(venue='paper', a...BTTKRX7FEn-NSbl6YDKpUMnQPV_GHtkheTywIgOjl7AOx-A9rWP5EMS5QZr1O9huwj6IBZMZ7t8M0F4bU'}, native_economic_observations=None) = &lt;test_active_trade_e2e.World object at 0x7f7391f53ec0&gt;.lifecycle
+
+trading/tests/test_family_native_supervision.py:135: AssertionError</failure></testcase></testsuite></testsuites>

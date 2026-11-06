@@ -1,0 +1,5 @@
+project-truth-ledger verify: GREEN — 470 commit(s) in a16f7cb80b01..bdd63a40174d
+  lineage: programme-b-jev-openmuse-convergence-r1
+  baseline: a16f7cb80b0169f93471d71bf6adab6cf03f7bf5
+  ledger_source: bdd63a40174d:docs/project-state/LOCAL_CHANGE_LEDGER.jsonl
+  trusted_records: bdd63a40174d

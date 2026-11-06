@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.status.OwnerSourceReadTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:57:33" hostname="052fefa249ff" time="0.044">
+  <properties/>
+  <testcase name="failed refresh retains original data and original observation time()" classname="com.dial.van.status.OwnerSourceReadTest" time="0.01"/>
+  <testcase name="failed source cannot masquerade as an observed empty list()" classname="com.dial.van.status.OwnerSourceReadTest" time="0.002"/>
+  <testcase name="independent failed read leaves sibling source observable()" classname="com.dial.van.status.OwnerSourceReadTest" time="0.003"/>
+  <testcase name="a stalled source becomes unavailable within its budget without losing confirmed data()" classname="com.dial.van.status.OwnerSourceReadTest" time="0.023"/>
+  <testcase name="recovery replaces cached data and clears source failure()" classname="com.dial.van.status.OwnerSourceReadTest" time="0.005"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

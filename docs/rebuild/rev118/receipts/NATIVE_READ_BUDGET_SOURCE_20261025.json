@@ -1,0 +1,37 @@
+{
+  "schema": "van.rebuild.native-read-budget-source/1",
+  "status": "SOURCE_TESTED_COMPONENT_NOT_UNIT_ACCEPTANCE",
+  "base_head": "df75b6cf77752ec0ba4708b21951c2af47f67bfa",
+  "updated_at_utc": "2026-10-25T19:37:37.950693+00:00",
+  "source_sha256": {
+    "trading/vati/execution/ctrader/transport.py": "85e774be45f15f7566ea3c4987e87244b209dbc302dd6ebe0f3edf0ee607500e",
+    "trading/vati/execution/ctrader/adapter.py": "632a8234834a261970c79360de7a127ceeb3ce0a6860a719cf53958cb741eb46",
+    "trading/vati/execution/ctrader/__init__.py": "9d2d3998894921923354b378f9ddf03490ed6229090aa553268c88cd78874e18",
+    "trading/tests/test_ctrader_read_budget.py": "6d9f1462ab643b7f9b54dbf074b82e21c43cefd45aa5dc68d64a6ad354d97585"
+  },
+  "executed": {
+    "initial_specification": "27failed: mostly missing new API/capability, not27confirmed production bugs. Retained.",
+    "detached_reader_before": "1failed/27deselected actual socket-release race; retained.",
+    "first_integration": "242pass/1incorrect raw-wire-diagnostic oracle. Original financial uncertainty/privacy contract inspected; assertion now preserves its generic reason and verifies disconnect/one request. No product error message changed.",
+    "second_integration": "243pass/0skip/audit0",
+    "final_integration": "256pass/0skip/audit0",
+    "extended_postgres": "910pass/0skip/audit0; actual pinned isolated PostgreSQL, canonical schema, owned container removed and children reconciled.",
+    "rebuild": "108pass/0skip",
+    "mutation_registry": "374cases/383edits/preflight0findings; NOT_EXECUTION on this packet"
+  },
+  "limits": [
+    "8MiB default/64MiB maximum are implementation resource bounds, not vendor maximum or production capacity qualification",
+    "Monotonic socket/response/send-mutex native-read budget does not interrupt OS DNS or arbitrary callback/connector code; expiry rechecked on return",
+    "Separate governed worker and persistence/host isolation remain necessary; no production worker or qualified consumer activated"
+  ],
+  "qualification": {
+    "unit_acceptance": "NOT_ISSUED",
+    "native": false,
+    "provider": false,
+    "capacity": false,
+    "economic": false,
+    "production": false,
+    "s24": false
+  },
+  "evidence": "ci/native_read_budgets_20261025"
+}

@@ -14,10 +14,10 @@ object OverlayTheme {
     const val RESTING_AVATAR_DP: Int = 96
 
     /** Workboard sizing. Height is bounded by presentation, content remains scrollable. */
-    const val COMPACT_WIDTH_DP: Int = 300
-    const val COMPACT_HEIGHT_DP: Int = 188
-    const val EXPANDED_WIDTH_DP: Int = 356
-    const val EXPANDED_HEIGHT_DP: Int = 420
+    const val COMPACT_WIDTH_DP: Int = 320
+    const val COMPACT_HEIGHT_DP: Int = 292
+    const val EXPANDED_WIDTH_DP: Int = 380
+    const val EXPANDED_HEIGHT_DP: Int = 520
     const val MAXIMIZED_HORIZONTAL_MARGIN_DP: Int = 12
     const val MAXIMIZED_HEIGHT_FRACTION: Float = 0.86f
 
@@ -44,5 +44,5 @@ object OverlayTheme {
     const val DISMISS_BOTTOM_MARGIN_DP: Int = 24
 
     val COMPACT_ACTIONS: List<String> = listOf("Chat", "Voice", "Projects", "Tasks", "Decisions")
-    val QUICK_CONTROLS: List<String> = listOf("Chat", "Voice", "Minimize", "Command Centre", "Dock", "Close")
+    val QUICK_CONTROLS: List<String> = listOf("Chat", "Voice", "Settings", "Minimize", "Command Centre", "Dock", "Close")
 }

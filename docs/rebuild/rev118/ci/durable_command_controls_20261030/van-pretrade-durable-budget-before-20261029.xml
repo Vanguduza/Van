@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="2" time="0.638" timestamp="2026-10-29T01:53:16.083572+00:00" hostname="6e9feff21467"><testcase classname="trading.tests.test_pretrade_durable_command_budget" name="test_actual_account_command_window_survives_a_recreated_control_owner[False]" time="0.458" /><testcase classname="trading.tests.test_pretrade_durable_command_budget" name="test_actual_account_command_window_survives_a_recreated_control_owner[True]" time="0.015"><failure message="AssertionError: assert 2 == 1&#10; +  where 2 = count(&lt;EventKind.ORDER_COMMAND: 'ORDER_COMMAND'&gt;)&#10; +    where count = &lt;vati.core.ledger.Ledger object at 0x7fd4788705c0&gt;.count&#10; +    and   &lt;EventKind.ORDER_COMMAND: 'ORDER_COMMAND'&gt; = EventKind.ORDER_COMMAND">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-256/test_actual_account_command_wi1')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+restart = True
+
+    @pytest.mark.parametrize('restart', [False, True])
+    def test_actual_account_command_window_survives_a_recreated_control_owner(tmp_path, eurusd, restart):
+        mandate, first, native = flow(eurusd, max_positions_per_instrument=2)
+        path = tmp_path/'commands.sqlite'
+        ledger, adapter = Ledger(path), PaperAdapter(account_alias=mandate.account_alias)
+        routes = RouteRegistry()
+        contract = replace(eurusd, venue='paper')
+        routes.refresh(account_alias=mandate.account_alias, adapter_id='paper',
+            contracts={'EURUSD': contract}, now_ms=NOW*1000)
+        def owner(connection):
+            return ExecutionRouter(ledger=connection, adapters={'paper': adapter},
+                kill_switch=KillSwitch(), protection=ProtectionManager(), route_registry=routes,
+                pretrade_controls=PreTradeControls(routes=routes, ledger=connection, max_orders_per_window=1),
+                style_selector=ExecutionStyleSelector(), enforce_rev51_controls=True)
+        def execute(router, trade, decision, at):
+            policy = ExecutionPolicyEngine().select(candidate_id=trade.trade_intent_id,
+                bucket=ExecutionBucket('paper',mandate.account_alias,'EURUSD','LONDON','NORMAL','NONE','LONG'))
+            return router.execute(trade,decision,mandate,now_ms=at,execution_policy_decision=policy,
+                market_reference=MarketReference(trade.entry,0),liquidity=LiquidityView())
+        connection = None
+        try:
+            router = owner(ledger)
+            decision = RiskAuthority(mandate).evaluate_safe(first,native)
+            assert decision.decision in {Decision.APPROVED,Decision.REDUCED}
+            assert execute(router,first,decision,NOW*1000).status == 'FILLED'
+            position = adapter.positions()[0]
+            existing = OpenPosition(position.symbol,position.direction,position.quantity,
+                abs(position.entry_price-position.stop_price),contract.value_per_price_unit_per_lot,
+                contract.base_currency,contract.quote_currency,strategy_id=first.strategy_id,
+                broker_position_id=position.position_id)
+            second = replace(first,trade_intent_id='second-original',idempotency_key='second-original-key')
+            current = snapshot(contract,open_positions=(existing,))
+            approved = RiskAuthority(mandate).evaluate_safe(second,current)
+            assert approved.decision in {Decision.APPROVED,Decision.REDUCED}
+            if restart:
+                connection = Ledger(path)
+                router = owner(connection)
+            try:
+                execute(router,second,approved,NOW*1000+1)
+            except RouterError as error:
+                assert 'ORDER_RATE_LIMIT' in str(error)
+&gt;           assert ledger.count(EventKind.ORDER_COMMAND) == 1
+E           AssertionError: assert 2 == 1
+E            +  where 2 = count(&lt;EventKind.ORDER_COMMAND: 'ORDER_COMMAND'&gt;)
+E            +    where count = &lt;vati.core.ledger.Ledger object at 0x7fd4788705c0&gt;.count
+E            +    and   &lt;EventKind.ORDER_COMMAND: 'ORDER_COMMAND'&gt; = EventKind.ORDER_COMMAND
+
+trading/tests/test_pretrade_durable_command_budget.py:59: AssertionError</failure></testcase></testsuite></testsuites>

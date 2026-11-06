@@ -30,7 +30,7 @@ AUTHORITY_SRC = (ROOT / "trading/vati/risk/authority.py").read_text(encoding="ut
 SIZING_SRC = (ROOT / "trading/vati/risk/sizing.py").read_text(encoding="utf-8")
 
 MANDATE_CLAMP = ("        if allowed_risk > m.max_risk_per_trade:\n            allowed_risk = m.max_risk_per_trade\n", "        if False:\n            pass\n")
-FINAL_RECHECK = ("        if sized.risk_pct > m.max_risk_per_trade or sized.risk_pct > intent.requested_risk_pct:\n            return rej(", "        if False:\n            return rej(")
+FINAL_RECHECK = ("        if exact_risk_pct > m.max_risk_per_trade or exact_risk_pct > intent.requested_risk_pct:\n            return rej(", "        if False:\n            return rej(")
 HEAT_CHECK = ("        if heat_after > m.max_open_stop_risk:\n            return rej(", "        if False:\n            return rej(")
 LEG_CHECK = ("        if hot:\n            return rej(", "        if False:\n            return rej(")
 DUP_LATCH = ("        self._seen_keys.add(intent.idempotency_key)\n", "")
@@ -72,8 +72,27 @@ def broken_authority(name: str, edits: list[tuple[str, str]], *, sizing_edits: l
     return mod.RiskAuthority
 
 
+def require_refusal_contracts():
+    """Required reason states must survive the production safe wrapper too.
+
+    Removing an early guard can otherwise crash a later lookup. Such a crash
+    is not evidence of an unsafe approval, and must not receive semantic credit.
+    """
+    from random import Random
+    contract = fuzz._contract(Random(0), 'EURUSD')
+    for mode, request, reason in [
+        ('OBSERVE', fuzz.intent(), 'MODE_NOT_ORDER_SENDING'),
+        ('LIMITED_LIVE', fuzz.intent(stop=None), 'STOP_REQUIRED'),
+    ]:
+        mandate = fuzz.TradingMandate.from_mapping(fuzz.mandate_dict(mode=mode))
+        result = fuzz.RiskAuthority(mandate).evaluate_safe(request, fuzz.snapshot(contract))
+        assert result.decision is authority.Decision.REJECTED, 'required refusal admitted an entry'
+        assert result.reason_code == reason, f'required refusal {reason} became {result.reason_code}'
+
+
 def run(label: str, expect_fail: bool) -> bool:
     try:
+        require_refusal_contracts()
         fuzz.test_risk_authority_invariants()
         outcome, ok = "fuzz PASSED", not expect_fail
     except AssertionError as exc:

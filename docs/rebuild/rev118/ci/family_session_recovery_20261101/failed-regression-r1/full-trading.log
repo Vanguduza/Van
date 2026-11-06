@@ -1,0 +1,990 @@
+........................................................................ [  1%]
+........................................................................ [  2%]
+............FFFFFF.FFFFF.F.....FF....................................... [  3%]
+........................................................................ [  4%]
+........................................................................ [  6%]
+........................................................................ [  7%]
+........................................................................ [  8%]
+........................................................................ [  9%]
+........................................................................ [ 11%]
+........................................................................ [ 12%]
+........................................................................ [ 13%]
+........................................................................ [ 14%]
+........................................................................ [ 16%]
+........................................................................ [ 17%]
+........................................................................ [ 18%]
+........................................................................ [ 19%]
+........................................................................ [ 21%]
+........................................................................ [ 22%]
+........................................................................ [ 23%]
+........................................................................ [ 24%]
+........................................................................ [ 26%]
+........................................................................ [ 27%]
+........................................................................ [ 28%]
+........................................................................ [ 29%]
+........................................................................ [ 31%]
+........................................................................ [ 32%]
+........................................................................ [ 33%]
+........................................................................ [ 34%]
+........................................................................ [ 36%]
+........................................................................ [ 37%]
+........................................................................ [ 38%]
+........................................................................ [ 39%]
+........................................................................ [ 41%]
+........................................................................ [ 42%]
+........................................................................ [ 43%]
+........................................................................ [ 44%]
+........................................................................ [ 46%]
+........................................................................ [ 47%]
+........................................................................ [ 48%]
+........................................................................ [ 49%]
+........................................................................ [ 51%]
+........................................................................ [ 52%]
+........................................................................ [ 53%]
+........................................................................ [ 54%]
+........................................................................ [ 56%]
+........................................................................ [ 57%]
+........................................................................ [ 58%]
+........................................................................ [ 59%]
+........................................................................ [ 61%]
+........................................................................ [ 62%]
+........................................................................ [ 63%]
+........................................................................ [ 64%]
+........................................................................ [ 66%]
+........................................................................ [ 67%]
+........................................................................ [ 68%]
+........................................................................ [ 69%]
+........................................................................ [ 71%]
+........................................................................ [ 72%]
+........................................................................ [ 73%]
+........................................................................ [ 74%]
+........................................................................ [ 76%]
+........................................................................ [ 77%]
+........................................................................ [ 78%]
+........................................................................ [ 79%]
+........................................................................ [ 81%]
+........................................................................ [ 82%]
+........................................................................ [ 83%]
+........................................................................ [ 84%]
+........................................................................ [ 86%]
+........................................................................ [ 87%]
+........................................................................ [ 88%]
+........................................................................ [ 89%]
+........................................................................ [ 91%]
+........................................................................ [ 92%]
+........................................................................ [ 93%]
+........................................................................ [ 94%]
+........................................................................ [ 96%]
+........................................................................ [ 97%]
+........................................................................ [ 98%]
+........................................................................ [ 99%]
+..........                                                               [100%]
+=================================== FAILURES ===================================
+_ test_signed_account_owner_clear_changes_only_the_cited_cause_and_never_submits _
+
+book = (<vati.app.account_service.AccountCoordinatorService object at 0x7f6fb99b24b0>, {'now': 1793495169758}, <function book.<locals>.review at 0x7f6fb9859ee0>, <function book.<locals>.request at 0x7f6fb985a200>)
+
+    def test_signed_account_owner_clear_changes_only_the_cited_cause_and_never_submits(book):
+        service,clock,review,request=book
+        source=halt(service);service._observe_owner_halt(clock['now'])
+        service.kill.trip(KillSwitchTrigger.STALE_DATA,clock['now'])
+>       journal,original=request();service.step_once()
+                                   ^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_account_runtime_recovery.py:126: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/app/account_service.py:1253: in step_once
+    process_recovery_requests(self)
+trading/vati/app/runtime_control_actor.py:200: in process_recovery_requests
+    before = recovery_review(service)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/runtime_control_actor.py:87: in recovery_review
+    'unresolved_entry_ids': sorted(c.unresolved_entry_attempts),
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/account_recovery.py:85: in unresolved_entry_attempts
+    def unresolved_entry_attempts(self):return unresolved_account_entries(self.service)
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/account_recovery.py:25: in unresolved_account_entries
+    history=NativePositionHistory(service._ledger,account_alias=service.cfg.account_alias,
+trading/vati/execution/recovery_scope.py:37: in __init__
+    with committed_source_snapshot(ledger):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+trading/vati/core/ledger.py:55: in committed_source_snapshot
+    require_committed_source_read(ledger)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ledger = <vati.core.ledger_pg.PostgresLedger object at 0x7f6fb98acec0>
+
+    def require_committed_source_read(ledger):
+        """An owned writer's staged rows are not committed source evidence."""
+        connection=getattr(ledger,'_conn',None)
+        if connection is None:
+            raise LedgerError('committed_source_transaction_state_unavailable')
+        if hasattr(connection,'in_transaction'):
+            active=connection.in_transaction
+        elif hasattr(connection,'info'):
+            active=connection.info.transaction_status!=0
+        else:
+            raise LedgerError('committed_source_transaction_state_unavailable')
+        depth=getattr(ledger,'_read_snapshot_depth',0)
+        if active and not (type(depth) is int and depth>0):
+>           raise LedgerError('committed_source_read_requires_idle_or_readonly_snapshot')
+E           vati.core.ledger.LedgerError: committed_source_read_requires_idle_or_readonly_snapshot
+
+trading/vati/core/ledger.py:50: LedgerError
+_ test_changed_account_recovery_authority_refuses_without_clearing[halt-STATE_CHANGED] _
+
+book = (<vati.app.account_service.AccountCoordinatorService object at 0x7f6fb9aa1730>, {'now': 1793495170288}, <function book.<locals>.review at 0x7f6fbabc2980>, <function book.<locals>.request at 0x7f6fbabfcd60>)
+change = 'halt', reason = 'STATE_CHANGED'
+
+    @pytest.mark.parametrize('change,reason',[('halt','STATE_CHANGED'),('expired','APPROVAL_EXPIRED'),
+        ('revoked','OWNER_KEY_UNREGISTERED'),('session','SESSION_CHANGED'),('lease','ACTOR_LEASE_LOST')])
+    def test_changed_account_recovery_authority_refuses_without_clearing(book,change,reason):
+        from vati.app.runtime_control_actor import process_recovery_requests
+        service,clock,review,request=book
+        halt(service);service._observe_owner_halt(clock['now'])
+        journal,original=request(session_id='a_previous_actor') if change=='session' else request()
+        if change=='halt':clock['now']+=1;halt(service)
+        elif change=='expired':clock['now']+=61000
+        elif change=='revoked':Path(service.cfg.owner_authority_keys).write_text(json.dumps({'keys':{}}))
+        elif change=='lease':service.lease.release(now_ms=clock['now'])
+        if change=='lease':process_recovery_requests(service)
+>       else:service.step_once()
+             ^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_account_runtime_recovery.py:150: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/app/account_service.py:1253: in step_once
+    process_recovery_requests(self)
+trading/vati/app/runtime_control_actor.py:200: in process_recovery_requests
+    before = recovery_review(service)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/runtime_control_actor.py:87: in recovery_review
+    'unresolved_entry_ids': sorted(c.unresolved_entry_attempts),
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/account_recovery.py:85: in unresolved_entry_attempts
+    def unresolved_entry_attempts(self):return unresolved_account_entries(self.service)
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/account_recovery.py:25: in unresolved_account_entries
+    history=NativePositionHistory(service._ledger,account_alias=service.cfg.account_alias,
+trading/vati/execution/recovery_scope.py:37: in __init__
+    with committed_source_snapshot(ledger):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+trading/vati/core/ledger.py:55: in committed_source_snapshot
+    require_committed_source_read(ledger)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ledger = <vati.core.ledger_pg.PostgresLedger object at 0x7f6fb9aa2840>
+
+    def require_committed_source_read(ledger):
+        """An owned writer's staged rows are not committed source evidence."""
+        connection=getattr(ledger,'_conn',None)
+        if connection is None:
+            raise LedgerError('committed_source_transaction_state_unavailable')
+        if hasattr(connection,'in_transaction'):
+            active=connection.in_transaction
+        elif hasattr(connection,'info'):
+            active=connection.info.transaction_status!=0
+        else:
+            raise LedgerError('committed_source_transaction_state_unavailable')
+        depth=getattr(ledger,'_read_snapshot_depth',0)
+        if active and not (type(depth) is int and depth>0):
+>           raise LedgerError('committed_source_read_requires_idle_or_readonly_snapshot')
+E           vati.core.ledger.LedgerError: committed_source_read_requires_idle_or_readonly_snapshot
+
+trading/vati/core/ledger.py:50: LedgerError
+_ test_changed_account_recovery_authority_refuses_without_clearing[expired-APPROVAL_EXPIRED] _
+
+book = (<vati.app.account_service.AccountCoordinatorService object at 0x7f6fb9a76d20>, {'now': 1793495231565}, <function book.<locals>.review at 0x7f6fbabfc900>, <function book.<locals>.request at 0x7f6fbabfd8a0>)
+change = 'expired', reason = 'APPROVAL_EXPIRED'
+
+    @pytest.mark.parametrize('change,reason',[('halt','STATE_CHANGED'),('expired','APPROVAL_EXPIRED'),
+        ('revoked','OWNER_KEY_UNREGISTERED'),('session','SESSION_CHANGED'),('lease','ACTOR_LEASE_LOST')])
+    def test_changed_account_recovery_authority_refuses_without_clearing(book,change,reason):
+        from vati.app.runtime_control_actor import process_recovery_requests
+        service,clock,review,request=book
+        halt(service);service._observe_owner_halt(clock['now'])
+        journal,original=request(session_id='a_previous_actor') if change=='session' else request()
+        if change=='halt':clock['now']+=1;halt(service)
+        elif change=='expired':clock['now']+=61000
+        elif change=='revoked':Path(service.cfg.owner_authority_keys).write_text(json.dumps({'keys':{}}))
+        elif change=='lease':service.lease.release(now_ms=clock['now'])
+        if change=='lease':process_recovery_requests(service)
+>       else:service.step_once()
+             ^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_account_runtime_recovery.py:150: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/app/account_service.py:1253: in step_once
+    process_recovery_requests(self)
+trading/vati/app/runtime_control_actor.py:200: in process_recovery_requests
+    before = recovery_review(service)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/runtime_control_actor.py:87: in recovery_review
+    'unresolved_entry_ids': sorted(c.unresolved_entry_attempts),
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/account_recovery.py:85: in unresolved_entry_attempts
+    def unresolved_entry_attempts(self):return unresolved_account_entries(self.service)
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/account_recovery.py:25: in unresolved_account_entries
+    history=NativePositionHistory(service._ledger,account_alias=service.cfg.account_alias,
+trading/vati/execution/recovery_scope.py:37: in __init__
+    with committed_source_snapshot(ledger):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+trading/vati/core/ledger.py:55: in committed_source_snapshot
+    require_committed_source_read(ledger)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ledger = <vati.core.ledger_pg.PostgresLedger object at 0x7f6fbab5d730>
+
+    def require_committed_source_read(ledger):
+        """An owned writer's staged rows are not committed source evidence."""
+        connection=getattr(ledger,'_conn',None)
+        if connection is None:
+            raise LedgerError('committed_source_transaction_state_unavailable')
+        if hasattr(connection,'in_transaction'):
+            active=connection.in_transaction
+        elif hasattr(connection,'info'):
+            active=connection.info.transaction_status!=0
+        else:
+            raise LedgerError('committed_source_transaction_state_unavailable')
+        depth=getattr(ledger,'_read_snapshot_depth',0)
+        if active and not (type(depth) is int and depth>0):
+>           raise LedgerError('committed_source_read_requires_idle_or_readonly_snapshot')
+E           vati.core.ledger.LedgerError: committed_source_read_requires_idle_or_readonly_snapshot
+
+trading/vati/core/ledger.py:50: LedgerError
+_ test_changed_account_recovery_authority_refuses_without_clearing[revoked-OWNER_KEY_UNREGISTERED] _
+
+book = (<vati.app.account_service.AccountCoordinatorService object at 0x7f6fc17892e0>, {'now': 1793495170790}, <function book.<locals>.review at 0x7f6fb9a01260>, <function book.<locals>.request at 0x7f6fb9a00720>)
+change = 'revoked', reason = 'OWNER_KEY_UNREGISTERED'
+
+    @pytest.mark.parametrize('change,reason',[('halt','STATE_CHANGED'),('expired','APPROVAL_EXPIRED'),
+        ('revoked','OWNER_KEY_UNREGISTERED'),('session','SESSION_CHANGED'),('lease','ACTOR_LEASE_LOST')])
+    def test_changed_account_recovery_authority_refuses_without_clearing(book,change,reason):
+        from vati.app.runtime_control_actor import process_recovery_requests
+        service,clock,review,request=book
+        halt(service);service._observe_owner_halt(clock['now'])
+        journal,original=request(session_id='a_previous_actor') if change=='session' else request()
+        if change=='halt':clock['now']+=1;halt(service)
+        elif change=='expired':clock['now']+=61000
+        elif change=='revoked':Path(service.cfg.owner_authority_keys).write_text(json.dumps({'keys':{}}))
+        elif change=='lease':service.lease.release(now_ms=clock['now'])
+        if change=='lease':process_recovery_requests(service)
+>       else:service.step_once()
+             ^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_account_runtime_recovery.py:150: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/app/account_service.py:1253: in step_once
+    process_recovery_requests(self)
+trading/vati/app/runtime_control_actor.py:200: in process_recovery_requests
+    before = recovery_review(service)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/runtime_control_actor.py:87: in recovery_review
+    'unresolved_entry_ids': sorted(c.unresolved_entry_attempts),
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/account_recovery.py:85: in unresolved_entry_attempts
+    def unresolved_entry_attempts(self):return unresolved_account_entries(self.service)
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/account_recovery.py:25: in unresolved_account_entries
+    history=NativePositionHistory(service._ledger,account_alias=service.cfg.account_alias,
+trading/vati/execution/recovery_scope.py:37: in __init__
+    with committed_source_snapshot(ledger):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+trading/vati/core/ledger.py:55: in committed_source_snapshot
+    require_committed_source_read(ledger)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ledger = <vati.core.ledger_pg.PostgresLedger object at 0x7f6fc16e6210>
+
+    def require_committed_source_read(ledger):
+        """An owned writer's staged rows are not committed source evidence."""
+        connection=getattr(ledger,'_conn',None)
+        if connection is None:
+            raise LedgerError('committed_source_transaction_state_unavailable')
+        if hasattr(connection,'in_transaction'):
+            active=connection.in_transaction
+        elif hasattr(connection,'info'):
+            active=connection.info.transaction_status!=0
+        else:
+            raise LedgerError('committed_source_transaction_state_unavailable')
+        depth=getattr(ledger,'_read_snapshot_depth',0)
+        if active and not (type(depth) is int and depth>0):
+>           raise LedgerError('committed_source_read_requires_idle_or_readonly_snapshot')
+E           vati.core.ledger.LedgerError: committed_source_read_requires_idle_or_readonly_snapshot
+
+trading/vati/core/ledger.py:50: LedgerError
+_ test_changed_account_recovery_authority_refuses_without_clearing[session-SESSION_CHANGED] _
+
+book = (<vati.app.account_service.AccountCoordinatorService object at 0x7f6fb9a77140>, {'now': 1793495171045}, <function book.<locals>.review at 0x7f6fbabfc900>, <function book.<locals>.request at 0x7f6fbabff740>)
+change = 'session', reason = 'SESSION_CHANGED'
+
+    @pytest.mark.parametrize('change,reason',[('halt','STATE_CHANGED'),('expired','APPROVAL_EXPIRED'),
+        ('revoked','OWNER_KEY_UNREGISTERED'),('session','SESSION_CHANGED'),('lease','ACTOR_LEASE_LOST')])
+    def test_changed_account_recovery_authority_refuses_without_clearing(book,change,reason):
+        from vati.app.runtime_control_actor import process_recovery_requests
+        service,clock,review,request=book
+        halt(service);service._observe_owner_halt(clock['now'])
+        journal,original=request(session_id='a_previous_actor') if change=='session' else request()
+        if change=='halt':clock['now']+=1;halt(service)
+        elif change=='expired':clock['now']+=61000
+        elif change=='revoked':Path(service.cfg.owner_authority_keys).write_text(json.dumps({'keys':{}}))
+        elif change=='lease':service.lease.release(now_ms=clock['now'])
+        if change=='lease':process_recovery_requests(service)
+>       else:service.step_once()
+             ^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_account_runtime_recovery.py:150: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/app/account_service.py:1253: in step_once
+    process_recovery_requests(self)
+trading/vati/app/runtime_control_actor.py:200: in process_recovery_requests
+    before = recovery_review(service)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/runtime_control_actor.py:87: in recovery_review
+    'unresolved_entry_ids': sorted(c.unresolved_entry_attempts),
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/account_recovery.py:85: in unresolved_entry_attempts
+    def unresolved_entry_attempts(self):return unresolved_account_entries(self.service)
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/account_recovery.py:25: in unresolved_account_entries
+    history=NativePositionHistory(service._ledger,account_alias=service.cfg.account_alias,
+trading/vati/execution/recovery_scope.py:37: in __init__
+    with committed_source_snapshot(ledger):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+trading/vati/core/ledger.py:55: in committed_source_snapshot
+    require_committed_source_read(ledger)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ledger = <vati.core.ledger_pg.PostgresLedger object at 0x7f6fbab5c410>
+
+    def require_committed_source_read(ledger):
+        """An owned writer's staged rows are not committed source evidence."""
+        connection=getattr(ledger,'_conn',None)
+        if connection is None:
+            raise LedgerError('committed_source_transaction_state_unavailable')
+        if hasattr(connection,'in_transaction'):
+            active=connection.in_transaction
+        elif hasattr(connection,'info'):
+            active=connection.info.transaction_status!=0
+        else:
+            raise LedgerError('committed_source_transaction_state_unavailable')
+        depth=getattr(ledger,'_read_snapshot_depth',0)
+        if active and not (type(depth) is int and depth>0):
+>           raise LedgerError('committed_source_read_requires_idle_or_readonly_snapshot')
+E           vati.core.ledger.LedgerError: committed_source_read_requires_idle_or_readonly_snapshot
+
+trading/vati/core/ledger.py:50: LedgerError
+_ test_changed_account_recovery_authority_refuses_without_clearing[lease-ACTOR_LEASE_LOST] _
+
+book = (<vati.app.account_service.AccountCoordinatorService object at 0x7f6fc16fc7a0>, {'now': 1793495171338}, <function book.<locals>.review at 0x7f6fb99ebf60>, <function book.<locals>.request at 0x7f6fb9858e00>)
+change = 'lease', reason = 'ACTOR_LEASE_LOST'
+
+    @pytest.mark.parametrize('change,reason',[('halt','STATE_CHANGED'),('expired','APPROVAL_EXPIRED'),
+        ('revoked','OWNER_KEY_UNREGISTERED'),('session','SESSION_CHANGED'),('lease','ACTOR_LEASE_LOST')])
+    def test_changed_account_recovery_authority_refuses_without_clearing(book,change,reason):
+        from vati.app.runtime_control_actor import process_recovery_requests
+        service,clock,review,request=book
+        halt(service);service._observe_owner_halt(clock['now'])
+        journal,original=request(session_id='a_previous_actor') if change=='session' else request()
+        if change=='halt':clock['now']+=1;halt(service)
+        elif change=='expired':clock['now']+=61000
+        elif change=='revoked':Path(service.cfg.owner_authority_keys).write_text(json.dumps({'keys':{}}))
+        elif change=='lease':service.lease.release(now_ms=clock['now'])
+>       if change=='lease':process_recovery_requests(service)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_account_runtime_recovery.py:149: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/app/runtime_control_actor.py:200: in process_recovery_requests
+    before = recovery_review(service)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/runtime_control_actor.py:87: in recovery_review
+    'unresolved_entry_ids': sorted(c.unresolved_entry_attempts),
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/account_recovery.py:85: in unresolved_entry_attempts
+    def unresolved_entry_attempts(self):return unresolved_account_entries(self.service)
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/account_recovery.py:25: in unresolved_account_entries
+    history=NativePositionHistory(service._ledger,account_alias=service.cfg.account_alias,
+trading/vati/execution/recovery_scope.py:37: in __init__
+    with committed_source_snapshot(ledger):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+trading/vati/core/ledger.py:55: in committed_source_snapshot
+    require_committed_source_read(ledger)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ledger = <vati.core.ledger_pg.PostgresLedger object at 0x7f6fc16fdee0>
+
+    def require_committed_source_read(ledger):
+        """An owned writer's staged rows are not committed source evidence."""
+        connection=getattr(ledger,'_conn',None)
+        if connection is None:
+            raise LedgerError('committed_source_transaction_state_unavailable')
+        if hasattr(connection,'in_transaction'):
+            active=connection.in_transaction
+        elif hasattr(connection,'info'):
+            active=connection.info.transaction_status!=0
+        else:
+            raise LedgerError('committed_source_transaction_state_unavailable')
+        depth=getattr(ledger,'_read_snapshot_depth',0)
+        if active and not (type(depth) is int and depth>0):
+>           raise LedgerError('committed_source_read_requires_idle_or_readonly_snapshot')
+E           vati.core.ledger.LedgerError: committed_source_read_requires_idle_or_readonly_snapshot
+
+trading/vati/core/ledger.py:50: LedgerError
+_ test_signed_account_drawdown_resume_records_current_money_without_entry_permission _
+
+book = (<vati.app.account_service.AccountCoordinatorService object at 0x7f6fb99b2ed0>, {'now': 1793495171890}, <function book.<locals>.review at 0x7f6fb9abc7c0>, <function book.<locals>.request at 0x7f6fb9abf100>)
+
+    def test_signed_account_drawdown_resume_records_current_money_without_entry_permission(book):
+        service,clock,review,request=book
+        service.peak_equity=D('12000')
+        journal,original=request('resume_drawdown',{})
+>       service.step_once();done=journal.status(original.proof.operation_id,original.intent.device_id)
+        ^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_account_runtime_recovery.py:169: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/app/account_service.py:1253: in step_once
+    process_recovery_requests(self)
+trading/vati/app/runtime_control_actor.py:200: in process_recovery_requests
+    before = recovery_review(service)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/runtime_control_actor.py:87: in recovery_review
+    'unresolved_entry_ids': sorted(c.unresolved_entry_attempts),
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/account_recovery.py:85: in unresolved_entry_attempts
+    def unresolved_entry_attempts(self):return unresolved_account_entries(self.service)
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/account_recovery.py:25: in unresolved_account_entries
+    history=NativePositionHistory(service._ledger,account_alias=service.cfg.account_alias,
+trading/vati/execution/recovery_scope.py:37: in __init__
+    with committed_source_snapshot(ledger):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+trading/vati/core/ledger.py:55: in committed_source_snapshot
+    require_committed_source_read(ledger)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ledger = <vati.core.ledger_pg.PostgresLedger object at 0x7f6fb998e270>
+
+    def require_committed_source_read(ledger):
+        """An owned writer's staged rows are not committed source evidence."""
+        connection=getattr(ledger,'_conn',None)
+        if connection is None:
+            raise LedgerError('committed_source_transaction_state_unavailable')
+        if hasattr(connection,'in_transaction'):
+            active=connection.in_transaction
+        elif hasattr(connection,'info'):
+            active=connection.info.transaction_status!=0
+        else:
+            raise LedgerError('committed_source_transaction_state_unavailable')
+        depth=getattr(ledger,'_read_snapshot_depth',0)
+        if active and not (type(depth) is int and depth>0):
+>           raise LedgerError('committed_source_read_requires_idle_or_readonly_snapshot')
+E           vati.core.ledger.LedgerError: committed_source_read_requires_idle_or_readonly_snapshot
+
+trading/vati/core/ledger.py:50: LedgerError
+_____ test_signed_account_loss_reset_does_not_erase_a_later_loss_on_replay _____
+
+book = (<vati.app.account_service.AccountCoordinatorService object at 0x7f6fb998d970>, {'now': 1793495172229}, <function book.<locals>.review at 0x7f6fb9abef20>, <function book.<locals>.request at 0x7f6fb9abfce0>)
+
+    def test_signed_account_loss_reset_does_not_erase_a_later_loss_on_replay(book):
+        service,clock,review,request=book;sid='FX-TREND-PULLBACK-01'
+        def loss(identity):
+            service._ledger.append(make_event(EventKind.TRADE_REVIEW,'vati-account-lifecycle',
+                {'strategy_id':sid,'account_alias':service.cfg.account_alias,'pnl':'-1'},
+                event_time_ms=clock['now'],received_time_ms=clock['now'],correlation_id=identity))
+            service.lifecycle.streaks.on_close(sid,D('-1'),clock['now'])
+        loss('original-loss');journal,original=request('reset_loss_streak',{'scope':'*ACCOUNT*'})
+>       service.step_once();assert journal.status(original.proof.operation_id,original.intent.device_id).phase=='APPLIED'
+        ^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_account_runtime_recovery.py:183: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/app/account_service.py:1253: in step_once
+    process_recovery_requests(self)
+trading/vati/app/runtime_control_actor.py:200: in process_recovery_requests
+    before = recovery_review(service)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/runtime_control_actor.py:87: in recovery_review
+    'unresolved_entry_ids': sorted(c.unresolved_entry_attempts),
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/account_recovery.py:85: in unresolved_entry_attempts
+    def unresolved_entry_attempts(self):return unresolved_account_entries(self.service)
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/account_recovery.py:25: in unresolved_account_entries
+    history=NativePositionHistory(service._ledger,account_alias=service.cfg.account_alias,
+trading/vati/execution/recovery_scope.py:37: in __init__
+    with committed_source_snapshot(ledger):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+trading/vati/core/ledger.py:55: in committed_source_snapshot
+    require_committed_source_read(ledger)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ledger = <vati.core.ledger_pg.PostgresLedger object at 0x7f6fb99b0470>
+
+    def require_committed_source_read(ledger):
+        """An owned writer's staged rows are not committed source evidence."""
+        connection=getattr(ledger,'_conn',None)
+        if connection is None:
+            raise LedgerError('committed_source_transaction_state_unavailable')
+        if hasattr(connection,'in_transaction'):
+            active=connection.in_transaction
+        elif hasattr(connection,'info'):
+            active=connection.info.transaction_status!=0
+        else:
+            raise LedgerError('committed_source_transaction_state_unavailable')
+        depth=getattr(ledger,'_read_snapshot_depth',0)
+        if active and not (type(depth) is int and depth>0):
+>           raise LedgerError('committed_source_read_requires_idle_or_readonly_snapshot')
+E           vati.core.ledger.LedgerError: committed_source_read_requires_idle_or_readonly_snapshot
+
+trading/vati/core/ledger.py:50: LedgerError
+____ test_owner_key_retirement_cannot_acknowledge_during_a_recovery_effect _____
+
+book = (<vati.app.account_service.AccountCoordinatorService object at 0x7f6fc16feae0>, {'now': 1793495172541}, <function book.<locals>.review at 0x7f6fb99e9260>, <function book.<locals>.request at 0x7f6fb9a08c20>)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f6fb998c5f0>
+
+    def test_owner_key_retirement_cannot_acknowledge_during_a_recovery_effect(book,monkeypatch):
+        from concurrent.futures import ThreadPoolExecutor
+        from threading import Event
+        from vati.app.runtime_control_actor import process_recovery_requests
+        from vati.authority_registry import owner_key_id,revocation_record,revoke_owner_key
+        service,clock,review,request=book
+        halt(service);service._observe_owner_halt(clock['now']);journal,original=request()
+        pem=original.public_key_pem;kid=owner_key_id(pem);record=revocation_record('source-s24',kid)
+        effect,started,retired=Event(),Event(),Event();append=service._ledger.append
+        def revoke():
+            assert effect.wait(3);started.set()
+            try:
+                return revoke_owner_key(service.cfg.owner_authority_keys,device_id='source-s24',key_id=kid,
+                    public_key_pem=pem,operation_id=record['operation_id'])
+            finally:retired.set()
+        def guarded_append(event):
+            if event.kind is EventKind.KILL_SWITCH and event.payload.get('cleared') is True:
+                effect.set();assert started.wait(2)
+                assert not retired.wait(.2),'native key retirement acknowledged before the approved recovery effect committed'
+            return append(event)
+        monkeypatch.setattr(service._ledger,'append',guarded_append)
+        with ThreadPoolExecutor(max_workers=1) as pool:
+            retiring=pool.submit(revoke)
+>           try:process_recovery_requests(service)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_account_runtime_recovery.py:213: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/app/runtime_control_actor.py:200: in process_recovery_requests
+    before = recovery_review(service)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/runtime_control_actor.py:87: in recovery_review
+    'unresolved_entry_ids': sorted(c.unresolved_entry_attempts),
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/account_recovery.py:85: in unresolved_entry_attempts
+    def unresolved_entry_attempts(self):return unresolved_account_entries(self.service)
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/account_recovery.py:25: in unresolved_account_entries
+    history=NativePositionHistory(service._ledger,account_alias=service.cfg.account_alias,
+trading/vati/execution/recovery_scope.py:37: in __init__
+    with committed_source_snapshot(ledger):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+trading/vati/core/ledger.py:55: in committed_source_snapshot
+    require_committed_source_read(ledger)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ledger = <vati.core.ledger_pg.PostgresLedger object at 0x7f6fb9a76f60>
+
+    def require_committed_source_read(ledger):
+        """An owned writer's staged rows are not committed source evidence."""
+        connection=getattr(ledger,'_conn',None)
+        if connection is None:
+            raise LedgerError('committed_source_transaction_state_unavailable')
+        if hasattr(connection,'in_transaction'):
+            active=connection.in_transaction
+        elif hasattr(connection,'info'):
+            active=connection.info.transaction_status!=0
+        else:
+            raise LedgerError('committed_source_transaction_state_unavailable')
+        depth=getattr(ledger,'_read_snapshot_depth',0)
+        if active and not (type(depth) is int and depth>0):
+>           raise LedgerError('committed_source_read_requires_idle_or_readonly_snapshot')
+E           vati.core.ledger.LedgerError: committed_source_read_requires_idle_or_readonly_snapshot
+
+trading/vati/core/ledger.py:50: LedgerError
+_______ test_equivalent_pem_format_keeps_the_same_approved_recovery_key ________
+
+book = (<vati.app.account_service.AccountCoordinatorService object at 0x7f6fb99e5430>, {'now': 1793495172930}, <function book.<locals>.review at 0x7f6fb9a08b80>, <function book.<locals>.request at 0x7f6fb9a8a3e0>)
+
+    def test_equivalent_pem_format_keeps_the_same_approved_recovery_key(book):
+        service,clock,review,request=book
+        halt(service);service._observe_owner_halt(clock['now']);journal,original=request()
+        Path(service.cfg.owner_authority_keys).write_text(json.dumps({'keys':{
+            original.proof.key_id:original.public_key_pem.replace('\n','\r\n')}}))
+>       service.step_once()
+
+trading/tests/test_account_runtime_recovery.py:224: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/app/account_service.py:1253: in step_once
+    process_recovery_requests(self)
+trading/vati/app/runtime_control_actor.py:200: in process_recovery_requests
+    before = recovery_review(service)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/runtime_control_actor.py:87: in recovery_review
+    'unresolved_entry_ids': sorted(c.unresolved_entry_attempts),
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/account_recovery.py:85: in unresolved_entry_attempts
+    def unresolved_entry_attempts(self):return unresolved_account_entries(self.service)
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/account_recovery.py:25: in unresolved_account_entries
+    history=NativePositionHistory(service._ledger,account_alias=service.cfg.account_alias,
+trading/vati/execution/recovery_scope.py:37: in __init__
+    with committed_source_snapshot(ledger):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+trading/vati/core/ledger.py:55: in committed_source_snapshot
+    require_committed_source_read(ledger)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ledger = <vati.core.ledger_pg.PostgresLedger object at 0x7f6fb99e63c0>
+
+    def require_committed_source_read(ledger):
+        """An owned writer's staged rows are not committed source evidence."""
+        connection=getattr(ledger,'_conn',None)
+        if connection is None:
+            raise LedgerError('committed_source_transaction_state_unavailable')
+        if hasattr(connection,'in_transaction'):
+            active=connection.in_transaction
+        elif hasattr(connection,'info'):
+            active=connection.info.transaction_status!=0
+        else:
+            raise LedgerError('committed_source_transaction_state_unavailable')
+        depth=getattr(ledger,'_read_snapshot_depth',0)
+        if active and not (type(depth) is int and depth>0):
+>           raise LedgerError('committed_source_read_requires_idle_or_readonly_snapshot')
+E           vati.core.ledger.LedgerError: committed_source_read_requires_idle_or_readonly_snapshot
+
+trading/vati/core/ledger.py:50: LedgerError
+_ test_unconfirmed_original_native_order_blocks_account_recovery_without_a_resend _
+
+book = (<vati.app.account_service.AccountCoordinatorService object at 0x7f6fbab69b80>, {'now': 1793495173430}, <function book.<locals>.review at 0x7f6fb9a091c0>, <function book.<locals>.request at 0x7f6fb9a0b1a0>)
+
+    def test_unconfirmed_original_native_order_blocks_account_recovery_without_a_resend(book):
+        service,clock,review,request=book
+        command=unconfirmed_order(service);halt(service);service._observe_owner_halt(clock['now'])
+        assert review()['state']['unresolved_entry_ids']==[command.trade_intent_id]
+>       journal,original=request();service.step_once()
+                                   ^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_account_runtime_recovery.py:257: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/app/account_service.py:1253: in step_once
+    process_recovery_requests(self)
+trading/vati/app/runtime_control_actor.py:200: in process_recovery_requests
+    before = recovery_review(service)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/runtime_control_actor.py:87: in recovery_review
+    'unresolved_entry_ids': sorted(c.unresolved_entry_attempts),
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/account_recovery.py:85: in unresolved_entry_attempts
+    def unresolved_entry_attempts(self):return unresolved_account_entries(self.service)
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/account_recovery.py:25: in unresolved_account_entries
+    history=NativePositionHistory(service._ledger,account_alias=service.cfg.account_alias,
+trading/vati/execution/recovery_scope.py:37: in __init__
+    with committed_source_snapshot(ledger):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+trading/vati/core/ledger.py:55: in committed_source_snapshot
+    require_committed_source_read(ledger)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ledger = <vati.core.ledger_pg.PostgresLedger object at 0x7f6fb9a76d20>
+
+    def require_committed_source_read(ledger):
+        """An owned writer's staged rows are not committed source evidence."""
+        connection=getattr(ledger,'_conn',None)
+        if connection is None:
+            raise LedgerError('committed_source_transaction_state_unavailable')
+        if hasattr(connection,'in_transaction'):
+            active=connection.in_transaction
+        elif hasattr(connection,'info'):
+            active=connection.info.transaction_status!=0
+        else:
+            raise LedgerError('committed_source_transaction_state_unavailable')
+        depth=getattr(ledger,'_read_snapshot_depth',0)
+        if active and not (type(depth) is int and depth>0):
+>           raise LedgerError('committed_source_read_requires_idle_or_readonly_snapshot')
+E           vati.core.ledger.LedgerError: committed_source_read_requires_idle_or_readonly_snapshot
+
+trading/vati/core/ledger.py:50: LedgerError
+_ test_original_zero_effect_readback_allows_a_fresh_account_recovery_without_resending _
+
+book = (<vati.app.account_service.AccountCoordinatorService object at 0x7f6fb9a971d0>, {'now': 1793495174105}, <function book.<locals>.review at 0x7f6fb9a2b100>, <function book.<locals>.request at 0x7f6fb9a28d60>)
+
+    def test_original_zero_effect_readback_allows_a_fresh_account_recovery_without_resending(book):
+        service,clock,review,request=book;command=unconfirmed_order(service)
+        halt(service);service._observe_owner_halt(clock['now'])
+>       journal,original=request();service.step_once()
+                                   ^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_account_runtime_recovery.py:276: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/app/account_service.py:1253: in step_once
+    process_recovery_requests(self)
+trading/vati/app/runtime_control_actor.py:200: in process_recovery_requests
+    before = recovery_review(service)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/runtime_control_actor.py:87: in recovery_review
+    'unresolved_entry_ids': sorted(c.unresolved_entry_attempts),
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/account_recovery.py:85: in unresolved_entry_attempts
+    def unresolved_entry_attempts(self):return unresolved_account_entries(self.service)
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/account_recovery.py:25: in unresolved_account_entries
+    history=NativePositionHistory(service._ledger,account_alias=service.cfg.account_alias,
+trading/vati/execution/recovery_scope.py:37: in __init__
+    with committed_source_snapshot(ledger):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+trading/vati/core/ledger.py:55: in committed_source_snapshot
+    require_committed_source_read(ledger)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ledger = <vati.core.ledger_pg.PostgresLedger object at 0x7f6fb99cc9e0>
+
+    def require_committed_source_read(ledger):
+        """An owned writer's staged rows are not committed source evidence."""
+        connection=getattr(ledger,'_conn',None)
+        if connection is None:
+            raise LedgerError('committed_source_transaction_state_unavailable')
+        if hasattr(connection,'in_transaction'):
+            active=connection.in_transaction
+        elif hasattr(connection,'info'):
+            active=connection.info.transaction_status!=0
+        else:
+            raise LedgerError('committed_source_transaction_state_unavailable')
+        depth=getattr(ledger,'_read_snapshot_depth',0)
+        if active and not (type(depth) is int and depth>0):
+>           raise LedgerError('committed_source_read_requires_idle_or_readonly_snapshot')
+E           vati.core.ledger.LedgerError: committed_source_read_requires_idle_or_readonly_snapshot
+
+trading/vati/core/ledger.py:50: LedgerError
+_ test_account_recovery_effect_and_original_outcome_are_one_real_pg_commit[False] _
+
+book = (<vati.app.account_service.AccountCoordinatorService object at 0x7f6fb9822480>, {'now': 1793495176293}, <function book.<locals>.review at 0x7f6fb9a8aa20>, <function book.<locals>.request at 0x7f6fb9a29d00>)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f6fb9822870>
+ack_lost = False
+
+    @pytest.mark.parametrize('ack_lost',[False,True])
+    def test_account_recovery_effect_and_original_outcome_are_one_real_pg_commit(book,monkeypatch,ack_lost):
+        from contextlib import contextmanager
+        from vati.app.runtime_control_actor import process_recovery_requests
+        service,clock,review,request=book
+        halt(service);service._observe_owner_halt(clock['now']);journal,original=request()
+        ledger=service._ledger;append=ledger.append;atomic=ledger.atomic;effect_written=[];fired=[]
+        def observed(event):
+            result=append(event)
+            if event.kind is EventKind.KILL_SWITCH and event.payload.get('cleared') is True:
+                effect_written.append(True)
+                if not ack_lost:raise OSError('fixture failure before actual PostgreSQL commit')
+            return result
+        @contextmanager
+        def lost_committed_reply():
+            outer=ledger._atomic_depth==0
+            with atomic():yield ledger
+            if outer and effect_written and not fired:
+                fired.append(True)
+                raise OSError('fixture reply lost after actual PostgreSQL commit')
+        with monkeypatch.context() as scoped:
+            scoped.setattr(ledger,'append',observed)
+            if ack_lost:
+                scoped.setattr(ledger,'atomic',lost_committed_reply)
+                process_recovery_requests(service)
+            else:
+                with pytest.raises(OSError,match='before actual PostgreSQL commit'):
+>                   process_recovery_requests(service)
+
+trading/tests/test_account_runtime_recovery.py:326: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/app/runtime_control_actor.py:200: in process_recovery_requests
+    before = recovery_review(service)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/runtime_control_actor.py:87: in recovery_review
+    'unresolved_entry_ids': sorted(c.unresolved_entry_attempts),
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/account_recovery.py:85: in unresolved_entry_attempts
+    def unresolved_entry_attempts(self):return unresolved_account_entries(self.service)
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/account_recovery.py:25: in unresolved_account_entries
+    history=NativePositionHistory(service._ledger,account_alias=service.cfg.account_alias,
+trading/vati/execution/recovery_scope.py:37: in __init__
+    with committed_source_snapshot(ledger):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+trading/vati/core/ledger.py:55: in committed_source_snapshot
+    require_committed_source_read(ledger)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ledger = <vati.core.ledger_pg.PostgresLedger object at 0x7f6fb99f91c0>
+
+    def require_committed_source_read(ledger):
+        """An owned writer's staged rows are not committed source evidence."""
+        connection=getattr(ledger,'_conn',None)
+        if connection is None:
+            raise LedgerError('committed_source_transaction_state_unavailable')
+        if hasattr(connection,'in_transaction'):
+            active=connection.in_transaction
+        elif hasattr(connection,'info'):
+            active=connection.info.transaction_status!=0
+        else:
+            raise LedgerError('committed_source_transaction_state_unavailable')
+        depth=getattr(ledger,'_read_snapshot_depth',0)
+        if active and not (type(depth) is int and depth>0):
+>           raise LedgerError('committed_source_read_requires_idle_or_readonly_snapshot')
+E           vati.core.ledger.LedgerError: committed_source_read_requires_idle_or_readonly_snapshot
+
+trading/vati/core/ledger.py:50: LedgerError
+_ test_account_recovery_effect_and_original_outcome_are_one_real_pg_commit[True] _
+
+book = (<vati.app.account_service.AccountCoordinatorService object at 0x7f6fb99469c0>, {'now': 1793495176800}, <function book.<locals>.review at 0x7f6fb9a14860>, <function book.<locals>.request at 0x7f6fb9a17880>)
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f6fb98229f0>
+ack_lost = True
+
+    @pytest.mark.parametrize('ack_lost',[False,True])
+    def test_account_recovery_effect_and_original_outcome_are_one_real_pg_commit(book,monkeypatch,ack_lost):
+        from contextlib import contextmanager
+        from vati.app.runtime_control_actor import process_recovery_requests
+        service,clock,review,request=book
+        halt(service);service._observe_owner_halt(clock['now']);journal,original=request()
+        ledger=service._ledger;append=ledger.append;atomic=ledger.atomic;effect_written=[];fired=[]
+        def observed(event):
+            result=append(event)
+            if event.kind is EventKind.KILL_SWITCH and event.payload.get('cleared') is True:
+                effect_written.append(True)
+                if not ack_lost:raise OSError('fixture failure before actual PostgreSQL commit')
+            return result
+        @contextmanager
+        def lost_committed_reply():
+            outer=ledger._atomic_depth==0
+            with atomic():yield ledger
+            if outer and effect_written and not fired:
+                fired.append(True)
+                raise OSError('fixture reply lost after actual PostgreSQL commit')
+        with monkeypatch.context() as scoped:
+            scoped.setattr(ledger,'append',observed)
+            if ack_lost:
+                scoped.setattr(ledger,'atomic',lost_committed_reply)
+>               process_recovery_requests(service)
+
+trading/tests/test_account_runtime_recovery.py:323: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/app/runtime_control_actor.py:200: in process_recovery_requests
+    before = recovery_review(service)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/runtime_control_actor.py:87: in recovery_review
+    'unresolved_entry_ids': sorted(c.unresolved_entry_attempts),
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/account_recovery.py:85: in unresolved_entry_attempts
+    def unresolved_entry_attempts(self):return unresolved_account_entries(self.service)
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/account_recovery.py:25: in unresolved_account_entries
+    history=NativePositionHistory(service._ledger,account_alias=service.cfg.account_alias,
+trading/vati/execution/recovery_scope.py:37: in __init__
+    with committed_source_snapshot(ledger):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+trading/vati/core/ledger.py:55: in committed_source_snapshot
+    require_committed_source_read(ledger)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ledger = <vati.core.ledger_pg.PostgresLedger object at 0x7f6fb9947a70>
+
+    def require_committed_source_read(ledger):
+        """An owned writer's staged rows are not committed source evidence."""
+        connection=getattr(ledger,'_conn',None)
+        if connection is None:
+            raise LedgerError('committed_source_transaction_state_unavailable')
+        if hasattr(connection,'in_transaction'):
+            active=connection.in_transaction
+        elif hasattr(connection,'info'):
+            active=connection.info.transaction_status!=0
+        else:
+            raise LedgerError('committed_source_transaction_state_unavailable')
+        depth=getattr(ledger,'_read_snapshot_depth',0)
+        if active and not (type(depth) is int and depth>0):
+>           raise LedgerError('committed_source_read_requires_idle_or_readonly_snapshot')
+E           vati.core.ledger.LedgerError: committed_source_read_requires_idle_or_readonly_snapshot
+
+trading/vati/core/ledger.py:50: LedgerError
+=============================== warnings summary ===============================
+../../van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py:53
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+trading/tests/test_entry_dispatch_commit_fence.py::test_real_process_death_after_commit_does_not_allow_a_replacement_send
+  /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/multiprocessing/popen_fork.py:66: DeprecationWarning: This process (pid=117790) is multi-threaded, use of fork() may lead to deadlocks in the child.
+    self.pid = os.fork()
+
+trading/tests/test_infra_live.py::test_deriv_ws_transport_over_a_real_websocket_server
+  /workspace/van-lanes-20261101/successor/trading/vati/execution/transports/deriv_ws.py:97: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+    self._ws.send(wire)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED trading/tests/test_account_runtime_recovery.py::test_signed_account_owner_clear_changes_only_the_cited_cause_and_never_submits
+FAILED trading/tests/test_account_runtime_recovery.py::test_changed_account_recovery_authority_refuses_without_clearing[halt-STATE_CHANGED]
+FAILED trading/tests/test_account_runtime_recovery.py::test_changed_account_recovery_authority_refuses_without_clearing[expired-APPROVAL_EXPIRED]
+FAILED trading/tests/test_account_runtime_recovery.py::test_changed_account_recovery_authority_refuses_without_clearing[revoked-OWNER_KEY_UNREGISTERED]
+FAILED trading/tests/test_account_runtime_recovery.py::test_changed_account_recovery_authority_refuses_without_clearing[session-SESSION_CHANGED]
+FAILED trading/tests/test_account_runtime_recovery.py::test_changed_account_recovery_authority_refuses_without_clearing[lease-ACTOR_LEASE_LOST]
+FAILED trading/tests/test_account_runtime_recovery.py::test_signed_account_drawdown_resume_records_current_money_without_entry_permission
+FAILED trading/tests/test_account_runtime_recovery.py::test_signed_account_loss_reset_does_not_erase_a_later_loss_on_replay
+FAILED trading/tests/test_account_runtime_recovery.py::test_owner_key_retirement_cannot_acknowledge_during_a_recovery_effect
+FAILED trading/tests/test_account_runtime_recovery.py::test_equivalent_pem_format_keeps_the_same_approved_recovery_key
+FAILED trading/tests/test_account_runtime_recovery.py::test_unconfirmed_original_native_order_blocks_account_recovery_without_a_resend
+FAILED trading/tests/test_account_runtime_recovery.py::test_original_zero_effect_readback_allows_a_fresh_account_recovery_without_resending
+FAILED trading/tests/test_account_runtime_recovery.py::test_account_recovery_effect_and_original_outcome_are_one_real_pg_commit[False]
+FAILED trading/tests/test_account_runtime_recovery.py::test_account_recovery_effect_and_original_outcome_are_one_real_pg_commit[True]
+14 failed, 5756 passed, 4 warnings in 783.03s (0:13:03)

@@ -1,0 +1,55 @@
+{
+  "schema": "van.rebuild.native-vits-speaker-identity-source/1",
+  "source_parent": "9599d695956adbe929ba4496065aa3baaa96b147",
+  "source_sha256": {
+    "android/app/src/main/java/com/dial/van/voice/SherpaLocalTtsRuntime.kt": "8c87773d674345b4e8e6a473444102952f77dd086d610d467a1d7a5117bb3db9",
+    "android/app/src/main/java/com/dial/van/voice/VitsLexiconCoverage.kt": "112acd76ed9a33e7973a6b5bf9b3a88a2330410c43443e05e1e531bf11719822",
+    "android/verification/src/test/kotlin/com/dial/van/voice/VitsSpeakerIdentityTest.kt": "30f329802e6604f889e346b6357c0f4b734dc6cc57bad38c32d1f79ee81d4061"
+  },
+  "upstream_repository": "k2-fsa/sherpa-onnx",
+  "upstream_version": "v1.13.8",
+  "upstream_commit": "11afbd009a7f8c08f4bcf2fc1b265d0df4670fbf",
+  "upstream_source_sha256": {
+    "/tmp/van-sherpa-v1138-offline-tts-vits-impl.h": "659c7e2201ef41305b3f772a2d836e93e2ce575c93bd9ab3b03ef0d0af6db695",
+    "/tmp/van-sherpa-v1138-offline-tts-vits-model.cc": "060907349036d63b60d035843defe7078b83c8099e0d4de323446c7db0d653d0"
+  },
+  "exact_model_metadata": {
+    "model_sha256": "5bbd273797a9ecf8d94bd6ec02ad16cb41cbb85f055ad98d528ced3e44c9b31a",
+    "top_level_onnx_metadata": {
+      "model_type": "vits",
+      "sample_rate": "22050",
+      "n_speakers": "0",
+      "language": "English"
+    },
+    "source": "Exact pinned public generic model; read-only protobuf metadata inspection"
+  },
+  "android_jvm": {
+    "tests": 1306,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "android_app_units": {
+    "tests": 195,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "lint": {
+    "Warning": 89,
+    "Hint": 22
+  },
+  "debug_and_instrumentation_apks_assembled": true,
+  "native_runtime": "PREVIOUS_RUN_FAILED_CURRENT_FIX_AWAITS_HOSTED_EXECUTION",
+  "voice_bundle_changed": false,
+  "native_synthesis_self_test_retained": true,
+  "audio_drain_assertions_retained": true,
+  "timeout_or_assertions_weakened": false,
+  "release_qualified": false,
+  "logs_sha256": {
+    "/tmp/van-vits-native-id-jvm.txt": "68f7003b41014a12b24e1eda771ab4922ea5ec89034f0f9d550f4ca02074465a",
+    "/tmp/van-vits-native-id-android.txt": "7dba36881b5371af9bbe153a1d8e9aed3dcac5883ba11fe081eeebdc97581256",
+    "/tmp/van-vits-model-metadata.json": "7e00fb81dd2acb25592bbf00acadbe883feb7e83b78dba080d164329b7f53f14",
+    "/tmp/van-9599-native-diagnostics/logcat.txt": "79e636eaed2ee083d23d1ab462688404416789f6d0c1ac750f14295db04efed9"
+  }
+}

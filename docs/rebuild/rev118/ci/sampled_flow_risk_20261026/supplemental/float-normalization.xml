@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="1.128" timestamp="2026-10-26T19:03:26.501992+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_flow_adjusted_risk" name="test_a_float_cannot_hide_in_an_equal_redundant_sample" time="0.261"><failure message="Failed: DID NOT RAISE UnitError">def test_a_float_cannot_hide_in_an_equal_redundant_sample():
+        first=value(1,'100','start',1);last=value(3,'90','end',1)
+&gt;       with pytest.raises(UnitError,match='NORMALIZED_INPUT_INVALID'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE UnitError
+
+trading/tests/test_flow_adjusted_risk.py:110: Failed</failure></testcase></testsuite></testsuites>

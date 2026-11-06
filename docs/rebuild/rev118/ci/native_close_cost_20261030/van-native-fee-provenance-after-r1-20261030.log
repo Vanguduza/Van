@@ -1,0 +1,194 @@
+.........FFFF.F.......F................................................. [ 85%]
+............                                                             [100%]
+=================================== FAILURES ===================================
+________ test_actual_account_review_includes_recorded_exit_charge_once _________
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-39/test_actual_account_review_inc0')
+
+    def test_actual_account_review_includes_recorded_exit_charge_once(tmp_path):
+        from vati.core import Ledger
+        ledger=Ledger(tmp_path/'close-cost-known.sqlite')
+        try:
+            out=account_close_review(ledger)
+            contract=out['life'].contracts['EURUSD']
+            expected=(out['receipt'].average_fill-out['entry'].average_fill)*out['entry'].filled_qty*contract.value_per_price_unit_per_lot
+            expected-=out['entry'].fees+out['receipt'].fees
+            assert out['receipt'].fees==D('3.25') and out['entry'].fees==D('1')
+>           assert out['review'].pnl==expected
+E           AssertionError: assert Decimal('0') == Decimal('44.95')
+E            +  where Decimal('0') = TradeReview(trade_intent_id='fee-knowledge', strategy_id='FX-TREND-PULLBACK-01', r_multiple=Decimal('2.46'), pnl=Decim...LE', 'reason': 'ValueError', 'exit_receipt_refs': [], 'fees_final': False, 'cash_reconciled': False}}, broker_ok=False).pnl
+
+trading/tests/test_ctrader_close_fee_knowledge.py:113: AssertionError
+_ test_native_close_cost_projection_reopens_original_sql_without_provider_io[missing0] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-39/test_native_close_cost_project0')
+missing = ()
+
+    @pytest.mark.parametrize('missing',[(),('commission',)])
+    def test_native_close_cost_projection_reopens_original_sql_without_provider_io(tmp_path,missing):
+        from vati.core import Ledger
+        from vati.app.trade_lifecycle import AccountTradeLifecycle
+        from vati.execution.recorded_close_costs import recorded_close_cost_entry
+        ledger=Ledger(tmp_path/'durable-close-cost.sqlite');cold=None
+        try:
+            out=account_close_review(ledger,missing=missing)
+            cold=Ledger(ledger.path);count=ledger.count();sent=out['adapter'].transport.sent
+            projected=recorded_close_cost_entry(cold,out['original_entry_row'],
+                trade_intent_id=out['command'].trade_intent_id,venue='ctrader',
+                account_alias=out['command'].account_alias,available_at_ms=out['closed_at_ms'])
+>           assert projected['fees']==(None if missing else D('4.25'))
+E           AssertionError: assert None == Decimal('4.25')
+
+trading/tests/test_ctrader_close_fee_knowledge.py:131: AssertionError
+_ test_native_close_cost_projection_reopens_original_sql_without_provider_io[missing1] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-39/test_native_close_cost_project1')
+missing = ('commission',)
+
+    @pytest.mark.parametrize('missing',[(),('commission',)])
+    def test_native_close_cost_projection_reopens_original_sql_without_provider_io(tmp_path,missing):
+        from vati.core import Ledger
+        from vati.app.trade_lifecycle import AccountTradeLifecycle
+        from vati.execution.recorded_close_costs import recorded_close_cost_entry
+        ledger=Ledger(tmp_path/'durable-close-cost.sqlite');cold=None
+        try:
+            out=account_close_review(ledger,missing=missing)
+            cold=Ledger(ledger.path);count=ledger.count();sent=out['adapter'].transport.sent
+            projected=recorded_close_cost_entry(cold,out['original_entry_row'],
+                trade_intent_id=out['command'].trade_intent_id,venue='ctrader',
+                account_alias=out['command'].account_alias,available_at_ms=out['closed_at_ms'])
+            assert projected['fees']==(None if missing else D('4.25'))
+            assert out['original_entry_row']['fees']==D('1')
+            from vati.core import EventKind
+            exits=[e for e in cold.iter(EventKind.EXECUTION_RECEIPT) if e.payload.get('exit_action')=='CLOSE']
+            assert len(exits)==1
+            restored=AccountTradeLifecycle._receipt_from_payload(exits[0].payload)
+            assert restored.receipt_hash==out['receipt'].receipt_hash and restored.fees==out['receipt'].fees
+>           assert projected['recorded_close_costs']['exit_receipt_refs']==[exits[0].hash]
+E           AssertionError: assert [] == ['7a09fb5ce9f...569c72e73543']
+E             
+E             Right contains one more item: '7a09fb5ce9ff3202acb99f069c5dba5833ffebb7284f14e8e615569c72e73543'
+E             Use -v to get more diff
+
+trading/tests/test_ctrader_close_fee_knowledge.py:138: AssertionError
+___ test_actual_single_symbol_review_consumes_original_exit_costs[missing0] ____
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-39/test_actual_single_symbol_revi0')
+missing = ()
+
+    @pytest.mark.parametrize('missing',[(),('commission',)])
+    def test_actual_single_symbol_review_consumes_original_exit_costs(tmp_path,missing):
+        from dataclasses import replace
+        from vati.core import Ledger
+        from vati.app.cycle import DecisionCycle
+        from vati.intelligence.events import EventMatrix
+        from vati.market_data import FX_CALENDAR
+        from test_backtest_runner_cli import fx_cfg,fx_engine
+        ledger=Ledger(tmp_path/'single-close-cost.sqlite')
+        try:
+            out=account_close_review(ledger,missing=missing)
+            original_cfg=fx_cfg(out['life'].contracts['EURUSD'])
+            cfg=replace(original_cfg,venue='ctrader',account_alias=out['command'].account_alias,
+                        contract=out['life'].contracts['EURUSD'])
+            cycle=DecisionCycle(cfg=cfg,adapter=out['adapter'],ledger=ledger,engine=fx_engine(cfg),
+                cost_fn=lambda state:D('.0003'),calendar=FX_CALENDAR,events=EventMatrix())
+            cycle._entries[out['command'].trade_intent_id]=deepcopy(out['original_entry_row'])
+            cycle._on_close(out['command'].trade_intent_id,out['receipt'].average_fill,'OWNER',out['closed_at_ms'])
+            review=cycle.reviews[-1]
+>           assert review.pnl_basis==('UNKNOWN_CHARGES' if missing else 'PRICE_DERIVED_NET_RECORDED_CHARGES')
+E           AssertionError: assert 'UNKNOWN_CHARGES' == 'PRICE_DERIVE...ORDED_CHARGES'
+E             
+E             - PRICE_DERIVED_NET_RECORDED_CHARGES
+E             + UNKNOWN_CHARGES
+
+trading/tests/test_ctrader_close_fee_knowledge.py:165: AssertionError
+____ test_replayed_identical_exit_receipt_does_not_charge_the_parent_twice _____
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-39/test_replayed_identical_exit_r0')
+
+    def test_replayed_identical_exit_receipt_does_not_charge_the_parent_twice(tmp_path):
+        from dataclasses import asdict
+        from vati.core import Ledger,EventKind,make_event
+        from vati.execution.recorded_close_costs import recorded_close_cost_entry
+        ledger=Ledger(tmp_path/'replayed-close-cost.sqlite')
+        try:
+            out=account_close_review(ledger)
+            original=next(e for e in ledger.iter(EventKind.EXECUTION_RECEIPT) if e.payload.get('exit_action')=='CLOSE')
+            ledger.append(make_event(EventKind.EXECUTION_RECEIPT,original.producer,original.payload,
+                event_time_ms=out['closed_at_ms']+1,received_time_ms=out['closed_at_ms']+1,
+                correlation_id=original.correlation_id))
+            entry=recorded_close_cost_entry(ledger,out['original_entry_row'],trade_intent_id=original.correlation_id,
+                venue='ctrader',account_alias=out['command'].account_alias,available_at_ms=out['closed_at_ms']+1)
+>           assert entry['fees']==D('4.25') and len(entry['recorded_exit_fills'])==1
+E           AssertionError: assert (None == Decimal('4.25'))
+E            +  where Decimal('4.25') = D('4.25')
+
+trading/tests/test_ctrader_close_fee_knowledge.py:185: AssertionError
+_ test_actual_partial_then_full_native_closes_use_every_price_and_charge_once[False] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-39/test_actual_partial_then_full_0')
+missing_last = False
+
+    @pytest.mark.parametrize('missing_last',[False,True])
+    def test_actual_partial_then_full_native_closes_use_every_price_and_charge_once(tmp_path,missing_last):
+        from vati.lifecycle.family import FamilyMember,MemberRole
+        ledger=Ledger(tmp_path/'partial-native-costs.sqlite')
+        try:
+            with native_fill(commission=-100) as (adapter,command,entry):
+                life=entry_lifecycle(ledger,adapter,command,entry)
+                peer=adapter.transport._connector.__self__;original=peer.handle;closed=[]
+                def handle(name,body,cid):
+                    if name!='ProtoOAClosePositionReq':return original(name,body,cid)
+                    pid=body['positionId'];before=deepcopy(peer.positions[pid]);volume=body['volume']
+                    remaining=before['tradeData']['volume']-volume;index=len(closed)
+                    assert remaining>=0
+                    if remaining:
+                        peer.positions[pid]['tradeData']['volume']=remaining
+                        position=deepcopy(peer.positions[pid])
+                    else:
+                        peer.positions.pop(pid);position={**before,'positionStatus':'POSITION_STATUS_CLOSED'}
+                    order_id=1001+index;price=(1.102,1.105)[index]
+                    deal={'dealId':2001+index,'orderId':order_id,'positionId':pid,'symbolId':before['tradeData']['symbolId'],
+                        'volume':volume,'filledVolume':volume,'tradeSide':'SELL','dealStatus':'FILLED',
+                        'createTimestamp':1700000000000,'executionTimestamp':1700000001000+index,
+                        'executionPrice':price,'commission':(-125,-200)[index],'moneyDigits':2}
+                    if missing_last and index==1:deal.pop('commission')
+                    closed.append(deepcopy(deal))
+                    return FakeCtrader.send(peer,'ProtoOAExecutionEvent',{'ctidTraderAccountId':12345,
+                        'executionType':'ORDER_FILLED','position':position,
+                        'order':{'orderId':order_id,'tradeData':{**before['tradeData'],'volume':volume,'tradeSide':'SELL'},
+                            'orderType':'MARKET','orderStatus':'ORDER_STATUS_FILLED','closingOrder':True},'deal':deal},cid)
+                peer.handle=handle
+                first=life.router.apply_preservation('ctrader',position_id=entry.broker_position_id,
+                    trade_intent_id=command.trade_intent_id,action='PARTIAL_CLOSE',quantity=D('.04'),
+                    now_ms=1700000001000,reason='PARTIAL')
+                assert first.status=='FILLED' and first.filled_qty==D('.04') and first.fees==D('1.25'), first.reject_reason
+                assert first.protective_stop_confirmed and adapter.positions()[0].quantity==D('.06')
+                family=life.families.for_intent(command.trade_intent_id)
+                life.families.apply(family.family_id,FamilyMember('actual-first-close',MemberRole.PARTIAL_EXIT,
+                    first.filled_qty,first.average_fill,1700000001000,command.trade_intent_id),now_ms=1700000001000)
+                life.entries[command.trade_intent_id]['quantity']=family.net_quantity
+                second=life.router.apply_preservation('ctrader',position_id=entry.broker_position_id,
+                    trade_intent_id=command.trade_intent_id,action='FULL_CLOSE',now_ms=1700000002000,reason='FULL')
+                assert second.status=='FILLED' and second.filled_qty==D('.06') and adapter.positions()==[]
+                life._on_close(command.trade_intent_id,second.average_fill,'FULL',1700000002000)
+                review=life.reviews[-1]
+                if missing_last:
+                    assert second.fees is None and review.pnl_basis=='UNKNOWN_CHARGES' and review.broker_ok is False
+                else:
+>                   assert second.fees==D('2') and review.pnl==D('32.95')
+E                   AssertionError: assert (Decimal('2.00') == Decimal('2') and Decimal('0') == Decimal('32.95'))
+E                    +  where Decimal('2.00') = ExecutionReceipt(trade_intent_id='', decision_hash='', venue='ctrader', status='FILLED', filled_qty=Decimal('0.06'), a...l('2.00'), protective_stop_price=None, receipt_hash='d2077eb5690da4af97e104f59cded8d6cb7b85e035f489c7dae4e4856e22351d').fees
+E                    +  and   Decimal('2') = D('2')
+E                    +  and   Decimal('0') = TradeReview(trade_intent_id='fee-knowledge', strategy_id='FX-TREND-PULLBACK-01', r_multiple=Decimal('2.46'), pnl=Decim...LE', 'reason': 'ValueError', 'exit_receipt_refs': [], 'fees_final': False, 'cash_reconciled': False}}, broker_ok=False).pnl
+E                    +  and   Decimal('32.95') = D('32.95')
+
+trading/tests/test_recorded_close_cost_scope.py:107: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_ctrader_close_fee_knowledge.py::test_actual_account_review_includes_recorded_exit_charge_once
+FAILED trading/tests/test_ctrader_close_fee_knowledge.py::test_native_close_cost_projection_reopens_original_sql_without_provider_io[missing0]
+FAILED trading/tests/test_ctrader_close_fee_knowledge.py::test_native_close_cost_projection_reopens_original_sql_without_provider_io[missing1]
+FAILED trading/tests/test_ctrader_close_fee_knowledge.py::test_actual_single_symbol_review_consumes_original_exit_costs[missing0]
+FAILED trading/tests/test_ctrader_close_fee_knowledge.py::test_replayed_identical_exit_receipt_does_not_charge_the_parent_twice
+FAILED trading/tests/test_recorded_close_cost_scope.py::test_actual_partial_then_full_native_closes_use_every_price_and_charge_once[False]
+6 failed, 78 passed in 2.63s

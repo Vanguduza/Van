@@ -1,0 +1,326 @@
+{
+  "directory": "/tmp/van-recovery-family-native-supervision-r10-20261101",
+  "at_utc": "2026-11-01T05:36:15.941267+00:00",
+  "files": [
+    {
+      "path": "test_restart_preserves_uncerta0/uncertain.sqlite",
+      "bytes": 24576,
+      "sha256": "aab09d0085f78ddcbffdf7afdaa8306eb000f648bd8f394a8c3ffd768ecdc4cc"
+    },
+    {
+      "path": "test_process_death_keeps_the_o3/venue-effects.txt",
+      "bytes": 8,
+      "sha256": "0cd2107421c18be75a90166eb91a40fad638afcae1f5c8aa4a149f876e5e7a49"
+    },
+    {
+      "path": "test_process_death_keeps_the_o3/death.sqlite",
+      "bytes": 24576,
+      "sha256": "1cf353d6150516d4df17dcb75b3bee51bbc807315206f861bf1a16f5f2390c9c"
+    },
+    {
+      "path": "test_process_death_keeps_the_o2/venue-effects.txt",
+      "bytes": 8,
+      "sha256": "0cd2107421c18be75a90166eb91a40fad638afcae1f5c8aa4a149f876e5e7a49"
+    },
+    {
+      "path": "test_process_death_keeps_the_o2/death.sqlite",
+      "bytes": 24576,
+      "sha256": "d15edaae65342769059a69046c0237457f1122e63ea690af204d2d9e03461530"
+    },
+    {
+      "path": "test_process_death_keeps_the_o1/venue-effects.txt",
+      "bytes": 8,
+      "sha256": "0cd2107421c18be75a90166eb91a40fad638afcae1f5c8aa4a149f876e5e7a49"
+    },
+    {
+      "path": "test_process_death_keeps_the_o1/death.sqlite",
+      "bytes": 24576,
+      "sha256": "d15edaae65342769059a69046c0237457f1122e63ea690af204d2d9e03461530"
+    },
+    {
+      "path": "test_process_death_keeps_the_o0/death.sqlite",
+      "bytes": 24576,
+      "sha256": "d15edaae65342769059a69046c0237457f1122e63ea690af204d2d9e03461530"
+    },
+    {
+      "path": "test_two_ledger_writers_cannot0/writers.sqlite",
+      "bytes": 24576,
+      "sha256": "aab09d0085f78ddcbffdf7afdaa8306eb000f648bd8f394a8c3ffd768ecdc4cc"
+    },
+    {
+      "path": "test_failed_second_recovery_ca2/repeat-recovery.sqlite",
+      "bytes": 36864,
+      "sha256": "f7c8e1beea855ce0d07ac56f4ab913dd9f0f5182d46842de9c4fb7d4117a785b"
+    },
+    {
+      "path": "test_failed_second_recovery_ca1/repeat-recovery.sqlite",
+      "bytes": 36864,
+      "sha256": "8578ce225b24712a78ef945ca436f0e4e4e3f81bccfa205c02441b8efb0fa43c"
+    },
+    {
+      "path": "test_failed_second_recovery_ca0/repeat-recovery.sqlite",
+      "bytes": 36864,
+      "sha256": "e95dcb57bc41f8c36d7c3b3cb0ebc64604de0df1a88a406f850fa6ce8e2812ff"
+    },
+    {
+      "path": "test_closing_one_held_hedged_p0/hedged-close.sqlite",
+      "bytes": 49152,
+      "sha256": "c56a862dfe375fd392fb9bed69450225466b843611c8dce1ad6788db33cae3bb"
+    },
+    {
+      "path": "test_legacy_current_position_r0/legacy.sqlite",
+      "bytes": 24576,
+      "sha256": "3e263ecf81f138a7300d13188943e93c55982d269be93d00a2eb096c4782e77f"
+    },
+    {
+      "path": "test_actual_paper_hedged_membe0/hedged.sqlite",
+      "bytes": 40960,
+      "sha256": "237e67b716008e7a101f12f859abb73e6e2a4f5c6c555f3b43925a3f54bc66c4"
+    },
+    {
+      "path": "test_netted_native_quantity_ab0/netted.sqlite",
+      "bytes": 40960,
+      "sha256": "e6b42dd0f487e7fb4c5aca88b9f3b6dc853a0bfc69f00771fb1d4463b591a139"
+    },
+    {
+      "path": "test_new_snapshot_cannot_rewri4/family.sqlite",
+      "bytes": 36864,
+      "sha256": "df6b08cd7b84b98768e59137900d4bbbaf9c018df3e2766817b6f30a4df7ad63"
+    },
+    {
+      "path": "test_new_snapshot_cannot_rewri3/family.sqlite",
+      "bytes": 36864,
+      "sha256": "04d435861761064af623c592eb70b9758cea3acfaa0da1598a0723f89b643406"
+    },
+    {
+      "path": "test_new_snapshot_cannot_rewri2/family.sqlite",
+      "bytes": 36864,
+      "sha256": "0e948bc872fcbda4173d0a37a670847227955cfffe4e12ee6ddf32eb8151743f"
+    },
+    {
+      "path": "test_new_snapshot_cannot_rewri1/family.sqlite",
+      "bytes": 36864,
+      "sha256": "4e484113cfe5547cf88fe627c4d8c3407f0885aab9c385f7e09759973645fb04"
+    },
+    {
+      "path": "test_new_snapshot_cannot_rewri0/family.sqlite",
+      "bytes": 36864,
+      "sha256": "e42f4f43903e10cec48f6af3b578cd8c35fab812db711baa94d8d0cfa66e71da"
+    },
+    {
+      "path": "test_failed_open_never_publish0/family.sqlite",
+      "bytes": 24576,
+      "sha256": "47d387291b833bf3a1d30e8be6b0978f1002105cf03ef77b44b316053d81df92"
+    },
+    {
+      "path": "test_lost_ack_reads_original_c0/family.sqlite",
+      "bytes": 24576,
+      "sha256": "a35a5dc27ea46a6c788c1635fd2034da419b5402009793a70630d2bd4a99613d"
+    },
+    {
+      "path": "test_failed_publication_preser2/family.sqlite",
+      "bytes": 24576,
+      "sha256": "fcdfb76c35ddb1fd45309f077c3425aab0e0c3c035c63ea2a88e09ce0d5047bf"
+    },
+    {
+      "path": "test_failed_publication_preser1/family.sqlite",
+      "bytes": 24576,
+      "sha256": "fcdfb76c35ddb1fd45309f077c3425aab0e0c3c035c63ea2a88e09ce0d5047bf"
+    },
+    {
+      "path": "test_failed_publication_preser0/family.sqlite",
+      "bytes": 24576,
+      "sha256": "fcdfb76c35ddb1fd45309f077c3425aab0e0c3c035c63ea2a88e09ce0d5047bf"
+    },
+    {
+      "path": "test_actual_cold_lifecycle_ret0/family-restart.sqlite",
+      "bytes": 36864,
+      "sha256": "bc261a0e495eaf58d822b8e278da157f1b07b9b83a8c73d90fe34e7e6d87f92a"
+    },
+    {
+      "path": "test_capsule_health_is_driven_0/vati.sqlite",
+      "bytes": 1400832,
+      "sha256": "91e9654ba595b2c80c3c609363f2f44eaadbae38b9dd090d3ee1a748be7645f5"
+    },
+    {
+      "path": "test_the_same_path_refuses_to_0/vati.sqlite",
+      "bytes": 40960,
+      "sha256": "4e698107055152d1e599da0ef70015f72e19410102c6a09326665cc9447ae654"
+    },
+    {
+      "path": "test_one_trade_from_sealed_cla0/vati.sqlite",
+      "bytes": 69632,
+      "sha256": "20f953bd645b9eb836ecf53bd89e41bf114a064be2299c95d766b66f6472b3c1"
+    },
+    {
+      "path": "test_source_native_owner_canno5/vati.sqlite",
+      "bytes": 102400,
+      "sha256": "84fd09b1eead289a1b07b10c3eb8666192abc500f1571ac72d3cb470956f13d5"
+    },
+    {
+      "path": "test_source_native_owner_canno4/vati.sqlite",
+      "bytes": 102400,
+      "sha256": "70a07f6ca4010510f39a386eeda75f62c056de3abd8250e76681127f6a6962b7"
+    },
+    {
+      "path": "test_source_native_owner_canno3/vati.sqlite",
+      "bytes": 102400,
+      "sha256": "c35a48d7a20737fdee37e3c786e0c884c163f69e75388d43fea85b8d2d2b7296"
+    },
+    {
+      "path": "test_source_native_owner_canno2/vati.sqlite",
+      "bytes": 102400,
+      "sha256": "f5aba5e3bcdc94ff598e1d88f337e4016d6b6b73fded4e02fced2937bd1c4c5e"
+    },
+    {
+      "path": "test_source_native_owner_canno1/vati.sqlite",
+      "bytes": 102400,
+      "sha256": "6c66f2dd97a891799b96079aa9d9bc963a203e6c36cde72ef19d87a5529fe74e"
+    },
+    {
+      "path": "test_source_native_owner_canno0/vati.sqlite",
+      "bytes": 102400,
+      "sha256": "5c4b1d34b60f2e69bff862c7a30977926cfb2f8ec6ffc8a6bbcf53351387cef6"
+    },
+    {
+      "path": "test_source_owner_late_cash_re0/vati.sqlite",
+      "bytes": 118784,
+      "sha256": "7d60965199952a9efef59326d9251661f4505ebdd3c1bc35b9ddc78366fce07b"
+    },
+    {
+      "path": "test_pending_actual_owner_read0/vati.sqlite",
+      "bytes": 106496,
+      "sha256": "3dee402019b6ce438cb6683cef6e97ecd18dba44945b5bd531a6a1c25cd21cc0"
+    },
+    {
+      "path": "test_explicit_original_targets0/vati.sqlite",
+      "bytes": 53248,
+      "sha256": "f521b1bfec048c09ba6f447e9795336bbc9ed00d860e32346c378da69bde68c2"
+    },
+    {
+      "path": "test_real_add_then_proportiona0/vati.sqlite",
+      "bytes": 102400,
+      "sha256": "05372940905d020afd9d773f05a3c7a8128d28a09c0581e8df3d64b6d27387b6"
+    },
+    {
+      "path": "test_real_lifecycle_caller_use0/vati.sqlite",
+      "bytes": 53248,
+      "sha256": "3bd09fbc7a8d106c430f233f4a66c89539efc4372a29a0837a001b68006ad724"
+    },
+    {
+      "path": "test_admitted_partial_effect_i0/vati.sqlite",
+      "bytes": 53248,
+      "sha256": "ca4cf3e021dac267848581a4cd2213f26ef5e2280fe6d2debcd77cde87fdd947"
+    },
+    {
+      "path": "test_current_effect_context_ca9/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "751f7d7019f1b928fb2bfe2d58c400dceabd93588c0caa13be4157a5624ab73b"
+    },
+    {
+      "path": "test_current_effect_context_ca8/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "6307ebae0810814fb004365286b77397165691fdf7908c25dbaaea78d16967a2"
+    },
+    {
+      "path": "test_current_effect_context_ca7/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "518ca21b76056f43e047ad3b0f8635a202f694cc79adddbad554577a03e0feb4"
+    },
+    {
+      "path": "test_current_effect_context_ca6/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "df04ddd77a7cfb23a8de3ee9d4bd327c8262fc6c1def2e979459be417b829562"
+    },
+    {
+      "path": "test_current_effect_context_ca5/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "7cb9c880877223ef1211aa0c6a783d620e8aba1c9fbbc0a3b06338d9db8f75b6"
+    },
+    {
+      "path": "test_current_effect_context_ca4/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "cf34fe6d7f1702a890251acf71d41839c234db0be1ac556ad8289ba773890450"
+    },
+    {
+      "path": "test_current_effect_context_ca3/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "cf15c07439725d21284ebec362f55b35122ac32cb80c0528cd5e175beeff1fe7"
+    },
+    {
+      "path": "test_current_effect_context_ca2/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "6fdae5d51a08d84d17f118dca4881fdbea45a4800d7f6756915eb323b631f2a9"
+    },
+    {
+      "path": "test_current_effect_context_ca1/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "00f18d5c496c24c22ed802688893e9ea67d7760176a70eaf1d115d46b73d6954"
+    },
+    {
+      "path": "test_current_effect_context_ca0/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "f1b2d01d3261b349116951fda951cb26cd459764f70943f0a59aa345890e3f23"
+    },
+    {
+      "path": "test_real_current_mandate_orig0/vati.sqlite",
+      "bytes": 45056,
+      "sha256": "8165364b536c0a0ae309c19c42cf038f0fae4a38bd86482eee751cf60a0918da"
+    },
+    {
+      "path": "test_committed_other_writer_re0/vati.sqlite",
+      "bytes": 77824,
+      "sha256": "c7e0ad9cd570fab3389d009bee8c0c31673664eb213a52d940108d5440080e7f"
+    },
+    {
+      "path": "test_original_unknown_full_tar0/vati.sqlite",
+      "bytes": 73728,
+      "sha256": "9ae557a379493b7bccb533af281d9497514b3991321d7672570dea78f7070774"
+    },
+    {
+      "path": "test_cold_expired_optional_pol0/vati.sqlite",
+      "bytes": 98304,
+      "sha256": "06052491a135f4de50c60124b676e89c35031232a4255cf4ef27b95e813469e4"
+    },
+    {
+      "path": "test_cold_optional_policy_expi0/vati.sqlite",
+      "bytes": 94208,
+      "sha256": "da91931d64a030247756395fa30d172fbe2b7a5a98b631e34962471825128ecb"
+    },
+    {
+      "path": "test_independent_tighten_reche0/vati.sqlite",
+      "bytes": 61440,
+      "sha256": "bef0d18ca3b71fe186ae37358afe8ef5654deff15ff015afd5a4d6a3925d4078"
+    },
+    {
+      "path": "test_cold_flat_recovery_reduce0/vati.sqlite",
+      "bytes": 86016,
+      "sha256": "67b460dc0634e49b213eda9a934d63c3d5dfab5f85ff1e1217cb6c255092f16b"
+    },
+    {
+      "path": "test_cold_recovery_restores_or0/vati.sqlite",
+      "bytes": 90112,
+      "sha256": "c0a013b1fc232ef53a7413d0b8fbcb2c1d263238b1cd9e6cfc65cb63b41935d0"
+    },
+    {
+      "path": "test_missing_native_stop_force0/vati.sqlite",
+      "bytes": 94208,
+      "sha256": "de51ebd46766ee489450f65104e6931fae77d16469144360b093966ba9490a94"
+    },
+    {
+      "path": "test_mark_supervises_once_and_0/vati.sqlite",
+      "bytes": 73728,
+      "sha256": "4e94c88313e12669ecad7e4ba3a0cfafe8cf660eb7d6190e3593113c73354675"
+    },
+    {
+      "path": "owner-authority0/owner_authority_keys.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "owner-authority0/owner_authority_keys.json",
+      "bytes": 212,
+      "sha256": "ba616f99a7b6388868c0d88561cf5cb0256f0f12f4f0f5ab7c9391dc45563327"
+    }
+  ]
+}

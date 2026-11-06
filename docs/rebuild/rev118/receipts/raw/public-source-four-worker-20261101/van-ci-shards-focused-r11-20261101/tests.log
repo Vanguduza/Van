@@ -1,0 +1,72 @@
+................................................F....................... [ 78%]
+....................                                                     [100%]
+=================================== FAILURES ===================================
+_ test_actual_collect_refuses_untracked_and_ignored_inputs_but_accepts_inert_outputs _
+
+tmp_path = PosixPath('/tmp/van-recovery-ci-shards-focused-r11-20261101/test_actual_collect_refuses_un0')
+
+    def test_actual_collect_refuses_untracked_and_ignored_inputs_but_accepts_inert_outputs(tmp_path):
+        """Regression for CI4-REVIEW-01: agreeing reduced inventories cannot bind HEAD."""
+        import os
+        import shutil
+        import subprocess
+        import sys
+        repo = tmp_path/"source-provenance-fixture"
+        repo.mkdir()
+        source = Path(__file__).resolve().parents[2]
+        for rel in ("tools/rebuild/backend_public_source.py", "tools/rebuild/public_source_shards.py",
+                    "tools/rebuild/source_storage_audit.py", "tools/rebuild/backend_public_source_costs.json"):
+            path=repo/rel;path.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(source/rel,path)
+        for rel in gate.PRIVATE | {gate.FIREWALL}:
+            path=repo/rel;path.parent.mkdir(parents=True,exist_ok=True);path.write_text("# separate fixture\n")
+        for index in range(4):
+            path=repo/f"backend/tests/test_fixture_{index}.py";path.parent.mkdir(parents=True,exist_ok=True)
+            path.write_text("import json\nfrom pathlib import Path\nimport pytest\n"
+                "data=Path(__file__).resolve().parents[2]/'parameters.json'\n"
+                "values=json.loads(data.read_text()) if data.exists() else [1,2]\n"
+                "@pytest.mark.parametrize('value',values)\ndef test_case(value):\n    assert value > 0\n")
+        (repo/"pytest.ini").write_text("[pytest]\n")
+        (repo/".gitignore").write_text("backend/tests/conftest.py\n*.ini\n*.json\n__pycache__/\n.pytest_cache/\n*.pth\n*.pyc\n")
+        subprocess.run(["git","init","-q"],cwd=repo,check=True)
+        subprocess.run(["git","add","."],cwd=repo,check=True)
+        subprocess.run(["git","add","-f","pytest.ini"],cwd=repo,check=True)
+        subprocess.run(["git","-c","user.name=Source instrument fixture","-c","user.email=source@example.test",
+                        "commit","-qm","Committed eight-case source provenance fixture"],cwd=repo,check=True)
+        commit=subprocess.check_output(["git","rev-parse","HEAD"],cwd=repo,text=True).strip()
+        env={**os.environ,"PYTHONPATH":os.pathsep.join(str(repo/p) for p in proof.CANONICAL_PYTHONPATH),"PYTHONDONTWRITEBYTECODE":"1",
+             "GITHUB_RUN_ID":"synthetic-provenance-subprocess","GITHUB_RUN_ATTEMPT":"1"}
+        env.pop("VATI_TEST_PG_DSN",None);env.pop("VATI_TEST_PG_ISOLATED_FIXTURE",None)
+        def collect(label, extra_env=None):
+            output=tmp_path/("evidence-"+label)
+            result=subprocess.run([sys.executable,"-B","-s","tools/rebuild/backend_public_source.py","collect",
+                "--output",str(output),"--runtime","gateway","--shards","4","--expected-commit",commit,
+                "--basetemp",str(tmp_path/("temp-"+label))],cwd=repo,env={**env,**(extra_env or {})},
+                capture_output=True,text=True,timeout=90)
+            return result,output
+        # An ancestor collector must not run; committed root config/confcutdir owns scope.
+        (tmp_path/"conftest.py").write_text("raise AssertionError('foreign ancestor collector loaded')\n")
+        baseline,output=collect("clean")
+>       assert baseline.returncode==0, baseline.stdout+baseline.stderr
+E       AssertionError: Traceback (most recent call last):
+E           File "/tmp/van-recovery-ci-shards-focused-r11-20261101/test_actual_collect_refuses_un0/source-provenance-fixture/tools/rebuild/backend_public_source.py", line 186, in <module>
+E             if __name__=="__main__":raise SystemExit(main())
+E                                                      ^^^^^^
+E           File "/tmp/van-recovery-ci-shards-focused-r11-20261101/test_actual_collect_refuses_un0/source-provenance-fixture/tools/rebuild/backend_public_source.py", line 167, in main
+E             return instrument_run(args)
+E                    ^^^^^^^^^^^^^^^^^^^^
+E           File "/tmp/van-recovery-ci-shards-focused-r11-20261101/test_actual_collect_refuses_un0/source-provenance-fixture/tools/rebuild/backend_public_source.py", line 114, in instrument_run
+E             source_before = evidence.source_identity(ROOT, args.expected_commit)
+E                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           File "/tmp/van-recovery-ci-shards-focused-r11-20261101/test_actual_collect_refuses_un0/source-provenance-fixture/tools/rebuild/public_source_shards.py", line 79, in source_identity
+E             require(not rejected, "uncommitted executable/config/fixture inputs outside explicit inert outputs: " + ", ".join(rejected[:10]))
+E           File "/tmp/van-recovery-ci-shards-focused-r11-20261101/test_actual_collect_refuses_un0/source-provenance-fixture/tools/rebuild/public_source_shards.py", line 54, in require
+E             raise ValueError(message)
+E         ValueError: uncommitted executable/config/fixture inputs outside explicit inert outputs: tools/rebuild/backend_public_source_costs.json
+E         
+E       assert 1 == 0
+E        +  where 1 = CompletedProcess(args=['/workspace/van-backend-venv-20261025/bin/python', '-B', '-s', 'tools/rebuild/backend_public_so...ted executable/config/fixture inputs outside explicit inert outputs: tools/rebuild/backend_public_source_costs.json\n').returncode
+
+tests/rebuild/test_public_source_shards.py:383: AssertionError
+=========================== short test summary info ============================
+FAILED tests/rebuild/test_public_source_shards.py::test_actual_collect_refuses_untracked_and_ignored_inputs_but_accepts_inert_outputs
+1 failed, 91 passed in 24.14s

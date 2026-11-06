@@ -1,0 +1,15 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+________ test_enabled_execution_contract_remains_independently_required ________
+
+    def test_enabled_execution_contract_remains_independently_required():
+        value=identity()
+        with pytest.raises(ValueError):NativeSymbolContract.from_body(value.body())
+>       with pytest.raises(ValueError,match='product scope'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_native_read_identity.py:84: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_native_read_identity.py::test_enabled_execution_contract_remains_independently_required
+1 failed in 0.70s

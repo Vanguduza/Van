@@ -1,0 +1,156 @@
+{
+  "schema": "van.rebuild.hosted-source/1",
+  "source_head": "31a726ca20e28f36be5e3e86c27f386e62206e0d",
+  "tested_merge": "79b0e9ffd1fde6f9fc4700921de9a0ea3c5fb76c",
+  "run_id": 40110205811,
+  "conclusion": "failure",
+  "jobs": [
+    {
+      "id": 120920150939,
+      "name": "backend",
+      "conclusion": "failure"
+    },
+    {
+      "id": 120920151033,
+      "name": "browser-guard-source",
+      "conclusion": "success"
+    },
+    {
+      "id": 120920151046,
+      "name": "mutation (kotlin-2, kotlin, 2/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120920151071,
+      "name": "mutation (kotlin-0, kotlin, 0/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120920151090,
+      "name": "mutation (python-0, python, 0/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120920151095,
+      "name": "project-truth-ledger",
+      "conclusion": "failure"
+    },
+    {
+      "id": 120920151109,
+      "name": "rebuild-documentary",
+      "conclusion": "success"
+    },
+    {
+      "id": 120920151117,
+      "name": "postgres-ledger",
+      "conclusion": "failure"
+    },
+    {
+      "id": 120920151121,
+      "name": "mutation (kotlin-1, kotlin, 1/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120920151129,
+      "name": "mutation (python-1, python, 1/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120920151136,
+      "name": "mutation (kotlin-3, kotlin, 3/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120920151163,
+      "name": "mutation (browser-agent, browser-agent, 0/1)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120920151167,
+      "name": "mutation (python-3, python, 3/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120920151168,
+      "name": "mutation (python-2, python, 2/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 120920151181,
+      "name": "android-instrumentation",
+      "conclusion": "success"
+    },
+    {
+      "id": 120920151185,
+      "name": "android-and-visual-evidence",
+      "conclusion": "success"
+    },
+    {
+      "id": 120923168382,
+      "name": "character-forge-gate",
+      "conclusion": "success"
+    }
+  ],
+  "trading": {
+    "tests": 2900,
+    "passed": 2898,
+    "failures": [
+      "trading.tests.test_contract_schemas::test_risk_snapshot_schema_matches_dataclass"
+    ],
+    "errors": 0,
+    "skipped": [
+      {
+        "id": "trading.tests.test_vtil_borrow::test_dial_resolver_selects_trading_knowledge_from_van_registry",
+        "reason": "dial-new checkout not available (set DIAL_REPO)"
+      }
+    ],
+    "sha256": "05e1f58e07a7f4c954bd0ea6453985bc4187cc132c47b00e088dcbd2669e9343"
+  },
+  "postgres": {
+    "tests": 26,
+    "passed": 26,
+    "failures": [],
+    "errors": 0,
+    "skipped": [],
+    "sha256": "7e5f65f20a2160de8b04d1916c98bc60451abec26898f20e651a2e1bd354a97d"
+  },
+  "voice_source": {
+    "executed": false,
+    "steps": [
+      {
+        "name": "Public voice, speaker-authority and speech-continuity checks",
+        "conclusion": "skipped"
+      },
+      {
+        "name": "Require executed voice cases without skips",
+        "conclusion": "skipped"
+      }
+    ]
+  },
+  "emulator": {
+    "tests": 22,
+    "failures": 0,
+    "skipped": 4,
+    "passed": 18,
+    "html_sha256": "9f861bf661151916cdab35fb7f0fb77dd75b9504204e9b57a46185c2cec5afb9",
+    "voice_methods": [
+      {
+        "name": "cancellationBeforeNativeStartCannotCompleteOrDamageTheReplacementAnswer",
+        "elapsed": "3.161s"
+      },
+      {
+        "name": "realOfflineAnswerReachesTheApplicationQueueAsSpoken",
+        "elapsed": "2.389s"
+      }
+    ],
+    "voice_html_sha256": "10043969bddf6a722a15b1bef596541227715e555a55bb3061bff716faaefb59"
+  },
+  "related_receipts": [
+    "NATIVE_METAEDITOR_31a726ca.json",
+    "HOSTED_FULL_BROWSER_SOURCE_31a726ca.json",
+    "../ci/MUTATION_CORPUS_31a726ca.json"
+  ],
+  "fixed_in_next_source": "RiskSnapshot used_margin property missing from its JSON schema; legacy snapshots remain valid without it. Actual serialization also exposed the previously incorrect nested native-sync reference. Both contracts corrected without inventing native provenance.",
+  "remaining_required_jobs": "Original backend DDS read key and trusted-main Project Truth bootstrap are still required; neither is bypassed.",
+  "limits": "Hosted source and emulator evidence only; no whole-backend pass, independent admission, live provider/host, handset, production signing or profitability claim."
+}

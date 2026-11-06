@@ -1,0 +1,36 @@
+
+### android/verification (Gradle)
+CAUGHT             C40 nothing is ever taken out of flight, so a resume resends everything
+CAUGHT             C38 a command good for sixty seconds is saved for four hours and denied later
+CAUGHT             C37 an A4 that will never be sent is described as queued
+CAUGHT             C36 a delivered command is never forgotten, and is re-sent after every restart
+CAUGHT             C36 the phone asks by one identity and the Gateway answers about another
+CAUGHT             C35 the queue's day-long default silently replaces the outbox's four-hour window
+CAUGHT             C35 a phone whose battery cannot be read holds a spare socket open
+CAUGHT             C34 a release build is pointed at a plain-http gateway
+CAUGHT             C34 an enrolment is authorised with nothing to attest it against
+CAUGHT             C33 one failover is observed again at every flush for the life of the app
+CAUGHT             C33 a phone at 5 percent holds a second socket open
+CAUGHT             C33 an A4 is stored and executes an hour later because connectivity returned
+CAUGHT             C32 the keyboard and the navigation bar are subtracted twice
+CAUGHT             C32 a tap is transformed across an unacknowledged reflow
+CAUGHT             C32 a search with a host in it is navigated to
+CAUGHT             C32 the page the owner is about to open is sent to a provider
+CAUGHT             C32 a home-screen tile opens on a phone that is not the owner's
+CAUGHT             C32 an external link carries a second scheme into the page
+CAUGHT             C32 an ephemeral copy never expires
+CAUGHT             C32 a session the Gateway ended is resumed anyway
+CAUGHT             C31 drop counts are posted cumulatively, so every flush re-counts them
+CAUGHT             C31 the decoder's whole history lands in the first flush
+CAUGHT             C14 thermal critical reads as fine
+CAUGHT             C14 reduced motion ranked as rich, so pressure clamps it into a moving budget
+CAUGHT             C14 a stretched backoff exceeds the ceiling
+CAUGHT             C30 the device asks to resume past audio it never played
+CAUGHT             C30 an unrecognised request is assumed to be answerable on the phone
+CAUGHT             C30 VAN ducks a phone call to read out a search result
+CAUGHT             C30 an answer from hours ago speaks the moment the owner opens VAN
+
+29/29 caught
+
+================ SURVIVORS ================
+none

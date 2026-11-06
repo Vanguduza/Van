@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.session.SessionReconciliationTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:57:32" hostname="052fefa249ff" time="0.005">
+  <properties/>
+  <testcase name="a terminal mission settles rather than being asked about forever()" classname="com.dial.van.session.SessionReconciliationTest" time="0.001"/>
+  <testcase name="a command the Gateway is running is not sent a second time()" classname="com.dial.van.session.SessionReconciliationTest" time="0.0"/>
+  <testcase name="a command with no command id is asked about by message id and still resends()" classname="com.dial.van.session.SessionReconciliationTest" time="0.0"/>
+  <testcase name="a command the Gateway did not answer for at all is sent again()" classname="com.dial.van.session.SessionReconciliationTest" time="0.001"/>
+  <testcase name="a command the Gateway has never heard of is sent again()" classname="com.dial.van.session.SessionReconciliationTest" time="0.0"/>
+  <testcase name="the identity asked about is the identity the answer is matched by()" classname="com.dial.van.session.SessionReconciliationTest" time="0.0"/>
+  <testcase name="a mixed answer splits rather than settling or resending everything()" classname="com.dial.van.session.SessionReconciliationTest" time="0.001"/>
+  <testcase name="a command the Gateway admitted without opening a mission is settled()" classname="com.dial.van.session.SessionReconciliationTest" time="0.0"/>
+  <testcase name="a durable admission with no recorded result remains recoverable()" classname="com.dial.van.session.SessionReconciliationTest" time="0.001"/>
+  <testcase name="order is preserved, because the owner issued these in an order()" classname="com.dial.van.session.SessionReconciliationTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.gateway.ReplayTriggerTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-08T04:43:34" hostname="052fefa249ff" time="0.001">
+  <properties/>
+  <testcase name="the owner pressing the button is never debounced()" classname="com.dial.van.gateway.ReplayTriggerTest" time="0.0"/>
+  <testcase name="a replay already running is never started twice()" classname="com.dial.van.gateway.ReplayTriggerTest" time="0.0"/>
+  <testcase name="only the edge into availability is a recovery()" classname="com.dial.van.gateway.ReplayTriggerTest" time="0.0"/>
+  <testcase name="the gateway coming back is its own edge()" classname="com.dial.van.gateway.ReplayTriggerTest" time="0.0"/>
+  <testcase name="a handover burst produces one replay, not four()" classname="com.dial.van.gateway.ReplayTriggerTest" time="0.0"/>
+  <testcase name="an empty queue is not replayed()" classname="com.dial.van.gateway.ReplayTriggerTest" time="0.0"/>
+  <testcase name="after the debounce window a genuinely new recovery replays again()" classname="com.dial.van.gateway.ReplayTriggerTest" time="0.0"/>
+  <testcase name="recovery replays a queue that has something in it()" classname="com.dial.van.gateway.ReplayTriggerTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

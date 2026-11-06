@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "authorization_id": "auth-20261023-owner-native-worker-source",
+  "project": "van",
+  "authority": "OWNER_DERIVED",
+  "owner_instruction_sha256": "90d7fde72bcbd5524bfa567a69533bbbb99b8aea62cd5c30a9a3c4dc42e8083b",
+  "owner_instruction_excerpt": "opus is nolonger available finish building from the current state to completion",
+  "derivation": "The existing owner instruction to finish the entire build autonomously includes repairing the native worker source and its deployment instructions. The earlier autonomous-candidate record omits deploy paths. This bounded intake covers only the MT5 worker and EA source/instructions needed to close reproduced account-identity and execution-protocol defects; it grants no host or financial effect. No additional owner instruction or signature is claimed.",
+  "source": {
+    "kind": "owner_session_instruction",
+    "channel": "codex",
+    "owner_attested": true,
+    "device_signature_claimed": false,
+    "cryptographic_signature_claimed": false,
+    "signed_ingress_claimed": false
+  },
+  "issued_at_utc": "2026-10-23T04:13:58.497748+00:00",
+  "branch_scope": "ccr-9e07e1af-8mgz1p and owner build continuation branches",
+  "authorized_paths": [
+    "deploy/van-trading-core/windows/mt5_worker/**",
+    "deploy/van-trading-core/mql5/**"
+  ],
+  "reusable": true,
+  "revoked": false,
+  "limitations": [
+    "Candidate source and source verification only. No host deployment, native identity qualification, provider connection, financial effect or production release.",
+    "Existing hooks, signatures, financial protections and independent gates remain required. Frozen blueprint and existing authorization/ledger records remain immutable."
+  ]
+}

@@ -1,0 +1,22 @@
+....................F
+=================================== FAILURES ===================================
+________ test_hidden_original_readback_is_not_a_success_receipt[sqlite] ________
+
+publication = (<vati.core.ledger.Ledger object at 0x7f5a4f9ba8d0>, <vati.research.dataset_archive.DatasetCandidateArchive object at ...tive_account_id":123,"schema":"vati.ctrader-symbol/1","transport_host":"demo.ctraderapi.com"}', received_at_ms=100000))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f5a4e4d5d60>
+
+    def test_hidden_original_readback_is_not_a_success_receipt(publication,monkeypatch):
+        ledger,archive,record,c=publication
+        with monkeypatch.context() as patch:
+            patch.setattr(archive,'lookup',lambda _:None)
+>           with pytest.raises(DatasetPublicationUnknown,match='READBACK_UNAVAILABLE'):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           AssertionError: Regex pattern did not match.
+E             Expected regex: 'READBACK_UNAVAILABLE'
+E             Actual message: 'DATASET_PUBLICATION_UNKNOWN_RECONCILE_ORIGINAL_REQUEST'
+
+trading/worker_tests/test_dataset_candidate_archive.py:150: AssertionError
+=========================== short test summary info ============================
+FAILED trading/worker_tests/test_dataset_candidate_archive.py::test_hidden_original_readback_is_not_a_success_receipt[sqlite]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 20 passed in 4.71s

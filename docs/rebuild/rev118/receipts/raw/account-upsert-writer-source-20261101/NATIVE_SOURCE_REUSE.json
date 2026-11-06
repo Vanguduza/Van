@@ -1,0 +1,58 @@
+{
+  "kind": "Exactsource-pinnedauthorSOURCEevidence_reuse_notfresh_integrated_run",
+  "testfiles_exact": [
+    "trading/tests/test_oauth_link_currentness.py",
+    "trading/tests/test_commander_accounts.py",
+    "trading/tests/test_deriv_credential_verification.py",
+    "trading/tests/test_native_account_effects.py",
+    "trading/tests/test_demo_creation_recovery.py",
+    "trading/tests/test_account_registry_atomic_rea.py",
+    "trading/tests/test_account_registry_concurrency.py",
+    "trading/tests/test_account_update_semantics.py",
+    "trading/tests/test_registry_entry_fence.py"
+  ],
+  "sixcandidate_sourcepins_exact": true,
+  "author_fixture_conditions": {
+    "command": [
+      "/workspace/van-backend-venv-20261025/bin/python",
+      "-m",
+      "pytest",
+      "-v",
+      "-p",
+      "no:cacheprovider",
+      "-o",
+      "faulthandler_timeout=60",
+      "-o",
+      "asyncio_mode=auto",
+      "trading/tests/test_oauth_link_currentness.py",
+      "trading/tests/test_commander_accounts.py",
+      "trading/tests/test_deriv_credential_verification.py",
+      "trading/tests/test_native_account_effects.py",
+      "trading/tests/test_demo_creation_recovery.py",
+      "trading/tests/test_account_registry_atomic_rea.py",
+      "trading/tests/test_account_registry_concurrency.py",
+      "trading/tests/test_account_update_semantics.py",
+      "trading/tests/test_registry_entry_fence.py",
+      "--basetemp=/tmp/van-be004-upsert-r1-final-native-pytest",
+      "--junitxml=/tmp/van-be004-upsert-r1-final-native.xml"
+    ],
+    "cwd": "/workspace/van-lanes-20261101/accounts-demo-recovery",
+    "receipt": "/tmp/van-be004-upsert-r1-final-native.log",
+    "exit": 0
+  },
+  "current_gateway_wholeapp_changed": "Acknowledged; selectednewintegratedSQL/HTTP/previewclosureuses4ccomposition, oldlane6aHTTPproofnotclaimedasmainexact. Native9testmodules exercisepurecommander/registry/controlledprovider branches; no provider/nativeadmission issued.",
+  "cases": 153,
+  "pass": 151,
+  "declared_skips": [
+    {
+      "id": "trading.tests.test_native_account_effects::test_postgres_original_operation_is_atomic_and_isolated_between_named_ledgers",
+      "reason": "requires explicitly isolated native PostgreSQL fixture"
+    },
+    {
+      "id": "trading.tests.test_native_account_effects::test_actual_concurrent_native_claim_writers_cannot_admit_two_effects_for_a_target[postgres]",
+      "reason": "requires explicitly isolated native PostgreSQL fixture"
+    }
+  ],
+  "junit_sha256": "d60cbd29038e5d913d3463d11b222fab3505284df1a0cc3779ff22b56dc1f15d",
+  "no_sdk_or_nativeacceptance": true
+}

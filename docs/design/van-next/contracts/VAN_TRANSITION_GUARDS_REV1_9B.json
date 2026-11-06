@@ -1,0 +1,1420 @@
+{
+ "schema": "van-next-transition-guards/1.0",
+ "revision": "Rev 1.9b (16 October 2026)",
+ "status": "PREPARED_PENDING_OWNER_SIGNATURE",
+ "authority": "OD-32 (G1). Pinned by SHA-256 in VAN_NEXT_OWNER_DECISIONS_REV1.md, section 'Locked contracts'. A change to this file is a change to the approved transition relation and needs the owner's re-approval of the new hash.",
+ "semantics": "Each entry permits exactly one (machine, from, to) transition. 'guards' is an AND set: every listed proof type is required, and nothing else is accepted. An empty list means the transition needs no proof (cancellations, expiries, requests). The model may not contain any transition, or any guard set, that is not listed here; and every listed transition must be present in the model.",
+ "model": "contracts/VAN_STATE_MACHINES_REV1_9.json",
+ "proof_types": {
+  "a4_approval": {
+   "meaning": "Owner A4 approval of this exact request",
+   "binds": [
+    "request_digest",
+    "eligible_authority"
+   ]
+  },
+  "a4_approval_bound_to_quote": {
+   "meaning": "Owner A4 approval whose digest covers the exact quote (amount, fees, rate, expiry)",
+   "binds": [
+    "request_digest",
+    "eligible_authority",
+    "revision"
+   ]
+  },
+  "a4_approval_bound_to_quote_and_beneficiary": {
+   "meaning": "Owner A4 approval whose digest covers the exact quote and the verified beneficiary",
+   "binds": [
+    "request_digest",
+    "eligible_authority",
+    "revision"
+   ]
+  },
+  "beneficiary_verification": {
+   "meaning": "Provider-verified beneficiary owned by the account holder",
+   "binds": [
+    "provider_ref",
+    "source_observed_at"
+   ]
+  },
+  "biometric_intent_token": {
+   "meaning": "Owner biometric intent token bound to the order digest",
+   "binds": [
+    "request_digest",
+    "eligible_authority"
+   ]
+  },
+  "broker_ack": {
+   "meaning": "Broker acknowledgement for this order or cancel",
+   "binds": [
+    "provider_ref",
+    "idempotency_key"
+   ]
+  },
+  "broker_balance_readback": {
+   "meaning": "Broker balance read back showing the credit",
+   "binds": [
+    "account_id",
+    "source_observed_at",
+    "receipt_state"
+   ]
+  },
+  "broker_fill": {
+   "meaning": "Broker fill report (execution ID, quantity, price)",
+   "binds": [
+    "provider_ref",
+    "event_id"
+   ]
+  },
+  "broker_readback": {
+   "meaning": "Broker state read back for this account or order",
+   "binds": [
+    "account_id",
+    "provider_ref",
+    "source_observed_at"
+   ]
+  },
+  "broker_readback_shows_closed": {
+   "meaning": "Broker readback showing the account closed",
+   "binds": [
+    "account_id",
+    "source_observed_at"
+   ]
+  },
+  "broker_response": {
+   "meaning": "Broker terminal response for this request",
+   "binds": [
+    "provider_ref",
+    "receipt_state"
+   ]
+  },
+  "destination_credit_readback": {
+   "meaning": "Destination account credit read back",
+   "binds": [
+    "account_id",
+    "source_observed_at",
+    "receipt_state"
+   ]
+  },
+  "exposure_clear_readback": {
+   "meaning": "Readback showing no open exposure",
+   "binds": [
+    "account_id",
+    "source_observed_at"
+   ]
+  },
+  "fresh_broker_readback": {
+   "meaning": "Broker state re-read now, not cached",
+   "binds": [
+    "account_id",
+    "source_observed_at"
+   ]
+  },
+  "fresh_capability_check": {
+   "meaning": "Provider capability for this account and rail re-read now, not cached",
+   "binds": [
+    "account_id",
+    "provider_ref",
+    "source_observed_at"
+   ]
+  },
+  "fresh_exposure_check": {
+   "meaning": "Open positions, orders and pending funds re-read now",
+   "binds": [
+    "account_id",
+    "source_observed_at"
+   ]
+  },
+  "grace_elapsed": {
+   "meaning": "The unlink grace period has elapsed without cancellation",
+   "binds": [
+    "event_id"
+   ]
+  },
+  "mandate_and_risk_gate": {
+   "meaning": "Current mandate and risk gate both pass at use time",
+   "binds": [
+    "eligible_authority",
+    "revision"
+   ]
+  },
+  "owner_biometric_over_frozen_grant": {
+   "meaning": "Owner biometric over the frozen NewsArmedTicketGrant envelope",
+   "binds": [
+    "request_digest",
+    "eligible_authority"
+   ]
+  },
+  "provider_ack": {
+   "meaning": "Provider acknowledgement carrying its reference for this idempotency key",
+   "binds": [
+    "provider_ref",
+    "idempotency_key"
+   ]
+  },
+  "provider_readback": {
+   "meaning": "Provider state read back after an unknown outcome",
+   "binds": [
+    "provider_ref",
+    "source_observed_at"
+   ]
+  },
+  "provider_response": {
+   "meaning": "Provider's terminal response for this request",
+   "binds": [
+    "provider_ref",
+    "idempotency_key",
+    "receipt_state"
+   ]
+  },
+  "provider_reversal_id": {
+   "meaning": "Provider identifier of a compensating reversal event",
+   "binds": [
+    "provider_ref",
+    "event_id"
+   ]
+  },
+  "provider_settlement_receipt": {
+   "meaning": "Authoritative provider settlement receipt bound to the approved quote and beneficiary",
+   "binds": [
+    "provider_ref",
+    "request_digest",
+    "receipt_state"
+   ]
+  },
+  "reconciliation_readback": {
+   "meaning": "Reconciliation read of provider and broker state after an unknown outcome (never a resend)",
+   "binds": [
+    "provider_ref",
+    "idempotency_key",
+    "source_observed_at"
+   ]
+  },
+  "risk_gate_pass": {
+   "meaning": "Risk gate passed for this exact order revision",
+   "binds": [
+    "request_digest",
+    "revision"
+   ]
+  },
+  "risk_gate_refusal": {
+   "meaning": "Risk gate refused this order revision, with reason",
+   "binds": [
+    "request_digest",
+    "revision"
+   ]
+  },
+  "server_margin_check": {
+   "meaning": "Server-side margin and free-funds check against a fresh broker balance",
+   "binds": [
+    "account_id",
+    "source_observed_at"
+   ]
+  },
+  "server_margin_recheck": {
+   "meaning": "The margin check repeated at submission time",
+   "binds": [
+    "account_id",
+    "source_observed_at"
+   ]
+  },
+  "signed_mandate": {
+   "meaning": "Current owner-signed mandate covering this account",
+   "binds": [
+    "eligible_authority",
+    "revision"
+   ]
+  },
+  "source_debit_readback": {
+   "meaning": "Source account debit read back",
+   "binds": [
+    "account_id",
+    "source_observed_at",
+    "receipt_state"
+   ]
+  },
+  "token_expired": {
+   "meaning": "The intent token expired unused",
+   "binds": [
+    "request_digest"
+   ]
+  },
+  "two_source_agreement": {
+   "meaning": "Two independent qualified sources agree on the event (OD-24)",
+   "binds": [
+    "event_id",
+    "source_observed_at"
+   ]
+  },
+  "unused_nonce": {
+   "meaning": "The grant's single-use nonce has not been consumed",
+   "binds": [
+    "event_id"
+   ]
+  },
+  "worst_case_risk_reserved": {
+   "meaning": "Worst-case risk reserved before transmission (\u00a77.4.5)",
+   "binds": [
+    "request_digest",
+    "idempotency_key"
+   ]
+  }
+ },
+ "machines": {
+  "VAN-SM-ACCOUNT_LIFECYCLE": [
+   {
+    "id": "ACC-T01",
+    "from": "UNLINKED",
+    "to": "DISCOVERED",
+    "guards": []
+   },
+   {
+    "id": "ACC-T02",
+    "from": "DISCOVERED",
+    "to": "AUTH_PENDING",
+    "guards": []
+   },
+   {
+    "id": "ACC-T03",
+    "from": "DISCOVERED",
+    "to": "ABANDONED",
+    "guards": []
+   },
+   {
+    "id": "ACC-T04",
+    "from": "AUTH_PENDING",
+    "to": "LINKED_READ_ONLY",
+    "guards": [
+     "broker_readback"
+    ]
+   },
+   {
+    "id": "ACC-T05",
+    "from": "AUTH_PENDING",
+    "to": "AUTH_FAILED",
+    "guards": []
+   },
+   {
+    "id": "ACC-T06",
+    "from": "AUTH_PENDING",
+    "to": "AUTH_OUTCOME_UNKNOWN",
+    "guards": []
+   },
+   {
+    "id": "ACC-T07",
+    "from": "AUTH_PENDING",
+    "to": "REMOTE_CLOSED",
+    "guards": [
+     "broker_readback_shows_closed"
+    ]
+   },
+   {
+    "id": "ACC-T08",
+    "from": "AUTH_OUTCOME_UNKNOWN",
+    "to": "LINKED_READ_ONLY",
+    "guards": [
+     "broker_readback"
+    ]
+   },
+   {
+    "id": "ACC-T09",
+    "from": "AUTH_OUTCOME_UNKNOWN",
+    "to": "AUTH_FAILED",
+    "guards": [
+     "provider_readback"
+    ]
+   },
+   {
+    "id": "ACC-T10",
+    "from": "AUTH_FAILED",
+    "to": "AUTH_PENDING",
+    "guards": []
+   },
+   {
+    "id": "ACC-T11",
+    "from": "AUTH_FAILED",
+    "to": "ABANDONED",
+    "guards": []
+   },
+   {
+    "id": "ACC-T12",
+    "from": "LINKED_READ_ONLY",
+    "to": "KYC_PENDING",
+    "guards": []
+   },
+   {
+    "id": "ACC-T13",
+    "from": "LINKED_READ_ONLY",
+    "to": "ACTIVE_ELIGIBLE",
+    "guards": [
+     "broker_readback",
+     "signed_mandate"
+    ]
+   },
+   {
+    "id": "ACC-T14",
+    "from": "KYC_PENDING",
+    "to": "ACTIVE_ELIGIBLE",
+    "guards": [
+     "broker_readback",
+     "signed_mandate"
+    ]
+   },
+   {
+    "id": "ACC-T15",
+    "from": "KYC_PENDING",
+    "to": "RESTRICTED",
+    "guards": []
+   },
+   {
+    "id": "ACC-T16",
+    "from": "LINKED_READ_ONLY",
+    "to": "RESTRICTED",
+    "guards": []
+   },
+   {
+    "id": "ACC-T17",
+    "from": "ACTIVE_ELIGIBLE",
+    "to": "RESTRICTED",
+    "guards": []
+   },
+   {
+    "id": "ACC-T18",
+    "from": "ACTIVE_ELIGIBLE",
+    "to": "LINKED_READ_ONLY",
+    "guards": [
+     "fresh_broker_readback"
+    ]
+   },
+   {
+    "id": "ACC-T19",
+    "from": "RESTRICTED",
+    "to": "REAUTH_PENDING",
+    "guards": []
+   },
+   {
+    "id": "ACC-T20",
+    "from": "REAUTH_PENDING",
+    "to": "LINKED_READ_ONLY",
+    "guards": [
+     "broker_readback"
+    ]
+   },
+   {
+    "id": "ACC-T21",
+    "from": "REAUTH_PENDING",
+    "to": "RESTRICTED",
+    "guards": []
+   },
+   {
+    "id": "ACC-T22",
+    "from": "LINKED_READ_ONLY",
+    "to": "UNLINK_REQUESTED",
+    "guards": []
+   },
+   {
+    "id": "ACC-T23",
+    "from": "ACTIVE_ELIGIBLE",
+    "to": "UNLINK_REQUESTED",
+    "guards": []
+   },
+   {
+    "id": "ACC-T24",
+    "from": "RESTRICTED",
+    "to": "UNLINK_REQUESTED",
+    "guards": []
+   },
+   {
+    "id": "ACC-T25",
+    "from": "UNLINK_REQUESTED",
+    "to": "UNLINK_BLOCKED",
+    "guards": [
+     "fresh_exposure_check"
+    ]
+   },
+   {
+    "id": "ACC-T26",
+    "from": "UNLINK_BLOCKED",
+    "to": "UNLINK_REQUESTED",
+    "guards": []
+   },
+   {
+    "id": "ACC-T27",
+    "from": "UNLINK_BLOCKED",
+    "to": "LINKED_READ_ONLY",
+    "guards": [
+     "fresh_broker_readback"
+    ]
+   },
+   {
+    "id": "ACC-T28",
+    "from": "UNLINK_REQUESTED",
+    "to": "UNLINKED_LOCAL",
+    "guards": [
+     "exposure_clear_readback",
+     "grace_elapsed"
+    ]
+   },
+   {
+    "id": "ACC-T29",
+    "from": "UNLINK_REQUESTED",
+    "to": "RELINK_REQUIRED",
+    "guards": []
+   },
+   {
+    "id": "ACC-T30",
+    "from": "RELINK_REQUIRED",
+    "to": "AUTH_PENDING",
+    "guards": []
+   },
+   {
+    "id": "ACC-T31",
+    "from": "RELINK_REQUIRED",
+    "to": "UNLINK_REQUESTED",
+    "guards": []
+   },
+   {
+    "id": "ACC-T32",
+    "from": "ACTIVE_ELIGIBLE",
+    "to": "REMOTE_CLOSURE_REQUESTED",
+    "guards": []
+   },
+   {
+    "id": "ACC-T33",
+    "from": "LINKED_READ_ONLY",
+    "to": "REMOTE_CLOSURE_REQUESTED",
+    "guards": []
+   },
+   {
+    "id": "ACC-T34",
+    "from": "REMOTE_CLOSURE_REQUESTED",
+    "to": "REMOTE_CLOSURE_PENDING",
+    "guards": [
+     "fresh_exposure_check",
+     "a4_approval"
+    ]
+   },
+   {
+    "id": "ACC-T35",
+    "from": "REMOTE_CLOSURE_REQUESTED",
+    "to": "LINKED_READ_ONLY",
+    "guards": [
+     "fresh_broker_readback"
+    ]
+   },
+   {
+    "id": "ACC-T36",
+    "from": "REMOTE_CLOSURE_PENDING",
+    "to": "REMOTE_CLOSED",
+    "guards": [
+     "broker_readback"
+    ]
+   },
+   {
+    "id": "ACC-T37",
+    "from": "REMOTE_CLOSURE_PENDING",
+    "to": "REMOTE_CLOSURE_REFUSED",
+    "guards": [
+     "provider_response"
+    ]
+   },
+   {
+    "id": "ACC-T38",
+    "from": "REMOTE_CLOSURE_PENDING",
+    "to": "CLOSURE_OUTCOME_UNKNOWN",
+    "guards": []
+   },
+   {
+    "id": "ACC-T39",
+    "from": "CLOSURE_OUTCOME_UNKNOWN",
+    "to": "REMOTE_CLOSED",
+    "guards": [
+     "broker_readback"
+    ]
+   },
+   {
+    "id": "ACC-T40",
+    "from": "CLOSURE_OUTCOME_UNKNOWN",
+    "to": "REMOTE_CLOSURE_REFUSED",
+    "guards": [
+     "broker_readback"
+    ]
+   },
+   {
+    "id": "ACC-T41",
+    "from": "REMOTE_CLOSURE_REFUSED",
+    "to": "LINKED_READ_ONLY",
+    "guards": [
+     "broker_readback"
+    ]
+   }
+  ],
+  "VAN-SM-FUND_DEPOSIT": [
+   {
+    "id": "DEP-T01",
+    "from": "DRAFT",
+    "to": "QUOTED",
+    "guards": [
+     "fresh_capability_check"
+    ]
+   },
+   {
+    "id": "DEP-T02",
+    "from": "DRAFT",
+    "to": "CANCELLED",
+    "guards": []
+   },
+   {
+    "id": "DEP-T03",
+    "from": "QUOTED",
+    "to": "AWAITING_OWNER",
+    "guards": []
+   },
+   {
+    "id": "DEP-T04",
+    "from": "QUOTED",
+    "to": "EXPIRED",
+    "guards": []
+   },
+   {
+    "id": "DEP-T05",
+    "from": "QUOTED",
+    "to": "CANCELLED",
+    "guards": []
+   },
+   {
+    "id": "DEP-T06",
+    "from": "AWAITING_OWNER",
+    "to": "AUTHORIZED",
+    "guards": [
+     "a4_approval_bound_to_quote"
+    ]
+   },
+   {
+    "id": "DEP-T07",
+    "from": "AWAITING_OWNER",
+    "to": "QUOTED",
+    "guards": []
+   },
+   {
+    "id": "DEP-T08",
+    "from": "AWAITING_OWNER",
+    "to": "EXPIRED",
+    "guards": []
+   },
+   {
+    "id": "DEP-T09",
+    "from": "AWAITING_OWNER",
+    "to": "CANCELLED",
+    "guards": []
+   },
+   {
+    "id": "DEP-T10",
+    "from": "AUTHORIZED",
+    "to": "PROVIDER_PENDING",
+    "guards": [
+     "fresh_capability_check"
+    ]
+   },
+   {
+    "id": "DEP-T11",
+    "from": "AUTHORIZED",
+    "to": "EXPIRED",
+    "guards": []
+   },
+   {
+    "id": "DEP-T12",
+    "from": "PROVIDER_PENDING",
+    "to": "SENT",
+    "guards": [
+     "provider_ack"
+    ]
+   },
+   {
+    "id": "DEP-T13",
+    "from": "PROVIDER_PENDING",
+    "to": "REJECTED",
+    "guards": [
+     "provider_response"
+    ]
+   },
+   {
+    "id": "DEP-T14",
+    "from": "PROVIDER_PENDING",
+    "to": "OUTCOME_UNKNOWN",
+    "guards": []
+   },
+   {
+    "id": "DEP-T15",
+    "from": "SENT",
+    "to": "PENDING_SETTLEMENT",
+    "guards": [
+     "provider_ack"
+    ]
+   },
+   {
+    "id": "DEP-T16",
+    "from": "SENT",
+    "to": "FAILED",
+    "guards": [
+     "provider_response"
+    ]
+   },
+   {
+    "id": "DEP-T17",
+    "from": "SENT",
+    "to": "OUTCOME_UNKNOWN",
+    "guards": []
+   },
+   {
+    "id": "DEP-T18",
+    "from": "OUTCOME_UNKNOWN",
+    "to": "PENDING_SETTLEMENT",
+    "guards": [
+     "reconciliation_readback"
+    ]
+   },
+   {
+    "id": "DEP-T19",
+    "from": "OUTCOME_UNKNOWN",
+    "to": "FAILED",
+    "guards": [
+     "reconciliation_readback"
+    ]
+   },
+   {
+    "id": "DEP-T20",
+    "from": "OUTCOME_UNKNOWN",
+    "to": "REJECTED",
+    "guards": [
+     "reconciliation_readback"
+    ]
+   },
+   {
+    "id": "DEP-T21",
+    "from": "PENDING_SETTLEMENT",
+    "to": "SETTLED",
+    "guards": [
+     "broker_balance_readback"
+    ]
+   },
+   {
+    "id": "DEP-T22",
+    "from": "PENDING_SETTLEMENT",
+    "to": "FAILED",
+    "guards": [
+     "provider_response"
+    ]
+   },
+   {
+    "id": "DEP-T23",
+    "from": "PENDING_SETTLEMENT",
+    "to": "REVERSED",
+    "guards": [
+     "provider_reversal_id"
+    ]
+   },
+   {
+    "id": "DEP-T24",
+    "from": "SETTLED",
+    "to": "REVERSED",
+    "guards": [
+     "provider_reversal_id"
+    ]
+   }
+  ],
+  "VAN-SM-FUND_WITHDRAWAL": [
+   {
+    "id": "WDR-T01",
+    "from": "DRAFT",
+    "to": "BENEFICIARY_VERIFIED",
+    "guards": [
+     "beneficiary_verification"
+    ]
+   },
+   {
+    "id": "WDR-T02",
+    "from": "DRAFT",
+    "to": "CANCELLED",
+    "guards": []
+   },
+   {
+    "id": "WDR-T03",
+    "from": "BENEFICIARY_VERIFIED",
+    "to": "QUOTED",
+    "guards": [
+     "fresh_capability_check"
+    ]
+   },
+   {
+    "id": "WDR-T04",
+    "from": "BENEFICIARY_VERIFIED",
+    "to": "CANCELLED",
+    "guards": []
+   },
+   {
+    "id": "WDR-T05",
+    "from": "QUOTED",
+    "to": "AWAITING_A4",
+    "guards": [
+     "server_margin_check"
+    ]
+   },
+   {
+    "id": "WDR-T06",
+    "from": "QUOTED",
+    "to": "REFUSED_MARGIN",
+    "guards": [
+     "server_margin_check"
+    ]
+   },
+   {
+    "id": "WDR-T07",
+    "from": "QUOTED",
+    "to": "EXPIRED",
+    "guards": []
+   },
+   {
+    "id": "WDR-T08",
+    "from": "QUOTED",
+    "to": "CANCELLED",
+    "guards": []
+   },
+   {
+    "id": "WDR-T09",
+    "from": "AWAITING_A4",
+    "to": "AUTHORIZED",
+    "guards": [
+     "a4_approval_bound_to_quote_and_beneficiary"
+    ]
+   },
+   {
+    "id": "WDR-T10",
+    "from": "AWAITING_A4",
+    "to": "QUOTED",
+    "guards": []
+   },
+   {
+    "id": "WDR-T11",
+    "from": "AWAITING_A4",
+    "to": "EXPIRED",
+    "guards": []
+   },
+   {
+    "id": "WDR-T12",
+    "from": "AWAITING_A4",
+    "to": "CANCELLED",
+    "guards": []
+   },
+   {
+    "id": "WDR-T13",
+    "from": "AUTHORIZED",
+    "to": "SUBMITTED",
+    "guards": [
+     "server_margin_recheck"
+    ]
+   },
+   {
+    "id": "WDR-T14",
+    "from": "AUTHORIZED",
+    "to": "REFUSED_MARGIN",
+    "guards": [
+     "server_margin_recheck"
+    ]
+   },
+   {
+    "id": "WDR-T15",
+    "from": "AUTHORIZED",
+    "to": "EXPIRED",
+    "guards": []
+   },
+   {
+    "id": "WDR-T16",
+    "from": "SUBMITTED",
+    "to": "PROVIDER_PENDING",
+    "guards": [
+     "provider_ack"
+    ]
+   },
+   {
+    "id": "WDR-T17",
+    "from": "SUBMITTED",
+    "to": "REJECTED",
+    "guards": [
+     "provider_response"
+    ]
+   },
+   {
+    "id": "WDR-T18",
+    "from": "SUBMITTED",
+    "to": "OUTCOME_UNKNOWN",
+    "guards": []
+   },
+   {
+    "id": "WDR-T19",
+    "from": "OUTCOME_UNKNOWN",
+    "to": "PROVIDER_PENDING",
+    "guards": [
+     "reconciliation_readback"
+    ]
+   },
+   {
+    "id": "WDR-T20",
+    "from": "OUTCOME_UNKNOWN",
+    "to": "REJECTED",
+    "guards": [
+     "reconciliation_readback"
+    ]
+   },
+   {
+    "id": "WDR-T21",
+    "from": "OUTCOME_UNKNOWN",
+    "to": "FAILED",
+    "guards": [
+     "reconciliation_readback"
+    ]
+   },
+   {
+    "id": "WDR-T22",
+    "from": "PROVIDER_PENDING",
+    "to": "PAID",
+    "guards": [
+     "provider_settlement_receipt"
+    ]
+   },
+   {
+    "id": "WDR-T23",
+    "from": "PROVIDER_PENDING",
+    "to": "FAILED",
+    "guards": [
+     "provider_response"
+    ]
+   },
+   {
+    "id": "WDR-T24",
+    "from": "PROVIDER_PENDING",
+    "to": "OUTCOME_UNKNOWN",
+    "guards": []
+   },
+   {
+    "id": "WDR-T25",
+    "from": "PAID",
+    "to": "REVERSED",
+    "guards": [
+     "provider_reversal_id"
+    ]
+   }
+  ],
+  "VAN-SM-FUND_TRANSFER": [
+   {
+    "id": "TRF-T01",
+    "from": "DRAFT",
+    "to": "QUOTED",
+    "guards": [
+     "fresh_capability_check"
+    ]
+   },
+   {
+    "id": "TRF-T02",
+    "from": "DRAFT",
+    "to": "CANCELLED",
+    "guards": []
+   },
+   {
+    "id": "TRF-T03",
+    "from": "QUOTED",
+    "to": "AWAITING_A4",
+    "guards": []
+   },
+   {
+    "id": "TRF-T04",
+    "from": "QUOTED",
+    "to": "EXPIRED",
+    "guards": []
+   },
+   {
+    "id": "TRF-T05",
+    "from": "QUOTED",
+    "to": "CANCELLED",
+    "guards": []
+   },
+   {
+    "id": "TRF-T06",
+    "from": "AWAITING_A4",
+    "to": "AUTHORIZED",
+    "guards": [
+     "a4_approval_bound_to_quote"
+    ]
+   },
+   {
+    "id": "TRF-T07",
+    "from": "AWAITING_A4",
+    "to": "QUOTED",
+    "guards": []
+   },
+   {
+    "id": "TRF-T08",
+    "from": "AWAITING_A4",
+    "to": "EXPIRED",
+    "guards": []
+   },
+   {
+    "id": "TRF-T09",
+    "from": "AWAITING_A4",
+    "to": "CANCELLED",
+    "guards": []
+   },
+   {
+    "id": "TRF-T10",
+    "from": "AUTHORIZED",
+    "to": "SUBMITTED",
+    "guards": [
+     "server_margin_check"
+    ]
+   },
+   {
+    "id": "TRF-T11",
+    "from": "AUTHORIZED",
+    "to": "EXPIRED",
+    "guards": []
+   },
+   {
+    "id": "TRF-T12",
+    "from": "SUBMITTED",
+    "to": "DEBIT_CONFIRMED",
+    "guards": [
+     "source_debit_readback"
+    ]
+   },
+   {
+    "id": "TRF-T13",
+    "from": "SUBMITTED",
+    "to": "REJECTED",
+    "guards": [
+     "provider_response"
+    ]
+   },
+   {
+    "id": "TRF-T14",
+    "from": "SUBMITTED",
+    "to": "FAILED",
+    "guards": [
+     "provider_response"
+    ]
+   },
+   {
+    "id": "TRF-T15",
+    "from": "SUBMITTED",
+    "to": "OUTCOME_UNKNOWN",
+    "guards": []
+   },
+   {
+    "id": "TRF-T16",
+    "from": "OUTCOME_UNKNOWN",
+    "to": "DEBIT_CONFIRMED",
+    "guards": [
+     "reconciliation_readback"
+    ]
+   },
+   {
+    "id": "TRF-T17",
+    "from": "OUTCOME_UNKNOWN",
+    "to": "REJECTED",
+    "guards": [
+     "reconciliation_readback"
+    ]
+   },
+   {
+    "id": "TRF-T18",
+    "from": "DEBIT_CONFIRMED",
+    "to": "SETTLED",
+    "guards": [
+     "destination_credit_readback"
+    ]
+   },
+   {
+    "id": "TRF-T19",
+    "from": "DEBIT_CONFIRMED",
+    "to": "INVESTIGATION_REQUIRED",
+    "guards": []
+   },
+   {
+    "id": "TRF-T20",
+    "from": "INVESTIGATION_REQUIRED",
+    "to": "SETTLED",
+    "guards": [
+     "destination_credit_readback"
+    ]
+   },
+   {
+    "id": "TRF-T21",
+    "from": "INVESTIGATION_REQUIRED",
+    "to": "REVERSED",
+    "guards": [
+     "provider_reversal_id"
+    ]
+   },
+   {
+    "id": "TRF-T22",
+    "from": "SETTLED",
+    "to": "REVERSED",
+    "guards": [
+     "provider_reversal_id"
+    ]
+   }
+  ],
+  "VAN-SM-TRADE_ORDER": [
+   {
+    "id": "ORD-T01",
+    "from": "DRAFT",
+    "to": "RISK_REVIEW",
+    "guards": []
+   },
+   {
+    "id": "ORD-T02",
+    "from": "DRAFT",
+    "to": "ABANDONED",
+    "guards": []
+   },
+   {
+    "id": "ORD-T03",
+    "from": "RISK_REVIEW",
+    "to": "OWNER_REVIEW",
+    "guards": [
+     "risk_gate_pass"
+    ]
+   },
+   {
+    "id": "ORD-T04",
+    "from": "RISK_REVIEW",
+    "to": "RISK_REFUSED",
+    "guards": [
+     "risk_gate_refusal"
+    ]
+   },
+   {
+    "id": "ORD-T05",
+    "from": "OWNER_REVIEW",
+    "to": "AUTHORIZED",
+    "guards": [
+     "biometric_intent_token"
+    ]
+   },
+   {
+    "id": "ORD-T06",
+    "from": "OWNER_REVIEW",
+    "to": "ABANDONED",
+    "guards": []
+   },
+   {
+    "id": "ORD-T07",
+    "from": "AUTHORIZED",
+    "to": "BROKER_PENDING",
+    "guards": [
+     "worst_case_risk_reserved"
+    ]
+   },
+   {
+    "id": "ORD-T08",
+    "from": "AUTHORIZED",
+    "to": "EXPIRED",
+    "guards": [
+     "token_expired"
+    ]
+   },
+   {
+    "id": "ORD-T09",
+    "from": "BROKER_PENDING",
+    "to": "PLACED",
+    "guards": [
+     "broker_ack"
+    ]
+   },
+   {
+    "id": "ORD-T10",
+    "from": "BROKER_PENDING",
+    "to": "PARTIAL",
+    "guards": [
+     "broker_fill"
+    ]
+   },
+   {
+    "id": "ORD-T11",
+    "from": "BROKER_PENDING",
+    "to": "FILLED",
+    "guards": [
+     "broker_fill"
+    ]
+   },
+   {
+    "id": "ORD-T12",
+    "from": "BROKER_PENDING",
+    "to": "REJECTED",
+    "guards": [
+     "broker_response"
+    ]
+   },
+   {
+    "id": "ORD-T13",
+    "from": "BROKER_PENDING",
+    "to": "EXPIRED",
+    "guards": [
+     "broker_response"
+    ]
+   },
+   {
+    "id": "ORD-T14",
+    "from": "BROKER_PENDING",
+    "to": "OUTCOME_UNKNOWN",
+    "guards": []
+   },
+   {
+    "id": "ORD-T15",
+    "from": "OUTCOME_UNKNOWN",
+    "to": "PLACED",
+    "guards": [
+     "broker_readback"
+    ]
+   },
+   {
+    "id": "ORD-T16",
+    "from": "OUTCOME_UNKNOWN",
+    "to": "PARTIAL",
+    "guards": [
+     "broker_readback"
+    ]
+   },
+   {
+    "id": "ORD-T17",
+    "from": "OUTCOME_UNKNOWN",
+    "to": "FILLED",
+    "guards": [
+     "broker_readback"
+    ]
+   },
+   {
+    "id": "ORD-T18",
+    "from": "OUTCOME_UNKNOWN",
+    "to": "REJECTED",
+    "guards": [
+     "broker_readback"
+    ]
+   },
+   {
+    "id": "ORD-T19",
+    "from": "OUTCOME_UNKNOWN",
+    "to": "CANCELLED",
+    "guards": [
+     "broker_readback"
+    ]
+   },
+   {
+    "id": "ORD-T20",
+    "from": "OUTCOME_UNKNOWN",
+    "to": "EXPIRED",
+    "guards": [
+     "broker_readback"
+    ]
+   },
+   {
+    "id": "ORD-T21",
+    "from": "PLACED",
+    "to": "PARTIAL",
+    "guards": [
+     "broker_fill"
+    ]
+   },
+   {
+    "id": "ORD-T22",
+    "from": "PLACED",
+    "to": "FILLED",
+    "guards": [
+     "broker_fill"
+    ]
+   },
+   {
+    "id": "ORD-T23",
+    "from": "PLACED",
+    "to": "MODIFY_PENDING",
+    "guards": [
+     "risk_gate_pass"
+    ]
+   },
+   {
+    "id": "ORD-T24",
+    "from": "PLACED",
+    "to": "CANCEL_PENDING",
+    "guards": []
+   },
+   {
+    "id": "ORD-T25",
+    "from": "PLACED",
+    "to": "EXPIRED",
+    "guards": [
+     "broker_response"
+    ]
+   },
+   {
+    "id": "ORD-T26",
+    "from": "PARTIAL",
+    "to": "PARTIAL",
+    "guards": [
+     "broker_fill"
+    ]
+   },
+   {
+    "id": "ORD-T27",
+    "from": "PARTIAL",
+    "to": "FILLED",
+    "guards": [
+     "broker_fill"
+    ]
+   },
+   {
+    "id": "ORD-T28",
+    "from": "PARTIAL",
+    "to": "CANCEL_PENDING",
+    "guards": []
+   },
+   {
+    "id": "ORD-T29",
+    "from": "PARTIAL",
+    "to": "MODIFY_PENDING",
+    "guards": [
+     "risk_gate_pass"
+    ]
+   },
+   {
+    "id": "ORD-T30",
+    "from": "PARTIAL",
+    "to": "EXPIRED",
+    "guards": [
+     "broker_response"
+    ]
+   },
+   {
+    "id": "ORD-T31",
+    "from": "MODIFY_PENDING",
+    "to": "PLACED",
+    "guards": [
+     "broker_response"
+    ]
+   },
+   {
+    "id": "ORD-T32",
+    "from": "MODIFY_PENDING",
+    "to": "PARTIAL",
+    "guards": [
+     "broker_fill"
+    ]
+   },
+   {
+    "id": "ORD-T33",
+    "from": "MODIFY_PENDING",
+    "to": "FILLED",
+    "guards": [
+     "broker_fill"
+    ]
+   },
+   {
+    "id": "ORD-T34",
+    "from": "MODIFY_PENDING",
+    "to": "OUTCOME_UNKNOWN",
+    "guards": []
+   },
+   {
+    "id": "ORD-T35",
+    "from": "CANCEL_PENDING",
+    "to": "CANCELLED",
+    "guards": [
+     "broker_ack"
+    ]
+   },
+   {
+    "id": "ORD-T36",
+    "from": "CANCEL_PENDING",
+    "to": "PARTIAL",
+    "guards": [
+     "broker_fill"
+    ]
+   },
+   {
+    "id": "ORD-T37",
+    "from": "CANCEL_PENDING",
+    "to": "FILLED",
+    "guards": [
+     "broker_fill"
+    ]
+   },
+   {
+    "id": "ORD-T38",
+    "from": "CANCEL_PENDING",
+    "to": "EXPIRED",
+    "guards": [
+     "broker_response"
+    ]
+   },
+   {
+    "id": "ORD-T39",
+    "from": "CANCEL_PENDING",
+    "to": "OUTCOME_UNKNOWN",
+    "guards": []
+   }
+  ],
+  "VAN-SM-NEWS_ARMED_TICKET": [
+   {
+    "id": "NEWS-T01",
+    "from": "DRAFT_UNAPPROVED",
+    "to": "SIGNED",
+    "guards": [
+     "owner_biometric_over_frozen_grant"
+    ]
+   },
+   {
+    "id": "NEWS-T02",
+    "from": "DRAFT_UNAPPROVED",
+    "to": "VOIDED",
+    "guards": []
+   },
+   {
+    "id": "NEWS-T03",
+    "from": "SIGNED",
+    "to": "ARMED",
+    "guards": []
+   },
+   {
+    "id": "NEWS-T04",
+    "from": "SIGNED",
+    "to": "VOIDED",
+    "guards": []
+   },
+   {
+    "id": "NEWS-T05",
+    "from": "SIGNED",
+    "to": "EXPIRED",
+    "guards": []
+   },
+   {
+    "id": "NEWS-T06",
+    "from": "ARMED",
+    "to": "USED",
+    "guards": [
+     "two_source_agreement",
+     "mandate_and_risk_gate",
+     "unused_nonce"
+    ]
+   },
+   {
+    "id": "NEWS-T07",
+    "from": "ARMED",
+    "to": "VOIDED",
+    "guards": []
+   },
+   {
+    "id": "NEWS-T08",
+    "from": "ARMED",
+    "to": "EXPIRED",
+    "guards": []
+   }
+  ]
+ }
+}

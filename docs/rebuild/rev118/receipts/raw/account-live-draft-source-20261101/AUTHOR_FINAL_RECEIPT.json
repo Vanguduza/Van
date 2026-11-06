@@ -1,0 +1,27 @@
+{
+  "state": "TERMINAL",
+  "source_pins": {
+    "backend/van_gateway/trading/account_application_drafts.py": "4ba0fd716762156346180fa327b7373bad4a470cddb12e2946355efa15ae5ccd",
+    "backend/tests/test_account_application_drafts.py": "a9a01817ddab26970e8f8eed54249e213091e28209a503b2549acc5bfdd06ff2",
+    "backend/van_gateway/app.py": "5dd80495c8a2627bfa2ddc7cf3477b3f5e129a0113e18b2370a23e99e0438140",
+    "backend/van_gateway/context/forget.py": "6fed25f2f105938d6e5be3ebbd98f3ac1bb8b36aee3fbf1b1dc19cbeb87a2625"
+  },
+  "source_pins_unchanged": true,
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "-B",
+    "-m",
+    "pytest",
+    "backend/tests/test_account_application_drafts.py",
+    "-q",
+    "--basetemp=/tmp/van-account-live-drafts-20261101/R2_FINAL/b",
+    "--junitxml=/tmp/van-account-live-drafts-20261101/R2_FINAL/report.xml"
+  ],
+  "exit": 0,
+  "elapsed_seconds": 165.0689995759967,
+  "reason": null,
+  "children_remaining": [],
+  "owned_bytes": 101621519,
+  "workspace_free": 69734400,
+  "tmp_free": 2697773056
+}

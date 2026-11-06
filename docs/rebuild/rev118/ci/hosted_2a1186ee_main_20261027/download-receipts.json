@@ -1,0 +1,138 @@
+[
+  {
+    "artifact_id": 12700310160,
+    "name": "van-backend-public-source",
+    "bytes": 156195,
+    "sha256": "177533924c740ea623f3615a66e8450dc71a967190b386aecf2569864d5fb39d",
+    "github_digest": "sha256:177533924c740ea623f3615a66e8450dc71a967190b386aecf2569864d5fb39d",
+    "crc_path_symlink_verified": true
+  },
+  {
+    "artifact_id": 12699361968,
+    "name": "van-browser-guard-source",
+    "bytes": 34350,
+    "sha256": "0a4786a68b9879f4c7dafc37c11ac3b6934630794ff1ea9a14cb938c331b722e",
+    "github_digest": "sha256:0a4786a68b9879f4c7dafc37c11ac3b6934630794ff1ea9a14cb938c331b722e",
+    "crc_path_symlink_verified": true
+  },
+  {
+    "artifact_id": 12698936544,
+    "name": "van-mutation-report-python-1",
+    "bytes": 2034,
+    "sha256": "941cab1b216e1ed7371ddd50d88921dc9b24125691e057ebf748ef9eb96b649f",
+    "github_digest": "sha256:941cab1b216e1ed7371ddd50d88921dc9b24125691e057ebf748ef9eb96b649f",
+    "crc_path_symlink_verified": true
+  },
+  {
+    "artifact_id": 12698820289,
+    "name": "van-mutation-report-kotlin-0",
+    "bytes": 1527,
+    "sha256": "16b9490c5be0fd67d55e9dd3e1ffdf529d6f6081a4ed20b6f0a5ccc4bedacbc2",
+    "github_digest": "sha256:16b9490c5be0fd67d55e9dd3e1ffdf529d6f6081a4ed20b6f0a5ccc4bedacbc2",
+    "crc_path_symlink_verified": true
+  },
+  {
+    "artifact_id": 12698750238,
+    "name": "van-mutation-report-kotlin-2",
+    "bytes": 1529,
+    "sha256": "6a01c5eab5550ac579486c03feb6529b0764f51bae62be44019dcc58832396d2",
+    "github_digest": "sha256:6a01c5eab5550ac579486c03feb6529b0764f51bae62be44019dcc58832396d2",
+    "crc_path_symlink_verified": true
+  },
+  {
+    "artifact_id": 12698671117,
+    "name": "van-mutation-report-python-0",
+    "bytes": 2295,
+    "sha256": "713e3406d8b1a583dbf8ad2eb992f682b0dadf529c72ab60d03bec3579523f63",
+    "github_digest": "sha256:713e3406d8b1a583dbf8ad2eb992f682b0dadf529c72ab60d03bec3579523f63",
+    "crc_path_symlink_verified": true
+  },
+  {
+    "artifact_id": 12698656142,
+    "name": "van-voice-runtime",
+    "bytes": 795,
+    "sha256": "ebdfa3d6a8ed1e8a2af43d9e8e8ede6b556b16c60e223b099f673b4171139e69",
+    "github_digest": "sha256:ebdfa3d6a8ed1e8a2af43d9e8e8ede6b556b16c60e223b099f673b4171139e69",
+    "crc_path_symlink_verified": true
+  },
+  {
+    "artifact_id": 12698565540,
+    "name": "van-mutation-report-kotlin-1",
+    "bytes": 1491,
+    "sha256": "6c2aacf8e96ee1594570ecd5795aa0de891fe505ef59edec02edd5008378ec22",
+    "github_digest": "sha256:6c2aacf8e96ee1594570ecd5795aa0de891fe505ef59edec02edd5008378ec22",
+    "crc_path_symlink_verified": true
+  },
+  {
+    "artifact_id": 12698531173,
+    "name": "van-character-forge-validation-binding",
+    "bytes": 2099,
+    "sha256": "764304a9527dab8178edd9fa221dc0a85bcf270b8f01dda89a53cd6a8624de83",
+    "github_digest": "sha256:764304a9527dab8178edd9fa221dc0a85bcf270b8f01dda89a53cd6a8624de83",
+    "crc_path_symlink_verified": true
+  },
+  {
+    "artifact_id": 12698496139,
+    "name": "van-instrumentation-report",
+    "bytes": 10631,
+    "sha256": "2f6a37f63a70f28e9c72b30ae5f61f7671ae32b6fbeb1e186a3b4e77f876c58c",
+    "github_digest": "sha256:2f6a37f63a70f28e9c72b30ae5f61f7671ae32b6fbeb1e186a3b4e77f876c58c",
+    "crc_path_symlink_verified": true
+  },
+  {
+    "artifact_id": 12697986772,
+    "name": "van-mutation-report-python-3",
+    "bytes": 2351,
+    "sha256": "4f4b3e08d2037a44a09de00b2b071ace0ecdb581642b460fdf950fd8133fd7a1",
+    "github_digest": "sha256:4f4b3e08d2037a44a09de00b2b071ace0ecdb581642b460fdf950fd8133fd7a1",
+    "crc_path_symlink_verified": true
+  },
+  {
+    "artifact_id": 12697883771,
+    "name": "van-actual-release-guards",
+    "bytes": 442,
+    "sha256": "d03223ec624e964f3af8731dd56b5aa9ae7352e0b113c630814ddb956a612654",
+    "github_digest": "sha256:d03223ec624e964f3af8731dd56b5aa9ae7352e0b113c630814ddb956a612654",
+    "crc_path_symlink_verified": true
+  },
+  {
+    "artifact_id": 12697823533,
+    "name": "van-mutation-report-browser-agent",
+    "bytes": 1362,
+    "sha256": "55de0d2e291c84f436cc373e3d0417272c497fa753b298941066a36e3b864aae",
+    "github_digest": "sha256:55de0d2e291c84f436cc373e3d0417272c497fa753b298941066a36e3b864aae",
+    "crc_path_symlink_verified": true
+  },
+  {
+    "artifact_id": 12697319241,
+    "name": "van-market-monitor-source",
+    "bytes": 7178,
+    "sha256": "f8ac6a632bd63df64f0fd6301c430cc185e8e79dc72d9893f9d1c92d0624fb8e",
+    "github_digest": "sha256:f8ac6a632bd63df64f0fd6301c430cc185e8e79dc72d9893f9d1c92d0624fb8e",
+    "crc_path_symlink_verified": true
+  },
+  {
+    "artifact_id": 12697194720,
+    "name": "van-mutation-report-python-2",
+    "bytes": 2078,
+    "sha256": "560d80f6bd2b0dddef6b59389f658faf5da6e4a72ebe43d29bb696acd4415809",
+    "github_digest": "sha256:560d80f6bd2b0dddef6b59389f658faf5da6e4a72ebe43d29bb696acd4415809",
+    "crc_path_symlink_verified": true
+  },
+  {
+    "artifact_id": 12696709510,
+    "name": "van-mutation-report-kotlin-3",
+    "bytes": 1541,
+    "sha256": "68e5c2b088c669f2cc00f0216967e20473a005a3651fc51945910c4ca55063d2",
+    "github_digest": "sha256:68e5c2b088c669f2cc00f0216967e20473a005a3651fc51945910c4ca55063d2",
+    "crc_path_symlink_verified": true
+  },
+  {
+    "artifact_id": 12696674728,
+    "name": "van-postgres-ledger-report",
+    "bytes": 164877,
+    "sha256": "4fe1bcfb7ac7e733aabb30b4587bee1f94cf4ca6699945e71234ff1d9abff806",
+    "github_digest": "sha256:4fe1bcfb7ac7e733aabb30b4587bee1f94cf4ca6699945e71234ff1d9abff806",
+    "crc_path_symlink_verified": true
+  }
+]

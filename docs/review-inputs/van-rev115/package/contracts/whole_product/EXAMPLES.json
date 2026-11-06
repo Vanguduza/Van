@@ -1,0 +1,86 @@
+{
+  "examples": {
+    "CapabilityBinding": {
+      "authority_policy_ref": "fixture:policy",
+      "capability_id": "WP-CAP-BE-023",
+      "classification": "READ",
+      "consumer_ref": "fixture:consumer",
+      "error_schema_ref": "fixture:error",
+      "handler_ref": "fixture:handler",
+      "idempotency_scope": "READ_ONLY",
+      "input_schema_ref": "fixture:input",
+      "native_owner": "fixture:work-owner",
+      "operation_id": "fixture:task-read",
+      "outcome_lookup_ref": "fixture:lookup",
+      "output_schema_ref": "fixture:output",
+      "qualification_receipt_refs": [],
+      "qualification_state": "NOT_QUALIFIED",
+      "source_config_digest": "0000000000000000000000000000000000000000000000000000000000000000",
+      "subject_scope": [
+        "owner",
+        "project"
+      ],
+      "transport": "RPC"
+    },
+    "Command": {
+      "arguments": {
+        "ref": "fixture:typed-args",
+        "schema_ref": "fixture:args-schema",
+        "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "classification": "EFFECT",
+      "command_id": "cmd-fixture",
+      "consent_epoch": 1,
+      "expected_revision": "r1",
+      "expires_at": "2026-10-21T12:00:00Z",
+      "idempotency_key": "cmd-fixture",
+      "operation_id": "op-fixture",
+      "proof_ref": "fixture:proof",
+      "scope": {
+        "account_id": null,
+        "authority_epoch": 1,
+        "device_id": "device-fixture",
+        "domain": "work",
+        "owner_id": "owner-fixture",
+        "project_id": "project-fixture",
+        "subject_id": "task-fixture"
+      },
+      "version": "1.0"
+    },
+    "Outcome": {
+      "command_id": "cmd-fixture",
+      "error_code": null,
+      "native_operation_id": "native-fixture",
+      "observed_at": "2026-10-21T11:00:00Z",
+      "postcondition_receipt_refs": [
+        "fixture:postcondition"
+      ],
+      "recovery_lookup_ref": "fixture:lookup",
+      "retry_policy": "NONE",
+      "scope": {
+        "account_id": null,
+        "authority_epoch": 1,
+        "device_id": "device-fixture",
+        "domain": "work",
+        "owner_id": "owner-fixture",
+        "project_id": "project-fixture",
+        "subject_id": "task-fixture"
+      },
+      "source_revision": "r2",
+      "state": "SUCCEEDED"
+    },
+    "VoiceEvent": {
+      "command_id": null,
+      "consent_epoch": 1,
+      "event_type": "PARTIAL_TRANSCRIPT",
+      "generation": 1,
+      "payload_ref": "fixture:partial",
+      "sequence": 1,
+      "session_id": "session-fixture",
+      "spoken_completion": false,
+      "turn_id": "turn-fixture",
+      "verified_outcome_ref": null
+    }
+  },
+  "scope": "SYNTHETIC_SCHEMA_EXAMPLES_NOT_REAL_PROOF"
+}

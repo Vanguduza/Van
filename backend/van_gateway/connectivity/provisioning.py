@@ -32,6 +32,9 @@ from __future__ import annotations
 
 import time
 import uuid
+import ipaddress
+import re
+from urllib.parse import urlsplit
 
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import hashes, serialization
@@ -48,9 +51,9 @@ PROVISIONING_PAYLOAD_VERSION = 1
 
 #: ADR-RB-026: "short-lived". Ten minutes is an installer run, not an afternoon.
 #:
-#: Deliberately far shorter than the bootstrap token's own hour-long TTL. The token is
-#: consumed by the Gateway and can afford to outlive the installer; the payload travels
-#: over a channel that logs, and it should be useless by the time anyone reads the log.
+#: Installer-issued bootstrap tokens also use this short server-enforced lifetime; the
+#: general administrative bootstrap default can be an hour. Client envelope expiry alone
+#: cannot shorten the lifetime of credentials observed on the delivery channel.
 PROVISIONING_TTL_MS = 10 * 60_000
 
 #: Fields a provisioning payload must never carry.
@@ -75,6 +78,32 @@ class ProvisioningError(ConnectivityError):
     """Named the same way as a manifest refusal, so one diagnostics screen reads both."""
 
 
+def validate_gateway_url(value: str) -> str:
+    url = value.strip()
+    if not url.lower().startswith("https://"):
+        raise ProvisioningError("provisioning_url_must_use_https")
+    try:
+        parsed = urlsplit(url)
+        port = parsed.port
+    except ValueError as exc:
+        raise ProvisioningError("provisioning_url_invalid") from exc
+    host = parsed.hostname or ""
+    if (not host or parsed.username or parsed.password or "?" in url or "#" in url
+            or parsed.path not in {"", "/"} or parsed.netloc.endswith(":")
+            or any(c.isspace() or ord(c) < 32 for c in url)
+            or port is not None and not 1 <= port <= 65535):
+        raise ProvisioningError("provisioning_url_invalid")
+    if ":" in host or re.fullmatch(r"[0-9.]+", host):
+        try:
+            ipaddress.ip_address(host)
+        except ValueError as exc:
+            raise ProvisioningError("provisioning_url_invalid") from exc
+    elif (len(host) > 253 or not all(re.fullmatch(r"[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?", label)
+                                   for label in host.split("."))):
+        raise ProvisioningError("provisioning_url_invalid")
+    return url.rstrip("/")
+
+
 def build_provisioning_payload(
     *,
     gateway_url: str,
@@ -92,9 +121,7 @@ def build_provisioning_payload(
     a Gateway that relaxed it here would sign a payload a release build must refuse, and the
     installer would appear to succeed.
     """
-    url = gateway_url.strip().rstrip("/")
-    if not url.lower().startswith("https://"):
-        raise ProvisioningError("provisioning_url_must_use_https")
+    url = validate_gateway_url(gateway_url)
     if len(pairing_token.strip()) < 32:
         raise ProvisioningError("provisioning_pairing_token_too_short")
     if len(bootstrap_token.strip()) < 32:

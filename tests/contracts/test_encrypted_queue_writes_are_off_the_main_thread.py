@@ -28,7 +28,9 @@ APP = ROOT / "android/app/src/main/java/com/dial/van"
 QUEUE = APP / "queue/EncryptedCommandQueue.kt"
 
 #: The calls that block until the bytes are down.
-WRITES = ("enqueue", "upsert", "remove", "clear", "markAttempt", "purgeExpired")
+WRITES = ("enqueue", "upsert", "remove", "clear", "markAttempt", "purgeExpired",
+          "drainExecutable", "finishCapturedContext", "discardReviewed", "claimGeneric",
+          "recordGenericPrepared", "recordGenericUnknown", "recordGenericReceipt")
 
 #: Files whose own dispatcher is not visible here, and why that is acceptable.
 #:  - the queue itself, which is the thing being called
@@ -41,11 +43,16 @@ def _call_sites() -> dict[Path, list[str]]:
     # `commandQueue` specifically. A first version matched any `*queue.` receiver and
     # reported `VoiceAudioArbiter`'s audio buffer, which is a ring of PCM frames and has
     # nothing to do with a disk — a check that cries wolf is one somebody switches off.
-    pattern = re.compile(rf"\bcommandQueue\.({'|'.join(WRITES)})\s*\(")
     for path in APP.rglob("*.kt"):
         if path.name in EXEMPT:
             continue
-        hits = pattern.findall(path.read_text(encoding="utf-8"))
+        source = path.read_text(encoding="utf-8")
+        # Include aliases actually declared as this canonical disk owner. A PCM
+        # buffer named `queue` still cannot become a false positive.
+        receivers = {"commandQueue"} | set(re.findall(
+            r"\b(?:val|var)\s+(\w+)\s*:\s*EncryptedCommandQueue\b", source))
+        pattern = re.compile(rf"\b(?:{'|'.join(sorted(receivers))})(?:\?\.|\.)({'|'.join(WRITES)})\s*\(")
+        hits = pattern.findall(source)
         if hits:
             found[path] = hits
     return found
@@ -118,3 +125,10 @@ def test_discarding_the_queue_is_one_write_rather_than_one_per_command():
     assert body.count(".commit()") == 1, (
         "clear() should be exactly one committed editor"
     )
+
+
+def test_reviewed_restoration_and_replay_shared_writers_are_in_the_guard():
+    sites = _call_sites()
+    assert "discardReviewed" in sites[APP / "degraded/DeviceSignals.kt"]
+    assert {"claimGeneric", "recordGenericPrepared", "recordGenericUnknown", "recordGenericReceipt",
+            "drainExecutable", "finishCapturedContext"} <= set(sites[APP / "gateway/QueueReplayer.kt"])

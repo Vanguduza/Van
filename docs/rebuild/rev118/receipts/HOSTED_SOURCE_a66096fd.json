@@ -1,0 +1,128 @@
+{
+  "source_head": "a66096fdabc8eef1ecbcf7140dc071d8f65f1d16",
+  "run": 40276672885,
+  "status": "FAILURE_17_PUBLIC_SOURCE_JOBS_SUCCESS_2_MANDATORY_PREREQUISITES_UNWAIVED",
+  "junit": [
+    {
+      "path": "van-market-monitor-source/report.xml",
+      "tests": 258,
+      "failed": 0,
+      "errors": 0,
+      "skips": 0,
+      "passed": 258
+    },
+    {
+      "path": "van-browser-guard-source/uid-report.xml",
+      "tests": 1,
+      "failed": 0,
+      "errors": 0,
+      "skips": 0,
+      "passed": 1
+    },
+    {
+      "path": "van-browser-guard-source/full-report.xml",
+      "tests": 1548,
+      "failed": 0,
+      "errors": 0,
+      "skips": 1,
+      "passed": 1547
+    },
+    {
+      "path": "van-browser-guard-source/report.xml",
+      "tests": 11,
+      "failed": 0,
+      "errors": 0,
+      "skips": 0,
+      "passed": 11
+    },
+    {
+      "path": "van-browser-guard-source/firewall-report.xml",
+      "tests": 10,
+      "failed": 0,
+      "errors": 0,
+      "skips": 0,
+      "passed": 10
+    },
+    {
+      "path": "van-postgres-ledger-report/trading-source-report.xml",
+      "tests": 3630,
+      "failed": 0,
+      "errors": 0,
+      "skips": 1,
+      "passed": 3629
+    },
+    {
+      "path": "van-postgres-ledger-report/voice-source-report.xml",
+      "tests": 117,
+      "failed": 0,
+      "errors": 0,
+      "skips": 0,
+      "passed": 117
+    },
+    {
+      "path": "van-postgres-ledger-report/postgres-ledger-report.xml",
+      "tests": 26,
+      "failed": 0,
+      "errors": 0,
+      "skips": 0,
+      "passed": 26
+    },
+    {
+      "path": "van-actual-release-guards/report.xml",
+      "tests": 2,
+      "failed": 0,
+      "errors": 0,
+      "skips": 0,
+      "passed": 2
+    },
+    {
+      "path": "van-backend-public-source/media-report.xml",
+      "tests": 198,
+      "failed": 0,
+      "errors": 0,
+      "skips": 0,
+      "passed": 198
+    },
+    {
+      "path": "van-backend-public-source/gateway-report.xml",
+      "tests": 5782,
+      "failed": 0,
+      "errors": 0,
+      "skips": 7,
+      "passed": 5775
+    }
+  ],
+  "canonical_mutations": {
+    "caught": 374,
+    "edits": 383,
+    "unique": 374,
+    "canonical_identity_counter_match": true,
+    "survivors": 0,
+    "unexecuted": 0
+  },
+  "later_uncommitted_ML005_not_qualified": true,
+  "schema": "van.hosted-exact-source/1",
+  "tested_merge": "dd89d0f05f67af01d37366410af4358903fb5944",
+  "public_source_jobs_passed": 17,
+  "mandatory_failures": [
+    {
+      "id": 121420772460,
+      "name": "project-truth-ledger",
+      "reason": "trusted-main checker absent;exit2;not waived"
+    },
+    {
+      "id": 121420772537,
+      "name": "backend",
+      "reason": "DDS_CONTRACT_READ_DEPLOY_KEY missing;exit1;not waived"
+    }
+  ],
+  "android_emulator": {
+    "tests": 22,
+    "passed": 18,
+    "failed": 0,
+    "declared_skips": 4,
+    "s24_acceptance": false
+  },
+  "evidence": "ci/hosted_a66096fd_20261026",
+  "native_or_unit_acceptance": false
+}

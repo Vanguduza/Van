@@ -1,0 +1,4 @@
+$ cd docs/design/van-next && python3 plan/generate_plan.py --check
+exit=0
+
+0 findings

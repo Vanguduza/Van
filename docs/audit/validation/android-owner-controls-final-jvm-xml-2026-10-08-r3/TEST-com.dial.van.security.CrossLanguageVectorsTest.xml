@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.security.CrossLanguageVectorsTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-08T06:47:28" hostname="052fefa249ff" time="0.007">
+  <properties/>
+  <testcase name="a key order the gateway never used still canonicalizes the same()" classname="com.dial.van.security.CrossLanguageVectorsTest" time="0.001"/>
+  <testcase name="the device proof signing input matches the gateway()" classname="com.dial.van.security.CrossLanguageVectorsTest" time="0.003"/>
+  <testcase name="a signature is always sixty four bytes whatever the DER spelling()" classname="com.dial.van.security.CrossLanguageVectorsTest" time="0.0"/>
+  <testcase name="a lowercase method signs the same bytes as an uppercase one()" classname="com.dial.van.security.CrossLanguageVectorsTest" time="0.0"/>
+  <testcase name="canonical json matches the gateway byte for byte()" classname="com.dial.van.security.CrossLanguageVectorsTest" time="0.003"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

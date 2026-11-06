@@ -1,0 +1,13 @@
+# Candidate PostgreSQL named-ledger isolation
+
+Five real PostgreSQL tests reproduced cross-ledger reads, global hash uniqueness rejecting valid identical events in separate scopes, reader transactions left open, and silent use of an unscoped legacy store. The API previously chose a named chain head while every event query shared one unpartitioned table.
+
+Events now carry the existing logical ledger name. Inserts, all readers, incremental/full verification and sequence lookups bind it, and chain uniqueness uses (ledger, chain_hash). Four concurrent writers preserve two separate chains despite globally interleaved sequence numbers. Closing a partial reader releases its read transaction without rolling back an enclosing atomic writer. An empty stream with a nonempty head is corrupt rather than fresh.
+
+Fresh deployment SQL matches this layout. Runtime startup refuses unscoped or incomplete legacy schemas. The explicit operator tool tools/rebuild/pg_ledger_migration.py takes its connection only from VATI_PG_MIGRATION_DSN and offers --check/--apply. It verifies the entire original event chain and exactly one populated head before assigning existing rows. Migration preserves immutable bodies, hashes, sequences and head values. Ambiguous histories, corruption and custom global uniqueness refuse migration; injected failures roll back DDL and backfill together. The tool does not supply deployment permission, backups, a native identity or a signature.
+
+Verification used a private Unix-socket-only PostgreSQL 17.11 cluster with pinned psycopg 3.2.9. Full trading passed 1,680 tests/one skip before the final two test-only controls. The exact latest CI selection passed 26/26 with zero skips, including actual deployment table DDL, concurrent writers, original PostgreSQL/SQLite chain parity, migration CLI and real protective-exit journal use in two scopes. Eighteen deployment/CI contracts pass. The local cluster was stopped and its disposable data removed.
+
+A new independent CI job pins the official PostgreSQL 17.11 image digest and requires those cases to execute without skips. Both workflow/template copies remain identical. The existing DDS-private-source and trusted-main gates remain required.
+
+This is a partial BE-003 source milestone. The default scope remains vati, preserving existing deployment behavior; no existing account history is silently reassigned. Account-service/Commander/readmodel scope admission and deployment migration need their own complete binding and native readback. This API correction is not a claim that all account projections are already isolated or that the production database migrated. No formal unit or live acceptance is issued. Receipt: receipts/POSTGRES_LEDGER_SCOPE_SOURCE_20261022.json.

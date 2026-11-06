@@ -1,0 +1,87 @@
+{
+  "schema": "van.rebuild.native-command-dispatch-source/1",
+  "source_parent": "4fb7be1e0a3b287125e81f17cb7eddd2ef95ffa4",
+  "source_sha256": {
+    "trading/commander/app.py": "e11e876683b0de06b8697276fa42a151c9e19a77a95eed2c2433a42eec34c5b3",
+    "trading/tests/test_commander_responsiveness.py": "697de2e7527b8ddd44723f18589473b0effb66f49353fb0ff708941c20854272"
+  },
+  "initial_counterexample": {
+    "native_event_loop_blocked": 1
+  },
+  "full_trading_real_postgresql": {
+    "tests": 1931,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "5a083ff1c9a7bcd4de74bce1739eb74acaf558300b4dff6b2e57e527a6f70eb8"
+  },
+  "focused_native_suites": {
+    "tests": 26,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "7ef5e0744c9753e9a9a09394e6b82608891bf6b685a23a30baf77dcf8075a913"
+  },
+  "custom_mutants": {
+    "detected": 5,
+    "survived": 0,
+    "source_restored": true,
+    "rows": [
+      {
+        "kind": "baseline",
+        "mutation": null,
+        "exit_code": 0,
+        "log": "/tmp/van-native-dispatch-mutant-0.txt",
+        "sha256": "1a896f619af70950747446de98f4adc2b5a2ac554d35422da4eb7b7a3b4f705e"
+      },
+      {
+        "kind": "mutation",
+        "mutation": "block the native event loop during provider reads",
+        "exit_code": 1,
+        "log": "/tmp/van-native-dispatch-mutant-1.txt",
+        "sha256": "3f6efd54855827ba89d9be1178b46167cd4947be57a17a7467b0bf0a73e42317"
+      },
+      {
+        "kind": "mutation",
+        "mutation": "let writes overtake each other outside the native executor",
+        "exit_code": 1,
+        "log": "/tmp/van-native-dispatch-mutant-2.txt",
+        "sha256": "a170642f9e13e2cb6705d9e023c70b424504a549a3b90abcaf9cb0169e825416"
+      },
+      {
+        "kind": "mutation",
+        "mutation": "execute a queued request after its authorization expires",
+        "exit_code": 1,
+        "log": "/tmp/van-native-dispatch-mutant-3.txt",
+        "sha256": "9ee49d1e4b871832e8264a3f26294c02da421307d93f6513bc211d4568d4ed1b"
+      },
+      {
+        "kind": "mutation",
+        "mutation": "let cancelled HTTP waiters reopen native queue capacity",
+        "exit_code": 1,
+        "log": "/tmp/van-native-dispatch-mutant-4.txt",
+        "sha256": "f454c40c45812f2124bc8fd462f2baf304bb32c28d25844e64d98dffdd691e76"
+      },
+      {
+        "kind": "mutation",
+        "mutation": "allow writes after native lifecycle shutdown",
+        "exit_code": 1,
+        "log": "/tmp/van-native-dispatch-mutant-5.txt",
+        "sha256": "edbe45d78a8ded2dadba4757246cad19a09b370ca759d164d67341f0d3cd2a31"
+      }
+    ]
+  },
+  "private_fixture_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "whole_unit_acceptance": "NOT_ISSUED",
+  "live_host_qualification": false,
+  "remaining": [
+    "durable original operation/result recovery",
+    "explicit native task cancellation and process-death reconciliation",
+    "cross-host lease and account physical identity",
+    "exposure/funds-safe unlink",
+    "original whole-product independent/provider/production/handset qualifications"
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "schema": "van.rebuild.native-depth-history-http/1",
+  "base_head": "9255b23d07ce976fa48c2f2e452b70113e6e6458",
+  "updated_at_utc": "2026-10-26T22:36:21.837174+00:00",
+  "unit": "BE-008",
+  "status": "SOURCE_TESTED_COMPONENT_NOT_UNIT_NATIVE_OR_PRODUCTION_ACCEPTANCE",
+  "acceptance": "NOT_ISSUED",
+  "source_sha256": {
+    "backend/van_gateway/trading/native_depth_history.py": "85eb90654bf5967a17d409eaae1e5cb690841dc6ca9e860803832d642ff5b667",
+    "backend/van_gateway/trading/service.py": "1990fded340c8fcf4dc705ad5dc6594174effcb768aa42e74ebfdcb5c8027b57",
+    "backend/van_gateway/config.py": "d3e8f9ecf433f9c4818d1b4f74d0ee7ccfc41a31b9f7ec47918e78c694b6305d",
+    "backend/van_gateway/app.py": "0c9aaaa8154d0d099107eb33ab9b86bbf83b975c8ed4ffede7540f4721a4b2d7",
+    "backend/tests/test_native_depth_history.py": "3925d399516cd3f8fca1430c655ba9b330d30285b138f8fd5e257df3423194c0",
+    "backend/tests/test_trading_api.py": "5bd2908d267fcd7f9eb0d6978d0b7e7a58ccabf32b53e30e78d5625aca867c35",
+    "tools/rebuild/refresh_owner_source_contracts.py": "364b1249dad34e83cec4936a959fb6dd1391ce476367c6c79cfd5d2beb5a9356"
+  },
+  "implementation": "Registered paired-owner GET /v1/trading/market/depth-history reads original physical-scope DEPTH captures through existing TradingService/NativeDepthArchive. Server-only root/byte budget;strict selectors, explicit private refusal/NO_CAPTURE, original policy/revision/as-of, no repair/broker I/O/normalized prices/current freshness/rights or execution grant. Two active verification slots remain occupied across caller cancellation. 32 new cases;910 final actual SQLite/PostgreSQL/HTTP/private-topology passes,0 skips/audit violations,1148 final backend/trading runtime-test hashes match,owned fixture independently absent;3 assertion faults caught/6 positive+6 restored controls/exact source restored;122 rebuild/workflow/T0 checks. Original integration failed1/106 on exact service-surface allowlist;only3 new read-only names added,authority tripwires retained,focused2 and final910 passed. Counts overlap;BE008 IN_PROGRESS,unit/native/production acceptance NOT_ISSUED.",
+  "actual_tests": {
+    "new_cases": 32,
+    "initial_http": 25,
+    "failed_initial_integration": {
+      "passed": 105,
+      "failed": 1,
+      "status": "FAILED_RETAINED"
+    },
+    "surface_repair_authority_controls": 2,
+    "added_scope_and_missing_index": 7,
+    "final_actual_SQLite_Postgres_HTTP_private_topology": 910,
+    "skips": 0,
+    "audit_violations": 0,
+    "runtime_test_hashes_verified": 1148,
+    "owned_fixture_independently_absent": true,
+    "supplemental_assertion_faults_caught": 3,
+    "positive_and_restored_controls": 6,
+    "supplemental_source_exactly_restored": true,
+    "rebuild_workflow_T0_boundary": 122,
+    "counts_overlap": true
+  },
+  "canonical_checks": {
+    "owner_frontend_drift": false,
+    "registry_cases": 374,
+    "registry_edits": 383,
+    "registry_validation_is_execution": false,
+    "endpoints": 480,
+    "schemas": 372,
+    "original_features": 42,
+    "original_surfaces": 78,
+    "original_function_ids": 105
+  },
+  "qualification": "Historical raw partial-depth consistency only;no provider-origin/price-scale/native-time-sequence/completeness/current-liquidity/entitlement/host/native/unit/production/economic/S24 acceptance. All full-unit obligations remain. No frontend design or deployment.",
+  "evidence": "ci/native_depth_history_http_20261026"
+}

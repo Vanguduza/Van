@@ -1,0 +1,30 @@
+{
+  "actual_base": "4c410418bf8f809b1df0e3eb3edfb85422c77f5c",
+  "reviewed_base": "6a0196a951dfb62413f76d3d91ceb855b16f6030",
+  "remote": "4c410418bf8f809b1df0e3eb3edfb85422c77f5c",
+  "all6_preimages_equal_6a": true,
+  "source_pins": {
+    "trading/commander/accounts.py": "6b20d5ae1ee01f00672287bb0d9183f41083c57874b5c53afa1ea339f648082a",
+    "trading/commander/account_effects.py": "8a842f27aa24bce106371cfb454c1feb224a494665e69645f6979f0c476487a2",
+    "trading/commander/app.py": "aa353acaa9ac8d74a51e6f2e500cae7ecdbc382e64413da4ccfae75fdbd85540",
+    "trading/vati/accounts/registry.py": "e7925dc1cacb1ce84af601fbbfb870220f43e6bd423fa52855d4900ce96f0be9",
+    "backend/tests/test_account_update_review.py": "c4fa99375516fd0c52833ff4dc941c7e68dc1d6e185418e4093c489606b25d0b",
+    "trading/tests/test_account_registry_atomic_rea.py": "0f371d8d35d609d585fd615b6e0393298749b839608bea3ac66f85a858a53674"
+  },
+  "patch_sha256": "975a810bf7a56ffc5cecb35249429b43a433a822bcf27a59f674dc50bf38062f",
+  "fingerprint": "f303441c2dacfadcb4fe8107f9bf218fc46d38699197f2d172e3a69971cea652",
+  "preview_composition_changed_from_author": {
+    "lane_base": "6a0196a",
+    "observed_main_HEAD": "4c410418",
+    "gateway_app_whole_file_identical": false,
+    "account_route_AST_exactly_equal": [
+      "trading_account_catalog",
+      "trading_account_challenge",
+      "trading_account_operation",
+      "trading_account_action"
+    ],
+    "actual_changed_composition": "Live-preview router+lifespan drain added; current_device_mutation_policy adds optional_db path, defaultNone retains original owner-policy calls. No gateway app edits by this lane. Native6 preimages fully equal.",
+    "test_claim": "Focused paired HTTP runs used lane6a composition; no exact integrated4c gateway/full-hosted claim. Source equivalence of unchanged account route bodies independently computed."
+  },
+  "at": "2026-11-01T23:53:42.976345+00:00"
+}

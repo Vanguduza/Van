@@ -1,0 +1,1602 @@
+{
+  "schema": "van.rebuild.hosted-mutation-corpus/1",
+  "run_id": 39723196572,
+  "source_head": "fca473cc9b3dfee52642696fcd1c36aeec703bba",
+  "tested_merge": "b1516dc308a7eddbb62a515a7315da8fb033b09e",
+  "tree": "15f3160c0c860dd38d98ee280a3f53ce6cd4e609",
+  "status": "FAILED_THREE_SURVIVORS",
+  "case_count": 374,
+  "edit_count": 381,
+  "detected": 371,
+  "survived": 3,
+  "every_original_identity_observed_exactly_once": true,
+  "independently_reviewed": false,
+  "jobs": [
+    {
+      "job_id": 119641334304,
+      "name": "mutation (python-0, python, 0/4)",
+      "conclusion": "success",
+      "detected": 58,
+      "survived": 0,
+      "log_sha256": "070830e4f8eff0ee138e928132528ff9a1759ded94d394af591c08801e80991f",
+      "cases": [
+        {
+          "mutation": "C39 the outbox says saved before the bytes are down",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C38 the stored command has no id for the Gateway to admit it by",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C36 an envelope nobody can carry out is written into the admission table first",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C5 drop the owner-halt claim",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C5 cite evidence on a failed halt",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C7 offer every strategy regardless of envelope",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C7 drop the auto-demote job",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C8 stop observing the goal",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C8 sweep the goals just mentioned",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "RC1 an add stops asserting the sources are there",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "RC2 'VAN does not know' punishes the strategy",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "RC4 one request becomes a standing goal again",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C11 a COMPLETED answer is retaken as work",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C11 accept a duplicate terminal callback",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C11 a replayed outcome row duplicates",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C17 exempt everything, so max_age_ms means nothing",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C16 an action with no mission is waved through",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C16 cite another mission's assumption as the replacement",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C16 A4 no longer needs owner approval",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C9 untrusted source looks credible",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C13 export only the store that was already exportable",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C13 report a correction as a withdrawal",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C13 report ids without the values that disagree",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C23 the control fence never moves",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C23 the grant verifier accepts the algorithm the token names",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C24 the interactive routes fall back to the Hermes-only scope",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C24 the ownership refusal is reported and then ignored",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C25 a late DOWN reopens a gesture that has moved on",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C25 a metered session reports high-quality certification",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C26 a frame from a retired path becomes a new command",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C26 protocol diversity is reported as route redundancy",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C26 a resubmitted command executes a second time",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C27 a device that failed verified boot is accepted",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C27 a proof no longer binds the route or the body",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C27 the gateway republishes an older manifest version",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C30 a barged-in answer is resumed, finishing a sentence the owner cut off",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C30 every segment claims to be the end of the answer",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C28 any device may present the owner's proof",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C31 a dangerous file completes like any other",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C31 ../../.bashrc is a filename",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C31 taking control preempts grants issued after it",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C31 a download is reported started and never leaves CREATED",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C34 a standing credential is signed into a payload sent over a channel that logs",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C34 one session under attack throttles the owner's own",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C33 a phone certifies its own session and the field is quietly ignored",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C33 a failover that never came back is not counted",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C20 the work screen is not navigable",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C22 a keystore Android cannot open is accepted and the build signs with the runner's",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C22 a build that produced no APK still reports a signature",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C21 the gate stops recognising a deleted Kotlin function",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C19 the owner's tasks reachable with a device token (both guards removed)",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C19 citing evidence no longer makes agreement well-founded",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C18 stop failing when the ledger understates",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C15 a symbol named in a line comment counts as a call site",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C15 miss enum and annotation declarations",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C14 the poll loop takes the default pressure",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C14 an unreadable battery reads as flat",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C12 point the upload at a variant the build never assembles",
+          "outcome": "DETECTED"
+        }
+      ]
+    },
+    {
+      "job_id": 119641334532,
+      "name": "mutation (python-1, python, 1/4)",
+      "conclusion": "success",
+      "detected": 58,
+      "survived": 0,
+      "log_sha256": "15d51f0a499301c7f07612cf14a06918a0dddd0492f848a63c8b4aaf0242d60a",
+      "cases": [
+        {
+          "mutation": "C39 a burst of notifications writes to an encrypted disk on the thread that draws",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C38 the offline path assembles its own payload again",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C36 the Gateway holds the message and tells the phone to send it again",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C5 revert the joint",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C6 pretend every surface has a worker",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C7 never raise the recorded ceiling",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C7 leave the scratch restore on disk",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C8 ordinary use recorded as a decision",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C8 drop the stale-intent sweep",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "RC1 an unreachable provider reads as a removed source",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "RC2 a policy refusal punishes the strategy",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "RC4 a brand-new goal starts standing",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C11 retake a stale claim under a different request",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C11 accept a duplicate non-terminal callback",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C11 an expired approval challenge can still be signed",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C17 an owner statement the owner scoped never ends",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C16 falsifying needs no evidence again",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C16 an assumption supersedes itself",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C16 A5 is no longer refused",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C9 claim every suite has a corpus",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C13 drop the fact supersession link again",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C13 order history by insertion instead of belief",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C13 bulk read of the owner graph leaves no matching trace",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C23 input lands before the device acknowledges the layout",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C23 a stream grant is redeemable twice",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C24 any paired device can drive the owner's browser session",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C25 a packet from another protocol version is parsed anyway",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C25 a reordered MOVE is applied, so the page jumps backwards",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C25 metered data gets the unmetered bitrate ladder by default",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C26 an invalidated session epoch keeps working",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C26 a failed path counts towards redundancy",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C26 a heartbeat occupies an idempotency key",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C27 another app on the same phone can bind the owner slot",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C27 an old manifest can be replayed at a device that moved on",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C30 resume from what arrived, putting a hole in the middle of the answer",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C30 delivered counts as heard",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C28 the proof is verified by nobody, as before",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C28 the proof covers an empty body rather than this request's",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C31 a server that lied at creation is believed at completion",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C31 a quarantined file whose reason was lost is one tap from opening",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C31 the queue survives preemption, so the agent acts after the owner took over",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C31 one session's device deletes another session's download",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C34 the provisioning window is a year instead of ten minutes",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C34 a page navigating in a tab it already owns is counted as a new one",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C33 the hysteresis streak restarts on every report",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C33 a second carrier on the same road is reported as a recovered route",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C20 the work screen never binds the repository result",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C22 the no-key run stops naming the consequence",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C22 the identity stays on the runner",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C21 the gate stops recognising a deleted Python function",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C19 the premise ingress moves and nothing records",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C18 a test-path reference counts as a production consumer",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C18 an entry with no symbols counts as verified",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C15 a symbol named in a KDoc counts as a call site",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C15 stop reporting files nothing references",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C14 the flush interval ignores the allowance",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C14 stop reading free storage",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C12 stop assembling the APK but keep uploading it",
+          "outcome": "DETECTED"
+        }
+      ]
+    },
+    {
+      "job_id": 119641334324,
+      "name": "mutation (python-2, python, 2/4)",
+      "conclusion": "failure",
+      "detected": 55,
+      "survived": 3,
+      "log_sha256": "cda19a065d8241bc8001b9afce6c0614aedae29601fbf6612782409ddefd3500",
+      "cases": [
+        {
+          "mutation": "C39 discarding the queue is one synchronous write per command, from a button",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C36 the owner cancels a mission over the session and nothing happens",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C36 a new session is told it already holds the abandoned one's work",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C5 accept a stale ledger",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C6 drop the no-worker refusal",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C7 an unverified mission counts as a strategy success",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C7 raise the earned-autonomy cap to the top",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C8 infer a reason the owner never gave",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "RC1 a source mutation falls back to the notebook contract",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "RC1 the source verifier falls back to the weaker notebook observation",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "RC2 inconclusive falls through to failure_count",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "RC4 the owner saying so stops counting",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C11 hide that a claim was recovered",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C11 a racing writer with a stale expectation clobbers the state",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C11 a revoked device approves an A4 action",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C16 drop the gate from the execution ingress",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C16 a caller may assert expiry",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C16 expiry reports a count that is always zero",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C9 stop recording what sources claim",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C9 admit a technology with no benchmark",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C13 drop the edge supersession link again",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C13 stop reporting inference-only contradictions",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C23 a stale control generation actuates",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C23 a stale viewport revision actuates",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C23 one device's events reach another device",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C24 a look-alike path is treated as the owner's session surface",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C25 trailing bytes are ignored, so two packets decode alike",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C25 a new gesture starts without cancelling the one it replaces",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C25 quality climbs on a single good sample",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C26 the envelope vouches for its own payload",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C27 an attestation for an older challenge is accepted",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C27 a rebuilt app with a different signing key binds",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C27 an unknown signing key is tried rather than refused",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C30 a device that restarted its queue makes VAN repeat a sentence",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C30 a pause lands in the middle of 'approx. 40 percent'",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C28 a missing proof header is treated as a valid proof",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C28 a Keystore signature is demanded on every poll",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C31 setup.exe served as text/plain is safe",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C31 a caller's own dangerous verdict is ignored",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C31 a refused mission binding strands the owner's profile",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C34 the installer points the owner's phone at a plain-http gateway",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C34 a stopped flood keeps the owner's session refused",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C34 a session that has ever finished sixteen downloads accepts no more",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C33 a closed session's data usage is billed to the next one",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C33 an outbox depth with no storability is bucketed with the retry queue",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C20 setting an app policy does nothing",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C22 a run with no key falls through into the restore path",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C21 a deleted class comes back and the removal claim stands",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C19 two new routes fall outside the scope set",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C19 agreeing with a preference counts as unsupported agreement",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C18 a test_-named file counts as a production consumer",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C15 a symbol named in a string counts as a call site",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C14 a stop is coerced back into a delay",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C12 drop the APK upload entirely",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C12 rename the module out from under the artifact path",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C26 an unknown kind is routed rather than refused",
+          "outcome": "SURVIVED"
+        },
+        {
+          "mutation": "C18 check classes that assert nothing about reachability",
+          "outcome": "SURVIVED"
+        },
+        {
+          "mutation": "C15 stop reporting test-only symbols",
+          "outcome": "SURVIVED"
+        }
+      ]
+    },
+    {
+      "job_id": 119641334383,
+      "name": "mutation (python-3, python, 3/4)",
+      "conclusion": "success",
+      "detected": 58,
+      "survived": 0,
+      "log_sha256": "2bf6e89f0c92acfba0b5ea6426ad23ed27579e2bf500cc12307557793ad1fb8a",
+      "cases": [
+        {
+          "mutation": "C38 the body stored offline is unsigned, and is refused on the flush",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C36 a refused message keeps its idempotency key and the corrected resend is refused",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C36 a malformed command reads as a server fault and is retried forever",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C5 unreachable provider reads as a deletion",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C6 health route falls through to device auth",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C7 strategy for a mission that ran nothing",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C7 a learning module writes an authority table",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C8 never record the decision outcome",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "RC1 a delete stops asserting the sources are gone",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "RC2 an owner cancellation punishes the strategy",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "RC2 a real failure stops counting",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C11 release a claim the instant it is taken",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C11 do not reset the lease when retaking",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C11 open a second mission for a command that already has one",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C17 the owner's own statement goes stale on a clock again",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C16 an undeclared reversibility is assumed reversible",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C16 supersession need not name a replacement",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C16 the orchestrator stops asking the descriptor",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C9 decide the owner is wrong from a headline",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C13 hide that the export was cut short",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C13 lose the forward direction of the chain",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C13 report inference conflicts as blocking",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C23 a fabricated control lease id actuates",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C23 the cleanup grace extends actuation authority",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C23 the cursor sticks behind another device's rows",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C24 the routes mount with no signing key configured",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C25 the duplicated edge becomes a second tap",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C25 a gesture can stay pressed forever after the phone vanishes",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C25 an unusable round trip is reported as an encoder problem",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C26 a different payload under a known key is executed",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C26 an expired command executes late",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C27 a software-only key is accepted as hardware-backed",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C27 an old signature stays a valid credential",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C27 a manifest may carry a pairing token",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C30 two streams for one answer, so de-duplication by segment id stops working",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C30 a long sentence is never actually split",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C28 a second paired device skips the gate by never enrolling",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C31 quarantine becomes a step on the way to completed",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C31 invoice.pdf served as an executable is safe",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C31 a grant already preempted is preempted again, losing when it happened",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C31 a file appears in a browser the owner already closed",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C34 a payload read out of a log an hour later still provisions the phone",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C34 the input window never slides, so one busy second is permanent",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C34 a download for a session nobody created reads as already reported",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C33 a tunnel is reported as a carrier route failure",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C20 the work screen has no render branch",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C20 the open mission is lost on rotation",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C22 an apksigner that prints no certificate publishes an empty identity",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C21 the gate stops recognising a deleted class",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C19 Google provider executes an A4 record that never received owner approval",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C19 a correction is counted as agreement",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C18 a reference from dead code counts as integration",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C15 the manifest sweep treats permissions as components again",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C15 strip everything, so all code looks dead",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C14 the embodiment resolves its own budget again",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C14 empty the never-shed set",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C12 publish an empty artefact instead of failing",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C12 a module that emits an AAR, not an APK",
+          "outcome": "DETECTED"
+        }
+      ]
+    },
+    {
+      "job_id": 119641334311,
+      "name": "mutation (kotlin-0, kotlin, 0/4)",
+      "conclusion": "success",
+      "detected": 29,
+      "survived": 0,
+      "log_sha256": "fc7c2d51c34f7021f66e3ed216fc860e75d7b50db35b8341adb2a24f5a82d02e",
+      "cases": [
+        {
+          "mutation": "C40 every event arriving on the socket is dropped",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C40 the saved cursor goes backwards and the owner reads a morning twice",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C37 an irreversible command is queued for a silent replay when the network returns",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C37 a command stored offline is sent addressed to a session that does not exist",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C36 a command the Gateway has never heard of is treated as delivered",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C35 a record with no policy is guessed as retryable, so an approval replays silently",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C35 something needing the owner present is stored as freely replayable",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C34 the phone accepts a payload that expired an hour ago",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C34 a standing credential arrives in a provisioning payload and is kept",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C34 the build-time PEM keeps its escaped newlines and no signature ever verifies",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C33 Data Saver is ignored and a spare socket runs on the owner's mobile data",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C33 a re-granted epoch promotes, leaving two authoritative paths",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C33 a command whose window closed is still sent",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C32 a drag never converges because the cadence never clears",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C32 the tail of the previous size is adopted as the new one",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C32 VAN chooses the insecure scheme on the owner's behalf",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C32 closing a tab lands the owner on the first one",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C32 a shortcut falls back to whichever profile is available",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C32 a page load displaces a trading warning",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C32 the owner's filename goes into a log line",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C31 a session that has shown nothing reports a current picture",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C31 a NaN decode rate reaches the gateway",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C31 the audio decoder's drops are reported as the picture's",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C14 pressure is the last input rather than the worst",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C14 a stopped subsystem keeps a cadence",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C30 a segment the owner already heard is re-queued and spoken again",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C30 an irreversible request is classified as ordinary work and queued",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C30 an engine whose offline data vanished fails silently instead of saying so",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C30 a rolling recording of the owner's room is written to disk",
+          "outcome": "DETECTED"
+        }
+      ]
+    },
+    {
+      "job_id": 119641334334,
+      "name": "mutation (kotlin-1, kotlin, 1/4)",
+      "conclusion": "success",
+      "detected": 29,
+      "survived": 0,
+      "log_sha256": "5918a9e130bf8f6e0567f82b2ef8e687f5180dacb1f9d58a0951d319289a25e1",
+      "cases": [
+        {
+          "mutation": "C40 an event with no sequence rewinds the stream to the beginning",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C40 a socket page replaces the history instead of merging with it",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C37 the owner waits for a question nothing asks",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C36 a kill between the two halves of a persist loses the owner's command",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C36 a command the Gateway is already running is sent a second time",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C35 a reminder is read back as session work",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C35 three failures on one path read as the first attempt after a restart",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C34 a payload replayed from a device log provisions the phone again",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C34 a payload from a format nobody has shipped is parsed as this one",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C33 a queue that emptied keeps telling an operator the owner is waiting",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C33 a spare path on the same road is held open and called redundancy",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C33 a path is promoted without the session ever being resumed on it",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C33 the record forgets what kind of command the owner was asked about",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C32 every raw resize callback renegotiates the remote browser",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C32 the held frame is stretched rather than letterboxed",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C32 every keystroke reaches a suggestion provider",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C32 Back closes the browser while the page has history",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C32 a logged-in page's title is printed on the home screen",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C32 attaching a file to a form is read as asking VAN to read it",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C32 a stale snapshot is shown to the owner as the current state",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C31 a clock step leaves the fps window anchored in the future",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C31 a closed stream keeps reporting the age of the picture it lost",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C31 what VAN sent is counted as what the owner received",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C14 the wake word is shed under pressure",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C14 catch-up stops being immediate, so pressure now stretches it",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C30 a duplicate after a failover is spoken twice",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C30 the phrasing outranks what the Gateway knows the command does",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C30 VAN hears its own speaker and interrupts itself",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C30 a substituted model decides what VAN hears",
+          "outcome": "DETECTED"
+        }
+      ]
+    },
+    {
+      "job_id": 119641334330,
+      "name": "mutation (kotlin-2, kotlin, 2/4)",
+      "conclusion": "success",
+      "detected": 29,
+      "survived": 0,
+      "log_sha256": "634dd9aca4da02cfd8edb57e14928549a4a36fe5fe313675e8da49551932d832",
+      "cases": [
+        {
+          "mutation": "C40 nothing is ever taken out of flight, so a resume resends everything",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C38 a command good for sixty seconds is saved for four hours and denied later",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C37 an A4 that will never be sent is described as queued",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C36 a delivered command is never forgotten, and is re-sent after every restart",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C36 the phone asks by one identity and the Gateway answers about another",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C35 the queue's day-long default silently replaces the outbox's four-hour window",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C35 a phone whose battery cannot be read holds a spare socket open",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C34 a release build is pointed at a plain-http gateway",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C34 an enrolment is authorised with nothing to attest it against",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C33 one failover is observed again at every flush for the life of the app",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C33 a phone at 5 percent holds a second socket open",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C33 an A4 is stored and executes an hour later because connectivity returned",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C32 the keyboard and the navigation bar are subtracted twice",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C32 a tap is transformed across an unacknowledged reflow",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C32 a search with a host in it is navigated to",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C32 the page the owner is about to open is sent to a provider",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C32 a home-screen tile opens on a phone that is not the owner's",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C32 an external link carries a second scheme into the page",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C32 an ephemeral copy never expires",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C32 a session the Gateway ended is resumed anyway",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C31 drop counts are posted cumulatively, so every flush re-counts them",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C31 the decoder's whole history lands in the first flush",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C14 thermal critical reads as fine",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C14 reduced motion ranked as rich, so pressure clamps it into a moving budget",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C14 a stretched backoff exceeds the ceiling",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C30 the device asks to resume past audio it never played",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C30 an unrecognised request is assumed to be answerable on the phone",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C30 VAN ducks a phone call to read out a search result",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C30 an answer from hours ago speaks the moment the owner opens VAN",
+          "outcome": "DETECTED"
+        }
+      ]
+    },
+    {
+      "job_id": 119641334364,
+      "name": "mutation (kotlin-3, kotlin, 3/4)",
+      "conclusion": "success",
+      "detected": 29,
+      "survived": 0,
+      "log_sha256": "eaf6f0345360637802ba621d799c08986f1133cc95bfc127cddac1788b05f5a5",
+      "cases": [
+        {
+          "mutation": "C40 the cursor and the record disagree, so the stream skips or repeats",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C37 a command the Gateway refused is stored and replayed hours later",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C37 a rebind edits the stored record, so a failed send corrupts what is on disk",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C36 a restart finds an empty outbox and the owner's queued work is gone",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C35 a restarted command loses the identity the Gateway matches it by, and goes twice",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C35 the owner is asked the same question again after a restart",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C35 the unknown sentinel drifts from the one the runtime actually reports",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C34 every build treats loopback http as acceptable, not only a debug one",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C34 a truncated build argument becomes a trust anchor nobody can verify against",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C33 a negative duration drags the failover percentile down",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C33 the warm path sends the owner's command too, doubling it",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C33 a command the owner has forgotten issuing is sent without asking",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C32 a transition sends Chromium a negative viewport",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C32 a frame swaps a revision the server never acknowledged",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C32 javascript: typed in the address bar is navigated to",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C32 closing an inactive tab moves the owner somewhere else",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C32 a revoked shortcut still navigates",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C32 a link from another app opens in the owner's logged-in browser",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C32 every plain file input on the web stops working",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C32 WebRTC is negotiated against a grant for a session that is gone",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C31 a decoder counter that went backwards erases drops that really happened",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C31 a new stream inherits the previous decoder's drop baseline",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C14 being on a charger excuses the heat",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C14 the envelope raises the embodiment's budget",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C14 SURVIVAL keeps polling",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C30 an answer counts as finished because its last segment arrived",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C30 approval-bearing work is queued and performed an hour later",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C30 VAN speaks under a video voiceover and is unintelligible",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C30 VAN starts talking because the owner happens to be holding the phone",
+          "outcome": "DETECTED"
+        }
+      ]
+    },
+    {
+      "job_id": 119641334285,
+      "name": "mutation (browser-agent, browser-agent, 0/1)",
+      "conclusion": "success",
+      "detected": 26,
+      "survived": 0,
+      "log_sha256": "dadc82951dc80eeb7c27f473685ac64d709ac540e396339d4f2c0bb1a8996766",
+      "cases": [
+        {
+          "mutation": "C29 a lease is never checked, so a preempted agent keeps typing",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C29 the owner takes control back and the agent does not notice",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C29 one service may use another's lease",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C29 mTLS says who, and then nothing says what",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C29 an observe-only task may actuate",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C29 a task that has gone wrong runs forever",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C29 the budget is never spent, which is the same as not having one",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C29 file:/// reads the host's disk into a page the owner is watching",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C29 the CDP client may be pointed at another host's browser",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C29 a hostname is accepted, and resolves on a machine we do not control",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C31 a caller names itself in the body and the certificate stops mattering",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C31 a caller sends its own scope and budget",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C31 a message from a different protocol version is decoded anyway",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C31 lease_generation true passes the fencing check",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C32 the input router grows a second CDP surface",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C29 the only bridge to Chromium binds to the internet",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C29 the control agent binds to a public address",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C29 a caller with no client certificate completes the handshake",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C29 a packet built against the previous layout is transformed rather than refused",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C29 a preempted agent's input still reaches the page",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C29 a press without a move, so a hover-dependent page is clicked in the wrong place",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C29 a drag reports no button held, and ends halfway through",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C29 a cancel is dropped, leaving the page holding a press",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C29 a printable key fires an event and types nothing",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C29 a scroll is a fixed pixel count, whatever the viewport is",
+          "outcome": "DETECTED"
+        },
+        {
+          "mutation": "C29 an unmapped kind is silently treated as a pointer move",
+          "outcome": "DETECTED"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="9" skipped="0" tests="11" time="1.146" timestamp="2026-10-27T01:09:16.333619+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_backtest_drawdown_paths" name="test_known_paths_keep_the_worst_percentage_independent_of_currency[100-pnls0-100-1/2]" time="0.131"><failure message="AssertionError: assert 0.1 == 0.5&#10; +  where 0.1 = Metrics(trades=3, wins=1, win_rate=0.3333333333333333, expectancy=266.6666666666667, expectancy_r=0.0, profit_factor=6...down_pct=0.1, sharpe_per_trade=0.4502132863066822, skew=0.3818168695924344, kurtosis=0.6666666666666664, net_pnl=800.0).max_drawdown_pct&#10; +  and   0.5 = float(Fraction(1, 2))&#10; +    where Fraction(1, 2) = Fraction('1/2')">start = '100', pnls = ('-50', '950', '-100'), amount = '100', ratio = '1/2'
+
+    @pytest.mark.parametrize('start,pnls,amount,ratio', [
+        ('100', ('-50', '950', '-100'), '100', '1/2'),
+        ('100', ('-150', '1050', '-200'), '200', '3/2'),
+        ('1e30', ('-.01',), '1/100', '1/100000000000000000000000000000000'),
+        ('10', ('-1.001', '100', '-2.002'), '1001/500', '1001/10000'),
+        ('100', ('100', '-20'), '20', '1/10'),
+        ('100', ('10', '0', '-5', '0', '-5'), '10', '1/11'),
+    ])
+    def test_known_paths_keep_the_worst_percentage_independent_of_currency(start, pnls, amount, ratio):
+        values = tuple(D(x) for x in pnls)
+        result = compute_metrics(values, (D(0),) * len(values), D(start))
+        assert result.max_drawdown == float(Fraction(amount))
+&gt;       assert result.max_drawdown_pct == float(Fraction(ratio))
+E       AssertionError: assert 0.1 == 0.5
+E        +  where 0.1 = Metrics(trades=3, wins=1, win_rate=0.3333333333333333, expectancy=266.6666666666667, expectancy_r=0.0, profit_factor=6...down_pct=0.1, sharpe_per_trade=0.4502132863066822, skew=0.3818168695924344, kurtosis=0.6666666666666664, net_pnl=800.0).max_drawdown_pct
+E        +  and   0.5 = float(Fraction(1, 2))
+E        +    where Fraction(1, 2) = Fraction('1/2')
+
+trading/tests/test_backtest_drawdown_paths.py:28: AssertionError</failure></testcase><testcase classname="trading.tests.test_backtest_drawdown_paths" name="test_known_paths_keep_the_worst_percentage_independent_of_currency[100-pnls1-200-3/2]" time="0.008"><failure message="AssertionError: assert 0.2 == 1.5&#10; +  where 0.2 = Metrics(trades=3, wins=1, win_rate=0.3333333333333333, expectancy=233.33333333333334, expectancy_r=0.0, profit_factor=...wn_pct=0.2, sharpe_per_trade=0.32970852183901284, skew=0.38273984260069543, kurtosis=0.6666666666666669, net_pnl=700.0).max_drawdown_pct&#10; +  and   1.5 = float(Fraction(3, 2))&#10; +    where Fraction(3, 2) = Fraction('3/2')">start = '100', pnls = ('-150', '1050', '-200'), amount = '200', ratio = '3/2'
+
+    @pytest.mark.parametrize('start,pnls,amount,ratio', [
+        ('100', ('-50', '950', '-100'), '100', '1/2'),
+        ('100', ('-150', '1050', '-200'), '200', '3/2'),
+        ('1e30', ('-.01',), '1/100', '1/100000000000000000000000000000000'),
+        ('10', ('-1.001', '100', '-2.002'), '1001/500', '1001/10000'),
+        ('100', ('100', '-20'), '20', '1/10'),
+        ('100', ('10', '0', '-5', '0', '-5'), '10', '1/11'),
+    ])
+    def test_known_paths_keep_the_worst_percentage_independent_of_currency(start, pnls, amount, ratio):
+        values = tuple(D(x) for x in pnls)
+        result = compute_metrics(values, (D(0),) * len(values), D(start))
+        assert result.max_drawdown == float(Fraction(amount))
+&gt;       assert result.max_drawdown_pct == float(Fraction(ratio))
+E       AssertionError: assert 0.2 == 1.5
+E        +  where 0.2 = Metrics(trades=3, wins=1, win_rate=0.3333333333333333, expectancy=233.33333333333334, expectancy_r=0.0, profit_factor=...wn_pct=0.2, sharpe_per_trade=0.32970852183901284, skew=0.38273984260069543, kurtosis=0.6666666666666669, net_pnl=700.0).max_drawdown_pct
+E        +  and   1.5 = float(Fraction(3, 2))
+E        +    where Fraction(3, 2) = Fraction('3/2')
+
+trading/tests/test_backtest_drawdown_paths.py:28: AssertionError</failure></testcase><testcase classname="trading.tests.test_backtest_drawdown_paths" name="test_known_paths_keep_the_worst_percentage_independent_of_currency[1e30-pnls2-1/100-1/100000000000000000000000000000000]" time="0.002"><failure message="AssertionError: assert 0.0 == 0.01&#10; +  where 0.0 = Metrics(trades=1, wins=0, win_rate=0.0, expectancy=-0.01, expectancy_r=0.0, profit_factor=0.0, max_drawdown=0.0, max_drawdown_pct=0.0, sharpe_per_trade=0.0, skew=0.0, kurtosis=3.0, net_pnl=-0.01).max_drawdown&#10; +  and   0.01 = float(Fraction(1, 100))&#10; +    where Fraction(1, 100) = Fraction('1/100')">start = '1e30', pnls = ('-.01',), amount = '1/100'
+ratio = '1/100000000000000000000000000000000'
+
+    @pytest.mark.parametrize('start,pnls,amount,ratio', [
+        ('100', ('-50', '950', '-100'), '100', '1/2'),
+        ('100', ('-150', '1050', '-200'), '200', '3/2'),
+        ('1e30', ('-.01',), '1/100', '1/100000000000000000000000000000000'),
+        ('10', ('-1.001', '100', '-2.002'), '1001/500', '1001/10000'),
+        ('100', ('100', '-20'), '20', '1/10'),
+        ('100', ('10', '0', '-5', '0', '-5'), '10', '1/11'),
+    ])
+    def test_known_paths_keep_the_worst_percentage_independent_of_currency(start, pnls, amount, ratio):
+        values = tuple(D(x) for x in pnls)
+        result = compute_metrics(values, (D(0),) * len(values), D(start))
+&gt;       assert result.max_drawdown == float(Fraction(amount))
+E       AssertionError: assert 0.0 == 0.01
+E        +  where 0.0 = Metrics(trades=1, wins=0, win_rate=0.0, expectancy=-0.01, expectancy_r=0.0, profit_factor=0.0, max_drawdown=0.0, max_drawdown_pct=0.0, sharpe_per_trade=0.0, skew=0.0, kurtosis=3.0, net_pnl=-0.01).max_drawdown
+E        +  and   0.01 = float(Fraction(1, 100))
+E        +    where Fraction(1, 100) = Fraction('1/100')
+
+trading/tests/test_backtest_drawdown_paths.py:27: AssertionError</failure></testcase><testcase classname="trading.tests.test_backtest_drawdown_paths" name="test_known_paths_keep_the_worst_percentage_independent_of_currency[10-pnls3-1001/500-1001/10000]" time="0.001"><failure message="AssertionError: assert 2.0019999999999953 == 2.002&#10; +  where 2.0019999999999953 = Metrics(trades=3, wins=1, win_rate=0.3333333333333333, expectancy=32.33233333333333, expectancy_r=0.0, profit_factor=3...0982944757, sharpe_per_trade=0.5517081197698658, skew=0.38477385127711483, kurtosis=0.6666666666666669, net_pnl=96.997).max_drawdown&#10; +  and   2.002 = float(Fraction(1001, 500))&#10; +    where Fraction(1001, 500) = Fraction('1001/500')">start = '10', pnls = ('-1.001', '100', '-2.002'), amount = '1001/500'
+ratio = '1001/10000'
+
+    @pytest.mark.parametrize('start,pnls,amount,ratio', [
+        ('100', ('-50', '950', '-100'), '100', '1/2'),
+        ('100', ('-150', '1050', '-200'), '200', '3/2'),
+        ('1e30', ('-.01',), '1/100', '1/100000000000000000000000000000000'),
+        ('10', ('-1.001', '100', '-2.002'), '1001/500', '1001/10000'),
+        ('100', ('100', '-20'), '20', '1/10'),
+        ('100', ('10', '0', '-5', '0', '-5'), '10', '1/11'),
+    ])
+    def test_known_paths_keep_the_worst_percentage_independent_of_currency(start, pnls, amount, ratio):
+        values = tuple(D(x) for x in pnls)
+        result = compute_metrics(values, (D(0),) * len(values), D(start))
+&gt;       assert result.max_drawdown == float(Fraction(amount))
+E       AssertionError: assert 2.0019999999999953 == 2.002
+E        +  where 2.0019999999999953 = Metrics(trades=3, wins=1, win_rate=0.3333333333333333, expectancy=32.33233333333333, expectancy_r=0.0, profit_factor=3...0982944757, sharpe_per_trade=0.5517081197698658, skew=0.38477385127711483, kurtosis=0.6666666666666669, net_pnl=96.997).max_drawdown
+E        +  and   2.002 = float(Fraction(1001, 500))
+E        +    where Fraction(1001, 500) = Fraction('1001/500')
+
+trading/tests/test_backtest_drawdown_paths.py:27: AssertionError</failure></testcase><testcase classname="trading.tests.test_backtest_drawdown_paths" name="test_known_paths_keep_the_worst_percentage_independent_of_currency[100-pnls4-20-1/10]" time="0.002" /><testcase classname="trading.tests.test_backtest_drawdown_paths" name="test_known_paths_keep_the_worst_percentage_independent_of_currency[100-pnls5-10-1/11]" time="0.003" /><testcase classname="trading.tests.test_backtest_drawdown_paths" name="test_exact_equity_path_is_independent_of_caller_decimal_context[3]" time="0.001"><failure message="assert 0.0 == 2.222&#10; +  where 0.0 = Metrics(trades=3, wins=1, win_rate=0.3333333333333333, expectancy=-0.37366666666666665, expectancy_r=-0.66666666666666..._pct=0.0, sharpe_per_trade=-0.2203224674703934, skew=-0.20456721669257774, kurtosis=0.6666666666666671, net_pnl=-1.121).max_drawdown">precision = 3
+
+    @pytest.mark.parametrize('precision', [3, 28, 80])
+    def test_exact_equity_path_is_independent_of_caller_decimal_context(precision):
+        start, values = D('1e30'), (D('-.01'), D('1.111'), D('-2.222'))
+        with localcontext() as context:
+            context.prec = precision
+            context.rounding = ROUND_DOWN
+            context.traps[Inexact] = True
+            result = compute_metrics(values, (D(-1), D(1), D(-2)), start)
+&gt;       assert result.max_drawdown == 2.222
+E       assert 0.0 == 2.222
+E        +  where 0.0 = Metrics(trades=3, wins=1, win_rate=0.3333333333333333, expectancy=-0.37366666666666665, expectancy_r=-0.66666666666666..._pct=0.0, sharpe_per_trade=-0.2203224674703934, skew=-0.20456721669257774, kurtosis=0.6666666666666671, net_pnl=-1.121).max_drawdown
+
+trading/tests/test_backtest_drawdown_paths.py:39: AssertionError</failure></testcase><testcase classname="trading.tests.test_backtest_drawdown_paths" name="test_exact_equity_path_is_independent_of_caller_decimal_context[28]" time="0.003"><failure message="assert 0.0 == 2.222&#10; +  where 0.0 = Metrics(trades=3, wins=1, win_rate=0.3333333333333333, expectancy=-0.37366666666666665, expectancy_r=-0.66666666666666..._pct=0.0, sharpe_per_trade=-0.2203224674703934, skew=-0.20456721669257774, kurtosis=0.6666666666666671, net_pnl=-1.121).max_drawdown">precision = 28
+
+    @pytest.mark.parametrize('precision', [3, 28, 80])
+    def test_exact_equity_path_is_independent_of_caller_decimal_context(precision):
+        start, values = D('1e30'), (D('-.01'), D('1.111'), D('-2.222'))
+        with localcontext() as context:
+            context.prec = precision
+            context.rounding = ROUND_DOWN
+            context.traps[Inexact] = True
+            result = compute_metrics(values, (D(-1), D(1), D(-2)), start)
+&gt;       assert result.max_drawdown == 2.222
+E       assert 0.0 == 2.222
+E        +  where 0.0 = Metrics(trades=3, wins=1, win_rate=0.3333333333333333, expectancy=-0.37366666666666665, expectancy_r=-0.66666666666666..._pct=0.0, sharpe_per_trade=-0.2203224674703934, skew=-0.20456721669257774, kurtosis=0.6666666666666671, net_pnl=-1.121).max_drawdown
+
+trading/tests/test_backtest_drawdown_paths.py:39: AssertionError</failure></testcase><testcase classname="trading.tests.test_backtest_drawdown_paths" name="test_exact_equity_path_is_independent_of_caller_decimal_context[80]" time="0.001"><failure message="assert 0.0 == 2.222&#10; +  where 0.0 = Metrics(trades=3, wins=1, win_rate=0.3333333333333333, expectancy=-0.37366666666666665, expectancy_r=-0.66666666666666..._pct=0.0, sharpe_per_trade=-0.2203224674703934, skew=-0.20456721669257774, kurtosis=0.6666666666666671, net_pnl=-1.121).max_drawdown">precision = 80
+
+    @pytest.mark.parametrize('precision', [3, 28, 80])
+    def test_exact_equity_path_is_independent_of_caller_decimal_context(precision):
+        start, values = D('1e30'), (D('-.01'), D('1.111'), D('-2.222'))
+        with localcontext() as context:
+            context.prec = precision
+            context.rounding = ROUND_DOWN
+            context.traps[Inexact] = True
+            result = compute_metrics(values, (D(-1), D(1), D(-2)), start)
+&gt;       assert result.max_drawdown == 2.222
+E       assert 0.0 == 2.222
+E        +  where 0.0 = Metrics(trades=3, wins=1, win_rate=0.3333333333333333, expectancy=-0.37366666666666665, expectancy_r=-0.66666666666666..._pct=0.0, sharpe_per_trade=-0.2203224674703934, skew=-0.20456721669257774, kurtosis=0.6666666666666671, net_pnl=-1.121).max_drawdown
+
+trading/tests/test_backtest_drawdown_paths.py:39: AssertionError</failure></testcase><testcase classname="trading.tests.test_backtest_drawdown_paths" name="test_prefix_curve_oracle_and_scale_invariance" time="0.003"><failure message="assert 0.2326714021851998 == 0.47655786350148366&#10; +  where 0.2326714021851998 = Metrics(trades=6, wins=2, win_rate=0.3333333333333333, expectancy=0.12250499999999999, expectancy_r=0.0, profit_factor...4021851998, sharpe_per_trade=0.27804592920280896, skew=1.2172344081928743, kurtosis=2.684830824746736, net_pnl=0.73503).max_drawdown_pct&#10; +  and   0.47655786350148366 = float(Fraction(803, 1685))">def test_prefix_curve_oracle_and_scale_invariance():
+        # Recompute every prefix independently, rather than sharing the streaming
+        # peak implementation. All arithmetic stays exact until the legacy float.
+        values = (D('-3.25'), D('10.1'), D('-8.03'), D('100.003'), D('-20.02'), D('-5.3'))
+        start = D('10')
+        curve = [Fraction(start), *accumulate((Fraction(x) for x in values), initial=Fraction(start))][1:]
+        peaks = [max(curve[:index + 1]) for index in range(len(curve))]
+        amount = max(peak - value for peak, value in zip(peaks, curve))
+        ratio = max((peak - value) / peak for peak, value in zip(peaks, curve))
+        for scale in (Fraction(1, 100), Fraction(1), Fraction(1000000000000000000000000000000)):
+            scaled = [Fraction(x) * scale for x in values]
+            result = compute_metrics(scaled, (D(0),) * len(values), Fraction(start) * scale)
+            assert result.max_drawdown == float(amount * scale)
+&gt;           assert result.max_drawdown_pct == float(ratio)
+E           assert 0.2326714021851998 == 0.47655786350148366
+E            +  where 0.2326714021851998 = Metrics(trades=6, wins=2, win_rate=0.3333333333333333, expectancy=0.12250499999999999, expectancy_r=0.0, profit_factor...4021851998, sharpe_per_trade=0.27804592920280896, skew=1.2172344081928743, kurtosis=2.684830824746736, net_pnl=0.73503).max_drawdown_pct
+E            +  and   0.47655786350148366 = float(Fraction(803, 1685))
+
+trading/tests/test_backtest_drawdown_paths.py:56: AssertionError</failure></testcase><testcase classname="trading.tests.test_backtest_drawdown_paths" name="test_actual_validation_producer_preserves_the_original_worst_drawdown" time="0.003"><failure message="AssertionError: assert 0.1 == 0.5&#10; +  where 0.1 = StrategyValidationCertificate(certificate_id='svc_23f62bfdd49b4c9e5131e7a8', strategy_id='SOURCE_FIXTURE_ONLY', strate..._version='validation-policy/1.1.0', validation_hash='5e7482774d0af3cb72a4fa33df5010528c4e34e2177f8936bcdf7d324753d471').max_drawdown">def test_actual_validation_producer_preserves_the_original_worst_drawdown():
+        pnls = tuple(D(x) for x in ('-50', '950', '-100', '0', '0', '0', '0', '0'))
+        certificate = build_strategy_validation_certificate(
+            strategy_id='SOURCE_FIXTURE_ONLY', strategy_version='1', capsule_hash='fixture-capsule',
+            data_manifest_hash='fixture-data', evidence_refs=('fixture-evidence',),
+            feature_set_version='fixture-features', cost_model_revision='fixture-cost',
+            pnls=pnls, r_multiples=tuple(D(x) for x in ('-.5', '9.5', '-1', '0', '0', '0', '0', '0')),
+            start_equity=D(100), trial_returns_matrix=((.1, -.2, .3, .1, -.1, .2, .1, -.1),),
+            walk_forward_windows=4, cost_stress_2x=GREEN, latency_slippage_stress=GREEN,
+            parameter_perturbation_stability=GREEN, leakage_switch_result=GREEN)
+        assert certificate.verify_seal()
+&gt;       assert certificate.max_drawdown == .5
+E       AssertionError: assert 0.1 == 0.5
+E        +  where 0.1 = StrategyValidationCertificate(certificate_id='svc_23f62bfdd49b4c9e5131e7a8', strategy_id='SOURCE_FIXTURE_ONLY', strate..._version='validation-policy/1.1.0', validation_hash='5e7482774d0af3cb72a4fa33df5010528c4e34e2177f8936bcdf7d324753d471').max_drawdown
+
+trading/tests/test_backtest_drawdown_paths.py:70: AssertionError</failure></testcase></testsuite></testsuites>

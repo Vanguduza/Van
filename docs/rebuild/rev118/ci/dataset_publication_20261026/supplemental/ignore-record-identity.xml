@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="1.518" timestamp="2026-10-26T11:15:28.501710+00:00" hostname="2c5a245e39f1"><testcase classname="trading.worker_tests.test_dataset_candidate_archive" name="test_original_request_and_record_identity_cannot_be_rebound[sqlite]" time="0.300"><failure message="AssertionError: Regex pattern did not match.&#10;  Expected regex: 'RECORD_ID_OR_EVENT'&#10;  Actual message: 'DATASET_ORIGINAL_IDENTITY_CLOCK_OR_WITNESS_INVALID'">publication = (&lt;vati.core.ledger.Ledger object at 0x7fdb7e3c6510&gt;, &lt;vati.research.dataset_archive.DatasetCandidateArchive object at ...tive_account_id":123,"schema":"vati.ctrader-symbol/1","transport_host":"demo.ctraderapi.com"}', received_at_ms=100000))
+
+    def test_original_request_and_record_identity_cannot_be_rebound(publication):
+        ledger,archive,record,c=publication
+        first=archive.publish('original',parse(record),expected_scope=c.native_scope)
+        changed=deepcopy(record);changed['consent_scope_ref']='other-unresolved-reference'
+        with pytest.raises(DatasetContractError,match='REQUEST_CONFLICT'):
+            archive.publish('original',parse(changed),expected_scope=c.native_scope)
+&gt;       with pytest.raises(DatasetContractError,match='RECORD_ID_OR_EVENT'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'RECORD_ID_OR_EVENT'
+E         Actual message: 'DATASET_ORIGINAL_IDENTITY_CLOCK_OR_WITNESS_INVALID'
+
+trading/worker_tests/test_dataset_candidate_archive.py:67: AssertionError</failure></testcase></testsuite></testsuites>

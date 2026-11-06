@@ -1,0 +1,717 @@
+{
+  "status": "SIGNED_DEBUG_APK_STATIC_INSPECTION_PASSED",
+  "source_commit": "d78368f2df1426a124072e7e04d703327f229ccd",
+  "apk_path": "/home/ubuntu/work/van-floating-gradle-hardening-20261105/source-checkout/android/app/build/outputs/apk/debug/app-debug.apk",
+  "apk_sha256": "8e7e0b3e920a61710378230eb52c8d32cb69c50434ce86bda968822e1d004a8a",
+  "apk_bytes": 321041411,
+  "certificate_sha256": "318316323489b0d216c3f25cff1184e3b1d3bcc32760f8d793fb578939057061",
+  "signature_verification_exit": 0,
+  "signature_log_sha256": "5af0ba8f5a2ad17fc5afbf9cf7863693d1a17fcaf9f8f2d96d9f2fd4b1a3b202",
+  "checks": [
+    {
+      "check": "Original SDK apksigner verifies the generated debug signature",
+      "passed": true
+    },
+    {
+      "check": "Signing certificate digest recorded without sharing a private key",
+      "passed": true
+    },
+    {
+      "check": "APK ZIP members are unique",
+      "passed": true
+    },
+    {
+      "check": "APK ZIP CRC validation passes",
+      "passed": true
+    },
+    {
+      "check": "Packaged source identity is the exact normal-hook source commit",
+      "passed": true
+    },
+    {
+      "check": "Actual APK voice manifest is byte-identical to the unchanged source lock",
+      "passed": true
+    },
+    {
+      "check": "No owner voice profile is included",
+      "passed": true
+    },
+    {
+      "check": "Voice model exact bytes asr/decoder-epoch-30-avg-1.int8.onnx",
+      "passed": true
+    },
+    {
+      "check": "Voice model exact bytes asr/encoder-epoch-30-avg-1.int8.onnx",
+      "passed": true
+    },
+    {
+      "check": "Voice model exact bytes asr/joiner-epoch-30-avg-1.int8.onnx",
+      "passed": true
+    },
+    {
+      "check": "Voice model exact bytes asr/tokens.txt",
+      "passed": true
+    },
+    {
+      "check": "Voice model exact bytes asr_second_pass.json",
+      "passed": true
+    },
+    {
+      "check": "Voice model exact bytes critical_phrases/wake_acknowledgement.wav",
+      "passed": true
+    },
+    {
+      "check": "Voice model exact bytes licenses/APACHE-2.0.txt",
+      "passed": true
+    },
+    {
+      "check": "Voice model exact bytes licenses/ASIO-LICENSE.txt",
+      "passed": true
+    },
+    {
+      "check": "Voice model exact bytes licenses/CC-BY-4.0.txt",
+      "passed": true
+    },
+    {
+      "check": "Voice model exact bytes licenses/CMU-DICTIONARY-NOTICE.txt",
+      "passed": true
+    },
+    {
+      "check": "Voice model exact bytes licenses/EIGEN-MPL-2.0.txt",
+      "passed": true
+    },
+    {
+      "check": "Voice model exact bytes licenses/ESPEAK-APACHE-2.0.txt",
+      "passed": true
+    },
+    {
+      "check": "Voice model exact bytes licenses/ESPEAK-BSD2-NOTICE.txt",
+      "passed": true
+    },
+    {
+      "check": "Voice model exact bytes licenses/ESPEAK-GPL-3.0.txt",
+      "passed": true
+    },
+    {
+      "check": "Voice model exact bytes licenses/ESPEAK-UNICODE-NOTICE.txt",
+      "passed": true
+    },
+    {
+      "check": "Voice model exact bytes licenses/HCLUST-LICENSE.txt",
+      "passed": true
+    },
+    {
+      "check": "Voice model exact bytes licenses/KALDI-DECODER-LICENSE.txt",
+      "passed": true
+    },
+    {
+      "check": "Voice model exact bytes licenses/KALDI-NATIVE-FBANK-LICENSE.txt",
+      "passed": true
+    },
+    {
+      "check": "Voice model exact bytes licenses/KALDIFST-LICENSE.txt",
+      "passed": true
+    },
+    {
+      "check": "Voice model exact bytes licenses/KISSFFT-LICENSE.txt",
+      "passed": true
+    },
+    {
+      "check": "Voice model exact bytes licenses/NATIVE-SOURCE-INPUTS.json",
+      "passed": true
+    },
+    {
+      "check": "Voice model exact bytes licenses/NLOHMANN-JSON-LICENSE.txt",
+      "passed": true
+    },
+    {
+      "check": "Voice model exact bytes licenses/NOTICE.txt",
+      "passed": true
+    },
+    {
+      "check": "Voice model exact bytes licenses/ONNXRUNTIME-MIT.txt",
+      "passed": true
+    },
+    {
+      "check": "Voice model exact bytes licenses/ONNXRUNTIME-THIRD-PARTY-NOTICES.txt",
+      "passed": true
+    },
+    {
+      "check": "Voice model exact bytes licenses/OPENFST-LICENSE.txt",
+      "passed": true
+    },
+    {
+      "check": "Voice model exact bytes licenses/PIPER-MIT.txt",
+      "passed": true
+    },
+    {
+      "check": "Voice model exact bytes licenses/PIPER-UNI-ALGO-NOTICE.txt",
+      "passed": true
+    },
+    {
+      "check": "Voice model exact bytes licenses/SIMPLE-SENTENCEPIECE-LICENSE.txt",
+      "passed": true
+    },
+    {
+      "check": "Voice model exact bytes licenses/WEBSOCKETPP-LICENSE.txt",
+      "passed": true
+    },
+    {
+      "check": "Voice model exact bytes licenses/WESPEAKER-ATTRIBUTION.txt",
+      "passed": true
+    },
+    {
+      "check": "Voice model exact bytes licenses/WESPEAKER-CODE-APACHE-2.0.txt",
+      "passed": true
+    },
+    {
+      "check": "Voice model exact bytes speaker/model.onnx",
+      "passed": true
+    },
+    {
+      "check": "Voice model exact bytes speaker/source.json",
+      "passed": true
+    },
+    {
+      "check": "Voice model exact bytes tts/lexicon.txt",
+      "passed": true
+    },
+    {
+      "check": "Voice model exact bytes tts/runtime.json",
+      "passed": true
+    },
+    {
+      "check": "Voice model exact bytes tts/tokens.txt",
+      "passed": true
+    },
+    {
+      "check": "Voice model exact bytes tts/vits-ljs.onnx",
+      "passed": true
+    },
+    {
+      "check": "Voice model exact bytes wake/bpe.model",
+      "passed": true
+    },
+    {
+      "check": "Voice model exact bytes wake/decoder-epoch-12-avg-2-chunk-16-left-64.onnx",
+      "passed": true
+    },
+    {
+      "check": "Voice model exact bytes wake/encoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx",
+      "passed": true
+    },
+    {
+      "check": "Voice model exact bytes wake/joiner-epoch-12-avg-2-chunk-16-left-64.int8.onnx",
+      "passed": true
+    },
+    {
+      "check": "Voice model exact bytes wake/keywords.txt",
+      "passed": true
+    },
+    {
+      "check": "Voice model exact bytes wake/tokens.txt",
+      "passed": true
+    },
+    {
+      "check": "Voice model exact bytes wake_hey_van.kws",
+      "passed": true
+    },
+    {
+      "check": "Native arm64 runtime present librive-android.so",
+      "passed": true
+    },
+    {
+      "check": "Native arm64 runtime present libsherpa-onnx-jni.so",
+      "passed": true
+    },
+    {
+      "check": "Native arm64 runtime present libonnxruntime.so",
+      "passed": true
+    },
+    {
+      "check": "Native arm64 runtime present libjingle_peerconnection_so.so",
+      "passed": true
+    },
+    {
+      "check": "Unadmitted prototype not silently promoted to main APK",
+      "passed": true
+    },
+    {
+      "check": "Unadmitted contextual metadata not silently activated",
+      "passed": true
+    },
+    {
+      "check": "Genuine DEX magic classes.dex",
+      "passed": true
+    },
+    {
+      "check": "Genuine DEX magic classes10.dex",
+      "passed": true
+    },
+    {
+      "check": "Genuine DEX magic classes11.dex",
+      "passed": true
+    },
+    {
+      "check": "Genuine DEX magic classes12.dex",
+      "passed": true
+    },
+    {
+      "check": "Genuine DEX magic classes13.dex",
+      "passed": true
+    },
+    {
+      "check": "Genuine DEX magic classes14.dex",
+      "passed": true
+    },
+    {
+      "check": "Genuine DEX magic classes15.dex",
+      "passed": true
+    },
+    {
+      "check": "Genuine DEX magic classes17.dex",
+      "passed": true
+    },
+    {
+      "check": "Genuine DEX magic classes18.dex",
+      "passed": true
+    },
+    {
+      "check": "Genuine DEX magic classes19.dex",
+      "passed": true
+    },
+    {
+      "check": "Genuine DEX magic classes2.dex",
+      "passed": true
+    },
+    {
+      "check": "Genuine DEX magic classes3.dex",
+      "passed": true
+    },
+    {
+      "check": "Genuine DEX magic classes5.dex",
+      "passed": true
+    },
+    {
+      "check": "Genuine DEX magic classes6.dex",
+      "passed": true
+    },
+    {
+      "check": "Genuine DEX magic classes7.dex",
+      "passed": true
+    },
+    {
+      "check": "Genuine DEX magic classes8.dex",
+      "passed": true
+    },
+    {
+      "check": "Genuine DEX magic classes9.dex",
+      "passed": true
+    },
+    {
+      "check": "Genuine DEX magic classes16.dex",
+      "passed": true
+    },
+    {
+      "check": "Genuine DEX magic classes4.dex",
+      "passed": true
+    },
+    {
+      "check": "Compiled current hardening class overlay/OverlaySessionRuntime",
+      "passed": true
+    },
+    {
+      "check": "Compiled current hardening class overlay/OverlaySnapshotOwnership",
+      "passed": true
+    },
+    {
+      "check": "Compiled current hardening class overlay/OverlayPersonalControlsKt",
+      "passed": true
+    },
+    {
+      "check": "Compiled current hardening class overlay/OverlayPrivacyVisibility",
+      "passed": true
+    },
+    {
+      "check": "Compiled current hardening class visual/VanBoundedRiveView",
+      "passed": true
+    },
+    {
+      "check": "Compiled current hardening class visual/VanRiveContextCapabilities",
+      "passed": true
+    },
+    {
+      "check": "Compiled current hardening class visual/VanRiveUpdateGate",
+      "passed": true
+    },
+    {
+      "check": "Compiled current hardening class visual/RiveCandidateHostActivity",
+      "passed": true
+    },
+    {
+      "check": "Compiled current hardening class visual/CharacterRigLabKt",
+      "passed": true
+    },
+    {
+      "check": "Compiled current hardening class visual/ForgePreviewView",
+      "passed": true
+    },
+    {
+      "check": "Compiled current hardening class voice/PcmPlaybackVisualClock",
+      "passed": true
+    },
+    {
+      "check": "Compiled current hardening class visual/VanNativeScreenContext",
+      "passed": true
+    }
+  ],
+  "check_count": 89,
+  "native_libraries": [
+    "lib/arm64-v8a/libc++_shared.so",
+    "lib/arm64-v8a/libjingle_peerconnection_so.so",
+    "lib/arm64-v8a/libonnxruntime.so",
+    "lib/arm64-v8a/librive-android.so",
+    "lib/arm64-v8a/libsherpa-onnx-c-api.so",
+    "lib/arm64-v8a/libsherpa-onnx-cxx-api.so",
+    "lib/arm64-v8a/libsherpa-onnx-jni.so"
+  ],
+  "voice_files": [
+    {
+      "path": "assets/voice/bundle/asr/decoder-epoch-30-avg-1.int8.onnx",
+      "bytes": 540688,
+      "sha256": "2b0580feb757696fa929922670b7126aaee609630349a1809fd5a2aee926d56e"
+    },
+    {
+      "path": "assets/voice/bundle/asr/encoder-epoch-30-avg-1.int8.onnx",
+      "bytes": 72850738,
+      "sha256": "d3eff4b1bd747bd781a47966795988539227d05638524b0313f26d3a166962d7"
+    },
+    {
+      "path": "assets/voice/bundle/asr/joiner-epoch-30-avg-1.int8.onnx",
+      "bytes": 259417,
+      "sha256": "80160e45cca71dd52f6b0a6d3d12be18126f5308b2d4ba03f001300fea377c64"
+    },
+    {
+      "path": "assets/voice/bundle/asr/tokens.txt",
+      "bytes": 5020,
+      "sha256": "0ef7d736bf4de3ef947292e4b119ef13f6808cd5f3aec225a843a7135ac1c2ce"
+    },
+    {
+      "path": "assets/voice/bundle/asr_second_pass.json",
+      "bytes": 844,
+      "sha256": "fe1c78e28f0ea1bab132594a946af80578b6e396fd10603c262b1a7c3f3df237"
+    },
+    {
+      "path": "assets/voice/bundle/critical_phrases/wake_acknowledgement.wav",
+      "bytes": 35884,
+      "sha256": "eafd13b589803b7bc404c469b69e3ab1c808defb5c8ed7e8e963b11f7eb6759b"
+    },
+    {
+      "path": "assets/voice/bundle/licenses/APACHE-2.0.txt",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "assets/voice/bundle/licenses/ASIO-LICENSE.txt",
+      "bytes": 1338,
+      "sha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566"
+    },
+    {
+      "path": "assets/voice/bundle/licenses/CC-BY-4.0.txt",
+      "bytes": 18657,
+      "sha256": "9ba9550ad48438d0836ddab3da480b3b69ffa0aac7b7878b5a0039e7ab429411"
+    },
+    {
+      "path": "assets/voice/bundle/licenses/CMU-DICTIONARY-NOTICE.txt",
+      "bytes": 1754,
+      "sha256": "bd4ce8e44170a5f9f481310ca85c51de3c4f851a65e679b40e603b143bd3542a"
+    },
+    {
+      "path": "assets/voice/bundle/licenses/EIGEN-MPL-2.0.txt",
+      "bytes": 16727,
+      "sha256": "66a3107d5ad6a058aab753eaac2047ccb2ed0e39465dd0fe5844da3e300d5172"
+    },
+    {
+      "path": "assets/voice/bundle/licenses/ESPEAK-APACHE-2.0.txt",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "assets/voice/bundle/licenses/ESPEAK-BSD2-NOTICE.txt",
+      "bytes": 1244,
+      "sha256": "a8b0c1c7d7af6c0415c068be8cf373799d1a42b0707b79dc4ccfcaf593cd902d"
+    },
+    {
+      "path": "assets/voice/bundle/licenses/ESPEAK-GPL-3.0.txt",
+      "bytes": 35147,
+      "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903"
+    },
+    {
+      "path": "assets/voice/bundle/licenses/ESPEAK-UNICODE-NOTICE.txt",
+      "bytes": 2788,
+      "sha256": "be029c50df83105a810e391778b6edcb522d6cb4b4e142332aca54437a499bf7"
+    },
+    {
+      "path": "assets/voice/bundle/licenses/HCLUST-LICENSE.txt",
+      "bytes": 1483,
+      "sha256": "e361d842da1d290351860ad6dcce2673a1e42e4f873a3ae1ff4eb92c6adaa882"
+    },
+    {
+      "path": "assets/voice/bundle/licenses/KALDI-DECODER-LICENSE.txt",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "assets/voice/bundle/licenses/KALDI-NATIVE-FBANK-LICENSE.txt",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "assets/voice/bundle/licenses/KALDIFST-LICENSE.txt",
+      "bytes": 11728,
+      "sha256": "a682d6efd1ee5dee08a8e405c233c2c198ea70ae0718129daa83ab58cfe31c5d"
+    },
+    {
+      "path": "assets/voice/bundle/licenses/KISSFFT-LICENSE.txt",
+      "bytes": 246,
+      "sha256": "a2840585f8411be8e6826a31ef15ae65c950bd74a2437a73b013398a934ad0c6"
+    },
+    {
+      "path": "assets/voice/bundle/licenses/NATIVE-SOURCE-INPUTS.json",
+      "bytes": 4243,
+      "sha256": "cb920bc8d8138ba503dcafab403665e74a44b577b1808f5473aa9cc56eac1dbc"
+    },
+    {
+      "path": "assets/voice/bundle/licenses/NLOHMANN-JSON-LICENSE.txt",
+      "bytes": 1076,
+      "sha256": "46a65cffd1ea955132d95a8dd921640714a8d6b537d2e4e482d31145ae95b603"
+    },
+    {
+      "path": "assets/voice/bundle/licenses/NOTICE.txt",
+      "bytes": 2444,
+      "sha256": "738669d674344205ca6af0837bce4050b51c612d3938aeb752b96cb9833ace79"
+    },
+    {
+      "path": "assets/voice/bundle/licenses/ONNXRUNTIME-MIT.txt",
+      "bytes": 1073,
+      "sha256": "2f07c72751aed99790b8a4869cf2311df85a860b22ded05fa22803587a48922c"
+    },
+    {
+      "path": "assets/voice/bundle/licenses/ONNXRUNTIME-THIRD-PARTY-NOTICES.txt",
+      "bytes": 325054,
+      "sha256": "0e07b95f3a8d6230037707c5c4a2b554d12c4cb67369669ac255635528ffcee2"
+    },
+    {
+      "path": "assets/voice/bundle/licenses/OPENFST-LICENSE.txt",
+      "bytes": 559,
+      "sha256": "4300529197035fd3452350718a0b8cee984e9412c9932d7f35fcde849fc97a4b"
+    },
+    {
+      "path": "assets/voice/bundle/licenses/PIPER-MIT.txt",
+      "bytes": 1071,
+      "sha256": "13746d509d74e55ea2265fbef204bb7cdbf84a8315b0207e988326cb54387028"
+    },
+    {
+      "path": "assets/voice/bundle/licenses/PIPER-UNI-ALGO-NOTICE.txt",
+      "bytes": 2208,
+      "sha256": "c55648b02873556d6ab2de14938998101fda3a0f293337542af9196435def318"
+    },
+    {
+      "path": "assets/voice/bundle/licenses/SIMPLE-SENTENCEPIECE-LICENSE.txt",
+      "bytes": 11357,
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    },
+    {
+      "path": "assets/voice/bundle/licenses/WEBSOCKETPP-LICENSE.txt",
+      "bytes": 7494,
+      "sha256": "5ba81a1ed402517dce2581fa2d4042baf6a9c8ca0fe94fa6a7043ce6ab23064f"
+    },
+    {
+      "path": "assets/voice/bundle/licenses/WESPEAKER-ATTRIBUTION.txt",
+      "bytes": 1961,
+      "sha256": "12b3c31733992e9f8aeef4b7de693195d4526b39c969ed7aebfdfea298b3ae1a"
+    },
+    {
+      "path": "assets/voice/bundle/licenses/WESPEAKER-CODE-APACHE-2.0.txt",
+      "bytes": 11357,
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    },
+    {
+      "path": "assets/voice/bundle/speaker/model.onnx",
+      "bytes": 26534365,
+      "sha256": "5ef208a9da1453335308a6b6f4e6dfbd7e183a38b604de0a57664f45d257fe94"
+    },
+    {
+      "path": "assets/voice/bundle/speaker/source.json",
+      "bytes": 598,
+      "sha256": "6ea05fce40801c4be6cf121240994790d13f4bf7f94582de1b01f3c945426eb8"
+    },
+    {
+      "path": "assets/voice/bundle/tts/lexicon.txt",
+      "bytes": 3708195,
+      "sha256": "ade8c4ee074265004115178813429bf2c066e4321bbb0e7e42ec9db02ddf58ec"
+    },
+    {
+      "path": "assets/voice/bundle/tts/runtime.json",
+      "bytes": 367,
+      "sha256": "d932a6b2419e3327f4b41a004b6af7cb060fb15267284af0a7bae7b7455f368c"
+    },
+    {
+      "path": "assets/voice/bundle/tts/tokens.txt",
+      "bytes": 1084,
+      "sha256": "5fee2c6b238d712287f2ecb08f34a8a8b413bcb7390862ef6fb6fd6f0f8d3a17"
+    },
+    {
+      "path": "assets/voice/bundle/tts/vits-ljs.onnx",
+      "bytes": 114124456,
+      "sha256": "5bbd273797a9ecf8d94bd6ec02ad16cb41cbb85f055ad98d528ced3e44c9b31a"
+    },
+    {
+      "path": "assets/voice/bundle/wake/bpe.model",
+      "bytes": 244837,
+      "sha256": "c8a2a0129c4ab8e463164c142f82d25649661b122c8cd0b7aab5c9e80b90ad24"
+    },
+    {
+      "path": "assets/voice/bundle/wake/decoder-epoch-12-avg-2-chunk-16-left-64.onnx",
+      "bytes": 1063189,
+      "sha256": "f61ebd3eed3773a44d088d53dfae92dbb6aec4839f4dcaee2d402414741663a3"
+    },
+    {
+      "path": "assets/voice/bundle/wake/encoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx",
+      "bytes": 4807159,
+      "sha256": "1e721676515bcd42a186979733981213c66c80db680e1cc582dfedf3be76e678"
+    },
+    {
+      "path": "assets/voice/bundle/wake/joiner-epoch-12-avg-2-chunk-16-left-64.int8.onnx",
+      "bytes": 163380,
+      "sha256": "eae9da0c7e1e6c6a3f4cc42d167899c388f6c6701b94cb96320e4f55df79624c"
+    },
+    {
+      "path": "assets/voice/bundle/wake/keywords.txt",
+      "bytes": 25,
+      "sha256": "ebead6200b36bcb653cd8517cc7050fbdf3a47cd867f3691c37c354fbd7dd1a2"
+    },
+    {
+      "path": "assets/voice/bundle/wake/tokens.txt",
+      "bytes": 5006,
+      "sha256": "fd2ded4050a55d2b1578870ba8697d02371980217806b7558bd0a5cc60f3ba53"
+    },
+    {
+      "path": "assets/voice/bundle/wake_hey_van.kws",
+      "bytes": 1178,
+      "sha256": "9139b0e1aeebcdf4b5f0f092911806a5009908b67de55baf263d8ea74a168451"
+    }
+  ],
+  "voice_total_bytes": 224852871,
+  "dex_files": [
+    {
+      "path": "classes.dex",
+      "classes": 17460,
+      "sha256": "e34eb0c133decac7f148d3cbb42cda3d01c177cae96f198578a2051f6ad22e38"
+    },
+    {
+      "path": "classes10.dex",
+      "classes": 612,
+      "sha256": "4afb9fdfe3c7b1bc86dd1c4c116dbf185594848d7b02296561ee6379572a6564"
+    },
+    {
+      "path": "classes11.dex",
+      "classes": 28,
+      "sha256": "7ff53a942d08bfb0d192f7026c90ef983c3d7e9b246c3387142fa24bb6c85732"
+    },
+    {
+      "path": "classes12.dex",
+      "classes": 200,
+      "sha256": "d497d4e753329f5812a88f64ff97a5a620b4f9634a6819c2816cb96252bf79dd"
+    },
+    {
+      "path": "classes13.dex",
+      "classes": 116,
+      "sha256": "7b0cff4bd0ab0bdb382afa3cd655792b29c3898cff48c6dbd8f931904acf76d8"
+    },
+    {
+      "path": "classes14.dex",
+      "classes": 35,
+      "sha256": "05d3cd18961310ff9c486a118a9ea8d3e4d588c2c7335c77c28365cad1519827"
+    },
+    {
+      "path": "classes15.dex",
+      "classes": 419,
+      "sha256": "7a4c617bc56226268d0f460847449fb3f38151578a7147dbf943d28559a3e6da"
+    },
+    {
+      "path": "classes17.dex",
+      "classes": 845,
+      "sha256": "87b580e2f5b377608b1c6a31ee031f92c23633af9ec05da24c2a51d5686a0a24"
+    },
+    {
+      "path": "classes18.dex",
+      "classes": 6865,
+      "sha256": "62bfe0919c428138edabaecbdb4c46d580a2c3e40d149f0065a365ac4da6048d"
+    },
+    {
+      "path": "classes19.dex",
+      "classes": 3380,
+      "sha256": "5cea1db3fd9c1432d8b44eca542684f7bc179894ea9bc1fd6a8cf34ac63cfb05"
+    },
+    {
+      "path": "classes2.dex",
+      "classes": 221,
+      "sha256": "f0a8354b4712a5fbce2004b08f22e08c25fe731ded445e2be340efd2b7e3d478"
+    },
+    {
+      "path": "classes3.dex",
+      "classes": 185,
+      "sha256": "00a62620036a40c704045b9bce539e3589b064e865567eec2bf5a467323fbba1"
+    },
+    {
+      "path": "classes5.dex",
+      "classes": 8,
+      "sha256": "8767ac81a1fe4d22c7a316f91c43697972efef7aa0835dc3fca344282fabbe79"
+    },
+    {
+      "path": "classes6.dex",
+      "classes": 50,
+      "sha256": "c3cf81f8c30b36c5a75a1b521cfb9f8ea771e3e9fd82405ef41172161fb61d73"
+    },
+    {
+      "path": "classes7.dex",
+      "classes": 796,
+      "sha256": "df3ed883abf6556c5a6ad56e14b5c3c210968fd8f692cbbb0814600d8a34a87c"
+    },
+    {
+      "path": "classes8.dex",
+      "classes": 692,
+      "sha256": "2ff23ce4257feb6d41d9f7a42fe85518590e4974687e036fb7554ff7c94650fd"
+    },
+    {
+      "path": "classes9.dex",
+      "classes": 117,
+      "sha256": "c55c08e4f9a3ae4c5754278977d360d64a8a1a06038bc2b820f879b7eb968ac6"
+    },
+    {
+      "path": "classes16.dex",
+      "classes": 482,
+      "sha256": "74cbe690635fe6417cbd2732331bd0400970dd26dc33e597b0b02aa013f4cd9a"
+    },
+    {
+      "path": "classes4.dex",
+      "classes": 1237,
+      "sha256": "7354d37b00460afad7d0d4f254b0fb2c0bff53fe65030f96644637314006875b"
+    }
+  ],
+  "compiled_class_count": 33748,
+  "build_provenance": {
+    "schema_version": 1,
+    "application_id": "com.dial.van",
+    "source_sha": "d78368f2df1426a124072e7e04d703327f229ccd",
+    "gateway_url": "https://62.83.35.103:8443",
+    "gateway_ca_pem_b64_sha256": "fb38248191796b334f3b0bd6466780b5563e917a88320a81e3692e1615e29a70",
+    "connectivity_trusted_keys_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "native_prototype_qualified": false,
+  "renderer_in_apk": "existing admitted fallback; refined Rive kept as separate unadmitted source candidate",
+  "installed": false,
+  "physical_tests": "DEFERRED_FINAL_STAGE",
+  "signing_type": "debug candidate, not release acceptance"
+}

@@ -1,0 +1,7 @@
+trading/tests/test_entry_margin_binding.py
+trading/tests/test_entry_margin_binding_postgres.py
+trading/tests/test_mt5_native_margin_book_postgres.py
+trading/tests/test_native_margin_book_postgres.py
+trading/tests/test_single_session_unknown_entry.py
+trading/tests/test_dispatch_current_risk.py
+trading/tests/test_router_native_entry_deadline.py

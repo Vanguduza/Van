@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -51,6 +52,10 @@ import org.json.JSONObject
  */
 private data class ProjectsData(
     val summaries: List<ProjectSummary>,
+    val failures: Map<String, String>,
+    val missionsAvailable: Boolean,
+    val attentionAvailable: Boolean,
+    val observedAtMs: Long,
 )
 
 @Composable
@@ -63,21 +68,32 @@ fun ProjectsRoute(app: VanApplication, onOpenProject: (String) -> Unit) {
 
     fun load() {
         scope.launch {
+            if (loading && data != null) return@launch
             loading = true
-            runCatching {
+            readProjectSource {
                 val ids = app.gatewayClient.projects().objectListOrStrings()
-                val missions = MissionParsing.missionSummaries(app.gatewayClient.missions())
-                val attention = app.gatewayClient.attention().objectList()
-                val facts = runCatching { MemoryReadModel.parseExportFacts(app.gatewayClient.contextExport()) }
-                    .getOrDefault(emptyList())
+                val missions = readProjectSource { MissionParsing.missionSummaries(app.gatewayClient.missions()) }
+                val attention = readProjectSource { app.gatewayClient.attention().objectList() }
+                val facts = readProjectSource { MemoryReadModel.parseExportFacts(app.gatewayClient.contextExport()) }
+                val failures = linkedMapOf<String, String>()
+                missions.failure?.let { failures["Current work"] = it }
+                attention.failure?.let { failures["Blockers and next actions"] = it }
+                facts.failure?.let { failures["Context and last change"] = it }
                 val summaries = ids.map { id ->
-                    val truthJson = runCatching { app.gatewayClient.projectTruth(id) }.getOrNull()
-                    val truth = truthJson?.let { ProjectTruthParsing.parse(id, it) }
-                    ProjectSummaryBuilder.build(id, truth, missions, attention, facts)
+                    val truth = readProjectSource { ProjectTruthParsing.parse(id, app.gatewayClient.projectTruth(id)) }
+                    truth.failure?.let { failures["Project truth: $id"] = it }
+                    val summary = ProjectSummaryBuilder.build(id, truth.value, missions.value.orEmpty(), attention.value.orEmpty(), facts.value.orEmpty())
+                    summary.copy(
+                        health = ProjectSourcePresentation.health(summary.health, truth.available, missions.available, attention.available),
+                        phase = ProjectSourcePresentation.phase(summary.phase, truth.available, missions.available),
+                    )
                 }
-                ProjectsData(summaries)
-            }.onSuccess { data = it; error = null; loading = false }
-                .onFailure { error = it.message ?: "VAN could not reach the projects it knows about."; loading = false }
+                ProjectsData(summaries, failures, missions.available, attention.available, System.currentTimeMillis())
+            }.let { result ->
+                result.value?.let { data = it }
+                error = result.failure
+                loading = false
+            }
         }
     }
     LaunchedEffect(Unit) { load() }
@@ -95,7 +111,15 @@ fun ProjectsRoute(app: VanApplication, onOpenProject: (String) -> Unit) {
             verticalArrangement = Arrangement.spacedBy(tokens.space.space3),
             contentPadding = PaddingValues(vertical = tokens.space.space3),
         ) {
-            item { SectionHeader("Projects", detail = "Health, phase, blockers, next actions") }
+            item {
+                SectionHeader("Projects", detail = "Health, phase, blockers, next actions")
+                Text("Last read ${com.dial.van.command.owner.ownerTime(projects.observedAtMs)}", style = tokens.type.label, color = tokens.color.textTertiary)
+                error?.let { Text("Refresh failed; last known project list remains visible. $it", style = tokens.type.body, color = tokens.color.textSecondary) }
+                projects.failures.forEach { (source, detail) ->
+                    Text("$source could not be read. $detail", style = tokens.type.body, color = tokens.color.textSecondary)
+                }
+                OutlinedButton(enabled = !loading, onClick = ::load) { Text(if (loading) "Refreshing…" else "Refresh projects") }
+            }
 
             if (projects.summaries.isEmpty()) {
                 item { Text("No projects registered.", style = tokens.type.body, color = tokens.color.textSecondary) }
@@ -111,8 +135,8 @@ fun ProjectsRoute(app: VanApplication, onOpenProject: (String) -> Unit) {
                             }
                             Text(summary.phase, style = tokens.type.body, color = tokens.color.textSecondary)
                             Row(horizontalArrangement = Arrangement.spacedBy(tokens.space.space3)) {
-                                Text("${summary.runningMissionsCount} running", style = tokens.type.label, color = tokens.color.textTertiary)
-                                Text("${summary.blockersCount} blockers", style = tokens.type.label, color = tokens.color.textTertiary)
+                                Text(if (projects.missionsAvailable) "${summary.runningMissionsCount} running" else "Current work unavailable", style = tokens.type.label, color = tokens.color.textTertiary)
+                                Text(if (projects.missionsAvailable && projects.attentionAvailable) "${summary.blockersCount} blockers" else "Blockers could not be confirmed", style = tokens.type.label, color = tokens.color.textTertiary)
                             }
                         }
                     }

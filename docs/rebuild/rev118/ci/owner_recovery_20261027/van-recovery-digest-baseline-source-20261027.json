@@ -1,0 +1,15 @@
+{
+  "head": "ca981d19615f614a1c41f78618e04ea1582d620e",
+  "causal_sources_equal_committed": true,
+  "source_sha256": {
+    "backend/van_gateway/approval/service.py": "2fdcbc2d4614fe92b274303dcb0dd3e38fe5e9804530823b670a6855438f0eaa",
+    "trading/vati/app/runtime_control_protocol.py": "1540afac2706d407e9ccb86c3ac940f2a7c6ee493481754fe69a976a32a61ea2",
+    "backend/van_gateway/trading/runtime_recovery_dispatch.py": "e98a05ee200f5eb75ac444a536962603063cf6ebdbc1a8cbe6c68fb4e7a79eb9"
+  },
+  "actual_failed": 62,
+  "passed_controls": 42,
+  "skips": 0,
+  "audit_violations": 0,
+  "owned_fixture_independently_absent": true,
+  "qualification": "Reproduced hosted current-digest/native-v1-only recovery compatibility failure; no native financial effect"
+}

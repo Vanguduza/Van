@@ -6,6 +6,10 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.Row
+import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -25,23 +29,28 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import com.dial.van.visual.LocalVanPresentationPreferences
+import com.dial.van.visual.VanPersonalPresentation
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dial.van.VanApplication
 import com.dial.van.trading.TradeView
-import com.dial.van.visual.VanEmbodiment
 import com.dial.van.visual.VanGlassSurface
 import com.dial.van.visual.VanGlassTokens
 import com.dial.van.visual.VanLiveVisualState
 import com.dial.van.visual.VanPresence
 import com.dial.van.visual.VanPresentation
 import com.dial.van.visual.VanVisualState
+import com.dial.van.visual.VanPresentationPreferences
 import com.dial.van.design.VanMotionSpec
 import com.dial.van.visual.rememberReducedMotion
 import com.dial.van.visual.rememberVanEffectBudget
@@ -68,7 +77,7 @@ import com.dial.van.visual.rememberVanEffectBudget
  *
  * Was `private` inside the service, which is why nothing outside it could render it.
  */
-internal enum class VanWorkboardMode { CONTEXT, CHAT, VOICE, TRADES }
+internal enum class VanWorkboardMode { CONTEXT, CHAT, VOICE, TRADES, SETTINGS }
 
 /**
  * Everything the surface draws from, measured by the service.
@@ -90,6 +99,14 @@ internal data class VanOverlaySurfaceState(
     /** Measured from the window, because only the service has one. */
     val maximizedWidthDp: Float,
     val maximizedHeightDp: Float,
+    val boardWidthDp: Float? = null,
+    val boardHeightDp: Float? = null,
+    val keyboardVisible: Boolean = false,
+    val preferences: VanPresentationPreferences = VanPresentationPreferences(),
+    val localReady: Boolean = true,
+    val ownerScopeValid: Boolean = true,
+    val recoveredDraftAvailable: Boolean = false,
+    val storageMessage: String = "",
 )
 
 /**
@@ -111,6 +128,13 @@ internal class VanOverlayActions(
     val onTradeView: (TradeView) -> Unit,
     val onTradeRefresh: () -> Unit,
     val onDraft: (String) -> Unit,
+    val dragHandle: Modifier = Modifier,
+    val onStopVoice: () -> Unit = {},
+    val onMove: (Int, Int) -> Boolean = { _, _ -> false },
+    val onPreferences: (VanPresentationPreferences) -> Unit = {},
+    val onResumeDraft: () -> Unit = {},
+    val onDiscardDraft: () -> Unit = {},
+    val onRetrySave: () -> Unit = {},
 )
 
 @Composable
@@ -120,7 +144,7 @@ internal fun VanOverlaySurface(
     actions: VanOverlayActions,
 ) {
     val degraded by app.degradedModeStore.state.collectAsState()
-    val liveFrame = VanLiveVisualState.frame
+    val liveFrame by remember { derivedStateOf { OverlayPresentationFrame.chrome(VanLiveVisualState.frame) } }
     val cue = VanPresence.cue(degraded, live = liveFrame)
     val visualState = VanPresence.visualState(cue, liveFrame)
     val chrome = VanOverlayChrome.resolve(
@@ -169,6 +193,7 @@ internal fun VanOverlaySurface(
                 healthLine = chrome.healthLine,
                 accent = chrome.accent,
                 latestMessage = conversation.messages.lastOrNull()?.text,
+                messages = conversation.messages,
             )
             VanOverlayPresentation.WORKBOARD_EXPANDED -> ExpandedWorkboard(
                 state = state,
@@ -193,7 +218,12 @@ internal fun VanOverlaySurface(
                 accent = chrome.accent,
                 messages = conversation.messages,
             )
-            VanOverlayPresentation.MINIMIZED -> MinimizedPresence(visualState, actions)
+            VanOverlayPresentation.MINIMIZED -> MinimizedPresence(
+                visualState, actions,
+                animate = state.animate,
+                budget = budget,
+                reducedMotion = reducedMotion,
+            )
             VanOverlayPresentation.DOCKED -> DockedPresence(visualState, state, actions)
         }
         }
@@ -207,7 +237,26 @@ internal fun FullFloatingPresence(
     state: VanOverlaySurfaceState,
     actions: VanOverlayActions,
 ) {
-    val width = if (showControls) 360 else OverlayTheme.RESTING_HIT_DP
+    if (showControls) {
+        // The old fixed right-hand menu overflowed narrow/split-screen windows.
+        // Keep the existing actions in one bounded scrollable native-size panel.
+        QuickControls(
+            modifier = Modifier.width(OverlayUsabilityPolicy.quickControlsWidth(state.maximizedWidthDp).dp)
+                .height(OverlayUsabilityPolicy.quickControlsHeight(state.maximizedHeightDp).dp),
+            blurBehindActive = state.blurBehindActive,
+            onQuickControl = actions.onQuickControl,
+            header = {
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    LiveOverlayEmbodiment(state = visualState, animate = state.animate, budget = rememberVanEffectBudget(),
+                        presentation = VanPresentation.COMPACT, modifier = Modifier.size(96.dp)
+                            .then(actions.gestures).vanAccessibleCharacter(visualState, actions))
+                    WorkChip("Return to VAN", VanGlassTokens.BABY_CYAN) { actions.onPresentation(VanOverlayPresentation.FULL_FLOATING) }
+                }
+            },
+        )
+        return
+    }
+    val width = OverlayTheme.RESTING_HIT_DP
     Box(
         modifier = Modifier
             .width(width.dp)
@@ -215,26 +264,18 @@ internal fun FullFloatingPresence(
         contentAlignment = Alignment.TopStart,
     ) {
         val budget = rememberVanEffectBudget()
-        VanEmbodiment(
+        LiveOverlayEmbodiment(
             animate = state.animate,
             state = visualState,
             budget = budget,
             presentation = VanPresentation.COMPACT,
             characterFraction = OverlayTheme.RESTING_AVATAR_DP / OverlayTheme.RESTING_HIT_DP.toFloat(),
+            passive = true,
             modifier = Modifier
                 .size(OverlayTheme.RESTING_HIT_DP.dp)
                 .semantics { contentDescription = "Van floating assistant" }
-                .then(actions.gestures),
+                .then(actions.gestures).vanAccessibleCharacter(visualState, actions),
         )
-        if (showControls) {
-            QuickControls(
-                modifier = Modifier
-                    .offset(x = 176.dp, y = 4.dp)
-                    .width(176.dp),
-                blurBehindActive = state.blurBehindActive,
-                onQuickControl = actions.onQuickControl,
-            )
-        }
     }
 }
 
@@ -244,6 +285,7 @@ internal fun QuickControls(
     modifier: Modifier = Modifier,
     blurBehindActive: Boolean,
     onQuickControl: (String) -> Unit,
+    header: @Composable () -> Unit = {},
 ) {
     VanGlassSurface(
         style = VanGlassTokens.forState(
@@ -252,39 +294,41 @@ internal fun QuickControls(
         ),
         modifier = modifier,
     ) {
-        Column(
-            modifier = Modifier.padding(8.dp),
+        LazyColumn(
+            modifier = Modifier.fillMaxSize().padding(8.dp).semantics { paneTitle = "VAN assistant actions" },
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            OverlayTheme.QUICK_CONTROLS.forEach { label ->
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(30.dp)
-                        .clip(RoundedCornerShape(9.dp))
-                        .background(Color(VanGlassTokens.BABY_CYAN).copy(alpha = 0.10f))
-                        .combinedClickable(onClick = { onQuickControl(label) })
-                        .padding(horizontal = 8.dp),
-                    contentAlignment = Alignment.CenterStart,
-                ) {
-                    Text(label, color = Color(0xFFF4FCFF), fontSize = 11.sp)
-                }
+            item(key = "header") { header() }
+            items(OverlayTheme.QUICK_CONTROLS, key = { it }) { label ->
+                WorkChip(label, VanGlassTokens.BABY_CYAN, modifier = Modifier.fillMaxWidth()) { onQuickControl(label) }
             }
         }
     }
 }
 
 @Composable
-internal fun MinimizedPresence(visualState: VanVisualState, actions: VanOverlayActions) {
+internal fun MinimizedPresence(
+    visualState: VanVisualState,
+    actions: VanOverlayActions,
+    animate: Boolean = true,
+    budget: com.dial.van.visual.VanEffectBudget = com.dial.van.visual.VanEffectBudget.FULL,
+    reducedMotion: Boolean = rememberReducedMotion(),
+) {
+    val personal = LocalVanPresentationPreferences.current
+    val rendered = VanPersonalPresentation.project(OverlayPresentationFrame.character(visualState, VanLiveVisualState.frame), personal)
     Box(
-        modifier = Modifier.size(OverlayTheme.MINIMIZED_TOUCH_DP.dp),
+        modifier = Modifier.size(OverlayTheme.MINIMIZED_TOUCH_DP.dp)
+            .graphicsLayer { alpha = VanPersonalPresentation.opacity(rendered, personal, passive = true) }
+            .then(actions.gestures).vanAccessibleCharacter(visualState, actions),
         contentAlignment = Alignment.Center,
     ) {
         VanMinimizedAvatar(
-            state = visualState,
+            state = rendered,
+            animate = VanPersonalPresentation.motionAllowed(rendered, personal, animate),
+            budget = budget,
+            reducedMotion = reducedMotion,
             modifier = Modifier
-                .size(OverlayTheme.MINIMIZED_VISUAL_DP.dp)
-                .then(actions.gestures),
+                .size(OverlayTheme.MINIMIZED_VISUAL_DP.dp),
         )
     }
 }
@@ -312,7 +356,7 @@ internal fun DockedPresence(
             }
             drawPath(path, field)
         }
-        VanEmbodiment(
+        LiveOverlayEmbodiment(
             animate = state.animate,
             state = visualState,
             budget = budget,
@@ -321,7 +365,7 @@ internal fun DockedPresence(
                 .size(OverlayTheme.DOCK_CHARACTER_DP.dp)
                 .align(Alignment.TopCenter)
                 .offset(y = (-4).dp)
-                .then(actions.gestures),
+                .then(actions.gestures).vanAccessibleCharacter(visualState, actions),
         )
     }
 }

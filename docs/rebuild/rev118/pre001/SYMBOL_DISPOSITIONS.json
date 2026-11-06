@@ -1,0 +1,699 @@
+{
+ "rows": {
+  "OVL:android/app/src/main/java/com/dial/van/browser/BrowserActivity.kt:main": {
+   "describe": {
+    "commit": "652ef3f38717c808f57fcbc97f92d1030f9ab4a8",
+    "status": "REMOVED_WITH_CALLER",
+    "why": "local string helper deleted with the document flow it formatted"
+   },
+   "onDocumentChosen": {
+    "at": "android/app/src/main/java/com/dial/van/browser/BrowserPhoneActions.kt",
+    "status": "REPLACED_BY",
+    "symbol": "documentChosen"
+   }
+  },
+  "OVL:android/app/src/main/java/com/dial/van/browser/BrowserSessionController.kt:main": {
+   "acknowledgeViewport": {
+    "at": "android/app/src/main/java/com/dial/van/browser/BrowserControlMutation.kt",
+    "status": "MOVED",
+    "symbol": null
+   },
+   "beginUpload": {
+    "at": "android/app/src/main/java/com/dial/van/browser/BrowserPhoneActions.kt",
+    "status": "REPLACED_BY",
+    "symbol": "documentChosen"
+   }
+  },
+  "OVL:android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt:main": {
+   "CommandBottomBar": {
+    "at": "android/app/src/main/java/com/dial/van/command/CommandNavigationChrome.kt",
+    "status": "MOVED",
+    "symbol": null
+   },
+   "CommandSideRail": {
+    "at": "android/app/src/main/java/com/dial/van/command/CommandNavigationChrome.kt",
+    "status": "MOVED",
+    "symbol": null
+   },
+   "MoreSheet": {
+    "at": "android/app/src/main/java/com/dial/van/command/CommandNavigationChrome.kt",
+    "status": "MOVED",
+    "symbol": null
+   },
+   "NavDestination": {
+    "at": "android/app/src/main/java/com/dial/van/command/CommandNavigationChrome.kt",
+    "status": "MOVED",
+    "symbol": null
+   }
+  },
+  "OVL:android/app/src/main/java/com/dial/van/command/connected/ConnectedRoute.kt:main": {
+   "ConnectedData": {
+    "at": "android/app/src/main/java/com/dial/van/command/connected/ConnectedReadback.kt",
+    "status": "REPLACED_BY",
+    "symbol": "ConnectedReadback"
+   },
+   "load": {
+    "at": "android/app/src/main/java/com/dial/van/command/connected/ConnectedRoute.kt",
+    "status": "REPLACED_BY",
+    "symbol": "refresh"
+   }
+  },
+  "OVL:android/app/src/main/java/com/dial/van/command/work/WorkRoute.kt:main": {
+   "ConversationBubble": {
+    "at": "android/app/src/main/java/com/dial/van/command/work/WorkDetails.kt",
+    "status": "MOVED",
+    "symbol": null
+   },
+   "MissionRow": {
+    "at": "android/app/src/main/java/com/dial/van/command/work/WorkDetails.kt",
+    "status": "MOVED",
+    "symbol": null
+   },
+   "ReconfirmationPanel": {
+    "at": "android/app/src/main/java/com/dial/van/command/work/WorkDetails.kt",
+    "status": "MOVED",
+    "symbol": null
+   },
+   "WorkActivityRoute": {
+    "at": "android/app/src/main/java/com/dial/van/command/work/WorkDetails.kt",
+    "status": "MOVED",
+    "symbol": null
+   },
+   "formatTime": {
+    "at": "android/app/src/main/java/com/dial/van/command/work/WorkDetails.kt",
+    "status": "MOVED",
+    "symbol": null
+   },
+   "refresh": {
+    "commit": "652ef3f38717c808f57fcbc97f92d1030f9ab4a8",
+    "status": "REMOVED_WITH_CALLER",
+    "why": "screen-local reload replaced by the moved WorkDetails state holders"
+   },
+   "severityRole": {
+    "at": "android/app/src/main/java/com/dial/van/command/work/WorkDetails.kt",
+    "status": "MOVED",
+    "symbol": null
+   },
+   "statusRole": {
+    "at": "android/app/src/main/java/com/dial/van/command/work/WorkDetails.kt",
+    "status": "MOVED",
+    "symbol": null
+   }
+  },
+  "OVL:android/app/src/main/java/com/dial/van/connectivity/ProvisioningPayload.kt:main": {
+   "isAcceptableUrl": {
+    "at": "android/app/src/main/java/com/dial/van/connectivity/ProvisioningPayload.kt",
+    "status": "REPLACED_BY",
+    "symbol": "GatewayBaseUrl"
+   }
+  },
+  "OVL:android/app/src/main/java/com/dial/van/notification/NotificationPolicy.kt:main": {
+   "AppNotificationPolicy": {
+    "at": "android/app/src/main/java/com/dial/van/notification/NotificationAppCatalogue.kt",
+    "status": "MOVED",
+    "symbol": null
+   }
+  },
+  "OVL:android/app/src/main/java/com/dial/van/onboarding/OnboardingActivity.kt:main": {
+   "ProvisioningStatus": {
+    "at": "android/app/src/main/java/com/dial/van/command/settings/SettingsRoute.kt",
+    "status": "REPLACED_BY",
+    "symbol": "SettingsRoute"
+   },
+   "isOnboardingComplete": {
+    "commit": "8c192be7145db1a660d5774086e4165e208e1052",
+    "status": "REMOVED_WITH_CALLER",
+    "why": "owner-directed launcher change: shell opens directly; onboarding reachable from Settings"
+   }
+  },
+  "OVL:android/app/src/main/java/com/dial/van/trading/TradingRepository.kt:main": {
+   "Loaded": {
+    "at": "android/app/src/main/java/com/dial/van/trading/TradingLoading.kt",
+    "status": "MOVED",
+    "symbol": null
+   },
+   "Loading": {
+    "at": "android/app/src/main/java/com/dial/van/trading/TradingLoading.kt",
+    "status": "MOVED",
+    "symbol": null
+   },
+   "Ready": {
+    "at": "android/app/src/main/java/com/dial/van/trading/TradingLoading.kt",
+    "status": "MOVED",
+    "symbol": null
+   },
+   "Unavailable": {
+    "at": "android/app/src/main/java/com/dial/van/trading/TradingLoading.kt",
+    "status": "MOVED",
+    "symbol": null
+   }
+  },
+  "OVL:android/app/src/main/java/com/dial/van/visual/VanCanvasFallback.kt:main": {
+   "VanOwnerArtAvatar": {
+    "commit": "077bc517e753921d6f2cb090d140a66dfa36e9c5",
+    "status": "RETIRED",
+    "why": "retired strand engine and owner-art renderer"
+   }
+  },
+  "OVL:android/app/src/main/java/com/dial/van/voice/SherpaSpeakerSimilarity.kt:main": {
+   "admitted": {
+    "commit": "652ef3f38717c808f57fcbc97f92d1030f9ab4a8",
+    "status": "REMOVED_WITH_CALLER",
+    "why": "file-admission helper of the retired embedding loader"
+   },
+   "cosine": {
+    "commit": "652ef3f38717c808f57fcbc97f92d1030f9ab4a8",
+    "status": "REMOVED_WITH_CALLER",
+    "why": "helper of the retired embedding loader; SherpaSpeakerSimilarityScorer.similarity computes the normalised dot product inline (an earlier claim that it moved to SpeakerEnrollmentPolicy was wrong: that file only has a local val named cosine)"
+   },
+   "normalized": {
+    "commit": "652ef3f38717c808f57fcbc97f92d1030f9ab4a8",
+    "status": "REMOVED_WITH_CALLER",
+    "why": "vector helper of the retired loader; scorer normalises inline"
+   },
+   "pcm16ToFloat": {
+    "at": "android/app/src/main/java/com/dial/van/voice/SherpaSecondPassAsr.kt",
+    "status": "MOVED",
+    "symbol": null
+   },
+   "readEmbedding": {
+    "commit": "652ef3f38717c808f57fcbc97f92d1030f9ab4a8",
+    "status": "RETIRED",
+    "why": "plaintext self-described embeddings deliberately not admitted"
+   },
+   "sha256": {
+    "commit": "652ef3f38717c808f57fcbc97f92d1030f9ab4a8",
+    "status": "REMOVED_WITH_CALLER",
+    "why": "file-hash helper of the retired loader"
+   }
+  },
+  "OVL:android/app/src/main/java/com/dial/van/voice/VoiceEdge.kt:main": {
+   "sha256": {
+    "commit": "652ef3f38717c808f57fcbc97f92d1030f9ab4a8",
+    "status": "REMOVED_WITH_CALLER",
+    "why": "local hash helper removed"
+   }
+  },
+  "OVL:android/app/src/main/java/com/dial/van/voice/WakeAcknowledgement.kt:main": {
+   "onDone": {
+    "at": "android/app/src/main/java/com/dial/van/voice/WakeAcknowledgement.kt",
+    "status": "REPLACED_BY",
+    "symbol": "WakeAcknowledgementManager"
+   },
+   "onError": {
+    "at": "android/app/src/main/java/com/dial/van/voice/WakeAcknowledgement.kt",
+    "status": "REPLACED_BY",
+    "symbol": "WakeAcknowledgementManager"
+   },
+   "onInit": {
+    "at": "android/app/src/main/java/com/dial/van/voice/WakeAcknowledgement.kt",
+    "status": "REPLACED_BY",
+    "symbol": "WakeAcknowledgementManager"
+   },
+   "onStart": {
+    "at": "android/app/src/main/java/com/dial/van/voice/WakeAcknowledgement.kt",
+    "status": "REPLACED_BY",
+    "symbol": "WakeAcknowledgementManager"
+   }
+  },
+  "OVL:android/verification/src/test/kotlin/com/dial/van/onboarding/OnboardingPlanTest.kt:main": {
+   "an": {
+    "status": "INSTRUMENT_ARTEFACT"
+   },
+   "pairing": {
+    "status": "INSTRUMENT_ARTEFACT"
+   }
+  },
+  "OVL:backend/tests/test_automation_api.py:main": {
+   "_n8n_transport": {
+    "commit": "652ef3f38717c808f57fcbc97f92d1030f9ab4a8",
+    "status": "REMOVED_WITH_CALLER",
+    "why": "mock transport helper replaced by 'executable' fixture"
+   },
+   "_n8n_transport.handler": {
+    "commit": "652ef3f38717c808f57fcbc97f92d1030f9ab4a8",
+    "status": "REMOVED_WITH_CALLER",
+    "why": "inner function of removed helper"
+   }
+  },
+  "OVL:backend/tests/test_automation_compiler.py:main": {
+   "test_credentials_compile_to_identifier_never_value": {
+    "at": "backend/tests/test_automation_compiler.py",
+    "status": "REPLACED_BY",
+    "symbol": "test_generic_credential_handle_cannot_invent_a_gateway_adapter"
+   },
+   "test_webhook_trigger_compiles_with_authentication": {
+    "at": "backend/tests/test_automation_compiler.py",
+    "status": "REPLACED_BY",
+    "symbol": "test_engine_entry_requires_canonical_admission_before_any_steps"
+   }
+  },
+  "OVL:backend/tests/test_automation_dispatch.py:main": {
+   "_transport": {
+    "commit": "652ef3f38717c808f57fcbc97f92d1030f9ab4a8",
+    "status": "REMOVED_WITH_CALLER",
+    "why": "mock transport helper removed"
+   },
+   "_transport.handler": {
+    "commit": "652ef3f38717c808f57fcbc97f92d1030f9ab4a8",
+    "status": "REMOVED_WITH_CALLER",
+    "why": "inner function of removed helper"
+   }
+  },
+  "OVL:backend/tests/test_automation_health_api.py:main": {
+   "test_automation_health_reports_governance_approved": {
+    "at": "backend/tests/test_automation_health_api.py",
+    "status": "REPLACED_BY",
+    "symbol": "test_automation_health_reports_governance_approved_but_production_gated"
+   }
+  },
+  "OVL:backend/tests/test_browser_api.py:main": {
+   "test_owner_approval_resumes_same_browser_task": {
+    "at": "backend/tests/test_browser_api.py",
+    "status": "REPLACED_BY",
+    "symbol": "test_advisory_owner_answer_cannot_resume_or_widen_browser_task"
+   }
+  },
+  "OVL:backend/tests/test_browser_escalation_boundary.py:main": {
+   "test_two_different_overruns_are_two_separate_questions": {
+    "at": "backend/tests/test_browser_escalation_boundary.py",
+    "status": "REPLACED_BY",
+    "symbol": "test_advisory_answer_cannot_run_a_second_scope_overrun"
+   }
+  },
+  "OVL:backend/tests/test_interactive_browser_api.py:main": {
+   "TestUnconfiguredDeployment.test_without_a_signing_key_the_routes_do_not_exist": {
+    "at": "backend/tests/test_interactive_browser_api.py",
+    "status": "REPLACED_BY",
+    "symbol": "test_without_a_signing_key_provider_preparation_has_no_execution_authority"
+   }
+  },
+  "OVL:backend/tests/test_knowledge_runtime.py:main": {
+   "test_consumer_preexisting_same_title_is_not_claimed_as_van_created": {
+    "at": "backend/tests/test_knowledge_runtime.py",
+    "status": "REPLACED_BY",
+    "symbol": "test_consumer_is_unavailable_while_stagehand_cannot_actuate"
+   },
+   "test_consumer_preexisting_same_title_is_not_claimed_as_van_created.Harness": {
+    "commit": "8cea9d61585862c6a097057364c4df8224f04ef2",
+    "status": "REMOVED_WITH_CALLER",
+    "why": "fake classes of the replaced test"
+   },
+   "test_consumer_preexisting_same_title_is_not_claimed_as_van_created.Harness.navigate": {
+    "commit": "8cea9d61585862c6a097057364c4df8224f04ef2",
+    "status": "REMOVED_WITH_CALLER",
+    "why": "fake classes of the replaced test"
+   },
+   "test_consumer_preexisting_same_title_is_not_claimed_as_van_created.Harness.page_info": {
+    "commit": "8cea9d61585862c6a097057364c4df8224f04ef2",
+    "status": "REMOVED_WITH_CALLER",
+    "why": "fake classes of the replaced test"
+   },
+   "test_consumer_preexisting_same_title_is_not_claimed_as_van_created.Stagehand": {
+    "commit": "8cea9d61585862c6a097057364c4df8224f04ef2",
+    "status": "REMOVED_WITH_CALLER",
+    "why": "fake classes of the replaced test"
+   },
+   "test_consumer_preexisting_same_title_is_not_claimed_as_van_created.Stagehand.act": {
+    "commit": "8cea9d61585862c6a097057364c4df8224f04ef2",
+    "status": "REMOVED_WITH_CALLER",
+    "why": "fake classes of the replaced test"
+   },
+   "test_consumer_preexisting_same_title_is_not_claimed_as_van_created.Stagehand.extract": {
+    "commit": "8cea9d61585862c6a097057364c4df8224f04ef2",
+    "status": "REMOVED_WITH_CALLER",
+    "why": "fake classes of the replaced test"
+   }
+  },
+  "OVL:backend/tests/test_recovery_matrix.py:main": {
+   "TestCellGatewayRestartMidCommand.test_a_conflict_is_never_retaken": {
+    "at": "backend/tests/test_recovery_matrix.py",
+    "status": "REPLACED_BY",
+    "symbol": "test_a_conflicting_attempt_does_not_poison_the_original_claim"
+   }
+  },
+  "OVL:backend/tests/test_visual_acceptance.py:main": {
+   "test_visual_acceptance_is_declared_device_proofed": {
+    "at": "backend/tests/test_visual_acceptance.py",
+    "status": "REPLACED_BY",
+    "symbol": "test_visual_acceptance_requires_actual_bound_device_proof"
+   }
+  },
+  "OVL:backend/van_gateway/automation/compiler.py:main": {
+   "AutomationCompiler._compile_parameters": {
+    "at": "backend/van_gateway/automation/compiler.py",
+    "status": "REPLACED_BY",
+    "symbol": "_runtime_graph"
+   },
+   "AutomationCompiler._position": {
+    "at": "backend/van_gateway/automation/compiler.py",
+    "status": "REPLACED_BY",
+    "symbol": "_runtime_graph"
+   }
+  },
+  "OVL:backend/van_gateway/browser/api.py:main": {
+   "BrowserApi._install_routes.run_assignment.assert_lease_active": {
+    "at": "backend/van_gateway/browser/adapters.py",
+    "status": "REPLACED_BY",
+    "symbol": "broker_lease_fence"
+   }
+  },
+  "OVL:backend/van_gateway/decisions/service.py:main": {
+   "DecisionCreate": {
+    "at": "backend/van_gateway/decisions/models.py",
+    "status": "MOVED",
+    "symbol": null
+   },
+   "DecisionRecord": {
+    "at": "backend/van_gateway/decisions/models.py",
+    "status": "MOVED",
+    "symbol": null
+   },
+   "DecisionStatus": {
+    "at": "backend/van_gateway/decisions/models.py",
+    "status": "MOVED",
+    "symbol": null
+   }
+  },
+  "OVL:tests/contracts/test_stored_command_is_deliverable.py:main": {
+   "test_the_builder_is_the_one_the_offline_path_uses": {
+    "at": "tests/contracts/test_stored_command_is_deliverable.py",
+    "status": "REPLACED_BY",
+    "symbol": "test_the_offline_path_stores_the_body_prepared_before_dispatch"
+   }
+  },
+  "OVL:tests/contracts/test_van_direct_mtls_deploy.py:main": {
+   "test_the_app_ships_configured_for_the_direct_link": {
+    "at": "tests/contracts/test_van_direct_mtls_deploy.py",
+    "status": "REPLACED_BY",
+    "symbol": "test_debug_keeps_the_historical_direct_link_without_qualifying_release"
+   }
+  },
+  "OVL:tests/test_artemis_subscription.py:accounts_3b2c9e04": {
+   "SubscriptionContracts": {
+    "at": "deploy/netcup/hermes-control/artemis/subscription/test_artemis_subscription.py",
+    "commit": "2964c6ecdea39b3ca55805c69e68b418e98b827d",
+    "repo": "Vanguduza/dial-development-system",
+    "status": "MOVED_CROSS_REPO"
+   },
+   "SubscriptionContracts.test_api_key_login_refused": {
+    "at": "deploy/netcup/hermes-control/artemis/subscription/test_artemis_subscription.py",
+    "commit": "2964c6ecdea39b3ca55805c69e68b418e98b827d",
+    "repo": "Vanguduza/dial-development-system",
+    "status": "MOVED_CROSS_REPO"
+   },
+   "SubscriptionContracts.test_binding_is_idempotent_and_refuses_unbound_provider": {
+    "at": "deploy/netcup/hermes-control/artemis/subscription/test_artemis_subscription.py",
+    "commit": "2964c6ecdea39b3ca55805c69e68b418e98b827d",
+    "repo": "Vanguduza/dial-development-system",
+    "status": "MOVED_CROSS_REPO"
+   },
+   "SubscriptionContracts.test_bound_tool_call_returned_to_artemis": {
+    "at": "deploy/netcup/hermes-control/artemis/subscription/test_artemis_subscription.py",
+    "commit": "2964c6ecdea39b3ca55805c69e68b418e98b827d",
+    "repo": "Vanguduza/dial-development-system",
+    "status": "MOVED_CROSS_REPO"
+   },
+   "SubscriptionContracts.test_codex_environment_excludes_native_loader_settings": {
+    "at": "deploy/netcup/hermes-control/artemis/subscription/test_artemis_subscription.py",
+    "commit": "2964c6ecdea39b3ca55805c69e68b418e98b827d",
+    "repo": "Vanguduza/dial-development-system",
+    "status": "MOVED_CROSS_REPO"
+   },
+   "SubscriptionContracts.test_command_disables_execution_and_delegation": {
+    "at": "deploy/netcup/hermes-control/artemis/subscription/test_artemis_subscription.py",
+    "commit": "2964c6ecdea39b3ca55805c69e68b418e98b827d",
+    "repo": "Vanguduza/dial-development-system",
+    "status": "MOVED_CROSS_REPO"
+   },
+   "SubscriptionContracts.test_different_account_refused": {
+    "at": "deploy/netcup/hermes-control/artemis/subscription/test_artemis_subscription.py",
+    "commit": "2964c6ecdea39b3ca55805c69e68b418e98b827d",
+    "repo": "Vanguduza/dial-development-system",
+    "status": "MOVED_CROSS_REPO"
+   },
+   "SubscriptionContracts.test_different_requested_model_refused_before_transport": {
+    "at": "deploy/netcup/hermes-control/artemis/subscription/test_artemis_subscription.py",
+    "commit": "2964c6ecdea39b3ca55805c69e68b418e98b827d",
+    "repo": "Vanguduza/dial-development-system",
+    "status": "MOVED_CROSS_REPO"
+   },
+   "SubscriptionContracts.test_every_profile_node_and_fallback_is_exact_model": {
+    "at": "deploy/netcup/hermes-control/artemis/subscription/test_artemis_subscription.py",
+    "commit": "2964c6ecdea39b3ca55805c69e68b418e98b827d",
+    "repo": "Vanguduza/dial-development-system",
+    "status": "MOVED_CROSS_REPO"
+   },
+   "SubscriptionContracts.test_fresh_native_task_child_inherits_binding": {
+    "at": "deploy/netcup/hermes-control/artemis/subscription/test_artemis_subscription.py",
+    "commit": "2964c6ecdea39b3ca55805c69e68b418e98b827d",
+    "repo": "Vanguduza/dial-development-system",
+    "status": "MOVED_CROSS_REPO"
+   },
+   "SubscriptionContracts.test_inline_image_preserved": {
+    "at": "deploy/netcup/hermes-control/artemis/subscription/test_artemis_subscription.py",
+    "commit": "2964c6ecdea39b3ca55805c69e68b418e98b827d",
+    "repo": "Vanguduza/dial-development-system",
+    "status": "MOVED_CROSS_REPO"
+   },
+   "SubscriptionContracts.test_local_file_url_refused": {
+    "at": "deploy/netcup/hermes-control/artemis/subscription/test_artemis_subscription.py",
+    "commit": "2964c6ecdea39b3ca55805c69e68b418e98b827d",
+    "repo": "Vanguduza/dial-development-system",
+    "status": "MOVED_CROSS_REPO"
+   },
+   "SubscriptionContracts.test_matching_chatgpt_account": {
+    "at": "deploy/netcup/hermes-control/artemis/subscription/test_artemis_subscription.py",
+    "commit": "2964c6ecdea39b3ca55805c69e68b418e98b827d",
+    "repo": "Vanguduza/dial-development-system",
+    "status": "MOVED_CROSS_REPO"
+   },
+   "SubscriptionContracts.test_missing_login_refused": {
+    "at": "deploy/netcup/hermes-control/artemis/subscription/test_artemis_subscription.py",
+    "commit": "2964c6ecdea39b3ca55805c69e68b418e98b827d",
+    "repo": "Vanguduza/dial-development-system",
+    "status": "MOVED_CROSS_REPO"
+   },
+   "SubscriptionContracts.test_non_image_payload_refused": {
+    "at": "deploy/netcup/hermes-control/artemis/subscription/test_artemis_subscription.py",
+    "commit": "2964c6ecdea39b3ca55805c69e68b418e98b827d",
+    "repo": "Vanguduza/dial-development-system",
+    "status": "MOVED_CROSS_REPO"
+   },
+   "SubscriptionContracts.test_non_object_tool_arguments_refused": {
+    "at": "deploy/netcup/hermes-control/artemis/subscription/test_artemis_subscription.py",
+    "commit": "2964c6ecdea39b3ca55805c69e68b418e98b827d",
+    "repo": "Vanguduza/dial-development-system",
+    "status": "MOVED_CROSS_REPO"
+   },
+   "SubscriptionContracts.test_process_environment_excludes_api_billing": {
+    "at": "deploy/netcup/hermes-control/artemis/subscription/test_artemis_subscription.py",
+    "commit": "2964c6ecdea39b3ca55805c69e68b418e98b827d",
+    "repo": "Vanguduza/dial-development-system",
+    "status": "MOVED_CROSS_REPO"
+   },
+   "SubscriptionContracts.test_role_and_tool_result_preserved": {
+    "at": "deploy/netcup/hermes-control/artemis/subscription/test_artemis_subscription.py",
+    "commit": "2964c6ecdea39b3ca55805c69e68b418e98b827d",
+    "repo": "Vanguduza/dial-development-system",
+    "status": "MOVED_CROSS_REPO"
+   },
+   "SubscriptionContracts.test_unbound_tool_refused": {
+    "at": "deploy/netcup/hermes-control/artemis/subscription/test_artemis_subscription.py",
+    "commit": "2964c6ecdea39b3ca55805c69e68b418e98b827d",
+    "repo": "Vanguduza/dial-development-system",
+    "status": "MOVED_CROSS_REPO"
+   }
+  },
+  "OVL:tools/artemis_subscription/__init__.py:accounts_3b2c9e04": {
+   "__file__": {
+    "at": "deploy/netcup/hermes-control/artemis/subscription/__init__.py",
+    "commit": "2964c6ecdea39b3ca55805c69e68b418e98b827d",
+    "repo": "Vanguduza/dial-development-system",
+    "status": "MOVED_CROSS_REPO"
+   }
+  },
+  "OVL:tools/artemis_subscription/mcp_launcher.py:accounts_3b2c9e04": {
+   "__file__": {
+    "at": "deploy/netcup/hermes-control/artemis/subscription/mcp_launcher.py",
+    "commit": "2964c6ecdea39b3ca55805c69e68b418e98b827d",
+    "repo": "Vanguduza/dial-development-system",
+    "status": "MOVED_CROSS_REPO"
+   }
+  },
+  "OVL:tools/artemis_subscription/provider.py:accounts_3b2c9e04": {
+   "ChatGPTSubscriptionChatModel": {
+    "at": "deploy/netcup/hermes-control/artemis/subscription/provider.py",
+    "commit": "2964c6ecdea39b3ca55805c69e68b418e98b827d",
+    "repo": "Vanguduza/dial-development-system",
+    "status": "MOVED_CROSS_REPO"
+   },
+   "ChatGPTSubscriptionChatModel._agenerate": {
+    "at": "deploy/netcup/hermes-control/artemis/subscription/provider.py",
+    "commit": "2964c6ecdea39b3ca55805c69e68b418e98b827d",
+    "repo": "Vanguduza/dial-development-system",
+    "status": "MOVED_CROSS_REPO"
+   },
+   "ChatGPTSubscriptionChatModel._astream": {
+    "at": "deploy/netcup/hermes-control/artemis/subscription/provider.py",
+    "commit": "2964c6ecdea39b3ca55805c69e68b418e98b827d",
+    "repo": "Vanguduza/dial-development-system",
+    "status": "MOVED_CROSS_REPO"
+   },
+   "ChatGPTSubscriptionChatModel._generate": {
+    "at": "deploy/netcup/hermes-control/artemis/subscription/provider.py",
+    "commit": "2964c6ecdea39b3ca55805c69e68b418e98b827d",
+    "repo": "Vanguduza/dial-development-system",
+    "status": "MOVED_CROSS_REPO"
+   },
+   "ChatGPTSubscriptionChatModel._identifying_params": {
+    "at": "deploy/netcup/hermes-control/artemis/subscription/provider.py",
+    "commit": "2964c6ecdea39b3ca55805c69e68b418e98b827d",
+    "repo": "Vanguduza/dial-development-system",
+    "status": "MOVED_CROSS_REPO"
+   },
+   "ChatGPTSubscriptionChatModel._llm_type": {
+    "at": "deploy/netcup/hermes-control/artemis/subscription/provider.py",
+    "commit": "2964c6ecdea39b3ca55805c69e68b418e98b827d",
+    "repo": "Vanguduza/dial-development-system",
+    "status": "MOVED_CROSS_REPO"
+   },
+   "ChatGPTSubscriptionChatModel.bind_tools": {
+    "at": "deploy/netcup/hermes-control/artemis/subscription/provider.py",
+    "commit": "2964c6ecdea39b3ca55805c69e68b418e98b827d",
+    "repo": "Vanguduza/dial-development-system",
+    "status": "MOVED_CROSS_REPO"
+   },
+   "ChatGPTSubscriptionChatModel.with_structured_output": {
+    "at": "deploy/netcup/hermes-control/artemis/subscription/provider.py",
+    "commit": "2964c6ecdea39b3ca55805c69e68b418e98b827d",
+    "repo": "Vanguduza/dial-development-system",
+    "status": "MOVED_CROSS_REPO"
+   },
+   "ChatGPTSubscriptionChatModel.with_structured_output.parse": {
+    "at": "deploy/netcup/hermes-control/artemis/subscription/provider.py",
+    "commit": "2964c6ecdea39b3ca55805c69e68b418e98b827d",
+    "repo": "Vanguduza/dial-development-system",
+    "status": "MOVED_CROSS_REPO"
+   },
+   "SubscriptionSession": {
+    "at": "deploy/netcup/hermes-control/artemis/subscription/provider.py",
+    "commit": "2964c6ecdea39b3ca55805c69e68b418e98b827d",
+    "repo": "Vanguduza/dial-development-system",
+    "status": "MOVED_CROSS_REPO"
+   },
+   "SubscriptionSession.__aenter__": {
+    "at": "deploy/netcup/hermes-control/artemis/subscription/provider.py",
+    "commit": "2964c6ecdea39b3ca55805c69e68b418e98b827d",
+    "repo": "Vanguduza/dial-development-system",
+    "status": "MOVED_CROSS_REPO"
+   },
+   "SubscriptionSession.__aexit__": {
+    "at": "deploy/netcup/hermes-control/artemis/subscription/provider.py",
+    "commit": "2964c6ecdea39b3ca55805c69e68b418e98b827d",
+    "repo": "Vanguduza/dial-development-system",
+    "status": "MOVED_CROSS_REPO"
+   },
+   "SubscriptionSession.__init__": {
+    "at": "deploy/netcup/hermes-control/artemis/subscription/provider.py",
+    "commit": "2964c6ecdea39b3ca55805c69e68b418e98b827d",
+    "repo": "Vanguduza/dial-development-system",
+    "status": "MOVED_CROSS_REPO"
+   },
+   "SubscriptionSession.complete": {
+    "at": "deploy/netcup/hermes-control/artemis/subscription/provider.py",
+    "commit": "2964c6ecdea39b3ca55805c69e68b418e98b827d",
+    "repo": "Vanguduza/dial-development-system",
+    "status": "MOVED_CROSS_REPO"
+   },
+   "SubscriptionSession.receive": {
+    "at": "deploy/netcup/hermes-control/artemis/subscription/provider.py",
+    "commit": "2964c6ecdea39b3ca55805c69e68b418e98b827d",
+    "repo": "Vanguduza/dial-development-system",
+    "status": "MOVED_CROSS_REPO"
+   },
+   "SubscriptionSession.rpc": {
+    "at": "deploy/netcup/hermes-control/artemis/subscription/provider.py",
+    "commit": "2964c6ecdea39b3ca55805c69e68b418e98b827d",
+    "repo": "Vanguduza/dial-development-system",
+    "status": "MOVED_CROSS_REPO"
+   },
+   "SubscriptionSession.send": {
+    "at": "deploy/netcup/hermes-control/artemis/subscription/provider.py",
+    "commit": "2964c6ecdea39b3ca55805c69e68b418e98b827d",
+    "repo": "Vanguduza/dial-development-system",
+    "status": "MOVED_CROSS_REPO"
+   },
+   "bind_native_artemis": {
+    "at": "deploy/netcup/hermes-control/artemis/subscription/provider.py",
+    "commit": "2964c6ecdea39b3ca55805c69e68b418e98b827d",
+    "repo": "Vanguduza/dial-development-system",
+    "status": "MOVED_CROSS_REPO"
+   },
+   "bind_native_artemis.create_model": {
+    "at": "deploy/netcup/hermes-control/artemis/subscription/provider.py",
+    "commit": "2964c6ecdea39b3ca55805c69e68b418e98b827d",
+    "repo": "Vanguduza/dial-development-system",
+    "status": "MOVED_CROSS_REPO"
+   },
+   "bind_native_artemis.probe": {
+    "at": "deploy/netcup/hermes-control/artemis/subscription/provider.py",
+    "commit": "2964c6ecdea39b3ca55805c69e68b418e98b827d",
+    "repo": "Vanguduza/dial-development-system",
+    "status": "MOVED_CROSS_REPO"
+   },
+   "codex_command": {
+    "at": "deploy/netcup/hermes-control/artemis/subscription/provider.py",
+    "commit": "2964c6ecdea39b3ca55805c69e68b418e98b827d",
+    "repo": "Vanguduza/dial-development-system",
+    "status": "MOVED_CROSS_REPO"
+   },
+   "messages_to_input": {
+    "at": "deploy/netcup/hermes-control/artemis/subscription/provider.py",
+    "commit": "2964c6ecdea39b3ca55805c69e68b418e98b827d",
+    "repo": "Vanguduza/dial-development-system",
+    "status": "MOVED_CROSS_REPO"
+   },
+   "read_subscription_account": {
+    "at": "deploy/netcup/hermes-control/artemis/subscription/provider.py",
+    "commit": "2964c6ecdea39b3ca55805c69e68b418e98b827d",
+    "repo": "Vanguduza/dial-development-system",
+    "status": "MOVED_CROSS_REPO"
+   },
+   "response_message": {
+    "at": "deploy/netcup/hermes-control/artemis/subscription/provider.py",
+    "commit": "2964c6ecdea39b3ca55805c69e68b418e98b827d",
+    "repo": "Vanguduza/dial-development-system",
+    "status": "MOVED_CROSS_REPO"
+   },
+   "subscription_environment": {
+    "at": "deploy/netcup/hermes-control/artemis/subscription/provider.py",
+    "commit": "2964c6ecdea39b3ca55805c69e68b418e98b827d",
+    "repo": "Vanguduza/dial-development-system",
+    "status": "MOVED_CROSS_REPO"
+   },
+   "tool_response_schema": {
+    "at": "deploy/netcup/hermes-control/artemis/subscription/provider.py",
+    "commit": "2964c6ecdea39b3ca55805c69e68b418e98b827d",
+    "repo": "Vanguduza/dial-development-system",
+    "status": "MOVED_CROSS_REPO"
+   },
+   "validate_account": {
+    "at": "deploy/netcup/hermes-control/artemis/subscription/provider.py",
+    "commit": "2964c6ecdea39b3ca55805c69e68b418e98b827d",
+    "repo": "Vanguduza/dial-development-system",
+    "status": "MOVED_CROSS_REPO"
+   }
+  },
+  "OVL:tools/artemis_subscription/sitecustomize.py:accounts_3b2c9e04": {
+   "__file__": {
+    "at": "deploy/netcup/hermes-control/artemis/subscription/sitecustomize.py",
+    "commit": "2964c6ecdea39b3ca55805c69e68b418e98b827d",
+    "repo": "Vanguduza/dial-development-system",
+    "status": "MOVED_CROSS_REPO"
+   }
+  }
+ },
+ "rule": "Every missing symbol of every overlap row has a typed status that pre001.py verifies mechanically against Git objects (consolidation head, removing commit, or the DDS checkout).",
+ "schema": "van.rebuild.pre001.symbol-dispositions/1"
+}

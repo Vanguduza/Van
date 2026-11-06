@@ -1,0 +1,30 @@
+{
+  "schema": "van.rebuild.actual-agp-guards/1",
+  "observed_at_utc": "2026-10-23T01:35:36.924401+00:00",
+  "android_source_head": "90868b6f0f5dfb6052d645b62f89417990da6474",
+  "scope": "Actual AGP direct packageRelease --dry-run refuses missing van-trading-core deployment profile, then valid fixture target refuses missing production signing. No production keystore exists or signing material read.",
+  "result": {
+    "tests": 2,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "cases": [
+    {
+      "class": "tests.contracts.test_android_instrumentation_abi",
+      "name": "test_actual_agp_direct_package_release_refuses_missing_core_deployment_profile"
+    },
+    {
+      "class": "tests.contracts.test_android_production_target",
+      "name": "test_actual_agp_valid_target_still_refuses_missing_production_signing"
+    }
+  ],
+  "xml_sha256": "192fb9ee3ef7faa4c427912c19f57ee01f1425073f1389ae31a7d98fc0c39380",
+  "log_sha256": "1478ff41b071a25f86e5da3501a00cfbbc0c6616ef6b8fb121b87362a3db3ddc",
+  "toolchain": {
+    "gradle": "8.11.1",
+    "jdk": "prepared Java21",
+    "sdk": "prepared Android SDK"
+  },
+  "qualification": "Source/build guard execution only. No production APK signing, deployed profile provisioning, independent/unit/release or S24 acceptance."
+}

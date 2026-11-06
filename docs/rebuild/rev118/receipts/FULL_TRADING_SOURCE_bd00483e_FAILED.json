@@ -1,0 +1,36 @@
+{
+  "schema": "van.rebuild.full-trading-source-failed/1",
+  "source_head": "bd00483e969822c65bfd493c93fa5dd30920bcc5",
+  "status": "FAILED",
+  "counts": {
+    "tests": 2420,
+    "failures": 5,
+    "errors": 0,
+    "skipped": 0
+  },
+  "passed": 2415,
+  "seconds": 330.466,
+  "xml_sha256": "4e369970b1e71c8bee4289726837e7d19fcd83f6934a46b1d312b2ee328eb4b6",
+  "source_clean_after": true,
+  "storage_audit": {
+    "schema": "van.source-storage-audit/1",
+    "forbidden_events": [],
+    "source_sha256": "d4e270150fb0da6e8d79b449dd0de68fd1f97b3ccea3d282f31d91297edbd495",
+    "root": "/workspace/van-autonomous-qualification-20261022/Van",
+    "scope": "SQLite opens, path-based writable opens and directory/link/rename/delete events under data and backend/data",
+    "limits": "Python audit events only; existing fd writes, native-library raw I/O and external processes are not an OS sandbox. Git state is checked separately."
+  },
+  "private_fixture_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "failures": [
+    "trading.tests.test_single_session_unknown_entry::test_original_timed_out_native_entry_is_not_reported_as_executed_or_approved",
+    "trading.tests.test_single_session_unknown_entry::test_current_empty_positions_do_not_release_original_unresolved_entry_risk",
+    "trading.tests.test_single_session_unknown_entry::test_late_original_native_rejection_releases_only_that_attempt_without_replaying_it",
+    "trading.tests.test_single_session_unknown_entry::test_late_original_native_fill_restores_full_trade_identity_and_protection_without_another_send",
+    "trading.tests.test_single_session_unknown_entry::test_missing_native_enqueue_reply_holds_the_durable_original_attempt"
+  ],
+  "diagnosis": "The new funding fence is provider-specific and holds MT5 automated entries before original recovery scenarios can enqueue their real native command. Complete MT5 cash-history/account-credit wiring; preserve the original recovery assertions and do not bypass the admission fence.",
+  "remaining_collection": "Stopped at5 failures; remaining cases were not executed. No full trading/backend pass or native acceptance."
+}

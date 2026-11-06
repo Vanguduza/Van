@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:van:forecast:prediction-market:EventAssetResponse:1.0",
+  "title": "EventAssetResponse",
+  "description": "Proposed VAN contract. JSON shape/local arithmetic is not evidence admission, source permission or financial authority.",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "record_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "environment": {
+      "enum": [
+        "FIXTURE",
+        "RESEARCH",
+        "SHADOW"
+      ]
+    },
+    "authority_effect": {
+      "const": "NONE"
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0
+    },
+    "source_digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "canonical_event_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "event_snapshot_digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "asset_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "horizon": {
+      "type": "string",
+      "minLength": 1
+    },
+    "target_definition_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "output_task": {
+      "enum": [
+        "EXPECTED_RETURN",
+        "REALIZED_VOLATILITY",
+        "TRADE_EVENT_PROBABILITY",
+        "OPPORTUNITY_RANK"
+      ]
+    },
+    "output_value": {
+      "type": "number"
+    },
+    "output_units": {
+      "type": "string",
+      "minLength": 1
+    },
+    "response_model_digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "calibrator_ref": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "fit_cutoff": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "max_input_available_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "prediction_cutoff": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "event_probability_copied_as_asset_probability": {
+      "const": false
+    },
+    "oof_fusion_ref": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "use_scope": {
+      "enum": [
+        "RESEARCH",
+        "SHADOW"
+      ]
+    },
+    "dependency_group": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "required": [
+    "schema_version",
+    "record_id",
+    "environment",
+    "authority_effect",
+    "evidence_refs",
+    "source_digest",
+    "canonical_event_id",
+    "event_snapshot_digest",
+    "asset_id",
+    "horizon",
+    "target_definition_ref",
+    "output_task",
+    "output_value",
+    "output_units",
+    "response_model_digest",
+    "calibrator_ref",
+    "fit_cutoff",
+    "max_input_available_at",
+    "prediction_cutoff",
+    "event_probability_copied_as_asset_probability",
+    "oof_fusion_ref",
+    "use_scope",
+    "dependency_group"
+  ],
+  "additionalProperties": false
+}

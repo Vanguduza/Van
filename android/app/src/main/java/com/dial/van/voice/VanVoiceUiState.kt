@@ -45,4 +45,8 @@ class VanVoiceUiStore {
     fun error(code: Int) {
         _state.update { it.copy(listening = false, errorCode = code) }
     }
+
+    fun cancelled() {
+        _state.update { it.copy(listening = false, partialTranscript = "", errorCode = null) }
+    }
 }

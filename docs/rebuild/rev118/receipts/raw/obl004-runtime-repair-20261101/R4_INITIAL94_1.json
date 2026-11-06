@@ -1,0 +1,50 @@
+{
+  "state": "TERMINAL",
+  "preflight": {
+    "path": "/tmp/van-recovery-obl004-runtime-setup-r4-checks-20261101",
+    "free_bytes_before": 4380463104,
+    "free_inodes_before": 2237069,
+    "minimum_free_bytes": 4294967296,
+    "no_preexisting_directory": true
+  },
+  "source_before": {
+    ".github/workflows/van-ci.yml": "3ab3df781f9bb1444bd853f1b5035fb3a57db51a422aed9c7708738b7ac5d407",
+    "tests/rebuild/test_canonical_source_audit.py": "224422b8252acd2a307c11f189745542556593fe066b32049f1a125309e97e86",
+    "tools/ci/github-actions-ci.yml": "3ab3df781f9bb1444bd853f1b5035fb3a57db51a422aed9c7708738b7ac5d407",
+    "tools/rebuild/canonical_source_audit.py": "7f977e794725fd529736f822ba183a3e2d2348c57826fcaf1e588bc9f1dd056c"
+  },
+  "targets": [
+    "tests/rebuild/test_canonical_source_audit.py",
+    "tests/contracts/test_ci_public_source_shards.py",
+    "tests/contracts/test_ci_workflow_is_what_it_claims.py"
+  ],
+  "reuse": "R1actual175 and R2actual18 + independentCLI/adversarial evidence kept separate; no fictitious rerun. This is narrow current integrated workflow/canonical/startup guard execution.",
+  "output_file_limit_bytes": 16777216,
+  "started": "2026-11-01T19:01:03.362664+00:00",
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "-B",
+    "tools/rebuild/source_storage_audit.py",
+    "--report",
+    "/workspace/van-obl004-runtime-setup-repair-r4-20261101/checks/storage-audit.json",
+    "tests/rebuild/test_canonical_source_audit.py",
+    "tests/contracts/test_ci_public_source_shards.py",
+    "tests/contracts/test_ci_workflow_is_what_it_claims.py",
+    "--basetemp=/tmp/van-recovery-obl004-runtime-setup-r4-checks-20261101",
+    "--junitxml=/workspace/van-obl004-runtime-setup-repair-r4-20261101/checks/tests.xml",
+    "-q"
+  ],
+  "exit": 1,
+  "tests": 95,
+  "failures": 1,
+  "errors": 0,
+  "skipped": 0,
+  "completed": "2026-11-01T19:01:16.042637+00:00",
+  "source_after": {
+    ".github/workflows/van-ci.yml": "3ab3df781f9bb1444bd853f1b5035fb3a57db51a422aed9c7708738b7ac5d407",
+    "tests/rebuild/test_canonical_source_audit.py": "224422b8252acd2a307c11f189745542556593fe066b32049f1a125309e97e86",
+    "tools/ci/github-actions-ci.yml": "3ab3df781f9bb1444bd853f1b5035fb3a57db51a422aed9c7708738b7ac5d407",
+    "tools/rebuild/canonical_source_audit.py": "7f977e794725fd529736f822ba183a3e2d2348c57826fcaf1e588bc9f1dd056c"
+  },
+  "failed_fixtures": "RETAINED ownedtmp; inventory/archive before any cleanup, no largeworkspace copy"
+}

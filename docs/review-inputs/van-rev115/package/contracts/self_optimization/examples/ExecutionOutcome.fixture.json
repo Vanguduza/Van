@@ -1,0 +1,36 @@
+{
+  "available_ms": 1000,
+  "cash_state": "UNRECONCILED",
+  "cost_measurement_ref": null,
+  "environment": "FIXTURE",
+  "fills": [],
+  "maturity": {
+    "eligible_for_estimator": false,
+    "fees_complete": false,
+    "markout_complete": false,
+    "order_final": false
+  },
+  "objective_quantity_base": "1.0",
+  "objective_ref": "FIXTURE_OBJECTIVE_REF",
+  "observation_revision": 0,
+  "order_state": "OUTCOME_UNKNOWN",
+  "parent_cluster_id": "FIXTURE_PARENT_CLUSTER_ID",
+  "policy_binding_ref": "FIXTURE_POLICY_BINDING_REF",
+  "protection_state": "UNRESOLVED",
+  "record_id": "FIXTURE_ExecutionOutcome",
+  "record_type": "ExecutionOutcome",
+  "schema_version": 2,
+  "scope": {
+    "account_id": "FIXTURE_ACCOUNT",
+    "market_type": "CRYPTO_SPOT",
+    "ownership": "OWNER_MANUAL",
+    "product_id": "FIXTURE_PRODUCT_ID",
+    "scope_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+    "strategy_id": "FIXTURE_STRATEGY_ID",
+    "venue_id": "FIXTURE_VENUE"
+  },
+  "source_evidence_refs": [],
+  "supersedes_observation_ref": null,
+  "unknown_possible_base": "1.0",
+  "working_remaining_base": "0.0"
+}

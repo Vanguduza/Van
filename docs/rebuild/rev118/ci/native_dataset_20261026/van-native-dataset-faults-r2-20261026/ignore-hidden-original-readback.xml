@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="23" time="2.141" timestamp="2026-10-26T08:15:12.352314+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_native_catalog_store" name="test_real_catalog_original_replay_and_cold_readback_do_not_append[sqlite]" time="0.032" /><testcase classname="trading.tests.test_native_catalog_store" name="test_delisting_source_update_does_not_backdate_or_rewrite_prior_universe_vintage[sqlite]" time="0.016" /><testcase classname="trading.tests.test_native_catalog_store" name="test_catalog_scope_and_ordinal_remain_pinned_when_same_clock_has_more_captures[sqlite]" time="0.012" /><testcase classname="trading.tests.test_native_catalog_store" name="test_conflicting_request_keeps_original_first_capture[sqlite]" time="0.007" /><testcase classname="trading.tests.test_native_catalog_store" name="test_financial_or_other_event_kinds_cannot_share_catalog_source_ledger[sqlite]" time="0.005" /><testcase classname="trading.tests.test_native_catalog_store" name="test_global_byte_capacity_is_checked_before_new_scope_publication[sqlite]" time="0.009" /><testcase classname="trading.tests.test_native_catalog_store" name="test_hidden_original_readback_refuses_new_publication_instead_of_recreating_it[sqlite]" time="0.007"><failure message="vati.market_data.catalog_store.CatalogPublicationUnknown: native catalog publication unknown; reconcile original request">self = &lt;vati.market_data.catalog_store.NativeCatalogStore object at 0x7f0ec9b2f5f0&gt;
+request_id = 'new'
+captured = NativeSymbolCatalog(metadata_json='{"include_archived_symbols":true,"protocol_schema_sha256":"3f45296ea8a4eb98b1642cea..."native_account_id":12345,"provider":"CTRADER","transport_host":"demo.ctraderapi.com"}}', received_at_ms=1800000000000)
+
+    def record(self,request_id,captured):
+        if not isinstance(captured,NativeSymbolCatalog):raise CatalogArchiveError('native catalog captured source required')
+        # Revalidate the actual immutable capture before entering the writer.
+        NativeSymbolCatalog.from_body(captured.body());scope=captured.native_scope
+        if not isinstance(request_id,str) or REQUEST.fullmatch(request_id) is None:
+            raise CatalogArchiveError('native catalog original request identity invalid')
+        publication_requested=False;confirmation_needed=False
+        try:
+            with self.ledger.atomic():
+                rows,total,count=self._history(scope)
+                original=next((event for event in rows if event.payload['request_id']==request_id),None)
+                if original is not None:
+                    if original.payload['captured']!=captured.body():
+                        raise CatalogArchiveError('native catalog request conflicts with original capture')
+                    confirmation_needed=True
+                else:
+                    if count&gt;=self.max_events:
+                        raise CatalogArchiveError('native catalog publication event capacity')
+                    now=native_integer(self.clock(),minimum=captured.received_at_ms,maximum=253402300799000)
+                    if rows and now&lt;rows[-1].received_time_ms:raise CatalogArchiveError('native catalog publication clock moved backwards')
+                    payload={'format':'native-symbol-catalog-record/1','request_id':request_id,'scope':scope,
+                        'revision':len(rows)+1,'previous_record_hash':rows[-1].hash if rows else None,
+                        'captured':captured.body(),'recorded_at_ms':now}
+                    original=make_event(EventKind.NATIVE_SYMBOL_CATALOG,PRODUCER,payload,
+                        event_time_ms=captured.received_at_ms,received_time_ms=now,correlation_id=canonical_hash(scope))
+                    size=total+len(canonical_json(original.body()).encode())
+                    if size&gt;self.max_bytes:raise CatalogArchiveError('native catalog publication byte capacity')
+                    publication_requested=True
+                    self.ledger.append(original)
+            confirmation_needed=True
+            confirmed=self.lookup(scope,request_id)
+            if confirmed is None or confirmed['record_ref']!=original.hash:
+&gt;               raise CatalogPublicationUnknown('native catalog original publication readback unavailable')
+E               vati.market_data.catalog_store.CatalogPublicationUnknown: native catalog original publication readback unavailable
+
+trading/vati/market_data/catalog_store.py:134: CatalogPublicationUnknown
+
+The above exception was the direct cause of the following exception:
+
+source = (&lt;vati.core.ledger.Ledger object at 0x7f0ec9b2fe30&gt;, &lt;vati.market_data.catalog_store.NativeCatalogStore object at 0x7f0ec9b2f5f0&gt;)
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7f0ec9b2ca70&gt;
+
+    def test_hidden_original_readback_refuses_new_publication_instead_of_recreating_it(source,monkeypatch):
+        ledger,store=source;store.record('one',captured());head=ledger.head();iterate=ledger.iter
+        def hidden(kind=None,correlation_id=None):
+            for event in iterate(kind,correlation_id):
+                if event.kind is not EventKind.NATIVE_SYMBOL_CATALOG:yield event
+        monkeypatch.setattr(ledger,'iter',hidden)
+&gt;       with pytest.raises(CatalogArchiveError,match='readback missing'):store.record('new',captured())
+                                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_native_catalog_store.py:92: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;vati.market_data.catalog_store.NativeCatalogStore object at 0x7f0ec9b2f5f0&gt;
+request_id = 'new'
+captured = NativeSymbolCatalog(metadata_json='{"include_archived_symbols":true,"protocol_schema_sha256":"3f45296ea8a4eb98b1642cea..."native_account_id":12345,"provider":"CTRADER","transport_host":"demo.ctraderapi.com"}}', received_at_ms=1800000000000)
+
+    def record(self,request_id,captured):
+        if not isinstance(captured,NativeSymbolCatalog):raise CatalogArchiveError('native catalog captured source required')
+        # Revalidate the actual immutable capture before entering the writer.
+        NativeSymbolCatalog.from_body(captured.body());scope=captured.native_scope
+        if not isinstance(request_id,str) or REQUEST.fullmatch(request_id) is None:
+            raise CatalogArchiveError('native catalog original request identity invalid')
+        publication_requested=False;confirmation_needed=False
+        try:
+            with self.ledger.atomic():
+                rows,total,count=self._history(scope)
+                original=next((event for event in rows if event.payload['request_id']==request_id),None)
+                if original is not None:
+                    if original.payload['captured']!=captured.body():
+                        raise CatalogArchiveError('native catalog request conflicts with original capture')
+                    confirmation_needed=True
+                else:
+                    if count&gt;=self.max_events:
+                        raise CatalogArchiveError('native catalog publication event capacity')
+                    now=native_integer(self.clock(),minimum=captured.received_at_ms,maximum=253402300799000)
+                    if rows and now&lt;rows[-1].received_time_ms:raise CatalogArchiveError('native catalog publication clock moved backwards')
+                    payload={'format':'native-symbol-catalog-record/1','request_id':request_id,'scope':scope,
+                        'revision':len(rows)+1,'previous_record_hash':rows[-1].hash if rows else None,
+                        'captured':captured.body(),'recorded_at_ms':now}
+                    original=make_event(EventKind.NATIVE_SYMBOL_CATALOG,PRODUCER,payload,
+                        event_time_ms=captured.received_at_ms,received_time_ms=now,correlation_id=canonical_hash(scope))
+                    size=total+len(canonical_json(original.body()).encode())
+                    if size&gt;self.max_bytes:raise CatalogArchiveError('native catalog publication byte capacity')
+                    publication_requested=True
+                    self.ledger.append(original)
+            confirmation_needed=True
+            confirmed=self.lookup(scope,request_id)
+            if confirmed is None or confirmed['record_ref']!=original.hash:
+                raise CatalogPublicationUnknown('native catalog original publication readback unavailable')
+            return confirmed
+        except STORAGE_ERRORS as error:
+            if publication_requested or confirmation_needed:
+&gt;               raise CatalogPublicationUnknown('native catalog publication unknown; reconcile original request') from error
+E               vati.market_data.catalog_store.CatalogPublicationUnknown: native catalog publication unknown; reconcile original request
+
+trading/vati/market_data/catalog_store.py:138: CatalogPublicationUnknown</failure></testcase><testcase classname="trading.tests.test_native_catalog_store" name="test_lost_commit_ack_stays_unknown_then_original_is_recovered_once[sqlite]" time="0.009" /><testcase classname="trading.tests.test_native_catalog_store" name="test_missing_independent_readback_never_becomes_acknowledged_publication[sqlite]" time="0.007" /><testcase classname="trading.tests.test_native_catalog_store" name="test_different_native_accounts_have_distinct_original_scopes_and_revision_sequences[sqlite]" time="0.011" /><testcase classname="trading.tests.test_native_catalog_store" name="test_known_past_catalog_before_first_availability_is_missing_not_an_empty_universe[sqlite]" time="0.008" /><testcase classname="trading.tests.test_native_catalog_store" name="test_publication_clock_cannot_move_backwards_or_precede_source_capture[sqlite]" time="0.011" /><testcase classname="trading.tests.test_native_catalog_store" name="test_original_catalog_cannot_self_issue_dataset_permission_even_with_correct_event_seal[sqlite]" time="0.009" /><testcase classname="trading.tests.test_native_catalog_store" name="test_correct_event_seal_does_not_make_bool_or_float_source_clocks_valid[event_time_ms-True]" time="0.004" /><testcase classname="trading.tests.test_native_catalog_store" name="test_correct_event_seal_does_not_make_bool_or_float_source_clocks_valid[received_time_ms-True]" time="0.004" /><testcase classname="trading.tests.test_native_catalog_store" name="test_correct_event_seal_does_not_make_bool_or_float_source_clocks_valid[event_time_ms-1.0]" time="0.003" /><testcase classname="trading.tests.test_native_catalog_store" name="test_real_separate_process_catalog_writers_publish_one_original" time="1.160" /><testcase classname="trading.tests.test_native_catalog_store" name="test_actual_catalog_collector_joins_independent_wire_reader_and_original_source_ledger[sqlite]" time="0.016" /><testcase classname="trading.tests.test_native_catalog_store" name="test_reader_is_closed_before_catalog_source_writer_is_entered[sqlite]" time="0.006" /><testcase classname="trading.tests.test_native_catalog_store" name="test_collector_does_not_publish_other_native_scope_or_partial_request_profile[sqlite]" time="0.009" /><testcase classname="trading.tests.test_native_catalog_store" name="test_real_driver_commit_lost_reply_is_unknown_then_reconciled_on_original_connection" time="0.009" /><testcase classname="trading.tests.test_native_catalog_store" name="test_prepublication_source_storage_failure_is_not_a_completed_or_unknown_write[sqlite]" time="0.006" /><testcase classname="trading.tests.test_native_catalog_store" name="test_hidden_source_snapshot_is_explicitly_refused_even_if_the_sql_chain_is_healthy[sqlite]" time="0.009"><failure message="AssertionError: missing source readback was reported as an empty universe&#10;assert False">source = (&lt;vati.core.ledger.Ledger object at 0x7f0ec9bd46b0&gt;, &lt;vati.market_data.catalog_store.NativeCatalogStore object at 0x7f0ec9bd4d40&gt;)
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7f0ec9bd47d0&gt;
+
+    def test_hidden_source_snapshot_is_explicitly_refused_even_if_the_sql_chain_is_healthy(source,monkeypatch):
+        ledger,store=source;store.record('original',captured());head=ledger.head();iterate=ledger.iter
+        def hidden(kind=None,correlation_id=None):
+            for event in iterate(kind,correlation_id):
+                if event.kind is not EventKind.NATIVE_SYMBOL_CATALOG:yield event
+        monkeypatch.setattr(ledger,'iter',hidden)
+        refused=False
+        try:store.snapshot(SCOPE)
+        except CatalogArchiveError:refused=True
+&gt;       assert refused,'missing source readback was reported as an empty universe'
+E       AssertionError: missing source readback was reported as an empty universe
+E       assert False
+
+trading/tests/test_native_catalog_store.py:340: AssertionError</failure></testcase></testsuite></testsuites>

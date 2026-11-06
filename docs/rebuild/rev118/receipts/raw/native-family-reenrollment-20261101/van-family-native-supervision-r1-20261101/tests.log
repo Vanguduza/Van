@@ -1,0 +1,48 @@
+.F................                                                       [100%]
+=================================== FAILURES ===================================
+_ test_missing_native_stop_forces_full_family_close_without_partial_policy_admission _
+
+tmp_path = PosixPath('/tmp/van-recovery-family-native-supervision-r1-20261101/test_missing_native_stop_force0')
+
+    def test_missing_native_stop_forces_full_family_close_without_partial_policy_admission(tmp_path):
+        w,store,time,grant,plan,history=admitted_source_world(tmp_path,actual_runtime_lease=True,add_child=True,max_quantity='.20')
+        try:
+            positions=w.adapter.positions();pid=positions[-1].position_id
+            # The actual simulator native owner loses a stop; a remembered manager
+            # rule must not replace this observed absence.
+            from dataclasses import replace
+>           w.adapter._positions[pid]=replace(w.adapter._positions[pid],stop_price=None)
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_family_native_supervision.py:30: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+obj = {'symbol': 'EURUSD', 'direction': <Direction.LONG: 'LONG'>, 'qty': Decimal('0.03'), 'entry': Decimal('1.10607'), ...}
+changes = {'stop_price': None}
+
+    def replace(obj, /, **changes):
+        """Return a new object replacing specified fields with new values.
+    
+        This is especially useful for frozen classes.  Example usage::
+    
+          @dataclass(frozen=True)
+          class C:
+              x: int
+              y: int
+    
+          c = C(1, 2)
+          c1 = replace(c, x=3)
+          assert c1.x == 3 and c1.y == 2
+        """
+    
+        # We're going to mutate 'changes', but that's okay because it's a
+        # new dict, even if called with 'replace(obj, **my_changes)'.
+    
+        if not _is_dataclass_instance(obj):
+>           raise TypeError("replace() should be called on dataclass instances")
+E           TypeError: replace() should be called on dataclass instances
+
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/dataclasses.py:1559: TypeError
+=========================== short test summary info ============================
+FAILED trading/tests/test_family_native_supervision.py::test_missing_native_stop_forces_full_family_close_without_partial_policy_admission
+1 failed, 17 passed in 2.04s

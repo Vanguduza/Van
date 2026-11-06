@@ -1,0 +1,540 @@
+{
+ "provenance": {
+  "blueprint": {
+   "path": "docs/design/van-next/VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_9B_20261016.md",
+   "sha256": "855e2aca3ab6ffdc965c823c147ef7d3143453c7f49708404f052aee7348f7fc"
+  },
+  "owner_decisions": {
+   "path": "docs/design/van-next/VAN_NEXT_OWNER_DECISIONS_REV1.md",
+   "sha256": "696cecf07d871f23a15809e2e4c3af9411461064c2da2d5254905846e69c3aad"
+  },
+  "generator": {
+   "path": "docs/design/van-next/plan/generate_plan.py",
+   "sha256": "62794a01eb7d3a9a02808ee262f1c6a616924bfb787b2f2ee29730f8392b2d2f"
+  },
+  "requirement_lock": {
+   "path": "docs/design/van-next/plan/REQUIREMENT_LOCK_REV1_9B.json",
+   "sha256": "9b3954fd896f68467abe91571332f0fa2f4596da8be7c8528fbe4bcdd4809c49"
+  },
+  "surface_matrix": {
+   "path": "docs/design/van-next/VAN_78_SURFACE_PRESERVATION_MATRIX_REV1_2_20261015.json",
+   "sha256": "34b97daaf8d92951833bc0270998e9ae5159fdeffa078844a8d2d4241cf52d1d"
+  },
+  "aggregate_input_sha256": "9993481530b45579ff5a3718c0a9571c2e0d24141ffb210184193703133aae3e",
+  "aggregate_algorithm": "sha256(blueprint_bytes + b'\\n' + decisions_bytes + generator_bytes + requirement_lock_bytes + surface_matrix_bytes)"
+ },
+ "findings": [],
+ "packets": [
+  {
+   "du": "DU-00a",
+   "phase": "P0",
+   "milestone": "FULL",
+   "packet": "PKT-001",
+   "level": 0
+  },
+  {
+   "du": "DU-01",
+   "phase": "P0",
+   "milestone": "FULL",
+   "packet": "PKT-002",
+   "level": 1
+  },
+  {
+   "du": "DU-31",
+   "phase": "P0",
+   "milestone": "FULL",
+   "packet": "PKT-003",
+   "level": 2
+  },
+  {
+   "du": "DU-00b",
+   "phase": "P0",
+   "milestone": "FULL",
+   "packet": "PKT-004",
+   "level": 3
+  },
+  {
+   "du": "DU-02",
+   "phase": "P1",
+   "milestone": "FULL",
+   "packet": "PKT-005",
+   "level": 4
+  },
+  {
+   "du": "DU-24",
+   "phase": "P1",
+   "milestone": "FULL",
+   "packet": "PKT-006",
+   "level": 4
+  },
+  {
+   "du": "DU-03",
+   "phase": "P1",
+   "milestone": "FULL",
+   "packet": "PKT-007",
+   "level": 5
+  },
+  {
+   "du": "DU-04",
+   "phase": "P1",
+   "milestone": "FULL",
+   "packet": "PKT-008",
+   "level": 6
+  },
+  {
+   "du": "DU-29",
+   "phase": "P2",
+   "milestone": "M1",
+   "packet": "PKT-009",
+   "level": 4
+  },
+  {
+   "du": "DU-30",
+   "phase": "P2",
+   "milestone": "M1",
+   "packet": "PKT-010",
+   "level": 4
+  },
+  {
+   "du": "DU-14a",
+   "phase": "P2",
+   "milestone": "M1",
+   "packet": "PKT-011",
+   "level": 4
+  },
+  {
+   "du": "DU-29a",
+   "phase": "P2",
+   "milestone": "M1",
+   "packet": "PKT-012",
+   "level": 5
+  },
+  {
+   "du": "DU-14b",
+   "phase": "P2",
+   "milestone": "M1",
+   "packet": "PKT-013",
+   "level": 5
+  },
+  {
+   "du": "DU-28",
+   "phase": "P2",
+   "milestone": "M1",
+   "packet": "PKT-014",
+   "level": 6
+  },
+  {
+   "du": "DU-14c",
+   "phase": "P2",
+   "milestone": "M1",
+   "packet": "PKT-015",
+   "level": 6
+  },
+  {
+   "du": "DU-05",
+   "phase": "P2",
+   "milestone": "M1",
+   "packet": "PKT-016",
+   "level": 7
+  },
+  {
+   "du": "DU-07",
+   "phase": "P2",
+   "milestone": "M1",
+   "packet": "PKT-017",
+   "level": 7
+  },
+  {
+   "du": "DU-12a",
+   "phase": "P2",
+   "milestone": "M1",
+   "packet": "PKT-018",
+   "level": 7
+  },
+  {
+   "du": "DU-28b",
+   "phase": "P2",
+   "milestone": "M1",
+   "packet": "PKT-019",
+   "level": 7
+  },
+  {
+   "du": "DU-28e",
+   "phase": "P2",
+   "milestone": "M1",
+   "packet": "PKT-020",
+   "level": 7
+  },
+  {
+   "du": "DU-15",
+   "phase": "P2",
+   "milestone": "M1",
+   "packet": "PKT-021",
+   "level": 7
+  },
+  {
+   "du": "DU-08",
+   "phase": "P2",
+   "milestone": "M1",
+   "packet": "PKT-022",
+   "level": 7
+  },
+  {
+   "du": "DU-21",
+   "phase": "P2",
+   "milestone": "M1",
+   "packet": "PKT-023",
+   "level": 7
+  },
+  {
+   "du": "DU-09",
+   "phase": "P2",
+   "milestone": "M1",
+   "packet": "PKT-024",
+   "level": 8
+  },
+  {
+   "du": "DU-16",
+   "phase": "P2",
+   "milestone": "M1",
+   "packet": "PKT-025",
+   "level": 8
+  },
+  {
+   "du": "DU-10",
+   "phase": "P2",
+   "milestone": "M1",
+   "packet": "PKT-026",
+   "level": 9
+  },
+  {
+   "du": "DU-13",
+   "phase": "P2",
+   "milestone": "M1",
+   "packet": "PKT-027",
+   "level": 9
+  },
+  {
+   "du": "DU-11",
+   "phase": "P2",
+   "milestone": "M1",
+   "packet": "PKT-028",
+   "level": 10
+  },
+  {
+   "du": "DU-14d",
+   "phase": "P2",
+   "milestone": "M1",
+   "packet": "PKT-029",
+   "level": 10
+  },
+  {
+   "du": "DU-06",
+   "phase": "P2",
+   "milestone": "M1",
+   "packet": "PKT-030",
+   "level": 11
+  },
+  {
+   "du": "DU-29",
+   "phase": "P3",
+   "milestone": "M2",
+   "packet": "PKT-031",
+   "level": 4
+  },
+  {
+   "du": "DU-30",
+   "phase": "P3",
+   "milestone": "M2",
+   "packet": "PKT-032",
+   "level": 4
+  },
+  {
+   "du": "DU-14a",
+   "phase": "P3",
+   "milestone": "M2",
+   "packet": "PKT-033",
+   "level": 4
+  },
+  {
+   "du": "DU-29a",
+   "phase": "P3",
+   "milestone": "M2",
+   "packet": "PKT-034",
+   "level": 5
+  },
+  {
+   "du": "DU-14b",
+   "phase": "P3",
+   "milestone": "M2",
+   "packet": "PKT-035",
+   "level": 5
+  },
+  {
+   "du": "DU-28",
+   "phase": "P3",
+   "milestone": "M2",
+   "packet": "PKT-036",
+   "level": 6
+  },
+  {
+   "du": "DU-29c",
+   "phase": "P3",
+   "milestone": "FULL",
+   "packet": "PKT-037",
+   "level": 6
+  },
+  {
+   "du": "DU-14c",
+   "phase": "P3",
+   "milestone": "M2",
+   "packet": "PKT-038",
+   "level": 6
+  },
+  {
+   "du": "DU-14f",
+   "phase": "P3",
+   "milestone": "FULL",
+   "packet": "PKT-039",
+   "level": 6
+  },
+  {
+   "du": "DU-05",
+   "phase": "P3",
+   "milestone": "M2",
+   "packet": "PKT-040",
+   "level": 7
+  },
+  {
+   "du": "DU-07",
+   "phase": "P3",
+   "milestone": "M2",
+   "packet": "PKT-041",
+   "level": 7
+  },
+  {
+   "du": "DU-12a",
+   "phase": "P3",
+   "milestone": "M2",
+   "packet": "PKT-042",
+   "level": 7
+  },
+  {
+   "du": "DU-28b",
+   "phase": "P3",
+   "milestone": "M2",
+   "packet": "PKT-043",
+   "level": 7
+  },
+  {
+   "du": "DU-28c",
+   "phase": "P3",
+   "milestone": "FULL",
+   "packet": "PKT-044",
+   "level": 7
+  },
+  {
+   "du": "DU-28e",
+   "phase": "P3",
+   "milestone": "M2",
+   "packet": "PKT-045",
+   "level": 7
+  },
+  {
+   "du": "DU-14e",
+   "phase": "P3",
+   "milestone": "FULL",
+   "packet": "PKT-046",
+   "level": 7
+  },
+  {
+   "du": "DU-15",
+   "phase": "P3",
+   "milestone": "M2",
+   "packet": "PKT-047",
+   "level": 7
+  },
+  {
+   "du": "DU-08",
+   "phase": "P3",
+   "milestone": "M2",
+   "packet": "PKT-048",
+   "level": 7
+  },
+  {
+   "du": "DU-19",
+   "phase": "P3",
+   "milestone": "FULL",
+   "packet": "PKT-049",
+   "level": 7
+  },
+  {
+   "du": "DU-20",
+   "phase": "P3",
+   "milestone": "FULL",
+   "packet": "PKT-050",
+   "level": 7
+  },
+  {
+   "du": "DU-21",
+   "phase": "P3",
+   "milestone": "M2",
+   "packet": "PKT-051",
+   "level": 7
+  },
+  {
+   "du": "DU-09",
+   "phase": "P3",
+   "milestone": "M2",
+   "packet": "PKT-052",
+   "level": 8
+  },
+  {
+   "du": "DU-12b",
+   "phase": "P3",
+   "milestone": "FULL",
+   "packet": "PKT-053",
+   "level": 8
+  },
+  {
+   "du": "DU-28d",
+   "phase": "P3",
+   "milestone": "FULL",
+   "packet": "PKT-054",
+   "level": 8
+  },
+  {
+   "du": "DU-29b",
+   "phase": "P3",
+   "milestone": "FULL",
+   "packet": "PKT-055",
+   "level": 8
+  },
+  {
+   "du": "DU-16",
+   "phase": "P3",
+   "milestone": "M2",
+   "packet": "PKT-056",
+   "level": 8
+  },
+  {
+   "du": "DU-18",
+   "phase": "P3",
+   "milestone": "FULL",
+   "packet": "PKT-057",
+   "level": 8
+  },
+  {
+   "du": "DU-10",
+   "phase": "P3",
+   "milestone": "M2",
+   "packet": "PKT-058",
+   "level": 9
+  },
+  {
+   "du": "DU-12",
+   "phase": "P3",
+   "milestone": "FULL",
+   "packet": "PKT-059",
+   "level": 9
+  },
+  {
+   "du": "DU-13",
+   "phase": "P3",
+   "milestone": "M2",
+   "packet": "PKT-060",
+   "level": 9
+  },
+  {
+   "du": "DU-17",
+   "phase": "P3",
+   "milestone": "FULL",
+   "packet": "PKT-061",
+   "level": 9
+  },
+  {
+   "du": "DU-10b",
+   "phase": "P3",
+   "milestone": "FULL",
+   "packet": "PKT-062",
+   "level": 10
+  },
+  {
+   "du": "DU-10c",
+   "phase": "P3",
+   "milestone": "FULL",
+   "packet": "PKT-063",
+   "level": 10
+  },
+  {
+   "du": "DU-11",
+   "phase": "P3",
+   "milestone": "M2",
+   "packet": "PKT-064",
+   "level": 10
+  },
+  {
+   "du": "DU-14d",
+   "phase": "P3",
+   "milestone": "M2",
+   "packet": "PKT-065",
+   "level": 10
+  },
+  {
+   "du": "DU-06",
+   "phase": "P3",
+   "milestone": "M2",
+   "packet": "PKT-066",
+   "level": 11
+  },
+  {
+   "du": "DU-10d",
+   "phase": "P3",
+   "milestone": "FULL",
+   "packet": "PKT-067",
+   "level": 11
+  },
+  {
+   "du": "DU-22",
+   "phase": "P4",
+   "milestone": "FULL",
+   "packet": "PKT-068",
+   "level": 12
+  },
+  {
+   "du": "DU-23",
+   "phase": "P4",
+   "milestone": "FULL",
+   "packet": "PKT-069",
+   "level": 13
+  },
+  {
+   "du": "DU-25",
+   "phase": "P4",
+   "milestone": "FULL",
+   "packet": "PKT-070",
+   "level": 14
+  },
+  {
+   "du": "DU-26",
+   "phase": "P4",
+   "milestone": "FULL",
+   "packet": "PKT-071",
+   "level": 15
+  },
+  {
+   "du": "DU-MR",
+   "phase": "P5",
+   "milestone": "ROLLOUT",
+   "packet": "PKT-072",
+   "level": 16
+  },
+  {
+   "du": "DU-MR",
+   "phase": "P6",
+   "milestone": "RETIREMENT",
+   "packet": "PKT-073",
+   "level": 16
+  }
+ ]
+}

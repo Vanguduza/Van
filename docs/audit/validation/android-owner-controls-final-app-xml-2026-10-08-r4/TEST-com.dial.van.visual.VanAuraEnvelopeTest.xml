@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.visual.VanAuraEnvelopeTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-08T06:57:30" hostname="052fefa249ff" time="0.038">
+  <properties/>
+  <testcase name="semanticColourDoesNotRepaintIdentityStatesWithoutEnvelope" classname="com.dial.van.visual.VanAuraEnvelopeTest" time="0.002"/>
+  <testcase name="everyStateHasAZoneCFragment" classname="com.dial.van.visual.VanAuraEnvelopeTest" time="0.021"/>
+  <testcase name="zoneCTopologyIsUniquePerState" classname="com.dial.van.visual.VanAuraEnvelopeTest" time="0.008"/>
+  <testcase name="tradePreviewsReserveDistinctZoneCColours" classname="com.dial.van.visual.VanAuraEnvelopeTest" time="0.001"/>
+  <testcase name="lowAndStaticKeepReadableEnvelope" classname="com.dial.van.visual.VanAuraEnvelopeTest" time="0.004"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

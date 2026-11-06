@@ -1,0 +1,25 @@
+{
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "tools/rebuild/source_storage_audit.py",
+    "--report",
+    "/workspace/van-mt5-quotes-pull-r1-20261028-audit.json",
+    "trading/tests/test_mt5_quotes_pull.py",
+    "trading/tests/test_mt5_quote_book.py",
+    "trading/tests/test_mt5_quotes.py",
+    "trading/tests/test_mt5_quote_worker.py",
+    "trading/tests/test_mt5_symbol_book.py",
+    "trading/tests/test_mt5_symbol_contract_pull.py",
+    "--junitxml=/workspace/van-mt5-quotes-pull-r1-20261028.xml",
+    "-q"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 342589,
+  "started_at_utc": "2026-10-28T10:44:52.783165+00:00",
+  "timeout_seconds": 300,
+  "state": "COMPLETED",
+  "command_pid": 342592,
+  "exit": 0,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-28T10:44:55.762173+00:00"
+}

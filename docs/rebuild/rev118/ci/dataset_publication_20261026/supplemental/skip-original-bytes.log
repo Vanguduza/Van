@@ -1,0 +1,40 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+_ test_new_publication_requires_current_original_bytes_before_any_sql_append[sqlite-missing] _
+
+publication = (<vati.core.ledger.Ledger object at 0x7f452a14f920>, <vati.research.dataset_archive.DatasetCandidateArchive object at ...tive_account_id":123,"schema":"vati.ctrader-symbol/1","transport_host":"demo.ctraderapi.com"}', received_at_ms=100000))
+damage = 'missing'
+
+    @pytest.mark.parametrize('damage',['missing','changed'])
+    def test_new_publication_requires_current_original_bytes_before_any_sql_append(publication,damage):
+        ledger,archive,record,c=publication
+        path=archive.inspector.partitions.root/(record['partitions'][0]['artifact_id']+'.parquet')
+        if damage=='missing':path.unlink()
+        else:path.write_bytes(b'PAR1not-the-original-sourcePAR1')
+        before=state(ledger)
+>       with pytest.raises(ValueError):archive.publish('invalid-source',parse(record),expected_scope=c.native_scope)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/worker_tests/test_dataset_candidate_archive.py:89: Failed
+_ test_new_publication_requires_current_original_bytes_before_any_sql_append[sqlite-changed] _
+
+publication = (<vati.core.ledger.Ledger object at 0x7f452a14f6b0>, <vati.research.dataset_archive.DatasetCandidateArchive object at ...tive_account_id":123,"schema":"vati.ctrader-symbol/1","transport_host":"demo.ctraderapi.com"}', received_at_ms=100000))
+damage = 'changed'
+
+    @pytest.mark.parametrize('damage',['missing','changed'])
+    def test_new_publication_requires_current_original_bytes_before_any_sql_append(publication,damage):
+        ledger,archive,record,c=publication
+        path=archive.inspector.partitions.root/(record['partitions'][0]['artifact_id']+'.parquet')
+        if damage=='missing':path.unlink()
+        else:path.write_bytes(b'PAR1not-the-original-sourcePAR1')
+        before=state(ledger)
+>       with pytest.raises(ValueError):archive.publish('invalid-source',parse(record),expected_scope=c.native_scope)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/worker_tests/test_dataset_candidate_archive.py:89: Failed
+=========================== short test summary info ============================
+FAILED trading/worker_tests/test_dataset_candidate_archive.py::test_new_publication_requires_current_original_bytes_before_any_sql_append[sqlite-missing]
+FAILED trading/worker_tests/test_dataset_candidate_archive.py::test_new_publication_requires_current_original_bytes_before_any_sql_append[sqlite-changed]
+2 failed, 2 deselected in 1.38s

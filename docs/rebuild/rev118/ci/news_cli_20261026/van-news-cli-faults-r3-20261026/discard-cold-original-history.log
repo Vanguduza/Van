@@ -1,0 +1,20 @@
+..........F....                                                          [100%]
+=================================== FAILURES ===================================
+_ test_actual_cli_missing_file_retains_history_with_nonzero_unavailable_state __
+
+files = (PosixPath('/tmp/pytest-of-agent/pytest-324/test_actual_cli_missing_file_r0/news.json'), PosixPath('/tmp/pytest-of-age...missing_file_r0/feed.xml'), PosixPath('/tmp/pytest-of-agent/pytest-324/test_actual_cli_missing_file_r0/ledger.sqlite'))
+capsys = <_pytest.capture.CaptureFixture object at 0x7f6ae66b91c0>
+
+    def test_actual_cli_missing_file_retains_history_with_nonzero_unavailable_state(files,capsys):
+        assert invoke(files,capsys)[0]==0
+        files[1].unlink();code,report=invoke(files,capsys,now=NOW+100)
+        assert code==2 and report['source_health']['state']=='MISSING'
+        assert report['counts']=={'accepted':0,'duplicates':0,'skipped':0}
+>       assert len(report['headlines_recorded'])==1 and report['source_health']['coverage']=='UNKNOWN'
+E       assert (0 == 1)
+E        +  where 0 = len([])
+
+trading/tests/test_news_cli_source.py:128: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_news_cli_source.py::test_actual_cli_missing_file_retains_history_with_nonzero_unavailable_state
+1 failed, 14 passed in 0.87s

@@ -1,0 +1,780 @@
+{
+  "schema": "van.rebuild.native-funding-observations-source/1",
+  "observed_at_utc": "2026-10-24T08:46:00.574913+00:00",
+  "source_parent": "c0b579024c74d5415aa71fd16ce2605b66114fca",
+  "source_sha256": {
+    "trading/vati/core/events.py": "015c37d7642502de5c7249e07ef743c5070f1bf114513e22b725e16ea3a3e2e1",
+    "trading/vati/execution/base.py": "dd187ff699219fcffbe5ad0457b3187b3c519f8241292fdffad33f5aaa86cc0d",
+    "trading/vati/execution/ctrader/adapter.py": "4a1b82b48699b2d57df590a6d66afd947373419a2e2bde5449c77a54a98110f5",
+    "trading/vati/app/account_service.py": "8a5035229f789d5a0e327aa7936ea5f8cb837f1d7959f9551ab44ee5e0b2b8b3",
+    "trading/vati/app/service.py": "50fe47463f05803d85dcbcd0be15778f2f8b27092264c27aa75e87cb46d4736d",
+    "trading/vati/app/portfolio.py": "11e34334dd721c58a919fb6ab667572145e8ab8b805512a1cc010733c1d5bf55",
+    "android/app/src/main/java/com/dial/van/trading/TradingModels.kt": "1d1c3f421dfc3e3cc4fc1523f0699361def08a2f60e416904b850ec9455b20de",
+    "android/app/src/main/java/com/dial/van/trading/FundingObservation.kt": "973647099ee6574ce42a95cdc6d50206272a588226792fb9b0fbfda151873eef",
+    "android/app/src/test/java/com/dial/van/trading/FundingObservationTest.kt": "444b7046ae10f74a380e2d72971a9879ed1f27f8dc0a32e51fedd58fa9d341c7",
+    "backend/tests/test_funding_owner_api.py": "cbf1ef262b45ef6451630d4f8c7a3e55d2b8ecc2fe84e2cb7d9dfd6c887397ee",
+    "trading/vati/funding/worker.py": "58ae037edc5d047a7860d4c5667b6dd7e628d57e4c62de26938292b97ce596ef",
+    "trading/vati/funding/runtime.py": "737083c69cf35f58843c2f0a3fb9ca41e6f4f8c9300bb4415516a80bb9a3b3ba",
+    "trading/vati/funding/classification.py": "6baa2a8cd9493ed4164a773af562098c01f8d0e1a2b2472c463ac11dd595fc19",
+    "trading/vati/funding/journal.py": "e7f457e0644f04dda93fc8227ee341acc013ea700b987cf5dd238c0eb2e3c0d7",
+    "trading/vati/funding/unitization.py": "f90d7ac0f285fec4923cbbecce3414228816954f368e5a94fc2815cdf0d1842d",
+    "trading/vati/funding/native.py": "d99dd6d70cff595d9bcad4b6b37edd90895ed0f2fcdd3cb4a8bff71ca7fb4ec2",
+    "trading/vati/funding/__init__.py": "642caefb8a1b381d283a996cad701858646924b8af9134c34d40ef0a7e853446",
+    "trading/tests/test_funding_postgres.py": "2cb3d6a6f97aea4c118528fcb260f496609456a3e3213e344dee8a5188369cbe",
+    "trading/tests/test_funding_classification.py": "4c2aa5b6809fbddaa7b9d3870ab90ecf1774a3cf21790a32532e560afbe1a1fb",
+    "trading/tests/test_funding_runtime.py": "f5a525f37e2b82195ca1ce550a248a937e506195c1a5761b8dc6a09a4a5a22d8",
+    "trading/tests/test_funding_owner_reports.py": "cbd8275c5f9daa20fe584f870e763793c1629296568c279fba2c21d71f342c5a",
+    "trading/tests/test_funding_journal.py": "26e0579231d7042ebc4c4beb1450e7b2b005030cc44309c2d4af854976f0799a",
+    "trading/tests/test_funding_unitization.py": "1cf096829809433d35172d0887df44940d2c23016f160fa87f35a14cd236aeba",
+    "trading/tests/test_native_cash_history.py": "7ba27ac68cf502c5ba8aa2add870fdcc3b8709c5e421e40d9300e979c67e6ea2",
+    "backend/tests/test_chart_workspace_backup.py": "637e8d5a80490fa47e9b853bd7ee5db01452560c0b1f1b9cda2bcf44b39b9ab8"
+  },
+  "provider_contract_sha256": {
+    "trading/vati/execution/ctrader/proto/OpenApiMessages.proto": "a84df9b528e69a494e197d48e21d6291b3d76db31396663a8188721eef9fcf35",
+    "trading/vati/execution/ctrader/proto/OpenApiModelMessages.proto": "56338dcac45a149227678b7c23637d64f4e2b607f6649af82394ce5c0957fedf"
+  },
+  "executions": {
+    "native_unitization_runtime": {
+      "tests": 103,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 103,
+      "seconds": 28.106,
+      "xml_sha256": "3f6d98892db1156542f011e14f0932acbffd0b9324e67febad885b16e2f71492"
+    },
+    "final_native_postgresql": {
+      "tests": 27,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 27,
+      "seconds": 0.722,
+      "xml_sha256": "ad51c487bb753697c67bf7e5c2db8befb4e3a331cbc29979e4b1adfe6cb25d4b"
+    },
+    "final_gateway_storage_backup_integration": {
+      "tests": 182,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 182,
+      "seconds": 34.017,
+      "xml_sha256": "a2a8962efc0d5b7da3b31dd9ba0bd3fc49defe603f50c7d237f7908667f5e6d9"
+    },
+    "owner_registry": {
+      "tests": 19,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 19,
+      "seconds": 5.007,
+      "xml_sha256": "be6931a66083134d79505170e218ecde8062d2eb597eb28f4ad78d00af79a598"
+    },
+    "owner_runtime_contract": {
+      "tests": 16,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 16,
+      "seconds": 0.155,
+      "xml_sha256": "f1062914f5c4debbadcccaa12c72d70e53f2a405fe2fbd3162f53160b02a52a7"
+    },
+    "rebuild": {
+      "tests": 80,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 80,
+      "seconds": 34.168,
+      "xml_sha256": "2216e268e519fe0f72e8d2289fba16f547b19fb8cde15b54dbff249aca971612"
+    },
+    "android_funding_parser": {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 2,
+      "seconds": 0.089,
+      "xml_sha256": "27440df52e7cc033c169a833513a7fd48a75ca391c54bc852c5899db8ce8f4fe"
+    },
+    "android_existing_trading_parser": {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 3,
+      "seconds": 0.076,
+      "xml_sha256": "d9c8429ab888892c63d84cdc7433a94a46d3d0f1dfa35a19cdd01bf1c477bf6a"
+    }
+  },
+  "storage_audit": {
+    "schema": "van.source-storage-audit/1",
+    "forbidden_events": [],
+    "source_sha256": "d4e270150fb0da6e8d79b449dd0de68fd1f97b3ccea3d282f31d91297edbd495",
+    "root": "/workspace/van-review-2026-10-18/publish",
+    "scope": "SQLite opens, path-based writable opens and directory/link/rename/delete events under data and backend/data",
+    "limits": "Python audit events only; existing fd writes, native-library raw I/O and external processes are not an OS sandbox. Git state is checked separately."
+  },
+  "private_pg_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "fault_campaign": {
+    "definitions": [
+      [
+        "lose signed native cash amounts",
+        [
+          [
+            "trading/vati/funding/native.py",
+            "int(value<0)",
+            "0"
+          ]
+        ],
+        "trading/tests/test_native_cash_history.py::test_cash_statements_retain_negative_native_money_through_actual_framed_protocol"
+      ],
+      [
+        "recount a repeated original statement",
+        [
+          [
+            "trading/vati/funding/journal.py",
+            "if event.payload['content_key']==key:return self._receipt(event)",
+            "if False:return self._receipt(event)"
+          ]
+        ],
+        "trading/tests/test_funding_journal.py::test_repeat_and_alias_relabel_retain_first_identity_and_availability"
+      ],
+      [
+        "hide changed native financial history",
+        [
+          [
+            "trading/vati/funding/journal.py",
+            "'content_key':key,'state':'CONFLICT' if conflicts else 'OBSERVED'",
+            "'content_key':key,'state':'OBSERVED'"
+          ]
+        ],
+        "trading/tests/test_funding_journal.py::test_conflicting_native_history_is_retained_without_overwriting_original_or_old_view"
+      ],
+      [
+        "accept a foreign account inside a hashed observation",
+        [
+          [
+            "trading/vati/funding/journal.py",
+            "statement.scope_hash!=scope_hash or self._key(statement)!=event.payload['content_key']",
+            "False"
+          ]
+        ],
+        "trading/tests/test_funding_journal.py::test_ledger_readback_rejects_a_valid_hash_with_foreign_native_scope_in_the_body"
+      ],
+      [
+        "classify an added deposit as account profit",
+        [
+          [
+            "trading/vati/funding/unitization.py",
+            "next_units=units+delta/nav",
+            "next_units=units"
+          ]
+        ],
+        "trading/tests/test_funding_unitization.py::test_deposit_is_not_profit_and_withdrawal_is_not_a_loss"
+      ],
+      [
+        "claim zero drawdown from incomplete valuation",
+        [
+          [
+            "trading/vati/funding/unitization.py",
+            "'worst_observed_drawdown':_render(worst) if status!='UNMEASURED' else None",
+            "'worst_observed_drawdown':_render(worst)"
+          ]
+        ],
+        "trading/tests/test_funding_unitization.py::test_unmeasured_results_do_not_publish_zero_drawdown_as_if_it_were_a_complete_measurement"
+      ],
+      [
+        "merge facts into a rebound account profile",
+        [
+          [
+            "trading/vati/funding/runtime.py",
+            "login!=str(scope['native_account_id'])",
+            "False"
+          ]
+        ],
+        "trading/tests/test_funding_owner_reports.py::test_native_funding_facts_survive_runtime_snapshot_and_only_current_profile_can_read_them"
+      ],
+      [
+        "report an unadjusted native deposit as owner PnL",
+        [
+          [
+            "trading/vati/app/portfolio.py",
+            "if a.get('broker')!='PAPER':",
+            "if False:"
+          ]
+        ],
+        "trading/tests/test_funding_owner_reports.py::test_native_deposit_without_qualified_cash_coverage_is_not_reported_as_profit"
+      ],
+      [
+        "drop single-session ingestion wiring",
+        [
+          [
+            "trading/vati/app/service.py",
+            "funding = snapshot_funding(self,r.cycle.ledger,r.cycle.adapter,acct,now_ms=now_ms)",
+            "funding = {'state':'UNSUPPORTED'}"
+          ]
+        ],
+        "trading/tests/test_funding_runtime.py::test_both_existing_runtime_snapshot_producers_ingest_native_facts[session]"
+      ],
+      [
+        "drop account-runtime ingestion wiring",
+        [
+          [
+            "trading/vati/app/account_service.py",
+            "funding = snapshot_funding(self,self._ledger,self.adapter,acct,now_ms=now_ms)",
+            "funding = {'state':'UNSUPPORTED'}"
+          ]
+        ],
+        "trading/tests/test_funding_runtime.py::test_both_existing_runtime_snapshot_producers_ingest_native_facts[account]"
+      ],
+      [
+        "allow changed bonus metadata during valuation",
+        [
+          [
+            "trading/vati/execution/ctrader/adapter.py",
+            "if latest['trader'].get(key)!=t.get(key) or (key in latest['trader'])!=(key in t):raise ValueError()",
+            "if False:raise ValueError()"
+          ]
+        ],
+        "trading/tests/test_funding_runtime.py::test_changed_native_version_or_bonus_during_mark_is_never_verified"
+      ],
+      [
+        "query cash history before native account registration",
+        [
+          [
+            "trading/vati/funding/runtime.py",
+            "start=max(start,mark.registered_at_ms)",
+            "start=start"
+          ]
+        ],
+        "trading/tests/test_funding_runtime.py::test_first_runtime_history_window_respects_native_account_registration"
+      ]
+    ],
+    "records": [
+      {
+        "case": 0,
+        "phase": "control",
+        "reason": "lose signed native cash amounts",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "b5569f95f13929ef807b22c926adea71e355c881219d05d68a37d44c473138fd"
+      },
+      {
+        "case": 0,
+        "phase": "fault",
+        "reason": "lose signed native cash amounts",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "b3acc76d6c3a011032d888c1e458ca4dce12ae7faa1c2089334577030f06d9a1"
+      },
+      {
+        "case": 1,
+        "phase": "control",
+        "reason": "recount a repeated original statement",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "5082e222f3922996f708c1dc0e36c1825ee38c8f2464467106578a216ed8195d"
+      },
+      {
+        "case": 1,
+        "phase": "fault",
+        "reason": "recount a repeated original statement",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "0ce8b4b0c1add6ef61f3ba0e7f542533a8b08de19b1b93467a1799bb82d32fe6"
+      },
+      {
+        "case": 2,
+        "phase": "control",
+        "reason": "hide changed native financial history",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "404ef1fbad094f9723fdcb7035527646229523790bff1555017d3eead50bf8bb"
+      },
+      {
+        "case": 2,
+        "phase": "fault",
+        "reason": "hide changed native financial history",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "7f3105af34169c55197d6e40735854fba5c2b264d2edb7469bb5ce04653c307d"
+      },
+      {
+        "case": 3,
+        "phase": "control",
+        "reason": "accept a foreign account inside a hashed observation",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "7c9f7a748a11994a84f3901b306991ccaef4bcc6b4453e2105cbbdc09d01440b"
+      },
+      {
+        "case": 3,
+        "phase": "fault",
+        "reason": "accept a foreign account inside a hashed observation",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "bf7ec8c405ed0130214d568f39233a1922c0cc32750c4c9ed233e43d0df7e612"
+      },
+      {
+        "case": 4,
+        "phase": "control",
+        "reason": "classify an added deposit as account profit",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "441c22a9b600a3d8979b86c23f8b586b253f4cbeaf35d3337a369155d9b69f52"
+      },
+      {
+        "case": 4,
+        "phase": "fault",
+        "reason": "classify an added deposit as account profit",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "533f3a989594bb647d516de8eeae8348c3e557804172a7a86492dc93e2abf2c2"
+      },
+      {
+        "case": 5,
+        "phase": "control",
+        "reason": "claim zero drawdown from incomplete valuation",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "7a37410d3d0fa58ce6be3c4556c04bff1a96c3a341313c36d25ad1e280d59653"
+      },
+      {
+        "case": 5,
+        "phase": "fault",
+        "reason": "claim zero drawdown from incomplete valuation",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "5a8fb39728959ad3c4f59d5c6cf9eb0d1ac82ab5fdd7a6f717589406d15e5270"
+      },
+      {
+        "case": 6,
+        "phase": "control",
+        "reason": "merge facts into a rebound account profile",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "9696887eefb78d28d44a185e99e8001780de5cce48efc6699a7711ab4d79ed89"
+      },
+      {
+        "case": 6,
+        "phase": "fault",
+        "reason": "merge facts into a rebound account profile",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "c46860c568ed46d7708092a934d897ac4222e1cfa39245545c19e782940a92b1"
+      },
+      {
+        "case": 7,
+        "phase": "control",
+        "reason": "report an unadjusted native deposit as owner PnL",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "792d66eb4ba0a7e2baef64898c9d175b8c87b0b9f69b5006dcc90d3d3ec7d61d"
+      },
+      {
+        "case": 7,
+        "phase": "fault",
+        "reason": "report an unadjusted native deposit as owner PnL",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "e3dd3e95a5f68f4e8b20a6960fe48b71a0646cb3e287be38b5f0df53b883f8b3"
+      },
+      {
+        "case": 8,
+        "phase": "control",
+        "reason": "drop single-session ingestion wiring",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "b69dc2c9a0278b4252353ca8a891833061108fe34787955c5ecc1e11d19c2143"
+      },
+      {
+        "case": 8,
+        "phase": "fault",
+        "reason": "drop single-session ingestion wiring",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "abd57dc9898f005a50dd3f5a31f74c2014f501dfcd0226ca26e6b4b9a939c0d9"
+      },
+      {
+        "case": 9,
+        "phase": "control",
+        "reason": "drop account-runtime ingestion wiring",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "8ff4edf4141077a8e72cc5db62d8906baf6740e02c9ce292a009ed7cc45d9e47"
+      },
+      {
+        "case": 9,
+        "phase": "fault",
+        "reason": "drop account-runtime ingestion wiring",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "cf7868c0e9626267710662735dde45ec133f04b2351be4571e38363fea975aa1"
+      },
+      {
+        "case": 10,
+        "phase": "control",
+        "reason": "allow changed bonus metadata during valuation",
+        "exit_code": 0,
+        "counts": {
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "f20dea5da602f95501f50c7cc13a86176d25c7ae67d271e2c848452964d0e659"
+      },
+      {
+        "case": 10,
+        "phase": "fault",
+        "reason": "allow changed bonus metadata during valuation",
+        "exit_code": 1,
+        "counts": {
+          "tests": 4,
+          "failures": 4,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 4,
+        "xml_sha256": "1b1ed414cd7202faa83bee594b1edacce83020bdb11888c57a58dd85f9eac23c"
+      },
+      {
+        "case": 11,
+        "phase": "control",
+        "reason": "query cash history before native account registration",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "87e738a17f5cc9d2ca6eb9d313719afd8501160a66ef0d6b6a8541fba070f8f6"
+      },
+      {
+        "case": 11,
+        "phase": "fault",
+        "reason": "query cash history before native account registration",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "4bc2712ec6769e836cc1bba3050fc70c452069caa0b6f57caf90af244838526c"
+      }
+    ],
+    "before": {
+      "trading/vati/funding/native.py": "d99dd6d70cff595d9bcad4b6b37edd90895ed0f2fcdd3cb4a8bff71ca7fb4ec2",
+      "trading/vati/funding/journal.py": "e7f457e0644f04dda93fc8227ee341acc013ea700b987cf5dd238c0eb2e3c0d7",
+      "trading/vati/funding/unitization.py": "f90d7ac0f285fec4923cbbecce3414228816954f368e5a94fc2815cdf0d1842d",
+      "trading/vati/funding/runtime.py": "737083c69cf35f58843c2f0a3fb9ca41e6f4f8c9300bb4415516a80bb9a3b3ba",
+      "trading/vati/app/portfolio.py": "11e34334dd721c58a919fb6ab667572145e8ab8b805512a1cc010733c1d5bf55",
+      "trading/vati/app/service.py": "50fe47463f05803d85dcbcd0be15778f2f8b27092264c27aa75e87cb46d4736d",
+      "trading/vati/app/account_service.py": "8a5035229f789d5a0e327aa7936ea5f8cb837f1d7959f9551ab44ee5e0b2b8b3",
+      "trading/vati/execution/ctrader/adapter.py": "4a1b82b48699b2d57df590a6d66afd947373419a2e2bde5449c77a54a98110f5"
+    },
+    "after": {
+      "trading/vati/funding/native.py": "d99dd6d70cff595d9bcad4b6b37edd90895ed0f2fcdd3cb4a8bff71ca7fb4ec2",
+      "trading/vati/funding/journal.py": "e7f457e0644f04dda93fc8227ee341acc013ea700b987cf5dd238c0eb2e3c0d7",
+      "trading/vati/funding/unitization.py": "f90d7ac0f285fec4923cbbecce3414228816954f368e5a94fc2815cdf0d1842d",
+      "trading/vati/funding/runtime.py": "737083c69cf35f58843c2f0a3fb9ca41e6f4f8c9300bb4415516a80bb9a3b3ba",
+      "trading/vati/app/portfolio.py": "11e34334dd721c58a919fb6ab667572145e8ab8b805512a1cc010733c1d5bf55",
+      "trading/vati/app/service.py": "50fe47463f05803d85dcbcd0be15778f2f8b27092264c27aa75e87cb46d4736d",
+      "trading/vati/app/account_service.py": "8a5035229f789d5a0e327aa7936ea5f8cb837f1d7959f9551ab44ee5e0b2b8b3",
+      "trading/vati/execution/ctrader/adapter.py": "4a1b82b48699b2d57df590a6d66afd947373419a2e2bde5449c77a54a98110f5"
+    },
+    "source_restored": true
+  },
+  "original_deposit_failure": {
+    "exit_code": 1,
+    "log_sha256": "20fbc743503c455ccd2aba6dee0837296269dc2e727d9577f227af8bbe67b715",
+    "source_head": "c0b579024c74d5415aa71fd16ce2605b66114fca",
+    "meaning": "Original native equity change100 incorrectly appeared as day_pnl100; the candidate reports unmeasured performance and retains the raw change under its actual meaning."
+  },
+  "earlier_executions": {
+    "postgres_before": {
+      "passed": 24,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "basis": "terminal log; original XML path was reused by subsequent runs",
+      "log_sha256": "d903f6903eee0964335bd5fa80ffca245d49bf40d7d48bcebfa198eb4e459d54"
+    },
+    "postgres_diagnostic": "Diagnostic3-test rerun reproduced the same worker failure; frame-only traceback retained locally.",
+    "initial_runtime": {
+      "tests": 14,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 12,
+      "seconds": 0.513,
+      "xml_sha256": "5a8bdad699b8e1707f02fc6de01016853e74a2cf0c5d33b7cb57ffdbaedecd7d"
+    },
+    "notes": [
+      "Initial runtime12pass2fail came from a fixture returning a row outside a point request and an incorrect class import. Neither source guard was weakened.",
+      "An attempted pre-change cross-checkout pytest imported the candidate through its conftest and passed; it is not pre-change evidence. The independent direct Python oracle above imports the committed original source and fails by assertion.",
+      "Two early fault campaigns stopped on a nonunique edit anchor after two passing control/fault pairs; source restoration succeeded. The final12-case campaign uses unique anchors and all24 phases completed.",
+      "The real PostgreSQL worker originally guessed SQLite from keyword conninfo. The final worker retains the original PostgreSQL engine and named ledger; the actual failing fixture is unchanged."
+    ]
+  },
+  "initial_integration_preimages": {
+    "trading/vati/core/events.py": {
+      "preimage_sha256": "4c9cf66e2431c2a97eb63d2158d197109c872a98a084d5f70ec6a316f7d4de0c",
+      "candidate_sha256": "015c37d7642502de5c7249e07ef743c5070f1bf114513e22b725e16ea3a3e2e1"
+    },
+    "trading/vati/execution/base.py": {
+      "preimage_sha256": "06238f039018468a49f7d1586186f97d6a093e003cc85456ccc388b48cef8ce5",
+      "candidate_sha256": "dd187ff699219fcffbe5ad0457b3187b3c519f8241292fdffad33f5aaa86cc0d"
+    },
+    "trading/vati/execution/ctrader/adapter.py": {
+      "preimage_sha256": "66a741ee9645b63c07fdd23881df527d2027ff0d85b365b6dc0a0505a0d251b4",
+      "candidate_sha256": "82bf3f6d4620d7dd1998a8bf55c37588af2c69e43a3e39bb13bd1f3a22391a52"
+    },
+    "trading/vati/app/account_service.py": {
+      "preimage_sha256": "f0450ede81a17436a75cd9ce54ba6c00265c308ad6de306ec720b4280378f39a",
+      "candidate_sha256": "a7aad84d84f30f4e3c6650f36756211ffd1d051516e9ca12f7523f43787c1c5f"
+    },
+    "trading/vati/app/service.py": {
+      "preimage_sha256": "9d96fa29bc3275a8aad65a1a82f73ee871ba55cac725e1b00cde4067c2e3aa1b",
+      "candidate_sha256": "50fe47463f05803d85dcbcd0be15778f2f8b27092264c27aa75e87cb46d4736d"
+    },
+    "trading/vati/app/portfolio.py": {
+      "preimage_sha256": "b5b1d8363c046118f78888fb53c9a3320391749b7b84972d38599a96f3dc99a2",
+      "candidate_sha256": "11e34334dd721c58a919fb6ab667572145e8ab8b805512a1cc010733c1d5bf55"
+    },
+    "android/app/src/main/java/com/dial/van/trading/TradingModels.kt": {
+      "preimage_sha256": "fb8da94dd68f64950ef8f1898f278e146635d95dbda2aa829494c201ea5f4e5a",
+      "candidate_sha256": "1d1c3f421dfc3e3cc4fc1523f0699361def08a2f60e416904b850ec9455b20de"
+    },
+    "android/app/src/main/java/com/dial/van/trading/FundingObservation.kt": {
+      "preimage_sha256": null,
+      "candidate_sha256": "973647099ee6574ce42a95cdc6d50206272a588226792fb9b0fbfda151873eef"
+    },
+    "android/app/src/test/java/com/dial/van/trading/FundingObservationTest.kt": {
+      "preimage_sha256": null,
+      "candidate_sha256": "444b7046ae10f74a380e2d72971a9879ed1f27f8dc0a32e51fedd58fa9d341c7"
+    },
+    "backend/tests/test_funding_owner_api.py": {
+      "preimage_sha256": null,
+      "candidate_sha256": "cbf1ef262b45ef6451630d4f8c7a3e55d2b8ecc2fe84e2cb7d9dfd6c887397ee"
+    },
+    "trading/vati/funding/worker.py": {
+      "preimage_sha256": null,
+      "candidate_sha256": "58ae037edc5d047a7860d4c5667b6dd7e628d57e4c62de26938292b97ce596ef"
+    },
+    "trading/vati/funding/runtime.py": {
+      "preimage_sha256": null,
+      "candidate_sha256": "7319bbc2536dff83cf0ec9b4b27d59b57f69765dc3aeacbe23d613c472afc30c"
+    },
+    "trading/vati/funding/classification.py": {
+      "preimage_sha256": null,
+      "candidate_sha256": "6baa2a8cd9493ed4164a773af562098c01f8d0e1a2b2472c463ac11dd595fc19"
+    },
+    "trading/vati/funding/journal.py": {
+      "preimage_sha256": null,
+      "candidate_sha256": "e7f457e0644f04dda93fc8227ee341acc013ea700b987cf5dd238c0eb2e3c0d7"
+    },
+    "trading/vati/funding/unitization.py": {
+      "preimage_sha256": null,
+      "candidate_sha256": "f90d7ac0f285fec4923cbbecce3414228816954f368e5a94fc2815cdf0d1842d"
+    },
+    "trading/vati/funding/native.py": {
+      "preimage_sha256": null,
+      "candidate_sha256": "b8bd20c56fbfa05aa27619cfc7cd204237f61d675917cc44797fbd32319cae70"
+    },
+    "trading/vati/funding/__init__.py": {
+      "preimage_sha256": null,
+      "candidate_sha256": "642caefb8a1b381d283a996cad701858646924b8af9134c34d40ef0a7e853446"
+    },
+    "trading/tests/test_funding_postgres.py": {
+      "preimage_sha256": null,
+      "candidate_sha256": "2cb3d6a6f97aea4c118528fcb260f496609456a3e3213e344dee8a5188369cbe"
+    },
+    "trading/tests/test_funding_classification.py": {
+      "preimage_sha256": null,
+      "candidate_sha256": "4c2aa5b6809fbddaa7b9d3870ab90ecf1774a3cf21790a32532e560afbe1a1fb"
+    },
+    "trading/tests/test_funding_runtime.py": {
+      "preimage_sha256": null,
+      "candidate_sha256": "33cc15ba6f61164ae5f6d21c7d55e7a5555242b0089d52e71c2fe5ea27685b3b"
+    },
+    "trading/tests/test_funding_owner_reports.py": {
+      "preimage_sha256": null,
+      "candidate_sha256": "cbd8275c5f9daa20fe584f870e763793c1629296568c279fba2c21d71f342c5a"
+    },
+    "trading/tests/test_funding_journal.py": {
+      "preimage_sha256": null,
+      "candidate_sha256": "26e0579231d7042ebc4c4beb1450e7b2b005030cc44309c2d4af854976f0799a"
+    },
+    "trading/tests/test_funding_unitization.py": {
+      "preimage_sha256": null,
+      "candidate_sha256": "1cf096829809433d35172d0887df44940d2c23016f160fa87f35a14cd236aeba"
+    },
+    "trading/tests/test_native_cash_history.py": {
+      "preimage_sha256": null,
+      "candidate_sha256": "7ba27ac68cf502c5ba8aa2add870fdcc3b8709c5e421e40d9300e979c67e6ea2"
+    }
+  },
+  "native_data_semantics": [
+    "Provider/environment/native account/deposit asset/currency bind cash identity; aliases and receipt times do not replace native IDs.",
+    "Every known vendored native balance-operation enum has one explicit category. Unknown operation/sign conflict is unresolved. Broker credit/support and IB business income are not claimed as trade alpha.",
+    "Native cash history retains missing optional valuations and versions, exact money digits, original availability, conflicts, same-ID dedup and prior as-of views; external notes are excluded.",
+    "Both runtimes queue a bounded background read using a separate authenticated native connection and a separate journal connection. Weekly catch-up cursors advance only from original recorded native windows, including registration bounds.",
+    "Current native marked equity excludes separate bonuses by construction; historical total equity is preserved raw. No historical credit normalization or complete return qualification is inferred.",
+    "Native day/week performance and drawdown stay null until properly reconstructed. Raw equity changes are labeled separately; partial totals remain null. Native-profile rebinding hides stale financial values.",
+    "Existing accounts/portfolio endpoints and Android AccountCard parse the additive funding observations with exact ID/money strings. No frontend redesign or new effect endpoint was added.",
+    "Failed account startup runs the existing finally cleanup, closes funding admission and retains the original startup exception; an actual blocked read-worker shutdown test covers the path."
+  ],
+  "original_mutation_preflight": {
+    "schema": "van.rebuild.mutation-registry-preflight/1",
+    "registry_sha256": "35d10c7b0f2b8319b7f7305828262c972b2a6451139d75b9e83c7d0062282955",
+    "mutation_count": 374,
+    "edit_count": 383,
+    "findings": [],
+    "execution_state": "NOT_RUN",
+    "status": "ANCHORS_VALID_BASELINES_AND_MUTATIONS_NOT_EXECUTED"
+  },
+  "remaining": [
+    "Complete source-bound historical valuation/credit normalization and ordering/reconciliation before exposing measured native cash-flow-neutral returns. The exact unitization calculator is source-tested, not a collector qualification.",
+    "Other venue cash ingestion, complete funding ledger reconciliation/compensating reversals, risk-capital/reservation integration and BE-007 payout/deposit/hosted handoff remain under the original programme.",
+    "Current-source full backend/contracts and trading runs; native F15/BG admission, owner policies, trusted-main intake, service deployment/signing/provisioning, actual providers/host security/recovery and S24 acceptance."
+  ],
+  "qualifications": {
+    "whole_unit_acceptance": "NOT_ISSUED",
+    "return_qualification": "NOT_ISSUED",
+    "execution_authority": false,
+    "financial_effects_submitted": false,
+    "production_deployed": false,
+    "handset_tested": false,
+    "profitability_claimed": false
+  }
+}

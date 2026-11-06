@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="4" failures="0" skipped="0" tests="27" time="1.920" timestamp="2026-10-29T00:05:25.183578+00:00" hostname="6e9feff21467"><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_actual_signed_worker_emits_only_observed_recorded_entry_components[-1.25--0.125-1.375]" time="0.037" /><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_actual_signed_worker_emits_only_observed_recorded_entry_components[0-0-0]" time="0.007" /><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_actual_signed_worker_emits_only_observed_recorded_entry_components[0.25-0--.25]" time="0.006" /><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_native_history_missing_a_required_component_retains_fill_and_unknown_cost[commission]" time="0.005" /><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_native_history_missing_a_required_component_retains_fill_and_unknown_cost[fee]" time="0.005" /><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_native_history_missing_a_required_component_retains_fill_and_unknown_cost[entry]" time="0.005" /><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_native_history_missing_a_required_component_retains_fill_and_unknown_cost[time_msc]" time="0.004" /><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_native_history_missing_a_required_component_retains_fill_and_unknown_cost[volume]" time="0.006" /><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_scope_unit_or_convention_mismatch_cannot_become_a_measured_charge[deal_id-99]" time="0.005" /><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_scope_unit_or_convention_mismatch_cannot_become_a_measured_charge[order_id-99]" time="0.004" /><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_scope_unit_or_convention_mismatch_cannot_become_a_measured_charge[position_ticket-99]" time="0.005" /><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_scope_unit_or_convention_mismatch_cannot_become_a_measured_charge[position_identifier-0]" time="0.004" /><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_scope_unit_or_convention_mismatch_cannot_become_a_measured_charge[symbol-GBPUSD]" time="0.006" /><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_scope_unit_or_convention_mismatch_cannot_become_a_measured_charge[side-SELL]" time="0.006" /><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_scope_unit_or_convention_mismatch_cannot_become_a_measured_charge[volume-99]" time="0.005" /><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_scope_unit_or_convention_mismatch_cannot_become_a_measured_charge[commission_delta-NaN]" time="0.004" /><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_scope_unit_or_convention_mismatch_cannot_become_a_measured_charge[fee_delta-None]" time="0.007" /><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_scope_unit_or_convention_mismatch_cannot_become_a_measured_charge[native_time_ms-True]" time="0.005" /><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_scope_unit_or_convention_mismatch_cannot_become_a_measured_charge[entry_type-INOUT]" time="0.005" /><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_scope_unit_or_convention_mismatch_cannot_become_a_measured_charge[cash_convention-UNQUALIFIED]" time="0.006" /><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_scope_unit_or_convention_mismatch_cannot_become_a_measured_charge[complete_future_charges-True]" time="0.007" /><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_scope_unit_or_convention_mismatch_cannot_become_a_measured_charge[settlement_final-True]" time="0.009" /><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_native_identity_and_explicit_producer_are_required" time="0.006" /><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_actual_ea_function_observes_charge_or_preserves_unavailability[entry-charge-zero-0]" time="0.997"><error message="failed on setup with &quot;AssertionError: /tmp/pytest-of-agent/pytest-238/actual-ea-bodies0/ea.cpp:188:6: error: redefinition of ‘bool HistoryDealSelect(ulong)’&#10;    188 | bool HistoryDealSelect(ulong ticket) { return entry_charge_available &amp;&amp; ticket==77; }&#10;        |      ^~~~~~~~~~~~~~~~~&#10;  /tmp/pytest-of-agent/pytest-238/actual-ea-bodies0/ea.cpp:175:6: note: ‘bool HistoryDealSelect(ulong)’ previously defined here&#10;    175 | bool HistoryDealSelect(ulong ticket) { return ticket==77; }&#10;        |      ^~~~~~~~~~~~~~~~~&#10;  &#10;assert 1 == 0&#10; +  where 1 = CompletedProcess(args=['g++', '-std=c++17', '-Wall', '-Werror', '-Wno-sign-compare', '/tmp/pytest-of-agent/pytest-238/...y defined here\n  175 | bool HistoryDealSelect(ulong ticket) { return ticket==77; }\n      |      ^~~~~~~~~~~~~~~~~\n').returncode&quot;">fixturedef = &lt;FixtureDef argname='ea' scope='module' baseid='trading/tests/test_mt5_recorded_entry_charges.py'&gt;
+request = &lt;SubRequest 'ea' for &lt;Function test_actual_ea_function_observes_charge_or_preserves_unavailability[entry-charge-zero-0]&gt;&gt;
+
+    @pytest.hookimpl(wrapper=True)
+    def pytest_fixture_setup(fixturedef: FixtureDef, request) -&gt; object | None:
+        if (
+            fixturedef.argname == "event_loop_policy"
+            and fixturedef.func.__module__ != __name__
+        ):
+            warnings.warn(
+                PytestDeprecationWarning(_EVENT_LOOP_POLICY_FIXTURE_DEPRECATION_WARNING),
+            )
+        asyncio_mode = _get_asyncio_mode(request.config)
+        if not _is_asyncio_fixture_function(fixturedef.func):
+            if asyncio_mode == Mode.STRICT:
+                # Ignore async fixtures without explicit asyncio mark in strict mode
+                # This applies to pytest_trio fixtures, for example
+                return (yield)
+            if not _is_coroutine_or_asyncgen(fixturedef.func):
+&gt;               return (yield)
+                        ^^^^^
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/pytest_asyncio/plugin.py:926: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tmp_path_factory = TempPathFactory(_given_basetemp=None, _trace=&lt;pluggy._tracing.TagTracerSub object at 0x7f32d6695ee0&gt;, _basetemp=PosixPath('/tmp/pytest-of-agent/pytest-238'), _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope='module')
+    def ea(tmp_path_factory):
+        assert shutil.which('g++'), 'EA function-body controls require g++'
+        source=EA.read_text()
+        names={'JsonEscape','JsonNumber','NativeRefusal','ResolvePositionTicket',
+               'NativeIdentityMatches','NativeEntryDeadline','NativeEntryDeadlineCurrent',
+               'NativeBindingJson','CashUnavailable','NativeCashJson','NativeMarginJson',
+               'SnapshotJson','PushResult','ExecOrderSend','ExecModifySl','ExecClose',
+               'MarginReadAccountScopeJson','NativeUnitsCanonical','NativeUnitsIncrement',
+               'NativeExactDecimalParts','NativeMoneyUnitsFromText','NativeUnitsCompare','NativeUnitsSubtract',
+               'NativeUnitsAdd','NativeUnitsScaleByInteger','NativeProjectedMarginFloorAllows',
+               'NativeUnitsMultiply','NativeReportedMarginFloorAllows',
+               'NativeCashAmount','NativeEntryCashScope','NativeEntryCashBound','NativeEntryCashBounds',
+               'NativeCheckCurrentEntryCash','NativePrepareEntryCash','NativeRecordedEntryCharges'}
+        bodies=[]
+        for match in re.finditer(r'^(?:string|void|bool|ulong|int) (\w+)\([^{};]*?\)\s*\{',source,re.M):
+            if match[1] not in names:
+                continue
+            # Brace-aware lexer: JSON strings/comments also contain braces.
+            at=match.end(); depth=1; quoted=False; escaped=False
+            while depth:
+                c=source[at]; at+=1
+                if escaped: escaped=False
+                elif quoted and c=='\\': escaped=True
+                elif c=='"': quoted=not quoted
+                elif not quoted:
+                    if c=='{': depth+=1
+                    elif c=='}': depth-=1
+            # Only array-reference ABI spelling changes for the C++ interface;
+            # each actual function body remains byte-identical to the EA source.
+            header=source[match.start():match.end()]
+            header=re.sub(r'const string &amp;(\w+)\[\]',r'const std::vector&lt;string&gt; &amp;\1',header)
+            bodies.append(header+source[match.end():at])
+        assert len(bodies)==len(names), 'every declared actual EA function must be extracted'
+        folder=tmp_path_factory.mktemp('actual-ea-bodies')
+        cpp=folder/'ea.cpp'; binary=folder/'ea'
+        fixture=Path(__file__).with_name('mql_terminal_fixture.cpp').read_text()
+        structure=source[source.index('struct EntryCashMarginCheck'):source.index('bool NativeCheckCurrentEntryCash(')]
+        floor=re.search(r'^const int NATIVE_ENTRY_MARGIN_FLOOR_LEVEL_PCT=\d+;',source,re.M)
+        assert floor is not None
+        cpp.write_text(fixture.replace('// EXTRACTED_EA_FUNCTIONS',floor[0]+'\n'+structure+'\n'+'\n'.join(bodies)))
+        compiled=subprocess.run(['g++','-std=c++17','-Wall','-Werror','-Wno-sign-compare',str(cpp),'-o',str(binary)],capture_output=True,text=True,timeout=30)
+&gt;       assert compiled.returncode==0, compiled.stderr
+E       AssertionError: /tmp/pytest-of-agent/pytest-238/actual-ea-bodies0/ea.cpp:188:6: error: redefinition of ‘bool HistoryDealSelect(ulong)’
+E           188 | bool HistoryDealSelect(ulong ticket) { return entry_charge_available &amp;&amp; ticket==77; }
+E               |      ^~~~~~~~~~~~~~~~~
+E         /tmp/pytest-of-agent/pytest-238/actual-ea-bodies0/ea.cpp:175:6: note: ‘bool HistoryDealSelect(ulong)’ previously defined here
+E           175 | bool HistoryDealSelect(ulong ticket) { return ticket==77; }
+E               |      ^~~~~~~~~~~~~~~~~
+E         
+E       assert 1 == 0
+E        +  where 1 = CompletedProcess(args=['g++', '-std=c++17', '-Wall', '-Werror', '-Wno-sign-compare', '/tmp/pytest-of-agent/pytest-238/...y defined here\n  175 | bool HistoryDealSelect(ulong ticket) { return ticket==77; }\n      |      ^~~~~~~~~~~~~~~~~\n').returncode
+
+trading/tests/test_mql_native_function_bodies.py:61: AssertionError</error></testcase><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_actual_ea_function_observes_charge_or_preserves_unavailability[entry-charge-debit-.26]" time="0.000"><error message="failed on setup with &quot;AssertionError: /tmp/pytest-of-agent/pytest-238/actual-ea-bodies0/ea.cpp:188:6: error: redefinition of ‘bool HistoryDealSelect(ulong)’&#10;    188 | bool HistoryDealSelect(ulong ticket) { return entry_charge_available &amp;&amp; ticket==77; }&#10;        |      ^~~~~~~~~~~~~~~~~&#10;  /tmp/pytest-of-agent/pytest-238/actual-ea-bodies0/ea.cpp:175:6: note: ‘bool HistoryDealSelect(ulong)’ previously defined here&#10;    175 | bool HistoryDealSelect(ulong ticket) { return ticket==77; }&#10;        |      ^~~~~~~~~~~~~~~~~&#10;  &#10;assert 1 == 0&#10; +  where 1 = CompletedProcess(args=['g++', '-std=c++17', '-Wall', '-Werror', '-Wno-sign-compare', '/tmp/pytest-of-agent/pytest-238/...y defined here\n  175 | bool HistoryDealSelect(ulong ticket) { return ticket==77; }\n      |      ^~~~~~~~~~~~~~~~~\n').returncode&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=None, _trace=&lt;pluggy._tracing.TagTracerSub object at 0x7f32d6695ee0&gt;, _basetemp=PosixPath('/tmp/pytest-of-agent/pytest-238'), _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope='module')
+    def ea(tmp_path_factory):
+        assert shutil.which('g++'), 'EA function-body controls require g++'
+        source=EA.read_text()
+        names={'JsonEscape','JsonNumber','NativeRefusal','ResolvePositionTicket',
+               'NativeIdentityMatches','NativeEntryDeadline','NativeEntryDeadlineCurrent',
+               'NativeBindingJson','CashUnavailable','NativeCashJson','NativeMarginJson',
+               'SnapshotJson','PushResult','ExecOrderSend','ExecModifySl','ExecClose',
+               'MarginReadAccountScopeJson','NativeUnitsCanonical','NativeUnitsIncrement',
+               'NativeExactDecimalParts','NativeMoneyUnitsFromText','NativeUnitsCompare','NativeUnitsSubtract',
+               'NativeUnitsAdd','NativeUnitsScaleByInteger','NativeProjectedMarginFloorAllows',
+               'NativeUnitsMultiply','NativeReportedMarginFloorAllows',
+               'NativeCashAmount','NativeEntryCashScope','NativeEntryCashBound','NativeEntryCashBounds',
+               'NativeCheckCurrentEntryCash','NativePrepareEntryCash','NativeRecordedEntryCharges'}
+        bodies=[]
+        for match in re.finditer(r'^(?:string|void|bool|ulong|int) (\w+)\([^{};]*?\)\s*\{',source,re.M):
+            if match[1] not in names:
+                continue
+            # Brace-aware lexer: JSON strings/comments also contain braces.
+            at=match.end(); depth=1; quoted=False; escaped=False
+            while depth:
+                c=source[at]; at+=1
+                if escaped: escaped=False
+                elif quoted and c=='\\': escaped=True
+                elif c=='"': quoted=not quoted
+                elif not quoted:
+                    if c=='{': depth+=1
+                    elif c=='}': depth-=1
+            # Only array-reference ABI spelling changes for the C++ interface;
+            # each actual function body remains byte-identical to the EA source.
+            header=source[match.start():match.end()]
+            header=re.sub(r'const string &amp;(\w+)\[\]',r'const std::vector&lt;string&gt; &amp;\1',header)
+            bodies.append(header+source[match.end():at])
+        assert len(bodies)==len(names), 'every declared actual EA function must be extracted'
+        folder=tmp_path_factory.mktemp('actual-ea-bodies')
+        cpp=folder/'ea.cpp'; binary=folder/'ea'
+        fixture=Path(__file__).with_name('mql_terminal_fixture.cpp').read_text()
+        structure=source[source.index('struct EntryCashMarginCheck'):source.index('bool NativeCheckCurrentEntryCash(')]
+        floor=re.search(r'^const int NATIVE_ENTRY_MARGIN_FLOOR_LEVEL_PCT=\d+;',source,re.M)
+        assert floor is not None
+        cpp.write_text(fixture.replace('// EXTRACTED_EA_FUNCTIONS',floor[0]+'\n'+structure+'\n'+'\n'.join(bodies)))
+        compiled=subprocess.run(['g++','-std=c++17','-Wall','-Werror','-Wno-sign-compare',str(cpp),'-o',str(binary)],capture_output=True,text=True,timeout=30)
+&gt;       assert compiled.returncode==0, compiled.stderr
+E       AssertionError: /tmp/pytest-of-agent/pytest-238/actual-ea-bodies0/ea.cpp:188:6: error: redefinition of ‘bool HistoryDealSelect(ulong)’
+E           188 | bool HistoryDealSelect(ulong ticket) { return entry_charge_available &amp;&amp; ticket==77; }
+E               |      ^~~~~~~~~~~~~~~~~
+E         /tmp/pytest-of-agent/pytest-238/actual-ea-bodies0/ea.cpp:175:6: note: ‘bool HistoryDealSelect(ulong)’ previously defined here
+E           175 | bool HistoryDealSelect(ulong ticket) { return ticket==77; }
+E               |      ^~~~~~~~~~~~~~~~~
+E         
+E       assert 1 == 0
+E        +  where 1 = CompletedProcess(args=['g++', '-std=c++17', '-Wall', '-Werror', '-Wno-sign-compare', '/tmp/pytest-of-agent/pytest-238/...y defined here\n  175 | bool HistoryDealSelect(ulong ticket) { return ticket==77; }\n      |      ^~~~~~~~~~~~~~~~~\n').returncode
+
+trading/tests/test_mql_native_function_bodies.py:61: AssertionError</error></testcase><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_actual_ea_function_observes_charge_or_preserves_unavailability[entry-charge-rebate--.25]" time="0.001"><error message="failed on setup with &quot;AssertionError: /tmp/pytest-of-agent/pytest-238/actual-ea-bodies0/ea.cpp:188:6: error: redefinition of ‘bool HistoryDealSelect(ulong)’&#10;    188 | bool HistoryDealSelect(ulong ticket) { return entry_charge_available &amp;&amp; ticket==77; }&#10;        |      ^~~~~~~~~~~~~~~~~&#10;  /tmp/pytest-of-agent/pytest-238/actual-ea-bodies0/ea.cpp:175:6: note: ‘bool HistoryDealSelect(ulong)’ previously defined here&#10;    175 | bool HistoryDealSelect(ulong ticket) { return ticket==77; }&#10;        |      ^~~~~~~~~~~~~~~~~&#10;  &#10;assert 1 == 0&#10; +  where 1 = CompletedProcess(args=['g++', '-std=c++17', '-Wall', '-Werror', '-Wno-sign-compare', '/tmp/pytest-of-agent/pytest-238/...y defined here\n  175 | bool HistoryDealSelect(ulong ticket) { return ticket==77; }\n      |      ^~~~~~~~~~~~~~~~~\n').returncode&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=None, _trace=&lt;pluggy._tracing.TagTracerSub object at 0x7f32d6695ee0&gt;, _basetemp=PosixPath('/tmp/pytest-of-agent/pytest-238'), _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope='module')
+    def ea(tmp_path_factory):
+        assert shutil.which('g++'), 'EA function-body controls require g++'
+        source=EA.read_text()
+        names={'JsonEscape','JsonNumber','NativeRefusal','ResolvePositionTicket',
+               'NativeIdentityMatches','NativeEntryDeadline','NativeEntryDeadlineCurrent',
+               'NativeBindingJson','CashUnavailable','NativeCashJson','NativeMarginJson',
+               'SnapshotJson','PushResult','ExecOrderSend','ExecModifySl','ExecClose',
+               'MarginReadAccountScopeJson','NativeUnitsCanonical','NativeUnitsIncrement',
+               'NativeExactDecimalParts','NativeMoneyUnitsFromText','NativeUnitsCompare','NativeUnitsSubtract',
+               'NativeUnitsAdd','NativeUnitsScaleByInteger','NativeProjectedMarginFloorAllows',
+               'NativeUnitsMultiply','NativeReportedMarginFloorAllows',
+               'NativeCashAmount','NativeEntryCashScope','NativeEntryCashBound','NativeEntryCashBounds',
+               'NativeCheckCurrentEntryCash','NativePrepareEntryCash','NativeRecordedEntryCharges'}
+        bodies=[]
+        for match in re.finditer(r'^(?:string|void|bool|ulong|int) (\w+)\([^{};]*?\)\s*\{',source,re.M):
+            if match[1] not in names:
+                continue
+            # Brace-aware lexer: JSON strings/comments also contain braces.
+            at=match.end(); depth=1; quoted=False; escaped=False
+            while depth:
+                c=source[at]; at+=1
+                if escaped: escaped=False
+                elif quoted and c=='\\': escaped=True
+                elif c=='"': quoted=not quoted
+                elif not quoted:
+                    if c=='{': depth+=1
+                    elif c=='}': depth-=1
+            # Only array-reference ABI spelling changes for the C++ interface;
+            # each actual function body remains byte-identical to the EA source.
+            header=source[match.start():match.end()]
+            header=re.sub(r'const string &amp;(\w+)\[\]',r'const std::vector&lt;string&gt; &amp;\1',header)
+            bodies.append(header+source[match.end():at])
+        assert len(bodies)==len(names), 'every declared actual EA function must be extracted'
+        folder=tmp_path_factory.mktemp('actual-ea-bodies')
+        cpp=folder/'ea.cpp'; binary=folder/'ea'
+        fixture=Path(__file__).with_name('mql_terminal_fixture.cpp').read_text()
+        structure=source[source.index('struct EntryCashMarginCheck'):source.index('bool NativeCheckCurrentEntryCash(')]
+        floor=re.search(r'^const int NATIVE_ENTRY_MARGIN_FLOOR_LEVEL_PCT=\d+;',source,re.M)
+        assert floor is not None
+        cpp.write_text(fixture.replace('// EXTRACTED_EA_FUNCTIONS',floor[0]+'\n'+structure+'\n'+'\n'.join(bodies)))
+        compiled=subprocess.run(['g++','-std=c++17','-Wall','-Werror','-Wno-sign-compare',str(cpp),'-o',str(binary)],capture_output=True,text=True,timeout=30)
+&gt;       assert compiled.returncode==0, compiled.stderr
+E       AssertionError: /tmp/pytest-of-agent/pytest-238/actual-ea-bodies0/ea.cpp:188:6: error: redefinition of ‘bool HistoryDealSelect(ulong)’
+E           188 | bool HistoryDealSelect(ulong ticket) { return entry_charge_available &amp;&amp; ticket==77; }
+E               |      ^~~~~~~~~~~~~~~~~
+E         /tmp/pytest-of-agent/pytest-238/actual-ea-bodies0/ea.cpp:175:6: note: ‘bool HistoryDealSelect(ulong)’ previously defined here
+E           175 | bool HistoryDealSelect(ulong ticket) { return ticket==77; }
+E               |      ^~~~~~~~~~~~~~~~~
+E         
+E       assert 1 == 0
+E        +  where 1 = CompletedProcess(args=['g++', '-std=c++17', '-Wall', '-Werror', '-Wno-sign-compare', '/tmp/pytest-of-agent/pytest-238/...y defined here\n  175 | bool HistoryDealSelect(ulong ticket) { return ticket==77; }\n      |      ^~~~~~~~~~~~~~~~~\n').returncode
+
+trading/tests/test_mql_native_function_bodies.py:61: AssertionError</error></testcase><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_actual_ea_function_observes_charge_or_preserves_unavailability[entry-charge-unavailable-None]" time="0.001"><error message="failed on setup with &quot;AssertionError: /tmp/pytest-of-agent/pytest-238/actual-ea-bodies0/ea.cpp:188:6: error: redefinition of ‘bool HistoryDealSelect(ulong)’&#10;    188 | bool HistoryDealSelect(ulong ticket) { return entry_charge_available &amp;&amp; ticket==77; }&#10;        |      ^~~~~~~~~~~~~~~~~&#10;  /tmp/pytest-of-agent/pytest-238/actual-ea-bodies0/ea.cpp:175:6: note: ‘bool HistoryDealSelect(ulong)’ previously defined here&#10;    175 | bool HistoryDealSelect(ulong ticket) { return ticket==77; }&#10;        |      ^~~~~~~~~~~~~~~~~&#10;  &#10;assert 1 == 0&#10; +  where 1 = CompletedProcess(args=['g++', '-std=c++17', '-Wall', '-Werror', '-Wno-sign-compare', '/tmp/pytest-of-agent/pytest-238/...y defined here\n  175 | bool HistoryDealSelect(ulong ticket) { return ticket==77; }\n      |      ^~~~~~~~~~~~~~~~~\n').returncode&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=None, _trace=&lt;pluggy._tracing.TagTracerSub object at 0x7f32d6695ee0&gt;, _basetemp=PosixPath('/tmp/pytest-of-agent/pytest-238'), _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope='module')
+    def ea(tmp_path_factory):
+        assert shutil.which('g++'), 'EA function-body controls require g++'
+        source=EA.read_text()
+        names={'JsonEscape','JsonNumber','NativeRefusal','ResolvePositionTicket',
+               'NativeIdentityMatches','NativeEntryDeadline','NativeEntryDeadlineCurrent',
+               'NativeBindingJson','CashUnavailable','NativeCashJson','NativeMarginJson',
+               'SnapshotJson','PushResult','ExecOrderSend','ExecModifySl','ExecClose',
+               'MarginReadAccountScopeJson','NativeUnitsCanonical','NativeUnitsIncrement',
+               'NativeExactDecimalParts','NativeMoneyUnitsFromText','NativeUnitsCompare','NativeUnitsSubtract',
+               'NativeUnitsAdd','NativeUnitsScaleByInteger','NativeProjectedMarginFloorAllows',
+               'NativeUnitsMultiply','NativeReportedMarginFloorAllows',
+               'NativeCashAmount','NativeEntryCashScope','NativeEntryCashBound','NativeEntryCashBounds',
+               'NativeCheckCurrentEntryCash','NativePrepareEntryCash','NativeRecordedEntryCharges'}
+        bodies=[]
+        for match in re.finditer(r'^(?:string|void|bool|ulong|int) (\w+)\([^{};]*?\)\s*\{',source,re.M):
+            if match[1] not in names:
+                continue
+            # Brace-aware lexer: JSON strings/comments also contain braces.
+            at=match.end(); depth=1; quoted=False; escaped=False
+            while depth:
+                c=source[at]; at+=1
+                if escaped: escaped=False
+                elif quoted and c=='\\': escaped=True
+                elif c=='"': quoted=not quoted
+                elif not quoted:
+                    if c=='{': depth+=1
+                    elif c=='}': depth-=1
+            # Only array-reference ABI spelling changes for the C++ interface;
+            # each actual function body remains byte-identical to the EA source.
+            header=source[match.start():match.end()]
+            header=re.sub(r'const string &amp;(\w+)\[\]',r'const std::vector&lt;string&gt; &amp;\1',header)
+            bodies.append(header+source[match.end():at])
+        assert len(bodies)==len(names), 'every declared actual EA function must be extracted'
+        folder=tmp_path_factory.mktemp('actual-ea-bodies')
+        cpp=folder/'ea.cpp'; binary=folder/'ea'
+        fixture=Path(__file__).with_name('mql_terminal_fixture.cpp').read_text()
+        structure=source[source.index('struct EntryCashMarginCheck'):source.index('bool NativeCheckCurrentEntryCash(')]
+        floor=re.search(r'^const int NATIVE_ENTRY_MARGIN_FLOOR_LEVEL_PCT=\d+;',source,re.M)
+        assert floor is not None
+        cpp.write_text(fixture.replace('// EXTRACTED_EA_FUNCTIONS',floor[0]+'\n'+structure+'\n'+'\n'.join(bodies)))
+        compiled=subprocess.run(['g++','-std=c++17','-Wall','-Werror','-Wno-sign-compare',str(cpp),'-o',str(binary)],capture_output=True,text=True,timeout=30)
+&gt;       assert compiled.returncode==0, compiled.stderr
+E       AssertionError: /tmp/pytest-of-agent/pytest-238/actual-ea-bodies0/ea.cpp:188:6: error: redefinition of ‘bool HistoryDealSelect(ulong)’
+E           188 | bool HistoryDealSelect(ulong ticket) { return entry_charge_available &amp;&amp; ticket==77; }
+E               |      ^~~~~~~~~~~~~~~~~
+E         /tmp/pytest-of-agent/pytest-238/actual-ea-bodies0/ea.cpp:175:6: note: ‘bool HistoryDealSelect(ulong)’ previously defined here
+E           175 | bool HistoryDealSelect(ulong ticket) { return ticket==77; }
+E               |      ^~~~~~~~~~~~~~~~~
+E         
+E       assert 1 == 0
+E        +  where 1 = CompletedProcess(args=['g++', '-std=c++17', '-Wall', '-Werror', '-Wno-sign-compare', '/tmp/pytest-of-agent/pytest-238/...y defined here\n  175 | bool HistoryDealSelect(ulong ticket) { return ticket==77; }\n      |      ^~~~~~~~~~~~~~~~~\n').returncode
+
+trading/tests/test_mql_native_function_bodies.py:61: AssertionError</error></testcase></testsuite></testsuites>

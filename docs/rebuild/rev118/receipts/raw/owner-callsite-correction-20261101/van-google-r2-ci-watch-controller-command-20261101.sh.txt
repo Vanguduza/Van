@@ -1,0 +1,10 @@
+# Historical representation of the already-running inline controller in exec session36262.
+# Do not execute this copy: it would create a duplicate watch. No push/dispatch/cancel is present.
+timeout 3600 gh run watch 41286883563 --repo Vanguduza/Van --exit-status > /workspace/van-7df-google-integration-ci-watch-20261101.log 2>&1
+result=$?
+python - "$result" <<'PY'
+import sys,json,datetime
+from pathlib import Path
+p=Path('/workspace/van-7df-google-integration-ci-watch-20261101.json')
+p.write_text(json.dumps({'run':41286883563,'head':'7df732de4c0a4f84bafadda658654a0ab8788553','exit':int(sys.argv[1]),'completed_at_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'qualification':'Watch completion only; actual jobs/logs/source-count readback still required. No dispatch/cancel/workflow changes.'},indent=2)+'\n')
+PY

@@ -1,0 +1,21 @@
+.........................F.....                                          [100%]
+=================================== FAILURES ===================================
+_________________ test_risk_snapshot_schema_matches_dataclass __________________
+
+    def test_risk_snapshot_schema_matches_dataclass():
+        fields = {f.name for f in dataclasses.fields(RiskSnapshot)}
+        schema = load_schema("risk_snapshot")
+        assert fields == set(schema["properties"])
+        # Optional source observations do not retroactively become mandatory in
+        # immutable legacy bodies. Every original required field stays mandatory.
+>       assert fields - {"used_margin", "native_account_context"} == required_keys("risk_snapshot")
+E       AssertionError: assert {'account_ali..._losses', ...} == {'account_ali..._losses', ...}
+E         
+E         Extra items in the left set:
+E         'native_risk_basis_ref'
+E         Use -v to get more diff
+
+trading/tests/test_contract_schemas.py:47: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_contract_schemas.py::test_risk_snapshot_schema_matches_dataclass
+1 failed, 30 passed in 1.46s

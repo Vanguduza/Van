@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "observed_at_utc": "2026-10-08T04:48:13.794976+00:00",
+  "connectivity": "connected",
+  "observations_current": true,
+  "spec_revision": "2",
+  "observed_spec_revision": "2",
+  "capabilities": [],
+  "secrets": [],
+  "outbound_identities": [],
+  "network_policy": {
+    "mode": "unrestricted",
+    "state": "unknown"
+  },
+  "config_draft_revision": 10,
+  "draft_published": false,
+  "live_dial_tools_callable": false,
+  "local_developer_validation_available": true,
+  "phone_test_deferred": true,
+  "production_bindings_available": false,
+  "scope": "Actual cloud status metadata; no credential values or remote principal permissions inferred.",
+  "config_draft_saved": true,
+  "requires_publish": true
+}

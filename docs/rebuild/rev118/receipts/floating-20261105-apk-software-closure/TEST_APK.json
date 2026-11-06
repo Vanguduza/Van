@@ -1,0 +1,22 @@
+{
+  "status": "SIGNED_INSTRUMENTATION_APK_STATIC_CHECKED_NOT_EXECUTED",
+  "source_commit": "d78368f2df1426a124072e7e04d703327f229ccd",
+  "apk_path": "/home/ubuntu/work/van-floating-gradle-hardening-20261105/source-checkout/android/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk",
+  "apk_sha256": "4466d4a31571ba54e6878e6619c4aed4fda48650c6e9d37fe8f7537e40ebfbe6",
+  "apk_bytes": 2341198,
+  "signature_verified": true,
+  "same_debug_certificate_as_main": true,
+  "certificate_sha256": "318316323489b0d216c3f25cff1184e3b1d3bcc32760f8d793fb578939057061",
+  "required_test_classes_present": [
+    "PhysicalS24MotionPerformanceTest",
+    "RiveContractTest"
+  ],
+  "compiled_class_count": 2169,
+  "main_apk_unchanged_sha256": "8e7e0b3e920a61710378230eb52c8d32cb69c50434ce86bda968822e1d004a8a",
+  "signature_log_sha256": "5af0ba8f5a2ad17fc5afbf9cf7863693d1a17fcaf9f8f2d96d9f2fd4b1a3b202",
+  "manifest_log_sha256": "77c28a4107c59bf7403e0296cf08b3c6ca022701600b7ef7253d5c1c70ef9754",
+  "test_execution": false,
+  "device_connected_by_this_step": false,
+  "installed": false,
+  "physical_stage": "DEFERRED_FINAL_STAGE"
+}

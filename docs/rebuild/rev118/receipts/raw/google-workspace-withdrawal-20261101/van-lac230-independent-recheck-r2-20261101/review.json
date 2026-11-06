@@ -1,0 +1,62 @@
+{
+  "schema": "van.independent-lac230-source-recheck/2",
+  "state": "ROOT_ACCEPTED_LAC230_REVIEW01_CLOSED_NO_REMAINING_BLOCKING_FINDING_IN_BOUNDED_SCOPE",
+  "base": "7df732de4c0a4f84bafadda658654a0ab8788553",
+  "reviewer": "Sol medium independent bounded SOURCE recheck; root retains decisions",
+  "source_identity": {
+    "exact_paths": 12,
+    "changed_from_r1_paths": [
+      "backend/tests/test_google_owner_withdrawal_recovery.py",
+      "backend/van_gateway/google/service.py"
+    ],
+    "archive_patch_source_before_after_final_verified": true,
+    "before": "before.json",
+    "after": [
+      "after.json",
+      "final-source-pins.json"
+    ],
+    "patch_sha256": "d1654c4c89fa5cd6595bf873b034e255bb765e06675d0b40a7549a5c24f45c35",
+    "archive_sha256": "f5b3dbae965365a100b2c1e22a6588981e2a8dadf6269352591018f42b66c771",
+    "prior_failing_receipt_preserved": "/workspace/van-lac230-independent-review-20261101/review.json"
+  },
+  "blocking_findings": [],
+  "closed_finding": {
+    "id": "LAC230-REVIEW-01",
+    "path": "backend/van_gateway/google/service.py:383",
+    "related": [
+      "backend/van_gateway/google/service.py:307"
+    ],
+    "disposition": "CLOSED_SOURCE_AND_EXACT_HTTP_COUNTEREXAMPLE_RECHECK",
+    "finding": "Currently lawful same stable owner/device can recover exact already-sealed APPLIED or REFUSED original outcome under existing auth/read policy despite modeled current access-token replacement. Old ephemeral actor hash remains archived and does not become new mutation authority. Fresh pending old-context request durably refuses without effect and stores its original token/caller_context unchanged. No new public rotation producer, authority or profile capability."
+  },
+  "independent_evidence": {
+    "http": "probe-results.json",
+    "r1_source_sealed_compatibility": "r1-sealed-compatibility-results.json",
+    "retention": "retention-probe-results.json",
+    "logs": [
+      "probe-http.log",
+      "probe-r1-sealed-compatibility.log",
+      "probe-retention.log"
+    ],
+    "cases": [
+      "Original independently authored trusted current sameprincipal replacement counterexample now original APPLIED GET200/exactPOST200; originalcipherhash and connectionrow unchanged. Existing real AuthService.renew_grant then actualHTTP originalGET200 remains separately positive.",
+      "Completed REFUSED original GET200/exactPOST409 retains exact original receipt after modeled replacement.",
+      "Fresh pending old-context request durableREFUSED/request_not_current, no credential effect, original requesttoken/caller_context preserved.",
+      "Wrong owner/device/profile, revoked current caller, corrupt old journal and pending-expiry negatives remain refused.",
+      "Actual frozen R1 archived source imported with verified e63d... hash produces original sealed APPLIED/REFUSED records; current R2 actualHTTP reads/replays both under modeled trusted sameprincipal replacement without rewriting either ciphertext or credential row (2PASS).",
+      "Currentbase actual5year retention probe keeps all3 encrypted original journal/generation/legacy-slot values unchanged; originalGET200, legacyretry409, replacement preserved."
+    ],
+    "all_observed_assertions_passed": true,
+    "imports": "probe-results.json (explicit isolated worktree service/mesh)",
+    "owned_tmp_cleanup": true,
+    "no_source_edits_commits_gradle_native_effects": true
+  },
+  "test_evidence_verified": "verified-test-evidence.json: worker126backend0skip; actual final current pureJVM12/0skip XML and current ownAndroidpins verified; genuineSDK36 appcompile terminal0 all638 actualinputs before/after/current match. No broad backend rerun/independent Gradle execution claimed.",
+  "remaining_limits_and_integration": [
+    "Modeled trusted current token replacement is a SOURCE compatibility diagnostic, not a claimed existing production token-rotation/renewal route. Ordinary renew_grant does not rotate token; no rotation capability added.",
+    "Existinglocal Workspace credential withdrawal only; no account-wide Google/provider token revocation. Native Workspace canary producer wiring remains unproved, no fakeREADY/certification.",
+    "Actual LAC230/OF-GOOGLE-001 citation/readback endpoint mapping and owner/frontend generator review remain integration owner responsibility. Genuine hooks/committed baseline verification/normal publish/readback/exact-headCI still required.",
+    "No unit/lint/instrumentation/device/provider/native/gate/release qualification or acceptance is issued by compilation or this bounded review. Explicit existing owner privacy erasure policy retained; age-prune cannot remove original security barriers.",
+    "R2source changes invalidate affected review pins; original R1 failure artifacts/source/archives remain untouched."
+  ]
+}

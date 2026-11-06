@@ -1,0 +1,17 @@
+...............F..........                                               [100%]
+=================================== FAILURES ===================================
+_ test_catalog_cannot_self_grant_use_or_execution[qualified_for_research-True] _
+
+field = 'qualified_for_research', value = True
+
+    @pytest.mark.parametrize('field,value',[('provider_qualified',True),('qualified_for_research',True),('authority_effect','ORDER')])
+    def test_catalog_cannot_self_grant_use_or_execution(field,value):
+        body=captured().body();body[field]=value
+>       with pytest.raises(ValueError,match='authority'):NativeSymbolCatalog.from_body(body)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_native_symbol_catalog.py:74: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_native_symbol_catalog.py::test_catalog_cannot_self_grant_use_or_execution[qualified_for_research-True]
+1 failed, 25 passed in 0.79s

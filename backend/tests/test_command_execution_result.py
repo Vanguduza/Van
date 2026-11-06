@@ -126,6 +126,14 @@ async def test_hermes_result_is_bound_to_run_and_cannot_self_verify(client, monk
     mission_id = accepted.json()["mission_id"]
     assert observed["metadata"]["mission_id"] == mission_id
 
+    main_before = (await ac.get("/v1/conversations/main")).json()
+    owner_messages = [
+        item for item in main_before["messages"]
+        if item["role"] == "OWNER" and item["command_id"] == body["command_id"]
+    ]
+    assert len(owner_messages) == 1
+    assert owner_messages[0]["body"] == body["text"]
+
     result = await ac.post(
         "/v1/runtime/missions/result",
         headers={"X-Van-Internal-Token": INTERNAL},
@@ -153,6 +161,20 @@ async def test_hermes_result_is_bound_to_run_and_cannot_self_verify(client, monk
     assert duplicate.status_code == 200
     assert duplicate.json()["state"] == MissionState.UNVERIFIABLE.value
 
+    main_after = (await ac.get("/v1/conversations/main")).json()
+    owner_messages = [
+        item for item in main_after["messages"]
+        if item["role"] == "OWNER" and item["command_id"] == body["command_id"]
+    ]
+    van_messages = [
+        item for item in main_after["messages"]
+        if item["role"] == "VAN" and item["mission_id"] == mission_id and item["terminal"]
+    ]
+    assert len(owner_messages) == 1
+    assert len(van_messages) == 1
+    assert van_messages[0]["body"] == "Finished, but VAN could not confirm it worked. Reported result: Hermes finished producing the briefing"
+    assert van_messages[0]["artifact_refs"] == [payload["artifact_id"]]
+
     forged = await ac.post(
         "/v1/runtime/missions/result",
         headers={"X-Van-Internal-Token": INTERNAL},
@@ -174,8 +196,10 @@ async def test_unknown_hermes_run_cannot_move_a_mission(client):
             "summary": "failed",
         },
     )
-    assert response.status_code == 404
-    assert response.json()["detail"] == "HERMES_RUN_UNBOUND"
+    assert response.status_code == 202
+    assert response.json()["status"] == "WAITING_FOR_BINDING"
+    assert response.json()["mission_id"] is None
+    assert await app.state.missions.for_hermes_run("run-never-bound") is None
 
 
 @pytest.mark.asyncio
@@ -216,6 +240,46 @@ async def test_another_device_cannot_read_this_one_s_command(client):
     refused = await ac.get(f"/v1/commands/{body['command_id']}")
     # 404 rather than 403: a 403 would confirm the command exists.
     assert refused.status_code == 404
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("audit_state", ["removed", "unscoped_latest", "foreign_latest"])
+async def test_mission_identity_scopes_status_even_when_audit_cannot_supply_the_owner(client, audit_state):
+    ac, app = client
+    device_id = await _enrol(ac, app)
+    body = _signed(app, device_id, "brief me", idempotency_key="exec-owner-without-audit")
+    accepted = await ac.post("/v1/commands", json=body)
+    assert accepted.status_code == 200 and accepted.json()["mission_id"]
+    other = await app.state.auth.create_pairing_ticket("exec-other")
+    enrolled = await app.state.auth.pair_device(other.token, "exec-other", "s" * 32, "PEM", "other")
+    if audit_state == "removed":
+        await app.state.store.execute("DELETE FROM audit WHERE command_id = ?", (body["command_id"],))
+    else:
+        await app.state.orchestrator.audit.record(command_id=body["command_id"], result="observed", capability="source-status-test",
+            device_id="exec-other" if audit_state == "foreign_latest" else None)
+    assert (await ac.get(f"/v1/commands/{body['command_id']}")).status_code == 200
+    ac.headers.update({"X-Van-Device-Token": enrolled.access_token})
+    foreign = await ac.get(f"/v1/commands/{body['command_id']}")
+    assert foreign.status_code == 404
+    assert foreign.json()["detail"] == "command_unknown"
+
+
+@pytest.mark.asyncio
+async def test_a_later_unscoped_observation_cannot_expose_a_pre_mission_refusal(client):
+    ac, app = client
+    device_id = await _enrol(ac, app)
+    owner_token = ac.headers["X-Van-Device-Token"]
+    body = _signed(app, device_id, "private owner request", idempotency_key="refusal-scope")
+    body["signature"] = "not-a-signature"
+    assert (await ac.post("/v1/commands", json=body)).json()["status"] == "denied"
+    await app.state.orchestrator.audit.record(command_id=body["command_id"],result="observed",failure_reason="unscoped diagnostic")
+    ticket = await app.state.auth.create_pairing_ticket("other-reader")
+    other = await app.state.auth.pair_device(ticket.token,"other-reader","s"*32,"PEM","other")
+    ac.headers["X-Van-Device-Token"] = other.access_token
+    assert (await ac.get(f"/v1/commands/{body['command_id']}")).status_code == 404
+    ac.headers["X-Van-Device-Token"] = owner_token
+    own = await ac.get(f"/v1/commands/{body['command_id']}")
+    assert own.status_code == 200 and own.json()["owner_status"] == OwnerWorkStatus.REFUSED.value
 
 
 @pytest.mark.asyncio

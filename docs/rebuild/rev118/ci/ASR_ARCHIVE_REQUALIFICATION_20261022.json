@@ -1,0 +1,48 @@
+{
+  "schema": "van.build.asr-archive-requalification/1",
+  "source_commit": "eba674aceaf9da18799840bf6fa12d3c879872f0",
+  "publisher": "k2-fsa/sherpa-onnx",
+  "asset_id": 663986592,
+  "updated_at": "2026-10-21T22:36:45Z",
+  "old_archive": {
+    "archive": "archives/sherpa-onnx-zipformer-gigaspeech-2023-12-12.tar.bz2",
+    "published_sha256": "4e8097ebda27dad47353bd4a7edea77c985e2dd5330d5f1cdc07354bb12ab00d",
+    "sha256": "4e8097ebda27dad47353bd4a7edea77c985e2dd5330d5f1cdc07354bb12ab00d",
+    "size": 310453030
+  },
+  "verified_size": 310562456,
+  "publisher_digest": "sha256:dd1925ff10b0bb1c00afee5d3b0f8c14582e18f283e9223d4e9aff2e877e97c2",
+  "verified_sha256": "dd1925ff10b0bb1c00afee5d3b0f8c14582e18f283e9223d4e9aff2e877e97c2",
+  "selected_models": [
+    {
+      "path": "asr/joiner-epoch-30-avg-1.int8.onnx",
+      "size": 259417,
+      "sha256": "80160e45cca71dd52f6b0a6d3d12be18126f5308b2d4ba03f001300fea377c64",
+      "unchanged": true
+    },
+    {
+      "path": "asr/encoder-epoch-30-avg-1.int8.onnx",
+      "size": 72850738,
+      "sha256": "d3eff4b1bd747bd781a47966795988539227d05638524b0313f26d3a166962d7",
+      "unchanged": true
+    },
+    {
+      "path": "asr/decoder-epoch-30-avg-1.int8.onnx",
+      "size": 540688,
+      "sha256": "2b0580feb757696fa929922670b7126aaee609630349a1809fd5a2aee926d56e",
+      "unchanged": true
+    }
+  ],
+  "meaning": "Publisher repackaged the archive again; all selected model bytes match existing pinned values. No model or bundle manifest change.",
+  "durable_correction": {
+    "source": "immutable Hugging Face model revision",
+    "repository": "https://huggingface.co/k2-fsa/sherpa-onnx-zipformer-gigaspeech-2023-12-12",
+    "revision": "4115aa3f7d3ff431cc04ce8223d8a20a37ef3cae",
+    "unchanged_weights": true,
+    "new_urls": [
+      "https://huggingface.co/k2-fsa/sherpa-onnx-zipformer-gigaspeech-2023-12-12/resolve/4115aa3f7d3ff431cc04ce8223d8a20a37ef3cae/decoder-epoch-30-avg-1.int8.onnx",
+      "https://huggingface.co/k2-fsa/sherpa-onnx-zipformer-gigaspeech-2023-12-12/resolve/4115aa3f7d3ff431cc04ce8223d8a20a37ef3cae/encoder-epoch-30-avg-1.int8.onnx",
+      "https://huggingface.co/k2-fsa/sherpa-onnx-zipformer-gigaspeech-2023-12-12/resolve/4115aa3f7d3ff431cc04ce8223d8a20a37ef3cae/joiner-epoch-30-avg-1.int8.onnx"
+    ]
+  }
+}

@@ -1,0 +1,16 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_ test_identity_revision_ignores_receipt_clock_but_retains_original_metadata_and_private_copies _
+
+    def test_identity_revision_ignores_receipt_clock_but_retains_original_metadata_and_private_copies():
+        first=identity();later=identity(received_at_ms=NOW+1000)
+>       assert first.revision==later.revision and first.received_at_ms!=later.received_at_ms
+E       AssertionError: assert ('d88c46336f45...7ecd1de577ed2' == '75f7a61c559d...e3906e198695d'
+E         
+E         - 75f7a61c559d363d69cbd52b88be4368a92b4b6890f50ec4bdee3906e198695d
+E         + d88c46336f451aaab64eed9913c7f50b7dd27bdb2d0ad501a6d7ecd1de577ed2)
+
+trading/tests/test_native_read_identity.py:56: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_native_read_identity.py::test_identity_revision_ignores_receipt_clock_but_retains_original_metadata_and_private_copies
+1 failed in 1.54s

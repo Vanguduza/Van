@@ -1,0 +1,59 @@
+{
+  "state": "EXACT_REVIEWED_NINE_APPLIED_SEVEN_FROZEN_UNCHANGED",
+  "base": "ba792c27f906c1ca17b4d87d3c129d1b50e430a8",
+  "published_source_base": "ba817c4a6aeaf9a8272d81270f6d0abaf7c18feb",
+  "source_pins": {
+    "trading/vati/app/portfolio.py": "1072ec238104568bfece9ea4461824b63096ede0b559999af4c0da9c686b88e9",
+    "backend/van_gateway/trading/service.py": "cb28b870f1e454867cde618b1392285baaf6af31b87ac9dd7cbe8b1240efd1ed",
+    "trading/tests/test_portfolio_views.py": "3cb11f07d209342265cf1145001557fade4b618491f26b5cf504316608720d63",
+    "trading/tests/test_account_snapshot_freshness.py": "d052d7a831a4d7254747edf69a9274dcde09220663a6c78fa8f55587c0e2ed8d",
+    "backend/tests/test_accounts_freshness_api.py": "67e787c18ecf523142c1255d28640b56d8e34b9238907884ffe3375304c3798c",
+    "backend/tests/test_trading_api.py": "65d920eeacadd34589e1078bde5255d7c179893ebd5faa7b394e1991095c357a",
+    "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
+    "android/app/src/main/java/com/dial/van/trading/TradingModels.kt": "880ddda71469a417d4ff27c8aeaa327db623b36bdd64b5056dc7c3e639fba1a9",
+    "android/app/src/test/java/com/dial/van/trading/TradingModelsTest.kt": "1939c3bc6e8911f1a7aca4c0e7d9671249c779e867baddaf8daab945ce5660b4"
+  },
+  "source_fingerprint": "1cd68541b19f9c282a008a4ec8fb502e122775726a072cde04481db39a7049c7",
+  "patch_sha256": "4f30c1e280c9d494bfd7689724593fc7d5a603566cee7943a7bdca6035fed9f6",
+  "preimage_equivalence": {
+    "trading/vati/app/portfolio.py": "4edeb4ea65a2f390311c3bc5bee17cf68f7319f4afaa9eb778a0f963df701188",
+    "backend/van_gateway/trading/service.py": "1d35aef8ddc7e2f3b6046902c784f5ea200d2e78be2333aacd947463e342f243",
+    "trading/tests/test_portfolio_views.py": "d66de1bc0da40318751dd4fa636ffeaf9679e0ec5740a6146bebedce974d78fc",
+    "trading/tests/test_account_snapshot_freshness.py": null,
+    "backend/tests/test_accounts_freshness_api.py": null,
+    "backend/tests/test_trading_api.py": "40b596964983b1ff35455623acac9a0839ecf915b680f962503c0207c4f66d8b",
+    "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+    "android/app/src/main/java/com/dial/van/trading/TradingModels.kt": "aa7bfa98e6b0a8c7cecd49aa9b57b34189393d0d52a694e57a6784d5ef87d962",
+    "android/app/src/test/java/com/dial/van/trading/TradingModelsTest.kt": "03a02daaca2845cc774036305e6e47b057d45aaca5482d924398ab2f8c753a7c"
+  },
+  "frozen_seven_pins": {
+    "trading/tests/test_capsule_migration.py": "f588b806f14e75ea337a5dff1c4c7a8b3044940a3da59176717c5da1e985b414",
+    "trading/tests/test_enhancement_closure.py": "27ca2d7e519aae2eeac2a27c0088f5312064487ab5b4dd01419f07937a01c026",
+    "trading/tests/test_feature_contract.py": "00600d60bbefa7438e305493ae6abed21e66b2b9089366b1f364d4f9c0d46146",
+    "trading/tests/test_research_and_drift.py": "e89772396b5f580c164b97d44bec6233a32f08c444343dcf17b267f4c47f1f5e",
+    "trading/tests/test_validation_certificates.py": "accbe86949c97a10b6826c72855e2c89b2f1a76c5b27c0b383adf28f60150764",
+    "trading/tests/test_mt5_nonce_durability.py": "039a2ec40ce1c9dcf07700dccc5f1412670a864d2c4a6699b09aa7d8f1832856",
+    "tests/contracts/test_artemis_console_boundary.py": "1c9f015f4ad322b6bfdba19fe768f6d6f8510a389dd0bdb43813978d1e3bc62f"
+  },
+  "old18_R3_pins_exact": {
+    "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt": "f5420e3d9fcf3e6c780813554380e0c7cbdfc40325f983cece648c9812abf0a3",
+    "android/app/src/main/java/com/dial/van/trading/AccountOnboarding.kt": "585a26eb1fa031b85d608f79e61ab2a6e7737683ec59c24ae7462f9606244cf4",
+    "android/app/src/main/java/com/dial/van/trading/AccountOperationRecovery.kt": "d2d8eb38f182c106ae475036110846e60c088a27b95dea21b6ad3546b4018c8f",
+    "android/app/src/main/java/com/dial/van/trading/ui/AccountOnboardingScreen.kt": "af87ea54db44088fe9e615a80e485c48535264eebdf4a0bb10c257bd3e86b33a",
+    "android/app/src/test/java/com/dial/van/trading/AccountOperationRecoveryTest.kt": "d8c8cb6dc312ac8e101c9846b7f764bbc1bafd35ee4ad7250142eee6c922d390",
+    "backend/tests/test_account_operation_recovery.py": "dab4bb9906c89d682afdb04221c6c586192ee86aeaed032eeb36f1a0caf2aa7d",
+    "backend/tests/test_account_unlink_review.py": "8b9d9e4111cfa17ed3ea2a27d7c6da79513aa5500c42d4a1750898d883caa253",
+    "backend/tests/test_trading_oauth_scope.py": "d14de3b0bba7d523beda7dbc3143bf83080c5a6ddb0be5670768b0d150636c00",
+    "backend/van_gateway/app.py": "2949bcc8e076b0599c6e8ab40eefa2b49e93d6a86c19807d662b96dfffa4da16",
+    "backend/van_gateway/trading/account_contracts.py": "651df53274e3f68e566d1fd694ad7ebb67c79517183764971fb777054a81fc61",
+    "backend/van_gateway/trading/accounts.py": "fc9f476a41c7189cfa7fc3738450581feaca64a4619720e6a464954becce4d3a",
+    "trading/commander/account_effects.py": "d6be385b527a6ea180023208dadfc2b1f815bfa5ea4c0a9af0aa574457a028b6",
+    "trading/commander/accounts.py": "b594e716b0af825eb32b15e10371349232ca025427a7bf46b220d0bd8861e66d",
+    "trading/commander/app.py": "024816b92c8260ca35adf12978cb6cda720efb5f398e2eb78ff6b043dc7940f4",
+    "trading/tests/test_commander_accounts.py": "62cc77e75fbed8f6b8abd343c3897ac3b3ccb01f9ecb8366eb65f4a684ac4372",
+    "trading/tests/test_demo_creation_recovery.py": "1593fb9f62aeeb9f1a5fd3dc65b477e4abca8b70a2128d9f9a28524ed07431ad",
+    "trading/tests/test_native_account_effects.py": "332a900ddc0207d9e9bc78a37e3d07a00571c5d7d2be91cc7c242ae3f6d05f8c",
+    "trading/vati/execution/transports/deriv_ws.py": "c53c897c9d5b1c154c6a53367b702b655520a362d34ff5df34758ac88b2545c7"
+  },
+  "at_utc": "2026-11-01T20:06:33.974562+00:00"
+}

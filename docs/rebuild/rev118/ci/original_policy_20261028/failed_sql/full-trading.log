@@ -1,0 +1,62 @@
+........................................................................ [  9%]
+........................................................................ [ 18%]
+........................................................................ [ 28%]
+........................................................................ [ 37%]
+........................................................................ [ 47%]
+........................................................................ [ 56%]
+........................................................................ [ 65%]
+........................................................................ [ 75%]
+........................................................................ [ 84%]
+...................................................F.................... [ 94%]
+.............................................                            [100%]
+=================================== FAILURES ===================================
+_ test_original_postgres_policy_reopen_expiry_scope_and_actual_commit_ack_loss[True] _
+
+pg_dsn = 'user=van_fixture password=van_ephemeral_test_only dbname=van_ledger_fixture_87cbfa21f147498d952a1de15b2882ff host=127.0.0.1 port=32777'
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-56/test_original_postgres_policy_1')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f4c751cc740>
+lost_ack = True
+
+    @pytest.mark.parametrize('lost_ack',[False,True])
+    def test_original_postgres_policy_reopen_expiry_scope_and_actual_commit_ack_loss(pg_dsn,tmp_path,eurusd,monkeypatch,lost_ack):
+        unused,adapter,account,_,_=mt5_context(tmp_path);unused.close()
+        ledger=PostgresLedger(pg_dsn,ledger_name='original-policy')
+        other=PostgresLedger(pg_dsn,ledger_name='other-policy');reopened=None
+        try:
+            capture=capture_cached_mt5(ledger,account,now_ms=10000)
+            context=context_for_account(ledger,adapter,account,now_ms=10000,mt5_capture=capture)
+            facts=snapshot(eurusd,account_alias=account.account_alias,balance=account.balance,equity=account.equity,native_account_context=context)
+            raw=mandate_dict(account_alias=facts.account_alias,venue=facts.symbol_contract.venue)
+            source=capture_mandate_source(TradingMandate.from_mapping(raw),raw,now_ms=NOW*1000)
+            assert source['state']=='ORIGINAL_BOUND'
+            original_atomic=ledger.atomic;depth=0
+            @contextmanager
+            def commit_then_lose_reply():
+                nonlocal depth
+                outer=depth==0;depth+=1
+                try:
+                    with original_atomic():yield ledger
+                finally:depth-=1
+                if outer:raise OSError('fixture actual PostgreSQL commit acknowledgement loss')
+            if lost_ack:monkeypatch.setattr(ledger,'atomic',commit_then_lose_reply)
+            def attach(payload):payload['inputs']['original_mandate_source']=source
+            if lost_ack:
+>               with pytest.raises(OSError,match='acknowledgement loss'):record(ledger,facts,grant=raw,damage=attach)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               Failed: DID NOT RAISE OSError
+
+trading/tests/test_mandate_source_postgres.py:43: Failed
+=============================== warnings summary ===============================
+../../van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py:53
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED trading/tests/test_mandate_source_postgres.py::test_original_postgres_policy_reopen_expiry_scope_and_actual_commit_ack_loss[True]
+1 failed, 764 passed, 2 warnings in 78.83s (0:01:18)

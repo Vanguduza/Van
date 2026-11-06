@@ -1,0 +1,43 @@
+{
+  "record_type": "model_routing_policy",
+  "effective_date": "2026-11-01",
+  "source": "Owner latest explicit instruction: Apply that model correction. Astra is only to be used for decisions and lesser models utilised for work that they excel at.",
+  "purpose": "Operational model routing guidance; not an authorization, acceptance, scope, or native-authority record.",
+  "routing": {
+    "root_current_frontier": {
+      "model": "gpt-6-astra",
+      "effort": "current",
+      "use": "Decision work only."
+    },
+    "implementation_debugging_tests_integration": {
+      "model": "gpt-6.1-sol",
+      "effort": "medium",
+      "use": "Implementation, debugging, tests, and integration."
+    },
+    "bounded_inventory_checkpoint_evidence_formatting": {
+      "model": "gpt-6-luna",
+      "effort": "low",
+      "use": "Bounded inventory, checkpoint, and evidence-formatting work."
+    },
+    "review": {
+      "model": "gpt-6.1-sol",
+      "effort": "medium",
+      "use": "Review where appropriate to the task."
+    }
+  },
+  "constraints": [
+    "Do not use Astra for implementation, records work, or full-history workers.",
+    "Use small, self-contained worker context; use fork_turns=none when selecting a model override.",
+    "Default to at most two concurrent model workers, and use concurrency only for justified, disjoint, dependency-ready work.",
+    "Do not send idle-poll chatter.",
+    "Terminal command processes are not model workers.",
+    "Escalate ambiguity to root only.",
+    "Do not change native authority, acceptance, hooks, or scope.",
+    "Make no model-price or quota assertions."
+  ],
+  "prospective_capacity_fallback_20261103": {
+    "trigger": "Selected Sol worker reported capacity error during current continuation.",
+    "selection": "Root selected Terra medium for bounded recovery and suitable implementation work under the owner lesser-model instruction; Luna low for bounded records and review.",
+    "status": "prospective operational guidance; not a native authority, scope or acceptance grant"
+  }
+}

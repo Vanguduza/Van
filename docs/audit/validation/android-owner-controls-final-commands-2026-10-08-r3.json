@@ -1,0 +1,80 @@
+{
+  "cwd": "/workspace/Van",
+  "environment_overrides": {
+    "ANDROID_HOME": "/workspace/.onboarding/android-sdk",
+    "ANDROID_USER_HOME": "/workspace/.onboarding/android-user",
+    "GRADLE_USER_HOME": "/workspace/.onboarding/gradle",
+    "JAVA_HOME": "/workspace/.onboarding/jdk/usr/lib/jvm/java-21-openjdk-amd64"
+  },
+  "fixture_correction_between_successful_components": {
+    "app_build_input": false,
+    "new_sha256": "120de4fe5284188ceff46558160b52c924335c81497bae7f1eb4179f21e9e643",
+    "old_sha256": "73cdd204beaffa6adbdbb2b1215fee02919ff2b75a4538f57c282d46f12ed9c7",
+    "path": "android/verification/src/test/kotlin/com/dial/van/voice/VoiceRecognitionPolicyTest.kt",
+    "prior_failed_jvm_log": {
+      "path": "docs/audit/validation/android-owner-controls-final-jvm_failed_diagnostic-2026-10-08-r3.log",
+      "sha256": "7fbf929d414e8395497e18122bf8c55e126139c8646266372b2534a97dd5fd19"
+    },
+    "reason": "Test now requires both actual runtime and asset guards on the assemble/bundle dependency closure; production sources unchanged."
+  },
+  "runs": [
+    {
+      "after": {
+        "path": "docs/audit/validation/android-owner-controls-final-app-inputs-after-2026-10-08-r3.json",
+        "sha256": "7c9eb76f209057dcd9c23f56faa69ff71159ace4ea525dd50b1dcd4e53e3e72a"
+      },
+      "argv": [
+        "/workspace/.onboarding/gradle-8.11.1/bin/gradle",
+        "-p",
+        "android",
+        ":app:assembleDebug",
+        ":app:testDebugUnitTest",
+        ":app:lintDebug",
+        "--offline",
+        "--no-daemon",
+        "--max-workers=2",
+        "--console=plain",
+        "--rerun-tasks"
+      ],
+      "before": {
+        "path": "docs/audit/validation/android-owner-controls-final-app-inputs-before-2026-10-08-r3.json",
+        "sha256": "7c9eb76f209057dcd9c23f56faa69ff71159ace4ea525dd50b1dcd4e53e3e72a"
+      },
+      "exit_code": 0,
+      "kind": "app",
+      "logs": {
+        "path": "docs/audit/validation/android-owner-controls-final-app-2026-10-08-r3.log",
+        "sha256": "0aff01b6a0b39a87f00d1fd9dd4c48f5820824156b77103a407bf06e08012f45"
+      },
+      "reported_duration": "3m 15s"
+    },
+    {
+      "after": {
+        "path": "docs/audit/validation/android-owner-controls-final-jvm-inputs-after-2026-10-08-r3.json",
+        "sha256": "2727347c1aba7d47081e86bb055f551f137172aca8c8be1be6234d8f5ab74aa3"
+      },
+      "argv": [
+        "/workspace/.onboarding/gradle-8.11.1/bin/gradle",
+        "-p",
+        "android/verification",
+        "test",
+        "--offline",
+        "--no-daemon",
+        "--max-workers=2",
+        "--console=plain",
+        "--rerun-tasks"
+      ],
+      "before": {
+        "path": "docs/audit/validation/android-owner-controls-final-jvm-inputs-before-2026-10-08-r3.json",
+        "sha256": "2727347c1aba7d47081e86bb055f551f137172aca8c8be1be6234d8f5ab74aa3"
+      },
+      "exit_code": 0,
+      "kind": "jvm",
+      "logs": {
+        "path": "docs/audit/validation/android-owner-controls-final-jvm-2026-10-08-r3.log",
+        "sha256": "c4224dda2502ef87abe2fa93d1bb3b119a3c565481dab519e09b54908f4f8829"
+      },
+      "reported_duration": "22s"
+    }
+  ]
+}

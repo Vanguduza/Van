@@ -17,6 +17,7 @@ EnvironmentFile=/etc/van-browser-stream/runtime.env
 ExecStart=/opt/van-browser-stream/venv/bin/python -m services.browser_control_agent.server
 WorkingDirectory=/opt/van-browser-stream/src
 Restart=on-failure
+RestartPreventExitStatus=2
 RestartSec=5
 
 NoNewPrivileges=true
@@ -28,6 +29,7 @@ ReadOnlyPaths=/opt/van-browser-stream
 ReadWritePaths=/var/log/van-browser-stream
 # It does not need the profile volume: it talks to Chromium, not to Chromium's files.
 InaccessiblePaths=-/var/lib/van-browser-profiles
+InaccessiblePaths=-/opt/van-browser-stream/pki/ca.key -/opt/van-browser-stream/pki/stream-producer.token
 
 [Install]
 WantedBy=multi-user.target

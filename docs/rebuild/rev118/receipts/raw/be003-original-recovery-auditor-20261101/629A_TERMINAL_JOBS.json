@@ -1,0 +1,146 @@
+{
+  "head": "629a986019a4eb298f58dd98c62e6bcbade36ab7",
+  "run_id": 41313426404,
+  "source": "one supported connected jobs read; conclusions only, no test/mutant counts inferred",
+  "jobs": [
+    {
+      "id": 124868393458,
+      "name": "backend-public-source-gateway (0)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 124868393568,
+      "name": "project-truth-ledger",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 124868393576,
+      "name": "backend-public-source-gateway (3)",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 124868393596,
+      "name": "browser-guard-source",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 124868393604,
+      "name": "rebuild-documentary",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 124868393616,
+      "name": "android-and-visual-evidence",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 124868393631,
+      "name": "postgres-ledger",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 124868393633,
+      "name": "mutation (browser-agent, browser-agent, 0/1)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 124868393637,
+      "name": "mutation (kotlin-2, kotlin, 2/4)",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 124868393646,
+      "name": "mutation (python-2, python, 2/4)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 124868393653,
+      "name": "mutation (python-0, python, 0/4)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 124868393681,
+      "name": "mutation (kotlin-1, kotlin, 1/4)",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 124868393694,
+      "name": "backend",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 124868393701,
+      "name": "mutation (python-1, python, 1/4)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 124868393704,
+      "name": "backend-public-source-gateway (1)",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 124868393734,
+      "name": "android-instrumentation",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 124868393746,
+      "name": "mutation (kotlin-0, kotlin, 0/4)",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 124868393750,
+      "name": "backend-public-source-gateway (2)",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 124868393770,
+      "name": "market-monitor-source",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 124868393776,
+      "name": "mutation (python-3, python, 3/4)",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 124868393865,
+      "name": "mutation (kotlin-3, kotlin, 3/4)",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 124871581553,
+      "name": "character-forge-gate",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 124872010597,
+      "name": "backend-public-source",
+      "status": "completed",
+      "conclusion": "failure"
+    }
+  ],
+  "qualification": "FAILED; four-worker complete union/speed/native qualification not issued"
+}

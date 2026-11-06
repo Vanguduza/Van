@@ -1,0 +1,53 @@
+{
+  "schema": "van.obl004.hosted-matrix-source/1",
+  "at_utc": "2026-11-01T18:00:08.410942+00:00",
+  "base": "53c3457c417a8545380ab8c4e538c727c862dfba",
+  "reviewed_source_paths": 9,
+  "pins": "raw/obl004-hosted-matrix-20261101/NINE_SOURCE_PINS.json",
+  "behavior": "Additive isolated canonical SOURCE inventory/phase/runtime/storage/snapshot qualification for allfive roots andbothactualcwd values; original required publicsource gate remains unchanged. No native authority service.",
+  "preservation": {
+    "original_job_count": 12,
+    "additive_job_ids": [
+      "obl004-backend-gateway",
+      "obl004-backend-public-source",
+      "obl004-browser-namespace",
+      "obl004-canonical-matrix",
+      "obl004-documentary",
+      "obl004-forecast-source",
+      "obl004-private-dds",
+      "obl004-scenarios",
+      "obl004-trading-pg"
+    ],
+    "all_original_objects_and_topfields_identical": true,
+    "workflow_mirror_identical": true,
+    "application_and_mutation_and_authority_paths_unchanged": true,
+    "full_matrix_state": "UNEXECUTED_NATIVE_DISPATCH_PENDING"
+  },
+  "qualification_contract": {
+    "roots": [
+      "backend/tests",
+      "tests",
+      "services",
+      "hermes/policy/tests",
+      "trading/tests"
+    ],
+    "cwd": [
+      "checkout",
+      "backend"
+    ],
+    "full_cells": "10 UNEXECUTED until actual complete hostedcollection/assignment/phase/JUnit/storage/source/environment proof; no status-only PASS",
+    "native_owners": "Exact existing DDS and Java17AGP prerequisite cases have rightful executed owning selectors; original non-owning skips disclosed separately. Existing unfiltered Android app tasks remain their owner, no tenth job. Missing prerequisites block qualification.",
+    "not_applicable": "Exactly3 hash-bound B1 click/scroll/select negative probes with originalreason and sourceproducer hashes may be N/A; listed explicitly, never counted as passes. All other skips fail closed.",
+    "rejects": "Missing/duplicate/foreign/wrongcwd/source/config/plugin/runtime/phase/artifact, setup/call/teardown failure, unexpectedskip/storagewrite/snapshotdrift or unexecutedcell blocksfullqualification."
+  },
+  "actual_source_evidence": {
+    "R1": "175 actual focused cases/0skip on R1 pins; independent3realCLIpositive/5contaminant/8receipt-damage controls, originalfailure histories retained.",
+    "R2": "18 actual workflow controls/0skip and6 independent workflow refusals after uploadpath/displayname fixes; six other paths exactR1, source-bound reuse not fictitious rerun.",
+    "current_integration": "81 actual workflow/canonical/startup source controls/0skip, audit0, allninepins unchanged. SOURCE instrument/controlledfixtures, not hostedmatrix/nativequalification.",
+    "startup_fix": "Retain53c four home-guard falsepositives. Tracked source/runtimecode inputs may be read under a home layout; private/env/protecteddata/unknown inputs and allwrite/DB/network/process effects still refuse. HOME never repurposed."
+  },
+  "known_failures": "Source53c van-ci41324788973 remainsFAILED: gateway0/3passed; gateway1pendingredteam2fail, gateway2fourstartuphome guardfail. No wholeunion/sourceperformance or374execution claim. Original6187watchterminalexit1; resumeUnknownprocessid once, controllerabsent; no successfulreap/restart/signal. a5d/c006/629 failures retained.",
+  "intake": "PR106 ready/open/unmerged at lastactualread; proposedrecord notused, protectedredteam evidence unchanged anditsgate remainsblocked/failed until ownertrustedintake. No sourcecandidate PASSwaiver.",
+  "limits": "Allfull10matrixcellsUNEXECUTED; no OBL004/BE003/formalunit/BG001/native/provider/device/production/release acceptance. Historical WAL/SHM attribution, tracked snapshot-owner disposition, backup/defaultpath and authentic source-revocation owner remain separate. No unreviewed account/product/nativefield changes.",
+  "next": "Genuinehooks/required4fd committedverify/normalpush/exactreadbacks; one ownedbounded watch. Read actual originalsourcegate and newprofile/aggregate artifacts to terminal via safetransport; diagnose realfailures without weakening controls."
+}

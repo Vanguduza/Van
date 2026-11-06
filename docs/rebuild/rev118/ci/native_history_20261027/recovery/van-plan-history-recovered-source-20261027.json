@@ -1,0 +1,29 @@
+{
+  "path": "/workspace/van-plan-history-recovered-source-20261027.zip",
+  "bytes": 205710,
+  "sha256": "8249ada5d16d298a8f42fdbd23926d6edbcfd143d32176299cfcd70c5c696f84",
+  "files": {
+    "docs/rebuild/rev118/BUILD_EXECUTION_PLAN.md": "29d3d28f9074622c9344960ae8954057b48bae1fba690545c6e03f641b6ed5d6",
+    "docs/rebuild/rev118/SOURCE_WORKMAP.json": "5a4ea8258fcaad67cdf374382367e818e3482358f7d4c5cad4bf0bf2797a8a19",
+    "tests/rebuild/test_source_workmap.py": "f9b7a1b3b6839593b8fb7274cab913f3df0813ce6e8e4e2f4f39fa9889822542",
+    "tools/rebuild/workmap.py": "908b8eb1b23ae04a25112e4073e6afa6b64cc7fbe9324f9d5a5449d6e601fa74",
+    "trading/tests/test_native_risk_history_index.py": "ecc4fc1eafe719790d02bfacb816be9661f86089a1dca9a634646083b13be7f3",
+    "trading/tests/test_native_risk_history_inputs.py": "54b6998c2f28307afc7bb61e7d52656f322be8c0ee88d8aabe3cfedfca237bb3",
+    "trading/tests/test_native_risk_history_postgres.py": "993c865d6b73141709886e5054698267cdb6cd7201065d1cfedc7579d72da0e2",
+    "trading/vati/risk/native_history.py": "d990d2dd9781cf80a85e01fb029322c2b940da1da8cd2b8429e07b68fce784b0"
+  },
+  "crc_per_file_readback_verified": true,
+  "base_commit": "c5108b3ce1a15caffac107de4eeff588bb33ce66",
+  "retained_SQL147_source_hashes_matched": 1179,
+  "interrupted_old_check_pids_absent": [
+    1223659,
+    1223663,
+    1224199,
+    1224213
+  ],
+  "interrupted_checks_not_pass": [
+    "van-workmap-history-rebuild-final-20261027",
+    "van-workmap-history-owner-registry-20261027"
+  ],
+  "observed_at_utc": "2026-10-27T13:45:16.720232+00:00"
+}

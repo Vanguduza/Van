@@ -1,0 +1,106 @@
+{
+  "directory": "/tmp/van-recovery-mutation-registry-controls-20261101",
+  "at_utc": "2026-11-01T02:35:25.504469+00:00",
+  "files": [
+    {
+      "path": "test_retargeted_python_edits_c0/guard.py",
+      "bytes": 23,
+      "sha256": "caaa002ea4ff44d8bb8b4c0ba9a930e54cee6cb09889e7ddaee23c80a9fd5e78"
+    },
+    {
+      "path": "test_a_gradle_compile_failure_0/Guard.kt",
+      "bytes": 7,
+      "sha256": "e7da2135b6d3a82d5242bbb5d7b8534e5841356c6973e1d479ce41e41dd6215b"
+    },
+    {
+      "path": "test_a_mutant_collection_error0/test_guard.py",
+      "bytes": 63,
+      "sha256": "ea6e1ff161bb72c85a10dc0e4e67e2179a90ea7b09d8a87ad7f4870f8125ddfa"
+    },
+    {
+      "path": "test_a_mutant_collection_error0/guard.py",
+      "bytes": 15,
+      "sha256": "77fc198f998aab70db5a8c5771cdc607729ba34736d1393488d7de6e06aa66f2"
+    },
+    {
+      "path": "test_registry_preflight_is_rea4/test_guard.py",
+      "bytes": 22,
+      "sha256": "ff6555680680af5324ced138dd178af9b6c315e803528602a3942937aad9972c"
+    },
+    {
+      "path": "test_registry_preflight_is_rea4/guard.py",
+      "bytes": 7,
+      "sha256": "e7da2135b6d3a82d5242bbb5d7b8534e5841356c6973e1d479ce41e41dd6215b"
+    },
+    {
+      "path": "test_registry_preflight_is_rea3/guard.py",
+      "bytes": 7,
+      "sha256": "e7da2135b6d3a82d5242bbb5d7b8534e5841356c6973e1d479ce41e41dd6215b"
+    },
+    {
+      "path": "test_registry_preflight_is_rea2/test_guard.py",
+      "bytes": 22,
+      "sha256": "ff6555680680af5324ced138dd178af9b6c315e803528602a3942937aad9972c"
+    },
+    {
+      "path": "test_registry_preflight_is_rea1/test_guard.py",
+      "bytes": 22,
+      "sha256": "ff6555680680af5324ced138dd178af9b6c315e803528602a3942937aad9972c"
+    },
+    {
+      "path": "test_registry_preflight_is_rea1/guard.py",
+      "bytes": 7,
+      "sha256": "e7da2135b6d3a82d5242bbb5d7b8534e5841356c6973e1d479ce41e41dd6215b"
+    },
+    {
+      "path": "test_registry_preflight_is_rea0/test_guard.py",
+      "bytes": 22,
+      "sha256": "ff6555680680af5324ced138dd178af9b6c315e803528602a3942937aad9972c"
+    },
+    {
+      "path": "test_registry_preflight_is_rea0/guard.py",
+      "bytes": 7,
+      "sha256": "e7da2135b6d3a82d5242bbb5d7b8534e5841356c6973e1d479ce41e41dd6215b"
+    },
+    {
+      "path": "test_valid_control_distinguish1/guard.py",
+      "bytes": 7,
+      "sha256": "e7da2135b6d3a82d5242bbb5d7b8534e5841356c6973e1d479ce41e41dd6215b"
+    },
+    {
+      "path": "test_valid_control_distinguish0/guard.py",
+      "bytes": 7,
+      "sha256": "e7da2135b6d3a82d5242bbb5d7b8534e5841356c6973e1d479ce41e41dd6215b"
+    },
+    {
+      "path": "test_a_failing_unmutated_contr0/guard.py",
+      "bytes": 7,
+      "sha256": "e7da2135b6d3a82d5242bbb5d7b8534e5841356c6973e1d479ce41e41dd6215b"
+    },
+    {
+      "path": "test_a_mutant_collection_error0/.pytest_cache/CACHEDIR.TAG",
+      "bytes": 191,
+      "sha256": "37dc88ef9a0abeddbe81053a6dd8fdfb13afb613045ea1eb4a5c815a74a3bde4"
+    },
+    {
+      "path": "test_a_mutant_collection_error0/.pytest_cache/.gitignore",
+      "bytes": 37,
+      "sha256": "3ed731b65d06150c138e2dadb0be0697550888a6b47eb8c45ecc9adba8b8e9bd"
+    },
+    {
+      "path": "test_a_mutant_collection_error0/.pytest_cache/README.md",
+      "bytes": 302,
+      "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad"
+    },
+    {
+      "path": "test_a_mutant_collection_error0/.pytest_cache/v/cache/lastfailed",
+      "bytes": 27,
+      "sha256": "069b043c162b9f8e22154ad09b9c241dbd56d33a21ff65ba3e6e6a2ff50e6b3d"
+    },
+    {
+      "path": "test_a_mutant_collection_error0/.pytest_cache/v/cache/nodeids",
+      "bytes": 33,
+      "sha256": "cd930142bbf42e6a6e00c29646491bc9df62898df2ebf7fa8eb876236560b637"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.trading.CognitionHierarchyContractTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-10-27T05:23:23" hostname="runnervmtai0g" time="0.002">
+  <properties/>
+  <testcase name="supported hierarchy is authoritative when both keys are present()" classname="com.dial.van.trading.CognitionHierarchyContractTest" time="0.001"/>
+  <testcase name="existing native legacy hierarchy contract remains readable()" classname="com.dial.van.trading.CognitionHierarchyContractTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

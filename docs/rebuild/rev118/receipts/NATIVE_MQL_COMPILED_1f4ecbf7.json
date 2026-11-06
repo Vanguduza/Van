@@ -1,0 +1,46 @@
+{
+  "source_sha256": "88d45cefd1ef766370cce39817317585b993af607123d89efec301ef0bf05189",
+  "source_blob_oid": "dad5018039c873a5c520cdb5951a579b41b062b1",
+  "compiler_sha256": "bb480fb66ca56118167f5a1bf398602de5541cd639b7882f91196014c496175a",
+  "compiler_file_version": "5.0.0.6285",
+  "compiler_signature": {
+    "status": "Valid",
+    "subject": "CN=MetaQuotes Ltd., O=MetaQuotes Ltd., S=Lemesos, C=CY",
+    "thumbprint": "5A64A7AED24C33DED342D01D01FA5286F06DA6DC"
+  },
+  "compile_cases": [
+    {
+      "name": "VanCompilerRejectionProbe",
+      "expected_success": false,
+      "process_exit_code": 0,
+      "errors": 4,
+      "warnings": 0,
+      "fresh_binary": false,
+      "started_at_utc": "2026-10-26T02:42:10.0510672Z",
+      "finished_at_utc": "2026-10-26T02:42:11.0433660Z",
+      "log_sha256": "651956b4298d2d2414422814ac2750edc0df9fad2787988bc667f8fe1bd3090b"
+    },
+    {
+      "name": "VanBridgeEA",
+      "expected_success": true,
+      "process_exit_code": 1,
+      "errors": 0,
+      "warnings": 0,
+      "fresh_binary": true,
+      "started_at_utc": "2026-10-26T02:42:11.0468583Z",
+      "finished_at_utc": "2026-10-26T02:42:13.0125209Z",
+      "log_sha256": "095f3768bc8abeb97983954653dac551ec1c12fe4374f190427fec7600677574",
+      "binary_sha256": "9003509c430a2ecb329f27e82e4751910a0c1251e7e603734dab50a2b767eac2"
+    }
+  ],
+  "schema": "van.native-mql-source-compile/1",
+  "source_head": "1f4ecbf748b870b3187ac33ccdac734e375e541c",
+  "tested_merge": "8e60293e9d764e6c6d7d05b5ae518be804bba885",
+  "run": 40260186823,
+  "status": "SOURCE_COMPILED",
+  "artifact_id": 12624332869,
+  "artifact_bytes": 72562,
+  "artifact_sha256": "93d05cf755612bdb07d54696fe2e00d1ff56d6ffc1f8aff4cf61fd0173a24e50",
+  "evidence": "ci/native_mql_compiled_1f4ecbf7_20261026",
+  "qualification": "Actual signed compiler/source compile/bad-source control;network-blocked SDK initialization only;no account/broker/order/deployed EA/financial/device acceptance"
+}

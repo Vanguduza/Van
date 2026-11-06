@@ -1,0 +1,84 @@
+........................................................................ [ 12%]
+........................................................................ [ 24%]
+........................................................................ [ 36%]
+........................................................................ [ 48%]
+............F........................................................... [ 61%]
+........................................................................ [ 73%]
+........................................................................ [ 85%]
+........................................................................ [ 97%]
+............                                                             [100%]
+=================================== FAILURES ===================================
+__ test_actual_record_a4_erasure_retains_unselected_record_and_retry_receipt ___
+
+client = (<httpx.AsyncClient object at 0x7f1e228bd790>, <fastapi.applications.FastAPI object at 0x7f1e0b30ebd0>, {'create_run': 0})
+
+    async def test_actual_record_a4_erasure_retains_unselected_record_and_retry_receipt(client):
+        ac, app, hermes = client
+        key = await _pair(ac, app)
+        selected = await _fact(app)
+        other = await app.state.owner_fact_author.state(device_id="dev-erasure", subject="owner",
+            predicate="other-memory", value="keep-this-record")
+        records = OwnerRecords(app.state.store)
+        page = await records.list("owner_facts")
+        target = next(record for record in page["records"] if any(field["name"] == "fact_id" and field["value"] == selected.fact_id for field in record["fields"]))
+        plan = await records.erasure_plan("owner_facts", target["record_id"])
+        body, result = await _approve(ac, app, key, plan["command_text"], "erase-one-fact")
+>       assert result["status"] == "accepted", result
+E       AssertionError: {'status': 'denied', 'command_id': 'f4dd2e8b-b068-4943-95c8-fb7500bd5f65', 'idempotency_key': 'erase-one-fact', 'message': 'The current device approval no longer authorizes this erasure', ...}
+E       assert 'denied' == 'accepted'
+E         
+E         - accepted
+E         + denied
+
+backend/tests/test_owner_record_erasure.py:27: AssertionError
+----------------------------- Captured stdout call -----------------------------
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 909.5, "method": "POST", "route": "/v1/devices/pairing-ticket"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-11-01T01:51:37.003Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 19.07, "method": "POST", "route": "/v1/devices/pair"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-11-01T01:51:37.026Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 25, "fired": 0, "job": "reminders.fire_due", "published": 0}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.scheduler", "message": "scheduled job completed", "mission_id": null, "principal": null, "result": "OK", "service": "van-gateway", "ts": "2026-11-01T01:51:37.142Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 22, "expired": 0, "job": "missions.expire_overdue"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.scheduler", "message": "scheduled job completed", "mission_id": null, "principal": null, "result": "OK", "service": "van-gateway", "ts": "2026-11-01T01:51:37.204Z"}
+{"action_class": "A4", "command_id": "73be7b4c-a3c5-4c2b-899b-58b4abe2746f", "correlation_id": "corr_46e5353f8697", "degraded_code": null, "detail": {"hermes_run_id": null, "origin_channel": "UI", "requires_approval": true, "resolved_action_id": "memory.erase"}, "device_id": "dev-erasure", "error_class": null, "level": "WARNING", "logger": "van.command", "message": "command outcome", "mission_id": null, "principal": "OWNER_DEVICE", "result": "approval_required", "service": "van-gateway", "ts": "2026-11-01T01:51:37.214Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 108.68, "method": "POST", "route": "/v1/commands"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-11-01T01:51:37.219Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 26, "job": "missions.publish_terminal", "published": 0}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.scheduler", "message": "scheduled job completed", "mission_id": null, "principal": null, "result": "OK", "service": "van-gateway", "ts": "2026-11-01T01:51:37.455Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 227, "job": "learning.repair_missions", "pending": 0, "repaired": 0, "retry_pending": 0}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.scheduler", "message": "scheduled job completed", "mission_id": null, "principal": null, "result": "OK", "service": "van-gateway", "ts": "2026-11-01T01:51:37.703Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"audit_pruned": 0, "automation_transient_retired": 0, "deleted": 0, "duration_ms": 91, "job": "ops.retention", "tables": 79}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.scheduler", "message": "scheduled job completed", "mission_id": null, "principal": null, "result": "OK", "service": "van-gateway", "ts": "2026-11-01T01:51:37.804Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 3699, "job": "proactive.follow_ups", "produced": {"decisions_open": 0, "intents_stale": 0, "missions_expired": 0, "missions_waiting": 0}, "total": 0}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.scheduler", "message": "scheduled job completed", "mission_id": null, "principal": null, "result": "OK", "service": "van-gateway", "ts": "2026-11-01T01:51:41.528Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"checked": 0, "due": 0, "duration_ms": 184, "failed": 0, "job": "owner.watches", "published": 0, "triggered": 0}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.scheduler", "message": "scheduled job completed", "mission_id": null, "principal": null, "result": "OK", "service": "van-gateway", "ts": "2026-11-01T01:51:41.724Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 0, "job": "trading.publish_closed", "ledger_available": false, "published": 0}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.scheduler", "message": "scheduled job completed", "mission_id": null, "principal": null, "result": "OK", "service": "van-gateway", "ts": "2026-11-01T01:51:41.732Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"attention_projected": 0, "duration_ms": 26, "evaluated": 0, "job": "trading.market_monitors", "triggered": 0}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.scheduler", "message": "scheduled job completed", "mission_id": null, "principal": null, "result": "OK", "service": "van-gateway", "ts": "2026-11-01T01:51:41.770Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"demoted": 0, "duration_ms": 20, "job": "learning.auto_demote"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.scheduler", "message": "scheduled job completed", "mission_id": null, "principal": null, "result": "OK", "service": "van-gateway", "ts": "2026-11-01T01:51:41.799Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 7, "job": "understanding.mark_stale_intents", "marked_stale": 0}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.scheduler", "message": "scheduled job completed", "mission_id": null, "principal": null, "result": "OK", "service": "van-gateway", "ts": "2026-11-01T01:51:41.820Z"}
+{"action_class": null, "command_id": null, "correlation_id": "corr_c753b70e070f", "degraded_code": null, "detail": {"duration_ms": 10100, "verification_state": "PENDING"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.mission", "message": "mission finished", "mission_id": "msn_52080d6d64e344acafe1cc3762c8e223", "principal": null, "result": "FAILED", "service": "van-gateway", "ts": "2026-11-01T01:51:48.049Z"}
+{"action_class": "A4", "command_id": "f4dd2e8b-b068-4943-95c8-fb7500bd5f65", "correlation_id": "corr_c753b70e070f", "degraded_code": null, "detail": {"hermes_run_id": null, "origin_channel": "UI", "requires_approval": false, "resolved_action_id": "memory.erase"}, "device_id": "dev-erasure", "error_class": null, "level": "WARNING", "logger": "van.command", "message": "command outcome", "mission_id": "msn_52080d6d64e344acafe1cc3762c8e223", "principal": "OWNER_DEVICE", "result": "denied", "service": "van-gateway", "ts": "2026-11-01T01:51:48.576Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 11365.65, "method": "POST", "route": "/v1/commands"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-11-01T01:51:48.603Z"}
+------------------------------ Captured log call -------------------------------
+INFO     van.request:logging.py:112 request
+INFO     van.request:logging.py:112 request
+INFO     van.scheduler:logging.py:112 scheduled job completed
+INFO     van.scheduler:logging.py:112 scheduled job completed
+WARNING  van.command:logging.py:112 command outcome
+INFO     van.request:logging.py:112 request
+INFO     van.scheduler:logging.py:112 scheduled job completed
+INFO     van.scheduler:logging.py:112 scheduled job completed
+INFO     van.scheduler:logging.py:112 scheduled job completed
+INFO     van.scheduler:logging.py:112 scheduled job completed
+INFO     van.scheduler:logging.py:112 scheduled job completed
+INFO     van.scheduler:logging.py:112 scheduled job completed
+INFO     van.scheduler:logging.py:112 scheduled job completed
+INFO     van.scheduler:logging.py:112 scheduled job completed
+INFO     van.scheduler:logging.py:112 scheduled job completed
+INFO     van.mission:logging.py:112 mission finished
+WARNING  van.command:logging.py:112 command outcome
+INFO     van.request:logging.py:112 request
+=============================== warnings summary ===============================
+../../van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py:53
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED backend/tests/test_owner_record_erasure.py::test_actual_record_a4_erasure_retains_unselected_record_and_retry_receipt
+1 failed, 587 passed, 2 warnings in 1061.99s (0:17:41)

@@ -1,0 +1,136 @@
+{
+  "schema": "van.rebuild.oauth-effect-recovery-source/1",
+  "source_parent": "c4e0e7b3bf123f6e7c58675f5d19b8472fa9baa1",
+  "source_sha256": {
+    "backend/van_gateway/app.py": "f38475ad694d4ca276f4fa4e11d454176be8daeddbc361a14d85d82d99c14efb",
+    "backend/van_gateway/trading/accounts.py": "31f8d2bad54905a3aff17f74eb713298edc0850ffe328c9e83bd5b49ab66bec5",
+    "backend/van_gateway/trading/oauth_effects.py": "a9feb90bce6560a195f18cadf7b081edb33e63a6c76f6ba1235c856dbef81364",
+    "backend/tests/test_trading_oauth_scope.py": "11568cfb074ecce21a6198a2d1b97c0801d855ed34a11c8905ce2a736ec1fd65",
+    "backend/tests/test_trading_oauth_effects.py": "f910539180538fa1638728b177fd52bb9244fc6a2c23271e0a72adb7b338c662"
+  },
+  "initial_gateway_counterexamples": 3,
+  "initial_cipher_transplant_counterexamples": 2,
+  "audited_gateway_selection": {
+    "tests": 82,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "219e092cb0c14a5e58b5bc622cddb201c48dd5dc51ec725e4618ef5c55069c55"
+  },
+  "storage_audit": {
+    "forbidden_events": [],
+    "scope": "backend/tests plus tests/contracts; repo-root invocation; writes and SQLite opens under root/data or backend/data refused"
+  },
+  "owner_contracts": {
+    "tests": 192,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "eb0e13e5a2aae5a77ae2bb9e19319639167a1754a12dcb28e13b93d979374a7c"
+  },
+  "rebuild": {
+    "tests": 78,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "766f5a948cf815fe0cc03ce9758e6f39bd2bcedce8b9fb972852f0481019fe88"
+  },
+  "custom_mutants": {
+    "detected": 6,
+    "survived": 0,
+    "source_restored": true,
+    "rows": [
+      {
+        "kind": "baseline",
+        "mutation": null,
+        "exit_code": 0,
+        "log": "/tmp/van-oauth-effects-mutant-0.txt",
+        "sha256": "88ccee04f4387a067ba0827a938dfd5d2c1a640e2c9209b3b514829829dd96f7"
+      },
+      {
+        "kind": "mutation",
+        "mutation": "replay a completed callback through all redundant claim guards",
+        "exit_code": 1,
+        "log": "/tmp/van-oauth-effects-mutant-1.txt",
+        "sha256": "2780eddad192525d36c605835822cf847d0ec31feafecdfa1818c63e865b39db"
+      },
+      {
+        "kind": "mutation",
+        "mutation": "let a new OAuth state bypass an unknown target",
+        "exit_code": 1,
+        "log": "/tmp/van-oauth-effects-mutant-2.txt",
+        "sha256": "b550f8690105df7a5b9ba3510a560ee6c6922864e594bbb89b7b2609c3ee7864"
+      },
+      {
+        "kind": "mutation",
+        "mutation": "commit token consumption before its result receipt",
+        "exit_code": 1,
+        "log": "/tmp/van-oauth-effects-mutant-3.txt",
+        "sha256": "c26a98057d0bba53a767742ae86ed434427d5c7827616e7754c8ee2cddcb33c1"
+      },
+      {
+        "kind": "mutation",
+        "mutation": "block the owner event loop during provider token exchange",
+        "exit_code": 1,
+        "log": "/tmp/van-oauth-effects-mutant-4.txt",
+        "sha256": "c4c8f8d039ac7a2b07fe3cc02b50ee049badd5e65ca7474fe74db728b07beacb"
+      },
+      {
+        "kind": "mutation",
+        "mutation": "adopt a valid encrypted receipt from another link",
+        "exit_code": 1,
+        "log": "/tmp/van-oauth-effects-mutant-5.txt",
+        "sha256": "af4c5b4baadd8976f1de454d01ce36f10c37ab8f7571ab4baf11ff69f5093fef"
+      },
+      {
+        "kind": "mutation",
+        "mutation": "adopt authorization ciphertext from another OAuth state",
+        "exit_code": 1,
+        "log": "/tmp/van-oauth-effects-mutant-6.txt",
+        "sha256": "ef55696a00cd2ebe838ff1311df090d02ff269eda56a105199a2210b24d77eb6"
+      }
+    ]
+  },
+  "legacy_mutation_preflight": {
+    "schema": "van.rebuild.mutation-registry-preflight/1",
+    "registry_sha256": "35d10c7b0f2b8319b7f7305828262c972b2a6451139d75b9e83c7d0062282955",
+    "mutation_count": 374,
+    "edit_count": 383,
+    "findings": [],
+    "execution_state": "NOT_RUN",
+    "status": "ANCHORS_VALID_BASELINES_AND_MUTATIONS_NOT_EXECUTED"
+  },
+  "owner_registry_refresh": {
+    "changed": [
+      "registries/owner_endpoints.json",
+      "registries/owner_endpoint_schemas.json",
+      "docs/rebuild/rev118/backend/OWNER_REGISTRY_SOURCE_REFRESH_20261022.json",
+      "registries/owner_features.json",
+      "registries/owner_screens.json",
+      "docs/rebuild/rev118/backend/OWNER_REGISTRY_GENERATION.json"
+    ],
+    "applied": true,
+    "scope": "SOURCE_CONTRACTS_ONLY"
+  },
+  "consolidation": {
+    "scope": "SOURCE_CONSOLIDATION_ONLY",
+    "branches_evaluated": 70,
+    "blueprint_archive_sha256": "6c7c7c1cb4fbd4748c0d63ceb2add9bd460778b66fb3b2302e16de09ac3a57a8",
+    "findings": [],
+    "runtime_qualification_issued": false
+  },
+  "process_death": "Real separate Python process os._exit(73) after committed claim; new reader and actual route refuse provider re-exchange",
+  "external_provider": "Isolated response fixtures only; real gateway, crypto, store, control and local files",
+  "harness_correction": "Five exact synthetic untracked fixtures were verified and removed; all subsequent effect tests bind storage to tmp_path and audited selection refuses checkout storage",
+  "whole_unit_acceptance": "NOT_ISSUED",
+  "release_qualified": false,
+  "remaining": [
+    "Native profile/environment/read-only identity",
+    "Verified credential swap and native resource-version fencing",
+    "Exposure/funds/lease-safe unlink",
+    "Direct non-OAuth native operation protocol",
+    "Native unknown-effect adjudication and retention/erasure",
+    "Original funds/economics/qualified-adaptation and other whole-product units",
+    "Independent, real service/provider/production and physical handset acceptance"
+  ]
+}

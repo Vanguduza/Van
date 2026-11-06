@@ -1,0 +1,492 @@
+{
+  "schema": "van.rebuild.owner-goal-integrity-source/1",
+  "observed_at_utc": "2026-10-23T15:54:34.130471+00:00",
+  "source_parent": "f45ab93c3692a05a32446604aa09b2a4189babf4",
+  "source_sha256": {
+    "backend/van_gateway/goals/service.py": "b12e2e8efe471b4b3e71bc561b593c2f392997ecb72b0b9cd355f07f327f82f9",
+    "backend/van_gateway/goals/models.py": "1a290831f10e59faaf4c295ae86b3c0ed000e865079c28050a2c61a24c07f386",
+    "backend/van_gateway/goals/api.py": "934cca18606ae59164855dc82cb17233faa74212583bf465ae3b15228fe63dcd",
+    "backend/tests/test_goals_watches.py": "6b17c63917611dabd61fb5f791d9ee5f52a384e3e3ad49df5ff19dbd62d129f3",
+    "backend/tests/test_owner_goal_integrity.py": "aad4762ca17676a5314d6c269dfb03472ff2d18c27bc1bef7a6003394be23485",
+    "backend/tests/test_owner_goal_gateway.py": "903f55b7384031584a08cd01116e0ae393b8f1c7cb588ee5762c1ca729cd2072"
+  },
+  "executions": {
+    "initial_before": {
+      "tests": 8,
+      "failures": 8,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.53,
+      "xml_sha256": "96ef1b7405d5f133891168274964f3964869998ec493b7d7c15181182415846f"
+    },
+    "additional_read_threshold_before": {
+      "tests": 2,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.442,
+      "xml_sha256": "730c6db87574b521e18e6963a4da0042fef7920fb4ecaa4313856be2b79bd8b0"
+    },
+    "list_and_timestamp_before": {
+      "tests": 3,
+      "failures": 3,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.7,
+      "xml_sha256": "7ff8252e2cc1700bc82021591ff522f660abb91f3859e65fa5586c7854288de1"
+    },
+    "isolated_expanded": {
+      "tests": 41,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 8.502,
+      "xml_sha256": "56a2d97cc89cff58e72116c1b7f4bea04b2d4669369b49a55ce139334ff0ae93"
+    },
+    "integrated_audited": {
+      "tests": 108,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 16.498,
+      "xml_sha256": "09006288916a2ff2d99c4e77f47ac5502e74dea639f5f827e80d4b5bf6638e95"
+    },
+    "owner_contracts": {
+      "tests": 29,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 3.968,
+      "xml_sha256": "573a7d278682a01a18a43d4752523159a596dd96182e58bafd35eb4978c74312"
+    },
+    "rebuild": {
+      "tests": 79,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 33.451,
+      "xml_sha256": "32d51a796c64aa72582aa26ad5c3c0f6ed2c03904f0238b1014ed875d46377ce"
+    }
+  },
+  "fault_campaign": {
+    "definitions": [
+      [
+        "commit owner goal before all milestones",
+        "backend/van_gateway/goals/service.py",
+        "            for order, title in enumerate(body.milestones):",
+        "            await db.commit()\n            for order, title in enumerate(body.milestones):",
+        "backend/tests/test_owner_goal_integrity.py::test_failed_second_milestone_insert_rolls_back_the_entire_goal"
+      ],
+      [
+        "read patch fields before writer admission",
+        "backend/van_gateway/goals/service.py",
+        "            await db.execute(\"BEGIN IMMEDIATE\")\n            row = await (await db.execute(\"SELECT * FROM owner_goals",
+        "            # broken: no writer admission\n            row = await (await db.execute(\"SELECT * FROM owner_goals",
+        "backend/tests/test_owner_goal_integrity.py::test_concurrent_goal_patch_preserves_an_independent_owner_description_change"
+      ],
+      [
+        "read goal and milestones from different snapshots",
+        "backend/van_gateway/goals/service.py",
+        "            async with self.store.connection() as db:\n                await db.execute(\"BEGIN\")\n                return await self._goal(goal_id, db=db)",
+        "            async with self.store.connection() as db:\n                # broken: no shared read snapshot\n                return await self._goal(goal_id, db=db)",
+        "backend/tests/test_owner_goal_integrity.py::test_goal_read_uses_one_snapshot_for_goal_fields_and_milestones"
+      ],
+      [
+        "invent a link to an absent mission",
+        "backend/van_gateway/goals/service.py",
+        "            if await (await db.execute(\"SELECT mission_id FROM missions WHERE mission_id=?\", (mission_id,))).fetchone() is None:",
+        "            if False:",
+        "backend/tests/test_owner_goal_integrity.py::test_goal_cannot_claim_a_mission_that_does_not_exist"
+      ],
+      [
+        "accept blank authored milestone",
+        "backend/van_gateway/goals/models.py",
+        "        if any(not value.strip() for value in values):",
+        "        if False:",
+        "backend/tests/test_owner_goal_integrity.py::test_blank_owner_input_is_refused_instead_of_silently_becoming_missing_work"
+      ],
+      [
+        "accept blank authored watch title or target",
+        "backend/van_gateway/goals/models.py",
+        "        if not value.strip():\n            raise ValueError(\"watch title and target must not be blank\")",
+        "        if False:\n            raise ValueError(\"watch title and target must not be blank\")",
+        "backend/tests/test_owner_goal_integrity.py::test_blank_owner_input_is_refused_instead_of_silently_becoming_missing_work"
+      ],
+      [
+        "coerce true into a numeric price threshold",
+        "backend/van_gateway/goals/service.py",
+        "                if isinstance(body.condition[\"threshold\"], bool):",
+        "                if False:",
+        "backend/tests/test_owner_goal_integrity.py::test_numeric_watch_threshold_is_not_a_boolean"
+      ],
+      [
+        "remove typed owner goal read contract",
+        "backend/van_gateway/goals/api.py",
+        "@router.get(\"/v1/goals/{goal_id}\", response_model=Goal)",
+        "@router.get(\"/v1/goals/{goal_id}\")",
+        "backend/tests/test_owner_goal_gateway.py::test_paired_owner_goal_lifecycle_uses_real_links_and_preserves_distinct_mission_state"
+      ],
+      [
+        "read filtered goal list across inconsistent snapshots",
+        "backend/van_gateway/goals/service.py",
+        "        async with self.store.connection() as db:\n            await db.execute(\"BEGIN\")\n            rows =",
+        "        async with self.store.connection() as db:\n            # broken: no list snapshot\n            rows =",
+        "backend/tests/test_owner_goal_integrity.py::test_goal_status_filter_and_returned_goals_share_one_snapshot"
+      ],
+      [
+        "commit milestone before parent change timestamp",
+        "backend/van_gateway/goals/service.py",
+        "\n            await db.execute(\"UPDATE owner_goals SET updated_at_ms=? WHERE goal_id=?\", (now,goal_id))\n            await db.commit()",
+        "\n            await db.commit()\n            await db.execute(\"UPDATE owner_goals SET updated_at_ms=? WHERE goal_id=?\", (now,goal_id))\n            await db.commit()",
+        "backend/tests/test_owner_goal_integrity.py::test_goal_parent_update_failure_cannot_commit_a_child_change"
+      ],
+      [
+        "commit mission link before parent change timestamp",
+        "backend/van_gateway/goals/service.py",
+        "            if inserted.rowcount == 1:\n                await db.execute",
+        "            if inserted.rowcount == 1:\n                await db.commit()\n                await db.execute",
+        "backend/tests/test_owner_goal_integrity.py::test_goal_parent_update_failure_cannot_commit_a_child_change"
+      ]
+    ],
+    "records": [
+      {
+        "case": 0,
+        "phase": "control",
+        "reason": "commit owner goal before all milestones",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "a8b0c4fd58dee30f7b090e4a0651191100c7470e4a70fb655e8a877838240732"
+      },
+      {
+        "case": 0,
+        "phase": "fault",
+        "reason": "commit owner goal before all milestones",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "5832a687f52808b3ce65eebac484ac1a98067fca99336ee594cd031f9e616d77"
+      },
+      {
+        "case": 1,
+        "phase": "control",
+        "reason": "read patch fields before writer admission",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "ae9c654926554ae0ae90993ca02c31d5e6d02929e3b5fa3b6ff9de045daf9f57"
+      },
+      {
+        "case": 1,
+        "phase": "fault",
+        "reason": "read patch fields before writer admission",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "2886a4214312ec6502be57d0a36c9c16f99d9d8e829a2bd03c4cb0b72fc230c8"
+      },
+      {
+        "case": 2,
+        "phase": "control",
+        "reason": "read goal and milestones from different snapshots",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "b155da646ac84b3d9b2b84af616d53cc3ae166bfb8410462d2258e3e8560c967"
+      },
+      {
+        "case": 2,
+        "phase": "fault",
+        "reason": "read goal and milestones from different snapshots",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "31ec15fdcf3960ba23557fe5156a31c2a7a57d36571dbb208c5b70da092e1a25"
+      },
+      {
+        "case": 3,
+        "phase": "control",
+        "reason": "invent a link to an absent mission",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "1369899fc6c5a2387da9bf0a2e9cc688da48c3033d25e050768b039aa8488ee8"
+      },
+      {
+        "case": 3,
+        "phase": "fault",
+        "reason": "invent a link to an absent mission",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "68baa92d703f69c126474efafa8e20f65b52a7a780273fdb06278ec8fa02edfc"
+      },
+      {
+        "case": 4,
+        "phase": "control",
+        "reason": "accept blank authored milestone",
+        "exit_code": 0,
+        "counts": {
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "932450931c1371e50953851f27b4e4f22f54f94d204a51e3d5eb160430e2af3a"
+      },
+      {
+        "case": 4,
+        "phase": "fault",
+        "reason": "accept blank authored milestone",
+        "exit_code": 1,
+        "counts": {
+          "tests": 5,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "142b2b8c9b3bb52df320a6288bf19526fb929dabb3e5ecfc4508c01116b5a5f5"
+      },
+      {
+        "case": 5,
+        "phase": "control",
+        "reason": "accept blank authored watch title or target",
+        "exit_code": 0,
+        "counts": {
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "89955eccf1b5b826ff1bacb5d4055c5f95ec5d41f6b6800ee42b5e8279cbb2c3"
+      },
+      {
+        "case": 5,
+        "phase": "fault",
+        "reason": "accept blank authored watch title or target",
+        "exit_code": 1,
+        "counts": {
+          "tests": 5,
+          "failures": 2,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 2,
+        "xml_sha256": "2cd8e37a07ca4595dbf608f33b8b4b0b39fde0e447ceca56a44cc4500cab71ae"
+      },
+      {
+        "case": 6,
+        "phase": "control",
+        "reason": "coerce true into a numeric price threshold",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "ac8c346e0ac8d01f73cbed4ae46ce1edcf22a0cd7fc346bf9d30e64654d6d7f6"
+      },
+      {
+        "case": 6,
+        "phase": "fault",
+        "reason": "coerce true into a numeric price threshold",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "6891f4039b79b621537851e3bf2cb9a6522cf0f034e286667d97dbe8b6f56c41"
+      },
+      {
+        "case": 7,
+        "phase": "control",
+        "reason": "remove typed owner goal read contract",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "3b41f4abc24ef2d632dff63b2cf245151e12a1dd6cd5def916ea2e86e3c44b91"
+      },
+      {
+        "case": 7,
+        "phase": "fault",
+        "reason": "remove typed owner goal read contract",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "3eb95eb7dc41243e4d88b0b906f7553cefc044a5ea355e09e5ac8eb6dad50dea"
+      },
+      {
+        "case": 8,
+        "phase": "control",
+        "reason": "read filtered goal list across inconsistent snapshots",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "bf6de5e7cc488e8ea989538dedcfd720ef7aa1a91b7ab79cf122ffe9764160e1"
+      },
+      {
+        "case": 8,
+        "phase": "fault",
+        "reason": "read filtered goal list across inconsistent snapshots",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "e3b414919c400f661af5479493f65ac0a469cecdc3fb751522a149a3f7423983"
+      },
+      {
+        "case": 9,
+        "phase": "control",
+        "reason": "commit milestone before parent change timestamp",
+        "exit_code": 0,
+        "counts": {
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "1cc90d2794ef3aec27439fc3e0d388deecb6d365dad4f697d2c1249ec42a2032"
+      },
+      {
+        "case": 9,
+        "phase": "fault",
+        "reason": "commit milestone before parent change timestamp",
+        "exit_code": 1,
+        "counts": {
+          "tests": 2,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "be2da3c5822979f2057a698716d2595c2c1b7f0c700ff25a3e6398d4a487ea90"
+      },
+      {
+        "case": 10,
+        "phase": "control",
+        "reason": "commit mission link before parent change timestamp",
+        "exit_code": 0,
+        "counts": {
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "9d9e741e63df8208e0f30ded334c6b57c7e524f00ee105492f02f903b7977c5f"
+      },
+      {
+        "case": 10,
+        "phase": "fault",
+        "reason": "commit mission link before parent change timestamp",
+        "exit_code": 1,
+        "counts": {
+          "tests": 2,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "05c2dfad183baf400bff2a5821671a9ec5e5c6039af10faa3fc6997cdc0f8844"
+      }
+    ],
+    "before": {
+      "backend/van_gateway/goals/service.py": "b12e2e8efe471b4b3e71bc561b593c2f392997ecb72b0b9cd355f07f327f82f9",
+      "backend/van_gateway/goals/models.py": "1a290831f10e59faaf4c295ae86b3c0ed000e865079c28050a2c61a24c07f386",
+      "backend/van_gateway/goals/api.py": "934cca18606ae59164855dc82cb17233faa74212583bf465ae3b15228fe63dcd"
+    },
+    "after": {
+      "backend/van_gateway/goals/service.py": "b12e2e8efe471b4b3e71bc561b593c2f392997ecb72b0b9cd355f07f327f82f9",
+      "backend/van_gateway/goals/models.py": "1a290831f10e59faaf4c295ae86b3c0ed000e865079c28050a2c61a24c07f386",
+      "backend/van_gateway/goals/api.py": "934cca18606ae59164855dc82cb17233faa74212583bf465ae3b15228fe63dcd"
+    },
+    "source_restored": true
+  },
+  "storage_audit": {
+    "schema": "van.source-storage-audit/1",
+    "forbidden_events": [],
+    "source_sha256": "d4e270150fb0da6e8d79b449dd0de68fd1f97b3ccea3d282f31d91297edbd495",
+    "root": "/workspace/van-review-2026-10-18/publish",
+    "scope": "SQLite opens, path-based writable opens and directory/link/rename/delete events under data and backend/data",
+    "limits": "Python audit events only; existing fd writes, native-library raw I/O and external processes are not an OS sandbox. Git state is checked separately."
+  },
+  "legacy_mutation_preflight": {
+    "schema": "van.rebuild.mutation-registry-preflight/1",
+    "registry_sha256": "35d10c7b0f2b8319b7f7305828262c972b2a6451139d75b9e83c7d0062282955",
+    "mutation_count": 374,
+    "edit_count": 383,
+    "findings": [],
+    "execution_state": "NOT_RUN",
+    "status": "ANCHORS_VALID_BASELINES_AND_MUTATIONS_NOT_EXECUTED"
+  },
+  "legacy_positive_test_correction": "Goal/milestone lifecycle test previously accepted mission-1 without an actual mission. It now creates a genuine canonical stored mission, links that ID and retains the original lifecycle assertions. New negatives reject phantom references and paired tests prove linking/completing/pausing a goal does not change mission state or dispatch Hermes.",
+  "qualification": "Candidate source only. Existing legacy references are preserved; no blanket original-request recovery for all CRUD, whole-unit, native, deployment, production or S24 acceptance. All original131units/93plannedfeatures and gates remain."
+}

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1" time="5.513" timestamp="2026-10-28T08:52:50.960547+00:00" hostname="6e9feff21467"><testcase classname="" name="trading.tests.test_pending_current_contract" time="0.000"><error message="collection failure">ImportError while importing test module '/workspace/van-review-2026-10-18/publish/trading/tests/test_pending_current_contract.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/tests/test_pending_current_contract.py:17: in &lt;module&gt;
+    from vati.risk.authority import _canonical_hash,recompute_decision_hash,RiskDecision,Decision
+E   ImportError: cannot import name 'recompute_decision_hash' from 'vati.risk.authority' (/workspace/van-review-2026-10-18/publish/trading/vati/risk/authority.py)</error></testcase></testsuite></testsuites>

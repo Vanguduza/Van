@@ -1,0 +1,11 @@
+# Candidate qualification-input integrity
+
+The actual certificate evaluators admitted impossible probabilities, invalid counts and policy-version drift. NaN feature statistics could pass every comparison and receive production admission. Twenty-two induced failures reproduced these issues. The existing CSCV implementation also dropped T % partitions trailing observations, while feature producers silently truncated unmatched baseline/candidate and correlation histories.
+
+Validation now checks finite numeric domains, probability ranges, integer observation/trial/window counts and policy versions before threshold comparisons. Strategy certificates check performance validity and internal lower-bound consistency; the existing all-winning +Infinity profit-factor diagnostic remains explicit and cannot replace finite Sharpe/probabilities. Feature certificates reject nonfinite statistics and policy drift, and known adverse instrument evidence prevents production admission alongside existing regime checks.
+
+The canonical producer refuses missing alignment, nonfinite/boolean observations and mismatched declared CPCV partitions. CSCV uses balanced boundaries containing every observation, rejects ragged/nonfinite trial matrices, and labels the output as a diagnostic of the declared selection population. Policy version is now validation-policy/1.1.0 because estimator/validity semantics changed. Existing numeric DSR/PBO thresholds remain unchanged; older certificates cannot silently claim the new evaluator's semantics.
+
+The full trading source run passed 1,663 tests/two skips before two final test-only controls were added; all 36 latest integrity tests and 88 gateway trading/activation tests pass. Real signed capsule promotion refuses malformed or old-version statistics without changing the capsule. Separate declared synthetic no-edge/positive controls exercise the actual producer and signed consumer. These controls do not establish market skill, profitability, real chronological qualification or independent acceptance.
+
+BE-013/021/035 remain partial candidate milestones. Complete data/fold/trial provenance, dependent inference, prospective validation and the qualified positive learning loop still need implementation and native acceptance. Receipt: receipts/VALIDATION_INPUT_INTEGRITY_SOURCE_20261022.json.

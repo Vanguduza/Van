@@ -1,0 +1,29 @@
+{
+  "kind": "RETAINED_ISOLATED_REAL_POSTGRES_FIXTURE_INPUT_CHECK",
+  "prior_receipt": "docs/audit/validation/postgres-ledger-real-fixture-2026-10-07.json",
+  "prior_receipt_sha256": "424ca1bad49fdff2644ee7d21f8d0bf1292056c3b64b45c75d6037241a8ab463",
+  "prior_fixture_source_matches": true,
+  "prior_inputs_sha256": {
+    "trading/tests/test_infra_live.py": "40aeb666ff026f660f907fb96bdbb317b669ee866acf4d7cb86242fec2dc2c99",
+    "trading/vati/core/ledger_pg.py": "67dc572be633462419e71fb4011d8ea6409ae947389fbfa5cfd47d6e1de61431",
+    "trading/vati/core/ledger.py": "0f421754b0ec7ddc39c27a2dfee17fb8df19c19bbebfadde9cf10876a61a8e3b",
+    "trading/vati/core/events.py": "8b50ee08492ca343df1e6d9ae27cf13cbb83bbab7579bdeaa28b7c0f09bd8b7d",
+    "trading/vati/core/canonical.py": "2b5bd78b575ce1092af9d44ec5f5b23e20bde1e3d489202bdd613032ec344bdb"
+  },
+  "current_inputs_sha256": {
+    "trading/tests/test_infra_live.py": "40aeb666ff026f660f907fb96bdbb317b669ee866acf4d7cb86242fec2dc2c99",
+    "trading/vati/core/ledger_pg.py": "67dc572be633462419e71fb4011d8ea6409ae947389fbfa5cfd47d6e1de61431",
+    "trading/vati/core/ledger.py": "0f421754b0ec7ddc39c27a2dfee17fb8df19c19bbebfadde9cf10876a61a8e3b",
+    "trading/vati/core/events.py": "8b50ee08492ca343df1e6d9ae27cf13cbb83bbab7579bdeaa28b7c0f09bd8b7d",
+    "trading/vati/core/canonical.py": "2b5bd78b575ce1092af9d44ec5f5b23e20bde1e3d489202bdd613032ec344bdb"
+  },
+  "all_5_current_inputs_match": true,
+  "prior_junit_counts": {
+    "tests": 1,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0
+  },
+  "production_or_shared_database_used": false,
+  "live_deployment_qualified": false
+}

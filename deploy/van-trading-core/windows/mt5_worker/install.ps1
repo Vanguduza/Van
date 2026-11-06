@@ -11,7 +11,7 @@ foreach ($f in "ca.crt","mt5-worker.crt","mt5-worker.key") { if (-not (Test-Path
 if (-not (Test-Path "$Root\bridge.key")) { $bytes = New-Object byte[] 32; [Security.Cryptography.RandomNumberGenerator]::Fill($bytes); [Convert]::ToHexString($bytes).ToLower() | Set-Content -NoNewline "$Root\bridge.key"; Write-Host "bridge.key created — copy its value into the account secrets file on van-trading-core as BRIDGE_SIGNING_KEY" }
 if (-not (Test-Path "$Root\worker.json")) {
   @{ listen="0.0.0.0"; port=$Port; cert="$Root\mt5-worker.crt"; key="$Root\mt5-worker.key"; ca="$Root\ca.crt"; signing_key_file="$Root\bridge.key"; accounts=@{} } | ConvertTo-Json -Depth 4 | Set-Content "$Root\worker.json"
-  Write-Host "worker.json created — add accounts: {alias: {login, server, password_file}}"
+  Write-Host "worker.json created — add accounts: {alias: {login, server, currency, demo, password_file}}"
 }
 # Owner-only ACLs on secrets (equivalent of 0600)
 foreach ($f in "bridge.key","mt5-worker.key","worker.json") { icacls "$Root\$f" /inheritance:r /grant:r "$env:USERNAME:(R,W)" | Out-Null }

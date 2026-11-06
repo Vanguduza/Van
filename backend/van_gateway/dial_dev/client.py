@@ -11,11 +11,14 @@ the bearer and an Accept header only.
 
 from __future__ import annotations
 
+import asyncio
 from dataclasses import dataclass
 from pathlib import Path
+import ssl
 from typing import Any, AsyncIterator, Awaitable, Callable
 
 import httpx
+import anyio
 
 from van_gateway.dial_dev.config import MIN_TOKEN_LENGTH, DialDevConfig
 
@@ -66,8 +69,44 @@ class UpstreamStream:
     discloses_credential: Callable[[str], bool]
 
     async def lines(self) -> AsyncIterator[str]:
-        async for line in self.response.aiter_lines():
-            yield line
+        try:
+            async for line in self.response.aiter_lines():
+                yield line
+        except httpx.TimeoutException as exc:
+            raise DialDevUnavailable("timeout") from exc
+        except (httpx.HTTPError, ssl.SSLError) as exc:
+            raise DialDevUnavailable("unreachable") from exc
+
+
+async def _finish_stream_close(task: asyncio.Task[None], timeout_s: float = 2.0) -> None:
+    """Close once, including after an ASGI disconnect or caller cancellation.
+
+    The shield keeps disconnect cancellation from abandoning the private close task;
+    the deadline also bounds a transport that cannot close. Ordinary programming
+    failures still propagate rather than being treated as connection failures.
+    """
+    deadline = asyncio.get_running_loop().time() + timeout_s
+    cancelled = False
+    with anyio.CancelScope(shield=True):
+        while not task.done():
+            remaining = deadline - asyncio.get_running_loop().time()
+            if remaining <= 0:
+                task.cancel()
+                task.add_done_callback(lambda done: None if done.cancelled() else done.exception())
+                if cancelled:
+                    raise asyncio.CancelledError
+                raise DialDevUnavailable("timeout")
+            try:
+                await asyncio.wait_for(asyncio.shield(task), remaining)
+            except asyncio.CancelledError:
+                if task.cancelled():
+                    raise
+                cancelled = True
+            except asyncio.TimeoutError:
+                continue
+        task.result()
+        if cancelled:
+            raise asyncio.CancelledError
 
 
 class DialDevClient:
@@ -95,6 +134,8 @@ class DialDevClient:
             token = Path(self.config.token_file).read_text(encoding="utf-8").strip()
         except OSError as exc:
             raise DialDevUnavailable("unconfigured") from exc
+        except UnicodeDecodeError as exc:
+            raise DialDevUnavailable("credential_invalid") from exc
         if len(token) < MIN_TOKEN_LENGTH or any(ch.isspace() for ch in token):
             raise DialDevUnavailable("credential_invalid")
         return token
@@ -107,10 +148,22 @@ class DialDevClient:
         }
 
     def _client(self, timeout: httpx.Timeout) -> httpx.AsyncClient:
+        verify: bool | ssl.SSLContext = True
+        if self.config.tls_configured:
+            try:
+                context = ssl.create_default_context(cafile=self.config.tls_ca_file)
+                context.minimum_version = ssl.TLSVersion.TLSv1_3
+                context.load_cert_chain(
+                    self.config.tls_client_cert_file, self.config.tls_client_key_file,
+                )
+                verify = context
+            except (OSError, ssl.SSLError, ValueError) as exc:
+                raise DialDevUnavailable("unconfigured") from exc
         return httpx.AsyncClient(
             base_url=self.config.base_url,
             timeout=timeout,
             transport=self.transport,
+            verify=verify,
             follow_redirects=False,
             # A proxy environment variable must not route DIAL traffic somewhere else.
             trust_env=False,
@@ -144,7 +197,9 @@ class DialDevClient:
                 )
             except httpx.TimeoutException as exc:
                 raise DialDevUnavailable("timeout") from exc
-            except httpx.HTTPError as exc:
+            # TLS 1.3 client-auth rejection can arrive as a read-phase alert
+            # outside httpx.HTTPError; keep the same safe unavailable contract.
+            except (httpx.HTTPError, ssl.SSLError) as exc:
                 raise DialDevUnavailable("unreachable") from exc
         body = response.content
         if token.encode("utf-8") in body:
@@ -164,13 +219,28 @@ class DialDevClient:
         except httpx.TimeoutException as exc:
             await client.aclose()
             raise DialDevUnavailable("timeout") from exc
-        except httpx.HTTPError as exc:
+        except (httpx.HTTPError, ssl.SSLError) as exc:
             await client.aclose()
             raise DialDevUnavailable("unreachable") from exc
 
+        close_task: asyncio.Task[None] | None = None
+
+        async def release() -> None:
+            try:
+                await response.aclose()
+            finally:
+                await client.aclose()
+
         async def close() -> None:
-            await response.aclose()
-            await client.aclose()
+            nonlocal close_task
+            if close_task is None:
+                close_task = asyncio.create_task(release())
+            try:
+                await _finish_stream_close(close_task)
+            except httpx.TimeoutException as exc:
+                raise DialDevUnavailable("timeout") from exc
+            except (httpx.HTTPError, ssl.SSLError) as exc:
+                raise DialDevUnavailable("unreachable") from exc
 
         return UpstreamStream(
             response=response,

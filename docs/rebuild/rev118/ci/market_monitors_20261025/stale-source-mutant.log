@@ -1,0 +1,12 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+__ test_stale_data_missing_binding_and_short_indicator_history_are_not_zeroes __
+backend/tests/test_market_monitor_measurements.py:61: in test_stale_data_missing_binding_and_short_indicator_history_are_not_zeroes
+    assert not fire and stale.reason == 'SOURCE_STALE' and stale.value is None
+E   AssertionError: assert (not False and 'FIRST_QUALIFIED_OBSERVATION' == 'SOURCE_STALE'
+E     
+E     - SOURCE_STALE
+E     + FIRST_QUALIFIED_OBSERVATION)
+=========================== short test summary info ============================
+FAILED backend/tests/test_market_monitor_measurements.py::test_stale_data_missing_binding_and_short_indicator_history_are_not_zeroes
+1 failed in 0.22s

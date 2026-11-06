@@ -15,7 +15,7 @@ import kotlin.math.sin
  * P4-VIS-004 — `headCounterDeg` used to sit here and is gone.
  *
  * It was computed on every frame and consumed by nothing. The only production caller of
- * this sampler is [VanOwnerArtAvatar], which renders an owner-supplied bitmap: a bitmap has
+ * this sampler is [VanCandidateBAvatar], which renders a single still: a still has
  * no separable head, so there was nothing to counter-rotate. The procedural Canvas
  * character *does* have a separable head, but it already carries its own head motion inside
  * `VanScene` (`headBob` and `actionHeadDrop`), so wiring this value in there would have

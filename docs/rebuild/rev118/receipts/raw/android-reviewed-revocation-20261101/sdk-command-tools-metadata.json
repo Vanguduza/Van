@@ -1,0 +1,9 @@
+{
+  "package": "cmdline-tools;latest",
+  "url": "https://dl.google.com/android/repository/commandlinetools-linux-16111833_latest.zip",
+  "checksum": "e025545c62a8e64c7559119566a569fb1dec5f60",
+  "checksum_type": {
+    "type": "sha1"
+  },
+  "size": "181052239"
+}

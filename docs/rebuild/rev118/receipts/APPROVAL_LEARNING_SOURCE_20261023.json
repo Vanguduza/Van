@@ -1,0 +1,800 @@
+{
+  "schema": "van.rebuild.approval-learning-source/1",
+  "observed_at_utc": "2026-10-23T18:23:37.695312+00:00",
+  "source_parent": "f2f541c9f2d1fe3b52a5756f46d7b01556baa03a",
+  "source_sha256": {
+    "backend/van_gateway/learning/feed.py": "a561750e627a06c3b11cbb544faa39e2afda1d5666761d2f92dc6bf681226777",
+    "backend/van_gateway/understanding/memory.py": "60322bb6ff1279c3efe34e8eece8716ee99beed305cb27c5da97007deb0563ca",
+    "backend/van_gateway/command/mission_link.py": "5bf584b8f762b9626b88609a515ef81e0044e7da9fdbb2efc34840731918fed3",
+    "backend/van_gateway/context/memory_erasure.py": "72aba370ae5b5c6d5a4c3541e6bc5a93bed2aacf0b774e3a64ba602847bfacd9",
+    "backend/tests/test_owner_memory_has_a_producer.py": "2546fa7735d23f75382244f91c2edf8c5bd66bcde8f9aa87ed6738f9b160e3fc",
+    "backend/tests/test_approval_learning_integrity.py": "deb0c35666a50510fb0ee68d90c463f8259a05dd5e9f897892f9fc7e326a07eb",
+    "backend/tests/test_approval_learning_gateway.py": "40d49a198a6f1fa265b29af9527feedec07707c2da318a4011a4deb4aa8544c4",
+    "tests/rebuild/test_mutation_controls.py": "d2ccd08f360a724eb7ea0a8fd3e92352157eeef789c2d7d84630c73a5b86bd01",
+    "backend/van_gateway/mission/service.py": "97e3913f22c1285f57a83dd6beaa1a48805ab65b8a3456adc669d9b58085db41",
+    "backend/tests/test_learning_projection_availability.py": "09b839e2dee510d383010bb60e8a4855a7b817ab6fd841f7d9fd3f58948e7bf7"
+  },
+  "executions": {
+    "original_before": {
+      "tests": 2,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.579,
+      "xml_sha256": "705610ac9a71981b992bc4af91e16ed8c97942930e1d8d971a13d020ede7d7f2"
+    },
+    "old_boolean_fixture_intermediate": {
+      "tests": 25,
+      "failures": 3,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 3.466,
+      "xml_sha256": "53dca7f1ab3d08bfd31b86dc4444e9932eef0d44d47c20c67659aec963248506"
+    },
+    "intermediate_erasure_resurrection": {
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 3.229,
+      "xml_sha256": "e320d9a1934808c628ef22904c66d937657e9b74bacbb82406ec4983e1066dda"
+    },
+    "projection_availability_before": {
+      "tests": 3,
+      "failures": 3,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 3.079,
+      "xml_sha256": "0aaef2a3d185009a32ad9df4c976e7eb272a9e52b0b6e407d1846712ec621d5c"
+    },
+    "new_real_registry_gate_before": {
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.052,
+      "xml_sha256": "198492da180849eee911b3b49a93accf5cbc292b7e9feb2708ddcadf1e468003"
+    },
+    "isolated_final": {
+      "tests": 82,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 16.323,
+      "xml_sha256": "31a62f6c2cc7cbc81995b742ad8d8829952116826b76ae8a74f9f06042b8b20f"
+    },
+    "integrated_audited": {
+      "tests": 236,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 101.744,
+      "xml_sha256": "7f372485beada7bbc3b639877da9588c556e0f9ab0e73c4f3de08dd535a6d159"
+    },
+    "owner_contracts": {
+      "tests": 29,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 3.819,
+      "xml_sha256": "a57eb6026b7e0256ca655c24ed9d7722714daad32d62b7fcab253d717120c468"
+    },
+    "rebuild": {
+      "tests": 80,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 31.951,
+      "xml_sha256": "adb5917d2154d4577b07f96afb3be20cb8341a6cc72814340cfb3bcf4db5c7e9"
+    }
+  },
+  "fault_campaign": {
+    "definitions": [
+      [
+        "learn an unapproved sealed source",
+        [
+          [
+            "backend/van_gateway/learning/feed.py",
+            " or not record.owner_approved",
+            "",
+            1
+          ]
+        ],
+        "backend/tests/test_approval_learning_integrity.py::test_unapproved_foreign_or_automation_sources_cannot_become_owner_choices"
+      ],
+      [
+        "learn an automation grant as a direct owner decision",
+        [
+          [
+            "backend/van_gateway/learning/feed.py",
+            "record.authority_source is not AuthoritySource.OWNER_COMMAND",
+            "False",
+            1
+          ]
+        ],
+        "backend/tests/test_approval_learning_integrity.py::test_unapproved_foreign_or_automation_sources_cannot_become_owner_choices"
+      ],
+      [
+        "learn another devices approval",
+        [
+          [
+            "backend/van_gateway/learning/feed.py",
+            "native[\"owner_principal_id\"]!=\"device:\"+record.device_id",
+            "False",
+            1
+          ]
+        ],
+        "backend/tests/test_approval_learning_integrity.py::test_unapproved_foreign_or_automation_sources_cannot_become_owner_choices"
+      ],
+      [
+        "ignore exact native context binding",
+        [
+          [
+            "backend/van_gateway/learning/feed.py",
+            "if snapshot is None or snapshot['command_id']!=source or snapshot['digest']!=record.context_digest:",
+            "if snapshot is None:",
+            1
+          ]
+        ],
+        "backend/tests/test_approval_learning_integrity.py::test_owner_choice_requires_the_exact_native_sealed_context"
+      ],
+      [
+        "learn stale caller text as the original owner choice",
+        [
+          [
+            "backend/van_gateway/learning/feed.py",
+            "\"goal\":native[\"goal\"]",
+            "\"goal\":mission.goal",
+            1
+          ]
+        ],
+        "backend/tests/test_approval_learning_integrity.py::test_stale_or_fabricated_caller_presentation_is_not_canonical_owner_evidence"
+      ],
+      [
+        "turn delivery replay into more owner choices",
+        [
+          [
+            "backend/van_gateway/learning/feed.py",
+            "projection_key=projection_key,_db=db",
+            "projection_key=None,_db=db",
+            1
+          ]
+        ],
+        "backend/tests/test_approval_learning_integrity.py::test_one_source_is_projected_once_under_concurrent_reads_and_after_original_outcome"
+      ],
+      [
+        "silently accept a relabelled original approval",
+        [
+          [
+            "backend/van_gateway/understanding/memory.py",
+            "if any(existing[key] != value for key,value in content.items()):",
+            "if False:",
+            1
+          ]
+        ],
+        "backend/tests/test_approval_learning_integrity.py::test_changed_native_goal_cannot_relabel_an_original_approval_projection"
+      ],
+      [
+        "ignore completed owner erasure",
+        [
+          [
+            "backend/van_gateway/learning/feed.py",
+            "if await source_memory_was_erased(db,",
+            "if False and await source_memory_was_erased(db,",
+            1
+          ]
+        ],
+        "backend/tests/test_approval_learning_gateway.py::test_original_approval_projection_cannot_resurrect_explicitly_erased_memory"
+      ],
+      [
+        "ignore the exact selective erasure tombstone",
+        [
+          [
+            "backend/van_gateway/context/memory_erasure.py",
+            "if identity in original['tables'][table]['before_ids']:",
+            "if False:",
+            1
+          ]
+        ],
+        "backend/tests/test_approval_learning_gateway.py::test_selective_erasure_blocks_only_the_original_choice_and_fresh_approval_remains_learnable"
+      ],
+      [
+        "relearn an old delayed source after bulk erasure",
+        [
+          [
+            "backend/van_gateway/context/memory_erasure.py",
+            "if original.get('record_id') is None and source_kernel_revision<original['context_revision_after']:",
+            "if False:",
+            1
+          ]
+        ],
+        "backend/tests/test_approval_learning_gateway.py::test_bulk_erasure_blocks_delayed_source_absent_from_original_erased_rows"
+      ],
+      [
+        "block fresh consent at the exact new revision",
+        [
+          [
+            "backend/van_gateway/context/memory_erasure.py",
+            "source_kernel_revision<original['context_revision_after']",
+            "source_kernel_revision<=original['context_revision_after']",
+            1
+          ]
+        ],
+        "backend/tests/test_approval_learning_gateway.py::test_bulk_erasure_barrier_preserves_fresh_sources_even_with_equal_native_creation_times"
+      ],
+      [
+        "omit the actual post-seal producer",
+        [
+          [
+            "backend/van_gateway/command/mission_link.py",
+            "await self.missions.learning.record_owner_approval(current)",
+            "pass",
+            1
+          ]
+        ],
+        "backend/tests/test_approval_learning_integrity.py::test_authorized_command_join_observes_approval_after_capture_and_seal"
+      ],
+      [
+        "let capture learning failure block native work",
+        [
+          [
+            "backend/van_gateway/mission/service.py",
+            "except Exception as exc:\n                self.report_learning_unavailable(mission.mission_id,\"capture\",exc)",
+            "except Exception as exc:\n                raise",
+            1
+          ]
+        ],
+        "backend/tests/test_learning_projection_availability.py::test_unavailable_optional_capture_learning_cannot_block_native_capture"
+      ],
+      [
+        "hide a terminal mission behind an optional outcome sink",
+        [
+          [
+            "backend/van_gateway/mission/service.py",
+            "except Exception as exc:\n                self.report_learning_unavailable(mission_id,\"mission_outcome\",exc)",
+            "except Exception as exc:\n                raise",
+            1
+          ]
+        ],
+        "backend/tests/test_learning_projection_availability.py::test_one_failed_learning_sink_cannot_hide_native_terminal_state_or_other_sinks"
+      ],
+      [
+        "let optional approval learning block a genuine owner control",
+        [
+          [
+            "backend/van_gateway/command/mission_link.py",
+            "except Exception as exc:\n                self.missions.report_learning_unavailable(current.mission_id,\"owner_approval\",exc)",
+            "except Exception as exc:\n                raise",
+            1
+          ]
+        ],
+        "backend/tests/test_learning_projection_availability.py::test_optional_post_seal_learning_failure_cannot_block_actual_approved_owner_control"
+      ],
+      [
+        "swallow owner request cancellation as optional failure",
+        [
+          [
+            "backend/van_gateway/mission/service.py",
+            "except Exception as exc:\n                self.report_learning_unavailable(mission.mission_id,\"capture\",exc)",
+            "except BaseException as exc:\n                self.report_learning_unavailable(mission.mission_id,\"capture\",exc)",
+            1
+          ]
+        ],
+        "backend/tests/test_learning_projection_availability.py::test_optional_learning_cancellation_remains_cancellation"
+      ]
+    ],
+    "records": [
+      {
+        "case": 0,
+        "phase": "control",
+        "reason": "learn an unapproved sealed source",
+        "exit_code": 0,
+        "counts": {
+          "tests": 7,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "d2b816b1b0ca389820a831fb775dce91f07b9ad738a1f985587e318aea0181ad"
+      },
+      {
+        "case": 0,
+        "phase": "fault",
+        "reason": "learn an unapproved sealed source",
+        "exit_code": 1,
+        "counts": {
+          "tests": 7,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "9f621ca175501f8a62b5919edc29e1354b0945ff821b3c70ef476d7ec7713b96"
+      },
+      {
+        "case": 1,
+        "phase": "control",
+        "reason": "learn an automation grant as a direct owner decision",
+        "exit_code": 0,
+        "counts": {
+          "tests": 7,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "f71f6e99a589093b5f1298499dbb397fa7150da8993f34579cdd7077aa200f33"
+      },
+      {
+        "case": 1,
+        "phase": "fault",
+        "reason": "learn an automation grant as a direct owner decision",
+        "exit_code": 1,
+        "counts": {
+          "tests": 7,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "ce179ee26df73b83fa4a3f202b82513fa8bc7723ea641185497482dc80a18049"
+      },
+      {
+        "case": 2,
+        "phase": "control",
+        "reason": "learn another devices approval",
+        "exit_code": 0,
+        "counts": {
+          "tests": 7,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "bf091743727ad793342d5bb738273db08b95caaf43937ef4c5f8ff40f2afbfd1"
+      },
+      {
+        "case": 2,
+        "phase": "fault",
+        "reason": "learn another devices approval",
+        "exit_code": 1,
+        "counts": {
+          "tests": 7,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "2ef026840b08e1d797bbf332d5a24a334e39841141220869403a31234705a765"
+      },
+      {
+        "case": 3,
+        "phase": "control",
+        "reason": "ignore exact native context binding",
+        "exit_code": 0,
+        "counts": {
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "c675cd5f981c4768f44c7eef9c65a08014ad264a695ada6011c8c07e40eb985b"
+      },
+      {
+        "case": 3,
+        "phase": "fault",
+        "reason": "ignore exact native context binding",
+        "exit_code": 1,
+        "counts": {
+          "tests": 3,
+          "failures": 2,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 2,
+        "xml_sha256": "0f84301ad77785f751599afbd3b29a7d401504591d338169cdf21dedd472cf9c"
+      },
+      {
+        "case": 4,
+        "phase": "control",
+        "reason": "learn stale caller text as the original owner choice",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "4e07076df0a5ae6aab480bfffc2ff6755a112fca8ae5f33931b33cb3a4c293f4"
+      },
+      {
+        "case": 4,
+        "phase": "fault",
+        "reason": "learn stale caller text as the original owner choice",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "c9827af1fb91cd076b23af6bb8c88abb37e5817af1632687e96225d52a0c3bf6"
+      },
+      {
+        "case": 5,
+        "phase": "control",
+        "reason": "turn delivery replay into more owner choices",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "e4cbdecd26f270b0f197cb93372b150846b02637d6a9fe1bbac738954519d957"
+      },
+      {
+        "case": 5,
+        "phase": "fault",
+        "reason": "turn delivery replay into more owner choices",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "81e49ad28b493f7dfaef2c27ca3abb05ff7b639c9dc4e591ff34a76dfa3a0b5d"
+      },
+      {
+        "case": 6,
+        "phase": "control",
+        "reason": "silently accept a relabelled original approval",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "c20fd2cd90dc48c22be124a456b04a0e4471c70ddca6ae9e7da12a460019ed36"
+      },
+      {
+        "case": 6,
+        "phase": "fault",
+        "reason": "silently accept a relabelled original approval",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "ba278bd8f65e630945693c05577f86ed4f58e0f7a4c6d700e8b0f1d11ebd23d5"
+      },
+      {
+        "case": 7,
+        "phase": "control",
+        "reason": "ignore completed owner erasure",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "7ea1fa54ba2f6465dd81ba8dbfe7c7b115b803949accc5c732a56d74721cb9c0"
+      },
+      {
+        "case": 7,
+        "phase": "fault",
+        "reason": "ignore completed owner erasure",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "fc6bee8d6ebfa6fb86759ea8b9d827f1b4d342c00a14486dea6183ba433aa440"
+      },
+      {
+        "case": 8,
+        "phase": "control",
+        "reason": "ignore the exact selective erasure tombstone",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "2e8c9a10bf7529fd0b0b2629cfcac1f4c8f2a4c10b0a4895653f387096efa9a3"
+      },
+      {
+        "case": 8,
+        "phase": "fault",
+        "reason": "ignore the exact selective erasure tombstone",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "a08889a6449433fed9db4d1d2b4114ec2fae0b25477228822ecfc73f44b48369"
+      },
+      {
+        "case": 9,
+        "phase": "control",
+        "reason": "relearn an old delayed source after bulk erasure",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "c9be444afb955cf1054067169dbba84697aa5ca827d9e682c06a0d5450e82c16"
+      },
+      {
+        "case": 9,
+        "phase": "fault",
+        "reason": "relearn an old delayed source after bulk erasure",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "a5171126619c259be280e0f4ded5375ff128f1733d08f40996f40398b291e8ef"
+      },
+      {
+        "case": 10,
+        "phase": "control",
+        "reason": "block fresh consent at the exact new revision",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "521e92a5beb6228904daee8dce7d0185d66cba9c75c1d50b5a90a1603f1e9167"
+      },
+      {
+        "case": 10,
+        "phase": "fault",
+        "reason": "block fresh consent at the exact new revision",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "ea3645ac2e7dbce29310fae5610d3d605f2e485e3fad5864116b88e9b5c8882b"
+      },
+      {
+        "case": 11,
+        "phase": "control",
+        "reason": "omit the actual post-seal producer",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "863e9595fe77b89449c15bd889cef336f5adef436a1430a296150534494b2a14"
+      },
+      {
+        "case": 11,
+        "phase": "fault",
+        "reason": "omit the actual post-seal producer",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "8780f1ac7ecd9b32dfd83c45491d24f11092110bfcdd8b3899edc36ec7c7e1e8"
+      },
+      {
+        "case": 12,
+        "phase": "control",
+        "reason": "let capture learning failure block native work",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "7e9f06c8b024f5d413a4b487801543acf35e4ebe75e951c3878b0fceeb0ae79a"
+      },
+      {
+        "case": 12,
+        "phase": "fault",
+        "reason": "let capture learning failure block native work",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "2ffce10779d457d0a798b0e26d0ef43107e9bf79fc2495b4382a57b3b50d89d6"
+      },
+      {
+        "case": 13,
+        "phase": "control",
+        "reason": "hide a terminal mission behind an optional outcome sink",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "8982623fbee6a39a5f4eba41e218788aefec3a50103ac282c5d95f91f41a3735"
+      },
+      {
+        "case": 13,
+        "phase": "fault",
+        "reason": "hide a terminal mission behind an optional outcome sink",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "037e419dc8eb0cbac8220bcf7ff3a10915f7782f23f5d99e6349aa05c7e8aac5"
+      },
+      {
+        "case": 14,
+        "phase": "control",
+        "reason": "let optional approval learning block a genuine owner control",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "6c3d18a7e91ac6ad31557c6711f3a5c67dfcf25597a88d51f9807fc148333075"
+      },
+      {
+        "case": 14,
+        "phase": "fault",
+        "reason": "let optional approval learning block a genuine owner control",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "7879c5262e40b959fa25fb6c0a80d2612961e37293c052e76c229786ea749965"
+      },
+      {
+        "case": 15,
+        "phase": "control",
+        "reason": "swallow owner request cancellation as optional failure",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "35019ed122078d8febbd9b3232ed9bd6b3fe697558ad87d90ba4a00d31ea7298"
+      },
+      {
+        "case": 15,
+        "phase": "fault",
+        "reason": "swallow owner request cancellation as optional failure",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "6ab376b7fe3705817e94b61adce9333fae1d87eb3525d8ee080d435c8c822df6"
+      }
+    ],
+    "before": {
+      "backend/van_gateway/learning/feed.py": "a561750e627a06c3b11cbb544faa39e2afda1d5666761d2f92dc6bf681226777",
+      "backend/van_gateway/understanding/memory.py": "60322bb6ff1279c3efe34e8eece8716ee99beed305cb27c5da97007deb0563ca",
+      "backend/van_gateway/context/memory_erasure.py": "72aba370ae5b5c6d5a4c3541e6bc5a93bed2aacf0b774e3a64ba602847bfacd9",
+      "backend/van_gateway/command/mission_link.py": "5bf584b8f762b9626b88609a515ef81e0044e7da9fdbb2efc34840731918fed3",
+      "backend/van_gateway/mission/service.py": "97e3913f22c1285f57a83dd6beaa1a48805ab65b8a3456adc669d9b58085db41"
+    },
+    "after": {
+      "backend/van_gateway/learning/feed.py": "a561750e627a06c3b11cbb544faa39e2afda1d5666761d2f92dc6bf681226777",
+      "backend/van_gateway/understanding/memory.py": "60322bb6ff1279c3efe34e8eece8716ee99beed305cb27c5da97007deb0563ca",
+      "backend/van_gateway/context/memory_erasure.py": "72aba370ae5b5c6d5a4c3541e6bc5a93bed2aacf0b774e3a64ba602847bfacd9",
+      "backend/van_gateway/command/mission_link.py": "5bf584b8f762b9626b88609a515ef81e0044e7da9fdbb2efc34840731918fed3",
+      "backend/van_gateway/mission/service.py": "97e3913f22c1285f57a83dd6beaa1a48805ab65b8a3456adc669d9b58085db41"
+    },
+    "source_restored": true
+  },
+  "storage_audit": {
+    "schema": "van.source-storage-audit/1",
+    "forbidden_events": [],
+    "source_sha256": "d4e270150fb0da6e8d79b449dd0de68fd1f97b3ccea3d282f31d91297edbd495",
+    "root": "/workspace/van-review-2026-10-18/publish",
+    "scope": "SQLite opens, path-based writable opens and directory/link/rename/delete events under data and backend/data",
+    "limits": "Python audit events only; existing fd writes, native-library raw I/O and external processes are not an OS sandbox. Git state is checked separately."
+  },
+  "legacy_mutation_preflight": {
+    "schema": "van.rebuild.mutation-registry-preflight/1",
+    "registry_sha256": "35d10c7b0f2b8319b7f7305828262c972b2a6451139d75b9e83c7d0062282955",
+    "mutation_count": 374,
+    "edit_count": 383,
+    "findings": [],
+    "execution_state": "NOT_RUN",
+    "status": "ANCHORS_VALID_BASELINES_AND_MUTATIONS_NOT_EXECUTED"
+  },
+  "legacy_executed_subsets": [
+    {
+      "log_sha256": "d15ab3e4758ca2f8753a5238e9fd02055f8b2f641dd9c372faabef68feff54da",
+      "cases_caught": 6,
+      "survived": 0
+    },
+    {
+      "log_sha256": "2f22844476356e8a0897af2239045d806d4e5802c9bca3ad27fab35d222a5b72",
+      "cases_caught": 1,
+      "survived": 0
+    }
+  ],
+  "source_anchor_before": {
+    "schema": "van.rebuild.mutation-registry-preflight/1",
+    "registry_sha256": "35d10c7b0f2b8319b7f7305828262c972b2a6451139d75b9e83c7d0062282955",
+    "mutation_count": 374,
+    "edit_count": 383,
+    "findings": [
+      {
+        "kind": "SOURCE_ANCHOR_MISSING",
+        "path": "van_gateway/understanding/memory.py",
+        "mutation": "RC4 a brand-new goal starts standing",
+        "anchor": "            current=IntentHorizon.EPHEMERAL,\n            observations=1,"
+      }
+    ],
+    "execution_state": "NOT_RUN",
+    "status": "INVALID_REGISTRY"
+  },
+  "retained_hosted_failure": "receipts/HOSTED_SOURCE_f2f541c9.json",
+  "provenance": "Two original learning failures: presence flag alone and duplicate replayed approval. Three old positive fixtures initially lacked actual authority; they were strengthened with native context snapshots/sealed records, retaining original assertions. Real gateway tests prove cryptographic A1-signed request can correctly resolve to A4 with exact approval; original signed class is retained, not required to equal effective class. Privacy resurrection was reproduced on the intermediate candidate and corrected with the existing native erasure witness. Three optional-projection failures include two existing capture/terminal dependencies and one newly introduced post-seal callback dependency; cancellation remains cancellation. One initial legacy invocation used the wrong cwd and executed no mutations; corrected final seven-case subsets are recorded. The prior hosted9shard refusal is retained, never converted to374 passing mutations.",
+  "qualification": "Candidate source only. Approval facts do not create grants, decide financial execution or qualify profitable strategies. No full learning recovery, complete erasure graph, whole-unit, native admission, production or S24 acceptance. Optional projection failures are diagnosed per sink; durable retry/reconciliation is still a separate pending component."
+}

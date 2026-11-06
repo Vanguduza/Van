@@ -1,0 +1,21 @@
+{
+  "command": [
+    "/workspace/van-backend-ci-lite-20261029/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "trading/tests/test_ctrader_order_details.py",
+    "trading/tests/test_native_order_book.py",
+    "trading/tests/test_native_order_book_postgres.py",
+    "--junitxml=/workspace/van-native-order-backend-only-20261030.xml"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 48330,
+  "started_at_utc": "2026-10-30T10:21:13.610501+00:00",
+  "timeout_seconds": 180,
+  "state": "COMPLETED",
+  "command_pid": 48333,
+  "exit": 0,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-30T10:21:18.046171+00:00"
+}

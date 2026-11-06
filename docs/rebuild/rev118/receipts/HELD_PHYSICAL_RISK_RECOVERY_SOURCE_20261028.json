@@ -1,0 +1,84 @@
+{
+  "schema": "van.rev118.held-physical-risk-recovery-source/1",
+  "source_parent": "89661bf72bfda9207000d3b9b346595ac41904ff",
+  "observed_at_utc": "2026-10-28T05:23:50.455298+00:00",
+  "source_files_sha256": {
+    "trading/vati/risk/lockouts.py": "4cf011408219e4be78988fa7342277c93aa619e1894900280918d1c9814201c1",
+    "trading/vati/risk/physical_baselines.py": "a95dad252135f0901afa6dddaa47d5889c2d7088cfcff0ed2ca6fc8010ce14be",
+    "trading/tests/test_physical_snapshot_producers.py": "bfd4e1359ff4f1fa06a4eb8901c5039a9d8270f5e2b9eb0083cb8bcfa546d1d8",
+    "trading/tests/test_funding_baseline_preservation.py": "927274888057dd39311112a918d87bdb8dc47f22d37003e6d9d97aeb432fa005",
+    "trading/tests/test_funding_risk_fence.py": "f5f8ebc7332865739f049a0619f718a0f12a4b8aca161cb2341bcfc90cfebf65"
+  },
+  "implementation": "Held physical projection failures no longer turn a displayed shared peak into a fresh own-alias contribution. Four real producer/read-or-SQL-commit-ACK-loss counterexamples and two higher-native-equity counterexamples failed before correction. Recovery now independently retains the original native equity sample rather than the displayed aggregate; missing or held funding never seeds risk capital. Both original alias-scoped owner resets and the separately observed higher natural peak remain effective after replay. Two old account harnesses now initialize the real signed test mandate required by the actual service; all42 original assertion ASTs remain identical. Final494actualSQLite/PostgreSQL/HTTP/source/namespace/authority/replay/recovery/funding cases pass0skip/audit0;494unique callIDs once,all1201pinnedPythonhashes match,ownedPG independently absent. The83 focused checks overlap. Owner contracts unchanged and mutationpreflight374/383/0findings is consistency only. Published89661 full hosted trading remainsFAILED4607pass/2fixturefail/1DDSskip;26PGpassed andvoiceunexecuted afterfailure. Untracked collateral/order read components remain separate unfinished reservation foundations, not accepted features. Flow adjustment, all-origin collateral/reservations, original policy/active mandate reconciliation, pending/partial/uncertain/manual exposure, native settlement and all remaining canonical units stay open.0formal/native/production/S24acceptance.",
+  "baseline_failures": {
+    "missing_policy_setup": 2,
+    "shared_peak_after_read_or_lost_commit_reply": 4,
+    "verified_natural_equity_vs_shared_display": 2,
+    "all_retained_as_failed": true
+  },
+  "source_result": {
+    "actual_outer_exit": 0,
+    "actual_inner_exit": 0,
+    "passed": 494,
+    "skipped": 0,
+    "audit_violations": 0,
+    "unique_call_identities_once": 494,
+    "pinned_python_inputs_matched": 1201,
+    "owned_postgres_independently_absent": true,
+    "raw": "ci/held_risk_recovery_20261028/sql_final"
+  },
+  "focused_result": {
+    "passed": 83,
+    "skipped": 0,
+    "overlaps_sql": true
+  },
+  "fixture_assertion_AST_comparison": {
+    "trading/tests/test_funding_baseline_preservation.py": {
+      "original_assertions": 13,
+      "assertion_AST_unchanged": true,
+      "before_sha256": "43fd780a74b3cd91a298eaf761a32c72aa51c0d7992dde18a4fccc6282b6c80f",
+      "after_sha256": "927274888057dd39311112a918d87bdb8dc47f22d37003e6d9d97aeb432fa005"
+    },
+    "trading/tests/test_funding_risk_fence.py": {
+      "original_assertions": 29,
+      "assertion_AST_unchanged": true,
+      "before_sha256": "f1651c7211bd39c5f90a3b8a3d102c1bf66caf7ec63f3080793d9b31806d4252",
+      "after_sha256": "f5f8ebc7332865739f049a0619f718a0f12a4b8aca161cb2341bcfc90cfebf65"
+    }
+  },
+  "hosted_parent_original_archive": {
+    "head": "89661bf72bfda9207000d3b9b346595ac41904ff",
+    "run": 40633983444,
+    "artifact_id": 12792737873,
+    "bytes": 180150,
+    "sha256": "91efbbba41197596fd5586e4950c7bd7a7e3212d27d9215580f30bf5ed3b6f16",
+    "github_size_digest_crc_paths_verified": true,
+    "junit": [
+      {
+        "path": "postgres-ledger-report.xml",
+        "cases": 26,
+        "passed": 26,
+        "failed": 0,
+        "errors": 0,
+        "skips": 0
+      },
+      {
+        "path": "trading-source-report.xml",
+        "cases": 4610,
+        "passed": 4607,
+        "failed": 2,
+        "errors": 0,
+        "skips": 1
+      }
+    ]
+  },
+  "registry_consistency_only": {
+    "cases": 374,
+    "edits": 383,
+    "findings": 0,
+    "mutation_corpus_execution": "NOT_RUN_ON_THIS_PACKET"
+  },
+  "qualification_issued": false,
+  "formal_acceptances_issued": 0,
+  "next": "Genuinehook/requiredbaselinecommittedverify/normalpush/readback/exactCI; finish account-wide collateral and all-origin reservation workflows under canonical scope."
+}
