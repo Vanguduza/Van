@@ -8,6 +8,7 @@ session service resolves the adapter from the record."""
 
 from __future__ import annotations
 
+import base64
 import json
 import os
 import re
@@ -20,6 +21,68 @@ from typing import Any, Optional
 
 SECRET_SHAPED = re.compile(r"(?i)(password|passwd|token|api[_-]?key|secret)")
 MODES = ("OBSERVE", "ADVISOR", "DEMO_TRADER", "SHADOW_TRADER", "LIMITED_LIVE", "AUTONOMOUS_LIVE")
+
+# BE-006 retained-history pagination. Read-only: a page is a scrubbed public
+# view of already-retained restriction/lifecycle incarnations, never a grant
+# of entry, mode, mandate, or financial effect. The opaque cursor binds the
+# exact snapshot it was issued against (alias, kind, venue, resource
+# revision, source digest, last key, index); any mismatch refuses with HOLD
+# instead of silently mixing snapshots.
+HISTORY_PAGE_SCHEMA = "vati.account-history-page/1"
+HISTORY_PAGE_LIMIT_MAX = 100
+_HISTORY_KINDS = ("restriction", "lifecycle")
+
+
+def _history_key(kind: str, row: dict) -> str:
+    return row["restriction_id"] if kind == "restriction" else row["operation_id"]
+
+
+def _history_order_key(kind: str, row: dict) -> tuple:
+    return (row["created_at_unix"], _history_key(kind, row))
+
+
+def _encode_history_cursor(payload: dict) -> str:
+    from vati.core.canonical import canonical_hash
+
+    body = base64.urlsafe_b64encode(
+        json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    ).decode("ascii").rstrip("=")
+    return f"{body}.{canonical_hash(payload)[:32]}"
+
+
+def _decode_history_cursor(cursor, *, alias, kind, venue, revision, digest, keys):
+    """Return the resume index for a cursor bound to this exact snapshot."""
+    from vati.core.canonical import canonical_hash
+
+    if not isinstance(cursor, str) or cursor.count(".") != 1:
+        raise AccountRegistryError("account history cursor is malformed, foreign or stale; HOLD")
+    body, check = cursor.rsplit(".", 1)
+    try:
+        raw = base64.urlsafe_b64decode(body + "=" * (-len(body) % 4))
+        payload = json.loads(raw.decode("utf-8"))
+    except (ValueError, TypeError, UnicodeDecodeError):
+        raise AccountRegistryError("account history cursor is malformed, foreign or stale; HOLD") from None
+    if (
+        not isinstance(payload, dict)
+        or payload.get("schema") != HISTORY_PAGE_SCHEMA
+        or payload.get("alias") != alias
+        or payload.get("kind") != kind
+        or payload.get("venue") != venue
+        or payload.get("source_revision") != revision
+        or payload.get("source_digest") != digest
+        or canonical_hash(payload)[:32] != check
+    ):
+        raise AccountRegistryError("account history cursor is malformed, foreign or stale; HOLD")
+    index = payload.get("index")
+    last_key = payload.get("last_key")
+    if type(index) is not int or not 0 <= index <= len(keys):
+        raise AccountRegistryError("account history cursor is malformed, foreign or stale; HOLD")
+    if index == 0:
+        if last_key is not None:
+            raise AccountRegistryError("account history cursor is malformed, foreign or stale; HOLD")
+    elif last_key != keys[index - 1]:
+        raise AccountRegistryError("account history cursor is malformed, foreign or stale; HOLD")
+    return index
 
 
 class AccountRegistryError(ValueError):
@@ -561,3 +624,78 @@ class AccountRegistry:
 
     def public(self) -> list[dict[str, Any]]:
         return [a.public() for a in sorted(self.accounts.values(), key=lambda x: x.alias)]
+
+    def history_page(self, alias: str, *, kind: str = "restriction", limit: int = 25, cursor=None) -> dict[str, Any]:
+        """BE-006: deterministic, read-only page over retained history.
+
+        ``kind`` is ``"restriction"`` (``_restriction_history``) or
+        ``"lifecycle"`` (``_lifecycle_history``). Rows are ordered by
+        ``(created_at_unix, restriction_id / operation_id)`` under one
+        freshly re-read snapshot, so a fixed snapshot never duplicates or
+        skips a row. Entries are the modules' scrubbed ``public_record``
+        views only: DATA, no secrets, no entry/mandate grant, no balance
+        change. A cursor issued against a different snapshot (writer
+        appended, incarnation recycled, revision moved) is refused, never
+        reconciled silently; replaying a returned cursor re-reads the same
+        page with no side effect.
+        """
+        from vati.core.canonical import canonical_hash
+
+        if not isinstance(alias, str) or not re.fullmatch(r"[a-z0-9_]{3,32}", alias):
+            raise AccountRegistryError("account history alias is invalid; HOLD")
+        if kind not in _HISTORY_KINDS:
+            raise AccountRegistryError("account history kind is invalid; HOLD")
+        if type(limit) is not int or not 1 <= limit <= HISTORY_PAGE_LIMIT_MAX:
+            raise AccountRegistryError("account history limit is invalid; HOLD")
+        with self._mutation_lock():
+            current = AccountRegistry(self.path)
+            rows_by_key = (
+                current._restriction_history if kind == "restriction" else current._lifecycle_history
+            )
+            rows = [row for row in rows_by_key.values() if row.get("alias") == alias]
+            if alias not in current.accounts and not rows:
+                raise AccountRegistryError(f"unknown account alias {alias}")
+            rows.sort(key=lambda row: _history_order_key(kind, row))
+            keys = [_history_key(kind, row) for row in rows]
+            revision = current._resource_revisions.get(alias, 0)
+            venue = current.accounts[alias].router_venue if alias in current.accounts else None
+            digest = canonical_hash(
+                {"alias": alias, "kind": kind, "revision": revision, "rows": rows}
+            )
+            start = 0
+            if cursor is not None:
+                start = _decode_history_cursor(
+                    cursor, alias=alias, kind=kind, venue=venue,
+                    revision=revision, digest=digest, keys=keys,
+                )
+            if kind == "restriction":
+                from vati.accounts.restrictions import public_record as _public_record
+            else:
+                from vati.accounts.lifecycle import public_record as _public_record
+            page_rows = rows[start : start + limit]
+            entries = []
+            for row in page_rows:
+                entry = _public_record(row)
+                entry["history_kind"] = kind
+                entry["source_key"] = _history_key(kind, row)
+                entries.append(entry)
+            end = start + len(page_rows)
+            next_cursor = None
+            if end < len(rows):
+                next_cursor = _encode_history_cursor(
+                    {"schema": HISTORY_PAGE_SCHEMA, "alias": alias, "kind": kind,
+                     "venue": venue, "source_revision": revision, "source_digest": digest,
+                     "index": end, "last_key": keys[end - 1]}
+                )
+            return {
+                "schema": HISTORY_PAGE_SCHEMA,
+                "alias": alias,
+                "kind": kind,
+                "venue": venue,
+                "source_revision": revision,
+                "source_digest": digest,
+                "total": len(rows),
+                "entries": entries,
+                "has_more": next_cursor is not None,
+                "next_cursor": next_cursor,
+            }
