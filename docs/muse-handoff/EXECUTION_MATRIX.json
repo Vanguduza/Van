@@ -1,0 +1,2589 @@
+{
+  "schema": "van.rev118.continuation-workplan/1",
+  "version": "1.0",
+  "date": "2026-11-07",
+  "purpose": "implementation handoff and proof inventory; planning metadata only",
+  "authority": "canonical VAN Rev1.18 source and original owner decisions; plan grants no execution or admission",
+  "repository": "Vanguduza/Van",
+  "branch": "ccr-9e07e1af-8mgz1p",
+  "head_sha": "e6f7e9098012140ac4033263ce8348221fe90607",
+  "base_sha": "8eb1889822fc8a83f219977c15340172e16acd91",
+  "unit_roster": [
+    {
+      "canonical_id": "PRE-001",
+      "canonical_milestone": "M0",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "PRE-002",
+      "canonical_milestone": "M0",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "PRE-003",
+      "canonical_milestone": "M0",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BE-001",
+      "canonical_milestone": "M1",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BE-002",
+      "canonical_milestone": "M1",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BE-003",
+      "canonical_milestone": "M1",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BE-004",
+      "canonical_milestone": "M1",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BE-005",
+      "canonical_milestone": "M1",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BE-006",
+      "canonical_milestone": "M1",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BE-007",
+      "canonical_milestone": "M1",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BE-008",
+      "canonical_milestone": "M1",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BE-009",
+      "canonical_milestone": "M1",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BE-010",
+      "canonical_milestone": "M1",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BE-011",
+      "canonical_milestone": "M1",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BE-012",
+      "canonical_milestone": "M1",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BE-014",
+      "canonical_milestone": "M2",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BE-015",
+      "canonical_milestone": "M2",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BE-018",
+      "canonical_milestone": "M2",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BE-019",
+      "canonical_milestone": "M2",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BE-020",
+      "canonical_milestone": "M2",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BE-021",
+      "canonical_milestone": "M2",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BE-023",
+      "canonical_milestone": "M2",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BE-024",
+      "canonical_milestone": "M2",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BE-025",
+      "canonical_milestone": "M2",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BE-026",
+      "canonical_milestone": "M2",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BE-027",
+      "canonical_milestone": "M2",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BE-028",
+      "canonical_milestone": "M2",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BE-029",
+      "canonical_milestone": "M2",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BE-030",
+      "canonical_milestone": "M2",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BE-031",
+      "canonical_milestone": "M2",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BE-034",
+      "canonical_milestone": "M2",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BE-035",
+      "canonical_milestone": "M3",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BE-013",
+      "canonical_milestone": "M3",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BE-016",
+      "canonical_milestone": "M3",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BE-017",
+      "canonical_milestone": "M3",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BE-022",
+      "canonical_milestone": "M3",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "VAN-ML-PKT-004",
+      "canonical_milestone": "M4",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "VAN-ML-PKT-005",
+      "canonical_milestone": "M4",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "VAN-ML-PKT-006",
+      "canonical_milestone": "M4",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "VAN-ML-PKT-007",
+      "canonical_milestone": "M4",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "VAN-ML-PKT-008",
+      "canonical_milestone": "M4",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "VAN-ML-PKT-009",
+      "canonical_milestone": "M4",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "VAN-ML-PKT-010",
+      "canonical_milestone": "M4",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "VAN-ML-PKT-011",
+      "canonical_milestone": "M4",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "VAN-ML-PKT-012",
+      "canonical_milestone": "M4",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "VAN-ML-PKT-013",
+      "canonical_milestone": "M4",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "VAN-ML-PKT-014",
+      "canonical_milestone": "M4",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "VAN-ML-PKT-015",
+      "canonical_milestone": "M4",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "VAN-ML-PKT-016",
+      "canonical_milestone": "M4",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "VAN-ML-PKT-017",
+      "canonical_milestone": "M4",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "VAN-ML-PKT-018",
+      "canonical_milestone": "M4",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "VAN-ML-PKT-019",
+      "canonical_milestone": "M4",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "VAN-ML-PKT-020",
+      "canonical_milestone": "M4",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "VAN-ML-PKT-021",
+      "canonical_milestone": "M4",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "VAN-ML-PKT-022",
+      "canonical_milestone": "M4",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "VAN-ML-PKT-023",
+      "canonical_milestone": "M4",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "VAN-ML-PKT-024",
+      "canonical_milestone": "M4",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "VAN-ML-PKT-025",
+      "canonical_milestone": "M4",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "VAN-ML-PKT-026",
+      "canonical_milestone": "M4",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "VAN-ML-PKT-027",
+      "canonical_milestone": "M4",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "VAN-ML-PKT-028",
+      "canonical_milestone": "M4",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "VAN-ML-PKT-029",
+      "canonical_milestone": "M4",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BE-037",
+      "canonical_milestone": "M4",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BE-038",
+      "canonical_milestone": "M4",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BE-039",
+      "canonical_milestone": "M4",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BE-040",
+      "canonical_milestone": "M4",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BE-041",
+      "canonical_milestone": "M4",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BE-042",
+      "canonical_milestone": "M4",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BE-043",
+      "canonical_milestone": "M4",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "VAN-ML-PKT-037",
+      "canonical_milestone": "M5",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "VAN-ML-PKT-038",
+      "canonical_milestone": "M5",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "VAN-ML-PKT-039",
+      "canonical_milestone": "M5",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "VAN-ML-PKT-040",
+      "canonical_milestone": "M5",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "VAN-ML-PKT-041",
+      "canonical_milestone": "M5",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "VAN-ML-PKT-042",
+      "canonical_milestone": "M5",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "VAN-ML-PKT-043",
+      "canonical_milestone": "M5",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "VAN-ML-PKT-044",
+      "canonical_milestone": "M5",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "VAN-ML-PKT-045",
+      "canonical_milestone": "M5",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "VAN-ML-PKT-046",
+      "canonical_milestone": "M5",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "VAN-ML-PKT-047",
+      "canonical_milestone": "M5",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "VAN-ML-PKT-048",
+      "canonical_milestone": "M5",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BE-036",
+      "canonical_milestone": "M5",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BE-044",
+      "canonical_milestone": "M5",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BE-032",
+      "canonical_milestone": "M5",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BE-033",
+      "canonical_milestone": "M5",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "VAN-ML-PKT-030",
+      "canonical_milestone": "M6",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "VAN-ML-PKT-031",
+      "canonical_milestone": "M6",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "VAN-ML-PKT-032",
+      "canonical_milestone": "M6",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BQ-001",
+      "canonical_milestone": "M6",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BQ-002",
+      "canonical_milestone": "M6",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BQ-003",
+      "canonical_milestone": "M6",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BQ-004",
+      "canonical_milestone": "M6",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BQ-005",
+      "canonical_milestone": "M6",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BQ-006",
+      "canonical_milestone": "M6",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BQ-007",
+      "canonical_milestone": "M6",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BQ-008",
+      "canonical_milestone": "M6",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BQ-009",
+      "canonical_milestone": "M6",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "BG-001",
+      "canonical_milestone": "M6",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "UX-001",
+      "canonical_milestone": "M7",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "UX-002",
+      "canonical_milestone": "M7",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "UX-003",
+      "canonical_milestone": "M7",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "FE-001",
+      "canonical_milestone": "M7",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "FE-002",
+      "canonical_milestone": "M7",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "FE-003",
+      "canonical_milestone": "M7",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "FE-004",
+      "canonical_milestone": "M7",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "FE-005",
+      "canonical_milestone": "M7",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "FE-006",
+      "canonical_milestone": "M7",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "FE-007",
+      "canonical_milestone": "M7",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "FE-008",
+      "canonical_milestone": "M7",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "FE-009",
+      "canonical_milestone": "M7",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "FE-010",
+      "canonical_milestone": "M7",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "FE-011",
+      "canonical_milestone": "M7",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "FE-012",
+      "canonical_milestone": "M7",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "FE-013",
+      "canonical_milestone": "M7",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "FE-014",
+      "canonical_milestone": "M7",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "FE-015",
+      "canonical_milestone": "M7",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "FE-016",
+      "canonical_milestone": "M7",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "FE-017",
+      "canonical_milestone": "M7",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "FE-018",
+      "canonical_milestone": "M7",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "FE-019",
+      "canonical_milestone": "M7",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "FE-020",
+      "canonical_milestone": "M7",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "FE-021",
+      "canonical_milestone": "M7",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "FE-022",
+      "canonical_milestone": "M7",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "FE-023",
+      "canonical_milestone": "M7",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "QA-001",
+      "canonical_milestone": "M8",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "QA-002",
+      "canonical_milestone": "M8",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "QA-003",
+      "canonical_milestone": "M8",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "QA-004",
+      "canonical_milestone": "M8",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "QA-005",
+      "canonical_milestone": "M8",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "REL-001",
+      "canonical_milestone": "M8",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    },
+    {
+      "canonical_id": "REL-002",
+      "canonical_milestone": "M8",
+      "acceptance_snapshot": "NOT_ISSUED_AS_OF_2026-11-01_LEDGER",
+      "current_acceptance": "REQUIRES_CURRENT_INDEPENDENT_READBACK",
+      "original_dependencies": "READ_CANONICAL_SOURCE_WORKMAP",
+      "original_acceptance_ids": "READ_EFFECTIVE_TEST_CONTRACTS",
+      "source_and_consumer_coverage": "NOT_REASSESSED_BY_THIS_PLAN"
+    }
+  ],
+  "canonical_milestone_unit_rosters": {
+    "M0": [
+      "PRE-001",
+      "PRE-002",
+      "PRE-003"
+    ],
+    "M1": [
+      "BE-001",
+      "BE-002",
+      "BE-003",
+      "BE-004",
+      "BE-005",
+      "BE-006",
+      "BE-007",
+      "BE-008",
+      "BE-009",
+      "BE-010",
+      "BE-011",
+      "BE-012"
+    ],
+    "M2": [
+      "BE-014",
+      "BE-015",
+      "BE-018",
+      "BE-019",
+      "BE-020",
+      "BE-021",
+      "BE-023",
+      "BE-024",
+      "BE-025",
+      "BE-026",
+      "BE-027",
+      "BE-028",
+      "BE-029",
+      "BE-030",
+      "BE-031",
+      "BE-034"
+    ],
+    "M3": [
+      "BE-035",
+      "BE-013",
+      "BE-016",
+      "BE-017",
+      "BE-022"
+    ],
+    "M4": [
+      "VAN-ML-PKT-004",
+      "VAN-ML-PKT-005",
+      "VAN-ML-PKT-006",
+      "VAN-ML-PKT-007",
+      "VAN-ML-PKT-008",
+      "VAN-ML-PKT-009",
+      "VAN-ML-PKT-010",
+      "VAN-ML-PKT-011",
+      "VAN-ML-PKT-012",
+      "VAN-ML-PKT-013",
+      "VAN-ML-PKT-014",
+      "VAN-ML-PKT-015",
+      "VAN-ML-PKT-016",
+      "VAN-ML-PKT-017",
+      "VAN-ML-PKT-018",
+      "VAN-ML-PKT-019",
+      "VAN-ML-PKT-020",
+      "VAN-ML-PKT-021",
+      "VAN-ML-PKT-022",
+      "VAN-ML-PKT-023",
+      "VAN-ML-PKT-024",
+      "VAN-ML-PKT-025",
+      "VAN-ML-PKT-026",
+      "VAN-ML-PKT-027",
+      "VAN-ML-PKT-028",
+      "VAN-ML-PKT-029",
+      "BE-037",
+      "BE-038",
+      "BE-039",
+      "BE-040",
+      "BE-041",
+      "BE-042",
+      "BE-043"
+    ],
+    "M5": [
+      "VAN-ML-PKT-037",
+      "VAN-ML-PKT-038",
+      "VAN-ML-PKT-039",
+      "VAN-ML-PKT-040",
+      "VAN-ML-PKT-041",
+      "VAN-ML-PKT-042",
+      "VAN-ML-PKT-043",
+      "VAN-ML-PKT-044",
+      "VAN-ML-PKT-045",
+      "VAN-ML-PKT-046",
+      "VAN-ML-PKT-047",
+      "VAN-ML-PKT-048",
+      "BE-036",
+      "BE-044",
+      "BE-032",
+      "BE-033"
+    ],
+    "M6": [
+      "VAN-ML-PKT-030",
+      "VAN-ML-PKT-031",
+      "VAN-ML-PKT-032",
+      "BQ-001",
+      "BQ-002",
+      "BQ-003",
+      "BQ-004",
+      "BQ-005",
+      "BQ-006",
+      "BQ-007",
+      "BQ-008",
+      "BQ-009",
+      "BG-001"
+    ],
+    "M7": [
+      "UX-001",
+      "UX-002",
+      "UX-003",
+      "FE-001",
+      "FE-002",
+      "FE-003",
+      "FE-004",
+      "FE-005",
+      "FE-006",
+      "FE-007",
+      "FE-008",
+      "FE-009",
+      "FE-010",
+      "FE-011",
+      "FE-012",
+      "FE-013",
+      "FE-014",
+      "FE-015",
+      "FE-016",
+      "FE-017",
+      "FE-018",
+      "FE-019",
+      "FE-020",
+      "FE-021",
+      "FE-022",
+      "FE-023"
+    ],
+    "M8": [
+      "QA-001",
+      "QA-002",
+      "QA-003",
+      "QA-004",
+      "QA-005",
+      "REL-001",
+      "REL-002"
+    ]
+  },
+  "canonical_scope": {
+    "total_units": 131,
+    "pre_units": 3,
+    "backend_implementation_units": 82,
+    "be_units": 44,
+    "ml_implementation_units": 38,
+    "backend_verification_units": 12,
+    "bq_units": 9,
+    "ml_verification_units": 3,
+    "bg_units": 1,
+    "ux_units": 3,
+    "fe_units": 23,
+    "qa_units": 5,
+    "rel_units": 2,
+    "requirements": 324,
+    "acceptance_identities": 1610,
+    "contexts": 234,
+    "owner_actions": 349,
+    "planned_features": 93
+  },
+  "id_note": "Within packet prose ML-PKT-xxx abbreviates canonical VAN-ML-PKT-xxx; exact 131 IDs in unit_roster remain authoritative identifiers to reconcile against original registry",
+  "last_verified_ci": {
+    "at": "2026-11-07",
+    "specific_success": [
+      "van-kernel-source",
+      "van-mql-native-source",
+      "van-forecast-runtime-source"
+    ],
+    "specific_failure": [
+      "van-ci",
+      "cognitive-fabric-r161-van"
+    ]
+  },
+  "actual_gate_state": "NOT_ISSUED; no artifact or review generated acceptance",
+  "milestone_sequence": [
+    "M0",
+    "M1",
+    "M2",
+    "M3",
+    "M4",
+    "M5",
+    "M6",
+    "M7",
+    "M8"
+  ],
+  "planning_topological_packet_order": [
+    "W00",
+    "W01",
+    "W02",
+    "W03",
+    "W04",
+    "W05",
+    "W06",
+    "W07",
+    "W08",
+    "W09",
+    "W13",
+    "W10",
+    "W11",
+    "W12",
+    "W14",
+    "W15",
+    "W16",
+    "W17",
+    "W18",
+    "W21",
+    "W19",
+    "W20",
+    "W22",
+    "W23",
+    "W24",
+    "W25",
+    "W26"
+  ],
+  "packets": [
+    {
+      "id": "W00",
+      "title": "Preservation, provenance and exact source inventory",
+      "lane": "M0 / governance",
+      "units": "PRE-001; PRE-002; every affected unit",
+      "dependencies": "none; non-destructive first",
+      "implementation": "Inventory Git remote/principal and every repo/worktree/branch; freeze PR #105 at HEAD, its base and dirty/untracked state; include the full VATI source/locks, other VMs and current agent assignments; retain every original failed/partial/interrupted CI receipt; compare real source with frozen plan hashes and effective contracts. Archive untracked bytes separately—Git bundles do not preserve them.",
+      "happy_path": "Produce immutable manifest with source paths/modes/digests, owner, latest origin, active work, test identities, missing source locations, and per-unit confidence.",
+      "error_recovery": "Missing worktree or mismatched blob becomes SOURCE_UNVERIFIED, not MISSING_IMPLEMENTATION; unknown live operation reconciled before handoff. Never reset/clean, delete branches, force-push or overwrite a worker-owned checkout.",
+      "green_gate": "All 131 IDs and source leads mapped; every dirty/untracked file fingerprinted; real tracked/untracked state preserved; no source or worktree modified.",
+      "deliverables": "SOURCE_SNAPSHOT.json, WORKTREE_OWNERS.json, COMPLETE_SOURCE_LOCATIONS.md, unresolved provenance queue",
+      "status": "NOT_STARTED_BY_THIS_PLAN",
+      "depends_on_ids": []
+    },
+    {
+      "id": "W01",
+      "title": "Canonical PRE-001/002 and PRE-003 F15 readiness",
+      "lane": "M0 / admission",
+      "units": "PRE-001; PRE-002; PRE-003; AP-001/AP-002; 18 owner decisions",
+      "dependencies": "W00",
+      "implementation": "Execute actual source/feature preservation and semantic/acceptance mapping; independently review AP-001/002 amendment proposals; inspect DDS native pack/registry identity rather than relying on package labels; prepare the actual F15 forensic gate, existing owner scope-lock OQ-05 and independent verifier. Candidate code work may continue under existing scoped instruction, but no formal unit acceptance before genuine gate.",
+      "happy_path": "Existing qualified DIAL owner path runs fingerprinted original F15 on `van`; signed owner/issuer/reviewer data and all dispositions read back independently.",
+      "error_recovery": "Unknown pack UUID/slug, absent signer, failed consent or wrong package pin remains PENDING/REFUSED; do not fake certificates or backdate owner instruction.",
+      "green_gate": "PRE evidence exactly maps 131/324/1610/234/349; AP decisions genuine; F15 original issuer, owner signature and independent verifier all authenticated for exact package/tree.",
+      "deliverables": "PRE-001/002 verdicts, F15 external receipt reference, decision register, scoped dependency graph",
+      "status": "NOT_STARTED_BY_THIS_PLAN",
+      "depends_on_ids": [
+        "W00"
+      ]
+    },
+    {
+      "id": "W02",
+      "title": "Restore trusted-base and exact-head source CI",
+      "lane": "M0 / CI",
+      "units": "PR #94; PR #104; PR #105; `van-ci`; cognitive-fabric; DDS pin",
+      "dependencies": "W00; independent of F15 for source correction",
+      "implementation": "Preserve existing main/branch history. Review PR #94 Project Truth intake and adopt through approved owner/code-owner process; provision DDS read-only key to the exact pin `64d6b7158c72` without printing it. Inspect failures in `backend-public-source-gateway`, OBL004 cwd and private-DDS workers, cognitive Android package, and trusted ledger. Reproduce the exact failing cases, fix the source/fixtures (not checks) and run affected tests; use Zuul for speculative or cross-repo Depends-On, existing PR CI for published exact-head evidence.",
+      "happy_path": "Actual trusted checker runs from main; DDS contract blobs are verified; every mandatory exact-head workflow/job terminates SUCCESS, protected-main approval preserved.",
+      "error_recovery": "Missing key remains fail-closed, timeout keeps original FAILED/INTERRUPTED; if original source archive missing, use a documented qualified retrieval route; no bypass, invented status, GitHub Actions substitution for selected Zuul, or force-push.",
+      "green_gate": "Exact HEAD/commit has no mandatory failed/error/unexecuted case; declared skips individually permitted; project-truth-ledger + DDS gate + public shards + cognitive Android + baseline checks green; actual GitHub and source receipts match.",
+      "deliverables": "CI_FAILURE_TO_FIX_MAP.md, trusted-base receipt, cross-repo pin proof, raw failing/passing test archive, exact SHA readback",
+      "status": "NOT_STARTED_BY_THIS_PLAN",
+      "depends_on_ids": [
+        "W00"
+      ]
+    },
+    {
+      "id": "W03",
+      "title": "Recover and qualify the complete VATI implementation footprint",
+      "lane": "M1 / source integration",
+      "units": "BE-006/008/009/010/012/013/014/035/036; ML-004–029",
+      "dependencies": "W00",
+      "implementation": "Identify actual `trading/vati`, `vati_forecast_worker`, MQL/EA, strategy and learning source locations across repos/worktrees/branches; pin commit/blob/lock/migrations and producer-to-consumer call graph. Prior audit saw only gateway wrappers and historical CI source copies; recover living source before assigning missing-code labels. Preserve native adapter boundaries, runtime profiles and original test fixtures.",
+      "happy_path": "One verified provenance map resolves every gateway import to actual source and tested runtime; no duplicate trading owner is introduced.",
+      "error_recovery": "Unavailable source remains UNVERIFIED with explicit dependency owner; do not reconstruct historical source from docs or equate fixture copy to current implementation. Missing credentials do not authorize bypass.",
+      "green_gate": "Every VATI-owned required code path classified PRESENT_VERIFIED / PRESENT_UNVERIFIED / MISSING_INTEGRATION / MISSING_IMPLEMENTATION / EXTERNALLY_BLOCKED with exact SHA and leads.",
+      "deliverables": "VATI_SOURCE_PROVENANCE.json, adapter import graph, reproducible environment lock, native-source review queue",
+      "status": "NOT_STARTED_BY_THIS_PLAN",
+      "depends_on_ids": [
+        "W00"
+      ]
+    },
+    {
+      "id": "W04",
+      "title": "Account onboarding, broker directory, restrictions, recovery",
+      "lane": "M1 / accounts",
+      "units": "BE-002–005; BE-031",
+      "dependencies": "W00; W03",
+      "implementation": "Reconcile Nov 3 commits `29b931f1`, `5fdf0b44`, `2a834025`, `fcbb6aba` with stale Nov 1 ledger. Preserve default OBSERVE and existing admitted PAPER/DEMO identities; enforce signed restriction/re-auth/recovery and original-readback; implement real Android persisted proof, current native identity producers, explicit LINKED_READ_ONLY, distinct governed mode/mandate promotion; preserve historical cash reads on unlink.",
+      "happy_path": "Owner-authorized account enters OBSERVE with no sending rights; restriction/re-auth produces immutable original outcome, no unintended activation; applicable admitted provider can return bounded positive identity.",
+      "error_recovery": "Stale device/lease/revision, changed credential, expired mandate, lost ACK, conflicting identity, unsupported provider and cancellation deny new effects while leaving historical readback and protected exits intact.",
+      "green_gate": "Positive/refusal/UNKNOWN on real SQL/HTTP and applicable provider demo with exact owner authority; final peer review; no automatic reenable; exact branch/public CI passes, original failed restriction timeout tracked.",
+      "deliverables": "Updated BE004 matrix, provider owner map, Android source proof, restriction and recovery raw receipts",
+      "status": "NOT_STARTED_BY_THIS_PLAN",
+      "depends_on_ids": [
+        "W00",
+        "W03"
+      ]
+    },
+    {
+      "id": "W05",
+      "title": "OAuth, credential lifecycle, entitlement and account retirement",
+      "lane": "M1 / ownership",
+      "units": "BE-002/004/005/031",
+      "dependencies": "W04; W03 for adapters",
+      "implementation": "Complete OAuth state/nonce/device/version binding; reject unowned legacy state and stale scope; implement exact account-edit/retirement review and final locked writer checks; read original effect before any retry; isolate token rotation vs Workspace withdrawal vs external account/provider revocation; preserve immutable retention and lawful audit, no secrets in model or logs.",
+      "happy_path": "Current owner may deliberately rotate/withdraw only the exact eligible local credential while keeping unrelated reference/history unchanged; original result survives transport loss.",
+      "error_recovery": "Revoked or replaced token generation, shared-file/symlink path, stale reviewer, ambiguous provider balance/order/position, unreachable issuer or live protective work refuses unlink/new side effects and records recovery-required state.",
+      "green_gate": "Actual two-process SQLite/PG races, resource-lock tests, lost-ACK recovery and generation-change adversarial tests pass; provider-wide operations separately admitted.",
+      "deliverables": "Credential-generation/retirement tests and receipt, unaffected shared-secret proof",
+      "status": "NOT_STARTED_BY_THIS_PLAN",
+      "depends_on_ids": [
+        "W04",
+        "W03"
+      ]
+    },
+    {
+      "id": "W06",
+      "title": "Real funding, transfer, payments and financial ledger",
+      "lane": "M1 / financial",
+      "units": "BE-006; BE-007; BE-012",
+      "dependencies": "W03; W04; W05",
+      "implementation": "Use exact Decimal/Money and per-venue/currency time/provenance. Close native cash movement classification, net deposits, internal transfers and fee corrections; implement payment quote→beneficiary verification→owner A4 approval→shared reservation→provider submit→original readback→settlement/compensation. Keep `PaymentDraftBook` draft-only until a qualified provider implements these steps.",
+      "happy_path": "One approved funding operation receives unique persisted intent, current authorization, immutable provider ID, accounted settlement and nonduplicated ledger effect; fee change triggers reapproval.",
+      "error_recovery": "Quote expired/fee changed/funds held/beneficiary changed, timeout before/after submit, double callback, partial settlement, reversal, FX unavailable or provider offline produces REFUSED_NO_EFFECT or UNKNOWN_RECONCILIATION_REQUIRED; never convert missing cash values to zero.",
+      "green_gate": "Actual SQL transaction, crash/restart, cross-account & provider demo positive+negative+unknown cases; accounting conservation and native-finality receipts, no draft-as-payment claims.",
+      "deliverables": "FinancialMovement provenance, settlement/reversal matrix, provider comparison, verified accounting ledger",
+      "status": "NOT_STARTED_BY_THIS_PLAN",
+      "depends_on_ids": [
+        "W03",
+        "W04",
+        "W05"
+      ]
+    },
+    {
+      "id": "W07",
+      "title": "Shared risk authority, collateral and all-origin reservations",
+      "lane": "M1 / trading risk",
+      "units": "BE-006; BE-009; BE-012; BE-013",
+      "dependencies": "W03; W04; W06 financial primitives",
+      "implementation": "Unify account/environment/venue native identity, equity/margin/funding as-of facts and mandates; compute risk from exact per-position stop, all pending/partial fills, sibling families, deposits/withdrawals and manual orders. Enforce account/portfolio/currency/concentration/correlation/loss-streak/heat limits and normal/risky/aggressive owner-signed temperaments; prevent extreme risk and unadmitted mode escalation.",
+      "happy_path": "Current signed mandate reserves exact shared resources once, native position/risk reflects available current funds, allowed entry only within every live limit, protective exit remains available.",
+      "error_recovery": "Unknown account balance/margin/fee/stop, stale price, unfilled child, unknown transfer, revoked signer, held exit, concurrent reservations, negative cash, corrupted replay → block new risk, retain protection/unknown obligations; no repeated original command.",
+      "green_gate": "Exact Decimal/rational oracles; independent two-writer PG/SQLite concurrency; wrong-sign, overflow, reversal, price/stop and partial-family cases; no duplicate release or unreserved risk.",
+      "deliverables": "RiskAuthority invariants, all-origin reservation ledger, signed-mode policy matrix, native evidence of account heat",
+      "status": "NOT_STARTED_BY_THIS_PLAN",
+      "depends_on_ids": [
+        "W03",
+        "W04",
+        "W06"
+      ]
+    },
+    {
+      "id": "W08",
+      "title": "Native execution, family lifecycle and original economics",
+      "lane": "M1 / trading execution",
+      "units": "BE-010; BE-011; BE-012; BE-035",
+      "dependencies": "W03; W04; W07",
+      "implementation": "Complete MT5, cTrader and selected venue adapter contracts with exact account/cohort/specification; prepared unique dispatch and native readback; parent/child order scheduling, cancel/replace vs amend, family partial/full close with rational proportional-floor or separately signed exact legs; stop/TP protection, positions, late fee/rebate/carry/FX, cost basis and correction/bust provenance. Retain unique trade-review revisions and learned outcomes separately from original decision.",
+      "happy_path": "Signed owner intent executes at most once, each child/leg reconciles with native identity and exact fees, partials/closures and protection accounted; no broker effects in source-only tests.",
+      "error_recovery": "Lost ACK, unknown close, conflicting native receipt, unsupported lot/price grid, stale mandate, venue read outage, session loss, overfill, native correction, hedged/opposing/cross-product unknown: no automatic re-send or guessed flat state; protection for confirmed sibling continues.",
+      "green_gate": "Full native demo (not PAPER) positive/refusal/uncertain/restart/protective cases + economic conservation/TCA oracles, actual native provider qualifications, all original assertions retained.",
+      "deliverables": "Native transport/readback facts, family lifecycle matrix, reconciliation receipts and trade review revision",
+      "status": "NOT_STARTED_BY_THIS_PLAN",
+      "depends_on_ids": [
+        "W03",
+        "W04",
+        "W07"
+      ]
+    },
+    {
+      "id": "W09",
+      "title": "Market instruments, feeds, bars, depth and entitlement",
+      "lane": "M1/M2 market data",
+      "units": "BE-008; BE-014; BE-015; BE-018; BE-020",
+      "dependencies": "W03; W04; W05",
+      "implementation": "Promote only admitted feed sources: venue/env/account/instrument revision, symbol precision, native sequence/time, as-of bars, bid/ask/depth completeness, entitlements/license/source time. Wire actual native source to market monitor; historic catalogue and `HISTORICAL_PARTIAL...UNQUALIFIED` remain read-only until qualified. Publish gap/revision/snapshot/cold-readback facts to durable lineage.",
+      "happy_path": "Native feed produces validated sequence-aware snapshots, consumer charts/alerts see correct freshness and unavailable states, original raw archive is reproducible.",
+      "error_recovery": "Out-of-order events, missing snapshot marker, inconsistent price scales, stale/negative spread, session disconnect, depth gap, licence expiry and partial archive → INVALID/STALE/UNKNOWN, no executable quote, never zero-price fallback.",
+      "green_gate": "Bounded live demo native capture with observed provider semantics + actual PG archive/cold recovery + as-of reproduction; consumer and entitlement tests green.",
+      "deliverables": "Instrument/feed canonical map, point-in-time raw archive, quote/depth contract validation",
+      "status": "NOT_STARTED_BY_THIS_PLAN",
+      "depends_on_ids": [
+        "W03",
+        "W04",
+        "W05"
+      ]
+    },
+    {
+      "id": "W10",
+      "title": "News/calendar, causal effects and armed tickets",
+      "lane": "M2/M3 trading intelligence",
+      "units": "BE-014; BE-015; BE-016; BE-017; BE-020",
+      "dependencies": "W09; W13 causal evaluation rules",
+      "implementation": "Close source-bound news/calendar ingestion; deduplicate/revise/withdraw with available_at, received_at and event_at preserved; governed D1–D7 effect classifications, configurable causality, armed one-use tickets and A4 owner approval. Observe real source health and entitlements before publishing tradable decision.",
+      "happy_path": "Entitled timely news can enter an auditable strategy candidate and an eligible approved ticket once; alert retains source/date and origin.",
+      "error_recovery": "Backdated relay, changed release time, duplicate event, revoked arm, expired event, source reliability loss, data embargo or execution outage remains withheld/REFUSED/PENDING; no hindsight applied to earlier decision or duplicate order.",
+      "green_gate": "Point-in-time and revision/retraction tests, 1-use and restart tests, real source provider scope, owner-signed positive and negative cases.",
+      "deliverables": "D1–D7 classifier evidence, armed-ticket journal, provenance-aware alerts",
+      "status": "NOT_STARTED_BY_THIS_PLAN",
+      "depends_on_ids": [
+        "W09",
+        "W13"
+      ]
+    },
+    {
+      "id": "W11",
+      "title": "Charts, alerts, manual trading, diagnostics, historical practice",
+      "lane": "M2/M3 user workflows",
+      "units": "BE-011; BE-018–022; BE-032",
+      "dependencies": "W09; W07; W08; W10",
+      "implementation": "Finish indicator/drawing/workspace versions, screen-appropriate chart data/refresh/alert suppression, watchlists and typed screening, diagnostics and owner review. Manual trade/add/protect/handover must route through the same mandates, reservations and native reconciliation as automated execution. Isolate practice/replay from live money and maintain original source identities.",
+      "happy_path": "Owner can inspect current evidence, run risk-bounded manual ticket, recover result after disconnect, and replay historically only from available-at observations.",
+      "error_recovery": "Broken deep link, stale chart, duplicated alert, wrong profile, unknown manual fill or changed mandate: explicit degraded state; no offline unverified trade execution or practice-to-live leakage.",
+      "green_gate": "Consumer/contract tests, historical as-of replay with no lookahead, accessibility tests, native demo manual order proof and persisted recovery.",
+      "deliverables": "Chart/replay fixtures, manual action authority matrix, diagnostics and alert proof",
+      "status": "NOT_STARTED_BY_THIS_PLAN",
+      "depends_on_ids": [
+        "W09",
+        "W07",
+        "W08",
+        "W10"
+      ]
+    },
+    {
+      "id": "W12",
+      "title": "Strategy lifecycles, signed risk temperaments and governed learning",
+      "lane": "M3/M5 strategies",
+      "units": "BE-013; BE-035; BE-036",
+      "dependencies": "W07; W08; W10; W13",
+      "implementation": "Preserve explicit normal/risky/aggressive (not extreme) owner-signed modes; implement strategy registry, evolving evidence episodes, stateful risk-aware entry/exit, novelty/uncertainty and manual interventions. Every promotion must cite a sealed evaluator and native/simulation alignment; preserve outcome revisions/knowledge times and original owner reset.",
+      "happy_path": "Candidate strategy advances only after evidence-qualified comparative benefit under current policy; decisions remain explainable and reversible.",
+      "error_recovery": "Reused model artifact, expired authority, missing benchmark/cost data, drift, illiquid asset, harmful counterfactual or conflicting corrections → freeze/rollback candidate, preserve incumbent and raw adverse observations.",
+      "green_gate": "Repeatable source+provider simulation+shadow/forward cohort; accepted only with independent evidence and a no-harm risk governor, not returns from backtest alone.",
+      "deliverables": "Original opportunity temperament contracts, governed promotion/canary/rollback and learning ledger",
+      "status": "NOT_STARTED_BY_THIS_PLAN",
+      "depends_on_ids": [
+        "W07",
+        "W08",
+        "W10",
+        "W13"
+      ]
+    },
+    {
+      "id": "W13",
+      "title": "Chronological research evaluator and economic proof",
+      "lane": "M3 research quality",
+      "units": "BE-035; BE-036; ML-PKT-007–010; ML-PKT-030",
+      "dependencies": "W09; W07; W08",
+      "implementation": "Build point-in-time train/validation/test, historical folds, warmup/gaps/holiday semantics, raw transaction timing, slippage/spread/fees/funding/carry/correction, position-size feasibility and queue-aware execution. Integrate deflated Sharpe, PBO/CSCV, baseline stress, walk-forward and bounded trial census into actual promotion; no test-only statistics accepted.",
+      "happy_path": "On immutable vintages, independent evaluator reports calibrated costs, realistic fill assumptions, false positives and OOS comparisons with complete provenance.",
+      "error_recovery": "Overlapping folds, lookahead, future news, survivorship, unavailable fees, overfitting, underpopulated sample, provider mismatch and optimizer leakage are hard fail/INCONCLUSIVE, not fabricated edge.",
+      "green_gate": "Independent replay oracle, shuffled-label/lookahead negative controls, time-split coverage and economic reproducibility; selected mode decisions cannot precede evidence.",
+      "deliverables": "Sealed evaluator, leakage suite, reproducible walk-forward and performance-risk report",
+      "status": "NOT_STARTED_BY_THIS_PLAN",
+      "depends_on_ids": [
+        "W09",
+        "W07",
+        "W08"
+      ]
+    },
+    {
+      "id": "W14",
+      "title": "ML004/005 real data plane, features, labels and replay",
+      "lane": "M4 data",
+      "units": "ML-PKT-004–010",
+      "dependencies": "W03; W09; W13",
+      "implementation": "Preserve tested pinned x86 CPU-isolated Qlib/LightGBM/NeuralForecast fixtures as environment evidence only. Complete native market/raw archive, point-in-time dataset candidate, source entitlements/clock, universe membership, licensed news joins, leak-free feature definitions/Feast parity, executable labels with outcome provenance, chronological folds and realistic replay. Distinguish candidate-published from dataset-admitted.",
+      "happy_path": "An entitled time-sliced dataset is reproducible from source bytes and supports a chronologically valid research job with negative controls.",
+      "error_recovery": "Stale import, missing source licence, wrong as-of, duplicate asset, inconsistent correction, wrong market holiday or leakage refuses dataset admission; preserve original fixture-only status.",
+      "green_gate": "Hosted partition on exact code with real sourced records; structural+data-quality+license+PIT negative controls; actual PG and independent reference parity.",
+      "deliverables": "DatasetManifest candidate, partition lineage, feature/label registry and negative leakage fixtures",
+      "status": "NOT_STARTED_BY_THIS_PLAN",
+      "depends_on_ids": [
+        "W03",
+        "W09",
+        "W13"
+      ]
+    },
+    {
+      "id": "W15",
+      "title": "Qlib, LightGBM, neural challengers, calibration",
+      "lane": "M4 models",
+      "units": "ML-PKT-011–021",
+      "dependencies": "W14; W13",
+      "implementation": "Implement Qlib processors/recorders, LightGBM net-edge regression, setup-event, quantile/ranking, simple baselines; NeuralForecast N-HiTS/N-BEATSx, DeepAR and contextual challengers; unified Optuna studies with chronology and resource caps. Compare to naive baselines and calibrate predictive distributions/uncertainty rather than cherry-picking one model. Synthetic smoke remains separate.",
+      "happy_path": "Reproducible training stores exact data/model/params and delivers uncertainty-calibrated candidate predictions with independent OOS benefit tests.",
+      "error_recovery": "NaNs/target leakage, label delay, numerically unstable model, excessive GPU/CPU, failed trial, inference parity loss, false confidence, missing MLflow/Feast scope or negative expected edge → reject candidate with original evidence retained.",
+      "green_gate": "All required model families have actual trained/evaluated artifacts on approved data, OOS/per-regime tests, calibration/reliability and independent comparison; no implicit profitable claim.",
+      "deliverables": "Pinned training recipes, trial ledger, calibration plots/data, baseline comparison matrix",
+      "status": "NOT_STARTED_BY_THIS_PLAN",
+      "depends_on_ids": [
+        "W14",
+        "W13"
+      ]
+    },
+    {
+      "id": "W16",
+      "title": "Model registry, drift, serving, fusion, protection",
+      "lane": "M4/M5 ML operating",
+      "units": "ML-PKT-022–029; BE-036",
+      "dependencies": "W15; W14; W07; W13",
+      "implementation": "Govern artifact signatures/versions/reviews, isolated promotion and rollback; implement drift/novelty/feature/data lag monitors, retraining scheduler, serve cache with time and vintage keys, fusion and mode arbitration, original outcome/revision ledger, APIs to trading and future screens; qualify VM health and restore. Never allow a new model to bypass hard risk controls.",
+      "happy_path": "Approved candidate serves only current eligible forecasts; risk authority interprets uncertainty; prediction and actual outcomes are causally linked and rollback works.",
+      "error_recovery": "Changed weights/signature, missing feature, stale market, drift, retraining overlap, network outage, stale cache, source revocation or missing GPU → safe unavailable/fallback to admitted incumbent; no uninformed live trade.",
+      "green_gate": "Signed model manifest, reloaded cold run, canary/shadow test, drift negative controls and genuine VM restart/rollback with no ungoverned effects.",
+      "deliverables": "ModelArtifactManifest, serving provenance, adaptive schedule and operating receipts",
+      "status": "NOT_STARTED_BY_THIS_PLAN",
+      "depends_on_ids": [
+        "W15",
+        "W14",
+        "W07",
+        "W13"
+      ]
+    },
+    {
+      "id": "W17",
+      "title": "Crypto discovery and prediction-market intelligence",
+      "lane": "M4/M5 new markets",
+      "units": "BE-037–044; ML-PKT-037–048",
+      "dependencies": "W03; W09; W13; W14",
+      "implementation": "Create read-only chain identity/discovery, Solana/EVM token/proxy capability, state-bound executable simulations, temporal wallet/flow, finality/reorg; separately Kalshi/comparator feed ingest, event identity/settlement, coherent distributions and price-vs-probability calibration. Start read-only; any future execution requires separate explicit authority and qualified provider.",
+      "happy_path": "Provider events, chain reorgs and market settlement revisions are research-grade, as-of and replayable; confidence and availability visible.",
+      "error_recovery": "Unlicensed data, chain fork, stale or manipulated token, untrusted proxy, wrong event outcome, missing settlement, market close and incomparable venue terms → UNKNOWN/REFUSED, invalidate affected descendants; no prediction trade orders.",
+      "green_gate": "Real sandbox/read-only provider data and provenance; temporal reorg/settlement negative suite; incremental value established prospectively before adoption.",
+      "deliverables": "Crypto capability graph, prediction event ledger, calibration/replay and evaluation report",
+      "status": "NOT_STARTED_BY_THIS_PLAN",
+      "depends_on_ids": [
+        "W03",
+        "W09",
+        "W13",
+        "W14"
+      ]
+    },
+    {
+      "id": "W18",
+      "title": "Mission/projects/agents, Hermes/Muse and intervention handoff",
+      "lane": "M2 assistant",
+      "units": "BE-023; BE-024; BE-034",
+      "dependencies": "W00; W05",
+      "implementation": "Use one durable mission/task/event graph, exact executor run identities, original outcome/receipt, admitted current service profiles, owner intervention and human handoff. Existing Hermes `van` bridge reports health and creates runs; source graph does not authorize work and cannot estimate time. Complete timed scheduler and project-wide task CRUD where canonical; provider result reconciliation and Muse/agent qualification via existing fabric, no unnecessary Hermes dependency for direct DIAL execution.",
+      "happy_path": "Qualified mission consumes one owner-authorized run and terminal verified result once; dependency scheduler advances only eligible node, with provenance and actual state.",
+      "error_recovery": "Cycle/orphan/duplicate binding, stale owner grant, remote timeout/ambiguous send, Hermes outage, conflicting terminal result, unreachable Muse, failed worker → no forged success, no repeated remote action, keep durable WAITING_EXTERNAL/RECONCILING state.",
+      "green_gate": "End-to-end live qualified executor run and readback on VM, retry/no-double-send restart tests, full original mission/agent action coverage, independent review.",
+      "deliverables": "Mission/executor state matrix, Hermes/Muse adapter proof, task intervention tests",
+      "status": "NOT_STARTED_BY_THIS_PLAN",
+      "depends_on_ids": [
+        "W00",
+        "W05"
+      ]
+    },
+    {
+      "id": "W19",
+      "title": "Browser, remote, JEV and artifacts",
+      "lane": "M2 assistant tooling",
+      "units": "BE-025; BE-026; BE-034",
+      "dependencies": "W18; W05; W21",
+      "implementation": "Complete scoped browser session/lease, Stagehand/Chromium startup, private-page classification, artifact/upload/download provenance, remote desktop permissioned action and JEV proposal-only path. Revalidate every proposed action VAN-side before execution; no user-private prompt/page content leak to anonymous providers. Use direct Global DIAL MCP VM path when qualified; no banned local desktop.",
+      "happy_path": "Eligible browser action makes one scoped, auditable effect and reliable receipt; prohibited JEV case returns no payload. Real Chromium startup and integration remain independently evidenced.",
+      "error_recovery": "SSRF, redirect/dns rebinding, prompt injection, stale selector, expired session, signed-in private content, timeout/lost reply, lease takeover, download integrity failure → POLICY_DENIED/UNKNOWN, no unapproved effect.",
+      "green_gate": "Hosted 11/11 startup and adversarial tests + real authorized browser session + artifact identity; DDS JEV contract tests and native Artemis qualification separately green.",
+      "deliverables": "Browser lease/fence receipts, JEV payload negatives, actual browser and artifact traces",
+      "status": "NOT_STARTED_BY_THIS_PLAN",
+      "depends_on_ids": [
+        "W18",
+        "W05",
+        "W21"
+      ]
+    },
+    {
+      "id": "W20",
+      "title": "Google connectors, knowledge/privacy, voice and conversation",
+      "lane": "M2 assistant",
+      "units": "BE-027; BE-029; BE-031; BE-032",
+      "dependencies": "W05; W18",
+      "implementation": "Complete Google token vault and narrow scopes with current permissions and authenticated provider readback; compose/send/calendar/drive actions preserve original effect IDs and per-provider uncertain outcomes. Close memory/knowledge/goals/research provenance, privacy/erasure and governed artifact classification. Wire gateway speech result producer, device-reported last_spoken cursor, interruption, resumption and retention to actual Android audio, without re-speaking consumed segments or revealing secrets.",
+      "happy_path": "Authenticated owner sees current connected source, receives cited assistant result and continuous voice; provider action commits only after current grant; erasure propagates to cache/search without inventing model unlearning.",
+      "error_recovery": "Token revoked, lost Google callback, stale source, invalid provider scope, private query, process restart, last_received!=last_spoken, audio focus loss, duplicate speech or interrupted result → explicit unavailable/reconcile, no silent lost/duplicated audio or external send.",
+      "green_gate": "Live provider current-scope test, source/erasure negative tests, actual emulator speech consumption and restart/cursor recovery, no private-data egress.",
+      "deliverables": "Provider origin inventory, voice/readback protocol, privacy audit and instrumented Android evidence",
+      "status": "NOT_STARTED_BY_THIS_PLAN",
+      "depends_on_ids": [
+        "W05",
+        "W18"
+      ]
+    },
+    {
+      "id": "W21",
+      "title": "Automation, standing authority, attention, notification",
+      "lane": "M2 assistant operations",
+      "units": "BE-028; BE-030",
+      "dependencies": "W05; W18",
+      "implementation": "Reuse canonical standing trigger (n8n not separate authority): atomically claim schedule/external event, seal snapshot/current grant, dispatch once; preserve cancellation, resolution, owner device/context binding, attention/notification projection and device delivery acknowledgements separately from server publication.",
+      "happy_path": "One eligible schedule firing yields one durable command and auditable target delivery when qualified; duplicate triggers return original receipt.",
+      "error_recovery": "Clock ambiguity, delayed cron, cancelled workflow, changed owner scope, duplicated callback, device offline or provider ack loss → no duplicate irreversible effect; status indicates FIRED/SENT/DELIVERED/UNKNOWN accurately.",
+      "green_gate": "Two-worker real DB claim races, restart/replay, timed tests at UTC boundaries, handset ack negative tests and delivery separation.",
+      "deliverables": "Standing-run ledger, notification-delivery protocol, owner preference and lifecycle tests",
+      "status": "NOT_STARTED_BY_THIS_PLAN",
+      "depends_on_ids": [
+        "W05",
+        "W18"
+      ]
+    },
+    {
+      "id": "W22",
+      "title": "Capability inventory, security, storage, deploy/recovery/observability",
+      "lane": "M5 operating readiness",
+      "units": "BE-032; BE-033; BE-034",
+      "dependencies": "W03; W04–W21 affected consumers",
+      "implementation": "Finish feature/function/surface/action consumption registry across backend and Android, complete stable permissions and source citation mapping. Qualify SQLite/PG production storage/migrations/permissions, VM topology and service owners, secret rotation, backup/offhost restore, host health/isolation/quotas, alerts, outage runbooks, signed packages and safe rollback. VM resource placement must respect 1GB Oracle Admin; large jobs on qualified healthy workers. No destructive cleanup of working state.",
+      "happy_path": "Qualified services cold-start with correct secrets/config, retain durable receipts across restart/failover, restore from independent backup and expose honest readiness and usage.",
+      "error_recovery": "Schema mismatch, migrating old data, partial backup, disk/inode exhaustion, host/process death, unauthorized secret read, out-of-order deployment, rollback to incompatible schema → refuse unsafe activation, preserve writable original recovery and restart only owned services.",
+      "green_gate": "Source-to-consumer registry no missing actions; actual backup/restore and fault tests; monitored deployment, exact topology and security negative controls with owner-approved SLO/RPO/RTO.",
+      "deliverables": "Backend capability graph, recovery runbooks, VM inventory, witnessed restore and canary evidence",
+      "status": "NOT_STARTED_BY_THIS_PLAN",
+      "depends_on_ids": [
+        "W03",
+        "W04",
+        "W05",
+        "W06",
+        "W07",
+        "W08",
+        "W09",
+        "W10",
+        "W11",
+        "W12",
+        "W13",
+        "W14",
+        "W15",
+        "W16",
+        "W17",
+        "W18",
+        "W19",
+        "W20",
+        "W21"
+      ]
+    },
+    {
+      "id": "W23",
+      "title": "Independent backend/ML verification and acceptance packets",
+      "lane": "M6 independent qualification",
+      "units": "BQ-001–009; ML-PKT-030–032 (12 total)",
+      "dependencies": "W01; W02; W04–W22 as applicable",
+      "implementation": "Execute exact effective POS/NEG/REC assertions for each of 12 backend verification identities; real provider, transaction, temporal/dataset, auth, replay/unknown/recovery, integration, security/privacy, operating and economic evidence. Include source, serving, real SQL, native demo, consumer, and registered independent issuer/reviewer as required. Maintain original 1,610 acceptance IDs; explain any permissible skip with canonical authority, never reduce denominator.",
+      "happy_path": "Independent verification authenticates original source/effects and signs only fully met exact input obligations; 12 results properly linked to producing backend units.",
+      "error_recovery": "Reused wrong-head receipt, self-review, synthetic mask for native, missing provider owner, skipped negative, stale dependency, missing original effect or invented qualification → REJECTED/NOT_ISSUED with exact failed requirement.",
+      "green_gate": "12/12 exact independent verification packets valid and current for their owning scope, all applicable effective tests and zero mandatory unresolved errors.",
+      "deliverables": "12 signed backend qualification dossiers, negative-control registry, independent audit",
+      "status": "NOT_STARTED_BY_THIS_PLAN",
+      "depends_on_ids": [
+        "W01",
+        "W02",
+        "W04",
+        "W05",
+        "W06",
+        "W07",
+        "W08",
+        "W09",
+        "W10",
+        "W11",
+        "W12",
+        "W13",
+        "W14",
+        "W15",
+        "W16",
+        "W17",
+        "W18",
+        "W19",
+        "W20",
+        "W21",
+        "W22"
+      ]
+    },
+    {
+      "id": "W24",
+      "title": "Genuine BG-001 backend-complete certificate",
+      "lane": "M6 backend exit",
+      "units": "BG-001 (global backend gate)",
+      "dependencies": "W01; W02; W23; all BE/ML acceptances",
+      "implementation": "Recompute original canonical graph from true source/acceptance identities, not a manually flipped progress JSON. Verify all 82 backend units (44 BE +38 ML implementation), all 12 verification packets, original identities, current owner decisions, deployment scope, secure real-provider qualifications and actual signed issuers before global backend completeness.",
+      "happy_path": "Qualified independent issuer checks every consumed dependency and emits verifiable BG-001 bound to exact source tree and evidence set; frontend can then advance under its own gates.",
+      "error_recovery": "Any UNKNOWN/missing, unresolved release blocker, failed CI, stale claim, unaccepted provider or discrepancy in 82/12 means BG-001 NOT_ISSUED, not false green.",
+      "green_gate": "All required canonical backend/verification obligations independently qualified, signed BG-001 output and matching current board, no owner waiver of mandatory gate.",
+      "deliverables": "BG-001 receipt, backend acceptance coverage matrix, operating red/green dashboard",
+      "status": "NOT_STARTED_BY_THIS_PLAN",
+      "depends_on_ids": [
+        "W01",
+        "W02",
+        "W23"
+      ]
+    },
+    {
+      "id": "W25",
+      "title": "UX/FE: consumption, Android integration and floating assistant",
+      "lane": "M7 frontend after BG-001",
+      "units": "UX-001–003; FE-001–023",
+      "dependencies": "W24; existing owner-authorized isolated character source work only outside admission",
+      "implementation": "Build approved 3 UX +23 FE units from canonical 234 contexts and 349 actions; provisioned VAN trading core is application host, no user-entered backend address; complete native Android consumers, instrumented action and privacy/UI states. Isolate existing character-review variant from production and bind actual Candidate B Rive/context hashes, aura/workboard and instrumented behavior; protect original M0–M5 owner/artwork gates.",
+      "happy_path": "Each original action has current authority, loading/empty/unknown/error/recovery and proper Android storage/navigation; overlay remains position-aware and accessible, not a source of trading authority.",
+      "error_recovery": "Offline, stale app token, lost native reply, terminated app, system overlay revocation, window clipping, changed action schema, missing Rive sidecar, voice interruption → explicit retry/reconcile and no unintended trading mutation.",
+      "green_gate": "26/26 UX+FE units accepted against backend contract and real Android integration; emulator/instrumentation and accessibility source gates pass, device acceptance stays final M8.",
+      "deliverables": "Android consumer matrix, Rive admission records, source-build and instrumented UI proofs",
+      "status": "NOT_STARTED_BY_THIS_PLAN",
+      "depends_on_ids": [
+        "W24"
+      ]
+    },
+    {
+      "id": "W26",
+      "title": "QA, signed release, real S24 and rollback/retirement",
+      "lane": "M8 final acceptance",
+      "units": "QA-001–005; REL-001–002",
+      "dependencies": "W24; W25; W22; owner release act",
+      "implementation": "Run full privacy/security, migration, failure injection, native provider demo, voice/accessibility/performance/thermal/power/S24 soak and exact signed build; compare APK/runtime/character/source hashes. Validate Canary deployment, inventory, monitoring, rollback and legacy retirement separately. Physical S24 is FINAL stage; actual Artemis/wireless ADB route only, no emulator masquerading as device.",
+      "happy_path": "Qualified release is signed, installed and exercised on S24 with raw frame/thermal/memory/battery/overlay/trade-protection evidence, then operator-authorized canary and proven rollback.",
+      "error_recovery": "No device, thermal/frame failure, wrong signing, missing QA, network outage, schema rollback risk, native provider unresolved, unknown release effect, bad canary → HOLD release, leave previous deployment and receipts safe; never fabricate success.",
+      "green_gate": "5/5 QA +2/2 REL complete with original signed authorities, exact package and actual device acceptance, canary/rollback, no unsafe financial activation; retirement separately authorized.",
+      "deliverables": "Signed release evidence, actual S24 test artifacts, launch/rollback/retirement disposition",
+      "status": "NOT_STARTED_BY_THIS_PLAN",
+      "depends_on_ids": [
+        "W24",
+        "W25",
+        "W22"
+      ]
+    }
+  ],
+  "proposed_gates": [
+    {
+      "id": "V0",
+      "name": "SOURCE_AND_CUSTODY_READY",
+      "requirement": "Exact Git SHA/tree/worktree/untracked/binary manifest and source owner; no unowned work overwritten.",
+      "status": "NOT_ISSUED"
+    },
+    {
+      "id": "V1",
+      "name": "CANONICAL_SCOPE_AND_PRE_READY",
+      "requirement": "All 131 units / 324 req / 1610 acceptances / 234 contexts / 349 actions mapped; PRE-001/002 and proposed amendments honestly dispositioned.",
+      "status": "NOT_ISSUED"
+    },
+    {
+      "id": "V2",
+      "name": "AUTHORITY_F15_READY",
+      "requirement": "Actual DDS native F15 certificate + OQ-05 owner scope lock + independent reviewer, exact original package and qualified issuer; no generated shortcut.",
+      "status": "NOT_ISSUED"
+    },
+    {
+      "id": "V3",
+      "name": "SOURCE_CORRECT",
+      "requirement": "Typed source/fixture/import/schema and affected regression tests exact HEAD; original tests and failure evidence unchanged.",
+      "status": "NOT_ISSUED"
+    },
+    {
+      "id": "V4",
+      "name": "REAL_STORAGE_RECOVERY_CORRECT",
+      "requirement": "Genuine SQL/HTTP transactions, lock/lease/CAS, concurrent process, rollback, lost ACK, crash, restart and idempotent readback.",
+      "status": "NOT_ISSUED"
+    },
+    {
+      "id": "V5",
+      "name": "NATIVE_PROVIDER_CORRECT",
+      "requirement": "Qualified provider/native/demo positive, refusal and UNKNOWN; actual owner account/env/instrument, fees and original effect readback. PAPER-only not sufficient.",
+      "status": "NOT_ISSUED"
+    },
+    {
+      "id": "V6",
+      "name": "CONSUMER_AND_ANDROID_CORRECT",
+      "requirement": "Authenticated gateway→real owner→durable receipt→actual client; Android/emulator and spoken/overlay consumer tests, no native device claim yet.",
+      "status": "NOT_ISSUED"
+    },
+    {
+      "id": "V7",
+      "name": "DATA_AND_ECONOMICS_CORRECT",
+      "requirement": "Point-in-time lineage, leak/cost/stress/forecast calibration/economic oracles, model/provenance and no profit claim absent OOS evidence.",
+      "status": "NOT_ISSUED"
+    },
+    {
+      "id": "V8",
+      "name": "SECURITY_PRIVACY_POLICY_CORRECT",
+      "requirement": "Current owner grants and real service secrets; no cross-owner/cross-account/privacy egress; revocation, typed refusals, signing and audit.",
+      "status": "NOT_ISSUED"
+    },
+    {
+      "id": "V9",
+      "name": "HOST_OPERATIONS_RECOVERY_CORRECT",
+      "requirement": "Real VM deployment isolation, cold start, backup restore, disk/capacity, observability, failover/rollback and approved SLO thresholds.",
+      "status": "NOT_ISSUED"
+    },
+    {
+      "id": "V10",
+      "name": "EXACT_HEAD_CI_ZUUL_CORRECT",
+      "requirement": "Trusted-base and DDS key, full applicable exact-head CI; Zuul genuine cross-repo speculative/Depends-On when selected; no mandatory failure/skip.",
+      "status": "NOT_ISSUED"
+    },
+    {
+      "id": "V11",
+      "name": "INDEPENDENT_BACKEND_VERIFICATION",
+      "requirement": "All 12 original backend verification identities independently prove positive/adverse, native, integration and economic scope, not synthetic-only.",
+      "status": "NOT_ISSUED"
+    },
+    {
+      "id": "V12",
+      "name": "GLOBAL_BG001_ISSUED",
+      "requirement": "82 backend units +12 verification packets fully accepted under original PRE gates and dependencies; genuine issuer signs BG-001.",
+      "status": "NOT_ISSUED"
+    },
+    {
+      "id": "V13",
+      "name": "UX_FE_CORRECT",
+      "requirement": "3 UX +23 FE accepted with original actions and current backend contracts, static/emulator/accessibility tests; no premature physical claim.",
+      "status": "NOT_ISSUED"
+    },
+    {
+      "id": "V14",
+      "name": "QA_DEVICE_RELEASE_AUTHORISED",
+      "requirement": "5 QA +2 REL, signed real S24 Artemis proof and approved rollout/rollback; release and live capital separately authorised.",
+      "status": "NOT_ISSUED"
+    }
+  ],
+  "adversarial_cases": [
+    {
+      "id": "C01",
+      "group": "request/authority",
+      "trigger": "Valid request and signed current mandate",
+      "required_handling": "Validate typed envelope, scope, original operation, mutable revisions, trusted now; commit via exact owning boundary.",
+      "expected_observable": "Exactly one APPLIED receipt and durable independent readback."
+    },
+    {
+      "id": "C02",
+      "group": "request/authority",
+      "trigger": "Malformed, oversized, unknown-field or wrong API revision",
+      "required_handling": "Refuse before state change; bound sizes, canonical Decimal/money and code/version enums.",
+      "expected_observable": "REFUSED_NO_EFFECT; unambiguous typed input error."
+    },
+    {
+      "id": "C03",
+      "group": "request/authority",
+      "trigger": "Unauthenticated, token expired, forged or replayed signature",
+      "required_handling": "Check issuer/audience/session/device/nonce/current signer and purpose under lock.",
+      "expected_observable": "REFUSED_NO_EFFECT; sanitized audit, no secret leak."
+    },
+    {
+      "id": "C04",
+      "group": "request/authority",
+      "trigger": "Wrong owner, broker account, environment or product generation",
+      "required_handling": "Bind physical native identity and cohort, not only display alias.",
+      "expected_observable": "No cross-owner/account native reads or effects."
+    },
+    {
+      "id": "C05",
+      "group": "request/authority",
+      "trigger": "Mandate or temperament revoked after read but before send",
+      "required_handling": "Recheck current policy, signer, lease and expiry at writer/send boundary.",
+      "expected_observable": "New risk blocked; existing protection remains eligible."
+    },
+    {
+      "id": "C06",
+      "group": "request/authority",
+      "trigger": "Wrong callback source or OAuth state collision",
+      "required_handling": "Correlate exact nonce/operation/credential generation and original callback.",
+      "expected_observable": "Reject adoption of legacy/unowned callback; original outcome available."
+    },
+    {
+      "id": "C07",
+      "group": "request/authority",
+      "trigger": "Consent, access, role or provider entitlement withdrawn",
+      "required_handling": "Invalidate scoped current sources and consumer cache; retain legal original audit facts.",
+      "expected_observable": "Access removed without deleting unrelated evidence or issuing new effects."
+    },
+    {
+      "id": "C08",
+      "group": "durability",
+      "trigger": "Duplicate same operation/same payload",
+      "required_handling": "Resolve immutable idempotency key, scope and fingerprint before side effect.",
+      "expected_observable": "Same receipt, exactly one state/event/provider effect."
+    },
+    {
+      "id": "C09",
+      "group": "durability",
+      "trigger": "Same idempotency key, changed payload",
+      "required_handling": "Reject changed fingerprint, preserve first committed intent.",
+      "expected_observable": "CONFLICT; zero second effect."
+    },
+    {
+      "id": "C10",
+      "group": "durability",
+      "trigger": "Two processes competing for same lease/row",
+      "required_handling": "Use actual SQL CAS/transaction and account/operation lock in canonical order.",
+      "expected_observable": "Exactly one winner, second conflict/re-read; no double reserve."
+    },
+    {
+      "id": "C11",
+      "group": "durability",
+      "trigger": "Loss before transaction commit",
+      "required_handling": "Rollback state/receipt/event and appropriate resource hold; safe retry only when no side effect.",
+      "expected_observable": "FAILED_BEFORE_EFFECT, no partial business state."
+    },
+    {
+      "id": "C12",
+      "group": "durability",
+      "trigger": "Lost ACK after local durable COMMIT",
+      "required_handling": "Read original exact operation and immutable receipt after reconnect.",
+      "expected_observable": "Recovered APPLIED/REFUSED; no duplicate transaction."
+    },
+    {
+      "id": "C13",
+      "group": "durability",
+      "trigger": "Provider timeout after possible send",
+      "required_handling": "Retain PENDING/UNKNOWN and original native operation ID, poll/reconcile; never auto-resend ambiguous command.",
+      "expected_observable": "UNKNOWN_RECONCILIATION_REQUIRED until native finality."
+    },
+    {
+      "id": "C14",
+      "group": "durability",
+      "trigger": "Restart during awaiting provider result",
+      "required_handling": "Resume durable outbox/inbox and original readback from persisted cursor.",
+      "expected_observable": "No lost claim, no duplicate dispatch."
+    },
+    {
+      "id": "C15",
+      "group": "durability",
+      "trigger": "Out-of-order, late or duplicate provider callbacks",
+      "required_handling": "Check native ID, revision, causality clock and terminal transitions.",
+      "expected_observable": "Duplicate ignored, conflicting effect flagged, original preserved."
+    },
+    {
+      "id": "C16",
+      "group": "durability",
+      "trigger": "Stale read or change between review and writer",
+      "required_handling": "Re-verify actual resource revision/credential/account identity under writer lock.",
+      "expected_observable": "Conflict/REFUSED; no stale-approval effect."
+    },
+    {
+      "id": "C17",
+      "group": "durability",
+      "trigger": "Clock reset, time skew or source freshness uncertain",
+      "required_handling": "Use authoritative event/received/effect times; reject invalid expiry or unknown time.",
+      "expected_observable": "No new risk, original historical facts unchanged."
+    },
+    {
+      "id": "C18",
+      "group": "durability",
+      "trigger": "Schema migration fails halfway",
+      "required_handling": "Transactional migration with back-compat read/or rollback; no destructive unqualified cleanup.",
+      "expected_observable": "Old state preserved; deploy blocked until recovery."
+    },
+    {
+      "id": "C19",
+      "group": "financial",
+      "trigger": "Missing balance, equity, commission or exchange rate",
+      "required_handling": "Keep unavailable/UNKNOWN, never treat missing scalar as zero or trusted cash.",
+      "expected_observable": "No new risk or false positive affordability."
+    },
+    {
+      "id": "C20",
+      "group": "financial",
+      "trigger": "Net deposits, withdrawal, transfer and provider reversal",
+      "required_handling": "Separate external pending, settled native cash and historical flow basis; append corrections.",
+      "expected_observable": "Exact conserved ledger, no duplicate funds."
+    },
+    {
+      "id": "C21",
+      "group": "financial",
+      "trigger": "Quote/beneficiary/fee changed after review",
+      "required_handling": "Bind quote and participant digests to exact owner approval and check at send.",
+      "expected_observable": "Expired/changed proposal requires new approval, prior state unchanged."
+    },
+    {
+      "id": "C22",
+      "group": "financial",
+      "trigger": "All-origin reservation race",
+      "required_handling": "Atomic shared account/currency collateral accounting over manual, auto, child, pending and withdrawal origins.",
+      "expected_observable": "Resource never oversubscribed; immutable reservations/release."
+    },
+    {
+      "id": "C23",
+      "group": "financial",
+      "trigger": "Position stop changed/partly missing",
+      "required_handling": "Recalculate native money risk per confirmed leg; absent stop remains unknown.",
+      "expected_observable": "Hard limits enforce conservative bound, no false protection."
+    },
+    {
+      "id": "C24",
+      "group": "financial",
+      "trigger": "Insufficient margin during partial order completion",
+      "required_handling": "Reserve remainder, recheck against native fill and per-leg requirements.",
+      "expected_observable": "No unbounded overfill; hedge/entry blocked as applicable."
+    },
+    {
+      "id": "C25",
+      "group": "financial",
+      "trigger": "Close request ambiguous while sibling protected",
+      "required_handling": "Protect confirmed sibling independently, no resend of ambiguous leg close.",
+      "expected_observable": "Family remains INCOMPLETE with original uncertain obligations."
+    },
+    {
+      "id": "C26",
+      "group": "financial",
+      "trigger": "Native fee correction/bust/late carry",
+      "required_handling": "Append signed native correction with original deal association and as-of time.",
+      "expected_observable": "Revised P&L/cost known only after native provenance."
+    },
+    {
+      "id": "C27",
+      "group": "financial",
+      "trigger": "Manual handover into automated lifecycle",
+      "required_handling": "Bind manual operation identity and mandate; prevent dual active owners or lease overlap.",
+      "expected_observable": "One lifecycle owner, recoverable handoff."
+    },
+    {
+      "id": "C28",
+      "group": "financial",
+      "trigger": "Provider says zero effect after earlier UNKNOWN",
+      "required_handling": "Require unique current native proof of no side effect before new authorized send.",
+      "expected_observable": "Old claim reconciled, new action may be separately admitted."
+    },
+    {
+      "id": "C29",
+      "group": "market",
+      "trigger": "Native tick/depth sequence gap, stale quote",
+      "required_handling": "Require source sequence/snapshot and availability time; invalidate missing intervals.",
+      "expected_observable": "HISTORICAL/STALE, not executable quote."
+    },
+    {
+      "id": "C30",
+      "group": "market",
+      "trigger": "Wrong instrument precision, venue or account binding",
+      "required_handling": "Validate actual native symbol specification and contract units before conversion.",
+      "expected_observable": "Reject unsafe scale/conversion, no order."
+    },
+    {
+      "id": "C31",
+      "group": "market",
+      "trigger": "News arrives after decision but with earlier event time",
+      "required_handling": "Use received/available time, immutable revision; prohibit hindsight.",
+      "expected_observable": "Earlier decision unchanged, late data logged as later evidence."
+    },
+    {
+      "id": "C32",
+      "group": "market",
+      "trigger": "News revised/retracted or entitlement revoked",
+      "required_handling": "Invalidate dependent decisions and future eligibility while retaining historical vintage.",
+      "expected_observable": "No silent backfill or unauthorized future use."
+    },
+    {
+      "id": "C33",
+      "group": "market",
+      "trigger": "Strategy armed ticket clicked twice/reconnected",
+      "required_handling": "Single-use durable original intent with current A4 and native confirmation.",
+      "expected_observable": "One ticket consumption, one original receipt."
+    },
+    {
+      "id": "C34",
+      "group": "market",
+      "trigger": "Market closed, halted, depth incomplete, spread unstable",
+      "required_handling": "Explicit NON_TRADABLE/UNKNOWN and bounded eligible route only.",
+      "expected_observable": "No guess-based execution."
+    },
+    {
+      "id": "C35",
+      "group": "market",
+      "trigger": "Partial feed outage during chart/alert",
+      "required_handling": "Surface stale/unknown rather than fake zero/healthy data; backfill only with source-time evidence.",
+      "expected_observable": "Correct freshness labels, no duplicate alert."
+    },
+    {
+      "id": "C36",
+      "group": "market",
+      "trigger": "Replay/practice data references live broker",
+      "required_handling": "Hard isolate sandbox account/keys and effect boundary.",
+      "expected_observable": "No live capital effect; simulation provenance explicit."
+    },
+    {
+      "id": "C37",
+      "group": "ML/economic",
+      "trigger": "PIT dataset uses record unavailable at prediction time",
+      "required_handling": "Causal join and entitlement/available_at validation across all feature/label links.",
+      "expected_observable": "Leakage test fails candidate, never admits dataset."
+    },
+    {
+      "id": "C38",
+      "group": "ML/economic",
+      "trigger": "Randomized/shuffled labels appear predictive",
+      "required_handling": "Negative oracle and chronological split/horizon holdout required.",
+      "expected_observable": "No model promotion; underlying issue surfaced."
+    },
+    {
+      "id": "C39",
+      "group": "ML/economic",
+      "trigger": "Cost/fees/slippage/principal unknown",
+      "required_handling": "Retain unknown sensitivity and infeasibility, require native/economic source.",
+      "expected_observable": "INCONCLUSIVE/REFUSED, no promised profit."
+    },
+    {
+      "id": "C40",
+      "group": "ML/economic",
+      "trigger": "Overlapping folds or model tuned on held-out period",
+      "required_handling": "Frozen folds/trial manifest and independent review, reject leakage.",
+      "expected_observable": "No inflated OOS score."
+    },
+    {
+      "id": "C41",
+      "group": "ML/economic",
+      "trigger": "Forecast artifact signature/hash/version mismatch",
+      "required_handling": "Verify exact data+feature+model+schema+weight hash before load/serve.",
+      "expected_observable": "Unavailable/rollback; never execute untrusted model."
+    },
+    {
+      "id": "C42",
+      "group": "ML/economic",
+      "trigger": "Stale forecast/cache drift/novelty threshold",
+      "required_handling": "Check live source/model vintage, calibration and per-mode risk every decision.",
+      "expected_observable": "No automatic trade from stale/confident-looking output."
+    },
+    {
+      "id": "C43",
+      "group": "ML/economic",
+      "trigger": "Prospective challenger underperforms incumbent",
+      "required_handling": "Compare realistically under same venue/fee/latency/availability policy, bounded shadow trial.",
+      "expected_observable": "Reject/rollback with evidence, incumbent retained."
+    },
+    {
+      "id": "C44",
+      "group": "ML/economic",
+      "trigger": "Research worker exhausts CPU/RAM/GPU or times out",
+      "required_handling": "Enforce resource/cgroup/process cap, cancel owned process, store failed trial.",
+      "expected_observable": "No hung server or silently successful experiment."
+    },
+    {
+      "id": "C45",
+      "group": "crypto/prediction",
+      "trigger": "Chain reorganization or corrected settlement",
+      "required_handling": "Bind finality depth, invalidate descendant facts and rerun causal dependent computation.",
+      "expected_observable": "Unknown pending finality until qualified."
+    },
+    {
+      "id": "C46",
+      "group": "crypto/prediction",
+      "trigger": "Prediction market event/contract mismatched",
+      "required_handling": "Source-bound event and outcome/settlement semantics; no ambiguous cross-venue equivalence.",
+      "expected_observable": "No arbitrage or probability claim from mismatched events."
+    },
+    {
+      "id": "C47",
+      "group": "assistant",
+      "trigger": "Hermes or Muse run outcome unknown after send",
+      "required_handling": "Reconcile single remote run id, idempotent inbox; no assumed `COMPLETED`.",
+      "expected_observable": "WAITING_EXTERNAL/UNKNOWN until original evidence."
+    },
+    {
+      "id": "C48",
+      "group": "assistant",
+      "trigger": "Mission graph cycle/orphan/executor conflict",
+      "required_handling": "Current scoped graph validation, no fictional critical duration.",
+      "expected_observable": "GraphIssue, no new action authority."
+    },
+    {
+      "id": "C49",
+      "group": "assistant",
+      "trigger": "Browser prompt injection/SSRF/redirect or private context",
+      "required_handling": "Deny-biased source classifier, origin lease and JEV proposal-only consent; final VAN validation.",
+      "expected_observable": "POLICY_DENIED, no private content/model egress."
+    },
+    {
+      "id": "C50",
+      "group": "assistant",
+      "trigger": "Browser lost ACK after button submitted",
+      "required_handling": "Recover observation/operation identity and current page/session state; avoid duplicate submission.",
+      "expected_observable": "UNKNOWN/reconcile, no blind second click."
+    },
+    {
+      "id": "C51",
+      "group": "assistant",
+      "trigger": "Google access revoked, provider returns partial effect",
+      "required_handling": "Per-scope vault and provider readback; invalidate expired cached ability.",
+      "expected_observable": "Explicit disconnected/unknown, no fictitious send."
+    },
+    {
+      "id": "C52",
+      "group": "assistant",
+      "trigger": "Voice segment delivered but not spoken",
+      "required_handling": "Resume from device `last_spoken_segment`, not received cursor; dedup segment IDs.",
+      "expected_observable": "No missing audio or restart from beginning."
+    },
+    {
+      "id": "C53",
+      "group": "assistant",
+      "trigger": "Gateway restart during speech/automation",
+      "required_handling": "Persist required original cursor/trigger/receipt or label unknown; cancel safely when unrecoverable.",
+      "expected_observable": "No false COMPLETED or duplicate firing."
+    },
+    {
+      "id": "C54",
+      "group": "assistant",
+      "trigger": "Cancelled automation fires on stale schedule",
+      "required_handling": "Recheck current standing grant and cancellation under claim transaction.",
+      "expected_observable": "REFUSED_NO_EFFECT; cancellation wins."
+    },
+    {
+      "id": "C55",
+      "group": "ops/Android",
+      "trigger": "Device offline or app crashes during original operation",
+      "required_handling": "Persist non-secret original request and reconcile on authorized reconnect.",
+      "expected_observable": "Correct original outcome without a new trade."
+    },
+    {
+      "id": "C56",
+      "group": "ops/Android",
+      "trigger": "Cross-app overlay revoked/clips/touches trade area",
+      "required_handling": "Respect window insets/IME/permissions, accessible safe fallback, never touch-modal on unrelated apps.",
+      "expected_observable": "Usable safe UI, no inferred screen control."
+    },
+    {
+      "id": "C57",
+      "group": "ops/Android",
+      "trigger": "APK/model/character source hash mismatch",
+      "required_handling": "Fail closed at candidate review and release boundary; keep unadmitted assets separate.",
+      "expected_observable": "No production promotion or substituted visual."
+    },
+    {
+      "id": "C58",
+      "group": "ops/Android",
+      "trigger": "Wrong runtime host, capacity exhaustion, failed backup",
+      "required_handling": "Use installed qualified VM route, isolate worker, preserve volumes/receipts and verify off-host restore.",
+      "expected_observable": "Degraded but recoverable, no destructive cleanup."
+    },
+    {
+      "id": "C59",
+      "group": "ops/Android",
+      "trigger": "Project Truth/DDS/CI mandatory check unavailable",
+      "required_handling": "Preserve exact failed action and source fixes; recover prerequisite, do not waive or invent success.",
+      "expected_observable": "CI remains red until actual trusted input present."
+    },
+    {
+      "id": "C60",
+      "group": "ops/Android",
+      "trigger": "S24 not connected or thermal/frame/soak failure",
+      "required_handling": "Hold physical acceptance, retain emulator/CPU proofs separately; enforce real native acceptance last.",
+      "expected_observable": "QA/REL NOT_ISSUED, previous version remains safe."
+    }
+  ],
+  "end_to_end_flows": [
+    {
+      "id": "E01",
+      "name": "Read-only onboarding",
+      "happy": "Select broker→prove account→OBSERVE→read history safely",
+      "adverse": "Old admitted rights leak, wrong physical account, missing balance",
+      "owners": "BE-002/004/005/031",
+      "status": "NOT_RUN_BY_THIS_PLAN"
+    },
+    {
+      "id": "E02",
+      "name": "Restriction → reauth → promotion",
+      "happy": "Owner signs restriction→unique original recovery→READ_ONLY→separate governed activation",
+      "adverse": "Lost ACK, stale signer, changed reauth, incorrect autoenable",
+      "owners": "BE-004/009; Android",
+      "status": "NOT_RUN_BY_THIS_PLAN"
+    },
+    {
+      "id": "E03",
+      "name": "Unlink retains money history",
+      "happy": "Safe native read→review→local unlink→history unchanged",
+      "adverse": "Open order, pending withdrawal, shared credential, failed transport",
+      "owners": "BE-004/006/012",
+      "status": "NOT_RUN_BY_THIS_PLAN"
+    },
+    {
+      "id": "E04",
+      "name": "Funding and transfer",
+      "happy": "Quote→beneficiary→A4→reserve→provider settlement→ledger",
+      "adverse": "Fee drift, double callback, partial refund, lost ACK",
+      "owners": "BE-006/007/009",
+      "status": "NOT_RUN_BY_THIS_PLAN"
+    },
+    {
+      "id": "E05",
+      "name": "Multi-origin risk account",
+      "happy": "Manual + auto + child pending orders share one exposure governor",
+      "adverse": "Race, undercollateralization, unknown stop or negative equity",
+      "owners": "BE-006/009/010/012",
+      "status": "NOT_RUN_BY_THIS_PLAN"
+    },
+    {
+      "id": "E06",
+      "name": "Native family lifecycle",
+      "happy": "Signed entry→partial child fills→protection→partial close→correction→review",
+      "adverse": "Unknown sibling close, opposite position, bust/late charge",
+      "owners": "BE-009/010/012/036",
+      "status": "NOT_RUN_BY_THIS_PLAN"
+    },
+    {
+      "id": "E07",
+      "name": "Native depth → indicators",
+      "happy": "Source-native snapshot→as-of archive→consumers→watch alerts",
+      "adverse": "Sequence gap, scale mismatch, disconnect/entitlement",
+      "owners": "BE-008/018/020",
+      "status": "NOT_RUN_BY_THIS_PLAN"
+    },
+    {
+      "id": "E08",
+      "name": "News D1–D7 to armed ticket",
+      "happy": "Entitled event→causal classifier→single-use approved ticket",
+      "adverse": "Backdated feed, changed event, duplicate arm, revoked mode",
+      "owners": "BE-014–017",
+      "status": "NOT_RUN_BY_THIS_PLAN"
+    },
+    {
+      "id": "E09",
+      "name": "Manual trade and practice replay",
+      "happy": "Owner ticket uses current risk→native result; sandbox replay remains isolated",
+      "adverse": "Offline replay taken live, dual handover owner, unknown fill",
+      "owners": "BE-011/019/022",
+      "status": "NOT_RUN_BY_THIS_PLAN"
+    },
+    {
+      "id": "E10",
+      "name": "Sealed forecast-to-decision",
+      "happy": "PIT dataset→features/labels→chronological evaluation→calibrated model→risk governor",
+      "adverse": "Leakage, stale feature, bad model signature, calibration drift",
+      "owners": "ML-004–029; BE-035/036",
+      "status": "NOT_RUN_BY_THIS_PLAN"
+    },
+    {
+      "id": "E11",
+      "name": "Kalshi read-only research",
+      "happy": "Authorized event feed→settlement semantics→calibration→incremental-value test",
+      "adverse": "Mismatched event, stale price, unexpected live order",
+      "owners": "ML-037–048",
+      "status": "NOT_RUN_BY_THIS_PLAN"
+    },
+    {
+      "id": "E12",
+      "name": "Chain research finality",
+      "happy": "Source chain token/proxy→state-bound simulation→reorg proof",
+      "adverse": "Proxy upgrade, delayed reorg, untrusted wallet facts",
+      "owners": "BE-037–044",
+      "status": "NOT_RUN_BY_THIS_PLAN"
+    },
+    {
+      "id": "E13",
+      "name": "Mission → Hermes/Muse → result",
+      "happy": "Current scope→one assigned run→receipt→original inbox result→next task",
+      "adverse": "Timeout, conflicting result, duplicate executor claim",
+      "owners": "BE-023/024/034",
+      "status": "NOT_RUN_BY_THIS_PLAN"
+    },
+    {
+      "id": "E14",
+      "name": "Browser/JEV mediated action",
+      "happy": "Admitted public origin→bounded observation→JEV proposal→VAN revalidation",
+      "adverse": "SSRF, private prompt, stale selector, lost ACK",
+      "owners": "BE-025/026",
+      "status": "NOT_RUN_BY_THIS_PLAN"
+    },
+    {
+      "id": "E15",
+      "name": "Voice/knowledge/privacy",
+      "happy": "Authenticated turn→result→Android spoken prefix→citation/erasure",
+      "adverse": "Audio dropped, gateway restart, token revoked, data-retention conflict",
+      "owners": "BE-027/029/031",
+      "status": "NOT_RUN_BY_THIS_PLAN"
+    },
+    {
+      "id": "E16",
+      "name": "Standing automation + notifications",
+      "happy": "Current trigger→durable claim→original action→device ack",
+      "adverse": "Cancelled run, race, device offline, duplicate provider event",
+      "owners": "BE-028/030",
+      "status": "NOT_RUN_BY_THIS_PLAN"
+    },
+    {
+      "id": "E17",
+      "name": "VM crash and restore",
+      "happy": "Committed transaction→failure→off-host restore→read original effects",
+      "adverse": "Disk pressure, partial snapshot, schema rollback incompatibility",
+      "owners": "BE-003/033; BQ",
+      "status": "NOT_RUN_BY_THIS_PLAN"
+    },
+    {
+      "id": "E18",
+      "name": "Android final acceptance",
+      "happy": "Backend BG-001→UX/FE→emulator→signed S24→rollout/rollback",
+      "adverse": "No device, thermal overrun, wrong signing or artifact",
+      "owners": "BG-001; UX/FE; QA/REL",
+      "status": "NOT_RUN_BY_THIS_PLAN"
+    }
+  ],
+  "evidence": {
+    "source_report": "oracle-admin:/home/ubuntu/reviews/van-crouton-20261106/CROUTON_VAN_REV118_FULL_REBUILD_HANDOFF.md",
+    "report_sha256": "304e971fffeba47e932ffff6099e4afd9edf4bd05830c8c9089f405b36e71188"
+  },
+  "status_notice": "These planning IDs and statuses are not mutations of or substitutes for the existing canonical programme acceptance ledger."
+}
