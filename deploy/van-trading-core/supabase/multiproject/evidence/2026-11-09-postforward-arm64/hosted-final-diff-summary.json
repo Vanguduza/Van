@@ -1,0 +1,111 @@
+{
+  "schema_version": 1,
+  "kind": "NISSAN_GTR_HOSTED_VS_NATIVE_POSTFORWARD_ARM64_DIFFERENCE_NOT_ADMISSION",
+  "hosted_project_ref": "bicyjghgdnzlnjqxzoud",
+  "gtr_source_commit": "8131858c7c7479d178cbe9e246f83cb49ed80f5e",
+  "native_job_id": "djob_8545e6f4c4d8a43be3a9a104",
+  "donor_image": "sha256:f371b5f3f2ac0a05703f33d6e6134515fb2498cab708fb948a0aeb7481467c00",
+  "original_runner_sha256": "11c80c443789437ac5fd4515d07008c37221774f6f2350fd4d4deda9b2055c41",
+  "observer_sha256": "3d0d85503fc5b99d33f847801a8b92babee51e278399673118a517e970a1db2b",
+  "snapshot_sha256": "dd13643eafe8746e00167ffe15420ac097dcb4e048cfb897c81f13cda3702526",
+  "query_transaction": "READ ONLY REPEATABLE READ",
+  "query_search_path": "public,extensions",
+  "proof": {
+    "migrations_passed": 13,
+    "smoke_suites_passed": 17,
+    "original_supabase_containers_preserved": 11,
+    "temporary_containers_remaining": 0
+  },
+  "results": {
+    "tables": {
+      "hosted": 212,
+      "postforward": 212,
+      "all_identities_rls_persistence_match": true,
+      "digest": "f73595546fac72bb35237098757fdff0ced1fd3ea4a05f4d2a16cdbaaabf1d85"
+    },
+    "views": {
+      "hosted": 2,
+      "postforward": 2,
+      "matching": 1,
+      "definition_fingerprint_changed": [
+        "public.v_master_stock"
+      ],
+      "both_security_invoker": true
+    },
+    "functions": {
+      "hosted": 760,
+      "postforward": 793,
+      "shared": 756,
+      "fully_equal_shared": 303,
+      "definition_digest_changed": 418,
+      "execute_grants_changed_shared": 131,
+      "postforward_only": 37,
+      "hosted_only": 4,
+      "historical_signature_absent_on_postforward": [
+        "public.create_hr_role",
+        "public.create_pos_cart",
+        "public.upsert_customer_garage_vehicle",
+        "public.upsert_staff_product_page"
+      ],
+      "shared_signature_execution_grant_deltas": {
+        "anon": {
+          "lost": 78,
+          "gained": 0
+        },
+        "authenticated": {
+          "lost": 58,
+          "gained": 1
+        },
+        "service_role": {
+          "lost": 99,
+          "gained": 0
+        }
+      }
+    },
+    "policies": {
+      "hosted": 337,
+      "postforward": 350,
+      "shared_matching": 337,
+      "existing_modified": 0,
+      "existing_missing": 0,
+      "added": 13,
+      "added_categories": [
+        "payroll_finance_visibility",
+        "employee_photos_storage",
+        "vehicle_artwork_storage"
+      ]
+    },
+    "relation_grants": {
+      "checks": 5136,
+      "relation_role_rows": 642,
+      "equal_rows": 176,
+      "different_rows": 466,
+      "affected_relations": 188,
+      "hosted_only_effective_privileges": 1735,
+      "postforward_only_effective_privileges": 0,
+      "hosted_only_by_role": {
+        "anon": 590,
+        "authenticated": 359,
+        "service_role": 786
+      }
+    },
+    "private_schema_usage": {
+      "checks": 3,
+      "equivalent": true,
+      "digest": "a483066c5a6e05c420ecc1e47232e0fe3bd5e376c9d207b4558a5eee36ea2859"
+    }
+  },
+  "gate": {
+    "schema_equivalent": false,
+    "canary_activation_authorized": false,
+    "migration_history_repair_authorized": false,
+    "production_deployment_authorized": false,
+    "nissan_gtr_cutover_authorized": false
+  },
+  "limitations": [
+    "Database function fingerprints are textual, not semantic proof.",
+    "Postforward fixture contains synthetic records, not hosted production data.",
+    "Sensitive full metadata snapshot retained only in private root-owned VM directory; not published.",
+    "Original canary refusal and guarded runner transfer refusal were not reattempted."
+  ]
+}
