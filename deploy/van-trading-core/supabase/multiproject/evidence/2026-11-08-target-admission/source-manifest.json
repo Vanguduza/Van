@@ -1,0 +1,28 @@
+{
+  "evaluator_unit_tests_passed": 25,
+  "evidence_sha256": {
+    "evaluation.json": "33bb7246cc92b04d737f3018fc362d03736fd3f4b892243dc3a729eeb3723124",
+    "observations.json": "cfe051203e8d3e1cda1a32795a2c69754d00c68477660755cdbd8293e8fe670c",
+    "unit-tests.txt": "ac870b58264b10191c0075469715c71b2e76d6ed4353166a41d20f938b0e7c29"
+  },
+  "live_canary_activated": false,
+  "live_observation_operations": [
+    "7a73368df5e6d0795e70e99a",
+    "2b03444f9cc99420df817052",
+    "431855d9c4b8c7a23dcb738c",
+    "107668d9b11e05574e6b738c",
+    "b1da2e76abf15dae038fed47"
+  ],
+  "nonsecret_source_sha256": {
+    "TARGET_ADMISSION_2026-11-08.md": "e38baac298bda0c27c5f2935c36e5b087f09e170684842e7dcdeb7dfdbbbdcb4",
+    "tests/test_target_admission.py": "798795fc9ad1902e03fac916d3fd3fed45ba78bf68f2308228841be3e4b2f703",
+    "tools/target_admission.py": "4e20f6698282e6486388322bb0cd05e6a03b3d91a54364a0d55c3172ceb9a562"
+  },
+  "original_refusal_replayed": false,
+  "parent_product_sha": "e62c0f0948b1d0c8778deee3a4460bc378a003eb",
+  "prior_recovery_evidence_head": "8d72ddf8af68f9905cf704321ea44dbff78a1985",
+  "production_deployment_authorized": false,
+  "read_only_assertion_not_attestation": true,
+  "schema_version": 1,
+  "scope": "READ_ONLY_NONSECRET_ARM64_PREFLIGHT_NOT_PRODUCTION_RELEASE"
+}

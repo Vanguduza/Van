@@ -1,0 +1,50 @@
+{
+  "actual_replication_slots_max": 5,
+  "auth_rest_canary_blockers": [
+    "bootstrap_privilege_and_hba_visibility",
+    "no_live_canary_refusal_remaining",
+    "operator_release_receipt"
+  ],
+  "canary_activation_authorized": false,
+  "canary_technically_ready": false,
+  "checks": {
+    "auth_rest_candidate_disk_floor": true,
+    "auth_rest_candidate_memory_floor": true,
+    "backup_verified_and_available_offhost": true,
+    "bootstrap_privilege_and_hba_visibility": false,
+    "candidate_arm64_images_admitted": false,
+    "canonical_lifecycle_installed": false,
+    "db_connection_capacity_nonnegative": true,
+    "exact_original_compose_and_unit": true,
+    "exact_tested_product_source": true,
+    "existing_compose_healthy": true,
+    "existing_image_architecture_matches": true,
+    "no_live_canary_refusal_remaining": false,
+    "no_namespace_collisions": true,
+    "operator_release_receipt": false,
+    "original_database_set_preserved": true,
+    "pg17_supported": true,
+    "real_target_full_service_coexistence": false,
+    "realtime_slot_reserve": false,
+    "standard_api_roles_match": true,
+    "target_name_and_cpu": true
+  },
+  "full_service_blockers": [
+    "bootstrap_privilege_and_hba_visibility",
+    "no_live_canary_refusal_remaining",
+    "realtime_slot_reserve",
+    "candidate_arm64_images_admitted",
+    "canonical_lifecycle_installed",
+    "real_target_full_service_coexistence",
+    "operator_release_receipt"
+  ],
+  "full_service_technically_ready": false,
+  "interpretation": "These are untrusted read-only facts, not signed admission. Previous refused operations must be independently reconciled by their original authority, never rerouted or replayed.",
+  "kind": "READ_ONLY_MULTIPROJECT_PREFLIGHT_NOT_QUALIFICATION",
+  "production_effects": false,
+  "project_count": 2,
+  "release_authorized": false,
+  "required_realtime_slots_with_reserve": 6,
+  "schema_version": 1,
+  "source_product_sha": "e62c0f0948b1d0c8778deee3a4460bc378a003eb"
+}

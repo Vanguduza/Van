@@ -1,0 +1,30 @@
+test_backup_digests_must_match (test_target_admission.TargetAdmissionTests.test_backup_digests_must_match) ... ok
+test_cli_rejects_symlinked_input (test_target_admission.TargetAdmissionTests.test_cli_rejects_symlinked_input) ... ok
+test_cli_writes_only_new_mode_0600_report (test_target_admission.TargetAdmissionTests.test_cli_writes_only_new_mode_0600_report) ... ok
+test_duplicate_or_nonlist_databases_refused (test_target_admission.TargetAdmissionTests.test_duplicate_or_nonlist_databases_refused) ... ok
+test_exact_live_snapshot_blocks_actuation (test_target_admission.TargetAdmissionTests.test_exact_live_snapshot_blocks_actuation) ... ok
+test_identically_spoofed_backup_hashes_cannot_replace_verified_backup (test_target_admission.TargetAdmissionTests.test_identically_spoofed_backup_hashes_cannot_replace_verified_backup) ... ok
+test_missing_or_extra_snapshot_field_refused (test_target_admission.TargetAdmissionTests.test_missing_or_extra_snapshot_field_refused) ... ok
+test_nan_boolean_or_wrong_source_refused (test_target_admission.TargetAdmissionTests.test_nan_boolean_or_wrong_source_refused) ... ok
+test_negative_memory_or_disk_refused (test_target_admission.TargetAdmissionTests.test_negative_memory_or_disk_refused) ... ok
+test_original_canary_presence_detected (test_target_admission.TargetAdmissionTests.test_original_canary_presence_detected) ... ok
+test_original_donor_and_backup_checks_pass_independently (test_target_admission.TargetAdmissionTests.test_original_donor_and_backup_checks_pass_independently) ... ok
+test_other_database_detected (test_target_admission.TargetAdmissionTests.test_other_database_detected) ... ok
+test_pg17_version_not_silently_mapped (test_target_admission.TargetAdmissionTests.test_pg17_version_not_silently_mapped) ... ok
+test_privileged_bootstrap_operator_gate (test_target_admission.TargetAdmissionTests.test_privileged_bootstrap_operator_gate) ... ok
+test_registry_does_not_accept_unknown_privilege_flags (test_target_admission.TargetAdmissionTests.test_registry_does_not_accept_unknown_privilege_flags) ... ok
+test_release_cannot_be_authorized_even_if_all_assertions_green (test_target_admission.TargetAdmissionTests.test_release_cannot_be_authorized_even_if_all_assertions_green) ... ok
+test_replication_slot_envelope_for_more_projects (test_target_admission.TargetAdmissionTests.test_replication_slot_envelope_for_more_projects) ... ok
+test_resource_floor_blocks_without_mutation (test_target_admission.TargetAdmissionTests.test_resource_floor_blocks_without_mutation) ... ok
+test_shared_api_roles_must_match (test_target_admission.TargetAdmissionTests.test_shared_api_roles_must_match) ... ok
+test_source_report_is_not_authority (test_target_admission.TargetAdmissionTests.test_source_report_is_not_authority) ... ok
+test_tampered_donor_detected (test_target_admission.TargetAdmissionTests.test_tampered_donor_detected) ... ok
+test_unknown_product_source_blocks (test_target_admission.TargetAdmissionTests.test_unknown_product_source_blocks) ... ok
+test_unqualified_arm64_lifecycle_and_live_coexistence_are_independent_blocks (test_target_admission.TargetAdmissionTests.test_unqualified_arm64_lifecycle_and_live_coexistence_are_independent_blocks) ... ok
+test_wrong_architecture_blocks (test_target_admission.TargetAdmissionTests.test_wrong_architecture_blocks) ... ok
+test_wrong_kind_refused (test_target_admission.TargetAdmissionTests.test_wrong_kind_refused) ... ok
+
+----------------------------------------------------------------------
+Ran 25 tests in 0.004s
+
+OK

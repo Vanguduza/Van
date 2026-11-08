@@ -1,0 +1,79 @@
+{
+  "backup": {
+    "captured_cluster_backup": true,
+    "offhost_cipher_sha256": "e6f4147d9c994d220e12664cacf311935f54f9de0a8b2f87ea1c23c0eb42f0ff",
+    "target_cipher_sha256": "e6f4147d9c994d220e12664cacf311935f54f9de0a8b2f87ea1c23c0eb42f0ff",
+    "verified_restore": true,
+    "verified_table_count": 57
+  },
+  "governance": {
+    "candidate_arm64_images_qualified": false,
+    "canonical_lifecycle_installed": false,
+    "full_target_service_coexistence_tested": false,
+    "original_canary_execution_refused": true,
+    "production_release_receipt_present": false,
+    "proposed_project_count": 2,
+    "refusal_reconciled_with_authority": false,
+    "required_slot_reserve": 2,
+    "source_sha": "e62c0f0948b1d0c8778deee3a4460bc378a003eb"
+  },
+  "observation_class": "UNTRUSTED_NONSECRET_READ_ONLY_FACTS",
+  "postgres": {
+    "api_roles": {
+      "anon": {
+        "bypassrls": false,
+        "login": false,
+        "membership_count": 0,
+        "superuser": false
+      },
+      "authenticated": {
+        "bypassrls": false,
+        "login": false,
+        "membership_count": 0,
+        "superuser": false
+      },
+      "service_role": {
+        "bypassrls": true,
+        "login": false,
+        "membership_count": 0,
+        "superuser": false
+      }
+    },
+    "connections_observed": 25,
+    "database_collision_count": 0,
+    "database_names": [
+      "_supabase",
+      "postgres"
+    ],
+    "execution_role": "postgres",
+    "max_connections": 100,
+    "max_replication_slots": 5,
+    "privileges": {
+      "can_read_hba_rules": false,
+      "can_set_log_min_error_statement": false,
+      "can_set_log_parameter_max_length": false,
+      "can_set_log_statement": false,
+      "is_superuser": false
+    },
+    "role_collision_count": 0,
+    "server_version_num": 170006,
+    "used_replication_slots": 0,
+    "wal_level": "logical"
+  },
+  "schema_version": 1,
+  "target": {
+    "architecture": "aarch64",
+    "available_memory_kib": 4894720,
+    "base_git_blob": "a37d39dc7c797b0487a8342855dda3cd1e66e0aa",
+    "canary_container_count": 0,
+    "compose_containers": 11,
+    "compose_project": "supabase",
+    "free_root_bytes": 4239806464,
+    "healthy_containers": 11,
+    "hostname": "van-trading-core",
+    "original_images_arm64": true,
+    "override_git_blob": "2507bbece5cd5a56ca27258a18f37adad867bbc9",
+    "systemd_active": true,
+    "unit_sha256": "ebadc3c846ace0bbfb85e4a7b72635c7f40b09c52ed8e1c8daa8677057598a14"
+  }
+}
