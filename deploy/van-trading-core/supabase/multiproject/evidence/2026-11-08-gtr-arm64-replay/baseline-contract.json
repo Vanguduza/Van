@@ -1,0 +1,48 @@
+{
+  "functions": {
+    "expected": 769,
+    "actual": 769,
+    "match": true,
+    "missing": [],
+    "extra": [],
+    "mismatches": []
+  },
+  "policies": {
+    "expected": 341,
+    "actual": 341,
+    "match": true,
+    "missing": [],
+    "extra": [],
+    "mismatches": []
+  },
+  "private_usage": {
+    "expected": 3,
+    "actual": 3,
+    "match": true,
+    "mismatches": []
+  },
+  "relation_grants": {
+    "expected": 5136,
+    "actual": 5136,
+    "match": true,
+    "missing": [],
+    "extra": [],
+    "mismatches": []
+  },
+  "tables": {
+    "expected": 212,
+    "actual": 212,
+    "match": true,
+    "missing": [],
+    "extra": [],
+    "mismatches": []
+  },
+  "views": {
+    "expected": 2,
+    "actual": 2,
+    "match": true,
+    "missing": [],
+    "extra": [],
+    "mismatches": []
+  }
+}

@@ -1,0 +1,92 @@
+[
+  {
+    "path": "supabase/tests/baseline_contract_smoke.sql",
+    "bytes": 3977,
+    "sha256": "0deb73feb2ba9079176987caf2cdc52c7bc020fe2f7ba3a38ee33b6440d29119"
+  },
+  {
+    "path": "supabase/tests/phase2_rls_smoke.sql",
+    "bytes": 4019,
+    "sha256": "956cf2cd6b0faf57fec01f154f3d7925f5f448f39eafa9cf8d4f03ac0f49388f"
+  },
+  {
+    "path": "supabase/tests/phase14_ci_smoke.sql",
+    "bytes": 884,
+    "sha256": "31151ebbd0c74574525f023c7e634f9f6d060089675cc02ea62f3790855f8273"
+  },
+  {
+    "path": "supabase/tests/phase3_finance_smoke.sql",
+    "bytes": 2604,
+    "sha256": "ca5a0e14201d2b3d9ea753777c2b3c8c117e0746965671eff7832d5a5ebdb0a0"
+  },
+  {
+    "path": "supabase/tests/phase4_inventory_smoke.sql",
+    "bytes": 2459,
+    "sha256": "1232d89ff54e52a9842a456d88ca8de62d72a65262c24756c16bbb7e01d9968c"
+  },
+  {
+    "path": "supabase/tests/pos_operator_discovery_smoke.sql",
+    "bytes": 836,
+    "sha256": "49efaa14bd4cc9a11b479443672072c9f888ba1772af39ab55c7364187964c46"
+  },
+  {
+    "path": "supabase/tests/pos_vehicle_context_smoke.sql",
+    "bytes": 1100,
+    "sha256": "18263595c1e873fda3cd10165f386d017cc8307882113756b2cdf77c605a0cd7"
+  },
+  {
+    "path": "supabase/tests/pos_customer_garage_popular_items_smoke.sql",
+    "bytes": 2165,
+    "sha256": "598c183933c6bc1b5e2c257ce1542a51f9a95b254ccf9358003c899c61a5b6de"
+  },
+  {
+    "path": "supabase/tests/pos_hidden_bestsellers_smoke.sql",
+    "bytes": 2673,
+    "sha256": "85676826558f59098d1b02fb2d4f2db5308e289ee48edab65254b8cabf2223cd"
+  },
+  {
+    "path": "supabase/tests/vehicle_artwork_storage_smoke.sql",
+    "bytes": 3063,
+    "sha256": "d597e7a55b7c2ee04242c5ef019be68f74f7c5823f7a47af4fa456fc8489d9d8"
+  },
+  {
+    "path": "supabase/tests/customer_garage_identity_smoke.sql",
+    "bytes": 2736,
+    "sha256": "129b77de48c5ca131820ad1bf0aadf3260834af27561f759173cdbd974df1be1"
+  },
+  {
+    "path": "supabase/tests/payment_settlement_reconciliation_smoke.sql",
+    "bytes": 5760,
+    "sha256": "beabf1e823332889a113f7aefade83a80b13e2972c28673a982b7508e1cc09a3"
+  },
+  {
+    "path": "supabase/tests/web_pos_sale_flow_smoke.sql",
+    "bytes": 7963,
+    "sha256": "6b40ac0efbe6616299b559d310df5224bb2c125a0f60e13f0063418869136ab9"
+  },
+  {
+    "path": "supabase/tests/retained_workflow_posting_smoke.sql",
+    "bytes": 16382,
+    "sha256": "cde3109c25ce7444a6155c24b238913bfed7fee78562b55a756d4f260c414f94"
+  },
+  {
+    "path": "supabase/tests/staff_self_service_reconciliation_smoke.sql",
+    "bytes": 10172,
+    "sha256": "855c816a28a270622be642bd711042f6396b57cef5be4fe81f80d678fbe4b7b3"
+  },
+  {
+    "path": "supabase/tests/staff_payroll_reconciliation_smoke.sql",
+    "bytes": 6005,
+    "sha256": "99c9a3c123c6e9b28882de2037ee8e5488cd0d993f3148fbe47b23cdd91147da"
+  },
+  {
+    "path": "supabase/tests/staff_overview_merchandising_reconciliation_smoke.sql",
+    "bytes": 10797,
+    "sha256": "09e348c8b0167408dd08735d4c018783ceae5b5fb6b8286da1b3dedb5acc8ab5"
+  },
+  {
+    "path": "supabase/seed.sql",
+    "bytes": 5704,
+    "sha256": "232b7d1490d9281526ce1fa7345d304e5cfc9c6975634e07b2e20fec0593e4f3"
+  }
+]

@@ -1,0 +1,36 @@
+{
+  "compiled_guarded_plan_natively_executed": false,
+  "evidence_sha256": {
+    "attempts.json": "3cdeed5b4e1b0d63b9c46da37742ae1fb225c104730e1960bcaf13b8e75c88c0",
+    "baseline-contract.json": "7715a2e229578da4c6ec47aaeb4a6d0d69181279bfc52baee2094fba653f0538",
+    "cleanup.json": "46d8465c13d7dbbacf310982ce343b53f706b3db91ae3fa4a27ed76989df381d",
+    "contract-reader-used.py.txt": "1c2ad1b487394d1a0e4ea8fded5b119799bc76bde444db3d6148874ae07928e5",
+    "donor-observation.json": "c73654ce84789b744ef08dd34a12911832a432afc2fd39702816eb7373f62994",
+    "native-result.json": "65928211d6ccc7712f0ac77a96a52d3836bb484899dc075c9525c36eb643afff",
+    "operation-references.json": "88f77d766829f88212613fc9ffddc19ab52016aa86d5dad16ceffa56cd230e61",
+    "runner-used.py.txt": "11c80c443789437ac5fd4515d07008c37221774f6f2350fd4d4deda9b2055c41",
+    "smoke-source-lock.json": "9a8e9ea2cee5e71b8cd4558df7163a087ad300d2c007eb24e0b6ba66212cb9c4",
+    "source-plan-check.json": "1bb7926a3bed796700839d8f7aa62db7a5e79e7cd4c38575ec4be2cede6331ee",
+    "target-readback.json": "21567e02d549cbd739f195d5d8390c235d4b093327bb54ee04452c34dd360011",
+    "unit-tests.txt": "0804391b33a6af9196ae231f87d962f67094786d5dbf64308667cb6bcbd4f960"
+  },
+  "fixture_image": "sha256:f371b5f3f2ac0a05703f33d6e6134515fb2498cab708fb948a0aeb7481467c00",
+  "gtr_source_commit": "8131858c7c7479d178cbe9e246f83cb49ed80f5e",
+  "live_canary_refusal_resolved": false,
+  "native_baseline_contract_all_groups_match": true,
+  "native_business_smoke_suites_passed": 17,
+  "native_replay_migrations_passed": 13,
+  "new_guarded_plans_checked_without_execution": 13,
+  "parent_commit": "9030b85d554487229a8b09273013e167226cef50",
+  "production_deployed": false,
+  "schema_version": 1,
+  "source_custody": "Original successful runner retained as non-executable text; newer pure compiler separately unit/source tested. No native acceptance asserted for the untransferred refactor.",
+  "source_sha256": {
+    "QUALIFICATION_GTR_SCHEMA_2026-11-08.md": "d482c2b345987184413e7c3a6b3297d6243d4d193b6874d2fcf43e8e792b2cd4",
+    "README.md": "96f01241640d9390f216c4057ace53aa2ae2faeeb3d412c4cbd6bed3f5aac9c0",
+    "tests/gtr_schema_contract.py": "5816e4ed96464e9fe69ea7bcccc948dfb4c5aa2b7b5efd4aaf6f046c70af6c9a",
+    "tests/test_gtr_migration_plan.py": "a39dcbaa7349007a49ef789c14d454617ea8f1ddce0e60d67ca24ce7f00391b2",
+    "tools/gtr_migration_plan.py": "568d0bf4663bbcd26640a5865d6426e2665089176718896393baac31eb40ba39"
+  },
+  "source_unit_tests_passed": 322
+}

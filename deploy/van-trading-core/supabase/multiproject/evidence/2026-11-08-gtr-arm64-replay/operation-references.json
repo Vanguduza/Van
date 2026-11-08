@@ -1,0 +1,16 @@
+{
+  "native_success_job": "djob_68ba52d46c5bb3d20b47851b",
+  "native_success_submit": "fe9282d1eb96e802060e4b1c",
+  "native_success_log_read": "5687e69c288e364d264afac8",
+  "native_success_result_sha256": "65928211d6ccc7712f0ac77a96a52d3836bb484899dc075c9525c36eb643afff",
+  "source_readback": "d5f8b6dbd29d4abe7a383bb9",
+  "cleanup": "08d7ab00ee67df6765ca5df2",
+  "source_unit_plan_check": "6d499e345ffa55db30686653",
+  "refused_operation": {
+    "kind": "NEW_GUARDED_RUNNER_SOURCE_UPDATE_AND_TRANSFER",
+    "executed": false,
+    "tool_receipt": null,
+    "not_retried_or_rerouted": true
+  },
+  "earlier_live_canary_refusal_resolved": false
+}

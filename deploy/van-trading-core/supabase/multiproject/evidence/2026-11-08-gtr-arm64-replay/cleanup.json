@@ -1,0 +1,14 @@
+{
+  "kind": "OWN_DISPOSABLE_SCHEMA_REPLAY_DATA_CLEANUP",
+  "private_attempt_data_directories_removed": [
+    "attempt-01659ac085",
+    "attempt-029aaeac8c",
+    "attempt-19bd465f39",
+    "attempt-c1c5e608df",
+    "attempt-de5c77c1a6"
+  ],
+  "temporary_containers_remaining": 0,
+  "production_data_or_backups_deleted": false,
+  "raw_source_and_nonsecret_reports_retained": true,
+  "native_success_result_sha256": "65928211d6ccc7712f0ac77a96a52d3836bb484899dc075c9525c36eb643afff"
+}

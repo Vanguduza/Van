@@ -75,6 +75,12 @@ A real isolated Edge runtime passed **209 native checks**; the expanded complete
 
 The final isolated run passed **248 real native/API/browser assertions**; the source suites passed **224 Python tests and eight Node admission tests**, with **26 complete Compose-model checks**. Browser phases used separate fresh sessions and stopped the earlier fixture pooler/Auth/REST processes to remain inside the existing memory budget. This is not a simultaneous all-services native load test. See `SHARED_MANAGEMENT.md`, `QUALIFICATION_MANAGEMENT_2026-11-04.md` and `evidence/2026-11-04-management/`.
 
+## Nissan GTR ARM64 SQL replay checkpoint
+
+The actual thirteen source-locked Nissan GTR migrations now pass against a fresh, network-isolated ARM64 PostgreSQL 17.6 fixture using the live donor's real Auth/Storage schemas. The baseline matches all 212 tables, 769 function definitions/capabilities, 341 policies, 5,136 relation-grant entries, two views and three private-schema privileges; all seventeen upstream database business smoke suites pass after the forward migrations. The full Python suite now passes 322 tests.
+
+This is actual native SQL compatibility, **not a live second-project activation or hosted-data migration**. Ordinary application definitions retained their intended owner; the exact native Auth/Storage owner-only sections were executed separately. The new pure `tools/gtr_migration_plan.py` prepares those source-locked contexts and guards the exact target database but does not execute SQL or grant deployment authority. Its newer guarded wrapper has source/unit proof; the completed native runner and the later refused transfer are distinguished in `QUALIFICATION_GTR_SCHEMA_2026-11-08.md` and `evidence/2026-11-08-gtr-arm64-replay/`.
+
 ## Mandatory database boundary
 
 PostgreSQL role names are cluster-wide. Reusing the standard Supabase API roles preserves source RLS compatibility, but an existing database may grant `CONNECT` to `PUBLIC`. Merely withholding an explicit grant from a new login would not exclude that login.

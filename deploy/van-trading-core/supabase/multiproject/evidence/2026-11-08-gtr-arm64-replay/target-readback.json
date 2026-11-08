@@ -1,0 +1,13 @@
+{
+  "source": "TetherBound read-only operation d5f8b6dbd29d4abe7a383bb9",
+  "original_containers_unchanged_and_healthy": true,
+  "original_container_count": 11,
+  "production_databases": [
+    "_supabase",
+    "postgres"
+  ],
+  "temporary_replay_containers_remaining": 0,
+  "new_guarded_runner_transferred": false,
+  "production_writes": false,
+  "guarded_compiler_has_native_result": false
+}

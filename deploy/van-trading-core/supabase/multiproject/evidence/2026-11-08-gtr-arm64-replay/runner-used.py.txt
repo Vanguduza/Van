@@ -1,0 +1,141 @@
+#!/usr/bin/env python3
+"""Bounded source replay in a NEW network-isolated ARM64 database container.
+No live cluster writes, mounted live data, production secrets or public endpoints.
+"""
+import os,json,pathlib,subprocess,hashlib,time,re,uuid,shutil
+import contracts
+ROOT=pathlib.Path('/var/tmp/dial-gtr-replay-fsur_69c')
+IMAGE='sha256:f371b5f3f2ac0a05703f33d6e6134515fb2498cab708fb948a0aeb7481467c00'
+LABEL='dial.gtr.schema-replay'
+def command(args,stdin=None,timeout=60):
+ return subprocess.run(args,input=stdin,text=True,capture_output=True,timeout=timeout)
+def qi(name):
+ if not re.fullmatch('[a-z][a-z0-9_]*',name):raise ValueError('ROLE_IDENTIFIER')
+ return '"'+name+'"'
+def call(args,stdin=None,timeout=60):
+ p=command(args,stdin,timeout)
+ if p.returncode:raise RuntimeError(p.stderr[-2500:])
+ return p.stdout
+
+def main():
+ os.umask(0o077)
+ attempt=ROOT/('attempt-'+uuid.uuid4().hex[:10]);attempt.mkdir(mode=0o700)
+ state=attempt/'data';state.mkdir(mode=0o700);os.chown(state,100,101)
+ name='gtr-db-arm64-replay-'+attempt.name[8:]
+ checks=[];migrations=[];smokes=[];baseline_contract=None;identity=None;error=None
+ def check(title,condition):
+  if not condition:raise RuntimeError(title)
+  checks.append(title);print('PASS '+title,flush=True)
+ def sql(text,db='postgres',user='fixture_admin',allow_error=False,label='query'):
+  assert identity
+  p=command(['docker','exec','-i','--user','100:101',identity,'psql','-X','-qAt','-h','/tmp','-U',user,'-d',db,'-v','ON_ERROR_STOP=1'],text,120)
+  (attempt/(label+'.stdout')).write_text(p.stdout);(attempt/(label+'.stderr')).write_text(p.stderr)
+  if p.returncode and not allow_error:raise RuntimeError(label+': '+p.stderr[-1600:])
+  return p
+ try:
+  metadata=json.loads(call(['docker','image','inspect',IMAGE]))[0]
+  check('exact_original_arm64_donor_image',metadata['Architecture']=='arm64' and metadata['Id']==IMAGE)
+  check('minimum_disk_headroom',shutil.disk_usage(ROOT).free>1500*1024*1024)
+  script='initdb -D /fixture/db -U fixture_admin --auth-local=trust --auth-host=reject --encoding=UTF8 --locale=C.UTF-8 > /fixture/initdb.log 2>&1 && exec postgres -D /fixture/db -k /tmp -h "" -c shared_buffers=16MB -c max_connections=25 -c max_worker_processes=4 -c shared_preload_libraries=pg_stat_statements,pg_cron,pg_net -c pg_net.database_name=gtr_replay -c cron.database_name=postgres -c cron.launch_active_jobs=off -c logging_collector=off -c log_statement=none -c log_min_error_statement=panic'
+  identity=call(['docker','run','-d','--name',name,'--label',LABEL+'='+attempt.name,'--network','none','--memory','512m','--memory-swap','512m','--cpus','0.5','--pids-limit','128','--cap-drop','ALL','--security-opt','no-new-privileges:true','--read-only','--tmpfs','/tmp:rw,nosuid,nodev,size=128m,mode=1777','--user','100:101','--mount','type=bind,src='+str(state)+',dst=/fixture','--entrypoint','/bin/bash',IMAGE,'-c',script]).strip()
+  (attempt/'container-id.txt').write_text(identity+'\n')
+  settings=json.loads(call(['docker','inspect',identity]))[0]
+  check('fixture_no_network_or_ports',settings['HostConfig']['NetworkMode']=='none' and not settings['HostConfig'].get('PortBindings'))
+  check('fixture_ordinary_postgres_uid',settings['Config']['User']=='100:101')
+  check('fixture_only_new_data_mounted',len(settings['Mounts'])==1 and settings['Mounts'][0]['Source']==str(state))
+  for _ in range(100):
+   p=command(['docker','exec','--user','100:101',identity,'pg_isready','-h','/tmp','-U','fixture_admin'],timeout=5)
+   if not p.returncode:break
+   if not json.loads(call(['docker','inspect',identity]))[0]['State']['Running']:raise RuntimeError('FIXTURE_EXITED')
+   time.sleep(.2)
+  else:raise RuntimeError('FIXTURE_NOT_READY')
+  check('real_arm64_postgres_17_6',sql('SHOW server_version_num;',label='server-version').stdout.strip()=='170006')
+  roles=json.loads((ROOT/'donor/roles-no-secrets.json').read_text());grants=json.loads((ROOT/'donor/memberships-no-secrets.json').read_text())
+  fields={'login':('LOGIN','NOLOGIN'),'super':('SUPERUSER','NOSUPERUSER'),'inherit':('INHERIT','NOINHERIT'),'createrole':('CREATEROLE','NOCREATEROLE'),'createdb':('CREATEDB','NOCREATEDB'),'replication':('REPLICATION','NOREPLICATION'),'bypassrls':('BYPASSRLS','NOBYPASSRLS')}
+  statements=['CREATE ROLE '+qi(r['name'])+' '+ ' '.join(v[0] if r[k] else v[1] for k,v in fields.items())+';' for r in roles]
+  for m in grants:statements.append('GRANT '+qi(m['role'])+' TO '+qi(m['member'])+' WITH ADMIN '+str(m['admin']).lower()+', INHERIT '+str(m['inherit']).lower()+', SET '+str(m['set']).lower()+';')
+  sql('\n'.join(statements),label='native-roles')
+  for item in json.loads((ROOT/'donor/role-settings-no-secrets.json').read_text()):
+   name,value=item['setting'].split('=',1)
+   if name=='search_path':
+    if not re.fullmatch(r'[A-Za-z0-9_$\\" ,]+',value):raise ValueError('UNSAFE_SEARCH_PATH')
+    statements_config='ALTER ROLE '+qi(item['role'])+' SET search_path TO '+value+';'
+   else:
+    if name not in ('statement_timeout','idle_in_transaction_session_timeout') or not re.fullmatch('[0-9]+(?:s|ms)?',value):raise ValueError('UNSAFE_TIMEOUT_CONFIG')
+    statements_config='ALTER ROLE '+qi(item['role'])+' SET '+name+"='"+value+"';"
+   sql(statements_config,label='role-settings-'+item['role']+'-'+name)
+
+  sql('CREATE DATABASE gtr_replay OWNER postgres TEMPLATE template0; CREATE DATABASE neighbor_fixture OWNER postgres TEMPLATE template0;',label='fixture-databases')
+  sql("CREATE TABLE public.sentinel(value text); INSERT INTO public.sentinel VALUES('unchanged-neighbor');",db='neighbor_fixture',label='neighbor-before')
+  prereq='CREATE SCHEMA extensions AUTHORIZATION postgres; CREATE SCHEMA vault AUTHORIZATION supabase_admin; CREATE EXTENSION pgcrypto WITH SCHEMA extensions; CREATE EXTENSION "uuid-ossp" WITH SCHEMA extensions; CREATE EXTENSION pg_net WITH SCHEMA extensions; CREATE EXTENSION supabase_vault WITH SCHEMA vault;'
+  sql(prereq,db='gtr_replay',label='native-extensions')
+  sql((ROOT/'donor/native-auth-storage.sql').read_text(),db='gtr_replay',label='native-platform-schema')
+  check('actual_donor_auth_storage_schema_restored',sql("SELECT to_regclass('auth.users') IS NOT NULL AND to_regclass('storage.objects') IS NOT NULL;",db='gtr_replay',label='platform-check').stdout.strip()=='t')
+  check('native_jobs_disabled',sql("SHOW cron.launch_active_jobs;",label='cron-disabled').stdout.strip()=='off')
+  sources=json.loads((ROOT/'source/source-lock.json').read_text())['files']
+  for i,item in enumerate(sources):
+   f=ROOT/'source'/pathlib.Path(item['path']).name;raw=f.read_bytes()
+   assert hashlib.sha256(raw).hexdigest()==item['sha256']
+   text=(ROOT/'source/adapted-baseline.sql').read_text() if i==0 else raw.decode()
+   # Fixture-only execution context, no new role membership or owner changes.
+   # Keep application definitions owned by the original non-super postgres;
+   # only the exact source's final native Auth/Storage section is platform-admin.
+   original_text=text
+   if i==0:
+    marker='-- Application hooks and policies on platform-owned relations are outside the\n-- public/private pg_dump selection and must travel with the application baseline.'
+    end='-- Retain canonical maintenance schedules; credentials remain in native Vault.'
+    assert text.count(marker)==1 and text.count(end)==1
+    text=text.replace(marker,'RESET ROLE;\n'+marker,1).replace(end,'SET LOCAL ROLE postgres;\n'+end,1)
+    context='SET LOCAL ROLE postgres;\n';user='supabase_admin'
+   elif pathlib.Path(item['path']).name=='20261102100000_staff_self_service_reconciliation.sql':
+    marker='INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)'
+    end='CREATE OR REPLACE FUNCTION public.update_my_staff_profile('
+    assert text.count(marker)==1 and text.count(end)==1
+    text=text.replace(marker,'RESET ROLE;\n'+marker,1).replace(end,'SET LOCAL ROLE postgres;\n'+end,1)
+    context='SET LOCAL ROLE postgres;\n';user='supabase_admin'
+   else:context='';user='postgres'
+   started=time.monotonic();p=sql('BEGIN;\n'+context+text+'\nCOMMIT;',db='gtr_replay',user=user,allow_error=True,label='migration-'+str(i).zfill(2))
+   migrations.append({'path':item['path'],'source_sha256':item['sha256'],'executed_sha256':hashlib.sha256(text.encode()).hexdigest(),'exit_code':p.returncode,'seconds':round(time.monotonic()-started,3)})
+   check('migration_'+pathlib.Path(item['path']).name,p.returncode==0)
+   if i==0:
+    actual=contracts.snapshot(sql);expected=json.loads((ROOT/'source/source-contract.json').read_text())
+    baseline_contract=contracts.differences(actual,expected)
+    (attempt/'baseline-contract.json').write_text(json.dumps(baseline_contract,indent=2)+'\n')
+    print('BASELINE_CONTRACT '+json.dumps({k:{'match':v['match'],'actual':v['actual'],'expected':v['expected'],'differences':len(v['mismatches'])} for k,v in baseline_contract.items()}),flush=True)
+  # Local synthetic seed only; no hosted users or production records are read.
+  seeded=sql('BEGIN;\n'+(ROOT/'source/seed.sql').read_text()+'\nCOMMIT;',db='gtr_replay',user='supabase_admin',allow_error=True,label='synthetic-seed')
+  check('original_local_seed_in_isolated_fixture',seeded.returncode==0)
+  for f in sorted((ROOT/'source').glob('*_smoke.sql')):
+   original=f.read_text();text=original.replace('public._test_', 'pg_temp._test_')
+   pattern=re.compile(r'(CREATE(?: OR REPLACE)? FUNCTION pg_temp\.(?P<name>_test_set_auth_uid|_test_set_service_role)\((?P<args>[^)]*)\)[\s\S]*?^\$\$;)',re.I|re.M)
+   def grant_fixture(match):
+    signature='uuid' if match.group('args').strip() else ''
+    return match.group(0)+"\nDO $fixture_grant$ BEGIN EXECUTE format('GRANT USAGE ON SCHEMA %I TO authenticated,service_role',pg_my_temp_schema()::regnamespace::text); END $fixture_grant$;"+'\nGRANT EXECUTE ON FUNCTION pg_temp.'+match.group('name')+'('+signature+') TO authenticated,service_role;\n'
+   text=pattern.sub(grant_fixture,text)
+   text=re.sub(r'(?m)^(DROP FUNCTION IF EXISTS pg_temp\._test_)',r'RESET ROLE;\n\1',text)
+   checked=sql('BEGIN;\n'+text+'\nRESET ROLE;\nROLLBACK;',db='gtr_replay',user='postgres',allow_error=True,label='smoke-'+f.stem)
+   ok=checked.returncode==0 and not re.search(r'(?m)^\s*not ok\b',checked.stdout)
+   smokes.append({'file':f.name,'source_sha256':hashlib.sha256(original.encode()).hexdigest(),'exit_code':checked.returncode,'passed':ok,'error_tail':checked.stderr[-1200:] if not ok else None})
+   print(('PASS' if ok else 'FAIL')+' smoke_'+f.name,flush=True)
+
+  check('neighbor_fixture_preserved',sql('SELECT value FROM public.sentinel;',db='neighbor_fixture',label='neighbor-after').stdout.strip()=='unchanged-neighbor')
+ except Exception as exc:
+  error=str(exc);print('FAIL '+error[:1800],flush=True)
+ finally:
+  if identity:
+   p=command(['docker','logs','--tail','120',identity]);(attempt/'postgres.log').write_text(p.stdout+p.stderr)
+   info=json.loads(call(['docker','inspect',identity]))[0]
+   (attempt/'container-safety.json').write_text(json.dumps({'id':identity,'name':name,'image':info['Image'],'state':info['State'],'network':info['HostConfig']['NetworkMode'],'user':info['Config']['User'],'memory':info['HostConfig']['Memory'],'mounts':info['Mounts']},indent=2))
+   if info['Config']['Labels'].get(LABEL)!=attempt.name:raise RuntimeError('CLEANUP_IDENTITY_MISMATCH')
+   call(['docker','rm','-f',identity])
+   check('temporary_container_removed',command(['docker','inspect',identity]).returncode!=0)
+  live_ids=call(['docker','ps','-q','--filter','label=com.docker.compose.project=supabase']).split()
+  live=json.loads(call(['docker','inspect',*live_ids]))
+  original=json.loads((ROOT/'donor/original-container-identities.json').read_text())
+  live_map={x['Id']:x for x in live}
+  unchanged=len(live_map)==len(original) and all(x['id'] in live_map and live_map[x['id']]['State']['StartedAt']==x['start'] and live_map[x['id']]['State'].get('Health',{}).get('Status')=='healthy' for x in original)
+  if not error and (any(not x['passed'] for x in smokes) or (baseline_contract and any(not x['match'] for x in baseline_contract.values()))):error='SOURCE_CONTRACT_OR_BUSINESS_SMOKES_REQUIRE_RECONCILIATION'
+  result={'schema_version':1,'state':'FAIL' if error else 'PASS','scope':'NETWORK_ISOLATED_FRESH_ARM64_GTR_SOURCE_REPLAY_NOT_LIVE_CANARY','checks':checks,'check_count':len(checks),'error':error,'migrations':migrations,'smokes':smokes,'baseline_contract':baseline_contract,'original_containers_preserved':unchanged,'temporary_container_removed':not identity or command(['docker','inspect',identity]).returncode!=0,'production_writes':False,'source_data_imported':False,'fixture':str(attempt)}
+  (attempt/'result.json').write_text(json.dumps(result,indent=2)+'\n');print('RESULT '+str(attempt/'result.json'),flush=True)
+ return 0 if not error and unchanged else 1
+if __name__=='__main__':raise SystemExit(main())
