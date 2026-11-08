@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "kind": "NISSAN_GTR_ACTUAL_HOSTED_READ_ONLY_OBSERVATION_NOT_RELEASE",
+  "repository_source": "Vanguduza/Nissan-Gtr-Auto@8131858c7c7479d178cbe9e246f83cb49ed80f5e",
+  "supabase_project_ref": "bicyjghgdnzlnjqxzoud",
+  "supabase_project_name": "Nissan GTR Auto",
+  "observed_project_status": "ACTIVE_HEALTHY",
+  "hosted_database_version": "17.6.1.166",
+  "hosted_database_name": "postgres",
+  "migration_ledger": {
+    "hosted_count": 157,
+    "archived_count": 125,
+    "archived_live": 125,
+    "legacy_only": 32,
+    "unknown_versions": 0,
+    "missing_archived": 0,
+    "version_name_conflicts": 0,
+    "active_new_baseline_markers": 0,
+    "actual_sql_capture": {
+      "capture_kind": "GTR_READ_ONLY_LEDGER_SNAPSHOT_V1",
+      "capture_nonce": "f3b0e14688ce4a30be85c920dea41767",
+      "captured_at": "2026-11-08T22:40:41.98013+00:00",
+      "read_only": true,
+      "isolation": "repeatable read",
+      "row_count": 157,
+      "all_statement_fingerprints_present": true,
+      "truncated": false,
+      "source_sql_returned": false
+    },
+    "source_comparison": "version-and-name concordance, NOT current schema equivalence"
+  },
+  "database_inventory": {
+    "public_tables": 210,
+    "public_tables_with_rls": 210,
+    "public_policies": 306,
+    "public_views": 2,
+    "public_functions": 693,
+    "auth_users": 1,
+    "storage_buckets": 10,
+    "storage_objects": 7,
+    "edge_functions": 31,
+    "publication_count": 1,
+    "installed_extensions": [
+      "pg_cron",
+      "pg_net",
+      "pg_stat_statements",
+      "pgcrypto",
+      "plpgsql",
+      "supabase_vault",
+      "uuid-ossp"
+    ]
+  },
+  "security_advisory": {
+    "type": "rls_enabled_no_policy",
+    "level": "INFO",
+    "count": 28,
+    "needs_review": true,
+    "automatic_remediation": false,
+    "documentation": "https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy"
+  },
+  "caveats": [
+    "Project identity is from the connected Supabase account; the SQL snapshot's declared project ref is correlation, not independent proof of transport.",
+    "The 125 retained hosted-archive versions plus 32 legacy-only archived versions exactly cover the 157 live migration versions. Statement-array fingerprints are not directly comparable to raw .sql file hashes.",
+    "The 13 consolidated fresh-install migration versions are not marked as applied on hosted production. Do not blindly replay or repair production history.",
+    "No live customer rows, payment entries, SQL statement bodies, access credentials or secrets were copied or emitted.",
+    "Project-level inventory counts do not establish coordinated storage/R2 integrity, Auth/session cutover or full business-data equivalence.",
+    "Earlier safety-refused DIAL canary operation is still blocked; this observation provides no alternate authority."
+  ],
+  "read_only": true,
+  "hosted_mutations": 0,
+  "dial_vm_mutations": 0,
+  "migrations_applied": 0,
+  "may_repair_hosted_ledger": false,
+  "may_migrate_gtr": false,
+  "may_activate_dial_canary": false,
+  "production_release_authorized": false
+}
