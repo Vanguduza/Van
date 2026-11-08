@@ -1,0 +1,39 @@
+{
+  "final_native_artifact": "scheduler-result-03.json",
+  "final_unit_total": 295,
+  "initial_unit_suite": {
+    "failures": 2,
+    "issues": [
+      "empty-search-path serialization",
+      "overbroad active-state assertion"
+    ],
+    "operation_id": "57d3caf85efebe57af22628f",
+    "tests": 25
+  },
+  "native": [
+    {
+      "artifact": "scheduler-result-01.json",
+      "checks": 38,
+      "cleanup_completed": true,
+      "error": "SQL_FAILED_postgres",
+      "sha256": "a623e7a24c1d07257b8e5a2903083775e0958fb73db6b42bbf3e268841d9bf03",
+      "state": "FAIL"
+    },
+    {
+      "artifact": "scheduler-result-02.json",
+      "checks": 52,
+      "cleanup_completed": true,
+      "error": null,
+      "sha256": "18636bbd69113454541738afb90ec9d86ec454747ee07ab2dc53622326d4f35a",
+      "state": "PASS"
+    },
+    {
+      "artifact": "scheduler-result-03.json",
+      "checks": 56,
+      "cleanup_completed": true,
+      "error": null,
+      "sha256": "9e0edd89eae785e625fad44f008914a2862773f421205c3783679e3e603fc20c",
+      "state": "PASS"
+    }
+  ]
+}

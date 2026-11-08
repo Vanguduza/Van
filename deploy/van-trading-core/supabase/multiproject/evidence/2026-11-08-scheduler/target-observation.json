@@ -1,0 +1,28 @@
+{
+  "canary_activated": false,
+  "database": "postgres",
+  "host": "van-trading-core",
+  "non_template_databases": [
+    "_supabase",
+    "postgres"
+  ],
+  "observed_extensions": {
+    "pg_net": "0.20.3",
+    "pgcrypto": "1.3",
+    "supabase_vault": "0.3.1"
+  },
+  "operation_id": "f0f02ac78eeaa3293540bf5f",
+  "pg_cron_installed_in_configured_database": false,
+  "scope": "BEGIN_READ_ONLY_CATALOGUE_METADATA",
+  "settings": {
+    "cron.database_name": "postgres",
+    "cron.enable_superuser_jobs": "on",
+    "cron.launch_active_jobs": "on",
+    "cron.max_running_jobs": "32",
+    "cron.timezone": "GMT",
+    "cron.use_background_workers": "off",
+    "max_worker_processes": "8"
+  },
+  "settings_changed": false,
+  "target_runtime_qualified": false
+}

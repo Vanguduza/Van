@@ -1,5 +1,12 @@
 # DIAL Supabase — one installation, independent database/Auth/API projects
 
+
+## Nissan GTR scheduler/migration compatibility checkpoint
+
+The source-locked GTR fresh baseline installs pg_cron per application database, which is incompatible with a single-cluster multi-project layout. `tools/shared_scheduler.py` now separates exactly that extension statement and four schedule registrations, preserving all other baseline bytes, into an inactive central-scheduler candidate. It supplies project-scoped roles, deny-only HBA guards, exact function grants, duplicate-job refusal and database/timezone-bound native registrations. No second PostgreSQL server or scheduler service is added.
+
+**295 Python tests and 56 real PostgreSQL/pg_cron checks passed.** The scheduler test executed synthetic functions in two databases through one real native cron extension. It did not execute GTR business functions or all thirteen migrations. The actual target has cron configured for `postgres` but no extension installed there and background-worker execution off; adoption requires separate original-owner configuration/release qualification, not a guessed live change. See `SHARED_SCHEDULER.md`, `QUALIFICATION_SCHEDULER_2026-11-08.md` and `evidence/2026-11-08-scheduler/`.
+
 **Status: ALL shared native services ran concurrently on one disposable PostgreSQL server. The final integration passed 681 real-service assertions; 245 Python tests, eight Node tests, 26 complete Compose-model checks and 28 canonical-lifecycle checks also passed. No live VAN deployment or Nissan GTR migration has occurred.**
 
 The owner requirement is one existing managed Supabase installation on `van-trading-core`, one PostgreSQL server, and independently functioning application databases and authentication environments. The candidate does not add a PostgreSQL server, VM or complete Supabase stack per project. It adds small project-specific Auth, REST and router services to the existing Compose model and reuses one shared Storage, one shared Realtime and one existing Edge Runtime service. The candidate also reuses the original Supavisor, Studio and Meta services behind one private project-administration gateway. Production rollout, actual operator-issuer integration and full Studio coverage still need qualification.

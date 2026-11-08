@@ -45,3 +45,7 @@ A single native Supavisor now serves isolated project database credentials, whil
 ## Complete simultaneous installation checkpoint
 
 The newer `QUALIFICATION_INSTALLATION_2026-11-05.md` records 681 passing real assertions with every shared service and both projects' Auth/REST/gateways simultaneously alive on one private PostgreSQL server. It includes exact cross-service data flow, bounded concurrency and selected failure isolation. The canonical lifecycle candidate passed native systemd/integrity checks without being installed. This supersedes earlier *separate-only service coverage* limitations in this guide, but NOT the limitations on production deployment, original operator issuer, target images, advanced/full-browser Studio usage, actual-volume/off-host recovery or Nissan GTR migration. No production or cgroup-policy changes occurred.
+
+## Single-cluster scheduler compatibility
+
+GTR's pinned fresh baseline contains a project-local cron installation and four unscoped schedules. The new source-bound split preserves the application SQL but prepares inactive, UUID-namespaced jobs in one central cron database. A real non-root PG17/pg_cron test passed 56 checks; the expanded Python suite passed 295. This is a scheduler infrastructure proof with synthetic functions, not full GTR migration or live activation. The current target cron engine/configuration and effective database grants still require original-owner admission. See `SHARED_SCHEDULER.md` and `QUALIFICATION_SCHEDULER_2026-11-08.md`.

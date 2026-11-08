@@ -1,0 +1,9 @@
+{
+  "key_material_exported": false,
+  "known_failed_fixture_directories_removed": [
+    "dial-cron-8qpaxnfv"
+  ],
+  "no_original_toolchain_or_production_files_removed": true,
+  "observed_staged_executables_running": [],
+  "successful_fixture_cleanup": true
+}

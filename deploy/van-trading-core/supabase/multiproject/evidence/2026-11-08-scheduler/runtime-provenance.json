@@ -1,0 +1,16 @@
+{
+  "cron_sql_version": "1.6",
+  "package": "postgresql-17-cron",
+  "pg_cron_library_sha256": "ce741add04eebfbb52765cb7901bd8d2f557d48085cc5c956e3eba4863743a40",
+  "postgres_binary_sha256": "a8de97eb871cee1fdb84cad48ec4e2c481ac826c3801d9e8bb35adec971f7e43",
+  "scope": "private-amd64-nonroot-test-toolchain",
+  "sha256": "29ce1d13b5e03aa795035702bdd1869e4b291000704e0270f1a484fcf8556142",
+  "signature_verified": false,
+  "system_installation": false,
+  "upstream_references": [
+    "https://github.com/citusdata/pg_cron/tree/v1.6.8",
+    "https://github.com/citusdata/pg_cron/blob/v1.6.8/src/job_metadata.c"
+  ],
+  "url": "https://apt.postgresql.org/pub/repos/apt/pool/main/p/pg-cron/postgresql-17-cron_1.6.8-1.pgdg24.04+2_amd64.deb",
+  "version": "1.6.8-1.pgdg24.04+2"
+}

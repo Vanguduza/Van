@@ -1,0 +1,38 @@
+{
+  "base_git_commit": "52f2e658d9f5b91b2fac177f5bd087b5c2a693bf",
+  "evidence_sha256": {
+    "attempts.json": "1671308e809144ada624b6adeb2ba71e0728572f6c13704be164f5932117ca73",
+    "baseline-adaptation.json": "45e75ffa2aed9308f711e66ac9ff8f1992e73a439ada93e86d276b0589d6f603",
+    "cleanup-observation.json": "802d4878827c8f3d195227bec220a7372286fcc9d8fce6c9db76c2552b8eb44f",
+    "gtr-source-lock.json": "5305d1db166f1496fe2a56a2e7ac20de9b46c3d86c578d308c2712a12ef604a0",
+    "native-result.json": "9e0edd89eae785e625fad44f008914a2862773f421205c3783679e3e603fc20c",
+    "native-run.txt": "b4132f5dd364d53e08c3b94c11cb676985014345a855ca1b5346014d5ac5b905",
+    "operation-references.json": "04c9b84edb638120195c844b0fa230555d48a34f323fbd33fd24a9922e1e8ba5",
+    "runtime-provenance.json": "845b4991b9ac081b60864f112a0f50dbfa85bbcf24c933091b657bb2487187f0",
+    "target-observation.json": "321f68eea53997ce55ab05943e6a206f33cc32a8bb98fa4fec8384bd94b9cb8a",
+    "unit-tests.txt": "77611056cd3b489b0ed766f2db2afaa2b34045cf4cf0608a8fe0860b5beb5e6a"
+  },
+  "host": "dial-control",
+  "production_deployed": false,
+  "rea_used": false,
+  "recorded_at": "2026-11-08T20:30:29.412703+00:00",
+  "root_release_qualified": false,
+  "schema_version": 1,
+  "source_sha256": {
+    "ARCHITECTURE.md": "c8d18074a85416dcd2dc677a978c511189aa0b1f9758746e440c9b60ae224d5c",
+    "INTEGRATION_GATES.md": "141aa9455cce9e6e6329626c2ad56142b396efa7889effd9f3f7f87efd20e080",
+    "NISSAN_GTR_CUTOVER.md": "2cf1b2aa0e063c25e1fd8647342ab682a03e4cb67f5df081a61bf33b3778fa76",
+    "QUALIFICATION_SCHEDULER_2026-11-08.md": "ea017011272e7697e178f4b7f3ad52ef6a4a256beb83ef312bccabfbf1507f3b",
+    "README.md": "8aabc3af12c67a962f1c83c61c7b91a8f1ca930625b9beb7176269d2f6310496",
+    "SHARED_SCHEDULER.md": "10f1cb12282dd9371bcdfff9120696ee0ea71df53aff25460e579c9573a45ddf",
+    "tests/rehearse_scheduler.py": "d711dfdee80b0330cb63f7abf2ad1a8f822a11b98bba2b9df325bf4e1615916a",
+    "tests/test_shared_scheduler.py": "7eddd0765110556fde809cf219871e174842eface48d0fbc747417471235a153",
+    "tools/shared_scheduler.py": "389a52cefd673637a3b1138290e7f6888ba224d96bc4c422193e54c58c8c8557"
+  },
+  "tests": {
+    "native_scheduler_passed": 56,
+    "new_scheduler_contracts": 25,
+    "python_passed": 295
+  },
+  "uid": 1000
+}
