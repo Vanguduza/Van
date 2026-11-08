@@ -16,6 +16,12 @@ A real authenticated Edge function wrote a row and an object through its own pro
 
 Current evidence: `QUALIFICATION_INSTALLATION_2026-11-05.md` and `evidence/2026-11-05-installation/`. This supersedes earlier guide statements that all components had only separate native coverage; earlier dated qualification files remain accurate historical records. The real target architecture, images, credentials, operator issuer, off-host recovery and Nissan GTR migration remain unqualified. Counts overlap and must not be added across milestones.
 
+## Actual target recovery checkpoint
+
+The real ARM64 `van-trading-core` donor now has an encrypted, off-host-verified pre-migration snapshot. A network-isolated native restore passed 17 checks; canonical SHA-256 comparisons matched all 57 application tables and role password verifiers. Original containers remained healthy and unrestarted, and a temporary local replication HBA rule was restored exactly. Verified temporary plaintext copies were removed; encrypted copies and separate-host decryption custody remain.
+
+**The live canary command was refused before execution. No new project databases or services were created, and Nissan GTR was not migrated.** See `TARGET_RECOVERY_2026-11-08.md` and `evidence/2026-11-08-target-recovery/`. This is a real target recovery proof, not an active multi-project deployment or release admission.
+
 ## Implemented and demonstrated
 
 `tools/bootstrap.py` generates a private, staged bootstrap bundle for fresh project databases. Each project has unique database logins, SCRAM password verifiers, an Auth schema, signing secret, API credentials and gateway configuration. GoTrue performs its real upstream Auth migrations; the code does not imitate its user/session tables. REST keeps standard `anon`, `authenticated`, `service_role` policies and adds an exact project-issuer check.

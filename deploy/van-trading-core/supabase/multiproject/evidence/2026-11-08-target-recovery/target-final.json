@@ -1,0 +1,66 @@
+{
+  "architecture": "aarch64",
+  "canary_databases_created": false,
+  "canary_script_exists": false,
+  "canary_work_exists": false,
+  "database_names": [
+    "_supabase",
+    "postgres"
+  ],
+  "health": {
+    "realtime-dev.supabase-realtime": {
+      "health": "healthy",
+      "running": true
+    },
+    "supabase-auth": {
+      "health": "healthy",
+      "running": true
+    },
+    "supabase-db": {
+      "health": "healthy",
+      "running": true
+    },
+    "supabase-edge-functions": {
+      "health": "healthy",
+      "running": true
+    },
+    "supabase-envoy": {
+      "health": "healthy",
+      "running": true
+    },
+    "supabase-imgproxy": {
+      "health": "healthy",
+      "running": true
+    },
+    "supabase-meta": {
+      "health": "healthy",
+      "running": true
+    },
+    "supabase-pooler": {
+      "health": "healthy",
+      "running": true
+    },
+    "supabase-rest": {
+      "health": "healthy",
+      "running": true
+    },
+    "supabase-storage": {
+      "health": "healthy",
+      "running": true
+    },
+    "supabase-studio": {
+      "health": "healthy",
+      "running": true
+    }
+  },
+  "nissan_gtr_cloud_migrated": false,
+  "original_container_count": 11,
+  "original_container_ids_and_start_times_preserved": true,
+  "original_hba_byte_identity_preserved": true,
+  "original_hba_sha256": "a925911753f4975548eb4079177441c886aa22b6dd69f2b0cff98f779fb0b66a",
+  "root_free_bytes": 3204579328,
+  "source_commit": "e62c0f0948b1d0c8778deee3a4460bc378a003eb",
+  "state": "ORIGINAL_TARGET_PRESERVED_CANARY_NOT_EXECUTED",
+  "systemd_unit_sha256": "ebadc3c846ace0bbfb85e4a7b72635c7f40b09c52ed8e1c8daa8677057598a14",
+  "temporary_restore_containers_remaining": []
+}
