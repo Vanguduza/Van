@@ -1,0 +1,33 @@
+{
+  "curated_inputs": 271,
+  "groups": {
+    "active": 13,
+    "hosted_archive": 125,
+    "legacy": 173
+  },
+  "hosted_query_executed": false,
+  "native_exact_source_operation": "ad6dbf8fd59d190e1edc9585",
+  "repeated_versions_with_distinct_raw_bytes": [
+    "20260905104822",
+    "20260905105502",
+    "20260905111845",
+    "20260905112221",
+    "20260905112932",
+    "20260905113538",
+    "20260905114149",
+    "20261001100000",
+    "20261001120000",
+    "20261002100000"
+  ],
+  "scope": "EXACT_PINNED_PUBLIC_SOURCE_NOT_CURRENT_HOSTED_LEDGER",
+  "semantic_sql_difference_claimed": false,
+  "source_bytes": 7898022,
+  "source_commit": "8131858c7c7479d178cbe9e246f83cb49ed80f5e",
+  "source_input_acquisition": {
+    "command_sha256": "fdcd2d3b80537b5502959bd201c362bc950fedff7ae8b006c8523341f17eb776",
+    "job_id": "djob_73703659871017e327d06e04",
+    "state": "succeeded"
+  },
+  "source_inputs": 313,
+  "source_sql_files": 311
+}

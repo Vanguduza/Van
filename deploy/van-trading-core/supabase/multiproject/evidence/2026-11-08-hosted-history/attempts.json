@@ -1,0 +1,30 @@
+{
+  "counts_are_not_additive": true,
+  "final_exact_source": "native-result-03.json",
+  "successive_source_revisions": [
+    {
+      "checks": 34,
+      "cleanup_completed": true,
+      "error": null,
+      "file": "native-result-01.json",
+      "sha256": "b72dc225d8acf8fd6696ba0c4120363616c76ab9fc10e7aed40a59136861d53c",
+      "state": "PASS"
+    },
+    {
+      "checks": 35,
+      "cleanup_completed": true,
+      "error": null,
+      "file": "native-result-02.json",
+      "sha256": "d971ec70244934ab2d72b3222b006dd29c10aeb93217544ff227ded761f44cc3",
+      "state": "PASS"
+    },
+    {
+      "checks": 37,
+      "cleanup_completed": true,
+      "error": null,
+      "file": "native-result-03.json",
+      "sha256": "e1f39aeaf4d63628ffe8ec580eb82b39e0e931405b8560d792237b3645e60cfe",
+      "state": "PASS"
+    }
+  ]
+}

@@ -34,3 +34,9 @@ Cloud source and retired recovery project remain until expressly retired after i
 ## Explicit no-go gates
 
 Any missing Auth/REST data independence, cross-project service-role reuse, unverifiable database history, partial object migration, missing provider webhook secret, uncleared payment settlement issue, untested RLS, unreliable backups, incorrect OAuth/OTP handling, unqualified project-specific Realtime/Edge, VAN trading regressions or untraceable deployment blocks production.
+
+## Read-only history tooling available
+
+`gtr_history_reconcile.py` now verifies the exact 173/125/13 source history sets and emits a nonce-bound READ ONLY/REPEATABLE READ metadata query for the active hosted project. It refuses a hidden, truncated, duplicate, RLS-filtered or view-backed ledger and keeps statement-array hashes distinct from source-file hashes. Ten repeated historical version/name pairs have different raw source bytes; do not infer behavioral equivalence or select a winner from filenames alone.
+
+Use a current authenticated hosted connection and retain its original receipt separately: the query's declared project ref is not connection authentication. No such hosted query has been performed in this checkpoint. The code does not repair the ledger, mark the baseline applied, reset a database or grant cutover authority. See `HOSTED_HISTORY_RECONCILIATION.md`.

@@ -1,5 +1,14 @@
 # DIAL Supabase — one installation, independent database/Auth/API projects
 
+## Hosted-history reconciliation checkpoint
+
+The expanded suite now passes **367 Python tests**. The new pure `tools/gtr_history_reconcile.py` accounts for **173 legacy, 125 exported-hosted and 13 active migrations**, verifying all **313 actual source inputs** and 271 reconstruction bindings against retained hashes. Ten historical version/name pairs have differing raw SQL-file bytes across the two source histories; metadata-only version matching must not silently choose either copy or claim semantic identity.
+
+A **37-check real PostgreSQL rehearsal** demonstrated bounded read-only ledger capture, changed/removed history detection, RLS/view/truncation refusal and no stored-statement disclosure. It used synthetic ledger records in a new unprivileged fixture, not the hosted application. The source files were hashed, not replayed. No current hosted ledger is claimed: an authenticated hosted connection is still unavailable here. See `HOSTED_HISTORY_RECONCILIATION.md`, `QUALIFICATION_HISTORY_2026-11-08.md` and `evidence/2026-11-08-hosted-history/`.
+
+The existing ARM64 migration replay and business SQL results remain separate valid evidence. The new tool cannot execute migrations, repair history, authorize a release or retry the refused canary. Live project activation and Nissan GTR migration remain blocked on their original permissions and independent acceptance requirements.
+
+
 
 ## Nissan GTR scheduler/migration compatibility checkpoint
 
