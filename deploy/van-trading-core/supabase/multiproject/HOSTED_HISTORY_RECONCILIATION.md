@@ -73,3 +73,12 @@ The existing live canary refusal, target service promotion, full workload recove
 ## Reference behavior
 
 Supabase's CLI reference documents that `migration list` compares version timestamps and that the remote ledger is `supabase_migrations.schema_migrations`. PostgreSQL 17's transaction documentation describes READ ONLY and REPEATABLE READ. This implementation adds evidence separation rather than invoking migration repair or inferring schema equality from that version list. The exact repository baseline README and manifest remain authoritative source inputs.
+
+
+## Archived overlapping SQL-body proof (additive, separate from hosted capture)
+
+A later exact-source adjudication established that all ten legacy/hosted-export version/name pairs with different **raw file hashes** have identical SQL bodies after removal of the **two exact hosted export provenance-comment lines and blank separator**, with six pairs additionally differing by exactly one terminal newline byte. No SQL statement, internal whitespace or additional comment was normalized.
+
+This result is reproduced by `tools/gtr_archive_equivalence.py` with strict hash, wrapper, version and filename validation. See `ARCHIVED_MIGRATION_BODY_EQUIVALENCE.md` and `evidence/2026-11-09-gtr-archive-equivalence/` for ten original-hash pairs, source-bound comparison and failure-path tests. **Keep both archived copies and their original raw hashes**; their file-level mismatch remains true.
+
+No **current active hosted migration ledger** has been authenticated or captured by this archival comparison. It must never be used to repair/mark a hosted ledger, authorize canary activation, infer business schema equivalence or permit cutover.

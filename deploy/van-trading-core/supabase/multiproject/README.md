@@ -90,6 +90,10 @@ The actual thirteen source-locked Nissan GTR migrations now pass against a fresh
 
 This is actual native SQL compatibility, **not a live second-project activation or hosted-data migration**. Ordinary application definitions retained their intended owner; the exact native Auth/Storage owner-only sections were executed separately. The new pure `tools/gtr_migration_plan.py` prepares those source-locked contexts and guards the exact target database but does not execute SQL or grant deployment authority. Its newer guarded wrapper has source/unit proof; the completed native runner and the later refused transfer are distinguished in `QUALIFICATION_GTR_SCHEMA_2026-11-08.md` and `evidence/2026-11-08-gtr-arm64-replay/`.
 
+## Archived GTR history-body reconciliation
+
+Ten legacy/hosted-export migration pairs with distinct raw file hashes contain the exact same SQL bodies after removal of the two *precisely known* hosted provenance comments and, for six pairs, one terminal LF. The original source hashes are retained and no arbitrary SQL content is normalized. See `ARCHIVED_MIGRATION_BODY_EQUIVALENCE.md` and `evidence/2026-11-09-gtr-archive-equivalence/`. **The current active hosted ledger and real customer/business data remain unverified**, and no canary activation or migration history repair is authorized.
+
 ## Mandatory database boundary
 
 PostgreSQL role names are cluster-wide. Reusing the standard Supabase API roles preserves source RLS compatibility, but an existing database may grant `CONNECT` to `PUBLIC`. Merely withholding an explicit grant from a new login would not exclude that login.
