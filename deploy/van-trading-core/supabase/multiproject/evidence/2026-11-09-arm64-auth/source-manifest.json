@@ -5,7 +5,7 @@
     "evidence/2026-11-09-arm64-auth/base-images.json": "e8d3894e358de5d9c87be18a232abc259977d7d2c843aace68084761d65e730c",
     "evidence/2026-11-09-arm64-auth/cleanup-result.json": "7ebd074f7b2d85e7336ff16bfc42ff5ddcf2caa08224cbbf0f920081b40dc4ea",
     "evidence/2026-11-09-arm64-auth/container-safety.json": "f1f3f5b7578a415db685bf2ee8566b64f6a7ab76f8ecee82c9e114f1ee05d792",
-    "evidence/2026-11-09-arm64-auth/fixture-build.log": "2019f6cf31bd1e6af4c854612dcf12462d0ceb6b66410a2dca204677f649f232",
+    "evidence/2026-11-09-arm64-auth/fixture-build.json": "1c073d9ce61612fabbfa590d8c0345f2b9485a2818144b4f6d4c24277eff65b0",
     "evidence/2026-11-09-arm64-auth/fixture.Dockerfile": "8f56bd6978b9e7ab9f7ac6a3ad4148579633a4f88be7f39007a700f05ab87d6a",
     "evidence/2026-11-09-arm64-auth/full-suite.txt": "6da1d0b2e79cbf076f5de9e7ac6d83d2597a14effd920335ea2f71acb5e7f4a7",
     "evidence/2026-11-09-arm64-auth/glibc-manifest.json": "78ed9d19edbf4cbb6bb3568f2f1cb3ccca2bb627743957faadacb3a079c6ea84",
