@@ -1,0 +1,189 @@
+{
+  "all_http_results": true,
+  "credential_or_jwt_saved": false,
+  "database": "gtr_replay",
+  "fixture_grant_revoked": true,
+  "fixture_only_grant_test": true,
+  "host_ports_published": false,
+  "jwt_from_cryptographically_random_synthetic_secret": true,
+  "kind": "GTR_REAL_LOCAL_POSTGREST_ARM64_HTTP_REHEARSAL_NOT_PRODUCTION",
+  "network_none": true,
+  "original_pg_replay_image": "sha256:f371b5f3f2ac0a05703f33d6e6134515fb2498cab708fb948a0aeb7481467c00",
+  "persistent_anon_stock_image_privilege_restored_to_initial_denial": true,
+  "postgrest_image": "sha256:c9dc201e555f5d8e37e7f39cdd4df0229774996e213bfd7de8d10ac609030f2c",
+  "postgrest_network_shared_only_with_fixture": true,
+  "production_writes": false,
+  "ready": true,
+  "real_business_user_data_touched": false,
+  "real_supabase_or_hosted_data_accessed": false,
+  "requests": [
+    {
+      "authenticated_synthetic": false,
+      "label": "anon_public_exchange_rate",
+      "method": "GET",
+      "status": 200,
+      "url_path_only": "/daily_exchange_rates"
+    },
+    {
+      "authenticated_synthetic": false,
+      "label": "anon_stock_images_before",
+      "method": "GET",
+      "status": 401,
+      "url_path_only": "/stock_item_images"
+    },
+    {
+      "authenticated_synthetic": true,
+      "label": "auth_stock_images_read",
+      "method": "GET",
+      "status": 200,
+      "url_path_only": "/stock_item_images"
+    },
+    {
+      "authenticated_synthetic": true,
+      "label": "auth_hr_grades_read",
+      "method": "GET",
+      "status": 200,
+      "url_path_only": "/hr_grades"
+    },
+    {
+      "authenticated_synthetic": false,
+      "label": "anon_hr_grades_denied",
+      "method": "GET",
+      "status": 401,
+      "url_path_only": "/hr_grades"
+    },
+    {
+      "authenticated_synthetic": true,
+      "label": "auth_rpc_cart_legacy_default",
+      "method": "POST",
+      "status": 400,
+      "url_path_only": "/rpc/create_pos_cart"
+    },
+    {
+      "authenticated_synthetic": true,
+      "label": "auth_rpc_hr_legacy_defaults",
+      "method": "POST",
+      "status": 400,
+      "url_path_only": "/rpc/create_hr_role"
+    },
+    {
+      "authenticated_synthetic": true,
+      "label": "auth_rpc_garage_legacy_defaults",
+      "method": "POST",
+      "status": 400,
+      "url_path_only": "/rpc/upsert_customer_garage_vehicle"
+    },
+    {
+      "authenticated_synthetic": true,
+      "label": "auth_rpc_staff_legacy_defaults",
+      "method": "POST",
+      "status": 400,
+      "url_path_only": "/rpc/upsert_staff_product_page"
+    },
+    {
+      "authenticated_synthetic": true,
+      "label": "auth_hr_grades_direct_insert_denied",
+      "method": "POST",
+      "status": 403,
+      "url_path_only": "/hr_grades"
+    },
+    {
+      "authenticated_synthetic": false,
+      "label": "anon_stock_images_after_fixture_grant",
+      "method": "GET",
+      "status": 200,
+      "url_path_only": "/stock_item_images"
+    },
+    {
+      "authenticated_synthetic": false,
+      "label": "anon_stock_images_after_fixture_revoke",
+      "method": "GET",
+      "status": 401,
+      "url_path_only": "/stock_item_images"
+    }
+  ],
+  "rpc_error_codes": {
+    "auth_rpc_cart_legacy_default": "P0001",
+    "auth_rpc_garage_legacy_defaults": "P0001",
+    "auth_rpc_hr_legacy_defaults": "P0001",
+    "auth_rpc_staff_legacy_defaults": "P0001"
+  },
+  "schema_version": 1,
+  "sidecar_removed": true,
+  "source_commit": "8131858c7c7479d178cbe9e246f83cb49ed80f5e",
+  "success": true,
+  "synthetic_rls_check_count": 10,
+  "synthetic_rls_checks": [
+    {
+      "body_or_real_identifier_retained": false,
+      "http_status": 200,
+      "label": "customer_own_profile",
+      "row_count": 1,
+      "synthetic_role": "customer_a"
+    },
+    {
+      "body_or_real_identifier_retained": false,
+      "http_status": 200,
+      "label": "customer_other_profile_denied",
+      "row_count": 0,
+      "synthetic_role": "customer_a"
+    },
+    {
+      "body_or_real_identifier_retained": false,
+      "http_status": 200,
+      "label": "customer_other_customer_denied",
+      "row_count": 0,
+      "synthetic_role": "customer_a"
+    },
+    {
+      "body_or_real_identifier_retained": false,
+      "http_status": 200,
+      "label": "customer_own_customer",
+      "row_count": 1,
+      "synthetic_role": "customer_a"
+    },
+    {
+      "body_or_real_identifier_retained": false,
+      "http_status": 200,
+      "label": "other_customer_sees_no_first_customer",
+      "row_count": 0,
+      "synthetic_role": "customer_b"
+    },
+    {
+      "body_or_real_identifier_retained": false,
+      "http_status": 200,
+      "label": "admin_can_see_customer_b",
+      "row_count": 1,
+      "synthetic_role": "admin"
+    },
+    {
+      "body_or_real_identifier_retained": false,
+      "http_status": 200,
+      "label": "admin_can_see_own_role",
+      "row_count": 1,
+      "synthetic_role": "admin"
+    },
+    {
+      "body_or_real_identifier_retained": false,
+      "http_status": 200,
+      "label": "customer_cannot_see_admin_role",
+      "row_count": 0,
+      "synthetic_role": "customer_a"
+    },
+    {
+      "body_or_real_identifier_retained": false,
+      "http_status": 200,
+      "label": "unseeded_cannot_see_customer",
+      "row_count": 0,
+      "synthetic_role": "outsider"
+    },
+    {
+      "body_or_real_identifier_retained": false,
+      "http_status": 200,
+      "label": "positive_auth_catalog_rpc",
+      "row_count": 0,
+      "synthetic_role": "admin"
+    }
+  ],
+  "synthetic_role_ids_stored": false
+}

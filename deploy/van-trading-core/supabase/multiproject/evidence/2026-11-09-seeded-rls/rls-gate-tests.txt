@@ -1,0 +1,47 @@
+test_admin_unable_to_read_seeded_customer_refused (test_gtr_postgrest_seeded_rls_gate.SeededRLSGateTests.test_admin_unable_to_read_seeded_customer_refused) ... ok
+test_all_releases_remain_refused (test_gtr_postgrest_seeded_rls_gate.SeededRLSGateTests.test_all_releases_remain_refused) ... ok
+test_ambiguous_rpc_detected (test_gtr_postgrest_seeded_rls_gate.SeededRLSGateTests.test_ambiguous_rpc_detected) ... ok
+test_business_financial_success_not_claimed (test_gtr_postgrest_seeded_rls_gate.SeededRLSGateTests.test_business_financial_success_not_claimed) ... ok
+test_cleanup_failure_refused (test_gtr_postgrest_seeded_rls_gate.SeededRLSGateTests.test_cleanup_failure_refused) ... ok
+test_customer_sees_admin_role_refused (test_gtr_postgrest_seeded_rls_gate.SeededRLSGateTests.test_customer_sees_admin_role_refused) ... ok
+test_exact_native_receipt_shas (test_gtr_postgrest_seeded_rls_gate.SeededRLSGateTests.test_exact_native_receipt_shas) ... ok
+test_exact_receipt_gate_output_private_new_only (test_gtr_postgrest_seeded_rls_gate.SeededRLSGateTests.test_exact_receipt_gate_output_private_new_only) ... ok
+test_extra_capture_field_refused (test_gtr_postgrest_seeded_rls_gate.SeededRLSGateTests.test_extra_capture_field_refused) ... ok
+test_extra_rls_result_field_refused (test_gtr_postgrest_seeded_rls_gate.SeededRLSGateTests.test_extra_rls_result_field_refused) ... ok
+test_extra_rpc_entry_refused (test_gtr_postgrest_seeded_rls_gate.SeededRLSGateTests.test_extra_rpc_entry_refused) ... ok
+test_final_schema_changed_refused (test_gtr_postgrest_seeded_rls_gate.SeededRLSGateTests.test_final_schema_changed_refused) ... ok
+test_fixture_production_write_refused (test_gtr_postgrest_seeded_rls_gate.SeededRLSGateTests.test_fixture_production_write_refused) ... ok
+test_four_code_names_bound (test_gtr_postgrest_seeded_rls_gate.SeededRLSGateTests.test_four_code_names_bound) ... ok
+test_missing_capture_field_refused (test_gtr_postgrest_seeded_rls_gate.SeededRLSGateTests.test_missing_capture_field_refused) ... ok
+test_missing_own_customer_refused (test_gtr_postgrest_seeded_rls_gate.SeededRLSGateTests.test_missing_own_customer_refused) ... ok
+test_missing_rpc_entry_refused (test_gtr_postgrest_seeded_rls_gate.SeededRLSGateTests.test_missing_rpc_entry_refused) ... ok
+test_modified_digest_refused (test_gtr_postgrest_seeded_rls_gate.SeededRLSGateTests.test_modified_digest_refused) ... ok
+test_no_executor_capabilities (test_gtr_postgrest_seeded_rls_gate.SeededRLSGateTests.test_no_executor_capabilities) ... ok
+test_no_real_user_data_accepted (test_gtr_postgrest_seeded_rls_gate.SeededRLSGateTests.test_no_real_user_data_accepted) ... ok
+test_no_stored_user_id_accepted (test_gtr_postgrest_seeded_rls_gate.SeededRLSGateTests.test_no_stored_user_id_accepted) ... ok
+test_observer_hosted_access_refused (test_gtr_postgrest_seeded_rls_gate.SeededRLSGateTests.test_observer_hosted_access_refused) ... ok
+test_observer_network_refused (test_gtr_postgrest_seeded_rls_gate.SeededRLSGateTests.test_observer_network_refused) ... ok
+test_old_anon_grant_regression_refused (test_gtr_postgrest_seeded_rls_gate.SeededRLSGateTests.test_old_anon_grant_regression_refused) ... ok
+test_old_http_denial_regression_refused (test_gtr_postgrest_seeded_rls_gate.SeededRLSGateTests.test_old_http_denial_regression_refused) ... ok
+test_one_rls_result_with_body_retained_refused (test_gtr_postgrest_seeded_rls_gate.SeededRLSGateTests.test_one_rls_result_with_body_retained_refused) ... ok
+test_original_native_run_is_green (test_gtr_postgrest_seeded_rls_gate.SeededRLSGateTests.test_original_native_run_is_green) ... ok
+test_other_customer_data_leak_refused (test_gtr_postgrest_seeded_rls_gate.SeededRLSGateTests.test_other_customer_data_leak_refused) ... ok
+test_pgrst_missing_rpc_detected (test_gtr_postgrest_seeded_rls_gate.SeededRLSGateTests.test_pgrst_missing_rpc_detected) ... ok
+test_positive_rpc_not_exposed_refused (test_gtr_postgrest_seeded_rls_gate.SeededRLSGateTests.test_positive_rpc_not_exposed_refused) ... ok
+test_reordered_checks_refused (test_gtr_postgrest_seeded_rls_gate.SeededRLSGateTests.test_reordered_checks_refused) ... ok
+test_replay_failure_refused (test_gtr_postgrest_seeded_rls_gate.SeededRLSGateTests.test_replay_failure_refused) ... ok
+test_report_contains_no_user_identifiers (test_gtr_postgrest_seeded_rls_gate.SeededRLSGateTests.test_report_contains_no_user_identifiers) ... ok
+test_rls_check_count_refused_when_missing (test_gtr_postgrest_seeded_rls_gate.SeededRLSGateTests.test_rls_check_count_refused_when_missing) ... ok
+test_rls_count_boolean_refused (test_gtr_postgrest_seeded_rls_gate.SeededRLSGateTests.test_rls_count_boolean_refused) ... ok
+test_rls_role_flip_refused (test_gtr_postgrest_seeded_rls_gate.SeededRLSGateTests.test_rls_role_flip_refused) ... ok
+test_rls_row_count_boolean_refused (test_gtr_postgrest_seeded_rls_gate.SeededRLSGateTests.test_rls_row_count_boolean_refused) ... ok
+test_schema_forward_not_exact_refused (test_gtr_postgrest_seeded_rls_gate.SeededRLSGateTests.test_schema_forward_not_exact_refused) ... ok
+test_source_changed_refused (test_gtr_postgrest_seeded_rls_gate.SeededRLSGateTests.test_source_changed_refused) ... ok
+test_unseeded_account_sees_customer_refused (test_gtr_postgrest_seeded_rls_gate.SeededRLSGateTests.test_unseeded_account_sees_customer_refused) ... ok
+
+----------------------------------------------------------------------
+Ran 40 tests in 0.010s
+
+OK
+POSTGREST_SYNTHETIC_RLS_GREEN_PRODUCTION_RELEASE_BLOCKED
+POSTGREST_RLS_EVIDENCE_INVALID_RELEASE_BLOCKED
