@@ -1,0 +1,275 @@
+#!/usr/bin/env python3
+"""Observe a pre-existing isolated GTR ARM64 replay, without modifying its runner.
+Read its NEW network-disconnected disposable fixture only, after last migration.
+Never attach, query, or mutate the existing Supabase installation.
+"""
+import hashlib, json, os, pathlib, signal, subprocess, sys, time
+ROOT=pathlib.Path('/var/tmp/dial-gtr-replay-fsur_69c')
+OUT=pathlib.Path('/var/tmp/dial-gtr-stock-images-compat-20261109-r1')
+IMAGE='sha256:f371b5f3f2ac0a05703f33d6e6134515fb2498cab708fb948a0aeb7481467c00'
+SOURCE_HASH='11c80c443789437ac5fd4515d07008c37221774f6f2350fd4d4deda9b2055c41'
+CONTRACT_HASH='1c2ad1b487394d1a0e4ea8fded5b119799bc76bde444db3d6148874ae07928e5'
+MARKER='PASS migration_20261102100300_staff_overview_reconciliation.sql'
+def run(args, *, inp=None, timeout=30):
+    p=subprocess.run(args,input=inp,text=True,capture_output=True,timeout=timeout)
+    if p.returncode: raise RuntimeError('SUBCOMMAND_FAILED '+str(args[:3])+' '+p.stderr[-400:])
+    return p.stdout
+def sha(raw):return hashlib.sha256(raw).hexdigest()
+def file_sha(path):return sha(path.read_bytes())
+def output(name,obj):
+    dest=OUT/name
+    with os.fdopen(os.open(dest,os.O_WRONLY|os.O_CREAT|os.O_EXCL,0o600),'w') as f:
+        json.dump(obj,f,sort_keys=True,indent=2,ensure_ascii=False)
+        f.write('\n')
+        f.flush();os.fsync(f.fileno())
+def observe(new_attempt):
+    import contracts
+    f=new_attempt/'container-id.txt'
+    cid=f.read_text().strip()
+    info=json.loads(run(['docker','inspect',cid]))[0]
+    state=info['State']
+    if not state['Running']:raise RuntimeError('FIXTURE_NOT_RUNNING')
+    assert info['Image']==IMAGE
+    assert info['Config']['User']=='100:101'
+    assert info['Config']['Labels'].get('dial.gtr.schema-replay')==new_attempt.name
+    assert info['HostConfig']['NetworkMode']=='none'
+    assert info['HostConfig'].get('PortBindings') in (None,{})
+    assert info['HostConfig']['Memory']<=512*1024*1024
+    assert len(info['Mounts'])==1
+    assert info['Mounts'][0]['Source']==str(new_attempt/'data')
+    def sql(statement,db='gtr_replay',label='read-only-snapshot'):
+        # Snapshot commands are SELECT-only. Their SET is session-local.
+        assert statement.startswith('SET search_path=public,extensions;SELECT ')
+        proc=subprocess.run(['docker','exec','-i','--user','100:101',cid,
+            'psql','-X','-qAt','-h','/tmp','-U','postgres','-d','gtr_replay',
+            '-v','ON_ERROR_STOP=1'],input='BEGIN TRANSACTION READ ONLY;\n'+statement+'\nROLLBACK;\n',
+            text=True,capture_output=True,timeout=35)
+        if proc.returncode:raise RuntimeError('FIXTURE_READ_ONLY_SNAPSHOT_FAILED '+label+' '+proc.stderr[-400:])
+        return proc
+    snapshot=contracts.snapshot(sql)
+    expected={'functions':None,'tables':212,'policies':None,'views':2,'private_usage':3,'relation_grants':5136}
+    for k,count in expected.items():
+        if count is not None and len(snapshot[k])!=count:raise RuntimeError('POSTFORWARD_SCOPE_DIFFERENT '+k+' '+str(len(snapshot[k])))
+    assert len(snapshot['functions'])>650
+    assert len(snapshot['policies'])>250
+    assert all(len(row)==7 for row in snapshot['functions'])
+    assert all(len(row)==8 for row in snapshot['policies'])
+    assert all(len(row)==5 for row in snapshot['relation_grants'])
+    sanitized={}
+    for k,rows in snapshot.items():
+        if k=='functions': sanitized[k]=rows # code hashed as md5 by PostgreSQL
+        elif k=='policies':
+            sanitized[k]=[row[:6]+[None if row[6] is None else sha(row[6].encode()),
+                                      None if row[7] is None else sha(row[7].encode())] for row in rows]
+        elif k=='views':
+            sanitized[k]=[row[:2]+[None if row[2] is None else sha(row[2].encode()),row[3]] for row in rows]
+        elif k=='relation_grants':
+            by={}
+            for schema,rel,role,priv,allowed in rows:
+                by.setdefault((schema,rel,role),{})[priv]=allowed
+            privs=('SELECT','INSERT','UPDATE','DELETE','TRUNCATE','REFERENCES','TRIGGER','MAINTAIN')
+            sanitized[k]=[[*key,*[bool(by[key][priv]) for priv in privs]] for key in sorted(by)]
+        else:sanitized[k]=rows
+    output('postforward-identity-sanitized.json',sanitized)
+    counts={k:len(v) for k,v in snapshot.items()}
+    digests={k:sha(json.dumps(v,sort_keys=True,separators=(',',':'),ensure_ascii=False).encode()) for k,v in sanitized.items()}
+    result={'schema_version':1,'scope':'NETWORK_ISOLATED_POSTFORWARD_ARM64_GTR_NOT_PRODUCTION',
+      'source_commit':'8131858c7c7479d178cbe9e246f83cb49ed80f5e',
+      'image_sha256':IMAGE,'runner_sha256':SOURCE_HASH,'reader_sha256':CONTRACT_HASH,
+      'table_policy_function_scope':'public_private_with_storage_policies',
+      'postforward_migrations':13,'counts':counts,'identity_digests':digests,
+      'sanitized_snapshot_sha256':file_sha(OUT/'postforward-identity-sanitized.json'),
+      'read_only_sql':True,'network_access':False,'production_sql_writes':False,
+      'hosted_connector_access':False,'canary_activation_attempted':False,
+      'postforward_run_passed':None,'source_sql_or_user_data_exported':False}
+    output('postforward-observer-result.json',result)
+    print('POSTFORWARD_CAPTURE_COUNTS '+json.dumps(counts,sort_keys=True),flush=True)
+    return result
+
+def rpc_probe(attempt):
+    """Parse/prepare 16 legacy and modern RPC call shapes; NEVER EXECUTE."""
+    cid=(attempt/'container-id.txt').read_text().strip()
+    inspect=json.loads(run(['docker','inspect',cid]))[0]
+    assert inspect['State']['Running'] and inspect['Image']==IMAGE
+    assert inspect['Config']['Labels'].get('dial.gtr.schema-replay')==attempt.name
+    assert inspect['Config']['User']=='100:101'
+    assert inspect['HostConfig']['NetworkMode']=='none'
+    assert not inspect['HostConfig'].get('PortBindings')
+    assert len(inspect['Mounts'])==1 and inspect['Mounts'][0]['Source']==str(attempt/'data')
+    probes=[
+      ('cart_one','(uuid)','public.create_pos_cart($1)'),
+      ('cart_three','(uuid,uuid,public.currency_code)','public.create_pos_cart($1,$2,$3)'),
+      ('cart_three_named','(uuid,uuid,public.currency_code)','public.create_pos_cart(p_warehouse_id => $1,p_customer_id => $2,p_currency => $3)'),
+      ('cart_four','(uuid,uuid,public.currency_code,public.fulfillment_mode)','public.create_pos_cart($1,$2,$3,$4)'),
+      ('hr_two','(text,uuid)','public.create_hr_role($1,$2)'),
+      ('hr_two_named','(text,uuid)','public.create_hr_role(p_title => $1,p_grade_id => $2)'),
+      ('hr_ten','(text,uuid,uuid,text,text,text,public.hr_pay_frequency,jsonb,jsonb,uuid[])','public.create_hr_role($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)'),
+      ('hr_eleven','(text,uuid,uuid,text,text,text,public.hr_pay_frequency,jsonb,jsonb,uuid[],public.staff_role)','public.create_hr_role($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)'),
+      ('garage_zero','','public.upsert_customer_garage_vehicle()'),
+      ('garage_seven','(uuid,text,text,text,text,text,boolean)','public.upsert_customer_garage_vehicle($1,$2,$3,$4,$5,$6,$7)'),
+      ('garage_seven_named','(uuid,text,boolean)','public.upsert_customer_garage_vehicle(p_id => $1,p_make => $2,p_is_primary => $3)'),
+      ('garage_ten','(uuid,text,text,text,text,text,boolean,text,text,text)','public.upsert_customer_garage_vehicle($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)'),
+      ('staff_two','(uuid,numeric)','public.upsert_staff_product_page($1,$2)'),
+      ('staff_five','(uuid,numeric,text,numeric,text)','public.upsert_staff_product_page($1,$2,$3,$4,$5)'),
+      ('staff_five_named','(uuid,numeric,text,numeric,text)','public.upsert_staff_product_page(p_stock_item_id => $1,p_unit_price => $2,p_discount_kind => $3,p_discount_value => $4,p_discount_description => $5)'),
+      ('staff_nine','(uuid,numeric,text,numeric,text,boolean,boolean,boolean,smallint)','public.upsert_staff_product_page($1,$2,$3,$4,$5,$6,$7,$8,$9)')
+    ]
+    results=[]
+    for label,types,expression in probes:
+        script=("BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY;\n"
+          "SET LOCAL statement_timeout='8s';\nSET LOCAL search_path=public,extensions;\n"
+          f"PREPARE {label}{types} AS SELECT {expression};\n"
+          f"SELECT EXISTS(SELECT 1 FROM pg_prepared_statements WHERE name='{label}');\n"
+          f"DEALLOCATE {label};\nROLLBACK;\n")
+        proc=subprocess.run(['docker','exec','-i','--user','100:101',cid,
+            'psql','-X','-qAt','-h','/tmp','-U','postgres','-d','gtr_replay',
+            '-v','ON_ERROR_STOP=1'],
+            input=script,text=True,capture_output=True,timeout=20)
+        ok=(proc.returncode==0 and proc.stdout.strip()=='t')
+        results.append({'name':label,'success':ok,
+            'error_class':'NONE' if ok else 'SQL_CALL_RESOLUTION_FAILED',
+            'function_body_executed':False})
+        print('RPC_PREPARE '+label+' '+('PASS' if ok else 'FAIL'),flush=True)
+        if not ok:
+            output('rpc-prepare-result.json',{'schema_version':1,'kind':'GTR_RPC_PARSE_ONLY_POSTFORWARD_ARM64',
+                'checks':results,'passed':False,'exact_runner_unmodified':True,
+                'production_modified':False,'bodies_executed':False,'no_network':True,
+                'failure_tail':proc.stderr[-1500:]})
+            raise RuntimeError('RPC_PREPARE_FAILED_'+label)
+    output('rpc-prepare-result.json',{'schema_version':1,'kind':'GTR_RPC_PARSE_ONLY_POSTFORWARD_ARM64',
+        'source_commit':'8131858c7c7479d178cbe9e246f83cb49ed80f5e',
+        'checks':results,'passed':True,'checked':len(results),
+        'exact_runner_unmodified':True,'production_modified':False,
+        'bodies_executed':False,'no_network':True,'postgrest_http_not_tested':True})
+    return len(results)
+
+
+def public_read_rollback_probe(attempt):
+    """Only the disposable gtr_replay database; verify grant then ROLLBACK."""
+    cid=(attempt/'container-id.txt').read_text().strip()
+    info=json.loads(run(['docker','inspect',cid]))[0]
+    assert info['State']['Running']
+    assert info['Image']==IMAGE
+    assert info['Config']['Labels'].get('dial.gtr.schema-replay')==attempt.name
+    assert info['HostConfig']['NetworkMode']=='none'
+    assert info['Config']['User']=='100:101'
+    assert len(info['Mounts'])==1 and info['Mounts'][0]['Source']==str(attempt/'data')
+    assert not info['HostConfig'].get('PortBindings')
+    # Restrict this SQL to the exact throwaway fixture, and exact pre-existing
+    # RLS/policy shape. Never try the donor postgres or hosted production DB.
+    query="""BEGIN;
+SET LOCAL statement_timeout='8s';
+SET LOCAL lock_timeout='2s';
+SET LOCAL search_path=pg_catalog;
+DO $gtr_compat$
+BEGIN
+ IF current_database()<>'gtr_replay'
+    OR current_user<>'postgres'
+    OR NOT EXISTS (
+       SELECT 1 FROM pg_class c
+       JOIN pg_namespace n ON n.oid=c.relnamespace
+       WHERE n.nspname='public' AND c.relname='stock_item_images'
+         AND c.relkind='r' AND c.relrowsecurity
+         AND pg_get_userbyid(c.relowner)='postgres'
+         AND NOT has_table_privilege('anon',c.oid,'SELECT')
+    )
+    OR NOT EXISTS (
+       SELECT 1 FROM pg_policies p
+       WHERE p.schemaname='public' AND p.tablename='stock_item_images'
+       AND p.policyname='stock_item_images_public_read'
+       AND p.cmd='SELECT' AND 'anon'=ANY(p.roles)
+       AND p.qual='true' AND p.with_check IS NULL
+    )
+ THEN RAISE EXCEPTION 'STOCK_IMAGES_PRECONDITIONS_NOT_MET';
+ END IF;
+END $gtr_compat$;
+GRANT SELECT ON TABLE public.stock_item_images TO anon;
+SELECT has_table_privilege('anon','public.stock_item_images','SELECT');
+ROLLBACK;
+SELECT has_table_privilege('anon','public.stock_item_images','SELECT');
+"""
+    p=subprocess.run(['docker','exec','-i','--user','100:101',cid,
+            'psql','-X','-qAt','-h','/tmp','-U','postgres','-d','gtr_replay',
+            '-v','ON_ERROR_STOP=1'],input=query,
+            text=True,capture_output=True,timeout=35)
+    ok=p.returncode==0 and p.stdout.strip().splitlines()==['t','f']
+    output('stock_images_scoped_transaction.json',{
+        'kind':'GTR_ISOLATED_STOCK_IMAGES_GRANT_ROLLBACK_V1',
+        'passed':ok,'only_fixture_database':'gtr_replay',
+        'production_database_touched':False,
+        'target_table':'public.stock_item_images',
+        'role':'anon','privilege':'SELECT',
+        'precondition_rls':True,
+        'precondition_policy':'stock_item_images_public_read',
+        'transactional_grant_observed':ok,
+        'rollback_restored_initial_denial':ok,
+        'sql_production_compatible_patch_not_applied':True,
+        'no_customer_data_copied':True,
+        'failure_reason':None if ok else 'ISOLATED_TRANSACTION_CHECK_FAILED'})
+    print('STOCK_IMAGES_ANON_READ_TRANSACTION '+('PASS' if ok else 'FAIL'),flush=True)
+    if not ok:raise RuntimeError('ISOLATED_STOCK_IMAGE_GRANT_ROLLBACK_FAILED '+p.stderr[-700:])
+
+def main():
+    os.umask(0o077)
+    if OUT.exists():raise RuntimeError('OUTPUT_EXISTS_REFUSED')
+    if file_sha(ROOT/'replay.py')!=SOURCE_HASH or file_sha(ROOT/'contracts.py')!=CONTRACT_HASH:
+        raise RuntimeError('ORIGINAL_PROVEN_RUNNER_OR_READER_HASH_MISMATCH')
+    source_lock=json.loads((ROOT/'source/source-lock.json').read_text())
+    if len(source_lock['files'])!=13:raise RuntimeError('SOURCE_INPUTS_CHANGED')
+    for item in source_lock['files']:
+        file=ROOT/'source'/pathlib.Path(item['path']).name
+        if file_sha(file)!=item['sha256']:raise RuntimeError('SOURCE_MIGRATION_SHA_MISMATCH')
+    image=json.loads(run(['docker','image','inspect',IMAGE]))[0]
+    if image['Id']!=IMAGE or image['Architecture']!='arm64':raise RuntimeError('ARM64_DONOR_IMAGE_CHANGED')
+    if run(['docker','ps','-aq','--filter','label=dial.gtr.schema-replay']).strip():
+        raise RuntimeError('EXISTING_REPLAY_CONTAINER_REFUSED')
+    old={x.name for x in ROOT.glob('attempt-*') if x.is_dir()}
+    OUT.mkdir(mode=0o700)
+    log=OUT/'replay-console.txt'
+    file=os.fdopen(os.open(log,os.O_WRONLY|os.O_CREAT|os.O_EXCL,0o600),'w')
+    proc=None;captured=False;failure=None
+    try:
+        proc=subprocess.Popen(['python3','-u',str(ROOT/'replay.py')],
+           cwd=str(ROOT),stdout=subprocess.PIPE,stderr=subprocess.STDOUT,
+           text=True,bufsize=1)
+        for line in proc.stdout:
+            file.write(line);file.flush()
+            print('REPLAY: '+line.strip()[:190],flush=True)
+            if line.strip()!=MARKER:continue
+            os.kill(proc.pid,signal.SIGSTOP)
+            try:
+                new=[x for x in ROOT.glob('attempt-*') if x.is_dir() and x.name not in old]
+                if len(new)!=1:raise RuntimeError('NEW_ATTEMPT_IDENTITY_NOT_UNIQUE')
+                observe(new[0]);rpc_probe(new[0]);public_read_rollback_probe(new[0]);captured=True
+            except Exception as exc:
+                failure=str(exc)
+                print('OBSERVER_FAILURE '+failure[:450],flush=True)
+            finally:
+                os.kill(proc.pid,signal.SIGCONT)
+        returncode=proc.wait(timeout=40)
+        file.flush();os.fsync(file.fileno())
+        new=[x for x in ROOT.glob('attempt-*') if x.is_dir() and x.name not in old]
+        if len(new)!=1:raise RuntimeError('FINAL_ATTEMPT_MISSING')
+        result=json.loads((new[0]/'result.json').read_text())
+        good=returncode==0 and result['state']=='PASS' and len(result['migrations'])==13 and all(x['exit_code']==0 for x in result['migrations']) and len(result['smokes'])==17 and all(x['passed'] for x in result['smokes']) and result['original_containers_preserved'] and result['temporary_container_removed']
+        output('replay-final-receipt.json',{'runner_returncode':returncode,
+           'runner_state':result['state'],'migration_total':len(result['migrations']),
+           'all_migrations_passed':all(x['exit_code']==0 for x in result['migrations']),
+           'smoke_count':len(result['smokes']),
+           'all_smokes_passed':all(x['passed'] for x in result['smokes']),
+           'original_containers_preserved':result['original_containers_preserved'],
+           'temporary_container_removed':result['temporary_container_removed'],
+           'capture_completed':captured,'capture_failure':failure,
+           'result_success':good and captured and not failure,'new_fixture_data_only':True})
+        print('FINAL_REPLAY_PASS '+str(good and captured and not failure),flush=True)
+        if not good or not captured or failure:return 2
+        return 0
+    finally:
+        file.close()
+        if proc and proc.poll() is None:
+            try:os.kill(proc.pid,signal.SIGCONT)
+            except ProcessLookupError:pass
+            proc.terminate()
+            try:proc.wait(timeout=10)
+            except subprocess.TimeoutExpired:proc.kill()
+if __name__=='__main__':raise SystemExit(main())

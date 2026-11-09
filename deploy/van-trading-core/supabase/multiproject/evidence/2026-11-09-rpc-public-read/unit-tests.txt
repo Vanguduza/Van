@@ -1,0 +1,20 @@
+test_active_installation_output_refused (test_gtr_public_read_plan.PublicReadPlanTests.test_active_installation_output_refused) ... ok
+test_explicit_project_binding (test_gtr_public_read_plan.PublicReadPlanTests.test_explicit_project_binding) ... ok
+test_new_output_private (test_gtr_public_read_plan.PublicReadPlanTests.test_new_output_private) ... ok
+test_no_executor_in_module (test_gtr_public_read_plan.PublicReadPlanTests.test_no_executor_in_module) ... ok
+test_reject_original_database (test_gtr_public_read_plan.PublicReadPlanTests.test_reject_original_database) ... ok
+test_review_not_authorized (test_gtr_public_read_plan.PublicReadPlanTests.test_review_not_authorized) ... ok
+test_rls_policy_guard (test_gtr_public_read_plan.PublicReadPlanTests.test_rls_policy_guard) ... ok
+test_single_exact_grant (test_gtr_public_read_plan.PublicReadPlanTests.test_single_exact_grant) ... ok
+test_source_binding (test_gtr_public_read_plan.PublicReadPlanTests.test_source_binding) ... ok
+test_sql_digest (test_gtr_public_read_plan.PublicReadPlanTests.test_sql_digest) ... ok
+test_transactional (test_gtr_public_read_plan.PublicReadPlanTests.test_transactional) ... ok
+test_unsafe_identifier_refused (test_gtr_public_read_plan.PublicReadPlanTests.test_unsafe_identifier_refused) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 0.012s
+
+OK
+GTR_STOCK_IMAGE_COMPATIBILITY_PRECONDITION_REFUSED
+GTR_STOCK_IMAGE_SOURCE_CANDIDATE_ONLY
+GTR_STOCK_IMAGE_COMPATIBILITY_PRECONDITION_REFUSED

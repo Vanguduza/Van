@@ -1,0 +1,16 @@
+{
+  "failure_reason": null,
+  "kind": "GTR_ISOLATED_STOCK_IMAGES_GRANT_ROLLBACK_V1",
+  "no_customer_data_copied": true,
+  "only_fixture_database": "gtr_replay",
+  "passed": true,
+  "precondition_policy": "stock_item_images_public_read",
+  "precondition_rls": true,
+  "privilege": "SELECT",
+  "production_database_touched": false,
+  "role": "anon",
+  "rollback_restored_initial_denial": true,
+  "sql_production_compatible_patch_not_applied": true,
+  "target_table": "public.stock_item_images",
+  "transactional_grant_observed": true
+}
