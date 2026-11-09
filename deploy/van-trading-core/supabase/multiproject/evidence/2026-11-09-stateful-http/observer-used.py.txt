@@ -1,0 +1,423 @@
+#!/usr/bin/env python3
+"""Observe a pre-existing isolated GTR ARM64 replay, without modifying its runner.
+Read its NEW network-disconnected disposable fixture only, after last migration.
+Never attach, query, or mutate the existing Supabase installation.
+"""
+import hashlib, json, os, pathlib, signal, subprocess, sys, time
+ROOT=pathlib.Path('/var/tmp/dial-gtr-replay-fsur_69c')
+OUT=pathlib.Path('/var/tmp/dial-gtr-postgrest-stateful-20261109-r1')
+IMAGE='sha256:f371b5f3f2ac0a05703f33d6e6134515fb2498cab708fb948a0aeb7481467c00'
+SOURCE_HASH='11c80c443789437ac5fd4515d07008c37221774f6f2350fd4d4deda9b2055c41'
+CONTRACT_HASH='1c2ad1b487394d1a0e4ea8fded5b119799bc76bde444db3d6148874ae07928e5'
+MARKER='PASS original_local_seed_in_isolated_fixture'
+def run(args, *, inp=None, timeout=30):
+    p=subprocess.run(args,input=inp,text=True,capture_output=True,timeout=timeout)
+    if p.returncode: raise RuntimeError('SUBCOMMAND_FAILED '+str(args[:3])+' '+p.stderr[-400:])
+    return p.stdout
+def sha(raw):return hashlib.sha256(raw).hexdigest()
+def file_sha(path):return sha(path.read_bytes())
+def output(name,obj):
+    dest=OUT/name
+    with os.fdopen(os.open(dest,os.O_WRONLY|os.O_CREAT|os.O_EXCL,0o600),'w') as f:
+        json.dump(obj,f,sort_keys=True,indent=2,ensure_ascii=False)
+        f.write('\n')
+        f.flush();os.fsync(f.fileno())
+def observe(new_attempt):
+    import contracts
+    f=new_attempt/'container-id.txt'
+    cid=f.read_text().strip()
+    info=json.loads(run(['docker','inspect',cid]))[0]
+    state=info['State']
+    if not state['Running']:raise RuntimeError('FIXTURE_NOT_RUNNING')
+    assert info['Image']==IMAGE
+    assert info['Config']['User']=='100:101'
+    assert info['Config']['Labels'].get('dial.gtr.schema-replay')==new_attempt.name
+    assert info['HostConfig']['NetworkMode']=='none'
+    assert info['HostConfig'].get('PortBindings') in (None,{})
+    assert info['HostConfig']['Memory']<=512*1024*1024
+    assert len(info['Mounts'])==1
+    assert info['Mounts'][0]['Source']==str(new_attempt/'data')
+    def sql(statement,db='gtr_replay',label='read-only-snapshot'):
+        # Snapshot commands are SELECT-only. Their SET is session-local.
+        assert statement.startswith('SET search_path=public,extensions;SELECT ')
+        proc=subprocess.run(['docker','exec','-i','--user','100:101',cid,
+            'psql','-X','-qAt','-h','/tmp','-U','postgres','-d','gtr_replay',
+            '-v','ON_ERROR_STOP=1'],input='BEGIN TRANSACTION READ ONLY;\n'+statement+'\nROLLBACK;\n',
+            text=True,capture_output=True,timeout=35)
+        if proc.returncode:raise RuntimeError('FIXTURE_READ_ONLY_SNAPSHOT_FAILED '+label+' '+proc.stderr[-400:])
+        return proc
+    snapshot=contracts.snapshot(sql)
+    expected={'functions':None,'tables':212,'policies':None,'views':2,'private_usage':3,'relation_grants':5136}
+    for k,count in expected.items():
+        if count is not None and len(snapshot[k])!=count:raise RuntimeError('POSTFORWARD_SCOPE_DIFFERENT '+k+' '+str(len(snapshot[k])))
+    assert len(snapshot['functions'])>650
+    assert len(snapshot['policies'])>250
+    assert all(len(row)==7 for row in snapshot['functions'])
+    assert all(len(row)==8 for row in snapshot['policies'])
+    assert all(len(row)==5 for row in snapshot['relation_grants'])
+    sanitized={}
+    for k,rows in snapshot.items():
+        if k=='functions': sanitized[k]=rows # code hashed as md5 by PostgreSQL
+        elif k=='policies':
+            sanitized[k]=[row[:6]+[None if row[6] is None else sha(row[6].encode()),
+                                      None if row[7] is None else sha(row[7].encode())] for row in rows]
+        elif k=='views':
+            sanitized[k]=[row[:2]+[None if row[2] is None else sha(row[2].encode()),row[3]] for row in rows]
+        elif k=='relation_grants':
+            by={}
+            for schema,rel,role,priv,allowed in rows:
+                by.setdefault((schema,rel,role),{})[priv]=allowed
+            privs=('SELECT','INSERT','UPDATE','DELETE','TRUNCATE','REFERENCES','TRIGGER','MAINTAIN')
+            sanitized[k]=[[*key,*[bool(by[key][priv]) for priv in privs]] for key in sorted(by)]
+        else:sanitized[k]=rows
+    output('postforward-identity-sanitized.json',sanitized)
+    counts={k:len(v) for k,v in snapshot.items()}
+    digests={k:sha(json.dumps(v,sort_keys=True,separators=(',',':'),ensure_ascii=False).encode()) for k,v in sanitized.items()}
+    result={'schema_version':1,'scope':'NETWORK_ISOLATED_POSTFORWARD_ARM64_GTR_NOT_PRODUCTION',
+      'source_commit':'8131858c7c7479d178cbe9e246f83cb49ed80f5e',
+      'image_sha256':IMAGE,'runner_sha256':SOURCE_HASH,'reader_sha256':CONTRACT_HASH,
+      'table_policy_function_scope':'public_private_with_storage_policies',
+      'postforward_migrations':13,'counts':counts,'identity_digests':digests,
+      'sanitized_snapshot_sha256':file_sha(OUT/'postforward-identity-sanitized.json'),
+      'read_only_sql':True,'network_access':False,'production_sql_writes':False,
+      'hosted_connector_access':False,'canary_activation_attempted':False,
+      'postforward_run_passed':None,'source_sql_or_user_data_exported':False}
+    output('postforward-observer-result.json',result)
+    print('POSTFORWARD_CAPTURE_COUNTS '+json.dumps(counts,sort_keys=True),flush=True)
+    return result
+
+def http_probe(attempt):
+    """Use only the disposable PostgreSQL replay process + local PostgREST image.
+
+    No production ports, network, credentials, host mounts, or production SQL.
+    """
+    import base64,hmac,urllib.parse,re
+    pgid=(attempt/'container-id.txt').read_text().strip()
+    pg=json.loads(run(['docker','inspect',pgid]))[0]
+    if not(pg['State']['Running'] and pg['Image']==IMAGE
+        and pg['HostConfig']['NetworkMode']=='none'
+        and pg['Config']['Labels'].get('dial.gtr.schema-replay')==attempt.name
+        and pg['Config']['User']=='100:101'
+        and len(pg['Mounts'])==1
+        and pg['Mounts'][0]['Source']==str(attempt/'data')):
+        raise RuntimeError('HTTP_DISPOSABLE_PG_IDENTITY_INVALID')
+    http_image='sha256:c9dc201e555f5d8e37e7f39cdd4df0229774996e213bfd7de8d10ac609030f2c'
+    img=json.loads(run(['docker','image','inspect',http_image]))[0]
+    if img['Id']!=http_image or img['Architecture']!='arm64':
+        raise RuntimeError('POSTGREST_ARM64_SOURCE_IDENTITY_CHANGED')
+    name='gtr-http-fixture-'+attempt.name[8:]
+    if run(['docker','ps','-aq','--filter','name=^/'+name+'$']).strip():
+        raise RuntimeError('ISOLATED_POSTGREST_NAME_OCCUPIED')
+    secret=base64.urlsafe_b64encode(os.urandom(48)).decode()
+    now=int(time.time())
+    def enc(value):
+        return base64.urlsafe_b64encode(json.dumps(value,separators=(',',':')).encode()).rstrip(b'=').decode()
+    unsigned=enc({'alg':'HS256','typ':'JWT'})+'.'+enc({
+        'role':'authenticated','sub':'aaaaaaa1-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        'aud':'authenticated','iat':now,'exp':now+600})
+    sig=base64.urlsafe_b64encode(hmac.new(secret.encode(),unsigned.encode(),'sha256').digest()).rstrip(b'=').decode()
+    token=unsigned+'.'+sig
+    settings=[
+      'PGRST_DB_URI=host=/proc/1/root/tmp dbname=gtr_replay user=authenticator',
+      'PGRST_DB_ANON_ROLE=anon','PGRST_DB_SCHEMAS=public',
+      'PGRST_DB_EXTRA_SEARCH_PATH=public,extensions',
+      'PGRST_DB_CONFIG=false','PGRST_DB_CHANNEL_ENABLED=false',
+      'PGRST_DB_TX_END=rollback','PGRST_SERVER_HOST=127.0.0.1',
+      'PGRST_SERVER_PORT=3199','PGRST_OPENAPI_MODE=disabled',
+      'PGRST_LOG_LEVEL=error','PGRST_JWT_SECRET='+secret
+    ]
+    argv=['docker','run','-d','--name',name,
+        '--label','dial.gtr.http-replay='+attempt.name,
+        '--network','container:'+pgid,'--pid','container:'+pgid,
+        '--memory','384m','--memory-swap','384m','--cpus','0.4','--pids-limit','64',
+        '--cap-drop','ALL','--security-opt','no-new-privileges:true',
+        '--read-only','--tmpfs','/tmp:rw,nosuid,nodev,size=16m',
+        '--user','100:101']
+    for env in settings:argv.extend(['--env',env])
+    argv.extend(['--entrypoint','/usr/bin/postgrest',http_image])
+    sidecar=None
+    report={'schema_version':1,'kind':'GTR_REAL_LOCAL_POSTGREST_ARM64_HTTP_REHEARSAL_NOT_PRODUCTION',
+        'source_commit':'8131858c7c7479d178cbe9e246f83cb49ed80f5e',
+        'original_pg_replay_image':IMAGE,'postgrest_image':http_image,
+        'database':'gtr_replay','network_none':True,'postgrest_network_shared_only_with_fixture':True,
+        'host_ports_published':False,'real_supabase_or_hosted_data_accessed':False,
+        'jwt_from_cryptographically_random_synthetic_secret':True,
+        'credential_or_jwt_saved':False,'requests':[],'production_writes':False,
+        'success':False,'all_http_results':False}
+    def fixture_sql(sql):
+        p=subprocess.run(['docker','exec','-i','--user','100:101',pgid,
+           'psql','-X','-qAt','-h','/tmp','-U','postgres','-d','gtr_replay',
+           '-v','ON_ERROR_STOP=1'],input=sql,text=True,capture_output=True,timeout=15)
+        if p.returncode:raise RuntimeError('ISOLATED_FIXTURE_SQL_FAILED '+p.stderr[-380:])
+        return p.stdout.strip()
+    def request(label,path,method='GET',auth=False,body=None):
+        if not path.startswith('/') or '://' in path:raise RuntimeError('URL_NOT_LOCAL')
+        # A native HTTP response is observed from inside the isolated PG
+        # namespace only. Output stores HTTP status, NEVER any user data.
+        classify_rpc=label.startswith('auth_rpc_')
+        cmd=['docker','exec','--user','100:101',pgid,'curl','--silent','--show-error',
+             '--max-time','5','--connect-timeout','2','--output','-' if classify_rpc else '/dev/null',
+             '--write-out','\n__DIAL_HTTP_STATUS__%{http_code}' if classify_rpc else '%{http_code}',
+             '--request',method,'--header','Accept: application/json']
+        if auth:cmd.extend(['--header','Authorization: Bearer '+token])
+        if body is not None:
+            cmd.extend(['--header','Content-Type: application/json','--data',json.dumps(body,separators=(',',':'))])
+        cmd.append('http://127.0.0.1:3199'+path)
+        p=subprocess.run(cmd,text=True,capture_output=True,timeout=9)
+        response_code=None
+        if classify_rpc:
+            rawbody,sep,code=p.stdout.rpartition('\n__DIAL_HTTP_STATUS__')
+            if not sep or len(rawbody)>4096:raise RuntimeError('BOUNDED_RPC_RESPONSE_REQUIRED_'+label)
+            if not code.strip().isdigit():raise RuntimeError('RPC_HTTP_STATUS_INVALID_'+label)
+            status=int(code.strip())
+            try:
+                payload=json.loads(rawbody)
+            except (ValueError,TypeError):
+                raise RuntimeError('RPC_ERROR_JSON_REQUIRED_'+label) from None
+            if not isinstance(payload,dict) or not isinstance(payload.get('code'),str):
+                raise RuntimeError('RPC_ERROR_CODE_REQUIRED_'+label)
+            response_code=payload['code']
+            if not re.fullmatch(r'(?:PGRST[0-9]{3}|[A-Z0-9]{5})',response_code):
+                raise RuntimeError('RPC_ERROR_CODE_NOT_ALLOWLISTED_'+label)
+            report.setdefault('rpc_error_codes',{})[label]=response_code
+            del rawbody,payload
+        else:
+            if not p.stdout.strip().isdigit():raise RuntimeError('HTTP_STATUS_INVALID_'+label)
+            status=int(p.stdout.strip())
+        if p.returncode:raise RuntimeError('LOCAL_HTTP_REQUEST_FAILED_'+label)
+        report['requests'].append({'label':label,'method':method,'authenticated_synthetic':auth,'status':status,'url_path_only':path.split('?')[0]})
+        print('POSTGREST_LOCAL_HTTP '+label+' HTTP_'+str(status)+((' CODE_'+response_code) if response_code else ''),flush=True)
+        return status
+    try:
+        sidecar=run(argv).strip()
+        sideinfo=json.loads(run(['docker','inspect',sidecar]))[0]
+        if not(sideinfo['State']['Running']
+           and sideinfo['Image']==http_image
+           and sideinfo['HostConfig']['NetworkMode']=='container:'+pgid
+           and sideinfo['HostConfig']['PidMode']=='container:'+pgid
+           and not sideinfo['HostConfig'].get('PortBindings')
+           and sideinfo['Config']['Labels'].get('dial.gtr.http-replay')==attempt.name):
+            raise RuntimeError('POSTGREST_DISPOSABLE_SIDECAR_BOUNDARY_REFUSED')
+        ready=False
+        for i in range(35):
+            p=subprocess.run(['docker','exec','--user','100:101',pgid,'curl','-s',
+               '--max-time','3','-o','/dev/null','-w','%{http_code}',
+               'http://127.0.0.1:3199/daily_exchange_rates?select=*&limit=0'],
+               text=True,capture_output=True,timeout=6)
+            if p.returncode==0 and p.stdout.strip() in ('200','401','403','404'):
+                ready=True;break
+            if not json.loads(run(['docker','inspect',sidecar]))[0]['State']['Running']:
+                raise RuntimeError('POSTGREST_SIDECAR_EXITED_'+str(i))
+            time.sleep(.35)
+        if not ready:
+            log=subprocess.run(['docker','logs','--tail','30',sidecar],capture_output=True,text=True,timeout=8)
+            report['readiness_failure_log_tail']=(log.stdout+log.stderr)[-1600:]
+            raise RuntimeError('POSTGREST_HTTP_READINESS_TIMEOUT')
+
+        report['ready']=True
+        anon_daily=request('anon_public_exchange_rate','/daily_exchange_rates?select=*&limit=0')
+        anon_images_before=request('anon_stock_images_before','/stock_item_images?select=id&limit=0')
+        auth_images=request('auth_stock_images_read','/stock_item_images?select=id&limit=0',auth=True)
+        auth_grades=request('auth_hr_grades_read','/hr_grades?select=id&limit=0',auth=True)
+        anon_grades=request('anon_hr_grades_denied','/hr_grades?select=id&limit=0')
+        # No customer data or real credentials used. Never commit effectful
+        # function body mutations. PostgREST is configured tx-end=rollback.
+        rpc_cart=request('auth_rpc_cart_legacy_default','/rpc/create_pos_cart','POST',True,{'p_warehouse_id':None})
+        rpc_hr=request('auth_rpc_hr_legacy_defaults','/rpc/create_hr_role','POST',True,{'p_title':'Fixture role','p_grade_id':'aaaaaaa1-aaaa-4aaa-8aaa-aaaaaaaaaaab'})
+        rpc_garage=request('auth_rpc_garage_legacy_defaults','/rpc/upsert_customer_garage_vehicle','POST',True,{})
+        rpc_staff=request('auth_rpc_staff_legacy_defaults','/rpc/upsert_staff_product_page','POST',True,{
+            'p_stock_item_id':'aaaaaaa1-aaaa-4aaa-8aaa-aaaaaaaaaaab','p_unit_price':25})
+        auth_write=request('auth_hr_grades_direct_insert_denied','/hr_grades','POST',True,{'code':'fixture-disabled','title':'Fixture disabled'})
+        if anon_images_before not in (401,403):raise RuntimeError('EXPECTED_ANON_STOCK_IMAGES_DENIAL_MISSING')
+        if auth_images!=200 or auth_grades!=200:
+            raise RuntimeError('AUTHENTICATED_SQL_SELECT_PATH_FAILED')
+        if anon_grades not in (401,403) or anon_daily!=200:
+            raise RuntimeError('ROLE_ISOLATION_OR_PUBLIC_EXCHANGE_RATE_FAILED')
+        if auth_write not in (401,403):
+            raise RuntimeError('MISSING_AUTH_DML_PRIVILEGE_NOT_ENFORCED')
+        for label,status in [('cart',rpc_cart),('hr',rpc_hr),('garage',rpc_garage),('staff',rpc_staff)]:
+            if status in (404,405,300) or status>=500 or status in (200,201,204):
+                raise RuntimeError('RPC_ENDPOINT_ERROR_OR_UNEXPECTED_MUTATION_'+label+'_'+str(status))
+        # Exact two-purpose configuration check and ephemeral local reversible
+        # GRANT; the fixture is disconnected and discarded, never deployed.
+        sqlpre="""BEGIN;
+SET LOCAL search_path=pg_catalog;
+DO $check$
+BEGIN IF current_database()<>'gtr_replay' OR current_user<>'postgres'
+ OR NOT EXISTS (SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
+    WHERE n.nspname='public' AND c.relname='stock_item_images' AND c.relrowsecurity
+      AND NOT has_table_privilege('anon',c.oid,'SELECT'))
+ OR NOT EXISTS (SELECT 1 FROM pg_policies p WHERE p.schemaname='public'
+   AND p.tablename='stock_item_images' AND p.policyname='stock_item_images_public_read'
+   AND 'anon'=ANY(p.roles) AND p.cmd='SELECT' AND p.qual='true')
+ THEN RAISE EXCEPTION 'RLS_AND_ROLE_FIXTURE_PRECONDITION_REFUSED'; END IF;END $check$;
+GRANT SELECT ON TABLE public.stock_item_images TO anon;
+COMMIT;"""
+        fixture_sql(sqlpre)
+        report['fixture_only_grant_test']=True
+        # Reload schema in this private sidecar only.
+        subprocess.run(['docker','kill','--signal=SIGUSR1',sidecar],text=True,capture_output=True,timeout=8)
+        time.sleep(.5)
+        anon_images_during=request('anon_stock_images_after_fixture_grant','/stock_item_images?select=id&limit=0')
+        fixture_sql("""BEGIN;
+SET LOCAL search_path=pg_catalog;
+DO $check$ BEGIN
+ IF current_database()<>'gtr_replay' OR current_user<>'postgres'
+ OR NOT has_table_privilege('anon','public.stock_item_images','SELECT')
+ THEN RAISE EXCEPTION 'FIXTURE_GRANT_MISSING'; END IF;END $check$;
+REVOKE SELECT ON TABLE public.stock_item_images FROM anon;
+COMMIT;""")
+        report['fixture_grant_revoked']=True
+        subprocess.run(['docker','kill','--signal=SIGUSR1',sidecar],text=True,capture_output=True,timeout=8)
+        time.sleep(.5)
+        anon_images_after=request('anon_stock_images_after_fixture_revoke','/stock_item_images?select=id&limit=0')
+        report['persistent_anon_stock_image_privilege_restored_to_initial_denial']=fixture_sql(
+            "SELECT NOT has_table_privilege('anon','public.stock_item_images','SELECT');")=='t'
+        if anon_images_during!=200 or anon_images_after not in (401,403) or not report['persistent_anon_stock_image_privilege_restored_to_initial_denial']:
+            raise RuntimeError('ISOLATED_HTTP_GRANT_REVERSAL_FAILED_'+str(anon_images_during)+'_'+str(anon_images_after))
+
+        # Real positive/negative RLS assertions against the ORIGINAL local-dev
+        # seed only (5 fake auth users, 2 fake customers, 3 staff roles).
+        # HTTP responses are parsed privately; only status+row counts are retained.
+        ids={
+          'admin':'a0000000-0000-4000-8000-000000000001',
+          'customer_a':'c0000000-0000-4000-8000-0000000000a1',
+          'customer_b':'c0000000-0000-4000-8000-0000000000b2',
+          'outsider':'ffff0000-0000-4000-8000-000000000001'
+        }
+        def seeded_token(who):
+            unsigned=enc({'alg':'HS256','typ':'JWT'})+'.'+enc({
+                'role':'authenticated','sub':ids[who],
+                'aud':'authenticated','iat':now,'exp':now+600})
+            sig=base64.urlsafe_b64encode(hmac.new(secret.encode(),unsigned.encode(),'sha256').digest()).rstrip(b'=').decode()
+            return unsigned+'.'+sig
+        checks=[]
+        def seeded_get(label,url,who,expected_status,expected_rows):
+            if not url.startswith('/') or '://' in url:
+                raise RuntimeError('NONLOCAL_READ_URL_REFUSED')
+            headers=['--header','Authorization: Bearer '+seeded_token(who)]
+            cmd=['docker','exec','--user','100:101',pgid,'curl',
+               '--silent','--show-error','--max-time','5','--connect-timeout','2',
+               '--output','-','--write-out','\n__DIAL_HTTP_STATUS__%{http_code}',
+               '--header','Accept: application/json',*headers,
+               'http://127.0.0.1:3199'+url]
+            proc=subprocess.run(cmd,text=True,capture_output=True,timeout=9)
+            body,marker,status=proc.stdout.rpartition('\n__DIAL_HTTP_STATUS__')
+            if proc.returncode or not marker or len(body)>8192 or not status.strip().isdigit():
+                raise RuntimeError('SYNTHETIC_RLS_HTTP_MALFORMED_'+label)
+            status=int(status.strip())
+            try:parsed=json.loads(body)
+            except (ValueError,TypeError):
+                raise RuntimeError('SYNTHETIC_RLS_RESPONSE_NOT_JSON_'+label) from None
+            if not isinstance(parsed,list):
+                raise RuntimeError('SYNTHETIC_RLS_RESPONSE_NOT_ROWS_'+label)
+            count=len(parsed)
+            if (expected_rows is not None and count!=expected_rows) or status!=expected_status:
+                print('SYNTHETIC_RLS_FAIL '+label+' '+str(status)+' '+str(count),flush=True)
+                raise RuntimeError('SYNTHETIC_RLS_STATUS_OR_COUNT_MISMATCH_'+label)
+            checks.append({'label':label,'http_status':status,'row_count':count,
+                'synthetic_role':who,'body_or_real_identifier_retained':False})
+            print('SYNTHETIC_RLS_PASS '+label+' '+str(status)+' ROWS_'+str(count),flush=True)
+            return status
+        seeded_get('customer_own_profile','/profiles?select=id&id=eq.'+ids['customer_a'],'customer_a',200,1)
+        seeded_get('customer_other_profile_denied','/profiles?select=id&id=eq.'+ids['customer_b'],'customer_a',200,0)
+        seeded_get('customer_other_customer_denied','/customers?select=id&profile_id=eq.'+ids['customer_b'],'customer_a',200,0)
+        seeded_get('customer_own_customer','/customers?select=id&profile_id=eq.'+ids['customer_a'],'customer_a',200,1)
+        seeded_get('other_customer_sees_no_first_customer','/customers?select=id&profile_id=eq.'+ids['customer_a'],'customer_b',200,0)
+        seeded_get('admin_can_see_customer_b','/customers?select=id&profile_id=eq.'+ids['customer_b'],'admin',200,1)
+        seeded_get('admin_can_see_own_role','/staff_roles?select=role&user_id=eq.'+ids['admin'],'admin',200,1)
+        seeded_get('customer_cannot_see_admin_role','/staff_roles?select=role&user_id=eq.'+ids['admin'],'customer_a',200,0)
+        seeded_get('unseeded_cannot_see_customer','/customers?select=id&profile_id=eq.'+ids['customer_a'],'outsider',200,0)
+        seeded_get('positive_auth_catalog_rpc','/rpc/list_catalog_makers?limit=1','admin',200,None)
+        import transactional_http_probe
+        transactional_http_probe.run(pgid,sidecar,ids,secret,fixture_sql,report)
+        report['synthetic_rls_checks']=checks
+        report['synthetic_rls_check_count']=len(checks)
+        report['synthetic_role_ids_stored']=False
+        report['real_business_user_data_touched']=False
+        report['all_http_results']=True
+        report['success']=True
+        print('POSTGREST_HTTP_QUALIFICATION_PASS '+str(len(report['requests'])),flush=True)
+        return True
+    finally:
+        if sidecar is not None:
+            # Delete only the process whose ID/name and attempt-bound label are
+            # proven; original production and the PG replay container are never targets.
+            p=subprocess.run(['docker','inspect',sidecar],text=True,capture_output=True,timeout=8)
+            if p.returncode==0:
+                found=json.loads(p.stdout)[0]
+                if found['Config']['Labels'].get('dial.gtr.http-replay')!=attempt.name or found['Name']!='/'+name:
+                    raise RuntimeError('SIDECAR_IDENTITY_CHANGED_CLEANUP_REFUSED')
+                run(['docker','rm','-f',sidecar])
+            report['sidecar_removed']=subprocess.run(
+                ['docker','inspect',sidecar],text=True,capture_output=True,timeout=8).returncode!=0
+        if report.get('fixture_only_grant_test') and not report.get('fixture_grant_revoked'):
+            # The original runner will delete the entire throwaway database
+            # container after this observer, never any production instance.
+            report['rollback_unproven_fixture_destroyed_by_original_runner']=True
+        output('postgrest-local-http-result.json',report)
+
+def main():
+    os.umask(0o077)
+    if OUT.exists():raise RuntimeError('OUTPUT_EXISTS_REFUSED')
+    if file_sha(ROOT/'replay.py')!=SOURCE_HASH or file_sha(ROOT/'contracts.py')!=CONTRACT_HASH:
+        raise RuntimeError('ORIGINAL_PROVEN_RUNNER_OR_READER_HASH_MISMATCH')
+    source_lock=json.loads((ROOT/'source/source-lock.json').read_text())
+    if len(source_lock['files'])!=13:raise RuntimeError('SOURCE_INPUTS_CHANGED')
+    for item in source_lock['files']:
+        file=ROOT/'source'/pathlib.Path(item['path']).name
+        if file_sha(file)!=item['sha256']:raise RuntimeError('SOURCE_MIGRATION_SHA_MISMATCH')
+    image=json.loads(run(['docker','image','inspect',IMAGE]))[0]
+    if image['Id']!=IMAGE or image['Architecture']!='arm64':raise RuntimeError('ARM64_DONOR_IMAGE_CHANGED')
+    if run(['docker','ps','-aq','--filter','label=dial.gtr.schema-replay']).strip():
+        raise RuntimeError('EXISTING_REPLAY_CONTAINER_REFUSED')
+    old={x.name for x in ROOT.glob('attempt-*') if x.is_dir()}
+    OUT.mkdir(mode=0o700)
+    log=OUT/'replay-console.txt'
+    file=os.fdopen(os.open(log,os.O_WRONLY|os.O_CREAT|os.O_EXCL,0o600),'w')
+    proc=None;captured=False;failure=None
+    try:
+        proc=subprocess.Popen(['python3','-u',str(ROOT/'replay.py')],
+           cwd=str(ROOT),stdout=subprocess.PIPE,stderr=subprocess.STDOUT,
+           text=True,bufsize=1)
+        for line in proc.stdout:
+            file.write(line);file.flush()
+            print('REPLAY: '+line.strip()[:190],flush=True)
+            if line.strip()!=MARKER:continue
+            os.kill(proc.pid,signal.SIGSTOP)
+            try:
+                new=[x for x in ROOT.glob('attempt-*') if x.is_dir() and x.name not in old]
+                if len(new)!=1:raise RuntimeError('NEW_ATTEMPT_IDENTITY_NOT_UNIQUE')
+                observe(new[0]);http_probe(new[0]);captured=True
+            except Exception as exc:
+                failure=str(exc)
+                print('OBSERVER_FAILURE '+failure[:450],flush=True)
+            finally:
+                os.kill(proc.pid,signal.SIGCONT)
+        returncode=proc.wait(timeout=40)
+        file.flush();os.fsync(file.fileno())
+        new=[x for x in ROOT.glob('attempt-*') if x.is_dir() and x.name not in old]
+        if len(new)!=1:raise RuntimeError('FINAL_ATTEMPT_MISSING')
+        result=json.loads((new[0]/'result.json').read_text())
+        good=returncode==0 and result['state']=='PASS' and len(result['migrations'])==13 and all(x['exit_code']==0 for x in result['migrations']) and len(result['smokes'])==17 and all(x['passed'] for x in result['smokes']) and result['original_containers_preserved'] and result['temporary_container_removed']
+        output('replay-final-receipt.json',{'runner_returncode':returncode,
+           'runner_state':result['state'],'migration_total':len(result['migrations']),
+           'all_migrations_passed':all(x['exit_code']==0 for x in result['migrations']),
+           'smoke_count':len(result['smokes']),
+           'all_smokes_passed':all(x['passed'] for x in result['smokes']),
+           'original_containers_preserved':result['original_containers_preserved'],
+           'temporary_container_removed':result['temporary_container_removed'],
+           'capture_completed':captured,'capture_failure':failure,
+           'result_success':good and captured and not failure,'new_fixture_data_only':True})
+        print('FINAL_REPLAY_PASS '+str(good and captured and not failure),flush=True)
+        if not good or not captured or failure:return 2
+        return 0
+    finally:
+        file.close()
+        if proc and proc.poll() is None:
+            try:os.kill(proc.pid,signal.SIGCONT)
+            except ProcessLookupError:pass
+            proc.terminate()
+            try:proc.wait(timeout=10)
+            except subprocess.TimeoutExpired:proc.kill()
+if __name__=='__main__':raise SystemExit(main())
