@@ -1,0 +1,53 @@
+{
+  "auth_executable_invoker_reference_tables": 10,
+  "authenticated_tables": 30,
+  "authenticated_write_gap_count": 77,
+  "base_pr_head": "2244f7a787dbed70e51efe33efa813d376e4b7cd",
+  "canary_activation_attempted": false,
+  "confirmed_user_session_direct_dml_sites": 0,
+  "database_writes": 0,
+  "evidence_sha256": {
+    "client-write-source-review.json": "89a16e8cf216c5c24f5fca7f2c99ccc3d685f71e9f6ad521a6c615ee13e4dd90",
+    "full-unit-tests.txt": "d0263f82f8f1620b9bf146d21ec541036a37296f078e49131d4a49ff198da085",
+    "hosted-invoker-review.json": "63717a78f6359c050cfdbaa1a88cfdcae90715f5788b4aae255bee8b8adc8d40",
+    "new-unit-tests.txt": "cc2d360bf367f101ff4bd976a01eae5dd014f768199b152f2ece390b7a9e587f",
+    "unit-tests.txt": "a9b2c57009c90e7d16d9aaffa427da386045587b66191ed868ed4ba0be582462"
+  },
+  "git_source_worktree_clean": true,
+  "hosted_database_read_only": true,
+  "hosted_function_definition_reference_tables": 28,
+  "kind": "SOURCE_LOCKED_GTR_CLIENT_DML_AUDIT_NOT_RELEASE",
+  "limitations": [
+    "Static matching does not establish absence of dynamically generated SQL or external clients.",
+    "Hosted pg_proc function-definition text matches do not imply writes or correct permissions.",
+    "All 77 authenticated permissions remain explicit review gates.",
+    "Original live canary refusal remains unchanged."
+  ],
+  "live_dial_vm_mutations": 0,
+  "may_grant_any_permission": false,
+  "may_merge_pr_without_native_owner_admission": false,
+  "may_migrate_nissan_gtr": false,
+  "project_ref": "bicyjghgdnzlnjqxzoud",
+  "python_tests": {
+    "complete_suite": 452,
+    "errors": 0,
+    "failed": 0,
+    "new_source_trace_tests": 27,
+    "optional_skips": 4
+  },
+  "schema_version": 1,
+  "scope": "PINNED_APPLICATION_EDGE_PACKAGES_SERVICES_STATIC_CALL_TRACE",
+  "separate_admin_service_key_provisioner_dml_sites": 2,
+  "source_commit": "8131858c7c7479d178cbe9e246f83cb49ed80f5e",
+  "source_file_inventory_sha256": "c16cbe677be9f1cf0d8f2377fefda7b208c1b7c103532341ee9d9d2edb8a95b5",
+  "source_repository": "Vanguduza/Nissan-Gtr-Auto",
+  "source_scanned_file_count": 1291,
+  "source_sha256": {
+    "AUTHENTICATED_DML_CLIENT_TRACE_2026-11-09.md": "3f0e9ea3f4480d27cc9e761387e79753b1908af2700d03129ef6646cb3c7c58d",
+    "tests/test_gtr_client_dml_trace.py": "8ff5153e95244eb4a105fb0817e3480dba9cc81552f9e35acc45782dcf8d0e35",
+    "tests/test_gtr_final_schema_gate.py": "91600839f40a11e9efaf8984c88da2e98330175816db9f9e1e2e890f99f73b8c",
+    "tests/test_gtr_public_read_plan.py": "cba7998e1f5c910806f9ff529e6d7e4d0f362faf705201dc5ae5bf247781914f",
+    "tools/gtr_client_dml_trace.py": "3cc3167c8e04eb52b67f7e4bbfef0b5f7baaacad2b3c5aa49426480756dfefc6"
+  },
+  "van_pr": 102
+}

@@ -2,7 +2,8 @@
 import pathlib,sys,unittest,tempfile,json,hashlib
 from unittest.mock import patch
 ROOT=pathlib.Path(__file__).parent
-sys.path.insert(0,str(ROOT))
+TOOLS=ROOT.parent/"tools"
+sys.path.insert(0,str(TOOLS))
 import gtr_public_read_plan as g
 
 class PublicReadPlanTests(unittest.TestCase):
@@ -62,7 +63,7 @@ class PublicReadPlanTests(unittest.TestCase):
     def test_active_installation_output_refused(self):
         self.assertEqual(g.main(["--project-database","nissan_gtr","--out","/etc/dial-supabase/example"] ),2)
     def test_no_executor_in_module(self):
-        s=(ROOT/"gtr_public_read_plan.py").read_text()
+        s=(TOOLS/"gtr_public_read_plan.py").read_text()
         for marker in ("subprocess","psycopg","supabase.execute","docker exec","os.system","curl ","ssh "):
             self.assertNotIn(marker,s)
 

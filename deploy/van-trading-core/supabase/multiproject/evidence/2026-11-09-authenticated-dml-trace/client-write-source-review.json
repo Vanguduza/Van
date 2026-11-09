@@ -1,0 +1,1160 @@
+{
+  "authenticated_distinct_tables": 30,
+  "authenticated_dml_grant_cases": 77,
+  "authorization_to_apply_any_grant": false,
+  "deployed_app_versions_verified": false,
+  "dynamic_table_references_resolved": false,
+  "external_clients_verified": false,
+  "grant_cases": [
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [
+        "select"
+      ],
+      "direct_write_calls": [],
+      "literal_source_files": 2,
+      "policy_names": [
+        "account_period_balances_finance"
+      ],
+      "privilege": "INSERT",
+      "role": "authenticated",
+      "table": "account_period_balances"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [
+        "select"
+      ],
+      "direct_write_calls": [],
+      "literal_source_files": 2,
+      "policy_names": [
+        "account_period_balances_finance"
+      ],
+      "privilege": "UPDATE",
+      "role": "authenticated",
+      "table": "account_period_balances"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [
+        "select"
+      ],
+      "direct_write_calls": [],
+      "literal_source_files": 2,
+      "policy_names": [
+        "account_period_balances_finance"
+      ],
+      "privilege": "DELETE",
+      "role": "authenticated",
+      "table": "account_period_balances"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 1,
+      "policy_names": [
+        "ai_worker_schedules_write"
+      ],
+      "privilege": "INSERT",
+      "role": "authenticated",
+      "table": "ai_worker_schedules"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 1,
+      "policy_names": [
+        "ai_worker_schedules_write"
+      ],
+      "privilege": "UPDATE",
+      "role": "authenticated",
+      "table": "ai_worker_schedules"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 1,
+      "policy_names": [
+        "ai_worker_schedules_write"
+      ],
+      "privilege": "DELETE",
+      "role": "authenticated",
+      "table": "ai_worker_schedules"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 22,
+      "policy_names": [
+        "catalog_diagram_parts_staff_write"
+      ],
+      "privilege": "INSERT",
+      "role": "authenticated",
+      "table": "catalog_diagram_parts"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 22,
+      "policy_names": [
+        "catalog_diagram_parts_staff_write"
+      ],
+      "privilege": "UPDATE",
+      "role": "authenticated",
+      "table": "catalog_diagram_parts"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 22,
+      "policy_names": [
+        "catalog_diagram_parts_staff_write"
+      ],
+      "privilege": "DELETE",
+      "role": "authenticated",
+      "table": "catalog_diagram_parts"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 31,
+      "policy_names": [
+        "catalog_diagrams_staff_write"
+      ],
+      "privilege": "INSERT",
+      "role": "authenticated",
+      "table": "catalog_diagrams"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 31,
+      "policy_names": [
+        "catalog_diagrams_staff_write"
+      ],
+      "privilege": "UPDATE",
+      "role": "authenticated",
+      "table": "catalog_diagrams"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 31,
+      "policy_names": [
+        "catalog_diagrams_staff_write"
+      ],
+      "privilege": "DELETE",
+      "role": "authenticated",
+      "table": "catalog_diagrams"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 22,
+      "policy_names": [
+        "catalog_makers_staff_write"
+      ],
+      "privilege": "INSERT",
+      "role": "authenticated",
+      "table": "catalog_makers"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 22,
+      "policy_names": [
+        "catalog_makers_staff_write"
+      ],
+      "privilege": "UPDATE",
+      "role": "authenticated",
+      "table": "catalog_makers"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 22,
+      "policy_names": [
+        "catalog_makers_staff_write"
+      ],
+      "privilege": "DELETE",
+      "role": "authenticated",
+      "table": "catalog_makers"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 26,
+      "policy_names": [
+        "catalog_models_staff_write"
+      ],
+      "privilege": "INSERT",
+      "role": "authenticated",
+      "table": "catalog_models"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 26,
+      "policy_names": [
+        "catalog_models_staff_write"
+      ],
+      "privilege": "UPDATE",
+      "role": "authenticated",
+      "table": "catalog_models"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 26,
+      "policy_names": [
+        "catalog_models_staff_write"
+      ],
+      "privilege": "DELETE",
+      "role": "authenticated",
+      "table": "catalog_models"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 24,
+      "policy_names": [
+        "catalog_sections_staff_write"
+      ],
+      "privilege": "INSERT",
+      "role": "authenticated",
+      "table": "catalog_sections"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 24,
+      "policy_names": [
+        "catalog_sections_staff_write"
+      ],
+      "privilege": "UPDATE",
+      "role": "authenticated",
+      "table": "catalog_sections"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 24,
+      "policy_names": [
+        "catalog_sections_staff_write"
+      ],
+      "privilege": "DELETE",
+      "role": "authenticated",
+      "table": "catalog_sections"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [
+        "select"
+      ],
+      "direct_write_calls": [],
+      "literal_source_files": 32,
+      "policy_names": [
+        "catalog_variants_staff_write"
+      ],
+      "privilege": "INSERT",
+      "role": "authenticated",
+      "table": "catalog_variants"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [
+        "select"
+      ],
+      "direct_write_calls": [],
+      "literal_source_files": 32,
+      "policy_names": [
+        "catalog_variants_staff_write"
+      ],
+      "privilege": "UPDATE",
+      "role": "authenticated",
+      "table": "catalog_variants"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [
+        "select"
+      ],
+      "direct_write_calls": [],
+      "literal_source_files": 32,
+      "policy_names": [
+        "catalog_variants_staff_write"
+      ],
+      "privilege": "DELETE",
+      "role": "authenticated",
+      "table": "catalog_variants"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 6,
+      "policy_names": [
+        "compare_customer_all"
+      ],
+      "privilege": "UPDATE",
+      "role": "authenticated",
+      "table": "customer_compare_items"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [
+        "select"
+      ],
+      "direct_write_calls": [],
+      "literal_source_files": 2,
+      "policy_names": [
+        "review_photos_staff_all"
+      ],
+      "privilege": "UPDATE",
+      "role": "authenticated",
+      "table": "customer_product_review_photos"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [
+        "select"
+      ],
+      "direct_write_calls": [],
+      "literal_source_files": 5,
+      "policy_names": [
+        "wishlist_customer_all"
+      ],
+      "privilege": "UPDATE",
+      "role": "authenticated",
+      "table": "customer_wishlist_items"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 1,
+      "policy_names": [
+        "finance_refunds_insert"
+      ],
+      "privilege": "INSERT",
+      "role": "authenticated",
+      "table": "finance_refunds"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 1,
+      "policy_names": [
+        "finance_req_approvals_insert"
+      ],
+      "privilege": "INSERT",
+      "role": "authenticated",
+      "table": "finance_requisition_approvals"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 1,
+      "policy_names": [
+        "finance_req_thresholds_write"
+      ],
+      "privilege": "INSERT",
+      "role": "authenticated",
+      "table": "finance_requisition_thresholds"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 1,
+      "policy_names": [
+        "finance_req_thresholds_write"
+      ],
+      "privilege": "UPDATE",
+      "role": "authenticated",
+      "table": "finance_requisition_thresholds"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 1,
+      "policy_names": [
+        "finance_req_thresholds_write"
+      ],
+      "privilege": "DELETE",
+      "role": "authenticated",
+      "table": "finance_requisition_thresholds"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 3,
+      "policy_names": [
+        "forecast_suggestions_staff_write"
+      ],
+      "privilege": "INSERT",
+      "role": "authenticated",
+      "table": "forecast_suggestions"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 3,
+      "policy_names": [
+        "forecast_suggestions_staff_write"
+      ],
+      "privilege": "UPDATE",
+      "role": "authenticated",
+      "table": "forecast_suggestions"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 3,
+      "policy_names": [
+        "forecast_suggestions_staff_write"
+      ],
+      "privilege": "DELETE",
+      "role": "authenticated",
+      "table": "forecast_suggestions"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 1,
+      "policy_names": [
+        "hr_clause_write"
+      ],
+      "privilege": "INSERT",
+      "role": "authenticated",
+      "table": "hr_contract_clause_templates"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 1,
+      "policy_names": [
+        "hr_clause_write"
+      ],
+      "privilege": "UPDATE",
+      "role": "authenticated",
+      "table": "hr_contract_clause_templates"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 1,
+      "policy_names": [
+        "hr_clause_write"
+      ],
+      "privilege": "DELETE",
+      "role": "authenticated",
+      "table": "hr_contract_clause_templates"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [
+        "select"
+      ],
+      "direct_write_calls": [],
+      "literal_source_files": 4,
+      "policy_names": [
+        "hr_grades_write"
+      ],
+      "privilege": "INSERT",
+      "role": "authenticated",
+      "table": "hr_grades"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [
+        "select"
+      ],
+      "direct_write_calls": [],
+      "literal_source_files": 4,
+      "policy_names": [
+        "hr_grades_write"
+      ],
+      "privilege": "UPDATE",
+      "role": "authenticated",
+      "table": "hr_grades"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [
+        "select"
+      ],
+      "direct_write_calls": [],
+      "literal_source_files": 4,
+      "policy_names": [
+        "hr_grades_write"
+      ],
+      "privilege": "DELETE",
+      "role": "authenticated",
+      "table": "hr_grades"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 1,
+      "policy_names": [
+        "hr_leave_balances_write"
+      ],
+      "privilege": "INSERT",
+      "role": "authenticated",
+      "table": "hr_leave_balances"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 1,
+      "policy_names": [
+        "hr_leave_balances_write"
+      ],
+      "privilege": "UPDATE",
+      "role": "authenticated",
+      "table": "hr_leave_balances"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 1,
+      "policy_names": [
+        "hr_leave_balances_write"
+      ],
+      "privilege": "DELETE",
+      "role": "authenticated",
+      "table": "hr_leave_balances"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 1,
+      "policy_names": [
+        "hr_leave_requests_insert"
+      ],
+      "privilege": "INSERT",
+      "role": "authenticated",
+      "table": "hr_leave_requests"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 1,
+      "policy_names": [
+        "hr_leave_requests_update"
+      ],
+      "privilege": "UPDATE",
+      "role": "authenticated",
+      "table": "hr_leave_requests"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 1,
+      "policy_names": [
+        "hr_leave_types_write"
+      ],
+      "privilege": "INSERT",
+      "role": "authenticated",
+      "table": "hr_leave_types"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 1,
+      "policy_names": [
+        "hr_leave_types_write"
+      ],
+      "privilege": "UPDATE",
+      "role": "authenticated",
+      "table": "hr_leave_types"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 1,
+      "policy_names": [
+        "hr_leave_types_write"
+      ],
+      "privilege": "DELETE",
+      "role": "authenticated",
+      "table": "hr_leave_types"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [
+        "select"
+      ],
+      "direct_write_calls": [],
+      "literal_source_files": 3,
+      "policy_names": [
+        "hr_onboarding_write"
+      ],
+      "privilege": "INSERT",
+      "role": "authenticated",
+      "table": "hr_onboarding_drafts"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [
+        "select"
+      ],
+      "direct_write_calls": [],
+      "literal_source_files": 3,
+      "policy_names": [
+        "hr_onboarding_write"
+      ],
+      "privilege": "UPDATE",
+      "role": "authenticated",
+      "table": "hr_onboarding_drafts"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [
+        "select"
+      ],
+      "direct_write_calls": [],
+      "literal_source_files": 3,
+      "policy_names": [
+        "hr_onboarding_write"
+      ],
+      "privilege": "DELETE",
+      "role": "authenticated",
+      "table": "hr_onboarding_drafts"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [
+        "select"
+      ],
+      "direct_write_calls": [],
+      "literal_source_files": 3,
+      "policy_names": [
+        "hr_payslip_schedules_write"
+      ],
+      "privilege": "INSERT",
+      "role": "authenticated",
+      "table": "hr_payslip_schedules"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [
+        "select"
+      ],
+      "direct_write_calls": [],
+      "literal_source_files": 3,
+      "policy_names": [
+        "hr_payslip_schedules_write"
+      ],
+      "privilege": "UPDATE",
+      "role": "authenticated",
+      "table": "hr_payslip_schedules"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [
+        "select"
+      ],
+      "direct_write_calls": [],
+      "literal_source_files": 3,
+      "policy_names": [
+        "hr_payslip_schedules_write"
+      ],
+      "privilege": "DELETE",
+      "role": "authenticated",
+      "table": "hr_payslip_schedules"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [
+        "select"
+      ],
+      "direct_write_calls": [],
+      "literal_source_files": 6,
+      "policy_names": [
+        "hr_roles_write"
+      ],
+      "privilege": "INSERT",
+      "role": "authenticated",
+      "table": "hr_roles"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [
+        "select"
+      ],
+      "direct_write_calls": [],
+      "literal_source_files": 6,
+      "policy_names": [
+        "hr_roles_write"
+      ],
+      "privilege": "UPDATE",
+      "role": "authenticated",
+      "table": "hr_roles"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [
+        "select"
+      ],
+      "direct_write_calls": [],
+      "literal_source_files": 6,
+      "policy_names": [
+        "hr_roles_write"
+      ],
+      "privilege": "DELETE",
+      "role": "authenticated",
+      "table": "hr_roles"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 1,
+      "policy_names": [
+        "pos_offline_sale_receipts_insert"
+      ],
+      "privilege": "INSERT",
+      "role": "authenticated",
+      "table": "pos_offline_sale_receipts"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 1,
+      "policy_names": [
+        "pos_operator_hidden_bestsellers_own_write"
+      ],
+      "privilege": "INSERT",
+      "role": "authenticated",
+      "table": "pos_operator_hidden_bestsellers"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 1,
+      "policy_names": [
+        "pos_operator_hidden_bestsellers_own_write"
+      ],
+      "privilege": "UPDATE",
+      "role": "authenticated",
+      "table": "pos_operator_hidden_bestsellers"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 1,
+      "policy_names": [
+        "pos_operator_hidden_bestsellers_own_write"
+      ],
+      "privilege": "DELETE",
+      "role": "authenticated",
+      "table": "pos_operator_hidden_bestsellers"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 1,
+      "policy_names": [
+        "pos_operator_popular_pins_own_write"
+      ],
+      "privilege": "INSERT",
+      "role": "authenticated",
+      "table": "pos_operator_popular_pins"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 1,
+      "policy_names": [
+        "pos_operator_popular_pins_own_write"
+      ],
+      "privilege": "UPDATE",
+      "role": "authenticated",
+      "table": "pos_operator_popular_pins"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 1,
+      "policy_names": [
+        "pos_operator_popular_pins_own_write"
+      ],
+      "privilege": "DELETE",
+      "role": "authenticated",
+      "table": "pos_operator_popular_pins"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 1,
+      "policy_names": [
+        "pos_quotation_lines_staff"
+      ],
+      "privilege": "INSERT",
+      "role": "authenticated",
+      "table": "pos_quotation_lines"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 1,
+      "policy_names": [
+        "pos_quotation_lines_staff"
+      ],
+      "privilege": "UPDATE",
+      "role": "authenticated",
+      "table": "pos_quotation_lines"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 1,
+      "policy_names": [
+        "pos_quotation_lines_staff"
+      ],
+      "privilege": "DELETE",
+      "role": "authenticated",
+      "table": "pos_quotation_lines"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 4,
+      "policy_names": [
+        "pos_quotations_staff"
+      ],
+      "privilege": "INSERT",
+      "role": "authenticated",
+      "table": "pos_quotations"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 4,
+      "policy_names": [
+        "pos_quotations_staff"
+      ],
+      "privilege": "UPDATE",
+      "role": "authenticated",
+      "table": "pos_quotations"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 4,
+      "policy_names": [
+        "pos_quotations_staff"
+      ],
+      "privilege": "DELETE",
+      "role": "authenticated",
+      "table": "pos_quotations"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "ADMIN_SERVER_PROVISIONER_ONLY_WRITE_OBSERVED",
+      "direct_table_call_methods": [
+        "delete",
+        "select",
+        "upsert"
+      ],
+      "direct_write_calls": [
+        {
+          "confirmed_server_admin_provisioner": true,
+          "line": 112,
+          "method": "delete",
+          "operation": "DELETE",
+          "path": "scripts/provision-canonical-staff.mjs"
+        },
+        {
+          "confirmed_server_admin_provisioner": true,
+          "line": 115,
+          "method": "upsert",
+          "operation": "INSERT_OR_UPDATE",
+          "path": "scripts/provision-canonical-staff.mjs"
+        }
+      ],
+      "literal_source_files": 17,
+      "policy_names": [
+        "staff_roles_admin_write"
+      ],
+      "privilege": "INSERT",
+      "role": "authenticated",
+      "table": "staff_roles"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "ADMIN_SERVER_PROVISIONER_ONLY_WRITE_OBSERVED",
+      "direct_table_call_methods": [
+        "delete",
+        "select",
+        "upsert"
+      ],
+      "direct_write_calls": [
+        {
+          "confirmed_server_admin_provisioner": true,
+          "line": 112,
+          "method": "delete",
+          "operation": "DELETE",
+          "path": "scripts/provision-canonical-staff.mjs"
+        },
+        {
+          "confirmed_server_admin_provisioner": true,
+          "line": 115,
+          "method": "upsert",
+          "operation": "INSERT_OR_UPDATE",
+          "path": "scripts/provision-canonical-staff.mjs"
+        }
+      ],
+      "literal_source_files": 17,
+      "policy_names": [
+        "staff_roles_admin_write"
+      ],
+      "privilege": "UPDATE",
+      "role": "authenticated",
+      "table": "staff_roles"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "ADMIN_SERVER_PROVISIONER_ONLY_WRITE_OBSERVED",
+      "direct_table_call_methods": [
+        "delete",
+        "select",
+        "upsert"
+      ],
+      "direct_write_calls": [
+        {
+          "confirmed_server_admin_provisioner": true,
+          "line": 112,
+          "method": "delete",
+          "operation": "DELETE",
+          "path": "scripts/provision-canonical-staff.mjs"
+        },
+        {
+          "confirmed_server_admin_provisioner": true,
+          "line": 115,
+          "method": "upsert",
+          "operation": "INSERT_OR_UPDATE",
+          "path": "scripts/provision-canonical-staff.mjs"
+        }
+      ],
+      "literal_source_files": 17,
+      "policy_names": [
+        "staff_roles_admin_write"
+      ],
+      "privilege": "DELETE",
+      "role": "authenticated",
+      "table": "staff_roles"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [
+        "select"
+      ],
+      "direct_write_calls": [],
+      "literal_source_files": 8,
+      "policy_names": [
+        "stock_item_images_public_read"
+      ],
+      "privilege": "SELECT",
+      "role": "anon",
+      "table": "stock_item_images"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 1,
+      "policy_names": [
+        "supplier_preferred_skus_staff"
+      ],
+      "privilege": "INSERT",
+      "role": "authenticated",
+      "table": "supplier_preferred_skus"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 1,
+      "policy_names": [
+        "supplier_preferred_skus_staff"
+      ],
+      "privilege": "UPDATE",
+      "role": "authenticated",
+      "table": "supplier_preferred_skus"
+    },
+    {
+      "automatic_grant_allowed": false,
+      "classification": "NO_STATIC_DIRECT_WRITE_OBSERVED_NOT_RUNTIME_PROOF",
+      "direct_table_call_methods": [],
+      "direct_write_calls": [],
+      "literal_source_files": 1,
+      "policy_names": [
+        "supplier_preferred_skus_staff"
+      ],
+      "privilege": "DELETE",
+      "role": "authenticated",
+      "table": "supplier_preferred_skus"
+    }
+  ],
+  "hosted_project_ref": "bicyjghgdnzlnjqxzoud",
+  "kind": "GTR_SOURCE_LOCKED_CLIENT_DML_STATIC_REVIEW_NOT_ADMISSION_V1",
+  "limitations": [
+    "Literal static source inspection cannot prove absence of dynamic SQL, runtime/generated table names or external consumers.",
+    "The two identified staff_roles writes use an explicitly authenticated admin-key provisioning script, not an authenticated client grant.",
+    "Grant review must consider database RLS predicates, service grants, actual deployed client/API, RPC and backend owner execution.",
+    "This report is not approval to copy 77, 78 or 1,735 hosted privileges to the final candidate.",
+    "Original refusal of the live canary remains binding."
+  ],
+  "live_canary_authorized": false,
+  "observed_server_admin_direct_write_calls": 2,
+  "other_direct_write_calls_observed": 0,
+  "policy_rows_reviewed": 78,
+  "postgrest_routing_verified": false,
+  "production_data_or_credential_accessed": false,
+  "schema_version": 1,
+  "source_commit": "8131858c7c7479d178cbe9e246f83cb49ed80f5e",
+  "source_file_inventory_sha256": "c16cbe677be9f1cf0d8f2377fefda7b208c1b7c103532341ee9d9d2edb8a95b5",
+  "source_files_scanned": 1291,
+  "source_repository": "Vanguduza/Nissan-Gtr-Auto",
+  "source_scopes": [
+    "apps/web/",
+    "apps/android-management/",
+    "apps/android-customer/",
+    "apps/android-delivery/",
+    "apps/catalog-apk/",
+    "apps/ios/",
+    "supabase/functions/",
+    "packages/",
+    "bridges/",
+    "powersync/",
+    "scripts/",
+    "services/",
+    "catalog/",
+    "data-pipeline/"
+  ],
+  "static_audit_complete_for_tracked_scopes": true
+}

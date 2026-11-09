@@ -4,7 +4,8 @@ import pathlib
 import sys
 import unittest
 ROOT=pathlib.Path(__file__).parent
-sys.path.insert(0,str(ROOT))
+TOOLS=ROOT.parent/"tools"
+sys.path.insert(0,str(TOOLS))
 import gtr_final_schema_gate as gate
 
 def source():
@@ -115,7 +116,7 @@ class SchemaReviewTests(unittest.TestCase):
   for k in ('production_deployment_authorized','migration_history_repair_authorized','canary_activation_authorized','nissan_gtr_cutover_authorized','hosted_database_modified','sql_or_customer_rows_returned'):
    self.assertFalse(r[k],k)
  def test_no_sql_or_network_executor_imports(self):
-  s=(ROOT/'gtr_final_schema_gate.py').read_text()
+  s=(TOOLS/"gtr_final_schema_gate.py").read_text()
   for part in ('subprocess','socket','psycopg','requests','supabase.','os.system','eval('):
    self.assertNotIn(part,s)
 
