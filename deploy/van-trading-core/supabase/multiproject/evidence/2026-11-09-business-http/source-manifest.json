@@ -4,6 +4,7 @@
   "files": {
     "evidence/2026-11-09-business-http/business-http-probe.py.txt": "b55a673e215c296a43ab31a723aef8fe0de79f83f904fdef8e3571c68cfb963b",
     "evidence/2026-11-09-business-http/full-suite.txt": "bada6ba545defea613cfae9e2594dd57876124889f5e5936787d642e56dc5175",
+    "evidence/2026-11-09-business-http/native-root-readonly-probe-refusal.json": "90eaeb4321823adbd7cc91ea34300701e7ecc5ab4dc632d4a1b720b779df2b97",
     "evidence/2026-11-09-business-http/observer-used.py.txt": "a6762093d6f1bfb9dd0f5b83d360c87d92c6be5280c13e1fc29ec661c34dcad9",
     "evidence/2026-11-09-business-http/postforward-observer-result.json": "17752b6d1d91d360d645d1dc888fd24dfb0dae51a291f4d49af77adc807d8a4b",
     "evidence/2026-11-09-business-http/postgrest-local-http-result.json": "f52b4fc4f2aacd9a8477b978c8473b7158e3edea53fb7413c75b4b42ee1c59ab",

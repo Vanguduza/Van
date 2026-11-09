@@ -15,6 +15,7 @@ import http.client
 import json
 import os
 import pathlib
+import platform
 import secrets
 import shutil
 import signal
@@ -273,11 +274,11 @@ class Rehearsal:
         result={'schema_version':1,'state':'PASS' if error is None else 'FAIL',
             'scope':'DISPOSABLE_PG17_AUTH_REST_NATIVE_REHEARSAL_NOT_PRODUCTION',
             'checks':self.checks,'check_count':len(self.checks),'error':error,
-            'production_changes':False,'rea_used':False,
+            'production_changes':False,'rea_used':False,'runtime_architecture':platform.machine(),
             'postgres_version':self.run([self.args.pg_bin/'postgres','--version']).stdout.strip(),
             'native_binary_sha256':{name:hashlib.sha256(path.read_bytes()).hexdigest() for name,path in [('auth',self.args.auth_bin),('rest',self.args.rest_bin),('postgres',self.args.pg_bin/'postgres')]},
             'source_sha256':self.source_hashes,'observed_at':datetime.now(timezone.utc).isoformat(),
-            'not_tested':['Supabase donor image/ARM64','Storage','Realtime','Edge Functions','Studio','Supavisor','OAuth/MFA/SMTP','live VAN','GTR migration','backup restore'],
+            'not_tested':['live Supabase donor state/production deployment','Storage','Realtime','Edge Functions','Studio','Supavisor','OAuth/MFA/SMTP','live VAN','GTR migration','backup restore'],
             'cleanup_completed':not self.pg_started and all(p.poll() is not None for p in self.children)}
         result.update(self.additional_evidence())
         fd=os.open(self.args.report,os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW,0o600)

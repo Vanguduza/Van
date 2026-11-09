@@ -1,0 +1,39 @@
+{
+  "scope": "READ_ONLY_BOOTSTRAP_PRIVILEGE_PROBE_NOT_CANARY",
+  "request_id": "supabase-privileged-readonly-run-20261109-r1",
+  "host": "van-trading-core",
+  "program": "/usr/bin/docker",
+  "args": [
+    "exec",
+    "-i",
+    "--user",
+    "postgres",
+    "supabase-db",
+    "psql",
+    "-X",
+    "-qAt",
+    "-v",
+    "ON_ERROR_STOP=1",
+    "-U",
+    "supabase_admin",
+    "-d",
+    "postgres"
+  ],
+  "stdin_text": "BEGIN TRANSACTION READ ONLY;\nSET LOCAL log_statement=none;\nSET LOCAL log_min_error_statement=panic;\nSET LOCAL log_parameter_max_length=0;\nSELECT json_build_object('principal',current_user,'database',current_database(),'read_only',current_setting('transaction_read_only'),'superuser',(SELECT rolsuper FROM pg_roles WHERE rolname=current_user),'hba_visible',(SELECT count(*)>=1 FROM pg_hba_file_rules),'credential_logging_protected',current_setting('log_statement')='none' AND current_setting('log_min_error_statement')='panic' AND current_setting('log_parameter_max_length')='0');\nROLLBACK;\n",
+  "grant_state": "GRANT_ISSUED",
+  "authority": "OWNER_DIRECT_SIGNED",
+  "control_epoch": 114,
+  "arguments_sha256": "e0cf12a066832677f23b324fc3c4505302a8dec88ab5fa36e22ef2e41dda402d",
+  "grant_expires_at": "2026-11-09T06:24:05.785869Z",
+  "run_reply": [
+    {
+      "type": "text",
+      "text": "QUALIFIED_REMOTE_ACTION_OWNER_REQUIRED"
+    }
+  ],
+  "run_is_error": true,
+  "executed": false,
+  "sql_result_observed": false,
+  "production_effects": false,
+  "retried_via_other_connector": false
+}

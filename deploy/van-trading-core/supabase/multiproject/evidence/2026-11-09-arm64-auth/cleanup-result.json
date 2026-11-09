@@ -1,0 +1,13 @@
+{
+  "fixture_image_layers_removed": [
+    "dbd5bef8ba86"
+  ],
+  "copied_runtime_libraries_removed": true,
+  "additional_completed_synthetic_data_removed": [
+    "attempt-9e4856f58d"
+  ],
+  "all_logs_source_receipts_retained": true,
+  "all_fixture_image_layers_absent": true,
+  "disk_free_bytes": 4112592896,
+  "no_fixture_containers": true
+}
