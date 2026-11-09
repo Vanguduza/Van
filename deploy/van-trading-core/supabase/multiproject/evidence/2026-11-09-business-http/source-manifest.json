@@ -1,0 +1,23 @@
+{
+  "canary_release_authorized": false,
+  "candidate_parent": "8d55570a0d0fd713f2508025da65fba0e39c7948",
+  "files": {
+    "evidence/2026-11-09-business-http/business-http-probe.py.txt": "b55a673e215c296a43ab31a723aef8fe0de79f83f904fdef8e3571c68cfb963b",
+    "evidence/2026-11-09-business-http/full-suite.txt": "bada6ba545defea613cfae9e2594dd57876124889f5e5936787d642e56dc5175",
+    "evidence/2026-11-09-business-http/native-root-readonly-probe-refusal.json": "90eaeb4321823adbd7cc91ea34300701e7ecc5ab4dc632d4a1b720b779df2b97",
+    "evidence/2026-11-09-business-http/observer-used.py.txt": "a6762093d6f1bfb9dd0f5b83d360c87d92c6be5280c13e1fc29ec661c34dcad9",
+    "evidence/2026-11-09-business-http/postforward-observer-result.json": "17752b6d1d91d360d645d1dc888fd24dfb0dae51a291f4d49af77adc807d8a4b",
+    "evidence/2026-11-09-business-http/postgrest-local-http-result.json": "f52b4fc4f2aacd9a8477b978c8473b7158e3edea53fb7413c75b4b42ee1c59ab",
+    "evidence/2026-11-09-business-http/replay-console.txt": "bc4e89a3b24b513548197f8ae786118069fe5871d6a9a58af993dce17c2d6b32",
+    "evidence/2026-11-09-business-http/replay-final-receipt.json": "1ac085b0d837ca958102eaa99ff13b1e55892a2923a9b88e6b9fd8c0bb6ce2d0"
+  },
+  "http_checks": 23,
+  "invariant_checks": 16,
+  "native_exit": 0,
+  "native_job": "djob_6d2dab1b18fa9242fb789390",
+  "production_effects": false,
+  "source_files": {
+    "POSTGREST_BUSINESS_WORKFLOWS_2026-11-09.md": "24a4b64d26fc34f2526792713734d70a6a9414771ffef128614e63dff8d2728e",
+    "tests/business_http_probe.py": "b55a673e215c296a43ab31a723aef8fe0de79f83f904fdef8e3571c68cfb963b"
+  }
+}

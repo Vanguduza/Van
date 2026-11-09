@@ -1,0 +1,16 @@
+{
+  "archive": "https://nodejs.org/dist/v24.22.2/node-v24.22.2-linux-x64.tar.xz",
+  "executed_node_sha256": "904a6d3484241d466989f9df9ba3aab822b1496191bdb28230eb491a55c32a52",
+  "fs_xattr_native_binding_sha256": "ac87e6c18951701bb96c757e9fa6193bbc3a3c49b30190d9a660ad743aadb7a0",
+  "full_upstream_typecheck_claimed": false,
+  "generated_dist_sha256": "f70fa3259be30186da3a131dd546e3573d1cbbdecc3e6c8e003a6b14f27d1150",
+  "native_programs_staged_not_system_installed": true,
+  "node": "v24.22.2",
+  "production_image_executed": false,
+  "sha256": "48cc0e21e048790e54c0cf5749c2725005313d652651c40b7a21feb9697aaf75",
+  "upstream_build_script_sha256": "500056527b3e00c6e17a9d215fc8874a939c1bb1d1192cb320fe7104f6b444a4",
+  "upstream_lock_sha256": "9b4b98d4a1257d651c6de8970f7ae6256505601b5a5f4dc755ce74d850a59179",
+  "upstream_source_dirty": false,
+  "upstream_storage_commit": "01c95148a981a88b5f7e9014571a2926567b51e3",
+  "upstream_target_code_modified": false
+}

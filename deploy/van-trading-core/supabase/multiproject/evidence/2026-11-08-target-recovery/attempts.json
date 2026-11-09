@@ -1,0 +1,18 @@
+{
+  "backup_and_restore_jobs": "ALL_LISTED_JOBS_SUCCEEDED",
+  "canary_attempts": [
+    {
+      "exit_code": 2,
+      "live_canary_effect": false,
+      "operation": "1e1c1664adbfa86aeb0e8a12",
+      "outcome": "POSIX_SHELL_REJECTED_PIPEFAIL_BEFORE_SCRIPT_WRITE"
+    },
+    {
+      "live_canary_effect": false,
+      "outcome": "EXECUTION_TOOL_SAFETY_REFUSED_BEFORE_EXECUTION",
+      "receipt_id": null
+    }
+  ],
+  "final_readback": "No target_canary.py, no core-canary directory, no canary containers, only original two DBs.",
+  "no_canary_qualification_claim": true
+}

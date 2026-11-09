@@ -1,0 +1,313 @@
+{
+  "schema_version": 1,
+  "kind": "GTR_READ_ONLY_HOSTED_FUNCTION_REFERENCE_STATIC_METADATA_V1",
+  "project_ref": "bicyjghgdnzlnjqxzoud",
+  "source_commit": "8131858c7c7479d178cbe9e246f83cb49ed80f5e",
+  "scope": "public_private_pg_proc_function_ddl_text_reference_NOT_BEHAVIOR_PROOF",
+  "hosted_tx": "READ ONLY REPEATABLE READ",
+  "tables": [
+    {
+      "table": "account_period_balances",
+      "references": 3,
+      "invoker_references": 1,
+      "authenticated_invoker_identities": [
+        {
+          "schema": "public",
+          "function": "forbid_account_period_direct_mutation",
+          "arguments": ""
+        }
+      ],
+      "authenticated_executable_invoker_references": 1
+    },
+    {
+      "table": "ai_worker_schedules",
+      "references": 1,
+      "invoker_references": 0,
+      "authenticated_invoker_identities": [],
+      "authenticated_executable_invoker_references": 0
+    },
+    {
+      "table": "catalog_diagram_parts",
+      "references": 2,
+      "invoker_references": 1,
+      "authenticated_invoker_identities": [
+        {
+          "schema": "public",
+          "function": "get_catalog_diagram",
+          "arguments": "p_maker_slug text, p_model_slug text, p_variant_slug text, p_section_slug text"
+        }
+      ],
+      "authenticated_executable_invoker_references": 1
+    },
+    {
+      "table": "catalog_diagrams",
+      "references": 4,
+      "invoker_references": 3,
+      "authenticated_invoker_identities": [
+        {
+          "schema": "public",
+          "function": "get_catalog_diagram",
+          "arguments": "p_maker_slug text, p_model_slug text, p_variant_slug text, p_section_slug text"
+        },
+        {
+          "schema": "public",
+          "function": "get_catalog_diagram_by_slug",
+          "arguments": "p_maker_slug text, p_model_slug text, p_variant_slug text, p_section_slug text, p_diagram_slug text"
+        },
+        {
+          "schema": "public",
+          "function": "list_catalog_diagrams",
+          "arguments": "p_maker_slug text, p_model_slug text, p_variant_slug text, p_section_slug text"
+        }
+      ],
+      "authenticated_executable_invoker_references": 3
+    },
+    {
+      "table": "catalog_makers",
+      "references": 1,
+      "invoker_references": 1,
+      "authenticated_invoker_identities": [
+        {
+          "schema": "public",
+          "function": "list_catalog_makers",
+          "arguments": ""
+        }
+      ],
+      "authenticated_executable_invoker_references": 1
+    },
+    {
+      "table": "catalog_models",
+      "references": 3,
+      "invoker_references": 2,
+      "authenticated_invoker_identities": [
+        {
+          "schema": "public",
+          "function": "list_catalog_makers",
+          "arguments": ""
+        },
+        {
+          "schema": "public",
+          "function": "list_catalog_models",
+          "arguments": "p_maker_slug text"
+        }
+      ],
+      "authenticated_executable_invoker_references": 2
+    },
+    {
+      "table": "catalog_sections",
+      "references": 1,
+      "invoker_references": 1,
+      "authenticated_invoker_identities": [
+        {
+          "schema": "public",
+          "function": "list_catalog_sections",
+          "arguments": "p_maker_slug text, p_model_slug text, p_variant_slug text"
+        }
+      ],
+      "authenticated_executable_invoker_references": 1
+    },
+    {
+      "table": "catalog_variants",
+      "references": 3,
+      "invoker_references": 2,
+      "authenticated_invoker_identities": [
+        {
+          "schema": "public",
+          "function": "list_catalog_variants",
+          "arguments": "p_maker_slug text, p_model_slug text"
+        },
+        {
+          "schema": "public",
+          "function": "search_pos_vehicle_spares",
+          "arguments": "p_model_slug text, p_chassis_code text, p_engine_code text, p_query text, p_limit integer"
+        }
+      ],
+      "authenticated_executable_invoker_references": 2
+    },
+    {
+      "table": "customer_compare_items",
+      "references": 3,
+      "invoker_references": 0,
+      "authenticated_invoker_identities": [],
+      "authenticated_executable_invoker_references": 0
+    },
+    {
+      "table": "customer_product_review_photos",
+      "references": 1,
+      "invoker_references": 0,
+      "authenticated_invoker_identities": [],
+      "authenticated_executable_invoker_references": 0
+    },
+    {
+      "table": "customer_wishlist_items",
+      "references": 5,
+      "invoker_references": 0,
+      "authenticated_invoker_identities": [],
+      "authenticated_executable_invoker_references": 0
+    },
+    {
+      "table": "finance_refunds",
+      "references": 1,
+      "invoker_references": 0,
+      "authenticated_invoker_identities": [],
+      "authenticated_executable_invoker_references": 0
+    },
+    {
+      "table": "finance_requisition_approvals",
+      "references": 3,
+      "invoker_references": 1,
+      "authenticated_invoker_identities": [
+        {
+          "schema": "public",
+          "function": "guard_finance_req_approvals_immutable",
+          "arguments": ""
+        }
+      ],
+      "authenticated_executable_invoker_references": 1
+    },
+    {
+      "table": "finance_requisition_thresholds",
+      "references": 1,
+      "invoker_references": 1,
+      "authenticated_invoker_identities": [
+        {
+          "schema": "public",
+          "function": "_finance_req_required_approvals",
+          "arguments": "p_req_type public.finance_requisition_type, p_currency public.currency_code, p_amount numeric"
+        }
+      ],
+      "authenticated_executable_invoker_references": 1
+    },
+    {
+      "table": "forecast_suggestions",
+      "references": 3,
+      "invoker_references": 0,
+      "authenticated_invoker_identities": [],
+      "authenticated_executable_invoker_references": 0
+    },
+    {
+      "table": "hr_contract_clause_templates",
+      "references": 0,
+      "invoker_references": 0,
+      "authenticated_invoker_identities": [],
+      "authenticated_executable_invoker_references": 0
+    },
+    {
+      "table": "hr_grades",
+      "references": 6,
+      "invoker_references": 0,
+      "authenticated_invoker_identities": [],
+      "authenticated_executable_invoker_references": 0
+    },
+    {
+      "table": "hr_leave_balances",
+      "references": 1,
+      "invoker_references": 0,
+      "authenticated_invoker_identities": [],
+      "authenticated_executable_invoker_references": 0
+    },
+    {
+      "table": "hr_leave_requests",
+      "references": 2,
+      "invoker_references": 0,
+      "authenticated_invoker_identities": [],
+      "authenticated_executable_invoker_references": 0
+    },
+    {
+      "table": "hr_leave_types",
+      "references": 0,
+      "invoker_references": 0,
+      "authenticated_invoker_identities": [],
+      "authenticated_executable_invoker_references": 0
+    },
+    {
+      "table": "hr_onboarding_drafts",
+      "references": 2,
+      "invoker_references": 0,
+      "authenticated_invoker_identities": [],
+      "authenticated_executable_invoker_references": 0
+    },
+    {
+      "table": "hr_payslip_schedules",
+      "references": 2,
+      "invoker_references": 0,
+      "authenticated_invoker_identities": [],
+      "authenticated_executable_invoker_references": 0
+    },
+    {
+      "table": "hr_roles",
+      "references": 11,
+      "invoker_references": 0,
+      "authenticated_invoker_identities": [],
+      "authenticated_executable_invoker_references": 0
+    },
+    {
+      "table": "pos_offline_sale_receipts",
+      "references": 1,
+      "invoker_references": 0,
+      "authenticated_invoker_identities": [],
+      "authenticated_executable_invoker_references": 0
+    },
+    {
+      "table": "pos_operator_hidden_bestsellers",
+      "references": 3,
+      "invoker_references": 0,
+      "authenticated_invoker_identities": [],
+      "authenticated_executable_invoker_references": 0
+    },
+    {
+      "table": "pos_operator_popular_pins",
+      "references": 3,
+      "invoker_references": 0,
+      "authenticated_invoker_identities": [],
+      "authenticated_executable_invoker_references": 0
+    },
+    {
+      "table": "pos_quotation_lines",
+      "references": 3,
+      "invoker_references": 0,
+      "authenticated_invoker_identities": [],
+      "authenticated_executable_invoker_references": 0
+    },
+    {
+      "table": "pos_quotations",
+      "references": 4,
+      "invoker_references": 0,
+      "authenticated_invoker_identities": [],
+      "authenticated_executable_invoker_references": 0
+    },
+    {
+      "table": "staff_roles",
+      "references": 32,
+      "invoker_references": 2,
+      "authenticated_invoker_identities": [
+        {
+          "schema": "public",
+          "function": "_chat_staff_roles",
+          "arguments": ""
+        }
+      ],
+      "authenticated_executable_invoker_references": 1
+    },
+    {
+      "table": "supplier_preferred_skus",
+      "references": 1,
+      "invoker_references": 0,
+      "authenticated_invoker_identities": [],
+      "authenticated_executable_invoker_references": 0
+    }
+  ],
+  "table_count": 30,
+  "tables_with_any_references": 28,
+  "tables_with_authenticated_executable_invoker_references": 10,
+  "production_mutated": false,
+  "source_bodies_returned": false,
+  "manual_review_required": true,
+  "authorization_to_apply_any_grant": false,
+  "limits": [
+    "Text-based pg_get_functiondef matching may match comments or nonexecuted paths and may miss dynamic SQL.",
+    "Invoker function reference does not prove that the authenticated role needs direct INSERT/UPDATE/DELETE grants.",
+    "No function, business table query or customer operation was executed.",
+    "Original canary refusal remains binding."
+  ]
+}

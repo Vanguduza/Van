@@ -1,0 +1,98 @@
+{
+  "admin_image_recipe_base": {
+    "image_built": false,
+    "index_digest": "sha256:48e4b67d85f87bd551df43704e24d252f56cc5f8e9718841aace50f19948f0f9",
+    "platforms": [
+      {
+        "architecture": "amd64",
+        "os": "linux"
+      },
+      {
+        "architecture": "arm64",
+        "os": "linux",
+        "variant": "v8"
+      }
+    ],
+    "repository": "library/node",
+    "signature_verified": false,
+    "tag": "22.23.2-bookworm-slim"
+  },
+  "architecture": "linux/amd64",
+  "browser": {
+    "browser_engine": "firefox",
+    "browser_version": "142.0.1",
+    "chromium_sandbox_required": true,
+    "fixture_network_only": true,
+    "full_studio_ui_qualified": false,
+    "host_namespace_sandbox_complete_qualification": false,
+    "sandbox_explicitly_disabled": false,
+    "separate_browser_sessions": true
+  },
+  "docker_daemon_used": false,
+  "native_file_sha256": {
+    "admin-browser/browsers/firefox-1495/firefox/firefox": "6b8676353f9dc026824a2864604ff498737a327c06ba4d8c3e3d550d08f29f03",
+    "bin/studio-node22/node": "3517c2df0b2f8cd7f422b4b8450ef81c6889f08eb03e281d6de9079b15e6a327",
+    "meta-source/dist/server/server.js": "2abde0dcc7cf0ac715fddff113ff0560d6fb14b80412385f41db7bfe9329066f",
+    "studio-release/app/apps/studio/server.js": "a1f06686e858014eadc112e0aa9ac03c29a7fd3aaba0ca169b6611ad4f3f68c5",
+    "supavisor-release/app/lib/supavisor-2.9.12/ebin/Elixir.Supavisor.Application.beam": "f96b03ea63222f8683da737c1e9ecedc8b523e91dc54f6897f6d99abe0c15955",
+    "supavisor-source/lib/supavisor/application.ex": "ab6cef910bcde9852e0a26481df40a31a453c48a1d02d1f71686fd86bde98d56"
+  },
+  "node_runtime": {
+    "layer": "sha256:51c53f95c2cae3d00dfc0350297c92dea913fe129ec38b8deb8313e5f3e0297d",
+    "sha256": "3517c2df0b2f8cd7f422b4b8450ef81c6889f08eb03e281d6de9079b15e6a327",
+    "system_install": false,
+    "version": "v22.23.2"
+  },
+  "pooler_fixture_network_amendment": {
+    "effect": "exact-source Application listener bind addresses only; in-memory compilation; original release files unchanged",
+    "path": "tests/pooler_loopback_fixture.exs",
+    "production_network_qualification": false,
+    "sha256": "7a777083b9b583bc74d5c45e22c8966b76a2c5608f16f209764f88cfd8c07d9b"
+  },
+  "private_package_locks": {
+    "admin-browser/package-lock.json": "f8deb6d2277eb789a6c25f753be84fa269de0e8ae6196877908d8c4f71ec5169",
+    "meta-source/package-lock.json": "3e7096fb3e49d571dcf4066a58af9a212749fb43bf5ce66886dc6a8d9c8a925b"
+  },
+  "production_images_built": false,
+  "schema_version": 1,
+  "signature_verification_claimed": false,
+  "sources": {
+    "meta-source": {
+      "git_commit": "f380cc5be21edef4e77d9838c732d1f20af0b3c0",
+      "tracked_source_unchanged": true
+    },
+    "supavisor-source": {
+      "git_commit": "e8719d9ac5a43604c46d2d9e15bb34c76dea8f12",
+      "tracked_source_unchanged": true
+    }
+  },
+  "studio_oci": {
+    "manifest_digest": "sha256:0f797270d236090c79fd26a97a1e5d1cf7ec5f36e93b9b4c3c453e1cb1aeadab",
+    "repository": "supabase/studio",
+    "signature_verified": false,
+    "source_commit": null,
+    "tag": "2026.09.07-sha-7996410"
+  },
+  "supavisor_oci": {
+    "manifest_digest": "sha256:68ec476a3cfed150fb067995e12bd751b4dd5872acb9f7d9ce762d63ffd4f64d",
+    "repository": "supabase/supavisor",
+    "signature_verified": false,
+    "source_commit": "e8719d9ac5a43604c46d2d9e15bb34c76dea8f12",
+    "tag": "2.9.12"
+  },
+  "supavisor_original_image_libraries": {
+    "files": [
+      {
+        "name": "libcrypto.so.1.1",
+        "sha256": "3e0ce80c9e81e79b938d29f01a4d89c4e929c177a4d6dd4fa0447e93c627ce74"
+      },
+      {
+        "name": "libssl.so.1.1",
+        "sha256": "13bbf733c6f15565a8999c19678d5c5d74e087c9b5bd9aa86a368d7075233207"
+      }
+    ],
+    "layer": "sha256:55534d9909ecd18467599b415fa2553c3106849154ae8a361a75f1a24f2a4364",
+    "system_install": false
+  },
+  "system_installation_performed": false
+}

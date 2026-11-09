@@ -1,0 +1,116 @@
+{
+  "state": "PASS",
+  "source_commit": "8131858c7c7479d178cbe9e246f83cb49ed80f5e",
+  "migration_plans": [
+    {
+      "file": "20261102080000_reconciled_erp_baseline.sql",
+      "source_sha256": "2502826ee08e67d7bcee3f7bdacdc31d944ccbb1bf9c3d86090b79b938ea016c",
+      "planned_sql_sha256": "69489a8aaca6e498506439bf2bb375a4aa9a38375aaf0dda2fe20472234ecb4a",
+      "application_body_preserved": true,
+      "platform_owner_section": true,
+      "cron_edits": 5
+    },
+    {
+      "file": "20261102085000_baseline_runtime_contracts.sql",
+      "source_sha256": "c4e2791d640b1c4e72f0ba5bd2a4be28ac5ad9e7c499ffc57471c4def04329f1",
+      "planned_sql_sha256": "3131643e35669dfc0c3f0b3a9099f7a2adc949e26b18c363a21f2d1cd2aa52a9",
+      "application_body_preserved": true,
+      "platform_owner_section": false,
+      "cron_edits": 0
+    },
+    {
+      "file": "20261102085100_pos_published_vehicle_validation.sql",
+      "source_sha256": "bd3ca928583aa9a0fd44bea028f457e93009d87d953fb55b605a945f2eb44dc0",
+      "planned_sql_sha256": "dbda23d20f2d029c32ed3217d6fa2371fb740c22a660cb78375ba3a37d7097cc",
+      "application_body_preserved": true,
+      "platform_owner_section": false,
+      "cron_edits": 0
+    },
+    {
+      "file": "20261102085200_cashier_reserved_settlement_posting.sql",
+      "source_sha256": "a52f97b42101481d744d824da9e88c878c79faa60094d87ef5598862f1fdd581",
+      "planned_sql_sha256": "be9c461235b9ba88ea131b291c8a00bcd1894266a82d15da03201c64455d7953",
+      "application_body_preserved": true,
+      "platform_owner_section": false,
+      "cron_edits": 0
+    },
+    {
+      "file": "20261102085300_storage_policy_helper_execution.sql",
+      "source_sha256": "355e863086c17a1691df2f9e56b347215a86ffa91d31d1515094a8b29315f4a2",
+      "planned_sql_sha256": "c53864518a00b17229f0e9f8b43545fda9e2d8cbaef951ab6219d0f2e4be0265",
+      "application_body_preserved": true,
+      "platform_owner_section": false,
+      "cron_edits": 0
+    },
+    {
+      "file": "20261102085400_retained_workflow_posting_scopes.sql",
+      "source_sha256": "f4636eafd3345f0aa4b343ae6a814fed79f466b19ca81ebadecd155748a72cdd",
+      "planned_sql_sha256": "92b8141bdcd947f150013975a365e12bf9cce3eaccfb238db908aedc91ef96a6",
+      "application_body_preserved": true,
+      "platform_owner_section": false,
+      "cron_edits": 0
+    },
+    {
+      "file": "20261102090000_payment_settlement_reconciliation.sql",
+      "source_sha256": "f52b0b5f301df0abc63b034f4a14b9a079cc9ab8db0e95684c502ca52205eee4",
+      "planned_sql_sha256": "5ab5982b3aaa60913e89ac7098c217ebf301f04226fde4ac77dab9e10743f26f",
+      "application_body_preserved": true,
+      "platform_owner_section": false,
+      "cron_edits": 0
+    },
+    {
+      "file": "20261102091000_customer_garage_identity.sql",
+      "source_sha256": "d89dc414fa09961dd49bf865823d99f6b5a294b85362bd0f327ca1a5f90b5d3b",
+      "planned_sql_sha256": "04610cf5e20709a21a3113cf144cf5040224ddbe47f64bca5cbd07b66048655b",
+      "application_body_preserved": true,
+      "platform_owner_section": false,
+      "cron_edits": 0
+    },
+    {
+      "file": "20261102092000_customer_order_projection_reconciliation.sql",
+      "source_sha256": "32f528b58a6603cffe422ca5db5107beacc62be901a3c440973fcb4d6c69cc96",
+      "planned_sql_sha256": "89589ae0f9831338f9c550969257459fac586d23715231b6ee2ff84fc33274ef",
+      "application_body_preserved": true,
+      "platform_owner_section": false,
+      "cron_edits": 0
+    },
+    {
+      "file": "20261102100000_staff_self_service_reconciliation.sql",
+      "source_sha256": "3ef739b8c361f5d7a4b0aff2bc21353c0f2bf6ecf6d532fc83207fc1f1e5d271",
+      "planned_sql_sha256": "f5386c7d13367c708146707be4c8a19750b2ccd042be10369b37dbc266c67c69",
+      "application_body_preserved": true,
+      "platform_owner_section": true,
+      "cron_edits": 0
+    },
+    {
+      "file": "20261102100100_staff_payroll_reconciliation.sql",
+      "source_sha256": "362699bd03a8753336a26aef1fb5b3c72a595a9610683a7e707a4c22810ca615",
+      "planned_sql_sha256": "5ce74c239c266d8c187fb2a211366d1a0de42587bf458b99194f2e7cce11ed50",
+      "application_body_preserved": true,
+      "platform_owner_section": false,
+      "cron_edits": 0
+    },
+    {
+      "file": "20261102100200_staff_merchandising_reconciliation.sql",
+      "source_sha256": "77b6d8b1575b950210d75d756b7bec3d2529adf8dd44cb8740290918214b37c0",
+      "planned_sql_sha256": "0d23f8f312ff17eb9c9dae41be5c5bf6f81e20d0267e34f6abf018b77652a7b8",
+      "application_body_preserved": true,
+      "platform_owner_section": false,
+      "cron_edits": 0
+    },
+    {
+      "file": "20261102100300_staff_overview_reconciliation.sql",
+      "source_sha256": "d392ff6f364a7df69b4190b15160f769ead0af45bdfe924371afefe53aa56979",
+      "planned_sql_sha256": "6d61409e51eda3c00f474961a76f81d950b8d209b6d0fb276afc77b2435738d7",
+      "application_body_preserved": true,
+      "platform_owner_section": false,
+      "cron_edits": 0
+    }
+  ],
+  "plan_count": 13,
+  "platform_context_sections": 2,
+  "production_authorized": false,
+  "planned_sql_executed": false,
+  "new_guarded_runner_transferred": false,
+  "source_sha256": "568d0bf4663bbcd26640a5865d6426e2665089176718896393baac31eb40ba39"
+}

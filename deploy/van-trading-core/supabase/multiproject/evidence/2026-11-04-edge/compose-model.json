@@ -1,0 +1,32 @@
+{
+  "check_count": 16,
+  "checks": {
+    "edge_runtime_image_digest_pinned": true,
+    "legacy_shared_database_credential_not_in_edge": true,
+    "legacy_single_project_signing_disabled": true,
+    "main_worker_launch_explicit": true,
+    "main_worker_mount_readonly": true,
+    "native_security_constraints_retained": true,
+    "no_new_postgres_or_functions_service": true,
+    "no_public_function_ports": true,
+    "original_function_healthcheck_preserved": true,
+    "original_services_preserved_exactly": true,
+    "original_volume_targets_preserved": true,
+    "other_services_byte_semantics_unchanged": true,
+    "private_edge_registry_mount_readonly": true,
+    "private_project_registry_is_staged_only": true,
+    "registry_hash_bound": true,
+    "resource_limits_present": true
+  },
+  "containers_started": false,
+  "docker_daemon_used": false,
+  "donor_ref": "cd4aab5377f2f1a6734a6cde7d6b8a7635a9a19d",
+  "production_arm64_qualified": false,
+  "production_image_executed": false,
+  "service_count": 11,
+  "source_sha256": {
+    "tests/check_edge_compose.py": "86b56a87ceb4f9ffda0a9297aba77b929297821d92fb1ef74cda01ff0027b6c3",
+    "tools/shared_edge.py": "ebe5fee85a64ced5d0ecc84f1c8f32e5d996aa9248d747c7499d4712b35fd0ec"
+  },
+  "state": "PASS"
+}

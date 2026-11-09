@@ -1,0 +1,40 @@
+# ARM64 multi-project Supabase — read-only release preflight
+
+**Disposition: preparation advanced; live canary activation is still not authorized.** This checkpoint adds a deterministic read-only gate for source and target compatibility without changing production PostgreSQL, Docker, systemd, tenant credentials, Auth, Storage or the original stopped canary operation. It is not Root-signed release admission, an approval to use a different execution channel, or a synthetic claim of runtime readiness.
+
+## Source and execution
+
+The single-installation product candidate is `e62c0f0948b1d0c8778deee3a4460bc378a003eb` inside VAN PR #102. A subsequent documentation-only checkpoint, `8d72ddf8af68f9905cf704321ea44dbff78a1985`, retained the actual backup/physical-restore evidence; product bootstrap code did not change. The PR is draft and unmerged.
+
+The added `tools/target_admission.py` **evaluates only an externally supplied, non-secret read-only observation snapshot**; it does not discover services, execute SQL, open an SSH connection, run a Docker operation or produce credentials. Every report is explicitly marked **not qualification, not canary authorization and not production release** even if all technical gates would become green. Unknown schema fields, invalid types, symlinked inputs and existing output paths are refused. Results can only be placed into a new local mode-0600 file. `tests/test_target_admission.py` exercises 25 validation and refusal cases using the standard Python unit test runner.
+
+The observation input was assembled from independent live authorized read-only checks of `van-trading-core`, the Root-signed non-mutating identity receipt and the previously retained backup/restoration receipts. **It is not an atomic signed snapshot** and does not substitute for a fresh original-owner readback immediately before deployment. The non-secret evaluated result is in `evidence/2026-11-08-target-admission/`.
+
+## Exact target observations and compatibility findings
+
+- Host is **aarch64 / ARM64**. Eleven existing Supabase containers are healthy and `vati-supabase.service` remains active in the original two-file Compose model. Git blob identities of both original Compose files and the SHA-256 of the original systemd unit match the reviewed donor, including the original `--remove-orphans` startup pattern. No new tenant containers exist.
+- Production PostgreSQL is **17.6**, with only `_supabase` and `postgres` application/control databases. No `dial_` role or proposed GTR database name collisions were observed. The existing global API roles `anon`, `authenticated` and `service_role` satisfy the candidate's no-login/membership/bypassRLS expectations. Existing legacy database `CONNECT` grants to `PUBLIC` mean explicit first-match HBA isolation remains essential.
+- The container's **`postgres` role is not a superuser**. It can create roles/databases, but it **cannot SET** `log_statement`, `log_min_error_statement` or `log_parameter_max_length`, and **cannot inspect** `pg_hba_file_rules`. The proposed role bootstrap deliberately manipulates those protected settings to prevent sensitive SQL/credential logging; do not remove those protections simply to make an unprivileged bootstrap run. The existing `supabase_admin` superuser role was observed **as metadata only**; its credentials were neither read nor exercised for deployment. An explicitly admitted privileged execution identity and scoped HBA mechanism must be qualified before activation.
+- PostgreSQL `wal_level` is already `logical`, but **`max_replication_slots=5` with 0 slots observed in use**. The native shared Realtime fixture observed two temporary slots per project. A conservative deployment policy of two projects plus **two reserved slots** therefore needs **six total slots**, exceeding the current five. This is a **full Realtime rollout gate**, not a blocker intrinsic to an Auth/REST-only canary. Raising the setting normally needs database restart and an independently qualified WAL/resource/recovery plan; the preflight makes no such change.
+- Live memory and disk observations were approximately **4.7 GiB available memory** and **4.2 GB free root filesystem**. A 2 GiB/2 GiB minimal preflight floor passes; this is **not** measured production capacity or approval for additional containers, images or sustained concurrent services.
+- The previously recorded encrypted physical backup is retained on the target and the off-host `dial-control` custody location, both with the same known ciphertext SHA-256 `e6f4147d9c994d220e12664cacf311935f54f9de0a8b2f87ea1c23c0eb42f0ff`. The original isolated ARM64 restoration passed 17 physical checks and 57 table-digest comparisons. The off-host verification key was not read during this checkpoint. This remains an earlier point-in-time recovery, not continuous PITR or simultaneous active-writer database+object preservation.
+- The current donor Auth, REST, Storage, Edge, Studio, Supavisor, Envoy and database **images are native ARM64**, but the proposed upgraded Realtime derivative/admin gateway have not been independently built and admitted for ARM64. The original Realtime image is v2.134.10, while the candidate slot correction is pinned to v2.152.0; this is a version/ABI and container-admission gate.
+- A non-mutating `id -u` previously completed through the original signed Global DIAL Root route with terminal receipt `action_ef041551-e052-4027-bd32-1f810e437e97`. This proves that exact command, **not** permission to rerun the previously tool-refused canary effect. The canary activation remains refused, unreconciled and unexecuted, with no release receipt.
+
+## Deterministic gate results
+
+The local evaluator returned **13 of 20 observation gates passing**, with seven full-release blockers. **Three specifically block Auth/REST canary activation**:
+
+1. Qualified, privileged bootstrap identity and exact `pg_hba_file_rules` visibility are not present under the observed current SQL principal.
+2. The original canary operation was refused before execution, and its authorization/safety refusal has not been reconciled by the originating admission authority.
+3. An exact, signed product release/admission receipt for this proposed canary operation is absent.
+
+Full-service activation also requires sufficient independently approved replication-slot headroom, target-compatible admitted ARM64 images, the canonical complete `vati-supabase.service` lifecycle installation, and actual full-service coexistence evidence on the target. All four are currently unqualified/unperformed.
+
+The output **always** sets `canary_activation_authorized=false`, `release_authorized=false` and `production_effects=false`, even if a caller fabricates an all-green metadata snapshot. This evaluator is not an authority issuer.
+
+## Next original-owner actions, not attempted here
+
+Reconcile the previously refused canary operation using the original qualified admission and release process; do not replay or disguise its refused command through another connector. Independently qualify the specific high-privilege SQL identity and HBA placement without removing credential-protecting logging gates. Adopt an explicit Realtime slot/WAL/restart strategy, qualify ARM64 service images, and refresh source/backup/host/capacity evidence. Only after signed native admission should the project perform a new, bounded second-database/Auth/REST canary with negative cross-project tests and preservation receipts. Shared-service overlays must be brought up through one complete canonical Compose start **and** stop model, never an incomplete `--remove-orphans` model. Nissan GTR's hosted history, Auth, Storage/R2, function/webhook/payment flows and business invariants remain subject to a separate reversible migration rehearsal before cutover.
+
+The original Supabase project, all original containers, PostgreSQL databases, credentials and application data were left untouched by this checkpoint. REA is not required to evaluate the target facts or implement the underlying Supabase architecture.

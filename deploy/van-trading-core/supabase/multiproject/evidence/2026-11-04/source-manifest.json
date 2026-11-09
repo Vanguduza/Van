@@ -1,0 +1,52 @@
+{
+  "base_commit": "62827134d7de41692b0dbd043e4f497a6beb1834",
+  "commands": [
+    "python3 -m unittest discover -s deploy/van-trading-core/supabase/multiproject/tests -v",
+    "python3 deploy/van-trading-core/supabase/multiproject/tests/rehearse_native.py --pg-bin <staged-pg17-bin> --pg-lib <staged-lib> --auth-bin <pinned-auth> --rest-bin <pinned-postgrest> --nginx <staged-nginx> --report <new-private-result>"
+  ],
+  "evidence_sha256": {
+    "native-result.json": "30ccd1f0c511b28fa93d20e95fa0099abb1b0f4ddafc93bdbcc3fc985018a475",
+    "native-run.txt": "3c9dbb7da58e7c9ee66e7947816cfc744623ca47d5f7bf855cbcb000454d59a1",
+    "unit-tests.txt": "519d00e911b6bcdada3fbee6594ef3de7befd6225ca6ad94cdb0046f6646fd0d"
+  },
+  "execution_route": "REMOTE_DESKTOP_COMMANDER_NONROOT_ISOLATED_REHEARSAL",
+  "host": "dial-control",
+  "native_checks": {
+    "failed": 0,
+    "passed": 101
+  },
+  "production_deployed": false,
+  "python": "3.12.3",
+  "rea_used": false,
+  "recorded_at": "2026-11-04T05:31:21.364273+00:00",
+  "repository": "Vanguduza/Van",
+  "root_signed_qualification": false,
+  "schema_version": 1,
+  "source_sha256": {
+    "ARCHITECTURE.md": "3bbc49ebb9baba8d2fec8d8d65a1dd20938144653efc06703ef29dd66928ee88",
+    "INTEGRATION_GATES.md": "b827b41d26f8d77bde74dc09d9f02f80e58d7d126c6d6d437c2de1e8e1819070",
+    "NISSAN_GTR_CUTOVER.md": "68b1335ea08fab2bf7d3d8750871fbb73b2cede6a05b2b07ed731d41065967ac",
+    "QUALIFICATION_2026-10-24.md": "085455da197f3d781d25dfc2c2a16d4e29ec4e852daa773006ba8edfb521065b",
+    "QUALIFICATION_2026-11-04.md": "8ef9fc17e8b753d0db2b5110c0f800418f616dc4a972ff57c41c1349a2eb2227",
+    "README.md": "6090d2892c8896310198004676345da74fc35f3c1256646f6cce00ea3c7e5186",
+    "SOURCE_EVIDENCE.md": "126bdab19a7186b9dcd96a0879bddc66dbe44eefbaa7a24011474b87200423e0",
+    "projects.example.json": "8548a9e8a5a3cf6b1030e473394795a302b8caf6b58ed776ca9b268522872306",
+    "projects.rehearsal.json": "b8ae6d7768cf189ce7a11c568d6431fb49ac9da947d1e074706aba07eca4d040",
+    "rea-requests.json": "909c46b89aa00b88f5914fbdd481fbc37ca49fdcde6d86bca9a05256ba6f5be2",
+    "tests/rehearsal-binaries.lock.json": "ddfd0561289abe20e8531f085d856739f2d1579f907eb01dcd3391bfce3d975e",
+    "tests/rehearse_native.py": "feeb60b49f8f407da5ae1f70319d2fcc82ed406b3016e0a36ab1be124cc89735",
+    "tests/test_bootstrap.py": "2da4619fd810a71faa23f4a6ecb2f416c07bb1915309c4aa6cfe269e6cdbc01d",
+    "tests/test_hardening.py": "eede0c901023c1b07e31244f5e8bbd0bb83835042af866785aa1ca5d07c95fe8",
+    "tests/test_render.py": "a76c55dfea2a6973474f970c995a450716edc34c00f347ee54d21b9809d43d26",
+    "tests/test_routing_local.py": "c9c0477c96b64fa5a3f0942000d531b6f05de32b6ece2c53bf740cf77b8eeee5",
+    "tools/bootstrap.py": "57ecfda8b4ac535962f1ec87085185b81b4e0c1cd2297e9a766f6db656da24a7",
+    "tools/render.py": "1084c47d632c24cd0e0f1d55b50b64a7889583e19b50f5cb65a4847e5b5dd836"
+  },
+  "uid": 1000,
+  "unit_tests": {
+    "errors": 0,
+    "failures": 0,
+    "run": 49,
+    "skipped": 0
+  }
+}

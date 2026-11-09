@@ -1,0 +1,10 @@
+{
+  "encryption_roundtrip": "PASS",
+  "private_key_host": "dial-control",
+  "private_key_printed": false,
+  "production_runtime_changed": false,
+  "public_recipient_sha256": "5083b8d1c54352fb607fde07f9b92237260d8abf0c6c56948eb3d5cd909d7029",
+  "source_commit": "e62c0f0948b1d0c8778deee3a4460bc378a003eb",
+  "source_tar_sha256": "fa361332c15189a2fed5749b538320ba8fa9bbc7a6ab88c7cba508caeaeed3e7",
+  "state": "SOURCE_AND_OFFHOST_RECOVERY_KEY_READY"
+}

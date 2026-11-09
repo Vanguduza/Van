@@ -1,0 +1,39 @@
+test_actual_native_http_run_accepted (test_gtr_postgrest_http_gate.PostgrestHTTPGateTests.test_actual_native_http_run_accepted) ... ok
+test_authentication_role_drift_refused (test_gtr_postgrest_http_gate.PostgrestHTTPGateTests.test_authentication_role_drift_refused) ... ok
+test_bad_anon_denial_refused (test_gtr_postgrest_http_gate.PostgrestHTTPGateTests.test_bad_anon_denial_refused) ... ok
+test_boolean_as_status_refused (test_gtr_postgrest_http_gate.PostgrestHTTPGateTests.test_boolean_as_status_refused) ... ok
+test_direct_dml_denial_removed_refused (test_gtr_postgrest_http_gate.PostgrestHTTPGateTests.test_direct_dml_denial_removed_refused) ... ok
+test_donor_image_tampering_refused (test_gtr_postgrest_http_gate.PostgrestHTTPGateTests.test_donor_image_tampering_refused) ... ok
+test_duplicate_label_refused (test_gtr_postgrest_http_gate.PostgrestHTTPGateTests.test_duplicate_label_refused) ... ok
+test_extra_http_receipt_field_refused (test_gtr_postgrest_http_gate.PostgrestHTTPGateTests.test_extra_http_receipt_field_refused) ... ok
+test_extra_request_field_refused (test_gtr_postgrest_http_gate.PostgrestHTTPGateTests.test_extra_request_field_refused) ... ok
+test_fixture_grant_not_revoked_refused (test_gtr_postgrest_http_gate.PostgrestHTTPGateTests.test_fixture_grant_not_revoked_refused) ... ok
+test_grant_failed_http_refused (test_gtr_postgrest_http_gate.PostgrestHTTPGateTests.test_grant_failed_http_refused) ... ok
+test_hosted_access_refused (test_gtr_postgrest_http_gate.PostgrestHTTPGateTests.test_hosted_access_refused) ... ok
+test_missing_network_isolation_refused (test_gtr_postgrest_http_gate.PostgrestHTTPGateTests.test_missing_network_isolation_refused) ... ok
+test_network_exposure_refused (test_gtr_postgrest_http_gate.PostgrestHTTPGateTests.test_network_exposure_refused) ... ok
+test_no_remote_executor_in_source (test_gtr_postgrest_http_gate.PostgrestHTTPGateTests.test_no_remote_executor_in_source) ... ok
+test_non_private_output_refused (test_gtr_postgrest_http_gate.PostgrestHTTPGateTests.test_non_private_output_refused) ... ok
+test_path_substitution_refused (test_gtr_postgrest_http_gate.PostgrestHTTPGateTests.test_path_substitution_refused) ... ok
+test_postgrest_image_tampering_refused (test_gtr_postgrest_http_gate.PostgrestHTTPGateTests.test_postgrest_image_tampering_refused) ... ok
+test_real_receipts_have_exact_hashes (test_gtr_postgrest_http_gate.PostgrestHTTPGateTests.test_real_receipts_have_exact_hashes) ... ok
+test_release_never_authorized_even_when_green (test_gtr_postgrest_http_gate.PostgrestHTTPGateTests.test_release_never_authorized_even_when_green) ... ok
+test_replay_donor_modified_refused (test_gtr_postgrest_http_gate.PostgrestHTTPGateTests.test_replay_donor_modified_refused) ... ok
+test_replay_missing_migration_refused (test_gtr_postgrest_http_gate.PostgrestHTTPGateTests.test_replay_missing_migration_refused) ... ok
+test_replay_missing_smoke_refused (test_gtr_postgrest_http_gate.PostgrestHTTPGateTests.test_replay_missing_smoke_refused) ... ok
+test_revoke_failed_http_refused (test_gtr_postgrest_http_gate.PostgrestHTTPGateTests.test_revoke_failed_http_refused) ... ok
+test_rpc_falsely_successful_refused (test_gtr_postgrest_http_gate.PostgrestHTTPGateTests.test_rpc_falsely_successful_refused) ... ok
+test_rpc_missing_endpoint_refused (test_gtr_postgrest_http_gate.PostgrestHTTPGateTests.test_rpc_missing_endpoint_refused) ... ok
+test_saved_token_refused (test_gtr_postgrest_http_gate.PostgrestHTTPGateTests.test_saved_token_refused) ... ok
+test_source_head_tampering_refused (test_gtr_postgrest_http_gate.PostgrestHTTPGateTests.test_source_head_tampering_refused) ... ok
+test_table_privilege_restoration_missing_refused (test_gtr_postgrest_http_gate.PostgrestHTTPGateTests.test_table_privilege_restoration_missing_refused) ... ok
+test_unremoved_sidecar_refused (test_gtr_postgrest_http_gate.PostgrestHTTPGateTests.test_unremoved_sidecar_refused) ... ok
+test_wrong_database_refused (test_gtr_postgrest_http_gate.PostgrestHTTPGateTests.test_wrong_database_refused) ... ok
+test_wrong_receipt_digest_refused (test_gtr_postgrest_http_gate.PostgrestHTTPGateTests.test_wrong_receipt_digest_refused) ... ok
+
+----------------------------------------------------------------------
+Ran 32 tests in 0.009s
+
+OK
+POSTGREST_ISOLATED_HTTP_GREEN_PRODUCTION_ADMISSION_BLOCKED
+POSTGREST_HTTP_EVIDENCE_INVALID_RELEASE_BLOCKED

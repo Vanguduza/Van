@@ -1,0 +1,8 @@
+{
+  "name": "dial-supabase-project-admin-gateway",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {"jose": "6.2.15"},
+  "scripts": {"start": "node server.mjs"}
+}

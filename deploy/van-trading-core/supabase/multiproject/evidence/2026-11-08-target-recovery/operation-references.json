@@ -1,0 +1,36 @@
+{
+  "global_dial_root_qualification_issued": false,
+  "jobs_observed_terminal_success": {
+    "arm64_restore": {
+      "command_sha256": "70482b6e161ea3ab3411b93d2547ad075a80c693cfcd9289b1ce1e52906f6793",
+      "host": "van-trading-core",
+      "job_id": "djob_4bd47f717e04f158a285c7c1"
+    },
+    "canonical_row_comparison": {
+      "command_sha256": "685c21ec5c82b8450d434ee4d9813f9890996c000ffb93b85178025a24fcf4e1",
+      "host": "van-trading-core",
+      "job_id": "djob_d1e902616c418b318265118b"
+    },
+    "offhost_decrypt": {
+      "command_sha256": "9e9cf490a6337e70981e5cdde9348475e55a29b0e7e77b72c93e6a7bb162a2f0",
+      "host": "dial-control",
+      "job_id": "djob_bc0af0f609d09d97a3a3efb8"
+    },
+    "physical_capture": {
+      "command_sha256": "4b04e8258d8899530ae899211f66e70c43c37c7fba8da677cf37a28d3f8f5def",
+      "host": "van-trading-core",
+      "job_id": "djob_8e627230ece3e75d56631e28"
+    },
+    "private_plaintext_cleanup": {
+      "command_sha256": "e89515e369f8c09f6039a18cdebf147362459819de630de278ac7200de4aa2e0",
+      "host": "dial-control",
+      "job_id": "djob_061aa5a1d326f69f0f9fe601"
+    },
+    "source_custody": {
+      "command_sha256": "d613cd947d09c1bf593cba954d562d9fefb09d19f24c9f88ffedb9a2f01cc832",
+      "host": "dial-control",
+      "job_id": "djob_ea7e81ec836b9bdda6ccfea4"
+    }
+  },
+  "route": "OWNER_AUTHORIZED_TETHERBOUND_TAILSCALE"
+}

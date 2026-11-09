@@ -1,0 +1,13 @@
+{
+  "cleanup_completed": true,
+  "error": null,
+  "fingerprint_manifest_sha256": "97996bb9c2fd8602d70d7e31e27e038feb4a136ed3e89db3ab3b9340f8b7d4e7",
+  "mismatched_tables": [],
+  "original_services_restarted": false,
+  "raw_rows_or_passwords_printed": false,
+  "role_password_verifiers_equal": true,
+  "scope": "RECOVERED_PHYSICAL_CLUSTER_VS_CURRENT_ORIGINAL_CANONICAL_ROW_SHA256",
+  "state": "PASS",
+  "tables_compared": 57,
+  "tables_matching": 57
+}

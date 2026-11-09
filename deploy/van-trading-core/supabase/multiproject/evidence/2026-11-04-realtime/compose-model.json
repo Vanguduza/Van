@@ -1,0 +1,36 @@
+{
+  "check_count": 18,
+  "checks": {
+    "all_existing_services_retained": true,
+    "compiled_gateways_keep_storage_and_websocket": true,
+    "compiled_hba_preserves_storage_logins": true,
+    "every_other_original_service_unchanged": true,
+    "management_jwt_not_legacy_donor_jwt": true,
+    "metrics_secret_independent": true,
+    "native_partition_maintenance_enabled": true,
+    "only_expected_project_auth_rest_router_services_added": true,
+    "postgres_service_unchanged": true,
+    "project_gateways_loopback_only": true,
+    "realtime_does_not_reseed": true,
+    "realtime_registry_login_not_donor_admin": true,
+    "realtime_registry_password_precedence_correct": true,
+    "realtime_resource_limits_present": true,
+    "realtime_selected_derivative_image": true,
+    "shared_services_have_no_published_ports": true,
+    "single_storage_and_realtime_service": true,
+    "storage_mount_preserved": true
+  },
+  "compose_version": "Docker Compose version 2.40.3+ds1-0ubuntu1~24.04.1",
+  "containers_started": false,
+  "derivative_image_placeholder_only": true,
+  "docker_daemon_used": false,
+  "donor_ref": "96c5c6d34edcc79b3d7f6f156bed0f789f26c800",
+  "production_image_built": false,
+  "service_count": 17,
+  "source_sha256": {
+    "tests/check_realtime_compose.py": "7cf7de1a63788b1f2e5acb83788460ed425cd059ff945b7be08515f65590926f",
+    "tools/shared_realtime.py": "d143a3c3841c44fb17dd3ba675bdd8d58ff3415972b0219145c419e8e3d0463c",
+    "tools/shared_storage.py": "280f63b634a3a376016e8c5f26164a5337dd9116fda82efe3c42bffa1c0a88fa"
+  },
+  "state": "PASS"
+}

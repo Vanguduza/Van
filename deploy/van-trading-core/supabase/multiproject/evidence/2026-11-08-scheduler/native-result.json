@@ -1,0 +1,123 @@
+{
+  "check_count": 56,
+  "checks": [
+    "real_postgresql17_server",
+    "real_pg_cron_extension_present",
+    "fixture-project_second_cron_installation_refused",
+    "fixture-project_job_role_initially_nologin",
+    "fixture-project_unreviewed_private_function_refused",
+    "fixture-project_refused_grant_transaction_rolled_back",
+    "fixture-project_correct_default_date_function_grant",
+    "fixture-project_wrong_project_identity_refused",
+    "fixture-project_role_recreation_refused",
+    "nissan-gtr_second_cron_installation_refused",
+    "nissan-gtr_job_role_initially_nologin",
+    "nissan-gtr_unreviewed_private_function_refused",
+    "nissan-gtr_refused_grant_transaction_rolled_back",
+    "nissan-gtr_correct_default_date_function_grant",
+    "nissan-gtr_wrong_project_identity_refused",
+    "nissan-gtr_role_recreation_refused",
+    "activation_without_exact_hba_refused",
+    "scheduler_login_enabled_only_after_deny_prefix",
+    "activation_replay_refused",
+    "fixture-project_own_direct_socket_login_rejected",
+    "fixture-project_central_direct_socket_login_rejected",
+    "fixture-project_cron_registry_unreadable_to_job_role",
+    "fixture-project_job_role_cannot_schedule",
+    "fixture-project_timezone_change_refused",
+    "fixture-project_four_inactive_scoped_jobs",
+    "fixture-project_native_upsert_blocked_before_overwrite",
+    "fixture-project_rejected_replay_preserves_original_jobs",
+    "fixture-project_native_scheduler_denies_foreign_database",
+    "fixture-project_job_role_cannot_read_ungranted_application_table",
+    "nissan-gtr_own_direct_socket_login_rejected",
+    "nissan-gtr_central_direct_socket_login_rejected",
+    "nissan-gtr_cron_registry_unreadable_to_job_role",
+    "nissan-gtr_job_role_cannot_schedule",
+    "nissan-gtr_timezone_change_refused",
+    "nissan-gtr_four_inactive_scoped_jobs",
+    "nissan-gtr_native_upsert_blocked_before_overwrite",
+    "nissan-gtr_rejected_replay_preserves_original_jobs",
+    "nissan-gtr_native_scheduler_denies_foreign_database",
+    "nissan-gtr_job_role_cannot_read_ungranted_application_table",
+    "fixture-project_inactive_jobs_have_no_effects",
+    "nissan-gtr_inactive_jobs_have_no_effects",
+    "one_central_scheduler_contains_eight_distinct_jobs",
+    "real_background_workers_execute_four_functions_in_each_database",
+    "fixture-project_real_execution_uses_exact_database_and_login",
+    "fixture-project_no_project_cron_extension",
+    "nissan-gtr_real_execution_uses_exact_database_and_login",
+    "nissan-gtr_no_project_cron_extension",
+    "native_jobs_succeeded_under_nonprivileged_runtime_roles",
+    "no_job_runs_as_cluster_superuser",
+    "application_role_has_no_central_scheduler_authority",
+    "original_fixture_data_preserved",
+    "original_fixture_acl_preserved",
+    "jobs_disabled_after_test_activation",
+    "actual_pinned_gtr_baseline_sha_matches",
+    "actual_baseline_has_only_five_scheduler_edits",
+    "actual_gtr_business_sql_preserved_by_reversible_split"
+  ],
+  "cleanup_completed": true,
+  "cron_sql_version": "1.6",
+  "error": null,
+  "full_gtr_sql_replayed": false,
+  "gtr_adaptation": {
+    "application_functions_tables_policies_unchanged": true,
+    "byte_exact_reverse_verified": true,
+    "candidate_sha256": "bfb150e848b426c7082c54de12dc45b780325046b00031c18151a349ea81641e",
+    "edit_count": 5,
+    "edits": [
+      {
+        "original_utf8": "CREATE EXTENSION IF NOT EXISTS pg_cron WITH SCHEMA pg_catalog;",
+        "replacement_utf8": "-- DIAL: original pg_cron installation is retained in the existing central cron database.",
+        "source_offset": 1317
+      },
+      {
+        "original_utf8": "SELECT cron.schedule('approval-alerts-sweep-v1', '*/5 * * * *', 'SELECT private.sweep_approval_alerts()');",
+        "replacement_utf8": "-- DIAL: central inactive schedule for approval-alerts-sweep-v1 is staged separately.",
+        "source_offset": 4026756
+      },
+      {
+        "original_utf8": "SELECT cron.schedule('commerce-expire-checkouts-v1', '*/2 * * * *', 'SELECT private.expire_commerce_checkouts_internal();');",
+        "replacement_utf8": "-- DIAL: central inactive schedule for commerce-expire-checkouts-v1 is staged separately.",
+        "source_offset": 4026863
+      },
+      {
+        "original_utf8": "SELECT cron.schedule('customer-suspension-sweep-v1', '10 2 * * *', 'SELECT private.sweep_customer_suspensions();');",
+        "replacement_utf8": "-- DIAL: central inactive schedule for customer-suspension-sweep-v1 is staged separately.",
+        "source_offset": 4026988
+      },
+      {
+        "original_utf8": "SELECT cron.schedule('morning-summary-v1', '0 5 * * *', 'SELECT private.send_morning_summaries()');",
+        "replacement_utf8": "-- DIAL: central inactive schedule for morning-summary-v1 is staged separately.",
+        "source_offset": 4027104
+      }
+    ],
+    "full_baseline_replayed": false,
+    "kind": "GTR_FRESH_BASELINE_CENTRAL_CRON_ADAPTATION",
+    "production_authorized": false,
+    "upstream_commit": "8131858c7c7479d178cbe9e246f83cb49ed80f5e",
+    "upstream_path": "supabase/migrations/20261102080000_reconciled_erp_baseline.sql",
+    "upstream_sha256": "2502826ee08e67d7bcee3f7bdacdc31d944ccbb1bf9c3d86090b79b938ea016c"
+  },
+  "gtr_business_job_logic_tested": false,
+  "native_sha256": "a8de97eb871cee1fdb84cad48ec4e2c481ac826c3801d9e8bb35adec971f7e43",
+  "not_tested": [
+    "live VAN",
+    "ARM64 donor",
+    "full GTR baseline/Auth/Storage/Vault/pg_net",
+    "real job cadence/timezone",
+    "active writer migration",
+    "production cron authority and release"
+  ],
+  "pg_cron_library_sha256": "ce741add04eebfbb52765cb7901bd8d2f557d48085cc5c956e3eba4863743a40",
+  "production_changes": false,
+  "scope": "ONE_NEW_PG17_REAL_PG_CRON_TWO_DATABASE_SYNTHETIC_SCHEDULER",
+  "source_sha256": {
+    "tests/rehearse_scheduler.py": "d711dfdee80b0330cb63f7abf2ad1a8f822a11b98bba2b9df325bf4e1615916a",
+    "tools/render.py": "1084c47d632c24cd0e0f1d55b50b64a7889583e19b50f5cb65a4847e5b5dd836",
+    "tools/shared_scheduler.py": "389a52cefd673637a3b1138290e7f6888ba224d96bc4c422193e54c58c8c8557"
+  },
+  "state": "PASS"
+}

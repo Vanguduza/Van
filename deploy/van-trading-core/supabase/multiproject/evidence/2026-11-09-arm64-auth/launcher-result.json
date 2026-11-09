@@ -1,0 +1,10 @@
+{
+  "exit_code": 0,
+  "image": "sha256:dbd5bef8ba86b4ae0eb11271c71736fcff006fe23d2f7cf670fc1687778ca400",
+  "container": "13d85a02643ed986aa5144d099d40f732c8f86e4146a3521f90539ab810e976d",
+  "state": "PASS",
+  "check_count": 101,
+  "cleanup_completed": true,
+  "temporary_container_removed": true,
+  "original_containers_preserved": true
+}

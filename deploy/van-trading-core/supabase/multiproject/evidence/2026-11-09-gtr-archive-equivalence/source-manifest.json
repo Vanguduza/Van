@@ -1,0 +1,46 @@
+{
+  "archive_comparison": {
+    "exact_known_header_only": 4,
+    "known_header_plus_final_lf": 6,
+    "other_sql_body_differences": 0,
+    "pairs": 10
+  },
+  "base_pr_head": "d2856388e9472624fc812e944a04900a4060a87b",
+  "canary_activation_authorized": false,
+  "current_hosted_ledger_seen": false,
+  "evidence_sha256": {
+    "archive-body-equality.json": "02daca1f670b27fd4de6f8483e3f38a8f7e6cfd3e1c4d547e1cac85b13e90348",
+    "unit-tests.txt": "23598e675d56fdd39b330bb2c0aa15d8640da5526ed368146c37eab345ac1d0c"
+  },
+  "execution_host": "dial-control",
+  "file_size_bytes": {
+    "archive-body-equality.json": 8439,
+    "unit-tests.txt": 53272
+  },
+  "gtr_source_commit": "8131858c7c7479d178cbe9e246f83cb49ed80f5e",
+  "gtr_source_manifest_sha256": "e63bbf3ef3f57d6cf4750879e2aceb5b0fdf794d20fcaf562616b8065cd9f3cc",
+  "kind": "ARCHIVED_GTR_SOURCE_BYTES_ONLY_NO_HOSTED_OR_PRODUCTION_OBSERVATION",
+  "network_connections_in_tool": 0,
+  "observed_at": "2026-11-08T22:24:34.562549+00:00",
+  "production_modified": false,
+  "python_tests": {
+    "additional_archive_tests": 20,
+    "errors": 0,
+    "failed": 0,
+    "passed": 387,
+    "skipped": 0
+  },
+  "release_admitted": false,
+  "schema_version": 1,
+  "source_content_executed": false,
+  "source_sha256": {
+    "ARCHIVED_MIGRATION_BODY_EQUIVALENCE.md": "91629a81ad5b051976061858c1654abfcd9e1fefc586f7623fd9d9e263f0a0e9",
+    "HOSTED_HISTORY_RECONCILIATION.md": "b34c6b4bfcbbb7718a2fdd35428b8d7e71a1745e6937bdebb22a2e2897dcb2f0",
+    "README.md": "ba2c04d94d784f9f214570b7dcdb9d1556487aa2d3e914b4126f5f2e220bd0c8",
+    "tests/test_gtr_archive_equivalence.py": "164e8ffddeb3b1bdcd4a126f1d280330d441c8d44e58fb32a92d609f8377d9c1",
+    "tools/gtr_archive_equivalence.py": "6cd119cbd92a43e744805783dd4739f594b8b8b99ecbae451494707e17338b11",
+    "tools/gtr_history_reconcile.py": "0e41973b175fdb01440277fc23c114864c0addf96e59e1cd54135be011acb215"
+  },
+  "sql_database_connections": 0,
+  "uid": 1000
+}

@@ -1,0 +1,10 @@
+{
+  "aead_tamper_rejected": true,
+  "cipher_sha256": "e6f4147d9c994d220e12664cacf311935f54f9de0a8b2f87ea1c23c0eb42f0ff",
+  "database_boot_restore_pending": true,
+  "key_separate_host": "dial-control",
+  "plaintext_archive_sha256": "aa198399b59d4f7593849afbbde465f254d5a2f3833109e640e5cdb91ab5d222",
+  "production_restart": false,
+  "state": "OFFHOST_ENCRYPTED_BACKUP_DECRYPTED_AND_HASH_VERIFIED",
+  "verified_payload_files": 1624
+}

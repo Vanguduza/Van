@@ -1,0 +1,23 @@
+{
+  "earlier_failed_distributed_start_epmd_reconciled": true,
+  "native_test_children_stopped": true,
+  "note": "Original native records assert their tracked child cleanup. A separately daemonized epmd from the first failed attempt was subsequently identified by exact staged executable and original UID, terminated and independently rechecked.",
+  "observed_at": "2026-11-04T19:05:34.670815+00:00",
+  "private_failed_fixture_directories_removed": [
+    "dial-supa-auth-741h7vx6",
+    "dial-supa-auth-qzxxklul",
+    "dial-supa-auth-8rx2e5uq",
+    "dial-supa-auth-70brj39d",
+    "dial-supa-auth-gcbj64c5",
+    "dial-supa-auth-b6xhnd5r",
+    "dial-supa-auth-9bhxdjk_",
+    "dial-supa-auth-fyn5aqyt",
+    "dial-supa-auth-lr7n5fsx",
+    "dial-supa-auth-ezvanwsk",
+    "dial-supa-auth-o4m2dli6"
+  ],
+  "production_processes_signalled": false,
+  "remaining_owned_pooler_pg_browser_binaries": [],
+  "scope": "OWN_ISOLATED_POOLER_ADMIN_FIXTURES_ONLY",
+  "unrelated_processes_signalled": false
+}

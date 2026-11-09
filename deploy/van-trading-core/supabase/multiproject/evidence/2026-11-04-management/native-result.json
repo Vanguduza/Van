@@ -1,0 +1,768 @@
+{
+  "admin": {
+    "basic_browser_selection_and_query_qualified": true,
+    "browser": {
+      "blocked": [],
+      "browser_engine": "firefox",
+      "browser_version": "142.0.1",
+      "checks": [
+        {
+          "check": "fixture-project_session_selector_contains_fixture-project",
+          "pass": true
+        },
+        {
+          "check": "fixture-project_session_selector_contains_nissan-gtr",
+          "pass": true
+        },
+        {
+          "check": "fixture-project_native_page_not_error",
+          "pass": true
+        },
+        {
+          "check": "fixture-project_rendered_table_editor_lists_fixture",
+          "pass": true
+        },
+        {
+          "check": "fixture-project_native_table_click_succeeds",
+          "pass": true
+        },
+        {
+          "check": "fixture-project_native_table_click_displays_own_row",
+          "pass": true
+        },
+        {
+          "check": "fixture-project_browser_cookie_catalogue",
+          "pass": true
+        },
+        {
+          "check": "fixture-project_browser_native_table_metadata",
+          "pass": true
+        },
+        {
+          "check": "fixture-project_browser_scoped_sql_response",
+          "pass": true
+        },
+        {
+          "check": "nissan-gtr_session_selector_contains_fixture-project",
+          "pass": true
+        },
+        {
+          "check": "nissan-gtr_session_selector_contains_nissan-gtr",
+          "pass": true
+        },
+        {
+          "check": "nissan-gtr_native_page_not_error",
+          "pass": true
+        },
+        {
+          "check": "nissan-gtr_rendered_table_editor_lists_fixture",
+          "pass": true
+        },
+        {
+          "check": "nissan-gtr_native_table_click_succeeds",
+          "pass": true
+        },
+        {
+          "check": "nissan-gtr_native_table_click_displays_own_row",
+          "pass": true
+        },
+        {
+          "check": "nissan-gtr_browser_cookie_catalogue",
+          "pass": true
+        },
+        {
+          "check": "nissan-gtr_browser_native_table_metadata",
+          "pass": true
+        },
+        {
+          "check": "nissan-gtr_browser_scoped_sql_response",
+          "pass": true
+        }
+      ],
+      "chromium_sandbox_required": true,
+      "errors": [],
+      "fixture_network_only": true,
+      "full_studio_ui_qualified": false,
+      "pages": [
+        {
+          "body": "Skip to content\nBack to organization home\nfixture-project\nConnect\n\nSearch...\n\nCtrl K\nHelp\nAdvisor Center\nSQL Editor\nAI Assistant\nSettings\nProject Overview\nTable Editor\nSQL Editor\nDatabase\nAuthentication\nStorage\nEdge Functions\nRealtime\nAdvisors\nObservability\nLogs\nIntegrations\nProject Settings\nTable Editor\n\nschema\n\npublic\n\nNew table\nSearch tables\nadmin_fixture\npool_fixture\nCollapse sidebar\nCreate a table\n\nDesign and create a new database table\n\nRecent items\n\nNo recent items yet\n\nItems will appear here as you browse through your project\n\nNEW\nname\u00b7where id = 10\n-\nRed\n+\nBlue\n\nQueue row edits in Table Editor\n\nBatch multiple row edits and review them before saving to your database\n\nEnable in preferences\n\nTable Editor | Supabase",
+          "ref": "5238a352-e1e1-4c5a-8e15-b39320fd00ad",
+          "title": "Table Editor | fixture-project | DIAL Projects | Supabase"
+        },
+        {
+          "ref": "5238a352-e1e1-4c5a-8e15-b39320fd00ad",
+          "table_url": "/project/5238a352-e1e1-4c5a-8e15-b39320fd00ad/editor/17659",
+          "table_view": "Skip to content\nBack to organization home\nfixture-project\nConnect\n\nSearch...\n\nCtrl K\nHelp\nAdvisor Center\nSQL Editor\nAI Assistant\nSettings\nProject Overview\nTable Editor\nSQL Editor\nDatabase\nAuthentication\nStorage\nEdge Functions\nRealtime\nAdvisors\nObservability\nLogs\nIntegrations\nProject Settings\nTable Editor\n\nschema\n\npublic\n\nNew table\nSearch tables\nadmin_fixture\npool_fixture\nCollapse sidebar\nadmin_fixture\nSort\nRole\npostgres\nInsert\nid\nint4\n17\n\nPage\n\nof 1\n\n100 rows\n\n1 record\n\nDefinition\nData\nNEW\nname\u00b7where id = 10\n-\nRed\n+\nBlue\n\nQueue row edits in Table Editor\n\nBatch multiple row edits and review them before saving to your database\n\nEnable in preferences\n\nTable Editor | fixture-project | DIAL Projects | Supabase"
+        },
+        {
+          "body": "Skip to content\nBack to organization home\nnissan-gtr\nConnect\n\nSearch...\n\nCtrl K\nHelp\nAdvisor Center\nSQL Editor\nAI Assistant\nSettings\nProject Overview\nTable Editor\nSQL Editor\nDatabase\nAuthentication\nStorage\nEdge Functions\nRealtime\nAdvisors\nObservability\nLogs\nIntegrations\nProject Settings\nTable Editor\n\nschema\n\npublic\n\nNew table\nSearch tables\nadmin_fixture\npool_fixture\nCollapse sidebar\nCreate a table\n\nDesign and create a new database table\n\nRecent items\n\nNo recent items yet\n\nItems will appear here as you browse through your project\n\nNEW\nname\u00b7where id = 10\n-\nRed\n+\nBlue\n\nQueue row edits in Table Editor\n\nBatch multiple row edits and review them before saving to your database\n\nEnable in preferences\n\nTable Editor | Supabase",
+          "ref": "53d39b5d-bf19-4cf1-9a5b-0904192d90d1",
+          "title": "Table Editor | nissan-gtr | DIAL Projects | Supabase"
+        },
+        {
+          "ref": "53d39b5d-bf19-4cf1-9a5b-0904192d90d1",
+          "table_url": "/project/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/editor/17664",
+          "table_view": "Skip to content\nBack to organization home\nnissan-gtr\nConnect\n\nSearch...\n\nCtrl K\nHelp\nAdvisor Center\nSQL Editor\nAI Assistant\nSettings\nProject Overview\nTable Editor\nSQL Editor\nDatabase\nAuthentication\nStorage\nEdge Functions\nRealtime\nAdvisors\nObservability\nLogs\nIntegrations\nProject Settings\nTable Editor\n\nschema\n\npublic\n\nNew table\nSearch tables\nadmin_fixture\npool_fixture\nCollapse sidebar\nadmin_fixture\nSort\nRole\npostgres\nInsert\nid\nint4\n29\n\nPage\n\nof 1\n\n100 rows\n\n1 record\n\nDefinition\nData\nNEW\nname\u00b7where id = 10\n-\nRed\n+\nBlue\n\nQueue row edits in Table Editor\n\nBatch multiple row edits and review them before saving to your database\n\nEnable in preferences\n\nTable Editor | nissan-gtr | DIAL Projects | Supabase"
+        }
+      ],
+      "requests": [
+        {
+          "path": "/api/cli-release-version",
+          "status": 501
+        },
+        {
+          "path": "/api/get-deployment-commit",
+          "status": 200
+        },
+        {
+          "path": "/api/cli-release-version",
+          "status": 501
+        },
+        {
+          "path": "/api/enabled-features-overrides",
+          "status": 200
+        },
+        {
+          "path": "/api/platform/deployment-mode",
+          "status": 200
+        },
+        {
+          "path": "/api/platform/projects/5238a352-e1e1-4c5a-8e15-b39320fd00ad",
+          "status": 200
+        },
+        {
+          "path": "/api/platform/profile",
+          "status": 200
+        },
+        {
+          "path": "/api/v1/projects/5238a352-e1e1-4c5a-8e15-b39320fd00ad/api-keys",
+          "status": 501
+        },
+        {
+          "path": "/api/platform/integrations/github/authorization",
+          "status": 501
+        },
+        {
+          "path": "/api/platform/projects/5238a352-e1e1-4c5a-8e15-b39320fd00ad/databases",
+          "status": 200
+        },
+        {
+          "path": "/api/platform/projects/5238a352-e1e1-4c5a-8e15-b39320fd00ad/run-lints",
+          "status": 501
+        },
+        {
+          "path": "/api/platform/pg-meta/5238a352-e1e1-4c5a-8e15-b39320fd00ad/query",
+          "status": 200
+        },
+        {
+          "path": "/api/platform/pg-meta/5238a352-e1e1-4c5a-8e15-b39320fd00ad/query",
+          "status": 200
+        },
+        {
+          "path": "/api/platform/pg-meta/5238a352-e1e1-4c5a-8e15-b39320fd00ad/query",
+          "status": 200
+        },
+        {
+          "path": "/api/platform/organizations",
+          "status": 200
+        },
+        {
+          "path": "/api/platform/pg-meta/5238a352-e1e1-4c5a-8e15-b39320fd00ad/query",
+          "status": 200
+        },
+        {
+          "path": "/api/platform/pg-meta/5238a352-e1e1-4c5a-8e15-b39320fd00ad/query",
+          "status": 200
+        },
+        {
+          "path": "/api/platform/projects/5238a352-e1e1-4c5a-8e15-b39320fd00ad/config/postgrest",
+          "status": 501
+        },
+        {
+          "path": "/api/v1/projects/5238a352-e1e1-4c5a-8e15-b39320fd00ad/api-keys",
+          "status": 501
+        },
+        {
+          "path": "/api/platform/pg-meta/5238a352-e1e1-4c5a-8e15-b39320fd00ad/query",
+          "status": 200
+        },
+        {
+          "path": "/api/platform/projects/5238a352-e1e1-4c5a-8e15-b39320fd00ad/run-lints",
+          "status": 501
+        },
+        {
+          "path": "/api/platform/projects/5238a352-e1e1-4c5a-8e15-b39320fd00ad/config/postgrest",
+          "status": 501
+        },
+        {
+          "path": "/api/v1/projects/5238a352-e1e1-4c5a-8e15-b39320fd00ad/api-keys",
+          "status": 501
+        },
+        {
+          "path": "/api/platform/projects/5238a352-e1e1-4c5a-8e15-b39320fd00ad/run-lints",
+          "status": 501
+        },
+        {
+          "path": "/api/platform/pg-meta/5238a352-e1e1-4c5a-8e15-b39320fd00ad/query",
+          "status": 200
+        },
+        {
+          "path": "/api/platform/pg-meta/5238a352-e1e1-4c5a-8e15-b39320fd00ad/query",
+          "status": 200
+        },
+        {
+          "path": "/api/platform/pg-meta/5238a352-e1e1-4c5a-8e15-b39320fd00ad/query",
+          "status": 200
+        },
+        {
+          "path": "/api/platform/pg-meta/5238a352-e1e1-4c5a-8e15-b39320fd00ad/query",
+          "status": 200
+        },
+        {
+          "path": "/api/platform/pg-meta/5238a352-e1e1-4c5a-8e15-b39320fd00ad/query",
+          "status": 200
+        },
+        {
+          "path": "/api/platform/pg-meta/5238a352-e1e1-4c5a-8e15-b39320fd00ad/query",
+          "status": 200
+        },
+        {
+          "path": "/api/platform/pg-meta/5238a352-e1e1-4c5a-8e15-b39320fd00ad/query",
+          "status": 200
+        },
+        {
+          "path": "/api/v1/projects/5238a352-e1e1-4c5a-8e15-b39320fd00ad/api-keys",
+          "status": 501
+        },
+        {
+          "path": "/api/platform/projects/5238a352-e1e1-4c5a-8e15-b39320fd00ad/settings",
+          "status": 501
+        },
+        {
+          "path": "/api/platform/projects/5238a352-e1e1-4c5a-8e15-b39320fd00ad/config/postgrest",
+          "status": 501
+        },
+        {
+          "path": "/api/platform/projects",
+          "status": 200
+        },
+        {
+          "path": "/api/v1/projects/5238a352-e1e1-4c5a-8e15-b39320fd00ad/api-keys",
+          "status": 501
+        },
+        {
+          "path": "/api/platform/projects/5238a352-e1e1-4c5a-8e15-b39320fd00ad/settings",
+          "status": 501
+        },
+        {
+          "path": "/api/platform/pg-meta/5238a352-e1e1-4c5a-8e15-b39320fd00ad/tables",
+          "status": 200
+        },
+        {
+          "path": "/api/platform/pg-meta/5238a352-e1e1-4c5a-8e15-b39320fd00ad/query",
+          "status": 200
+        },
+        {
+          "path": "/api/cli-release-version",
+          "status": 501
+        },
+        {
+          "path": "/api/get-deployment-commit",
+          "status": 200
+        },
+        {
+          "path": "/api/cli-release-version",
+          "status": 501
+        },
+        {
+          "path": "/api/enabled-features-overrides",
+          "status": 200
+        },
+        {
+          "path": "/api/platform/deployment-mode",
+          "status": 200
+        },
+        {
+          "path": "/api/platform/projects/53d39b5d-bf19-4cf1-9a5b-0904192d90d1",
+          "status": 200
+        },
+        {
+          "path": "/api/platform/profile",
+          "status": 200
+        },
+        {
+          "path": "/api/platform/projects/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/databases",
+          "status": 200
+        },
+        {
+          "path": "/api/platform/integrations/github/authorization",
+          "status": 501
+        },
+        {
+          "path": "/api/v1/projects/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/api-keys",
+          "status": 501
+        },
+        {
+          "path": "/api/platform/pg-meta/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/query",
+          "status": 200
+        },
+        {
+          "path": "/api/v1/projects/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/api-keys",
+          "status": 501
+        },
+        {
+          "path": "/api/platform/organizations",
+          "status": 200
+        },
+        {
+          "path": "/api/platform/pg-meta/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/query",
+          "status": 200
+        },
+        {
+          "path": "/api/platform/pg-meta/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/query",
+          "status": 200
+        },
+        {
+          "path": "/api/platform/pg-meta/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/query",
+          "status": 200
+        },
+        {
+          "path": "/api/platform/projects/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/run-lints",
+          "status": 501
+        },
+        {
+          "path": "/api/platform/pg-meta/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/query",
+          "status": 200
+        },
+        {
+          "path": "/api/platform/projects/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/config/postgrest",
+          "status": 501
+        },
+        {
+          "path": "/api/platform/pg-meta/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/query",
+          "status": 200
+        },
+        {
+          "path": "/api/v1/projects/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/api-keys",
+          "status": 501
+        },
+        {
+          "path": "/api/platform/projects/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/run-lints",
+          "status": 501
+        },
+        {
+          "path": "/api/platform/projects/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/config/postgrest",
+          "status": 501
+        },
+        {
+          "path": "/api/platform/pg-meta/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/query",
+          "status": 200
+        },
+        {
+          "path": "/api/platform/pg-meta/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/query",
+          "status": 200
+        },
+        {
+          "path": "/api/platform/pg-meta/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/query",
+          "status": 200
+        },
+        {
+          "path": "/api/platform/pg-meta/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/query",
+          "status": 200
+        },
+        {
+          "path": "/api/platform/pg-meta/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/query",
+          "status": 200
+        },
+        {
+          "path": "/api/platform/pg-meta/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/query",
+          "status": 200
+        },
+        {
+          "path": "/api/platform/projects/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/run-lints",
+          "status": 501
+        },
+        {
+          "path": "/api/platform/pg-meta/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/query",
+          "status": 200
+        },
+        {
+          "path": "/api/platform/projects/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/settings",
+          "status": 501
+        },
+        {
+          "path": "/api/v1/projects/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/api-keys",
+          "status": 501
+        },
+        {
+          "path": "/api/platform/projects/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/config/postgrest",
+          "status": 501
+        },
+        {
+          "path": "/api/v1/projects/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/api-keys",
+          "status": 501
+        },
+        {
+          "path": "/api/platform/projects/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/settings",
+          "status": 501
+        },
+        {
+          "path": "/api/v1/projects/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/api-keys",
+          "status": 501
+        },
+        {
+          "path": "/api/platform/projects",
+          "status": 200
+        },
+        {
+          "path": "/api/platform/pg-meta/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/tables",
+          "status": 200
+        },
+        {
+          "path": "/api/platform/pg-meta/53d39b5d-bf19-4cf1-9a5b-0904192d90d1/query",
+          "status": 200
+        }
+      ],
+      "sandbox_explicitly_disabled": false,
+      "separate_browser_sessions": true,
+      "state": "PASS"
+    },
+    "browser_scope": "separate_fresh_sessions_select_real_Studio_tables_and_read_distinct_project_rows",
+    "earlier_services_stopped_before_browser_for_memory": [
+      "pooler",
+      "auth",
+      "rest",
+      "project-api-routers"
+    ],
+    "full_browser_interaction_qualified": false,
+    "native_ui_http_only": false,
+    "new_identity_issuer": false,
+    "real_postgres_meta": true,
+    "real_upstream_studio_http": true,
+    "same_session_live_project_switch_qualified": false
+  },
+  "check_count": 248,
+  "checks": [
+    "postgres17_real_server",
+    "activation_refuses_missing_hba_prefix",
+    "fixture_hba_reload",
+    "activation_after_exact_hba_prefix",
+    "activation_replay_refused",
+    "fixture-project_auth_own_db_login",
+    "fixture-project_auth_deny_db_postgres",
+    "fixture-project_auth_deny_db_legacy_van",
+    "fixture-project_auth_deny_db_gtr_prod",
+    "fixture-project_rest_own_db_login",
+    "fixture-project_rest_deny_db_postgres",
+    "fixture-project_rest_deny_db_legacy_van",
+    "fixture-project_rest_deny_db_gtr_prod",
+    "fixture-project_migrate_own_db_login",
+    "fixture-project_migrate_deny_db_postgres",
+    "fixture-project_migrate_deny_db_legacy_van",
+    "fixture-project_migrate_deny_db_gtr_prod",
+    "fixture-project_rest_cannot_become_admin",
+    "fixture-project_bootstrap_replay_refused",
+    "fixture-project_real_auth_migrations",
+    "fixture-project_real_postgrest_ready",
+    "nissan-gtr_auth_own_db_login",
+    "nissan-gtr_auth_deny_db_postgres",
+    "nissan-gtr_auth_deny_db_legacy_van",
+    "nissan-gtr_auth_deny_db_fixture_db",
+    "nissan-gtr_rest_own_db_login",
+    "nissan-gtr_rest_deny_db_postgres",
+    "nissan-gtr_rest_deny_db_legacy_van",
+    "nissan-gtr_rest_deny_db_fixture_db",
+    "nissan-gtr_migrate_own_db_login",
+    "nissan-gtr_migrate_deny_db_postgres",
+    "nissan-gtr_migrate_deny_db_legacy_van",
+    "nissan-gtr_migrate_deny_db_fixture_db",
+    "nissan-gtr_rest_cannot_become_admin",
+    "nissan-gtr_bootstrap_replay_refused",
+    "nissan-gtr_real_auth_migrations",
+    "nissan-gtr_real_postgrest_ready",
+    "fixture-project_real_nginx_configuration",
+    "nissan-gtr_real_nginx_configuration",
+    "fixture-project_admin_create_real_user",
+    "fixture-project_password_login",
+    "fixture-project_rls_owner_insert",
+    "fixture-project_second_real_user",
+    "fixture-project_service_role_writes_second_owner",
+    "fixture-project_service_role_reads_project_rows",
+    "fixture-project_rls_read_hides_second_owner",
+    "fixture-project_ordinary_user_cannot_admin_auth",
+    "fixture-project_auth_schema_not_exposed_by_rest",
+    "fixture-project_rls_foreign_owner_insert_denied",
+    "fixture-project_anonymous_table_denied",
+    "fixture-project_invalid_api_key_denied",
+    "fixture-project_missing_api_key_denied",
+    "nissan-gtr_admin_create_real_user",
+    "nissan-gtr_password_login",
+    "nissan-gtr_rls_owner_insert",
+    "nissan-gtr_second_real_user",
+    "nissan-gtr_service_role_writes_second_owner",
+    "nissan-gtr_service_role_reads_project_rows",
+    "nissan-gtr_rls_read_hides_second_owner",
+    "nissan-gtr_ordinary_user_cannot_admin_auth",
+    "nissan-gtr_auth_schema_not_exposed_by_rest",
+    "nissan-gtr_rls_foreign_owner_insert_denied",
+    "nissan-gtr_anonymous_table_denied",
+    "nissan-gtr_invalid_api_key_denied",
+    "nissan-gtr_missing_api_key_denied",
+    "same_email_separate_auth_identities",
+    "fixture-project_foreign_user_jwt_denied",
+    "fixture-project_correct_signature_wrong_iss_denied",
+    "fixture-project_correct_signature_wrong_aud_denied",
+    "fixture-project_foreign_apikey_denied",
+    "fixture-project_foreign_service_key_denied_/rest/v1/notes",
+    "fixture-project_foreign_service_key_denied_/auth/v1/admin/users",
+    "fixture-project_other_realm_password_denied",
+    "fixture-project_other_realm_refresh_denied",
+    "fixture-project_header_spoof_cannot_change_database",
+    "fixture-project_foreign_host_denied",
+    "fixture-project_unqualified_route_closed_/storage/v1/test",
+    "fixture-project_unqualified_route_closed_/realtime/v1/websocket",
+    "fixture-project_unqualified_route_closed_/functions/v1/test",
+    "fixture-project_unqualified_route_closed_/_health",
+    "fixture-project_unqualified_route_closed_/auth/v1/callback",
+    "nissan-gtr_foreign_user_jwt_denied",
+    "nissan-gtr_correct_signature_wrong_iss_denied",
+    "nissan-gtr_correct_signature_wrong_aud_denied",
+    "nissan-gtr_foreign_apikey_denied",
+    "nissan-gtr_foreign_service_key_denied_/rest/v1/notes",
+    "nissan-gtr_foreign_service_key_denied_/auth/v1/admin/users",
+    "nissan-gtr_other_realm_password_denied",
+    "nissan-gtr_other_realm_refresh_denied",
+    "nissan-gtr_header_spoof_cannot_change_database",
+    "nissan-gtr_foreign_host_denied",
+    "nissan-gtr_unqualified_route_closed_/storage/v1/test",
+    "nissan-gtr_unqualified_route_closed_/realtime/v1/websocket",
+    "nissan-gtr_unqualified_route_closed_/functions/v1/test",
+    "nissan-gtr_unqualified_route_closed_/_health",
+    "nissan-gtr_unqualified_route_closed_/auth/v1/callback",
+    "concurrent_project_pools_isolated_40_requests",
+    "fixture-project_own_refresh_still_works",
+    "nissan-gtr_own_refresh_still_works",
+    "legacy_database_data_untouched",
+    "legacy_database_acl_untouched",
+    "temporary_pg_pool_capacity",
+    "pooler_activation_without_scoped_hba_denied",
+    "pooler_repeated_activation_denied",
+    "real_supavisor_registry_migrations",
+    "one_real_supavisor_ready",
+    "management_listener_loopback_only",
+    "session_listener_loopback_only",
+    "transaction_listener_loopback_only",
+    "proxy_listener_loopback_only",
+    "session_shard_listener_loopback_only",
+    "tx_shard_listener_loopback_only",
+    "shared_pooler_admin_rejects_project_service_key",
+    "shared_pooler_admin_requires_token",
+    "fixture-project_pool_tenant_not_existing",
+    "fixture-project_native_pool_tenant_registered",
+    "fixture-project_pool_config_uses_own_database",
+    "fixture-project_native_management_readback_requires_secret_redaction",
+    "fixture-project_safe_readback_has_no_password",
+    "nissan-gtr_pool_tenant_not_existing",
+    "nissan-gtr_native_pool_tenant_registered",
+    "nissan-gtr_pool_config_uses_own_database",
+    "nissan-gtr_native_management_readback_requires_secret_redaction",
+    "nissan-gtr_safe_readback_has_no_password",
+    "fixture-project_session_real_database_and_user",
+    "fixture-project_session_transactions_work",
+    "fixture-project_session_foreign_password_denied",
+    "fixture-project_session_foreign_database_denied",
+    "fixture-project_session_no_cluster_superuser",
+    "fixture-project_session_no_global_passwords",
+    "fixture-project_session_no_cluster_role_creation",
+    "fixture-project_transaction_real_database_and_user",
+    "fixture-project_transaction_transactions_work",
+    "fixture-project_transaction_foreign_password_denied",
+    "fixture-project_transaction_foreign_database_denied",
+    "fixture-project_transaction_no_cluster_superuser",
+    "fixture-project_transaction_no_global_passwords",
+    "fixture-project_transaction_no_cluster_role_creation",
+    "fixture-project_foreign_role_on_own_tenant_denied",
+    "fixture-project_raw_pool_login_cross_database_denied",
+    "nissan-gtr_session_real_database_and_user",
+    "nissan-gtr_session_transactions_work",
+    "nissan-gtr_session_foreign_password_denied",
+    "nissan-gtr_session_foreign_database_denied",
+    "nissan-gtr_session_no_cluster_superuser",
+    "nissan-gtr_session_no_global_passwords",
+    "nissan-gtr_session_no_cluster_role_creation",
+    "nissan-gtr_transaction_real_database_and_user",
+    "nissan-gtr_transaction_transactions_work",
+    "nissan-gtr_transaction_foreign_password_denied",
+    "nissan-gtr_transaction_foreign_database_denied",
+    "nissan-gtr_transaction_no_cluster_superuser",
+    "nissan-gtr_transaction_no_global_passwords",
+    "nissan-gtr_transaction_no_cluster_role_creation",
+    "nissan-gtr_foreign_role_on_own_tenant_denied",
+    "nissan-gtr_raw_pool_login_cross_database_denied",
+    "concurrent_tenant_pools_keep_24_requests_separate",
+    "bounded_backend_connections_for_both_tenants",
+    "one_real_supavisor_ready",
+    "management_listener_loopback_only",
+    "session_listener_loopback_only",
+    "transaction_listener_loopback_only",
+    "proxy_listener_loopback_only",
+    "session_shard_listener_loopback_only",
+    "tx_shard_listener_loopback_only",
+    "fixture-project_pool_recovers_after_shared_restart",
+    "fixture-project_direct_rest_preserved",
+    "nissan-gtr_pool_recovers_after_shared_restart",
+    "nissan-gtr_direct_rest_preserved",
+    "pooler_preserves_legacy_database",
+    "ephemeral_fixture_issuer_created",
+    "real_pinned_postgres_meta_ready",
+    "real_upstream_studio_server_ready",
+    "operator_verified_admin_gateway_ready",
+    "private_health_probe_binds_exact_registry_and_process",
+    "health_probe_cannot_accept_changed_registry",
+    "studio_catalogue_contains_both_authorized_projects",
+    "catalogue_contains_no_database_credentials",
+    "scoped_operator_sees_only_allowed_project",
+    "scoped_operator_foreign_project_hidden",
+    "operator_authority_invalid_case_180",
+    "operator_authority_invalid_case_181",
+    "operator_authority_invalid_case_182",
+    "operator_authority_invalid_case_183",
+    "operator_authority_invalid_case_184",
+    "operator_authority_invalid_case_185",
+    "fixture-project_real_meta_query_selected_database",
+    "fixture-project_caller_connection_headers_cannot_change_database",
+    "fixture-project_operator_can_manage_own_public_schema",
+    "fixture-project_real_meta_lists_own_tables",
+    "fixture-project_cannot_create_cluster_role",
+    "fixture-project_cannot_become_cluster_admin",
+    "fixture-project_cannot_read_cluster_passwords",
+    "fixture-project_operator_sql_login_denied_postgres",
+    "fixture-project_operator_sql_login_denied_legacy_van",
+    "fixture-project_operator_sql_login_denied_dial_pooler_control",
+    "fixture-project_operator_sql_login_denied_gtr_prod",
+    "fixture-project_read_only_operator_cannot_run_sql",
+    "fixture-project_cluster_admin_api_not_exposed",
+    "fixture-project_native_studio_project_page_served",
+    "nissan-gtr_real_meta_query_selected_database",
+    "nissan-gtr_caller_connection_headers_cannot_change_database",
+    "nissan-gtr_operator_can_manage_own_public_schema",
+    "nissan-gtr_real_meta_lists_own_tables",
+    "nissan-gtr_cannot_create_cluster_role",
+    "nissan-gtr_cannot_become_cluster_admin",
+    "nissan-gtr_cannot_read_cluster_passwords",
+    "nissan-gtr_operator_sql_login_denied_postgres",
+    "nissan-gtr_operator_sql_login_denied_legacy_van",
+    "nissan-gtr_operator_sql_login_denied_dial_pooler_control",
+    "nissan-gtr_operator_sql_login_denied_fixture_db",
+    "nissan-gtr_read_only_operator_cannot_run_sql",
+    "nissan-gtr_cluster_admin_api_not_exposed",
+    "nissan-gtr_native_studio_project_page_served",
+    "other_project_sql_ref_denied_before_meta",
+    "cookie_admin_requires_same_origin_for_writes",
+    "verified_cookie_same_origin_query_allowed",
+    "admin_gateway_rejects_foreign_host",
+    "admin_gateway_rejects_foreign_origin",
+    "unqualified_platform_api_does_not_fall_back_to_default_project",
+    "meta_without_server_selected_context_has_no_db_authority",
+    "admin_work_did_not_change_legacy_data",
+    "operator_query_is_queued_before_execution_not_replayed",
+    "at_most_two_native_queries_execute_for_one_operator",
+    "another_operator_remains_available_with_bounded_capacity",
+    "original_bounded_queries_and_queued_request_finish",
+    "capacity_released_after_original_query_completion",
+    "ephemeral_browser_tls_certificate",
+    "private_browser_tls_proxy_config",
+    "native_browser_process_completed",
+    "fixture-project_session_selector_contains_fixture-project",
+    "fixture-project_session_selector_contains_nissan-gtr",
+    "fixture-project_native_page_not_error",
+    "fixture-project_rendered_table_editor_lists_fixture",
+    "fixture-project_native_table_click_succeeds",
+    "fixture-project_native_table_click_displays_own_row",
+    "fixture-project_browser_cookie_catalogue",
+    "fixture-project_browser_native_table_metadata",
+    "fixture-project_browser_scoped_sql_response",
+    "nissan-gtr_session_selector_contains_fixture-project",
+    "nissan-gtr_session_selector_contains_nissan-gtr",
+    "nissan-gtr_native_page_not_error",
+    "nissan-gtr_rendered_table_editor_lists_fixture",
+    "nissan-gtr_native_table_click_succeeds",
+    "nissan-gtr_native_table_click_displays_own_row",
+    "nissan-gtr_browser_cookie_catalogue",
+    "nissan-gtr_browser_native_table_metadata",
+    "nissan-gtr_browser_scoped_sql_response"
+  ],
+  "cleanup_completed": true,
+  "error": null,
+  "meta_source": "f380cc5be21edef4e77d9838c732d1f20af0b3c0",
+  "native_binary_sha256": {
+    "auth": "280fe1372d71b32cfb61fd932f03458398258cae679061af29eda5228c8bf839",
+    "postgres": "a8de97eb871cee1fdb84cad48ec4e2c481ac826c3801d9e8bb35adec971f7e43",
+    "rest": "74a3ca24413d50071abc50d70ba77064c228c6dd7213d25c024e72b1ae167744"
+  },
+  "not_tested": [
+    "live VAN",
+    "real operator identity issuer integration",
+    "full browser-interaction Studio coverage",
+    "production TLS/ARM64",
+    "all shared Storage/Realtime/Edge together",
+    "Nissan GTR migration"
+  ],
+  "observed_at": "2026-11-04T19:03:29.446526+00:00",
+  "pooler_observations": {
+    "observed_project_backend_connections": 6,
+    "private_listeners": [
+      {
+        "loopback": true,
+        "purpose": "management"
+      },
+      {
+        "loopback": true,
+        "purpose": "session"
+      },
+      {
+        "loopback": true,
+        "purpose": "transaction"
+      },
+      {
+        "loopback": true,
+        "purpose": "proxy"
+      },
+      {
+        "loopback": true,
+        "purpose": "session_shard"
+      },
+      {
+        "loopback": true,
+        "purpose": "tx_shard"
+      }
+    ]
+  },
+  "pooler_processes": 1,
+  "pooler_version": "2.9.12",
+  "postgres_servers": 1,
+  "postgres_version": "postgres (PostgreSQL) 17.11 (Ubuntu 17.11-1.pgdg24.04+2)",
+  "production_changes": false,
+  "rea_used": false,
+  "runtime_module_sha256": "f96b03ea63222f8683da737c1e9ecedc8b523e91dc54f6897f6d99abe0c15955",
+  "schema_version": 1,
+  "scope": "ONE_SERVER_SHARED_POOLER_META_STUDIO_ADMIN_NATIVE_REHEARSAL",
+  "source_sha256": {
+    "admin/admission.mjs": "95a8343558ad5b27070cbe4a483fb41d57a65591a181182ecd29ad236f4f53e7",
+    "admin/health.mjs": "ae94f58542ab9c98968ddc62d91a8f1ce6ad40f4d3ce9468a727c1d0024f01b8",
+    "admin/package-lock.json": "c534cdab304543d7083126c3c8364e72e1c9be6a656728e8d8f0ba4523cd3763",
+    "admin/server.mjs": "d43cb77fcc7b8fcb6d2627895780be34aa8591b919d36b0427cca509aa3758f8",
+    "tests/pooler_loopback_fixture.exs": "7a777083b9b583bc74d5c45e22c8966b76a2c5608f16f209764f88cfd8c07d9b",
+    "tests/rehearse_admin.py": "91b012d7e2200c48336ab5399d329585ad4c42ddf3c91bfdc1a3228f306f16c0",
+    "tests/rehearse_native.py": "3ff2f03dde0a6f2969acc87c2ebd04ab47ef056debd4ce7b03edd34435f2d778",
+    "tests/rehearse_pooler.py": "6159447ba2824022861f16789ba6ab97814f63355285a5133ac5f688b6fe9c00",
+    "tests/studio_browser.mjs": "3f69ead530757c3ce8c98a4bd187ac80d783546511ccc0c1d062cb17a6ebd5d7",
+    "tools/bootstrap.py": "d1872afa590b3c0dd8705d470c26c69c5b1d1c19fcbb216d9e9ffea988b7acb0",
+    "tools/render.py": "1084c47d632c24cd0e0f1d55b50b64a7889583e19b50f5cb65a4847e5b5dd836",
+    "tools/shared_admin.py": "94690adde2e883f2528262eef48852250a5006afa83c070a20f524966aff7f41",
+    "tools/shared_pooler.py": "956e060df88d4b83f63a1e4744fbe2e8e82daee465cb8a7417b04ee31cf13f42"
+  },
+  "state": "PASS",
+  "studio_image": "2026.09.07-sha-7996410",
+  "upstream_source": "e8719d9ac5a43604c46d2d9e15bb34c76dea8f12"
+}

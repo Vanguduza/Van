@@ -1,0 +1,14 @@
+{
+  "all_migrations_passed": true,
+  "all_smokes_passed": true,
+  "capture_completed": true,
+  "capture_failure": null,
+  "migration_total": 13,
+  "new_fixture_data_only": true,
+  "original_containers_preserved": true,
+  "result_success": true,
+  "runner_returncode": 0,
+  "runner_state": "PASS",
+  "smoke_count": 17,
+  "temporary_container_removed": true
+}

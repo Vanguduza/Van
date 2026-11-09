@@ -1,0 +1,52 @@
+[
+  {
+    "attempt": "attempt-01659ac085",
+    "state": "FAIL",
+    "error": "original_local_seed_in_isolated_fixture",
+    "migrations_passed": 13,
+    "smokes_passed": 0,
+    "container_removed": true,
+    "original_containers_preserved": true,
+    "result_sha256": "a1c885b2c42545ef47fdf38378f72e67f087e210f831a24081fb7ab2866cf53c"
+  },
+  {
+    "attempt": "attempt-029aaeac8c",
+    "state": "FAIL",
+    "error": "migration_20261102100000_staff_self_service_reconciliation.sql",
+    "migrations_passed": 9,
+    "smokes_passed": 0,
+    "container_removed": true,
+    "original_containers_preserved": true,
+    "result_sha256": "d0876482c19473f907ff91a6e662137883b6a3e531bde2b1dc7c553b0be01228"
+  },
+  {
+    "attempt": "attempt-19bd465f39",
+    "state": "FAIL",
+    "error": "migration_20261102080000_reconciled_erp_baseline.sql",
+    "migrations_passed": 0,
+    "smokes_passed": 0,
+    "container_removed": true,
+    "original_containers_preserved": true,
+    "result_sha256": "12429469f15793abe59c930aca8c08951f4cbeb8f9cd2320d550445ad2cb0864"
+  },
+  {
+    "attempt": "attempt-c1c5e608df",
+    "state": "PASS",
+    "error": null,
+    "migrations_passed": 13,
+    "smokes_passed": 17,
+    "container_removed": true,
+    "original_containers_preserved": true,
+    "result_sha256": "65928211d6ccc7712f0ac77a96a52d3836bb484899dc075c9525c36eb643afff"
+  },
+  {
+    "attempt": "attempt-de5c77c1a6",
+    "state": "FAIL",
+    "error": "native-extensions: ERROR:  pg_net is not in shared_preload_libraries\nHINT:  Add pg_net to the shared_preload_libraries configuration variable in postgresql.conf.\n",
+    "migrations_passed": 0,
+    "smokes_passed": 0,
+    "container_removed": true,
+    "original_containers_preserved": true,
+    "result_sha256": "138cb96e5ea81aef9857e0a54d06b3a9cb8cfd32532375e3aa86f089cd8d6ba0"
+  }
+]

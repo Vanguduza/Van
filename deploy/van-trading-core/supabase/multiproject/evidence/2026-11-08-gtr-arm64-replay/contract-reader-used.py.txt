@@ -1,0 +1,24 @@
+import json
+
+def snapshot(sql):
+ queries={
+ 'functions':"SELECT json_agg(json_build_array(n.nspname,p.proname,pg_get_function_identity_arguments(p.oid),md5(pg_get_functiondef(p.oid)),has_function_privilege('anon',p.oid,'EXECUTE'),has_function_privilege('authenticated',p.oid,'EXECUTE'),has_function_privilege('service_role',p.oid,'EXECUTE')) ORDER BY n.nspname,p.proname,pg_get_function_identity_arguments(p.oid)) FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname IN ('public','private') AND p.prokind='f'",
+ 'tables':"SELECT json_agg(json_build_array(n.nspname,c.relname,c.relrowsecurity,c.relpersistence) ORDER BY n.nspname,c.relname) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname IN ('public','private') AND c.relkind IN ('r','p')",
+ 'policies':"SELECT json_agg(json_build_array(schemaname,tablename,policyname,permissive,roles,cmd,qual,with_check) ORDER BY schemaname,tablename,policyname) FROM pg_policies WHERE schemaname IN ('public','private','storage')",
+ 'views':"SELECT json_agg(json_build_array(n.nspname,c.relname,pg_get_viewdef(c.oid,true),c.reloptions) ORDER BY n.nspname,c.relname) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname IN ('public','private') AND c.relkind='v'",
+ 'private_usage':"SELECT json_build_array(has_schema_privilege('anon','private','USAGE'),has_schema_privilege('authenticated','private','USAGE'),has_schema_privilege('service_role','private','USAGE'))",
+ 'relation_grants':"SELECT json_agg(json_build_array(n.nspname,c.relname,r.rol,priv.p,has_table_privilege(r.rol,c.oid,priv.p)) ORDER BY n.nspname,c.relname,r.rol,priv.p) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace CROSS JOIN (VALUES ('anon'),('authenticated'),('service_role')) r(rol) CROSS JOIN (VALUES ('SELECT'),('INSERT'),('UPDATE'),('DELETE'),('TRUNCATE'),('REFERENCES'),('TRIGGER'),('MAINTAIN')) priv(p) WHERE n.nspname IN ('public','private') AND c.relkind IN ('r','p','v')"
+ }
+ return {key:json.loads(sql("SET search_path=public,extensions;"+query+';',db='gtr_replay',label='contract-'+key).stdout.strip()) for key,query in queries.items()}
+
+def differences(actual,expected):
+ result={}
+ for name in expected:
+  a=actual[name];b=expected[name]
+  if name=='private_usage':result[name]={'expected':len(b),'actual':len(a),'match':a==b,'mismatches':[] if a==b else [{'actual':a,'expected':b}]};continue
+  nkey={'functions':3,'policies':3,'tables':2,'views':2,'relation_grants':4}[name]
+  amap={tuple(row[:nkey]):row for row in a};bmap={tuple(row[:nkey]):row for row in b}
+  missing=[k for k in bmap if k not in amap];extra=[k for k in amap if k not in bmap]
+  changed=[{'identity':list(k),'actual':amap[k][nkey:],'expected':bmap[k][nkey:]} for k in bmap if k in amap and amap[k]!=bmap[k]]
+  result[name]={'expected':len(b),'actual':len(a),'match':not missing and not extra and not changed,'missing':missing,'extra':extra,'mismatches':changed}
+ return result

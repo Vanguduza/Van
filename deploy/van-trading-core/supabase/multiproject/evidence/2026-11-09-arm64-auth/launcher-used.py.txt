@@ -1,0 +1,53 @@
+import json, pathlib, subprocess, os, time
+ROOT=pathlib.Path('/var/tmp/dial-supa-arm64-core-20261109-r1')
+NAME='dial-supa-arm64-core-rehearsal-r1'
+def cmd(a,**kw):return subprocess.run(a,text=True,capture_output=True,check=True,timeout=kw.pop('timeout',30),**kw)
+def inspect(a):return json.loads(cmd(['docker','inspect',a]).stdout)[0]
+old=cmd(['docker','ps','-q','--filter','label=com.docker.compose.project=supabase']).stdout.split()
+original={c:(inspect(c)['State']['StartedAt']) for c in old}
+assert len(original)==11
+assert all(inspect(c)['State'].get('Health',{}).get('Status')=='healthy' for c in original)
+(ROOT/'original-container-identities.json').write_text(json.dumps(original,indent=2))
+image=json.loads(cmd(['docker','image','inspect','dial-supa-arm64-core-fixture:20261109-r1']).stdout)[0]
+assert image['Architecture']=='arm64'
+out=ROOT/'attempt1';out.mkdir(mode=0o700);os.chown(out,100,101)
+assert not cmd(['docker','ps','-aq','--filter','name=^/'+NAME+'$']).stdout.strip()
+cid=None;result={}
+try:
+ args=['docker','run','-d','--name',NAME,'--label','dial.supabase.arm64-core=20261109-r1',
+ '--network','none','--memory','768m','--memory-swap','768m','--cpus','0.7','--pids-limit','256',
+ '--cap-drop','ALL','--security-opt','no-new-privileges:true','--read-only',
+ '--tmpfs','/tmp:rw,nosuid,nodev,size=384m,mode=1777',
+ '--mount','type=bind,src='+str(out)+',dst=/output','--mount','type=bind,src='+str(ROOT/'glibc')+',dst=/usr/lib/aarch64-linux-gnu,readonly','--mount','type=bind,src='+str(ROOT/'glibc/ld-linux-aarch64.so.1')+',dst=/lib/ld-linux-aarch64.so.1,readonly','--user','100:101',image['Id'],
+ '--pg-bin','/nix/var/nix/profiles/default/bin','--pg-lib','/tmp/emptylib',
+ '--auth-bin','/fixture-bin/auth','--rest-bin','/fixture-bin/postgrest',
+ '--nginx','/usr/sbin/nginx','--report','/output/native-result.json']
+ cid=cmd(args).stdout.strip()
+ metadata=inspect(cid)
+ assert metadata['HostConfig']['NetworkMode']=='none' and not metadata['HostConfig'].get('PortBindings')
+ assert metadata['Config']['User']=='100:101'
+ assert {m['Source'] for m in metadata['Mounts']}=={str(out),str(ROOT/'glibc'),str(ROOT/'glibc/ld-linux-aarch64.so.1')}
+ assert all(m['RW']==False for m in metadata['Mounts'] if m['Source']!=str(out))
+ (ROOT/'container-safety.json').write_text(json.dumps({'image':image['Id'],'architecture':image['Architecture'],
+ 'network_none':True,'host_ports':False,'ordinary_uid':'100:101','mounts_only_new_output_and_readonly_image_libraries':True,
+ 'memory_limit':metadata['HostConfig']['Memory'],'source_candidate':'b46c978fbe73cca1340f010ab19c808f02d39b05'},indent=2))
+ finished=cmd(['docker','wait',cid],timeout=300)
+ code=int(finished.stdout.strip())
+ log=cmd(['docker','logs',cid]).stdout
+ (ROOT/'native-run.txt').write_text(log)
+ print(log,flush=True)
+ result={'exit_code':code,'image':image['Id'],'container':cid}
+ if (out/'native-result.json').exists():
+  report=json.loads((out/'native-result.json').read_text())
+  result.update(state=report['state'],check_count=report['check_count'],cleanup_completed=report['cleanup_completed'])
+ print('ARM64_CORE_RESULT '+json.dumps(result),flush=True)
+finally:
+ if cid:
+  m=inspect(cid)
+  assert m['Config']['Labels'].get('dial.supabase.arm64-core')=='20261109-r1'
+  cmd(['docker','rm','-f',cid])
+  result['temporary_container_removed']=subprocess.run(['docker','inspect',cid],capture_output=True).returncode!=0
+ result['original_containers_preserved']=all(inspect(c)['State']['StartedAt']==s and inspect(c)['State'].get('Health',{}).get('Status')=='healthy' for c,s in original.items())
+ (ROOT/'launcher-result.json').write_text(json.dumps(result,indent=2))
+ if not result['original_containers_preserved']:raise RuntimeError('ORIGINAL_PRODUCTION_IDENTITY_CHANGED')
+if result.get('exit_code')!=0 or result.get('state')!='PASS':raise SystemExit(2)

@@ -1,0 +1,142 @@
+"""Synthetic positive/negative PostgREST writes on disposable GTR database ONLY.
+
+No external networking or publication; the observer's PostgREST process has
+PGRST_DB_TX_END=rollback. The only persistent GRANTs are to a throwaway test
+database and must be explicitly revoked before calling this gate green.
+"""
+import base64,hmac,json,re,subprocess,time
+
+def run(pgid,sidecar,ids,secret,fixture_sql,report):
+    now=int(time.time())
+    ids=dict(ids)
+    ids['finance']='a0000000-0000-4000-8000-000000000002'
+    results=[]
+    def enc(d):
+        return base64.urlsafe_b64encode(json.dumps(d,separators=(',',':')).encode()).rstrip(b'=').decode()
+    def jwt(who):
+        if who not in ids:raise RuntimeError('UNRECOGNIZED_FIXTURE_ROLE')
+        unsigned=enc({'alg':'HS256','typ':'JWT'})+'.'+enc(
+            {'role':'authenticated','sub':ids[who],'aud':'authenticated','iat':now,'exp':now+500})
+        sig=base64.urlsafe_b64encode(hmac.new(secret.encode(),unsigned.encode(),'sha256').digest()).rstrip(b'=').decode()
+        return unsigned+'.'+sig
+    def call(label,who,method,path,body=None,statuses=(200,),rows=None,code=None,field=None):
+        if who not in ids or method not in ('GET','POST','PATCH') or not path.startswith('/') or '://' in path:
+            raise RuntimeError('UNSAFE_SYNTHETIC_ENDPOINT_OR_ROLE')
+        cmd=['docker','exec','--user','100:101',pgid,'curl','--silent','--show-error',
+            '--max-time','7','--connect-timeout','2','-o','-',
+            '-w','\n__DIAL_LOCAL_STATUS__%{http_code}',
+            '-X',method,'-H','Accept: application/json',
+            '-H','Authorization: Bearer '+jwt(who)]
+        if body is not None:
+            cmd.extend(['-H','Content-Type: application/json',
+                '-H','Prefer: return=representation,missing=default',
+                '--data',json.dumps(body,separators=(',',':'))])
+        cmd.append('http://127.0.0.1:3199'+path)
+        p=subprocess.run(cmd,text=True,capture_output=True,timeout=12)
+        raw,marker,status_text=p.stdout.rpartition('\n__DIAL_LOCAL_STATUS__')
+        if p.returncode or not marker or len(raw)>12000 or not status_text.strip().isdigit():
+            raise RuntimeError('LOCAL_SYNTHETIC_WRITE_HTTP_MALFORMED_'+label)
+        status=int(status_text.strip())
+        try:v=json.loads(raw)
+        except (ValueError,TypeError):
+            raise RuntimeError('LOCAL_SYNTHETIC_WRITE_NOT_JSON_'+label) from None
+        n=len(v) if isinstance(v,list) else None
+        err=v.get('code') if isinstance(v,dict) else None
+        if err is not None and (not isinstance(err,str) or not re.fullmatch(r'[A-Z0-9]{5}',err)):
+            raise RuntimeError('LOCAL_SYNTHETIC_WRITE_CODE_NOT_VALID_'+label)
+        results.append({'label':label,'actor':who,'method':method,'status':status,
+            'rows':n,'sqlstate':err,'response_body_saved':False,
+            'synthetic_fixture_only':True})
+        print('LOCAL_SYNTHETIC_DML '+label+' HTTP_'+str(status)+' ROWS_'+str(n)+' CODE_'+str(err),flush=True)
+        if status not in statuses or (rows is not None and n!=rows) or (code is not None and err not in code):
+            raise RuntimeError('LOCAL_SYNTHETIC_DML_EXPECTATION_FAILED_'+label)
+        if field:
+            k,value=field
+            if not(isinstance(v,list) and len(v)==1 and isinstance(v[0],dict) and v[0].get(k)==value):
+                raise RuntimeError('LOCAL_SYNTHETIC_DML_RESPONSE_VALUE_CHANGED_'+label)
+        del v,raw,p
+    aid=ids['customer_a'];bid=ids['customer_b'];admin=ids['admin']
+    call('customer_before','customer_a','GET',
+        '/customers?select=display_name&profile_id=eq.'+aid,rows=1,
+        field=('display_name','Storefront Customer A'))
+    call('customer_own_update_rollback','customer_a','PATCH',
+        '/customers?profile_id=eq.'+aid+'&select=display_name',
+        {'display_name':'Synthetic Rollback Customer Name'},
+        statuses=(200,),rows=1,field=('display_name','Synthetic Rollback Customer Name'))
+    call('customer_after_http_rollback','customer_a','GET',
+        '/customers?select=display_name&profile_id=eq.'+aid,rows=1,
+        field=('display_name','Storefront Customer A'))
+    call('customer_cross_update_no_rows','customer_a','PATCH',
+        '/customers?profile_id=eq.'+bid+'&select=id',
+        {'display_name':'SHOULD NEVER PERSIST'},rows=0)
+    call('other_customer_unmodified','customer_b','GET',
+        '/customers?select=display_name&profile_id=eq.'+bid,rows=1,
+        field=('display_name','Storefront Customer B'))
+    tests=(
+      ('hr_grade','/hr_grades?select=code',{'code':'Z9','title':'Synthetic Nonpersistent Grade'},
+       'admin','customer_a','/hr_grades?select=id&code=eq.Z9'),
+      ('pos_pin','/pos_operator_popular_pins?select=item_key',
+       {'user_id':admin,'item_type':'part','item_key':'synthetic-local-nonpersistent-pin',
+        'label':'Synthetic POS Pin','search_query':'local-testing-only'},
+       'admin','customer_a',
+       '/pos_operator_popular_pins?select=id&item_key=eq.synthetic-local-nonpersistent-pin'),
+      ('finance_threshold','/finance_requisition_thresholds?select=req_type',
+       {'req_type':'vendor','currency':'USD','min_amount':999999.99,'required_approvals':1},
+       'admin','finance','/finance_requisition_thresholds?select=id&min_amount=eq.999999.99')
+    )
+    for name,url,body,owner,other,checkurl in tests:
+        call(name+'_initial_dml_denied',owner,'POST',url,body,statuses=(401,403))
+    fixture_sql("""BEGIN;SET LOCAL search_path=pg_catalog;SET LOCAL statement_timeout='8s';
+DO $guard$
+DECLARE n integer;
+BEGIN
+ IF current_database()<>'gtr_replay' OR current_user<>'postgres' THEN RAISE EXCEPTION 'NOT_FIXTURE'; END IF;
+ SELECT count(*) INTO n FROM pg_class c JOIN pg_namespace s ON s.oid=c.relnamespace
+ WHERE s.nspname='public'
+ AND c.relname IN ('hr_grades','pos_operator_popular_pins','finance_requisition_thresholds')
+ AND c.relkind='r' AND c.relrowsecurity AND pg_get_userbyid(c.relowner)='postgres'
+ AND NOT has_table_privilege('authenticated',c.oid,'INSERT');
+ IF n<>3 THEN RAISE EXCEPTION 'EXACT_RLS_TABLES_WITHOUT_INSERT_REQUIRED'; END IF;
+ SELECT count(*) INTO n FROM pg_policies p WHERE p.schemaname='public'
+ AND ((p.tablename='hr_grades' AND p.policyname='hr_grades_write')
+ OR (p.tablename='pos_operator_popular_pins' AND p.policyname='pos_operator_popular_pins_own_write')
+ OR (p.tablename='finance_requisition_thresholds' AND p.policyname='finance_req_thresholds_write'))
+ AND p.cmd='ALL' AND 'authenticated'=ANY(p.roles) AND p.with_check IS NOT NULL;
+ IF n<>3 THEN RAISE EXCEPTION 'REQUIRED_THREE_RLS_POLICIES_MISSING'; END IF;
+END $guard$;
+GRANT INSERT ON TABLE public.hr_grades,public.pos_operator_popular_pins,public.finance_requisition_thresholds TO authenticated;
+COMMIT;""")
+    report['three_temporary_fixture_insert_grants']=True
+    subprocess.run(['docker','kill','--signal=SIGUSR1',sidecar],capture_output=True,text=True,timeout=8)
+    time.sleep(.6)
+    for name,url,body,owner,other,checkurl in tests:
+        call(name+'_admin_post_nonpersistent',owner,'POST',url,body,
+             statuses=(200,201),rows=1)
+        call(name+'_not_persisted',owner,'GET',checkurl,rows=0)
+        call(name+'_unauthorized_denied',other,'POST',url,body,
+             statuses=(401,403),code=('42501',))
+    fixture_sql("""BEGIN;SET LOCAL search_path=pg_catalog;SET LOCAL statement_timeout='8s';
+DO $guard$ BEGIN
+ IF current_database()<>'gtr_replay' OR current_user<>'postgres'
+ OR NOT has_table_privilege('authenticated','public.hr_grades','INSERT')
+ OR NOT has_table_privilege('authenticated','public.pos_operator_popular_pins','INSERT')
+ OR NOT has_table_privilege('authenticated','public.finance_requisition_thresholds','INSERT')
+ THEN RAISE EXCEPTION 'TEMP_GRANTS_NOT_PRESENT';END IF;END $guard$;
+REVOKE INSERT ON TABLE public.hr_grades,public.pos_operator_popular_pins,public.finance_requisition_thresholds FROM authenticated;
+COMMIT;""")
+    report['three_temporary_fixture_grants_revoked']=True
+    subprocess.run(['docker','kill','--signal=SIGUSR1',sidecar],capture_output=True,text=True,timeout=8)
+    time.sleep(.6)
+    for name,url,body,owner,other,checkurl in tests:
+        call(name+'_post_revoke_denied',owner,'POST',url,body,statuses=(401,403))
+    no_grants=fixture_sql("""SELECT NOT has_table_privilege('authenticated','public.hr_grades','INSERT')
+ AND NOT has_table_privilege('authenticated','public.pos_operator_popular_pins','INSERT')
+ AND NOT has_table_privilege('authenticated','public.finance_requisition_thresholds','INSERT');""")
+    if no_grants!='t':
+        raise RuntimeError('SYNTHETIC_TEST_GRANT_CLEANUP_NOT_CONFIRMED')
+    report['three_fixture_grants_final_denial_verified']=True
+    report['stateful_http_checks']=results
+    report['stateful_http_check_count']=len(results)
+    report['stateful_http_tx_rollback_proven']=True
+    report['stateful_response_bodies_or_auth_tokens_saved']=False
+    print('STATEFUL_ISOLATED_HTTP_CHECKS_PASS '+str(len(results)),flush=True)

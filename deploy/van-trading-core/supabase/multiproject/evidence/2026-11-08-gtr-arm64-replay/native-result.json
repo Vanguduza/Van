@@ -1,0 +1,300 @@
+{
+  "schema_version": 1,
+  "state": "PASS",
+  "scope": "NETWORK_ISOLATED_FRESH_ARM64_GTR_SOURCE_REPLAY_NOT_LIVE_CANARY",
+  "checks": [
+    "exact_original_arm64_donor_image",
+    "minimum_disk_headroom",
+    "fixture_no_network_or_ports",
+    "fixture_ordinary_postgres_uid",
+    "fixture_only_new_data_mounted",
+    "real_arm64_postgres_17_6",
+    "actual_donor_auth_storage_schema_restored",
+    "native_jobs_disabled",
+    "migration_20261102080000_reconciled_erp_baseline.sql",
+    "migration_20261102085000_baseline_runtime_contracts.sql",
+    "migration_20261102085100_pos_published_vehicle_validation.sql",
+    "migration_20261102085200_cashier_reserved_settlement_posting.sql",
+    "migration_20261102085300_storage_policy_helper_execution.sql",
+    "migration_20261102085400_retained_workflow_posting_scopes.sql",
+    "migration_20261102090000_payment_settlement_reconciliation.sql",
+    "migration_20261102091000_customer_garage_identity.sql",
+    "migration_20261102092000_customer_order_projection_reconciliation.sql",
+    "migration_20261102100000_staff_self_service_reconciliation.sql",
+    "migration_20261102100100_staff_payroll_reconciliation.sql",
+    "migration_20261102100200_staff_merchandising_reconciliation.sql",
+    "migration_20261102100300_staff_overview_reconciliation.sql",
+    "original_local_seed_in_isolated_fixture",
+    "neighbor_fixture_preserved",
+    "temporary_container_removed"
+  ],
+  "check_count": 24,
+  "error": null,
+  "migrations": [
+    {
+      "path": "supabase/migrations/20261102080000_reconciled_erp_baseline.sql",
+      "source_sha256": "2502826ee08e67d7bcee3f7bdacdc31d944ccbb1bf9c3d86090b79b938ea016c",
+      "executed_sha256": "8043b5025a8f453de9ee95f0b6e3698e1f4d6a8ee49660d55a0e558265a86c31",
+      "exit_code": 0,
+      "seconds": 4.968
+    },
+    {
+      "path": "supabase/migrations/20261102085000_baseline_runtime_contracts.sql",
+      "source_sha256": "c4e2791d640b1c4e72f0ba5bd2a4be28ac5ad9e7c499ffc57471c4def04329f1",
+      "executed_sha256": "c4e2791d640b1c4e72f0ba5bd2a4be28ac5ad9e7c499ffc57471c4def04329f1",
+      "exit_code": 0,
+      "seconds": 0.1
+    },
+    {
+      "path": "supabase/migrations/20261102085100_pos_published_vehicle_validation.sql",
+      "source_sha256": "bd3ca928583aa9a0fd44bea028f457e93009d87d953fb55b605a945f2eb44dc0",
+      "executed_sha256": "bd3ca928583aa9a0fd44bea028f457e93009d87d953fb55b605a945f2eb44dc0",
+      "exit_code": 0,
+      "seconds": 0.09
+    },
+    {
+      "path": "supabase/migrations/20261102085200_cashier_reserved_settlement_posting.sql",
+      "source_sha256": "a52f97b42101481d744d824da9e88c878c79faa60094d87ef5598862f1fdd581",
+      "executed_sha256": "a52f97b42101481d744d824da9e88c878c79faa60094d87ef5598862f1fdd581",
+      "exit_code": 0,
+      "seconds": 0.092
+    },
+    {
+      "path": "supabase/migrations/20261102085300_storage_policy_helper_execution.sql",
+      "source_sha256": "355e863086c17a1691df2f9e56b347215a86ffa91d31d1515094a8b29315f4a2",
+      "executed_sha256": "355e863086c17a1691df2f9e56b347215a86ffa91d31d1515094a8b29315f4a2",
+      "exit_code": 0,
+      "seconds": 0.099
+    },
+    {
+      "path": "supabase/migrations/20261102085400_retained_workflow_posting_scopes.sql",
+      "source_sha256": "f4636eafd3345f0aa4b343ae6a814fed79f466b19ca81ebadecd155748a72cdd",
+      "executed_sha256": "f4636eafd3345f0aa4b343ae6a814fed79f466b19ca81ebadecd155748a72cdd",
+      "exit_code": 0,
+      "seconds": 0.094
+    },
+    {
+      "path": "supabase/migrations/20261102090000_payment_settlement_reconciliation.sql",
+      "source_sha256": "f52b0b5f301df0abc63b034f4a14b9a079cc9ab8db0e95684c502ca52205eee4",
+      "executed_sha256": "f52b0b5f301df0abc63b034f4a14b9a079cc9ab8db0e95684c502ca52205eee4",
+      "exit_code": 0,
+      "seconds": 0.109
+    },
+    {
+      "path": "supabase/migrations/20261102091000_customer_garage_identity.sql",
+      "source_sha256": "d89dc414fa09961dd49bf865823d99f6b5a294b85362bd0f327ca1a5f90b5d3b",
+      "executed_sha256": "d89dc414fa09961dd49bf865823d99f6b5a294b85362bd0f327ca1a5f90b5d3b",
+      "exit_code": 0,
+      "seconds": 0.109
+    },
+    {
+      "path": "supabase/migrations/20261102092000_customer_order_projection_reconciliation.sql",
+      "source_sha256": "32f528b58a6603cffe422ca5db5107beacc62be901a3c440973fcb4d6c69cc96",
+      "executed_sha256": "32f528b58a6603cffe422ca5db5107beacc62be901a3c440973fcb4d6c69cc96",
+      "exit_code": 0,
+      "seconds": 0.094
+    },
+    {
+      "path": "supabase/migrations/20261102100000_staff_self_service_reconciliation.sql",
+      "source_sha256": "3ef739b8c361f5d7a4b0aff2bc21353c0f2bf6ecf6d532fc83207fc1f1e5d271",
+      "executed_sha256": "314f02f2643ebeb167c67b5bcdce41f1d48c2b84a27b614772016787e0d3082d",
+      "exit_code": 0,
+      "seconds": 0.098
+    },
+    {
+      "path": "supabase/migrations/20261102100100_staff_payroll_reconciliation.sql",
+      "source_sha256": "362699bd03a8753336a26aef1fb5b3c72a595a9610683a7e707a4c22810ca615",
+      "executed_sha256": "362699bd03a8753336a26aef1fb5b3c72a595a9610683a7e707a4c22810ca615",
+      "exit_code": 0,
+      "seconds": 0.149
+    },
+    {
+      "path": "supabase/migrations/20261102100200_staff_merchandising_reconciliation.sql",
+      "source_sha256": "77b6d8b1575b950210d75d756b7bec3d2529adf8dd44cb8740290918214b37c0",
+      "executed_sha256": "77b6d8b1575b950210d75d756b7bec3d2529adf8dd44cb8740290918214b37c0",
+      "exit_code": 0,
+      "seconds": 0.156
+    },
+    {
+      "path": "supabase/migrations/20261102100300_staff_overview_reconciliation.sql",
+      "source_sha256": "d392ff6f364a7df69b4190b15160f769ead0af45bdfe924371afefe53aa56979",
+      "executed_sha256": "d392ff6f364a7df69b4190b15160f769ead0af45bdfe924371afefe53aa56979",
+      "exit_code": 0,
+      "seconds": 0.22
+    }
+  ],
+  "smokes": [
+    {
+      "file": "baseline_contract_smoke.sql",
+      "source_sha256": "0deb73feb2ba9079176987caf2cdc52c7bc020fe2f7ba3a38ee33b6440d29119",
+      "exit_code": 0,
+      "passed": true,
+      "error_tail": null
+    },
+    {
+      "file": "customer_garage_identity_smoke.sql",
+      "source_sha256": "129b77de48c5ca131820ad1bf0aadf3260834af27561f759173cdbd974df1be1",
+      "exit_code": 0,
+      "passed": true,
+      "error_tail": null
+    },
+    {
+      "file": "payment_settlement_reconciliation_smoke.sql",
+      "source_sha256": "beabf1e823332889a113f7aefade83a80b13e2972c28673a982b7508e1cc09a3",
+      "exit_code": 0,
+      "passed": true,
+      "error_tail": null
+    },
+    {
+      "file": "phase14_ci_smoke.sql",
+      "source_sha256": "31151ebbd0c74574525f023c7e634f9f6d060089675cc02ea62f3790855f8273",
+      "exit_code": 0,
+      "passed": true,
+      "error_tail": null
+    },
+    {
+      "file": "phase2_rls_smoke.sql",
+      "source_sha256": "956cf2cd6b0faf57fec01f154f3d7925f5f448f39eafa9cf8d4f03ac0f49388f",
+      "exit_code": 0,
+      "passed": true,
+      "error_tail": null
+    },
+    {
+      "file": "phase3_finance_smoke.sql",
+      "source_sha256": "ca5a0e14201d2b3d9ea753777c2b3c8c117e0746965671eff7832d5a5ebdb0a0",
+      "exit_code": 0,
+      "passed": true,
+      "error_tail": null
+    },
+    {
+      "file": "phase4_inventory_smoke.sql",
+      "source_sha256": "1232d89ff54e52a9842a456d88ca8de62d72a65262c24756c16bbb7e01d9968c",
+      "exit_code": 0,
+      "passed": true,
+      "error_tail": null
+    },
+    {
+      "file": "pos_customer_garage_popular_items_smoke.sql",
+      "source_sha256": "598c183933c6bc1b5e2c257ce1542a51f9a95b254ccf9358003c899c61a5b6de",
+      "exit_code": 0,
+      "passed": true,
+      "error_tail": null
+    },
+    {
+      "file": "pos_hidden_bestsellers_smoke.sql",
+      "source_sha256": "85676826558f59098d1b02fb2d4f2db5308e289ee48edab65254b8cabf2223cd",
+      "exit_code": 0,
+      "passed": true,
+      "error_tail": null
+    },
+    {
+      "file": "pos_operator_discovery_smoke.sql",
+      "source_sha256": "49efaa14bd4cc9a11b479443672072c9f888ba1772af39ab55c7364187964c46",
+      "exit_code": 0,
+      "passed": true,
+      "error_tail": null
+    },
+    {
+      "file": "pos_vehicle_context_smoke.sql",
+      "source_sha256": "18263595c1e873fda3cd10165f386d017cc8307882113756b2cdf77c605a0cd7",
+      "exit_code": 0,
+      "passed": true,
+      "error_tail": null
+    },
+    {
+      "file": "retained_workflow_posting_smoke.sql",
+      "source_sha256": "cde3109c25ce7444a6155c24b238913bfed7fee78562b55a756d4f260c414f94",
+      "exit_code": 0,
+      "passed": true,
+      "error_tail": null
+    },
+    {
+      "file": "staff_overview_merchandising_reconciliation_smoke.sql",
+      "source_sha256": "09e348c8b0167408dd08735d4c018783ceae5b5fb6b8286da1b3dedb5acc8ab5",
+      "exit_code": 0,
+      "passed": true,
+      "error_tail": null
+    },
+    {
+      "file": "staff_payroll_reconciliation_smoke.sql",
+      "source_sha256": "99c9a3c123c6e9b28882de2037ee8e5488cd0d993f3148fbe47b23cdd91147da",
+      "exit_code": 0,
+      "passed": true,
+      "error_tail": null
+    },
+    {
+      "file": "staff_self_service_reconciliation_smoke.sql",
+      "source_sha256": "855c816a28a270622be642bd711042f6396b57cef5be4fe81f80d678fbe4b7b3",
+      "exit_code": 0,
+      "passed": true,
+      "error_tail": null
+    },
+    {
+      "file": "vehicle_artwork_storage_smoke.sql",
+      "source_sha256": "d597e7a55b7c2ee04242c5ef019be68f74f7c5823f7a47af4fa456fc8489d9d8",
+      "exit_code": 0,
+      "passed": true,
+      "error_tail": null
+    },
+    {
+      "file": "web_pos_sale_flow_smoke.sql",
+      "source_sha256": "6b40ac0efbe6616299b559d310df5224bb2c125a0f60e13f0063418869136ab9",
+      "exit_code": 0,
+      "passed": true,
+      "error_tail": null
+    }
+  ],
+  "baseline_contract": {
+    "functions": {
+      "expected": 769,
+      "actual": 769,
+      "match": true,
+      "missing": [],
+      "extra": [],
+      "mismatches": []
+    },
+    "policies": {
+      "expected": 341,
+      "actual": 341,
+      "match": true,
+      "missing": [],
+      "extra": [],
+      "mismatches": []
+    },
+    "private_usage": {
+      "expected": 3,
+      "actual": 3,
+      "match": true,
+      "mismatches": []
+    },
+    "relation_grants": {
+      "expected": 5136,
+      "actual": 5136,
+      "match": true,
+      "missing": [],
+      "extra": [],
+      "mismatches": []
+    },
+    "tables": {
+      "expected": 212,
+      "actual": 212,
+      "match": true,
+      "missing": [],
+      "extra": [],
+      "mismatches": []
+    },
+    "views": {
+      "expected": 2,
+      "actual": 2,
+      "match": true,
+      "missing": [],
+      "extra": [],
+      "mismatches": []
+    }
+  },
+  "original_containers_preserved": true,
+  "temporary_container_removed": true,
+  "production_writes": false,
+  "source_data_imported": false,
+  "fixture": "/var/tmp/dial-gtr-replay-fsur_69c/attempt-c1c5e608df"
+}

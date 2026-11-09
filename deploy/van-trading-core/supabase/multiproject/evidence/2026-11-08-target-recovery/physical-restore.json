@@ -1,0 +1,43 @@
+{
+  "check_count": 17,
+  "checks": [
+    "offhost_returned_archive_identity",
+    "archive_has_only_safe_regular_files_and_dirs",
+    "all_returned_payload_hashes_match",
+    "no_existing_restore_container",
+    "physical_cluster_booted_on_native_arm64",
+    "restore_has_no_network_or_published_port",
+    "restore_uses_exact_running_donor_image",
+    "system_identifier_preserved",
+    "physical_recovery_finished",
+    "original_databases_restored",
+    "_supabase_table_catalogue_preserved",
+    "_supabase_all_application_table_counts_match",
+    "postgres_table_catalogue_preserved",
+    "postgres_all_application_table_counts_match",
+    "all_cluster_role_attributes_restored",
+    "auth_and_storage_metadata_preserved",
+    "all_original_live_containers_unrestarted"
+  ],
+  "error": null,
+  "future_point_in_time_recovery": false,
+  "native_image_id": "sha256:f371b5f3f2ac0a05703f33d6e6134515fb2498cab708fb948a0aeb7481467c00",
+  "original_live_services_restarted": false,
+  "production_data_restored_over": false,
+  "restore_container_removed": true,
+  "scope": "LIVE_DONOR_ENCRYPTED_OFFHOST_PHYSICAL_BACKUP_NATIVE_ARM64_RESTORE",
+  "source_commit": "e62c0f0948b1d0c8778deee3a4460bc378a003eb",
+  "state": "PASS",
+  "table_summary": {
+    "_supabase": {
+      "counts_sha256": "32682a41ce8c65d61ebf3d4e0e9a7b6d7cdb06734b6678afa3f0fab52aa43ab0",
+      "tables": 5,
+      "total_rows": 24
+    },
+    "postgres": {
+      "counts_sha256": "d506f6fdf315e934174a6f9e1ae4f7d344e648a10aa231fd723985800c4ffbbb",
+      "tables": 52,
+      "total_rows": 268
+    }
+  }
+}

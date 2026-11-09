@@ -1,0 +1,17 @@
+..............................................................................................................................................................................................................................................................................................................................................................................................ssss...........................................................................................................................................................................................
+----------------------------------------------------------------------
+Ran 573 tests in 0.895s
+
+OK (skipped=4)
+GTR_CLIENT_DML_STATIC_REVIEW_ONLY 2 0
+GTR_CLIENT_DML_TRACE_REFUSED
+POSTGREST_ISOLATED_HTTP_GREEN_PRODUCTION_ADMISSION_BLOCKED
+POSTGREST_HTTP_EVIDENCE_INVALID_RELEASE_BLOCKED
+POSTGREST_SYNTHETIC_RLS_GREEN_PRODUCTION_RELEASE_BLOCKED
+POSTGREST_RLS_EVIDENCE_INVALID_RELEASE_BLOCKED
+GTR_STATEFUL_DISPOSABLE_HTTP_GREEN_LIVE_RELEASE_BLOCKED
+GTR_STATEFUL_HTTP_EVIDENCE_INVALID_LIVE_RELEASE_BLOCKED
+GTR_STOCK_IMAGE_COMPATIBILITY_PRECONDITION_REFUSED
+GTR_STOCK_IMAGE_SOURCE_CANDIDATE_ONLY
+GTR_STOCK_IMAGE_COMPATIBILITY_PRECONDITION_REFUSED
+REFUSED_EDGE_CANDIDATE

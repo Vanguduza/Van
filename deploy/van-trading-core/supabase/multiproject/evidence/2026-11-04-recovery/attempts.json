@@ -1,0 +1,38 @@
+{
+  "attempts": [
+    {
+      "attempt": 1,
+      "checks_passed": 133,
+      "cleanup_completed": true,
+      "error": "Failure:full_fixture_data_owners_acls_and_rls_restored",
+      "original_result_sha256": "e0ae1751bc3bf8ae67ad94dee1ac1a58d627a7f85b3231267eac2c8e0b2da879",
+      "state": "FAIL"
+    },
+    {
+      "attempt": 2,
+      "checks_passed": 149,
+      "cleanup_completed": true,
+      "error": "TimeoutExpired",
+      "original_result_sha256": "c02ae2284142f88cd28744bf741205eb71169d5b53edc1a361b81ac60e6c3314",
+      "state": "FAIL"
+    },
+    {
+      "attempt": 3,
+      "checks_passed": 156,
+      "cleanup_completed": true,
+      "error": null,
+      "original_result_sha256": "615f69b3298b368507af97cc4c78709181013dff896a52fd040a0727c45f3078",
+      "state": "PASS"
+    },
+    {
+      "attempt": 4,
+      "checks_passed": 157,
+      "cleanup_completed": true,
+      "error": null,
+      "original_result_sha256": "ec8cc9b6eb666adb665d5eb29c3ac2fef73391fc7b63e275ef7f94a11255480b",
+      "state": "PASS"
+    }
+  ],
+  "private_fixture_data_retained": false,
+  "schema_version": 1
+}

@@ -1,0 +1,9 @@
+{
+  "roles": 16,
+  "memberships": 25,
+  "schema_bytes": 134893,
+  "schema_sha256": "5db39098a1241760bc650a7cb662534f04b80373eceaaa97b5865461d8cf809c",
+  "data_rows_exported": false,
+  "passwords_exported": false,
+  "original_containers": 11
+}

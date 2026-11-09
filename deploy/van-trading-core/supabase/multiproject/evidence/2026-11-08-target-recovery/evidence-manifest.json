@@ -1,0 +1,27 @@
+{
+  "canonical_tables_matching": 57,
+  "docs_sha256": {
+    "README.md": "d56b450f46eeca5ee755031685fb6be172e4db97c887861a061a9e57f05c32d7",
+    "TARGET_RECOVERY_2026-11-08.md": "5fe7eeaad57be13aeb20b34c9965831abc0c353c3bd2928d6742636cd23f8adb"
+  },
+  "evidence_sha256": {
+    "attempts.json": "0836ff1e0f0446ff569357d02df3a576c9266afa1887993fa18133641eb4ad0d",
+    "backup.json": "ac873bf81f413fc50cc37d676ae34240c74c10a774605501c186a80b085cedcd",
+    "cleanup.json": "c94503bd025312f79ecaaa0bc3eca0b2ad78e54cdd44396c29b557b44f977dde",
+    "offhost-recovery.json": "14bbcbf430ecdea22550bb710f5bcf84c1bd5b1b140c7f264f42feb51ea35efa",
+    "operation-references.json": "d2dc3e3012eb6c5300389331bc7af222c01f56780c4d176f9336b77d369a65c0",
+    "physical-restore.json": "283ffd066ad83dc690da16097c6e5274df0bc80a13970034a4fa446560ae99e0",
+    "row-fingerprints.json": "67f111277b56c120cd549791a1b9f33b3622ce2007d537360f5251b0185cf21c",
+    "source-custody.json": "d67105bf86677928fa50af08060e82f23d0dbcb9071e03bcbd948bb0116f9955",
+    "staged-router-image.json": "7ceb30cdbf2d4e47964ad661bcd42bbaa81498203573254e68dc21c24de2b9f0",
+    "target-final.json": "f45b1655012cf66d838f14b0bd0b1dff4b12ee7fc3ee69f731d4cbf914164dea"
+  },
+  "new_project_databases_created": 0,
+  "nissan_cloud_migrated": false,
+  "physical_restore_checks": 17,
+  "production_release_admitted": false,
+  "recorded_at": "2026-11-08T13:57:06.963302+00:00",
+  "runtime_product_code_changed": false,
+  "schema_version": 1,
+  "source_parent_commit": "e62c0f0948b1d0c8778deee3a4460bc378a003eb"
+}

@@ -1,0 +1,91 @@
+{
+  "application_functions_tables_policies_unchanged": true,
+  "byte_exact_reverse_verified": true,
+  "canary_activation_authorized": false,
+  "candidate_sha256": "bfb150e848b426c7082c54de12dc45b780325046b00031c18151a349ea81641e",
+  "database": "gtr_prod",
+  "edit_count": 5,
+  "edits": [
+    {
+      "original_utf8": "CREATE EXTENSION IF NOT EXISTS pg_cron WITH SCHEMA pg_catalog;",
+      "replacement_utf8": "-- DIAL: original pg_cron installation is retained in the existing central cron database.",
+      "source_offset": 1317
+    },
+    {
+      "original_utf8": "SELECT cron.schedule('approval-alerts-sweep-v1', '*/5 * * * *', 'SELECT private.sweep_approval_alerts()');",
+      "replacement_utf8": "-- DIAL: central inactive schedule for approval-alerts-sweep-v1 is staged separately.",
+      "source_offset": 4026756
+    },
+    {
+      "original_utf8": "SELECT cron.schedule('commerce-expire-checkouts-v1', '*/2 * * * *', 'SELECT private.expire_commerce_checkouts_internal();');",
+      "replacement_utf8": "-- DIAL: central inactive schedule for commerce-expire-checkouts-v1 is staged separately.",
+      "source_offset": 4026863
+    },
+    {
+      "original_utf8": "SELECT cron.schedule('customer-suspension-sweep-v1', '10 2 * * *', 'SELECT private.sweep_customer_suspensions();');",
+      "replacement_utf8": "-- DIAL: central inactive schedule for customer-suspension-sweep-v1 is staged separately.",
+      "source_offset": 4026988
+    },
+    {
+      "original_utf8": "SELECT cron.schedule('morning-summary-v1', '0 5 * * *', 'SELECT private.send_morning_summaries()');",
+      "replacement_utf8": "-- DIAL: central inactive schedule for morning-summary-v1 is staged separately.",
+      "source_offset": 4027104
+    }
+  ],
+  "existing_cron_database": "postgres",
+  "files": {
+    "cron-deny.hba-prefix.conf": "18ccc5776d348c294bc68aa323fd8234224a61d8d5037a7173b9b16706880508",
+    "cron-grants.project.sql": "44134cccedfe8f736e064ac532128654a26819f31f5a5c2d879023e0ae05b6bc",
+    "cron-register.inactive.sql": "6b9fe46ced3bc7597b8122ed1ffb387c551c65fbbe68aa7a976933db82a82e12",
+    "cron-role.enable-after-hba.sql": "eb6f07ed65f9724bc837ad440cff0a4ee8582efd37ce3c33e0802a0fe4055e48",
+    "cron-role.quarantined.sql": "c826938481c8d531b457ec1a4cc0057bc6f1bb353d2d10270df01fbf1c46af49",
+    "gtr-baseline.central-cron.sql": "bfb150e848b426c7082c54de12dc45b780325046b00031c18151a349ea81641e"
+  },
+  "full_baseline_replayed": false,
+  "jobs": [
+    {
+      "active": false,
+      "command": "SELECT private.sweep_approval_alerts()",
+      "function_signature": "private.sweep_approval_alerts()",
+      "name": "dial:53d39b5dbf194cf19a5b0904192d90d1:approval-alerts-sweep-v1",
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "active": false,
+      "command": "SELECT private.expire_commerce_checkouts_internal();",
+      "function_signature": "private.expire_commerce_checkouts_internal()",
+      "name": "dial:53d39b5dbf194cf19a5b0904192d90d1:commerce-expire-checkouts-v1",
+      "schedule": "*/2 * * * *"
+    },
+    {
+      "active": false,
+      "command": "SELECT private.sweep_customer_suspensions();",
+      "function_signature": "private.sweep_customer_suspensions()",
+      "name": "dial:53d39b5dbf194cf19a5b0904192d90d1:customer-suspension-sweep-v1",
+      "schedule": "10 2 * * *"
+    },
+    {
+      "active": false,
+      "command": "SELECT private.send_morning_summaries()",
+      "function_signature": "private.send_morning_summaries(date)",
+      "name": "dial:53d39b5dbf194cf19a5b0904192d90d1:morning-summary-v1",
+      "schedule": "0 5 * * *"
+    }
+  ],
+  "kind": "GTR_FRESH_BASELINE_CENTRAL_CRON_ADAPTATION",
+  "limitations": [
+    "Only pinned FRESH-INSTALL baseline may be adapted; original GTR source stays unchanged.",
+    "Application/source-history comparison, Auth/Storage/Vault/pg_net versions and entire migration replay remain unqualified.",
+    "Actual central cron database, timezone, background workers, HBA and role/function grants must be independently admitted.",
+    "No job activation SQL is supplied. Registration is inactive; original owner must approve enabling effects.",
+    "Shared background workers do not use HBA. SQL role isolation and protected central scheduling authority remain essential."
+  ],
+  "native_scheduler_changes_executed": false,
+  "observed_cron_timezone": "GMT",
+  "production_authorized": false,
+  "project_uuid": "53d39b5d-bf19-4cf1-9a5b-0904192d90d1",
+  "scheduler_role": "dial_53d39b5dbf194cf19a5b0904192d90d1_cron",
+  "upstream_commit": "8131858c7c7479d178cbe9e246f83cb49ed80f5e",
+  "upstream_path": "supabase/migrations/20261102080000_reconciled_erp_baseline.sql",
+  "upstream_sha256": "2502826ee08e67d7bcee3f7bdacdc31d944ccbb1bf9c3d86090b79b938ea016c"
+}

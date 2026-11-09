@@ -1,0 +1,91 @@
+{
+  "auxiliary_source_sha256": {
+    "supabase/baseline/README.md": "25a73f123f7c0201039a9e63f64a65d01c7c42d39055149f735e3601a294bfc4",
+    "supabase/baseline/manifest.json": "e63bbf3ef3f57d6cf4750879e2aceb5b0fdf794d20fcaf562616b8065cd9f3cc",
+    "supabase/baseline/source-contract.json": "44e791daf3750a3f1f6a9a76f4f2f0d4ff11c166f04a67a54feeb9a2f84f8976"
+  },
+  "commit": "8131858c7c7479d178cbe9e246f83cb49ed80f5e",
+  "files": [
+    {
+      "bytes": 4027262,
+      "git_blob": "3eb52a1ba2a632e9ce6db3f369b2bfcc061a6a7e",
+      "path": "supabase/migrations/20261102080000_reconciled_erp_baseline.sql",
+      "sha256": "2502826ee08e67d7bcee3f7bdacdc31d944ccbb1bf9c3d86090b79b938ea016c"
+    },
+    {
+      "bytes": 2142,
+      "git_blob": "ade71dc4cc6fae5b8d082b28562999aa8a1714cd",
+      "path": "supabase/migrations/20261102085000_baseline_runtime_contracts.sql",
+      "sha256": "c4e2791d640b1c4e72f0ba5bd2a4be28ac5ad9e7c499ffc57471c4def04329f1"
+    },
+    {
+      "bytes": 5853,
+      "git_blob": "c692170c5b5db6fcc4895d71ebea2fa1370ea9fb",
+      "path": "supabase/migrations/20261102085100_pos_published_vehicle_validation.sql",
+      "sha256": "bd3ca928583aa9a0fd44bea028f457e93009d87d953fb55b605a945f2eb44dc0"
+    },
+    {
+      "bytes": 1777,
+      "git_blob": "028fd6612cef08151290e57d000e3c04ccf2a944",
+      "path": "supabase/migrations/20261102085200_cashier_reserved_settlement_posting.sql",
+      "sha256": "a52f97b42101481d744d824da9e88c878c79faa60094d87ef5598862f1fdd581"
+    },
+    {
+      "bytes": 675,
+      "git_blob": "54d3cbb96ffa97e4a3d50dd0b7e88f9f68b8f268",
+      "path": "supabase/migrations/20261102085300_storage_policy_helper_execution.sql",
+      "sha256": "355e863086c17a1691df2f9e56b347215a86ffa91d31d1515094a8b29315f4a2"
+    },
+    {
+      "bytes": 20886,
+      "git_blob": "10dc919719b6a158de6df709b9f29c44ba675e99",
+      "path": "supabase/migrations/20261102085400_retained_workflow_posting_scopes.sql",
+      "sha256": "f4636eafd3345f0aa4b343ae6a814fed79f466b19ca81ebadecd155748a72cdd"
+    },
+    {
+      "bytes": 12076,
+      "git_blob": "025b985580414d1be502a46dd9a9c17a7140ab55",
+      "path": "supabase/migrations/20261102090000_payment_settlement_reconciliation.sql",
+      "sha256": "f52b0b5f301df0abc63b034f4a14b9a079cc9ab8db0e95684c502ca52205eee4"
+    },
+    {
+      "bytes": 3644,
+      "git_blob": "989fb3df2faf23a35caf53b85054ee326889b471",
+      "path": "supabase/migrations/20261102091000_customer_garage_identity.sql",
+      "sha256": "d89dc414fa09961dd49bf865823d99f6b5a294b85362bd0f327ca1a5f90b5d3b"
+    },
+    {
+      "bytes": 4246,
+      "git_blob": "43757350cfe67a857e0be1c1fe5a466e50226c8b",
+      "path": "supabase/migrations/20261102092000_customer_order_projection_reconciliation.sql",
+      "sha256": "32f528b58a6603cffe422ca5db5107beacc62be901a3c440973fcb4d6c69cc96"
+    },
+    {
+      "bytes": 13561,
+      "git_blob": "fad72e6882a606d843d7d5ab4c9b8e398f660844",
+      "path": "supabase/migrations/20261102100000_staff_self_service_reconciliation.sql",
+      "sha256": "3ef739b8c361f5d7a4b0aff2bc21353c0f2bf6ecf6d532fc83207fc1f1e5d271"
+    },
+    {
+      "bytes": 17050,
+      "git_blob": "48c6c740a65ff92afe9ab5a96c3b6eddff0bb4c6",
+      "path": "supabase/migrations/20261102100100_staff_payroll_reconciliation.sql",
+      "sha256": "362699bd03a8753336a26aef1fb5b3c72a595a9610683a7e707a4c22810ca615"
+    },
+    {
+      "bytes": 14272,
+      "git_blob": "54eb5ee56d571b0554b6bf99a4dc4215fc6d75df",
+      "path": "supabase/migrations/20261102100200_staff_merchandising_reconciliation.sql",
+      "sha256": "77b6d8b1575b950210d75d756b7bec3d2529adf8dd44cb8740290918214b37c0"
+    },
+    {
+      "bytes": 15816,
+      "git_blob": "a490559d57a329e5a1ec37bec3f69b4ff07c8250",
+      "path": "supabase/migrations/20261102100300_staff_overview_reconciliation.sql",
+      "sha256": "d392ff6f364a7df69b4190b15160f769ead0af45bdfe924371afefe53aa56979"
+    }
+  ],
+  "full_gtr_migrations_executed": false,
+  "full_live_schema_history_reconciled": false,
+  "repo": "Vanguduza/Nissan-Gtr-Auto"
+}

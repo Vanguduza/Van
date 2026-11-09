@@ -1,0 +1,93 @@
+{
+  "cleanup_completed": true,
+  "commands": [
+    "python3 -m unittest discover -s deploy/van-trading-core/supabase/multiproject/tests -v",
+    "python3 tests/check_realtime_compose.py --repo <source> --donor-ref 96c5c6d34edcc79b3d7f6f156bed0f789f26c800 --upstream-schema <pinned> --report <new>",
+    "python3 tests/rehearse_shared_fabric.py --pg-bin <staged PG17> --pg-lib <staged PG libraries> --auth-bin <staged Auth> --rest-bin <staged PostgREST> --nginx <staged Nginx> --report <new>; with staged Storage/Realtime environment"
+  ],
+  "compose_model_checks": {
+    "derivative_image_placeholder_only": true,
+    "failed": 0,
+    "passed": 18
+  },
+  "evidence_sha256": {
+    "attempts.json": "6fcf84fd425dc768533803216b624c767006065104d7f86c5d208de44d6dc4ad",
+    "compose-model.json": "97ca38f03efa4442523d453f9b3153788b6efd74e45ab4ab9237c477a88afba5",
+    "compose-model.txt": "2a5bf3bcbe292f201296e776dc4f7e839b444b7ad1e8aad4194f506e303ef050",
+    "native-result.json": "4d1e26f3e565d791e8e7d909ddcc413a70c538e4bd64af05e2780433dad3b0cc",
+    "native-run.txt": "5184c89c84fd807a7f312af0434fa69aae6ce7c6f5b10c6d17ea75999896af04",
+    "unit-tests.txt": "23681683e7bffa6bb4b121ee128d2d2a143205d1f0833f2b9456b1d760835922",
+    "upstream-provenance.json": "0f70ebc26f6212a070a7057d1dfb5c0c32896ec1d93b3615020865e930248128"
+  },
+  "execution_owner": "REMOTE_DESKTOP_COMMANDER_NONROOT_ISOLATED",
+  "host": "dial-control",
+  "not_tested": [
+    "live VAN",
+    "Nissan GTR migration",
+    "production container/ARM64",
+    "Edge Functions",
+    "Studio",
+    "Supavisor",
+    "TLS/CORS",
+    "coordinated production database/object disaster recovery",
+    "production credential rotation"
+  ],
+  "production_deployed": false,
+  "rea_used": false,
+  "real_service_checks": {
+    "failed": 0,
+    "passed": 345,
+    "scope": "one_disposable_Postgres_Auth_REST_shared_Storage_shared_Realtime"
+  },
+  "recorded_at": "2026-11-04T14:21:45.583227+00:00",
+  "schema_version": 1,
+  "source_parent_git_sha": "96c5c6d34edcc79b3d7f6f156bed0f789f26c800",
+  "source_sha256": {
+    "ARCHITECTURE.md": "3d4d2892b365d0b3a3f0b319a656b1d6f41ad601d140fe94c4edcd485d9ca930",
+    "INTEGRATION_GATES.md": "0a0adb9ce3d460978a8689e4fa75902fb469933c6161b23202d7bdbc5d6d7362",
+    "NISSAN_GTR_CUTOVER.md": "68b1335ea08fab2bf7d3d8750871fbb73b2cede6a05b2b07ed731d41065967ac",
+    "QUALIFICATION_2026-10-24.md": "085455da197f3d781d25dfc2c2a16d4e29ec4e852daa773006ba8edfb521065b",
+    "QUALIFICATION_2026-11-04.md": "8ef9fc17e8b753d0db2b5110c0f800418f616dc4a972ff57c41c1349a2eb2227",
+    "QUALIFICATION_REALTIME_2026-11-04.md": "d6fc0acae147427e5e8a70e52b882137f5c77f1a10e2a33db3f2a8bd42ec830f",
+    "QUALIFICATION_RECOVERY_2026-11-04.md": "5fdb49eea5602ad2f59175c5406c8951ed827cac886b43833ed0cc32676ffb08",
+    "QUALIFICATION_STORAGE_2026-11-04.md": "0c3ff59f592dd60d645b705227bc3e2d5a8c1fcd86c5b2c2ce179fa1a9a67703",
+    "README.md": "f8a84ac8fff0fe8e163c77eb6f9ef6f8d5a6e4f75e4937081e1d877fc1214463",
+    "RECOVERY.md": "588345cba17f09df083ffae8f4773834229aa43727b5d0c664be58f8e8cb52fd",
+    "SHARED_REALTIME.md": "96a64eef399a4948cc03a48f50179ecfc940d1c367bab502082eb6c03d3b13d8",
+    "SHARED_STORAGE.md": "69ac8695915f9bae19838703ead08e166fb8d72b0cbfa8fe0ad553c61d2bdd4d",
+    "SOURCE_EVIDENCE.md": "126bdab19a7186b9dcd96a0879bddc66dbe44eefbaa7a24011474b87200423e0",
+    "projects.example.json": "8548a9e8a5a3cf6b1030e473394795a302b8caf6b58ed776ca9b268522872306",
+    "projects.rehearsal.json": "b8ae6d7768cf189ce7a11c568d6431fb49ac9da947d1e074706aba07eca4d040",
+    "rea-requests.json": "909c46b89aa00b88f5914fbdd481fbc37ca49fdcde6d86bca9a05256ba6f5be2",
+    "realtime-image/Dockerfile": "554b517028856b3aa6f28ebe70140a70fa1dcf649bfc5998366a2b511d4cc43d",
+    "realtime-image/compile_patch.exs": "35431720320dac93a12a191c3c7bacf6dcb1df8d52934df1cb95f755ba3fcf7e",
+    "tests/check_realtime_compose.py": "7cf7de1a63788b1f2e5acb83788460ed425cd059ff945b7be08515f65590926f",
+    "tests/check_storage_compose.py": "300f859dc0cc5586a24a8afe5cadcdc10742dc489cef34dcedc7361257bbffc7",
+    "tests/rehearsal-binaries.lock.json": "ddfd0561289abe20e8531f085d856739f2d1579f907eb01dcd3391bfce3d975e",
+    "tests/rehearse_native.py": "3ff2f03dde0a6f2969acc87c2ebd04ab47ef056debd4ce7b03edd34435f2d778",
+    "tests/rehearse_realtime.py": "5d823a00101d94a59fc243d5fbc9e8edda1b9d26b5afe1d4b2dde66457594082",
+    "tests/rehearse_recovery.py": "10b925e5fd9816942e11a49301926d3861bdbb2f99d3d393b20b07ad6fdb46c7",
+    "tests/rehearse_shared_fabric.py": "b761bb5336e2c33f8d8de8d7faf9c6b4f98d2fbb5dd84cf7cef64a841cf722c4",
+    "tests/rehearse_storage.py": "c0e963acf7714b7d677d1dd4c6e1bb5c2b29089c9307066ab0b19451117c4bd4",
+    "tests/test_bootstrap.py": "2da4619fd810a71faa23f4a6ecb2f416c07bb1915309c4aa6cfe269e6cdbc01d",
+    "tests/test_hardening.py": "eede0c901023c1b07e31244f5e8bbd0bb83835042af866785aa1ca5d07c95fe8",
+    "tests/test_realtime_bundle.py": "fd7df31ac9149d065b6a09ab8adc52c46d7e8346f79e13ec4ad1c7313412b710",
+    "tests/test_recovery.py": "3aa657f4ac69b0e1b1373c2e6f5d95b4be6617174e9102881758b54294befe3f",
+    "tests/test_render.py": "a76c55dfea2a6973474f970c995a450716edc34c00f347ee54d21b9809d43d26",
+    "tests/test_routing_local.py": "c9c0477c96b64fa5a3f0942000d531b6f05de32b6ece2c53bf740cf77b8eeee5",
+    "tests/test_shared_realtime.py": "fcb279ea12ca6924c7e823033c94cda619f1eaede777c8ee0c34ba039b2645be",
+    "tests/test_shared_storage.py": "6aa17c5582442c86da3bf2f3ea38522338aefee3b1aebd6624807bcb6fbd7d4a",
+    "tools/bootstrap.py": "d1872afa590b3c0dd8705d470c26c69c5b1d1c19fcbb216d9e9ffea988b7acb0",
+    "tools/patch_realtime.py": "0393e05433a5f0ab757a96563b554c39f6e25c407e7cfb75dfdd6267bf6d68cd",
+    "tools/recovery.py": "8469564472ca44e2c7967e7bad224beb589601e82220e60bc44a0798951d7180",
+    "tools/render.py": "1084c47d632c24cd0e0f1d55b50b64a7889583e19b50f5cb65a4847e5b5dd836",
+    "tools/shared_realtime.py": "d143a3c3841c44fb17dd3ba675bdd8d58ff3415972b0219145c419e8e3d0463c",
+    "tools/shared_storage.py": "280f63b634a3a376016e8c5f26164a5337dd9116fda82efe3c42bffa1c0a88fa"
+  },
+  "unit_tests": {
+    "errors": 0,
+    "failed": 0,
+    "passed": 164,
+    "skips": 0
+  }
+}

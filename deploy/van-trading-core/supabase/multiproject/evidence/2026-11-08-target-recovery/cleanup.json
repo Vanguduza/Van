@@ -1,0 +1,11 @@
+{
+  "canary_script_present": false,
+  "cipher_sha256": "e6f4147d9c994d220e12664cacf311935f54f9de0a8b2f87ea1c23c0eb42f0ff",
+  "encrypted_target_backup_retained": true,
+  "offhost_verified_copy_and_key_retained": true,
+  "original_application_data_removed": false,
+  "original_live_services_stopped": false,
+  "restore_test_containers_absent": true,
+  "root_free_bytes": 3205066752,
+  "state": "VERIFIED_PLAINTEXT_FIXTURES_REMOVED"
+}

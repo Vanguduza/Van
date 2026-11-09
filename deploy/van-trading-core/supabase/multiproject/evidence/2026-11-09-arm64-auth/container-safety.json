@@ -1,0 +1,10 @@
+{
+  "image": "sha256:dbd5bef8ba86b4ae0eb11271c71736fcff006fe23d2f7cf670fc1687778ca400",
+  "architecture": "arm64",
+  "network_none": true,
+  "host_ports": false,
+  "ordinary_uid": "100:101",
+  "mounts_only_new_output_and_readonly_image_libraries": true,
+  "memory_limit": 805306368,
+  "source_candidate": "b46c978fbe73cca1340f010ab19c808f02d39b05"
+}

@@ -1,0 +1,34 @@
+test_actual_client_write_remains_unresolved_not_auto_granted (test_gtr_client_dml_trace.TraceTests.test_actual_client_write_remains_unresolved_not_auto_granted) ... ok
+test_comment_not_a_call (test_gtr_client_dml_trace.TraceTests.test_comment_not_a_call) ... ok
+test_delete_js (test_gtr_client_dml_trace.TraceTests.test_delete_js) ... ok
+test_dirty_source_refused (test_gtr_client_dml_trace.TraceTests.test_dirty_source_refused) ... ok
+test_disconnected_statement_not_mistaken (test_gtr_client_dml_trace.TraceTests.test_disconnected_statement_not_mistaken) ... ok
+test_dynamic_not_proven (test_gtr_client_dml_trace.TraceTests.test_dynamic_not_proven) ... ok
+test_exact_policy (test_gtr_client_dml_trace.TraceTests.test_exact_policy) ... ok
+test_literal_mention_without_call (test_gtr_client_dml_trace.TraceTests.test_literal_mention_without_call) ... ok
+test_no_db_or_remote_executor (test_gtr_client_dml_trace.TraceTests.test_no_db_or_remote_executor) ... ok
+test_output_read_only_and_private (test_gtr_client_dml_trace.TraceTests.test_output_read_only_and_private) ... ok
+test_preserves_line (test_gtr_client_dml_trace.TraceTests.test_preserves_line) ... ok
+test_privileged_provisioning_classified_not_client (test_gtr_client_dml_trace.TraceTests.test_privileged_provisioning_classified_not_client) ... ok
+test_realistic_source_scan (test_gtr_client_dml_trace.TraceTests.test_realistic_source_scan) ... ok
+test_reject_duplicate (test_gtr_client_dml_trace.TraceTests.test_reject_duplicate) ... ok
+test_reject_injected_table (test_gtr_client_dml_trace.TraceTests.test_reject_injected_table) ... ok
+test_reject_missing_policy_entry (test_gtr_client_dml_trace.TraceTests.test_reject_missing_policy_entry) ... ok
+test_reject_non_dml_authenticated (test_gtr_client_dml_trace.TraceTests.test_reject_non_dml_authenticated) ... ok
+test_reject_policy_entry_extra_field (test_gtr_client_dml_trace.TraceTests.test_reject_policy_entry_extra_field) ... ok
+test_reject_wrong_project (test_gtr_client_dml_trace.TraceTests.test_reject_wrong_project) ... ok
+test_reject_wrong_role (test_gtr_client_dml_trace.TraceTests.test_reject_wrong_role) ... ok
+test_reject_wrong_source (test_gtr_client_dml_trace.TraceTests.test_reject_wrong_source) ... ok
+test_reject_wrong_table_count (test_gtr_client_dml_trace.TraceTests.test_reject_wrong_table_count) ... ok
+test_select_kotlin_multiline (test_gtr_client_dml_trace.TraceTests.test_select_kotlin_multiline) ... ok
+test_unmaterialized_tracked_source_refused (test_gtr_client_dml_trace.TraceTests.test_unmaterialized_tracked_source_refused) ... ok
+test_update_js_multiline (test_gtr_client_dml_trace.TraceTests.test_update_js_multiline) ... ok
+test_upsert_js (test_gtr_client_dml_trace.TraceTests.test_upsert_js) ... ok
+test_wrong_git_head_refused (test_gtr_client_dml_trace.TraceTests.test_wrong_git_head_refused) ... ok
+
+----------------------------------------------------------------------
+Ran 27 tests in 0.028s
+
+OK
+GTR_CLIENT_DML_STATIC_REVIEW_ONLY 2 0
+GTR_CLIENT_DML_TRACE_REFUSED

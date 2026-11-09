@@ -1,0 +1,128 @@
+{
+  "additional_cleanup_record": "cleanup-observation.json",
+  "failures_remain_failures": true,
+  "final_exact_source_run": "admin-result-11.json",
+  "model_correction": "Initial no-published-port assertion did not account for donor Studio existing 127.0.0.1:3000. Correct check proves original binding retained, loopback-only and no new admin port.",
+  "original_native_attempts": [
+    {
+      "checks_completed": 105,
+      "error": "Failure:POOLER_NATIVE_EXIT",
+      "file": "pooler-result-01.json",
+      "sha256": "531f4883991d75c8f51a1b6159d5ef8c67f39df0bb303dbf853cd0da9d982d5e",
+      "state": "FAIL",
+      "tracked_cleanup_completed": true
+    },
+    {
+      "checks_completed": 105,
+      "error": "Failure:POOLER_NATIVE_EXIT",
+      "file": "pooler-result-02.json",
+      "sha256": "d739ada3f7cea9518e01742b6a6cd6375534ffe19f25329e3d3aeb14b605dde8",
+      "state": "FAIL",
+      "tracked_cleanup_completed": true
+    },
+    {
+      "checks_completed": 117,
+      "error": "Failure:fixture-project_registration_readback_has_no_password",
+      "file": "pooler-result-03.json",
+      "sha256": "23c496da85fedcd5031a531a550b1bc771e6254673b56109414acbbcb1fc4e90",
+      "state": "FAIL",
+      "tracked_cleanup_completed": true
+    },
+    {
+      "checks_completed": 170,
+      "error": null,
+      "file": "pooler-result-04.json",
+      "sha256": "d9003ff9cb0831f171a209556c6056e5d37ddb26bf53be394124d75844932016",
+      "state": "PASS",
+      "tracked_cleanup_completed": true
+    },
+    {
+      "checks_completed": 171,
+      "error": "Failure:SERVICE_EXITED_1",
+      "file": "admin-result-01.json",
+      "sha256": "bc07becd7ec366a63b22c8f3e16b54248632318104db04303ad0a471fe854a8c",
+      "state": "FAIL",
+      "tracked_cleanup_completed": true
+    },
+    {
+      "checks_completed": 220,
+      "error": null,
+      "file": "admin-result-02.json",
+      "sha256": "98a96a0c1df746c0f3dead8e0a8bf278339d8d9f9a6d40e57af33a6d362bd0f6",
+      "state": "PASS",
+      "tracked_cleanup_completed": true
+    },
+    {
+      "checks_completed": 222,
+      "error": "Failure:native_browser_process_completed",
+      "file": "admin-result-03.json",
+      "sha256": "271e95c0d1b839d1c88ff7c49129426d6675501b6df0204ba2d7b0329a6e1cb7",
+      "state": "FAIL",
+      "tracked_cleanup_completed": true
+    },
+    {
+      "checks_completed": 233,
+      "error": "Failure:fixture-project_rendered_table_editor_lists_fixture",
+      "file": "admin-result-04.json",
+      "sha256": "2f1f4dfe8ff2d0f9b42ef006083351066922816a6d04713bb215ead572811ad3",
+      "state": "FAIL",
+      "tracked_cleanup_completed": true
+    },
+    {
+      "checks_completed": 233,
+      "error": "Failure:fixture-project_rendered_table_editor_lists_fixture",
+      "file": "admin-result-05.json",
+      "sha256": "14736c8f68911ae5fb0e35a558544a42a9980ac256092840b14e1a113fe37a2c",
+      "state": "FAIL",
+      "tracked_cleanup_completed": true
+    },
+    {
+      "checks_completed": 233,
+      "error": "Failure:fixture-project_rendered_table_editor_lists_fixture",
+      "file": "admin-result-06.json",
+      "sha256": "2e48cd65f7f43819f192d3afcb25db444e3f31a4dcad9173cac9b80d06503484",
+      "state": "FAIL",
+      "tracked_cleanup_completed": true
+    },
+    {
+      "checks_completed": 226,
+      "error": "TimeoutExpired",
+      "file": "admin-result-07.json",
+      "sha256": "cf70eb39df2955e0b832ea641f5d1451442e998fdf37d10d014b1abcb9afd84e",
+      "state": "FAIL",
+      "tracked_cleanup_completed": true
+    },
+    {
+      "checks_completed": 240,
+      "error": "Failure:nissan-gtr_rendered_table_editor_lists_fixture",
+      "file": "admin-result-08.json",
+      "sha256": "00defc70155acca5a81a67b823d89e8d7184b5506dda2b5c1b45573659a73fbe",
+      "state": "FAIL",
+      "tracked_cleanup_completed": true
+    },
+    {
+      "checks_completed": 227,
+      "error": "Failure:NATIVE_BROWSER_BOUNDED_TIME_EXPIRED",
+      "file": "admin-result-09.json",
+      "sha256": "0bc1f47ab7a443a9d50844edaa7fa65a35d87d546a7d3da9c7ab3e486ec276f5",
+      "state": "FAIL",
+      "tracked_cleanup_completed": true
+    },
+    {
+      "checks_completed": 246,
+      "error": null,
+      "file": "admin-result-10.json",
+      "sha256": "72f3acb0e724afc72f90fb5d81987544a276f2623055bea1c8f6a03bc0d254ca",
+      "state": "PASS",
+      "tracked_cleanup_completed": true
+    },
+    {
+      "checks_completed": 248,
+      "error": null,
+      "file": "admin-result-11.json",
+      "sha256": "692fbb2567c0e4d1c0c29a76f942c50881201c5d19220918543692037ca7518e",
+      "state": "PASS",
+      "tracked_cleanup_completed": true
+    }
+  ]
+}

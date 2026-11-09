@@ -1,0 +1,16 @@
+{
+  "native_executable_bytes": 165445032,
+  "oci_manifest_digest": "sha256:b331c6422f4f4bebd6052357da5f3c87610128c8cb530390ca024eb68cf4bf2e",
+  "package_lock_sha256": "2330e0d10e44a3d5acecc093536de7a24eb5ef7b067f36b22e4f3bd4412db54d",
+  "package_sha256": "68bc553c54dc93f4075b1868f81b91e88c53e87258772f763706842422c5fc78",
+  "production_deployed": false,
+  "reproducible_bundle_sha256": "774b3d2d83d0df06541f9c52680368bc0fd24aa8ef8863785f613e710b96e40a",
+  "runtime_native_executable_sha256": "ff195e6fb5e6df5fd87eef5603cbe8bcc9c7cea7d74f2027c7a7daa1608bcbb0",
+  "schema_version": 1,
+  "scope": "PUBLIC_IDENTITY_ONLY_NONROOT_REHEARSAL",
+  "signature_verified": false,
+  "source_sha256": "a7ff3565d261bcd6e83face057bf3c367870e309fbe12750aa7ef899d86518a3",
+  "target_cpu_architecture_qualified": false,
+  "upstream_source": "db47af5264be7a6e649d9488cc4f3f0da16ff875",
+  "upstream_tag": "v1.76.2"
+}

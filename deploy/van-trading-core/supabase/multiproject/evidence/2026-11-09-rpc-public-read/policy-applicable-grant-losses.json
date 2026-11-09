@@ -1,0 +1,654 @@
+{
+  "schema_version": 1,
+  "kind": "GTR_READ_ONLY_POLICY_APPLICABLE_MISSING_GRANTS_NOT_RELEASE",
+  "project_ref": "bicyjghgdnzlnjqxzoud",
+  "hosted_sql_role": "postgres",
+  "hosted_transaction": "REPEATABLE READ READ ONLY",
+  "captured_at": "2026-11-09T00:04:26.60567+00:00",
+  "source_commit": "8131858c7c7479d178cbe9e246f83cb49ed80f5e",
+  "public_tables_compared": 210,
+  "public_policies_compared": 306,
+  "missing_hosted_grants_by_role_raw": {
+    "anon": 446,
+    "authenticated": 185
+  },
+  "policy_applicable_missing_grants": 78,
+  "grouped": {
+    "authenticated_INSERT": 27,
+    "authenticated_UPDATE": 27,
+    "authenticated_DELETE": 23,
+    "anon_SELECT": 1
+  },
+  "entries": [
+    {
+      "table": "account_period_balances",
+      "role": "authenticated",
+      "privilege": "INSERT",
+      "applicable_policy_names": [
+        "account_period_balances_finance"
+      ]
+    },
+    {
+      "table": "account_period_balances",
+      "role": "authenticated",
+      "privilege": "UPDATE",
+      "applicable_policy_names": [
+        "account_period_balances_finance"
+      ]
+    },
+    {
+      "table": "account_period_balances",
+      "role": "authenticated",
+      "privilege": "DELETE",
+      "applicable_policy_names": [
+        "account_period_balances_finance"
+      ]
+    },
+    {
+      "table": "ai_worker_schedules",
+      "role": "authenticated",
+      "privilege": "INSERT",
+      "applicable_policy_names": [
+        "ai_worker_schedules_write"
+      ]
+    },
+    {
+      "table": "ai_worker_schedules",
+      "role": "authenticated",
+      "privilege": "UPDATE",
+      "applicable_policy_names": [
+        "ai_worker_schedules_write"
+      ]
+    },
+    {
+      "table": "ai_worker_schedules",
+      "role": "authenticated",
+      "privilege": "DELETE",
+      "applicable_policy_names": [
+        "ai_worker_schedules_write"
+      ]
+    },
+    {
+      "table": "catalog_diagram_parts",
+      "role": "authenticated",
+      "privilege": "INSERT",
+      "applicable_policy_names": [
+        "catalog_diagram_parts_staff_write"
+      ]
+    },
+    {
+      "table": "catalog_diagram_parts",
+      "role": "authenticated",
+      "privilege": "UPDATE",
+      "applicable_policy_names": [
+        "catalog_diagram_parts_staff_write"
+      ]
+    },
+    {
+      "table": "catalog_diagram_parts",
+      "role": "authenticated",
+      "privilege": "DELETE",
+      "applicable_policy_names": [
+        "catalog_diagram_parts_staff_write"
+      ]
+    },
+    {
+      "table": "catalog_diagrams",
+      "role": "authenticated",
+      "privilege": "INSERT",
+      "applicable_policy_names": [
+        "catalog_diagrams_staff_write"
+      ]
+    },
+    {
+      "table": "catalog_diagrams",
+      "role": "authenticated",
+      "privilege": "UPDATE",
+      "applicable_policy_names": [
+        "catalog_diagrams_staff_write"
+      ]
+    },
+    {
+      "table": "catalog_diagrams",
+      "role": "authenticated",
+      "privilege": "DELETE",
+      "applicable_policy_names": [
+        "catalog_diagrams_staff_write"
+      ]
+    },
+    {
+      "table": "catalog_makers",
+      "role": "authenticated",
+      "privilege": "INSERT",
+      "applicable_policy_names": [
+        "catalog_makers_staff_write"
+      ]
+    },
+    {
+      "table": "catalog_makers",
+      "role": "authenticated",
+      "privilege": "UPDATE",
+      "applicable_policy_names": [
+        "catalog_makers_staff_write"
+      ]
+    },
+    {
+      "table": "catalog_makers",
+      "role": "authenticated",
+      "privilege": "DELETE",
+      "applicable_policy_names": [
+        "catalog_makers_staff_write"
+      ]
+    },
+    {
+      "table": "catalog_models",
+      "role": "authenticated",
+      "privilege": "INSERT",
+      "applicable_policy_names": [
+        "catalog_models_staff_write"
+      ]
+    },
+    {
+      "table": "catalog_models",
+      "role": "authenticated",
+      "privilege": "UPDATE",
+      "applicable_policy_names": [
+        "catalog_models_staff_write"
+      ]
+    },
+    {
+      "table": "catalog_models",
+      "role": "authenticated",
+      "privilege": "DELETE",
+      "applicable_policy_names": [
+        "catalog_models_staff_write"
+      ]
+    },
+    {
+      "table": "catalog_sections",
+      "role": "authenticated",
+      "privilege": "INSERT",
+      "applicable_policy_names": [
+        "catalog_sections_staff_write"
+      ]
+    },
+    {
+      "table": "catalog_sections",
+      "role": "authenticated",
+      "privilege": "UPDATE",
+      "applicable_policy_names": [
+        "catalog_sections_staff_write"
+      ]
+    },
+    {
+      "table": "catalog_sections",
+      "role": "authenticated",
+      "privilege": "DELETE",
+      "applicable_policy_names": [
+        "catalog_sections_staff_write"
+      ]
+    },
+    {
+      "table": "catalog_variants",
+      "role": "authenticated",
+      "privilege": "INSERT",
+      "applicable_policy_names": [
+        "catalog_variants_staff_write"
+      ]
+    },
+    {
+      "table": "catalog_variants",
+      "role": "authenticated",
+      "privilege": "UPDATE",
+      "applicable_policy_names": [
+        "catalog_variants_staff_write"
+      ]
+    },
+    {
+      "table": "catalog_variants",
+      "role": "authenticated",
+      "privilege": "DELETE",
+      "applicable_policy_names": [
+        "catalog_variants_staff_write"
+      ]
+    },
+    {
+      "table": "customer_compare_items",
+      "role": "authenticated",
+      "privilege": "UPDATE",
+      "applicable_policy_names": [
+        "compare_customer_all"
+      ]
+    },
+    {
+      "table": "customer_product_review_photos",
+      "role": "authenticated",
+      "privilege": "UPDATE",
+      "applicable_policy_names": [
+        "review_photos_staff_all"
+      ]
+    },
+    {
+      "table": "customer_wishlist_items",
+      "role": "authenticated",
+      "privilege": "UPDATE",
+      "applicable_policy_names": [
+        "wishlist_customer_all"
+      ]
+    },
+    {
+      "table": "finance_refunds",
+      "role": "authenticated",
+      "privilege": "INSERT",
+      "applicable_policy_names": [
+        "finance_refunds_insert"
+      ]
+    },
+    {
+      "table": "finance_requisition_approvals",
+      "role": "authenticated",
+      "privilege": "INSERT",
+      "applicable_policy_names": [
+        "finance_req_approvals_insert"
+      ]
+    },
+    {
+      "table": "finance_requisition_thresholds",
+      "role": "authenticated",
+      "privilege": "INSERT",
+      "applicable_policy_names": [
+        "finance_req_thresholds_write"
+      ]
+    },
+    {
+      "table": "finance_requisition_thresholds",
+      "role": "authenticated",
+      "privilege": "UPDATE",
+      "applicable_policy_names": [
+        "finance_req_thresholds_write"
+      ]
+    },
+    {
+      "table": "finance_requisition_thresholds",
+      "role": "authenticated",
+      "privilege": "DELETE",
+      "applicable_policy_names": [
+        "finance_req_thresholds_write"
+      ]
+    },
+    {
+      "table": "forecast_suggestions",
+      "role": "authenticated",
+      "privilege": "INSERT",
+      "applicable_policy_names": [
+        "forecast_suggestions_staff_write"
+      ]
+    },
+    {
+      "table": "forecast_suggestions",
+      "role": "authenticated",
+      "privilege": "UPDATE",
+      "applicable_policy_names": [
+        "forecast_suggestions_staff_write"
+      ]
+    },
+    {
+      "table": "forecast_suggestions",
+      "role": "authenticated",
+      "privilege": "DELETE",
+      "applicable_policy_names": [
+        "forecast_suggestions_staff_write"
+      ]
+    },
+    {
+      "table": "hr_contract_clause_templates",
+      "role": "authenticated",
+      "privilege": "INSERT",
+      "applicable_policy_names": [
+        "hr_clause_write"
+      ]
+    },
+    {
+      "table": "hr_contract_clause_templates",
+      "role": "authenticated",
+      "privilege": "UPDATE",
+      "applicable_policy_names": [
+        "hr_clause_write"
+      ]
+    },
+    {
+      "table": "hr_contract_clause_templates",
+      "role": "authenticated",
+      "privilege": "DELETE",
+      "applicable_policy_names": [
+        "hr_clause_write"
+      ]
+    },
+    {
+      "table": "hr_grades",
+      "role": "authenticated",
+      "privilege": "INSERT",
+      "applicable_policy_names": [
+        "hr_grades_write"
+      ]
+    },
+    {
+      "table": "hr_grades",
+      "role": "authenticated",
+      "privilege": "UPDATE",
+      "applicable_policy_names": [
+        "hr_grades_write"
+      ]
+    },
+    {
+      "table": "hr_grades",
+      "role": "authenticated",
+      "privilege": "DELETE",
+      "applicable_policy_names": [
+        "hr_grades_write"
+      ]
+    },
+    {
+      "table": "hr_leave_balances",
+      "role": "authenticated",
+      "privilege": "INSERT",
+      "applicable_policy_names": [
+        "hr_leave_balances_write"
+      ]
+    },
+    {
+      "table": "hr_leave_balances",
+      "role": "authenticated",
+      "privilege": "UPDATE",
+      "applicable_policy_names": [
+        "hr_leave_balances_write"
+      ]
+    },
+    {
+      "table": "hr_leave_balances",
+      "role": "authenticated",
+      "privilege": "DELETE",
+      "applicable_policy_names": [
+        "hr_leave_balances_write"
+      ]
+    },
+    {
+      "table": "hr_leave_requests",
+      "role": "authenticated",
+      "privilege": "INSERT",
+      "applicable_policy_names": [
+        "hr_leave_requests_insert"
+      ]
+    },
+    {
+      "table": "hr_leave_requests",
+      "role": "authenticated",
+      "privilege": "UPDATE",
+      "applicable_policy_names": [
+        "hr_leave_requests_update"
+      ]
+    },
+    {
+      "table": "hr_leave_types",
+      "role": "authenticated",
+      "privilege": "INSERT",
+      "applicable_policy_names": [
+        "hr_leave_types_write"
+      ]
+    },
+    {
+      "table": "hr_leave_types",
+      "role": "authenticated",
+      "privilege": "UPDATE",
+      "applicable_policy_names": [
+        "hr_leave_types_write"
+      ]
+    },
+    {
+      "table": "hr_leave_types",
+      "role": "authenticated",
+      "privilege": "DELETE",
+      "applicable_policy_names": [
+        "hr_leave_types_write"
+      ]
+    },
+    {
+      "table": "hr_onboarding_drafts",
+      "role": "authenticated",
+      "privilege": "INSERT",
+      "applicable_policy_names": [
+        "hr_onboarding_write"
+      ]
+    },
+    {
+      "table": "hr_onboarding_drafts",
+      "role": "authenticated",
+      "privilege": "UPDATE",
+      "applicable_policy_names": [
+        "hr_onboarding_write"
+      ]
+    },
+    {
+      "table": "hr_onboarding_drafts",
+      "role": "authenticated",
+      "privilege": "DELETE",
+      "applicable_policy_names": [
+        "hr_onboarding_write"
+      ]
+    },
+    {
+      "table": "hr_payslip_schedules",
+      "role": "authenticated",
+      "privilege": "INSERT",
+      "applicable_policy_names": [
+        "hr_payslip_schedules_write"
+      ]
+    },
+    {
+      "table": "hr_payslip_schedules",
+      "role": "authenticated",
+      "privilege": "UPDATE",
+      "applicable_policy_names": [
+        "hr_payslip_schedules_write"
+      ]
+    },
+    {
+      "table": "hr_payslip_schedules",
+      "role": "authenticated",
+      "privilege": "DELETE",
+      "applicable_policy_names": [
+        "hr_payslip_schedules_write"
+      ]
+    },
+    {
+      "table": "hr_roles",
+      "role": "authenticated",
+      "privilege": "INSERT",
+      "applicable_policy_names": [
+        "hr_roles_write"
+      ]
+    },
+    {
+      "table": "hr_roles",
+      "role": "authenticated",
+      "privilege": "UPDATE",
+      "applicable_policy_names": [
+        "hr_roles_write"
+      ]
+    },
+    {
+      "table": "hr_roles",
+      "role": "authenticated",
+      "privilege": "DELETE",
+      "applicable_policy_names": [
+        "hr_roles_write"
+      ]
+    },
+    {
+      "table": "pos_offline_sale_receipts",
+      "role": "authenticated",
+      "privilege": "INSERT",
+      "applicable_policy_names": [
+        "pos_offline_sale_receipts_insert"
+      ]
+    },
+    {
+      "table": "pos_operator_hidden_bestsellers",
+      "role": "authenticated",
+      "privilege": "INSERT",
+      "applicable_policy_names": [
+        "pos_operator_hidden_bestsellers_own_write"
+      ]
+    },
+    {
+      "table": "pos_operator_hidden_bestsellers",
+      "role": "authenticated",
+      "privilege": "UPDATE",
+      "applicable_policy_names": [
+        "pos_operator_hidden_bestsellers_own_write"
+      ]
+    },
+    {
+      "table": "pos_operator_hidden_bestsellers",
+      "role": "authenticated",
+      "privilege": "DELETE",
+      "applicable_policy_names": [
+        "pos_operator_hidden_bestsellers_own_write"
+      ]
+    },
+    {
+      "table": "pos_operator_popular_pins",
+      "role": "authenticated",
+      "privilege": "INSERT",
+      "applicable_policy_names": [
+        "pos_operator_popular_pins_own_write"
+      ]
+    },
+    {
+      "table": "pos_operator_popular_pins",
+      "role": "authenticated",
+      "privilege": "UPDATE",
+      "applicable_policy_names": [
+        "pos_operator_popular_pins_own_write"
+      ]
+    },
+    {
+      "table": "pos_operator_popular_pins",
+      "role": "authenticated",
+      "privilege": "DELETE",
+      "applicable_policy_names": [
+        "pos_operator_popular_pins_own_write"
+      ]
+    },
+    {
+      "table": "pos_quotation_lines",
+      "role": "authenticated",
+      "privilege": "INSERT",
+      "applicable_policy_names": [
+        "pos_quotation_lines_staff"
+      ]
+    },
+    {
+      "table": "pos_quotation_lines",
+      "role": "authenticated",
+      "privilege": "UPDATE",
+      "applicable_policy_names": [
+        "pos_quotation_lines_staff"
+      ]
+    },
+    {
+      "table": "pos_quotation_lines",
+      "role": "authenticated",
+      "privilege": "DELETE",
+      "applicable_policy_names": [
+        "pos_quotation_lines_staff"
+      ]
+    },
+    {
+      "table": "pos_quotations",
+      "role": "authenticated",
+      "privilege": "INSERT",
+      "applicable_policy_names": [
+        "pos_quotations_staff"
+      ]
+    },
+    {
+      "table": "pos_quotations",
+      "role": "authenticated",
+      "privilege": "UPDATE",
+      "applicable_policy_names": [
+        "pos_quotations_staff"
+      ]
+    },
+    {
+      "table": "pos_quotations",
+      "role": "authenticated",
+      "privilege": "DELETE",
+      "applicable_policy_names": [
+        "pos_quotations_staff"
+      ]
+    },
+    {
+      "table": "staff_roles",
+      "role": "authenticated",
+      "privilege": "INSERT",
+      "applicable_policy_names": [
+        "staff_roles_admin_write"
+      ]
+    },
+    {
+      "table": "staff_roles",
+      "role": "authenticated",
+      "privilege": "UPDATE",
+      "applicable_policy_names": [
+        "staff_roles_admin_write"
+      ]
+    },
+    {
+      "table": "staff_roles",
+      "role": "authenticated",
+      "privilege": "DELETE",
+      "applicable_policy_names": [
+        "staff_roles_admin_write"
+      ]
+    },
+    {
+      "table": "stock_item_images",
+      "role": "anon",
+      "privilege": "SELECT",
+      "applicable_policy_names": [
+        "stock_item_images_public_read"
+      ]
+    },
+    {
+      "table": "supplier_preferred_skus",
+      "role": "authenticated",
+      "privilege": "INSERT",
+      "applicable_policy_names": [
+        "supplier_preferred_skus_staff"
+      ]
+    },
+    {
+      "table": "supplier_preferred_skus",
+      "role": "authenticated",
+      "privilege": "UPDATE",
+      "applicable_policy_names": [
+        "supplier_preferred_skus_staff"
+      ]
+    },
+    {
+      "table": "supplier_preferred_skus",
+      "role": "authenticated",
+      "privilege": "DELETE",
+      "applicable_policy_names": [
+        "supplier_preferred_skus_staff"
+      ]
+    }
+  ],
+  "rls_predicates_evaluated": false,
+  "storage_policies_included": false,
+  "production_change_performed": false,
+  "apply_grants_authorized": false,
+  "canary_activation_authorized": false,
+  "caution": "A matching role/command policy is only a potential compatibility signal; predicates, Data API exposure, caller identity and SQL grants still govern real access."
+}

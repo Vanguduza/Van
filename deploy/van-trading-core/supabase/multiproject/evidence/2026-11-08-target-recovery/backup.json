@@ -1,0 +1,18 @@
+{
+  "archive_plain_sha256": "aa198399b59d4f7593849afbbde465f254d5a2f3833109e640e5cdb91ab5d222",
+  "cluster_system_identifier": "7686704512130965538",
+  "encrypted_bytes": 4796688,
+  "encrypted_sha256": "e6f4147d9c994d220e12664cacf311935f54f9de0a8b2f87ea1c23c0eb42f0ff",
+  "live_containers_restarted": false,
+  "logical_archives_listed": [
+    "postgres",
+    "_supabase"
+  ],
+  "original_container_ids_unchanged": true,
+  "original_hba_restored": true,
+  "pg_verifybackup": "PASS",
+  "production_restore_not_tested_yet": true,
+  "recovery_private_key_on_target": false,
+  "secret_values_printed": false,
+  "state": "PHYSICAL_BACKUP_VERIFIED_ENCRYPTED_RESTORE_PENDING"
+}

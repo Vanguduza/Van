@@ -1,0 +1,98 @@
+{
+  "actual_gtr_user_roles_or_business_data_transferred": false,
+  "anonymous_stock_images_401_to_200_to_401": true,
+  "business_function_end_to_end_success_verified": false,
+  "business_smoke_suite_count": 17,
+  "critical_limits": [
+    "HTTP 400 is NOT evidence of a successful business transaction or exact SQLSTATE without response error-code capture.",
+    "Only a disposable, zero-external-network ARM64 fixture, one synthetic JWT, and recorded endpoints were tested.",
+    "The grant/revoke experiment committed changes solely in the disposable fixture; the fixture and sidecar were removed.",
+    "No JWT, password, database row, private object, real customer or payment input is retained.",
+    "The 77 authenticated DML privilege differences are NOT automatically approved by these HTTP tests.",
+    "No result bypasses the earlier live canary refusal or signed owner production admission."
+  ],
+  "fixture_pg_and_sidecar_removed": true,
+  "four_rpc_routes_returned_400_validation_errors": true,
+  "full_13_migration_replay_pass": true,
+  "hosted_migrations_applied": false,
+  "http_check_count": 12,
+  "http_checks": [
+    {
+      "name": "anon_public_exchange_rate",
+      "status": 200,
+      "synthetic_authenticated": false
+    },
+    {
+      "name": "anon_stock_images_before",
+      "status": 401,
+      "synthetic_authenticated": false
+    },
+    {
+      "name": "auth_stock_images_read",
+      "status": 200,
+      "synthetic_authenticated": true
+    },
+    {
+      "name": "auth_hr_grades_read",
+      "status": 200,
+      "synthetic_authenticated": true
+    },
+    {
+      "name": "anon_hr_grades_denied",
+      "status": 401,
+      "synthetic_authenticated": false
+    },
+    {
+      "name": "auth_rpc_cart_legacy_default",
+      "status": 400,
+      "synthetic_authenticated": true
+    },
+    {
+      "name": "auth_rpc_hr_legacy_defaults",
+      "status": 400,
+      "synthetic_authenticated": true
+    },
+    {
+      "name": "auth_rpc_garage_legacy_defaults",
+      "status": 400,
+      "synthetic_authenticated": true
+    },
+    {
+      "name": "auth_rpc_staff_legacy_defaults",
+      "status": 400,
+      "synthetic_authenticated": true
+    },
+    {
+      "name": "auth_hr_grades_direct_insert_denied",
+      "status": 403,
+      "synthetic_authenticated": true
+    },
+    {
+      "name": "anon_stock_images_after_fixture_grant",
+      "status": 200,
+      "synthetic_authenticated": false
+    },
+    {
+      "name": "anon_stock_images_after_fixture_revoke",
+      "status": 401,
+      "synthetic_authenticated": false
+    }
+  ],
+  "http_receipt_sha256": "2e96a96db61e889cb815696f5fa078cc75b67789c7afb24298513da039258a01",
+  "kind": "GTR_ARM64_POSTGREST_HTTP_ROLE_GATE_NOT_PRODUCTION_ADMISSION",
+  "live_canary_authorized": false,
+  "negative_authenticated_direct_insert_denied_403": true,
+  "nissan_cutover_authorized": false,
+  "no_production_or_hosted_changes": true,
+  "observer_sha256": "def0d944c70a10541787bb9e0d8d9200753fce1f2def1c9a8b3fe3de74971dcb",
+  "original_canary_refusal_resolved": false,
+  "original_supabase_containers_preserved": true,
+  "pg_image": "sha256:f371b5f3f2ac0a05703f33d6e6134515fb2498cab708fb948a0aeb7481467c00",
+  "postgrest_error_body_codes_verified": false,
+  "postgrest_image": "sha256:c9dc201e555f5d8e37e7f39cdd4df0229774996e213bfd7de8d10ac609030f2c",
+  "production_deployed": false,
+  "replay_receipt_sha256": "1ac085b0d837ca958102eaa99ff13b1e55892a2923a9b88e6b9fd8c0bb6ce2d0",
+  "schema_version": 1,
+  "source_commit": "8131858c7c7479d178cbe9e246f83cb49ed80f5e",
+  "synthetic_authenticated_request_pass": true
+}
